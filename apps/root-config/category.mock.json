@@ -1,0 +1,14 @@
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "applicationCategoryId": 11274214,
+      "label": "Finance"
+    },
+    {
+      "applicationCategoryId": 11274215,
+      "label": "Communication"
+    }
+  ]
+}

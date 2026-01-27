@@ -1,0 +1,33 @@
+{
+  "extends": "ts-config-single-spa",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "declaration": true,
+    "declarationDir": "dist",
+    "removeComments": true,
+    "declarationMap": false,
+    "sourceMap": false,
+    "incremental": true,
+    "allowJs": false,
+    "checkJs": false,
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "allowSyntheticDefaultImports": true,
+    "noFallthroughCasesInSwitch": true,
+    "typeRoots": ["./src/@types", "./node_modules/@types", "../../node_modules/@types"],
+    "moduleResolution": "bundler",
+    "paths": {
+      "*": ["./@mf-types/*"]
+    }
+  },
+  "files": ["src/root.tsx"],
+  "include": ["src/**/*"],
+  "exclude": ["*.ts", "*.tsx", "*.json", "*.js", ".jsx"]
+}

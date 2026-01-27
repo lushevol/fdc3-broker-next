@@ -1,0 +1,28 @@
+[
+  {
+    "appId": "template_tile_fdc3_1",
+    "interop": {
+      "intents": {
+        "listensFor": [
+          {
+            "intent": "ViewCashflow",
+            "contexts": ["scb.fmptp.cashflow"]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "appId": "template_tile_fdc3_2",
+    "interop": {
+      "intents": {
+        "listensFor": [
+          {
+            "intent": "ViewChart",
+            "contexts": ["fdc3.instrument"]
+          }
+        ]
+      }
+    }
+  }
+]

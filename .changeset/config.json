@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [],
+  "linked": [
+    ["ratan-fdc3-broker", "ratan-fdc3-agent", "ratan-fdc3-app-directory", "ratan-fdc3-resolver-ui"]
+  ],
+  "access": "restricted",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": ["@fm/*", "mf_tile", "mf_container"]
+}

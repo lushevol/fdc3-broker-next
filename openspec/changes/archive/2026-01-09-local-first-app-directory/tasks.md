@@ -1,0 +1,8 @@
+- [x] Implement `localApps` configuration in `AppDirectoryConfig` <!-- id: 1 -->
+- [x] Update `AppDirectoryClientImpl` constructor to ingest local apps <!-- id: 2 -->
+- [x] Implemenet internal storage/cache for apps (Map<string, AppDefinition>) <!-- id: 3 -->
+- [x] Update `getAllApps`, `getApp`, `findByIntent`, `findByContextType`, `findByCategory` to query local cache <!-- id: 4 -->
+- [x] Add error handling strategy: return local apps if remote fails (optional/configurable) <!-- id: 5 -->
+- [x] Add explicit `refresh()` or `loadRemote()` capability if needed (or verify `getAllApps` suffices) <!-- id: 6 -->
+- [x] Add unit tests for local-only mode <!-- id: 7 -->
+- [x] Add unit tests for hybrid mode (local + remote) <!-- id: 8 -->

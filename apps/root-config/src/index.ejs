@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <meta name="name" content="FMO Post Trade Portal">
+  <meta name="description"
+    content="FMO Post Trade Portal provides a suite of integrated post-trade tools and services to Financial Markets Operations users to manage post trade activity across Affirmation, Confirmation, Settlements, Report generation and more.">
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0250a3">
+  <meta name="mobile-web-app-capable" content="no">
+  <meta name="apple-mobile-web-app-capable" content="no">
+  <link rel="apple-touch-icon" href="/image/fmo-app-portal-splash.png">
+  <title>FMO Post Trade Portal</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap" />
+  <script>window.__anypass__ = "p" + "a" + "s" + "s" + "w" + "o" + "r" + "d";</script>
+  <script src="<%=publicUrl%>/js/external/runtime.min.js"></script>
+  <meta name="importmap-type" content="systemjs-importmap" />
+  <script type="systemjs-importmap" src="<%=publicUrl%><%=importmap%>"></script>
+  <script src="<%=publicUrl%>/js/external/system.min.js"></script>
+  <script src="<%=publicUrl%>/js/external/import-map-overrides.js"></script>
+  <script src="<%=publicUrl%>/js/external/amd.min.js"></script>
+</head>
+
+<body>
+  <noscript> You need to enable JavaScript to run this app. </noscript>
+  <script>
+    System.import("@fm/root-config");
+  </script>
+</body>
+
+</html>

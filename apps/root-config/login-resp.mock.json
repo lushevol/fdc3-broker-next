@@ -1,0 +1,169 @@
+{
+  "entities": [
+    {
+      "id": 11274101,
+      "name": "X_RATANONE",
+      "applicationName": "RATAN",
+      "roleId": 11274177,
+      "roleName": "FMO_OPS_BOM",
+      "subjects": [
+        {
+          "longName": "/template_subject",
+          "name": "template_subject",
+          "id": 11274214,
+          "actions": [
+            {
+              "name": "ACCESS_FMO_POST_TRADE_PORTAL",
+              "id": 11274984,
+              "entitlementId": 410862
+            }
+          ]
+        },
+        {
+          "longName": "/admin_subject",
+          "name": "admin_subject",
+          "id": 11274215,
+          "actions": [
+            {
+              "name": "ACCESS_FMO_POST_TRADE_PORTAL",
+              "id": 11274985,
+              "entitlementId": 410863
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "result": true,
+  "expiration": null,
+  "userInfo": "{\"max_age\":1766329564,\"sub\":\"1481696\",\"auth_time\":1766325964,\"iss\":\"single-ui-bff\",\"id\":\"18849432D79A5A284608F5CA8F4B87E3\",\"exp\":1766326864,\"iat\":1766325964,\"jti\":\"single-ui-bff-id\",\"oud\":\"{\\\"lastName\\\":\\\"Cao\\\",\\\"country\\\":\\\"China\\\",\\\"firstName\\\":\\\"Ruiheng\\\",\\\"psEmplStatus\\\":\\\"A\\\",\\\"fullName\\\":\\\"IIQ1481696,User\\\",\\\"emailId\\\":\\\"IIQ1481696.User@scbdev.net\\\",\\\"cn\\\":\\\"1481696\\\",\\\"title\\\":\\\"Development Manager\\\",\\\"userId\\\":\\\"1481696\\\"}\"}",
+  "errorMessage": null,
+  "oud": "{\"lastName\":\"Cao\",\"country\":\"China\",\"firstName\":\"Ruiheng\",\"psEmplStatus\":\"A\",\"fullName\":\"IIQ1481696,User\",\"emailId\":\"IIQ1481696.User@scbdev.net\",\"cn\":\"1481696\",\"title\":\"Development Manager\",\"userId\":\"1481696\"}",
+  "entitlementsToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjo5MDAwMCwiZW50aXRsZW1lbnRzIjoiW10ifQ.WkOHUPc3R12_oJpBX7Ie2fY7cX3Hfm9I5JG3YsPDDwg",
+  "drawers": [
+    {
+      "tiles": [
+        {
+          "container": "@fm/template_container",
+          "imageDarkTheme": "darkIcons/trade.dark.svg",
+          "subject": "template_subject",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "/template_container1",
+          "subtitle": "",
+          "imageLightTheme": "lightIcons/trade.light.svg",
+          "tile": "/template_tile1",
+          "id": 54,
+          "title": "Test Tile",
+          "entity": ["X_RATANONE"]
+        },
+        {
+          "container": "mf_container",
+          "imageDarkTheme": "darkIcons/trade.dark.svg",
+          "subject": "mf_consumer_subject",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "/mf_container",
+          "subtitle": "",
+          "imageLightTheme": "lightIcons/trade.light.svg",
+          "tile": "/mf_tile",
+          "id": 55,
+          "title": "MF Tile",
+          "entity": ["X_RATANONE"]
+        },
+        {
+          "container": "@fm/template_container",
+          "imageDarkTheme": "darkIcons/trade.dark.svg",
+          "subject": "template_subject",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "/template_container1",
+          "subtitle": "",
+          "imageLightTheme": "lightIcons/trade.light.svg",
+          "tile": "/template_tile_fdc3_1",
+          "id": 56,
+          "title": "FDC3 Tile 1",
+          "entity": ["X_RATANONE"]
+        },
+        {
+          "container": "@fm/template_container",
+          "imageDarkTheme": "darkIcons/trade.dark.svg",
+          "subject": "template_subject",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "/template_container1",
+          "subtitle": "",
+          "imageLightTheme": "lightIcons/trade.light.svg",
+          "tile": "/template_tile_fdc3_2",
+          "id": 57,
+          "title": "FDC3 Tile 2",
+          "entity": ["X_RATANONE"]
+        }
+      ],
+      "id": 15,
+      "label": "Test Label"
+    },
+    {
+      "tiles": [
+        {
+          "container": "@fm/base",
+          "imageDarkTheme": "darkIcons/trade.dark.svg",
+          "subject": "admin_subject",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "/importmap",
+          "subtitle": "",
+          "imageLightTheme": "lightIcons/trade.light.svg",
+          "tile": "/importmap_tile",
+          "id": 56,
+          "title": "Import Map",
+          "entity": ["X_RATANONE"]
+        },
+        {
+          "container": "@fm/base",
+          "imageDarkTheme": "darkIcons/trade.dark.svg",
+          "subject": "admin_subject",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "/category",
+          "subtitle": "",
+          "imageLightTheme": "lightIcons/trade.light.svg",
+          "tile": "/category_tile",
+          "id": 57,
+          "title": "Category",
+          "entity": ["X_RATANONE"]
+        },
+        {
+          "container": "@fm/base",
+          "imageDarkTheme": "darkIcons/trade.dark.svg",
+          "subject": "admin_subject",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "/tile",
+          "subtitle": "",
+          "imageLightTheme": "lightIcons/trade.light.svg",
+          "tile": "/tile_tile",
+          "id": 58,
+          "title": "Tile",
+          "entity": ["X_RATANONE"]
+        },
+        {
+          "container": "@fm/base",
+          "imageDarkTheme": "darkIcons/trade.dark.svg",
+          "subject": "admin_subject",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "/fdc3",
+          "subtitle": "",
+          "imageLightTheme": "lightIcons/trade.light.svg",
+          "tile": "/fdc3_tile",
+          "id": 59,
+          "title": "FDC3",
+          "entity": ["X_RATANONE"]
+        }
+      ],
+      "id": 1,
+      "label": "Admin Module"
+    }
+  ]
+}

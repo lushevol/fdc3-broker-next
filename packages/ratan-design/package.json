@@ -1,0 +1,64 @@
+{
+  "name": "ratan-design",
+  "version": "0.0.2",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rslib build",
+    "build:sb": "storybook build",
+    "dev": "rslib build --watch",
+    "dev:sb": "storybook dev",
+    "format": "prettier --write .",
+    "generate:tokens": "tsx scripts/generate-tokens.ts",
+    "generate:tokens:css": "tsx scripts/generate-tokens.ts -- css",
+    "generate:tokens:scss": "tsx scripts/generate-tokens.ts -- scss",
+    "generate:tokens:less": "tsx scripts/generate-tokens.ts -- less",
+    "generate:tokens:preview": "tsx scripts/generate-tokens.ts -- preview",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@rsbuild/core": "1.7.1",
+    "@rsbuild/plugin-react": "^1.4.2",
+    "@rslib/core": "^0.19.2",
+    "@storybook/addon-docs": "^10.1.11",
+    "@storybook/addon-onboarding": "^10.1.11",
+    "@storybook/react": "^10.1.11",
+    "@storybook/test": "^8.6.15",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@types/react": "^19.2.8",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.7.3",
+    "react": "^18.3.1",
+    "storybook": "^10.1.11",
+    "storybook-addon-rslib": "^3.2.0",
+    "storybook-react-rsbuild": "^3.2.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.48.0",
+    "vitest": "^4.0.16"
+  },
+  "peerDependencies": {
+    "@ant-design/icons": ">=5.0.0",
+    "@ant-design/react": ">=2.0.0",
+    "@emotion/react": ">=11.0.0",
+    "@emotion/styled": ">=11.0.0",
+    "antd": ">=5.0.0",
+    "react": ">=16.9.0",
+    "react-dom": ">=16.9.0"
+  },
+  "private": true
+}

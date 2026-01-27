@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+.pnpm-store
+.yarn
+
+# Build outputs
+dist
+build
+.turbo
+.mf
+out
+
+# TypeScript
+*.tsbuildinfo
+apps/**/tsconfig.tsbuildinfo
+apps/base/tsconfig.tsbuildinfo
+
+# Testing
+coverage
+.nyc_output
+*.log
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma
+prisma/migrations/*/migration.sql
+
+# Misc
+.cache
+.temp
+.tmp
+
+*storybook.log
+storybook-static

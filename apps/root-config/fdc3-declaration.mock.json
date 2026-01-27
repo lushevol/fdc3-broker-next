@@ -1,0 +1,46 @@
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "appId": "MegaApp",
+      "interop": {
+        "intents": {
+          "listensFor": {
+            "ViewContact": {
+              "contexts": ["fdc3.contact"]
+            }
+          },
+          "raises": {
+            "StartChat": {
+              "contexts": ["fdc3.contact"]
+            }
+          }
+        },
+        "userChannels": ["red", "green"]
+      },
+      "applicationCategoryId": 11274214,
+      "applicationCategory": {
+        "id": 11274214,
+        "label": "Finance"
+      }
+    },
+    {
+      "appId": "TradingView",
+      "interop": {
+        "intents": {
+          "listensFor": {
+            "ViewInstrument": {
+              "contexts": ["fdc3.instrument"]
+            }
+          }
+        }
+      },
+      "applicationCategoryId": 11274214,
+      "applicationCategory": {
+        "id": 11274214,
+        "label": "Finance"
+      }
+    }
+  ]
+}

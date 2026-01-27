@@ -1,0 +1,56 @@
+[
+  {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "scb.fmptp.cashflow"
+        },
+        "id": {
+          "type": "object",
+          "properties": {
+            "cashflowId": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "simples": [
+      {
+        "type": "scb.fmptp.cashflow",
+        "id": {
+          "cashflowId": ""
+        }
+      }
+    ],
+    "description": "Specific Single Cashflow Context"
+  },
+  {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "scb.fmptp.trade"
+        },
+        "id": {
+          "type": "object",
+          "properties": {
+            "cashflowId": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "simples": [
+      {
+        "type": "scb.fmptp.trade",
+        "id": {
+          "tradeId": ""
+        }
+      }
+    ],
+    "description": "Specific Single Trade Context"
+  }
+]

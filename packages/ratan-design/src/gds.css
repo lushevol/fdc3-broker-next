@@ -1,0 +1,1502 @@
+[data-theme='Light Mode'] {
+  /* color */
+  --figma-palette-designers-color-green-lite: #e5fcf4;
+  --figma-palette-designers-color-purple: #9747ff;
+  --figma-palette-designers-color-purple-lite: #f5edff;
+  --ods-component-critical-warning-background-primary-color-default: var(
+    --ods-palette-orange-color-500
+  );
+  --ods-component-critical-warning-background-primary-color-highlight: var(
+    --ods-palette-orange-color-300
+  );
+  --ods-component-critical-warning-background-primary-color-lowlight: var(
+    --ods-palette-orange-color-400
+  );
+  --ods-component-critical-warning-background-secondary-color-default: var(
+    --ods-palette-orange-color-075
+  );
+  --ods-component-critical-warning-background-secondary-color-highlight: var(
+    --ods-palette-orange-color-250
+  );
+  --ods-component-critical-warning-background-secondary-color-lowlight: var(
+    --ods-palette-orange-color-150
+  );
+  --ods-component-critical-warning-foreground-primary-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-component-derived-background-primary-color-default: var(
+    --ods-palette-purple-color-450
+  );
+  --ods-component-derived-background-primary-color-highlight: var(
+    --ods-palette-purple-color-650
+  );
+  --ods-component-derived-background-primary-color-lowlight: var(
+    --ods-palette-purple-color-550
+  );
+  --ods-component-derived-background-secondary-color-default: var(
+    --ods-palette-violet-color-050
+  );
+  --ods-component-derived-background-secondary-color-highlight: var(
+    --ods-palette-violet-color-150
+  );
+  --ods-component-derived-background-secondary-color-lowlight: var(
+    --ods-palette-violet-color-100
+  );
+  --ods-component-derived-foreground-primary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-component-error-background-primary-color-default: var(
+    --ods-palette-red-color-500
+  );
+  --ods-component-error-background-primary-color-highlight: var(
+    --ods-palette-red-color-700
+  );
+  --ods-component-error-background-primary-color-lowlight: var(
+    --ods-palette-red-color-600
+  );
+  --ods-component-error-background-secondary-color-default: var(
+    --ods-palette-magenta-color-050
+  );
+  --ods-component-error-background-secondary-color-highlight: var(
+    --ods-palette-magenta-color-150
+  );
+  --ods-component-error-background-secondary-color-lowlight: var(
+    --ods-palette-magenta-color-100
+  );
+  --ods-component-error-foreground-primary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-component-information-background-primary-color-default: var(
+    --ods-palette-blue-color-500
+  );
+  --ods-component-information-background-primary-color-highlight: var(
+    --ods-palette-blue-color-700
+  );
+  --ods-component-information-background-primary-color-lowlight: var(
+    --ods-palette-blue-color-600
+  );
+  --ods-component-information-background-secondary-color-default: var(
+    --ods-palette-blue-color-050
+  );
+  --ods-component-information-background-secondary-color-highlight: var(
+    --ods-palette-blue-color-200
+  );
+  --ods-component-information-background-secondary-color-lowlight: var(
+    --ods-palette-blue-color-125
+  );
+  --ods-component-information-foreground-primary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-component-nested-background-secondary-color-lowlight: var(
+    --ods-palette-cyan-color-125
+  );
+  --ods-component-neutral-background-primary-color-default: var(
+    --ods-palette-gray-color-600
+  );
+  --ods-component-neutral-background-primary-color-highlight: var(
+    --ods-palette-gray-color-800
+  );
+  --ods-component-neutral-background-primary-color-lowlight: var(
+    --ods-palette-gray-color-700
+  );
+  --ods-component-neutral-background-secondary-color-default: var(
+    --ods-palette-gray-color-050
+  );
+  --ods-component-neutral-background-secondary-color-highlight: var(
+    --ods-palette-gray-color-200
+  );
+  --ods-component-neutral-background-secondary-color-lowlight: var(
+    --ods-palette-gray-color-125
+  );
+  --ods-component-neutral-background-tertiary-color-default: var(
+    --ods-palette-midnight-color-050
+  );
+  --ods-component-neutral-background-tertiary-color-highlight: var(
+    --ods-palette-midnight-color-200
+  );
+  --ods-component-neutral-background-tertiary-color-lowlight: var(
+    --ods-palette-midnight-color-125
+  );
+  --ods-component-neutral-foreground-primary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-component-new-background-secondary-color-highlight: var(
+    --ods-palette-cyan-color-250
+  );
+  --ods-component-overridden-background-primary-color-default: var(
+    --ods-palette-cyan-color-500
+  );
+  --ods-component-overridden-background-primary-color-highlight: var(
+    --ods-palette-cyan-color-300
+  );
+  --ods-component-overridden-background-primary-color-lowlight: var(
+    --ods-palette-cyan-color-400
+  );
+  --ods-component-overridden-background-secondary-color-default: var(
+    --ods-palette-cyan-color-050
+  );
+  --ods-component-overridden-foreground-primary-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-component-sc-pays-background-secondary-color-highlight: var(
+    --ods-palette-blue-color-700
+  );
+  --ods-component-sc-receives-background-secondary-color-highlight: var(
+    --ods-palette-red-color-700
+  );
+  --ods-component-success-background-primary-color-default: var(
+    --ods-palette-green-color-700
+  );
+  --ods-component-success-background-primary-color-highlight: var(
+    --ods-palette-green-color-900
+  );
+  --ods-component-success-background-primary-color-lowlight: var(
+    --ods-palette-green-color-800
+  );
+  --ods-component-success-background-secondary-color-default: var(
+    --ods-palette-green-color-050
+  );
+  --ods-component-success-background-secondary-color-highlight: var(
+    --ods-palette-green-color-200
+  );
+  --ods-component-success-background-secondary-color-lowlight: var(
+    --ods-palette-green-color-125
+  );
+  --ods-component-success-foreground-primary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-component-warning-background-primary-color-default: var(
+    --ods-palette-amber-color-500
+  );
+  --ods-component-warning-background-primary-color-highlight: var(
+    --ods-palette-amber-color-300
+  );
+  --ods-component-warning-background-primary-color-lowlight: var(
+    --ods-palette-amber-color-400
+  );
+  --ods-component-warning-background-secondary-color-default: var(
+    --ods-palette-amber-color-075
+  );
+  --ods-component-warning-background-secondary-color-highlight: var(
+    --ods-palette-amber-color-450
+  );
+  --ods-component-warning-background-secondary-color-lowlight: var(
+    --ods-palette-amber-color-200
+  );
+  --ods-component-warning-foreground-primary-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-navigation-bar-color: var(--ods-palette-brand-prosper-blue);
+  --ods-navigation-border-color: var(--ods-palette-gray-color-400);
+  --ods-navigation-content-color-active: var(--ods-palette-white);
+  --ods-navigation-content-color-highlight: var(--ods-palette-blue-color-200);
+  --ods-navigation-content-color-limelight: var(
+    --ods-palette-brand-prosper-blue
+  );
+  --ods-navigation-content-color-lowlight: var(--ods-palette-gray-color-250);
+  --ods-navigation-tab-color-active: var(--ods-palette-gray-color-075);
+  --ods-navigation-tab-color-highlight: var(--ods-palette-blue-color-100);
+  --ods-navigation-tab-color-inactive: var(--ods-palette-brand-prosper-blue);
+  --ods-palette-black: #000000;
+  --ods-palette-white: #ffffff;
+  --ods-palette-accent-color-limelightblue: #0000ff;
+  --ods-palette-accent-color-yellow: #ffc700;
+  --ods-palette-amber-color-025: #fffbf4;
+  --ods-palette-amber-color-050: #fef6e7;
+  --ods-palette-amber-color-075: #fef2db;
+  --ods-palette-amber-color-100: #feefd0;
+  --ods-palette-amber-color-125: #fdeac4;
+  --ods-palette-amber-color-150: #fde6b8;
+  --ods-palette-amber-color-200: #fddea1;
+  --ods-palette-amber-color-250: #fdd689;
+  --ods-palette-amber-color-300: #fcce72;
+  --ods-palette-amber-color-350: #fcc65b;
+  --ods-palette-amber-color-400: #fbbd43;
+  --ods-palette-amber-color-450: #fab52c;
+  --ods-palette-amber-color-500: #faad14;
+  --ods-palette-amber-color-550: #e19c12;
+  --ods-palette-amber-color-600: #c88a10;
+  --ods-palette-amber-color-650: #af790e;
+  --ods-palette-amber-color-700: #96680c;
+  --ods-palette-amber-color-750: #7d570a;
+  --ods-palette-amber-color-800: #644508;
+  --ods-palette-amber-color-825: #583d08;
+  --ods-palette-amber-color-850: #4b3406;
+  --ods-palette-amber-color-875: #3f2c06;
+  --ods-palette-amber-color-900: #322304;
+  --ods-palette-amber-color-925: #261b04;
+  --ods-palette-amber-color-950: #191102;
+  --ods-palette-blue-color-025: #f2f8fe;
+  --ods-palette-blue-color-050: #e5f1fc;
+  --ods-palette-blue-color-075: #d8eafb;
+  --ods-palette-blue-color-100: #cce3fa;
+  --ods-palette-blue-color-125: #bfdcf9;
+  --ods-palette-blue-color-150: #b3d5f8;
+  --ods-palette-blue-color-200: #9ac7f6;
+  --ods-palette-blue-color-250: #81b9f4;
+  --ods-palette-blue-color-300: #68abf2;
+  --ods-palette-blue-color-350: #4f9df0;
+  --ods-palette-blue-color-400: #368fee;
+  --ods-palette-blue-color-450: #1d81ec;
+  --ods-palette-blue-color-500: #0473ea;
+  --ods-palette-blue-color-550: #0367d2;
+  --ods-palette-blue-color-600: #035cbb;
+  --ods-palette-blue-color-650: #0250a3;
+  --ods-palette-blue-color-700: #02458c;
+  --ods-palette-blue-color-750: #023975;
+  --ods-palette-blue-color-800: #012e5d;
+  --ods-palette-blue-color-825: #022952;
+  --ods-palette-blue-color-850: #012246;
+  --ods-palette-blue-color-875: #011d3b;
+  --ods-palette-blue-color-900: #00172e;
+  --ods-palette-blue-color-925: #011223;
+  --ods-palette-blue-color-950: #000b17;
+  --ods-palette-brand-brand-dark-blue: #2c3a87;
+  --ods-palette-brand-brand-light-blue: #0061c7;
+  --ods-palette-brand-gradient-alternative-color-blue: #254498;
+  --ods-palette-brand-prosper-blue: #020b43;
+  --ods-palette-brand-trustmark-color-blue: #0473ea;
+  --ods-palette-brand-trustmark-color-green: #38d200;
+  --ods-palette-brand-vault-grey: #282d32;
+  --ods-palette-brand-wordmark-color-gray: #525355;
+  --ods-palette-cyan-color-025: #f3fcfd;
+  --ods-palette-cyan-color-050: #e8fbfc;
+  --ods-palette-cyan-color-075: #dcf8fa;
+  --ods-palette-cyan-color-100: #d1f6fa;
+  --ods-palette-cyan-color-125: #c5f3f8;
+  --ods-palette-cyan-color-150: #baf2f7;
+  --ods-palette-cyan-color-200: #a3edf4;
+  --ods-palette-cyan-color-250: #8ce9f2;
+  --ods-palette-cyan-color-300: #76e5ef;
+  --ods-palette-cyan-color-350: #5fe0ed;
+  --ods-palette-cyan-color-400: #4bdcea;
+  --ods-palette-cyan-color-450: #31d7e8;
+  --ods-palette-cyan-color-500: #1ad3e5;
+  --ods-palette-cyan-color-550: #17bece;
+  --ods-palette-cyan-color-600: #15a9b7;
+  --ods-palette-cyan-color-650: #1294a0;
+  --ods-palette-cyan-color-700: #107f89;
+  --ods-palette-cyan-color-750: #0d6972;
+  --ods-palette-cyan-color-800: #0a545c;
+  --ods-palette-cyan-color-825: #094a50;
+  --ods-palette-cyan-color-850: #083f45;
+  --ods-palette-cyan-color-875: #073539;
+  --ods-palette-cyan-color-900: #052a2e;
+  --ods-palette-cyan-color-925: #042022;
+  --ods-palette-cyan-color-950: #031517;
+  --ods-palette-gray-color-025: #f9f9f9;
+  --ods-palette-gray-color-050: #f2f2f2;
+  --ods-palette-gray-color-075: #ececec;
+  --ods-palette-gray-color-100: #e5e5e5;
+  --ods-palette-gray-color-125: #dfdfdf;
+  --ods-palette-gray-color-150: #d9d9d9;
+  --ods-palette-gray-color-175: #d2d2d2;
+  --ods-palette-gray-color-200: #cccccc;
+  --ods-palette-gray-color-250: #bfbfbf;
+  --ods-palette-gray-color-300: #b2b2b2;
+  --ods-palette-gray-color-350: #a6a6a6;
+  --ods-palette-gray-color-400: #999999;
+  --ods-palette-gray-color-450: #8c8c8c;
+  --ods-palette-gray-color-500: #808080;
+  --ods-palette-gray-color-550: #737373;
+  --ods-palette-gray-color-600: #666666;
+  --ods-palette-gray-color-650: #595959;
+  --ods-palette-gray-color-700: #4d4d4d;
+  --ods-palette-gray-color-750: #404040;
+  --ods-palette-gray-color-775: #3a3a3a;
+  --ods-palette-gray-color-800: #333333;
+  --ods-palette-gray-color-825: #2d2d2d;
+  --ods-palette-gray-color-850: #262626;
+  --ods-palette-gray-color-875: #202020;
+  --ods-palette-gray-color-900: #1a1a1a;
+  --ods-palette-gray-color-925: #141414;
+  --ods-palette-gray-color-950: #0d0d0d;
+  --ods-palette-gray-color-975: #070707;
+  --ods-palette-green-color-025: #f6fef3;
+  --ods-palette-green-color-050: #ebfbe6;
+  --ods-palette-green-color-075: #e1f9d9;
+  --ods-palette-green-color-100: #d7f7cd;
+  --ods-palette-green-color-125: #cdf5c0;
+  --ods-palette-green-color-150: #c3f3b4;
+  --ods-palette-green-color-200: #afef9b;
+  --ods-palette-green-color-250: #9beb82;
+  --ods-palette-green-color-300: #87e769;
+  --ods-palette-green-color-350: #73e350;
+  --ods-palette-green-color-400: #5fdf37;
+  --ods-palette-green-color-450: #4bdb1e;
+  --ods-palette-green-color-500: #38d200;
+  --ods-palette-green-color-550: #32bd00;
+  --ods-palette-green-color-600: #2ca800;
+  --ods-palette-green-color-650: #269300;
+  --ods-palette-green-color-700: #207e00;
+  --ods-palette-green-color-750: #1a6900;
+  --ods-palette-green-color-800: #145400;
+  --ods-palette-green-color-825: #124a01;
+  --ods-palette-green-color-850: #0e3f00;
+  --ods-palette-green-color-875: #0c3501;
+  --ods-palette-green-color-900: #082a00;
+  --ods-palette-green-color-925: #062001;
+  --ods-palette-green-color-950: #021500;
+  --ods-palette-magenta-color-025: #fef3f8;
+  --ods-palette-magenta-color-050: #fde7f2;
+  --ods-palette-magenta-color-075: #fcdbeb;
+  --ods-palette-magenta-color-100: #fccfe5;
+  --ods-palette-magenta-color-125: #fac3de;
+  --ods-palette-magenta-color-150: #fab8d7;
+  --ods-palette-magenta-color-200: #f8a0ca;
+  --ods-palette-magenta-color-250: #f788bd;
+  --ods-palette-magenta-color-300: #f570b0;
+  --ods-palette-magenta-color-350: #f358a3;
+  --ods-palette-magenta-color-400: #f14195;
+  --ods-palette-magenta-color-450: #f02988;
+  --ods-palette-magenta-color-500: #ee117b;
+  --ods-palette-magenta-color-550: #d60f6f;
+  --ods-palette-magenta-color-600: #be0e62;
+  --ods-palette-magenta-color-650: #a70c56;
+  --ods-palette-magenta-color-700: #8f0a4a;
+  --ods-palette-magenta-color-750: #77093e;
+  --ods-palette-magenta-color-800: #5f0731;
+  --ods-palette-magenta-color-825: #53062b;
+  --ods-palette-magenta-color-850: #470525;
+  --ods-palette-magenta-color-875: #3b041e;
+  --ods-palette-magenta-color-900: #300319;
+  --ods-palette-magenta-color-925: #230212;
+  --ods-palette-magenta-color-950: #18020c;
+  --ods-palette-maroon-color-025: #fbf4f6;
+  --ods-palette-maroon-color-050: #f7e9ee;
+  --ods-palette-maroon-color-075: #f3dee6;
+  --ods-palette-maroon-color-100: #efd3de;
+  --ods-palette-maroon-color-125: #ebc8d6;
+  --ods-palette-maroon-color-150: #e6bdcd;
+  --ods-palette-maroon-color-200: #dea7bd;
+  --ods-palette-maroon-color-250: #d690ac;
+  --ods-palette-maroon-color-300: #ce7a9c;
+  --ods-palette-maroon-color-350: #c6648b;
+  --ods-palette-maroon-color-400: #bd4e7b;
+  --ods-palette-maroon-color-450: #b5386b;
+  --ods-palette-maroon-color-500: #ad225a;
+  --ods-palette-maroon-color-550: #9c1f51;
+  --ods-palette-maroon-color-600: #8a1b48;
+  --ods-palette-maroon-color-650: #79183f;
+  --ods-palette-maroon-color-700: #681436;
+  --ods-palette-maroon-color-750: #57112d;
+  --ods-palette-maroon-color-800: #450e24;
+  --ods-palette-maroon-color-825: #3d0c20;
+  --ods-palette-maroon-color-850: #340a1b;
+  --ods-palette-maroon-color-875: #2c0917;
+  --ods-palette-maroon-color-900: #230712;
+  --ods-palette-maroon-color-925: #1a050e;
+  --ods-palette-maroon-color-950: #110309;
+  --ods-palette-midnight-color-025: #f7f8fa;
+  --ods-palette-midnight-color-050: #f0f2f4;
+  --ods-palette-midnight-color-075: #e8ecef;
+  --ods-palette-midnight-color-100: #e1e5ea;
+  --ods-palette-midnight-color-125: #d9dee4;
+  --ods-palette-midnight-color-150: #d1d8df;
+  --ods-palette-midnight-color-200: #c2cbd5;
+  --ods-palette-midnight-color-250: #b3beca;
+  --ods-palette-midnight-color-300: #a4b1bf;
+  --ods-palette-midnight-color-350: #94a4b5;
+  --ods-palette-midnight-color-400: #8597aa;
+  --ods-palette-midnight-color-450: #768a9f;
+  --ods-palette-midnight-color-500: #677d95;
+  --ods-palette-midnight-color-550: #5d7186;
+  --ods-palette-midnight-color-600: #526477;
+  --ods-palette-midnight-color-650: #485869;
+  --ods-palette-midnight-color-700: #3e4b59;
+  --ods-palette-midnight-color-750: #333e4a;
+  --ods-palette-midnight-color-775: #2e3843;
+  --ods-palette-midnight-color-800: #29323c;
+  --ods-palette-midnight-color-825: #242c34;
+  --ods-palette-midnight-color-850: #1f262d;
+  --ods-palette-midnight-color-875: #1a1f25;
+  --ods-palette-midnight-color-900: #15191e;
+  --ods-palette-midnight-color-925: #0f1316;
+  --ods-palette-midnight-color-950: #0b0d0f;
+  --ods-palette-midnight-color-975: #050608;
+  --ods-palette-olive-color-025: #fbfcf5;
+  --ods-palette-olive-color-050: #f8f9eb;
+  --ods-palette-olive-color-075: #f4f6e1;
+  --ods-palette-olive-color-100: #f0f4d7;
+  --ods-palette-olive-color-125: #ecf1cd;
+  --ods-palette-olive-color-150: #e9eec3;
+  --ods-palette-olive-color-200: #e1e9af;
+  --ods-palette-olive-color-250: #dae39b;
+  --ods-palette-olive-color-300: #d3dd88;
+  --ods-palette-olive-color-350: #cbd874;
+  --ods-palette-olive-color-400: #c4d260;
+  --ods-palette-olive-color-450: #bccd4c;
+  --ods-palette-olive-color-500: #b5c738;
+  --ods-palette-olive-color-550: #a3b332;
+  --ods-palette-olive-color-600: #919f2d;
+  --ods-palette-olive-color-650: #7f8b27;
+  --ods-palette-olive-color-700: #6d7722;
+  --ods-palette-olive-color-750: #5b641c;
+  --ods-palette-olive-color-800: #485016;
+  --ods-palette-olive-color-825: #3f4513;
+  --ods-palette-olive-color-850: #363c11;
+  --ods-palette-olive-color-875: #2d310e;
+  --ods-palette-olive-color-900: #24280b;
+  --ods-palette-olive-color-925: #1b1d08;
+  --ods-palette-olive-color-950: #121406;
+  --ods-palette-orange-color-025: #fef7f3;
+  --ods-palette-orange-color-050: #fef0e8;
+  --ods-palette-orange-color-075: #fee8dc;
+  --ods-palette-orange-color-100: #fee0d1;
+  --ods-palette-orange-color-125: #fdd8c5;
+  --ods-palette-orange-color-150: #fdd1ba;
+  --ods-palette-orange-color-200: #fdc2a3;
+  --ods-palette-orange-color-250: #fcb28c;
+  --ods-palette-orange-color-300: #fba375;
+  --ods-palette-orange-color-350: #fb945e;
+  --ods-palette-orange-color-400: #fa8547;
+  --ods-palette-orange-color-450: #fa7530;
+  --ods-palette-orange-color-500: #f96619;
+  --ods-palette-orange-color-550: #e05c17;
+  --ods-palette-orange-color-600: #c75214;
+  --ods-palette-orange-color-650: #ae4712;
+  --ods-palette-orange-color-700: #953d0f;
+  --ods-palette-orange-color-750: #7d330d;
+  --ods-palette-orange-color-800: #64290a;
+  --ods-palette-orange-color-825: #582409;
+  --ods-palette-orange-color-850: #4b1f08;
+  --ods-palette-orange-color-875: #3f1a07;
+  --ods-palette-orange-color-900: #321405;
+  --ods-palette-orange-color-925: #260f04;
+  --ods-palette-orange-color-950: #190a03;
+  --ods-palette-purple-color-025: #f9f4ff;
+  --ods-palette-purple-color-050: #f2e8ff;
+  --ods-palette-purple-color-075: #ebdcfe;
+  --ods-palette-purple-color-100: #e5d2fe;
+  --ods-palette-purple-color-125: #dec6fd;
+  --ods-palette-purple-color-150: #d8bbfe;
+  --ods-palette-purple-color-200: #cba5fd;
+  --ods-palette-purple-color-250: #be8efd;
+  --ods-palette-purple-color-300: #b277fd;
+  --ods-palette-purple-color-350: #a561fc;
+  --ods-palette-purple-color-400: #984afc;
+  --ods-palette-purple-color-450: #8b34fb;
+  --ods-palette-purple-color-500: #7e1dfb;
+  --ods-palette-purple-color-550: #711ae2;
+  --ods-palette-purple-color-600: #6517c9;
+  --ods-palette-purple-color-650: #5814b0;
+  --ods-palette-purple-color-700: #4c1197;
+  --ods-palette-purple-color-750: #3f0f7e;
+  --ods-palette-purple-color-800: #320c64;
+  --ods-palette-purple-color-825: #2c0a58;
+  --ods-palette-purple-color-850: #26094b;
+  --ods-palette-purple-color-875: #1f073f;
+  --ods-palette-purple-color-900: #190632;
+  --ods-palette-purple-color-925: #130426;
+  --ods-palette-purple-color-950: #0d0319;
+  --ods-palette-red-color-025: #fef3f4;
+  --ods-palette-red-color-050: #fce6e7;
+  --ods-palette-red-color-075: #fadadb;
+  --ods-palette-red-color-100: #f9ced0;
+  --ods-palette-red-color-125: #f7c1c4;
+  --ods-palette-red-color-150: #f6b5b8;
+  --ods-palette-red-color-200: #f39da1;
+  --ods-palette-red-color-250: #ef848a;
+  --ods-palette-red-color-300: #ec6c73;
+  --ods-palette-red-color-350: #e9545b;
+  --ods-palette-red-color-400: #e63b44;
+  --ods-palette-red-color-450: #e3232c;
+  --ods-palette-red-color-500: #e00a15;
+  --ods-palette-red-color-550: #ca0913;
+  --ods-palette-red-color-600: #b30811;
+  --ods-palette-red-color-650: #9d070f;
+  --ods-palette-red-color-700: #86060d;
+  --ods-palette-red-color-750: #70050b;
+  --ods-palette-red-color-800: #5a0408;
+  --ods-palette-red-color-825: #4f0408;
+  --ods-palette-red-color-850: #430306;
+  --ods-palette-red-color-875: #390306;
+  --ods-palette-red-color-900: #2d0204;
+  --ods-palette-red-color-925: #220204;
+  --ods-palette-red-color-950: #160102;
+  --ods-palette-violet-color-025: #f6f6fb;
+  --ods-palette-violet-color-050: #ededf8;
+  --ods-palette-violet-color-075: #e4e4f7;
+  --ods-palette-violet-color-100: #dadaf2;
+  --ods-palette-violet-color-125: #d1d1ef;
+  --ods-palette-violet-color-150: #c8c8eb;
+  --ods-palette-violet-color-200: #b6b6e5;
+  --ods-palette-violet-color-250: #a3a3de;
+  --ods-palette-violet-color-300: #9191d7;
+  --ods-palette-violet-color-350: #7f7fd1;
+  --ods-palette-violet-color-400: #6d6dca;
+  --ods-palette-violet-color-450: #5a5ac4;
+  --ods-palette-violet-color-500: #4848bd;
+  --ods-palette-violet-color-550: #4141aa;
+  --ods-palette-violet-color-600: #3a3a97;
+  --ods-palette-violet-color-650: #323284;
+  --ods-palette-violet-color-700: #2b2b71;
+  --ods-palette-violet-color-750: #24245f;
+  --ods-palette-violet-color-800: #1d1d4c;
+  --ods-palette-violet-color-825: #1a1a43;
+  --ods-palette-violet-color-850: #161639;
+  --ods-palette-violet-color-875: #121230;
+  --ods-palette-violet-color-900: #0e0e26;
+  --ods-palette-violet-color-925: #0b0b1d;
+  --ods-palette-violet-color-950: #070713;
+  --ods-severity-critical-warning-background-secondary-color-default: var(
+    --ods-palette-orange-color-600
+  );
+  --ods-severity-critical-warning-background-secondary-color-highlight: var(
+    --ods-palette-orange-color-800
+  );
+  --ods-severity-critical-warning-background-secondary-color-lowlight: var(
+    --ods-palette-orange-color-700
+  );
+  --ods-severity-critical-warning-foreground-color-limelight: var(
+    --ods-palette-orange-color-600
+  );
+  --ods-severity-critical-warning-foreground-secondary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-severity-derived-background-color-default: var(
+    --ods-palette-purple-color-450
+  );
+  --ods-severity-derived-background-color-highlight: var(
+    --ods-palette-purple-color-650
+  );
+  --ods-severity-derived-background-color-lowlight: var(
+    --ods-palette-purple-color-550
+  );
+  --ods-severity-derived-foreground-color-default: var(--ods-palette-white);
+  --ods-severity-derived-foreground-color-limelight: var(
+    --ods-palette-purple-color-450
+  );
+  --ods-severity-error-background-color-default: var(
+    --ods-palette-red-color-500
+  );
+  --ods-severity-error-background-color-highlight: var(
+    --ods-palette-red-color-700
+  );
+  --ods-severity-error-background-color-lowlight: var(
+    --ods-palette-red-color-600
+  );
+  --ods-severity-error-foreground-color-default: var(--ods-palette-white);
+  --ods-severity-error-foreground-color-limelight: var(
+    --ods-palette-red-color-500
+  );
+  --ods-severity-information-background-primary-color-default: var(
+    --ods-palette-blue-color-500
+  );
+  --ods-severity-information-background-primary-color-highlight: var(
+    --ods-palette-blue-color-700
+  );
+  --ods-severity-information-background-primary-color-lowlight: var(
+    --ods-palette-blue-color-600
+  );
+  --ods-severity-information-background-secondary-color-default: var(
+    --ods-palette-blue-color-600
+  );
+  --ods-severity-information-background-secondary-color-highlight: var(
+    --ods-palette-blue-color-800
+  );
+  --ods-severity-information-background-secondary-color-lowlight: var(
+    --ods-palette-blue-color-700
+  );
+  --ods-severity-information-foreground-primary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-severity-information-foreground-primary-color-limelight: var(
+    --ods-palette-blue-color-500
+  );
+  --ods-severity-information-foreground-secondary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-severity-information-foreground-secondary-color-limelight: var(
+    --ods-palette-blue-color-600
+  );
+  --ods-severity-neutral-background-color-default: var(
+    --ods-palette-gray-color-600
+  );
+  --ods-severity-neutral-background-color-highlight: var(
+    --ods-palette-gray-color-800
+  );
+  --ods-severity-neutral-background-color-lowlight: var(
+    --ods-palette-gray-color-700
+  );
+  --ods-severity-neutral-foreground-color-default: var(--ods-palette-white);
+  --ods-severity-neutral-foreground-color-limelight: var(
+    --ods-palette-gray-color-600
+  );
+  --ods-severity-overridden-background-color-default: var(
+    --ods-palette-cyan-color-700
+  );
+  --ods-severity-overridden-background-color-highlight: var(
+    --ods-palette-cyan-color-900
+  );
+  --ods-severity-overridden-background-color-lowlight: var(
+    --ods-palette-cyan-color-800
+  );
+  --ods-severity-overridden-foreground-color-default: var(--ods-palette-white);
+  --ods-severity-overridden-foreground-color-limelight: var(
+    --ods-palette-cyan-color-700
+  );
+  --ods-severity-success-background-color-default: var(
+    --ods-palette-green-color-700
+  );
+  --ods-severity-success-background-color-highlight: var(
+    --ods-palette-green-color-900
+  );
+  --ods-severity-success-background-color-lowlight: var(
+    --ods-palette-green-color-800
+  );
+  --ods-severity-success-foreground-color-default: var(--ods-palette-white);
+  --ods-severity-success-foreground-color-limelight: var(
+    --ods-palette-green-color-700
+  );
+  --ods-severity-warning-background-secondary-color-default: var(
+    --ods-palette-amber-color-700
+  );
+  --ods-severity-warning-background-secondary-color-highlight: var(
+    --ods-palette-amber-color-900
+  );
+  --ods-severity-warning-background-secondary-color-lowlight: var(
+    --ods-palette-amber-color-800
+  );
+  --ods-severity-warning-foreground-color-limelight: var(
+    --ods-palette-amber-color-500
+  );
+  --ods-severity-warning-foreground-secondary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-structure-border-color: var(--ods-palette-gray-color-175);
+  --ods-structure-container-color-tooltip: var(
+    --ods-palette-midnight-color-200
+  );
+  --ods-structure-container-primary-color: var(--ods-palette-white);
+  --ods-structure-container-secondary-color: var(--ods-palette-gray-color-075);
+  --ods-structure-content-color-blotter: var(--ods-palette-gray-color-900);
+  --ods-structure-content-color-highlight: var(--ods-palette-gray-color-700);
+  --ods-structure-content-color-limelight: var(--ods-palette-gray-color-900);
+  --ods-structure-content-color-limelightblue: var(
+    --ods-palette-accent-color-limelightblue
+  );
+  --ods-structure-content-primary-color-disabled: var(
+    --ods-palette-gray-color-250
+  );
+  --ods-structure-content-primary-color-lowlight: var(
+    --ods-palette-gray-color-550
+  );
+  --ods-structure-content-secondary-color-disabled: var(
+    --ods-palette-gray-color-300
+  );
+  --ods-structure-content-secondary-color-lowlight: var(
+    --ods-palette-gray-color-600
+  );
+  --ods-structure-header-primary-color: var(--ods-palette-midnight-color-150);
+  --ods-structure-header-secondary-color: var(--ods-palette-gray-color-100);
+  --ods-structure-header-tertiary-color: var(--ods-palette-gray-color-050);
+}
+[data-theme='Dark Mode'] {
+  /* color */
+  --figma-palette-designers-color-green-lite: #e5fcf4;
+  --figma-palette-designers-color-purple: #9747ff;
+  --figma-palette-designers-color-purple-lite: #f5edff;
+  --ods-component-critical-warning-background-primary-color-default: var(
+    --ods-palette-orange-color-500
+  );
+  --ods-component-critical-warning-background-primary-color-highlight: var(
+    --ods-palette-orange-color-300
+  );
+  --ods-component-critical-warning-background-primary-color-lowlight: var(
+    --ods-palette-orange-color-400
+  );
+  --ods-component-critical-warning-background-secondary-color-default: var(
+    --ods-palette-orange-color-900
+  );
+  --ods-component-critical-warning-background-secondary-color-highlight: var(
+    --ods-palette-orange-color-800
+  );
+  --ods-component-critical-warning-background-secondary-color-lowlight: var(
+    --ods-palette-orange-color-850
+  );
+  --ods-component-critical-warning-foreground-primary-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-component-derived-background-primary-color-default: var(
+    --ods-palette-purple-color-450
+  );
+  --ods-component-derived-background-primary-color-highlight: var(
+    --ods-palette-purple-color-650
+  );
+  --ods-component-derived-background-primary-color-lowlight: var(
+    --ods-palette-purple-color-550
+  );
+  --ods-component-derived-background-secondary-color-default: var(
+    --ods-palette-violet-color-900
+  );
+  --ods-component-derived-background-secondary-color-highlight: var(
+    --ods-palette-violet-color-700
+  );
+  --ods-component-derived-background-secondary-color-lowlight: var(
+    --ods-palette-violet-color-800
+  );
+  --ods-component-derived-foreground-primary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-component-error-background-primary-color-default: var(
+    --ods-palette-red-color-500
+  );
+  --ods-component-error-background-primary-color-highlight: var(
+    --ods-palette-red-color-700
+  );
+  --ods-component-error-background-primary-color-lowlight: var(
+    --ods-palette-red-color-600
+  );
+  --ods-component-error-background-secondary-color-default: var(
+    --ods-palette-magenta-color-900
+  );
+  --ods-component-error-background-secondary-color-highlight: var(
+    --ods-palette-magenta-color-750
+  );
+  --ods-component-error-background-secondary-color-lowlight: var(
+    --ods-palette-magenta-color-850
+  );
+  --ods-component-error-foreground-primary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-component-information-background-primary-color-default: var(
+    --ods-palette-blue-color-500
+  );
+  --ods-component-information-background-primary-color-highlight: var(
+    --ods-palette-blue-color-700
+  );
+  --ods-component-information-background-primary-color-lowlight: var(
+    --ods-palette-blue-color-600
+  );
+  --ods-component-information-background-secondary-color-default: var(
+    --ods-palette-blue-color-900
+  );
+  --ods-component-information-background-secondary-color-highlight: var(
+    --ods-palette-blue-color-750
+  );
+  --ods-component-information-background-secondary-color-lowlight: var(
+    --ods-palette-blue-color-850
+  );
+  --ods-component-information-foreground-primary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-component-nested-background-secondary-color-lowlight: var(
+    --ods-palette-cyan-color-850
+  );
+  --ods-component-neutral-background-primary-color-default: var(
+    --ods-palette-gray-color-600
+  );
+  --ods-component-neutral-background-primary-color-highlight: var(
+    --ods-palette-gray-color-800
+  );
+  --ods-component-neutral-background-primary-color-lowlight: var(
+    --ods-palette-gray-color-700
+  );
+  --ods-component-neutral-background-secondary-color-default: var(
+    --ods-palette-gray-color-850
+  );
+  --ods-component-neutral-background-secondary-color-highlight: var(
+    --ods-palette-gray-color-700
+  );
+  --ods-component-neutral-background-secondary-color-lowlight: var(
+    --ods-palette-gray-color-775
+  );
+  --ods-component-neutral-background-tertiary-color-default: var(
+    --ods-palette-midnight-color-850
+  );
+  --ods-component-neutral-background-tertiary-color-highlight: var(
+    --ods-palette-midnight-color-700
+  );
+  --ods-component-neutral-background-tertiary-color-lowlight: var(
+    --ods-palette-midnight-color-775
+  );
+  --ods-component-neutral-foreground-primary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-component-new-background-secondary-color-highlight: var(
+    --ods-palette-cyan-color-800
+  );
+  --ods-component-overridden-background-primary-color-default: var(
+    --ods-palette-cyan-color-500
+  );
+  --ods-component-overridden-background-primary-color-highlight: var(
+    --ods-palette-cyan-color-300
+  );
+  --ods-component-overridden-background-primary-color-lowlight: var(
+    --ods-palette-cyan-color-400
+  );
+  --ods-component-overridden-background-secondary-color-default: var(
+    --ods-palette-cyan-color-900
+  );
+  --ods-component-overridden-foreground-primary-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-component-sc-pays-background-secondary-color-highlight: var(
+    --ods-palette-blue-color-200
+  );
+  --ods-component-sc-receives-background-secondary-color-highlight: var(
+    --ods-palette-red-color-200
+  );
+  --ods-component-success-background-primary-color-default: var(
+    --ods-palette-green-color-700
+  );
+  --ods-component-success-background-primary-color-highlight: var(
+    --ods-palette-green-color-900
+  );
+  --ods-component-success-background-primary-color-lowlight: var(
+    --ods-palette-green-color-800
+  );
+  --ods-component-success-background-secondary-color-default: var(
+    --ods-palette-green-color-925
+  );
+  --ods-component-success-background-secondary-color-highlight: var(
+    --ods-palette-green-color-800
+  );
+  --ods-component-success-background-secondary-color-lowlight: var(
+    --ods-palette-green-color-850
+  );
+  --ods-component-success-foreground-primary-color-default: var(
+    --ods-palette-white
+  );
+  --ods-component-warning-background-primary-color-default: var(
+    --ods-palette-amber-color-500
+  );
+  --ods-component-warning-background-primary-color-highlight: var(
+    --ods-palette-amber-color-300
+  );
+  --ods-component-warning-background-primary-color-lowlight: var(
+    --ods-palette-amber-color-400
+  );
+  --ods-component-warning-background-secondary-color-default: var(
+    --ods-palette-amber-color-925
+  );
+  --ods-component-warning-background-secondary-color-highlight: var(
+    --ods-palette-amber-color-800
+  );
+  --ods-component-warning-background-secondary-color-lowlight: var(
+    --ods-palette-amber-color-850
+  );
+  --ods-component-warning-foreground-primary-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-navigation-bar-color: var(--ods-palette-gray-color-975);
+  --ods-navigation-border-color: var(--ods-palette-gray-color-600);
+  --ods-navigation-content-color-active: var(--ods-palette-white);
+  --ods-navigation-content-color-highlight: var(--ods-palette-blue-color-200);
+  --ods-navigation-content-color-limelight: var(--ods-palette-white);
+  --ods-navigation-content-color-lowlight: var(--ods-palette-gray-color-250);
+  --ods-navigation-tab-color-active: var(--ods-palette-gray-color-825);
+  --ods-navigation-tab-color-highlight: var(--ods-palette-blue-color-800);
+  --ods-navigation-tab-color-inactive: var(--ods-palette-gray-color-975);
+  --ods-palette-black: #000000;
+  --ods-palette-white: #ffffff;
+  --ods-palette-accent-color-limelightblue: #0000ff;
+  --ods-palette-accent-color-yellow: #ffc700;
+  --ods-palette-amber-color-025: #fffbf4;
+  --ods-palette-amber-color-050: #fef6e7;
+  --ods-palette-amber-color-075: #fef2db;
+  --ods-palette-amber-color-100: #feefd0;
+  --ods-palette-amber-color-125: #fdeac4;
+  --ods-palette-amber-color-150: #fde6b8;
+  --ods-palette-amber-color-200: #fddea1;
+  --ods-palette-amber-color-250: #fdd689;
+  --ods-palette-amber-color-300: #fcce72;
+  --ods-palette-amber-color-350: #fcc65b;
+  --ods-palette-amber-color-400: #fbbd43;
+  --ods-palette-amber-color-450: #fab52c;
+  --ods-palette-amber-color-500: #faad14;
+  --ods-palette-amber-color-550: #e19c12;
+  --ods-palette-amber-color-600: #c88a10;
+  --ods-palette-amber-color-650: #af790e;
+  --ods-palette-amber-color-700: #96680c;
+  --ods-palette-amber-color-750: #7d570a;
+  --ods-palette-amber-color-800: #644508;
+  --ods-palette-amber-color-825: #583d08;
+  --ods-palette-amber-color-850: #4b3406;
+  --ods-palette-amber-color-875: #3f2c06;
+  --ods-palette-amber-color-900: #322304;
+  --ods-palette-amber-color-925: #261b04;
+  --ods-palette-amber-color-950: #191102;
+  --ods-palette-blue-color-025: #f2f8fe;
+  --ods-palette-blue-color-050: #e5f1fc;
+  --ods-palette-blue-color-075: #d8eafb;
+  --ods-palette-blue-color-100: #cce3fa;
+  --ods-palette-blue-color-125: #bfdcf9;
+  --ods-palette-blue-color-150: #b3d5f8;
+  --ods-palette-blue-color-200: #9ac7f6;
+  --ods-palette-blue-color-250: #81b9f4;
+  --ods-palette-blue-color-300: #68abf2;
+  --ods-palette-blue-color-350: #4f9df0;
+  --ods-palette-blue-color-400: #368fee;
+  --ods-palette-blue-color-450: #1d81ec;
+  --ods-palette-blue-color-500: #0473ea;
+  --ods-palette-blue-color-550: #0367d2;
+  --ods-palette-blue-color-600: #035cbb;
+  --ods-palette-blue-color-650: #0250a3;
+  --ods-palette-blue-color-700: #02458c;
+  --ods-palette-blue-color-750: #023975;
+  --ods-palette-blue-color-800: #012e5d;
+  --ods-palette-blue-color-825: #022952;
+  --ods-palette-blue-color-850: #012246;
+  --ods-palette-blue-color-875: #011d3b;
+  --ods-palette-blue-color-900: #00172e;
+  --ods-palette-blue-color-925: #011223;
+  --ods-palette-blue-color-950: #000b17;
+  --ods-palette-brand-brand-dark-blue: #2c3a87;
+  --ods-palette-brand-brand-light-blue: #0061c7;
+  --ods-palette-brand-gradient-alternative-color-blue: #254498;
+  --ods-palette-brand-prosper-blue: #020b43;
+  --ods-palette-brand-trustmark-color-blue: #0473ea;
+  --ods-palette-brand-trustmark-color-green: #38d200;
+  --ods-palette-brand-vault-grey: #282d32;
+  --ods-palette-brand-wordmark-color-gray: #525355;
+  --ods-palette-cyan-color-025: #f3fcfd;
+  --ods-palette-cyan-color-050: #e8fbfc;
+  --ods-palette-cyan-color-075: #dcf8fa;
+  --ods-palette-cyan-color-100: #d1f6fa;
+  --ods-palette-cyan-color-125: #c9ffff;
+  --ods-palette-cyan-color-150: #baf2f7;
+  --ods-palette-cyan-color-200: #a3edf4;
+  --ods-palette-cyan-color-250: #8ce9f2;
+  --ods-palette-cyan-color-300: #76e5ef;
+  --ods-palette-cyan-color-350: #5fe0ed;
+  --ods-palette-cyan-color-400: #4bdcea;
+  --ods-palette-cyan-color-450: #30d7e8;
+  --ods-palette-cyan-color-500: #1ad3e5;
+  --ods-palette-cyan-color-550: #17bece;
+  --ods-palette-cyan-color-600: #15a9b7;
+  --ods-palette-cyan-color-650: #1294a0;
+  --ods-palette-cyan-color-700: #107f89;
+  --ods-palette-cyan-color-750: #0d6972;
+  --ods-palette-cyan-color-800: #0a545c;
+  --ods-palette-cyan-color-825: #094a50;
+  --ods-palette-cyan-color-850: #083f45;
+  --ods-palette-cyan-color-875: #073539;
+  --ods-palette-cyan-color-900: #052a2e;
+  --ods-palette-cyan-color-925: #042022;
+  --ods-palette-cyan-color-950: #031517;
+  --ods-palette-gray-color-025: #f9f9f9;
+  --ods-palette-gray-color-050: #f2f2f2;
+  --ods-palette-gray-color-075: #ececec;
+  --ods-palette-gray-color-100: #e5e5e5;
+  --ods-palette-gray-color-125: #dfdfdf;
+  --ods-palette-gray-color-150: #d9d9d9;
+  --ods-palette-gray-color-175: #d2d2d2;
+  --ods-palette-gray-color-200: #cccccc;
+  --ods-palette-gray-color-250: #bfbfbf;
+  --ods-palette-gray-color-300: #b2b2b2;
+  --ods-palette-gray-color-350: #a6a6a6;
+  --ods-palette-gray-color-400: #999999;
+  --ods-palette-gray-color-450: #8c8c8c;
+  --ods-palette-gray-color-500: #808080;
+  --ods-palette-gray-color-550: #737373;
+  --ods-palette-gray-color-600: #666666;
+  --ods-palette-gray-color-650: #595959;
+  --ods-palette-gray-color-700: #4d4d4d;
+  --ods-palette-gray-color-750: #404040;
+  --ods-palette-gray-color-775: #3a3a3a;
+  --ods-palette-gray-color-800: #333333;
+  --ods-palette-gray-color-825: #2d2d2d;
+  --ods-palette-gray-color-850: #262626;
+  --ods-palette-gray-color-875: #202020;
+  --ods-palette-gray-color-900: #1a1a1a;
+  --ods-palette-gray-color-925: #141414;
+  --ods-palette-gray-color-950: #0d0d0d;
+  --ods-palette-gray-color-975: #070707;
+  --ods-palette-green-color-025: #f6fef3;
+  --ods-palette-green-color-050: #ebfbe6;
+  --ods-palette-green-color-075: #e1f9d9;
+  --ods-palette-green-color-100: #d7f7cd;
+  --ods-palette-green-color-125: #cdf5c0;
+  --ods-palette-green-color-150: #c3f3b4;
+  --ods-palette-green-color-200: #afef9b;
+  --ods-palette-green-color-250: #9beb82;
+  --ods-palette-green-color-300: #87e769;
+  --ods-palette-green-color-350: #73e350;
+  --ods-palette-green-color-400: #5fdf37;
+  --ods-palette-green-color-450: #4bdb1e;
+  --ods-palette-green-color-500: #38d200;
+  --ods-palette-green-color-550: #32bd00;
+  --ods-palette-green-color-600: #2ca800;
+  --ods-palette-green-color-650: #269300;
+  --ods-palette-green-color-700: #207e00;
+  --ods-palette-green-color-750: #1a6900;
+  --ods-palette-green-color-800: #145400;
+  --ods-palette-green-color-825: #124a01;
+  --ods-palette-green-color-850: #0e3f00;
+  --ods-palette-green-color-875: #0c3501;
+  --ods-palette-green-color-900: #082a00;
+  --ods-palette-green-color-925: #062001;
+  --ods-palette-green-color-950: #021500;
+  --ods-palette-magenta-color-025: #fef3f8;
+  --ods-palette-magenta-color-050: #fde7f2;
+  --ods-palette-magenta-color-075: #fcdbeb;
+  --ods-palette-magenta-color-100: #fccfe5;
+  --ods-palette-magenta-color-125: #fac3de;
+  --ods-palette-magenta-color-150: #fab8d7;
+  --ods-palette-magenta-color-200: #f8a0ca;
+  --ods-palette-magenta-color-250: #f788bd;
+  --ods-palette-magenta-color-300: #f570b0;
+  --ods-palette-magenta-color-350: #f358a3;
+  --ods-palette-magenta-color-400: #f14195;
+  --ods-palette-magenta-color-450: #f02988;
+  --ods-palette-magenta-color-500: #ee117b;
+  --ods-palette-magenta-color-550: #d60f6f;
+  --ods-palette-magenta-color-600: #be0e62;
+  --ods-palette-magenta-color-650: #a70c56;
+  --ods-palette-magenta-color-700: #8f0a4a;
+  --ods-palette-magenta-color-750: #77093e;
+  --ods-palette-magenta-color-800: #5f0731;
+  --ods-palette-magenta-color-825: #53062b;
+  --ods-palette-magenta-color-850: #470525;
+  --ods-palette-magenta-color-875: #3b041e;
+  --ods-palette-magenta-color-900: #300319;
+  --ods-palette-magenta-color-925: #230212;
+  --ods-palette-magenta-color-950: #18020c;
+  --ods-palette-maroon-color-025: #fbf4f6;
+  --ods-palette-maroon-color-050: #f7e9ee;
+  --ods-palette-maroon-color-075: #f3dee6;
+  --ods-palette-maroon-color-100: #efd3de;
+  --ods-palette-maroon-color-125: #ebc8d6;
+  --ods-palette-maroon-color-150: #e6bdcd;
+  --ods-palette-maroon-color-200: #dea7bd;
+  --ods-palette-maroon-color-250: #d690ac;
+  --ods-palette-maroon-color-300: #ce7a9c;
+  --ods-palette-maroon-color-350: #c6648b;
+  --ods-palette-maroon-color-400: #bd4e7b;
+  --ods-palette-maroon-color-450: #b5386b;
+  --ods-palette-maroon-color-500: #ad225a;
+  --ods-palette-maroon-color-550: #9c1f51;
+  --ods-palette-maroon-color-600: #8a1b48;
+  --ods-palette-maroon-color-650: #79183f;
+  --ods-palette-maroon-color-700: #681436;
+  --ods-palette-maroon-color-750: #57112d;
+  --ods-palette-maroon-color-800: #450e24;
+  --ods-palette-maroon-color-825: #3d0c20;
+  --ods-palette-maroon-color-850: #340a1b;
+  --ods-palette-maroon-color-875: #2c0917;
+  --ods-palette-maroon-color-900: #230712;
+  --ods-palette-maroon-color-925: #1a050e;
+  --ods-palette-maroon-color-950: #110309;
+  --ods-palette-midnight-color-025: #f7f8fa;
+  --ods-palette-midnight-color-050: #f0f2f4;
+  --ods-palette-midnight-color-075: #e8ecef;
+  --ods-palette-midnight-color-100: #e1e5ea;
+  --ods-palette-midnight-color-125: #d9dee4;
+  --ods-palette-midnight-color-150: #d1d8df;
+  --ods-palette-midnight-color-200: #c2cbd5;
+  --ods-palette-midnight-color-250: #b3beca;
+  --ods-palette-midnight-color-300: #a4b1bf;
+  --ods-palette-midnight-color-350: #94a4b5;
+  --ods-palette-midnight-color-400: #8597aa;
+  --ods-palette-midnight-color-450: #768a9f;
+  --ods-palette-midnight-color-500: #677d95;
+  --ods-palette-midnight-color-550: #5d7186;
+  --ods-palette-midnight-color-600: #526477;
+  --ods-palette-midnight-color-650: #485869;
+  --ods-palette-midnight-color-700: #3e4b59;
+  --ods-palette-midnight-color-750: #333e4a;
+  --ods-palette-midnight-color-775: #2e3843;
+  --ods-palette-midnight-color-800: #29323c;
+  --ods-palette-midnight-color-825: #242c34;
+  --ods-palette-midnight-color-850: #1f262d;
+  --ods-palette-midnight-color-875: #1a1f25;
+  --ods-palette-midnight-color-900: #15191e;
+  --ods-palette-midnight-color-925: #0f1316;
+  --ods-palette-midnight-color-950: #0b0d0f;
+  --ods-palette-midnight-color-975: #050608;
+  --ods-palette-olive-color-025: #fbfcf5;
+  --ods-palette-olive-color-050: #f8f9eb;
+  --ods-palette-olive-color-075: #f4f6e1;
+  --ods-palette-olive-color-100: #f0f4d7;
+  --ods-palette-olive-color-125: #ecf1cd;
+  --ods-palette-olive-color-150: #e9eec3;
+  --ods-palette-olive-color-200: #e1e9af;
+  --ods-palette-olive-color-250: #dae39b;
+  --ods-palette-olive-color-300: #d3dd88;
+  --ods-palette-olive-color-350: #cbd874;
+  --ods-palette-olive-color-400: #c4d260;
+  --ods-palette-olive-color-450: #bccd4c;
+  --ods-palette-olive-color-500: #b5c738;
+  --ods-palette-olive-color-550: #a3b332;
+  --ods-palette-olive-color-600: #919f2d;
+  --ods-palette-olive-color-650: #7f8b27;
+  --ods-palette-olive-color-700: #6d7722;
+  --ods-palette-olive-color-750: #5b641c;
+  --ods-palette-olive-color-800: #485016;
+  --ods-palette-olive-color-825: #3f4513;
+  --ods-palette-olive-color-850: #363c11;
+  --ods-palette-olive-color-875: #2d310e;
+  --ods-palette-olive-color-900: #24280b;
+  --ods-palette-olive-color-925: #1b1d08;
+  --ods-palette-olive-color-950: #121406;
+  --ods-palette-orange-color-025: #fef7f3;
+  --ods-palette-orange-color-050: #fef0e8;
+  --ods-palette-orange-color-075: #fee8dc;
+  --ods-palette-orange-color-100: #fee0d1;
+  --ods-palette-orange-color-125: #fdd8c5;
+  --ods-palette-orange-color-150: #fdd1ba;
+  --ods-palette-orange-color-200: #fdc2a3;
+  --ods-palette-orange-color-250: #fcb28c;
+  --ods-palette-orange-color-300: #fba375;
+  --ods-palette-orange-color-350: #fb945e;
+  --ods-palette-orange-color-400: #fa8547;
+  --ods-palette-orange-color-450: #fa7530;
+  --ods-palette-orange-color-500: #f96619;
+  --ods-palette-orange-color-550: #e05c17;
+  --ods-palette-orange-color-600: #c75214;
+  --ods-palette-orange-color-650: #ae4712;
+  --ods-palette-orange-color-700: #953d0f;
+  --ods-palette-orange-color-750: #7d330d;
+  --ods-palette-orange-color-800: #64290a;
+  --ods-palette-orange-color-825: #582409;
+  --ods-palette-orange-color-850: #4b1f08;
+  --ods-palette-orange-color-875: #3f1a07;
+  --ods-palette-orange-color-900: #321405;
+  --ods-palette-orange-color-925: #260f04;
+  --ods-palette-orange-color-950: #190a03;
+  --ods-palette-purple-color-025: #f9f4ff;
+  --ods-palette-purple-color-050: #f2e8ff;
+  --ods-palette-purple-color-075: #ebdcfe;
+  --ods-palette-purple-color-100: #e5d2fe;
+  --ods-palette-purple-color-125: #dec6fd;
+  --ods-palette-purple-color-150: #d8bbfe;
+  --ods-palette-purple-color-200: #cba5fd;
+  --ods-palette-purple-color-250: #be8efd;
+  --ods-palette-purple-color-300: #b277fd;
+  --ods-palette-purple-color-350: #a561fc;
+  --ods-palette-purple-color-400: #984afc;
+  --ods-palette-purple-color-450: #8b34fb;
+  --ods-palette-purple-color-500: #7e1dfb;
+  --ods-palette-purple-color-550: #711ae2;
+  --ods-palette-purple-color-600: #6517c9;
+  --ods-palette-purple-color-650: #5814b0;
+  --ods-palette-purple-color-700: #4c1197;
+  --ods-palette-purple-color-750: #3f0f7e;
+  --ods-palette-purple-color-800: #320c64;
+  --ods-palette-purple-color-825: #2c0a58;
+  --ods-palette-purple-color-850: #26094b;
+  --ods-palette-purple-color-875: #1f073f;
+  --ods-palette-purple-color-900: #190632;
+  --ods-palette-purple-color-925: #130426;
+  --ods-palette-purple-color-950: #0d0319;
+  --ods-palette-red-color-025: #fef3f4;
+  --ods-palette-red-color-050: #fce6e7;
+  --ods-palette-red-color-075: #fadadb;
+  --ods-palette-red-color-100: #f9ced0;
+  --ods-palette-red-color-125: #f7c1c4;
+  --ods-palette-red-color-150: #f6b5b8;
+  --ods-palette-red-color-200: #f39da1;
+  --ods-palette-red-color-250: #ef848a;
+  --ods-palette-red-color-300: #ec6c73;
+  --ods-palette-red-color-350: #e9545b;
+  --ods-palette-red-color-400: #e63b44;
+  --ods-palette-red-color-450: #e3232c;
+  --ods-palette-red-color-500: #e00a15;
+  --ods-palette-red-color-550: #ca0913;
+  --ods-palette-red-color-600: #b30811;
+  --ods-palette-red-color-650: #9d070f;
+  --ods-palette-red-color-700: #86060d;
+  --ods-palette-red-color-750: #70050b;
+  --ods-palette-red-color-800: #5a0408;
+  --ods-palette-red-color-825: #5a0408;
+  --ods-palette-red-color-850: #430306;
+  --ods-palette-red-color-875: #390306;
+  --ods-palette-red-color-900: #2d0204;
+  --ods-palette-red-color-925: #220204;
+  --ods-palette-red-color-950: #160102;
+  --ods-palette-violet-color-025: #f6f6fb;
+  --ods-palette-violet-color-050: #ededf8;
+  --ods-palette-violet-color-075: #e4e4f7;
+  --ods-palette-violet-color-100: #dadaf2;
+  --ods-palette-violet-color-125: #d1d1ef;
+  --ods-palette-violet-color-150: #c8c8eb;
+  --ods-palette-violet-color-200: #b6b6e5;
+  --ods-palette-violet-color-250: #a3a3de;
+  --ods-palette-violet-color-300: #9191d7;
+  --ods-palette-violet-color-350: #7f7fd1;
+  --ods-palette-violet-color-400: #6d6dca;
+  --ods-palette-violet-color-450: #5a5ac4;
+  --ods-palette-violet-color-500: #4848bd;
+  --ods-palette-violet-color-550: #4141aa;
+  --ods-palette-violet-color-600: #3a3a97;
+  --ods-palette-violet-color-650: #323284;
+  --ods-palette-violet-color-700: #2b2b71;
+  --ods-palette-violet-color-750: #24245f;
+  --ods-palette-violet-color-800: #1d1d4c;
+  --ods-palette-violet-color-825: #1a1a43;
+  --ods-palette-violet-color-850: #161639;
+  --ods-palette-violet-color-875: #121230;
+  --ods-palette-violet-color-900: #0e0e26;
+  --ods-palette-violet-color-925: #0b0b1d;
+  --ods-palette-violet-color-950: #070713;
+  --ods-severity-critical-warning-background-secondary-color-default: var(
+    --ods-palette-orange-color-500
+  );
+  --ods-severity-critical-warning-background-secondary-color-highlight: var(
+    --ods-palette-orange-color-300
+  );
+  --ods-severity-critical-warning-background-secondary-color-lowlight: var(
+    --ods-palette-orange-color-400
+  );
+  --ods-severity-critical-warning-foreground-color-limelight: var(
+    --ods-palette-orange-color-500
+  );
+  --ods-severity-critical-warning-foreground-secondary-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-severity-derived-background-color-default: var(
+    --ods-palette-purple-color-300
+  );
+  --ods-severity-derived-background-color-highlight: var(
+    --ods-palette-purple-color-100
+  );
+  --ods-severity-derived-background-color-lowlight: var(
+    --ods-palette-purple-color-200
+  );
+  --ods-severity-derived-foreground-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-severity-derived-foreground-color-limelight: var(
+    --ods-palette-purple-color-300
+  );
+  --ods-severity-error-background-color-default: var(
+    --ods-palette-red-color-350
+  );
+  --ods-severity-error-background-color-highlight: var(
+    --ods-palette-red-color-150
+  );
+  --ods-severity-error-background-color-lowlight: var(
+    --ods-palette-red-color-250
+  );
+  --ods-severity-error-foreground-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-severity-error-foreground-color-limelight: var(
+    --ods-palette-red-color-350
+  );
+  --ods-severity-information-background-primary-color-default: var(
+    --ods-palette-blue-color-400
+  );
+  --ods-severity-information-background-primary-color-highlight: var(
+    --ods-palette-blue-color-200
+  );
+  --ods-severity-information-background-primary-color-lowlight: var(
+    --ods-palette-blue-color-300
+  );
+  --ods-severity-information-background-secondary-color-default: var(
+    --ods-palette-blue-color-200
+  );
+  --ods-severity-information-background-secondary-color-highlight: var(
+    --ods-palette-white
+  );
+  --ods-severity-information-background-secondary-color-lowlight: var(
+    --ods-palette-blue-color-100
+  );
+  --ods-severity-information-foreground-primary-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-severity-information-foreground-primary-color-limelight: var(
+    --ods-palette-blue-color-400
+  );
+  --ods-severity-information-foreground-secondary-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-severity-information-foreground-secondary-color-limelight: var(
+    --ods-palette-blue-color-200
+  );
+  --ods-severity-neutral-background-color-default: var(
+    --ods-palette-gray-color-300
+  );
+  --ods-severity-neutral-background-color-highlight: var(
+    --ods-palette-gray-color-100
+  );
+  --ods-severity-neutral-background-color-lowlight: var(
+    --ods-palette-gray-color-200
+  );
+  --ods-severity-neutral-foreground-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-severity-neutral-foreground-color-limelight: var(
+    --ods-palette-gray-color-300
+  );
+  --ods-severity-overridden-background-color-default: var(
+    --ods-palette-cyan-color-500
+  );
+  --ods-severity-overridden-background-color-highlight: var(
+    --ods-palette-cyan-color-300
+  );
+  --ods-severity-overridden-background-color-lowlight: var(
+    --ods-palette-cyan-color-400
+  );
+  --ods-severity-overridden-foreground-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-severity-overridden-foreground-color-limelight: var(
+    --ods-palette-cyan-color-500
+  );
+  --ods-severity-success-background-color-default: var(
+    --ods-palette-green-color-550
+  );
+  --ods-severity-success-background-color-highlight: var(
+    --ods-palette-green-color-350
+  );
+  --ods-severity-success-background-color-lowlight: var(
+    --ods-palette-green-color-450
+  );
+  --ods-severity-success-foreground-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-severity-success-foreground-color-limelight: var(
+    --ods-palette-green-color-550
+  );
+  --ods-severity-warning-background-secondary-color-default: var(
+    --ods-palette-amber-color-500
+  );
+  --ods-severity-warning-background-secondary-color-highlight: var(
+    --ods-palette-amber-color-300
+  );
+  --ods-severity-warning-background-secondary-color-lowlight: var(
+    --ods-palette-amber-color-400
+  );
+  --ods-severity-warning-foreground-color-limelight: var(
+    --ods-palette-amber-color-500
+  );
+  --ods-severity-warning-foreground-secondary-color-default: var(
+    --ods-palette-gray-color-975
+  );
+  --ods-structure-border-color: var(--ods-palette-gray-color-800);
+  --ods-structure-container-color-tooltip: var(
+    --ods-palette-midnight-color-700
+  );
+  --ods-structure-container-primary-color: var(--ods-palette-gray-color-900);
+  --ods-structure-container-secondary-color: var(--ods-palette-gray-color-825);
+  --ods-structure-content-color-blotter: var(--ods-palette-gray-color-200);
+  --ods-structure-content-color-highlight: var(--ods-palette-gray-color-200);
+  --ods-structure-content-color-limelight: var(--ods-palette-white);
+  --ods-structure-content-color-limelightblue: var(
+    --ods-palette-blue-color-200
+  );
+  --ods-structure-content-primary-color-disabled: var(
+    --ods-palette-gray-color-650
+  );
+  --ods-structure-content-primary-color-lowlight: var(
+    --ods-palette-gray-color-350
+  );
+  --ods-structure-content-secondary-color-disabled: var(
+    --ods-palette-gray-color-600
+  );
+  --ods-structure-content-secondary-color-lowlight: var(
+    --ods-palette-gray-color-300
+  );
+  --ods-structure-header-primary-color: var(--ods-palette-midnight-color-800);
+  --ods-structure-header-secondary-color: var(--ods-palette-gray-color-750);
+  --ods-structure-header-tertiary-color: var(--ods-palette-gray-color-850);
+}
+* {
+  /* number */
+  --ods-line-height-body-05: 0.8125rem;
+  --ods-line-height-body-04: 0.875rem;
+  --ods-line-height-body-03: 1rem;
+  --ods-line-height-body-02: 1.0625rem;
+  --ods-line-height-body-01: 1.25rem;
+  --ods-line-height-display-05: 1.5rem;
+  --ods-line-height-display-04: 1.625rem;
+  --ods-line-height-display-03: 2.125rem;
+  --ods-line-height-display-02: 3.0625rem;
+  --ods-line-height-display-01: 3.875rem;
+  --ods-size-body-05: 0.625rem;
+  --ods-size-body-04: 0.6875rem;
+  --ods-size-body-03: 0.75rem;
+  --ods-size-body-02: 0.8125rem;
+  --ods-size-body-01: 1rem;
+  --ods-size-display-05: 1.125rem;
+  --ods-size-display-04: 1.25rem;
+  --ods-size-display-03: 1.625rem;
+  --ods-size-display-02: 2.375rem;
+  --ods-size-display-01: 3rem;
+  /* string */
+  --ods-family-body: segoe-ui;
+  --ods-family-display: segoe-ui;
+  --ods-family-iconfont-15-05-25: blade_uds_15_05_25;
+  --ods-weight-regular: regular;
+  --ods-weight-semibold: semibold;
+}
+* {
+  /* number */
+  --ods-rounding-alias-no-rounding: var(--ods-rounding-ramp-0);
+  --ods-rounding-alias-xs: var(--ods-rounding-ramp-025);
+  --ods-rounding-alias-s: var(--ods-rounding-ramp-100);
+  --ods-rounding-alias-m: var(--ods-rounding-ramp-200);
+  --ods-rounding-alias-l: var(--ods-rounding-ramp-400);
+  --ods-rounding-alias-xl: var(--ods-rounding-ramp-600);
+  --ods-rounding-alias-xxl: var(--ods-rounding-ramp-700);
+  --ods-rounding-ramp-0: 0rem;
+  --ods-rounding-ramp-025: 0.0313rem;
+  --ods-rounding-ramp-100: 0.125rem;
+  --ods-rounding-ramp-200: 0.25rem;
+  --ods-rounding-ramp-300: 0.375rem;
+  --ods-rounding-ramp-400: 0.5rem;
+  --ods-rounding-ramp-500: 0.625rem;
+  --ods-rounding-ramp-600: 0.75rem;
+  --ods-rounding-ramp-700: 0.875rem;
+}
+* {
+  /* number */
+  --ods-sizing-alias-xxs: var(--ods-sizing-ramp-100);
+  --ods-sizing-alias-xs: var(--ods-sizing-ramp-200);
+  --ods-sizing-alias-s: var(--ods-sizing-ramp-300);
+  --ods-sizing-alias-m: var(--ods-sizing-ramp-400);
+  --ods-sizing-alias-l-20: var(--ods-sizing-ramp-500);
+  --ods-sizing-alias-l-24: var(--ods-sizing-ramp-600);
+  --ods-sizing-alias-xl: var(--ods-sizing-ramp-700);
+  --ods-sizing-alias-xxl: var(--ods-sizing-ramp-800);
+  --ods-sizing-alias-xxxl: var(--ods-sizing-ramp-900);
+  --ods-sizing-alias-nav-bar: var(--ods-sizing-ramp-1000);
+  --ods-sizing-alias-giant-i: var(--ods-sizing-ramp-1100);
+  --ods-sizing-alias-giant-ii: var(--ods-sizing-ramp-1200);
+  --ods-sizing-alias-giant-iii: var(--ods-sizing-ramp-1300);
+  --ods-sizing-iconfont-sm: var(--ods-sizing-ramp-200-icon-font);
+  --ods-sizing-iconfont-md: var(--ods-sizing-ramp-300-icon-font);
+  --ods-sizing-iconfont-lg: var(--ods-sizing-ramp-400-icon-font);
+  --ods-sizing-ramp-100: 0.25rem;
+  --ods-sizing-ramp-200: 0.5rem;
+  --ods-sizing-ramp-200-icon-font: 0.6875rem;
+  --ods-sizing-ramp-300: 0.75rem;
+  --ods-sizing-ramp-300-icon-font: 0.8125rem;
+  --ods-sizing-ramp-400: 1rem;
+  --ods-sizing-ramp-400-icon-font: 1.0625rem;
+  --ods-sizing-ramp-500: 1.25rem;
+  --ods-sizing-ramp-600: 1.5rem;
+  --ods-sizing-ramp-700: 1.75rem;
+  --ods-sizing-ramp-800: 2rem;
+  --ods-sizing-ramp-900: 2.5rem;
+  --ods-sizing-ramp-1000: 2.75rem;
+  --ods-sizing-ramp-1100: 3rem;
+  --ods-sizing-ramp-1200: 4rem;
+  --ods-sizing-ramp-1300: 5rem;
+  --ods-sizing-ramp-1400: 8rem;
+}
+* {
+  /* number */
+  --ods-spacing-no-spacing: var(--ods-spacing-ramp-0);
+  --ods-spacing-xs: var(--ods-spacing-ramp-100);
+  --ods-spacing-sm: var(--ods-spacing-ramp-200);
+  --ods-spacing-md: var(--ods-spacing-ramp-300);
+  --ods-spacing-lg: var(--ods-spacing-ramp-400);
+  --ods-spacing-xl: var(--ods-spacing-ramp-500);
+  --ods-spacing-xxl: var(--ods-spacing-ramp-600);
+  --ods-spacing-xxxl: var(--ods-spacing-ramp-700);
+  --ods-spacing-ramp-0: 0rem;
+  --ods-spacing-ramp-100: 0.125rem;
+  --ods-spacing-ramp-200: 0.25rem;
+  --ods-spacing-ramp-300: 0.5rem;
+  --ods-spacing-ramp-400: 0.75rem;
+  --ods-spacing-ramp-500: 1rem;
+  --ods-spacing-ramp-600: 1.25rem;
+  --ods-spacing-ramp-700: 1.5rem;
+  --ods-spacing-ramp-800: 2rem;
+  --ods-spacing-ramp-900: 2.5rem;
+  --ods-spacing-ramp-1000: 3rem;
+}

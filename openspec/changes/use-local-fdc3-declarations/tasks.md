@@ -1,0 +1,3 @@
+- [x] Implement `local-declarations` capability <!-- spec: local-declarations -->
+  - [x] Modify `apps/base/src/admin/FDC3Declaration/services/useServices.ts` to use local JSONs.
+  - [x] Verify `FDC3Declaration` UI displays data from JSONs.

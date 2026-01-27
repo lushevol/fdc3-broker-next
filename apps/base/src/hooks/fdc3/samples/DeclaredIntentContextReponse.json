@@ -1,0 +1,12 @@
+{
+  "intents": [
+    {
+      "tileId": "cashflow_simple",
+      "intent": "scb.fmptp.ViewCashflows",
+      "contextType": "scb.fmptp.cashflows",
+      "allowedSourceTiles": [],
+      "allowedEntitlements": [],
+      "allowExternal": true
+    }
+  ]
+}

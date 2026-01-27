@@ -1,0 +1,49 @@
+trigger: none
+
+parameters:
+  - name: releaseId
+    type: string
+    displayName: Release WorkItem ID
+    default: 0
+
+  - name: rollbackAppVersion
+    type: string
+    displayName: Rollback App Version
+    default: 0
+
+  - name: rollbackBuildNumber
+    type: string
+    displayName: Rollback Build Number
+    default: 0
+
+  - name: deployEnv
+    type: string
+    displayName: Deploy to VM or AWS (only for develop branch)
+    default: vm
+    values:
+      - vm
+      - aws
+
+variables:
+  - name: APP_NAME
+    value: ${{ replace(variables['Build.Repository.Name'], '51358-', '') }}
+
+resources:
+  repositories:
+    - repository: templates
+      ref: main
+      name: FMQPR/51358-ratanone-ado-templates
+      type: git
+
+extends:
+  template: java-maven.yml@templates
+  parameters:
+    releaseId: ${{ parameters.releaseId }}
+    jdkVersion: 17
+    packageVersion: 2.0.3
+    deployStack: ansible
+    rollbackAppVersion: ${{ parameters.rollbackAppVersion }}
+    rollbackBuildNumber: ${{ parameters.rollbackBuildNumber }}
+    deployEnv: ${{ parameters.deployEnv }}
+    sonarCoverageExclusions: '**/singleuibff/config/*,**/singleuibff/filter/*,**/singleuibff/util/*,**/singleuibff/dto/*,**/singleuibff/entity/*,**/singleuibff/SingleUIBffApplication.*,**/db/migration/*'
+    featureRelease: true

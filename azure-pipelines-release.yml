@@ -1,0 +1,73 @@
+# Azure DevOps Pipeline for NPM Package Release
+# This pipeline handles version bumping and publishing packages to NPM
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - name: isMainBranch
+    value: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+
+stages:
+  - stage: Release
+    displayName: 'Version & Publish Packages'
+    condition: eq(variables.isMainBranch, true)
+    jobs:
+      - job: Release
+        displayName: 'Release Packages'
+        steps:
+          - checkout: self
+            fetchDepth: 0
+            persistCredentials: true
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '20.x'
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: |
+              git config user.email "azure-pipelines@dev.azure.com"
+              git config user.name "Azure Pipelines"
+            displayName: 'Configure Git User'
+
+          - script: |
+              # Check if there are any changesets to process
+              CHANGESETS=$(ls .changeset/*.md 2>/dev/null | grep -v README.md | wc -l)
+
+              if [ "$CHANGESETS" -gt 0 ]; then
+                echo "Found $CHANGESETS changeset(s) to process"
+                
+                # Apply changesets - bump versions and generate changelogs
+                npx changeset version
+                
+                # Check if there are changes to commit
+                if [ -n "$(git status --porcelain)" ]; then
+                  git add .
+                  git commit -m "chore: version packages"
+                  git push origin HEAD:main
+                  echo "##vso[task.setvariable variable=hasVersionChanges]true"
+                fi
+              else
+                echo "No changesets found - checking for unpublished versions"
+                echo "##vso[task.setvariable variable=hasVersionChanges]false"
+              fi
+            displayName: 'Apply Changesets'
+
+          - script: |
+              npm run build:packages
+            displayName: 'Build Packages'
+
+          - script: |
+              echo "//registry.npmjs.org/:_authToken=$(NPM_TOKEN)" > ~/.npmrc
+              npx changeset publish
+            displayName: 'Publish to NPM'
+            env:
+              NPM_TOKEN: $(NPM_TOKEN)
