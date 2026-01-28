@@ -1,6 +1,6 @@
-import * as crypto from 'node:crypto';
+const crypto = require('node:crypto');
 
-export function base64url(str: string | Buffer): string {
+function base64url(str) {
   return Buffer.from(str)
     .toString('base64')
     .replace(/=/g, '')
@@ -8,7 +8,7 @@ export function base64url(str: string | Buffer): string {
     .replace(/\//g, '_');
 }
 
-export function generateJWT(payload: Record<string, unknown>, secret: string = 'secret'): string {
+function generateJWT(payload, secret = 'secret') {
   const header = { alg: 'HS256', typ: 'JWT' };
   const encodedHeader = base64url(JSON.stringify(header));
   const encodedPayload = base64url(JSON.stringify(payload));
@@ -23,3 +23,8 @@ export function generateJWT(payload: Record<string, unknown>, secret: string = '
 
   return `${encodedHeader}.${encodedPayload}.${signature}`;
 }
+
+module.exports = {
+  base64url,
+  generateJWT,
+};
