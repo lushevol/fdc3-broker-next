@@ -3,7 +3,31 @@ import {
   ConfigProvider,
   Input as AntInput,
   InputProps as AntInputProps,
+  type ThemeConfig,
 } from 'antd';
+
+// ============================================================================
+// Design Tokens Import
+// ============================================================================
+
+import {
+  primitiveColors,
+  foundationColors,
+  colorTokens,
+} from './tokens/colors';
+import {
+  fontFamily,
+  fontSize,
+  fontWeight,
+  lineHeight,
+  typographyStyles,
+} from './tokens/typography';
+import {
+  componentSizes,
+  componentSpacing,
+  componentRound,
+} from './tokens/sizes';
+import { lightTheme } from './tokens/themes/light';
 
 // ============================================================================
 // Input Status Types
@@ -56,104 +80,56 @@ export interface InputProps extends AntInputProps {
 }
 
 // ============================================================================
-// Design Tokens (from Figma SC GDS)
-// ============================================================================
-
-const tokens = {
-  // Colors
-  colorPrimary: '#0473ea',
-  colorPrimaryHover: '#4f9df0',
-  colorPrimaryActive: '#0250a3',
-  colorText: '#333333',
-  colorPlaceholder: '#666666',
-  colorBackground: '#ffffff',
-  colorBorder: '#cccccc',
-  colorBorderHover: '#4f9df0',
-  colorBorderActive: '#0250a3',
-  colorError: '#ca0913',
-  colorErrorHover: '#e63b44',
-  colorAlert: '#faad14',
-  colorAlertHover: '#fddea1',
-  colorSuccess: '#207e00',
-  colorSuccessHover: '#32bd00',
-  colorDisabledBackground: '#e5e5e5',
-  colorDisabledText: '#a6a6a6',
-
-  // Typography
-  fontFamily:
-    "'SC Prosper Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-  labelFontSize: '12px',
-  labelFontWeight: 500,
-  labelLineHeight: '16px',
-  labelColor: '#4d4d4d',
-  helperFontSize: '12px',
-  helperFontWeight: 400,
-  helperLineHeight: '16px',
-  helperColor: '#595959',
-  errorColor: '#ca0913',
-  alertColor: '#7d570a',
-  successColor: '#207e00',
-
-  // Spacing
-  paddingHorizontal: '12px',
-  paddingVertical: '5px',
-  labelMarginBottom: '4px',
-  helperMarginTop: '4px',
-
-  // Border
-  borderRadius: '6px',
-};
-
-// ============================================================================
 // Theme Configuration for Ant Design Input
 // ============================================================================
 
-const getInputThemeConfig = (inputStatus: InputStatus) => {
+const getInputThemeConfig = (inputStatus: InputStatus): ThemeConfig => {
   const statusConfig = {
     error: {
-      colorPrimary: tokens.colorError,
-      colorErrorBg: '#fce6e7',
-      colorErrorBorder: tokens.colorError,
-      colorError: tokens.colorError,
+      colorPrimary: primitiveColors.red[550],
+      colorErrorBg: primitiveColors.red[50],
+      colorErrorBorder: primitiveColors.red[550],
+      colorError: primitiveColors.red[550],
     },
     alert: {
-      colorPrimary: tokens.colorAlert,
-      colorWarningBg: '#fef2db',
-      colorWarningBorder: tokens.colorAlert,
-      colorWarning: tokens.colorAlert,
+      colorPrimary: primitiveColors.amber[500],
+      colorWarningBg: primitiveColors.amber[50],
+      colorWarningBorder: primitiveColors.amber[500],
+      colorWarning: primitiveColors.amber[500],
     },
     success: {
-      colorPrimary: tokens.colorSuccess,
-      colorSuccessBg: '#ebfbe6',
-      colorSuccessBorder: tokens.colorSuccess,
-      colorSuccess: tokens.colorSuccess,
+      colorPrimary: primitiveColors.green[500],
+      colorSuccessBg: primitiveColors.green[50],
+      colorSuccessBorder: primitiveColors.green[500],
+      colorSuccess: primitiveColors.green[500],
     },
     default: {
-      colorPrimary: tokens.colorPrimary,
+      colorPrimary: lightTheme.colors.brand.blue,
     },
   };
 
   return {
     token: {
-      fontFamily: tokens.fontFamily,
-      colorPrimary: tokens.colorPrimary,
-      colorText: tokens.colorText,
-      colorTextPlaceholder: tokens.colorPlaceholder,
-      colorBgContainer: tokens.colorBackground,
-      colorBorder: tokens.colorBorder,
-      colorBorderHover: tokens.colorBorderHover,
-      colorBorderActive: tokens.colorBorderActive,
-      controlHeight: 32,
-      controlPaddingHorizontal: parseInt(tokens.paddingHorizontal, 10),
-      borderRadius: parseInt(tokens.borderRadius, 10),
+      fontFamily: fontFamily.primary,
+      colorPrimary: lightTheme.colors.brand.blue,
+      colorText: primitiveColors.grey[800],
+      colorTextPlaceholder: lightTheme.colors.text.placeholder,
+      colorBgContainer: lightTheme.colors.background.primary,
+      colorBorder: primitiveColors.grey[200],
+      controlHeight: componentSizes['32px'],
+      controlPaddingHorizontal: componentSpacing['12px'],
+      borderRadius: componentRound['round-theme'],
     },
     components: {
       Input: {
         ...statusConfig[inputStatus],
+        // Custom hover/active border colors for Input component
+        colorBorderHover: primitiveColors.blue[350],
+        colorBorderActive: primitiveColors.blue[650],
         algorithm: true,
       },
     },
-  };
+  } as unknown as ThemeConfig;
 };
 
 // ============================================================================
@@ -161,9 +137,9 @@ const getInputThemeConfig = (inputStatus: InputStatus) => {
 // ============================================================================
 
 const sizeMap = {
-  small: 24,
-  medium: 32,
-  large: 40,
+  small: componentSizes['24px'],
+  medium: componentSizes['32px'],
+  large: componentSizes['40px'],
 };
 
 // ============================================================================
@@ -177,47 +153,47 @@ const InputContainer = styled.div`
 `;
 
 const StyledLabel = styled.label`
-  font-family: ${tokens.fontFamily};
-  font-size: ${tokens.labelFontSize};
-  font-weight: ${tokens.labelFontWeight};
-  line-height: ${tokens.labelLineHeight};
-  color: ${tokens.labelColor};
-  margin-bottom: ${tokens.labelMarginBottom};
+  font-family: ${fontFamily.primary};
+  font-size: ${fontSize.helper}px;
+  font-weight: ${fontWeight.medium};
+  line-height: ${lineHeight.helper}px;
+  color: ${primitiveColors.grey[700]};
+  margin-bottom: ${componentSpacing['4px']}px;
 `;
 
 const StyledHelperText = styled.div<{ $status: InputStatus }>`
-  font-family: ${tokens.fontFamily};
-  font-size: ${tokens.helperFontSize};
-  font-weight: ${tokens.helperFontWeight};
-  line-height: ${tokens.helperLineHeight};
+  font-family: ${fontFamily.primary};
+  font-size: ${fontSize.helper}px;
+  font-weight: ${fontWeight.regular};
+  line-height: ${lineHeight.helper}px;
   color: ${(props) => {
     switch (props.$status) {
       case 'error':
-        return tokens.errorColor;
+        return primitiveColors.red[550];
       case 'alert':
-        return tokens.alertColor;
+        return primitiveColors.amber[700];
       case 'success':
-        return tokens.successColor;
+        return primitiveColors.green[700];
       default:
-        return tokens.helperColor;
+        return lightTheme.colors.text.helper;
     }
   }};
-  margin-top: ${tokens.helperMarginTop};
+  margin-top: ${componentSpacing['4px']}px;
 `;
 
 const RequiredAsterisk = styled.span`
-  color: ${tokens.colorError};
-  margin-left: 2px;
+  color: ${primitiveColors.red[550]};
+  margin-left: ${componentSizes['2px']}px;
 `;
 
 const PrefixText = styled.span`
-  color: ${tokens.colorText};
-  padding-left: ${tokens.paddingHorizontal};
+  color: ${primitiveColors.grey[800]};
+  padding-left: ${componentSpacing['12px']}px;
 `;
 
 const SuffixText = styled.span`
-  color: ${tokens.colorText};
-  padding-right: ${tokens.paddingHorizontal};
+  color: ${primitiveColors.grey[800]};
+  padding-right: ${componentSpacing['12px']}px;
 `;
 
 // ============================================================================
@@ -429,8 +405,8 @@ const PasswordStrengthIndicator: React.FC = () => {
   return (
     <span
       style={{
-        fontSize: '12px',
-        color: tokens.colorPlaceholder,
+        fontSize: fontSize.helper,
+        color: lightTheme.colors.text.placeholder,
       }}
     >
       {/* Password requirements indicator */}

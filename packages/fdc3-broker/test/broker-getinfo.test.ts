@@ -21,7 +21,7 @@ describe('Broker getInfo()', () => {
       appDirectory: mockAppDirectory,
       callbacks: {
         onLoginStatusCheck: async () => true,
-        onTileOpen: async () => undefined,
+        onTileOpen: async (app) => ({ appId: app.appId, instanceId: `${app.appId}-1` }),
         onValidateEntitlements: async () => true,
         onShowResolverUI: async (targets) => targets[0] || null,
         onSecurityEvent: vi.fn(),
@@ -194,9 +194,9 @@ describe('Broker getInfo()', () => {
 
     it('should work after channel operations', async () => {
       broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
-      await broker.joinUserChannel('red');
+      await broker.joinUserChannel('red', source);
 
       const info = await broker.getInfo();
 
@@ -205,10 +205,10 @@ describe('Broker getInfo()', () => {
 
     it('should work after intent operations', async () => {
       broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       const handler = vi.fn();
-      await broker.addIntentListener('ViewChart', handler);
+      await broker.addIntentListener('ViewChart', handler, source);
 
       const info = await broker.getInfo();
 

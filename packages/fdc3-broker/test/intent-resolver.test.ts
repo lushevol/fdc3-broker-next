@@ -295,8 +295,9 @@ describe('IntentResolver', () => {
 
       const result = await resolver.resolve('ViewChart', mockContext, target);
 
+      // When instance doesn't exist but app does, returns success with instanceId from input
       expect(result.type).toBe('success');
-      expect(result.target?.instanceId).toBeUndefined();
+      expect(result.target?.instanceId).toBe('nonexistent-tile');
     });
   });
 

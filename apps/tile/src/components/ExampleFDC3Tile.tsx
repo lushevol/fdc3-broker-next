@@ -118,11 +118,9 @@ const useFDC3TileRegister = (appIdentifier: AppIdentifier) => {
   const fdc3 = useFDC3();
 
   useEffect(() => {
-    // @ts-expect-error function not in DA type
     fdc3.registerTile(appIdentifier.instanceId, appIdentifier.appId);
 
     return () => {
-      // @ts-expect-error function not in DA type
       fdc3.unregisterTile(appIdentifier.instanceId, appIdentifier.appId);
     };
   }, [fdc3]);

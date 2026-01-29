@@ -40,7 +40,7 @@ describe('Broker Entitlement Validation', () => {
       appDirectory: mockAppDirectory,
       callbacks: {
         onLoginStatusCheck: async () => true,
-        onTileOpen: async () => undefined,
+        onTileOpen: async (app) => ({ appId: app.appId, instanceId: `${app.appId}-1` }),
         onValidateEntitlements: mockValidateEntitlements,
         onShowResolverUI: async (targets) => targets[0] || null,
         onSecurityEvent: vi.fn(),
@@ -57,38 +57,43 @@ describe('Broker Entitlement Validation', () => {
       mockValidateEntitlements.mockResolvedValue(false);
 
       broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       const context: Context = {
         type: 'fdc3.chart',
         id: { ticker: 'AAPL' },
       };
 
-      await expect(broker.raiseIntent('ViewChart', context)).rejects.toThrow(
+      await expect(broker.raiseIntent('ViewChart', context, undefined, source)).rejects.toThrow(
         'Not entitled to send this intent',
       );
 
-      expect(mockValidateEntitlements).toHaveBeenCalledWith('tile-1', 'send-intent');
+      expect(mockValidateEntitlements).toHaveBeenCalledWith('app-a', 'send-intent');
     });
 
     it('should allow raiseIntent when sender entitled', async () => {
       mockValidateEntitlements.mockResolvedValue(true);
 
       broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       const handler = vi.fn();
-      await broker.addIntentListener('ViewChart', handler);
+      await broker.addIntentListener('ViewChart', handler, source);
 
       const context: Context = {
         type: 'fdc3.chart',
         id: { ticker: 'AAPL' },
       };
 
-      const result = await broker.raiseIntent('ViewChart', context, {
-        appId: 'app-a',
-        instanceId: 'tile-1',
-      });
+      const result = await broker.raiseIntent(
+        'ViewChart',
+        context,
+        {
+          appId: 'app-a',
+          instanceId: 'tile-1',
+        },
+        source,
+      );
 
       expect(result.source.instanceId).toBe('tile-1');
       expect(handler).toHaveBeenCalledWith(context);
@@ -96,37 +101,72 @@ describe('Broker Entitlement Validation', () => {
 
     it('should deny raiseIntent for specific intent types based on entitlements', async () => {
       // Allow ViewChart but deny PlaceOrder
-      mockValidateEntitlements.mockImplementation(async (tileId, action) => {
+      mockValidateEntitlements.mockImplementation(async (appId, action) => {
         // Deny sending PlaceOrder intent
         if (action === 'send-intent') {
-          // Check tile's entitlement level
-          return tileId === 'premium-tile'; // Only premium tiles can send
+          // Check app's entitlement level - only premium-app can send
+          return appId === 'premium-app';
         }
         return true;
       });
 
-      // Regular tile cannot send
-      broker.registerTile('regular-tile', 'app-a');
-      broker.setCurrentTile('regular-tile');
+      // Register an app that handles PlaceOrder
+      const mockAppDirectory = new MockAppDirectoryService();
+      mockAppDirectory.registerApp({
+        appId: 'app-a',
+        name: 'App A',
+        version: '1.0.0',
+        interop: {
+          intents: {
+            listensFor: [{ intent: 'PlaceOrder', contexts: ['fdc3.order'] }],
+          },
+        },
+      });
+      mockAppDirectory.registerApp({
+        appId: 'premium-app',
+        name: 'Premium App',
+        version: '1.0.0',
+        interop: {
+          intents: {
+            listensFor: [{ intent: 'PlaceOrder', contexts: ['fdc3.order'] }],
+          },
+        },
+      });
+
+      const premiumBroker = new Broker({
+        ...mockConfig,
+        appDirectory: mockAppDirectory,
+      });
+
+      // Regular app cannot send
+      premiumBroker.registerTile('regular-tile', 'app-a');
+      const regularSource = { appId: 'app-a', instanceId: 'regular-tile' };
 
       const context: Context = {
         type: 'fdc3.order',
         id: { orderId: '12345' },
       };
 
-      await expect(broker.raiseIntent('PlaceOrder', context)).rejects.toThrow();
+      await expect(
+        premiumBroker.raiseIntent('PlaceOrder', context, undefined, regularSource),
+      ).rejects.toThrow();
 
-      // Premium tile can send
-      broker.registerTile('premium-tile', 'app-b');
-      broker.setCurrentTile('premium-tile');
+      // Premium app can send
+      premiumBroker.registerTile('premium-tile', 'premium-app');
+      const premiumSource = { appId: 'premium-app', instanceId: 'premium-tile' };
 
       const handler = vi.fn();
-      await broker.addIntentListener('PlaceOrder', handler);
+      await premiumBroker.addIntentListener('PlaceOrder', handler, premiumSource);
 
-      const result = await broker.raiseIntent('PlaceOrder', context, {
-        appId: 'app-b',
-        instanceId: 'premium-tile',
-      });
+      const result = await premiumBroker.raiseIntent(
+        'PlaceOrder',
+        context,
+        {
+          appId: 'premium-app',
+          instanceId: 'premium-tile',
+        },
+        premiumSource,
+      );
 
       expect(result.source.instanceId).toBe('premium-tile');
     });
@@ -137,48 +177,51 @@ describe('Broker Entitlement Validation', () => {
       mockValidateEntitlements.mockResolvedValue(false);
 
       broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
-      await expect(broker.addIntentListener('ViewChart', vi.fn())).rejects.toThrow(
+      await expect(broker.addIntentListener('ViewChart', vi.fn(), source)).rejects.toThrow(
         'Not entitled to receive this intent',
       );
 
-      expect(mockValidateEntitlements).toHaveBeenCalledWith('tile-1', 'receive-intent');
+      expect(mockValidateEntitlements).toHaveBeenCalledWith('app-a', 'receive-intent');
     });
 
     it('should allow addIntentListener when receiver entitled', async () => {
       mockValidateEntitlements.mockResolvedValue(true);
 
       broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       const handler = vi.fn();
-      const listener = await broker.addIntentListener('ViewChart', handler);
+      const listener = await broker.addIntentListener('ViewChart', handler, source);
 
       expect(listener).toBeDefined();
       expect(listener.unsubscribe).toBeDefined();
     });
 
     it('should prevent unauthorized tiles from receiving intents', async () => {
-      mockValidateEntitlements.mockImplementation(async (tileId, action) => {
+      mockValidateEntitlements.mockImplementation(async (appId, action) => {
         if (action === 'receive-intent') {
-          return tileId === 'authorized-tile';
+          // Only authorized-app can receive intents
+          return appId === 'authorized-app';
         }
         return true;
       });
 
       // Unauthorized tile cannot add listener
       broker.registerTile('unauthorized-tile', 'app-a');
-      broker.setCurrentTile('unauthorized-tile');
+      const unauthorizedSource = { appId: 'app-a', instanceId: 'unauthorized-tile' };
 
-      await expect(broker.addIntentListener('ViewChart', vi.fn())).rejects.toThrow();
+      await expect(
+        broker.addIntentListener('ViewChart', vi.fn(), unauthorizedSource),
+      ).rejects.toThrow();
 
       // Authorized tile can add listener
-      broker.registerTile('authorized-tile', 'app-b');
-      broker.setCurrentTile('authorized-tile');
+      broker.registerTile('authorized-tile', 'authorized-app');
+      const authorizedSource = { appId: 'authorized-app', instanceId: 'authorized-tile' };
 
       const handler = vi.fn();
-      const listener = await broker.addIntentListener('ViewChart', handler);
+      const listener = await broker.addIntentListener('ViewChart', handler, authorizedSource);
 
       expect(listener).toBeDefined();
     });
@@ -189,24 +232,24 @@ describe('Broker Entitlement Validation', () => {
       mockValidateEntitlements.mockResolvedValue(false);
 
       broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
-      await expect(broker.joinUserChannel('red')).rejects.toThrow(
+      await expect(broker.joinUserChannel('red', source)).rejects.toThrow(
         'Not entitled to join this channel',
       );
 
-      expect(mockValidateEntitlements).toHaveBeenCalledWith('tile-1', 'join-channel');
+      expect(mockValidateEntitlements).toHaveBeenCalledWith('app-a', 'join-channel');
     });
 
     it('should allow joinUserChannel when entitled', async () => {
       mockValidateEntitlements.mockResolvedValue(true);
 
       broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
-      await broker.joinUserChannel('red');
+      await broker.joinUserChannel('red', source);
 
-      const currentChannel = await broker.getCurrentChannel();
+      const currentChannel = await broker.getCurrentChannel(source);
       expect(currentChannel?.id).toBe('red');
     });
 
@@ -220,14 +263,14 @@ describe('Broker Entitlement Validation', () => {
         .mockResolvedValueOnce(false); // Premium channel denied
 
       broker.registerTile('regular-tile', 'app-a');
-      broker.setCurrentTile('regular-tile');
+      const regularSource = { appId: 'app-a', instanceId: 'regular-tile' };
 
       // Regular channel should work
-      await broker.joinUserChannel('red');
-      expect((await broker.getCurrentChannel())?.id).toBe('red');
+      await broker.joinUserChannel('red', regularSource);
+      expect((await broker.getCurrentChannel(regularSource))?.id).toBe('red');
 
       // Premium channel should be denied
-      await expect(broker.joinUserChannel('premium-gold')).rejects.toThrow(
+      await expect(broker.joinUserChannel('premium-gold', regularSource)).rejects.toThrow(
         'Premium subscription required for this channel',
       );
     });
@@ -239,11 +282,11 @@ describe('Broker Entitlement Validation', () => {
         .mockResolvedValueOnce(true); // Premium channel allowed
 
       broker.registerTile('premium-tile', 'app-a');
-      broker.setCurrentTile('premium-tile');
+      const premiumSource = { appId: 'app-a', instanceId: 'premium-tile' };
 
-      await broker.joinUserChannel('premium-gold');
+      await broker.joinUserChannel('premium-gold', premiumSource);
 
-      const currentChannel = await broker.getCurrentChannel();
+      const currentChannel = await broker.getCurrentChannel(premiumSource);
       expect(currentChannel?.id).toBe('premium-gold');
     });
   });
@@ -309,55 +352,71 @@ describe('Broker Entitlement Validation', () => {
       mockValidateEntitlements.mockResolvedValue(false);
 
       broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       // Test raiseIntent denial
       const raiseError = await broker
-        .raiseIntent('ViewChart', {} as Context)
+        .raiseIntent('ViewChart', {} as Context, undefined, source)
         .catch((e) => e.message);
       expect(raiseError).toBeDefined();
       expect(raiseError).not.toContain('password');
       expect(raiseError).not.toContain('token');
 
       // Test joinUserChannel denial
-      const joinError = await broker.joinUserChannel('red').catch((e) => e.message);
+      const joinError = await broker.joinUserChannel('red', source).catch((e) => e.message);
       expect(joinError).toBeDefined();
       expect(joinError).not.toMatch(/password|token|secret/);
     });
 
     it('should log all entitlement violations', async () => {
-      const mockSecurityEvent = vi.fn();
-      mockConfig.callbacks.onSecurityEvent = mockSecurityEvent;
+      // Capture security events via console.warn since logger.security uses it
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      mockConfig.callbacks.onSecurityEvent = vi.fn();
       // Create new broker with updated config
       const securityBroker = new Broker(mockConfig);
       mockValidateEntitlements.mockResolvedValue(false);
 
       securityBroker.registerTile('tile-1', 'app-a');
-      securityBroker.setCurrentTile('tile-1');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       // Test raiseIntent security log
       try {
-        await securityBroker.raiseIntent('ViewChart', {
-          type: 'fdc3.chart',
-          id: { ticker: 'AAPL' },
-        } as Context);
+        await securityBroker.raiseIntent(
+          'ViewChart',
+          {
+            type: 'fdc3.chart',
+            id: { ticker: 'AAPL' },
+          } as Context,
+          undefined,
+          source,
+        );
       } catch (error) {
         // Expected
       }
 
-      expect(mockSecurityEvent).toHaveBeenCalled();
+      // Verify security event was logged via console.warn
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[FDC3:SECURITY] Intent send denied due to entitlements',
+        expect.anything(),
+      );
 
       // Test joinUserChannel security log
       vi.clearAllMocks();
+      warnSpy.mockClear();
       mockValidateEntitlements.mockResolvedValue(false);
 
       try {
-        await securityBroker.joinUserChannel('red');
+        await securityBroker.joinUserChannel('red', source);
       } catch (error) {
         // Expected
       }
 
-      expect(mockSecurityEvent).toHaveBeenCalled();
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[FDC3:SECURITY] Channel join denied due to entitlements',
+        expect.anything(),
+      );
+
+      warnSpy.mockRestore();
     });
   });
 
@@ -366,22 +425,22 @@ describe('Broker Entitlement Validation', () => {
       // Return false for empty tileId (simulating entitlement check failure for unknown tile)
       mockValidateEntitlements.mockResolvedValue(false);
 
-      // No current tile set
+      // No current tile set - passing empty source should fail
       const context: Context = { type: 'fdc3.chart', id: { ticker: 'AAPL' } };
-      await expect(broker.raiseIntent('ViewChart', context)).rejects.toThrow(
-        'Not entitled to send this intent',
-      );
+      await expect(
+        broker.raiseIntent('ViewChart', context, undefined, { appId: '', instanceId: '' }),
+      ).rejects.toThrow('Not entitled to send this intent');
     });
 
     it('should handle validation callback errors', async () => {
       mockValidateEntitlements.mockRejectedValue(new Error('Service unavailable'));
 
       broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
-      await expect(broker.raiseIntent('ViewChart', {} as Context)).rejects.toThrow(
-        'Error validating entitlements',
-      );
+      await expect(
+        broker.raiseIntent('ViewChart', {} as Context, undefined, source),
+      ).rejects.toThrow('Error validating entitlements');
     });
 
     it('should work without entitlement validation callback', async () => {
@@ -395,10 +454,10 @@ describe('Broker Entitlement Validation', () => {
       const brokerWithoutCallback = new Broker(configWithoutCallback);
 
       brokerWithoutCallback.registerTile('tile-1', 'app-a');
-      brokerWithoutCallback.setCurrentTile('tile-1');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       const handler = vi.fn();
-      await brokerWithoutCallback.addIntentListener('ViewChart', handler);
+      await brokerWithoutCallback.addIntentListener('ViewChart', handler, source);
 
       expect(handler).toBeDefined();
     });

@@ -12,7 +12,7 @@ describe('Broker + Resolver UI Integration', () => {
   let broker: Broker;
   let mockAppDirectory: MockAppDirectoryService;
   let mockCallbacks: BrokerConfig['callbacks'];
-  let resolverUIPromise: Promise<ResolverTarget | null> | null;
+
   let resolveResolverUI: (target: ResolverTarget) => void;
   let rejectResolverUI: () => void;
 
@@ -66,22 +66,14 @@ describe('Broker + Resolver UI Integration', () => {
     mockApps.forEach((app) => mockAppDirectory.registerApp(app));
 
     // Create resolver UI callback that returns a promise
-    resolverUIPromise = null;
-    resolveResolverUI = vi.fn();
-    rejectResolverUI = vi.fn();
-
     const onShowResolverUI = vi.fn().mockImplementation(() => {
       return new Promise<ResolverTarget | null>((resolve, reject) => {
-        resolverUIPromise = new Promise((res, rej) => {
-          resolveResolverUI = (target: ResolverTarget) => {
-            res(target);
-            resolve(target);
-          };
-          rejectResolverUI = () => {
-            rej(new Error('User cancelled'));
-            resolve(null);
-          };
-        });
+        resolveResolverUI = (target: ResolverTarget) => {
+          resolve(target);
+        };
+        rejectResolverUI = () => {
+          reject(new Error('User cancelled'));
+        };
       });
     });
 

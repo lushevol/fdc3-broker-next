@@ -52,7 +52,7 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
       appDirectory: mockAppDirectory,
       callbacks: {
         onLoginStatusCheck: async () => true,
-        onTileOpen: async () => undefined,
+        onTileOpen: async (app) => ({ appId: app.appId, instanceId: `${app.appId}-1` }),
         onValidateEntitlements: async () => true,
         onShowResolverUI: async (targets) => targets[0] || null,
         onSecurityEvent: () => undefined,
@@ -168,8 +168,16 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
 
   describe('addContextListener() - Context Listening', () => {
     it('should add listener and return Listener object', async () => {
+      // Register a tile and join a channel first
+      (broker as Broker)['registerTile']('tile-1', 'test-app', {
+        appId: 'test-app',
+        name: 'Test Application',
+      });
+      const source = { appId: 'test-app', instanceId: 'tile-1' };
+      await broker.joinUserChannel('red', source);
+
       const handler = vi.fn();
-      const listener = await broker.addContextListener('fdc3.chart', handler);
+      const listener = await broker.addContextListener('fdc3.chart', handler, source);
 
       expect((listener as any).id).toBeDefined();
       expect(listener.unsubscribe).toBeDefined();
@@ -177,8 +185,16 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
     });
 
     it('should support listening to all context types with null', async () => {
+      // Register a tile and join a channel first
+      (broker as Broker)['registerTile']('tile-2', 'test-app', {
+        appId: 'test-app',
+        name: 'Test Application',
+      });
+      const source = { appId: 'test-app', instanceId: 'tile-2' };
+      await broker.joinUserChannel('red', source);
+
       const handler = vi.fn();
-      const listener = await broker.addContextListener(null, handler);
+      const listener = await broker.addContextListener(null, handler, source);
 
       expect(listener).toBeDefined();
       expect(listener.unsubscribe).toBeDefined();
@@ -189,7 +205,9 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
     it('should return AppIntent with intent and apps array', async () => {
       const appIntent = await broker.findIntent('ViewChart');
 
-      expect(appIntent).toHaveProperty('intent', 'ViewChart');
+      // intent is an object with name and displayName properties
+      expect(appIntent.intent).toHaveProperty('name', 'ViewChart');
+      expect(appIntent.intent).toHaveProperty('displayName', 'ViewChart');
       expect(appIntent).toHaveProperty('apps');
       expect(Array.isArray(appIntent.apps)).toBe(true);
 
@@ -237,6 +255,17 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
 
   describe('raiseIntent() - Intent Raising', () => {
     it('should return IntentResolution with source', async () => {
+      // Register a tile and add intent listener so there's a target to receive the intent
+      (broker as Broker)['registerTile']('tile-1', 'test-app', {
+        appId: 'test-app',
+        name: 'Test Application',
+      });
+      // Must pass source to addIntentListener so it registers with tile registry
+      await broker.addIntentListener('ViewChart', vi.fn(), {
+        appId: 'test-app',
+        instanceId: 'tile-1',
+      });
+
       const context: Context = {
         type: 'fdc3.chart',
         id: { ticker: 'AAPL' },
@@ -249,6 +278,17 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
     });
 
     it('should support targeting specific app', async () => {
+      // Register a tile and add intent listener
+      (broker as Broker)['registerTile']('tile-2', 'test-app', {
+        appId: 'test-app',
+        name: 'Test Application',
+      });
+      // Must pass source to addIntentListener so it registers with tile registry
+      await broker.addIntentListener('ViewChart', vi.fn(), {
+        appId: 'test-app',
+        instanceId: 'tile-2',
+      });
+
       const context: Context = {
         type: 'fdc3.chart',
         id: { ticker: 'AAPL' },
@@ -261,8 +301,14 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
     });
 
     it('should support targeting specific instance', async () => {
-      (broker as Broker)['registerTile']('tile-1', 'test-app');
-      await broker.addIntentListener('ViewChart', vi.fn());
+      (broker as Broker)['registerTile']('tile-1', 'test-app', {
+        appId: 'test-app',
+        name: 'Test Application',
+      });
+      await broker.addIntentListener('ViewChart', vi.fn(), {
+        appId: 'test-app',
+        instanceId: 'tile-1',
+      });
 
       const context: Context = {
         type: 'fdc3.chart',
@@ -292,6 +338,17 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
 
   describe('raiseIntentForContext() - Context-based Intent Raising', () => {
     it('should return IntentResolution', async () => {
+      // Register a tile and add intent listener
+      (broker as Broker)['registerTile']('tile-1', 'test-app', {
+        appId: 'test-app',
+        name: 'Test Application',
+      });
+      // Must pass source to addIntentListener so it registers with tile registry
+      await broker.addIntentListener('ViewChart', vi.fn(), {
+        appId: 'test-app',
+        instanceId: 'tile-1',
+      });
+
       const context: Context = {
         type: 'fdc3.chart',
         id: { ticker: 'AAPL' },
@@ -304,6 +361,17 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
     });
 
     it('should support targeting specific app', async () => {
+      // Register a tile and add intent listener
+      (broker as Broker)['registerTile']('tile-2', 'test-app', {
+        appId: 'test-app',
+        name: 'Test Application',
+      });
+      // Must pass source to addIntentListener so it registers with tile registry
+      await broker.addIntentListener('ViewChart', vi.fn(), {
+        appId: 'test-app',
+        instanceId: 'tile-2',
+      });
+
       const context: Context = {
         type: 'fdc3.chart',
         id: { ticker: 'AAPL' },
@@ -381,6 +449,12 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
 
   describe('joinUserChannel() - Channel Joining', () => {
     it('should join channel successfully', async () => {
+      // Register a tile first to have a valid source
+      (broker as Broker)['registerTile']('tile-1', 'test-app', {
+        appId: 'test-app',
+        name: 'Test Application',
+      });
+
       const channel: Channel = {
         id: 'red',
         type: 'user',
@@ -393,7 +467,8 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
         addContextListener: vi.fn(),
       };
 
-      await expect(broker.joinUserChannel(channel.id)).resolves.toBeUndefined();
+      const source = { appId: 'test-app', instanceId: 'tile-1' };
+      await expect(broker.joinUserChannel(channel.id, source)).resolves.toBeUndefined();
     });
   });
 
@@ -456,11 +531,19 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
 
   describe('Listener.unsubscribe() - Listener Cleanup', () => {
     it('should unsubscribe context listener', async () => {
-      // Join a channel first (required by broker)
-      await broker.joinUserChannel('red');
+      // Register a tile first
+      (broker as Broker)['registerTile']('tile-1', 'test-app', {
+        appId: 'test-app',
+        name: 'Test Application',
+      });
+
+      const source = { appId: 'test-app', instanceId: 'tile-1' };
+
+      // Join a channel with source (required by broker)
+      await broker.joinUserChannel('red', source);
 
       const handler = vi.fn();
-      const listener = await broker.addContextListener('fdc3.chart', handler);
+      const listener = await broker.addContextListener('fdc3.chart', handler, source);
 
       expect(() => listener.unsubscribe()).not.toThrow();
     });
@@ -482,6 +565,12 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
 
   describe('Type Safety - Return Types', () => {
     it('should return correct types for all methods', async () => {
+      // Register a tile first for operations that require a source
+      (broker as Broker)['registerTile']('tile-1', 'test-app', {
+        appId: 'test-app',
+        name: 'Test Application',
+      });
+
       // Application Management - use registered mock app
       const appIdentifier: AppIdentifier = await broker.open({
         appId: 'test-app',
@@ -498,7 +587,8 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
       });
       expect(metadata.appId).toBeDefined();
 
-      // Intent Operations
+      // Intent Operations - register listener first
+      await broker.addIntentListener('ViewChart', vi.fn());
       const intent: AppIntent = await broker.findIntent('ViewChart');
       expect(intent.intent).toBeDefined();
 
@@ -527,9 +617,14 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
       const info: ImplementationMetadata = await broker.getInfo();
       expect(info.fdc3Version).toBeDefined();
 
-      // Listeners - need to join a channel first for context listener
-      await broker.joinUserChannel('red');
-      const contextListener: Listener = await broker.addContextListener('fdc3.chart', vi.fn());
+      // Listeners - need to join a channel with source for context listener
+      const source = { appId: 'test-app', instanceId: 'tile-1' };
+      await broker.joinUserChannel('red', source);
+      const contextListener: Listener = await broker.addContextListener(
+        'fdc3.chart',
+        vi.fn(),
+        source,
+      );
       expect((contextListener as any).id).toBeDefined();
 
       const intentListener: Listener = await broker.addIntentListener('ViewChart', vi.fn());

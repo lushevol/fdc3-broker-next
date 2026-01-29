@@ -89,8 +89,9 @@ describe('EntitlementValidator', () => {
 
     it('should log security event when denied', async () => {
       mockValidateEntitlements.mockResolvedValue(false);
-      const mockSecurityEvent = vi.fn();
-      mockConfig.callbacks.onSecurityEvent = mockSecurityEvent;
+
+      // Capture the security event via console.warn (since logger.security uses console.warn)
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const result = await validator.canSendIntent('tile-1', 'ViewChart', {
         type: 'fdc3.chart',
@@ -98,14 +99,17 @@ describe('EntitlementValidator', () => {
       } as Context);
 
       expect(result.allowed).toBe(false);
-      expect(mockSecurityEvent).toHaveBeenCalledWith(
-        'Intent send denied due to entitlements',
+      // Verify security event was logged
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[FDC3:SECURITY] Intent send denied due to entitlements',
         expect.objectContaining({
           tileId: 'tile-1',
           intent: 'ViewChart',
           contextType: 'fdc3.chart',
         }),
       );
+
+      warnSpy.mockRestore();
     });
   });
 
@@ -155,19 +159,23 @@ describe('EntitlementValidator', () => {
 
     it('should log security event when denied', async () => {
       mockValidateEntitlements.mockResolvedValue(false);
-      const mockSecurityEvent = vi.fn();
-      mockConfig.callbacks.onSecurityEvent = mockSecurityEvent;
+
+      // Capture the security event via console.warn (since logger.security uses console.warn)
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const result = await validator.canReceiveIntent('tile-1', 'ViewChart');
 
       expect(result.allowed).toBe(false);
-      expect(mockSecurityEvent).toHaveBeenCalledWith(
-        'Intent receive denied due to entitlements',
+      // Verify security event was logged
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[FDC3:SECURITY] Intent receive denied due to entitlements',
         expect.objectContaining({
           tileId: 'tile-1',
           intent: 'ViewChart',
         }),
       );
+
+      warnSpy.mockRestore();
     });
   });
 
@@ -271,19 +279,23 @@ describe('EntitlementValidator', () => {
 
     it('should log security event when denied', async () => {
       mockValidateEntitlements.mockResolvedValue(false);
-      const mockSecurityEvent = vi.fn();
-      mockConfig.callbacks.onSecurityEvent = mockSecurityEvent;
+
+      // Capture the security event via console.warn (since logger.security uses console.warn)
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const result = await validator.canJoinChannel('tile-1', 'red');
 
       expect(result.allowed).toBe(false);
-      expect(mockSecurityEvent).toHaveBeenCalledWith(
-        'Channel join denied due to entitlements',
+      // Verify security event was logged
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[FDC3:SECURITY] Channel join denied due to entitlements',
         expect.objectContaining({
           tileId: 'tile-1',
           channelId: 'red',
         }),
       );
+
+      warnSpy.mockRestore();
     });
   });
 
@@ -336,8 +348,9 @@ describe('EntitlementValidator', () => {
 
     it('should log security event when denied', async () => {
       mockValidateEntitlements.mockResolvedValue(false);
-      const mockSecurityEvent = vi.fn();
-      mockConfig.callbacks.onSecurityEvent = mockSecurityEvent;
+
+      // Capture the security event via console.warn (since logger.security uses console.warn)
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const result = await validator.canOpenTile('chart-app', {
         type: 'fdc3.chart',
@@ -345,13 +358,16 @@ describe('EntitlementValidator', () => {
       } as Context);
 
       expect(result.allowed).toBe(false);
-      expect(mockSecurityEvent).toHaveBeenCalledWith(
-        'Tile open denied due to entitlements',
+      // Verify security event was logged
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[FDC3:SECURITY] Tile open denied due to entitlements',
         expect.objectContaining({
           appId: 'chart-app',
           contextType: 'fdc3.chart',
         }),
       );
+
+      warnSpy.mockRestore();
     });
   });
 
