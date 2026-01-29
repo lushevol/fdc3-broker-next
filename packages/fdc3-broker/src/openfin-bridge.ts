@@ -78,7 +78,7 @@ export class OpenFinBridge {
             });
 
             // Call handler with intent, context, and source
-            intentHandler(intent, context);
+            return intentHandler(intent, context);
           });
         }
       });

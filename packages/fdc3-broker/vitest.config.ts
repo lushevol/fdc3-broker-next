@@ -19,5 +19,11 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts', 'test/**'],
     },
+    reporters: ['default', 'junit', 'vitest-sonar-reporter'],
+    outputFile: {
+      junit: './coverage/junit-test-report.xml',
+      'vitest-sonar-reporter': './coverage/sonar-test-report.xml',
+    },
+    exclude: ['node_modules', 'dist', '.idea', '.git', '.cache'],
   },
 });

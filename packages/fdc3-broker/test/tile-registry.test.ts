@@ -16,7 +16,7 @@ describe('TileRegistryImpl', () => {
 
   beforeEach(() => {
     mockTile1 = {
-      tileId: 'tile-1',
+      instanceId: 'tile-1',
       appId: 'app1',
       state: 'mounted',
       metadata: {
@@ -26,10 +26,10 @@ describe('TileRegistryImpl', () => {
       },
       intentListeners: new Set(['ViewChart', 'ViewQuote']),
       contextListeners: new Set(),
-    };
+    } as unknown as TileInstance;
 
     mockTile2 = {
-      tileId: 'tile-2',
+      instanceId: 'tile-2',
       appId: 'app1',
       state: 'mounted',
       metadata: {
@@ -39,10 +39,10 @@ describe('TileRegistryImpl', () => {
       },
       intentListeners: new Set(['ViewQuote']),
       contextListeners: new Set(),
-    };
+    } as unknown as TileInstance;
 
     mockTile3 = {
-      tileId: 'tile-3',
+      instanceId: 'tile-3',
       appId: 'app2',
       state: 'unmounted',
       metadata: {
@@ -52,7 +52,7 @@ describe('TileRegistryImpl', () => {
       },
       intentListeners: new Set(['ViewChart']),
       contextListeners: new Set(),
-    };
+    } as unknown as TileInstance;
 
     registry = new TileRegistryImpl();
   });

@@ -215,29 +215,7 @@ export class Broker implements DesktopAgent {
 
         // Subscribe to intents from OpenFin
         this.openFinBridge.subscribeToIntents(
-          async (intent: string, context: Context, source?: AppIdentifier) => {
-            this.logger.debug('Received intent from OpenFin', {
-              intent,
-              context,
-              source,
-            });
-
-            // Find internal tiles that can handle this intent
-            const listeners = this.intentListeners.get(intent);
-            if (listeners && listeners.length > 0) {
-              // Forward to internal listeners
-              for (const listener of listeners) {
-                const handler = (listener as any).handler;
-                if (handler) {
-                  try {
-                    await handler(context);
-                  } catch (error) {
-                    this.logger.error(`Error forwarding OpenFin intent ${intent}:`, error as Error);
-                  }
-                }
-              }
-            }
-          },
+          this.handleOpenFinIntent.bind(this),
           Array.from(this.intentListeners.keys()),
         );
 
@@ -249,6 +227,37 @@ export class Broker implements DesktopAgent {
 
     // Initialize bridge asynchronously
     initBridge();
+  }
+
+  /**
+   * Handle incoming intent from OpenFin
+   */
+  private async handleOpenFinIntent(
+    intent: string,
+    context: Context,
+    source?: AppIdentifier,
+  ): Promise<void> {
+    this.logger.debug('Received intent from OpenFin', {
+      intent,
+      context,
+      source,
+    });
+
+    // Find internal tiles that can handle this intent
+    const listeners = this.intentListeners.get(intent);
+    if (listeners && listeners.length > 0) {
+      // Forward to internal listeners
+      for (const listener of listeners) {
+        const handler = (listener as any).handler;
+        if (handler) {
+          try {
+            await handler(context);
+          } catch (error) {
+            this.logger.error(`Error forwarding OpenFin intent ${intent}:`, error as Error);
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -1027,6 +1036,13 @@ export class Broker implements DesktopAgent {
 
     // Store handler with listener
     (listener as any).handler = handler;
+
+    // Sync with OpenFin if this is a new intent type
+    const isNewIntentType = this.intentListeners.get(intent)!.length === 1;
+    const bridge = await this.getOpenFinBridge();
+    if (isNewIntentType && bridge?.isEnabled()) {
+      bridge.subscribeToIntents(this.handleOpenFinIntent.bind(this), [intent]);
+    }
 
     // Check if any pending waits for this intent from this app
     if (source?.appId) {

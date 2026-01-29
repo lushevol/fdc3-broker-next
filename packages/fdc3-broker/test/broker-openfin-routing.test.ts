@@ -3,7 +3,7 @@
  * @see plan.md#T146
  */
 
-import { MockAppDirectoryService } from '@fm/fdc3-app-directory/mock';
+import { MockAppDirectoryService } from '../../fdc3-app-directory/src/mock';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Broker } from '../src/broker';
 import type { AppIdentifier, BrokerConfig, Context } from '../src/types';
@@ -35,6 +35,7 @@ describe('Broker Bidirectional Routing', () => {
 
     // Setup OpenFin environment
     (globalThis as any).fin = mockFin;
+    (globalThis as any).fdc3 = mockFDC3;
 
     const mockAppDirectory = new MockAppDirectoryService();
 
@@ -42,7 +43,7 @@ describe('Broker Bidirectional Routing', () => {
       appDirectory: mockAppDirectory,
       callbacks: {
         onLoginStatusCheck: async () => true,
-        onTileOpen: async () => undefined,
+        onTileOpen: async () => ({ appId: 'test', instanceId: 'test' }),
         onValidateEntitlements: async () => true,
         onShowResolverUI: async (targets) => targets[0] || null,
         onSecurityEvent: () => undefined,
@@ -106,9 +107,9 @@ describe('Broker Bidirectional Routing', () => {
 
       // Register a tile that can handle the intent
       broker.registerTile('tile-1', 'test-app');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'test-app', instanceId: 'tile-1' };
 
-      await broker.addIntentListener(intent, vi.fn());
+      await broker.addIntentListener(intent, vi.fn(), source);
 
       const result = await broker.raiseIntent(intent, context, {
         appId: 'test-app',
@@ -160,10 +161,10 @@ describe('Broker Bidirectional Routing', () => {
 
       // Register a tile with intent listener
       broker.registerTile('tile-1', 'test-app');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'test-app', instanceId: 'tile-1' };
 
       const handler = vi.fn();
-      await broker.addIntentListener(intent, handler);
+      await broker.addIntentListener(intent, handler, source);
 
       // Get the intent handler that was registered with OpenFin
       const registeredHandler = mockFDC3.addIntentListener.mock.calls[0][1];
@@ -183,13 +184,13 @@ describe('Broker Bidirectional Routing', () => {
 
       // Register multiple tiles with listeners
       broker.registerTile('tile-1', 'test-app');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'test-app', instanceId: 'tile-1' };
 
       const handler1 = vi.fn();
       const handler2 = vi.fn();
 
-      await broker.addIntentListener(intent, handler1);
-      await broker.addIntentListener(intent, handler2);
+      await broker.addIntentListener(intent, handler1, source);
+      await broker.addIntentListener(intent, handler2, source);
 
       // Get the intent handler that was registered with OpenFin
       const registeredHandler = mockFDC3.addIntentListener.mock.calls[0][1];
@@ -210,10 +211,10 @@ describe('Broker Bidirectional Routing', () => {
 
       // Register a tile with a failing handler
       broker.registerTile('tile-1', 'test-app');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'test-app', instanceId: 'tile-1' };
 
       const failingHandler = vi.fn().mockRejectedValue(new Error('Handler error'));
-      await broker.addIntentListener(intent, failingHandler);
+      await broker.addIntentListener(intent, failingHandler, source);
 
       // Get the intent handler that was registered with OpenFin
       const registeredHandler = mockFDC3.addIntentListener.mock.calls[0][1];
@@ -230,13 +231,10 @@ describe('Broker Bidirectional Routing', () => {
 
       // Register tile without intent listener
       broker.registerTile('tile-1', 'test-app');
-      broker.setCurrentTile('tile-1');
+      // No current tile set (removed setCurrentTile)
 
-      // Get the intent handler that was registered with OpenFin
-      const registeredHandler = mockFDC3.addIntentListener.mock.calls[0][1];
-
-      // Should not throw
-      await expect(registeredHandler(context)).resolves.toBeUndefined();
+      // Should not register with OpenFin if no internal listeners
+      expect(mockFDC3.addIntentListener).not.toHaveBeenCalled();
     });
   });
 
@@ -261,11 +259,12 @@ describe('Broker Bidirectional Routing', () => {
 
       // Scenario 2: OpenFin sends to internal tile
       broker.registerTile('tile-1', 'test-app');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'test-app', instanceId: 'tile-1' };
 
       const handler = vi.fn();
-      await broker.addIntentListener(intent, handler);
+      await broker.addIntentListener(intent, handler, source);
 
+      await new Promise((r) => setTimeout(r, 50));
       const incomingHandler = mockFDC3.addIntentListener.mock.calls[0][1];
       await incomingHandler(context);
 
@@ -282,10 +281,10 @@ describe('Broker Bidirectional Routing', () => {
       };
 
       broker.registerTile('tile-1', 'test-app');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'test-app', instanceId: 'tile-1' };
 
       const handler = vi.fn();
-      await broker.addIntentListener(intent, handler);
+      await broker.addIntentListener(intent, handler, source);
 
       // Verify tile is registered
       const tile = (broker as any).tileRegistry.getTile('tile-1');
@@ -302,13 +301,14 @@ describe('Broker Bidirectional Routing', () => {
 
       // Register and then unregister tile
       broker.registerTile('tile-1', 'test-app');
-      broker.setCurrentTile('tile-1');
+      const source = { appId: 'test-app', instanceId: 'tile-1' };
 
       const handler = vi.fn();
-      await broker.addIntentListener(intent, handler);
+      await broker.addIntentListener(intent, handler, source);
 
       broker.unregisterTile('tile-1');
 
+      await new Promise((r) => setTimeout(r, 50));
       // Get the intent handler
       const registeredHandler = mockFDC3.addIntentListener.mock.calls[0][1];
 

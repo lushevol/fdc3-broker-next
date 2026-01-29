@@ -3,7 +3,7 @@
  * @see plan.md#T094
  */
 
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '@testing-library/jest-dom';
 import { clearBroker, getAgentApi, setBroker } from '../src/agent';
@@ -61,6 +61,8 @@ const mockDesktopAgent: DesktopAgent = {
     provider: '@fm/fdc3-broker',
     providerVersion: '1.0.0',
   }),
+  getSystemChannels: vi.fn().mockResolvedValue([]),
+  joinChannel: vi.fn().mockResolvedValue(undefined),
 };
 
 describe('useFDC3 hook', () => {
@@ -76,15 +78,17 @@ describe('useFDC3 hook', () => {
   });
 
   describe('with AgentProvider', () => {
-    it('should return DesktopAgent instance from context', () => {
+    it('should return DesktopAgent instance from context', async () => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <AgentProvider>{children}</AgentProvider>
       );
 
       const { result } = renderHook(() => useFDC3(), { wrapper });
 
-      expect(result.current).toBeDefined();
-      expect(result.current).toEqual(mockDesktopAgent);
+      await waitFor(() => {
+        expect(result.current).toBeDefined();
+        expect(result.current).toEqual(mockDesktopAgent);
+      });
     });
 
     it('should provide the same agent instance to all consumers', () => {
@@ -303,6 +307,26 @@ describe('useFDC3 hook', () => {
       expect(mockDesktopAgent.getUserChannels).toHaveBeenCalled();
     });
 
+    it('should provide access to getSystemChannels() method', async () => {
+      const { result } = renderHook(() => useFDC3());
+
+      await act(async () => {
+        await result.current.getSystemChannels();
+      });
+
+      expect(mockDesktopAgent.getSystemChannels).toHaveBeenCalled();
+    });
+
+    it('should provide access to joinChannel() method', async () => {
+      const { result } = renderHook(() => useFDC3());
+
+      await act(async () => {
+        await result.current.joinChannel('channel-id');
+      });
+
+      expect(mockDesktopAgent.joinChannel).toHaveBeenCalledWith('channel-id');
+    });
+
     it('should provide access to joinUserChannel() method', async () => {
       const { result } = renderHook(() => useFDC3());
 
@@ -344,10 +368,10 @@ describe('useFDC3 hook', () => {
       const handler = vi.fn();
 
       await act(async () => {
-        await result.current.addEventListener('appListener', handler);
+        await result.current.addEventListener('userChannelChanged', handler);
       });
 
-      expect(mockDesktopAgent.addEventListener).toHaveBeenCalledWith('appListener', handler);
+      expect(mockDesktopAgent.addEventListener).toHaveBeenCalledWith('userChannelChanged', handler);
     });
 
     it('should provide access to getInfo() method', async () => {

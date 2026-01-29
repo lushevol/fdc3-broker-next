@@ -3,7 +3,7 @@
  * @see plan.md#T161
  */
 
-import { MockAppDirectoryService } from '@fm/fdc3-app-directory/mock';
+import { MockAppDirectoryService } from '../../fdc3-app-directory/src/mock';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Broker } from '../src/broker';
 import type { AppIdentifier, BrokerConfig, Context } from '../src/types';
@@ -11,7 +11,7 @@ import type { AppIdentifier, BrokerConfig, Context } from '../src/types';
 describe('Security Event Logging', () => {
   let broker: Broker;
   let mockConfig: BrokerConfig;
-  let mockSecurityEvent: ReturnType<typeof vi.fn>;
+  let consoleSpy: ReturnType<typeof vi.spyOn>;
 
   const mockApps = [
     {
@@ -31,7 +31,7 @@ describe('Security Event Logging', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockSecurityEvent = vi.fn();
+    consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const mockAppDirectory = new MockAppDirectoryService();
     mockApps.forEach((app) => mockAppDirectory.registerApp(app));
@@ -40,10 +40,9 @@ describe('Security Event Logging', () => {
       appDirectory: mockAppDirectory,
       callbacks: {
         onLoginStatusCheck: async () => true,
-        onTileOpen: async () => undefined,
+        onTileOpen: async () => ({ appId: 'test', instanceId: 'test' }),
         onValidateEntitlements: async () => true,
         onShowResolverUI: async (targets) => targets[0] || null,
-        onSecurityEvent: mockSecurityEvent,
       },
       enableDebug: false,
       userChannelIds: ['red', 'green', 'blue'],
@@ -54,11 +53,13 @@ describe('Security Event Logging', () => {
 
   describe('intent sending security events', () => {
     it('should log successful intent send with full context', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      (broker as any).registerTile('tile-1', 'app-a');
 
       const handler = vi.fn();
-      await broker.addIntentListener('ViewChart', handler);
+      await broker.addIntentListener('ViewChart', handler, {
+        appId: 'app-a',
+        instanceId: 'tile-1',
+      });
 
       const context: Context = {
         type: 'fdc3.chart',
@@ -70,8 +71,10 @@ describe('Security Event Logging', () => {
         instanceId: 'tile-1',
       });
 
-      // Security event should not be called for successful operations
-      expect(mockSecurityEvent).not.toHaveBeenCalled();
+      const securityCalls = consoleSpy.mock.calls.filter(
+        (call: any[]) => typeof call[0] === 'string' && call[0].includes('[FDC3:SECURITY]'),
+      );
+      expect(securityCalls.length).toBe(0);
     });
 
     it('should log denied intent send with audit trail', async () => {
@@ -86,8 +89,7 @@ describe('Security Event Logging', () => {
       };
       broker = new Broker(mockConfig);
 
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      broker['registerTile']('tile-1', 'app-a');
 
       const context: Context = {
         type: 'fdc3.chart',
@@ -95,15 +97,18 @@ describe('Security Event Logging', () => {
       };
 
       try {
-        await broker.raiseIntent('ViewChart', context);
+        await broker.raiseIntent('ViewChart', context, undefined, {
+          appId: 'app-a',
+          instanceId: 'tile-1',
+        });
       } catch (error) {
         // Expected
       }
 
-      expect(mockSecurityEvent).toHaveBeenCalledWith(
-        'Intent send denied due to entitlements',
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[FDC3:SECURITY] Intent send denied due to entitlements'),
         expect.objectContaining({
-          tileId: 'tile-1',
+          tileId: 'app-a',
           intent: 'ViewChart',
           contextType: 'fdc3.chart',
         }),
@@ -114,17 +119,19 @@ describe('Security Event Logging', () => {
       mockConfig.callbacks.onValidateEntitlements = async () => false;
       broker = new Broker(mockConfig);
 
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      broker['registerTile']('tile-1', 'app-a');
 
       try {
-        await broker.raiseIntent('ViewChart', {} as Context);
+        await broker.raiseIntent('ViewChart', {} as Context, undefined, {
+          appId: 'app-a',
+          instanceId: 'tile-1',
+        });
       } catch (error) {
         // Expected
       }
 
-      expect(mockSecurityEvent).toHaveBeenCalledWith(
-        expect.stringContaining('denied'),
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[FDC3:SECURITY]'),
         expect.any(Object),
       );
     });
@@ -135,19 +142,21 @@ describe('Security Event Logging', () => {
       mockConfig.callbacks.onValidateEntitlements = async () => false;
       broker = new Broker(mockConfig);
 
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      broker['registerTile']('tile-1', 'app-a');
 
       try {
-        await broker.addIntentListener('ViewChart', vi.fn());
+        await broker.addIntentListener('ViewChart', vi.fn(), {
+          appId: 'app-a',
+          instanceId: 'tile-1',
+        });
       } catch (error) {
         // Expected
       }
 
-      expect(mockSecurityEvent).toHaveBeenCalledWith(
-        'Intent receive denied due to entitlements',
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[FDC3:SECURITY] Intent receive denied due to entitlements'),
         expect.objectContaining({
-          tileId: 'tile-1',
+          tileId: 'app-a',
           intent: 'ViewChart',
         }),
       );
@@ -157,22 +166,24 @@ describe('Security Event Logging', () => {
       mockConfig.callbacks.onValidateEntitlements = async () => false;
       broker = new Broker(mockConfig);
 
-      broker.registerTile('unauthorized-tile', 'malicious-app');
-      broker.setCurrentTile('unauthorized-tile');
+      (broker as any).registerTile('unauthorized-tile', 'malicious-app');
 
       try {
-        await broker.addIntentListener('ViewChart', vi.fn());
+        await broker.addIntentListener('ViewChart', vi.fn(), {
+          appId: 'malicious-app',
+          instanceId: 'unauthorized-tile',
+        });
       } catch (error) {
         // Expected
       }
 
-      const securityCall = mockSecurityEvent.mock.calls.find((call) =>
-        call[0].includes('Intent receive denied'),
+      const securityCall = consoleSpy.mock.calls.find(
+        (call: any[]) => typeof call[0] === 'string' && call[0].includes('Intent receive denied'),
       );
 
       expect(securityCall).toBeDefined();
       expect(securityCall[1]).toMatchObject({
-        tileId: 'unauthorized-tile',
+        tileId: 'malicious-app',
         intent: 'ViewChart',
       });
     });
@@ -183,19 +194,18 @@ describe('Security Event Logging', () => {
       mockConfig.callbacks.onValidateEntitlements = async () => false;
       broker = new Broker(mockConfig);
 
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      broker['registerTile']('tile-1', 'app-a');
 
       try {
-        await broker.joinUserChannel('premium-gold');
+        await broker.joinUserChannel('premium-gold', { appId: 'app-a', instanceId: 'tile-1' });
       } catch (error) {
         // Expected
       }
 
-      expect(mockSecurityEvent).toHaveBeenCalledWith(
-        'Channel join denied due to entitlements',
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[FDC3:SECURITY] Channel join denied due to entitlements'),
         expect.objectContaining({
-          tileId: 'tile-1',
+          tileId: 'app-a',
           channelId: 'premium-gold',
         }),
       );
@@ -208,19 +218,21 @@ describe('Security Event Logging', () => {
       };
       broker = new Broker(mockConfig);
 
-      broker.registerTile('regular-tile', 'app-a');
-      broker.setCurrentTile('regular-tile');
+      (broker as any).registerTile('regular-tile', 'app-a');
 
       try {
-        await broker.joinUserChannel('premium-gold');
+        await broker.joinUserChannel('premium-gold', {
+          appId: 'app-a',
+          instanceId: 'regular-tile',
+        });
       } catch (error) {
         // Expected
       }
 
-      expect(mockSecurityEvent).toHaveBeenCalledWith(
-        'Channel join denied due to entitlements',
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[FDC3:SECURITY] Premium channel join denied due to entitlements'),
         expect.objectContaining({
-          tileId: 'regular-tile',
+          tileId: 'app-a',
           channelId: 'premium-gold',
         }),
       );
@@ -230,16 +242,16 @@ describe('Security Event Logging', () => {
       mockConfig.callbacks.onValidateEntitlements = async () => true;
       broker = new Broker(mockConfig);
 
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
-
       // Join multiple channels
-      await broker.joinUserChannel('red');
-      await broker.joinUserChannel('green');
-      await broker.joinUserChannel('blue');
+      await broker.joinUserChannel('red', { appId: 'app-a', instanceId: 'tile-1' });
+      await broker.joinUserChannel('green', { appId: 'app-a', instanceId: 'tile-1' });
+      await broker.joinUserChannel('blue', { appId: 'app-a', instanceId: 'tile-1' });
 
       // No security events should be logged for successful operations
-      expect(mockSecurityEvent).not.toHaveBeenCalled();
+      const securityCalls = consoleSpy.mock.calls.filter(
+        (call: any[]) => typeof call[0] === 'string' && call[0].includes('[FDC3:SECURITY]'),
+      );
+      expect(securityCalls.length).toBe(0);
     });
   });
 
@@ -256,8 +268,8 @@ describe('Security Event Logging', () => {
         // Expected
       }
 
-      expect(mockSecurityEvent).toHaveBeenCalledWith(
-        'Tile open denied due to entitlements',
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[FDC3:SECURITY] Tile open denied due to entitlements'),
         expect.objectContaining({
           appId: 'restricted-app',
         }),
@@ -280,8 +292,8 @@ describe('Security Event Logging', () => {
         // Expected
       }
 
-      expect(mockSecurityEvent).toHaveBeenCalledWith(
-        'Tile open denied due to entitlements',
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[FDC3:SECURITY] Tile open denied due to entitlements'),
         expect.objectContaining({
           appId: 'restricted-app',
           contextType: 'fdc3.chart',
@@ -295,21 +307,29 @@ describe('Security Event Logging', () => {
       mockConfig.callbacks.onValidateEntitlements = async () => false;
       broker = new Broker(mockConfig);
 
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      broker['registerTile']('tile-1', 'app-a');
 
       // Test multiple security violations
       const violations = [
         {
-          action: () => broker.raiseIntent('ViewChart', {} as Context),
+          action: () =>
+            broker.raiseIntent('ViewChart', {} as Context, undefined, {
+              appId: 'app-a',
+              instanceId: 'tile-1',
+            }),
           expectedEvent: 'Intent send denied',
         },
         {
-          action: () => broker.addIntentListener('ViewChart', vi.fn()),
+          action: () =>
+            broker.addIntentListener('ViewChart', vi.fn(), {
+              appId: 'app-a',
+              instanceId: 'tile-1',
+            }),
           expectedEvent: 'Intent receive denied',
         },
         {
-          action: () => broker.joinUserChannel('premium-gold'),
+          action: () =>
+            broker.joinUserChannel('premium-gold', { appId: 'app-a', instanceId: 'tile-1' }),
           expectedEvent: 'Channel join denied',
         },
         {
@@ -327,33 +347,41 @@ describe('Security Event Logging', () => {
       }
 
       // Verify all violations were logged
-      expect(mockSecurityEvent).toHaveBeenCalledTimes(4);
+      const securityCalls = consoleSpy.mock.calls.filter(
+        (call: any[]) => typeof call[0] === 'string' && call[0].includes('[FDC3:SECURITY]'),
+      );
+      expect(securityCalls.length).toBe(4);
 
-      // Verify each violation type was logged
-      const loggedEvents = mockSecurityEvent.mock.calls.map((call) => call[0]);
-      expect(loggedEvents).toContain('Intent send denied due to entitlements');
-      expect(loggedEvents).toContain('Intent receive denied due to entitlements');
-      expect(loggedEvents).toContain('Channel join denied due to entitlements');
-      expect(loggedEvents).toContain('Tile open denied due to entitlements');
+      const loggedEvents = securityCalls.map((call: any[]) => call[0]);
+      expect(loggedEvents).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('Intent send denied'),
+          expect.stringContaining('Intent receive denied'),
+          expect.stringContaining('Channel join denied'),
+          expect.stringContaining('Tile open denied'),
+        ]),
+      );
     });
 
     it('should include tile identity in all security events', async () => {
       mockConfig.callbacks.onValidateEntitlements = async () => false;
       broker = new Broker(mockConfig);
 
-      broker.registerTile('suspicious-tile', 'app-x');
-      broker.setCurrentTile('suspicious-tile');
+      (broker as any).registerTile('suspicious-tile', 'app-x');
 
       try {
-        await broker.raiseIntent('ViewChart', {} as Context);
+        await broker.raiseIntent('ViewChart', {} as Context, undefined, {
+          appId: 'app-x',
+          instanceId: 'suspicious-tile',
+        });
       } catch (error) {
         // Expected
       }
 
-      expect(mockSecurityEvent).toHaveBeenCalledWith(
-        expect.any(String),
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[FDC3:SECURITY]'),
         expect.objectContaining({
-          tileId: 'suspicious-tile',
+          tileId: 'app-x',
         }),
       );
     });
@@ -362,15 +390,18 @@ describe('Security Event Logging', () => {
       mockConfig.callbacks.onValidateEntitlements = async () => true;
       broker = new Broker(mockConfig);
 
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
-
       // Successful operations should not trigger security events
-      await broker.addIntentListener('ViewChart', vi.fn());
-      await broker.joinUserChannel('red');
+      await broker.addIntentListener('ViewChart', vi.fn(), {
+        appId: 'app-a',
+        instanceId: 'tile-1',
+      });
+      await broker.joinUserChannel('red', { appId: 'app-a', instanceId: 'tile-1' });
       await broker.open({ appId: 'app-b' });
 
-      expect(mockSecurityEvent).not.toHaveBeenCalled();
+      const securityCalls = consoleSpy.mock.calls.filter(
+        (call: any[]) => typeof call[0] === 'string' && call[0].includes('[FDC3:SECURITY]'),
+      );
+      expect(securityCalls.length).toBe(0);
     });
   });
 
@@ -379,8 +410,7 @@ describe('Security Event Logging', () => {
       mockConfig.callbacks.onValidateEntitlements = async () => false;
       broker = new Broker(mockConfig);
 
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      (broker as any).registerTile('tile-1', 'app-a');
 
       const context: Context = {
         type: 'fdc3.instrument',
@@ -388,15 +418,20 @@ describe('Security Event Logging', () => {
       };
 
       try {
-        await broker.raiseIntent('ViewChart', context);
+        await broker.raiseIntent('ViewChart', context, undefined, {
+          appId: 'app-a',
+          instanceId: 'tile-1',
+        });
       } catch (error) {
         // Expected
       }
 
-      const securityCall = mockSecurityEvent.mock.calls[0];
-      expect(securityCall[0]).toContain('denied');
-      expect(securityCall[1]).toMatchObject({
-        tileId: 'tile-1',
+      const securityCall = consoleSpy.mock.calls.find(
+        (call: any[]) => typeof call[0] === 'string' && call[0].includes('denied'),
+      );
+      expect(securityCall).toBeDefined();
+      expect(securityCall![1]).toMatchObject({
+        tileId: 'app-a',
         intent: 'ViewChart',
         contextType: 'fdc3.instrument',
       });
@@ -406,8 +441,7 @@ describe('Security Event Logging', () => {
       mockConfig.callbacks.onValidateEntitlements = async () => false;
       broker = new Broker(mockConfig);
 
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      (broker as any).registerTile('tile-1', 'app-a');
 
       // Test different denial types
       const testCases = [
@@ -425,23 +459,38 @@ describe('Security Event Logging', () => {
         mockConfig.callbacks.onValidateEntitlements = async () => false;
         broker = new Broker(mockConfig);
 
-        broker.registerTile('tile-1', 'app-a');
-        broker.setCurrentTile('tile-1');
+        (broker as any).registerTile('tile-1', 'app-a');
 
         try {
           if (testCase.method === 'raiseIntent') {
-            await broker.raiseIntent(testCase.intent, {} as Context);
+            await broker.raiseIntent(testCase.intent!, {} as Context, undefined, {
+              appId: 'app-a',
+              instanceId: 'tile-1',
+            });
           } else if (testCase.method === 'joinUserChannel') {
-            await broker.joinUserChannel(testCase.channelId);
+            await broker.joinUserChannel(testCase.channelId!, {
+              appId: 'app-a',
+              instanceId: 'tile-1',
+            });
           } else if (testCase.method === 'open') {
-            await broker.open({ appId: testCase.appId });
+            await broker.open({ appId: testCase.appId! }, undefined, {
+              appId: 'app-a',
+              instanceId: 'tile-1',
+            });
           }
         } catch (error) {
           // Expected
         }
 
-        const securityCall = mockSecurityEvent.mock.calls[0];
-        expect(securityCall[1]).toHaveProperty(testCase.expectedField);
+        const securityCall = consoleSpy.mock.calls.find(
+          (call: any[]) =>
+            typeof call[0] === 'string' &&
+            call[0].includes('[FDC3:SECURITY]') &&
+            call[0].includes('denied'),
+        );
+        expect(securityCall).toBeDefined();
+        // Check data property (arguments[1])
+        expect(securityCall![1]).toHaveProperty(testCase.expectedField);
       }
     });
   });

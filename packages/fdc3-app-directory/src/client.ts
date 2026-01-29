@@ -731,7 +731,9 @@ export class AppDirectoryClientImpl implements AppDirectoryClientInterface {
     method: string,
     params?: Record<string, string>,
   ): Promise<T> {
-    const url = new URL(endpoint, this.baseUrl);
+    const normalizedBase = this.baseUrl.replace(/\/+$/, '') + '/';
+    const normalizedEndpoint = endpoint.replace(/^\/+/, '');
+    const url = new URL(normalizedEndpoint, normalizedBase);
 
     // Add query parameters
     if (params) {

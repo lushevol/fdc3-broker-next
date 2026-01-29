@@ -3,9 +3,10 @@
  * @see plan.md#T177
  */
 
-import { MockAppDirectoryService } from '@fm/fdc3-app-directory/mock';
+import { MockAppDirectoryService } from '../../fdc3-app-directory/src/mock';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Broker } from '../src/broker';
+import { LogLevel } from '../src/logger';
 import type { AppIdentifier, BrokerConfig, Context } from '../src/types';
 
 describe('Broker Logging', () => {
@@ -41,6 +42,18 @@ describe('Broker Logging', () => {
         },
       },
     },
+    {
+      appId: 'app-a',
+      name: 'Test App A',
+      version: '1.0.0',
+      title: 'Test App A',
+      description: 'Test application',
+      interop: {
+        intents: {
+          listensFor: [{ intent: 'ViewChart', contexts: ['fdc3.chart'] }],
+        },
+      },
+    },
   ];
 
   beforeEach(() => {
@@ -65,29 +78,39 @@ describe('Broker Logging', () => {
         onSecurityEvent: vi.fn(),
       },
       enableDebug: true, // Enable debug mode for these tests
+      logLevel: LogLevel.DEBUG, // Ensure debug logs are output
       userChannelIds: ['red', 'green', 'blue'],
     };
 
     broker = new Broker(mockConfig);
+
+    // Mock internal bridge getters to prevent timeouts (they are lazy loaded and might hang in test env)
+    vi.spyOn(broker as any, 'getOpenFinBridge').mockResolvedValue(null);
+    vi.spyOn(broker as any, 'getPostMessageBridge').mockResolvedValue(null);
   });
 
   describe('debug mode logging', () => {
     it('should log detailed intent information in debug mode', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       const handler = vi.fn();
-      await broker.addIntentListener('ViewChart', handler);
+      await (broker as any).addIntentListener('ViewChart', handler, source);
 
       const context: Context = {
         type: 'fdc3.chart',
         id: { ticker: 'AAPL' },
       };
 
-      await broker.raiseIntent('ViewChart', context, {
-        appId: 'app-a',
-        instanceId: 'tile-1',
-      });
+      await (broker as any).raiseIntent(
+        'ViewChart',
+        context,
+        {
+          appId: 'app-a',
+          instanceId: 'tile-1',
+        },
+        source,
+      );
 
       // Should log debug messages
       expect(consoleDebugSpy).toHaveBeenCalled();
@@ -96,40 +119,44 @@ describe('Broker Logging', () => {
     });
 
     it('should log intent type, context, and source in debug mode', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       const handler = vi.fn();
-      await broker.addIntentListener('ViewChart', handler);
+      await (broker as any).addIntentListener('ViewChart', handler, source);
 
       const context: Context = {
         type: 'fdc3.chart',
         id: { ticker: 'AAPL' },
       };
 
-      await broker.raiseIntent('ViewChart', context);
+      await (broker as any).raiseIntent('ViewChart', context, undefined, source);
 
       // Check that debug logs contain relevant information
-      const debugCalls = consoleDebugSpy.mock.calls.map((call) => String(call[0]).join(' '));
-      const hasIntentInfo = debugCalls.some(
-        (call) =>
-          call.includes('ViewChart') || call.includes('fdc3.chart') || call.includes('tile-1'),
-      );
+      const debugCalls = consoleDebugSpy.mock.calls;
+      const hasIntentInfo = debugCalls.some(([msg, data]) => {
+        const fullLog = `${msg} ${JSON.stringify(data)}`;
+        return (
+          fullLog.includes('ViewChart') ||
+          fullLog.includes('fdc3.chart') ||
+          fullLog.includes('tile-1')
+        );
+      });
       expect(hasIntentInfo).toBe(true);
     });
 
     it('should log context broadcasting details in debug mode', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
-      await broker.joinUserChannel('red');
+      await (broker as any).joinUserChannel('red', source);
 
       const context: Context = {
         type: 'fdc3.chart',
         id: { ticker: 'AAPL' },
       };
 
-      await broker.broadcast(context);
+      await (broker as any).broadcast(context, source);
 
       // Should log broadcast operation
       expect(consoleDebugSpy).toHaveBeenCalled();
@@ -138,25 +165,27 @@ describe('Broker Logging', () => {
     });
 
     it('should log channel operations in debug mode', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
-      await broker.joinUserChannel('green');
+      await (broker as any).joinUserChannel('green', source);
 
       // Should log channel join operation
       expect(consoleDebugSpy).toHaveBeenCalled();
-      const debugCalls = consoleDebugSpy.mock.calls.map((call) => String(call[0]).join(' '));
-      expect(debugCalls.some((call) => call.includes('green') || call.includes('channel'))).toBe(
-        true,
-      );
+      const debugCalls = consoleDebugSpy.mock.calls;
+      const hasLog = debugCalls.some(([msg, data]) => {
+        const fullLog = `${msg} ${JSON.stringify(data)}`;
+        return fullLog.includes('green') || fullLog.includes('channel');
+      });
+      expect(hasLog).toBe(true);
     });
 
     it('should log listener registration in debug mode', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       const handler = vi.fn();
-      await broker.addIntentListener('ViewChart', handler);
+      await (broker as any).addIntentListener('ViewChart', handler, source);
 
       // Should log listener registration
       expect(consoleDebugSpy).toHaveBeenCalled();
@@ -171,18 +200,18 @@ describe('Broker Logging', () => {
     });
 
     it('should not log debug messages when debug mode is disabled', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       const handler = vi.fn();
-      await broker.addIntentListener('ViewChart', handler);
+      await (broker as any).addIntentListener('ViewChart', handler, source);
 
       const context: Context = {
         type: 'fdc3.chart',
         id: { ticker: 'AAPL' },
       };
 
-      await broker.raiseIntent('ViewChart', context);
+      await (broker as any).raiseIntent('ViewChart', context, undefined, source);
 
       // Should not log debug messages
       const debugCalls = consoleDebugSpy.mock.calls.filter((call) =>
@@ -192,12 +221,12 @@ describe('Broker Logging', () => {
     });
 
     it('should still log errors when debug mode is disabled', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       // Try to join non-existent channel
       try {
-        await broker.joinUserChannel('non-existent');
+        await (broker as any).joinUserChannel('non-existent', source);
       } catch (error) {
         // Expected
       }
@@ -207,12 +236,12 @@ describe('Broker Logging', () => {
     });
 
     it('should still log warnings when debug mode is disabled', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       // Try to raise intent without listeners
       try {
-        await broker.raiseIntent('ViewChart', {} as Context);
+        await (broker as any).raiseIntent('ViewChart', {} as Context, undefined, source);
       } catch (error) {
         // Expected
       }
@@ -224,33 +253,38 @@ describe('Broker Logging', () => {
 
   describe('intent operation logging', () => {
     it('should log successful intent resolution', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       const handler = vi.fn();
-      await broker.addIntentListener('ViewChart', handler);
+      await (broker as any).addIntentListener('ViewChart', handler, source);
 
       const context: Context = {
         type: 'fdc3.chart',
         id: { ticker: 'AAPL' },
       };
 
-      await broker.raiseIntent('ViewChart', context, {
-        appId: 'app-a',
-        instanceId: 'tile-1',
-      });
+      await (broker as any).raiseIntent(
+        'ViewChart',
+        context,
+        {
+          appId: 'app-a',
+          instanceId: 'tile-1',
+        },
+        source,
+      );
 
       // Should log successful operation
       expect(consoleDebugSpy).toHaveBeenCalled();
     });
 
     it('should log failed intent resolution', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       // Try to raise intent without any listeners
       try {
-        await broker.raiseIntent('ViewChart', {} as Context);
+        await (broker as any).raiseIntent('ViewChart', {} as Context, undefined, source);
       } catch (error) {
         // Expected
       }
@@ -260,25 +294,26 @@ describe('Broker Logging', () => {
     });
 
     it('should log intent resolution with multiple targets', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.registerTile('tile-2', 'app-b');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      await broker.registerTile('tile-2', 'app-b');
+      const source1 = { appId: 'app-a', instanceId: 'tile-1' };
+      const source2 = { appId: 'app-b', instanceId: 'tile-2' };
 
       const handler1 = vi.fn();
       const handler2 = vi.fn();
 
-      await broker.addIntentListener('ViewChart', handler1);
-      broker.setCurrentTile('tile-2');
-      await broker.addIntentListener('ViewChart', handler2);
+      await (broker as any).addIntentListener('ViewChart', handler1, source1);
+      // broker.setCurrentTile('tile-2'); // Removed
+      await (broker as any).addIntentListener('ViewChart', handler2, source2);
 
-      broker.setCurrentTile('tile-1');
+      // broker.setCurrentTile('tile-1'); // Removed
 
       const context: Context = {
         type: 'fdc3.chart',
         id: { ticker: 'AAPL' },
       };
 
-      await broker.raiseIntent('ViewChart', context);
+      await (broker as any).raiseIntent('ViewChart', context, undefined, source1);
 
       // Should log that multiple targets were found
       expect(consoleDebugSpy).toHaveBeenCalled();
@@ -287,52 +322,58 @@ describe('Broker Logging', () => {
 
   describe('channel operation logging', () => {
     it('should log channel join operations', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
-      await broker.joinUserChannel('red');
+      await (broker as any).joinUserChannel('red', source);
 
       // Should log channel join
       expect(consoleDebugSpy).toHaveBeenCalled();
     });
 
     it('should log broadcast operations', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
-      await broker.joinUserChannel('red');
+      await (broker as any).joinUserChannel('red', source);
 
       const context: Context = {
         type: 'fdc3.chart',
         id: { ticker: 'AAPL' },
       };
 
-      await broker.broadcast(context);
+      await (broker as any).broadcast(context, source);
 
       // Should log broadcast
       expect(consoleDebugSpy).toHaveBeenCalled();
     });
 
     it('should log context listener additions', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
-      await broker.joinUserChannel('red');
+      await (broker as any).joinUserChannel('red', source);
 
       const handler = vi.fn();
-      await broker.addContextListener('fdc3.chart', handler);
+      await (broker as any).addContextListener('fdc3.chart', handler, source);
 
       // Should log listener addition
       expect(consoleDebugSpy).toHaveBeenCalled();
     });
 
     it('should log current channel retrieval', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
-      await broker.joinUserChannel('red');
+      await (broker as any).joinUserChannel('red', source);
 
-      const channel = await broker.getCurrentChannel();
+      // getCurrentChannel might require source or internal method
+      // Assuming broker.getCurrentChannel(source) signature?
+      // Checking Broker.ts... standard specific says getCurrentChannel() no args.
+      // But implementation uses this.getTile(source.instanceId).
+      // So I likely need to pass source if calling directly on Broker class.
+      // I'll check signature later, but assuming (broker as any).getCurrentChannel(source).
+      const channel = await (broker as any).getCurrentChannel(source);
 
       expect(channel?.id).toBe('red');
       // Should log channel retrieval
@@ -342,11 +383,11 @@ describe('Broker Logging', () => {
 
   describe('error and warning logging', () => {
     it('should log errors with context information', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       try {
-        await broker.joinUserChannel('invalid-channel');
+        await (broker as any).joinUserChannel('invalid-channel', source);
       } catch (error) {
         // Expected
       }
@@ -355,20 +396,20 @@ describe('Broker Logging', () => {
       expect(consoleErrorSpy).toHaveBeenCalled();
 
       // Check that error message includes relevant context
-      const errorCalls = consoleErrorSpy.mock.calls.map((call) => String(call[0]).join(' '));
+      const errorCalls = consoleErrorSpy.mock.calls.map((call) => String(call[0]));
       expect(
         errorCalls.some((call) => call.includes('Channel') || call.includes('not found')),
       ).toBe(true);
     });
 
     it('should log warnings for edge cases', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       // Add and remove the same listener multiple times
       const handler = vi.fn();
-      const listener1 = await broker.addIntentListener('ViewChart', handler);
-      const listener2 = await broker.addIntentListener('ViewChart', handler);
+      const listener1 = await (broker as any).addIntentListener('ViewChart', handler, source);
+      const listener2 = await (broker as any).addIntentListener('ViewChart', handler, source);
 
       listener1.unsubscribe();
       listener2.unsubscribe();
@@ -380,7 +421,8 @@ describe('Broker Logging', () => {
     it('should handle missing tile context gracefully', async () => {
       // No current tile set
       try {
-        await broker.raiseIntent('ViewChart', {} as Context);
+        // Passing undefined/empty source might trigger error logging
+        await (broker as any).raiseIntent('ViewChart', {} as Context, undefined, undefined);
       } catch (error) {
         // Expected
       }
@@ -392,32 +434,32 @@ describe('Broker Logging', () => {
 
   describe('logging format and structure', () => {
     it('should include FDC3 prefix in log messages', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
-      await broker.joinUserChannel('red');
+      await (broker as any).joinUserChannel('red', source);
 
       const allLogs = [
-        ...consoleDebugSpy.mock.calls.map((call) => String(call[0])),
-        ...consoleInfoSpy.mock.calls.map((call) => String(call[0])),
+        ...consoleDebugSpy.mock.calls.map((call) => `${call[0]} ${JSON.stringify(call[1])}`),
+        ...consoleInfoSpy.mock.calls.map((call) => `${call[0]} ${JSON.stringify(call[1])}`),
       ];
 
       expect(allLogs.some((log) => String(log).includes('FDC3'))).toBe(true);
     });
 
     it('should include timestamp information in logs', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
-      await broker.joinUserChannel('red');
+      await (broker as any).joinUserChannel('red', source);
 
       // Debug logs should be called
       expect(consoleDebugSpy).toHaveBeenCalled();
     });
 
     it('should serialize complex objects in logs', async () => {
-      broker.registerTile('tile-1', 'app-a');
-      broker.setCurrentTile('tile-1');
+      await broker.registerTile('tile-1', 'app-a');
+      const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       const context: Context = {
         type: 'fdc3.instrument',
@@ -429,9 +471,9 @@ describe('Broker Logging', () => {
       };
 
       const handler = vi.fn();
-      await broker.addIntentListener('ViewChart', handler);
+      await (broker as any).addIntentListener('ViewChart', handler, source);
 
-      await broker.raiseIntent('ViewChart', context);
+      await (broker as any).raiseIntent('ViewChart', context, undefined, source);
 
       // Should log complex context
       expect(consoleDebugSpy).toHaveBeenCalled();

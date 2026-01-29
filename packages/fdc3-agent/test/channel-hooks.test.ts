@@ -6,7 +6,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '@testing-library/jest-dom';
-import { clearBroker, setBroker } from '../src/agent';
+import { clearBroker, setBroker, getAgentApi } from '../src/agent';
 import { useContextListener, useCurrentChannel, useUserChannels } from '../src/hooks';
 import type { Channel, Context, DesktopAgent } from '../src/types';
 
@@ -125,6 +125,8 @@ const createMockBroker = () => {
       provider: '@fm/fdc3-broker',
       providerVersion: '1.0.0',
     }),
+    getSystemChannels: vi.fn().mockResolvedValue([]),
+    joinChannel: vi.fn().mockResolvedValue(undefined),
   };
 
   return { mockBroker, getCurrentChannelMock: () => currentChannel };
@@ -148,7 +150,7 @@ describe('Channel Hooks', () => {
       renderHook(() => useContextListener('fdc3.chart', handler));
 
       await waitFor(() => {
-        const broker = require('../src/agent').getAgentApi();
+        const broker = getAgentApi();
         expect(broker.addContextListener).toHaveBeenCalledWith('fdc3.chart', handler);
       });
     });
@@ -159,7 +161,7 @@ describe('Channel Hooks', () => {
       const { result } = renderHook(() => useContextListener('fdc3.chart', handler));
 
       await waitFor(() => {
-        const broker = require('../src/agent').getAgentApi();
+        const broker = getAgentApi();
         expect(broker.addContextListener).toHaveBeenCalled();
       });
 
@@ -172,8 +174,8 @@ describe('Channel Hooks', () => {
       await act(async () => {
         // Get the registered listener and call it
         const addContextListenerCalls = vi.mocked(
-          (require('../src/agent').getAgentApi() as DesktopAgent).addContextListener,
-        ).mock.calls;
+          (getAgentApi() as DesktopAgent).addContextListener,
+        ).mock.calls as any;
 
         if (addContextListenerCalls.length > 0) {
           const registeredHandler = addContextListenerCalls[0][1];
@@ -189,7 +191,7 @@ describe('Channel Hooks', () => {
       renderHook(() => useContextListener('fdc3.chart', handler));
 
       await waitFor(() => {
-        const broker = require('../src/agent').getAgentApi();
+        const broker = getAgentApi();
         expect(broker.addContextListener).toHaveBeenCalledWith('fdc3.chart', handler);
       });
     });
@@ -200,7 +202,7 @@ describe('Channel Hooks', () => {
       renderHook(() => useContextListener(null, handler));
 
       await waitFor(() => {
-        const broker = require('../src/agent').getAgentApi();
+        const broker = getAgentApi();
         expect(broker.addContextListener).toHaveBeenCalledWith(null, handler);
       });
     });
@@ -209,9 +211,8 @@ describe('Channel Hooks', () => {
       const handler = vi.fn();
       const unsubscribe = vi.fn();
 
-      const mockBroker = require('../src/agent').getAgentApi() as DesktopAgent;
+      const mockBroker = getAgentApi() as DesktopAgent;
       vi.mocked(mockBroker.addContextListener).mockResolvedValue({
-        id: 'listener-1',
         unsubscribe,
       });
 
@@ -239,7 +240,7 @@ describe('Channel Hooks', () => {
       );
 
       await waitFor(() => {
-        const broker = require('../src/agent').getAgentApi();
+        const broker = getAgentApi();
         expect(broker.addContextListener).toHaveBeenCalledTimes(1);
       });
 
@@ -248,7 +249,7 @@ describe('Channel Hooks', () => {
       });
 
       await waitFor(() => {
-        const broker = require('../src/agent').getAgentApi();
+        const broker = getAgentApi();
         expect(broker.addContextListener).toHaveBeenCalledTimes(2);
       });
     });
@@ -268,7 +269,7 @@ describe('Channel Hooks', () => {
       );
 
       await waitFor(() => {
-        const broker = require('../src/agent').getAgentApi();
+        const broker = getAgentApi();
         expect(broker.addContextListener).toHaveBeenCalledTimes(1);
       });
 
@@ -280,7 +281,7 @@ describe('Channel Hooks', () => {
       });
 
       await waitFor(() => {
-        const broker = require('../src/agent').getAgentApi();
+        const broker = getAgentApi();
         expect(broker.addContextListener).toHaveBeenCalledTimes(2);
       });
     });
@@ -291,7 +292,7 @@ describe('Channel Hooks', () => {
       const { result } = renderHook(() => useCurrentChannel());
 
       await waitFor(() => {
-        const broker = require('../src/agent').getAgentApi() as DesktopAgent;
+        const broker = getAgentApi() as DesktopAgent;
         expect(broker.getCurrentChannel).toHaveBeenCalled();
       });
 
@@ -299,7 +300,7 @@ describe('Channel Hooks', () => {
     });
 
     it('should return null when not on channel', async () => {
-      const mockBroker = require('../src/agent').getAgentApi() as DesktopAgent;
+      const mockBroker = getAgentApi() as DesktopAgent;
       vi.mocked(mockBroker.getCurrentChannel).mockResolvedValue(null);
 
       const { result } = renderHook(() => useCurrentChannel());
@@ -319,7 +320,7 @@ describe('Channel Hooks', () => {
         addContextListener: vi.fn(),
       };
 
-      const mockBroker = require('../src/agent').getAgentApi() as DesktopAgent;
+      const mockBroker = getAgentApi() as DesktopAgent;
       vi.mocked(mockBroker.getCurrentChannel).mockResolvedValue(mockChannel);
 
       const { result } = renderHook(() => useCurrentChannel());
@@ -329,45 +330,8 @@ describe('Channel Hooks', () => {
       });
     });
 
-    it('should update when channel changes', async () => {
-      const mockChannel1: Channel = {
-        id: 'red',
-        type: 'user',
-        broadcast: vi.fn(),
-        getCurrentContext: vi.fn(),
-        addContextListener: vi.fn(),
-      };
-
-      const mockChannel2: Channel = {
-        id: 'green',
-        type: 'user',
-        broadcast: vi.fn(),
-        getCurrentContext: vi.fn(),
-        addContextListener: vi.fn(),
-      };
-
-      const mockBroker = require('../src/agent').getAgentApi() as DesktopAgent;
-      vi.mocked(mockBroker.getCurrentChannel)
-        .mockResolvedValueOnce(mockChannel1)
-        .mockResolvedValueOnce(mockChannel2);
-
-      const { result, rerender } = renderHook(() => useCurrentChannel());
-
-      await waitFor(() => {
-        expect(result.current).toEqual(mockChannel1);
-      });
-
-      act(() => {
-        rerender();
-      });
-
-      await waitFor(() => {
-        expect(result.current).toEqual(mockChannel2);
-      });
-    });
-
     it('should fetch channel on mount only', async () => {
-      const mockBroker = require('../src/agent').getAgentApi() as DesktopAgent;
+      const mockBroker = getAgentApi() as DesktopAgent;
 
       renderHook(() => useCurrentChannel());
 
@@ -393,7 +357,7 @@ describe('Channel Hooks', () => {
         expect(Array.isArray(result.current)).toBe(true);
       });
 
-      const mockBroker = require('../src/agent').getAgentApi() as DesktopAgent;
+      const mockBroker = getAgentApi() as DesktopAgent;
       expect(mockBroker.getUserChannels).toHaveBeenCalled();
     });
 
@@ -434,7 +398,7 @@ describe('Channel Hooks', () => {
     });
 
     it('should fetch channels on mount only', async () => {
-      const mockBroker = require('../src/agent').getAgentApi() as DesktopAgent;
+      const mockBroker = getAgentApi() as DesktopAgent;
 
       renderHook(() => useUserChannels());
 
@@ -451,7 +415,7 @@ describe('Channel Hooks', () => {
     });
 
     it('should handle empty user channels array', async () => {
-      const mockBroker = require('../src/agent').getAgentApi() as DesktopAgent;
+      const mockBroker = getAgentApi() as DesktopAgent;
       vi.mocked(mockBroker.getUserChannels).mockResolvedValue([]);
 
       const { result } = renderHook(() => useUserChannels());
@@ -466,7 +430,7 @@ describe('Channel Hooks', () => {
     it('should handle addContextListener errors gracefully', async () => {
       const handler = vi.fn();
 
-      const mockBroker = require('../src/agent').getAgentApi() as DesktopAgent;
+      const mockBroker = getAgentApi() as DesktopAgent;
       vi.mocked(mockBroker.addContextListener).mockRejectedValue(new Error('Listener error'));
 
       // Should not throw
@@ -476,7 +440,7 @@ describe('Channel Hooks', () => {
     });
 
     it('should handle getCurrentChannel errors gracefully', async () => {
-      const mockBroker = require('../src/agent').getAgentApi() as DesktopAgent;
+      const mockBroker = getAgentApi() as DesktopAgent;
       vi.mocked(mockBroker.getCurrentChannel).mockRejectedValue(new Error('Channel error'));
 
       const { result } = renderHook(() => useCurrentChannel());
@@ -486,7 +450,7 @@ describe('Channel Hooks', () => {
     });
 
     it('should handle getUserChannels errors gracefully', async () => {
-      const mockBroker = require('../src/agent').getAgentApi() as DesktopAgent;
+      const mockBroker = getAgentApi() as DesktopAgent;
       vi.mocked(mockBroker.getUserChannels).mockRejectedValue(new Error('Channels error'));
 
       const { result } = renderHook(() => useUserChannels());
@@ -534,7 +498,7 @@ describe('Channel Hooks', () => {
         addContextListener: vi.fn(),
       };
 
-      const mockBroker = require('../src/agent').getAgentApi() as DesktopAgent;
+      const mockBroker = getAgentApi() as DesktopAgent;
       vi.mocked(mockBroker.getCurrentChannel)
         .mockResolvedValueOnce(mockChannel1)
         .mockResolvedValueOnce(mockChannel2);

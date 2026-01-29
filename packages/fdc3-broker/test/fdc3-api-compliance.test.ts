@@ -6,7 +6,7 @@
  * Reference: https://fdc3.finos.org/docs/api/overview/
  */
 
-import { MockAppDirectoryService } from '@fm/fdc3-app-directory/mock';
+import { MockAppDirectoryService } from '../../fdc3-app-directory/src/mock';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Broker } from '../src/broker';
 import type {
@@ -65,7 +65,6 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
 
     // Register a tile for operations that require current tile context
     broker.registerTile('test-tile', 'test-app');
-    broker.setCurrentTile('test-tile');
   });
 
   describe('DesktopAgent Interface Compliance', () => {
@@ -92,14 +91,14 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
 
     it('should have methods that return correct Promise types', async () => {
       // Verify method signatures match FDC3 spec
-      expect(broker.open({ appId: 'test-app' })).resolves.toBeDefined();
-      expect(broker.findInstances({ appId: 'test-app' })).resolves.toBeDefined();
-      expect(broker.getAppMetadata({ appId: 'test-app' })).resolves.toBeDefined();
-      expect(broker.findIntent('ViewChart')).resolves.toBeDefined();
-      expect(broker.findIntentsByContext({ type: 'fdc3.chart' })).resolves.toBeDefined();
-      expect(broker.getUserChannels()).resolves.toBeDefined();
-      expect(broker.getCurrentChannel()).resolves.toBeDefined();
-      expect(broker.getInfo()).resolves.toBeDefined();
+      await expect(broker.open({ appId: 'test-app' })).resolves.toBeDefined();
+      await expect(broker.findInstances({ appId: 'test-app' })).resolves.toBeDefined();
+      await expect(broker.getAppMetadata({ appId: 'test-app' })).resolves.toBeDefined();
+      await expect(broker.findIntent('ViewChart')).resolves.toBeDefined();
+      await expect(broker.findIntentsByContext({ type: 'fdc3.chart' })).resolves.toBeDefined();
+      await expect(broker.getUserChannels()).resolves.toBeDefined();
+      await expect(broker.getCurrentChannel()).resolves.toBeDefined();
+      await expect(broker.getInfo()).resolves.toBeDefined();
     });
   });
 
@@ -151,7 +150,10 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
     it('should broadcast context to current channel', async () => {
       // Register tile and add to channel first
       (broker as Broker)['registerTile']('tile-1', 'test-app');
-      (broker as Broker)['setCurrentTile']('tile-1');
+
+      const source = { appId: 'test-app', instanceId: 'tile-1' };
+      // We need to join a channel for the tile to broadcast
+      await (broker as any).joinUserChannel('red', source);
 
       const context: Context = {
         type: 'fdc3.chart',
@@ -159,8 +161,8 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
       };
 
       // Should not throw when not in channel
-      // Note: This test verifies the method exists and can be called
-      expect(broker.broadcast).toBeDefined();
+      // Note: This test now verifies we can broadcast if we have joined a channel
+      await expect((broker as any).broadcast(context, source)).resolves.not.toThrow();
     });
   });
 
@@ -169,7 +171,7 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
       const handler = vi.fn();
       const listener = await broker.addContextListener('fdc3.chart', handler);
 
-      expect(listener).toHaveProperty('id');
+      expect((listener as any).id).toBeDefined();
       expect(listener.unsubscribe).toBeDefined();
       expect(typeof listener.unsubscribe).toBe('function');
     });
@@ -319,7 +321,7 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
       const handler = vi.fn();
       const listener = await broker.addIntentListener('ViewChart', handler);
 
-      expect(listener).toHaveProperty('id');
+      expect((listener as any).id).toBeDefined();
       expect(listener.unsubscribe).toBeDefined();
       expect(typeof listener.unsubscribe).toBe('function');
     });
@@ -330,7 +332,6 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
 
       // Register tile to receive intent
       (broker as Broker)['registerTile']('tile-1', 'test-app');
-      (broker as Broker)['setCurrentTile']('tile-1');
 
       const context: Context = {
         type: 'fdc3.chart',
@@ -392,7 +393,7 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
         addContextListener: vi.fn(),
       };
 
-      await expect(broker.joinUserChannel(channel)).resolves.toBeUndefined();
+      await expect(broker.joinUserChannel(channel.id)).resolves.toBeUndefined();
     });
   });
 
@@ -425,7 +426,7 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
       const handler = vi.fn();
       const listener = await broker.addEventListener('appListener', handler);
 
-      expect(listener).toHaveProperty('id');
+      expect((listener as any).id).toBeDefined();
       expect(listener.unsubscribe).toBeDefined();
       expect(typeof listener.unsubscribe).toBe('function');
     });
@@ -529,13 +530,13 @@ describe('FDC3 2.2 API Compliance Contract Tests', () => {
       // Listeners - need to join a channel first for context listener
       await broker.joinUserChannel('red');
       const contextListener: Listener = await broker.addContextListener('fdc3.chart', vi.fn());
-      expect(contextListener.id).toBeDefined();
+      expect((contextListener as any).id).toBeDefined();
 
       const intentListener: Listener = await broker.addIntentListener('ViewChart', vi.fn());
-      expect(intentListener.id).toBeDefined();
+      expect((intentListener as any).id).toBeDefined();
 
       const eventListener: Listener = await broker.addEventListener('appListener', vi.fn());
-      expect(eventListener.id).toBeDefined();
+      expect((eventListener as any).id).toBeDefined();
     });
   });
 

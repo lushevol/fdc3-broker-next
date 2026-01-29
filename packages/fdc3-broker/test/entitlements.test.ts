@@ -3,7 +3,7 @@
  * @see plan.md#T159
  */
 
-import { MockAppDirectoryService } from '@fm/fdc3-app-directory/mock';
+import { MockAppDirectoryService } from '../../fdc3-app-directory/src/mock';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EntitlementValidator } from '../src/entitlements';
 import type { BrokerConfig, Context } from '../src/types';

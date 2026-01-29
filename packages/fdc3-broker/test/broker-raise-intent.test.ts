@@ -553,7 +553,7 @@ describe('Broker.raiseIntent()', () => {
         intent: 'ViewChart',
         context: mockContext,
         target: undefined,
-        sourceTile: 'tile-1',
+        sourceTile: { appId: 'tile-1', instanceId: 'tile-1' },
       });
     });
 

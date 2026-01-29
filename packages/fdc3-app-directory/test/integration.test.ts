@@ -6,7 +6,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import { AppDirectoryClientImpl } from '../src/client';
-import { MockAppDirectoryService } from '../src/mock-service';
+import { MockAppDirectoryService } from '../src/mock';
 import type { AppDefinition } from '../src/types';
 
 describe('App Directory Integration', () => {

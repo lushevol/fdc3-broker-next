@@ -3,7 +3,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { MockAppDirectoryService } from '../src/mock-service';
+import { MockAppDirectoryService } from '../src/mock';
 import type { AppDefinition } from '../src/types';
 
 describe('MockAppDirectoryService', () => {

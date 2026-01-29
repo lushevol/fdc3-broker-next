@@ -19,5 +19,11 @@ export default defineConfig({
         'test/**',
       ],
     },
+    reporters: ['default', 'junit', 'vitest-sonar-reporter'],
+    outputFile: {
+      junit: './coverage/junit-test-report.xml',
+      'vitest-sonar-reporter': './coverage/sonar-test-report.xml',
+    },
+    exclude: ['node_modules', 'dist', '.idea', '.git', '.cache'],
   },
 });

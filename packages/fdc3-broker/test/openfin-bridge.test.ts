@@ -35,6 +35,7 @@ describe('OpenFinBridge', () => {
     vi.clearAllMocks();
     // Setup global fin object
     (globalThis as any).fin = mockFin;
+    (globalThis as any).fdc3 = mockFDC3;
     bridge = new OpenFinBridge();
   });
 

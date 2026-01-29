@@ -98,8 +98,8 @@ describe('ResolverDialog', () => {
     it('should render AppCard for each target', () => {
       render(<ResolverDialog {...defaultProps} />);
 
-      expect(screen.getByText('Chart Application')).toBeInTheDocument();
-      expect(screen.getByText('Quote Application')).toBeInTheDocument();
+      expect(screen.getByText('Chart App')).toBeInTheDocument();
+      expect(screen.getByText('Quote App')).toBeInTheDocument();
     });
 
     it('should render Cancel button', () => {
@@ -111,7 +111,7 @@ describe('ResolverDialog', () => {
     it('should display keyboard navigation instructions', () => {
       render(<ResolverDialog {...defaultProps} />);
 
-      expect(screenByText(/Use arrow keys to navigate/)).toBeInTheDocument();
+      expect(screen.getByText(/Use arrow keys to navigate/)).toBeInTheDocument();
     });
   });
 
@@ -162,7 +162,7 @@ describe('ResolverDialog', () => {
 
       render(<ResolverDialog {...defaultProps} onSelect={onSelect} />);
 
-      const chartApp = screen.getByText('Chart Application').closest('div');
+      const chartApp = screen.getByText('Chart App').closest('div');
       fireEvent.click(chartApp!);
 
       await waitFor(() => {
@@ -175,7 +175,7 @@ describe('ResolverDialog', () => {
 
       render(<ResolverDialog {...defaultProps} onSelect={onSelect} />);
 
-      const chartApp = screen.getByText('Chart Application').closest('div');
+      const chartApp = screen.getByText('Chart App').closest('div');
       fireEvent.doubleClick(chartApp!);
 
       await waitFor(() => {
@@ -216,7 +216,7 @@ describe('ResolverDialog', () => {
       const { container } = render(<ResolverDialog {...defaultProps} onCancel={onCancel} />);
 
       // Click the inner content (white box)
-      const content = container.querySelector('[style*="backgroundColor: #fff"]');
+      const content = container.querySelector('[style*="background-color: rgb(255, 255, 255)"]');
       fireEvent.click(content!);
 
       expect(onCancel).not.toHaveBeenCalled();
@@ -227,7 +227,7 @@ describe('ResolverDialog', () => {
     it('should set focus on first target initially', () => {
       render(<ResolverDialog {...defaultProps} />);
 
-      const firstApp = screen.getByText('Chart Application').closest('div');
+      const firstApp = screen.getByText('Chart App').closest('[role="option"]');
       expect(firstApp).toHaveFocus();
     });
 
@@ -249,7 +249,7 @@ describe('ResolverDialog', () => {
 
       render(<ResolverDialog {...emptyProps} />);
 
-      expect(screen.getByText('0 applications available')).toBeInTheDocument();
+      expect(screen.getByText(/0\s*application/i)).toBeInTheDocument();
     });
 
     it('should handle target without instanceId', () => {
@@ -312,7 +312,7 @@ describe('ResolverDialog', () => {
 
       render(<ResolverDialog {...defaultProps} onSelect={onSelect} />);
 
-      const quoteApp = screen.getByText('Quote Application').closest('div');
+      const quoteApp = screen.getByText('Quote App').closest('[role="option"]');
       fireEvent.click(quoteApp!);
 
       await waitFor(() => {
@@ -365,7 +365,7 @@ describe('ResolverDialog', () => {
     it('should render content box with white background', () => {
       const { container } = render(<ResolverDialog {...defaultProps} />);
 
-      const content = container.querySelector('[style*="backgroundColor: #fff"]');
+      const content = container.querySelector('[style*="background-color: rgb(255, 255, 255)"]');
       expect(content).toBeInTheDocument();
     });
 
@@ -382,15 +382,18 @@ describe('ResolverDialog', () => {
       render(<ResolverDialog {...defaultProps} />);
 
       // Verify app names are displayed (passed via metadata)
-      expect(screen.getByText('Chart Application')).toBeInTheDocument();
-      expect(screen.getByText('Quote Application')).toBeInTheDocument();
+      const chartApps = screen.getAllByText('Chart App');
+      expect(chartApps.length).toBeGreaterThan(0);
+
+      const quoteApps = screen.getAllByText('Quote App');
+      expect(quoteApps.length).toBeGreaterThan(0);
     });
 
     it('should pass context to ContextPreview component', () => {
       render(<ResolverDialog {...defaultProps} />);
 
       // ContextPreview should display the context type
-      expect(screen.getByText(/chart/i)).toBeInTheDocument();
+      expect(screen.getByText(/fdc3\.chart/)).toBeInTheDocument();
     });
   });
 });

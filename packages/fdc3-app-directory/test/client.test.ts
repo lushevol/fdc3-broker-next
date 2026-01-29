@@ -35,7 +35,7 @@ describe('AppDirectoryClientImpl', () => {
   beforeEach(() => {
     client = new AppDirectoryClientImpl({
       baseUrl: 'https://app-directory.example.com/api',
-      authToken: mockToken,
+      getAuthToken: () => mockToken,
       timeout: 5000,
     });
 
@@ -186,14 +186,26 @@ describe('AppDirectoryClientImpl', () => {
 
       // Mock fetch to hang
       vi.mocked(fetch).mockImplementationOnce(
-        () =>
-          new Promise((resolve) => {
-            setTimeout(() => {
+        (url, options) =>
+          new Promise((resolve, reject) => {
+            const timer = setTimeout(() => {
               resolve({
                 ok: true,
                 json: async () => [],
               } as Response);
             }, 200);
+
+            if (options && typeof options === 'object' && 'signal' in options) {
+              const signal = (options as any).signal;
+              if (signal) {
+                signal.addEventListener('abort', () => {
+                  clearTimeout(timer);
+                  const error = new Error('The operation was aborted');
+                  error.name = 'AbortError';
+                  reject(error);
+                });
+              }
+            }
           }),
       );
 

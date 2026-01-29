@@ -41,7 +41,7 @@ describe('IntentResolver', () => {
   };
 
   const mockTile1: TileInstance = {
-    tileId: 'tile-1',
+    instanceId: 'tile-1',
     appId: 'app1',
     state: 'mounted',
     metadata: {
@@ -52,7 +52,7 @@ describe('IntentResolver', () => {
   };
 
   const mockTile2: TileInstance = {
-    tileId: 'tile-2',
+    instanceId: 'tile-2',
     appId: 'app2',
     state: 'mounted',
     metadata: {
@@ -120,7 +120,7 @@ describe('IntentResolver', () => {
     it('should filter out unmounted tiles', async () => {
       const mockContext = { type: 'fdc3.chart', id: { ticker: 'AAPL' } };
       const unmountedTile: TileInstance = {
-        tileId: 'tile-3',
+        instanceId: 'tile-3',
         appId: 'app1',
         state: 'unmounted',
       };
@@ -158,7 +158,7 @@ describe('IntentResolver', () => {
     it('should return ambiguous result when multiple instances of same app', async () => {
       const mockContext = { type: 'fdc3.chart', id: { ticker: 'AAPL' } };
       const mockTile2a: TileInstance = {
-        tileId: 'tile-2a',
+        instanceId: 'tile-2a',
         appId: 'app1',
         state: 'mounted',
         metadata: { appId: 'app1', name: 'App 1', title: 'Tile 2A' },

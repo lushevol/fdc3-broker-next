@@ -177,20 +177,20 @@ export const AgentProvider: React.FC<{
     );
   }
 
-  // Show loading while waiting for broker
-  if (!agent) {
-    return (
-      <div
-        style={{
-          padding: '16px',
-          backgroundColor: '#e3f2fd',
-          color: '#1565c0',
-        }}
-      >
-        Initializing FDC3...
-      </div>
-    );
-  }
+  // Show loading while waiting for broker - DISABLED to allow fallback behavior
+  // if (!agent) {
+  //   return (
+  //     <div
+  //       style={{
+  //         padding: '16px',
+  //         backgroundColor: '#e3f2fd',
+  //         color: '#1565c0',
+  //       }}
+  //     >
+  //       Initializing FDC3...
+  //     </div>
+  //   );
+  // }
 
   return <AgentContext.Provider value={value}>{children}</AgentContext.Provider>;
 };
@@ -398,7 +398,11 @@ export function useIntentListener(
     let listener: Listener | null = null;
 
     const setupListener = async () => {
-      listener = await fdc3.addIntentListener(intent, handler);
+      try {
+        listener = await fdc3.addIntentListener(intent, handler);
+      } catch (error) {
+        console.error('Error adding intent listener:', error);
+      }
     };
 
     setupListener();
@@ -489,7 +493,11 @@ export function useContextListener(
     let listener: Listener | null = null;
 
     const setupListener = async () => {
-      listener = await fdc3.addContextListener(contextType, handler);
+      try {
+        listener = await fdc3.addContextListener(contextType, handler);
+      } catch (error) {
+        console.error('Error adding context listener:', error);
+      }
     };
 
     setupListener();
@@ -580,9 +588,13 @@ export function useCurrentChannel(): Channel | null {
     let mounted = true;
 
     const getCurrentChannel = async () => {
-      const currentChannel = await fdc3.getCurrentChannel();
-      if (mounted) {
-        setChannel(currentChannel);
+      try {
+        const currentChannel = await fdc3.getCurrentChannel();
+        if (mounted) {
+          setChannel(currentChannel);
+        }
+      } catch (error) {
+        console.error('Error getting current channel:', error);
       }
     };
 
@@ -691,9 +703,13 @@ export function useUserChannels(): Channel[] {
     let mounted = true;
 
     const fetchChannels = async () => {
-      const userChannels = await fdc3.getUserChannels();
-      if (mounted) {
-        setChannels(userChannels);
+      try {
+        const userChannels = await fdc3.getUserChannels();
+        if (mounted) {
+          setChannels(userChannels);
+        }
+      } catch (error) {
+        console.error('Error fetching user channels:', error);
       }
     };
 
