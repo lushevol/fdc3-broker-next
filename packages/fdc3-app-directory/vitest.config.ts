@@ -8,12 +8,13 @@ export default defineConfig({
     environment: 'happy-dom',
     setupFiles: ['./test/setup.ts'],
     coverage: {
+      enabled: true,
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'lcov', 'cobertura'],
       include: ['src/**/*.ts'],
       exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts', 'test/**'],
     },
-    reporters: ['default', 'junit', 'vitest-sonar-reporter'],
+    reporters: ['junit', 'vitest-sonar-reporter'],
     outputFile: {
       junit: './coverage/junit-test-report.xml',
       'vitest-sonar-reporter': './coverage/sonar-test-report.xml',

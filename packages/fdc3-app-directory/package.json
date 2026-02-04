@@ -24,7 +24,6 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "format": "prettier --write .",
     "clean": "rm -rf dist"
