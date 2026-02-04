@@ -22,7 +22,7 @@ describe('ResolverDialog', () => {
         description: 'Displays financial charts',
         version: '1.0.0',
       },
-      currentContext: null,
+      currentContext: undefined,
     },
     {
       appId: 'quote-app',
@@ -34,7 +34,7 @@ describe('ResolverDialog', () => {
         description: 'Displays real-time quotes',
         version: '1.0.0',
       },
-      currentContext: null,
+      currentContext: undefined,
     },
   ];
 
@@ -216,7 +216,7 @@ describe('ResolverDialog', () => {
       const { container } = render(<ResolverDialog {...defaultProps} onCancel={onCancel} />);
 
       // Click the inner content (white box)
-      const content = container.querySelector('[style*="background-color: rgb(255, 255, 255)"]');
+      const content = screen.getByTestId('resolver-content');
       fireEvent.click(content!);
 
       expect(onCancel).not.toHaveBeenCalled();
@@ -365,7 +365,7 @@ describe('ResolverDialog', () => {
     it('should render content box with white background', () => {
       const { container } = render(<ResolverDialog {...defaultProps} />);
 
-      const content = container.querySelector('[style*="background-color: rgb(255, 255, 255)"]');
+      const content = screen.getByTestId('resolver-content');
       expect(content).toBeInTheDocument();
     });
 

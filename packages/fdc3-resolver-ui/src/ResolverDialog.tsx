@@ -194,6 +194,7 @@ export const ResolverDialog = ({
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
         }}
         onClick={(e) => e.stopPropagation()}
+        data-testid="resolver-content"
       >
         {/* Header */}
         <div
