@@ -145,6 +145,29 @@ export interface BrokerCallbacks {
    * @returns Selected target or null if cancelled
    */
   onShowResolverUI?(targets: ResolverTarget[]): Promise<ResolverTarget | null>;
+
+  /**
+   * Called when a tile fails to open
+   * @param failure Failure details
+   */
+  onTileOpenFailure?(failure: TileOpenFailureDetails): void;
+}
+
+/**
+ * Details provided when a tile fails to open
+ */
+export interface TileOpenFailureDetails {
+  /** App identifier that failed to open */
+  appId: string;
+
+  /** Error message describing the failure */
+  reason: string;
+
+  /** Error code for programmatic handling (optional) */
+  errorCode?: string;
+
+  /** Original error if available (optional) */
+  error?: Error;
 }
 
 /**

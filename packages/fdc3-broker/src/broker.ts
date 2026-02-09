@@ -20,6 +20,7 @@ import type {
   AppIntent,
   AppMetadata,
   BrokerConfig,
+  BrokerCallbacks,
   Channel,
   Context,
   DesktopAgent,
@@ -28,6 +29,7 @@ import type {
   Listener,
   PrivateChannel,
   ResolverTarget,
+  TileOpenFailureDetails,
 } from './types';
 
 // Lazy load OpenFin bridge only when needed
@@ -459,7 +461,9 @@ export class Broker implements DesktopAgent {
       if (this.config.callbacks.onLoginStatusCheck) {
         const loggedIn = await this.config.callbacks.onLoginStatusCheck();
         if (!loggedIn) {
-          throw new Error('User not logged in');
+          const reason = 'User not logged in';
+          this.notifyTileOpenFailure(appIdentifier.appId, reason);
+          throw new Error(reason);
         }
       }
 
@@ -471,12 +475,20 @@ export class Broker implements DesktopAgent {
 
       if (!entitlementCheck.allowed) {
         // Security event already logged by EntitlementValidator
-        throw new Error(entitlementCheck.reason || 'Not entitled to open this application');
+        const reason = entitlementCheck.reason || 'Not entitled to open this application';
+        this.notifyTileOpenFailure(appIdentifier.appId, reason, entitlementCheck.errorCode);
+        throw new Error(reason);
       }
 
       // Open tile via callback
       if (this.config.callbacks.onTileOpen) {
-        return this.config.callbacks.onTileOpen(appIdentifier);
+        try {
+          return await this.config.callbacks.onTileOpen(appIdentifier);
+        } catch (error) {
+          const reason = error instanceof Error ? error.message : 'Unknown error';
+          this.notifyTileOpenFailure(appIdentifier.appId, reason, undefined, error as Error);
+          throw error;
+        }
       }
 
       return appIdentifier;
@@ -1424,6 +1436,43 @@ export class Broker implements DesktopAgent {
   /**
    * Internal Methods
    */
+
+  /**
+   * Notifies the consuming application that a tile failed to open
+   *
+   * @param appId - The app ID that failed to open
+   * @param reason - Error message describing the failure
+   * @param errorCode - Optional error code for programmatic handling
+   * @param error - Optional original error
+   */
+  private notifyTileOpenFailure(
+    appId: string,
+    reason: string,
+    errorCode?: string,
+    error?: Error,
+  ): void {
+    const failureDetails: TileOpenFailureDetails = {
+      appId,
+      reason,
+      errorCode,
+      error,
+    };
+
+    const callback = this.config.callbacks.onTileOpenFailure;
+    if (callback) {
+      try {
+        callback(failureDetails);
+      } catch (callbackError) {
+        this.logger.error('Error in onTileOpenFailure callback:', callbackError as Error);
+      }
+    } else {
+      this.logger.warn('Tile open failed', {
+        appId,
+        reason,
+        errorCode,
+      });
+    }
+  }
 
   /**
    * Registers a tile instance with the broker
