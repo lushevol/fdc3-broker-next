@@ -20,7 +20,6 @@ import type {
   AppIntent,
   AppMetadata,
   BrokerConfig,
-  BrokerCallbacks,
   Channel,
   Context,
   DesktopAgent,
@@ -162,12 +161,12 @@ export class Broker implements DesktopAgent {
     this.intentQueue.loadFromPersistence();
 
     // Conditionally set up OpenFin intent forwarding
-    if (config.enableOpenFinBridge !== false) {
+    if (config.enableOpenFinBridge) {
       this.setupOpenFinIntentForwarding();
     }
 
     // Conditionally set up PostMessage intent forwarding
-    if (config.enablePostMessageBridge && config.postMessageBridgeOptions) {
+    if (config.enablePostMessageBridge) {
       this.setupPostMessageIntentForwarding();
     }
 
@@ -211,7 +210,7 @@ export class Broker implements DesktopAgent {
         if (!openFinBridgeClass) {
           throw new Error('OpenFin bridge class not initialized');
         }
-        const OpenFinBridge = await openFinBridgeClass;
+        const OpenFinBridge = openFinBridgeClass;
         this.openFinBridge = new OpenFinBridge();
         this.logger.info('OpenFin bridge initialized (lazy loaded)');
 
@@ -1660,9 +1659,7 @@ export class Broker implements DesktopAgent {
     }
 
     // No instance specified - open new instance
-    if (this.config.callbacks.onTileOpen) {
-      await this.config.callbacks.onTileOpen(target);
-    }
+    await this.open(target);
 
     // Wait for the app to register the intent listener
     if (target.appId) {
