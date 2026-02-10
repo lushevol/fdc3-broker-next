@@ -12,6 +12,7 @@ import { authorizeIntent, getAllDeclaredIntents } from './app-directory';
 import type { TileFullInfo } from './interfaces/dto';
 import type { DeclaredIntent, IntentType } from './interfaces/types';
 import { getExternalFDC3 } from './useExternalFDC3';
+import type { Container } from '../model/workspaces';
 
 type TaskResult = {
   status: 'processing' | 'completed' | 'failed';
@@ -148,7 +149,7 @@ export class BaseFDC3Broker {
 
     console.log(`[BaseFDC3Broker] Intent completed: ${intent}, result:`, result.data);
     return {
-      source: result.resolvedApp?.app!,
+      source: result.resolvedApp?.app as AppIdentifier,
       intent,
       getResult: () => Promise.resolve(result.data!),
     };
@@ -224,7 +225,7 @@ export class BaseFDC3Broker {
 
   private async handleOpenTile(task: Task): Promise<Task> {
     const { opened, workspaceId, newTile, failedReason } = await this.mfeWorkspaceOpenFile(
-      task.result?.resolvedApp?.tileFullInfo!,
+      task.result?.resolvedApp?.tileFullInfo as Container,
       {
         workspaceId:
           typeof task.intent.app === 'object' && task.intent.app.instanceId
@@ -239,14 +240,15 @@ export class BaseFDC3Broker {
         }`,
       );
 
-      task.result &&
-        (task.result.resolvedApp = {
-          ...task.result?.resolvedApp!,
+      if (task.result) {
+        task.result.resolvedApp = {
           app: {
-            appId: task.result?.resolvedApp?.app.appId!,
+            appId: task.result?.resolvedApp?.app.appId as string,
             instanceId: workspaceId,
           },
-        });
+          tileFullInfo: task.result?.resolvedApp?.tileFullInfo as TileFullInfo,
+        };
+      }
       return task;
     } else {
       // TODO: alert to user
