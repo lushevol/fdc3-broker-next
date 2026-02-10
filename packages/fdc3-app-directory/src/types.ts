@@ -768,17 +768,17 @@ export interface AppDirectoryConfig {
 
   /**
    * App Directory operation mode.
-   *
-   * Controls how the client retrieves application definitions.
-   *
-   * - 'remote-only' (default): Fetches from remote API only. Fails on network error.
-   * - 'local-only': Uses localApps only. No network requests.
-   * - 'local-first': Tries remote API, falls back to localApps on error.
    */
-  mode?: 'remote-only' | 'local-only' | 'local-first';
+  mode?: AppDirectoryMode;
 }
 
 /**
  * App Directory operation mode.
+ *
+ * Controls how the client retrieves application definitions.
+ *
+ * - 'remote-only' (default): Fetches from remote API only. Fails on network error.
+ * - 'local-only': Uses localApps only. No network requests.
+ * - 'local-first': Tries remote API, falls back to localApps on error.
  */
 export type AppDirectoryMode = 'remote-only' | 'local-only' | 'local-first';
