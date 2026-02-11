@@ -2,11 +2,11 @@
  * GDS Design Tokens - Generate CSS/SCSS/Less Artifacts
  *
  * Usage:
- *   pnpm run generate:tokens           # Generate all artifacts
- *   pnpm run generate:tokens -- css    # Generate CSS only
- *   pnpm run generate:tokens -- scss   # Generate SCSS only
- *   pnpm run generate:tokens -- less   # Generate Less only
- *   pnpm run generate:tokens -- watch  # Watch for changes
+ *   npm run generate:tokens           # Generate all artifacts
+ *   npm run generate:tokens -- css    # Generate CSS only
+ *   npm run generate:tokens -- scss   # Generate SCSS only
+ *   npm run generate:tokens -- less   # Generate Less only
+ *   npm run generate:tokens -- watch  # Watch for changes
  */
 
 import { promises as fs } from 'node:fs';

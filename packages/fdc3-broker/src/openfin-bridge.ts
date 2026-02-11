@@ -10,7 +10,19 @@
 
 import { isOpenFinAvailable } from './environment';
 import { Logger } from './logger';
-import type { AppIdentifier, Channel, Context, DesktopAgent, IntentResolution } from './types';
+import type { AppDirectoryClient } from 'ratan-fdc3-app-directory';
+import type {
+  AppIdentifier,
+  AppDefinition,
+  Channel,
+  Context,
+  DesktopAgent,
+  IntentResolution,
+} from './types';
+import { ContextMetadata } from '@finos/fdc3';
+
+// Default global intents - standard FDC3 intents that are always subscribed
+export const DEFAULT_GLOBAL_INTENTS: string[] = [];
 
 /**
  * OpenFin Bridge Implementation
@@ -22,15 +34,18 @@ export class OpenFinBridge {
   private logger: Logger;
   private enabled: boolean;
   private fdc3: DesktopAgent | null = null; // OpenFin's fin.desktop.fdc3
+  private appDirectoryClient: AppDirectoryClient | null = null;
+  private subscribedIntents = new Set<string>();
 
   /**
    * Creates an OpenFin bridge instance
    *
-   * Automatically detects OpenFin availability and initializes the bridge.
+   * @param appDirectoryClient - Optional AppDirectoryClient for intent discovery
    */
-  constructor() {
+  constructor(appDirectoryClient?: AppDirectoryClient) {
     this.logger = new Logger(!!(globalThis as any).__FDC3_DEBUG__);
     this.enabled = isOpenFinAvailable();
+    this.appDirectoryClient = appDirectoryClient || null;
 
     if (this.enabled) {
       try {
@@ -53,10 +68,132 @@ export class OpenFinBridge {
   }
 
   /**
+   * Gets entitled intents from the app directory
+   *
+   * @returns Promise resolving to array of unique intent names
+   */
+  private async getEntitledIntents(
+    globalIntents: string[] = DEFAULT_GLOBAL_INTENTS,
+  ): Promise<string[]> {
+    const intents = new Set<string>(globalIntents);
+
+    if (!this.appDirectoryClient) {
+      this.logger.debug('No appDirectory client, using only global intents');
+      return Array.from(intents);
+    }
+
+    try {
+      const apps: AppDefinition[] = await this.appDirectoryClient.getAllApps();
+
+      for (const app of apps) {
+        const intentHandlers = app.interop?.intents?.listensFor;
+        if (intentHandlers) {
+          for (const handler of intentHandlers) {
+            intents.add(handler.intent);
+          }
+        }
+      }
+
+      this.logger.debug('Discovered entitled intents', {
+        totalIntents: intents.size,
+        intents: Array.from(intents),
+      });
+
+      return Array.from(intents);
+    } catch (error) {
+      this.logger.warn(
+        'Failed to fetch entitled intents, using only global intents:',
+        error as Error,
+      );
+      return globalIntents;
+    }
+  }
+
+  /**
+   * check if intent source is from an external OpenFin application (heuristic based on appId)
+   * @param source
+   * @returns
+   */
+  isIntentFromExternalOpenFinSource(source?: AppIdentifier): boolean {
+    // all intents internally should have a source, but if not, assume it's from OpenFin to allow routing (e.g. pre-login intents)
+    if (!source) {
+      return true;
+    }
+
+    // Heuristic: if source has an appId that is not 'external', consider it from OpenFin
+    return source.appId !== 'external';
+  }
+
+  /**
+   * Initializes intent subscriptions by discovering entitled intents and subscribing to them
+   *
+   * @param globalIntents - Optional custom global intents (defaults to DEFAULT_GLOBAL_INTENTS)
+   * @returns Promise resolving when subscriptions are complete
+   */
+  async initializeIntents(globalIntents?: string[]): Promise<void> {
+    if (!this.enabled || !this.fdc3) {
+      this.logger.warn('OpenFin not available, skipping intent initialization');
+      return;
+    }
+
+    const intents = await this.getEntitledIntents(globalIntents);
+
+    // Subscribe to each intent
+    for (const intent of intents) {
+      if (this.subscribedIntents.has(intent)) {
+        continue; // Already subscribed
+      }
+
+      try {
+        await this.fdc3.addIntentListener(
+          intent,
+          (context: Context, metadata?: ContextMetadata) => {
+            this.logger.debug('Received intent from OpenFin', {
+              intent,
+              context,
+              metadata,
+            });
+            // Handler is set via setIntentHandler
+            if (this._intentHandler) {
+              return this._intentHandler(intent, context, metadata?.source);
+            } else {
+              this.logger.warn('No intent handler set for OpenFin intents');
+            }
+          },
+        );
+
+        this.subscribedIntents.add(intent);
+      } catch (error) {
+        this.logger.error(`Failed to subscribe to intent ${intent}:`, error as Error);
+      }
+    }
+
+    this.logger.info('OpenFin bridge initialized with intents', {
+      intentCount: this.subscribedIntents.size,
+      intents: Array.from(this.subscribedIntents),
+    });
+  }
+
+  /**
+   * Sets the intent handler for receiving intents from OpenFin
+   *
+   * @param intentHandler - Handler for incoming intents from OpenFin
+   */
+  setIntentHandler(
+    intentHandler: (intent: string, context: Context, source?: AppIdentifier) => void,
+  ): void {
+    this._intentHandler = intentHandler;
+  }
+  private _intentHandler:
+    | ((intent: string, context: Context, source?: AppIdentifier) => void)
+    | null = null;
+
+  /**
    * Subscribes to intents from OpenFin applications
    *
    * @param intentHandler - Handler for incoming intents from OpenFin
    * @param supportedIntents - List of intent types to subscribe to
+   * @deprecated Use initializeIntents() and setIntentHandler() instead
    */
   subscribeToIntents(
     intentHandler: (intent: string, context: Context, source?: AppIdentifier) => void,
@@ -67,9 +204,16 @@ export class OpenFinBridge {
       return;
     }
 
+    // Set the handler
+    this._intentHandler = intentHandler;
+
     try {
       // Subscribe to each supported intent type
       supportedIntents.forEach((intent) => {
+        if (this.subscribedIntents.has(intent)) {
+          return; // Already subscribed
+        }
+
         if (this.fdc3?.addIntentListener) {
           this.fdc3.addIntentListener(intent, (context: Context) => {
             this.logger.debug('Received intent from OpenFin', {
@@ -80,6 +224,8 @@ export class OpenFinBridge {
             // Call handler with intent, context, and source
             return intentHandler(intent, context);
           });
+
+          this.subscribedIntents.add(intent);
         }
       });
 

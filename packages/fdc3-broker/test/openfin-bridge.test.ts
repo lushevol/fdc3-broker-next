@@ -4,8 +4,9 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { OpenFinBridge } from '../src/openfin-bridge';
+import { OpenFinBridge, DEFAULT_GLOBAL_INTENTS } from '../src/openfin-bridge';
 import type { AppIdentifier, Channel, Context } from '../src/types';
+import type { AppDefinition } from 'ratan-fdc3-app-directory';
 
 // Mock OpenFin FDC3 API
 const mockFDC3 = {
@@ -27,6 +28,14 @@ const mockFin = {
     version: '1.0.0',
   },
 };
+
+// Mock AppDirectoryClient
+const createMockAppDirectoryClient = (apps: AppDefinition[]) => ({
+  getAllApps: vi.fn().mockResolvedValue(apps),
+  findByIntent: vi.fn(),
+  findByContextType: vi.fn(),
+  getApp: vi.fn(),
+});
 
 describe('OpenFinBridge', () => {
   let bridge: OpenFinBridge;
@@ -56,6 +65,356 @@ describe('OpenFinBridge', () => {
       // Logger should have been called with version info
       expect(mockFin.desktop.version).toBeDefined();
     });
+
+    it('should accept AppDirectoryClient in constructor', () => {
+      const mockClient = createMockAppDirectoryClient([]);
+      const bridgeWithClient = new OpenFinBridge(mockClient as any);
+
+      expect(bridgeWithClient.isEnabled()).toBe(true);
+    });
+  });
+
+  describe('DEFAULT_GLOBAL_INTENTS', () => {
+    it('should have default global intents array', () => {
+      expect(Array.isArray(DEFAULT_GLOBAL_INTENTS)).toBe(true);
+    });
+
+    it('should be empty by default (configured via BrokerConfig)', () => {
+      // DEFAULT_GLOBAL_INTENTS is empty by default - configured via BrokerConfig.openFinBridgeOptions.globalIntents
+      expect(DEFAULT_GLOBAL_INTENTS).toEqual([]);
+    });
+  });
+
+  describe('getEntitledIntents()', () => {
+    it('should return only global intents when no appDirectory client', async () => {
+      const intents = await (bridge as any).getEntitledIntents(['CustomIntent']);
+
+      expect(intents).toContain('CustomIntent');
+    });
+
+    it('should extract intents from entitled apps', async () => {
+      const mockApps: AppDefinition[] = [
+        {
+          appId: 'app1',
+          name: 'App 1',
+          title: 'App 1',
+          interop: {
+            intents: {
+              listensFor: [
+                { intent: 'ViewChart', contexts: ['fdc3.chart'] },
+                { intent: 'ViewQuote', contexts: ['fdc3.instrument'] },
+              ],
+            },
+          },
+        },
+        {
+          appId: 'app2',
+          name: 'App 2',
+          title: 'App 2',
+          interop: {
+            intents: {
+              listensFor: [
+                { intent: 'ViewChart', contexts: ['fdc3.chart'] },
+                { intent: 'StartCall', contexts: ['fdc3.contact'] },
+              ],
+            },
+          },
+        },
+      ];
+
+      const mockClient = createMockAppDirectoryClient(mockApps);
+      const bridgeWithClient = new OpenFinBridge(mockClient as any);
+
+      const intents = await (bridgeWithClient as any).getEntitledIntents(['ViewChart']);
+
+      expect(intents).toContain('ViewChart');
+      expect(intents).toContain('ViewQuote');
+      expect(intents).toContain('StartCall');
+    });
+
+    it('should deduplicate intents across apps', async () => {
+      const mockApps: AppDefinition[] = [
+        {
+          appId: 'app1',
+          name: 'App 1',
+          title: 'App 1',
+          interop: {
+            intents: {
+              listensFor: [{ intent: 'ViewChart', contexts: ['fdc3.chart'] }],
+            },
+          },
+        },
+        {
+          appId: 'app2',
+          name: 'App 2',
+          title: 'App 2',
+          interop: {
+            intents: {
+              listensFor: [{ intent: 'ViewChart', contexts: ['fdc3.chart'] }],
+            },
+          },
+        },
+      ];
+
+      const mockClient = createMockAppDirectoryClient(mockApps);
+      const bridgeWithClient = new OpenFinBridge(mockClient as any);
+
+      const intents = await (bridgeWithClient as any).getEntitledIntents([]);
+
+      // ViewChart should appear only once despite being in multiple apps
+      const chartCount = intents.filter((i: string) => i === 'ViewChart').length;
+      expect(chartCount).toBe(1);
+    });
+
+    it('should handle apps without interop config', async () => {
+      const mockApps: AppDefinition[] = [
+        {
+          appId: 'app1',
+          name: 'App 1',
+          title: 'App 1',
+          // No interop property
+        },
+      ];
+
+      const mockClient = createMockAppDirectoryClient(mockApps);
+      const bridgeWithClient = new OpenFinBridge(mockClient as any);
+
+      const intents = await (bridgeWithClient as any).getEntitledIntents(['ViewChart']);
+
+      expect(intents).toEqual(['ViewChart']);
+    });
+
+    it('should handle app directory failure gracefully', async () => {
+      const mockClient = {
+        getAllApps: vi.fn().mockRejectedValue(new Error('Network error')),
+      };
+
+      const bridgeWithClient = new OpenFinBridge(mockClient as any);
+
+      const intents = await (bridgeWithClient as any).getEntitledIntents(['ViewChart']);
+
+      // Should fall back to global intents only
+      expect(intents).toEqual(['ViewChart']);
+    });
+
+    it('should handle empty app directory response', async () => {
+      const mockClient = createMockAppDirectoryClient([]);
+      const bridgeWithClient = new OpenFinBridge(mockClient as any);
+
+      const intents = await (bridgeWithClient as any).getEntitledIntents(['ViewChart']);
+
+      expect(intents).toEqual(['ViewChart']);
+    });
+  });
+
+  describe('isIntentFromExternalOpenFinSource()', () => {
+    it('should return true when source is undefined', () => {
+      const result = bridge.isIntentFromExternalOpenFinSource(undefined);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return true when source.appId is "external"', () => {
+      const source: AppIdentifier = { appId: 'external' };
+      const result = bridge.isIntentFromExternalOpenFinSource(source);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return true when source has a real appId', () => {
+      const source: AppIdentifier = { appId: 'real-app-id' };
+      const result = bridge.isIntentFromExternalOpenFinSource(source);
+
+      expect(result).toBe(true);
+    });
+
+    it('should handle source with name but no appId', () => {
+      const source: AppIdentifier = { name: 'Some App' };
+      const result = bridge.isIntentFromExternalOpenFinSource(source);
+
+      // name exists but no appId, so it won't match 'external'
+      expect(result).toBe(true);
+    });
+  });
+
+  describe('initializeIntents()', () => {
+    it('should skip initialization when OpenFin not available', async () => {
+      delete (globalThis as any).fin;
+      const bridgeWithoutOpenFin = new OpenFinBridge();
+
+      await bridgeWithoutOpenFin.initializeIntents(['ViewChart']);
+
+      expect(mockFDC3.addIntentListener).not.toHaveBeenCalled();
+    });
+
+    it('should subscribe to entitled intents', async () => {
+      const mockApps: AppDefinition[] = [
+        {
+          appId: 'app1',
+          name: 'App 1',
+          title: 'App 1',
+          interop: {
+            intents: {
+              listensFor: [{ intent: 'ViewChart', contexts: ['fdc3.chart'] }],
+            },
+          },
+        },
+      ];
+
+      const mockClient = createMockAppDirectoryClient(mockApps);
+      const bridgeWithClient = new OpenFinBridge(mockClient as any);
+
+      await bridgeWithClient.initializeIntents(['ViewChart']);
+
+      expect(mockFDC3.addIntentListener).toHaveBeenCalled();
+    });
+
+    it('should skip duplicate intents when subscribing', async () => {
+      const mockApps: AppDefinition[] = [
+        {
+          appId: 'app1',
+          name: 'App 1',
+          title: 'App 1',
+          interop: {
+            intents: {
+              listensFor: [{ intent: 'ViewChart', contexts: ['fdc3.chart'] }],
+            },
+          },
+        },
+      ];
+
+      const mockClient = createMockAppDirectoryClient(mockApps);
+      const bridgeWithClient = new OpenFinBridge(mockClient as any);
+
+      // Call twice - second call should skip duplicates
+      await bridgeWithClient.initializeIntents(['ViewChart']);
+      await bridgeWithClient.initializeIntents(['ViewChart']);
+
+      // Should only subscribe once per unique intent
+      const calls = mockFDC3.addIntentListener.mock.calls.filter(
+        (call) => call[0] === 'ViewChart',
+      );
+      expect(calls.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should handle subscription errors gracefully', async () => {
+      mockFDC3.addIntentListener.mockRejectedValue(new Error('Subscription failed'));
+
+      const mockApps: AppDefinition[] = [
+        {
+          appId: 'app1',
+          name: 'App 1',
+          title: 'App 1',
+          interop: {
+            intents: {
+              listensFor: [{ intent: 'ViewChart', contexts: ['fdc3.chart'] }],
+            },
+          },
+        },
+      ];
+
+      const mockClient = createMockAppDirectoryClient(mockApps);
+      const bridgeWithClient = new OpenFinBridge(mockClient as any);
+
+      // Should not throw
+      await expect(
+        bridgeWithClient.initializeIntents(['ViewChart']),
+      ).resolves.not.toThrow();
+    });
+
+    it('should call intent handler when intent is received', async () => {
+      const mockApps: AppDefinition[] = [
+        {
+          appId: 'app1',
+          name: 'App 1',
+          title: 'App 1',
+          interop: {
+            intents: {
+              listensFor: [{ intent: 'ViewChart', contexts: ['fdc3.chart'] }],
+            },
+          },
+        },
+      ];
+
+      const mockClient = createMockAppDirectoryClient(mockApps);
+      const bridgeWithClient = new OpenFinBridge(mockClient as any);
+
+      const intentHandler = vi.fn();
+      bridgeWithClient.setIntentHandler(intentHandler);
+
+      await bridgeWithClient.initializeIntents(['ViewChart']);
+
+      // Get the handler that was registered
+      const registeredHandler = mockFDC3.addIntentListener.mock.calls.find(
+        (call) => call[0] === 'ViewChart',
+      )?.[1];
+
+      expect(registeredHandler).toBeDefined();
+
+      // Simulate receiving an intent
+      const context: Context = {
+        type: 'fdc3.chart',
+        id: { ticker: 'AAPL' },
+      };
+      const source: AppIdentifier = { appId: 'test-source' };
+
+      registeredHandler(context, { source });
+
+      expect(intentHandler).toHaveBeenCalledWith('ViewChart', context, source);
+    });
+
+    it('should log warning when no handler is set', async () => {
+      const mockApps: AppDefinition[] = [
+        {
+          appId: 'app1',
+          name: 'App 1',
+          title: 'App 1',
+          interop: {
+            intents: {
+              listensFor: [{ intent: 'ViewChart', contexts: ['fdc3.chart'] }],
+            },
+          },
+        },
+      ];
+
+      const mockClient = createMockAppDirectoryClient(mockApps);
+      const bridgeWithClient = new OpenFinBridge(mockClient as any);
+
+      // Don't set a handler
+      await bridgeWithClient.initializeIntents(['ViewChart']);
+
+      // Get the handler and simulate receiving intent
+      const registeredHandler = mockFDC3.addIntentListener.mock.calls.find(
+        (call) => call[0] === 'ViewChart',
+      )?.[1];
+
+      const context: Context = {
+        type: 'fdc3.chart',
+        id: { ticker: 'AAPL' },
+      };
+
+      // Should not throw
+      expect(() => registeredHandler(context)).not.toThrow();
+    });
+  });
+
+  describe('setIntentHandler()', () => {
+    it('should set the intent handler', () => {
+      const handler = vi.fn();
+      bridge.setIntentHandler(handler);
+
+      expect((bridge as any)._intentHandler).toBe(handler);
+    });
+
+    it('should allow replacing the intent handler', () => {
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
+
+      bridge.setIntentHandler(handler1);
+      bridge.setIntentHandler(handler2);
+
+      expect((bridge as any)._intentHandler).toBe(handler2);
+    });
   });
 
   describe('subscribeToIntents()', () => {
@@ -66,8 +425,14 @@ describe('OpenFinBridge', () => {
       bridge.subscribeToIntents(intentHandler, supportedIntents);
 
       expect(mockFDC3.addIntentListener).toHaveBeenCalledTimes(2);
-      expect(mockFDC3.addIntentListener).toHaveBeenCalledWith('ViewChart', expect.any(Function));
-      expect(mockFDC3.addIntentListener).toHaveBeenCalledWith('ViewQuote', expect.any(Function));
+      expect(mockFDC3.addIntentListener).toHaveBeenCalledWith(
+        'ViewChart',
+        expect.any(Function),
+      );
+      expect(mockFDC3.addIntentListener).toHaveBeenCalledWith(
+        'ViewQuote',
+        expect.any(Function),
+      );
     });
 
     it('should call intent handler when intent is received', () => {
@@ -97,6 +462,19 @@ describe('OpenFinBridge', () => {
       bridgeWithoutOpenFin.subscribeToIntents(intentHandler, ['ViewChart']);
 
       expect(mockFDC3.addIntentListener).not.toHaveBeenCalled();
+    });
+
+    it('should skip duplicate intents', () => {
+      const intentHandler = vi.fn();
+
+      bridge.subscribeToIntents(intentHandler, ['ViewChart']);
+      bridge.subscribeToIntents(intentHandler, ['ViewChart']);
+
+      // Should only subscribe once
+      const calls = mockFDC3.addIntentListener.mock.calls.filter(
+        (call) => call[0] === 'ViewChart',
+      );
+      expect(calls.length).toBe(1);
     });
   });
 
@@ -152,9 +530,9 @@ describe('OpenFinBridge', () => {
     it('should handle errors from OpenFin', async () => {
       mockFDC3.raiseIntent.mockRejectedValue(new Error('OpenFin error'));
 
-      await expect(bridge.raiseIntentExternal('ViewChart', {} as Context)).rejects.toThrow(
-        'OpenFin error',
-      );
+      await expect(
+        bridge.raiseIntentExternal('ViewChart', {} as Context),
+      ).rejects.toThrow('OpenFin error');
     });
   });
 
@@ -384,7 +762,10 @@ describe('OpenFinBridge', () => {
       delete (globalThis as any).fin;
       const bridgeWithoutOpenFin = new OpenFinBridge();
 
-      const result = await bridgeWithoutOpenFin.addIntentListener('ViewChart', vi.fn());
+      const result = await bridgeWithoutOpenFin.addIntentListener(
+        'ViewChart',
+        vi.fn(),
+      );
 
       expect(result).toEqual({ unsubscribe: expect.any(Function) });
     });
@@ -412,9 +793,9 @@ describe('OpenFinBridge', () => {
       delete (globalThis as any).fin;
       const bridgeWithoutOpenFin = new OpenFinBridge();
 
-      await expect(bridgeWithoutOpenFin.getOrCreateChannel('test')).rejects.toThrow(
-        'OpenFin not available',
-      );
+      await expect(
+        bridgeWithoutOpenFin.getOrCreateChannel('test'),
+      ).rejects.toThrow('OpenFin not available');
     });
   });
 

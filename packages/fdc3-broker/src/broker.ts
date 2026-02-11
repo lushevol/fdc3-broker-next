@@ -35,6 +35,9 @@ import type {
 type OpenFinBridgeType = typeof import('./openfin-bridge').OpenFinBridge;
 let openFinBridgeClass: OpenFinBridgeType | null = null;
 
+// Pre-login tile ID for intent queue
+const PRELOGIN_TILE_ID = '__prelogin__';
+
 // Lazy load PostMessage bridge only when needed
 type PostMessageBridgeType = typeof import('./postmessage-bridge').PostMessageBridge;
 let postMessageBridgeClass: PostMessageBridgeType | null = null;
@@ -170,6 +173,10 @@ export class Broker implements DesktopAgent {
       this.setupPostMessageIntentForwarding();
     }
 
+    if (config.onLogin) {
+      config.onLogin(this.processQueuedIntentsAfterLogin.bind(this));
+    }
+
     this.logger.info('Broker initialized', {
       enableDebug: config.enableDebug,
       userChannels: config.userChannelIds,
@@ -211,14 +218,18 @@ export class Broker implements DesktopAgent {
           throw new Error('OpenFin bridge class not initialized');
         }
         const OpenFinBridge = openFinBridgeClass;
-        this.openFinBridge = new OpenFinBridge();
+        // Pass appDirectoryClient for intent discovery
+        this.openFinBridge = new OpenFinBridge(this.appDirectory);
         this.logger.info('OpenFin bridge initialized (lazy loaded)');
 
-        // Subscribe to intents from OpenFin
-        this.openFinBridge.subscribeToIntents(
-          this.handleOpenFinIntent.bind(this),
-          Array.from(this.intentListeners.keys()),
-        );
+        // Get global intents from config or use defaults
+        const globalIntents = this.config.openFinBridgeOptions?.globalIntents;
+
+        // Initialize intents (discovers entitled apps and subscribes)
+        await this.openFinBridge.initializeIntents(globalIntents);
+
+        // Set the intent handler for receiving intents
+        this.openFinBridge.setIntentHandler(this.handleOpenFinIntent.bind(this));
 
         this.logger.info('OpenFin intent forwarding set up');
       } catch (error) {
@@ -244,21 +255,94 @@ export class Broker implements DesktopAgent {
       source,
     });
 
-    // Find internal tiles that can handle this intent
-    const listeners = this.intentListeners.get(intent);
-    if (listeners && listeners.length > 0) {
-      // Forward to internal listeners
-      for (const listener of listeners) {
-        const handler = (listener as any).handler;
-        if (handler) {
-          try {
-            await handler(context);
-          } catch (error) {
-            this.logger.error(`Error forwarding OpenFin intent ${intent}:`, error as Error);
-          }
-        }
+    // Check if user is logged in
+    const isLoggedIn = await this.checkLoginStatus();
+    if (!isLoggedIn) {
+      // Queue intent for after login
+      const sourceId: AppIdentifier = source || { appId: 'external' };
+      this.intentQueue.enqueue(PRELOGIN_TILE_ID, intent, context, sourceId);
+      this.logger.debug('User not logged in, queued intent for post-login', { intent });
+      return;
+    }
+
+    // // Find internal tiles that can handle this intent
+    // const listeners = this.intentListeners.get(intent);
+    // if (listeners && listeners.length > 0) {
+    //   // Forward to internal listeners
+    //   for (const listener of listeners) {
+    //     const handler = (listener as any).handler;
+    //     if (handler) {
+    //       try {
+    //         await handler(context);
+    //       } catch (error) {
+    //         this.logger.error(`Error forwarding OpenFin intent ${intent}:`, error as Error);
+    //       }
+    //     }
+    //   }
+    //   return;
+    // }
+
+    // No internal listeners - raise intent internally (will find apps, resolve, open, deliver)
+    // Pass skipExternalRouting=true to prevent infinite loop back to OpenFin
+    try {
+      await this.raiseIntent(intent, context, undefined, source);
+    } catch (error) {
+      this.logger.error(`Error raising intent ${intent} from OpenFin:`, error as Error);
+    }
+  }
+
+  /**
+   * Check if user is logged in
+   */
+  private async checkLoginStatus(): Promise<boolean> {
+    if (this.config.callbacks.onLoginStatusCheck) {
+      return this.config.callbacks.onLoginStatusCheck();
+    }
+    return true; // Default to logged in if no callback
+  }
+
+  /**
+   * Process queued intents after login
+   */
+  private async processQueuedIntentsAfterLogin(): Promise<void> {
+    const isLoggedIn = await this.checkLoginStatus();
+    if (!isLoggedIn) return;
+
+    const queued = this.intentQueue.getQueuedIntents(PRELOGIN_TILE_ID);
+    if (queued.length === 0) return;
+
+    this.logger.info(`Processing ${queued.length} queued intents after login`);
+
+    // Filter by entitlements
+    const validIntents = [];
+    for (const queuedIntent of queued) {
+      const entitlementCheck = await this.entitlementValidator.canSendIntent(
+        queuedIntent.source?.appId || '',
+        queuedIntent.intent,
+        queuedIntent.context,
+      );
+      if (entitlementCheck.allowed) {
+        validIntents.push(queuedIntent);
       }
     }
+
+    // Raise filtered intents
+    for (const queuedIntent of validIntents) {
+      try {
+        await this.raiseIntent(
+          queuedIntent.intent,
+          queuedIntent.context,
+          undefined,
+          queuedIntent.source,
+        );
+      } catch (error) {
+        this.logger.error(`Error raising queued intent ${queuedIntent.intent}:`, error as Error);
+      }
+    }
+
+    // Clear queue
+    this.intentQueue.clearQueue(PRELOGIN_TILE_ID);
+    this.logger.info('Cleared pre-login intent queue');
   }
 
   /**
@@ -457,13 +541,11 @@ export class Broker implements DesktopAgent {
 
     return this.perf.measure('open', async () => {
       // Check login status
-      if (this.config.callbacks.onLoginStatusCheck) {
-        const loggedIn = await this.config.callbacks.onLoginStatusCheck();
-        if (!loggedIn) {
-          const reason = 'User not logged in';
-          this.notifyTileOpenFailure(appIdentifier.appId, reason);
-          throw new Error(reason);
-        }
+      const loggedIn = await this.checkLoginStatus();
+      if (!loggedIn) {
+        const reason = 'User not logged in';
+        this.notifyTileOpenFailure(appIdentifier.appId, reason);
+        throw new Error(reason);
       }
 
       // Validate tile open entitlements using EntitlementValidator
@@ -812,6 +894,7 @@ export class Broker implements DesktopAgent {
    * @param intent - Intent type to raise
    * @param context - Context data to send with the intent
    * @param target - Optional target app identifier
+   * @param source - Source app identifier
    * @returns Promise resolving to IntentResolution with source app details
    * @throws Error if sender lacks entitlements to send this intent
    * @throws Error if no target is found for the intent
@@ -865,31 +948,34 @@ export class Broker implements DesktopAgent {
       const result = await this.intentResolver.resolve(intent, context, targetApp);
 
       if (result.type === 'not-found') {
-        // Try routing to OpenFin if available
-        const openFinBridge = await this.getOpenFinBridge();
-        if (openFinBridge?.isEnabled()) {
-          this.logger.debug('No internal target found, routing to OpenFin', {
-            intent,
-            context,
-          });
-          return await openFinBridge.raiseIntentExternal(intent, context, targetApp);
-        }
+        // Skip external routing if flag is set (prevents infinite loop from OpenFin)
+        if (!this.openFinBridge?.isIntentFromExternalOpenFinSource(source)) {
+          // Try routing to OpenFin if available
+          const openFinBridge = await this.getOpenFinBridge();
+          if (openFinBridge?.isEnabled()) {
+            this.logger.debug('No internal target found, routing to OpenFin', {
+              intent,
+              context,
+            });
+            return await openFinBridge.raiseIntentExternal(intent, context, targetApp);
+          }
 
-        // Try routing to PostMessage bridge if available
-        const postMessageBridge = await this.getPostMessageBridge();
-        if (postMessageBridge?.isEnabled()) {
-          this.logger.debug('No internal target found, routing to PostMessage bridge', {
-            intent,
-            context,
-          });
-          return await postMessageBridge.raiseIntentExternal(intent, context, targetApp);
+          // Try routing to PostMessage bridge if available
+          const postMessageBridge = await this.getPostMessageBridge();
+          if (postMessageBridge?.isEnabled()) {
+            this.logger.debug('No internal target found, routing to PostMessage bridge', {
+              intent,
+              context,
+            });
+            return await postMessageBridge.raiseIntentExternal(intent, context, targetApp);
+          }
         }
 
         throw new Error(`No target found for intent: ${intent}`);
       }
 
       if (result.type === 'ambiguous' && result.targets) {
-        // Show resolver UI
+        // Always show resolver UI for ambiguous intents
         const selected = await this.intentResolver.showResolverUI(result.targets);
         if (!selected) {
           throw new Error('User cancelled intent resolution');
@@ -1048,12 +1134,12 @@ export class Broker implements DesktopAgent {
     // Store handler with listener
     (listener as any).handler = handler;
 
-    // Sync with OpenFin if this is a new intent type
-    const isNewIntentType = this.intentListeners.get(intent)!.length === 1;
-    const bridge = await this.getOpenFinBridge();
-    if (isNewIntentType && bridge?.isEnabled()) {
-      bridge.subscribeToIntents(this.handleOpenFinIntent.bind(this), [intent]);
-    }
+    // // Sync with OpenFin if this is a new intent type
+    // const isNewIntentType = this.intentListeners.get(intent)!.length === 1;
+    // const bridge = await this.getOpenFinBridge();
+    // if (isNewIntentType && bridge?.isEnabled()) {
+    //   bridge.subscribeToIntents(this.handleOpenFinIntent.bind(this), [intent]);
+    // }
 
     // Check if any pending waits for this intent from this app
     if (source?.appId) {

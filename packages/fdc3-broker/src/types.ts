@@ -83,6 +83,20 @@ export interface BrokerConfig {
 
   /** PostMessage bridge options */
   postMessageBridgeOptions?: PostMessageBridgeOptions;
+
+  /** OpenFin bridge options */
+  openFinBridgeOptions?: OpenFinBridgeOptions;
+
+  onLogin: (callback: () => Promise<any>) => Promise<void>;
+  onLogout: (callback: () => Promise<any>) => Promise<void>;
+}
+
+/**
+ * OpenFin bridge configuration options
+ */
+export interface OpenFinBridgeOptions {
+  /** Global intents to subscribe to (defaults to standard FDC3 intents) */
+  globalIntents?: string[];
 }
 
 /**
