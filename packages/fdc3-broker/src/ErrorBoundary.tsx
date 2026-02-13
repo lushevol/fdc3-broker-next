@@ -76,8 +76,7 @@ function DefaultFallback({
   onRetry: () => void;
   onDismiss: () => void;
 }): React.JSX.Element {
-  // Use import.meta.env for Vite compatibility
-  const isDevelopment = import.meta.env.DEV;
+  const isDevelopment = process.env.NODE_ENV === "development";
 
   return (
     <div

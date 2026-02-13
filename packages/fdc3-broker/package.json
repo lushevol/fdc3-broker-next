@@ -1,6 +1,6 @@
 {
   "name": "ratan-fdc3-broker",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "FDC3 2.2 broker implementation for MFE platform",
   "type": "module",
   "main": "./dist/index.js",
