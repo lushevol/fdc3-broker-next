@@ -291,9 +291,7 @@ describe('OpenFinBridge', () => {
       await bridgeWithClient.initializeIntents(['ViewChart']);
 
       // Should only subscribe once per unique intent
-      const calls = mockFDC3.addIntentListener.mock.calls.filter(
-        (call) => call[0] === 'ViewChart',
-      );
+      const calls = mockFDC3.addIntentListener.mock.calls.filter((call) => call[0] === 'ViewChart');
       expect(calls.length).toBeGreaterThanOrEqual(1);
     });
 
@@ -317,9 +315,7 @@ describe('OpenFinBridge', () => {
       const bridgeWithClient = new OpenFinBridge(mockClient as any);
 
       // Should not throw
-      await expect(
-        bridgeWithClient.initializeIntents(['ViewChart']),
-      ).resolves.not.toThrow();
+      await expect(bridgeWithClient.initializeIntents(['ViewChart'])).resolves.not.toThrow();
     });
 
     it('should call intent handler when intent is received', async () => {
@@ -425,14 +421,8 @@ describe('OpenFinBridge', () => {
       bridge.subscribeToIntents(intentHandler, supportedIntents);
 
       expect(mockFDC3.addIntentListener).toHaveBeenCalledTimes(2);
-      expect(mockFDC3.addIntentListener).toHaveBeenCalledWith(
-        'ViewChart',
-        expect.any(Function),
-      );
-      expect(mockFDC3.addIntentListener).toHaveBeenCalledWith(
-        'ViewQuote',
-        expect.any(Function),
-      );
+      expect(mockFDC3.addIntentListener).toHaveBeenCalledWith('ViewChart', expect.any(Function));
+      expect(mockFDC3.addIntentListener).toHaveBeenCalledWith('ViewQuote', expect.any(Function));
     });
 
     it('should call intent handler when intent is received', () => {
@@ -471,9 +461,7 @@ describe('OpenFinBridge', () => {
       bridge.subscribeToIntents(intentHandler, ['ViewChart']);
 
       // Should only subscribe once
-      const calls = mockFDC3.addIntentListener.mock.calls.filter(
-        (call) => call[0] === 'ViewChart',
-      );
+      const calls = mockFDC3.addIntentListener.mock.calls.filter((call) => call[0] === 'ViewChart');
       expect(calls.length).toBe(1);
     });
   });
@@ -530,9 +518,9 @@ describe('OpenFinBridge', () => {
     it('should handle errors from OpenFin', async () => {
       mockFDC3.raiseIntent.mockRejectedValue(new Error('OpenFin error'));
 
-      await expect(
-        bridge.raiseIntentExternal('ViewChart', {} as Context),
-      ).rejects.toThrow('OpenFin error');
+      await expect(bridge.raiseIntentExternal('ViewChart', {} as Context)).rejects.toThrow(
+        'OpenFin error',
+      );
     });
   });
 
@@ -762,10 +750,7 @@ describe('OpenFinBridge', () => {
       delete (globalThis as any).fin;
       const bridgeWithoutOpenFin = new OpenFinBridge();
 
-      const result = await bridgeWithoutOpenFin.addIntentListener(
-        'ViewChart',
-        vi.fn(),
-      );
+      const result = await bridgeWithoutOpenFin.addIntentListener('ViewChart', vi.fn());
 
       expect(result).toEqual({ unsubscribe: expect.any(Function) });
     });
@@ -793,9 +778,9 @@ describe('OpenFinBridge', () => {
       delete (globalThis as any).fin;
       const bridgeWithoutOpenFin = new OpenFinBridge();
 
-      await expect(
-        bridgeWithoutOpenFin.getOrCreateChannel('test'),
-      ).rejects.toThrow('OpenFin not available');
+      await expect(bridgeWithoutOpenFin.getOrCreateChannel('test')).rejects.toThrow(
+        'OpenFin not available',
+      );
     });
   });
 

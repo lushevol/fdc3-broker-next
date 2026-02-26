@@ -76,7 +76,7 @@ function DefaultFallback({
   onRetry: () => void;
   onDismiss: () => void;
 }): React.JSX.Element {
-  const isDevelopment = process.env.NODE_ENV === "development";
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (
     <div

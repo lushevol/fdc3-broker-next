@@ -176,7 +176,7 @@ Global intents are passed via broker configuration:
 interface BrokerConfig {
   // ... existing config ...
   openFinBridgeOptions?: {
-    globalIntents?: string[];  // Configurable list of global intents
+    globalIntents?: string[]; // Configurable list of global intents
   };
   onLogin?: (callback: () => Promise<void>) => Promise<void>;
   onLogout?: (callback: () => Promise<void>) => Promise<void>;

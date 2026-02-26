@@ -49,9 +49,7 @@ describe('Broker Bidirectional Routing', () => {
       title: 'Test Application',
       interop: {
         intents: {
-          listensFor: [
-            { intent: 'ViewChart', contexts: ['fdc3.chart', 'fdc3.instrument'] },
-          ],
+          listensFor: [{ intent: 'ViewChart', contexts: ['fdc3.chart', 'fdc3.instrument'] }],
         },
       },
     });
@@ -234,9 +232,7 @@ describe('Broker Bidirectional Routing', () => {
         version: '1.0.0',
         interop: {
           intents: {
-            listensFor: [
-              { intent: 'ViewChart', contexts: ['fdc3.chart'] },
-            ],
+            listensFor: [{ intent: 'ViewChart', contexts: ['fdc3.chart'] }],
           },
         },
       });
