@@ -4,7 +4,7 @@ import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import React, { type ReactElement } from 'react';
+import React, { type ReactElement, useState, useCallback } from 'react';
 import json from '../../../package.json';
 import Profile from '../Profile';
 import type { AvatarProps } from './common/interface';
@@ -22,10 +22,29 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
     handleOpenUserProfile,
     handleCloseUserProfile,
   } = useController(props);
-  let imgUrl = '';
-  if (store?.user?.id) {
-    imgUrl = `https://axess.sc.net/scb-axess-cms/api/users/${store?.user?.id}/photo`;
-  }
+
+  // Track image loading error to prevent console errors
+  const [imageError, setImageError] = useState(false);
+
+  // Generate avatar URL with error handling
+  const imgUrl =
+    store?.user?.id && !imageError
+      ? `https://axess.sc.net/scb-axess-cms/api/users/${store?.user?.id}/photo`
+      : '';
+
+  // Get user initials for fallback avatar
+  const userInitials = store?.user?.fullName
+    ? store.user.fullName
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : store?.user?.userId?.slice(0, 2).toUpperCase() || '?';
+
+  const handleImageError = useCallback(() => {
+    setImageError(true);
+  }, []);
 
   return (
     <>
@@ -36,7 +55,14 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
             sx={{ p: 0 }}
             data-testid={`${PREFIX}_IconButton`}
           >
-            <AvatarMui className={classes.img} alt="Avatar" src={imgUrl} />
+            <AvatarMui
+              className={classes.img}
+              alt={store?.user?.fullName ?? store?.user?.userId ?? 'User'}
+              src={imgUrl}
+              onError={handleImageError}
+            >
+              {!imgUrl || imageError ? userInitials : null}
+            </AvatarMui>
           </IconButton>
         </Tooltip>
         <MenuStyled

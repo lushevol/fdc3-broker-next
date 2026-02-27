@@ -186,6 +186,19 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
       // Log level
       logLevel: LogLevel.DEBUG,
 
+      // Login/logout handler registration
+      onLogin: async (callback: () => Promise<any>) => {
+        // Register login callback - called when user logs in
+        console.log('[FDC3] Login handler registered');
+        await callback();
+      },
+
+      onLogout: async (callback: () => Promise<any>) => {
+        // Register logout callback - called when user logs out
+        console.log('[FDC3] Logout handler registered');
+        await callback();
+      },
+
       // Callbacks for broker operations
       callbacks: {
         /**
@@ -353,10 +366,22 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
    *
    * This creates the Broker instance and makes it available to all tiles
    * via the setBroker() function from @fm/fdc3-agent.
+   *
+   * Note: We use a ref to track if initialization has occurred to prevent
+   * re-initialization due to brokerConfig reference changes. The brokerConfig
+   * object is stable via useMemo, but we add an extra guard to ensure
+   * the broker is only initialized once.
    */
+  const brokerInitializedRef = useRef(false);
+
   useEffect(() => {
-    // Skip if already initialized or app directory not available
-    if (brokerInitializedWithTiles) {
+    // Skip if already initialized
+    if (brokerInitializedRef.current) {
+      return;
+    }
+
+    // Skip if app directory has no tiles yet (still loading)
+    if (allAccessibleTiles.length === 0) {
       return;
     }
 
@@ -370,13 +395,12 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
         // Make broker available to all tiles
         setBroker(broker);
 
+        // Mark as initialized to prevent re-initialization
+        brokerInitializedRef.current = true;
         setBrokerInitialized(true);
+        setBrokerInitializedWithTiles(true);
 
         console.log('[FDC3] Broker initialized successfully');
-        if (allAccessibleTiles.length > 0) {
-          setBrokerInitializedWithTiles(true);
-          console.log('[FDC3] Broker initialized with tiles successfully');
-        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         setBrokerError(`Failed to initialize broker: ${errorMessage}`);
@@ -385,7 +409,7 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
     };
 
     initializeBroker();
-  }, [brokerInitializedWithTiles, brokerConfig, allAccessibleTiles]);
+  }, [brokerConfig, allAccessibleTiles.length]);
 
   // ========================================================================
   // Resolver Dialog Handlers

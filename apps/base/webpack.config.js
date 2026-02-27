@@ -30,6 +30,10 @@ module.exports = (webpackConfigEnv, argv) => {
     entry: path.resolve(__dirname, "src", "root"),
     devServer: {
       port,
+      headers: {
+        // Cache static assets for better performance
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
     },
     output: {
       filename: "base.js",

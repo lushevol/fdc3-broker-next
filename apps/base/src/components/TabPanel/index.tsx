@@ -4,7 +4,7 @@ import ErrorBoundry from '../ErrorBoundry';
 import type { TabPanelProps } from './common/interface';
 
 const TabPanel: React.FC<TabPanelProps> = (props: TabPanelProps): ReactElement => {
-  const { children, value, index, isActive, ...other } = props;
+  const { children, value, index, isActive, className, tabId, ...other } = props;
   const [isHidden, setIsHidden] = React.useState(true);
   const [isHidden2, setIsHidden2] = React.useState(true);
   const [isTabPanelLoaded, setIsTabPanelLoaded] = React.useState(false);
@@ -18,6 +18,9 @@ const TabPanel: React.FC<TabPanelProps> = (props: TabPanelProps): ReactElement =
       hidden={isHidden}
       id={`workspaces-tabpanel-${index}`}
       data-testid={`workspaces-tabpanel-${index}`}
+      data-tab-id={tabId}
+      data-is-active={isActive}
+      className={className}
       {...other}
     >
       <div hidden={isHidden2} className="tabmain" style={{ position: 'relative' }}>

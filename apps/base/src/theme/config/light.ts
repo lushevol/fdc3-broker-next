@@ -217,7 +217,7 @@ export default {
           backgroundColor: 'transparent',
         },
         '&.Mui-disabled': {
-          '-webkit-text-fill-color': 'rgba(0, 0, 0, 0.7)',
+          WebkitTextFillColor: 'rgba(0, 0, 0, 0.7)',
         },
         '&::placeholder': {
           color: 'rgba(0, 0, 0, 0.9)',

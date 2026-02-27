@@ -99,10 +99,10 @@ const Root = styled('section')(({ theme }) => ({
       padding: '6px 8px',
       overflow: 'auto',
       position: 'relative',
-      '&>section:first-child': {
+      '&>section:first-of-type': {
         height: 'auto!important',
       },
-      '&>div:first-child': {
+      '&>div:first-of-type': {
         height: 'auto!important',
       },
     },

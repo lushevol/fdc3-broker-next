@@ -40,7 +40,7 @@ class SimpleErrorBoundary extends React.Component<
   }
 }
 
-const App = (props: any) => {
+const App = (_props: any) => {
   return (
     <SimpleErrorBoundary>
       <div className="content">

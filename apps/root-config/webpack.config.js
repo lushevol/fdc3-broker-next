@@ -48,6 +48,10 @@ module.exports = (webpackConfigEnv, argv) => {
     devServer: {
       hot: true,
       port,
+      headers: {
+        // Cache static assets for better performance
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
       client: {
         overlay: false,
       },
@@ -96,16 +100,16 @@ module.exports = (webpackConfigEnv, argv) => {
         };
 
         // Login Mock
-        // middlewares.unshift({
-        //   name: "mock-login",
-        //   path: "/api/auth/v2/sso/login",
-        //   middleware: (req, res) => {
-        //     res.statusCode = 200;
-        //     res.setHeader("Content-Type", "application/json");
-        //     res.setHeader("single-ui-authorization", `Bearer ${token}`);
-        //     res.end(JSON.stringify(mockLoginResp));
-        //   },
-        // });
+        middlewares.unshift({
+          name: "mock-login",
+          path: "/api/auth/v2/sso/login",
+          middleware: (req, res) => {
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "application/json");
+            res.setHeader("single-ui-authorization", `Bearer ${token}`);
+            res.end(JSON.stringify(mockLoginResp));
+          },
+        });
 
         // --- FDC3 Intents Mocks ---
         middlewares.unshift({
