@@ -17,6 +17,7 @@
     "build:sb": "storybook build",
     "dev": "rslib build --watch",
     "dev:sb": "storybook dev",
+    "dev:demo": "npx vite --config vite.demo.config.ts",
     "format": "prettier --write .",
     "generate:tokens": "tsx scripts/generate-tokens.ts",
     "generate:tokens:css": "tsx scripts/generate-tokens.ts -- css",
