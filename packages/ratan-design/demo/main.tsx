@@ -114,15 +114,19 @@ const getAntdThemeConfig = (isDark: boolean): ThemeConfig => {
       colorSuccess: foundationColors.basic.brandGreen,
       fontFamily: fontFamily.primary,
       fontSize: fontSize.smMd,
-      borderRadius: componentRound['6px'],
-      borderRadiusLG: 8,
+      borderRadius: componentRound.pill,
+      borderRadiusLG: componentRound['6px'],
       borderRadiusSM: componentRound['4px'],
       controlHeight: componentSizes['32px'],
       controlHeightLG: componentSizes['40px'],
       controlHeightSM: componentSizes['24px'],
     },
     components: {
-      Button: { primaryShadow: 'none', defaultShadow: 'none', dangerShadow: 'none' },
+      Button: {
+        primaryShadow: 'none',
+        defaultShadow: 'none',
+        dangerShadow: 'none',
+      },
     },
   };
 };
@@ -149,9 +153,7 @@ const treeData: TreeDataNode[] = [
   {
     title: 'Parent 2',
     value: 'parent2',
-    children: [
-      { title: 'Child 2-1', value: 'child2-1' },
-    ],
+    children: [{ title: 'Child 2-1', value: 'child2-1' }],
   },
 ];
 
@@ -186,13 +188,29 @@ const GeneralSection = () => {
         <div>
           <Text strong>Typography:</Text>
           <div style={{ marginTop: 8 }}>
-            <Title level={1} style={{ margin: 0 }}>H1 Title</Title>
-            <Title level={2} style={{ margin: 0 }}>H2 Title</Title>
-            <Title level={3} style={{ margin: 0 }}>H3 Title</Title>
-            <Title level={4} style={{ margin: 0 }}>H4 Title</Title>
-            <Title level={5} style={{ margin: 0 }}>H5 Title</Title>
-            <Paragraph>Paragraph text with <Link href="#">a link</Link> and <Text strong>bold</Text>, <Text italic>italic</Text>, <Text code>code</Text> styles.</Paragraph>
-            <Paragraph type="secondary">Secondary text for descriptions</Paragraph>
+            <Title level={1} style={{ margin: 0 }}>
+              H1 Title
+            </Title>
+            <Title level={2} style={{ margin: 0 }}>
+              H2 Title
+            </Title>
+            <Title level={3} style={{ margin: 0 }}>
+              H3 Title
+            </Title>
+            <Title level={4} style={{ margin: 0 }}>
+              H4 Title
+            </Title>
+            <Title level={5} style={{ margin: 0 }}>
+              H5 Title
+            </Title>
+            <Paragraph>
+              Paragraph text with <Link href="#">a link</Link> and{' '}
+              <Text strong>bold</Text>, <Text italic>italic</Text>,{' '}
+              <Text code>code</Text> styles.
+            </Paragraph>
+            <Paragraph type="secondary">
+              Secondary text for descriptions
+            </Paragraph>
             <Paragraph type="success">Success text</Paragraph>
             <Paragraph type="warning">Warning text</Paragraph>
             <Paragraph type="danger">Danger text</Paragraph>
@@ -209,18 +227,32 @@ const GeneralSection = () => {
             <Button type="text">Text</Button>
             <Button type="link">Link</Button>
             <Button danger>Danger</Button>
-            <Button type="primary" danger>Primary Danger</Button>
-            <Button type="primary" ghost>Ghost</Button>
+            <Button type="primary" danger>
+              Primary Danger
+            </Button>
+            <Button type="primary" ghost>
+              Ghost
+            </Button>
             <Button icon={<PlusOutlined />}>Icon</Button>
-            <Button type="primary" loading>Loading</Button>
+            <Button type="primary" loading>
+              Loading
+            </Button>
             <Button disabled>Disabled</Button>
-            <Button type="primary" block>Block Button</Button>
+            <Button type="primary" block>
+              Block Button
+            </Button>
           </Space>
           <div style={{ marginTop: 8 }}>
             <Space>
-              <Button type="primary" size="small">Small</Button>
-              <Button type="primary" size="middle">Middle</Button>
-              <Button type="primary" size="large">Large</Button>
+              <Button type="primary" size="small">
+                Small
+              </Button>
+              <Button type="primary" size="middle">
+                Middle
+              </Button>
+              <Button type="primary" size="large">
+                Large
+              </Button>
             </Space>
           </div>
         </div>
@@ -313,7 +345,13 @@ const NavigationSection = () => {
   ];
 
   const breadcrumbItems: BreadcrumbProps['items'] = [
-    { title: <><HomeOutlined /> Home</> },
+    {
+      title: (
+        <>
+          <HomeOutlined /> Home
+        </>
+      ),
+    },
     { title: <Link href="#">Application Center</Link> },
     { title: 'Application List' },
     { title: 'An Application' },
@@ -388,18 +426,29 @@ const NavigationSection = () => {
         <div>
           <Text strong>Steps:</Text>
           <div style={{ marginTop: 8 }}>
-            <Steps current={1} items={[
-              { title: 'Finished', description: 'This is a description' },
-              { title: 'In Progress', description: 'This is a description', subTitle: 'Left 00:00:08' },
-              { title: 'Waiting', description: 'This is a description' },
-            ]} />
+            <Steps
+              current={1}
+              items={[
+                { title: 'Finished', description: 'This is a description' },
+                {
+                  title: 'In Progress',
+                  description: 'This is a description',
+                  subTitle: 'Left 00:00:08',
+                },
+                { title: 'Waiting', description: 'This is a description' },
+              ]}
+            />
           </div>
           <div style={{ marginTop: 16 }}>
-            <Steps size="small" current={1} items={[
-              { title: 'Finished' },
-              { title: 'In Progress' },
-              { title: 'Waiting' },
-            ]} />
+            <Steps
+              size="small"
+              current={1}
+              items={[
+                { title: 'Finished' },
+                { title: 'In Progress' },
+                { title: 'Waiting' },
+              ]}
+            />
           </div>
         </div>
       </Space>
@@ -412,7 +461,9 @@ const NavigationSection = () => {
 // =============================================================================
 
 const DataEntrySection = () => {
-  const [transferTargetKeys, setTransferTargetKeys] = React.useState<string[]>([]);
+  const [transferTargetKeys, setTransferTargetKeys] = React.useState<string[]>(
+    [],
+  );
   const transferDataSource: TransferProps['dataSource'] = [
     { key: '1', title: 'Option 1' },
     { key: '2', title: 'Option 2' },
@@ -436,7 +487,11 @@ const DataEntrySection = () => {
           <div style={{ marginTop: 8 }}>
             <AutoComplete
               style={{ width: 200 }}
-              options={[{ value: 'Option 1' }, { value: 'Option 2' }, { value: 'Option 3' }]}
+              options={[
+                { value: 'Option 1' },
+                { value: 'Option 2' },
+                { value: 'Option 3' },
+              ]}
               placeholder="Type to search"
             />
           </div>
@@ -506,7 +561,11 @@ const DataEntrySection = () => {
           <Text strong>Form:</Text>
           <div style={{ marginTop: 8, maxWidth: 400 }}>
             <Form layout="vertical" size="small">
-              <Form.Item label="Username" name="username" rules={[{ required: true }]}>
+              <Form.Item
+                label="Username"
+                name="username"
+                rules={[{ required: true }]}
+              >
                 <Input placeholder="Enter username" />
               </Form.Item>
               <Form.Item label="Email" name="email" rules={[{ type: 'email' }]}>
@@ -593,8 +652,17 @@ const DataEntrySection = () => {
           <Text strong>Select:</Text>
           <div style={{ marginTop: 8 }}>
             <Space wrap>
-              <Select placeholder="Select" style={{ width: 120 }} options={statusOptions} />
-              <Select mode="multiple" placeholder="Multi Select" style={{ width: 200 }} options={statusOptions} />
+              <Select
+                placeholder="Select"
+                style={{ width: 120 }}
+                options={statusOptions}
+              />
+              <Select
+                mode="multiple"
+                placeholder="Multi Select"
+                style={{ width: 200 }}
+                options={statusOptions}
+              />
               <Select mode="tags" placeholder="Tags" style={{ width: 200 }} />
             </Space>
           </div>
@@ -618,7 +686,11 @@ const DataEntrySection = () => {
           <div style={{ marginTop: 8 }}>
             <Space>
               <Switch defaultChecked />
-              <Switch defaultChecked checkedChildren="ON" unCheckedChildren="OFF" />
+              <Switch
+                defaultChecked
+                checkedChildren="ON"
+                unCheckedChildren="OFF"
+              />
               <Switch defaultChecked size="small" />
               <Switch defaultChecked loading />
               <Switch defaultChecked disabled />
@@ -672,8 +744,12 @@ const DataEntrySection = () => {
               <p className="ant-upload-drag-icon">
                 <InboxOutlined />
               </p>
-              <p className="ant-upload-text">Click or drag file to this area to upload</p>
-              <p className="ant-upload-hint">Support for single or bulk upload</p>
+              <p className="ant-upload-text">
+                Click or drag file to this area to upload
+              </p>
+              <p className="ant-upload-hint">
+                Support for single or bulk upload
+              </p>
             </Upload.Dragger>
           </div>
         </div>
@@ -690,9 +766,14 @@ const DataDisplaySection = () => {
   const tableColumns: TableColumnsType = [
     { title: 'Name', dataIndex: 'name', key: 'name' },
     { title: 'Age', dataIndex: 'age', key: 'age', sorter: true },
-    { title: 'Status', dataIndex: 'status', key: 'status', render: (status: string) => (
-      <Tag color={status === 'Active' ? 'success' : 'warning'}>{status}</Tag>
-    )},
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => (
+        <Tag color={status === 'Active' ? 'success' : 'warning'}>{status}</Tag>
+      ),
+    },
   ];
 
   const tableData = [
@@ -712,8 +793,16 @@ const DataDisplaySection = () => {
               <Avatar icon={<UserOutlined />} />
               <Avatar>U</Avatar>
               <Avatar size={40}>User</Avatar>
-              <Avatar style={{ backgroundColor: foundationColors.basic.brandBlue }}>A</Avatar>
-              <Avatar style={{ backgroundColor: foundationColors.basic.brandGreen }}>B</Avatar>
+              <Avatar
+                style={{ backgroundColor: foundationColors.basic.brandBlue }}
+              >
+                A
+              </Avatar>
+              <Avatar
+                style={{ backgroundColor: foundationColors.basic.brandGreen }}
+              >
+                B
+              </Avatar>
               <Avatar.Group maxCount={2}>
                 <Avatar style={{ backgroundColor: '#f56a00' }}>K</Avatar>
                 <Avatar style={{ backgroundColor: '#1890ff' }}>J</Avatar>
@@ -764,7 +853,14 @@ const DataDisplaySection = () => {
               <Card title="Card Title" style={{ width: 250 }}>
                 <p>Card with title</p>
               </Card>
-              <Card title="Card with Actions" style={{ width: 250 }} actions={[<SettingOutlined key="setting" />, <SmileOutlined key="smile" />]}>
+              <Card
+                title="Card with Actions"
+                style={{ width: 250 }}
+                actions={[
+                  <SettingOutlined key="setting" />,
+                  <SmileOutlined key="smile" />,
+                ]}
+              >
                 <p>Card with actions</p>
               </Card>
             </Space>
@@ -776,13 +872,37 @@ const DataDisplaySection = () => {
           <Text strong>Carousel:</Text>
           <div style={{ marginTop: 8 }}>
             <Carousel autoplay style={{ maxWidth: 400 }}>
-              <div style={{ height: 160, background: '#364d79', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div
+                style={{
+                  height: 160,
+                  background: '#364d79',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <Text style={{ color: '#fff', fontSize: 24 }}>Slide 1</Text>
               </div>
-              <div style={{ height: 160, background: '#7265a0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div
+                style={{
+                  height: 160,
+                  background: '#7265a0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <Text style={{ color: '#fff', fontSize: 24 }}>Slide 2</Text>
               </div>
-              <div style={{ height: 160, background: '#00a698', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div
+                style={{
+                  height: 160,
+                  background: '#00a698',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
                 <Text style={{ color: '#fff', fontSize: 24 }}>Slide 3</Text>
               </div>
             </Carousel>
@@ -795,9 +915,21 @@ const DataDisplaySection = () => {
           <div style={{ marginTop: 8 }}>
             <Collapse
               items={[
-                { key: '1', label: 'Panel 1', children: <p>This is panel 1 content</p> },
-                { key: '2', label: 'Panel 2', children: <p>This is panel 2 content</p> },
-                { key: '3', label: 'Panel 3', children: <p>This is panel 3 content</p> },
+                {
+                  key: '1',
+                  label: 'Panel 1',
+                  children: <p>This is panel 1 content</p>,
+                },
+                {
+                  key: '2',
+                  label: 'Panel 2',
+                  children: <p>This is panel 2 content</p>,
+                },
+                {
+                  key: '3',
+                  label: 'Panel 3',
+                  children: <p>This is panel 3 content</p>,
+                },
               ]}
             />
           </div>
@@ -810,8 +942,12 @@ const DataDisplaySection = () => {
             <Descriptions title="User Info" bordered column={2}>
               <Descriptions.Item label="Name">John Doe</Descriptions.Item>
               <Descriptions.Item label="Age">32</Descriptions.Item>
-              <Descriptions.Item label="Address">123 Main St, Anytown, USA</Descriptions.Item>
-              <Descriptions.Item label="Status"><Tag color="success">Active</Tag></Descriptions.Item>
+              <Descriptions.Item label="Address">
+                123 Main St, Anytown, USA
+              </Descriptions.Item>
+              <Descriptions.Item label="Status">
+                <Tag color="success">Active</Tag>
+              </Descriptions.Item>
             </Descriptions>
           </div>
         </div>
@@ -834,8 +970,14 @@ const DataDisplaySection = () => {
                 src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
               />
               <Image.PreviewGroup>
-                <Image width={80} src="https://picsum.photos/200/200?random=1" />
-                <Image width={80} src="https://picsum.photos/200/200?random=2" />
+                <Image
+                  width={80}
+                  src="https://picsum.photos/200/200?random=1"
+                />
+                <Image
+                  width={80}
+                  src="https://picsum.photos/200/200?random=2"
+                />
               </Image.PreviewGroup>
             </Space>
           </div>
@@ -885,7 +1027,11 @@ const DataDisplaySection = () => {
               <Segmented options={['Daily', 'Weekly', 'Monthly', 'Yearly']} />
               <Segmented
                 options={[
-                  { label: 'List', value: 'list', icon: <MinusCircleOutlined /> },
+                  {
+                    label: 'List',
+                    value: 'list',
+                    icon: <MinusCircleOutlined />,
+                  },
                   { label: 'Kanban', value: 'kanban', icon: <HomeOutlined /> },
                 ]}
               />
@@ -899,8 +1045,20 @@ const DataDisplaySection = () => {
           <div style={{ marginTop: 8 }}>
             <Space>
               <Statistic title="Active Users" value={112893} />
-              <Statistic title="Account Balance" value={112893} precision={2} prefix="$" />
-              <Statistic title="Growth" value={11.28} precision={2} valueStyle={{ color: '#3f8600' }} prefix={<SmileOutlined />} suffix="%" />
+              <Statistic
+                title="Account Balance"
+                value={112893}
+                precision={2}
+                prefix="$"
+              />
+              <Statistic
+                title="Growth"
+                value={11.28}
+                precision={2}
+                valueStyle={{ color: '#3f8600' }}
+                prefix={<SmileOutlined />}
+                suffix="%"
+              />
             </Space>
           </div>
         </div>
@@ -909,7 +1067,12 @@ const DataDisplaySection = () => {
         <div>
           <Text strong>Table:</Text>
           <div style={{ marginTop: 8 }}>
-            <Table columns={tableColumns} dataSource={tableData} pagination={false} size="small" />
+            <Table
+              columns={tableColumns}
+              dataSource={tableData}
+              pagination={false}
+              size="small"
+            />
           </div>
         </div>
         <Divider />
@@ -959,10 +1122,22 @@ const DataDisplaySection = () => {
           <div style={{ marginTop: 8 }}>
             <Timeline
               items={[
-                { children: 'Create a services site 2015-09-01', color: 'green' },
-                { children: 'Solve initial network problems 2015-09-01', color: 'blue' },
-                { dot: <ClockCircleOutlined style={{ fontSize: '16px' }} />, children: 'Technical testing 2015-09-01' },
-                { children: 'Network problems being solved 2015-11-1', color: 'red' },
+                {
+                  children: 'Create a services site 2015-09-01',
+                  color: 'green',
+                },
+                {
+                  children: 'Solve initial network problems 2015-09-01',
+                  color: 'blue',
+                },
+                {
+                  dot: <ClockCircleOutlined style={{ fontSize: '16px' }} />,
+                  children: 'Technical testing 2015-09-01',
+                },
+                {
+                  children: 'Network problems being solved 2015-11-1',
+                  color: 'red',
+                },
               ]}
             />
           </div>
@@ -1024,7 +1199,8 @@ const DataDisplaySection = () => {
 
 const FeedbackSection = () => {
   const [messageApi, contextHolder] = message.useMessage();
-  const [notification, notificationContextHolder] = notification.useNotification();
+  const [notificationApi, notificationContextHolder] =
+    notification.useNotification();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [modalOpen, setModalOpen] = React.useState(false);
 
@@ -1076,11 +1252,17 @@ const FeedbackSection = () => {
           <Text strong>Message:</Text>
           <div style={{ marginTop: 8 }}>
             <Space>
-              <Button onClick={() => messageApi.success('Success!')}>Success</Button>
+              <Button onClick={() => messageApi.success('Success!')}>
+                Success
+              </Button>
               <Button onClick={() => messageApi.error('Error!')}>Error</Button>
-              <Button onClick={() => messageApi.warning('Warning!')}>Warning</Button>
+              <Button onClick={() => messageApi.warning('Warning!')}>
+                Warning
+              </Button>
               <Button onClick={() => messageApi.info('Info!')}>Info</Button>
-              <Button onClick={() => messageApi.loading('Loading...')}>Loading</Button>
+              <Button onClick={() => messageApi.loading('Loading...')}>
+                Loading
+              </Button>
             </Space>
           </div>
         </div>
@@ -1091,11 +1273,15 @@ const FeedbackSection = () => {
           <div style={{ marginTop: 8 }}>
             <Space>
               <Button onClick={() => setModalOpen(true)}>Open Modal</Button>
-              <Button onClick={() => Modal.confirm({
-                title: 'Confirm',
-                content: 'Are you sure you want to delete this item?',
-                onOk: () => messageApi.success('Deleted!'),
-              })}>
+              <Button
+                onClick={() =>
+                  Modal.confirm({
+                    title: 'Confirm',
+                    content: 'Are you sure you want to delete this item?',
+                    onOk: () => messageApi.success('Deleted!'),
+                  })
+                }
+              >
                 Confirm Dialog
               </Button>
             </Space>
@@ -1117,16 +1303,44 @@ const FeedbackSection = () => {
           <Text strong>Notification:</Text>
           <div style={{ marginTop: 8 }}>
             <Space>
-              <Button onClick={() => notification.success({ message: 'Success', description: 'This is a success notification.' })}>
+              <Button
+                onClick={() =>
+                  notificationApi.success({
+                    message: 'Success',
+                    description: 'This is a success notification.',
+                  })
+                }
+              >
                 Success
               </Button>
-              <Button onClick={() => notification.error({ message: 'Error', description: 'This is an error notification.' })}>
+              <Button
+                onClick={() =>
+                  notificationApi.error({
+                    message: 'Error',
+                    description: 'This is an error notification.',
+                  })
+                }
+              >
                 Error
               </Button>
-              <Button onClick={() => notification.warning({ message: 'Warning', description: 'This is a warning notification.' })}>
+              <Button
+                onClick={() =>
+                  notificationApi.warning({
+                    message: 'Warning',
+                    description: 'This is a warning notification.',
+                  })
+                }
+              >
                 Warning
               </Button>
-              <Button onClick={() => notification.info({ message: 'Info', description: 'This is an info notification.' })}>
+              <Button
+                onClick={() =>
+                  notification.info({
+                    message: 'Info',
+                    description: 'This is an info notification.',
+                  })
+                }
+              >
                 Info
               </Button>
             </Space>
@@ -1138,10 +1352,18 @@ const FeedbackSection = () => {
           <Text strong>Popconfirm:</Text>
           <div style={{ marginTop: 8 }}>
             <Space>
-              <Popconfirm title="Are you sure?" onConfirm={() => messageApi.success('Confirmed!')}>
+              <Popconfirm
+                title="Are you sure?"
+                onConfirm={() => messageApi.success('Confirmed!')}
+              >
                 <Button danger>Delete</Button>
               </Popconfirm>
-              <Popconfirm title="Delete this item?" description="This action cannot be undone." okText="Yes" cancelText="No">
+              <Popconfirm
+                title="Delete this item?"
+                description="This action cannot be undone."
+                okText="Yes"
+                cancelText="No"
+              >
                 <Button>Confirm Action</Button>
               </Popconfirm>
             </Space>
@@ -1230,10 +1452,24 @@ const OtherSection = () => {
           <div style={{ marginTop: 8 }}>
             <Space>
               <Button type="primary">Default Theme</Button>
-              <ConfigProvider theme={{ token: { colorPrimary: primitiveColors.green[500], borderRadius: 16 } }}>
+              <ConfigProvider
+                theme={{
+                  token: {
+                    colorPrimary: primitiveColors.green[500],
+                    borderRadius: 16,
+                  },
+                }}
+              >
                 <Button type="primary">Green Theme</Button>
               </ConfigProvider>
-              <ConfigProvider theme={{ token: { colorPrimary: primitiveColors.amber[500], borderRadius: 24 } }}>
+              <ConfigProvider
+                theme={{
+                  token: {
+                    colorPrimary: primitiveColors.amber[500],
+                    borderRadius: 24,
+                  },
+                }}
+              >
                 <Button type="primary">Amber Theme</Button>
               </ConfigProvider>
             </Space>
@@ -1245,13 +1481,69 @@ const OtherSection = () => {
           <Text strong>Design Tokens:</Text>
           <div style={{ marginTop: 8 }}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <div style={{ width: 40, height: 40, background: 'var(--ant-color-primary)', borderRadius: 4 }} title="Primary" />
-              <div style={{ width: 40, height: 40, background: 'var(--ant-color-primary-bg)', borderRadius: 4 }} title="Primary BG" />
-              <div style={{ width: 40, height: 40, background: 'var(--ant-color-primary-border)', borderRadius: 4 }} title="Primary Border" />
-              <div style={{ width: 40, height: 40, background: 'var(--ant-color-success)', borderRadius: 4 }} title="Success" />
-              <div style={{ width: 40, height: 40, background: 'var(--ant-color-warning)', borderRadius: 4 }} title="Warning" />
-              <div style={{ width: 40, height: 40, background: 'var(--ant-color-error)', borderRadius: 4 }} title="Error" />
-              <div style={{ width: 40, height: 40, background: 'var(--ant-color-info)', borderRadius: 4 }} title="Info" />
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  background: 'var(--ant-color-primary)',
+                  borderRadius: 4,
+                }}
+                title="Primary"
+              />
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  background: 'var(--ant-color-primary-bg)',
+                  borderRadius: 4,
+                }}
+                title="Primary BG"
+              />
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  background: 'var(--ant-color-primary-border)',
+                  borderRadius: 4,
+                }}
+                title="Primary Border"
+              />
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  background: 'var(--ant-color-success)',
+                  borderRadius: 4,
+                }}
+                title="Success"
+              />
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  background: 'var(--ant-color-warning)',
+                  borderRadius: 4,
+                }}
+                title="Warning"
+              />
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  background: 'var(--ant-color-error)',
+                  borderRadius: 4,
+                }}
+                title="Error"
+              />
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  background: 'var(--ant-color-info)',
+                  borderRadius: 4,
+                }}
+                title="Info"
+              />
             </div>
           </div>
         </div>
@@ -1288,33 +1580,62 @@ const DemoApp = () => {
           <div style={{ marginBottom: 24, marginTop: 48 }}>
             <Title level={2}>Ant Design v6 Component Showcase</Title>
             <Paragraph type="secondary">
-              Comprehensive demonstration of Ant Design v6 components with GDS design tokens.
-              Toggle between light and dark themes to see token changes.
+              Comprehensive demonstration of Ant Design v6 components with GDS
+              design tokens. Toggle between light and dark themes to see token
+              changes.
             </Paragraph>
           </div>
 
           {/* Table of Contents */}
           <Card style={{ marginBottom: 24 }}>
             <Space wrap>
-              <a href="#general"><Tag color="blue">General</Tag></a>
-              <a href="#layout"><Tag color="blue">Layout</Tag></a>
-              <a href="#navigation"><Tag color="blue">Navigation</Tag></a>
-              <a href="#data-entry"><Tag color="blue">Data Entry</Tag></a>
-              <a href="#data-display"><Tag color="blue">Data Display</Tag></a>
-              <a href="#feedback"><Tag color="blue">Feedback</Tag></a>
-              <a href="#other"><Tag color="blue">Other</Tag></a>
+              <a href="#general">
+                <Tag color="blue">General</Tag>
+              </a>
+              <a href="#layout">
+                <Tag color="blue">Layout</Tag>
+              </a>
+              <a href="#navigation">
+                <Tag color="blue">Navigation</Tag>
+              </a>
+              <a href="#data-entry">
+                <Tag color="blue">Data Entry</Tag>
+              </a>
+              <a href="#data-display">
+                <Tag color="blue">Data Display</Tag>
+              </a>
+              <a href="#feedback">
+                <Tag color="blue">Feedback</Tag>
+              </a>
+              <a href="#other">
+                <Tag color="blue">Other</Tag>
+              </a>
             </Space>
           </Card>
 
           {/* Demo Sections */}
           <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-            <section id="general"><GeneralSection /></section>
-            <section id="layout"><LayoutSection /></section>
-            <section id="navigation"><NavigationSection /></section>
-            <section id="data-entry"><DataEntrySection /></section>
-            <section id="data-display"><DataDisplaySection /></section>
-            <section id="feedback"><FeedbackSection /></section>
-            <section id="other"><OtherSection /></section>
+            <section id="general">
+              <GeneralSection />
+            </section>
+            <section id="layout">
+              <LayoutSection />
+            </section>
+            <section id="navigation">
+              <NavigationSection />
+            </section>
+            <section id="data-entry">
+              <DataEntrySection />
+            </section>
+            <section id="data-display">
+              <DataDisplaySection />
+            </section>
+            <section id="feedback">
+              <FeedbackSection />
+            </section>
+            <section id="other">
+              <OtherSection />
+            </section>
           </div>
 
           {/* Footer */}

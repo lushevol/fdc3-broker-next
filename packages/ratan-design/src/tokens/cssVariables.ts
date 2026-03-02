@@ -23,8 +23,21 @@ import {
   componentRound,
   iconSizes,
 } from './sizes';
-import { fontFamily, fontSize, fontWeight, lineHeight } from './typography';
+import {
+  fontFamily,
+  fontSize,
+  fontWeight,
+  lineHeight,
+  letterSpacing,
+  typographyStyles,
+} from './typography';
 import { shadowStyles } from './shadows';
+import {
+  breakpoints,
+  gridConfig,
+  gridGutters,
+  containerMaxWidths,
+} from './grid';
 import { lightTheme } from './themes/light';
 import { darkTheme } from './themes/dark';
 
@@ -208,6 +221,130 @@ export function generateTypographyCssVariables(
     lines.push(`  --${prefix}-line-height-${name}: ${lineHeightValue};`);
   }
 
+  lines.push('');
+  lines.push(`  /* Letter spacing */`);
+
+  for (const [name, value] of Object.entries(letterSpacing)) {
+    lines.push(`  --${prefix}-letter-spacing-${name}: ${value};`);
+  }
+
+  lines.push('');
+  lines.push(`  /* Typography styles (complete style definitions) */`);
+
+  for (const [styleName, style] of Object.entries(typographyStyles)) {
+    const varPrefix = `--${prefix}-text-style-${styleName}`;
+    lines.push(`  ${varPrefix}-font-family: ${style.fontFamily};`);
+    lines.push(`  ${varPrefix}-font-size: ${style.fontSize}px;`);
+    lines.push(`  ${varPrefix}-font-weight: ${style.fontWeight};`);
+    const lhValue =
+      typeof style.lineHeight === 'number'
+        ? `${style.lineHeight}px`
+        : style.lineHeight;
+    lines.push(`  ${varPrefix}-line-height: ${lhValue};`);
+    lines.push(`  ${varPrefix}-letter-spacing: ${style.letterSpacing};`);
+  }
+
+  lines.push('}');
+
+  return lines.join('\n');
+}
+
+/**
+ * Convert grid tokens to CSS custom properties
+ *
+ * @param prefix - Variable prefix (default: 'gds')
+ * @param themeSelector - CSS selector for theme (default: ':root')
+ */
+export function generateGridCssVariables(
+  prefix = 'gds',
+  themeSelector = ':root',
+): string {
+  const lines: string[] = [];
+  lines.push(`${themeSelector} {`);
+  lines.push(`  /* Breakpoints */`);
+
+  lines.push(`  --${prefix}-grid-breakpoint-mobile: ${breakpoints.mobile}px;`);
+  lines.push(`  --${prefix}-grid-breakpoint-tablet: ${breakpoints.tablet}px;`);
+  lines.push(
+    `  --${prefix}-grid-breakpoint-desktop: ${breakpoints.desktop}px;`,
+  );
+
+  lines.push('');
+  lines.push(`  /* Gutters */`);
+
+  lines.push(`  --${prefix}-grid-gutter: ${gridGutters.default}px;`);
+  lines.push(`  --${prefix}-grid-gutter-half: ${gridGutters.half}px;`);
+  lines.push(`  --${prefix}-grid-gutter-quarter: ${gridGutters.quarter}px;`);
+  lines.push(`  --${prefix}-grid-gutter-double: ${gridGutters.double}px;`);
+
+  lines.push('');
+  lines.push(`  /* Mobile grid */`);
+
+  lines.push(
+    `  --${prefix}-grid-mobile-columns: ${gridConfig.mobile.columns};`,
+  );
+  lines.push(
+    `  --${prefix}-grid-mobile-margin: ${gridConfig.mobile.margin}px;`,
+  );
+  lines.push(
+    `  --${prefix}-grid-mobile-column-width: ${gridConfig.mobile.columnWidth}px;`,
+  );
+  lines.push(
+    `  --${prefix}-grid-mobile-total-content-width: ${gridConfig.mobile.totalContentWidth}px;`,
+  );
+
+  lines.push('');
+  lines.push(`  /* Tablet grid */`);
+
+  lines.push(
+    `  --${prefix}-grid-tablet-columns: ${gridConfig.tablet.columns};`,
+  );
+  lines.push(
+    `  --${prefix}-grid-tablet-margin: ${gridConfig.tablet.margin}px;`,
+  );
+  lines.push(
+    `  --${prefix}-grid-tablet-column-width: ${gridConfig.tablet.columnWidth}px;`,
+  );
+  lines.push(
+    `  --${prefix}-grid-tablet-total-content-width: ${gridConfig.tablet.totalContentWidth}px;`,
+  );
+
+  lines.push('');
+  lines.push(`  /* Desktop narrow grid */`);
+
+  lines.push(
+    `  --${prefix}-grid-desktop-columns: ${gridConfig.desktopNarrow.columns};`,
+  );
+  lines.push(
+    `  --${prefix}-grid-desktop-margin-narrow: ${gridConfig.desktopNarrow.margin}px;`,
+  );
+  lines.push(
+    `  --${prefix}-grid-desktop-column-width-narrow: ${gridConfig.desktopNarrow.columnWidth}px;`,
+  );
+  lines.push(
+    `  --${prefix}-grid-desktop-total-content-width-narrow: ${gridConfig.desktopNarrow.totalContentWidth}px;`,
+  );
+
+  lines.push('');
+  lines.push(`  /* Desktop wide grid */`);
+
+  lines.push(
+    `  --${prefix}-grid-desktop-margin-wide: ${gridConfig.desktopWide.margin}px;`,
+  );
+  lines.push(
+    `  --${prefix}-grid-desktop-column-width-wide: ${gridConfig.desktopWide.columnWidth}px;`,
+  );
+  lines.push(
+    `  --${prefix}-grid-desktop-total-content-width-wide: ${gridConfig.desktopWide.totalContentWidth}px;`,
+  );
+
+  lines.push('');
+  lines.push(`  /* Container max widths */`);
+
+  for (const [name, value] of Object.entries(containerMaxWidths)) {
+    lines.push(`  --${prefix}-grid-container-max-width-${name}: ${value};`);
+  }
+
   lines.push('}');
 
   return lines.join('\n');
@@ -313,6 +450,8 @@ export function generateAllCssVariables(prefix = 'gds'): string {
     ``,
     generateTypographyCssVariables(prefix),
     ``,
+    generateGridCssVariables(prefix),
+    ``,
     generateShadowCssVariables(prefix),
   ].join('\n');
 }
@@ -333,6 +472,8 @@ export function generateThemedCssVariables(prefix = 'gds'): string {
     generateSizeCssVariables(prefix),
     ``,
     generateTypographyCssVariables(prefix),
+    ``,
+    generateGridCssVariables(prefix),
     ``,
     generateShadowCssVariables(prefix),
     ``,
@@ -363,6 +504,8 @@ export function generateCompleteCssModule(prefix = 'gds'): string {
     generateSizeCssVariables(prefix),
     ``,
     generateTypographyCssVariables(prefix),
+    ``,
+    generateGridCssVariables(prefix),
     ``,
     generateShadowCssVariables(prefix),
     ``,
@@ -486,6 +629,7 @@ export default {
   generateColorCssVariables,
   generateSizeCssVariables,
   generateTypographyCssVariables,
+  generateGridCssVariables,
   generateShadowCssVariables,
   generateThemeVariables,
   generateAllCssVariables,

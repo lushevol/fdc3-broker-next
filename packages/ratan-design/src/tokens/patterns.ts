@@ -63,13 +63,8 @@ export const writingBestPractices = {
    * ❌ DON'T: "Your form can now be exported as PDF"
    */
   activeVoice: {
-    do: [
-      'Start with a verb',
-      'Subjects (you, I, we) are optional',
-    ],
-    dont: [
-      'Past or present perfect tense verbs (has been added, was done)',
-    ],
+    do: ['Start with a verb', 'Subjects (you, I, we) are optional'],
+    dont: ['Past or present perfect tense verbs (has been added, was done)'],
     examples: {
       good: 'Export your form as PDF',
       bad: 'Your form can now be exported as PDF',
@@ -124,11 +119,17 @@ export const writingBestPractices = {
      *   Negative action: Reject
      */
     authoriseVsApprove: {
-      authorise: 'Can only be performed by authoriser roles, usually followed by 2FA',
+      authorise:
+        'Can only be performed by authoriser roles, usually followed by 2FA',
       authoriseNegative: 'Decline',
       approve: 'Only used for maker flows with no checker involved',
       approveNegative: 'Reject',
-      examples: ['Authorise payment', 'Decline request', 'Approved by Bank', 'Rejected by Bank'],
+      examples: [
+        'Authorise payment',
+        'Decline request',
+        'Approved by Bank',
+        'Rejected by Bank',
+      ],
     },
 
     /**
@@ -137,9 +138,15 @@ export const writingBestPractices = {
      * - Reset: Reverts all changes to a form to default value
      */
     clearVsReset: {
-      clear: 'Makes all input fields blank including unchecking of checkboxes and deselecting choices',
+      clear:
+        'Makes all input fields blank including unchecking of checkboxes and deselecting choices',
       reset: 'Reverts all changes to a form to default value',
-      examples: ['Clear filters', 'Clear fields', 'Reset fields', 'Reset to default'],
+      examples: [
+        'Clear filters',
+        'Clear fields',
+        'Reset fields',
+        'Reset to default',
+      ],
     },
 
     /**
@@ -160,9 +167,12 @@ export const writingBestPractices = {
      * - Cancel: Also erases unsaved changes. Not recommended.
      */
     deleteVsDiscardVsCancel: {
-      delete: 'Destroys an existing object so that it no longer exists. Delete should be followed with a confirmation.',
-      discard: 'Erases unsaved changes and provides a way out. Discard should be followed with a confirmation.',
-      cancel: 'Also erases unsaved changes. Not recommended as it may be confusing when the positive flow is also a cancellation.',
+      delete:
+        'Destroys an existing object so that it no longer exists. Delete should be followed with a confirmation.',
+      discard:
+        'Erases unsaved changes and provides a way out. Discard should be followed with a confirmation.',
+      cancel:
+        'Also erases unsaved changes. Not recommended as it may be confusing when the positive flow is also a cancellation.',
       examples: ['Delete file', 'Discard changes'],
     },
 
@@ -182,8 +192,10 @@ export const writingBestPractices = {
      * - Download: Copies data in the same format. Process should be near-instant.
      */
     exportVsDownload: {
-      exportGenerate: 'Initiates transfer and conversion of data to the user\'s machine. User expects some time will be needed.',
-      download: 'Copies data in the same format to the user\'s machine. Process should be near-instant.',
+      exportGenerate:
+        "Initiates transfer and conversion of data to the user's machine. User expects some time will be needed.",
+      download:
+        "Copies data in the same format to the user's machine. Process should be near-instant.",
       examples: ['Export CSV', 'Generate swagger', 'Download PDF'],
     },
 
@@ -193,7 +205,8 @@ export const writingBestPractices = {
      * - Upload: Used when users copy data of the same format to your platform
      */
     importVsUpload: {
-      import: 'Used when users transfer data for conversion into another format',
+      import:
+        'Used when users transfer data for conversion into another format',
       upload: 'Used when users copy data of the same format to your platform',
       examples: ['Import swagger', 'Upload photo'],
     },
@@ -206,7 +219,8 @@ export const writingBestPractices = {
      */
     saveVsSubmitVsDone: {
       save: 'Saves an input immediately to a database. Status of object is typically "in progress" or "draft".',
-      submit: 'Indicates submission of input to the next stage i.e. for review or approval',
+      submit:
+        'Indicates submission of input to the next stage i.e. for review or approval',
       done: 'Applies changes inside a modal or sheet that have not yet been saved. When the modal or sheet closes, users can save or submit all changes.',
     },
   },
@@ -259,10 +273,7 @@ export const writingBestPractices = {
       'Use 1-2 short sentences to describe the error and solution',
       'Warn user in cases where there is a negative outcome if they continue entering the wrong input',
     ],
-    dont: [
-      'Use system error messages',
-      'Redundant words like "Please"',
-    ],
+    dont: ['Use system error messages', 'Redundant words like "Please"'],
     examples: {
       goodEmptyField: 'This field is required',
       badEmptyField: 'Please add an input',
@@ -318,9 +329,28 @@ export const namingGuide = {
    *   "from", "with" should NOT be capitalised UNLESS at the start
    */
   titleCaseRules: {
-    capitalize: ['Nouns', 'Verbs', 'Adjectives', 'Adverbs', 'Prepositions with 4+ letters'],
-    doNotCapitalize: ['a', 'an', 'at', 'and', 'the', 'on', 'or', 'of', 'for', 'from', 'with'],
-    exception: 'These words SHOULD be capitalised when at the START of the name',
+    capitalize: [
+      'Nouns',
+      'Verbs',
+      'Adjectives',
+      'Adverbs',
+      'Prepositions with 4+ letters',
+    ],
+    doNotCapitalize: [
+      'a',
+      'an',
+      'at',
+      'and',
+      'the',
+      'on',
+      'or',
+      'of',
+      'for',
+      'from',
+      'with',
+    ],
+    exception:
+      'These words SHOULD be capitalised when at the START of the name',
   },
 
   /**
@@ -364,7 +394,8 @@ export const punctuationGuidelines = {
    */
   fullStops: {
     prose: 'Use at end of complete sentences or bullet lists',
-    uxCopy: 'Avoid full stops and unnecessary punctuation. Only use when statement contains more than one sentence.',
+    uxCopy:
+      'Avoid full stops and unnecessary punctuation. Only use when statement contains more than one sentence.',
   },
 
   /**
@@ -375,7 +406,8 @@ export const punctuationGuidelines = {
    */
   exclamationMarks: {
     rule: 'Avoid as they can come across as shouting or overly friendly, especially for CIB users',
-    exceptions: 'Greetings and congratulatory messages on staff and retail banking platforms (limit to one per page)',
+    exceptions:
+      'Greetings and congratulatory messages on staff and retail banking platforms (limit to one per page)',
   },
 
   /**
@@ -386,8 +418,8 @@ export const punctuationGuidelines = {
    * - Never use as a lazy alternative to 'and'
    */
   ampersands: {
-    rule: 'Don\'t use unless part of a formal or legal name',
-    exceptions: ['Johnson & Johnson', 'Standard & Poor\'s'],
+    rule: "Don't use unless part of a formal or legal name",
+    exceptions: ['Johnson & Johnson', "Standard & Poor's"],
     note: 'Never use as a lazy alternative to "and" (exceptions for space-limited UX copy)',
   },
 
@@ -421,8 +453,10 @@ export const dateTimeNumberGuidelines = {
   dates: {
     style: 'day, date month year',
     examples: ['3 Nov 2021', 'Wed, 5 Dec 2024'],
-    abbreviations: 'Use 3-letter abbreviations for days and months when space limited',
-    warning: 'Avoid using numbers for dates unless helper text is clearly provided (regions may interpret differently)',
+    abbreviations:
+      'Use 3-letter abbreviations for days and months when space limited',
+    warning:
+      'Avoid using numbers for dates unless helper text is clearly provided (regions may interpret differently)',
   },
 
   /**
@@ -435,7 +469,8 @@ export const dateTimeNumberGuidelines = {
     format: '24 hour clock (HH:MM:SS) for timestamps',
     ranges: 'Use "–" endash for ranges',
     examples: ['16:05:33', '17:00–19:00'],
-    timezone: 'Customized if system can personalize, otherwise use GMT format by default',
+    timezone:
+      'Customized if system can personalize, otherwise use GMT format by default',
     timezoneExample: '12 Aug 2024, 7.30PM UTC+8',
   },
 
@@ -493,7 +528,11 @@ export const capitalizationGuidelines = {
    * Examples
    */
   examples: {
-    sentenceCase: ['Customer information', 'Transaction history', 'Settings and preferences'],
+    sentenceCase: [
+      'Customer information',
+      'Transaction history',
+      'Settings and preferences',
+    ],
     titleCase: ['Customer 360', 'Entity 360', 'Open Banking Marketplace'],
   },
 } as const;

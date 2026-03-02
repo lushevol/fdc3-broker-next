@@ -196,7 +196,7 @@ export const gridGutters = {
  */
 export const calculateColumnSpan = (
   columns: number,
-  breakpoint: keyof typeof gridConfig = 'desktopNarrow'
+  breakpoint: keyof typeof gridConfig = 'desktopNarrow',
 ): number => {
   const config = gridConfig[breakpoint];
   const gutterCount = columns - 1;
@@ -265,42 +265,6 @@ export const mediaQueries = {
   mobile: `@media (min-width: ${breakpoints.mobile}px)`,
   tablet: `@media (min-width: ${breakpoints.tablet}px)`,
   desktop: `@media (min-width: ${breakpoints.desktop}px)`,
-} as const;
-
-// =============================================================================
-// CSS CUSTOM PROPERTIES
-// =============================================================================
-
-/**
- * Grid CSS variable names following GDS naming convention
- * These map to CSS custom properties for use in stylesheets
- */
-export const gridCssVars = {
-  // Breakpoints
-  '--sc-grid-breakpoint-mobile': `${breakpoints.mobile}px`,
-  '--sc-grid-breakpoint-tablet': `${breakpoints.tablet}px`,
-  '--sc-grid-breakpoint-desktop': `${breakpoints.desktop}px`,
-
-  // Gutters
-  '--sc-grid-gutter': `${gridGutters.default}px`,
-  '--sc-grid-gutter-half': `${gridGutters.half}px`,
-  '--sc-grid-gutter-quarter': `${gridGutters.quarter}px`,
-  '--sc-grid-gutter-double': `${gridGutters.double}px`,
-
-  // Mobile
-  '--sc-grid-mobile-columns': `${gridConfig.mobile.columns}`,
-  '--sc-grid-mobile-margin': `${gridConfig.mobile.margin}px`,
-
-  // Tablet
-  '--sc-grid-tablet-columns': `${gridConfig.tablet.columns}`,
-  '--sc-grid-tablet-margin': `${gridConfig.tablet.margin}px`,
-
-  // Desktop (narrow margin)
-  '--sc-grid-desktop-columns': `${gridConfig.desktopNarrow.columns}`,
-  '--sc-grid-desktop-margin-narrow': `${gridConfig.desktopNarrow.margin}px`,
-
-  // Desktop (wide margin)
-  '--sc-grid-desktop-margin-wide': `${gridConfig.desktopWide.margin}px`,
 } as const;
 
 // =============================================================================

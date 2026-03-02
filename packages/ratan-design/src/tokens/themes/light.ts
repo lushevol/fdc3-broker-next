@@ -18,40 +18,40 @@ export const lightTheme = {
   colors: {
     // Background
     background: {
-      primary: '#ffffff',
+      primary: primitiveColors.grey.white,
       secondary: primitiveColors.grey[50],
       tertiary: primitiveColors.grey[100],
     },
     // Surface
     surface: {
-      primary: '#ffffff',
-      secondary: '#666666',
-      elevated: '#ffffff',
+      primary: primitiveColors.grey.white,
+      secondary: primitiveColors.grey[600],
+      elevated: primitiveColors.grey.white,
     },
     // Text
     text: {
-      primary: '#262626',
-      secondary: '#0d0d0d',
+      primary: primitiveColors.grey[850],
+      secondary: primitiveColors.grey[950],
       tertiary: primitiveColors.grey[600],
       disabled: primitiveColors.grey[400],
-      placeholder: '#999999',
-      helper: '#595959',
-      eyebrowHint: '#808080',
+      placeholder: primitiveColors.grey[400],
+      helper: primitiveColors.grey[650],
+      eyebrowHint: primitiveColors.grey[500],
       link: {
-        default: '#9ac7f6',
-        hover: '#4f9df0',
-        active: '#035cbb',
+        default: primitiveColors.blue[200],
+        hover: primitiveColors.blue[350],
+        active: primitiveColors.blue[600],
         visited: primitiveColors.purple[500],
       },
-      information: '#035cbb',
+      information: primitiveColors.blue[600],
     },
     // Border
     border: {
-      primary: '#0473ea',
-      secondary: '#737373',
+      primary: primitiveColors.blue[500],
+      secondary: primitiveColors.grey[550],
       disabled: primitiveColors.grey[200],
-      focus: '#0473ea',
-      divider: '#cccccc',
+      focus: primitiveColors.blue[500],
+      divider: primitiveColors.grey[200],
     },
     // State
     state: {
@@ -66,33 +66,33 @@ export const lightTheme = {
     },
     // Surface states
     surfacePrimary: {
-      zeroDefault: '#262626',
-      subtleDefault: '#262626',
-      solidDefault: '#0473ea',
+      zeroDefault: primitiveColors.grey[850],
+      subtleDefault: primitiveColors.grey[850],
+      solidDefault: primitiveColors.blue[500],
     },
     surfaceSecondary: {
-      subtleDefault: '#666666',
+      subtleDefault: primitiveColors.grey[600],
     },
     // Link states
     linkPrimary: {
-      default: '#9ac7f6',
+      default: primitiveColors.blue[200],
     },
     linkSecondary: {
-      default: '#9ac7f6',
-      selected: '#e5f1fc',
+      default: primitiveColors.blue[200],
+      selected: primitiveColors.blue[50],
     },
     // Text states
     textPrimary: {
-      subtleSelected: '#0250a3',
+      subtleSelected: primitiveColors.blue[650],
     },
     textSecondary: {
-      subtleDefault: '#b3d5f8',
+      subtleDefault: primitiveColors.blue[150],
     },
     // Tab/Status
     tab: {
       horizPad: 16,
       vertPad: 16,
-      surfaceSelectedLayered: '#ffffff',
+      surfaceSelectedLayered: primitiveColors.grey.white,
     },
     // Card
     card: {
@@ -116,13 +116,13 @@ export const lightTheme = {
     success: primitiveColors.green[500],
     warning: primitiveColors.amber[500],
     error: primitiveColors.red[500],
-    information: '#035cbb',
+    information: primitiveColors.blue[600],
     // Brand colors
     brand: {
-      green: '#38d200',
-      blue: '#0473ea',
-      prosperBlue: '#020b43',
-      prosperBlueInverse: '#020b43',
+      green: primitiveColors.green[500],
+      blue: primitiveColors.blue[500],
+      prosperBlue: primitiveColors.grey[900],
+      prosperBlueInverse: primitiveColors.grey[900],
     },
   },
   sizes: {
@@ -143,7 +143,7 @@ export const lightTheme = {
   },
   // Focus
   focus: {
-    borderHover: '#ffffff00',
+    borderHover: `${primitiveColors.grey.white}00`,
   },
 };
 

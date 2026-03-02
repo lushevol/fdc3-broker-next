@@ -16,9 +16,31 @@ import { fileURLToPath } from 'node:url';
 import {
   generateAllCssVariables,
   generateThemedCssVariables,
-  generateScssVariables,
-  generateLessVariables,
+  generateGridCssVariables,
 } from '../src/tokens/cssVariables.js';
+import { primitiveColors } from '../src/tokens/colors.js';
+import { darkPrimitiveColors } from '../src/tokens/colorsDark.js';
+import {
+  componentSizes,
+  componentSpacing,
+  componentRound,
+  iconSizes,
+} from '../src/tokens/sizes.js';
+import {
+  fontFamily,
+  fontSize,
+  fontWeight,
+  lineHeight,
+  letterSpacing,
+  typographyStyles,
+} from '../src/tokens/typography.js';
+import { shadowStyles } from '../src/tokens/shadows.js';
+import {
+  breakpoints,
+  gridConfig,
+  gridGutters,
+  containerMaxWidths,
+} from '../src/tokens/grid.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -34,6 +56,40 @@ async function ensureDirs() {
   await fs.mkdir(CSS_DIR, { recursive: true });
   await fs.mkdir(SCSS_DIR, { recursive: true });
   await fs.mkdir(LESS_DIR, { recursive: true });
+}
+
+/**
+ * Convert camelCase to kebab-case
+ */
+function toKebabCase(str: string): string {
+  return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
+/**
+ * Flatten a nested object into dotted keys
+ */
+function flattenObject(
+  obj: Record<string, unknown>,
+  prefix = '',
+): Record<string, string | number> {
+  const result: Record<string, string | number> = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    const newKey = prefix ? `${prefix}-${key}` : key;
+
+    if (typeof value === 'string') {
+      result[newKey] = value;
+    } else if (typeof value === 'number') {
+      result[newKey] = value;
+    } else if (value !== null && typeof value === 'object') {
+      Object.assign(
+        result,
+        flattenObject(value as Record<string, unknown>, newKey),
+      );
+    }
+  }
+
+  return result;
 }
 
 // Generate CSS artifacts
@@ -81,126 +137,285 @@ ${generateAllCssVariables('gds')
 async function generateScss() {
   console.log('Generating SCSS artifacts...');
 
-  // Main variables file
+  const lines: string[] = [];
+  lines.push(`// GDS Design Tokens - SCSS Variables`);
+  lines.push(`// Generated from Figma Design System`);
+  lines.push(`// Auto-generated - do not edit manually`);
+  lines.push(``);
+
+  // Primitive colors
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(`// PRIMITIVE COLORS`);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(``);
+  for (const [colorName, shades] of Object.entries(primitiveColors)) {
+    if (typeof shades === 'object' && shades !== null) {
+      for (const [shade, value] of Object.entries(
+        shades as Record<string, string>,
+      )) {
+        lines.push(`$gds-color-${colorName}-${shade}: ${value};`);
+      }
+    }
+  }
+
+  // Dark mode primitive colors
+  lines.push(``);
+  lines.push(`// Dark mode primitive colors`);
+  for (const [colorName, shades] of Object.entries(darkPrimitiveColors)) {
+    if (typeof shades === 'object' && shades !== null) {
+      for (const [shade, value] of Object.entries(
+        shades as Record<string, string>,
+      )) {
+        lines.push(`$gds-color-${colorName}-${shade}-dark: ${value};`);
+      }
+    }
+  }
+
+  // Sizes
+  lines.push(``);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(`// SIZES`);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(``);
+  lines.push(`// Component sizes`);
+  for (const [name, value] of Object.entries(componentSizes)) {
+    lines.push(`$gds-size-${toKebabCase(name)}: ${value}px;`);
+  }
+
+  lines.push(``);
+  lines.push(`// Spacing`);
+  for (const [name, value] of Object.entries(componentSpacing)) {
+    lines.push(`$gds-spacing-${toKebabCase(name)}: ${value}px;`);
+  }
+
+  lines.push(``);
+  lines.push(`// Border radius`);
+  for (const [name, value] of Object.entries(componentRound)) {
+    lines.push(`$gds-radius-${toKebabCase(name)}: ${value}px;`);
+  }
+
+  lines.push(``);
+  lines.push(`// Icon sizes`);
+  for (const [name, value] of Object.entries(iconSizes)) {
+    lines.push(`$gds-icon-${toKebabCase(name)}: ${value}px;`);
+  }
+
+  // Typography
+  lines.push(``);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(`// TYPOGRAPHY`);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(``);
+  lines.push(`// Font families`);
+  lines.push(`$gds-font-family-primary: ${fontFamily.primary};`);
+  lines.push(`$gds-font-family-system: ${fontFamily.system};`);
+  lines.push(`$gds-font-family-monospace: ${fontFamily.monospace};`);
+
+  lines.push(``);
+  lines.push(`// Font sizes`);
+  for (const [name, value] of Object.entries(fontSize)) {
+    lines.push(`$gds-font-size-${toKebabCase(name)}: ${value}px;`);
+  }
+
+  lines.push(``);
+  lines.push(`// Font weights`);
+  for (const [name, value] of Object.entries(fontWeight)) {
+    lines.push(`$gds-font-weight-${toKebabCase(name)}: ${value};`);
+  }
+
+  lines.push(``);
+  lines.push(`// Line heights`);
+  for (const [name, value] of Object.entries(lineHeight)) {
+    const lhValue = typeof value === 'number' ? `${value}px` : value;
+    lines.push(`$gds-line-height-${toKebabCase(name)}: ${lhValue};`);
+  }
+
+  lines.push(``);
+  lines.push(`// Letter spacing`);
+  for (const [name, value] of Object.entries(letterSpacing)) {
+    lines.push(`$gds-letter-spacing-${toKebabCase(name)}: ${value};`);
+  }
+
+  lines.push(``);
+  lines.push(`// Typography styles`);
+  for (const [styleName, style] of Object.entries(typographyStyles)) {
+    lines.push(
+      `$gds-text-style-${toKebabCase(styleName)}-font-family: ${style.fontFamily};`,
+    );
+    lines.push(
+      `$gds-text-style-${toKebabCase(styleName)}-font-size: ${style.fontSize}px;`,
+    );
+    lines.push(
+      `$gds-text-style-${toKebabCase(styleName)}-font-weight: ${style.fontWeight};`,
+    );
+    const lh =
+      typeof style.lineHeight === 'number'
+        ? `${style.lineHeight}px`
+        : style.lineHeight;
+    lines.push(`$gds-text-style-${toKebabCase(styleName)}-line-height: ${lh};`);
+    lines.push(
+      `$gds-text-style-${toKebabCase(styleName)}-letter-spacing: ${style.letterSpacing};`,
+    );
+  }
+
+  // Grid
+  lines.push(``);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(`// GRID`);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(``);
+  lines.push(`// Breakpoints`);
+  lines.push(`$gds-grid-breakpoint-mobile: ${breakpoints.mobile}px;`);
+  lines.push(`$gds-grid-breakpoint-tablet: ${breakpoints.tablet}px;`);
+  lines.push(`$gds-grid-breakpoint-desktop: ${breakpoints.desktop}px;`);
+
+  lines.push(``);
+  lines.push(`// Gutters`);
+  lines.push(`$gds-grid-gutter: ${gridGutters.default}px;`);
+  lines.push(`$gds-grid-gutter-half: ${gridGutters.half}px;`);
+  lines.push(`$gds-grid-gutter-quarter: ${gridGutters.quarter}px;`);
+  lines.push(`$gds-grid-gutter-double: ${gridGutters.double}px;`);
+
+  lines.push(``);
+  lines.push(`// Mobile grid`);
+  lines.push(`$gds-grid-mobile-columns: ${gridConfig.mobile.columns};`);
+  lines.push(`$gds-grid-mobile-margin: ${gridConfig.mobile.margin}px;`);
+  lines.push(
+    `$gds-grid-mobile-column-width: ${gridConfig.mobile.columnWidth}px;`,
+  );
+  lines.push(
+    `$gds-grid-mobile-total-content-width: ${gridConfig.mobile.totalContentWidth}px;`,
+  );
+
+  lines.push(``);
+  lines.push(`// Tablet grid`);
+  lines.push(`$gds-grid-tablet-columns: ${gridConfig.tablet.columns};`);
+  lines.push(`$gds-grid-tablet-margin: ${gridConfig.tablet.margin}px;`);
+  lines.push(
+    `$gds-grid-tablet-column-width: ${gridConfig.tablet.columnWidth}px;`,
+  );
+  lines.push(
+    `$gds-grid-tablet-total-content-width: ${gridConfig.tablet.totalContentWidth}px;`,
+  );
+
+  lines.push(``);
+  lines.push(`// Desktop narrow grid`);
+  lines.push(`$gds-grid-desktop-columns: ${gridConfig.desktopNarrow.columns};`);
+  lines.push(
+    `$gds-grid-desktop-margin-narrow: ${gridConfig.desktopNarrow.margin}px;`,
+  );
+  lines.push(
+    `$gds-grid-desktop-column-width-narrow: ${gridConfig.desktopNarrow.columnWidth}px;`,
+  );
+  lines.push(
+    `$gds-grid-desktop-total-content-width-narrow: ${gridConfig.desktopNarrow.totalContentWidth}px;`,
+  );
+
+  lines.push(``);
+  lines.push(`// Desktop wide grid`);
+  lines.push(
+    `$gds-grid-desktop-margin-wide: ${gridConfig.desktopWide.margin}px;`,
+  );
+  lines.push(
+    `$gds-grid-desktop-column-width-wide: ${gridConfig.desktopWide.columnWidth}px;`,
+  );
+  lines.push(
+    `$gds-grid-desktop-total-content-width-wide: ${gridConfig.desktopWide.totalContentWidth}px;`,
+  );
+
+  lines.push(``);
+  lines.push(`// Container max widths`);
+  for (const [name, value] of Object.entries(containerMaxWidths)) {
+    lines.push(`$gds-grid-container-max-width-${name}: ${value};`);
+  }
+
+  // Shadows
+  lines.push(``);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(`// SHADOWS`);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(``);
+  for (const [name, style] of Object.entries(shadowStyles)) {
+    lines.push(`$gds-shadow-${toKebabCase(name)}: ${style.boxShadow};`);
+  }
+
   await fs.writeFile(
     path.join(SCSS_DIR, '_variables.scss'),
-    generateScssVariables('gds'),
+    lines.join('\n'),
     'utf-8',
   );
 
-  // Color maps for iteration
-  const colorMaps = `// GDS Color Maps - Auto-generated
-// Use these maps with @each for dynamic styling
+  // Generate color maps dynamically from token source
+  const colorMapLines: string[] = [];
+  colorMapLines.push(`// GDS Color Maps - Auto-generated`);
+  colorMapLines.push(`// Use these maps with @each for dynamic styling`);
+  colorMapLines.push(``);
+  colorMapLines.push(`$gds-colors: (`);
 
-$gds-colors: (
-  'grey': (
-    '50': #f9f9f9,
-    '100': #e5e5e5,
-    '200': #cccccc,
-    '300': #b2b2b2,
-    '400': #999999,
-    '500': #808080,
-    '600': #666666,
-    '700': #4d4d4d,
-    '800': #333333,
-    '900': #1a1a1a,
-    '950': #0d0d0d,
-  ),
-  'blue': (
-    '50': #e5f1fc,
-    '100': #cce3fa,
-    '200': #9ac7f6,
-    '300': #68abf2,
-    '400': #368fee,
-    '500': #0473ea,
-    '600': #035cbb,
-    '700': #02458c,
-    '800': #012e5d,
-    '900': #00172e,
-  ),
-  'green': (
-    '50': #ebfbe6,
-    '100': #d7f7cd,
-    '200': #afef9b,
-    '300': #87e769,
-    '400': #5fdf37,
-    '500': #38d200,
-    '600': #2ca800,
-    '700': #207e00,
-    '800': #145400,
-    '900': #082a00,
-  ),
-  'red': (
-    '50': #fce6e7,
-    '100': #f9ced0,
-    '200': #f39da1,
-    '300': #ec6c73,
-    '400': #e63b44,
-    '500': #e00a15,
-    '600': #b30811,
-    '700': #86060d,
-    '800': #5a0408,
-    '900': #2d0204,
-  ),
-  'amber': (
-    '50': #fef6e7,
-    '100': #feefd0,
-    '200': #fddea1,
-    '300': #fcce72,
-    '400': #fbbd43,
-    '500': #faad14,
-    '600': #c88a10,
-    '700': #96680c,
-    '800': #644508,
-    '900': #322304,
-  ),
-);
-
-$gds-colors-dark: (
-  'grey': (
-    '50': #0d0d0d,
-    '100': #1a1a1a,
-    '200': #333333,
-    '300': #4d4d4d,
-    '400': #666666,
-    '500': #808080,
-    '600': #999999,
-    '700': #b2b2b2,
-    '800': #cccccc,
-    '900': #e5e5e5,
-    '950': #f2f2f2,
-  ),
-  'blue': (
-    '50': #000b17,
-    '100': #00172e,
-    '200': #012e5d,
-    '300': #02458c,
-    '400': #035cbb,
-    '500': #0473ea,
-    '600': #1d81ec,
-    '700': #368fee,
-    '800': #4f9df0,
-    '900': #9ac7f6,
-  ),
-);
-
-// Mixins for easy theming
-@mixin theme-light {
-  [data-theme="light"], .theme-light & {
-    @content;
+  const colorEntries: string[] = [];
+  for (const [colorName, shades] of Object.entries(primitiveColors)) {
+    if (typeof shades === 'object' && shades !== null) {
+      const shadeEntries = Object.entries(shades as Record<string, string>)
+        .map(([shade, value]) => `    '${shade}': ${value}`)
+        .join(',\n');
+      colorEntries.push(`  '${colorName}': (\n${shadeEntries}\n  )`);
+    }
   }
-}
+  colorMapLines.push(colorEntries.join(',\n'));
+  colorMapLines.push(`);`);
 
-@mixin theme-dark {
-  [data-theme="dark"], .theme-dark & {
-    @content;
+  colorMapLines.push(``);
+  colorMapLines.push(`$gds-colors-dark: (`);
+
+  const darkColorEntries: string[] = [];
+  for (const [colorName, shades] of Object.entries(darkPrimitiveColors)) {
+    if (typeof shades === 'object' && shades !== null) {
+      const shadeEntries = Object.entries(shades as Record<string, string>)
+        .map(([shade, value]) => `    '${shade}': ${value}`)
+        .join(',\n');
+      darkColorEntries.push(`  '${colorName}': (\n${shadeEntries}\n  )`);
+    }
   }
-}
-`;
+  colorMapLines.push(darkColorEntries.join(',\n'));
+  colorMapLines.push(`);`);
+
+  colorMapLines.push(``);
+  colorMapLines.push(`// Mixins for easy theming`);
+  colorMapLines.push(`@mixin theme-light {`);
+  colorMapLines.push(`  [data-theme="light"], .theme-light & {`);
+  colorMapLines.push(`    @content;`);
+  colorMapLines.push(`  }`);
+  colorMapLines.push(`}`);
+  colorMapLines.push(``);
+  colorMapLines.push(`@mixin theme-dark {`);
+  colorMapLines.push(`  [data-theme="dark"], .theme-dark & {`);
+  colorMapLines.push(`    @content;`);
+  colorMapLines.push(`  }`);
+  colorMapLines.push(`}`);
 
   await fs.writeFile(
     path.join(SCSS_DIR, '_color-maps.scss'),
-    colorMaps,
+    colorMapLines.join('\n'),
     'utf-8',
   );
 
@@ -226,35 +441,195 @@ $gds-colors-dark: (
 async function generateLess() {
   console.log('Generating Less artifacts...');
 
-  // Main variables file
+  const lines: string[] = [];
+  lines.push(`// GDS Design Tokens - Less Variables`);
+  lines.push(`// Generated from Figma Design System`);
+  lines.push(`// Auto-generated - do not edit manually`);
+  lines.push(``);
+
+  // Primitive colors
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(`// PRIMITIVE COLORS`);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(``);
+  for (const [colorName, shades] of Object.entries(primitiveColors)) {
+    if (typeof shades === 'object' && shades !== null) {
+      for (const [shade, value] of Object.entries(
+        shades as Record<string, string>,
+      )) {
+        lines.push(`@gds-color-${colorName}-${shade}: ${value};`);
+      }
+    }
+  }
+
+  // Dark mode primitive colors
+  lines.push(``);
+  lines.push(`// Dark mode primitive colors`);
+  for (const [colorName, shades] of Object.entries(darkPrimitiveColors)) {
+    if (typeof shades === 'object' && shades !== null) {
+      for (const [shade, value] of Object.entries(
+        shades as Record<string, string>,
+      )) {
+        lines.push(`@gds-color-${colorName}-${shade}-dark: ${value};`);
+      }
+    }
+  }
+
+  // Sizes
+  lines.push(``);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(`// SIZES`);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(``);
+  lines.push(`// Component sizes`);
+  for (const [name, value] of Object.entries(componentSizes)) {
+    lines.push(`@gds-size-${toKebabCase(name)}: ${value}px;`);
+  }
+
+  lines.push(``);
+  lines.push(`// Spacing`);
+  for (const [name, value] of Object.entries(componentSpacing)) {
+    lines.push(`@gds-spacing-${toKebabCase(name)}: ${value}px;`);
+  }
+
+  lines.push(``);
+  lines.push(`// Border radius`);
+  for (const [name, value] of Object.entries(componentRound)) {
+    lines.push(`@gds-radius-${toKebabCase(name)}: ${value}px;`);
+  }
+
+  lines.push(``);
+  lines.push(`// Icon sizes`);
+  for (const [name, value] of Object.entries(iconSizes)) {
+    lines.push(`@gds-icon-${toKebabCase(name)}: ${value}px;`);
+  }
+
+  // Typography
+  lines.push(``);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(`// TYPOGRAPHY`);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(``);
+  lines.push(`// Font families`);
+  lines.push(`@gds-font-family-primary: ${fontFamily.primary};`);
+  lines.push(`@gds-font-family-system: ${fontFamily.system};`);
+  lines.push(`@gds-font-family-monospace: ${fontFamily.monospace};`);
+
+  lines.push(``);
+  lines.push(`// Font sizes`);
+  for (const [name, value] of Object.entries(fontSize)) {
+    lines.push(`@gds-font-size-${toKebabCase(name)}: ${value}px;`);
+  }
+
+  lines.push(``);
+  lines.push(`// Font weights`);
+  for (const [name, value] of Object.entries(fontWeight)) {
+    lines.push(`@gds-font-weight-${toKebabCase(name)}: ${value};`);
+  }
+
+  lines.push(``);
+  lines.push(`// Line heights`);
+  for (const [name, value] of Object.entries(lineHeight)) {
+    const lhValue = typeof value === 'number' ? `${value}px` : value;
+    lines.push(`@gds-line-height-${toKebabCase(name)}: ${lhValue};`);
+  }
+
+  lines.push(``);
+  lines.push(`// Letter spacing`);
+  for (const [name, value] of Object.entries(letterSpacing)) {
+    lines.push(`@gds-letter-spacing-${toKebabCase(name)}: ${value};`);
+  }
+
+  // Grid
+  lines.push(``);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(`// GRID`);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(``);
+  lines.push(`// Breakpoints`);
+  lines.push(`@gds-grid-breakpoint-mobile: ${breakpoints.mobile}px;`);
+  lines.push(`@gds-grid-breakpoint-tablet: ${breakpoints.tablet}px;`);
+  lines.push(`@gds-grid-breakpoint-desktop: ${breakpoints.desktop}px;`);
+
+  lines.push(``);
+  lines.push(`// Gutters`);
+  lines.push(`@gds-grid-gutter: ${gridGutters.default}px;`);
+  lines.push(`@gds-grid-gutter-half: ${gridGutters.half}px;`);
+  lines.push(`@gds-grid-gutter-quarter: ${gridGutters.quarter}px;`);
+  lines.push(`@gds-grid-gutter-double: ${gridGutters.double}px;`);
+
+  lines.push(``);
+  lines.push(`// Container max widths`);
+  for (const [name, value] of Object.entries(containerMaxWidths)) {
+    lines.push(`@gds-grid-container-max-width-${name}: ${value};`);
+  }
+
+  // Shadows
+  lines.push(``);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(`// SHADOWS`);
+  lines.push(
+    `// =============================================================================`,
+  );
+  lines.push(``);
+  for (const [name, style] of Object.entries(shadowStyles)) {
+    lines.push(`@gds-shadow-${toKebabCase(name)}: ${style.boxShadow};`);
+  }
+
   await fs.writeFile(
     path.join(LESS_DIR, '_variables.less'),
-    generateLessVariables('gds'),
+    lines.join('\n'),
     'utf-8',
   );
 
-  // Color mixins
-  const lessMixins = `// GDS Design Tokens - Less Mixins
-// Auto-generated from Figma Design System
+  // Generate dark theme overrides from token source
+  const mixinsLines: string[] = [];
+  mixinsLines.push(`// GDS Design Tokens - Less Mixins`);
+  mixinsLines.push(`// Auto-generated from Figma Design System`);
+  mixinsLines.push(``);
 
-.gds-theme-light {
-  // Light theme overrides
-  @import (once) '_variables.less';
-}
+  mixinsLines.push(`.gds-theme-light {`);
+  mixinsLines.push(`  // Light theme overrides`);
+  mixinsLines.push(`}`);
 
-.gds-theme-dark {
-  // Dark theme values
-  @gds-color-grey-50: #0d0d0d;
-  @gds-color-grey-100: #1a1a1a;
-  @gds-color-grey-200: #333333;
-  @gds-color-grey-500: #808080;
-  @gds-color-grey-900: #e5e5e5;
-  @gds-color-blue-500: #0473ea;
-  @gds-color-blue-900: #9ac7f6;
-}
-`;
+  mixinsLines.push(``);
+  mixinsLines.push(`.gds-theme-dark {`);
+  mixinsLines.push(`  // Dark theme values`);
+  // Generate dark theme color overrides
+  for (const [colorName, shades] of Object.entries(darkPrimitiveColors)) {
+    if (typeof shades === 'object' && shades !== null) {
+      for (const [shade, value] of Object.entries(
+        shades as Record<string, string>,
+      )) {
+        mixinsLines.push(`  @gds-color-${colorName}-${shade}: ${value};`);
+      }
+    }
+  }
+  mixinsLines.push(`}`);
 
-  await fs.writeFile(path.join(LESS_DIR, '_mixins.less'), lessMixins, 'utf-8');
+  await fs.writeFile(
+    path.join(LESS_DIR, '_mixins.less'),
+    mixinsLines.join('\n'),
+    'utf-8',
+  );
 
   // Index file
   await fs.writeFile(
@@ -377,6 +752,24 @@ async function generateThemePreview() {
       </div>
       <div class="color-swatch" style="background: var(--gds-color-grey-950)">
         <span style="color: white">Grey 950</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Grid System</h2>
+    <div class="color-grid">
+      <div class="color-swatch" style="background: var(--gds-color-blue-100)">
+        <span>Mobile: ${breakpoints.mobile}px</span>
+      </div>
+      <div class="color-swatch" style="background: var(--gds-color-blue-200)">
+        <span>Tablet: ${breakpoints.tablet}px</span>
+      </div>
+      <div class="color-swatch" style="background: var(--gds-color-blue-300)">
+        <span>Desktop: ${breakpoints.desktop}px</span>
+      </div>
+      <div class="color-swatch" style="background: var(--gds-color-blue-400)">
+        <span>Gutter: ${gridGutters.default}px</span>
       </div>
     </div>
   </div>

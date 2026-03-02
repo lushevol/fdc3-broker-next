@@ -231,8 +231,7 @@ export const fontFamily = {
    * Fallback system font stack
    * Used when SC Prosper Sans is not available
    */
-  system:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  system: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 
   /**
    * Monospace font for code, technical content
@@ -752,93 +751,6 @@ export const typographyStyles = {
     lineHeight: 1.4,
     letterSpacing: letterSpacing.default,
   },
-} as const;
-
-// =============================================================================
-// CSS VARIABLE DEFINITIONS
-// =============================================================================
-
-/**
- * Typography CSS variable names following GDS naming convention
- * These map to CSS custom properties for use in stylesheets
- */
-export const typographyCssVars = {
-  // Hero level
-  '--sc-text-style-hero-main-font-family': fontFamily.primary,
-  '--sc-text-style-hero-main-font-size': '56px',
-  '--sc-text-style-hero-main-font-weight': fontWeight.medium,
-  '--sc-text-style-hero-main-line-height': '72px',
-
-  '--sc-text-hero-font-family': fontFamily.primary,
-  '--sc-text-hero-font-size': '60px',
-  '--sc-text-hero-font-weight': fontWeight.medium,
-  '--sc-text-hero-line-height': '80px',
-
-  // Header level
-  '--sc-text-header-2-font-family': fontFamily.primary,
-  '--sc-text-header-2-font-size': '32px',
-  '--sc-text-header-2-font-weight': fontWeight.medium,
-  '--sc-text-header-2-line-height': '40px',
-
-  '--sc-text-header-5-font-family': fontFamily.primary,
-  '--sc-text-header-5-font-size': '20px',
-  '--sc-text-header-5-font-weight': fontWeight.medium,
-  '--sc-text-header-5-line-height': '28px',
-
-  // Section level
-  '--sc-text-section-main-font-family': fontFamily.primary,
-  '--sc-text-section-main-font-size': '28px',
-  '--sc-text-section-main-font-weight': fontWeight.medium,
-  '--sc-text-section-main-line-height': '44px',
-
-  '--sc-text-section-sub-font-family': fontFamily.primary,
-  '--sc-text-section-sub-font-size': '22px',
-  '--sc-text-section-sub-font-weight': fontWeight.bold,
-  '--sc-text-section-sub-line-height': '38px',
-
-  // Title level
-  '--sc-text-title-main-font-family': fontFamily.primary,
-  '--sc-text-title-main-font-size': '15px',
-  '--sc-text-title-main-font-weight': fontWeight.medium,
-  '--sc-text-title-main-line-height': '22px',
-
-  '--sc-text-title-sub-font-family': fontFamily.primary,
-  '--sc-text-title-sub-font-size': '16px',
-  '--sc-text-title-sub-font-weight': fontWeight.semibold,
-  '--sc-text-title-sub-line-height': '24px',
-
-  // Component level
-  '--sc-text-item-main-font-family': fontFamily.primary,
-  '--sc-text-item-main-font-size': '14px',
-  '--sc-text-item-main-font-weight': fontWeight.medium,
-  '--sc-text-item-main-line-height': '22px',
-
-  // Body level
-  '--sc-text-bodycopy-font-family': fontFamily.primary,
-  '--sc-text-bodycopy-font-size': '16px',
-  '--sc-text-bodycopy-font-weight': fontWeight.regular,
-  '--sc-text-bodycopy-line-height': '24px',
-
-  '--sc-text-paragraph-main-font-family': fontFamily.primary,
-  '--sc-text-paragraph-main-font-size': '14px',
-  '--sc-text-paragraph-main-font-weight': fontWeight.regular,
-  '--sc-text-paragraph-main-line-height': '22px',
-
-  // Supporting level
-  '--sc-text-label-main-font-family': fontFamily.primary,
-  '--sc-text-label-main-font-size': '12px',
-  '--sc-text-label-main-font-weight': fontWeight.medium,
-  '--sc-text-label-main-line-height': '16px',
-
-  '--sc-text-helper-main-font-family': fontFamily.primary,
-  '--sc-text-helper-main-font-size': '12px',
-  '--sc-text-helper-main-font-weight': fontWeight.medium,
-  '--sc-text-helper-main-line-height': '16px',
-
-  '--sc-text-description-main-font-family': fontFamily.primary,
-  '--sc-text-description-main-font-size': '12px',
-  '--sc-text-description-main-font-weight': fontWeight.regular,
-  '--sc-text-description-main-line-height': '16px',
 } as const;
 
 // =============================================================================

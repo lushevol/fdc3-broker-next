@@ -1,7 +1,11 @@
 // GDS Design Tokens - SCSS Variables
 // Generated from Figma Design System
+// Auto-generated - do not edit manually
 
-// Primitive colors
+// =============================================================================
+// PRIMITIVE COLORS
+// =============================================================================
+
 $gds-color-grey-25: #f9f9f9;
 $gds-color-grey-50: #f2f2f2;
 $gds-color-grey-100: #e5e5e5;
@@ -467,49 +471,11 @@ $gds-color-purple-850-dark: #d8bbfe;
 $gds-color-purple-900-dark: #e5d2fe;
 $gds-color-purple-950-dark: #f2e8ff;
 
-// Foundation colors
-$gds-basic-background-base: #ffffff;
-$gds-basic-container-layer: #ffffff;
-$gds-basic-divider-base: #cccccc;
-$gds-basic-brand-green: #38d200;
-$gds-basic-brand-blue: #0473ea;
-$gds-basic-brand-prosper-blue: #020b43;
-$gds-basic-brand-prosper-blue-inverse: #020b43;
-$gds-content-title: #262626;
-$gds-content-header: #0d0d0d;
-$gds-content-header-layered: #ffffff;
-$gds-content-helper-text: #595959;
-$gds-content-information-text: #035cbb;
-$gds-content-placeholder-text: #999999;
-$gds-content-eyebrow-hint-text: #808080;
-$gds-state-surface-primary-zero-default: #262626;
-$gds-state-surface-primary-subtle-default: #262626;
-$gds-state-surface-primary-solid-default: #0473ea;
-$gds-state-surface-secondary-subtle-default: #666666;
-$gds-state-border-primary-default: #0473ea;
-$gds-state-border-secondary-default: #737373;
-$gds-state-text-primary-subtle-selected: #0250a3;
-$gds-state-text-secondary-subtle-default: #b3d5f8;
-$gds-state-link-primary-default: #9ac7f6;
-$gds-state-link-secondary-default: #9ac7f6;
-$gds-state-link-secondary-selected: #e5f1fc;
-$gds-state-focus-border-hover: #ffffff00;
-$gds-shadow-base-shadow-color: #1a1a1a4d;
-$gds-shadow-base-shadow-xposition: 0;
-$gds-shadow-base-shadow-yposition: 1;
-$gds-shadow-base-shadow-blur: 2;
-$gds-shadow-base-shadow-spread: 0;
-$gds-shadow-elevated-shadow-color: #1a1a1a26;
-$gds-opacity-20: #ffffff33;
-$gds-opacity-40: #ffffff66;
-$gds-opacity-60: #ffffff99;
-$gds-opacity-80: #ffffffcc;
-$gds-opacity-20-layered: #1a1a1a33;
-$gds-opacity-40-layered: #1a1a1a66;
-$gds-opacity-60-layered: #1a1a1a99;
-$gds-opacity-80-layered: #1a1a1acc;
+// =============================================================================
+// SIZES
+// =============================================================================
 
-// Sizes
+// Component sizes
 $gds-size-1px: 1px;
 $gds-size-2px: 2px;
 $gds-size-3px: 3px;
@@ -566,15 +532,334 @@ $gds-spacing-20px: 10px;
 $gds-spacing-24px: 12px;
 $gds-spacing-32px: 16px;
 
-// Typography
-$gds-font-family-primary: "SC Prosper Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+// Border radius
+$gds-radius-4px: 4px;
+$gds-radius-6px: 6px;
+$gds-radius-round-theme: 6px;
+$gds-radius-pill: 32px;
+
+// Icon sizes
+$gds-icon-12px: 12px;
+$gds-icon-16px: 16px;
+
+// =============================================================================
+// TYPOGRAPHY
+// =============================================================================
+
+// Font families
+$gds-font-family-primary:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-font-family-system:
+  -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$gds-font-family-monospace:
+  'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', 'Droid Sans Mono',
+  'Source Code Pro', monospace;
+
+// Font sizes
+$gds-font-size-xs: 10px;
+$gds-font-size-sm: 12px;
+$gds-font-size-sm-md: 14px;
+$gds-font-size-md: 15px;
+$gds-font-size-md-lg: 16px;
+$gds-font-size-lg: 18px;
+$gds-font-size-xl: 20px;
+$gds-font-size-section-sub: 22px;
+$gds-font-size-title-sub: 24px;
+$gds-font-size-section-main: 28px;
+$gds-font-size-header2: 32px;
+$gds-font-size-hero-main: 56px;
+$gds-font-size-hero: 60px;
 $gds-font-size-helper: 12px;
+$gds-font-size-label: 12px;
 $gds-font-size-description: 12px;
 $gds-font-size-component: 14px;
-$gds-font-size-titleSub: 16px;
-$gds-font-size-sectionMinor: 18px;
-$gds-font-size-sectionMain: 28px;
+$gds-font-size-body: 16px;
+$gds-font-size-title: 15px;
+
+// Font weights
 $gds-font-weight-regular: 400;
 $gds-font-weight-medium: 500;
-$gds-font-weight-semibold: 700;
+$gds-font-weight-semibold: 600;
 $gds-font-weight-bold: 700;
+
+// Line heights
+$gds-line-height-helper: 16px;
+$gds-line-height-description: 16px;
+$gds-line-height-component: 100%;
+$gds-line-height-component-px: 22px;
+$gds-line-height-title: 22px;
+$gds-line-height-title-sub: 24px;
+$gds-line-height-bodycopy: 24px;
+$gds-line-height-section-minor: 34px;
+$gds-line-height-header5: 28px;
+$gds-line-height-section-sub: 38px;
+$gds-line-height-section-main: 44px;
+$gds-line-height-header2: 40px;
+$gds-line-height-hero-main: 72px;
+$gds-line-height-hero: 80px;
+
+// Letter spacing
+$gds-letter-spacing-default: 0;
+$gds-letter-spacing-tight: -0.01em;
+$gds-letter-spacing-wide: 0.02em;
+$gds-letter-spacing-section-tracking: 0.16px;
+
+// Typography styles
+$gds-text-style-hero-main-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-hero-main-font-size: 56px;
+$gds-text-style-hero-main-font-weight: 500;
+$gds-text-style-hero-main-line-height: 72px;
+$gds-text-style-hero-main-letter-spacing: 0;
+$gds-text-style-hero-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-hero-font-size: 60px;
+$gds-text-style-hero-font-weight: 500;
+$gds-text-style-hero-line-height: 80px;
+$gds-text-style-hero-letter-spacing: 0;
+$gds-text-style-header2-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-header2-font-size: 32px;
+$gds-text-style-header2-font-weight: 500;
+$gds-text-style-header2-line-height: 40px;
+$gds-text-style-header2-letter-spacing: 0;
+$gds-text-style-section-main-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-section-main-font-size: 28px;
+$gds-text-style-section-main-font-weight: 500;
+$gds-text-style-section-main-line-height: 44px;
+$gds-text-style-section-main-letter-spacing: 0;
+$gds-text-style-section-sub-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-section-sub-font-size: 22px;
+$gds-text-style-section-sub-font-weight: 500;
+$gds-text-style-section-sub-line-height: 38px;
+$gds-text-style-section-sub-letter-spacing: 0;
+$gds-text-style-section-sub-bold-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-section-sub-bold-font-size: 22px;
+$gds-text-style-section-sub-bold-font-weight: 700;
+$gds-text-style-section-sub-bold-line-height: 38px;
+$gds-text-style-section-sub-bold-letter-spacing: 0;
+$gds-text-style-section-minor-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-section-minor-font-size: 18px;
+$gds-text-style-section-minor-font-weight: 700;
+$gds-text-style-section-minor-line-height: 34px;
+$gds-text-style-section-minor-letter-spacing: 0.16px;
+$gds-text-style-header5-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-header5-font-size: 20px;
+$gds-text-style-header5-font-weight: 500;
+$gds-text-style-header5-line-height: 28px;
+$gds-text-style-header5-letter-spacing: 0;
+$gds-text-style-title-main-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-title-main-font-size: 15px;
+$gds-text-style-title-main-font-weight: 500;
+$gds-text-style-title-main-line-height: 22px;
+$gds-text-style-title-main-letter-spacing: 0;
+$gds-text-style-title-sub-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-title-sub-font-size: 16px;
+$gds-text-style-title-sub-font-weight: 600;
+$gds-text-style-title-sub-line-height: 24px;
+$gds-text-style-title-sub-letter-spacing: 0;
+$gds-text-style-bodycopy-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-bodycopy-font-size: 16px;
+$gds-text-style-bodycopy-font-weight: 400;
+$gds-text-style-bodycopy-line-height: 24px;
+$gds-text-style-bodycopy-letter-spacing: 0;
+$gds-text-style-paragraph-main-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-paragraph-main-font-size: 14px;
+$gds-text-style-paragraph-main-font-weight: 400;
+$gds-text-style-paragraph-main-line-height: 22px;
+$gds-text-style-paragraph-main-letter-spacing: 0;
+$gds-text-style-component-main-regular-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-component-main-regular-font-size: 14px;
+$gds-text-style-component-main-regular-font-weight: 400;
+$gds-text-style-component-main-regular-line-height: 22px;
+$gds-text-style-component-main-regular-letter-spacing: 0;
+$gds-text-style-component-main-medium-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-component-main-medium-font-size: 14px;
+$gds-text-style-component-main-medium-font-weight: 500;
+$gds-text-style-component-main-medium-line-height: 22px;
+$gds-text-style-component-main-medium-letter-spacing: 0;
+$gds-text-style-label-main-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-label-main-font-size: 12px;
+$gds-text-style-label-main-font-weight: 500;
+$gds-text-style-label-main-line-height: 16px;
+$gds-text-style-label-main-letter-spacing: 0;
+$gds-text-style-helper-main-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-helper-main-font-size: 12px;
+$gds-text-style-helper-main-font-weight: 500;
+$gds-text-style-helper-main-line-height: 16px;
+$gds-text-style-helper-main-letter-spacing: 0;
+$gds-text-style-description-main-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-description-main-font-size: 12px;
+$gds-text-style-description-main-font-weight: 400;
+$gds-text-style-description-main-line-height: 16px;
+$gds-text-style-description-main-letter-spacing: 0;
+$gds-text-style-xs-font-family:
+  'SC Prosper Sans',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$gds-text-style-xs-font-size: 10px;
+$gds-text-style-xs-font-weight: 400;
+$gds-text-style-xs-line-height: 1.4px;
+$gds-text-style-xs-letter-spacing: 0;
+
+// =============================================================================
+// GRID
+// =============================================================================
+
+// Breakpoints
+$gds-grid-breakpoint-mobile: 375px;
+$gds-grid-breakpoint-tablet: 768px;
+$gds-grid-breakpoint-desktop: 1440px;
+
+// Gutters
+$gds-grid-gutter: 24px;
+$gds-grid-gutter-half: 12px;
+$gds-grid-gutter-quarter: 6px;
+$gds-grid-gutter-double: 48px;
+
+// Mobile grid
+$gds-grid-mobile-columns: 2;
+$gds-grid-mobile-margin: 24px;
+$gds-grid-mobile-column-width: 151.5px;
+$gds-grid-mobile-total-content-width: 327px;
+
+// Tablet grid
+$gds-grid-tablet-columns: 4;
+$gds-grid-tablet-margin: 80px;
+$gds-grid-tablet-column-width: 134px;
+$gds-grid-tablet-total-content-width: 608px;
+
+// Desktop narrow grid
+$gds-grid-desktop-columns: 12;
+$gds-grid-desktop-margin-narrow: 160px;
+$gds-grid-desktop-column-width-narrow: 71.33px;
+$gds-grid-desktop-total-content-width-narrow: 1120px;
+
+// Desktop wide grid
+$gds-grid-desktop-margin-wide: 40px;
+$gds-grid-desktop-column-width-wide: 91.33px;
+$gds-grid-desktop-total-content-width-wide: 1360px;
+
+// Container max widths
+$gds-grid-container-max-width-mobile: 375px;
+$gds-grid-container-max-width-tablet: 768px;
+$gds-grid-container-max-width-desktop: 1440px;
+$gds-grid-container-max-width-full: 100%;
+
+// =============================================================================
+// SHADOWS
+// =============================================================================
+
+$gds-shadow-elevation1:
+  0 1px 3px 1px rgba(26, 26, 26, 0.15),
+  0 1px 2px 0 rgba(26, 26, 26, 0.3);
+$gds-shadow-elevation3:
+  0 4px 8px 3px rgba(26, 26, 26, 0.15),
+  0 1px 2px 0 rgba(26, 26, 26, 0.3);

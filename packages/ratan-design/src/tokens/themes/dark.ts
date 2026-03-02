@@ -18,15 +18,15 @@ export const darkTheme = {
   colors: {
     // Background
     background: {
-      primary: '#1a1a1a',
+      primary: darkPrimitiveColors.grey[100],
       secondary: darkPrimitiveColors.grey[850],
       tertiary: darkPrimitiveColors.grey[800],
     },
     // Surface
     surface: {
-      primary: '#1a1a1a',
-      secondary: '#333333',
-      elevated: '#262626',
+      primary: darkPrimitiveColors.grey[100],
+      secondary: darkPrimitiveColors.grey[200],
+      elevated: darkPrimitiveColors.grey[150],
     },
     // Text
     text: {
@@ -38,20 +38,20 @@ export const darkTheme = {
       helper: darkPrimitiveColors.grey[650],
       eyebrowHint: darkPrimitiveColors.grey[500],
       link: {
-        default: '#9ac7f6',
-        hover: '#68abf2',
-        active: '#368fee',
-        visited: '#984afc',
+        default: darkPrimitiveColors.blue[800],
+        hover: darkPrimitiveColors.blue[700],
+        active: darkPrimitiveColors.blue[600],
+        visited: darkPrimitiveColors.purple[600],
       },
-      information: '#368fee',
+      information: darkPrimitiveColors.blue[600],
     },
     // Border
     border: {
-      primary: '#368fee',
-      secondary: '#737373',
+      primary: darkPrimitiveColors.blue[600],
+      secondary: darkPrimitiveColors.grey[550],
       disabled: darkPrimitiveColors.grey[700],
-      focus: '#9ac7f6',
-      divider: '#666666',
+      focus: darkPrimitiveColors.blue[800],
+      divider: darkPrimitiveColors.grey[400],
     },
     // State
     state: {
@@ -66,33 +66,33 @@ export const darkTheme = {
     },
     // Surface states
     surfacePrimary: {
-      zeroDefault: '#262626',
-      subtleDefault: '#262626',
-      solidDefault: '#0473ea',
+      zeroDefault: darkPrimitiveColors.grey[150],
+      subtleDefault: darkPrimitiveColors.grey[150],
+      solidDefault: darkPrimitiveColors.blue[500],
     },
     surfaceSecondary: {
-      subtleDefault: '#666666',
+      subtleDefault: darkPrimitiveColors.grey[400],
     },
     // Link states
     linkPrimary: {
-      default: '#9ac7f6',
+      default: darkPrimitiveColors.blue[800],
     },
     linkSecondary: {
-      default: '#9ac7f6',
-      selected: '#e5f1fc',
+      default: darkPrimitiveColors.blue[800],
+      selected: darkPrimitiveColors.blue[950],
     },
     // Text states
     textPrimary: {
-      subtleSelected: '#0250a3',
+      subtleSelected: darkPrimitiveColors.blue[350],
     },
     textSecondary: {
-      subtleDefault: '#b3d5f8',
+      subtleDefault: darkPrimitiveColors.blue[850],
     },
     // Tab/Status
     tab: {
       horizPad: 16,
       vertPad: 16,
-      surfaceSelectedLayered: '#ffffff',
+      surfaceSelectedLayered: darkPrimitiveColors.grey[900],
     },
     // Card
     card: {
@@ -116,13 +116,13 @@ export const darkTheme = {
     success: darkPrimitiveColors.green[400],
     warning: darkPrimitiveColors.amber[400],
     error: darkPrimitiveColors.red[400],
-    information: '#368fee',
+    information: darkPrimitiveColors.blue[600],
     // Brand colors
     brand: {
-      green: '#38d200',
-      blue: '#0473ea',
-      prosperBlue: '#020b43',
-      prosperBlueInverse: '#020b43',
+      green: darkPrimitiveColors.green[500],
+      blue: darkPrimitiveColors.blue[500],
+      prosperBlue: darkPrimitiveColors.grey[900],
+      prosperBlueInverse: darkPrimitiveColors.grey[900],
     },
   },
   sizes: {
@@ -143,7 +143,7 @@ export const darkTheme = {
   },
   // Focus
   focus: {
-    borderHover: '#ffffff00',
+    borderHover: `${darkPrimitiveColors.grey[100]}00`,
   },
 };
 
