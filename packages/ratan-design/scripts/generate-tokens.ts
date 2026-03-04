@@ -96,10 +96,10 @@ function flattenObject(
 async function generateCss() {
   console.log('Generating CSS artifacts...');
 
-  // Full CSS module with themes
+  // Full CSS module with themes - use 'sc' prefix to match official
   await fs.writeFile(
     path.join(CSS_DIR, 'gds.tokens.css'),
-    generateThemedCssVariables('gds'),
+    generateThemedCssVariables('sc'),
     'utf-8',
   );
 
@@ -107,7 +107,7 @@ async function generateCss() {
   await fs.writeFile(
     path.join(CSS_DIR, 'gds.colors.css'),
     `:root {
-${generateAllCssVariables('gds')
+${generateAllCssVariables('sc')
   .split('\n')
   .filter((line) => !line.startsWith('/*') && line.trim())
   .map((line) => '  ' + line)
@@ -117,7 +117,7 @@ ${generateAllCssVariables('gds')
   );
 
   // Minified version
-  const minified = generateThemedCssVariables('gds')
+  const minified = generateThemedCssVariables('sc')
     .replace(/\/\*[\s\S]*?\*\//g, '') // Remove comments
     .replace(/\s+/g, ' ') // Collapse whitespace
     .trim();

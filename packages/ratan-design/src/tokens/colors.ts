@@ -30,8 +30,11 @@ export const primitiveColors = {
     white: '#ffffff',
     25: '#f9f9f9',
     50: '#f2f2f2',
+    75: '#ececec',
     100: '#e5e5e5',
+    125: '#dfdfdf',
     150: '#d9d9d9',
+    175: '#d2d2d2',
     200: '#cccccc',
     250: '#bfbfbf',
     300: '#b2b2b2',
@@ -44,9 +47,13 @@ export const primitiveColors = {
     650: '#595959',
     700: '#4d4d4d',
     750: '#404040',
+    775: '#3a3a3a',
     800: '#333333',
+    825: '#2d2d2d',
     850: '#262626',
+    875: '#202020',
     900: '#1a1a1a',
+    925: '#141414',
     950: '#0d0d0d',
     975: '#070707',
     black: '#000000',
@@ -79,6 +86,10 @@ export const primitiveColors = {
     900: '#00172e',
     950: '#000b17',
   },
+  /**
+   * Prosper Blue - Brand color for page headers
+   */
+  prosperBlue: '#020b43',
   /**
    * Success green scale for positive states and confirmations
    * - 50-200: Light greens for success backgrounds
@@ -223,7 +234,7 @@ export const primitiveColors = {
   violet: {
     50: '#ededf8',
     100: '#dadaf2',
-    150: '#c8c8eb',
+    150: '#c8c8e8',
     200: '#b6b6e5',
     250: '#a3a3de',
     300: '#9191d7',
@@ -232,7 +243,7 @@ export const primitiveColors = {
     450: '#5a5ac4',
     500: '#4848bd',
     550: '#4141aa',
-    600: '#3a3a97',
+    600: '#3a4a97',
     650: '#323284',
     700: '#2b2b71',
     750: '#24245f',
@@ -250,6 +261,7 @@ export const primitiveColors = {
   orange: {
     50: '#fff0e8',
     100: '#ffefe6',
+    150: '#ffdecd',
     200: '#ffceb4',
     250: '#ffbe9c',
     300: '#ffad84',
@@ -276,7 +288,7 @@ export const primitiveColors = {
   maroon: {
     50: '#f7e9ee',
     100: '#efd3de',
-    150: '#e6bdcd',
+    150: '#e68dcd',
     200: '#dea7bd',
     250: '#d690ac',
     300: '#ce7a9c',
@@ -352,106 +364,214 @@ export const primitiveColors = {
 
 /**
  * Foundation colors - Semantic tokens for common UI patterns
- * These tokens map primitive colors to specific use cases in the design system
+ * These tokens use CSS variable references for proper theme switching
+ * Values are expressed as CSS var() references to primitive colors
+ *
+ * Note: Variable names follow official format:
+ * --sc-color-foundation-{category}-{name}
+ */
+export const foundationBasicColors = {
+  backgroundBase: 'var(--sc-color-white)',
+  containerLayer: 'var(--sc-color-white)',
+  containerLayerInverse: 'var(--sc-color-grey-850)',
+  dividerBase: 'var(--sc-color-grey-200)',
+  dividerBaseInverse: 'var(--sc-color-grey-600)',
+  brandGrey: 'var(--sc-color-grey-650)',
+  brandBlue: 'var(--sc-color-blue-500)',
+  brandGreen: 'var(--sc-color-green-500)',
+  brandProsperBlue: 'var(--sc-color-prosper-blue)',
+  brandProsperBlueInverse: 'var(--sc-color-white)',
+};
+
+export const foundationContentColors = {
+  header: 'var(--sc-color-grey-950)',
+  title: 'var(--sc-color-grey-850)',
+  body: 'var(--sc-color-grey-700)',
+  labelText: 'var(--sc-color-grey-700)',
+  inputText: 'var(--sc-color-grey-800)',
+  placeholderText: 'var(--sc-color-grey-600)',
+  eyebrowHintText: 'var(--sc-color-grey-500)',
+  disabledText: 'var(--sc-color-grey-500)',
+  helperText: 'var(--sc-color-grey-650)',
+  informationText: 'var(--sc-color-blue-600)',
+  errorText: 'var(--sc-color-red-550)',
+  warningText: 'var(--sc-color-amber-750)',
+  successText: 'var(--sc-color-green-700)',
+  // Inverse variants for dark surfaces
+  headerInverse: 'var(--sc-color-white)',
+  titleInverse: 'var(--sc-color-grey-25)',
+  bodyInverse: 'var(--sc-color-grey-50)',
+  labelTextInverse: 'var(--sc-color-grey-100)',
+  inputTextInverse: 'var(--sc-color-grey-200)',
+  placeholderTextInverse: 'var(--sc-color-grey-400)',
+  eyebrowHintTextInverse: 'var(--sc-color-grey-400)',
+  disabledTextInverse: 'var(--sc-color-grey-400)',
+  helperTextInverse: 'var(--sc-color-grey-150)',
+  informationTextInverse: 'var(--sc-color-blue-400)',
+  errorTextInverse: 'var(--sc-color-red-300)',
+  warningTextInverse: 'var(--sc-color-amber-450)',
+  successTextInverse: 'var(--sc-color-green-500)',
+};
+
+/**
+ * Semantic foreground link colors
+ * Following official naming: --sc-color-semantic-fg-link-{variant}-{state}
+ */
+export const semanticFgLinkColors = {
+  primary: {
+    rest: 'var(--sc-color-blue-500)',
+    hover: 'var(--sc-color-blue-350)',
+    pressed: 'var(--sc-color-blue-600)',
+    selected: 'var(--sc-color-blue-650)',
+    disabled: 'var(--sc-color-grey-400)',
+    restSubtle: 'var(--sc-color-blue-150)',
+    hoverSubtle: 'var(--sc-color-blue-200)',
+    pressedSubtle: 'var(--sc-color-blue-250)',
+    selectedSubtle: 'var(--sc-color-white)',
+    disabledSubtle: 'var(--sc-color-grey-500)',
+  },
+  secondary: {
+    rest: 'var(--sc-color-blue-850)',
+    hover: 'var(--sc-color-blue-550)',
+    pressed: 'var(--sc-color-blue-600)',
+    selected: 'var(--sc-color-blue-650)',
+    disabled: 'var(--sc-color-grey-400)',
+  },
+  destructive: {
+    rest: 'var(--sc-color-red-550)',
+    hover: 'var(--sc-color-red-400)',
+    pressed: 'var(--sc-color-red-650)',
+    selected: 'var(--sc-color-red-700)',
+    disabled: 'var(--sc-color-grey-400)',
+    restSubtle: 'var(--sc-color-red-150)',
+    hoverSubtle: 'var(--sc-color-red-200)',
+    pressedSubtle: 'var(--sc-color-red-250)',
+    selectedSubtle: 'var(--sc-color-red-50)',
+    disabledSubtle: 'var(--sc-color-grey-500)',
+  },
+  warning: {
+    rest: 'var(--sc-color-amber-700)',
+    hover: 'var(--sc-color-amber-550)',
+    pressed: 'var(--sc-color-amber-800)',
+    selected: 'var(--sc-color-amber-850)',
+    disabled: 'var(--sc-color-grey-400)',
+    restSubtle: 'var(--sc-color-amber-150)',
+    hoverSubtle: 'var(--sc-color-amber-200)',
+    pressedSubtle: 'var(--sc-color-amber-250)',
+    selectedSubtle: 'var(--sc-color-amber-50)',
+    disabledSubtle: 'var(--sc-color-grey-500)',
+  },
+  success: {
+    rest: 'var(--sc-color-green-700)',
+    hover: 'var(--sc-color-green-550)',
+    pressed: 'var(--sc-color-green-800)',
+    selected: 'var(--sc-color-green-850)',
+    disabled: 'var(--sc-color-grey-400)',
+    restSubtle: 'var(--sc-color-green-150)',
+    hoverSubtle: 'var(--sc-color-green-200)',
+    pressedSubtle: 'var(--sc-color-green-250)',
+    selectedSubtle: 'var(--sc-color-green-50)',
+    disabledSubtle: 'var(--sc-color-grey-500)',
+  },
+};
+
+/**
+ * Semantic foreground text colors
+ * Following official naming: --sc-color-semantic-fg-text-{variant}-{state}
+ */
+export const semanticFgTextColors = {
+  primary: {
+    rest: 'var(--sc-color-white)',
+    hover: 'var(--sc-color-white)',
+    pressed: 'var(--sc-color-blue-100)',
+    selected: 'var(--sc-color-white)',
+    disabled: 'var(--sc-color-grey-500)',
+    restSubtle: 'var(--sc-color-blue-500)',
+    hoverSubtle: 'var(--sc-color-blue-350)',
+    pressedSubtle: 'var(--sc-color-blue-300)',
+    selectedSubtle: 'var(--sc-color-white)',
+    disabledSubtle: 'var(--sc-color-grey-500)',
+  },
+  secondary: {
+    rest: 'var(--sc-color-grey-700)',
+    hover: 'var(--sc-color-grey-600)',
+    pressed: 'var(--sc-color-grey-800)',
+    selected: 'var(--sc-color-grey-650)',
+    disabled: 'var(--sc-color-grey-500)',
+    restSubtle: 'var(--sc-color-grey-150)',
+    hoverSubtle: 'var(--sc-color-grey-200)',
+    pressedSubtle: 'var(--sc-color-grey-100)',
+    selectedSubtle: 'var(--sc-color-grey-100)',
+    disabledSubtle: 'var(--sc-color-grey-400)',
+  },
+};
+
+/**
+ * Foundation colors object for backwards compatibility
+ * Organized to generate correct CSS variable names
  */
 export const foundationColors = {
-  /**
-   * Basic foundational colors for backgrounds, dividers, and brand elements
-   * Used as default values for core UI components
-   */
-  basic: {
-    backgroundBase: '#ffffff',
-    containerLayer: '#ffffff',
-    dividerBase: '#cccccc',
-    brandGreen: '#38d200',
-    brandBlue: '#0473ea',
-    brandProsperBlue: '#020b43',
-    brandProsperBlueInverse: '#020b43',
-  },
-  /**
-   * Content colors for text hierarchy and information display
-   * Used for titles, headers, helper text, and informational elements
-   */
-  content: {
-    title: '#262626',
-    header: '#0d0d0d',
-    headerLayered: '#ffffff',
-    helperText: '#595959',
-    informationText: '#035cbb',
-    placeholderText: '#999999',
-    eyebrowHintText: '#808080',
-  },
+  // These will be flattened to: --sc-color-foundation-basic-{name}
+  basic: foundationBasicColors,
+  // These will be flattened to: --sc-color-foundation-content-{name}
+  content: foundationContentColors,
   /**
    * State colors for interactive elements (hover, active, focus, selected, disabled)
    * Defines colors for surfaces, borders, text, links, and focus states
    */
   state: {
-    // Surface colors
     surfacePrimary: {
-      zeroDefault: '#262626',
-      subtleDefault: '#262626',
-      solidDefault: '#0473ea',
+      zeroDefault: 'var(--sc-color-grey-850)',
+      subtleDefault: 'var(--sc-color-grey-850)',
+      solidDefault: 'var(--sc-color-blue-500)',
     },
     surfaceSecondary: {
-      subtleDefault: '#666666',
+      subtleDefault: 'var(--sc-color-grey-600)',
     },
-    // Border colors
     borderPrimary: {
-      default: '#0473ea',
+      default: 'var(--sc-color-blue-500)',
     },
     borderSecondary: {
-      default: '#737373',
+      default: 'var(--sc-color-grey-550)',
     },
-    // Text colors
     textPrimary: {
-      subtleSelected: '#0250a3',
+      subtleSelected: 'var(--sc-color-blue-650)',
     },
     textSecondary: {
-      subtleDefault: '#b3d5f8',
+      subtleDefault: 'var(--sc-color-blue-150)',
     },
-    // Link colors
     linkPrimary: {
-      default: '#9ac7f6',
+      default: 'var(--sc-color-blue-200)',
     },
     linkSecondary: {
-      default: '#9ac7f6',
-      selected: '#e5f1fc',
+      default: 'var(--sc-color-blue-200)',
+      selected: 'var(--sc-color-blue-50)',
     },
-    // Focus
     focus: {
-      borderHover: '#ffffff00',
+      borderHover: 'var(--sc-color-white)',
     },
   },
-  /**
-   * Shadow colors for elevation and depth effects
-   * Used with box-shadow to create layered depth in UI
-   */
   shadow: {
     baseShadow: {
-      color: '#1a1a1a4d',
-      XPosition: '0',
-      YPosition: '1',
+      color: 'rgba(26, 26, 26, 0.3)',
+      xPosition: '0',
+      yPosition: '1',
       blur: '2',
       spread: '0',
     },
     elevatedShadow: {
-      color: '#1a1a1a26',
+      color: 'rgba(26, 26, 26, 0.15)',
     },
   },
-  /**
-   * Opacity tokens for overlays, modals, and layered interfaces
-   * - Unprefixed: For light backgrounds (white-based)
-   * - -layered: For dark/layered backgrounds (dark-based)
-   */
   opacity: {
-    '20': '#ffffff33',
-    '40': '#ffffff66',
-    '60': '#ffffff99',
-    '80': '#ffffffcc',
-    '20-layered': '#1a1a1a33',
-    '40-layered': '#1a1a1a66',
-    '60-layered': '#1a1a1a99',
-    '80-layered': '#1a1a1acc',
+    '20': 'rgba(255, 255, 255, 0.2)',
+    '40': 'rgba(255, 255, 255, 0.4)',
+    '60': 'rgba(255, 255, 255, 0.6)',
+    '80': 'rgba(255, 255, 255, 0.8)',
+    '20-layered': 'rgba(26, 26, 26, 0.2)',
+    '40-layered': 'rgba(26, 26, 26, 0.4)',
+    '60-layered': 'rgba(26, 26, 26, 0.6)',
+    '80-layered': 'rgba(26, 26, 26, 0.8)',
   },
 };
 

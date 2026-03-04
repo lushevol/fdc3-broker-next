@@ -1,6 +1,7 @@
 /**
  * GDS Design Tokens - CSS Variables Generator
  * Converts design tokens to CSS custom properties
+ * Matches official theme.css format with --sc- prefix
  *
  * @description
  * This module provides functions to generate CSS custom properties (variables)
@@ -15,7 +16,7 @@
  * - generateCssModule(): Generate CSS module content
  */
 
-import { primitiveColors, foundationColors } from './colors';
+import { primitiveColors, foundationColors, semanticFgLinkColors, semanticFgTextColors } from './colors';
 import { darkPrimitiveColors } from './colorsDark';
 import {
   componentSizes,
@@ -40,6 +41,9 @@ import {
 } from './grid';
 import { lightTheme } from './themes/light';
 import { darkTheme } from './themes/dark';
+
+// Default prefix to match official theme.css
+const DEFAULT_PREFIX = 'sc';
 
 /**
  * Convert a camelCase or kebab-case name to kebab-case
@@ -76,41 +80,138 @@ function flattenObject(
 }
 
 /**
- * Convert color tokens to CSS custom properties
- *
- * @param prefix - Variable prefix (default: 'gds')
- * @param includeDark - Whether to include dark mode colors
- * @param themeSelector - CSS selector for theme (default: ':root')
+ * Generate typography sizing variables (matching official format)
  */
-export function generateColorCssVariables(
-  prefix = 'gds',
-  includeDark = true,
-  themeSelector = ':root',
+function generateTypographySizingVariables(
+  prefix = DEFAULT_PREFIX,
 ): string {
   const lines: string[] = [];
-  lines.push(`${themeSelector} {`);
+  lines.push(`  /* Typography variables */`);
 
-  // Primitive colors - light mode
-  for (const [colorName, shades] of Object.entries(primitiveColors)) {
-    if (typeof shades === 'object' && shades !== null) {
-      for (const [shade, value] of Object.entries(
-        shades as Record<string, string>,
-      )) {
+  // Match official typography sizing
+  const typographySizes: Record<string, string> = {
+    'text-hero-main': '56px',
+    'text-hero-sub': '48px',
+    'text-headline-main': '40px',
+    'text-headline-sub': '32px',
+    'text-section-main': '28px',
+    'text-section-sub': '22px',
+    'text-section-minor': '18px',
+    'text-paragraph-main': '14px',
+    'text-title-main': '18px',
+    'text-title-sub': '16px',
+    'text-component-main': '14px',
+    'text-label-main': '12px',
+    'text-description-main': '12px',
+    'text-helper-main': '12px',
+  };
+
+  for (const [name, value] of Object.entries(typographySizes)) {
+    lines.push(`  --${prefix}-${name}: ${value};`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Generate primitive color variables for a single palette
+ */
+function generatePrimitiveColorPalette(
+  colors: typeof primitiveColors,
+  prefix = DEFAULT_PREFIX,
+  isDark = false,
+): string {
+  const lines: string[] = [];
+  const suffix = isDark ? '-dark' : '';
+
+  for (const [colorName, shades] of Object.entries(colors)) {
+    if (colorName === 'prosperBlue') {
+      // Handle prosperBlue as a single value (not nested shades)
+      const value = shades as unknown as string;
+      const varName = `--${prefix}-color-prosper-blue`;
+      lines.push(`  ${varName}: ${value};`);
+    } else if (colorName === 'grey' && typeof shades === 'object' && shades !== null) {
+      // Handle grey specially - white and black are separate, not shades
+      const greyShades = shades as Record<string, string>;
+
+      // First output white and black
+      if ('white' in greyShades) {
+        lines.push(`  --${prefix}-color-white: ${greyShades.white};`);
+      }
+      if ('black' in greyShades) {
+        lines.push(`  --${prefix}-color-black: ${greyShades.black};`);
+      }
+
+      // Then output numbered shades
+      for (const [shade, value] of Object.entries(greyShades)) {
+        if (shade !== 'white' && shade !== 'black') {
+          const varName = `--${prefix}-color-grey-${shade}`;
+          lines.push(`  ${varName}: ${value};`);
+        }
+      }
+    } else if (typeof shades === 'object' && shades !== null) {
+      // Regular color with numbered shades
+      for (const [shade, value] of Object.entries(shades as Record<string, string>)) {
         const varName = `--${prefix}-color-${colorName}-${shade}`;
         lines.push(`  ${varName}: ${value};`);
       }
     }
   }
 
-  // Dark mode primitive colors
+  return lines.join('\n');
+}
+
+/**
+ * Convert color tokens to CSS custom properties
+ *
+ * @param prefix - Variable prefix (default: 'sc')
+ * @param includeDark - Whether to include dark mode colors
+ * @param themeSelector - CSS selector for theme (default: ':root')
+ */
+export function generateColorCssVariables(
+  prefix = DEFAULT_PREFIX,
+  includeDark = true,
+  themeSelector = ':root',
+): string {
+  const lines: string[] = [];
+  lines.push(`${themeSelector} {`);
+
+  // Typography sizing variables first (matching official)
+  lines.push(generateTypographySizingVariables(prefix));
+  lines.push('');
+
+  // Light mode colors
+  lines.push(`  /* Grey Color Palette */`);
+  lines.push(generatePrimitiveColorPalette(primitiveColors, prefix, false));
+
+  // Dark mode primitive colors (with -dark suffix for reference)
   if (includeDark) {
     lines.push('');
     lines.push(`  /* Dark mode primitive colors */`);
     for (const [colorName, shades] of Object.entries(darkPrimitiveColors)) {
-      if (typeof shades === 'object' && shades !== null) {
-        for (const [shade, value] of Object.entries(
-          shades as Record<string, string>,
-        )) {
+      if (colorName === 'prosperBlue') {
+        // prosperBlue stays the same in dark mode
+        continue;
+      } else if (colorName === 'grey' && typeof shades === 'object' && shades !== null) {
+        const greyShades = shades as Record<string, string>;
+
+        // Dark mode white and black (inverted)
+        if ('white' in greyShades) {
+          lines.push(`  --${prefix}-color-white-dark: ${greyShades.white};`);
+        }
+        if ('black' in greyShades) {
+          lines.push(`  --${prefix}-color-black-dark: ${greyShades.black};`);
+        }
+
+        // Numbered shades
+        for (const [shade, value] of Object.entries(greyShades)) {
+          if (shade !== 'white' && shade !== 'black') {
+            const varName = `--${prefix}-color-grey-${shade}-dark`;
+            lines.push(`  ${varName}: ${value};`);
+          }
+        }
+      } else if (typeof shades === 'object' && shades !== null) {
+        for (const [shade, value] of Object.entries(shades as Record<string, string>)) {
           const varName = `--${prefix}-color-${colorName}-${shade}-dark`;
           lines.push(`  ${varName}: ${value};`);
         }
@@ -118,16 +219,49 @@ export function generateColorCssVariables(
     }
   }
 
-  // Foundation colors
+  // Foundation colors with official naming format
+  // Format: --sc-color-foundation-{category}-{name}
   lines.push('');
-  lines.push(`  /* Foundation colors */`);
-  for (const [category, values] of Object.entries(foundationColors)) {
-    if (typeof values === 'object' && values !== null) {
-      const flattened = flattenObject(values);
-      for (const [key, value] of Object.entries(flattened)) {
-        const varName = `--${prefix}-${category}-${toKebabCase(key)}`;
-        lines.push(`  ${varName}: ${value};`);
-      }
+  lines.push(`  /* Foundation Basic Color Palette */`);
+
+  for (const [key, value] of Object.entries(foundationColors.basic)) {
+    // Convert camelCase to kebab-case: backgroundBase -> background-base
+    const kebabKey = toKebabCase(key);
+    const varName = `--${prefix}-color-foundation-basic-${kebabKey}`;
+    lines.push(`  ${varName}: ${value};`);
+    // Add comment for description (matching official)
+  }
+
+  lines.push('');
+  lines.push(`  /* Foundation Content Color Palette */`);
+
+  for (const [key, value] of Object.entries(foundationColors.content)) {
+    const kebabKey = toKebabCase(key);
+    const varName = `--${prefix}-color-foundation-content-${kebabKey}`;
+    lines.push(`  ${varName}: ${value};`);
+  }
+
+  // Semantic foreground link colors
+  // Format: --sc-color-semantic-fg-link-{variant}-{state}
+  lines.push('');
+  lines.push(`  /* Semantic Foreground Color Palette */`);
+
+  for (const [variant, states] of Object.entries(semanticFgLinkColors)) {
+    for (const [state, value] of Object.entries(states)) {
+      // Convert camelCase state to kebab-case: restSubtle -> rest-subtle
+      const kebabState = toKebabCase(state);
+      const varName = `--${prefix}-color-semantic-fg-link-${variant}-${kebabState}`;
+      lines.push(`  ${varName}: ${value};`);
+    }
+  }
+
+  // Semantic foreground text colors
+  // Format: --sc-color-semantic-fg-text-{variant}-{state}
+  for (const [variant, states] of Object.entries(semanticFgTextColors)) {
+    for (const [state, value] of Object.entries(states)) {
+      const kebabState = toKebabCase(state);
+      const varName = `--${prefix}-color-semantic-fg-text-${variant}-${kebabState}`;
+      lines.push(`  ${varName}: ${value};`);
     }
   }
 
@@ -139,11 +273,11 @@ export function generateColorCssVariables(
 /**
  * Convert size tokens to CSS custom properties
  *
- * @param prefix - Variable prefix (default: 'gds')
+ * @param prefix - Variable prefix (default: 'sc')
  * @param themeSelector - CSS selector for theme (default: ':root')
  */
 export function generateSizeCssVariables(
-  prefix = 'gds',
+  prefix = DEFAULT_PREFIX,
   themeSelector = ':root',
 ): string {
   const lines: string[] = [];
@@ -187,11 +321,11 @@ export function generateSizeCssVariables(
 /**
  * Convert typography tokens to CSS custom properties
  *
- * @param prefix - Variable prefix (default: 'gds')
+ * @param prefix - Variable prefix (default: 'sc')
  * @param themeSelector - CSS selector for theme (default: ':root')
  */
 export function generateTypographyCssVariables(
-  prefix = 'gds',
+  prefix = DEFAULT_PREFIX,
   themeSelector = ':root',
 ): string {
   const lines: string[] = [];
@@ -252,11 +386,11 @@ export function generateTypographyCssVariables(
 /**
  * Convert grid tokens to CSS custom properties
  *
- * @param prefix - Variable prefix (default: 'gds')
+ * @param prefix - Variable prefix (default: 'sc')
  * @param themeSelector - CSS selector for theme (default: ':root')
  */
 export function generateGridCssVariables(
-  prefix = 'gds',
+  prefix = DEFAULT_PREFIX,
   themeSelector = ':root',
 ): string {
   const lines: string[] = [];
@@ -353,11 +487,11 @@ export function generateGridCssVariables(
 /**
  * Convert shadow tokens to CSS custom properties
  *
- * @param prefix - Variable prefix (default: 'gds')
+ * @param prefix - Variable prefix (default: 'sc')
  * @param themeSelector - CSS selector for theme (default: ':root')
  */
 export function generateShadowCssVariables(
-  prefix = 'gds',
+  prefix = DEFAULT_PREFIX,
   themeSelector = ':root',
 ): string {
   const lines: string[] = [];
@@ -378,11 +512,11 @@ export function generateShadowCssVariables(
  * Generate CSS variables for a complete theme
  *
  * @param theme - The theme object (lightTheme or darkTheme)
- * @param prefix - Variable prefix (default: 'gds')
+ * @param prefix - Variable prefix (default: 'sc')
  */
 export function generateThemeVariables(
   theme: typeof lightTheme,
-  prefix = 'gds',
+  prefix = DEFAULT_PREFIX,
 ): string {
   const lines: string[] = [];
   lines.push(`[data-theme="${theme.name}"], .theme-${theme.name} {`);
@@ -437,9 +571,9 @@ export function generateThemeVariables(
 /**
  * Generate all CSS variables (colors, sizes, typography)
  *
- * @param prefix - Variable prefix (default: 'gds')
+ * @param prefix - Variable prefix (default: 'sc')
  */
-export function generateAllCssVariables(prefix = 'gds'): string {
+export function generateAllCssVariables(prefix = DEFAULT_PREFIX): string {
   return [
     `/* GDS Design Tokens - CSS Custom Properties */`,
     `/* Generated from Figma Design System */`,
@@ -459,14 +593,12 @@ export function generateAllCssVariables(prefix = 'gds'): string {
 /**
  * Generate CSS variables for both light and dark themes
  *
- * @param prefix - Variable prefix (default: 'gds')
+ * @param prefix - Variable prefix (default: 'sc')
  */
-export function generateThemedCssVariables(prefix = 'gds'): string {
+export function generateThemedCssVariables(prefix = DEFAULT_PREFIX): string {
   return [
-    `/* GDS Design Tokens - Themed CSS Custom Properties */`,
-    `/* Generated from Figma Design System */`,
+    `@custom-variant dark (&:is(.dark *));`,
     ``,
-    `/* Light theme (default) */`,
     generateColorCssVariables(prefix, true),
     ``,
     generateSizeCssVariables(prefix),
@@ -480,7 +612,6 @@ export function generateThemedCssVariables(prefix = 'gds'): string {
     `/* Dark theme */`,
     `[data-theme="dark"], .theme-dark {`,
     `  /* Dark theme overrides */`,
-    `  /* Colors are available as -dark suffix variants */`,
     `}`,
     ``,
     generateThemeVariables(darkTheme, prefix),
@@ -490,15 +621,12 @@ export function generateThemedCssVariables(prefix = 'gds'): string {
 /**
  * Generate a complete CSS module with light and dark themes
  *
- * @param prefix - Variable prefix (default: 'gds')
+ * @param prefix - Variable prefix (default: 'sc')
  */
-export function generateCompleteCssModule(prefix = 'gds'): string {
+export function generateCompleteCssModule(prefix = DEFAULT_PREFIX): string {
   return [
-    `/* GDS Design Tokens - Complete CSS Module */`,
-    `/* Generated from Figma Design System */`,
-    `/* Auto-generated - do not edit manually */`,
+    `@custom-variant dark (&:is(.dark *));`,
     ``,
-    `/* Light theme (default) */`,
     generateColorCssVariables(prefix, true),
     ``,
     generateSizeCssVariables(prefix),
@@ -518,18 +646,18 @@ export function generateCompleteCssModule(prefix = 'gds'): string {
 /**
  * Generate CSS module content
  *
- * @param prefix - Variable prefix (default: 'gds')
+ * @param prefix - Variable prefix (default: 'sc')
  */
-export function generateCssModule(prefix = 'gds'): string {
+export function generateCssModule(prefix = DEFAULT_PREFIX): string {
   return generateCompleteCssModule(prefix);
 }
 
 /**
  * Generate SCSS variables from design tokens
  *
- * @param prefix - Variable prefix (default: 'gds')
+ * @param prefix - Variable prefix (default: 'sc')
  */
-export function generateScssVariables(prefix = 'gds'): string {
+export function generateScssVariables(prefix = DEFAULT_PREFIX): string {
   const lines: string[] = [];
   lines.push(`// GDS Design Tokens - SCSS Variables`);
   lines.push(`// Generated from Figma Design System`);
@@ -538,10 +666,24 @@ export function generateScssVariables(prefix = 'gds'): string {
   // Colors
   lines.push(`// Primitive colors`);
   for (const [colorName, shades] of Object.entries(primitiveColors)) {
-    if (typeof shades === 'object' && shades !== null) {
-      for (const [shade, value] of Object.entries(
-        shades as Record<string, string>,
-      )) {
+    if (colorName === 'prosperBlue') {
+      const value = shades as unknown as string;
+      lines.push(`$${prefix}-color-prosper-blue: ${value};`);
+    } else if (colorName === 'grey' && typeof shades === 'object' && shades !== null) {
+      const greyShades = shades as Record<string, string>;
+      if ('white' in greyShades) {
+        lines.push(`$${prefix}-color-white: ${greyShades.white};`);
+      }
+      if ('black' in greyShades) {
+        lines.push(`$${prefix}-color-black: ${greyShades.black};`);
+      }
+      for (const [shade, value] of Object.entries(greyShades)) {
+        if (shade !== 'white' && shade !== 'black') {
+          lines.push(`$${prefix}-color-grey-${shade}: ${value};`);
+        }
+      }
+    } else if (typeof shades === 'object' && shades !== null) {
+      for (const [shade, value] of Object.entries(shades as Record<string, string>)) {
         lines.push(`$${prefix}-color-${colorName}-${shade}: ${value};`);
       }
     }
@@ -550,10 +692,23 @@ export function generateScssVariables(prefix = 'gds'): string {
   lines.push(``);
   lines.push(`// Dark mode primitive colors`);
   for (const [colorName, shades] of Object.entries(darkPrimitiveColors)) {
-    if (typeof shades === 'object' && shades !== null) {
-      for (const [shade, value] of Object.entries(
-        shades as Record<string, string>,
-      )) {
+    if (colorName === 'prosperBlue') {
+      continue;
+    } else if (colorName === 'grey' && typeof shades === 'object' && shades !== null) {
+      const greyShades = shades as Record<string, string>;
+      if ('white' in greyShades) {
+        lines.push(`$${prefix}-color-white-dark: ${greyShades.white};`);
+      }
+      if ('black' in greyShades) {
+        lines.push(`$${prefix}-color-black-dark: ${greyShades.black};`);
+      }
+      for (const [shade, value] of Object.entries(greyShades)) {
+        if (shade !== 'white' && shade !== 'black') {
+          lines.push(`$${prefix}-color-grey-${shade}-dark: ${value};`);
+        }
+      }
+    } else if (typeof shades === 'object' && shades !== null) {
+      for (const [shade, value] of Object.entries(shades as Record<string, string>)) {
         lines.push(`$${prefix}-color-${colorName}-${shade}-dark: ${value};`);
       }
     }
@@ -598,9 +753,9 @@ export function generateScssVariables(prefix = 'gds'): string {
 /**
  * Generate Less variables from design tokens
  *
- * @param prefix - Variable prefix (default: 'gds')
+ * @param prefix - Variable prefix (default: 'sc')
  */
-export function generateLessVariables(prefix = 'gds'): string {
+export function generateLessVariables(prefix = DEFAULT_PREFIX): string {
   const lines: string[] = [];
   lines.push(`// GDS Design Tokens - Less Variables`);
   lines.push(`// Generated from Figma Design System`);
@@ -609,10 +764,24 @@ export function generateLessVariables(prefix = 'gds'): string {
   // Colors
   lines.push(`// Primitive colors`);
   for (const [colorName, shades] of Object.entries(primitiveColors)) {
-    if (typeof shades === 'object' && shades !== null) {
-      for (const [shade, value] of Object.entries(
-        shades as Record<string, string>,
-      )) {
+    if (colorName === 'prosperBlue') {
+      const value = shades as unknown as string;
+      lines.push(`@${prefix}-color-prosper-blue: ${value};`);
+    } else if (colorName === 'grey' && typeof shades === 'object' && shades !== null) {
+      const greyShades = shades as Record<string, string>;
+      if ('white' in greyShades) {
+        lines.push(`@${prefix}-color-white: ${greyShades.white};`);
+      }
+      if ('black' in greyShades) {
+        lines.push(`@${prefix}-color-black: ${greyShades.black};`);
+      }
+      for (const [shade, value] of Object.entries(greyShades)) {
+        if (shade !== 'white' && shade !== 'black') {
+          lines.push(`@${prefix}-color-grey-${shade}: ${value};`);
+        }
+      }
+    } else if (typeof shades === 'object' && shades !== null) {
+      for (const [shade, value] of Object.entries(shades as Record<string, string>)) {
         lines.push(`@${prefix}-color-${colorName}-${shade}: ${value};`);
       }
     }
