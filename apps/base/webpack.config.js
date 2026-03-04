@@ -2,7 +2,6 @@ const { merge } = require("webpack-merge");
 const singleSpaDefaults = require("webpack-config-single-spa-react-ts");
 const path = require("path");
 const Dotenv = require("dotenv-webpack");
-// const { ModuleFederationPlugin } = require("webpack").container;
 const {
   ModuleFederationPlugin,
 } = require("@module-federation/enhanced/webpack");

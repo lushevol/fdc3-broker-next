@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cashflow Blotter | FMO Post Trade Portal</title>
+    <style>
+      :root {
+        --bg-0: #0b141e;
+        --bg-1: #0f1a24;
+        --bg-2: #162330;
+        --bg-3: #1b2b3a;
+        --line: #2a3b4b;
+        --text-0: #e9f1f8;
+        --text-1: #b8c7d6;
+        --text-2: #89a1b7;
+        --primary: #2f80ed;
+        --primary-hover: #4f98f0;
+        --ok: #2ea44f;
+        --warn: #f0ad4e;
+        --danger: #ef5350;
+        --chip: #213548;
+        --radius-sm: 4px;
+        --radius-md: 6px;
+        --radius-lg: 10px;
+        --shadow: 0 8px 22px rgba(1, 8, 14, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        color: var(--text-0);
+        background:
+          radial-gradient(circle at 12% 0%, rgba(47, 128, 237, 0.11), transparent 32%),
+          radial-gradient(circle at 86% 8%, rgba(43, 184, 125, 0.08), transparent 26%),
+          linear-gradient(180deg, #0a1119 0%, #0d1924 100%);
+        min-height: 100%;
+      }
+
+      .app-shell {
+        max-width: 1580px;
+        margin: 0 auto;
+        padding: 0 16px 20px;
+      }
+
+      .top-nav {
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #213242;
+        background: linear-gradient(90deg, #0b1620 0%, #101c29 55%, #0a151f 100%);
+        padding: 0 14px;
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .title {
+        font-size: 19px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .icon-btn,
+      .btn {
+        border: 1px solid var(--line);
+        background: #132232;
+        color: var(--text-0);
+        border-radius: var(--radius-md);
+        padding: 8px 12px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      .icon-btn {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
+
+      .btn.primary {
+        background: var(--primary);
+        border-color: #286ecf;
+        color: #fff;
+      }
+
+      .btn.primary:hover {
+        background: var(--primary-hover);
+      }
+
+      .btn:hover,
+      .icon-btn:hover {
+        filter: brightness(1.14);
+      }
+
+      .btn:focus-visible,
+      .icon-btn:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        outline: 2px solid #5ca6ff;
+        outline-offset: 1px;
+      }
+
+      .clock {
+        color: var(--text-1);
+        font-size: 12px;
+        letter-spacing: 0.3px;
+        padding: 0 6px;
+      }
+
+      .avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #4a6c8f 0%, #2f80ed 100%);
+        font-weight: 600;
+        font-size: 12px;
+      }
+
+      .module-header {
+        margin-top: 12px;
+        background: #111c28;
+        border: 1px solid #22384a;
+        border-radius: var(--radius-md);
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .module-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .module-title {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .tag {
+        background: var(--chip);
+        border: 1px solid #36506a;
+        color: var(--text-1);
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 11px;
+      }
+
+      .workspace {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: 2.4fr 1fr;
+        gap: 14px;
+      }
+
+      .panel,
+      .card,
+      .table-panel {
+        background: linear-gradient(180deg, #12202d 0%, #101b27 100%);
+        border: 1px solid #23394a;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+      }
+
+      .panel {
+        padding: 14px;
+      }
+
+      .section-title {
+        margin: 0 0 10px;
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .filters {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .field label {
+        font-size: 12px;
+        color: var(--text-1);
+      }
+
+      input,
+      select {
+        height: 34px;
+        border-radius: var(--radius-sm);
+        border: 1px solid #2a4254;
+        background: #0f1c28;
+        color: #dce8f2;
+        padding: 0 10px;
+        font-size: 12px;
+      }
+
+      .range-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .actions-row {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-start;
+        padding-top: 2px;
+      }
+
+      .right-stack {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .card {
+        padding: 12px;
+      }
+
+      .card h3 {
+        margin: 0 0 10px;
+        font-size: 14px;
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--text-1);
+      }
+
+      .badge {
+        min-width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        display: inline-grid;
+        place-items: center;
+        font-size: 11px;
+        font-weight: 600;
+        color: #fff;
+      }
+
+      .badge.warn {
+        background: var(--warn);
+      }
+
+      .badge.ok {
+        background: var(--ok);
+      }
+
+      .badge.danger {
+        background: var(--danger);
+      }
+
+      .table-panel {
+        margin-top: 14px;
+        padding: 10px;
+      }
+
+      .table-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 4px;
+      }
+
+      .toolbar-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .toolbar-chip {
+        border: 1px solid #314a5e;
+        background: #132230;
+        color: var(--text-1);
+        padding: 7px 10px;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+      }
+
+      .alert {
+        border: 1px solid #466278;
+        background: #163043;
+        color: #cfe8ff;
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+      }
+
+      .table-wrap {
+        margin-top: 10px;
+        border: 1px solid #253d50;
+        border-radius: var(--radius-md);
+        overflow: auto;
+        max-height: 500px;
+      }
+
+      table {
+        width: 1500px;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+
+      thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #162838;
+        color: #d6e3ee;
+        border-bottom: 1px solid #345064;
+        text-align: left;
+        padding: 10px 9px;
+        white-space: nowrap;
+      }
+
+      tbody td {
+        border-bottom: 1px solid #22384a;
+        color: var(--text-1);
+        padding: 9px;
+        white-space: nowrap;
+      }
+
+      tbody tr:hover {
+        background: #142a3b;
+      }
+
+      .state {
+        color: #ffd27c;
+        font-weight: 600;
+      }
+
+      .amount {
+        color: #a8f0c0;
+        font-weight: 600;
+      }
+
+      .release.warn {
+        color: #ff9592;
+      }
+
+      .muted {
+        color: var(--text-2);
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      @media (max-width: 1180px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .filters {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .filters {
+          grid-template-columns: 1fr;
+        }
+
+        .top-nav {
+          height: auto;
+          padding: 10px;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        .nav-actions {
+          width: 100%;
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="top-nav" aria-label="Global Header">
+        <div class="title">FMO Post Trade Portal</div>
+        <div class="nav-actions">
+          <button class="icon-btn" aria-label="Global Search" title="Search">⌕</button>
+          <button class="btn">New Tile</button>
+          <button class="icon-btn" id="themeToggle" aria-label="Toggle Theme" title="Toggle Theme">◐</button>
+          <div class="clock" id="clock">01:02 UTC</div>
+          <div class="avatar" aria-label="User Profile">TA</div>
+        </div>
+      </header>
+
+      <section class="module-header" aria-label="Module Header">
+        <div class="module-left">
+          <span class="module-title">Cashflow Blotter</span>
+          <button class="icon-btn" aria-label="Add Tab" title="Add Tab">+</button>
+        </div>
+        <div class="module-left">
+          <span class="tag">Version 2.6.17</span>
+          <span class="tag">Env: UAT</span>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="panel" id="searchPanel">
+          <h2 class="section-title">Quick Search</h2>
+          <form class="filters" aria-label="Cashflow Search Filters">
+            <div class="field">
+              <label for="cashflowId">Cashflow ID</label>
+              <input id="cashflowId" type="text" placeholder="e.g., 000126000067" />
+            </div>
+
+            <div class="field">
+              <label for="tradeId">Trade ID</label>
+              <input id="tradeId" type="text" placeholder="Input Trade ID" />
+            </div>
+
+            <div class="field">
+              <label for="valueDate">Value Date Range</label>
+              <div class="range-pair">
+                <input id="valueDate" type="date" aria-label="Value date start" />
+                <input type="date" aria-label="Value date end" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="currency">Currency</label>
+              <select id="currency">
+                <option>Select...</option>
+                <option>USD</option>
+                <option>EUR</option>
+                <option>GBP</option>
+                <option>SGD</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="taxonomy">Product Taxonomy</label>
+              <select id="taxonomy">
+                <option>Select...</option>
+                <option>IRS</option>
+                <option>FX Option</option>
+                <option>Repo</option>
+                <option>Bond</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="fmc">Counterparty FMCODEV</label>
+              <input id="fmc" type="text" placeholder="Multiple searches separated by comma" />
+            </div>
+
+            <div class="field">
+              <label for="entity">SCB Booking Entity</label>
+              <select id="entity">
+                <option>Select...</option>
+                <option>SCB London</option>
+                <option>SCB Singapore</option>
+                <option>SCB New York</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="beneficiary">Beneficiary Name</label>
+              <input id="beneficiary" type="text" placeholder="Input Beneficiary Name" />
+            </div>
+
+            <div class="field">
+              <label for="bic">Beneficiary Account BIC Code</label>
+              <input id="bic" type="text" placeholder="Input BIC Code" />
+            </div>
+
+            <div class="field">
+              <label for="state">Cashflow State</label>
+              <select id="state">
+                <option>Select...</option>
+                <option>WAITING</option>
+                <option>VERIFIED</option>
+                <option>RELEASED</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="amountMin">Amount Range ($)</label>
+              <div class="range-pair">
+                <input id="amountMin" type="number" placeholder="Min" />
+                <input type="number" placeholder="Max" />
+              </div>
+            </div>
+
+            <div class="actions-row">
+              <button type="reset" class="btn">Clear Filters</button>
+              <button type="button" class="btn primary">Search</button>
+            </div>
+          </form>
+        </div>
+
+        <aside class="right-stack" aria-label="Status Widgets">
+          <div class="card">
+            <h3>API Status</h3>
+            <div class="row">
+              <span>Cashflow API</span>
+              <span class="badge ok" aria-label="API healthy">OK</span>
+            </div>
+            <div class="row">
+              <span class="muted">Last Poll</span>
+              <span id="pollTime">01:02 UTC</span>
+            </div>
+            <div class="row">
+              <button class="btn" id="refreshBtn">Refresh Page</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Value Today</h3>
+            <div class="row"><span>Pending Operator</span><span class="badge warn">14</span></div>
+            <div class="row"><span>Pending Verification</span><span class="badge ok">0</span></div>
+          </div>
+
+          <div class="card">
+            <h3>Value Tomorrow</h3>
+            <div class="row"><span>Pending Operator</span><span class="badge warn">9</span></div>
+            <div class="row"><span>Pending Verification</span><span class="badge danger">3</span></div>
+          </div>
+
+          <div class="card">
+            <h3>Custom Search / View</h3>
+            <div class="row"><span>Saved Filters</span><span>12</span></div>
+            <div class="row"><span>Saved Views</span><span>4</span></div>
+            <div class="row"><button class="btn primary">Create Or Modify</button></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="table-panel">
+        <div class="table-toolbar">
+          <div class="toolbar-group">
+            <span class="toolbar-chip">Results 19 / 19</span>
+            <button class="btn">Load next 1000</button>
+            <span class="alert" role="status">If more than 1000 records are loaded, exports may take longer.</span>
+            <button class="btn" id="toggleSearch">Hide Search Bar</button>
+          </div>
+          <div class="toolbar-group">
+            <button class="btn">Resize</button>
+            <button class="btn primary" id="exportBtn">Export File</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table aria-label="Cashflow Transactions" role="table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" aria-label="Select all rows" /></th>
+                <th>Cashflow ID</th>
+                <th>Cashflow State</th>
+                <th>Operator</th>
+                <th>Verification</th>
+                <th>Payment Date</th>
+                <th>Currency</th>
+                <th>Event</th>
+                <th>Netting</th>
+                <th>Counterparty</th>
+                <th>Amount</th>
+                <th>Release Time</th>
+                <th>Trade</th>
+                <th>Event Reason</th>
+              </tr>
+            </thead>
+            <tbody id="tbody">
+              <tr>
+                <td><input type="checkbox" /></td>
+                <td>000126000067</td>
+                <td class="state">WAITING</td>
+                <td>Y</td>
+                <td>N</td>
+                <td>2026 Mar 04</td>
+                <td>USD</td>
+                <td>Coupon</td>
+                <td>Single</td>
+                <td>FMCODEV-0197</td>
+                <td class="amount">1,746.01</td>
+                <td class="release warn">00 D, 00 H, 12 M</td>
+                <td>TRD-882901</td>
+                <td>Event Date Reached</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" /></td>
+                <td>000126000068</td>
+                <td class="state">WAITING</td>
+                <td>Y</td>
+                <td>N</td>
+                <td>2026 Mar 04</td>
+                <td>EUR</td>
+                <td>Reset</td>
+                <td>Single</td>
+                <td>FMCODEV-1082</td>
+                <td class="amount">93,141.77</td>
+                <td>00 D, 03 H, 08 M</td>
+                <td>TRD-882951</td>
+                <td>Manual Release Pending</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" /></td>
+                <td>000126000069</td>
+                <td>VERIFIED</td>
+                <td>Y</td>
+                <td>Y</td>
+                <td>2026 Mar 05</td>
+                <td>USD</td>
+                <td>Fee</td>
+                <td>Portfolio</td>
+                <td>FMCODEV-2201</td>
+                <td class="amount">246.00</td>
+                <td>01 D, 01 H, 40 M</td>
+                <td>TRD-882964</td>
+                <td>Scheduled Sweep</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" /></td>
+                <td>000126000070</td>
+                <td class="state">WAITING</td>
+                <td>N</td>
+                <td>N</td>
+                <td>2026 Mar 05</td>
+                <td>GBP</td>
+                <td>Settlement</td>
+                <td>Single</td>
+                <td>FMCODEV-3328</td>
+                <td class="amount">14,224.16</td>
+                <td>00 D, 14 H, 41 M</td>
+                <td>TRD-883011</td>
+                <td>Awaiting Operator Approval</td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" /></td>
+                <td>000126000071</td>
+                <td>RELEASED</td>
+                <td>Y</td>
+                <td>Y</td>
+                <td>2026 Mar 06</td>
+                <td>SGD</td>
+                <td>Principal</td>
+                <td>Portfolio</td>
+                <td>FMCODEV-4470</td>
+                <td class="amount">502,001.00</td>
+                <td>02 D, 02 H, 00 M</td>
+                <td>TRD-883043</td>
+                <td>Auto Release Complete</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        const root = document.documentElement;
+        const themeToggle = document.getElementById("themeToggle");
+        const clock = document.getElementById("clock");
+        const pollTime = document.getElementById("pollTime");
+        const refreshBtn = document.getElementById("refreshBtn");
+        const toggleSearch = document.getElementById("toggleSearch");
+        const searchPanel = document.getElementById("searchPanel");
+        const exportBtn = document.getElementById("exportBtn");
+        const tableBody = document.getElementById("tbody");
+
+        const updateUtcClock = function () {
+          const now = new Date();
+          const hh = String(now.getUTCHours()).padStart(2, "0");
+          const mm = String(now.getUTCMinutes()).padStart(2, "0");
+          const text = hh + ":" + mm + " UTC";
+          clock.textContent = text;
+        };
+
+        updateUtcClock();
+        setInterval(updateUtcClock, 10000);
+
+        themeToggle.addEventListener("click", function () {
+          const dark = root.dataset.theme !== "light";
+          root.dataset.theme = dark ? "light" : "dark";
+          if (root.dataset.theme === "light") {
+            root.style.setProperty("--bg-0", "#f4f8fc");
+            root.style.setProperty("--bg-1", "#f7fbff");
+            root.style.setProperty("--bg-2", "#ffffff");
+            root.style.setProperty("--bg-3", "#f1f5f9");
+            root.style.setProperty("--line", "#cfddeb");
+            root.style.setProperty("--text-0", "#173047");
+            root.style.setProperty("--text-1", "#36506a");
+            root.style.setProperty("--text-2", "#4f6e87");
+            document.body.style.background = "linear-gradient(180deg,#edf4fb 0%,#e8f0f8 100%)";
+          } else {
+            root.style = "";
+            document.body.style.background = "";
+          }
+        });
+
+        refreshBtn.addEventListener("click", function () {
+          const now = new Date();
+          const hh = String(now.getUTCHours()).padStart(2, "0");
+          const mm = String(now.getUTCMinutes()).padStart(2, "0");
+          pollTime.textContent = hh + ":" + mm + " UTC";
+        });
+
+        toggleSearch.addEventListener("click", function () {
+          const hidden = searchPanel.hasAttribute("hidden");
+          if (hidden) {
+            searchPanel.removeAttribute("hidden");
+            toggleSearch.textContent = "Hide Search Bar";
+          } else {
+            searchPanel.setAttribute("hidden", "");
+            toggleSearch.textContent = "Show Search Bar";
+          }
+        });
+
+        exportBtn.addEventListener("click", function () {
+          const headers = [
+            "Cashflow ID",
+            "Cashflow State",
+            "Operator",
+            "Verification",
+            "Payment Date",
+            "Currency",
+            "Event",
+            "Netting",
+            "Counterparty",
+            "Amount",
+            "Release Time",
+            "Trade",
+            "Event Reason"
+          ];
+          const rows = Array.from(tableBody.querySelectorAll("tr")).map(function (tr) {
+            return Array.from(tr.querySelectorAll("td"))
+              .slice(1)
+              .map(function (td) {
+                return '"' + td.textContent.trim().replaceAll('"', '""') + '"';
+              })
+              .join(",");
+          });
+          const csv = headers.join(",") + "\n" + rows.join("\n");
+          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "cashflow-blotter-export.csv";
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+      })();
+    </script>
+  </body>
+</html>

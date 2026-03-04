@@ -16,7 +16,12 @@
  * - generateCssModule(): Generate CSS module content
  */
 
-import { primitiveColors, foundationColors, semanticFgLinkColors, semanticFgTextColors } from './colors';
+import {
+  primitiveColors,
+  foundationColors,
+  semanticFgLinkColors,
+  semanticFgTextColors,
+} from './colors';
 import { darkPrimitiveColors } from './colorsDark';
 import {
   componentSizes,
@@ -82,9 +87,7 @@ function flattenObject(
 /**
  * Generate typography sizing variables (matching official format)
  */
-function generateTypographySizingVariables(
-  prefix = DEFAULT_PREFIX,
-): string {
+function generateTypographySizingVariables(prefix = DEFAULT_PREFIX): string {
   const lines: string[] = [];
   lines.push(`  /* Typography variables */`);
 
@@ -130,7 +133,11 @@ function generatePrimitiveColorPalette(
       const value = shades as unknown as string;
       const varName = `--${prefix}-color-prosper-blue`;
       lines.push(`  ${varName}: ${value};`);
-    } else if (colorName === 'grey' && typeof shades === 'object' && shades !== null) {
+    } else if (
+      colorName === 'grey' &&
+      typeof shades === 'object' &&
+      shades !== null
+    ) {
       // Handle grey specially - white and black are separate, not shades
       const greyShades = shades as Record<string, string>;
 
@@ -151,7 +158,9 @@ function generatePrimitiveColorPalette(
       }
     } else if (typeof shades === 'object' && shades !== null) {
       // Regular color with numbered shades
-      for (const [shade, value] of Object.entries(shades as Record<string, string>)) {
+      for (const [shade, value] of Object.entries(
+        shades as Record<string, string>,
+      )) {
         const varName = `--${prefix}-color-${colorName}-${shade}`;
         lines.push(`  ${varName}: ${value};`);
       }
@@ -192,7 +201,11 @@ export function generateColorCssVariables(
       if (colorName === 'prosperBlue') {
         // prosperBlue stays the same in dark mode
         continue;
-      } else if (colorName === 'grey' && typeof shades === 'object' && shades !== null) {
+      } else if (
+        colorName === 'grey' &&
+        typeof shades === 'object' &&
+        shades !== null
+      ) {
         const greyShades = shades as Record<string, string>;
 
         // Dark mode white and black (inverted)
@@ -211,7 +224,9 @@ export function generateColorCssVariables(
           }
         }
       } else if (typeof shades === 'object' && shades !== null) {
-        for (const [shade, value] of Object.entries(shades as Record<string, string>)) {
+        for (const [shade, value] of Object.entries(
+          shades as Record<string, string>,
+        )) {
           const varName = `--${prefix}-color-${colorName}-${shade}-dark`;
           lines.push(`  ${varName}: ${value};`);
         }
@@ -669,7 +684,11 @@ export function generateScssVariables(prefix = DEFAULT_PREFIX): string {
     if (colorName === 'prosperBlue') {
       const value = shades as unknown as string;
       lines.push(`$${prefix}-color-prosper-blue: ${value};`);
-    } else if (colorName === 'grey' && typeof shades === 'object' && shades !== null) {
+    } else if (
+      colorName === 'grey' &&
+      typeof shades === 'object' &&
+      shades !== null
+    ) {
       const greyShades = shades as Record<string, string>;
       if ('white' in greyShades) {
         lines.push(`$${prefix}-color-white: ${greyShades.white};`);
@@ -683,7 +702,9 @@ export function generateScssVariables(prefix = DEFAULT_PREFIX): string {
         }
       }
     } else if (typeof shades === 'object' && shades !== null) {
-      for (const [shade, value] of Object.entries(shades as Record<string, string>)) {
+      for (const [shade, value] of Object.entries(
+        shades as Record<string, string>,
+      )) {
         lines.push(`$${prefix}-color-${colorName}-${shade}: ${value};`);
       }
     }
@@ -694,7 +715,11 @@ export function generateScssVariables(prefix = DEFAULT_PREFIX): string {
   for (const [colorName, shades] of Object.entries(darkPrimitiveColors)) {
     if (colorName === 'prosperBlue') {
       continue;
-    } else if (colorName === 'grey' && typeof shades === 'object' && shades !== null) {
+    } else if (
+      colorName === 'grey' &&
+      typeof shades === 'object' &&
+      shades !== null
+    ) {
       const greyShades = shades as Record<string, string>;
       if ('white' in greyShades) {
         lines.push(`$${prefix}-color-white-dark: ${greyShades.white};`);
@@ -708,7 +733,9 @@ export function generateScssVariables(prefix = DEFAULT_PREFIX): string {
         }
       }
     } else if (typeof shades === 'object' && shades !== null) {
-      for (const [shade, value] of Object.entries(shades as Record<string, string>)) {
+      for (const [shade, value] of Object.entries(
+        shades as Record<string, string>,
+      )) {
         lines.push(`$${prefix}-color-${colorName}-${shade}-dark: ${value};`);
       }
     }
@@ -767,7 +794,11 @@ export function generateLessVariables(prefix = DEFAULT_PREFIX): string {
     if (colorName === 'prosperBlue') {
       const value = shades as unknown as string;
       lines.push(`@${prefix}-color-prosper-blue: ${value};`);
-    } else if (colorName === 'grey' && typeof shades === 'object' && shades !== null) {
+    } else if (
+      colorName === 'grey' &&
+      typeof shades === 'object' &&
+      shades !== null
+    ) {
       const greyShades = shades as Record<string, string>;
       if ('white' in greyShades) {
         lines.push(`@${prefix}-color-white: ${greyShades.white};`);
@@ -781,7 +812,9 @@ export function generateLessVariables(prefix = DEFAULT_PREFIX): string {
         }
       }
     } else if (typeof shades === 'object' && shades !== null) {
-      for (const [shade, value] of Object.entries(shades as Record<string, string>)) {
+      for (const [shade, value] of Object.entries(
+        shades as Record<string, string>,
+      )) {
         lines.push(`@${prefix}-color-${colorName}-${shade}: ${value};`);
       }
     }
