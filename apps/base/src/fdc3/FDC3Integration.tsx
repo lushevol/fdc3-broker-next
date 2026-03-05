@@ -211,7 +211,7 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
           try {
             // Integrate with your auth system
             // Example: Check if user has a valid token
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem('SET_TOKEN');
             return !!token;
           } catch (error) {
             console.error('Login status check failed:', error);

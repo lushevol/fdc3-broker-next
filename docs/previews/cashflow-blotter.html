@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cashflow blotter | FMO post trade portal</title>
+    <style>
+      :root {
+        /* Typography tokens */
+        --sc-text-section-main: 28px;
+        --sc-text-title-main: 18px;
+        --sc-text-title-sub: 16px;
+        --sc-text-component-main: 14px;
+        --sc-text-label-main: 12px;
+        --sc-text-helper-main: 12px;
+
+        /* Foundation tokens (dark surface) */
+        --sc-color-foundation-basic-background-base-inverse: #0f1a24;
+        --sc-color-foundation-basic-background-secondary-inverse: #122131;
+        --sc-color-foundation-basic-container-base-inverse: #162634;
+        --sc-color-foundation-basic-container-layer-inverse: #1a2c3b;
+        --sc-color-foundation-basic-divider-base-inverse: #2b4155;
+        --sc-color-foundation-content-header-inverse: #ffffff;
+        --sc-color-foundation-content-title-inverse: #edf3f8;
+        --sc-color-foundation-content-body-inverse: #d2deea;
+        --sc-color-foundation-content-label-text-inverse: #bad0e1;
+        --sc-color-foundation-content-helper-text-inverse: #98b3c7;
+
+        /* Semantic tokens */
+        --sc-color-semantic-bg-primary-rest: #0073f5;
+        --sc-color-semantic-bg-primary-hover: #0068db;
+        --sc-color-semantic-bg-primary-pressed: #005cc4;
+        --sc-color-semantic-bg-secondary-rest: #1d3347;
+        --sc-color-semantic-bg-warning-rest: #f9cf99;
+        --sc-color-semantic-bg-warning-subtle: #604321;
+        --sc-color-semantic-bg-success-rest: #00a854;
+        --sc-color-semantic-bg-success-subtle: #184734;
+        --sc-color-semantic-bg-destructive-rest: #ff4d4f;
+        --sc-color-semantic-bg-destructive-subtle: #542629;
+
+        --sc-color-semantic-fg-text-primary-rest: #edf3f8;
+        --sc-color-semantic-fg-text-secondary-rest: #bad0e1;
+        --sc-color-semantic-fg-text-warning-rest: #ffd9a5;
+        --sc-color-semantic-fg-text-success-rest: #b9f3d6;
+        --sc-color-semantic-fg-text-destructive-rest: #ffc7c8;
+        --sc-color-semantic-fg-text-success-contrast: #004d26;
+        --sc-color-semantic-fg-text-destructive-contrast: #8b1e20;
+
+        --sc-color-semantic-border-primary-rest: #4f84b1;
+        --sc-color-semantic-border-secondary-rest: #2f4c64;
+        --sc-color-semantic-border-warning-rest: #ce8a33;
+        --sc-color-semantic-border-success-rest: #279d61;
+        --sc-color-semantic-border-destructive-rest: #cf5053;
+
+        --gds-radius-card: 6px;
+        --gds-radius-field: 6px;
+        --gds-spacing-4: 4px;
+        --gds-spacing-8: 8px;
+        --gds-spacing-12: 12px;
+        --gds-spacing-16: 16px;
+        --gds-spacing-20: 20px;
+        --gds-spacing-24: 24px;
+        --gds-shadow-layer: 0 8px 20px rgba(2, 10, 17, 0.32);
+        --gds-shadow-elevated: 0 12px 28px rgba(2, 10, 17, 0.4);
+      }
+
+      :root[data-theme="light"] {
+        --sc-color-foundation-basic-background-base-inverse: #f5f8fb;
+        --sc-color-foundation-basic-background-secondary-inverse: #eef3f7;
+        --sc-color-foundation-basic-container-base-inverse: #ffffff;
+        --sc-color-foundation-basic-container-layer-inverse: #f8fbff;
+        --sc-color-foundation-basic-divider-base-inverse: #d3deea;
+        --sc-color-foundation-content-header-inverse: #0f2336;
+        --sc-color-foundation-content-title-inverse: #173048;
+        --sc-color-foundation-content-body-inverse: #26445f;
+        --sc-color-foundation-content-label-text-inverse: #32556f;
+        --sc-color-foundation-content-helper-text-inverse: #4d708f;
+        --sc-color-semantic-bg-secondary-rest: #eff5fb;
+        --sc-color-semantic-border-secondary-rest: #bfd0df;
+        --sc-color-semantic-fg-text-success-contrast: #006034;
+        --sc-color-semantic-fg-text-destructive-contrast: #a82326;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        scroll-behavior: smooth;
+      }
+
+      /* Skip link for accessibility */
+      .skip-link {
+        position: absolute;
+        top: -100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--sc-color-semantic-bg-primary-rest);
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: var(--gds-radius-card);
+        text-decoration: none;
+        font-weight: 600;
+        z-index: 1000;
+        transition: top 0.2s;
+      }
+
+      .skip-link:focus {
+        top: 8px;
+      }
+
+      body {
+        font-family: "SC Prosper Sans", "Inter", "Segoe UI", Arial, sans-serif;
+        font-size: var(--sc-text-component-main);
+        line-height: 1.5;
+        color: var(--sc-color-foundation-content-body-inverse);
+        background: radial-gradient(circle at 10% -2%, rgba(0, 115, 245, 0.14), transparent 32%),
+          radial-gradient(circle at 88% -8%, rgba(0, 168, 84, 0.09), transparent 30%),
+          var(--sc-color-foundation-basic-background-base-inverse);
+      }
+
+      .app-shell {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 0 var(--gds-spacing-16) var(--gds-spacing-24);
+      }
+
+      .icon {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .icon-sm {
+        width: 14px;
+        height: 14px;
+      }
+
+      .gds-icon-button,
+      .gds-button {
+        border: 1px solid var(--sc-color-semantic-border-secondary-rest);
+        border-radius: 999px;
+        cursor: pointer;
+        font: inherit;
+        transition: 140ms ease;
+      }
+
+      .gds-icon-button {
+        width: 32px;
+        height: 32px;
+        display: inline-grid;
+        place-items: center;
+        color: var(--sc-color-semantic-fg-text-secondary-rest);
+        background: var(--sc-color-semantic-bg-secondary-rest);
+      }
+
+      .gds-icon-button:hover {
+        color: var(--sc-color-semantic-fg-text-primary-rest);
+      }
+
+      .gds-button {
+        height: 32px;
+        padding: 0 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: var(--sc-text-component-main);
+      }
+
+      .gds-button--primary {
+        background: var(--sc-color-semantic-bg-primary-rest);
+        border-color: var(--sc-color-semantic-bg-primary-rest);
+        color: #fff;
+      }
+
+      .gds-button--primary:hover {
+        background: var(--sc-color-semantic-bg-primary-hover);
+      }
+
+      .gds-button--primary:disabled {
+        background: var(--sc-color-semantic-bg-secondary-rest);
+        border-color: transparent;
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .gds-button--secondary {
+        background: var(--sc-color-semantic-bg-secondary-rest);
+        color: var(--sc-color-semantic-fg-text-primary-rest);
+      }
+
+      .gds-button--secondary:hover {
+        border-color: var(--sc-color-semantic-border-primary-rest);
+      }
+
+      .gds-button--link {
+        border: 0;
+        background: transparent;
+        color: var(--sc-color-semantic-bg-primary-rest);
+        padding: 0;
+        height: auto;
+      }
+
+      /* Loading spinner */
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      .gds-icon-button:focus-visible,
+      .gds-button:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        outline: 2px solid var(--sc-color-semantic-bg-primary-rest);
+        outline-offset: 2px;
+      }
+
+      .top-nav {
+        min-height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: var(--gds-spacing-12) 14px;
+        border-bottom: 1px solid var(--sc-color-foundation-basic-divider-base-inverse);
+        background: linear-gradient(100deg, #102130 0%, #10283c 50%, #0f1d2a 100%);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-radius: 0 0 var(--gds-radius-card) var(--gds-radius-card);
+      }
+
+      .portal-title {
+        margin: 0;
+        font-size: var(--sc-text-title-main);
+        line-height: 26px;
+        color: var(--sc-color-foundation-content-header-inverse);
+      }
+
+      .top-nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .clock {
+        color: var(--sc-color-foundation-content-helper-text-inverse);
+        font-size: var(--sc-text-helper-main);
+        min-width: 104px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .clock-pulse {
+        width: 6px;
+        height: 6px;
+        background: var(--sc-color-semantic-bg-success-rest);
+        border-radius: 50%;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+      }
+
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        border: 1px solid var(--sc-color-semantic-border-primary-rest);
+        color: var(--sc-color-foundation-content-header-inverse);
+        font-weight: 600;
+        display: inline-grid;
+        place-items: center;
+        background: linear-gradient(135deg, #0073f5 0%, #00a854 100%);
+      }
+
+      .page-header {
+        margin-top: 12px;
+        background: #005cc4;
+        border: 1px solid #1d66b8;
+        border-radius: var(--gds-radius-card);
+        padding: var(--gds-spacing-16);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .page-header-title {
+        margin: 0;
+        font-size: var(--sc-text-section-main);
+        line-height: 34px;
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .page-header-sub {
+        margin-top: 4px;
+        color: #d7e8fb;
+        font-size: var(--sc-text-helper-main);
+      }
+
+      .meta-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .status-tag {
+        height: 24px;
+        border-radius: 999px;
+        padding: 0 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid var(--sc-color-semantic-border-secondary-rest);
+        background: var(--sc-color-semantic-bg-secondary-rest);
+        font-size: var(--sc-text-helper-main);
+      }
+
+      .layout {
+        margin-top: var(--gds-spacing-16);
+        display: grid;
+        grid-template-columns: 2.2fr 1fr;
+        gap: var(--gds-spacing-16);
+      }
+
+      .gds-card {
+        border: 1px solid var(--sc-color-foundation-basic-divider-base-inverse);
+        background: var(--sc-color-foundation-basic-container-base-inverse);
+        border-radius: var(--gds-radius-card);
+        padding: var(--gds-spacing-16);
+        box-shadow: var(--gds-shadow-layer);
+      }
+
+      .section-heading {
+        margin: 0 0 var(--gds-spacing-16);
+        color: var(--sc-color-foundation-content-title-inverse);
+        font-size: var(--sc-text-title-sub);
+        line-height: 24px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .field-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--gds-spacing-16);
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field label {
+        color: var(--sc-color-foundation-content-label-text-inverse);
+        font-size: var(--sc-text-label-main);
+        line-height: 16px;
+        font-weight: 500;
+      }
+
+      .field-help {
+        color: var(--sc-color-foundation-content-helper-text-inverse);
+        font-size: var(--sc-text-helper-main);
+        line-height: 16px;
+      }
+
+      .gds-input,
+      .gds-select {
+        height: 36px;
+        border-radius: var(--gds-radius-field);
+        border: 1px solid var(--sc-color-semantic-border-secondary-rest);
+        background: var(--sc-color-foundation-basic-container-layer-inverse);
+        color: var(--sc-color-foundation-content-body-inverse);
+        font-size: var(--sc-text-component-main);
+        line-height: 22px;
+        padding: 0 12px;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+
+      .gds-input:hover,
+      .gds-select:hover {
+        border-color: var(--sc-color-semantic-border-primary-rest);
+      }
+
+      .gds-input:focus,
+      .gds-select:focus {
+        border-color: var(--sc-color-semantic-bg-primary-rest);
+        box-shadow: 0 0 0 3px rgba(0, 115, 245, 0.15);
+        outline: none;
+      }
+
+      .range-row {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .filter-actions {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        padding-top: 8px;
+      }
+
+      .widget-stack {
+        display: grid;
+        gap: var(--gds-spacing-16);
+        align-content: start;
+      }
+
+      .status-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+      }
+
+      .status-label {
+        color: var(--sc-color-foundation-content-body-inverse);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .gds-badge {
+        min-height: 22px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: var(--sc-text-helper-main);
+        line-height: 22px;
+        border: 1px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        gap: 4px;
+        font-weight: 500;
+      }
+
+      .gds-badge--warning {
+        background: var(--sc-color-semantic-bg-warning-subtle);
+        color: var(--sc-color-semantic-fg-text-warning-rest);
+        border-color: var(--sc-color-semantic-border-warning-rest);
+      }
+
+      .gds-badge--success {
+        background: var(--sc-color-semantic-bg-success-subtle);
+        color: var(--sc-color-semantic-fg-text-success-rest);
+        border-color: var(--sc-color-semantic-border-success-rest);
+      }
+
+      .gds-badge--destructive {
+        background: var(--sc-color-semantic-bg-destructive-subtle);
+        color: var(--sc-color-semantic-fg-text-destructive-rest);
+        border-color: var(--sc-color-semantic-border-destructive-rest);
+      }
+
+      .toolbar-card {
+        margin-top: var(--gds-spacing-16);
+      }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding-bottom: var(--gds-spacing-12);
+        border-bottom: 1px solid var(--sc-color-foundation-basic-divider-base-inverse);
+        margin-bottom: var(--gds-spacing-12);
+      }
+
+      .toolbar-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .toolbar-divider {
+        width: 1px;
+        height: 24px;
+        background: var(--sc-color-foundation-basic-divider-base-inverse);
+        margin: 0 4px;
+      }
+
+      .toolbar-chip {
+        min-height: 24px;
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0 10px;
+        border: 1px solid var(--sc-color-semantic-border-secondary-rest);
+        background: var(--sc-color-semantic-bg-secondary-rest);
+        color: var(--sc-color-semantic-fg-text-secondary-rest);
+        font-size: var(--sc-text-helper-main);
+        gap: 6px;
+      }
+
+      .gds-banner {
+        border: 1px solid var(--sc-color-semantic-border-primary-rest);
+        background: rgba(0, 115, 245, 0.12);
+        color: var(--sc-color-semantic-fg-text-primary-rest);
+        border-radius: var(--gds-radius-card);
+        padding: 12px 16px;
+        font-size: var(--sc-text-helper-main);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .table-wrap {
+        border: 1px solid var(--sc-color-foundation-basic-divider-base-inverse);
+        border-radius: var(--gds-radius-card);
+        overflow: auto;
+        max-height: 520px;
+      }
+
+      .blotter-table {
+        width: 100%;
+        min-width: 1400px;
+        border-collapse: collapse;
+        font-size: var(--sc-text-component-main);
+      }
+
+      .blotter-table thead th {
+        position: sticky;
+        top: 0;
+        background: var(--sc-color-foundation-basic-container-layer-inverse);
+        color: var(--sc-color-foundation-content-title-inverse);
+        border-bottom: 2px solid var(--sc-color-foundation-basic-divider-base-inverse);
+        padding: 12px 10px;
+        text-align: left;
+        font-weight: 600;
+        white-space: nowrap;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.15s;
+      }
+
+      .blotter-table thead th:hover {
+        background: rgba(0, 115, 245, 0.08);
+      }
+
+      .blotter-table thead th .sort-icon {
+        margin-left: 4px;
+        opacity: 0.4;
+      }
+
+      .blotter-table thead th.sorted .sort-icon {
+        opacity: 1;
+      }
+
+      .blotter-table tbody td {
+        border-bottom: 1px solid var(--sc-color-foundation-basic-divider-base-inverse);
+        padding: 12px 10px;
+        color: var(--sc-color-foundation-content-body-inverse);
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+
+      .blotter-table tbody tr {
+        transition: background 0.12s, box-shadow 0.12s;
+      }
+
+      .blotter-table tbody tr:hover {
+        background: rgba(0, 115, 245, 0.08);
+      }
+
+      .blotter-table tbody tr.selected {
+        background: rgba(0, 115, 245, 0.12);
+        box-shadow: inset 3px 0 0 var(--sc-color-semantic-bg-primary-rest);
+      }
+
+      .state-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 24px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: var(--sc-text-helper-main);
+        border: 1px solid var(--sc-color-semantic-border-warning-rest);
+        font-weight: 500;
+      }
+
+      .state-pill[data-state="waiting"] {
+        color: var(--sc-color-semantic-fg-text-warning-rest);
+        background: var(--sc-color-semantic-bg-warning-subtle);
+        border-color: var(--sc-color-semantic-border-warning-rest);
+      }
+
+      .state-pill[data-state="verified"] {
+        border-color: var(--sc-color-semantic-border-success-rest);
+        color: var(--sc-color-semantic-fg-text-success-rest);
+        background: var(--sc-color-semantic-bg-success-subtle);
+      }
+
+      .state-pill[data-state="released"] {
+        border-color: var(--sc-color-semantic-border-primary-rest);
+        color: var(--sc-color-semantic-fg-text-primary-rest);
+        background: rgba(0, 115, 245, 0.16);
+      }
+
+      .amount-positive {
+        color: var(--sc-color-semantic-fg-text-success-rest);
+        font-weight: 600;
+      }
+
+      .amount-negative {
+        color: var(--sc-color-semantic-fg-text-destructive-rest);
+        font-weight: 600;
+      }
+
+      :root[data-theme="light"] .amount-positive {
+        color: var(--sc-color-semantic-fg-text-success-contrast);
+      }
+
+      :root[data-theme="light"] .amount-negative {
+        color: var(--sc-color-semantic-fg-text-destructive-contrast);
+      }
+
+      .release-time {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .release-time[data-warning="true"] {
+        color: var(--sc-color-semantic-fg-text-destructive-rest);
+      }
+
+      .release-time-icon {
+        color: inherit;
+        flex-shrink: 0;
+      }
+
+      .checkbox-wrap {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+      }
+
+      .gds-checkbox {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        accent-color: var(--sc-color-semantic-bg-primary-rest);
+        cursor: pointer;
+      }
+
+      .check-icon {
+        color: var(--sc-color-semantic-fg-text-success-rest);
+      }
+
+      .yes-badge {
+        color: var(--sc-color-semantic-fg-text-success-rest);
+        font-weight: 600;
+      }
+
+      .no-badge {
+        color: var(--sc-color-semantic-fg-text-secondary-rest);
+      }
+
+      .tooltip {
+        position: relative;
+        cursor: help;
+        border-bottom: 1px dotted var(--sc-color-foundation-content-helper-text-inverse);
+      }
+
+      .tooltip:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--sc-color-foundation-basic-container-layer-inverse);
+        color: var(--sc-color-foundation-content-title-inverse);
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        box-shadow: var(--gds-shadow-elevated);
+        border: 1px solid var(--sc-color-foundation-basic-divider-base-inverse);
+        z-index: 100;
+      }
+
+      /* Keyboard shortcut hint */
+      .shortcut-hint {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        background: var(--sc-color-foundation-basic-container-layer-inverse);
+        border: 1px solid var(--sc-color-foundation-basic-divider-base-inverse);
+        border-radius: var(--gds-radius-card);
+        padding: 10px 14px;
+        font-size: var(--sc-text-helper-main);
+        color: var(--sc-color-foundation-content-helper-text-inverse);
+        box-shadow: var(--gds-shadow-elevated);
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .shortcut-hint kbd {
+        background: var(--sc-color-semantic-bg-secondary-rest);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        border: 1px solid var(--sc-color-foundation-basic-divider-base-inverse);
+      }
+
+      .shortcut-hint.hidden {
+        display: none;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      /* Mobile responsive */
+      @media (max-width: 1220px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .field-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .gds-card {
+          padding: var(--gds-spacing-12);
+        }
+      }
+
+      @media (max-width: 700px) {
+        .field-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .top-nav {
+          align-items: flex-start;
+        }
+
+        .gds-input,
+        .gds-select {
+          min-height: 44px;
+        }
+
+        .gds-button,
+        .gds-icon-button {
+          min-height: 44px;
+        }
+
+        /* Mobile table - card view */
+        .table-wrap {
+          overflow: visible;
+        }
+
+        .blotter-table,
+        .blotter-table thead,
+        .blotter-table tbody,
+        .blotter-table tr {
+          display: block;
+        }
+
+        .blotter-table thead {
+          position: absolute;
+          left: -9999px;
+        }
+
+        .blotter-table tbody tr {
+          background: var(--sc-color-foundation-basic-container-base-inverse);
+          border: 1px solid var(--sc-color-foundation-basic-divider-base-inverse);
+          border-radius: var(--gds-radius-card);
+          margin-bottom: var(--gds-spacing-12);
+          padding: var(--gds-spacing-12);
+        }
+
+        .blotter-table tbody td {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 6px 0;
+          border: none;
+        }
+
+        .blotter-table tbody td::before {
+          content: attr(data-label);
+          font-weight: 600;
+          color: var(--sc-color-foundation-content-label-text-inverse);
+          margin-right: 16px;
+        }
+
+        .blotter-table tbody td:first-child {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+
+      /* Print styles */
+      @media print {
+        .top-nav-actions,
+        .filter-actions,
+        .toolbar,
+        .gds-banner,
+        .shortcut-hint {
+          display: none;
+        }
+
+        .gds-card {
+          break-inside: avoid;
+        }
+
+        .table-wrap {
+          max-height: none;
+          overflow: visible;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="app-shell">
+      <header class="top-nav" aria-label="Global header">
+        <h1 class="portal-title">FMO post trade portal</h1>
+
+        <div class="top-nav-actions">
+          <button class="gds-icon-button" aria-label="Search (Press /)" title="Search (Press /)">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.3-4.3"></path>
+            </svg>
+          </button>
+
+          <button class="gds-button gds-button--secondary" type="button">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 12h14"></path>
+              <path d="M12 5v14"></path>
+            </svg>
+            New tile
+          </button>
+
+          <button id="themeToggle" class="gds-icon-button" aria-label="Toggle theme" title="Toggle theme">
+            <svg id="themeIcon" class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+            </svg>
+          </button>
+
+          <div class="clock" id="utcClock">
+            <span class="clock-pulse"></span>
+            <span>00:00:00 UTC</span>
+          </div>
+          <div class="avatar" aria-label="User account">TA</div>
+        </div>
+      </header>
+
+      <section class="page-header" aria-label="Page header">
+        <div>
+          <h2 class="page-header-title">Cashflow blotter</h2>
+          <div class="page-header-sub">Monitor, review and export cashflow operations</div>
+        </div>
+
+        <div class="meta-row">
+          <button class="gds-icon-button" aria-label="Add tab" title="Add tab">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 12h14"></path>
+              <path d="M12 5v14"></path>
+            </svg>
+          </button>
+          <span class="status-tag">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            v2.6.17
+          </span>
+          <span class="status-tag">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            UAT
+          </span>
+        </div>
+      </section>
+
+      <main id="main-content">
+        <section class="layout">
+          <section id="searchPanel" class="gds-card" aria-label="Quick search filters">
+            <h3 class="section-heading">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </svg>
+              Quick search
+            </h3>
+
+            <form id="searchForm" class="field-grid" novalidate>
+              <div class="field">
+                <label for="cashflowId">Cashflow ID</label>
+                <input id="cashflowId" class="gds-input" type="text" placeholder="Enter cashflow ID" autocomplete="off" />
+              </div>
+
+              <div class="field">
+                <label for="tradeId">Trade ID</label>
+                <input id="tradeId" class="gds-input" type="text" placeholder="Enter trade ID" autocomplete="off" />
+              </div>
+
+              <div class="field">
+                <label for="valueStart">Value date range</label>
+                <div class="range-row">
+                  <input id="valueStart" class="gds-input" type="date" aria-label="Value date start" />
+                  <input id="valueEnd" class="gds-input" type="date" aria-label="Value date end" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="currency">Currency</label>
+                <select id="currency" class="gds-select">
+                  <option value="">Select currency</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                  <option value="SGD">SGD</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="taxonomy">Product taxonomy</label>
+                <select id="taxonomy" class="gds-select">
+                  <option value="">Select taxonomy</option>
+                  <option value="IRS">IRS</option>
+                  <option value="FX option">FX option</option>
+                  <option value="Repo">Repo</option>
+                  <option value="Bond">Bond</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="counterparty">Counterparty FM code</label>
+                <input id="counterparty" class="gds-input" type="text" placeholder="Separate codes with commas" autocomplete="off" />
+              </div>
+
+              <div class="field">
+                <label for="bookingEntity">SCB booking entity</label>
+                <select id="bookingEntity" class="gds-select">
+                  <option value="">Select entity</option>
+                  <option>SCB London</option>
+                  <option>SCB Singapore</option>
+                  <option>SCB New York</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="beneficiaryName">Beneficiary name</label>
+                <input id="beneficiaryName" class="gds-input" type="text" placeholder="Enter beneficiary name" autocomplete="off" />
+              </div>
+
+              <div class="field">
+                <label for="beneficiaryBic">Beneficiary account BIC code</label>
+                <input id="beneficiaryBic" class="gds-input" type="text" placeholder="Enter BIC code" autocomplete="off" />
+              </div>
+
+              <div class="field">
+                <label for="cashflowState">Cashflow state</label>
+                <select id="cashflowState" class="gds-select">
+                  <option value="">Select state</option>
+                  <option value="waiting">Waiting</option>
+                  <option value="verified">Verified</option>
+                  <option value="released">Released</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="amountMin">Amount range (USD)</label>
+                <div class="range-row">
+                  <input id="amountMin" class="gds-input" type="number" step="0.01" placeholder="Min" />
+                  <input id="amountMax" class="gds-input" type="number" step="0.01" placeholder="Max" />
+                </div>
+                <div class="field-help">Use decimals for exact amount matching</div>
+              </div>
+
+              <div class="filter-actions">
+                <button class="gds-button gds-button--secondary" type="reset">Clear filters</button>
+                <button class="gds-button gds-button--primary" id="searchBtn" type="submit">
+                  <span class="btn-text">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <path d="m21 21-4.3-4.3"></path>
+                    </svg>
+                    Search
+                  </span>
+                  <span class="spinner" hidden></span>
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <aside class="widget-stack" aria-label="Status widgets">
+            <section class="gds-card">
+              <h3 class="section-heading">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                API status
+              </h3>
+              <div class="status-row">
+                <span class="status-label">
+                  Cashflow API
+                </span>
+                <span class="gds-badge gds-badge--success">
+                  <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  Healthy
+                </span>
+              </div>
+              <div class="status-row">
+                <span class="status-label">Last poll</span>
+                <span id="pollTime">00:00:00 UTC</span>
+              </div>
+              <div class="status-row">
+                <button id="refreshBtn" class="gds-button gds-button--secondary" type="button">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                    <path d="M21 3v5h-5"></path>
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                    <path d="M8 16H3v5"></path>
+                  </svg>
+                  Refresh page
+                </button>
+              </div>
+            </section>
+
+            <section class="gds-card">
+              <h3 class="section-heading">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                Value today
+              </h3>
+              <div class="status-row">
+                <span>Pending operator</span>
+                <span class="gds-badge gds-badge--warning">
+                  <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                  14
+                </span>
+              </div>
+              <div class="status-row">
+                <span>Pending verification</span>
+                <span class="gds-badge gds-badge--success">
+                  <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  0
+                </span>
+              </div>
+            </section>
+
+            <section class="gds-card">
+              <h3 class="section-heading">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Value tomorrow
+              </h3>
+              <div class="status-row">
+                <span>Pending operator</span>
+                <span class="gds-badge gds-badge--warning">
+                  <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                  9
+                </span>
+              </div>
+              <div class="status-row">
+                <span>Pending verification</span>
+                <span class="gds-badge gds-badge--destructive">
+                  <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                  3
+                </span>
+              </div>
+            </section>
+
+            <section class="gds-card">
+              <h3 class="section-heading">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                </svg>
+                Custom search and view
+              </h3>
+              <div class="status-row">
+                <span>Saved filters</span>
+                <span>12</span>
+              </div>
+              <div class="status-row">
+                <span>Saved views</span>
+                <span>4</span>
+              </div>
+              <div class="status-row">
+                <button class="gds-button gds-button--secondary" type="button">Create or modify</button>
+              </div>
+            </section>
+          </aside>
+        </section>
+
+        <section class="gds-card toolbar-card" aria-label="Blotter results">
+          <div class="toolbar">
+            <div class="toolbar-group">
+              <span id="resultChip" class="toolbar-chip">
+                <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Results 8 / 8
+              </span>
+              <button class="gds-button gds-button--secondary" type="button">Load next 1,000</button>
+              <button id="toggleSearch" class="gds-button gds-button--secondary" type="button">Hide search bar</button>
+            </div>
+
+            <div class="toolbar-group">
+              <button class="gds-button gds-button--secondary" type="button">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <polyline points="9 21 3 21 3 15"></polyline>
+                  <line x1="21" x2="14" y1="3" y2="10"></line>
+                  <line x1="3" x2="10" y1="21" y2="14"></line>
+                </svg>
+                Resize
+              </button>
+              <div class="toolbar-divider"></div>
+              <button id="exportBtn" class="gds-button gds-button--secondary" type="button">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" x2="12" y1="15" y2="3"></line>
+                </svg>
+                Export file
+              </button>
+            </div>
+          </div>
+
+          <div class="gds-banner" role="status" aria-live="polite">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            If you load more than 1,000 records, exports can take longer
+          </div>
+
+          <div class="table-wrap">
+            <table class="blotter-table" aria-label="Cashflow transactions table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">
+                    <label class="checkbox-wrap" aria-label="Select all rows">
+                      <input id="selectAll" class="gds-checkbox" type="checkbox" />
+                    </label>
+                  </th>
+                  <th data-sort="cashflowId">
+                    Cashflow ID
+                    <svg class="icon icon-sm sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 15 5 5 5-5"></path>
+                      <path d="m7 9 5-5 5 5"></path>
+                    </svg>
+                  </th>
+                  <th data-sort="state">
+                    Cashflow state
+                    <svg class="icon icon-sm sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 15 5 5 5-5"></path>
+                      <path d="m7 9 5-5 5 5"></path>
+                    </svg>
+                  </th>
+                  <th data-sort="operator">
+                    Operator
+                    <svg class="icon icon-sm sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 15 5 5 5-5"></path>
+                      <path d="m7 9 5-5 5 5"></path>
+                    </svg>
+                  </th>
+                  <th data-sort="verification">
+                    Verification
+                    <svg class="icon icon-sm sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 15 5 5 5-5"></path>
+                      <path d="m7 9 5-5 5 5"></path>
+                    </svg>
+                  </th>
+                  <th data-sort="paymentDate">
+                    Payment date
+                    <svg class="icon icon-sm sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 15 5 5 5-5"></path>
+                      <path d="m7 9 5-5 5 5"></path>
+                    </svg>
+                  </th>
+                  <th data-sort="currency">
+                    Currency
+                    <svg class="icon icon-sm sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 15 5 5 5-5"></path>
+                      <path d="m7 9 5-5 5 5"></path>
+                    </svg>
+                  </th>
+                  <th data-sort="event">
+                    Event
+                    <svg class="icon icon-sm sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 15 5 5 5-5"></path>
+                      <path d="m7 9 5-5 5 5"></path>
+                    </svg>
+                  </th>
+                  <th data-sort="netting">
+                    Netting
+                    <svg class="icon icon-sm sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 15 5 5 5-5"></path>
+                      <path d="m7 9 5-5 5 5"></path>
+                    </svg>
+                  </th>
+                  <th data-sort="counterparty">
+                    Counterparty
+                    <svg class="icon icon-sm sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 15 5 5 5-5"></path>
+                      <path d="m7 9 5-5 5 5"></path>
+                    </svg>
+                  </th>
+                  <th data-sort="amount">
+                    Amount
+                    <svg class="icon icon-sm sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 15 5 5 5-5"></path>
+                      <path d="m7 9 5-5 5 5"></path>
+                    </svg>
+                  </th>
+                  <th data-sort="releaseTime">
+                    Release time
+                    <svg class="icon icon-sm sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 15 5 5 5-5"></path>
+                      <path d="m7 9 5-5 5 5"></path>
+                    </svg>
+                  </th>
+                  <th data-sort="trade">
+                    Trade
+                    <svg class="icon icon-sm sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 15 5 5 5-5"></path>
+                      <path d="m7 9 5-5 5 5"></path>
+                    </svg>
+                  </th>
+                  <th data-sort="eventReason">
+                    Event reason
+                    <svg class="icon icon-sm sort-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m7 15 5 5 5-5"></path>
+                      <path d="m7 9 5-5 5 5"></path>
+                    </svg>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Keyboard shortcut hints -->
+    <div id="shortcutHints" class="shortcut-hint">
+      <div><kbd>/</kbd> Focus search</div>
+      <div><kbd>R</kbd> Refresh</div>
+      <div><kbd>T</kbd> Toggle theme</div>
+      <div><kbd>Esc</kbd> Close hints</div>
+    </div>
+
+    <script>
+      (function () {
+        const stateStyles = {
+          waiting: ["Waiting", "waiting", "⏳"],
+          verified: ["Verified", "verified", "✓"],
+          released: ["Released", "released", "→"]
+        };
+
+        const rows = [
+          ["000126000067", "waiting", "Y", "N", "4 Mar 2026", "USD", "Coupon", "Single", "FMCODEV-0197", 1746.01, "00 D, 00 H, 12 M", true, "TRD-882901", "Event date reached"],
+          ["000126000068", "waiting", "Y", "N", "4 Mar 2026", "EUR", "Reset", "Single", "FMCODEV-1082", 93141.77, "00 D, 03 H, 08 M", false, "TRD-882951", "Manual release pending"],
+          ["000126000069", "verified", "Y", "Y", "5 Mar 2026", "USD", "Fee", "Portfolio", "FMCODEV-2201", 246.0, "01 D, 01 H, 40 M", false, "TRD-882964", "Scheduled sweep"],
+          ["000126000070", "waiting", "N", "N", "5 Mar 2026", "GBP", "Settlement", "Single", "FMCODEV-3328", -14224.16, "00 D, 14 H, 41 M", false, "TRD-883011", "Awaiting operator approval"],
+          ["000126000071", "released", "Y", "Y", "6 Mar 2026", "SGD", "Principal", "Portfolio", "FMCODEV-4470", 502001.0, "02 D, 02 H, 00 M", false, "TRD-883043", "Auto release complete"],
+          ["000126000072", "waiting", "Y", "N", "6 Mar 2026", "USD", "Margin", "Single", "FMCODEV-5139", -9322.55, "00 D, 01 H, 27 M", false, "TRD-883052", "Pending verification"],
+          ["000126000073", "verified", "Y", "Y", "7 Mar 2026", "EUR", "Coupon", "Portfolio", "FMCODEV-6208", 72733.2, "01 D, 20 H, 09 M", false, "TRD-883110", "Validation complete"],
+          ["000126000074", "waiting", "N", "N", "7 Mar 2026", "USD", "Settlement", "Single", "FMCODEV-7715", -3010.0, "00 D, 00 H, 47 M", true, "TRD-883188", "Pending operator action"]
+        ];
+
+        const tbody = document.getElementById("tbody");
+        const resultChip = document.getElementById("resultChip");
+        const utcClock = document.getElementById("utcClock").querySelector("span");
+        const pollTime = document.getElementById("pollTime");
+        const refreshBtn = document.getElementById("refreshBtn");
+        const selectAll = document.getElementById("selectAll");
+        const searchForm = document.getElementById("searchForm");
+        const searchBtn = document.getElementById("searchBtn");
+        const btnText = searchBtn.querySelector(".btn-text");
+        const spinner = searchBtn.querySelector(".spinner");
+        const toggleSearch = document.getElementById("toggleSearch");
+        const searchPanel = document.getElementById("searchPanel");
+        const exportBtn = document.getElementById("exportBtn");
+        const themeToggle = document.getElementById("themeToggle");
+        const themeIcon = document.getElementById("themeIcon");
+        const shortcutHints = document.getElementById("shortcutHints");
+
+        let filteredRows = [...rows];
+        let selectedRows = new Set();
+        let sortColumn = null;
+        let sortDirection = 'asc';
+
+        const fmtMoney = function (amount) {
+          const isNegative = amount < 0;
+          const absAmount = Math.abs(amount);
+          const formatted = absAmount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          return { text: (isNegative ? "-" : "") + formatted, isNegative };
+        };
+
+        const formatRelativeTime = function(timeStr) {
+          const match = timeStr.match(/(\d+) D, (\d+) H, (\d+) M/);
+          if (!match) return timeStr;
+
+          const days = parseInt(match[1]);
+          const hours = parseInt(match[2]);
+          const mins = parseInt(match[3]);
+
+          const totalMinutes = days * 24 * 60 + hours * 60 + mins;
+
+          if (totalMinutes < 60) {
+            return totalMinutes + "m";
+          } else if (totalMinutes < 1440) {
+            return Math.round(totalMinutes / 60) + "h";
+          } else {
+            return days + "d " + hours + "h";
+          }
+        };
+
+        const renderRows = function () {
+          tbody.innerHTML = filteredRows
+            .map(function (row, index) {
+              const stateValue = stateStyles[row[1]];
+              const amountData = fmtMoney(row[9]);
+              const isSelected = selectedRows.has(index);
+              const yesIcon = '<svg class="icon icon-sm check-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+              return '<tr' + (isSelected ? ' class="selected"' : '') + ' data-index="' + index + '">' +
+                '<td data-label="Select"><label class="checkbox-wrap" aria-label="Select row"><input class="gds-checkbox row-check" type="checkbox"' + (isSelected ? ' checked' : '') + '></label></td>' +
+                '<td data-label="Cashflow ID">' + row[0] + '</td>' +
+                '<td data-label="State"><span class="state-pill" data-state="' + row[1] + '">' + stateValue[2] + ' ' + stateValue[0] + "</span></td>" +
+                '<td data-label="Operator"><span class="' + (row[2] === 'Y' ? 'yes-badge' : '') + '">' + (row[2] === 'Y' ? yesIcon + ' Yes' : '<span class="no-badge">No</span>') + "</span></td>" +
+                '<td data-label="Verification"><span class="' + (row[3] === 'Y' ? 'yes-badge' : '') + '">' + (row[3] === 'Y' ? yesIcon + ' Verified' : '<span class="no-badge">Not verified</span>') + "</span></td>" +
+                '<td data-label="Payment date">' + row[4] + "</td>" +
+                '<td data-label="Currency">' + row[5] + "</td>" +
+                '<td data-label="Event">' + row[6] + "</td>" +
+                '<td data-label="Netting">' + row[7] + "</td>" +
+                '<td data-label="Counterparty"><span class="tooltip" data-tooltip="' + row[8] + '">' + row[8] + "</span></td>" +
+                '<td data-label="Amount" class="' + (amountData.isNegative ? 'amount-negative' : 'amount-positive') + '">' + amountData.text + "</td>" +
+                '<td data-label="Release time" class="release-time" data-warning="' + String(row[11]) + '">' +
+                  (row[11] ? '<svg class="icon icon-sm release-time-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' : '') +
+                  '<span title="' + row[10] + '">' + formatRelativeTime(row[10]) + "</span>" +
+                "</td>" +
+                '<td data-label="Trade">' + row[12] + "</td>" +
+                '<td data-label="Event reason">' + row[13] + "</td>" +
+                "</tr>";
+            })
+            .join("");
+
+          resultChip.textContent = "Results " + filteredRows.length + " / " + rows.length;
+
+          // Re-attach row checkbox listeners
+          Array.from(document.querySelectorAll(".row-check")).forEach(function (checkbox, index) {
+            checkbox.addEventListener("change", function () {
+              if (checkbox.checked) {
+                selectedRows.add(index);
+                checkbox.closest("tr").classList.add("selected");
+              } else {
+                selectedRows.delete(index);
+                checkbox.closest("tr").classList.remove("selected");
+              }
+              updateSelectAllState();
+            });
+          });
+        };
+
+        const updateSelectAllState = function () {
+          const allChecked = filteredRows.length > 0 && filteredRows.every((_, i) => selectedRows.has(i));
+          const someChecked = filteredRows.some((_, i) => selectedRows.has(i));
+
+          selectAll.checked = allChecked;
+          selectAll.indeterminate = someChecked && !allChecked;
+        };
+
+        const sortRows = function (column) {
+          if (sortColumn === column) {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+          } else {
+            sortColumn = column;
+            sortDirection = 'asc';
+          }
+
+          const columnIndices = {
+            cashflowId: 0,
+            state: 1,
+            operator: 2,
+            verification: 3,
+            paymentDate: 4,
+            currency: 5,
+            event: 6,
+            netting: 7,
+            counterparty: 8,
+            amount: 9,
+            releaseTime: 10,
+            trade: 12,
+            eventReason: 13
+          };
+
+          const idx = columnIndices[column];
+          if (idx === undefined) return;
+
+          filteredRows.sort(function (a, b) {
+            let valA = a[idx];
+            let valB = b[idx];
+
+            // Handle numeric columns
+            if (column === 'amount') {
+              valA = Number(valA);
+              valB = Number(valB);
+            } else if (column === 'paymentDate') {
+              valA = parseDate(valA).getTime();
+              valB = parseDate(valB).getTime();
+            } else if (typeof valA === 'string') {
+              valA = valA.toLowerCase();
+              valB = valB.toLowerCase();
+            }
+
+            if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+            if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+          });
+
+          // Update sort indicators
+          Array.from(document.querySelectorAll(".blotter-table thead th")).forEach(function (th) {
+            th.classList.remove("sorted");
+            const icon = th.querySelector(".sort-icon");
+            if (icon) {
+              if (th.dataset.sort === column) {
+                th.classList.add("sorted");
+                icon.innerHTML = sortDirection === 'asc'
+                  ? '<path d="m7 15 5 5 5-5"/>'
+                  : '<path d="m7 9 5 5 5-5"/>';
+              }
+            }
+          });
+
+          renderRows();
+        };
+
+        const updateClock = function () {
+          const now = new Date();
+          const hh = String(now.getUTCHours()).padStart(2, "0");
+          const mm = String(now.getUTCMinutes()).padStart(2, "0");
+          const ss = String(now.getUTCSeconds()).padStart(2, "0");
+          const value = hh + ":" + mm + ":" + ss + " UTC";
+          utcClock.textContent = value;
+        };
+
+        const updatePollTime = function () {
+          const now = new Date();
+          const hh = String(now.getUTCHours()).padStart(2, "0");
+          const mm = String(now.getUTCMinutes()).padStart(2, "0");
+          const ss = String(now.getUTCSeconds()).padStart(2, "0");
+          pollTime.textContent = hh + ":" + mm + ":" + ss + " UTC";
+        };
+
+        const parseDate = function (dateStr) {
+          const [day, monthLabel, year] = dateStr.split(" ");
+          const months = {
+            Jan: 0,
+            Feb: 1,
+            Mar: 2,
+            Apr: 3,
+            May: 4,
+            Jun: 5,
+            Jul: 6,
+            Aug: 7,
+            Sep: 8,
+            Oct: 9,
+            Nov: 10,
+            Dec: 11
+          };
+          return new Date(Number(year), months[monthLabel], Number(day));
+        };
+
+        // Debounced search
+        let searchTimeout;
+        const debounce = function (fn, delay) {
+          return function (...args) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => fn.apply(this, args), delay);
+          };
+        };
+
+        const performSearch = function () {
+          searchBtn.disabled = true;
+          btnText.querySelector("svg").hidden = true;
+          btnText.querySelector("span").textContent = "Searching...";
+          spinner.hidden = false;
+
+          setTimeout(() => {
+            const cashflowId = document.getElementById("cashflowId").value.trim().toLowerCase();
+            const tradeId = document.getElementById("tradeId").value.trim().toLowerCase();
+            const currency = document.getElementById("currency").value;
+            const state = document.getElementById("cashflowState").value;
+            const amountMin = Number(document.getElementById("amountMin").value || "0");
+            const amountMaxRaw = document.getElementById("amountMax").value;
+            const amountMax = amountMaxRaw === "" ? Number.POSITIVE_INFINITY : Number(amountMaxRaw);
+            const valueStartRaw = document.getElementById("valueStart").value;
+            const valueEndRaw = document.getElementById("valueEnd").value;
+            const valueStart = valueStartRaw ? new Date(valueStartRaw + "T00:00:00") : null;
+            const valueEnd = valueEndRaw ? new Date(valueEndRaw + "T23:59:59") : null;
+
+            filteredRows = rows.filter(function (row) {
+              const inId = !cashflowId || row[0].toLowerCase().includes(cashflowId);
+              const inTrade = !tradeId || row[12].toLowerCase().includes(tradeId);
+              const inCurrency = !currency || row[5] === currency;
+              const inState = !state || row[1] === state;
+              const inAmount = row[9] >= amountMin && Math.abs(row[9]) <= amountMax;
+
+              const paymentDate = parseDate(row[4]);
+              const inDateStart = !valueStart || paymentDate >= valueStart;
+              const inDateEnd = !valueEnd || paymentDate <= valueEnd;
+
+              return inId && inTrade && inCurrency && inState && inAmount && inDateStart && inDateEnd;
+            });
+
+            searchBtn.disabled = false;
+            btnText.querySelector("svg").hidden = false;
+            btnText.querySelector("span").textContent = "Search";
+            spinner.hidden = true;
+            renderRows();
+          }, 300);
+        };
+
+        searchForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+          performSearch();
+        });
+
+        // Add debounced listeners to text inputs
+        const textInputs = searchForm.querySelectorAll('input[type="text"], input[type="number"]');
+        textInputs.forEach(function (input) {
+          input.addEventListener("input", debounce(performSearch, 500));
+        });
+
+        searchForm.addEventListener("reset", function () {
+          setTimeout(function () {
+            filteredRows = [...rows];
+            sortColumn = null;
+            selectedRows.clear();
+            Array.from(document.querySelectorAll(".blotter-table thead th")).forEach(function (th) {
+              th.classList.remove("sorted");
+            });
+            renderRows();
+          }, 0);
+        });
+
+        refreshBtn.addEventListener("click", function () {
+          updatePollTime();
+          // Visual feedback
+          const icon = refreshBtn.querySelector(".icon");
+          icon.style.animation = "spin 0.8s linear";
+          setTimeout(() => { icon.style.animation = ""; }, 800);
+        });
+
+        selectAll.addEventListener("change", function () {
+          if (selectAll.indeterminate || !selectAll.checked) {
+            // Select all
+            filteredRows.forEach((_, i) => selectedRows.add(i));
+          } else {
+            // Deselect all
+            selectedRows.clear();
+          }
+          renderRows();
+        });
+
+        toggleSearch.addEventListener("click", function () {
+          const hidden = searchPanel.hasAttribute("hidden");
+          if (hidden) {
+            searchPanel.removeAttribute("hidden");
+            toggleSearch.textContent = "Hide search bar";
+          } else {
+            searchPanel.setAttribute("hidden", "");
+            toggleSearch.textContent = "Show search bar";
+          }
+        });
+
+        // Theme toggle with icon switch
+        const updateThemeIcon = function () {
+          const theme = document.documentElement.getAttribute("data-theme");
+          const isDark = theme !== "light";
+          themeIcon.innerHTML = isDark
+            ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>'
+            : '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+        };
+
+        themeToggle.addEventListener("click", function () {
+          const theme = document.documentElement.getAttribute("data-theme");
+          document.documentElement.setAttribute("data-theme", theme === "light" ? "dark" : "light");
+          updateThemeIcon();
+        });
+
+        // Export functionality
+        exportBtn.addEventListener("click", function () {
+          const headers = [
+            "Cashflow ID",
+            "Cashflow state",
+            "Operator",
+            "Verification",
+            "Payment date",
+            "Currency",
+            "Event",
+            "Netting",
+            "Counterparty",
+            "Amount",
+            "Release time",
+            "Trade",
+            "Event reason"
+          ];
+
+          const lines = filteredRows.map(function (row) {
+            return [
+              row[0],
+              stateStyles[row[1]][0],
+              row[2] === 'Y' ? 'Yes' : 'No',
+              row[3] === 'Y' ? 'Verified' : 'Not verified',
+              row[4],
+              row[5],
+              row[6],
+              row[7],
+              row[8],
+              fmtMoney(row[9]).text,
+              row[10],
+              row[12],
+              row[13]
+            ]
+              .map(function (value) {
+                return '"' + String(value).replaceAll('"', '""') + '"';
+              })
+              .join(",");
+          });
+
+          const csv = headers.join(",") + "\n" + lines.join("\n");
+          const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "cashflow-blotter-" + new Date().toISOString().split('T')[0] + ".csv";
+          link.click();
+          URL.revokeObjectURL(url);
+        });
+
+        // Table header sorting
+        Array.from(document.querySelectorAll(".blotter-table thead th[data-sort]")).forEach(function (th) {
+          th.addEventListener("click", function () {
+            sortRows(th.dataset.sort);
+          });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener("keydown", function (e) {
+          // Focus search with /
+          if (e.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+            e.preventDefault();
+            document.getElementById("cashflowId").focus();
+          }
+          // Refresh with R
+          if (e.key.toLowerCase() === "r" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+            e.preventDefault();
+            updatePollTime();
+          }
+          // Toggle theme with T
+          if (e.key.toLowerCase() === "t" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+            e.preventDefault();
+            themeToggle.click();
+          }
+          // Hide shortcuts with Esc
+          if (e.key === "Escape") {
+            shortcutHints.classList.add("hidden");
+          }
+        });
+
+        // Row click to select
+        tbody.addEventListener("click", function (e) {
+          const tr = e.target.closest("tr");
+          if (tr && !e.target.classList.contains("gds-checkbox")) {
+            const index = parseInt(tr.dataset.index);
+            const checkbox = tr.querySelector(".row-check");
+            if (checkbox) {
+              checkbox.checked = !checkbox.checked;
+              checkbox.dispatchEvent(new Event("change"));
+            }
+          }
+        });
+
+        // Initialize
+        renderRows();
+        updateClock();
+        updatePollTime();
+        updateThemeIcon();
+        setInterval(updateClock, 1000);
+
+        // Hide shortcuts hint after 10 seconds
+        setTimeout(function () {
+          shortcutHints.classList.add("hidden");
+        }, 10000);
+      })();
+    </script>
+  </body>
+</html>
