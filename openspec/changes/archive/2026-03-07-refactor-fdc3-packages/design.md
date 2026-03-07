@@ -13,6 +13,7 @@ The FDC3 packages (`fdc3-agent`, `fdc3-broker`, `fdc3-app-directory`, `fdc3-reso
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Reduce overall code volume by ~1,200+ lines
 - Improve code maintainability and readability
 - Eliminate code duplication across packages
@@ -21,6 +22,7 @@ The FDC3 packages (`fdc3-agent`, `fdc3-broker`, `fdc3-app-directory`, `fdc3-reso
 - All existing tests remain passing
 
 **Non-Goals:**
+
 - No new features or capabilities
 - No API changes or breaking changes
 - No performance optimization (unless incidental to refactoring)
@@ -33,6 +35,7 @@ The FDC3 packages (`fdc3-agent`, `fdc3-broker`, `fdc3-app-directory`, `fdc3-reso
 **Decision:** Create a shared `ErrorBoundary` in `packages/fdc3-broker/src/ErrorBoundary.tsx` and re-export from other packages.
 
 **Rationale:**
+
 - `fdc3-broker` is the core package with no React component dependencies
 - Both `fdc3-agent` and `fdc3-resolver-ui` already depend on `fdc3-broker`
 - Avoids creating a new shared package for a single component
@@ -44,6 +47,7 @@ The FDC3 packages (`fdc3-agent`, `fdc3-broker`, `fdc3-app-directory`, `fdc3-reso
 **Decision:** Extract inline styles to a `styles.ts` file in each package that needs them, using a `Styles` object pattern.
 
 **Example:**
+
 ```typescript
 // styles.ts
 export const Styles = {
@@ -123,13 +127,13 @@ private async checkEntitlement(
 
 ## Risks / Trade-offs
 
-| Risk | Mitigation |
-|------|------------|
-| Breaking imports when consolidating ErrorBoundary | Re-export from original locations with deprecation comments |
-| Missing test coverage for refactored code | Run full test suite before/after each change |
-| Introducing bugs during Broker decomposition | Keep methods small, refactor incrementally, test after each step |
-| TypeScript errors when removing `@ts-expect-error` | Fix underlying type issues, don't just remove suppressions |
-| Inline style extraction breaking React rendering | Verify visual behavior unchanged after extraction |
+| Risk                                               | Mitigation                                                       |
+| -------------------------------------------------- | ---------------------------------------------------------------- |
+| Breaking imports when consolidating ErrorBoundary  | Re-export from original locations with deprecation comments      |
+| Missing test coverage for refactored code          | Run full test suite before/after each change                     |
+| Introducing bugs during Broker decomposition       | Keep methods small, refactor incrementally, test after each step |
+| TypeScript errors when removing `@ts-expect-error` | Fix underlying type issues, don't just remove suppressions       |
+| Inline style extraction breaking React rendering   | Verify visual behavior unchanged after extraction                |
 
 ## Migration Plan
 

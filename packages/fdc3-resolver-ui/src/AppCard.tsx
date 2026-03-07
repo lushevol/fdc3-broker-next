@@ -200,20 +200,23 @@ export const AppCard: React.FC<AppCardProps> = ({
       )}
 
       {/* App Name */}
-      <div style={AppCardStyles.name}>
-        {app.title || app.name}
-      </div>
+      <div style={AppCardStyles.name}>{app.title || app.name}</div>
 
       {/* App Instance */}
       {instanceId && (
-        <div style={{ ...Typography.caption, marginBottom: '8px' }}>
-          Instance: {instanceId}
-        </div>
+        <div style={{ ...Typography.caption, marginBottom: '8px' }}>Instance: {instanceId}</div>
       )}
 
       {/* Current Context */}
       {currentContext && (
-        <div style={{ ...Typography.caption, padding: '8px', backgroundColor: Colors.backgroundLight, borderRadius: '4px' }}>
+        <div
+          style={{
+            ...Typography.caption,
+            padding: '8px',
+            backgroundColor: Colors.backgroundLight,
+            borderRadius: '4px',
+          }}
+        >
           <div>Current Context:</div>
           <div style={{ fontFamily: 'monospace', marginTop: '4px' }}>{currentContext.type}</div>
         </div>
@@ -221,9 +224,7 @@ export const AppCard: React.FC<AppCardProps> = ({
 
       {/* App Description */}
       {app.description && (
-        <div style={{ ...Typography.caption, marginTop: '8px' }}>
-          {app.description}
-        </div>
+        <div style={{ ...Typography.caption, marginTop: '8px' }}>{app.description}</div>
       )}
     </div>
   );

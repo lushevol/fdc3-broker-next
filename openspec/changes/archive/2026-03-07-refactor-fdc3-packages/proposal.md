@@ -25,12 +25,14 @@ None. No spec-level behavior changes. All refactoring preserves existing functio
 ## Impact
 
 **Packages Affected:**
+
 - `packages/fdc3-agent` - ErrorBoundary consolidation, hook patterns, type exports
 - `packages/fdc3-broker` - Major refactoring: Broker class decomposition, ErrorBoundary, channel types, entitlements, dead code removal
 - `packages/fdc3-app-directory` - Type file organization, client method simplification
 - `packages/fdc3-resolver-ui` - ErrorBoundary consolidation, inline style extraction
 
 **Estimated Impact:**
+
 - ~1,200+ lines reduced
 - Improved code maintainability
 - Reduced duplication

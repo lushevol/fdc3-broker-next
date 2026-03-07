@@ -97,7 +97,10 @@ export class ChannelImpl implements Channel {
    * @param handler - Function to handle incoming contexts
    * @returns Promise resolving to Listener with unsubscribe method
    */
-  async addContextListener(contextType: string, handler: (context: Context) => void): Promise<Listener>;
+  async addContextListener(
+    contextType: string,
+    handler: (context: Context) => void,
+  ): Promise<Listener>;
 
   async addContextListener(
     contextTypeOrHandler: string | ((context: Context) => void),
@@ -106,8 +109,10 @@ export class ChannelImpl implements Channel {
     const listenerId = `channel_listener_${Date.now()}_${Math.random()}`;
 
     // Handle overload: if first arg is a function, it's the handler for all contexts
-    const actualContextType: string | null = typeof contextTypeOrHandler === 'function' ? null : contextTypeOrHandler;
-    const actualHandler = typeof contextTypeOrHandler === 'function' ? contextTypeOrHandler : handler!;
+    const actualContextType: string | null =
+      typeof contextTypeOrHandler === 'function' ? null : contextTypeOrHandler;
+    const actualHandler =
+      typeof contextTypeOrHandler === 'function' ? contextTypeOrHandler : handler!;
 
     const listener: ContextListener = {
       id: listenerId,
@@ -232,7 +237,10 @@ export class PrivateChannelImpl implements PrivateChannel {
    * @param handler - Function to handle incoming contexts
    * @returns Promise resolving to Listener
    */
-  async addContextListener(contextType: string, handler: (context: Context) => void): Promise<Listener>;
+  async addContextListener(
+    contextType: string,
+    handler: (context: Context) => void,
+  ): Promise<Listener>;
 
   async addContextListener(
     contextTypeOrHandler: string | ((context: Context) => void),

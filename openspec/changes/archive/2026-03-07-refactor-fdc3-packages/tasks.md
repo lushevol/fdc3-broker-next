@@ -72,6 +72,7 @@
 - [x] 8.5 Update any affected documentation
 
 **Note:** All tests pass. TypeScript errors remaining are pre-existing issues:
+
 - Missing module 'ratan-fdc3-app-directory' (module resolution)
 - PrivateChannelImpl missing FDC3 interface methods (implementation gap)
 
@@ -79,14 +80,14 @@
 
 ### Completed Refactoring
 
-| Phase | Description | Lines Saved |
-|-------|-------------|-------------|
-| 1 | Dead code removal | ~50 lines |
-| 2 | ErrorBoundary consolidation | ~700 lines |
-| 3 | Inline style extraction | ~150 lines |
-| 4 | Entitlement check deduplication | ~115 lines |
-| 6 | TypeScript suppression removal | 15 comments removed |
-| **Total** | | **~1,015 lines** |
+| Phase     | Description                     | Lines Saved         |
+| --------- | ------------------------------- | ------------------- |
+| 1         | Dead code removal               | ~50 lines           |
+| 2         | ErrorBoundary consolidation     | ~700 lines          |
+| 3         | Inline style extraction         | ~150 lines          |
+| 4         | Entitlement check deduplication | ~115 lines          |
+| 6         | TypeScript suppression removal  | 15 comments removed |
+| **Total** |                                 | **~1,015 lines**    |
 
 ### Files Modified
 

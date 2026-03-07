@@ -82,7 +82,10 @@ export class EntitlementValidator {
     }
 
     try {
-      const entitled = await this.config.callbacks.onValidateEntitlements(tileId, checkConfig.action);
+      const entitled = await this.config.callbacks.onValidateEntitlements(
+        tileId,
+        checkConfig.action,
+      );
 
       if (!entitled) {
         this.logger.security(checkConfig.securityLogMessage, checkConfig.logContext);
@@ -112,7 +115,11 @@ export class EntitlementValidator {
    * @param context - Optional context data
    * @returns Promise resolving to entitlement check result
    */
-  async canSendIntent(tileId: string, intent: string, context?: Context): Promise<EntitlementCheckResult> {
+  async canSendIntent(
+    tileId: string,
+    intent: string,
+    context?: Context,
+  ): Promise<EntitlementCheckResult> {
     return this.checkEntitlement(tileId, {
       action: 'send-intent',
       deniedErrorCode: 'ENTITLEMENT_DENIED_SEND',

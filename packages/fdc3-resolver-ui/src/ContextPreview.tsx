@@ -132,12 +132,8 @@ export const ContextPreview: React.FC<ContextPreviewProps> = ({ context }) => {
         marginBottom: '16px',
       }}
     >
-      <div style={ContextPreviewStyles.label}>
-        Context Data:
-      </div>
-      <div style={ContextPreviewStyles.content}>
-        {JSON.stringify(context, null, 2)}
-      </div>
+      <div style={ContextPreviewStyles.label}>Context Data:</div>
+      <div style={ContextPreviewStyles.content}>{JSON.stringify(context, null, 2)}</div>
     </div>
   );
 };

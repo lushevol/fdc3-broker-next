@@ -405,7 +405,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
       const theme = getTheme(this.props.theme);
       const title = this.props.title ?? 'FDC3 Error';
-      const description = this.props.description ?? 'Something went wrong. This may affect functionality.';
+      const description =
+        this.props.description ?? 'Something went wrong. This may affect functionality.';
 
       return (
         <DefaultFallback
