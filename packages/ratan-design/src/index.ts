@@ -35,3 +35,12 @@ export { SearchInput } from './Input';
 
 // Design Tokens
 export * from './tokens';
+
+// CSS Cleanup utility
+export { cleanUnusedCss } from './css-cleanup/index.js';
+export type {
+  CleanUnusedCssOptions,
+  CleanUnusedCssResult,
+  CleanupStats,
+  DomSignature,
+} from './css-cleanup/index.js';

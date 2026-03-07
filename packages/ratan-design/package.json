@@ -25,7 +25,8 @@
     "generate:tokens:less": "tsx scripts/generate-tokens.ts -- less",
     "generate:tokens:preview": "tsx scripts/generate-tokens.ts -- preview",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "css-cleanup": "tsx scripts/css-cleanup.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -59,6 +60,8 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "antd": "^6.2.2",
+    "cheerio": "^1.0.0",
+    "css-tree": "^3.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
