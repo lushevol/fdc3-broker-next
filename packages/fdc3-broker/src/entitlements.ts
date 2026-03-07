@@ -27,6 +27,22 @@ export interface EntitlementCheckResult {
 }
 
 /**
+ * Configuration for entitlement check
+ */
+interface EntitlementCheckConfig {
+  /** Action being checked (e.g., 'send-intent', 'receive-intent') */
+  action: string;
+  /** Error code when denied */
+  deniedErrorCode: string;
+  /** Reason message when denied */
+  deniedReason: string;
+  /** Log message for security events */
+  securityLogMessage: string;
+  /** Additional context for logging */
+  logContext: Record<string, unknown>;
+}
+
+/**
  * Entitlement Validator Implementation
  *
  * Validates user permissions for FDC3 operations including sending intents,
@@ -48,71 +64,62 @@ export class EntitlementValidator {
   }
 
   /**
-   * Checks if a tile can send an intent
+   * Shared entitlement check logic
    *
-   * Validates that the tile has permission to send the specified intent type.
-   * Logs a security event if denied.
-   *
-   * @param tileId - Tile identifier to check
-   * @param intent - Intent type to send
-   * @param context - Optional context data
+   * @param tileId - Tile or app identifier
+   * @param checkConfig - Check configuration
    * @returns Promise resolving to entitlement check result
-   *
-   * @example
-   * ```typescript
-   * const check = await validator.canSendIntent('tile-123', 'ViewChart', context);
-   * if (!check.allowed) {
-   *   console.error(check.reason);
-   * }
-   * ```
    */
-  async canSendIntent(
+  private async checkEntitlement(
     tileId: string,
-    intent: string,
-    context?: Context,
+    checkConfig: EntitlementCheckConfig,
   ): Promise<EntitlementCheckResult> {
-    this.logger.debug('Checking send intent entitlement', {
-      tileId,
-      intent,
-      contextType: context?.type,
-    });
+    this.logger.debug(`Checking ${checkConfig.action} entitlement`, checkConfig.logContext);
 
-    // Check if entitlement validation callback is configured
     if (!this.config.callbacks.onValidateEntitlements) {
-      // No validation configured - allow by default
       this.logger.warn('No entitlement validation configured, allowing by default');
       return { allowed: true };
     }
 
     try {
-      // Call entitlement validation callback
-      const entitled = await this.config.callbacks.onValidateEntitlements(tileId, 'send-intent');
+      const entitled = await this.config.callbacks.onValidateEntitlements(tileId, checkConfig.action);
 
       if (!entitled) {
-        this.logger.security('Intent send denied due to entitlements', {
-          tileId,
-          intent,
-          contextType: context?.type,
-        });
-
+        this.logger.security(checkConfig.securityLogMessage, checkConfig.logContext);
         return {
           allowed: false,
-          reason: 'Not entitled to send this intent',
-          errorCode: 'ENTITLEMENT_DENIED_SEND',
+          reason: checkConfig.deniedReason,
+          errorCode: checkConfig.deniedErrorCode,
         };
       }
 
       return { allowed: true };
     } catch (error) {
-      this.logger.error('Error checking send intent entitlements', error as Error);
-
-      // Fail closed for security
+      this.logger.error(`Error checking ${checkConfig.action} entitlements`, error as Error);
       return {
         allowed: false,
         reason: 'Error validating entitlements',
         errorCode: 'ENTITLEMENT_ERROR',
       };
     }
+  }
+
+  /**
+   * Checks if a tile can send an intent
+   *
+   * @param tileId - Tile identifier to check
+   * @param intent - Intent type to send
+   * @param context - Optional context data
+   * @returns Promise resolving to entitlement check result
+   */
+  async canSendIntent(tileId: string, intent: string, context?: Context): Promise<EntitlementCheckResult> {
+    return this.checkEntitlement(tileId, {
+      action: 'send-intent',
+      deniedErrorCode: 'ENTITLEMENT_DENIED_SEND',
+      deniedReason: 'Not entitled to send this intent',
+      securityLogMessage: 'Intent send denied due to entitlements',
+      logContext: { tileId, intent, contextType: context?.type },
+    });
   }
 
   /**
@@ -123,46 +130,13 @@ export class EntitlementValidator {
    * @returns Promise resolving to entitlement check result
    */
   async canReceiveIntent(tileId: string, intent: string): Promise<EntitlementCheckResult> {
-    this.logger.debug('Checking receive intent entitlement', {
-      tileId,
-      intent,
+    return this.checkEntitlement(tileId, {
+      action: 'receive-intent',
+      deniedErrorCode: 'ENTITLEMENT_DENIED_RECEIVE',
+      deniedReason: 'Not entitled to receive this intent',
+      securityLogMessage: 'Intent receive denied due to entitlements',
+      logContext: { tileId, intent },
     });
-
-    // Check if entitlement validation callback is configured
-    if (!this.config.callbacks.onValidateEntitlements) {
-      // No validation configured - allow by default
-      this.logger.warn('No entitlement validation configured, allowing by default');
-      return { allowed: true };
-    }
-
-    try {
-      // Call entitlement validation callback
-      const entitled = await this.config.callbacks.onValidateEntitlements(tileId, 'receive-intent');
-
-      if (!entitled) {
-        this.logger.security('Intent receive denied due to entitlements', {
-          tileId,
-          intent,
-        });
-
-        return {
-          allowed: false,
-          reason: 'Not entitled to receive this intent',
-          errorCode: 'ENTITLEMENT_DENIED_RECEIVE',
-        };
-      }
-
-      return { allowed: true };
-    } catch (error) {
-      this.logger.error('Error checking receive intent entitlements', error as Error);
-
-      // Fail closed for security
-      return {
-        allowed: false,
-        reason: 'Error validating entitlements',
-        errorCode: 'ENTITLEMENT_ERROR',
-      };
-    }
   }
 
   /**
@@ -173,67 +147,31 @@ export class EntitlementValidator {
    * @returns Promise resolving to entitlement check result
    */
   async canJoinChannel(tileId: string, channelId: string): Promise<EntitlementCheckResult> {
-    this.logger.debug('Checking join channel entitlement', {
-      tileId,
-      channelId,
+    const baseResult = await this.checkEntitlement(tileId, {
+      action: 'join-channel',
+      deniedErrorCode: 'ENTITLEMENT_DENIED_CHANNEL',
+      deniedReason: 'Not entitled to join this channel',
+      securityLogMessage: 'Channel join denied due to entitlements',
+      logContext: { tileId, channelId },
     });
 
-    // Check if entitlement validation callback is configured
-    if (!this.config.callbacks.onValidateEntitlements) {
-      // No validation configured - allow by default
-      this.logger.warn('No entitlement validation configured, allowing by default');
-      return { allowed: true };
+    if (!baseResult.allowed) {
+      return baseResult;
     }
 
-    try {
-      // Call entitlement validation callback
-      const entitled = await this.config.callbacks.onValidateEntitlements(tileId, 'join-channel');
-
-      if (!entitled) {
-        this.logger.security('Channel join denied due to entitlements', {
-          tileId,
-          channelId,
-        });
-
-        return {
-          allowed: false,
-          reason: 'Not entitled to join this channel',
-          errorCode: 'ENTITLEMENT_DENIED_CHANNEL',
-        };
-      }
-
-      // Additional check for premium channels
-      if (this.isPremiumChannel(channelId)) {
-        const premiumEntitled = await this.config.callbacks.onValidateEntitlements(
-          tileId,
-          'join-premium-channel',
-        );
-
-        if (!premiumEntitled) {
-          this.logger.security('Premium channel join denied due to entitlements', {
-            tileId,
-            channelId,
-          });
-
-          return {
-            allowed: false,
-            reason: 'Premium subscription required for this channel',
-            errorCode: 'ENTITLEMENT_DENIED_PREMIUM_CHANNEL',
-          };
-        }
-      }
-
-      return { allowed: true };
-    } catch (error) {
-      this.logger.error('Error checking join channel entitlements', error as Error);
-
-      // Fail closed for security
-      return {
-        allowed: false,
-        reason: 'Error validating entitlements',
-        errorCode: 'ENTITLEMENT_ERROR',
-      };
+    // Additional check for premium channels
+    if (this.isPremiumChannel(channelId)) {
+      const premiumResult = await this.checkEntitlement(tileId, {
+        action: 'join-premium-channel',
+        deniedErrorCode: 'ENTITLEMENT_DENIED_PREMIUM_CHANNEL',
+        deniedReason: 'Premium subscription required for this channel',
+        securityLogMessage: 'Premium channel join denied due to entitlements',
+        logContext: { tileId, channelId, premium: true },
+      });
+      return premiumResult;
     }
+
+    return baseResult;
   }
 
   /**
@@ -244,46 +182,13 @@ export class EntitlementValidator {
    * @returns Promise resolving to entitlement check result
    */
   async canOpenTile(appId: string, context?: Context): Promise<EntitlementCheckResult> {
-    this.logger.debug('Checking open tile entitlement', {
-      appId,
-      contextType: context?.type,
+    return this.checkEntitlement(appId, {
+      action: 'open',
+      deniedErrorCode: 'ENTITLEMENT_DENIED_OPEN',
+      deniedReason: 'Not entitled to open this application',
+      securityLogMessage: 'Tile open denied due to entitlements',
+      logContext: { appId, contextType: context?.type },
     });
-
-    // Check if entitlement validation callback is configured
-    if (!this.config.callbacks.onValidateEntitlements) {
-      // No validation configured - allow by default
-      this.logger.warn('No entitlement validation configured, allowing by default');
-      return { allowed: true };
-    }
-
-    try {
-      // Call entitlement validation callback
-      const entitled = await this.config.callbacks.onValidateEntitlements(appId, 'open');
-
-      if (!entitled) {
-        this.logger.security('Tile open denied due to entitlements', {
-          appId,
-          contextType: context?.type,
-        });
-
-        return {
-          allowed: false,
-          reason: 'Not entitled to open this application',
-          errorCode: 'ENTITLEMENT_DENIED_OPEN',
-        };
-      }
-
-      return { allowed: true };
-    } catch (error) {
-      this.logger.error('Error checking open tile entitlements', error as Error);
-
-      // Fail closed for security
-      return {
-        allowed: false,
-        reason: 'Error validating entitlements',
-        errorCode: 'ENTITLEMENT_ERROR',
-      };
-    }
   }
 
   /**
@@ -292,27 +197,7 @@ export class EntitlementValidator {
    * @returns true if channel requires premium access
    */
   private isPremiumChannel(channelId: string): boolean {
-    // Example: channels starting with 'premium-' require premium access
-    // This can be configured via broker config if needed
     const premiumChannelPrefixes = ['premium-', 'private-'];
     return premiumChannelPrefixes.some((prefix) => channelId.startsWith(prefix));
-  }
-
-  /**
-   * Log security event
-   * @param event Event description
-   * @param data Event data
-   */
-  private logSecurityEvent(event: string, data: Record<string, unknown>): void {
-    this.logger.security(event, data);
-
-    // Call security event callback if configured
-    if (this.config.callbacks.onSecurityEvent) {
-      try {
-        this.config.callbacks.onSecurityEvent(event, data);
-      } catch (error) {
-        this.logger.error('Error calling security event callback', error as Error);
-      }
-    }
   }
 }

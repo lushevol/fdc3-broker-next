@@ -124,6 +124,7 @@
  */
 
 import React from 'react';
+import { Card, Colors, Typography, AppCardStyles } from './styles';
 import type { AppCardProps } from './types';
 
 /**
@@ -177,14 +178,11 @@ export const AppCard: React.FC<AppCardProps> = ({
       role="option"
       aria-selected={selected}
       style={{
+        ...Card.base,
         border: '2px solid',
-        borderColor: selected ? '#1976d2' : focused ? '#42a5f5' : '#e0e0e0',
-        borderRadius: '8px',
-        padding: '16px',
+        borderColor: selected ? Colors.primary : focused ? Colors.primaryLight : Colors.border,
         margin: '8px',
-        cursor: 'pointer',
-        backgroundColor: selected ? '#e3f2fd' : '#fff',
-        transition: 'all 0.2s',
+        backgroundColor: selected ? '#e3f2fd' : Colors.background,
       }}
     >
       {/* App Icon */}
@@ -202,40 +200,20 @@ export const AppCard: React.FC<AppCardProps> = ({
       )}
 
       {/* App Name */}
-      <div
-        style={{
-          fontSize: '16px',
-          fontWeight: 600,
-          marginBottom: '4px',
-        }}
-      >
+      <div style={AppCardStyles.name}>
         {app.title || app.name}
       </div>
 
       {/* App Instance */}
       {instanceId && (
-        <div
-          style={{
-            fontSize: '12px',
-            color: '#666',
-            marginBottom: '8px',
-          }}
-        >
+        <div style={{ ...Typography.caption, marginBottom: '8px' }}>
           Instance: {instanceId}
         </div>
       )}
 
       {/* Current Context */}
       {currentContext && (
-        <div
-          style={{
-            fontSize: '12px',
-            color: '#666',
-            padding: '8px',
-            backgroundColor: '#f5f5f5',
-            borderRadius: '4px',
-          }}
-        >
+        <div style={{ ...Typography.caption, padding: '8px', backgroundColor: Colors.backgroundLight, borderRadius: '4px' }}>
           <div>Current Context:</div>
           <div style={{ fontFamily: 'monospace', marginTop: '4px' }}>{currentContext.type}</div>
         </div>
@@ -243,13 +221,7 @@ export const AppCard: React.FC<AppCardProps> = ({
 
       {/* App Description */}
       {app.description && (
-        <div
-          style={{
-            fontSize: '12px',
-            color: '#666',
-            marginTop: '8px',
-          }}
-        >
+        <div style={{ ...Typography.caption, marginTop: '8px' }}>
           {app.description}
         </div>
       )}

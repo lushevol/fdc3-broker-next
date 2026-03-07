@@ -22,6 +22,7 @@
  */
 
 import { type ComponentType, lazy, type ReactNode, Suspense } from 'react';
+import { Colors, Layout } from './styles';
 import type { AppCardProps, ContextPreviewProps, ResolverDialogProps } from './types';
 
 /**
@@ -122,26 +123,13 @@ export function ResolverSuspense({
  */
 function ResolverLoadingFallback() {
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        zIndex: 9999,
-      }}
-    >
+    <div style={Layout.overlay}>
       <div
         style={{
-          backgroundColor: 'white',
+          backgroundColor: Colors.background,
           padding: '20px',
           borderRadius: '8px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+          boxShadow: `0 4px 6px ${Colors.shadow}`,
         }}
       >
         <div
@@ -150,15 +138,15 @@ function ResolverLoadingFallback() {
             alignItems: 'center',
             gap: '12px',
             fontSize: '14px',
-            color: '#666',
+            color: Colors.textLight,
           }}
         >
           <div
             style={{
               width: '20px',
               height: '20px',
-              border: '2px solid #e0e0e0',
-              borderTop: '2px solid #1976d2',
+              border: `2px solid ${Colors.border}`,
+              borderTop: `2px solid ${Colors.primary}`,
               borderRadius: '50%',
               animation: 'spin 1s linear infinite',
             }}

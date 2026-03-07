@@ -113,6 +113,7 @@
  */
 
 import type React from 'react';
+import { Colors, ContextPreviewStyles } from './styles';
 import type { ContextPreviewProps } from './types';
 
 /**
@@ -126,33 +127,15 @@ export const ContextPreview: React.FC<ContextPreviewProps> = ({ context }) => {
     <div
       style={{
         padding: '16px',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: Colors.backgroundLight,
         borderRadius: '8px',
         marginBottom: '16px',
       }}
     >
-      <div
-        style={{
-          fontSize: '14px',
-          fontWeight: 600,
-          marginBottom: '8px',
-          color: '#333',
-        }}
-      >
+      <div style={ContextPreviewStyles.label}>
         Context Data:
       </div>
-      <div
-        style={{
-          fontSize: '12px',
-          fontFamily: 'monospace',
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-all',
-          backgroundColor: '#fff',
-          padding: '12px',
-          borderRadius: '4px',
-          border: '1px solid #e0e0e0',
-        }}
-      >
+      <div style={ContextPreviewStyles.content}>
         {JSON.stringify(context, null, 2)}
       </div>
     </div>

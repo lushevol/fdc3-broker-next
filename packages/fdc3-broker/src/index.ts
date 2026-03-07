@@ -9,9 +9,9 @@ export { Broker } from './broker';
 // Export channel components
 export { ChannelImpl, PrivateChannelImpl, USER_CHANNEL_IDS } from './channel';
 export { ChannelManager } from './channel-manager';
-export type { ErrorBoundaryProps } from './ErrorBoundary';
+export type { ErrorBoundaryProps, ErrorBoundaryTheme } from './ErrorBoundary';
 // Export Error Boundary
-export { ErrorBoundary } from './ErrorBoundary';
+export { ErrorBoundary, ErrorBoundaryThemes } from './ErrorBoundary';
 export { EntitlementValidator } from './entitlements';
 // Export environment utilities
 export * from './environment';

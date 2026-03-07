@@ -83,34 +83,40 @@ export class ChannelImpl implements Channel {
   }
 
   /**
-   * Adds a context listener to the channel
+   * Adds a context listener to the channel (all context types)
    *
-   * @param contextType - Context type filter, or null for all contexts
    * @param handler - Function to handle incoming contexts
    * @returns Promise resolving to Listener with unsubscribe method
-   *
-   * @example
-   * ```typescript
-   * const listener = await channel.addContextListener('fdc3.instrument', (context) => {
-   *   console.log('Received:', context);
-   * });
-   * ```
    */
-  // @ts-expect-error - Channel.addContextListener signature mismatch
+  async addContextListener(handler: (context: Context) => void): Promise<Listener>;
+
+  /**
+   * Adds a context listener to the channel (filtered by type)
+   *
+   * @param contextType - Context type filter
+   * @param handler - Function to handle incoming contexts
+   * @returns Promise resolving to Listener with unsubscribe method
+   */
+  async addContextListener(contextType: string, handler: (context: Context) => void): Promise<Listener>;
+
   async addContextListener(
-    contextType: string | null,
-    handler: (context: Context) => void,
+    contextTypeOrHandler: string | ((context: Context) => void),
+    handler?: (context: Context) => void,
   ): Promise<Listener> {
     const listenerId = `channel_listener_${Date.now()}_${Math.random()}`;
+
+    // Handle overload: if first arg is a function, it's the handler for all contexts
+    const actualContextType: string | null = typeof contextTypeOrHandler === 'function' ? null : contextTypeOrHandler;
+    const actualHandler = typeof contextTypeOrHandler === 'function' ? contextTypeOrHandler : handler!;
+
     const listener: ContextListener = {
       id: listenerId,
-      contextType,
-      handler,
+      contextType: actualContextType,
+      handler: actualHandler,
     };
 
     this.contextListeners.add(listener);
 
-    // Return listener with id and unsubscribe
     return {
       id: listenerId,
       unsubscribe: async () => {
@@ -212,18 +218,32 @@ export class PrivateChannelImpl implements PrivateChannel {
   }
 
   /**
-   * Adds a context listener
+   * Adds a context listener (all context types)
    *
-   * @param contextType - Context type filter, or null for all
    * @param handler - Function to handle incoming contexts
    * @returns Promise resolving to Listener
    */
-  // @ts-expect-error - PrivateChannel.addContextListener signature mismatch
+  async addContextListener(handler: (context: Context) => void): Promise<Listener>;
+
+  /**
+   * Adds a context listener (filtered by type)
+   *
+   * @param contextType - Context type filter
+   * @param handler - Function to handle incoming contexts
+   * @returns Promise resolving to Listener
+   */
+  async addContextListener(contextType: string, handler: (context: Context) => void): Promise<Listener>;
+
   async addContextListener(
-    contextType: string | null,
-    handler: (context: Context) => void,
+    contextTypeOrHandler: string | ((context: Context) => void),
+    handler?: (context: Context) => void,
   ): Promise<Listener> {
-    return this.channel.addContextListener(contextType, handler);
+    // If first arg is a function, it's the handler for all contexts
+    if (typeof contextTypeOrHandler === 'function') {
+      return this.channel.addContextListener(contextTypeOrHandler);
+    }
+    // Otherwise it's (contextType, handler)
+    return this.channel.addContextListener(contextTypeOrHandler, handler!);
   }
 
   /**

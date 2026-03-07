@@ -73,13 +73,11 @@ export class ChannelManager {
    */
   createChannel(channelId: string): Channel {
     if (this.appChannels.has(channelId)) {
-      // @ts-expect-error - ChannelImpl extends Channel
       return this.appChannels.get(channelId)!;
     }
 
     const channel = new ChannelImpl(channelId, 'app');
     this.appChannels.set(channelId, channel);
-    // @ts-expect-error - ChannelImpl extends Channel
     return channel;
   }
 
@@ -92,13 +90,11 @@ export class ChannelManager {
   getChannel(channelId: string): Channel | null {
     // Check app channels
     if (this.appChannels.has(channelId)) {
-      // @ts-expect-error - ChannelImpl extends Channel
       return this.appChannels.get(channelId)!;
     }
 
     // Check user channels
     if (this.userChannels.has(channelId)) {
-      // @ts-expect-error - ChannelImpl extends Channel
       return this.userChannels.get(channelId)!;
     }
 
@@ -115,7 +111,6 @@ export class ChannelManager {
     const id = channelId || `private_${Date.now()}_${Math.random()}`;
     const privateChannel = new PrivateChannelImpl(id);
     this.privateChannels.set(id, privateChannel);
-    // @ts-expect-error - PrivateChannelImpl has extra methods
     return privateChannel;
   }
 
@@ -125,7 +120,6 @@ export class ChannelManager {
    * @returns Array of user channel objects
    */
   getUserChannels(): Channel[] {
-    // @ts-expect-error - ChannelImpl extends Channel
     return Array.from(this.userChannels.values());
   }
 
@@ -214,7 +208,6 @@ export class ChannelManager {
    * @returns Array of all channels
    */
   getAllChannels(): Channel[] {
-    // @ts-expect-error - PrivateChannelImpl extends PrivateChannel
     return [
       ...Array.from(this.appChannels.values()),
       ...Array.from(this.userChannels.values()),
@@ -335,13 +328,10 @@ export class ChannelManager {
   getChannelsByType(type: 'app' | 'user' | 'private'): Channel[] {
     switch (type) {
       case 'app':
-        // @ts-expect-error - ChannelImpl extends Channel
         return Array.from(this.appChannels.values());
       case 'user':
-        // @ts-expect-error - ChannelImpl extends Channel
         return Array.from(this.userChannels.values());
       case 'private':
-        // @ts-expect-error - PrivateChannelImpl extends PrivateChannel
         return Array.from(this.privateChannels.values());
       default:
         return [];
@@ -357,13 +347,10 @@ export class ChannelManager {
   getChannelByType(type: 'app' | 'user' | 'private', channelId: string): Channel | null {
     switch (type) {
       case 'app':
-        // @ts-expect-error - ChannelImpl extends Channel
         return this.appChannels.get(channelId) || null;
       case 'user':
-        // @ts-expect-error - ChannelImpl extends Channel
         return this.userChannels.get(channelId) || null;
       case 'private':
-        // @ts-expect-error - PrivateChannelImpl extends PrivateChannel
         return this.privateChannels.get(channelId) || null;
       default:
         return null;

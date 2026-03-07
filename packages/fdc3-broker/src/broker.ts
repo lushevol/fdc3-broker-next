@@ -265,23 +265,6 @@ export class Broker implements DesktopAgent {
       return;
     }
 
-    // // Find internal tiles that can handle this intent
-    // const listeners = this.intentListeners.get(intent);
-    // if (listeners && listeners.length > 0) {
-    //   // Forward to internal listeners
-    //   for (const listener of listeners) {
-    //     const handler = (listener as any).handler;
-    //     if (handler) {
-    //       try {
-    //         await handler(context);
-    //       } catch (error) {
-    //         this.logger.error(`Error forwarding OpenFin intent ${intent}:`, error as Error);
-    //       }
-    //     }
-    //   }
-    //   return;
-    // }
-
     // No internal listeners - raise intent internally (will find apps, resolve, open, deliver)
     // Pass skipExternalRouting=true to prevent infinite loop back to OpenFin
     try {

@@ -135,10 +135,6 @@ export const AgentProvider: React.FC<{
             // This ensures that all FDC3 calls from this provider are attributed to this app
             setAgent(new ScopedDesktopAgent(brokerInstance as Broker, appIdentifier));
           }
-          // else {
-          //   // Otherwise use the global broker instance (legacy/unscoped mode)
-          //   setAgent(brokerInstance);
-          // }
           setError(null);
         }
       } catch (err) {
@@ -176,21 +172,6 @@ export const AgentProvider: React.FC<{
       </div>
     );
   }
-
-  // Show loading while waiting for broker - DISABLED to allow fallback behavior
-  // if (!agent) {
-  //   return (
-  //     <div
-  //       style={{
-  //         padding: '16px',
-  //         backgroundColor: '#e3f2fd',
-  //         color: '#1565c0',
-  //       }}
-  //     >
-  //       Initializing FDC3...
-  //     </div>
-  //   );
-  // }
 
   return <AgentContext.Provider value={value}>{children}</AgentContext.Provider>;
 };
