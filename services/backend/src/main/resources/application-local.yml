@@ -2,6 +2,10 @@
 spring:
   application:
     name: single-ui-bff-local
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.ldap.LdapAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.ldap.LdapDataAutoConfiguration
 
   # Use H2 in-memory database for local development
   datasource:
@@ -17,9 +21,6 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.H2Dialect
-  # Disable LDAP auto-configuration for local
-  ldap:
-    urls: ldap://localhost:389
   # Disable Flyway for local (use JPA ddl-auto instead)
   flyway:
     enabled: false
@@ -27,6 +28,7 @@ spring:
 # Local server config
 server:
   port: 8088
+  address: 127.0.0.1
 
 # Disable Eureka client for local
 eureka:

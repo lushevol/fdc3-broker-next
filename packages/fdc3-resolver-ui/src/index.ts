@@ -153,10 +153,9 @@ export {
 } from './lazy';
 // Export components
 export { ResolverDialog } from './ResolverDialog';
-export type { ResolverErrorBoundaryProps } from './ResolverErrorBoundary';
-
-// Export Error Boundary
-export { ResolverErrorBoundary } from './ResolverErrorBoundary';
+// Export Error Boundary (re-exported from fdc3-broker)
+export { ErrorBoundary, ErrorBoundaryThemes, ResolverErrorBoundary } from './ResolverErrorBoundary';
+export type { ErrorBoundaryProps, ErrorBoundaryTheme } from './ResolverErrorBoundary';
 // Export all types
 export * from './types';
 // Export hooks

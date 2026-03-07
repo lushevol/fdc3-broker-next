@@ -12,11 +12,6 @@
 export function isOpenFinAvailable(): boolean {
   try {
     const fin = (globalThis as any).fin;
-    console.log('DEBUG: isOpenFinAvailable', {
-      finType: typeof fin,
-      hasDesktop: fin ? typeof fin.desktop : 'N/A',
-    });
-    // const fin = (globalThis as any).fin; // Removed duplicate declaration
     return (
       typeof fin !== 'undefined' &&
       typeof fin === 'object' &&

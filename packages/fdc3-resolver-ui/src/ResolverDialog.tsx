@@ -110,6 +110,7 @@
 import React, { useCallback } from 'react';
 import { AppCard } from './AppCard';
 import { ContextPreview } from './ContextPreview';
+import { Layout, Typography, Buttons } from './styles';
 import type { ResolverDialogProps, ResolverTarget } from './types';
 import { useResolverKeyboard } from './useResolverKeyboard';
 
@@ -165,18 +166,7 @@ export const ResolverDialog = ({
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 9999,
-      }}
+      style={Layout.overlay}
       onClick={handleCancel}
       role="dialog"
       aria-modal="true"
@@ -184,43 +174,16 @@ export const ResolverDialog = ({
       aria-describedby="resolver-description"
     >
       <div
-        style={{
-          backgroundColor: '#fff',
-          borderRadius: '12px',
-          padding: '24px',
-          maxWidth: '800px',
-          maxHeight: '80vh',
-          overflowY: 'auto',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-        }}
+        style={Layout.dialog}
         onClick={(e) => e.stopPropagation()}
         data-testid="resolver-content"
       >
         {/* Header */}
-        <div
-          style={{
-            marginBottom: '16px',
-          }}
-        >
-          <h2
-            id="resolver-title"
-            style={{
-              fontSize: '20px',
-              fontWeight: 600,
-              margin: 0,
-              color: '#333',
-            }}
-          >
+        <div style={Layout.header}>
+          <h2 id="resolver-title" style={Typography.title}>
             Select Application for {intent}
           </h2>
-          <p
-            id="resolver-description"
-            style={{
-              fontSize: '14px',
-              color: '#666',
-              marginTop: '8px',
-            }}
-          >
+          <p id="resolver-description" style={Typography.subtitle}>
             {targets.length} application{targets.length > 1 ? 's' : ''} available
           </p>
         </div>
@@ -229,26 +192,12 @@ export const ResolverDialog = ({
         <ContextPreview context={context} />
 
         {/* Instructions */}
-        <div
-          style={{
-            fontSize: '12px',
-            color: '#666',
-            marginBottom: '16px',
-            fontStyle: 'italic',
-          }}
-        >
+        <div style={Typography.hint}>
           Use arrow keys to navigate, Enter to select, Escape to cancel
         </div>
 
         {/* App Cards */}
-        <div
-          role="listbox"
-          aria-label="Available applications"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
+        <div role="listbox" aria-label="Available applications" style={Layout.cardList}>
           {targets.map((target, index) => (
             <AppCard
               key={target.instanceId || target.appId}
@@ -268,27 +217,8 @@ export const ResolverDialog = ({
         </div>
 
         {/* Footer Actions */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '8px',
-            marginTop: '16px',
-          }}
-        >
-          <button
-            onClick={handleCancel}
-            style={{
-              padding: '8px 16px',
-              fontSize: '14px',
-              fontWeight: 500,
-              color: '#666',
-              backgroundColor: '#f5f5f5',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
+        <div style={Layout.footer}>
+          <button onClick={handleCancel} style={Buttons.secondary}>
             Cancel
           </button>
         </div>
