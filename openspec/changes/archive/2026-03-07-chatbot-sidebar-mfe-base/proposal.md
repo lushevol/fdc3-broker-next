@@ -26,23 +26,27 @@ None - this is a new feature with no changes to existing spec-level behavior.
 ## Impact
 
 **Frontend (apps/base)**:
+
 - New `ChatbotSidebar` component with assistant-ui integration
 - New hooks for chat state management and tool execution
 - New services for backend API communication
 - Module Federation exports for chatbot components
 
 **Backend (new service)**:
+
 - New Java service using Google ADK for agent development
 - LangChain4j integration for LLM capabilities
 - Tool registry for executable actions
 - WebSocket/SSE support for streaming responses
 
 **Dependencies**:
+
 - assistant-ui (latest) - React components for AI chat interfaces
 - Google ADK Java - Agent development kit
 - LangChain4j - LLM integration framework
 
 **APIs**:
+
 - New REST endpoints for chat operations
 - WebSocket/SSE endpoint for streaming responses
 - Tool execution API

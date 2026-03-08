@@ -7,7 +7,15 @@
  * @see plan.md#L637-L676
  */
 
-import type { Channel, Context, ContextListener, EventHandler, Listener, PrivateChannel, PrivateChannelEventTypes } from './types';
+import type {
+  Channel,
+  Context,
+  ContextListener,
+  EventHandler,
+  Listener,
+  PrivateChannel,
+  PrivateChannelEventTypes,
+} from './types';
 
 /**
  * Channel Implementation
@@ -312,7 +320,10 @@ export class PrivateChannelImpl implements PrivateChannel {
    * @param handler - Function to handle events
    * @returns Promise resolving to Listener
    */
-  async addEventListener(type: PrivateChannelEventTypes | null, handler: EventHandler): Promise<Listener> {
+  async addEventListener(
+    type: PrivateChannelEventTypes | null,
+    handler: EventHandler,
+  ): Promise<Listener> {
     const listenerId = `event_listener_${Date.now()}_${Math.random()}`;
 
     const typesToListen: PrivateChannelEventTypes[] = type

@@ -49,10 +49,10 @@ Send a chat message and receive a streaming response via SSE.
 
 **Query Parameters:**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| message | string | Yes | The message to send |
-| conversationId | string | No | Existing conversation ID |
+| Parameter      | Type   | Required | Description              |
+| -------------- | ------ | -------- | ------------------------ |
+| message        | string | Yes      | The message to send      |
+| conversationId | string | No       | Existing conversation ID |
 
 **Response Format (SSE Events):**
 
@@ -72,14 +72,14 @@ data:
 
 **Event Types:**
 
-| Event | Description |
-|-------|-------------|
+| Event           | Description                           |
+| --------------- | ------------------------------------- |
 | conversation_id | Sent first with the conversation UUID |
-| message | Streamed text chunks |
-| tool_call | When the AI invokes a tool |
-| tool_result | Tool execution result |
-| error | Error message |
-| done | Stream complete |
+| message         | Streamed text chunks                  |
+| tool_call       | When the AI invokes a tool            |
+| tool_result     | Tool execution result                 |
+| error           | Error message                         |
+| done            | Stream complete                       |
 
 ### GET /api/chat/{conversationId}/history
 

@@ -62,9 +62,7 @@ export const ToolExecutionCard: React.FC<ToolExecutionCardProps> = ({
         </Typography>
       </Box>
 
-      <Box className={sidebarStyles.toolStatus(theme, toolCall.status)}>
-        {getStatusText()}
-      </Box>
+      <Box className={sidebarStyles.toolStatus(theme, toolCall.status)}>{getStatusText()}</Box>
 
       {/* Show arguments if meaningful */}
       {Object.keys(toolCall.arguments).length > 0 && (
@@ -143,11 +141,11 @@ export const ToolExecutionList: React.FC<ToolExecutionListProps> = ({
 }) => {
   return (
     <Box>
-      {toolCalls.map(toolCall => (
+      {toolCalls.map((toolCall) => (
         <ToolExecutionCard
           key={toolCall.id}
           toolCall={toolCall}
-          result={toolResults.find(r => r.toolCallId === toolCall.id)}
+          result={toolResults.find((r) => r.toolCallId === toolCall.id)}
           onRetry={onRetry ? () => onRetry(toolCall.id) : undefined}
         />
       ))}

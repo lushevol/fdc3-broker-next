@@ -36,7 +36,7 @@ export const GenerativeUIProvider: React.FC<GenerativeUIProviderProps> = ({
 
   // Register initial components
   React.useEffect(() => {
-    initialComponents.forEach(component => {
+    initialComponents.forEach((component) => {
       registryRef.current.set(component.name, component);
     });
   }, [initialComponents]);
@@ -81,10 +81,13 @@ export const useGenerativeUI = () => {
 export const useRegisterGenerativeComponent = () => {
   const { registerComponent, unregisterComponent } = useGenerativeUI();
 
-  const register = useCallback((entry: GenerativeComponentEntry) => {
-    registerComponent(entry);
-    return () => unregisterComponent(entry.name);
-  }, [registerComponent, unregisterComponent]);
+  const register = useCallback(
+    (entry: GenerativeComponentEntry) => {
+      registerComponent(entry);
+      return () => unregisterComponent(entry.name);
+    },
+    [registerComponent, unregisterComponent],
+  );
 
   return register;
 };
@@ -110,12 +113,14 @@ export const RegisteredComponent: React.FC<RegisteredComponentProps> = ({
 const UnknownComponent: React.FC<{ name: string }> = ({ name }) => {
   const theme = useTheme();
   return (
-    <div style={{
-      padding: '16px',
-      background: theme.palette.warning.light,
-      borderRadius: '8px',
-      color: theme.palette.warning.contrastText,
-    }}>
+    <div
+      style={{
+        padding: '16px',
+        background: theme.palette.warning.light,
+        borderRadius: '8px',
+        color: theme.palette.warning.contrastText,
+      }}
+    >
       Unknown component: {name}
     </div>
   );
@@ -145,11 +150,7 @@ export const ListComponent: React.FC<{ props: ListComponentProps }> = ({ props }
   return (
     <ul className={generativeStyles.list(theme)}>
       {items.map((item, index) => (
-        <li
-          key={item.id}
-          className={generativeStyles.listItem(theme)}
-          onClick={item.onClick}
-        >
+        <li key={item.id} className={generativeStyles.listItem(theme)} onClick={item.onClick}>
           {ordered && <span style={{ marginRight: 8 }}>{index + 1}.</span>}
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 500 }}>{item.title}</div>
@@ -174,7 +175,7 @@ export const TableComponent: React.FC<{ props: TableComponentProps }> = ({ props
     <table className={generativeStyles.table(theme)}>
       <thead>
         <tr>
-          {columns.map(col => (
+          {columns.map((col) => (
             <th key={col.key}>{col.label}</th>
           ))}
         </tr>
@@ -182,7 +183,7 @@ export const TableComponent: React.FC<{ props: TableComponentProps }> = ({ props
       <tbody>
         {rows.map((row, index) => (
           <tr key={index}>
-            {columns.map(col => (
+            {columns.map((col) => (
               <td key={col.key}>{String(row[col.key] ?? '')}</td>
             ))}
           </tr>
@@ -215,15 +216,9 @@ export const ErrorComponent: React.FC<{ props: ErrorComponentProps }> = ({ props
 
   return (
     <div className={generativeStyles.card(theme, 'error')}>
-      <div className={generativeStyles.cardTitle(theme)}>
-        ❌ {title}
-      </div>
+      <div className={generativeStyles.cardTitle(theme)}>❌ {title}</div>
       <div style={{ marginBottom: theme.spacing(1) }}>{message}</div>
-      {code && (
-        <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>
-          Error code: {code}
-        </div>
-      )}
+      {code && <div style={{ fontSize: '0.75rem', opacity: 0.7 }}>Error code: {code}</div>}
       {retryable && onRetry && (
         <button
           onClick={onRetry}
@@ -250,7 +245,7 @@ export const FormComponent: React.FC<{ props: FormComponentProps }> = ({ props }
   const [values, setValues] = React.useState<Record<string, unknown>>({});
 
   const handleChange = (name: string, value: unknown) => {
-    setValues(prev => ({ ...prev, [name]: value }));
+    setValues((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -260,7 +255,7 @@ export const FormComponent: React.FC<{ props: FormComponentProps }> = ({ props }
 
   return (
     <form className={generativeStyles.form(theme)} onSubmit={handleSubmit}>
-      {fields.map(field => (
+      {fields.map((field) => (
         <div key={field.name} className={generativeStyles.formField(theme)}>
           <label className={generativeStyles.formLabel(theme)}>
             {field.label}
@@ -271,7 +266,7 @@ export const FormComponent: React.FC<{ props: FormComponentProps }> = ({ props }
               name={field.name}
               required={field.required}
               defaultValue={field.defaultValue as string}
-              onChange={e => handleChange(field.name, e.target.value)}
+              onChange={(e) => handleChange(field.name, e.target.value)}
               style={{
                 width: '100%',
                 padding: '8px 12px',
@@ -284,7 +279,7 @@ export const FormComponent: React.FC<{ props: FormComponentProps }> = ({ props }
               name={field.name}
               required={field.required}
               defaultValue={field.defaultValue as string}
-              onChange={e => handleChange(field.name, e.target.value)}
+              onChange={(e) => handleChange(field.name, e.target.value)}
               style={{
                 width: '100%',
                 padding: '8px 12px',
@@ -292,7 +287,7 @@ export const FormComponent: React.FC<{ props: FormComponentProps }> = ({ props }
                 border: `1px solid ${theme.palette.divider}`,
               }}
             >
-              {field.options?.map(opt => (
+              {field.options?.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
@@ -304,10 +299,12 @@ export const FormComponent: React.FC<{ props: FormComponentProps }> = ({ props }
               name={field.name}
               required={field.required}
               defaultChecked={field.defaultValue as boolean}
-              onChange={e => handleChange(
-                field.name,
-                field.type === 'checkbox' ? e.target.checked : e.target.value
-              )}
+              onChange={(e) =>
+                handleChange(
+                  field.name,
+                  field.type === 'checkbox' ? e.target.checked : e.target.value,
+                )
+              }
               style={{
                 width: '100%',
                 padding: '8px 12px',
@@ -337,12 +334,30 @@ export const FormComponent: React.FC<{ props: FormComponentProps }> = ({ props }
 
 // Default component registry entries
 export const defaultGenerativeComponents: GenerativeComponentEntry[] = [
-  { name: 'Card', component: CardComponent as React.ComponentType<{ props: Record<string, unknown> }> },
-  { name: 'List', component: ListComponent as React.ComponentType<{ props: Record<string, unknown> }> },
-  { name: 'Table', component: TableComponent as React.ComponentType<{ props: Record<string, unknown> }> },
-  { name: 'Status', component: StatusComponent as React.ComponentType<{ props: Record<string, unknown> }> },
-  { name: 'Error', component: ErrorComponent as React.ComponentType<{ props: Record<string, unknown> }> },
-  { name: 'Form', component: FormComponent as React.ComponentType<{ props: Record<string, unknown> }> },
+  {
+    name: 'Card',
+    component: CardComponent as React.ComponentType<{ props: Record<string, unknown> }>,
+  },
+  {
+    name: 'List',
+    component: ListComponent as React.ComponentType<{ props: Record<string, unknown> }>,
+  },
+  {
+    name: 'Table',
+    component: TableComponent as React.ComponentType<{ props: Record<string, unknown> }>,
+  },
+  {
+    name: 'Status',
+    component: StatusComponent as React.ComponentType<{ props: Record<string, unknown> }>,
+  },
+  {
+    name: 'Error',
+    component: ErrorComponent as React.ComponentType<{ props: Record<string, unknown> }>,
+  },
+  {
+    name: 'Form',
+    component: FormComponent as React.ComponentType<{ props: Record<string, unknown> }>,
+  },
 ];
 
 export default GenerativeUIProvider;

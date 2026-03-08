@@ -1,12 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import {
-  ChatMessage,
-  ChatState,
-  ToolCall,
-  ToolResult,
-  SSEEvent,
-  SSEEventType,
-} from './interface';
+import { ChatMessage, ChatState, ToolCall, ToolResult, SSEEvent, SSEEventType } from './interface';
 
 interface UseChatbotControllerProps {
   apiUrl?: string;
@@ -22,7 +15,9 @@ interface UseChatbotControllerReturn extends ChatState {
 
 const DEFAULT_API_URL = '/api/chat';
 
-export function useChatbotController(props?: UseChatbotControllerProps): UseChatbotControllerReturn {
+export function useChatbotController(
+  props?: UseChatbotControllerProps,
+): UseChatbotControllerReturn {
   const { apiUrl = DEFAULT_API_URL, conversationId: initialConversationId } = props || {};
 
   const [state, setState] = useState<ChatState>({
@@ -52,107 +47,107 @@ export function useChatbotController(props?: UseChatbotControllerProps): UseChat
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   };
 
-  const sendMessage = useCallback(async (content: string) => {
-    if (!content.trim() || state.isLoading) return;
+  const sendMessage = useCallback(
+    async (content: string) => {
+      if (!content.trim() || state.isLoading) return;
 
-    const userMessage: ChatMessage = {
-      id: generateId(),
-      role: 'user',
-      content: content.trim(),
-      timestamp: new Date(),
-    };
-
-    setState(prev => ({
-      ...prev,
-      messages: [...prev.messages, userMessage],
-      isLoading: true,
-      error: null,
-    }));
-
-    try {
-      // Create assistant message placeholder
-      const assistantMessage: ChatMessage = {
+      const userMessage: ChatMessage = {
         id: generateId(),
-        role: 'assistant',
-        content: '',
+        role: 'user',
+        content: content.trim(),
         timestamp: new Date(),
-        toolCalls: [],
-        toolResults: [],
       };
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        messages: [...prev.messages, assistantMessage],
+        messages: [...prev.messages, userMessage],
+        isLoading: true,
+        error: null,
       }));
 
-      // Use SSE for streaming
-      const streamUrl = `${apiUrl}/stream`;
-      const params = new URLSearchParams({
-        message: content.trim(),
-        conversationId: state.conversationId || '',
-      });
+      try {
+        // Create assistant message placeholder
+        const assistantMessage: ChatMessage = {
+          id: generateId(),
+          role: 'assistant',
+          content: '',
+          timestamp: new Date(),
+          toolCalls: [],
+          toolResults: [],
+        };
 
-      const eventSource = new EventSource(`${streamUrl}?${params.toString()}`);
-      eventSourceRef.current = eventSource;
+        setState((prev) => ({
+          ...prev,
+          messages: [...prev.messages, assistantMessage],
+        }));
 
-      eventSource.onmessage = (event) => {
-        try {
-          const data: SSEEvent = JSON.parse(event.data);
-          handleSSEEvent(data, assistantMessage.id);
-        } catch (e) {
-          console.error('Failed to parse SSE event:', e);
-        }
-      };
+        // Use SSE for streaming
+        const streamUrl = `${apiUrl}/stream`;
+        const params = new URLSearchParams({
+          message: content.trim(),
+          conversationId: state.conversationId || '',
+        });
 
-      eventSource.onerror = (error) => {
-        console.error('SSE error:', error);
-        eventSource.close();
-        setState(prev => ({
+        const eventSource = new EventSource(`${streamUrl}?${params.toString()}`);
+        eventSourceRef.current = eventSource;
+
+        eventSource.onmessage = (event) => {
+          try {
+            const data: SSEEvent = JSON.parse(event.data);
+            handleSSEEvent(data, assistantMessage.id);
+          } catch (e) {
+            console.error('Failed to parse SSE event:', e);
+          }
+        };
+
+        eventSource.onerror = (error) => {
+          console.error('SSE error:', error);
+          eventSource.close();
+          setState((prev) => ({
+            ...prev,
+            isLoading: false,
+            error: 'Connection lost. Please try again.',
+          }));
+        };
+
+        // Wait for the 'done' event or error
+        await new Promise<void>((resolve, reject) => {
+          eventSource.addEventListener('done', () => {
+            eventSource.close();
+            resolve();
+          });
+
+          eventSource.addEventListener('error', () => {
+            eventSource.close();
+            reject(new Error('Stream error'));
+          });
+        });
+
+        setState((prev) => ({
           ...prev,
           isLoading: false,
-          error: 'Connection lost. Please try again.',
         }));
-      };
-
-      // Wait for the 'done' event or error
-      await new Promise<void>((resolve, reject) => {
-        eventSource.addEventListener('done', () => {
-          eventSource.close();
-          resolve();
-        });
-
-        eventSource.addEventListener('error', () => {
-          eventSource.close();
-          reject(new Error('Stream error'));
-        });
-      });
-
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-      }));
-
-    } catch (error) {
-      console.error('Failed to send message:', error);
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to send message',
-      }));
-    }
-  }, [apiUrl, state.conversationId, state.isLoading]);
+      } catch (error) {
+        console.error('Failed to send message:', error);
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: error instanceof Error ? error.message : 'Failed to send message',
+        }));
+      }
+    },
+    [apiUrl, state.conversationId, state.isLoading],
+  );
 
   const handleSSEEvent = useCallback((event: SSEEvent, messageId: string) => {
     switch (event.type) {
       case 'message':
         // Append text to assistant message
         const textChunk = event.data as string;
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
-          messages: prev.messages.map(msg =>
-            msg.id === messageId
-              ? { ...msg, content: msg.content + textChunk }
-              : msg
+          messages: prev.messages.map((msg) =>
+            msg.id === messageId ? { ...msg, content: msg.content + textChunk } : msg,
           ),
         }));
         break;
@@ -160,12 +155,12 @@ export function useChatbotController(props?: UseChatbotControllerProps): UseChat
       case 'tool_call':
         // Add tool call to message
         const toolCall = event.data as ToolCall;
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
-          messages: prev.messages.map(msg =>
+          messages: prev.messages.map((msg) =>
             msg.id === messageId
               ? { ...msg, toolCalls: [...(msg.toolCalls || []), toolCall] }
-              : msg
+              : msg,
           ),
         }));
         break;
@@ -173,12 +168,12 @@ export function useChatbotController(props?: UseChatbotControllerProps): UseChat
       case 'tool_result':
         // Add tool result to message
         const toolResult = event.data as ToolResult;
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
-          messages: prev.messages.map(msg =>
+          messages: prev.messages.map((msg) =>
             msg.id === messageId
               ? { ...msg, toolResults: [...(msg.toolResults || []), toolResult] }
-              : msg
+              : msg,
           ),
         }));
         break;
@@ -189,7 +184,7 @@ export function useChatbotController(props?: UseChatbotControllerProps): UseChat
         break;
 
       case 'error':
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           error: (event.data as { message: string }).message,
         }));
@@ -198,7 +193,7 @@ export function useChatbotController(props?: UseChatbotControllerProps): UseChat
   }, []);
 
   const clearConversation = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       messages: [],
       error: null,
@@ -207,13 +202,11 @@ export function useChatbotController(props?: UseChatbotControllerProps): UseChat
   }, []);
 
   const retryLastMessage = useCallback(async () => {
-    const lastUserMessage = [...state.messages]
-      .reverse()
-      .find(msg => msg.role === 'user');
+    const lastUserMessage = [...state.messages].reverse().find((msg) => msg.role === 'user');
 
     if (lastUserMessage) {
       // Remove failed messages after the last user message
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         messages: prev.messages.slice(0, prev.messages.indexOf(lastUserMessage) + 1),
         error: null,
@@ -224,7 +217,7 @@ export function useChatbotController(props?: UseChatbotControllerProps): UseChat
   }, [state.messages, sendMessage]);
 
   const setConversationId = useCallback((id: string | null) => {
-    setState(prev => ({ ...prev, conversationId: id }));
+    setState((prev) => ({ ...prev, conversationId: id }));
   }, []);
 
   return {

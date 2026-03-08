@@ -2,7 +2,12 @@ import { css } from '@emotion/css';
 import { Theme } from '@mui/material';
 
 export const sidebarStyles = {
-  container: (theme: Theme, isOpen: boolean, width: number | string = 400, position: 'left' | 'right' = 'right') => css`
+  container: (
+    theme: Theme,
+    isOpen: boolean,
+    width: number | string = 400,
+    position: 'left' | 'right' = 'right',
+  ) => css`
     position: fixed;
     top: 0;
     ${position}: 0;
@@ -132,7 +137,9 @@ export const sidebarStyles = {
     }
 
     @keyframes typing {
-      0%, 80%, 100% {
+      0%,
+      80%,
+      100% {
         transform: scale(0.6);
         opacity: 0.5;
       }
@@ -165,12 +172,13 @@ export const sidebarStyles = {
     align-items: center;
     gap: 4px;
     font-size: 0.75rem;
-    color: ${
-      status === 'completed' ? theme.palette.success.main :
-      status === 'failed' ? theme.palette.error.main :
-      status === 'running' ? theme.palette.warning.main :
-      theme.palette.text.disabled
-    };
+    color: ${status === 'completed'
+      ? theme.palette.success.main
+      : status === 'failed'
+        ? theme.palette.error.main
+        : status === 'running'
+          ? theme.palette.warning.main
+          : theme.palette.text.disabled};
   `,
 
   emptyState: (theme: Theme) => css`
@@ -207,18 +215,21 @@ export const generativeStyles = {
   card: (theme: Theme, variant: 'default' | 'success' | 'warning' | 'error' = 'default') => css`
     padding: ${theme.spacing(2)};
     border-radius: 8px;
-    background: ${
-      variant === 'success' ? theme.palette.success.light :
-      variant === 'warning' ? theme.palette.warning.light :
-      variant === 'error' ? theme.palette.error.light :
-      theme.palette.grey[50]
-    };
-    border: 1px solid ${
-      variant === 'success' ? theme.palette.success.main :
-      variant === 'warning' ? theme.palette.warning.main :
-      variant === 'error' ? theme.palette.error.main :
-      theme.palette.divider
-    };
+    background: ${variant === 'success'
+      ? theme.palette.success.light
+      : variant === 'warning'
+        ? theme.palette.warning.light
+        : variant === 'error'
+          ? theme.palette.error.light
+          : theme.palette.grey[50]};
+    border: 1px solid
+      ${variant === 'success'
+        ? theme.palette.success.main
+        : variant === 'warning'
+          ? theme.palette.warning.main
+          : variant === 'error'
+            ? theme.palette.error.main
+            : theme.palette.divider};
   `,
 
   cardTitle: (theme: Theme) => css`
@@ -258,7 +269,8 @@ export const generativeStyles = {
     border-collapse: collapse;
     font-size: 0.875rem;
 
-    th, td {
+    th,
+    td {
       padding: ${theme.spacing(1)};
       text-align: left;
       border-bottom: 1px solid ${theme.palette.divider};
@@ -278,20 +290,24 @@ export const generativeStyles = {
     border-radius: 16px;
     font-size: 0.75rem;
     font-weight: 500;
-    background: ${
-      status === 'success' ? theme.palette.success.light :
-      status === 'error' ? theme.palette.error.light :
-      status === 'warning' ? theme.palette.warning.light :
-      status === 'info' ? theme.palette.info.light :
-      theme.palette.grey[100]
-    };
-    color: ${
-      status === 'success' ? theme.palette.success.dark :
-      status === 'error' ? theme.palette.error.dark :
-      status === 'warning' ? theme.palette.warning.dark :
-      status === 'info' ? theme.palette.info.dark :
-      theme.palette.text.secondary
-    };
+    background: ${status === 'success'
+      ? theme.palette.success.light
+      : status === 'error'
+        ? theme.palette.error.light
+        : status === 'warning'
+          ? theme.palette.warning.light
+          : status === 'info'
+            ? theme.palette.info.light
+            : theme.palette.grey[100]};
+    color: ${status === 'success'
+      ? theme.palette.success.dark
+      : status === 'error'
+        ? theme.palette.error.dark
+        : status === 'warning'
+          ? theme.palette.warning.dark
+          : status === 'info'
+            ? theme.palette.info.dark
+            : theme.palette.text.secondary};
   `,
 
   form: (theme: Theme) => css`

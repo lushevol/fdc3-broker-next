@@ -1,10 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
-import {
-  ChatMessage,
-  ChatbotContextValue,
-  ChatState,
-  ToolDefinition,
-} from './interface';
+import { ChatMessage, ChatbotContextValue, ChatState, ToolDefinition } from './interface';
 
 const ChatbotContext = createContext<ChatbotContextValue | null>(null);
 
@@ -60,138 +55,141 @@ export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
   }, []);
 
   // Execute a tool
-  const executeTool = useCallback(async (name: string, args: Record<string, unknown>): Promise<unknown> => {
-    const tool = toolRegistryRef.current.get(name);
-    if (!tool) {
-      throw new Error(`Tool "${name}" not found`);
-    }
-    return tool.execute(args);
-  }, []);
+  const executeTool = useCallback(
+    async (name: string, args: Record<string, unknown>): Promise<unknown> => {
+      const tool = toolRegistryRef.current.get(name);
+      if (!tool) {
+        throw new Error(`Tool "${name}" not found`);
+      }
+      return tool.execute(args);
+    },
+    [],
+  );
 
-  const sendMessage = useCallback(async (content: string) => {
-    if (!content.trim() || state.isLoading) return;
+  const sendMessage = useCallback(
+    async (content: string) => {
+      if (!content.trim() || state.isLoading) return;
 
-    const userMessage: ChatMessage = {
-      id: generateId(),
-      role: 'user',
-      content: content.trim(),
-      timestamp: new Date(),
-    };
-
-    setState(prev => ({
-      ...prev,
-      messages: [...prev.messages, userMessage],
-      isLoading: true,
-      error: null,
-    }));
-
-    try {
-      // Create assistant message placeholder
-      const assistantMessage: ChatMessage = {
+      const userMessage: ChatMessage = {
         id: generateId(),
-        role: 'assistant',
-        content: '',
+        role: 'user',
+        content: content.trim(),
         timestamp: new Date(),
-        toolCalls: [],
-        toolResults: [],
       };
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        messages: [...prev.messages, assistantMessage],
+        messages: [...prev.messages, userMessage],
+        isLoading: true,
+        error: null,
       }));
 
-      // Store conversation in session storage
-      const conversationKey = `chatbot-conversation-${state.conversationId || 'default'}`;
-      const currentMessages = [...state.messages, userMessage, assistantMessage];
-      sessionStorage.setItem(conversationKey, JSON.stringify(currentMessages));
+      try {
+        // Create assistant message placeholder
+        const assistantMessage: ChatMessage = {
+          id: generateId(),
+          role: 'assistant',
+          content: '',
+          timestamp: new Date(),
+          toolCalls: [],
+          toolResults: [],
+        };
 
-      // Use SSE for streaming
-      const streamUrl = `${apiUrl}/stream`;
-      const params = new URLSearchParams({
-        message: content.trim(),
-        conversationId: state.conversationId || '',
-      });
+        setState((prev) => ({
+          ...prev,
+          messages: [...prev.messages, assistantMessage],
+        }));
 
-      const eventSource = new EventSource(`${streamUrl}?${params.toString()}`);
-      eventSourceRef.current = eventSource;
+        // Store conversation in session storage
+        const conversationKey = `chatbot-conversation-${state.conversationId || 'default'}`;
+        const currentMessages = [...state.messages, userMessage, assistantMessage];
+        sessionStorage.setItem(conversationKey, JSON.stringify(currentMessages));
 
-      let accumulatedContent = '';
+        // Use SSE for streaming
+        const streamUrl = `${apiUrl}/stream`;
+        const params = new URLSearchParams({
+          message: content.trim(),
+          conversationId: state.conversationId || '',
+        });
 
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
+        const eventSource = new EventSource(`${streamUrl}?${params.toString()}`);
+        eventSourceRef.current = eventSource;
 
-          if (data.type === 'message') {
-            accumulatedContent += data.text || '';
-            setState(prev => ({
-              ...prev,
-              messages: prev.messages.map(msg =>
-                msg.id === assistantMessage.id
-                  ? { ...msg, content: accumulatedContent }
-                  : msg
-              ),
-            }));
-          } else if (data.type === 'tool_call') {
-            setState(prev => ({
-              ...prev,
-              messages: prev.messages.map(msg =>
-                msg.id === assistantMessage.id
-                  ? { ...msg, toolCalls: [...(msg.toolCalls || []), data.toolCall] }
-                  : msg
-              ),
-            }));
-          } else if (data.type === 'tool_result') {
-            setState(prev => ({
-              ...prev,
-              messages: prev.messages.map(msg =>
-                msg.id === assistantMessage.id
-                  ? { ...msg, toolResults: [...(msg.toolResults || []), data.result] }
-                  : msg
-              ),
-            }));
-          } else if (data.type === 'error') {
-            setState(prev => ({
-              ...prev,
-              error: data.message,
-            }));
-          } else if (data.type === 'done' || data.type === 'conversation_id') {
-            if (data.conversationId) {
-              setState(prev => ({ ...prev, conversationId: data.conversationId }));
+        let accumulatedContent = '';
+
+        eventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+
+            if (data.type === 'message') {
+              accumulatedContent += data.text || '';
+              setState((prev) => ({
+                ...prev,
+                messages: prev.messages.map((msg) =>
+                  msg.id === assistantMessage.id ? { ...msg, content: accumulatedContent } : msg,
+                ),
+              }));
+            } else if (data.type === 'tool_call') {
+              setState((prev) => ({
+                ...prev,
+                messages: prev.messages.map((msg) =>
+                  msg.id === assistantMessage.id
+                    ? { ...msg, toolCalls: [...(msg.toolCalls || []), data.toolCall] }
+                    : msg,
+                ),
+              }));
+            } else if (data.type === 'tool_result') {
+              setState((prev) => ({
+                ...prev,
+                messages: prev.messages.map((msg) =>
+                  msg.id === assistantMessage.id
+                    ? { ...msg, toolResults: [...(msg.toolResults || []), data.result] }
+                    : msg,
+                ),
+              }));
+            } else if (data.type === 'error') {
+              setState((prev) => ({
+                ...prev,
+                error: data.message,
+              }));
+            } else if (data.type === 'done' || data.type === 'conversation_id') {
+              if (data.conversationId) {
+                setState((prev) => ({ ...prev, conversationId: data.conversationId }));
+              }
+              eventSource.close();
+              setState((prev) => ({ ...prev, isLoading: false }));
             }
-            eventSource.close();
-            setState(prev => ({ ...prev, isLoading: false }));
+          } catch (e) {
+            console.error('Failed to parse SSE event:', e);
           }
-        } catch (e) {
-          console.error('Failed to parse SSE event:', e);
-        }
-      };
+        };
 
-      eventSource.onerror = () => {
-        eventSource.close();
-        setState(prev => ({
+        eventSource.onerror = () => {
+          eventSource.close();
+          setState((prev) => ({
+            ...prev,
+            isLoading: false,
+            error: 'Connection lost. Please try again.',
+          }));
+        };
+      } catch (error) {
+        console.error('Failed to send message:', error);
+        setState((prev) => ({
           ...prev,
           isLoading: false,
-          error: 'Connection lost. Please try again.',
+          error: error instanceof Error ? error.message : 'Failed to send message',
         }));
-      };
-
-    } catch (error) {
-      console.error('Failed to send message:', error);
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to send message',
-      }));
-    }
-  }, [apiUrl, state.conversationId, state.isLoading, state.messages]);
+      }
+    },
+    [apiUrl, state.conversationId, state.isLoading, state.messages],
+  );
 
   const clearConversation = useCallback(() => {
     // Clear session storage
     if (state.conversationId) {
       sessionStorage.removeItem(`chatbot-conversation-${state.conversationId}`);
     }
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       messages: [],
       error: null,
@@ -200,18 +198,16 @@ export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
   }, [state.conversationId]);
 
   const toggleSidebar = useCallback(() => {
-    setState(prev => ({ ...prev, isOpen: !prev.isOpen }));
+    setState((prev) => ({ ...prev, isOpen: !prev.isOpen }));
   }, []);
 
   const retryLastMessage = useCallback(async () => {
-    const lastUserMessage = [...state.messages]
-      .reverse()
-      .find(msg => msg.role === 'user');
+    const lastUserMessage = [...state.messages].reverse().find((msg) => msg.role === 'user');
 
     if (lastUserMessage) {
       // Remove failed messages after the last user message
-      const userMessageIndex = state.messages.findIndex(m => m.id === lastUserMessage.id);
-      setState(prev => ({
+      const userMessageIndex = state.messages.findIndex((m) => m.id === lastUserMessage.id);
+      setState((prev) => ({
         ...prev,
         messages: prev.messages.slice(0, userMessageIndex + 1),
         error: null,
@@ -229,11 +225,7 @@ export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
     retryLastMessage,
   };
 
-  return (
-    <ChatbotContext.Provider value={value}>
-      {children}
-    </ChatbotContext.Provider>
-  );
+  return <ChatbotContext.Provider value={value}>{children}</ChatbotContext.Provider>;
 };
 
 export const useChatbot = (): ChatbotContextValue => {

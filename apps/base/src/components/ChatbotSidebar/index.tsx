@@ -38,15 +38,18 @@ const ChatContent: React.FC<{
   const thread = useThread();
   const runtime = useThreadRuntime();
 
-  const handleSendMessage = useCallback((content: string) => {
-    if (content.trim()) {
-      // For assistant-ui, we use the runtime to append a message
-      runtime.append({
-        role: 'user',
-        content: [{ type: 'text', text: content.trim() }],
-      });
-    }
-  }, [runtime]);
+  const handleSendMessage = useCallback(
+    (content: string) => {
+      if (content.trim()) {
+        // For assistant-ui, we use the runtime to append a message
+        runtime.append({
+          role: 'user',
+          content: [{ type: 'text', text: content.trim() }],
+        });
+      }
+    },
+    [runtime],
+  );
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -75,10 +78,7 @@ const ChatContent: React.FC<{
             className={sidebarStyles.textField(theme)}
           />
           <Composer.Send>
-            <IconButton
-              color="primary"
-              className={sidebarStyles.sendButton(theme)}
-            >
+            <IconButton color="primary" className={sidebarStyles.sendButton(theme)}>
               <SendIcon />
             </IconButton>
           </Composer.Send>
@@ -107,8 +107,8 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
     // Adapter for connecting to backend
     async onNew(message) {
       const userMessage = message.content
-        .filter(part => part.type === 'text')
-        .map(part => (part as { type: 'text'; text: string }).text)
+        .filter((part) => part.type === 'text')
+        .map((part) => (part as { type: 'text'; text: string }).text)
         .join('\n');
 
       if (userMessage.trim()) {
@@ -131,7 +131,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
     if (onToggle) {
       onToggle();
     } else {
-      setInternalIsOpen(prev => !prev);
+      setInternalIsOpen((prev) => !prev);
     }
   }, [onToggle]);
 
@@ -160,7 +160,12 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
       )}
 
       {/* Sidebar */}
-      <Slide direction={position === 'right' ? 'left' : 'right'} in={isOpen} mountOnEnter unmountOnExit>
+      <Slide
+        direction={position === 'right' ? 'left' : 'right'}
+        in={isOpen}
+        mountOnEnter
+        unmountOnExit
+      >
         <Box className={sidebarStyles.container(theme, isOpen, width, position)}>
           {/* Header */}
           <Box className={sidebarStyles.header(theme)}>
@@ -169,27 +174,15 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
               <Typography variant="h6">AI Assistant</Typography>
             </Box>
             <Box className={sidebarStyles.headerActions}>
-              <IconButton
-                size="small"
-                onClick={handleNewChat}
-                title="New conversation"
-              >
+              <IconButton size="small" onClick={handleNewChat} title="New conversation">
                 <AddIcon />
               </IconButton>
               {controller.error && (
-                <IconButton
-                  size="small"
-                  onClick={handleRetry}
-                  title="Retry"
-                >
+                <IconButton size="small" onClick={handleRetry} title="Retry">
                   <RefreshIcon />
                 </IconButton>
               )}
-              <IconButton
-                size="small"
-                onClick={handleToggle}
-                title="Close"
-              >
+              <IconButton size="small" onClick={handleToggle} title="Close">
                 <CloseIcon />
               </IconButton>
             </Box>

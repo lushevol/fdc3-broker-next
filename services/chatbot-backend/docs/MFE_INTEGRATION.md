@@ -58,20 +58,20 @@ By default, the chatbot uses `/api/chat` as the backend URL. You can customize t
 
 ### ChatbotSidebar
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| isOpen | boolean | undefined | Controlled open state |
-| onToggle | () => void | undefined | Callback when sidebar is toggled |
-| apiUrl | string | '/api/chat' | Backend API URL |
-| position | 'left' \| 'right' | 'right' | Sidebar position |
-| width | number \| string | 400 | Sidebar width |
+| Prop     | Type              | Default     | Description                      |
+| -------- | ----------------- | ----------- | -------------------------------- |
+| isOpen   | boolean           | undefined   | Controlled open state            |
+| onToggle | () => void        | undefined   | Callback when sidebar is toggled |
+| apiUrl   | string            | '/api/chat' | Backend API URL                  |
+| position | 'left' \| 'right' | 'right'     | Sidebar position                 |
+| width    | number \| string  | 400         | Sidebar width                    |
 
 ### ChatbotProvider
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| apiUrl | string | '/api/chat' | Backend API URL |
-| initialOpen | boolean | false | Initial sidebar open state |
+| Prop        | Type    | Default     | Description                |
+| ----------- | ------- | ----------- | -------------------------- |
+| apiUrl      | string  | '/api/chat' | Backend API URL            |
+| initialOpen | boolean | false       | Initial sidebar open state |
 
 ## Using the Hook
 
@@ -89,12 +89,8 @@ const MyComponent = () => {
 
   return (
     <div>
-      <button onClick={toggleSidebar}>
-        {isOpen ? 'Close' : 'Open'} Chat
-      </button>
-      <button onClick={handleQuickQuestion}>
-        Quick Question
-      </button>
+      <button onClick={toggleSidebar}>{isOpen ? 'Close' : 'Open'} Chat</button>
+      <button onClick={handleQuickQuestion}>Quick Question</button>
     </div>
   );
 };
@@ -102,17 +98,17 @@ const MyComponent = () => {
 
 ### Hook Return Values
 
-| Property | Type | Description |
-|----------|------|-------------|
-| messages | ChatMessage[] | Current conversation messages |
-| isLoading | boolean | Whether a message is being processed |
-| error | string \| null | Current error message |
-| conversationId | string \| null | Current conversation ID |
-| isOpen | boolean | Sidebar open state |
-| sendMessage | (content: string) => Promise<void> | Send a message |
-| clearConversation | () => void | Clear current conversation |
-| toggleSidebar | () => void | Toggle sidebar open/close |
-| retryLastMessage | () => Promise<void> | Retry the last failed message |
+| Property          | Type                               | Description                          |
+| ----------------- | ---------------------------------- | ------------------------------------ |
+| messages          | ChatMessage[]                      | Current conversation messages        |
+| isLoading         | boolean                            | Whether a message is being processed |
+| error             | string \| null                     | Current error message                |
+| conversationId    | string \| null                     | Current conversation ID              |
+| isOpen            | boolean                            | Sidebar open state                   |
+| sendMessage       | (content: string) => Promise<void> | Send a message                       |
+| clearConversation | () => void                         | Clear current conversation           |
+| toggleSidebar     | () => void                         | Toggle sidebar open/close            |
+| retryLastMessage  | () => Promise<void>                | Retry the last failed message        |
 
 ## Generative UI
 
@@ -162,13 +158,14 @@ const theme = createTheme({
 The chatbot backend must be running and accessible. Configure the backend URL based on your environment:
 
 ```tsx
-const apiUrl = process.env.NODE_ENV === 'production'
-  ? 'https://api.production.com/chat'
-  : 'http://localhost:8080/api/chat';
+const apiUrl =
+  process.env.NODE_ENV === 'production'
+    ? 'https://api.production.com/chat'
+    : 'http://localhost:8080/api/chat';
 
 <ChatbotProvider apiUrl={apiUrl}>
   <ChatbotSidebar />
-</ChatbotProvider>
+</ChatbotProvider>;
 ```
 
 ## Troubleshooting

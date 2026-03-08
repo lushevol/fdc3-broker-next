@@ -39,7 +39,7 @@ export class ChatService {
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
 
     // Add response interceptor for error handling
@@ -55,7 +55,7 @@ export class ChatService {
           return Promise.reject(new RateLimitError(retryAfter));
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -88,7 +88,7 @@ export class ChatService {
     conversationId: string | null,
     onEvent: (event: SSEEvent) => void,
     onError: (error: Error) => void,
-    onComplete: () => void
+    onComplete: () => void,
   ): () => void {
     const params = new URLSearchParams({
       message,
@@ -141,7 +141,7 @@ export class ChatService {
   async confirmToolCall(
     conversationId: string,
     toolCallId: string,
-    confirmed: boolean
+    confirmed: boolean,
   ): Promise<void> {
     await this.client.post(`/chat/${conversationId}/tools/${toolCallId}/confirm`, {
       confirmed,
@@ -153,7 +153,7 @@ export class ChatService {
    */
   async getConversationHistory(conversationId: string): Promise<ChatMessage[]> {
     const response = await this.client.get<{ messages: ChatMessage[] }>(
-      `/chat/${conversationId}/history`
+      `/chat/${conversationId}/history`,
     );
     return response.data.messages;
   }

@@ -28,7 +28,7 @@ describe('ChatbotProvider', () => {
     render(
       <ChatbotProvider>
         <TestComponent />
-      </ChatbotProvider>
+      </ChatbotProvider>,
     );
 
     expect(screen.getByTestId('message-count')).toHaveTextContent('0');
@@ -39,7 +39,7 @@ describe('ChatbotProvider', () => {
     render(
       <ChatbotProvider>
         <TestComponent />
-      </ChatbotProvider>
+      </ChatbotProvider>,
     );
 
     fireEvent.click(screen.getByTestId('toggle-btn'));
@@ -53,7 +53,7 @@ describe('ChatbotProvider', () => {
     render(
       <ChatbotProvider>
         <TestComponent />
-      </ChatbotProvider>
+      </ChatbotProvider>,
     );
 
     fireEvent.click(screen.getByTestId('clear-btn'));

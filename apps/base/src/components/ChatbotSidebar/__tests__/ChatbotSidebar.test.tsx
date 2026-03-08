@@ -20,7 +20,7 @@ describe('ChatbotSidebar', () => {
     return render(
       <ChatbotProvider>
         <ChatbotSidebar {...props} />
-      </ChatbotProvider>
+      </ChatbotProvider>,
     );
   };
 

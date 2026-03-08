@@ -44,7 +44,13 @@ export interface ChatResponse {
 }
 
 // SSE event types
-export type SSEEventType = 'message' | 'tool_call' | 'tool_result' | 'generative_ui' | 'error' | 'done';
+export type SSEEventType =
+  | 'message'
+  | 'tool_call'
+  | 'tool_result'
+  | 'generative_ui'
+  | 'error'
+  | 'done';
 
 export interface SSEEvent {
   type: SSEEventType;

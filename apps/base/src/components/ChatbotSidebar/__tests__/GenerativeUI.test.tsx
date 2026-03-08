@@ -20,7 +20,7 @@ describe('GenerativeUI', () => {
     render(
       <GenerativeUIProvider>
         <TestComponent />
-      </GenerativeUIProvider>
+      </GenerativeUIProvider>,
     );
 
     expect(screen.getByTestId('has-card')).toHaveTextContent('false');
@@ -35,7 +35,7 @@ describe('GenerativeUI', () => {
     render(
       <GenerativeUIProvider initialComponents={[{ name: 'Card', component: CardComponent }]}>
         <TestComponent />
-      </GenerativeUIProvider>
+      </GenerativeUIProvider>,
     );
 
     expect(screen.getByTestId('has-card')).toHaveTextContent('true');
@@ -50,7 +50,7 @@ describe('GenerativeUI', () => {
     render(
       <GenerativeUIProvider initialComponents={[{ name: 'Card', component: CardComponent }]}>
         <RegisteredComponent name="Card" props={{ title: 'Test Card' }} />
-      </GenerativeUIProvider>
+      </GenerativeUIProvider>,
     );
 
     expect(screen.getByTestId('card-content')).toHaveTextContent('Test Card');
@@ -60,7 +60,7 @@ describe('GenerativeUI', () => {
     render(
       <GenerativeUIProvider>
         <RegisteredComponent name="Unknown" props={{}} />
-      </GenerativeUIProvider>
+      </GenerativeUIProvider>,
     );
 
     expect(screen.getByText(/Unknown component: Unknown/)).toBeInTheDocument();

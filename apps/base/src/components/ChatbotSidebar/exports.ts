@@ -49,4 +49,9 @@ export type {
 } from './common/interface';
 
 // Services
-export { ChatService, RateLimitError, getChatService, initializeChatService } from './common/ChatService';
+export {
+  ChatService,
+  RateLimitError,
+  getChatService,
+  initializeChatService,
+} from './common/ChatService';

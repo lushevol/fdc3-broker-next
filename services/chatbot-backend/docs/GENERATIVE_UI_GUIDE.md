@@ -64,23 +64,24 @@ export const StockCard: React.FC<{ props: StockCardProps }> = ({ props }) => {
   const color = isPositive ? theme.palette.success.main : theme.palette.error.main;
 
   return (
-    <Box sx={{
-      p: 2,
-      borderRadius: 2,
-      background: theme.palette.background.paper,
-      border: `1px solid ${theme.palette.divider}`,
-      minWidth: 200,
-    }}>
+    <Box
+      sx={{
+        p: 2,
+        borderRadius: 2,
+        background: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.divider}`,
+        minWidth: 200,
+      }}
+    >
       <Typography variant="h6" fontWeight="bold">
         {symbol}
       </Typography>
-      <Typography variant="h4">
-        ${price.toFixed(2)}
-      </Typography>
+      <Typography variant="h4">${price.toFixed(2)}</Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color }}>
         {isPositive ? <TrendingUp /> : <TrendingDown />}
         <Typography>
-          {isPositive ? '+' : ''}{change.toFixed(2)} ({changePercent.toFixed(2)}%)
+          {isPositive ? '+' : ''}
+          {change.toFixed(2)} ({changePercent.toFixed(2)}%)
         </Typography>
       </Box>
     </Box>
@@ -95,13 +96,16 @@ export const StockCard: React.FC<{ props: StockCardProps }> = ({ props }) => {
 import { StockCard } from './common/GenerativeComponents/StockCard';
 
 const generativeComponents = [
-  { name: 'StockCard', component: StockCard as React.ComponentType<{ props: Record<string, unknown> }> },
+  {
+    name: 'StockCard',
+    component: StockCard as React.ComponentType<{ props: Record<string, unknown> }>,
+  },
   // ... other components
 ];
 
 <GenerativeUIProvider initialComponents={generativeComponents}>
   <ChatbotSidebar />
-</GenerativeUIProvider>
+</GenerativeUIProvider>;
 ```
 
 ## Interactive Components
@@ -109,10 +113,10 @@ const generativeComponents = [
 Components can handle user interactions and trigger follow-up actions:
 
 ```tsx
-export const ActionCard: React.FC<{ props: ActionCardProps; onAction?: (action: string, data: unknown) => void }> = ({
-  props,
-  onAction
-}) => {
+export const ActionCard: React.FC<{
+  props: ActionCardProps;
+  onAction?: (action: string, data: unknown) => void;
+}> = ({ props, onAction }) => {
   const { title, actionLabel, actionData } = props;
 
   const handleClick = () => {
@@ -144,8 +148,8 @@ The AI returns component directives that the frontend renders:
   "component": "StockCard",
   "props": {
     "symbol": "AAPL",
-    "price": 175.50,
-    "change": 2.30,
+    "price": 175.5,
+    "change": 2.3,
     "changePercent": 1.33
   }
 }
@@ -177,7 +181,9 @@ export const SafeComponent: React.FC<{ props: Partial<Props> }> = ({ props }) =>
   return (
     <div>
       <h2>{title}</h2>
-      {items.map(item => <div key={item.id}>{item.name}</div>)}
+      {items.map((item) => (
+        <div key={item.id}>{item.name}</div>
+      ))}
     </div>
   );
 };
@@ -211,11 +217,11 @@ describe('StockCard', () => {
       <StockCard
         props={{
           symbol: 'AAPL',
-          price: 175.50,
-          change: 2.30,
+          price: 175.5,
+          change: 2.3,
           changePercent: 1.33,
         }}
-      />
+      />,
     );
 
     expect(screen.getByText('AAPL')).toBeInTheDocument();
@@ -227,11 +233,11 @@ describe('StockCard', () => {
       <StockCard
         props={{
           symbol: 'AAPL',
-          price: 175.50,
-          change: -2.30,
+          price: 175.5,
+          change: -2.3,
           changePercent: -1.33,
         }}
-      />
+      />,
     );
 
     // Check for negative indicator
@@ -277,13 +283,15 @@ export const WeatherCard: React.FC<{ props: WeatherCardProps }> = ({ props }) =>
   const { location, temperature, conditions, humidity, icon } = props;
 
   return (
-    <Box sx={{
-      p: 2,
-      borderRadius: 2,
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      color: 'white',
-      minWidth: 200,
-    }}>
+    <Box
+      sx={{
+        p: 2,
+        borderRadius: 2,
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        minWidth: 200,
+      }}
+    >
       <Typography variant="subtitle1">{location}</Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         {icon && <span style={{ fontSize: 48 }}>{icon}</span>}

@@ -11,9 +11,11 @@ class MockEventSource {
     // Simulate successful connection and message
     setTimeout(() => {
       if (this.onmessage) {
-        this.onmessage(new MessageEvent('message', {
-          data: JSON.stringify({ type: 'message', text: 'Hello' })
-        }));
+        this.onmessage(
+          new MessageEvent('message', {
+            data: JSON.stringify({ type: 'message', text: 'Hello' }),
+          }),
+        );
       }
     }, 100);
   }
