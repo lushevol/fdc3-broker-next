@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: chatbot-backend
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      model: gpt-4
+      temperature: 0.7
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY:}
+      model: claude-3-sonnet-20240229
+
+server:
+  port: 8080
+
+chatbot:
+  agent:
+    name: FDC3 Assistant
+    max-tokens: 4096
+    conversation-timeout: 1800000 # 30 minutes
+  tools:
+    enabled: true
+  rate-limit:
+    requests-per-minute: 60
+    tokens-per-minute: 100000
+
+logging:
+  level:
+    com.fdc3.chatbot: DEBUG
+    dev.langchain4j: INFO

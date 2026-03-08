@@ -131,7 +131,11 @@
     "rxjs": "^7.8.2",
     "single-spa": "^5.9.3",
     "single-spa-react": "^5.0.1",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "@assistant-ui/react": "^0.7.0",
+    "@assistant-ui/react-ai-sdk": "^0.7.0",
+    "ai": "^4.0.0",
+    "zod": "^3.23.8"
   },
   "types": "dist/fm-base.d.ts"
 }
