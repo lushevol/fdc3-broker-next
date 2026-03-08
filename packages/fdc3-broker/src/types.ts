@@ -17,12 +17,14 @@ import type {
   Context,
   DesktopAgent,
   DisplayMetadata,
+  EventHandler,
   FDC3Event,
   ImplementationMetadata,
   Intent,
   IntentResolution,
   Listener,
   PrivateChannel,
+  PrivateChannelEventTypes,
 } from '@finos/fdc3';
 import type { AppDirectoryClient } from 'ratan-fdc3-app-directory';
 import type { LogLevel } from './logger';
@@ -39,6 +41,7 @@ export type {
   // Channel types
   DisplayMetadata,
   // Event types
+  EventHandler,
   FDC3Event,
   // Implementation metadata
   ImplementationMetadata,
@@ -46,6 +49,7 @@ export type {
   IntentResolution,
   Listener,
   PrivateChannel,
+  PrivateChannelEventTypes,
 } from '@finos/fdc3';
 export type { AppDefinition } from 'ratan-fdc3-app-directory';
 /* eslint-enable */

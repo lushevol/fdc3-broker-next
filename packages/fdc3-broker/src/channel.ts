@@ -7,7 +7,7 @@
  * @see plan.md#L637-L676
  */
 
-import type { Channel, Context, ContextListener, Listener, PrivateChannel } from './types';
+import type { Channel, Context, ContextListener, EventHandler, Listener, PrivateChannel, PrivateChannelEventTypes } from './types';
 
 /**
  * Channel Implementation
@@ -298,6 +298,167 @@ export class PrivateChannelImpl implements PrivateChannel {
    */
   removeTile(tileId: string): void {
     this.channel.removeTile(tileId);
+  }
+
+  // PrivateChannel-specific event handling
+
+  private eventHandlers: Map<string, Set<EventHandler>> = new Map();
+  private disconnected = false;
+
+  /**
+   * Register a handler for events from the PrivateChannel.
+   *
+   * @param type - Event type to listen for, or null for all events
+   * @param handler - Function to handle events
+   * @returns Promise resolving to Listener
+   */
+  async addEventListener(type: PrivateChannelEventTypes | null, handler: EventHandler): Promise<Listener> {
+    const listenerId = `event_listener_${Date.now()}_${Math.random()}`;
+
+    const typesToListen: PrivateChannelEventTypes[] = type
+      ? [type]
+      : ['addContextListener', 'unsubscribe', 'disconnect'];
+
+    for (const eventType of typesToListen) {
+      if (!this.eventHandlers.has(eventType)) {
+        this.eventHandlers.set(eventType, new Set());
+      }
+      this.eventHandlers.get(eventType)!.add(handler);
+    }
+
+    return {
+      id: listenerId,
+      unsubscribe: async () => {
+        for (const eventType of typesToListen) {
+          this.eventHandlers.get(eventType)?.delete(handler);
+        }
+      },
+    } as Listener;
+  }
+
+  /**
+   * Disconnect from the private channel.
+   *
+   * After calling this, desktop agents should prevent apps from broadcasting
+   * on this channel and automatically unsubscribe all listeners.
+   */
+  async disconnect(): Promise<void> {
+    if (this.disconnected) {
+      return;
+    }
+    this.disconnected = true;
+
+    // Notify all disconnect handlers
+    const handlers = this.eventHandlers.get('disconnect');
+    if (handlers) {
+      for (const handler of handlers) {
+        try {
+          handler({ type: 'disconnect', details: null });
+        } catch (error) {
+          console.error('[PrivateChannel] Error in disconnect handler:', error);
+        }
+      }
+    }
+  }
+
+  /**
+   * @deprecated Use `addEventListener("addContextListener", handler)` instead.
+   *
+   * Adds a listener that will be called each time the remote app invokes
+   * addContextListener on this channel.
+   *
+   * @param handler - Function to call when addContextListener is invoked
+   * @returns Listener with unsubscribe method
+   */
+  onAddContextListener(handler: (contextType?: string) => void): Listener {
+    const wrappedHandler: EventHandler = (event) => {
+      if (event.type === 'addContextListener') {
+        handler(event.details?.contextType ?? undefined);
+      }
+    };
+
+    const listenerId = `onAddContextListener_${Date.now()}`;
+
+    if (!this.eventHandlers.has('addContextListener')) {
+      this.eventHandlers.set('addContextListener', new Set());
+    }
+    this.eventHandlers.get('addContextListener')!.add(wrappedHandler);
+
+    return {
+      id: listenerId,
+      unsubscribe: async () => {
+        this.eventHandlers.get('addContextListener')?.delete(wrappedHandler);
+      },
+    } as Listener;
+  }
+
+  /**
+   * @deprecated Use `addEventListener("unsubscribe", handler)` instead.
+   *
+   * Adds a listener that will be called whenever the remote app invokes
+   * Listener.unsubscribe() on a context listener.
+   *
+   * @param handler - Function to call when unsubscribe is invoked
+   * @returns Listener with unsubscribe method
+   */
+  onUnsubscribe(handler: (contextType?: string) => void): Listener {
+    const wrappedHandler: EventHandler = (event) => {
+      if (event.type === 'unsubscribe') {
+        handler(event.details?.contextType ?? undefined);
+      }
+    };
+
+    const listenerId = `onUnsubscribe_${Date.now()}`;
+
+    if (!this.eventHandlers.has('unsubscribe')) {
+      this.eventHandlers.set('unsubscribe', new Set());
+    }
+    this.eventHandlers.get('unsubscribe')!.add(wrappedHandler);
+
+    return {
+      id: listenerId,
+      unsubscribe: async () => {
+        this.eventHandlers.get('unsubscribe')?.delete(wrappedHandler);
+      },
+    } as Listener;
+  }
+
+  /**
+   * @deprecated Use `addEventListener("disconnect", handler)` instead.
+   *
+   * Adds a listener that will be called when the remote app terminates or disconnects.
+   *
+   * @param handler - Function to call on disconnect
+   * @returns Listener with unsubscribe method
+   */
+  onDisconnect(handler: () => void): Listener {
+    const wrappedHandler: EventHandler = (event) => {
+      if (event.type === 'disconnect') {
+        handler();
+      }
+    };
+
+    const listenerId = `onDisconnect_${Date.now()}`;
+
+    if (!this.eventHandlers.has('disconnect')) {
+      this.eventHandlers.set('disconnect', new Set());
+    }
+    this.eventHandlers.get('disconnect')!.add(wrappedHandler);
+
+    return {
+      id: listenerId,
+      unsubscribe: async () => {
+        this.eventHandlers.get('disconnect')?.delete(wrappedHandler);
+      },
+    } as Listener;
+  }
+
+  /**
+   * Check if the channel is disconnected
+   * @returns true if disconnected
+   */
+  isDisconnected(): boolean {
+    return this.disconnected;
   }
 }
 

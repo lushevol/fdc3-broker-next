@@ -21,12 +21,17 @@
  * ```
  */
 
-// Re-export from fdc3-broker with resolver theme defaults
-export { ErrorBoundary, ErrorBoundaryThemes } from 'ratan-fdc3-broker';
-export type { ErrorBoundaryProps, ErrorBoundaryTheme } from 'ratan-fdc3-broker';
+import { ErrorBoundary as ErrorBoundaryComponent, ErrorBoundaryThemes } from 'ratan-fdc3-broker';
+import type { ErrorBoundaryProps, ErrorBoundaryTheme } from 'ratan-fdc3-broker';
+
+// Re-export types
+export type { ErrorBoundaryProps, ErrorBoundaryTheme };
+
+// Re-export the ErrorBoundary class and themes
+export { ErrorBoundaryComponent as ErrorBoundary, ErrorBoundaryThemes };
 
 /**
  * @deprecated Use `ErrorBoundary` from `@fm/fdc3-broker` instead.
  * This alias is provided for backward compatibility.
  */
-export const ResolverErrorBoundary = ErrorBoundary;
+export const ResolverErrorBoundary = ErrorBoundaryComponent;
