@@ -22,10 +22,11 @@ import {
   AssistantRuntimeProvider,
   useLocalRuntime,
   Thread,
-  Composer,
+  ComposerPrimitive,
   useThreadRuntime,
   useThread,
 } from '@assistant-ui/react';
+import type { ChatModelAdapter } from '@assistant-ui/react';
 import { useChatbotController } from './common/useController';
 import { ChatbotSidebarProps } from './common/interface';
 import { sidebarStyles } from './common/style';
@@ -72,17 +73,17 @@ const ChatContent: React.FC<{
 
       {/* Composer / Input */}
       <Box className={sidebarStyles.inputArea(theme)}>
-        <Composer>
-          <Composer.Input
+        <ComposerPrimitive.Root>
+          <ComposerPrimitive.Input
             placeholder="Type a message..."
             className={sidebarStyles.textField(theme)}
           />
-          <Composer.Send>
+          <ComposerPrimitive.Send>
             <IconButton color="primary" className={sidebarStyles.sendButton(theme)}>
               <SendIcon />
             </IconButton>
-          </Composer.Send>
-        </Composer>
+          </ComposerPrimitive.Send>
+        </ComposerPrimitive.Root>
       </Box>
     </Box>
   );
@@ -102,13 +103,16 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
 
   const controller = useChatbotController({ apiUrl });
 
-  // Create assistant-ui runtime
-  const runtime = useLocalRuntime({
-    // Adapter for connecting to backend
-    async onNew(message) {
-      const userMessage = message.content
-        .filter((part) => part.type === 'text')
-        .map((part) => (part as { type: 'text'; text: string }).text)
+  // Create assistant-ui runtime with ChatModelAdapter
+  const chatAdapter: ChatModelAdapter = {
+    async *run({ messages, abortSignal }) {
+      // Get the last user message
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage?.role !== 'user') return;
+
+      const userMessage = lastMessage.content
+        .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
+        .map((part) => part.text)
         .join('\n');
 
       if (userMessage.trim()) {
@@ -116,16 +120,16 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
       }
 
       // Return the assistant response
-      const lastMessage = controller.messages[controller.messages.length - 1];
-      if (lastMessage?.role === 'assistant') {
-        return {
-          content: [{ type: 'text' as const, text: lastMessage.content }],
+      const assistantMessage = controller.messages[controller.messages.length - 1];
+      if (assistantMessage?.role === 'assistant') {
+        yield {
+          content: [{ type: 'text' as const, text: assistantMessage.content }],
         };
       }
-
-      return { content: [{ type: 'text' as const, text: '' }] };
     },
-  });
+  };
+
+  const runtime = useLocalRuntime(chatAdapter);
 
   const handleToggle = useCallback(() => {
     if (onToggle) {
@@ -137,8 +141,8 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
 
   const handleNewChat = useCallback(() => {
     controller.clearConversation();
-    // Reset the runtime thread
-    runtime.resetThread();
+    // Start a new thread
+    runtime.switchToNewThread();
   }, [controller, runtime]);
 
   const handleRetry = useCallback(() => {

@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { ChatbotSidebar } from './index';
-import { ChatbotProvider } from './common/ChatbotProvider';
+import { ChatbotSidebar } from '../index';
+import { ChatbotProvider } from '../common/ChatbotProvider';
 
 // Mock assistant-ui
 jest.mock('@assistant-ui/react', () => ({

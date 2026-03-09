@@ -336,27 +336,29 @@ export const FormComponent: React.FC<{ props: FormComponentProps }> = ({ props }
 export const defaultGenerativeComponents: GenerativeComponentEntry[] = [
   {
     name: 'Card',
-    component: CardComponent as React.ComponentType<{ props: Record<string, unknown> }>,
+    component: CardComponent as unknown as React.ComponentType<{ props: Record<string, unknown> }>,
   },
   {
     name: 'List',
-    component: ListComponent as React.ComponentType<{ props: Record<string, unknown> }>,
+    component: ListComponent as unknown as React.ComponentType<{ props: Record<string, unknown> }>,
   },
   {
     name: 'Table',
-    component: TableComponent as React.ComponentType<{ props: Record<string, unknown> }>,
+    component: TableComponent as unknown as React.ComponentType<{ props: Record<string, unknown> }>,
   },
   {
     name: 'Status',
-    component: StatusComponent as React.ComponentType<{ props: Record<string, unknown> }>,
+    component: StatusComponent as unknown as React.ComponentType<{
+      props: Record<string, unknown>;
+    }>,
   },
   {
     name: 'Error',
-    component: ErrorComponent as React.ComponentType<{ props: Record<string, unknown> }>,
+    component: ErrorComponent as unknown as React.ComponentType<{ props: Record<string, unknown> }>,
   },
   {
     name: 'Form',
-    component: FormComponent as React.ComponentType<{ props: Record<string, unknown> }>,
+    component: FormComponent as unknown as React.ComponentType<{ props: Record<string, unknown> }>,
   },
 ];
 

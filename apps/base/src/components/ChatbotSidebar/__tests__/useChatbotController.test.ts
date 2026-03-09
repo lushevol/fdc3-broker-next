@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useChatbotController } from './common/useController';
+import { useChatbotController } from '../common/useController';
 
 // Mock EventSource
 class MockEventSource {

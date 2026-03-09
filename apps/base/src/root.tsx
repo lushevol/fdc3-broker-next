@@ -276,3 +276,5 @@ export * as ReactWrapper from './utils/ReactWrapper';
 
 /** FDC3 Agent */
 export * as FDC3Agent from './fdc3/expose';
+
+export * as Chatbot from './components/ChatbotSidebar/exports';

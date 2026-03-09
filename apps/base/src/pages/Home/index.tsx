@@ -16,6 +16,7 @@ import Root, { classes, PREFIX } from './common/style';
 import useController from './common/useController';
 import useOpenfin from './common/useOpenfin';
 import useParameters from './common/useParameters';
+import { ChatbotProvider, ChatbotSidebar } from '../../components/ChatbotSidebar/exports';
 
 export const ContainerComponent = (validation: boolean, item, i) =>
   validation ? (
@@ -55,80 +56,83 @@ const Home: React.FC = (): ReactElement => {
   }
 
   return (
-    <Root data-testid={PREFIX} onMouseMove={mouseMove}>
-      <header>
-        <AppBar />
-      </header>
-      <main className={classes.main}>
-        <Tabs
-          value={value}
-          onChange={handleChange}
-          data-testid={`${PREFIX}_workspaces`}
-          aria-label="workspaces"
-          className={classes.tabs}
-          variant="scrollable"
-          scrollButtons
-          onDoubleClick={focus(value)}
-        >
-          <div className={classes.firsttab}></div>
-          {store?.workspaces?.map((item: Workspace) => {
-            const showRefresh: boolean = !!(
-              item.id === store?.currentWorkspace?.id &&
-              store?.refreshTab &&
-              store?.refreshTab[item.id]
-            );
-            return (
-              <Tab
-                key={item.id}
-                label={
-                  <TabItem
-                    item={item}
-                    edit={edit}
-                    remove={remove}
-                    refreshTab={refreshTab}
-                    showRemove={length > 1}
-                    showRefresh={showRefresh}
-                  />
-                }
-                className={classes.tab}
-                {...a11yProps(item.id)}
-              />
-            );
-          })}
-          <div className={classes.lasttab}>
-            <Button
-              variant="contained"
-              className={classes.addtab}
-              onClick={add}
-              data-testid={`${PREFIX}_add_btn`}
-              aria-label="Add Workspace"
-              title="Add Workspace"
-            >
-              <AddIcon />
-            </Button>
-          </div>
-        </Tabs>
-        <Box className={classes.box}>
-          {store?.workspaces?.map((item: Workspace, i) => {
-            const validation: boolean = !!item?.containers?.length;
-            return (
-              <TabPanel
-                key={item.id}
-                tabId={item.id}
-                value={value}
-                index={i + 1}
-                className={classes.tabpanel}
-                isActive={item.isActive}
+    <ChatbotProvider>
+      <Root data-testid={PREFIX} onMouseMove={mouseMove}>
+        <header>
+          <AppBar />
+        </header>
+        <main className={classes.main}>
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            data-testid={`${PREFIX}_workspaces`}
+            aria-label="workspaces"
+            className={classes.tabs}
+            variant="scrollable"
+            scrollButtons
+            onDoubleClick={focus(value)}
+          >
+            <div className={classes.firsttab}></div>
+            {store?.workspaces?.map((item: Workspace) => {
+              const showRefresh: boolean = !!(
+                item.id === store?.currentWorkspace?.id &&
+                store?.refreshTab &&
+                store?.refreshTab[item.id]
+              );
+              return (
+                <Tab
+                  key={item.id}
+                  label={
+                    <TabItem
+                      item={item}
+                      edit={edit}
+                      remove={remove}
+                      refreshTab={refreshTab}
+                      showRemove={length > 1}
+                      showRefresh={showRefresh}
+                    />
+                  }
+                  className={classes.tab}
+                  {...a11yProps(item.id)}
+                />
+              );
+            })}
+            <div className={classes.lasttab}>
+              <Button
+                variant="contained"
+                className={classes.addtab}
+                onClick={add}
+                data-testid={`${PREFIX}_add_btn`}
+                aria-label="Add Workspace"
+                title="Add Workspace"
               >
-                {ContainerComponent(validation, item, i)}
-              </TabPanel>
-            );
-          })}
-        </Box>
-      </main>
-      {showTimeout && <Timeout setOpen={setShowTimeout} />}
-      {channelMessage && <Snackbar message={channelMessage} open={true} onClose={clearMessage} />}
-    </Root>
+                <AddIcon />
+              </Button>
+            </div>
+          </Tabs>
+          <Box className={classes.box}>
+            {store?.workspaces?.map((item: Workspace, i) => {
+              const validation: boolean = !!item?.containers?.length;
+              return (
+                <TabPanel
+                  key={item.id}
+                  tabId={item.id}
+                  value={value}
+                  index={i + 1}
+                  className={classes.tabpanel}
+                  isActive={item.isActive}
+                >
+                  {ContainerComponent(validation, item, i)}
+                </TabPanel>
+              );
+            })}
+          </Box>
+        </main>
+        {showTimeout && <Timeout setOpen={setShowTimeout} />}
+        {channelMessage && <Snackbar message={channelMessage} open={true} onClose={clearMessage} />}
+        <ChatbotSidebar />
+      </Root>
+    </ChatbotProvider>
   );
 };
 

@@ -39,6 +39,15 @@ module.exports = (webpackConfigEnv, argv) => {
       publicPath: `http://localhost:${port}/`,
       chunkFilename: "[chunkhash].[name].base.js",
     },
+    // optimization: {
+    //   runtimeChunk: false,
+    //   splitChunks: {
+    //     cacheGroups: {
+    //       defaultVendors: false,
+    //       default: false,
+    //     },
+    //   },
+    // },
     plugins: [
       new Dotenv({
         path: "./.env.mfe", // Path to .env file (this is the default)
@@ -54,7 +63,7 @@ module.exports = (webpackConfigEnv, argv) => {
       //     "react-dom": { singleton: true },
       //   },
       // }),
-      new ModuleFederationPlugin(mfConfigs),
+      // new ModuleFederationPlugin(mfConfigs),
     ],
   });
 };

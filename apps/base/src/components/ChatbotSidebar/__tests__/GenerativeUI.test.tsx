@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { GenerativeUIProvider, useGenerativeUI, RegisteredComponent } from './common/GenerativeUI';
+import { GenerativeUIProvider, useGenerativeUI, RegisteredComponent } from '../common/GenerativeUI';
 
 // Test component to access the registry
 const TestComponent = () => {

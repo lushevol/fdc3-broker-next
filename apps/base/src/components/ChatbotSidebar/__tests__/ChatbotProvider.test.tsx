@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ChatbotProvider, useChatbot } from './common/ChatbotProvider';
+import { ChatbotProvider, useChatbot } from '../common/ChatbotProvider';
 
 // Test component to access the context
 const TestComponent = () => {
