@@ -20,8 +20,4 @@ export const Button = Container.Button.default;
 export const ExtendTokenService = Container.ExtendService.extendToken;
 export const Dialog = Container.Dialog.default;
 export const useAnalytics = Container.Analytics.default;
-// Chatbot exports
-export const ChatbotSidebar = Container.ChatbotSidebar;
-export const ChatbotProvider = Container.ChatbotProvider;
-export const useChatbot = Container.useChatbot;
 export default Container;
