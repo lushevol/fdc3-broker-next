@@ -83,8 +83,21 @@ interface PresetQuery {
 // Mock Data
 const generateMockData = (): CashflowRecord[] => {
   const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD'];
-  const counterparties = ['Bank of America', 'Deutsche Bank', 'HSBC', 'JP Morgan', 'Barclays', 'Citigroup', 'Morgan Stanley'];
-  const statuses = ['Pending Operator', 'Pending Verification', 'Completed', 'Failed'];
+  const counterparties = [
+    'Bank of America',
+    'Deutsche Bank',
+    'HSBC',
+    'JP Morgan',
+    'Barclays',
+    'Citigroup',
+    'Morgan Stanley',
+  ];
+  const statuses = [
+    'Pending Operator',
+    'Pending Verification',
+    'Completed',
+    'Failed',
+  ];
   const types = ['Payment', 'Receipt'];
   const products = ['FX Spot', 'FX Forward', 'Money Market', 'Securities'];
 
@@ -114,11 +127,16 @@ const generateMockData = (): CashflowRecord[] => {
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const getStatusColor = (s: string) => {
     switch (s) {
-      case 'Pending Operator': return { color: '#faad14', bg: '#fffbe6', border: '#ffe58f' };
-      case 'Pending Verification': return { color: '#1677ff', bg: '#e6f4ff', border: '#91caff' };
-      case 'Completed': return { color: '#52c41a', bg: '#f6ffed', border: '#b7eb8f' };
-      case 'Failed': return { color: '#ff4d4f', bg: '#fff2f0', border: '#ffccc7' };
-      default: return { color: '#8c8c8c', bg: '#f5f5f5', border: '#d9d9d9' };
+      case 'Pending Operator':
+        return { color: '#faad14', bg: '#fffbe6', border: '#ffe58f' };
+      case 'Pending Verification':
+        return { color: '#1677ff', bg: '#e6f4ff', border: '#91caff' };
+      case 'Completed':
+        return { color: '#52c41a', bg: '#f6ffed', border: '#b7eb8f' };
+      case 'Failed':
+        return { color: '#ff4d4f', bg: '#fff2f0', border: '#ffccc7' };
+      default:
+        return { color: '#8c8c8c', bg: '#f5f5f5', border: '#d9d9d9' };
     }
   };
 
@@ -139,13 +157,21 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
 };
 
 // Preset Query Button
-const PresetQueryButton: React.FC<{ query: PresetQuery; onClick: () => void }> = ({ query, onClick }) => (
+const PresetQueryButton: React.FC<{
+  query: PresetQuery;
+  onClick: () => void;
+}> = ({ query, onClick }) => (
   <button className="preset-query-btn" onClick={onClick}>
     <span className="preset-query-label">{query.label}</span>
     <span
       className={`preset-query-count ${query.type}`}
       style={{
-        backgroundColor: query.type === 'warning' ? '#faad14' : query.type === 'success' ? '#52c41a' : '#1677ff',
+        backgroundColor:
+          query.type === 'warning'
+            ? '#faad14'
+            : query.type === 'success'
+              ? '#52c41a'
+              : '#1677ff',
         color: query.type === 'warning' ? '#000' : '#fff',
       }}
     >
@@ -207,121 +233,145 @@ const CashflowBlotter: React.FC = () => {
     setAmountRange(undefined);
   }, []);
 
-  const columns: TableColumnsType<CashflowRecord> = useMemo(() => [
-    {
-      title: 'Cashflow ID',
-      dataIndex: 'cashflowId',
-      key: 'cashflowId',
-      width: 140,
-      sorter: (a, b) => a.cashflowId.localeCompare(b.cashflowId),
-      fixed: 'left',
-      render: (text) => <span className="cell-highlight">{text}</span>,
-    },
-    {
-      title: 'Trade ID',
-      dataIndex: 'tradeId',
-      key: 'tradeId',
-      width: 130,
-      sorter: (a, b) => a.tradeId.localeCompare(b.tradeId),
-    },
-    {
-      title: 'Value Date',
-      dataIndex: 'valueDate',
-      key: 'valueDate',
-      width: 120,
-      sorter: (a, b) => new Date(a.valueDate).getTime() - new Date(b.valueDate).getTime(),
-    },
-    {
-      title: 'Currency',
-      dataIndex: 'currency',
-      key: 'currency',
-      width: 90,
-      align: 'center',
-      render: (text) => <span className="currency-badge">{text}</span>,
-    },
-    {
-      title: 'Amount',
-      dataIndex: 'amount',
-      key: 'amount',
-      width: 130,
-      align: 'right',
-      sorter: (a, b) => a.amount - b.amount,
-      render: (amount, record) => (
-        <span className={`amount-cell ${record.cashflowType === 'Payment' ? 'negative' : 'positive'}`}>
-          {record.cashflowType === 'Payment' ? '-' : '+'}{amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-        </span>
-      ),
-    },
-    {
-      title: 'Type',
-      dataIndex: 'cashflowType',
-      key: 'cashflowType',
-      width: 100,
-      render: (type) => (
-        <Tag className={`type-tag ${type.toLowerCase()}`}>
-          {type}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Status',
-      dataIndex: 'cashflowStatus',
-      key: 'cashflowStatus',
-      width: 150,
-      filters: [
-        { text: 'Pending Operator', value: 'Pending Operator' },
-        { text: 'Pending Verification', value: 'Pending Verification' },
-        { text: 'Completed', value: 'Completed' },
-        { text: 'Failed', value: 'Failed' },
-      ],
-      onFilter: (value, record) => record.cashflowStatus === value,
-      render: (status) => <StatusBadge status={status} />,
-    },
-    {
-      title: 'Settlement',
-      dataIndex: 'settlementMethod',
-      key: 'settlementMethod',
-      width: 100,
-      align: 'center',
-    },
-    {
-      title: 'Counterparty',
-      dataIndex: 'counterparty',
-      key: 'counterparty',
-      width: 150,
-      ellipsis: true,
-    },
-    {
-      title: 'Product',
-      dataIndex: 'productTaxonomy',
-      key: 'productTaxonomy',
-      width: 120,
-    },
-    {
-      title: 'Booking Entity',
-      dataIndex: 'bookingEntity',
-      key: 'bookingEntity',
-      width: 130,
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      width: 100,
-      fixed: 'right',
-      render: () => (
-        <Space size="small">
-          <Tooltip title="View Details">
-            <Button type="text" size="small" icon={<EyeOutlined />} className="action-btn" />
-          </Tooltip>
-          <Tooltip title="Download">
-            <Button type="text" size="small" icon={<DownloadOutlined />} className="action-btn" />
-          </Tooltip>
-        </Space>
-      ),
-    },
-  ], []);
+  const columns: TableColumnsType<CashflowRecord> = useMemo(
+    () => [
+      {
+        title: 'Cashflow ID',
+        dataIndex: 'cashflowId',
+        key: 'cashflowId',
+        width: 140,
+        sorter: (a, b) => a.cashflowId.localeCompare(b.cashflowId),
+        fixed: 'left',
+        render: (text) => <span className="cell-highlight">{text}</span>,
+      },
+      {
+        title: 'Trade ID',
+        dataIndex: 'tradeId',
+        key: 'tradeId',
+        width: 130,
+        sorter: (a, b) => a.tradeId.localeCompare(b.tradeId),
+      },
+      {
+        title: 'Value Date',
+        dataIndex: 'valueDate',
+        key: 'valueDate',
+        width: 120,
+        sorter: (a, b) =>
+          new Date(a.valueDate).getTime() - new Date(b.valueDate).getTime(),
+      },
+      {
+        title: 'Currency',
+        dataIndex: 'currency',
+        key: 'currency',
+        width: 90,
+        align: 'center',
+        render: (text) => <span className="currency-badge">{text}</span>,
+      },
+      {
+        title: 'Amount',
+        dataIndex: 'amount',
+        key: 'amount',
+        width: 130,
+        align: 'right',
+        sorter: (a, b) => a.amount - b.amount,
+        render: (amount, record) => (
+          <span
+            className={`amount-cell ${record.cashflowType === 'Payment' ? 'negative' : 'positive'}`}
+          >
+            {record.cashflowType === 'Payment' ? '-' : '+'}
+            {amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          </span>
+        ),
+      },
+      {
+        title: 'Type',
+        dataIndex: 'cashflowType',
+        key: 'cashflowType',
+        width: 100,
+        render: (type) => (
+          <Tag className={`type-tag ${type.toLowerCase()}`}>{type}</Tag>
+        ),
+      },
+      {
+        title: 'Status',
+        dataIndex: 'cashflowStatus',
+        key: 'cashflowStatus',
+        width: 150,
+        filters: [
+          { text: 'Pending Operator', value: 'Pending Operator' },
+          { text: 'Pending Verification', value: 'Pending Verification' },
+          { text: 'Completed', value: 'Completed' },
+          { text: 'Failed', value: 'Failed' },
+        ],
+        onFilter: (value, record) => record.cashflowStatus === value,
+        render: (status) => <StatusBadge status={status} />,
+      },
+      {
+        title: 'Settlement',
+        dataIndex: 'settlementMethod',
+        key: 'settlementMethod',
+        width: 100,
+        align: 'center',
+      },
+      {
+        title: 'Counterparty',
+        dataIndex: 'counterparty',
+        key: 'counterparty',
+        width: 150,
+        ellipsis: true,
+      },
+      {
+        title: 'Product',
+        dataIndex: 'productTaxonomy',
+        key: 'productTaxonomy',
+        width: 120,
+      },
+      {
+        title: 'Booking Entity',
+        dataIndex: 'bookingEntity',
+        key: 'bookingEntity',
+        width: 130,
+      },
+      {
+        title: 'Actions',
+        key: 'actions',
+        width: 100,
+        fixed: 'right',
+        render: () => (
+          <Space size="small">
+            <Tooltip title="View Details">
+              <Button
+                type="text"
+                size="small"
+                icon={<EyeOutlined />}
+                className="action-btn"
+              />
+            </Tooltip>
+            <Tooltip title="Download">
+              <Button
+                type="text"
+                size="small"
+                icon={<DownloadOutlined />}
+                className="action-btn"
+              />
+            </Tooltip>
+          </Space>
+        ),
+      },
+    ],
+    [],
+  );
 
-  const hasFilters = cashflowId || tradeId || dateRange || currency || productTaxonomy?.length || counterparty || bookingEntity || beneficiaryName || amountRange;
+  const hasFilters =
+    cashflowId ||
+    tradeId ||
+    dateRange ||
+    currency ||
+    productTaxonomy?.length ||
+    counterparty ||
+    bookingEntity ||
+    beneficiaryName ||
+    amountRange;
 
   const rowSelection = {
     selectedRowKeys,
@@ -367,11 +417,26 @@ const CashflowBlotter: React.FC = () => {
             <div className="logo">
               <div className="logo-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <rect x="2" y="2" width="20" height="20" rx="4" fill="currentColor" fillOpacity="0.2"/>
-                  <path d="M7 12h10M7 8h6M7 16h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <rect
+                    x="2"
+                    y="2"
+                    width="20"
+                    height="20"
+                    rx="4"
+                    fill="currentColor"
+                    fillOpacity="0.2"
+                  />
+                  <path
+                    d="M7 12h10M7 8h6M7 16h8"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </div>
-              <Title level={4} className="app-title">FMO Post Trade Portal</Title>
+              <Title level={4} className="app-title">
+                FMO Post Trade Portal
+              </Title>
             </div>
           </div>
 
@@ -395,7 +460,9 @@ const CashflowBlotter: React.FC = () => {
             <Divider type="vertical" className="header-divider" />
 
             <div className="time-display">
-              <Text className="utc-time">{format(new Date(), 'HH:mm')} UTC</Text>
+              <Text className="utc-time">
+                {format(new Date(), 'HH:mm')} UTC
+              </Text>
             </div>
 
             <Divider type="vertical" className="header-divider" />
@@ -407,7 +474,11 @@ const CashflowBlotter: React.FC = () => {
             </Tooltip>
 
             <Tooltip title="Share Feedback">
-              <Button type="text" className="header-btn feedback-btn" icon={<MessageOutlined />} />
+              <Button
+                type="text"
+                className="header-btn feedback-btn"
+                icon={<MessageOutlined />}
+              />
             </Tooltip>
           </div>
         </Header>
@@ -417,9 +488,7 @@ const CashflowBlotter: React.FC = () => {
           <Tabs
             type="editable-card"
             defaultActiveKey="1"
-            items={[
-              { key: '1', label: 'Cashflow Blotter', closable: false },
-            ]}
+            items={[{ key: '1', label: 'Cashflow Blotter', closable: false }]}
             addIcon={<PlusOutlined />}
           />
         </div>
@@ -429,14 +498,20 @@ const CashflowBlotter: React.FC = () => {
           {/* Page Header */}
           <div className="page-header">
             <div className="version-info">
-              <Tag className="version-tag">Version: 1.40.0-v1.40.0-20260227.4</Tag>
+              <Tag className="version-tag">
+                Version: 1.40.0-v1.40.0-20260227.4
+              </Tag>
               <Tag className="env-tag">Env: UAT</Tag>
             </div>
             <Space>
               <Button icon={<ApiOutlined />} className="header-action-btn">
                 API Status
               </Button>
-              <Button icon={<ReloadOutlined />} onClick={handleRefresh} className="header-action-btn">
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={handleRefresh}
+                className="header-action-btn"
+              >
                 Refresh Page
               </Button>
             </Space>
@@ -447,8 +522,16 @@ const CashflowBlotter: React.FC = () => {
             <div className="search-section-wrapper">
               <div className="search-panels">
                 {/* Quick Search Panel */}
-                <Card className="search-panel quick-search" title="Quick Search">
-                  <Form layout="horizontal" labelAlign="right" labelCol={{ span: 10 }} wrapperCol={{ span: 14 }}>
+                <Card
+                  className="search-panel quick-search"
+                  title="Quick Search"
+                >
+                  <Form
+                    layout="horizontal"
+                    labelAlign="right"
+                    labelCol={{ span: 10 }}
+                    wrapperCol={{ span: 14 }}
+                  >
                     <Row gutter={[16, 12]}>
                       <Col span={12}>
                         <Form.Item label="Cashflow ID">
@@ -573,7 +656,11 @@ const CashflowBlotter: React.FC = () => {
                 {/* Preset Queries */}
                 <div className="preset-queries">
                   {presetQueries.map((section) => (
-                    <Card key={section.title} className="preset-card" title={section.title}>
+                    <Card
+                      key={section.title}
+                      className="preset-card"
+                      title={section.title}
+                    >
                       <div className="preset-list">
                         {section.queries.map((query) => (
                           <PresetQueryButton
@@ -588,11 +675,17 @@ const CashflowBlotter: React.FC = () => {
                 </div>
 
                 {/* Custom Search/View */}
-                <Card className="search-panel custom-search" title="Custom Search/View">
+                <Card
+                  className="search-panel custom-search"
+                  title="Custom Search/View"
+                >
                   <div className="custom-field-row">
                     <div className="custom-field">
                       <Text className="field-label">Filters</Text>
-                      <Select placeholder="Select..." style={{ width: '100%' }} />
+                      <Select
+                        placeholder="Select..."
+                        style={{ width: '100%' }}
+                      />
                     </div>
                     <Space className="custom-actions">
                       <Button disabled>Clear</Button>
@@ -602,7 +695,10 @@ const CashflowBlotter: React.FC = () => {
                   <div className="custom-field-row">
                     <div className="custom-field">
                       <Text className="field-label">Views</Text>
-                      <Select placeholder="Select..." style={{ width: '100%' }} />
+                      <Select
+                        placeholder="Select..."
+                        style={{ width: '100%' }}
+                      />
                     </div>
                     <Space className="custom-actions">
                       <Button disabled>Clear</Button>
@@ -682,7 +778,10 @@ const CashflowBlotter: React.FC = () => {
               allowClear
               options={[
                 { value: 'PENDING_OPERATOR', label: 'Pending Operator' },
-                { value: 'PENDING_VERIFICATION', label: 'Pending Verification' },
+                {
+                  value: 'PENDING_VERIFICATION',
+                  label: 'Pending Verification',
+                },
                 { value: 'COMPLETED', label: 'Completed' },
               ]}
             />
@@ -709,7 +808,8 @@ const CashflowBlotter: React.FC = () => {
               pagination={{
                 pageSize: 10,
                 showSizeChanger: true,
-                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} items`,
               }}
               size="small"
               className="cashflow-table"
@@ -720,9 +820,15 @@ const CashflowBlotter: React.FC = () => {
           <div className="grid-footer">
             <div className="footer-left">
               <Text className="results-label">Results</Text>
-              <Badge count={selectedRowKeys.length} className="selection-badge" overflowCount={999}>
+              <Badge
+                count={selectedRowKeys.length}
+                className="selection-badge"
+                overflowCount={999}
+              >
                 <Text className="results-count">
-                  {selectedRowKeys.length > 0 ? `${selectedRowKeys.length} selected / ` : ''}
+                  {selectedRowKeys.length > 0
+                    ? `${selectedRowKeys.length} selected / `
+                    : ''}
                   {data.length} total
                 </Text>
               </Badge>
@@ -743,7 +849,8 @@ const CashflowBlotter: React.FC = () => {
             <Divider type="vertical" />
 
             <Text className="last-updated">
-              <InfoCircleOutlined /> Last updated: {format(new Date(), 'd MMM yyyy, HH:mm:ss')} UTC
+              <InfoCircleOutlined /> Last updated:{' '}
+              {format(new Date(), 'd MMM yyyy, HH:mm:ss')} UTC
             </Text>
           </div>
         </Content>

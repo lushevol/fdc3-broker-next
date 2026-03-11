@@ -125,16 +125,15 @@
 
 #### D3: Custom Search/View Panel
 
-**Purpose:** Save and load custom filter configurations.
+**Purpose:** Save and load custom filter/views configurations.
 
 **Components:**
 | Component | Description |
 |-----------|-------------|
-| Filters Dropdown | Select saved filter sets |
-| Clear Button | Reset filters (outlined, disabled when no selection) |
-| Create or Modify Button | Open filter builder (contained primary) |
-| Views Dropdown | Select saved column views |
-| View Management Buttons | Clear and Create/Modify for views |
+| Section Title | "Filters" and "Views" |
+| Filters Dropdown | Select saved filter or view sets |
+| Clear Button | Reset filters or views (outlined, disabled when no selection) |
+| Create or Modify Button | Open filter or view builder (contained primary) |
 
 #### D4: Hide Search Bar Toggle
 

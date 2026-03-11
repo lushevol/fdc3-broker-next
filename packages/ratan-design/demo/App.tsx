@@ -23,7 +23,7 @@ import './demo.css';
 const { Header, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
-type ViewType = 'home' | 'components' | 'cashflow';
+type ViewType = 'home' | 'components' | 'cashflow' | 'trading';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewType>('home');
@@ -65,11 +65,15 @@ const App: React.FC = () => {
                   <div className="demo-icon-wrapper">
                     <TableOutlined className="demo-icon" />
                   </div>
-                  <Title level={4} style={{ marginTop: 0, marginBottom: '8px' }}>
+                  <Title
+                    level={4}
+                    style={{ marginTop: 0, marginBottom: '8px' }}
+                  >
                     Cashflow Blotter
                   </Title>
                   <Text type="secondary">
-                    Professional financial operations dashboard with advanced filtering and data grid
+                    Professional financial operations dashboard with advanced
+                    filtering and data grid
                   </Text>
                 </Card>
                 <Card
@@ -81,11 +85,15 @@ const App: React.FC = () => {
                   <div className="demo-icon-wrapper">
                     <AppstoreOutlined className="demo-icon" />
                   </div>
-                  <Title level={4} style={{ marginTop: 0, marginBottom: '8px' }}>
+                  <Title
+                    level={4}
+                    style={{ marginTop: 0, marginBottom: '8px' }}
+                  >
                     Component Showcase
                   </Title>
                   <Text type="secondary">
-                    Browse the complete set of design system components and tokens
+                    Browse the complete set of design system components and
+                    tokens
                   </Text>
                 </Card>
               </Space>
@@ -156,9 +164,7 @@ const App: React.FC = () => {
               ]}
             />
           </Sider>
-          <Content className="demo-content">
-            {renderContent()}
-          </Content>
+          <Content className="demo-content">{renderContent()}</Content>
         </Layout>
       </Layout>
     </ConfigProvider>

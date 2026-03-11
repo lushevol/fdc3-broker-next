@@ -4,9 +4,9 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  root: 'demo',
+  root: process.env.VITE_PREVIEW_ROOT || 'demo',
   server: {
-    port: 3001,
+    port: parseInt(process.env.VITE_PREVIEW_PORT || '3001'),
     host: true,
   },
   resolve: {
