@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
+import { ThemeProvider } from './components/ThemeProvider';
 import {
   Search,
   Plus,
@@ -1145,6 +1146,8 @@ const CashflowBlotterPreview: React.FC = () => {
 const root = createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
-    <CashflowBlotterPreview />
+    <ThemeProvider>
+      <CashflowBlotterPreview />
+    </ThemeProvider>
   </React.StrictMode>,
 );
