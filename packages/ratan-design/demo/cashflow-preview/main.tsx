@@ -402,9 +402,9 @@ const Card: React.FC<{
   title?: React.ReactNode;
   headerAction?: React.ReactNode;
 }> = ({ children, className = '', title, headerAction }) => (
-  <div className={`bg-slate-900/40 border border-slate-800 rounded-lg overflow-hidden ${className}`}>
+  <div className={`bg-white dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm dark:shadow-none ${className}`}>
     {(title || headerAction) && (
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900/50">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50">
         {title && (
           <h3 className="text-sm font-semibold text-slate-200">{title}</h3>
         )}
@@ -424,7 +424,7 @@ const Checkbox: React.FC<{
     className={`w-4 h-4 rounded border transition-all duration-150 flex items-center justify-center ${
       checked
         ? 'bg-primary-600 border-primary-500'
-        : 'bg-slate-900/50 border-slate-600 hover:border-slate-500'
+        : 'bg-white dark:bg-slate-900/50 border-gray-300 dark:border-slate-600 hover:border-gray-400 dark:hover:border-slate-500'
     }`}
   >
     {checked && <Check className="w-3 h-3 text-white" />}
@@ -507,7 +507,7 @@ const StatisticsBar: React.FC<{
   statGroups: StatGroup[];
   onMetricClick: (metric: StatMetric) => void;
 }> = ({ statGroups, onMetricClick }) => (
-  <div className="flex flex-wrap items-center gap-6 p-3 rounded-lg bg-slate-900/40 border border-slate-800">
+  <div className="flex flex-wrap items-center gap-6 p-3 rounded-lg bg-white dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 shadow-sm dark:shadow-none">
     {statGroups.map((group) => (
       <div key={group.title} className="flex items-center gap-3">
         <span className="text-xs text-slate-500 font-medium">{group.title}:</span>
@@ -516,7 +516,7 @@ const StatisticsBar: React.FC<{
             <button
               key={metric.label}
               onClick={() => onMetricClick(metric)}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-800/50 hover:bg-slate-800 transition-colors group"
+              className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-800/50 hover:bg-gray-200 dark:hover:bg-slate-800 transition-colors group"
             >
               <span className="text-xs text-slate-400 group-hover:text-slate-300">
                 {metric.label}
@@ -559,7 +559,7 @@ const CustomSearchViewPanel: React.FC = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-slate-900/40 border border-slate-800">
+    <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-white dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 shadow-sm dark:shadow-none">
       {/* Filters Section */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
@@ -769,7 +769,7 @@ const CashflowBlotterPreview: React.FC = () => {
 
             <div className="h-5 w-px bg-slate-700" />
 
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-800/50 border border-slate-700">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700">
               <Clock className="w-3.5 h-3.5 text-slate-500" />
               <span className="text-xs font-mono text-slate-300">
                 {format(new Date(), 'HH:mm')}
@@ -959,7 +959,7 @@ const CashflowBlotterPreview: React.FC = () => {
             <div className="flex justify-start mb-4">
               <button
                 onClick={() => setSearchExpanded(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-900/40 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors text-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-100 dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 hover:bg-gray-200 dark:hover:bg-slate-800 text-gray-600 dark:text-slate-400 dark:hover:text-slate-200 transition-colors text-xs"
               >
                 <ChevronDown className="w-3.5 h-3.5" />
                 Show Search
@@ -986,7 +986,7 @@ const CashflowBlotterPreview: React.FC = () => {
           {/* Data Grid with Header (Footer moved to header) */}
           <Card className="mt-4 overflow-hidden">
             {/* Grid Header - Results and Actions */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900/50">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50">
               <div className="flex items-center gap-3">
                 <span className="text-xs text-slate-400">Results:</span>
                 {selectedRows.size > 0 && (
@@ -1019,7 +1019,7 @@ const CashflowBlotterPreview: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-slate-800 bg-slate-900/30">
+                  <tr className="border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/30">
                     <th className="p-3 text-left w-10">
                       <Checkbox
                         checked={selectedRows.size === data.length && data.length > 0}
