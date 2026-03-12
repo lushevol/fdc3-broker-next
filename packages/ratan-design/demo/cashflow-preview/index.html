@@ -121,12 +121,17 @@
       box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
     }
 
-    /* Grid pattern background */
-    .bg-grid {
+    /* Grid pattern - only show in dark mode */
+    .dark .bg-grid {
       background-image:
         linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
       background-size: 24px 24px;
+    }
+
+    /* Light mode - no grid pattern */
+    .bg-grid {
+      background-image: none;
     }
 
     /* Line clamp */
@@ -161,7 +166,7 @@
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-200 font-sans antialiased bg-grid min-h-screen">
+<body class="bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-200 font-sans antialiased bg-grid min-h-screen">
   <div id="root"></div>
   <script type="module" src="./main.tsx"></script>
 </body>
