@@ -624,7 +624,6 @@ const CustomSearchViewPanel: React.FC = () => {
 // Main Application
 const CashflowBlotterPreview: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
-  const [darkMode, setDarkMode] = useState(true);
   const [searchExpanded, setSearchExpanded] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
