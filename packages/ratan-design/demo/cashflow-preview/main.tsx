@@ -142,8 +142,8 @@ const Button: React.FC<{
     primary:
       'bg-primary-600 hover:bg-primary-500 text-white shadow-md shadow-primary-500/20',
     secondary:
-      'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700',
-    ghost: 'hover:bg-slate-800 text-slate-400 hover:text-slate-200',
+      'bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-slate-200 border border-gray-300 dark:border-slate-700',
+    ghost: 'hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200',
     danger:
       'bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30',
   };
@@ -180,7 +180,7 @@ const Input: React.FC<{
 }> = ({ placeholder, value, onChange, className = '', icon, type = 'text' }) => (
   <div className={`relative focus-ring rounded-md ${className}`}>
     {icon && (
-      <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500">
+      <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
         {icon}
       </div>
     )}
@@ -189,7 +189,7 @@ const Input: React.FC<{
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className={`w-full bg-slate-900/50 border border-slate-700 rounded-md text-slate-200 placeholder-slate-500 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50 transition-all ${
+      className={`w-full bg-white dark:bg-slate-900/50 border border-gray-300 dark:border-slate-700 rounded-md text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50 transition-all ${
         icon ? 'pl-9 pr-3 py-1.5' : 'px-3 py-1.5'
       }`}
     />
@@ -207,7 +207,7 @@ const Select: React.FC<{
     <select
       value={value || ''}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full bg-slate-900/50 border border-slate-700 rounded-md text-slate-200 text-sm px-3 py-1.5 pr-8 appearance-none focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50 transition-all cursor-pointer"
+      className="w-full bg-white dark:bg-slate-900/50 border border-gray-300 dark:border-slate-700 rounded-md text-gray-900 dark:text-slate-200 text-sm px-3 py-1.5 pr-8 appearance-none focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50 transition-all cursor-pointer"
     >
       <option value="">{placeholder || 'Select...'}</option>
       {options.map((opt) => (
@@ -216,7 +216,7 @@ const Select: React.FC<{
         </option>
       ))}
     </select>
-    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-slate-500 pointer-events-none" />
   </div>
 );
 
@@ -258,10 +258,10 @@ const MultiSelect: React.FC<{
     <div ref={dropdownRef} className={`relative ${className}`}>
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full min-h-[34px] bg-slate-900/50 border border-slate-700 rounded-md px-3 py-1.5 cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50 transition-all"
+        className="w-full min-h-[34px] bg-white dark:bg-slate-900/50 border border-gray-300 dark:border-slate-700 rounded-md px-3 py-1.5 cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50 transition-all"
       >
         {values.length === 0 ? (
-          <span className="text-sm text-slate-500">{placeholder || 'Select...'}</span>
+          <span className="text-sm text-gray-500 dark:text-slate-500">{placeholder || 'Select...'}</span>
         ) : (
           <div className="flex flex-wrap gap-1">
             {values.map((v) => {
@@ -288,13 +288,13 @@ const MultiSelect: React.FC<{
         )}
       </div>
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-slate-900 border border-slate-700 rounded-md shadow-lg max-h-48 overflow-auto">
+        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-md shadow-lg max-h-48 overflow-auto">
           {options.map((opt) => (
             <button
               key={opt.value}
               onClick={() => toggleValue(opt.value)}
-              className={`w-full px-3 py-2 text-left text-sm hover:bg-slate-800 transition-colors flex items-center gap-2 ${
-                values.includes(opt.value) ? 'text-primary-400' : 'text-slate-300'
+              className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 ${
+                values.includes(opt.value) ? 'text-primary-400' : 'text-gray-700 dark:text-slate-300'
               }`}
             >
               <div
@@ -323,24 +323,24 @@ const DateRangePicker: React.FC<{
 }> = ({ startDate = '', endDate = '', onChange, className = '' }) => (
   <div className={`flex items-center gap-2 ${className}`}>
     <div className="relative flex-1">
-      <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+      <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-slate-500" />
       <input
         type="text"
         placeholder="Start Date"
         value={startDate}
         onChange={(e) => onChange(e.target.value, endDate)}
-        className="w-full bg-slate-900/50 border border-slate-700 rounded-md text-slate-200 placeholder-slate-500 text-sm pl-9 pr-3 py-1.5 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50 transition-all"
+        className="w-full bg-white dark:bg-slate-900/50 border border-gray-300 dark:border-slate-700 rounded-md text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 text-sm pl-9 pr-3 py-1.5 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50 transition-all"
       />
     </div>
-    <span className="text-slate-500">-</span>
+    <span className="text-gray-400 dark:text-slate-500">-</span>
     <div className="relative flex-1">
-      <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+      <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-slate-500" />
       <input
         type="text"
         placeholder="End Date"
         value={endDate}
         onChange={(e) => onChange(startDate, e.target.value)}
-        className="w-full bg-slate-900/50 border border-slate-700 rounded-md text-slate-200 placeholder-slate-500 text-sm pl-9 pr-3 py-1.5 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50 transition-all"
+        className="w-full bg-white dark:bg-slate-900/50 border border-gray-300 dark:border-slate-700 rounded-md text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 text-sm pl-9 pr-3 py-1.5 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50 transition-all"
       />
     </div>
   </div>
@@ -352,7 +352,7 @@ const Badge: React.FC<{
   className?: string;
 }> = ({ children, variant = 'default', className = '' }) => {
   const variants = {
-    default: 'bg-slate-800 text-slate-300 border-slate-700',
+    default: 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-700',
     success:
       'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
     warning:
@@ -406,7 +406,7 @@ const Card: React.FC<{
     {(title || headerAction) && (
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50">
         {title && (
-          <h3 className="text-sm font-semibold text-slate-200">{title}</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-200">{title}</h3>
         )}
         {headerAction}
       </div>
@@ -457,43 +457,43 @@ const WorkspaceDropdown: React.FC<{
   return (
     <div
       ref={dropdownRef}
-      className="absolute top-full left-0 mt-1 w-64 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-50 animate-fade-in"
+      className="absolute top-full left-0 mt-1 w-64 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl z-50 animate-fade-in"
     >
       <div className="p-3 space-y-2">
         {/* Environment */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-400">Environment</span>
+          <span className="text-xs text-gray-500 dark:text-slate-400">Environment</span>
           <Badge variant="success" className="text-xs">UAT</Badge>
         </div>
 
         {/* Version */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-400">Version</span>
-          <span className="text-xs text-slate-300 font-mono">1.40.0</span>
+          <span className="text-xs text-gray-500 dark:text-slate-400">Version</span>
+          <span className="text-xs text-gray-700 dark:text-slate-300 font-mono">1.40.0</span>
         </div>
 
         {/* API Status */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-400">API Status</span>
+          <span className="text-xs text-gray-500 dark:text-slate-400">API Status</span>
           <div className="flex items-center gap-1.5">
             <Activity className="w-3 h-3 text-emerald-400" />
             <span className="text-xs text-emerald-400">Online</span>
           </div>
         </div>
 
-        <div className="h-px bg-slate-800 my-2" />
+        <div className="h-px bg-gray-200 dark:bg-slate-800 my-2" />
 
         {/* Refresh Button */}
         <button
           onClick={onRefresh}
-          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-800 transition-colors text-left"
+          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-left"
         >
-          <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
-          <span className="text-xs text-slate-300">Refresh Page</span>
+          <RefreshCw className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
+          <span className="text-xs text-gray-700 dark:text-slate-300">Refresh Page</span>
         </button>
 
         {/* Last Updated */}
-        <div className="flex items-center gap-2 px-2 py-1 text-xs text-slate-500">
+        <div className="flex items-center gap-2 px-2 py-1 text-xs text-gray-500 dark:text-slate-500">
           <Clock className="w-3 h-3" />
           <span>Updated: {format(lastUpdated, 'HH:mm:ss')}</span>
         </div>
@@ -510,7 +510,7 @@ const StatisticsBar: React.FC<{
   <div className="flex flex-wrap items-center gap-6 p-3 rounded-lg bg-white dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 shadow-sm dark:shadow-none">
     {statGroups.map((group) => (
       <div key={group.title} className="flex items-center gap-3">
-        <span className="text-xs text-slate-500 font-medium">{group.title}:</span>
+        <span className="text-xs text-gray-500 dark:text-slate-500 font-medium">{group.title}:</span>
         <div className="flex items-center gap-2">
           {group.metrics.map((metric) => (
             <button
@@ -518,7 +518,7 @@ const StatisticsBar: React.FC<{
               onClick={() => onMetricClick(metric)}
               className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-800/50 hover:bg-gray-200 dark:hover:bg-slate-800 transition-colors group"
             >
-              <span className="text-xs text-slate-400 group-hover:text-slate-300">
+              <span className="text-xs text-gray-500 dark:text-slate-400 group-hover:text-gray-700 dark:group-hover:text-slate-300">
                 {metric.label}
               </span>
               <Badge
@@ -563,7 +563,7 @@ const CustomSearchViewPanel: React.FC = () => {
       {/* Filters Section */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500 uppercase font-medium w-14">Filters</span>
+          <span className="text-xs text-gray-500 dark:text-slate-500 uppercase font-medium w-14">Filters</span>
           <Select
             placeholder="Select..."
             value={selectedFilter}
@@ -592,7 +592,7 @@ const CustomSearchViewPanel: React.FC = () => {
       {/* Views Section */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500 uppercase font-medium w-14">Views</span>
+          <span className="text-xs text-gray-500 dark:text-slate-500 uppercase font-medium w-14">Views</span>
           <Select
             placeholder="Select..."
             value={selectedView}
@@ -735,7 +735,7 @@ const CashflowBlotterPreview: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-950">
       {/* Header - Simplified */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-900 border-b border-slate-800">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800">
         <div className="flex items-center justify-between h-14 px-4">
           {/* Logo */}
           <div className="flex items-center gap-3">
@@ -761,7 +761,7 @@ const CashflowBlotterPreview: React.FC = () => {
               aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {theme === 'dark' ? (
-                <Sun className="w-5 h-5 text-slate-300" />
+                <Sun className="w-5 h-5 text-gray-700 dark:text-slate-300" />
               ) : (
                 <Moon className="w-5 h-5 text-gray-600" />
               )}
@@ -770,11 +770,11 @@ const CashflowBlotterPreview: React.FC = () => {
             <div className="h-5 w-px bg-slate-700" />
 
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700">
-              <Clock className="w-3.5 h-3.5 text-slate-500" />
-              <span className="text-xs font-mono text-slate-300">
+              <Clock className="w-3.5 h-3.5 text-gray-400 dark:text-slate-500" />
+              <span className="text-xs font-mono text-gray-700 dark:text-slate-300">
                 {format(new Date(), 'HH:mm')}
               </span>
-              <span className="text-xs text-slate-500">UTC</span>
+              <span className="text-xs text-gray-500 dark:text-slate-500">UTC</span>
             </div>
 
             <div className="h-5 w-px bg-slate-700" />
@@ -812,7 +812,7 @@ const CashflowBlotterPreview: React.FC = () => {
                   lastUpdated={lastUpdated}
                 />
               </div>
-              <button className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-slate-800 text-slate-400 transition-colors">
+              <button className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 transition-colors">
                 <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -820,7 +820,7 @@ const CashflowBlotterPreview: React.FC = () => {
             {/* Environment/Status indicators in tab bar */}
             <div className="flex items-center gap-3">
               <Badge variant="success" className="text-xs">UAT</Badge>
-              <span className="text-xs text-slate-500">v1.40.0</span>
+              <span className="text-xs text-gray-500 dark:text-slate-500">v1.40.0</span>
               <div className="flex items-center gap-1.5">
                 <Activity className="w-3 h-3 text-emerald-400" />
                 <span className="text-xs text-emerald-400">Online</span>
@@ -838,7 +838,7 @@ const CashflowBlotterPreview: React.FC = () => {
               headerAction={
                 <button
                   onClick={() => setSearchExpanded(false)}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors text-xs"
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 transition-colors text-xs"
                 >
                   <ChevronUp className="w-3.5 h-3.5" />
                   Hide
@@ -860,7 +860,7 @@ const CashflowBlotterPreview: React.FC = () => {
                     onChange={(v) => setFilters((f) => ({ ...f, tradeId: v }))}
                     className="pr-16"
                   />
-                  <button className="absolute right-1.5 top-1/2 -translate-y-1/2 px-2 py-0.5 text-xs text-slate-400 hover:text-slate-200 bg-slate-800 rounded">
+                  <button className="absolute right-1.5 top-1/2 -translate-y-1/2 px-2 py-0.5 text-xs text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 bg-gray-100 dark:bg-slate-800 rounded">
                     ID ▼
                   </button>
                 </div>
@@ -988,18 +988,18 @@ const CashflowBlotterPreview: React.FC = () => {
             {/* Grid Header - Results and Actions */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50">
               <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-400">Results:</span>
+                <span className="text-xs text-gray-500 dark:text-slate-400">Results:</span>
                 {selectedRows.size > 0 && (
                   <Badge variant="info" className="text-xs">
                     {selectedRows.size} selected
                   </Badge>
                 )}
-                <span className="text-xs text-slate-300 font-medium">
+                <span className="text-xs text-gray-700 dark:text-slate-300 font-medium">
                   {data.length.toLocaleString()} total
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-slate-500">
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-500">
                 <Clock className="w-3 h-3" />
                 Last updated: {format(lastUpdated, 'd MMM yyyy, HH:mm:ss')} UTC
               </div>
@@ -1026,37 +1026,37 @@ const CashflowBlotterPreview: React.FC = () => {
                         onChange={toggleAllRows}
                       />
                     </th>
-                    <th className="p-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-slate-200 transition-colors">
+                    <th className="p-3 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:text-gray-900 dark:hover:text-slate-200 transition-colors">
                       <div className="flex items-center gap-1.5">
                         Cashflow ID
                         <ArrowUpDown className="w-3 h-3" />
                       </div>
                     </th>
-                    <th className="p-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <th className="p-3 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Trade ID
                     </th>
-                    <th className="p-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <th className="p-3 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Value Date
                     </th>
-                    <th className="p-3 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <th className="p-3 text-center text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       CCY
                     </th>
-                    <th className="p-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <th className="p-3 text-right text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Amount
                     </th>
-                    <th className="p-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <th className="p-3 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Type
                     </th>
-                    <th className="p-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <th className="p-3 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="p-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <th className="p-3 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Counterparty
                     </th>
-                    <th className="p-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <th className="p-3 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Product
                     </th>
-                    <th className="p-3 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <th className="p-3 text-center text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -1069,12 +1069,12 @@ const CashflowBlotterPreview: React.FC = () => {
                     return (
                       <tr
                         key={row.id}
-                        className={`hover:bg-slate-800/30 transition-colors ${
+                        className={`hover:bg-gray-50 dark:hover:bg-slate-800/30 transition-colors ${
                           isSelected
                             ? 'bg-primary-500/5'
                             : index % 2 === 0
                             ? 'bg-transparent'
-                            : 'bg-slate-900/20'
+                            : 'bg-gray-100 dark:bg-slate-900/20'
                         }`}
                       >
                         <td className="p-3">
@@ -1088,10 +1088,10 @@ const CashflowBlotterPreview: React.FC = () => {
                             {row.cashflowId}
                           </span>
                         </td>
-                        <td className="p-3 text-xs text-slate-300">{row.tradeId}</td>
-                        <td className="p-3 text-xs text-slate-300">{row.valueDate}</td>
+                        <td className="p-3 text-xs text-gray-700 dark:text-slate-300">{row.tradeId}</td>
+                        <td className="p-3 text-xs text-gray-700 dark:text-slate-300">{row.valueDate}</td>
                         <td className="p-3 text-center">
-                          <span className="inline-flex items-center justify-center min-w-[36px] px-1.5 py-0.5 rounded bg-slate-800 text-xs font-medium text-slate-300 font-mono">
+                          <span className="inline-flex items-center justify-center min-w-[36px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-800 text-xs font-medium text-gray-700 dark:text-slate-300 font-mono">
                             {row.currency}
                           </span>
                         </td>
@@ -1113,19 +1113,19 @@ const CashflowBlotterPreview: React.FC = () => {
                         <td className="p-3">
                           <StatusIndicator status={row.cashflowStatus} />
                         </td>
-                        <td className="p-3 text-xs text-slate-300 truncate max-w-[120px]">
+                        <td className="p-3 text-xs text-gray-700 dark:text-slate-300 truncate max-w-[120px]">
                           {row.counterparty}
                         </td>
-                        <td className="p-3 text-xs text-slate-300">{row.productTaxonomy}</td>
+                        <td className="p-3 text-xs text-gray-700 dark:text-slate-300">{row.productTaxonomy}</td>
                         <td className="p-3">
                           <div className="flex items-center justify-center gap-0.5">
-                            <button className="p-1 rounded hover:bg-slate-800 text-slate-500 hover:text-primary-400 transition-colors">
+                            <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-500 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
                               <Eye className="w-3.5 h-3.5" />
                             </button>
-                            <button className="p-1 rounded hover:bg-slate-800 text-slate-500 hover:text-primary-400 transition-colors">
+                            <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-500 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
                               <Download className="w-3.5 h-3.5" />
                             </button>
-                            <button className="p-1 rounded hover:bg-slate-800 text-slate-500 hover:text-slate-200 transition-colors">
+                            <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-500 hover:text-gray-900 dark:hover:text-slate-200 transition-colors">
                               <MoreHorizontal className="w-3.5 h-3.5" />
                             </button>
                           </div>
