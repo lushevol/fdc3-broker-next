@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ThemeProvider } from './components/ThemeProvider';
+import { ThemeProvider, useTheme } from './components/ThemeProvider';
 import {
   Search,
   Plus,
@@ -623,6 +623,7 @@ const CustomSearchViewPanel: React.FC = () => {
 
 // Main Application
 const CashflowBlotterPreview: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
   const [darkMode, setDarkMode] = useState(true);
   const [searchExpanded, setSearchExpanded] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -755,15 +756,15 @@ const CashflowBlotterPreview: React.FC = () => {
             <div className="h-5 w-px bg-slate-700" />
 
             <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-slate-800 transition-colors"
+              onClick={toggleTheme}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              {darkMode ? (
-                <Moon className="w-3.5 h-3.5 text-primary-400" />
+              {theme === 'dark' ? (
+                <Sun className="w-5 h-5 text-slate-300" />
               ) : (
-                <Sun className="w-3.5 h-3.5 text-amber-400" />
+                <Moon className="w-5 h-5 text-gray-600" />
               )}
-              <span className="text-xs text-slate-400">{darkMode ? 'Dark' : 'Light'}</span>
             </button>
 
             <div className="h-5 w-px bg-slate-700" />
