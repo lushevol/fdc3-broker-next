@@ -1,0 +1,166 @@
+spring:
+  application:
+    name: authentication
+  zipkin:
+    enabled: false
+  sleuth:
+    redis:
+      enabled: false
+  session:
+    redis:
+      namespace: ratanone:auth:session
+    store-type: redis
+  kafka:
+    bootstrap-servers: ${KAFKA_CLUSTER_BROKERS}
+  ldap:
+    urls: ${OUD_URL}
+  data:
+    redis:
+      cluster:
+        nodes: ${REDIS_CLUSTER_NODES}
+        max-redirects: 3
+      password: ${REDIS_JANUS}
+      lettuce:
+        cluster:
+          refresh:
+            adaptive: true
+            period: 30s
+      timeout: 30s
+
+info:
+  build:
+    artifactId: '@project.artifactId@'
+    name: '@project.name@'
+    description: '@project.description@'
+    version: '@project.version@'
+  applicationName: ${spring.application.name}
+
+ratanone:
+  cert:
+    rest:
+      enabled: true
+  logging:
+    level: info
+    folder: ${LOG_DIR:/apps/ratanrt/logs}
+    logstash:
+      destinations: ${LOGSTASH_URL}
+  authentication:
+    cert:
+      keystore-file: ${JKS_KEYSTORE_FILE}
+      keystore-pwd: ${JKS_KEYSTORE_PWD}
+      truststore-file: ${JKS_TRUSTSTORE_FILE}
+      truststore-pwd: ${JKS_TRUSTSTORE_PWD}
+    kong:
+      account: ${EDMI_OUD}
+      sec: ${EDMI_OUD_PWD}
+      application-name: ${KONG_APPLICATION_NAME}
+      iam: ${KONG_IAM_URL}
+      token-endpoint: ${KONG_TOKEN_ENDPOINT}
+      client-id: ${KONG_CLIENT_ID}
+      client-secret: ${KONG_CLIENT_SEC}
+      client-endpoint: ${KONG_CLIENT_ENDPOINT}
+      gateway: ${KONG_GATEWAY}
+    pct2:
+      endpoint: ${PCT2_ENDPOINT}
+    cipher-key: ${RATAN_CIPHER_KEY}
+    users:
+      - username: quality-assurance
+        password: ${RATANONE_QA_BASIC_PWD}
+        actions:
+          - RATAN_INTERNAL_FUNC:QUALITY_ASSURANCE:PROCESS_START
+          - RATAN_INTERNAL_FUNC:QUALITY_ASSURANCE:PROCESS_RESULT
+      - username: audit-service
+        password: ${RATANONE_AUDIT_BASIC_PWD}
+        actions:
+          - RATAN_INTERNAL_FUNC:DB_REST:INSERT
+      - username: ratanone-control-m
+        password: ${RATANONE_CONTROL_M_PWD}
+        actions:
+          - RATAN_INTERNAL_FUNC:CASHFLOW_SERVICE:AUTO_NETTING
+          - RATAN_INTERNAL_FUNC:CASHFLOW_SERVICE:AUTO_FAILING
+          - RATAN_INTERNAL_FUNC:CASHFLOW_SERVICE:HOLDING_RELEASE
+          - RATAN_INTERNAL_FUNC:DA_SERVICE:REFRESH_COUNTERPARTY_CACHE
+          - RATAN_INTERNAL_FUNC:STATIC_SERVICE:FETCHANDUPDATE
+          - RATAN_INTERNAL_FUNC:DA_SERVICE:REFRESH_HASHICORP_CACHE
+          - RATAN_INTERNAL_FUNC:STATIC_SERVICE:PORTFOLIO
+          - RATAN_INTERNAL_FUNC:FLOWZERO_SERVICE:WF_LIFECYCLE
+      - username: ratanone-rundeck
+        password: ${RATANONE_RUNDECK_PWD}
+        actions:
+          - RATAN_INTERNAL_FUNC:QUERY_SERVICE:SYNC
+          - RATAN_INTERNAL_FUNC:QUERY_SERVICE:QUERY
+          - RATAN_INTERNAL_FUNC:QUERY_SERVICE:STATUS_RESET
+          - RATAN_INTERNAL_FUNC:MESSAGE_EVENT:UAT_REPLAY
+          - RATAN_INTERNAL_FUNC:MESSAGE_EVENT:PROD_REPLAY
+          - RATAN_INTERNAL_FUNC:STATIC_SERVICE:EXECUTE
+          - RATAN_INTERNAL_FUNC:STATIC_SERVICE:ROLLBACK
+  sso:
+    domain-name: uk.dev.net
+    max-age: 1m
+  jwt-token-parser:
+    caching-enabled: true
+    expiry-time: 120 #60*2 minute
+    ratan-entity: X_RATANONE
+    ratan-data-entitlement-entity: RATAN_DATA_ENTITLEMENT
+    request-ems2-url: ${EMS2_HTTPS_HOST}/ems2/rest/entitlements/entity/name/%s/user/%s
+
+fmoportal:
+  auth:
+    exclude-urls:
+      - /v1/login
+      - /v2/login
+      - /v1/user
+      - /actuator/**
+    user-login-max-duration: P365D
+    skip-jwt-headers:
+      - 'X-Token'
+      - 'Authorization'
+      - 'FMAA-Token'
+management:
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_SERVER_ENDPOINT:https://zipkin/api/v2/spans}
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:0.3}
+  health:
+    redis:
+      enabled: false
+    db:
+      enabled: false
+#    ratanKafka:
+#      enabled: true
+
+scb:
+  ems2:
+    expiryTime: 3600 #seconds
+    cachingEnabled: true
+    host: ${EMS2_HOST}
+    userRoles: ${scb.ems2.host}/ems2/rest/account/%s
+    userAuthorizationOnEntity: ${scb.ems2.host}/ems2/rest/entitlements/entity/name/%s/user/%s
+    sysAccountEntityList:
+      - RATAN_FUNC
+    entityList:
+      - RATAN_TRADE_BLOTTER
+      - RATAN_CASHFLOW_BLOTTER
+      - RATAN_MO_EXCEPTION
+      - RATAN_VALIDATION_EXCEPTION
+      - RATAN_SETTLEMENT_EXCEPTION
+      - RATAN_WORKFLOW
+      - RATAN_SUPPRESSION_RULE
+      - RATAN_SETTLEMENT_STP_RULE
+      - RATAN_CURRENCY_NSTP_RULE
+      - RATAN_ISO_CURRENCY_MAPPING
+      - RATAN_NETTING_RULE
+      - RATAN_CURRENCY_CUTOFF
+      - RATAN_ENTITLEMENT_RULE
+    dataEntitlementEntity: RATAN_DATA_ENTITLEMENT
+fmaa:
+  api:
+    introspectPoint: ${FMAA_HOST}/introspect
+    account: ${FMAA_ACCOUNT}
+    janus: ${FMAA_JANUS}
+    host: ${FMAA_HOST} # required when auth-system is fmaa
+    cert-path: ${FMAA_CERT_PATH} # required when auth-system is fmaa
+    cipher-key: ${RATAN_CIPHER_KEY}
+    token-refresh-duration: '40d'

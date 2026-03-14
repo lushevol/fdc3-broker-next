@@ -1,0 +1,17 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: authentication
+
+logging:
+  level:
+    root: INFO
+
+ratanone:
+  logging:
+    level: info
+    folder: ${LOG_DIR:/apps/ratanrt/logs}
+    logstash:
+      destinations: ${LOGSTASH_URL:10.198.199.160:5000}

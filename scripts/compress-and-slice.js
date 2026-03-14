@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { createTar } = require('tar');
+const { create: createTar } = require('tar');
 
 const MAX_CHUNK_SIZE = 10 * 1024; // 10KB
 

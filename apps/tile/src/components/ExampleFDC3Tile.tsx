@@ -118,12 +118,20 @@ const useFDC3TileRegister = (appIdentifier: AppIdentifier) => {
   const fdc3 = useFDC3();
 
   useEffect(() => {
-    fdc3.registerTile(appIdentifier.instanceId, appIdentifier.appId);
+    try {
+      fdc3.registerTile(appIdentifier.instanceId, appIdentifier.appId);
+    } catch (error) {
+      console.error('Failed to register tile:', error);
+    }
 
     return () => {
-      fdc3.unregisterTile(appIdentifier.instanceId, appIdentifier.appId);
+      try {
+        fdc3.unregisterTile(appIdentifier.instanceId, appIdentifier.appId);
+      } catch (error) {
+        console.error('Failed to unregister tile:', error);
+      }
     };
-  }, [fdc3]);
+  }, [fdc3, appIdentifier.instanceId, appIdentifier.appId]);
 };
 
 /**
@@ -225,10 +233,16 @@ function ChannelSection() {
   // Fetch current channel on mount
   useEffect(() => {
     const initialUserChannel = async () => {
-      const channels = await fdc3.getUserChannels();
-      await fdc3.joinUserChannel(channels[0].id);
-      const channel = await fdc3.getCurrentChannel();
-      setCurrentChannel(channel);
+      try {
+        const channels = await fdc3.getUserChannels();
+        if (channels.length > 0) {
+          await fdc3.joinUserChannel(channels[0].id);
+          const channel = await fdc3.getCurrentChannel();
+          setCurrentChannel(channel);
+        }
+      } catch (error) {
+        console.error('Failed to initialize user channel:', error);
+      }
     };
     initialUserChannel();
   }, [fdc3]);

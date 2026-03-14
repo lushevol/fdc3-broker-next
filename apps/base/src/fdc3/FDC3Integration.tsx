@@ -458,9 +458,9 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
       />
 
       {/* Broker Status Indicator (for development) */}
-      {process.env.NODE_ENV === 'development' && (
+      {/* {process.env.NODE_ENV === 'development' && (
         <BrokerStatusBadge initialized={brokerInitialized} error={brokerError} />
-      )}
+      )} */}
     </>
   );
 };

@@ -3,11 +3,10 @@ import {
   Box,
   IconButton,
   Typography,
-  TextField,
-  Button,
   Slide,
   Fab,
   CircularProgress,
+  TextField,
   useTheme,
 } from '@mui/material';
 import {
@@ -18,45 +17,41 @@ import {
   Refresh as RefreshIcon,
   ErrorOutline as ErrorIcon,
 } from '@mui/icons-material';
-import {
-  AssistantRuntimeProvider,
-  useLocalRuntime,
-  Thread,
-  ComposerPrimitive,
-  useThreadRuntime,
-  useThread,
-} from '@assistant-ui/react';
-import type { ChatModelAdapter } from '@assistant-ui/react';
 import { useChatbotController } from './common/useController';
 import { ChatbotSidebarProps } from './common/interface';
 import { sidebarStyles } from './common/style';
 
-// Inner component that uses assistant-ui hooks
-const ChatContent: React.FC<{
-  onNewChat: () => void;
-}> = ({ onNewChat }) => {
+// Simple chat content component that doesn't use the problematic hooks
+const SimpleChatContent: React.FC<{
+  messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string; id: string }>;
+  isLoading: boolean;
+  onSendMessage: (content: string) => void;
+}> = ({ messages, isLoading, onSendMessage }) => {
   const theme = useTheme();
-  const thread = useThread();
-  const runtime = useThreadRuntime();
+  const [inputValue, setInputValue] = useState('');
 
-  const handleSendMessage = useCallback(
-    (content: string) => {
-      if (content.trim()) {
-        // For assistant-ui, we use the runtime to append a message
-        runtime.append({
-          role: 'user',
-          content: [{ type: 'text', text: content.trim() }],
-        });
+  const handleSend = useCallback(() => {
+    if (inputValue.trim() && !isLoading) {
+      onSendMessage(inputValue.trim());
+      setInputValue('');
+    }
+  }, [inputValue, isLoading, onSendMessage]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
       }
     },
-    [runtime],
+    [handleSend],
   );
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Message Thread */}
       <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
-        {thread.messages.length === 0 ? (
+        {messages.length === 0 ? (
           <Box className={sidebarStyles.emptyState(theme)}>
             <SmartToyIcon className={sidebarStyles.emptyIcon(theme)} />
             <Typography variant="h6" gutterBottom>
@@ -67,23 +62,51 @@ const ChatContent: React.FC<{
             </Typography>
           </Box>
         ) : (
-          <Thread />
+          <Box className={sidebarStyles.messageList}>
+            {messages
+              .filter((msg) => msg.role === 'user' || msg.role === 'assistant')
+              .map((msg) => (
+                <Box
+                  key={msg.id}
+                  className={sidebarStyles.message(theme, msg.role as 'user' | 'assistant')}
+                >
+                  <Typography variant="body1">{msg.content}</Typography>
+                </Box>
+              ))}
+            {isLoading && (
+              <Box className={sidebarStyles.typingIndicator(theme)}>
+                <Box className={sidebarStyles.typingDot(theme)} />
+                <Box className={sidebarStyles.typingDot(theme)} />
+                <Box className={sidebarStyles.typingDot(theme)} />
+              </Box>
+            )}
+          </Box>
         )}
       </Box>
 
-      {/* Composer / Input */}
+      {/* Input Area */}
       <Box className={sidebarStyles.inputArea(theme)}>
-        <ComposerPrimitive.Root>
-          <ComposerPrimitive.Input
+        <Box className={sidebarStyles.inputContainer(theme)}>
+          <TextField
+            fullWidth
+            multiline
+            maxRows={4}
             placeholder="Type a message..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isLoading}
             className={sidebarStyles.textField(theme)}
           />
-          <ComposerPrimitive.Send>
-            <IconButton color="primary" className={sidebarStyles.sendButton(theme)}>
-              <SendIcon />
-            </IconButton>
-          </ComposerPrimitive.Send>
-        </ComposerPrimitive.Root>
+          <IconButton
+            color="primary"
+            onClick={handleSend}
+            disabled={!inputValue.trim() || isLoading}
+            className={sidebarStyles.sendButton(theme)}
+          >
+            {isLoading ? <CircularProgress size={24} /> : <SendIcon />}
+          </IconButton>
+        </Box>
       </Box>
     </Box>
   );
@@ -103,34 +126,6 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
 
   const controller = useChatbotController({ apiUrl });
 
-  // Create assistant-ui runtime with ChatModelAdapter
-  const chatAdapter: ChatModelAdapter = {
-    async *run({ messages, abortSignal }) {
-      // Get the last user message
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage?.role !== 'user') return;
-
-      const userMessage = lastMessage.content
-        .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
-        .map((part) => part.text)
-        .join('\n');
-
-      if (userMessage.trim()) {
-        await controller.sendMessage(userMessage);
-      }
-
-      // Return the assistant response
-      const assistantMessage = controller.messages[controller.messages.length - 1];
-      if (assistantMessage?.role === 'assistant') {
-        yield {
-          content: [{ type: 'text' as const, text: assistantMessage.content }],
-        };
-      }
-    },
-  };
-
-  const runtime = useLocalRuntime(chatAdapter);
-
   const handleToggle = useCallback(() => {
     if (onToggle) {
       onToggle();
@@ -141,17 +136,22 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
 
   const handleNewChat = useCallback(() => {
     controller.clearConversation();
-    // Start a new thread
-    runtime.switchToNewThread();
-  }, [controller, runtime]);
+  }, [controller]);
 
   const handleRetry = useCallback(() => {
     controller.retryLastMessage();
   }, [controller]);
 
+  const handleSendMessage = useCallback(
+    async (content: string) => {
+      await controller.sendMessage(content);
+    },
+    [controller],
+  );
+
   return (
     <>
-      {/* Toggle Button */}
+      {/* Toggle Button (Floating Action Button) */}
       {!isOpen && (
         <Fab
           color="primary"
@@ -200,17 +200,12 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
             </Box>
           )}
 
-          {/* Chat Content with assistant-ui runtime */}
-          <AssistantRuntimeProvider runtime={runtime}>
-            <ChatContent onNewChat={handleNewChat} />
-          </AssistantRuntimeProvider>
-
-          {/* Loading Indicator */}
-          {controller.isLoading && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-              <CircularProgress size={24} />
-            </Box>
-          )}
+          {/* Chat Content */}
+          <SimpleChatContent
+            messages={controller.messages}
+            isLoading={controller.isLoading}
+            onSendMessage={handleSendMessage}
+          />
         </Box>
       </Slide>
     </>
