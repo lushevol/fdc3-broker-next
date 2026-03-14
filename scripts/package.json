@@ -1,0 +1,8 @@
+{
+  "name": "compress-scripts",
+  "version": "1.0.0",
+  "description": "Scripts to compress and slice folders into base64 chunks",
+  "dependencies": {
+    "tar": "^7.5.11"
+  }
+}
