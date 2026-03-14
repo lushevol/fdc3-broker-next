@@ -12,11 +12,11 @@
 
 ## File Structure
 
-| File | Purpose |
-|------|---------|
-| `components/ThemeProvider.tsx` | NEW: Theme context with persistence logic |
-| `main.tsx` | MODIFY: Wrap app with ThemeProvider, add toggle to header |
-| `index.html` | MODIFY: Remove hardcoded dark class, update CSS for light theme |
+| File                           | Purpose                                                         |
+| ------------------------------ | --------------------------------------------------------------- |
+| `components/ThemeProvider.tsx` | NEW: Theme context with persistence logic                       |
+| `main.tsx`                     | MODIFY: Wrap app with ThemeProvider, add toggle to header       |
+| `index.html`                   | MODIFY: Remove hardcoded dark class, update CSS for light theme |
 
 ---
 
@@ -25,6 +25,7 @@
 ### Task 1: Create ThemeProvider Component
 
 **Files:**
+
 - Create: `components/ThemeProvider.tsx`
 - Modify: `main.tsx` (to wrap app)
 
@@ -122,11 +123,13 @@ git commit -m "feat: add ThemeProvider with persistence"
 ### Task 2: Integrate ThemeProvider into App
 
 **Files:**
+
 - Modify: `main.tsx` (top of file where imports and root render are)
 
 - [ ] **Step 1: Add import for ThemeProvider**
 
 At the top of `main.tsx`, add import:
+
 ```typescript
 import { ThemeProvider } from './components/ThemeProvider';
 ```
@@ -136,12 +139,14 @@ import { ThemeProvider } from './components/ThemeProvider';
 Find where `createRoot` is called (around line 800-850 in main.tsx):
 
 Change from:
+
 ```typescript
 const root = createRoot(document.getElementById('root')!);
 root.render(<CashflowBlotterApp />);
 ```
 
 To:
+
 ```typescript
 const root = createRoot(document.getElementById('root')!);
 root.render(
@@ -170,6 +175,7 @@ git commit -m "feat: wrap app with ThemeProvider"
 ### Task 3: Implement Theme Toggle Button
 
 **Files:**
+
 - Modify: `main.tsx` (Header component, around line 500-600)
 
 Context: The Header component already has Sun and Moon icons imported. There's a comment/placeholder for the theme toggle.
@@ -179,6 +185,7 @@ Context: The Header component already has Sun and Moon icons imported. There's a
 Find the Header component in main.tsx (search for "function Header" or "const Header"). Near the imports at top of file, `useTheme` is already available from the import added in Task 2.
 
 Add inside the Header component function:
+
 ```typescript
 const { theme, toggleTheme } = useTheme();
 ```
@@ -204,10 +211,12 @@ Find the theme toggle button in Header (look for comment about "Dark Toggle" or 
 - [ ] **Step 3: Verify toggle renders**
 
 Run dev server and check header shows either Sun or Moon icon:
+
 ```bash
 cd /Users/taissa/lushuai/code/mfe/mfe-next/packages/ratan-design
 npm run dev:demo
 ```
+
 Visit http://localhost:8001 and confirm toggle button appears in header.
 
 - [ ] **Step 4: Test toggle functionality**
@@ -215,8 +224,9 @@ Visit http://localhost:8001 and confirm toggle button appears in header.
 Click the toggle button. Expected: Icon switches between Sun and Moon.
 
 Check localStorage in browser console:
+
 ```javascript
-localStorage.getItem('theme') // should be "dark" or "light"
+localStorage.getItem('theme'); // should be "dark" or "light"
 ```
 
 - [ ] **Step 5: Commit**
@@ -233,18 +243,23 @@ git commit -m "feat: add theme toggle button to header"
 ### Task 4: Remove Hardcoded Dark Class from HTML
 
 **Files:**
+
 - Modify: `index.html`
 
 - [ ] **Step 1: Update body class to be theme-agnostic**
 
 Change:
+
 ```html
-<body class="bg-slate-950 text-slate-200 font-sans antialiased bg-grid min-h-screen">
+<body class="bg-slate-950 text-slate-200 font-sans antialiased bg-grid min-h-screen"></body>
 ```
 
 To:
+
 ```html
-<body class="bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-200 font-sans antialiased min-h-screen">
+<body
+  class="bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-200 font-sans antialiased min-h-screen"
+></body>
 ```
 
 Note: Remove `bg-grid` class from body (will add it conditionally via CSS).
@@ -271,8 +286,11 @@ Add to the `<style>` section in index.html:
 - [ ] **Step 3: Add bg-grid class back to body**
 
 Add `bg-grid` back to body class:
+
 ```html
-<body class="bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-200 font-sans antialiased bg-grid min-h-screen">
+<body
+  class="bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-200 font-sans antialiased bg-grid min-h-screen"
+></body>
 ```
 
 - [ ] **Step 4: Commit**
@@ -289,6 +307,7 @@ git commit -m "feat: make body theme-aware, conditional grid pattern"
 ### Task 5: Update Card/Panel Backgrounds
 
 **Files:**
+
 - Modify: `main.tsx` (multiple locations)
 
 Context: Need to add `dark:` prefix to existing dark styles and add light mode equivalents.
@@ -298,13 +317,16 @@ Context: Need to add `dark:` prefix to existing dark styles and add light mode e
 Find the Search Panel component (look for "Quick Search Panel" or similar). Update container classes:
 
 From:
+
 ```typescript
-className="... bg-slate-900/50 border-slate-700/50 ..."
+className = '... bg-slate-900/50 border-slate-700/50 ...';
 ```
 
 To:
+
 ```typescript
-className="... bg-white dark:bg-slate-900/50 border-gray-200 dark:border-slate-700/50 shadow-sm dark:shadow-none ..."
+className =
+  '... bg-white dark:bg-slate-900/50 border-gray-200 dark:border-slate-700/50 shadow-sm dark:shadow-none ...';
 ```
 
 - [ ] **Step 2: Update Statistics Bar styles**
@@ -312,13 +334,16 @@ className="... bg-white dark:bg-slate-900/50 border-gray-200 dark:border-slate-7
 Find Statistics Bar. Update:
 
 From:
+
 ```typescript
-className="... bg-slate-800/50 ..."
+className = '... bg-slate-800/50 ...';
 ```
 
 To:
+
 ```typescript
-className="... bg-white dark:bg-slate-800/50 border-b border-gray-200 dark:border-transparent ..."
+className =
+  '... bg-white dark:bg-slate-800/50 border-b border-gray-200 dark:border-transparent ...';
 ```
 
 - [ ] **Step 3: Update Data Grid styles**
@@ -326,13 +351,15 @@ className="... bg-white dark:bg-slate-800/50 border-b border-gray-200 dark:borde
 Find Data Grid container. Update:
 
 From:
+
 ```typescript
-className="... bg-slate-900/30 ..."
+className = '... bg-slate-900/30 ...';
 ```
 
 To:
+
 ```typescript
-className="... bg-white dark:bg-slate-900/30 border border-gray-200 dark:border-transparent ..."
+className = '... bg-white dark:bg-slate-900/30 border border-gray-200 dark:border-transparent ...';
 ```
 
 - [ ] **Step 4: Update Grid Header styles**
@@ -340,13 +367,16 @@ className="... bg-white dark:bg-slate-900/30 border border-gray-200 dark:border-
 Find Grid Header. Update:
 
 From:
+
 ```typescript
-className="... bg-slate-800/50 ..."
+className = '... bg-slate-800/50 ...';
 ```
 
 To:
+
 ```typescript
-className="... bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-700/50 ..."
+className =
+  '... bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-700/50 ...';
 ```
 
 - [ ] **Step 5: Commit**
@@ -363,6 +393,7 @@ git commit -m "feat: update panel backgrounds for light/dark themes"
 ### Task 6: Update Text Colors and Input Styles
 
 **Files:**
+
 - Modify: `main.tsx`
 
 - [ ] **Step 1: Update page title and headings**
@@ -370,13 +401,15 @@ git commit -m "feat: update panel backgrounds for light/dark themes"
 Find page title elements. Update slate-200/300 text colors:
 
 From:
+
 ```typescript
-className="... text-slate-200 ..."
+className = '... text-slate-200 ...';
 ```
 
 To:
+
 ```typescript
-className="... text-gray-900 dark:text-slate-200 ..."
+className = '... text-gray-900 dark:text-slate-200 ...';
 ```
 
 - [ ] **Step 2: Update secondary text**
@@ -384,13 +417,15 @@ className="... text-gray-900 dark:text-slate-200 ..."
 Find secondary text elements (labels, descriptions). Update:
 
 From:
+
 ```typescript
-className="... text-slate-400 ..."
+className = '... text-slate-400 ...';
 ```
 
 To:
+
 ```typescript
-className="... text-gray-500 dark:text-slate-400 ..."
+className = '... text-gray-500 dark:text-slate-400 ...';
 ```
 
 - [ ] **Step 3: Update input fields**
@@ -398,13 +433,16 @@ className="... text-gray-500 dark:text-slate-400 ..."
 Find input elements. Update:
 
 From:
+
 ```typescript
-className="... bg-slate-800 border-slate-700 text-slate-200 ..."
+className = '... bg-slate-800 border-slate-700 text-slate-200 ...';
 ```
 
 To:
+
 ```typescript
-className="... bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-200 ..."
+className =
+  '... bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 text-gray-900 dark:text-slate-200 ...';
 ```
 
 - [ ] **Step 4: Update table rows**
@@ -412,13 +450,15 @@ className="... bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 
 Find table row hover styles. Update:
 
 From:
+
 ```typescript
-className="... hover:bg-slate-800/50 ..."
+className = '... hover:bg-slate-800/50 ...';
 ```
 
 To:
+
 ```typescript
-className="... hover:bg-gray-50 dark:hover:bg-slate-800/50 ..."
+className = '... hover:bg-gray-50 dark:hover:bg-slate-800/50 ...';
 ```
 
 - [ ] **Step 5: Commit**
@@ -435,6 +475,7 @@ git commit -m "feat: update text and input styles for light theme"
 ### Task 7: Update Scrollbar Styles for Light Theme
 
 **Files:**
+
 - Modify: `index.html` (style section)
 
 - [ ] **Step 1: Update scrollbar CSS to support both themes**
@@ -442,6 +483,7 @@ git commit -m "feat: update text and input styles for light theme"
 Replace the scrollbar styles in `<style>`:
 
 From:
+
 ```css
 ::-webkit-scrollbar-track {
   background: #0f172a;
@@ -456,6 +498,7 @@ From:
 ```
 
 To:
+
 ```css
 /* Scrollbar - Dark mode */
 .dark ::-webkit-scrollbar-track {
@@ -487,6 +530,7 @@ To:
 Update glass styles to support both themes:
 
 From:
+
 ```css
 .glass {
   background: rgba(30, 41, 59, 0.7);
@@ -496,6 +540,7 @@ From:
 ```
 
 To:
+
 ```css
 .glass {
   background: rgba(255, 255, 255, 0.9);
@@ -522,6 +567,7 @@ git commit -m "feat: update scrollbar and glass styles for light theme"
 ### Task 8: Test Complete Implementation
 
 **Files:**
+
 - Verify: `main.tsx`, `index.html`, `components/ThemeProvider.tsx`
 
 - [ ] **Step 1: Run dev server**
@@ -566,6 +612,7 @@ git log --oneline -5  # verify commit history
 ## Summary
 
 This implementation adds:
+
 1. ThemeProvider context with localStorage persistence
 2. Header toggle button with Sun/Moon icons
 3. Dual-mode styles for all components

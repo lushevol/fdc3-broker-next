@@ -7,7 +7,7 @@
     "build:packages": "turbo run build --filter=\"./packages/*\"",
     "test": "turbo run test",
     "test:packages": "turbo run test --filter=\"./packages/*\"",
-    "lint": "turbo run lint",
+    "lint": "turbo run lint --continue",
     "clean": "turbo run clean",
     "format": "prettier --write \"**/*.{ts,tsx,md,json,yml,yaml}\"",
     "dev": "turbo run dev --filter=\"./apps/base\" --filter=\"./apps/root-config\" --filter=\"./apps/container\" --filter=\"./apps/tile\"",

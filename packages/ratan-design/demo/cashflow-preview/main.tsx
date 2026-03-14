@@ -143,7 +143,8 @@ const Button: React.FC<{
       'bg-primary-600 hover:bg-primary-500 text-white shadow-md shadow-primary-500/20',
     secondary:
       'bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-slate-200 border border-gray-300 dark:border-slate-700',
-    ghost: 'hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200',
+    ghost:
+      'hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200',
     danger:
       'bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30',
   };
@@ -177,7 +178,14 @@ const Input: React.FC<{
   className?: string;
   icon?: React.ReactNode;
   type?: string;
-}> = ({ placeholder, value, onChange, className = '', icon, type = 'text' }) => (
+}> = ({
+  placeholder,
+  value,
+  onChange,
+  className = '',
+  icon,
+  type = 'text',
+}) => (
   <div className={`relative focus-ring rounded-md ${className}`}>
     {icon && (
       <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
@@ -232,7 +240,10 @@ const MultiSelect: React.FC<{
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -261,7 +272,9 @@ const MultiSelect: React.FC<{
         className="w-full min-h-[34px] bg-white dark:bg-slate-900/50 border border-gray-300 dark:border-slate-700 rounded-md px-3 py-1.5 cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/50 transition-all"
       >
         {values.length === 0 ? (
-          <span className="text-sm text-gray-500 dark:text-slate-500">{placeholder || 'Select...'}</span>
+          <span className="text-sm text-gray-500 dark:text-slate-500">
+            {placeholder || 'Select...'}
+          </span>
         ) : (
           <div className="flex flex-wrap gap-1">
             {values.map((v) => {
@@ -294,7 +307,9 @@ const MultiSelect: React.FC<{
               key={opt.value}
               onClick={() => toggleValue(opt.value)}
               className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 ${
-                values.includes(opt.value) ? 'text-primary-400' : 'text-gray-700 dark:text-slate-300'
+                values.includes(opt.value)
+                  ? 'text-primary-400'
+                  : 'text-gray-700 dark:text-slate-300'
               }`}
             >
               <div
@@ -304,7 +319,9 @@ const MultiSelect: React.FC<{
                     : 'border-slate-600'
                 }`}
               >
-                {values.includes(opt.value) && <Check className="w-3 h-3 text-white" />}
+                {values.includes(opt.value) && (
+                  <Check className="w-3 h-3 text-white" />
+                )}
               </div>
               {opt.label}
             </button>
@@ -352,11 +369,10 @@ const Badge: React.FC<{
   className?: string;
 }> = ({ children, variant = 'default', className = '' }) => {
   const variants = {
-    default: 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-700',
-    success:
-      'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-    warning:
-      'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    default:
+      'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-700',
+    success: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+    warning: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
     danger: 'bg-red-500/15 text-red-400 border-red-500/30',
     info: 'bg-primary-500/15 text-primary-400 border-primary-500/30',
   };
@@ -402,11 +418,15 @@ const Card: React.FC<{
   title?: React.ReactNode;
   headerAction?: React.ReactNode;
 }> = ({ children, className = '', title, headerAction }) => (
-  <div className={`bg-white dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm dark:shadow-none ${className}`}>
+  <div
+    className={`bg-white dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm dark:shadow-none ${className}`}
+  >
     {(title || headerAction) && (
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50">
         {title && (
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-200">{title}</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-200">
+            {title}
+          </h3>
         )}
         {headerAction}
       </div>
@@ -442,7 +462,10 @@ const WorkspaceDropdown: React.FC<{
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
@@ -462,19 +485,29 @@ const WorkspaceDropdown: React.FC<{
       <div className="p-3 space-y-2">
         {/* Environment */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500 dark:text-slate-400">Environment</span>
-          <Badge variant="success" className="text-xs">UAT</Badge>
+          <span className="text-xs text-gray-500 dark:text-slate-400">
+            Environment
+          </span>
+          <Badge variant="success" className="text-xs">
+            UAT
+          </Badge>
         </div>
 
         {/* Version */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500 dark:text-slate-400">Version</span>
-          <span className="text-xs text-gray-700 dark:text-slate-300 font-mono">1.40.0</span>
+          <span className="text-xs text-gray-500 dark:text-slate-400">
+            Version
+          </span>
+          <span className="text-xs text-gray-700 dark:text-slate-300 font-mono">
+            1.40.0
+          </span>
         </div>
 
         {/* API Status */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500 dark:text-slate-400">API Status</span>
+          <span className="text-xs text-gray-500 dark:text-slate-400">
+            API Status
+          </span>
           <div className="flex items-center gap-1.5">
             <Activity className="w-3 h-3 text-emerald-400" />
             <span className="text-xs text-emerald-400">Online</span>
@@ -489,7 +522,9 @@ const WorkspaceDropdown: React.FC<{
           className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-left"
         >
           <RefreshCw className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
-          <span className="text-xs text-gray-700 dark:text-slate-300">Refresh Page</span>
+          <span className="text-xs text-gray-700 dark:text-slate-300">
+            Refresh Page
+          </span>
         </button>
 
         {/* Last Updated */}
@@ -510,7 +545,9 @@ const StatisticsBar: React.FC<{
   <div className="flex flex-wrap items-center gap-6 p-3 rounded-lg bg-white dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 shadow-sm dark:shadow-none">
     {statGroups.map((group) => (
       <div key={group.title} className="flex items-center gap-3">
-        <span className="text-xs text-gray-500 dark:text-slate-500 font-medium">{group.title}:</span>
+        <span className="text-xs text-gray-500 dark:text-slate-500 font-medium">
+          {group.title}:
+        </span>
         <div className="flex items-center gap-2">
           {group.metrics.map((metric) => (
             <button
@@ -526,8 +563,8 @@ const StatisticsBar: React.FC<{
                   metric.type === 'warning'
                     ? 'warning'
                     : metric.type === 'success'
-                    ? 'success'
-                    : 'info'
+                      ? 'success'
+                      : 'info'
                 }
                 className="text-xs"
               >
@@ -563,7 +600,9 @@ const CustomSearchViewPanel: React.FC = () => {
       {/* Filters Section */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500 dark:text-slate-500 uppercase font-medium w-14">Filters</span>
+          <span className="text-xs text-gray-500 dark:text-slate-500 uppercase font-medium w-14">
+            Filters
+          </span>
           <Select
             placeholder="Select..."
             value={selectedFilter}
@@ -592,7 +631,9 @@ const CustomSearchViewPanel: React.FC = () => {
       {/* Views Section */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500 dark:text-slate-500 uppercase font-medium w-14">Views</span>
+          <span className="text-xs text-gray-500 dark:text-slate-500 uppercase font-medium w-14">
+            Views
+          </span>
           <Select
             placeholder="Select..."
             value={selectedView}
@@ -748,7 +789,11 @@ const CashflowBlotterPreview: React.FC = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" icon={<Plus className="w-3.5 h-3.5" />}>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<Plus className="w-3.5 h-3.5" />}
+            >
               New Tile
             </Button>
 
@@ -757,7 +802,11 @@ const CashflowBlotterPreview: React.FC = () => {
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={
+                theme === 'dark'
+                  ? 'Switch to light mode'
+                  : 'Switch to dark mode'
+              }
             >
               {theme === 'dark' ? (
                 <Sun className="w-5 h-5 text-gray-700 dark:text-slate-300" />
@@ -773,7 +822,9 @@ const CashflowBlotterPreview: React.FC = () => {
               <span className="text-xs font-mono text-gray-700 dark:text-slate-300">
                 {format(new Date(), 'HH:mm')}
               </span>
-              <span className="text-xs text-gray-500 dark:text-slate-500">UTC</span>
+              <span className="text-xs text-gray-500 dark:text-slate-500">
+                UTC
+              </span>
             </div>
 
             <div className="h-5 w-px bg-slate-700" />
@@ -782,7 +833,11 @@ const CashflowBlotterPreview: React.FC = () => {
               A
             </button>
 
-            <Button variant="ghost" size="sm" icon={<MessageSquare className="w-3.5 h-3.5" />}>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<MessageSquare className="w-3.5 h-3.5" />}
+            >
               Feedback
             </Button>
           </div>
@@ -802,7 +857,9 @@ const CashflowBlotterPreview: React.FC = () => {
                 >
                   <Zap className="w-3.5 h-3.5" />
                   Cashflow Blotter
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+                  />
                 </button>
                 <WorkspaceDropdown
                   isOpen={dropdownOpen}
@@ -818,8 +875,12 @@ const CashflowBlotterPreview: React.FC = () => {
 
             {/* Environment/Status indicators in tab bar */}
             <div className="flex items-center gap-3">
-              <Badge variant="success" className="text-xs">UAT</Badge>
-              <span className="text-xs text-gray-500 dark:text-slate-500">v1.40.0</span>
+              <Badge variant="success" className="text-xs">
+                UAT
+              </Badge>
+              <span className="text-xs text-gray-500 dark:text-slate-500">
+                v1.40.0
+              </span>
               <div className="flex items-center gap-1.5">
                 <Activity className="w-3 h-3 text-emerald-400" />
                 <span className="text-xs text-emerald-400">Online</span>
@@ -867,7 +928,11 @@ const CashflowBlotterPreview: React.FC = () => {
                   startDate={filters.valueDateStart}
                   endDate={filters.valueDateEnd}
                   onChange={(start, end) =>
-                    setFilters((f) => ({ ...f, valueDateStart: start, valueDateEnd: end }))
+                    setFilters((f) => ({
+                      ...f,
+                      valueDateStart: start,
+                      valueDateEnd: end,
+                    }))
                   }
                 />
                 <Select
@@ -894,14 +959,18 @@ const CashflowBlotterPreview: React.FC = () => {
                     { value: 'DER', label: 'Derivatives' },
                     { value: 'BOND', label: 'Bonds' },
                   ]}
-                  onChange={(v) => setFilters((f) => ({ ...f, productTaxonomy: v }))}
+                  onChange={(v) =>
+                    setFilters((f) => ({ ...f, productTaxonomy: v }))
+                  }
                 />
 
                 {/* Row 2 */}
                 <Input
                   placeholder="Counterparty FMCODE"
                   value={filters.counterpartyFmcode}
-                  onChange={(v) => setFilters((f) => ({ ...f, counterpartyFmcode: v }))}
+                  onChange={(v) =>
+                    setFilters((f) => ({ ...f, counterpartyFmcode: v }))
+                  }
                 />
                 <Select
                   placeholder="SCB Booking Entity"
@@ -913,22 +982,30 @@ const CashflowBlotterPreview: React.FC = () => {
                     { value: 'Hong Kong', label: 'Hong Kong' },
                     { value: 'Tokyo', label: 'Tokyo' },
                   ]}
-                  onChange={(v) => setFilters((f) => ({ ...f, bookingEntity: v }))}
+                  onChange={(v) =>
+                    setFilters((f) => ({ ...f, bookingEntity: v }))
+                  }
                 />
                 <Input
                   placeholder="Beneficiary Name"
                   value={filters.beneficiaryName}
-                  onChange={(v) => setFilters((f) => ({ ...f, beneficiaryName: v }))}
+                  onChange={(v) =>
+                    setFilters((f) => ({ ...f, beneficiaryName: v }))
+                  }
                 />
                 <Input
                   placeholder="Beneficiary Account BIC Code"
                   value={filters.beneficiaryBic}
-                  onChange={(v) => setFilters((f) => ({ ...f, beneficiaryBic: v }))}
+                  onChange={(v) =>
+                    setFilters((f) => ({ ...f, beneficiaryBic: v }))
+                  }
                 />
                 <Input
                   placeholder="Amount Range (Is)"
                   value={filters.amountRange}
-                  onChange={(v) => setFilters((f) => ({ ...f, amountRange: v }))}
+                  onChange={(v) =>
+                    setFilters((f) => ({ ...f, amountRange: v }))
+                  }
                   type="number"
                 />
               </div>
@@ -972,13 +1049,17 @@ const CashflowBlotterPreview: React.FC = () => {
           </div>
 
           {/* Statistics Bar - Compact Dashboard */}
-          <StatisticsBar statGroups={statGroups} onMetricClick={handleMetricClick} />
+          <StatisticsBar
+            statGroups={statGroups}
+            onMetricClick={handleMetricClick}
+          />
 
           {/* Alert */}
           <div className="flex items-start gap-2 p-3 mt-4 rounded-lg bg-primary-500/10 border border-primary-500/20 text-primary-400">
             <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <p className="text-xs">
-              If more than 1000 records are loaded, column filters will be applied only within the first 1000 records.
+              If more than 1000 records are loaded, column filters will be
+              applied only within the first 1000 records.
             </p>
           </div>
 
@@ -987,7 +1068,9 @@ const CashflowBlotterPreview: React.FC = () => {
             {/* Grid Header - Results and Actions */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50">
               <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-500 dark:text-slate-400">Results:</span>
+                <span className="text-xs text-gray-500 dark:text-slate-400">
+                  Results:
+                </span>
                 {selectedRows.size > 0 && (
                   <Badge variant="info" className="text-xs">
                     {selectedRows.size} selected
@@ -1004,13 +1087,25 @@ const CashflowBlotterPreview: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" icon={<Columns className="w-3.5 h-3.5" />}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<Columns className="w-3.5 h-3.5" />}
+                >
                   Resize
                 </Button>
-                <Button variant="ghost" size="sm" icon={<FileSpreadsheet className="w-3.5 h-3.5" />}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<FileSpreadsheet className="w-3.5 h-3.5" />}
+                >
                   Export
                 </Button>
-                <Button variant="ghost" size="sm" icon={<Settings className="w-3.5 h-3.5" />} />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<Settings className="w-3.5 h-3.5" />}
+                />
               </div>
             </div>
 
@@ -1021,7 +1116,9 @@ const CashflowBlotterPreview: React.FC = () => {
                   <tr className="border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/30">
                     <th className="p-3 text-left w-10">
                       <Checkbox
-                        checked={selectedRows.size === data.length && data.length > 0}
+                        checked={
+                          selectedRows.size === data.length && data.length > 0
+                        }
                         onChange={toggleAllRows}
                       />
                     </th>
@@ -1062,7 +1159,9 @@ const CashflowBlotterPreview: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-800/50">
                   {data.slice(0, 15).map((row, index) => {
-                    const { formatted, sign, colorClass } = formatAmount(row.amount);
+                    const { formatted, sign, colorClass } = formatAmount(
+                      row.amount,
+                    );
                     const isSelected = selectedRows.has(row.id);
 
                     return (
@@ -1072,8 +1171,8 @@ const CashflowBlotterPreview: React.FC = () => {
                           isSelected
                             ? 'bg-primary-500/5'
                             : index % 2 === 0
-                            ? 'bg-transparent'
-                            : 'bg-gray-100 dark:bg-slate-900/20'
+                              ? 'bg-transparent'
+                              : 'bg-gray-100 dark:bg-slate-900/20'
                         }`}
                       >
                         <td className="p-3">
@@ -1087,8 +1186,12 @@ const CashflowBlotterPreview: React.FC = () => {
                             {row.cashflowId}
                           </span>
                         </td>
-                        <td className="p-3 text-xs text-gray-700 dark:text-slate-300">{row.tradeId}</td>
-                        <td className="p-3 text-xs text-gray-700 dark:text-slate-300">{row.valueDate}</td>
+                        <td className="p-3 text-xs text-gray-700 dark:text-slate-300">
+                          {row.tradeId}
+                        </td>
+                        <td className="p-3 text-xs text-gray-700 dark:text-slate-300">
+                          {row.valueDate}
+                        </td>
                         <td className="p-3 text-center">
                           <span className="inline-flex items-center justify-center min-w-[36px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-800 text-xs font-medium text-gray-700 dark:text-slate-300 font-mono">
                             {row.currency}
@@ -1102,7 +1205,9 @@ const CashflowBlotterPreview: React.FC = () => {
                         <td className="p-3">
                           <Badge
                             variant={
-                              row.cashflowType === 'Payment' ? 'danger' : 'success'
+                              row.cashflowType === 'Payment'
+                                ? 'danger'
+                                : 'success'
                             }
                             className="text-xs"
                           >
@@ -1115,7 +1220,9 @@ const CashflowBlotterPreview: React.FC = () => {
                         <td className="p-3 text-xs text-gray-700 dark:text-slate-300 truncate max-w-[120px]">
                           {row.counterparty}
                         </td>
-                        <td className="p-3 text-xs text-gray-700 dark:text-slate-300">{row.productTaxonomy}</td>
+                        <td className="p-3 text-xs text-gray-700 dark:text-slate-300">
+                          {row.productTaxonomy}
+                        </td>
                         <td className="p-3">
                           <div className="flex items-center justify-center gap-0.5">
                             <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-500 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
