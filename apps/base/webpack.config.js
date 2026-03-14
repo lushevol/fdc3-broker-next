@@ -2,10 +2,10 @@ const { merge } = require("webpack-merge");
 const singleSpaDefaults = require("webpack-config-single-spa-react-ts");
 const path = require("path");
 const Dotenv = require("dotenv-webpack");
-const {
-  ModuleFederationPlugin,
-} = require("@module-federation/enhanced/webpack");
-const mfConfigs = require("./module-federation.config");
+// const {
+//   ModuleFederationPlugin,
+// } = require("@module-federation/enhanced/webpack");
+// const mfConfigs = require("./module-federation.config");
 
 module.exports = (webpackConfigEnv, argv) => {
   const port = process.env.port;
@@ -29,10 +29,10 @@ module.exports = (webpackConfigEnv, argv) => {
     entry: path.resolve(__dirname, "src", "root"),
     devServer: {
       port,
-      headers: {
-        // Cache static assets for better performance
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
+      // headers: {
+      //   // Cache static assets for better performance
+      //   'Cache-Control': 'public, max-age=31536000, immutable',
+      // },
     },
     output: {
       filename: "base.js",
@@ -53,16 +53,6 @@ module.exports = (webpackConfigEnv, argv) => {
         path: "./.env.mfe", // Path to .env file (this is the default)
         safe: false, // load .env.example (defaults to "false" which does not use dotenv-safe)
       }),
-      // new ModuleFederationPlugin({
-      //   name: "baseContainer",
-      //   remotes: {
-      //     cduplatform,
-      //   },
-      //   shared: {
-      //     react: { singleton: true },
-      //     "react-dom": { singleton: true },
-      //   },
-      // }),
       // new ModuleFederationPlugin(mfConfigs),
     ],
   });

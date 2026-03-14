@@ -1,0 +1,528 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - heading "FMO Post Trade Portal" [level=1] [ref=e13]
+      - generic [ref=e14]:
+        - button "New Tile" [ref=e15] [cursor=pointer]:
+          - img [ref=e17]
+          - text: New Tile
+        - button "Dark" [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - generic [ref=e22]: Dark
+        - generic [ref=e24]:
+          - img [ref=e25]
+          - generic [ref=e28]: 00:36
+          - generic [ref=e29]: UTC
+        - button "A" [ref=e31] [cursor=pointer]
+        - button "Feedback" [ref=e32] [cursor=pointer]:
+          - img [ref=e34]
+          - text: Feedback
+  - main [ref=e36]:
+    - generic [ref=e38]:
+      - generic [ref=e39]:
+        - button "Cashflow Blotter" [ref=e41] [cursor=pointer]:
+          - img [ref=e42]
+          - text: Cashflow Blotter
+          - img [ref=e44]
+        - button [ref=e46] [cursor=pointer]:
+          - img [ref=e47]
+      - generic [ref=e48]:
+        - generic [ref=e49]: UAT
+        - generic [ref=e50]: v1.40.0
+        - generic [ref=e51]:
+          - img [ref=e52]
+          - generic [ref=e54]: Online
+    - generic [ref=e55]:
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - heading "Quick Search" [level=3] [ref=e58]
+          - button "Hide" [ref=e59] [cursor=pointer]:
+            - img [ref=e60]
+            - text: Hide
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - textbox "Cashflow ID" [ref=e65]
+            - generic [ref=e66]:
+              - textbox "Trade ID" [ref=e68]
+              - button "ID ▼" [ref=e69] [cursor=pointer]
+            - generic [ref=e70]:
+              - generic [ref=e71]:
+                - img [ref=e72]
+                - textbox "Start Date" [ref=e74]
+              - generic [ref=e75]: "-"
+              - generic [ref=e76]:
+                - img [ref=e77]
+                - textbox "End Date" [ref=e79]
+            - generic [ref=e80]:
+              - combobox [ref=e81] [cursor=pointer]:
+                - option "Currency" [selected]
+                - option "USD - US Dollar"
+                - option "EUR - Euro"
+                - option "GBP - British Pound"
+                - option "JPY - Japanese Yen"
+                - option "CHF - Swiss Franc"
+                - option "CAD - Canadian Dollar"
+                - option "AUD - Australian Dollar"
+              - img
+            - generic [ref=e83] [cursor=pointer]: Product Taxonomy
+            - textbox "Counterparty FMCODE" [ref=e85]
+            - generic [ref=e86]:
+              - combobox [ref=e87] [cursor=pointer]:
+                - option "SCB Booking Entity" [selected]
+                - option "London"
+                - option "New York"
+                - option "Singapore"
+                - option "Hong Kong"
+                - option "Tokyo"
+              - img
+            - textbox "Beneficiary Name" [ref=e89]
+            - textbox "Beneficiary Account BIC Code" [ref=e91]
+            - spinbutton [ref=e93]
+          - generic [ref=e94]:
+            - button "Clear" [disabled] [ref=e95]
+            - button "Search" [disabled] [ref=e96]:
+              - img [ref=e98]
+              - text: Search
+      - generic [ref=e102]:
+        - generic [ref=e104]:
+          - generic [ref=e105]: Filters
+          - generic [ref=e106]:
+            - combobox [ref=e107] [cursor=pointer]:
+              - option "Select..." [selected]
+              - option "High Priority Items"
+              - option "Today Pending"
+              - option "Failed Transactions"
+            - img
+          - button "Clear" [disabled] [ref=e108]
+          - button "Create or Modify" [ref=e109] [cursor=pointer]
+        - generic [ref=e111]:
+          - generic [ref=e112]: Views
+          - generic [ref=e113]:
+            - combobox [ref=e114] [cursor=pointer]:
+              - option "Select..." [selected]
+              - option "Default View"
+              - option "Operations View"
+              - option "Audit View"
+            - img
+          - button "Clear" [disabled] [ref=e115]
+          - button "Create or Modify" [ref=e116] [cursor=pointer]
+      - generic [ref=e117]:
+        - generic [ref=e118]:
+          - generic [ref=e119]: "Value Today:"
+          - generic [ref=e120]:
+            - button "Pending Operator 12" [ref=e121] [cursor=pointer]:
+              - generic [ref=e122]: Pending Operator
+              - generic [ref=e123]: "12"
+            - button "Pending Verification 5" [ref=e124] [cursor=pointer]:
+              - generic [ref=e125]: Pending Verification
+              - generic [ref=e126]: "5"
+        - generic [ref=e127]:
+          - generic [ref=e128]: "Value till Monday:"
+          - generic [ref=e129]:
+            - button "Pending Operator 48" [ref=e130] [cursor=pointer]:
+              - generic [ref=e131]: Pending Operator
+              - generic [ref=e132]: "48"
+            - button "Pending Verification 23" [ref=e133] [cursor=pointer]:
+              - generic [ref=e134]: Pending Verification
+              - generic [ref=e135]: "23"
+      - generic [ref=e136]:
+        - img [ref=e137]
+        - paragraph [ref=e139]: If more than 1000 records are loaded, column filters will be applied only within the first 1000 records.
+      - generic [ref=e141]:
+        - generic [ref=e142]:
+          - generic [ref=e143]:
+            - generic [ref=e144]: "Results:"
+            - generic [ref=e145]: 50 total
+          - generic [ref=e146]:
+            - img [ref=e147]
+            - text: "Last updated: 11 Mar 2026, 00:36:48 UTC"
+          - generic [ref=e150]:
+            - button "Resize" [ref=e151] [cursor=pointer]:
+              - img [ref=e153]
+              - text: Resize
+            - button "Export" [ref=e155] [cursor=pointer]:
+              - img [ref=e157]
+              - text: Export
+            - button [ref=e160] [cursor=pointer]:
+              - img [ref=e162]
+        - table [ref=e166]:
+          - rowgroup [ref=e167]:
+            - row "Cashflow ID Trade ID Value Date CCY Amount Type Status Counterparty Product Actions" [ref=e168]:
+              - columnheader [ref=e169]:
+                - button [ref=e170] [cursor=pointer]
+              - columnheader "Cashflow ID" [ref=e171] [cursor=pointer]:
+                - generic [ref=e172]:
+                  - text: Cashflow ID
+                  - img [ref=e173]
+              - columnheader "Trade ID" [ref=e176]
+              - columnheader "Value Date" [ref=e177]
+              - columnheader "CCY" [ref=e178]
+              - columnheader "Amount" [ref=e179]
+              - columnheader "Type" [ref=e180]
+              - columnheader "Status" [ref=e181]
+              - columnheader "Counterparty" [ref=e182]
+              - columnheader "Product" [ref=e183]
+              - columnheader "Actions" [ref=e184]
+          - rowgroup [ref=e185]:
+            - row "CF-202600001 TD-2026-01000 08 Mar 2026 USD -$336,968.98 Payment Pending Operator Bank of America FX Spot" [ref=e186]:
+              - cell [ref=e187]:
+                - button [ref=e188] [cursor=pointer]
+              - cell "CF-202600001" [ref=e189]
+              - cell "TD-2026-01000" [ref=e190]
+              - cell "08 Mar 2026" [ref=e191]
+              - cell "USD" [ref=e192]:
+                - generic [ref=e193]: USD
+              - cell "-$336,968.98" [ref=e194]:
+                - generic [ref=e195]: "-$336,968.98"
+              - cell "Payment" [ref=e196]:
+                - generic [ref=e197]: Payment
+              - cell "Pending Operator" [ref=e198]:
+                - generic [ref=e199]: Pending Operator
+              - cell "Bank of America" [ref=e201]
+              - cell "FX Spot" [ref=e202]
+              - cell [ref=e203]:
+                - generic [ref=e204]:
+                  - button [ref=e205] [cursor=pointer]:
+                    - img [ref=e206]
+                  - button [ref=e209] [cursor=pointer]:
+                    - img [ref=e210]
+                  - button [ref=e213] [cursor=pointer]:
+                    - img [ref=e214]
+            - row "CF-202600002 TD-2026-01001 08 Mar 2026 EUR +$183,419.74 Receipt Pending Verification Deutsche Bank FX Forward" [ref=e218]:
+              - cell [ref=e219]:
+                - button [ref=e220] [cursor=pointer]
+              - cell "CF-202600002" [ref=e221]
+              - cell "TD-2026-01001" [ref=e222]
+              - cell "08 Mar 2026" [ref=e223]
+              - cell "EUR" [ref=e224]:
+                - generic [ref=e225]: EUR
+              - cell "+$183,419.74" [ref=e226]:
+                - generic [ref=e227]: +$183,419.74
+              - cell "Receipt" [ref=e228]:
+                - generic [ref=e229]: Receipt
+              - cell "Pending Verification" [ref=e230]:
+                - generic [ref=e231]: Pending Verification
+              - cell "Deutsche Bank" [ref=e233]
+              - cell "FX Forward" [ref=e234]
+              - cell [ref=e235]:
+                - generic [ref=e236]:
+                  - button [ref=e237] [cursor=pointer]:
+                    - img [ref=e238]
+                  - button [ref=e241] [cursor=pointer]:
+                    - img [ref=e242]
+                  - button [ref=e245] [cursor=pointer]:
+                    - img [ref=e246]
+            - row "CF-202600003 TD-2026-01002 08 Mar 2026 GBP -$480,554.92 Payment Completed HSBC Money Market" [ref=e250]:
+              - cell [ref=e251]:
+                - button [ref=e252] [cursor=pointer]
+              - cell "CF-202600003" [ref=e253]
+              - cell "TD-2026-01002" [ref=e254]
+              - cell "08 Mar 2026" [ref=e255]
+              - cell "GBP" [ref=e256]:
+                - generic [ref=e257]: GBP
+              - cell "-$480,554.92" [ref=e258]:
+                - generic [ref=e259]: "-$480,554.92"
+              - cell "Payment" [ref=e260]:
+                - generic [ref=e261]: Payment
+              - cell "Completed" [ref=e262]:
+                - generic [ref=e263]: Completed
+              - cell "HSBC" [ref=e265]
+              - cell "Money Market" [ref=e266]
+              - cell [ref=e267]:
+                - generic [ref=e268]:
+                  - button [ref=e269] [cursor=pointer]:
+                    - img [ref=e270]
+                  - button [ref=e273] [cursor=pointer]:
+                    - img [ref=e274]
+                  - button [ref=e277] [cursor=pointer]:
+                    - img [ref=e278]
+            - row "CF-202600004 TD-2026-01003 08 Mar 2026 JPY +$353,132.77 Receipt Failed JP Morgan Securities" [ref=e282]:
+              - cell [ref=e283]:
+                - button [ref=e284] [cursor=pointer]
+              - cell "CF-202600004" [ref=e285]
+              - cell "TD-2026-01003" [ref=e286]
+              - cell "08 Mar 2026" [ref=e287]
+              - cell "JPY" [ref=e288]:
+                - generic [ref=e289]: JPY
+              - cell "+$353,132.77" [ref=e290]:
+                - generic [ref=e291]: +$353,132.77
+              - cell "Receipt" [ref=e292]:
+                - generic [ref=e293]: Receipt
+              - cell "Failed" [ref=e294]:
+                - generic [ref=e295]: Failed
+              - cell "JP Morgan" [ref=e297]
+              - cell "Securities" [ref=e298]
+              - cell [ref=e299]:
+                - generic [ref=e300]:
+                  - button [ref=e301] [cursor=pointer]:
+                    - img [ref=e302]
+                  - button [ref=e305] [cursor=pointer]:
+                    - img [ref=e306]
+                  - button [ref=e309] [cursor=pointer]:
+                    - img [ref=e310]
+            - row "CF-202600005 TD-2026-01004 08 Mar 2026 CHF -$440,570.73 Payment Pending Operator Barclays Derivatives" [ref=e314]:
+              - cell [ref=e315]:
+                - button [ref=e316] [cursor=pointer]
+              - cell "CF-202600005" [ref=e317]
+              - cell "TD-2026-01004" [ref=e318]
+              - cell "08 Mar 2026" [ref=e319]
+              - cell "CHF" [ref=e320]:
+                - generic [ref=e321]: CHF
+              - cell "-$440,570.73" [ref=e322]:
+                - generic [ref=e323]: "-$440,570.73"
+              - cell "Payment" [ref=e324]:
+                - generic [ref=e325]: Payment
+              - cell "Pending Operator" [ref=e326]:
+                - generic [ref=e327]: Pending Operator
+              - cell "Barclays" [ref=e329]
+              - cell "Derivatives" [ref=e330]
+              - cell [ref=e331]:
+                - generic [ref=e332]:
+                  - button [ref=e333] [cursor=pointer]:
+                    - img [ref=e334]
+                  - button [ref=e337] [cursor=pointer]:
+                    - img [ref=e338]
+                  - button [ref=e341] [cursor=pointer]:
+                    - img [ref=e342]
+            - row "CF-202600006 TD-2026-01005 09 Mar 2026 CAD +$178,474.77 Receipt Pending Verification Citigroup FX Spot" [ref=e346]:
+              - cell [ref=e347]:
+                - button [ref=e348] [cursor=pointer]
+              - cell "CF-202600006" [ref=e349]
+              - cell "TD-2026-01005" [ref=e350]
+              - cell "09 Mar 2026" [ref=e351]
+              - cell "CAD" [ref=e352]:
+                - generic [ref=e353]: CAD
+              - cell "+$178,474.77" [ref=e354]:
+                - generic [ref=e355]: +$178,474.77
+              - cell "Receipt" [ref=e356]:
+                - generic [ref=e357]: Receipt
+              - cell "Pending Verification" [ref=e358]:
+                - generic [ref=e359]: Pending Verification
+              - cell "Citigroup" [ref=e361]
+              - cell "FX Spot" [ref=e362]
+              - cell [ref=e363]:
+                - generic [ref=e364]:
+                  - button [ref=e365] [cursor=pointer]:
+                    - img [ref=e366]
+                  - button [ref=e369] [cursor=pointer]:
+                    - img [ref=e370]
+                  - button [ref=e373] [cursor=pointer]:
+                    - img [ref=e374]
+            - row "CF-202600007 TD-2026-01006 09 Mar 2026 AUD -$26,541.06 Payment Completed Morgan Stanley FX Forward" [ref=e378]:
+              - cell [ref=e379]:
+                - button [ref=e380] [cursor=pointer]
+              - cell "CF-202600007" [ref=e381]
+              - cell "TD-2026-01006" [ref=e382]
+              - cell "09 Mar 2026" [ref=e383]
+              - cell "AUD" [ref=e384]:
+                - generic [ref=e385]: AUD
+              - cell "-$26,541.06" [ref=e386]:
+                - generic [ref=e387]: "-$26,541.06"
+              - cell "Payment" [ref=e388]:
+                - generic [ref=e389]: Payment
+              - cell "Completed" [ref=e390]:
+                - generic [ref=e391]: Completed
+              - cell "Morgan Stanley" [ref=e393]
+              - cell "FX Forward" [ref=e394]
+              - cell [ref=e395]:
+                - generic [ref=e396]:
+                  - button [ref=e397] [cursor=pointer]:
+                    - img [ref=e398]
+                  - button [ref=e401] [cursor=pointer]:
+                    - img [ref=e402]
+                  - button [ref=e405] [cursor=pointer]:
+                    - img [ref=e406]
+            - row "CF-202600008 TD-2026-01007 09 Mar 2026 USD +$489,812.93 Receipt Failed Goldman Sachs Money Market" [ref=e410]:
+              - cell [ref=e411]:
+                - button [ref=e412] [cursor=pointer]
+              - cell "CF-202600008" [ref=e413]
+              - cell "TD-2026-01007" [ref=e414]
+              - cell "09 Mar 2026" [ref=e415]
+              - cell "USD" [ref=e416]:
+                - generic [ref=e417]: USD
+              - cell "+$489,812.93" [ref=e418]:
+                - generic [ref=e419]: +$489,812.93
+              - cell "Receipt" [ref=e420]:
+                - generic [ref=e421]: Receipt
+              - cell "Failed" [ref=e422]:
+                - generic [ref=e423]: Failed
+              - cell "Goldman Sachs" [ref=e425]
+              - cell "Money Market" [ref=e426]
+              - cell [ref=e427]:
+                - generic [ref=e428]:
+                  - button [ref=e429] [cursor=pointer]:
+                    - img [ref=e430]
+                  - button [ref=e433] [cursor=pointer]:
+                    - img [ref=e434]
+                  - button [ref=e437] [cursor=pointer]:
+                    - img [ref=e438]
+            - row "CF-202600009 TD-2026-01008 09 Mar 2026 EUR -$180,791.88 Payment Pending Operator Bank of America Securities" [ref=e442]:
+              - cell [ref=e443]:
+                - button [ref=e444] [cursor=pointer]
+              - cell "CF-202600009" [ref=e445]
+              - cell "TD-2026-01008" [ref=e446]
+              - cell "09 Mar 2026" [ref=e447]
+              - cell "EUR" [ref=e448]:
+                - generic [ref=e449]: EUR
+              - cell "-$180,791.88" [ref=e450]:
+                - generic [ref=e451]: "-$180,791.88"
+              - cell "Payment" [ref=e452]:
+                - generic [ref=e453]: Payment
+              - cell "Pending Operator" [ref=e454]:
+                - generic [ref=e455]: Pending Operator
+              - cell "Bank of America" [ref=e457]
+              - cell "Securities" [ref=e458]
+              - cell [ref=e459]:
+                - generic [ref=e460]:
+                  - button [ref=e461] [cursor=pointer]:
+                    - img [ref=e462]
+                  - button [ref=e465] [cursor=pointer]:
+                    - img [ref=e466]
+                  - button [ref=e469] [cursor=pointer]:
+                    - img [ref=e470]
+            - row "CF-202600010 TD-2026-01009 09 Mar 2026 GBP +$209,376.04 Receipt Pending Verification Deutsche Bank Derivatives" [ref=e474]:
+              - cell [ref=e475]:
+                - button [ref=e476] [cursor=pointer]
+              - cell "CF-202600010" [ref=e477]
+              - cell "TD-2026-01009" [ref=e478]
+              - cell "09 Mar 2026" [ref=e479]
+              - cell "GBP" [ref=e480]:
+                - generic [ref=e481]: GBP
+              - cell "+$209,376.04" [ref=e482]:
+                - generic [ref=e483]: +$209,376.04
+              - cell "Receipt" [ref=e484]:
+                - generic [ref=e485]: Receipt
+              - cell "Pending Verification" [ref=e486]:
+                - generic [ref=e487]: Pending Verification
+              - cell "Deutsche Bank" [ref=e489]
+              - cell "Derivatives" [ref=e490]
+              - cell [ref=e491]:
+                - generic [ref=e492]:
+                  - button [ref=e493] [cursor=pointer]:
+                    - img [ref=e494]
+                  - button [ref=e497] [cursor=pointer]:
+                    - img [ref=e498]
+                  - button [ref=e501] [cursor=pointer]:
+                    - img [ref=e502]
+            - row "CF-202600011 TD-2026-01010 10 Mar 2026 JPY -$20,102.26 Payment Completed HSBC FX Spot" [ref=e506]:
+              - cell [ref=e507]:
+                - button [ref=e508] [cursor=pointer]
+              - cell "CF-202600011" [ref=e509]
+              - cell "TD-2026-01010" [ref=e510]
+              - cell "10 Mar 2026" [ref=e511]
+              - cell "JPY" [ref=e512]:
+                - generic [ref=e513]: JPY
+              - cell "-$20,102.26" [ref=e514]:
+                - generic [ref=e515]: "-$20,102.26"
+              - cell "Payment" [ref=e516]:
+                - generic [ref=e517]: Payment
+              - cell "Completed" [ref=e518]:
+                - generic [ref=e519]: Completed
+              - cell "HSBC" [ref=e521]
+              - cell "FX Spot" [ref=e522]
+              - cell [ref=e523]:
+                - generic [ref=e524]:
+                  - button [ref=e525] [cursor=pointer]:
+                    - img [ref=e526]
+                  - button [ref=e529] [cursor=pointer]:
+                    - img [ref=e530]
+                  - button [ref=e533] [cursor=pointer]:
+                    - img [ref=e534]
+            - row "CF-202600012 TD-2026-01011 10 Mar 2026 CHF +$232,166.87 Receipt Failed JP Morgan FX Forward" [ref=e538]:
+              - cell [ref=e539]:
+                - button [ref=e540] [cursor=pointer]
+              - cell "CF-202600012" [ref=e541]
+              - cell "TD-2026-01011" [ref=e542]
+              - cell "10 Mar 2026" [ref=e543]
+              - cell "CHF" [ref=e544]:
+                - generic [ref=e545]: CHF
+              - cell "+$232,166.87" [ref=e546]:
+                - generic [ref=e547]: +$232,166.87
+              - cell "Receipt" [ref=e548]:
+                - generic [ref=e549]: Receipt
+              - cell "Failed" [ref=e550]:
+                - generic [ref=e551]: Failed
+              - cell "JP Morgan" [ref=e553]
+              - cell "FX Forward" [ref=e554]
+              - cell [ref=e555]:
+                - generic [ref=e556]:
+                  - button [ref=e557] [cursor=pointer]:
+                    - img [ref=e558]
+                  - button [ref=e561] [cursor=pointer]:
+                    - img [ref=e562]
+                  - button [ref=e565] [cursor=pointer]:
+                    - img [ref=e566]
+            - row "CF-202600013 TD-2026-01012 10 Mar 2026 CAD -$85,997.89 Payment Pending Operator Barclays Money Market" [ref=e570]:
+              - cell [ref=e571]:
+                - button [ref=e572] [cursor=pointer]
+              - cell "CF-202600013" [ref=e573]
+              - cell "TD-2026-01012" [ref=e574]
+              - cell "10 Mar 2026" [ref=e575]
+              - cell "CAD" [ref=e576]:
+                - generic [ref=e577]: CAD
+              - cell "-$85,997.89" [ref=e578]:
+                - generic [ref=e579]: "-$85,997.89"
+              - cell "Payment" [ref=e580]:
+                - generic [ref=e581]: Payment
+              - cell "Pending Operator" [ref=e582]:
+                - generic [ref=e583]: Pending Operator
+              - cell "Barclays" [ref=e585]
+              - cell "Money Market" [ref=e586]
+              - cell [ref=e587]:
+                - generic [ref=e588]:
+                  - button [ref=e589] [cursor=pointer]:
+                    - img [ref=e590]
+                  - button [ref=e593] [cursor=pointer]:
+                    - img [ref=e594]
+                  - button [ref=e597] [cursor=pointer]:
+                    - img [ref=e598]
+            - row "CF-202600014 TD-2026-01013 10 Mar 2026 AUD +$10,409.14 Receipt Pending Verification Citigroup Securities" [ref=e602]:
+              - cell [ref=e603]:
+                - button [ref=e604] [cursor=pointer]
+              - cell "CF-202600014" [ref=e605]
+              - cell "TD-2026-01013" [ref=e606]
+              - cell "10 Mar 2026" [ref=e607]
+              - cell "AUD" [ref=e608]:
+                - generic [ref=e609]: AUD
+              - cell "+$10,409.14" [ref=e610]:
+                - generic [ref=e611]: +$10,409.14
+              - cell "Receipt" [ref=e612]:
+                - generic [ref=e613]: Receipt
+              - cell "Pending Verification" [ref=e614]:
+                - generic [ref=e615]: Pending Verification
+              - cell "Citigroup" [ref=e617]
+              - cell "Securities" [ref=e618]
+              - cell [ref=e619]:
+                - generic [ref=e620]:
+                  - button [ref=e621] [cursor=pointer]:
+                    - img [ref=e622]
+                  - button [ref=e625] [cursor=pointer]:
+                    - img [ref=e626]
+                  - button [ref=e629] [cursor=pointer]:
+                    - img [ref=e630]
+            - row "CF-202600015 TD-2026-01014 10 Mar 2026 USD -$336,793.37 Payment Completed Morgan Stanley Derivatives" [ref=e634]:
+              - cell [ref=e635]:
+                - button [ref=e636] [cursor=pointer]
+              - cell "CF-202600015" [ref=e637]
+              - cell "TD-2026-01014" [ref=e638]
+              - cell "10 Mar 2026" [ref=e639]
+              - cell "USD" [ref=e640]:
+                - generic [ref=e641]: USD
+              - cell "-$336,793.37" [ref=e642]:
+                - generic [ref=e643]: "-$336,793.37"
+              - cell "Payment" [ref=e644]:
+                - generic [ref=e645]: Payment
+              - cell "Completed" [ref=e646]:
+                - generic [ref=e647]: Completed
+              - cell "Morgan Stanley" [ref=e649]
+              - cell "Derivatives" [ref=e650]
+              - cell [ref=e651]:
+                - generic [ref=e652]:
+                  - button [ref=e653] [cursor=pointer]:
+                    - img [ref=e654]
+                  - button [ref=e657] [cursor=pointer]:
+                    - img [ref=e658]
+                  - button [ref=e661] [cursor=pointer]:
+                    - img [ref=e662]

@@ -1,4 +1,4 @@
-import { loadRemote } from '@module-federation/enhanced/runtime';
+// import { loadRemote } from '@module-federation/enhanced/runtime';
 import React, { type ReactElement, Suspense } from 'react';
 import ErrorBoundry from '../../../components/ErrorBoundry';
 import Splash from '../../../components/Splash';
@@ -10,11 +10,11 @@ const Container: React.FC<ContainerProps> = (props: ContainerProps): ReactElemen
   const Comp = React.useMemo(
     () =>
       React.lazy(async () => {
-        if (props.container?.startsWith('mf_')) {
-          return loadRemote(props.container) as Promise<{
-            default: React.ComponentType<any>;
-          }>;
-        }
+        // if (props.container?.startsWith('mf_')) {
+        //   return loadRemote(props.container) as Promise<{
+        //     default: React.ComponentType<any>;
+        //   }>;
+        // }
         return System.import(props.container);
       }),
     [],
