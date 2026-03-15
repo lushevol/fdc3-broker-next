@@ -183,4 +183,24 @@ public class ChatController {
         result.put("ready", chatService.isReady());
         return result;
     }
+
+    /**
+     * Confirm a tool execution.
+     */
+    @PostMapping("/{conversationId}/tools/{toolCallId}/confirm")
+    public Map<String, Object> confirmToolCall(
+            @PathVariable String conversationId,
+            @PathVariable String toolCallId,
+            @RequestBody Map<String, Boolean> request) {
+        log.info("Received tool confirmation for conversation: {}, tool: {}, confirmed: {}",
+                conversationId, toolCallId, request.get("confirmed"));
+
+        boolean confirmed = request.getOrDefault("confirmed", false);
+        chatService.confirmToolCall(conversationId, toolCallId, confirmed);
+
+        Map<String, Object> result = new java.util.HashMap<>();
+        result.put("success", true);
+        result.put("message", confirmed ? "Tool execution confirmed" : "Tool execution cancelled");
+        return result;
+    }
 }

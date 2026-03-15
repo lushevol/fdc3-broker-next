@@ -92,4 +92,13 @@ public class ChatService {
     public boolean isReady() {
         return agentService.isReady();
     }
+
+    /**
+     * Confirm or cancel a tool call.
+     */
+    public void confirmToolCall(String conversationId, String toolCallId, boolean confirmed) {
+        log.info("Tool call {} for conversation {}: {}", toolCallId, conversationId, confirmed ? "confirmed" : "cancelled");
+        // Delegate to agent service for handling tool confirmation
+        agentService.confirmToolCall(conversationId, toolCallId, confirmed);
+    }
 }

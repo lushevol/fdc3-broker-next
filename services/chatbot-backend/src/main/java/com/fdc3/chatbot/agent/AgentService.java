@@ -287,4 +287,22 @@ public class AgentService {
     public boolean isReady() {
         return mockEnabled || chatModel != null;
     }
+
+    /**
+     * Confirm or cancel a tool call.
+     * This is a placeholder implementation - in production, this would manage
+     * pending tool executions and resume the conversation flow.
+     */
+    public void confirmToolCall(String conversationId, String toolCallId, boolean confirmed) {
+        log.info("Tool call {} for conversation {}: {}",
+                toolCallId, conversationId, confirmed ? "confirmed" : "cancelled");
+
+        if (confirmed) {
+            // In production: execute the tool and continue the conversation
+            log.debug("Would execute tool {} for conversation {}", toolCallId, conversationId);
+        } else {
+            // In production: cancel the tool execution and notify the user
+            log.debug("Cancelled tool {} for conversation {}", toolCallId, conversationId);
+        }
+    }
 }

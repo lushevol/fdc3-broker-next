@@ -76,7 +76,7 @@ export class ChatService {
    * Send a chat message and get a response
    */
   async sendMessage(request: ChatRequest): Promise<ChatResponse> {
-    const response = await this.client.post<ChatResponse>('/chat', request);
+    const response = await this.client.post<ChatResponse>('/', request);
     return response.data;
   }
 
@@ -95,7 +95,7 @@ export class ChatService {
       ...(conversationId && { conversationId }),
     });
 
-    const url = `${this.baseUrl}/chat/stream?${params.toString()}`;
+    const url = `${this.baseUrl}/stream?${params.toString()}`;
     const eventSource = new EventSource(url);
 
     eventSource.onmessage = (event) => {
@@ -143,7 +143,7 @@ export class ChatService {
     toolCallId: string,
     confirmed: boolean,
   ): Promise<void> {
-    await this.client.post(`/chat/${conversationId}/tools/${toolCallId}/confirm`, {
+    await this.client.post(`/${conversationId}/tools/${toolCallId}/confirm`, {
       confirmed,
     });
   }
@@ -153,7 +153,7 @@ export class ChatService {
    */
   async getConversationHistory(conversationId: string): Promise<ChatMessage[]> {
     const response = await this.client.get<{ messages: ChatMessage[] }>(
-      `/chat/${conversationId}/history`,
+      `/${conversationId}/history`,
     );
     return response.data.messages;
   }
