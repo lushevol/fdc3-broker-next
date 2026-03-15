@@ -14,6 +14,8 @@ server:
   port: 8080
 
 chatbot:
+  mock:
+    enabled: true
   agent:
     name: FDC3 Assistant
     max-tokens: 4096

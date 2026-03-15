@@ -10,6 +10,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
+import dev.langchain4j.model.StreamingResponseHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,9 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * AI Agent service using LangChain4j for conversation handling.
@@ -42,10 +46,14 @@ public class AgentService {
     @Value("${chatbot.agent.name:FDC3 Assistant}")
     private String agentName;
 
+    @Value("${chatbot.mock.enabled:false}")
+    private boolean mockEnabled;
+
     private final ToolRegistry toolRegistry;
 
     private ChatLanguageModel chatModel;
     private StreamingChatLanguageModel streamingChatModel;
+    private final ScheduledExecutorService mockExecutor = Executors.newScheduledThreadPool(1);
 
     // In-memory conversation storage (use Redis/Database in production)
     private final Map<String, List<ChatMessage>> conversations = new ConcurrentHashMap<>();
@@ -56,6 +64,11 @@ public class AgentService {
 
     @PostConstruct
     public void init() {
+        if (mockEnabled) {
+            log.info("Mock mode enabled - using simulated responses");
+            return;
+        }
+
         if (openaiApiKey != null && !openaiApiKey.isEmpty()) {
             this.chatModel = OpenAiChatModel.builder()
                     .apiKey(openaiApiKey)
@@ -90,8 +103,9 @@ public class AgentService {
             java.util.function.Consumer<Throwable> onError,
             java.lang.Runnable onComplete
     ) {
-        if (streamingChatModel == null) {
-            onError.accept(new IllegalStateException("Chat model not configured"));
+        // Mock mode - simulate streaming response
+        if (mockEnabled || streamingChatModel == null) {
+            processMockStreaming(userMessage, onNext, onComplete);
             return;
         }
 
@@ -119,7 +133,7 @@ public class AgentService {
             log.debug("Processing message for conversation: {}", conversationId);
 
             // Generate streaming response
-            streamingChatModel.generate(messages, new dev.langchain4j.model.output.StreamingResponseHandler<AiMessage>() {
+            streamingChatModel.generate(messages, new StreamingResponseHandler<AiMessage>() {
                 private final StringBuilder responseBuilder = new StringBuilder();
 
                 @Override
@@ -145,6 +159,58 @@ public class AgentService {
             log.error("Error processing message", e);
             onError.accept(e);
         }
+    }
+
+    /**
+     * Simulate a streaming response for mock mode.
+     */
+    private void processMockStreaming(
+            String userMessage,
+            java.util.function.Consumer<String> onNext,
+            java.lang.Runnable onComplete
+    ) {
+        String mockResponse = generateMockResponse(userMessage);
+        String[] words = mockResponse.split(" ");
+
+        // Stream words with delays
+        for (int i = 0; i < words.length; i++) {
+            final int index = i;
+            final String word = words[i] + (i < words.length - 1 ? " " : "");
+            mockExecutor.schedule(() -> {
+                onNext.accept(word);
+                if (index == words.length - 1) {
+                    onComplete.run();
+                }
+            }, (i + 1) * 100L, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    /**
+     * Generate a mock response based on the user message.
+     */
+    private String generateMockResponse(String userMessage) {
+        String lowerMessage = userMessage.toLowerCase();
+
+        if (lowerMessage.contains("hello") || lowerMessage.contains("hi")) {
+            return "Hello! I'm the FDC3 Assistant, running in mock mode. How can I help you today?";
+        }
+
+        if (lowerMessage.contains("help")) {
+            return "I'm a mock chatbot assistant. In production, I would help you with:\n\n" +
+                   "- FDC3 interoperability questions\n" +
+                   "- Financial workflow automation\n" +
+                   "- Platform navigation\n\n" +
+                   "For now, I can respond to basic messages to test the integration.";
+        }
+
+        if (lowerMessage.contains("fdc3")) {
+            return "FDC3 (Financial Desktop Connectivity and Consoritum) is an open standard for " +
+                   "financial desktop interoperability. It enables applications to communicate and " +
+                   "share context across the desktop. This is a mock response for testing.";
+        }
+
+        return String.format("You said: \"%s\"\n\nThis is a mock response. In production, I would " +
+                             "provide helpful information about FDC3 and financial workflows.", userMessage);
     }
 
     /**
@@ -219,6 +285,6 @@ public class AgentService {
      * Check if the agent is ready.
      */
     public boolean isReady() {
-        return chatModel != null;
+        return mockEnabled || chatModel != null;
     }
 }

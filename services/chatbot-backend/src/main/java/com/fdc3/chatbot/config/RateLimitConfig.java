@@ -2,9 +2,7 @@ package com.fdc3.chatbot.config;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.Refill;
-import io.github.bucket4j.distributed.proxy.ProxyManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

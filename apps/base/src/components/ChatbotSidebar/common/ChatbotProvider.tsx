@@ -109,61 +109,86 @@ export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
         const streamUrl = `${apiUrl}/stream`;
         const params = new URLSearchParams({
           message: content.trim(),
-          conversationId: state.conversationId || '',
         });
+        if (state.conversationId) {
+          params.set('conversationId', state.conversationId);
+        }
 
         const eventSource = new EventSource(`${streamUrl}?${params.toString()}`);
         eventSourceRef.current = eventSource;
 
         let accumulatedContent = '';
 
-        eventSource.onmessage = (event) => {
+        // Handle conversation_id event
+        eventSource.addEventListener('conversation_id', (event) => {
+          const conversationId = event.data;
+          setState((prev) => ({ ...prev, conversationId }));
+        });
+
+        // Handle message events (streaming tokens)
+        eventSource.addEventListener('message', (event) => {
+          accumulatedContent += event.data || '';
+          setState((prev) => ({
+            ...prev,
+            messages: prev.messages.map((msg) =>
+              msg.id === assistantMessage.id ? { ...msg, content: accumulatedContent } : msg,
+            ),
+          }));
+        });
+
+        // Handle tool_call events
+        eventSource.addEventListener('tool_call', (event) => {
           try {
-            const data = JSON.parse(event.data);
-
-            if (data.type === 'message') {
-              accumulatedContent += data.text || '';
-              setState((prev) => ({
-                ...prev,
-                messages: prev.messages.map((msg) =>
-                  msg.id === assistantMessage.id ? { ...msg, content: accumulatedContent } : msg,
-                ),
-              }));
-            } else if (data.type === 'tool_call') {
-              setState((prev) => ({
-                ...prev,
-                messages: prev.messages.map((msg) =>
-                  msg.id === assistantMessage.id
-                    ? { ...msg, toolCalls: [...(msg.toolCalls || []), data.toolCall] }
-                    : msg,
-                ),
-              }));
-            } else if (data.type === 'tool_result') {
-              setState((prev) => ({
-                ...prev,
-                messages: prev.messages.map((msg) =>
-                  msg.id === assistantMessage.id
-                    ? { ...msg, toolResults: [...(msg.toolResults || []), data.result] }
-                    : msg,
-                ),
-              }));
-            } else if (data.type === 'error') {
-              setState((prev) => ({
-                ...prev,
-                error: data.message,
-              }));
-            } else if (data.type === 'done' || data.type === 'conversation_id') {
-              if (data.conversationId) {
-                setState((prev) => ({ ...prev, conversationId: data.conversationId }));
-              }
-              eventSource.close();
-              setState((prev) => ({ ...prev, isLoading: false }));
-            }
+            const toolCall = JSON.parse(event.data);
+            setState((prev) => ({
+              ...prev,
+              messages: prev.messages.map((msg) =>
+                msg.id === assistantMessage.id
+                  ? { ...msg, toolCalls: [...(msg.toolCalls || []), toolCall] }
+                  : msg,
+              ),
+            }));
           } catch (e) {
-            console.error('Failed to parse SSE event:', e);
+            console.error('Failed to parse tool_call event:', e);
           }
-        };
+        });
 
+        // Handle tool_result events
+        eventSource.addEventListener('tool_result', (event) => {
+          try {
+            const result = JSON.parse(event.data);
+            setState((prev) => ({
+              ...prev,
+              messages: prev.messages.map((msg) =>
+                msg.id === assistantMessage.id
+                  ? { ...msg, toolResults: [...(msg.toolResults || []), result] }
+                  : msg,
+              ),
+            }));
+          } catch (e) {
+            console.error('Failed to parse tool_result event:', e);
+          }
+        });
+
+        // Handle error events
+        eventSource.addEventListener('error', (event) => {
+          if (event instanceof MessageEvent) {
+            setState((prev) => ({
+              ...prev,
+              error: event.data || 'An error occurred',
+              isLoading: false,
+            }));
+          }
+          eventSource.close();
+        });
+
+        // Handle done event
+        eventSource.addEventListener('done', () => {
+          eventSource.close();
+          setState((prev) => ({ ...prev, isLoading: false }));
+        });
+
+        // Handle connection errors
         eventSource.onerror = () => {
           eventSource.close();
           setState((prev) => ({

@@ -252,6 +252,12 @@ module.exports = (webpackConfigEnv, argv) => {
       },
       proxy: [
         {
+          context: ["/api/chat"],
+          target: "http://localhost:8080",
+          secure: false,
+          changeOrigin: true,
+        },
+        {
           context: ["/api/bff/"],
           pathRewrite: { "^/api/bff": "" },
           target: "http://localhost:8088",

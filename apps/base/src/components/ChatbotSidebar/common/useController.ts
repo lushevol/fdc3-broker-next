@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { ChatMessage, ChatState, ToolCall, ToolResult, SSEEvent, SSEEventType } from './interface';
+import { ChatMessage, ChatState, ToolCall, ToolResult } from './interface';
 
 interface UseChatbotControllerProps {
   apiUrl?: string;
@@ -85,21 +85,86 @@ export function useChatbotController(
         const streamUrl = `${apiUrl}/stream`;
         const params = new URLSearchParams({
           message: content.trim(),
-          conversationId: state.conversationId || '',
         });
+        if (state.conversationId) {
+          params.set('conversationId', state.conversationId);
+        }
 
         const eventSource = new EventSource(`${streamUrl}?${params.toString()}`);
         eventSourceRef.current = eventSource;
 
-        eventSource.onmessage = (event) => {
-          try {
-            const data: SSEEvent = JSON.parse(event.data);
-            handleSSEEvent(data, assistantMessage.id);
-          } catch (e) {
-            console.error('Failed to parse SSE event:', e);
-          }
-        };
+        let accumulatedContent = '';
 
+        // Handle conversation_id event
+        eventSource.addEventListener('conversation_id', (event) => {
+          const conversationId = event.data;
+          setState((prev) => ({ ...prev, conversationId }));
+        });
+
+        // Handle message events (streaming tokens)
+        eventSource.addEventListener('message', (event) => {
+          accumulatedContent += event.data || '';
+          setState((prev) => ({
+            ...prev,
+            messages: prev.messages.map((msg) =>
+              msg.id === assistantMessage.id ? { ...msg, content: accumulatedContent } : msg,
+            ),
+          }));
+        });
+
+        // Handle tool_call events
+        eventSource.addEventListener('tool_call', (event) => {
+          try {
+            const toolCall = JSON.parse(event.data) as ToolCall;
+            setState((prev) => ({
+              ...prev,
+              messages: prev.messages.map((msg) =>
+                msg.id === assistantMessage.id
+                  ? { ...msg, toolCalls: [...(msg.toolCalls || []), toolCall] }
+                  : msg,
+              ),
+            }));
+          } catch (e) {
+            console.error('Failed to parse tool_call event:', e);
+          }
+        });
+
+        // Handle tool_result events
+        eventSource.addEventListener('tool_result', (event) => {
+          try {
+            const toolResult = JSON.parse(event.data) as ToolResult;
+            setState((prev) => ({
+              ...prev,
+              messages: prev.messages.map((msg) =>
+                msg.id === assistantMessage.id
+                  ? { ...msg, toolResults: [...(msg.toolResults || []), toolResult] }
+                  : msg,
+              ),
+            }));
+          } catch (e) {
+            console.error('Failed to parse tool_result event:', e);
+          }
+        });
+
+        // Handle error events
+        eventSource.addEventListener('error', (event) => {
+          if (event instanceof MessageEvent) {
+            setState((prev) => ({
+              ...prev,
+              error: event.data || 'An error occurred',
+              isLoading: false,
+            }));
+          }
+          eventSource.close();
+        });
+
+        // Handle done event
+        eventSource.addEventListener('done', () => {
+          eventSource.close();
+          setState((prev) => ({ ...prev, isLoading: false }));
+        });
+
+        // Handle connection errors
         eventSource.onerror = (error) => {
           console.error('SSE error:', error);
           eventSource.close();
@@ -109,24 +174,6 @@ export function useChatbotController(
             error: 'Connection lost. Please try again.',
           }));
         };
-
-        // Wait for the 'done' event or error
-        await new Promise<void>((resolve, reject) => {
-          eventSource.addEventListener('done', () => {
-            eventSource.close();
-            resolve();
-          });
-
-          eventSource.addEventListener('error', () => {
-            eventSource.close();
-            reject(new Error('Stream error'));
-          });
-        });
-
-        setState((prev) => ({
-          ...prev,
-          isLoading: false,
-        }));
       } catch (error) {
         console.error('Failed to send message:', error);
         setState((prev) => ({
@@ -138,59 +185,6 @@ export function useChatbotController(
     },
     [apiUrl, state.conversationId, state.isLoading],
   );
-
-  const handleSSEEvent = useCallback((event: SSEEvent, messageId: string) => {
-    switch (event.type) {
-      case 'message':
-        // Append text to assistant message
-        const textChunk = event.data as string;
-        setState((prev) => ({
-          ...prev,
-          messages: prev.messages.map((msg) =>
-            msg.id === messageId ? { ...msg, content: msg.content + textChunk } : msg,
-          ),
-        }));
-        break;
-
-      case 'tool_call':
-        // Add tool call to message
-        const toolCall = event.data as ToolCall;
-        setState((prev) => ({
-          ...prev,
-          messages: prev.messages.map((msg) =>
-            msg.id === messageId
-              ? { ...msg, toolCalls: [...(msg.toolCalls || []), toolCall] }
-              : msg,
-          ),
-        }));
-        break;
-
-      case 'tool_result':
-        // Add tool result to message
-        const toolResult = event.data as ToolResult;
-        setState((prev) => ({
-          ...prev,
-          messages: prev.messages.map((msg) =>
-            msg.id === messageId
-              ? { ...msg, toolResults: [...(msg.toolResults || []), toolResult] }
-              : msg,
-          ),
-        }));
-        break;
-
-      case 'generative_ui':
-        // Handle generative UI component
-        // This will be handled by the GenerativeUIProvider
-        break;
-
-      case 'error':
-        setState((prev) => ({
-          ...prev,
-          error: (event.data as { message: string }).message,
-        }));
-        break;
-    }
-  }, []);
 
   const clearConversation = useCallback(() => {
     setState((prev) => ({

@@ -5,25 +5,37 @@ import { useChatbotController } from '../common/useController';
 class MockEventSource {
   onmessage: ((event: MessageEvent) => void) | null = null;
   onerror: (() => void) | null = null;
+  private listeners: Map<string, Function[]> = new Map();
   close = jest.fn();
 
   constructor(url: string) {
-    // Simulate successful connection and message
+    // Simulate successful connection with named events (matching backend format)
     setTimeout(() => {
-      if (this.onmessage) {
-        this.onmessage(
-          new MessageEvent('message', {
-            data: JSON.stringify({ type: 'message', text: 'Hello' }),
-          }),
-        );
-      }
+      // Send conversation_id event
+      this.emit('conversation_id', 'test-conv-id');
+    }, 50);
+
+    setTimeout(() => {
+      // Send message event (raw text, not JSON)
+      this.emit('message', 'Hello');
     }, 100);
+
+    setTimeout(() => {
+      // Send done event
+      this.emit('done', '');
+    }, 200);
   }
 
   addEventListener(event: string, callback: Function) {
-    if (event === 'done') {
-      setTimeout(() => callback({}), 200);
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, []);
     }
+    this.listeners.get(event)!.push(callback);
+  }
+
+  private emit(event: string, data: string) {
+    const callbacks = this.listeners.get(event) || [];
+    callbacks.forEach((cb) => cb({ data }));
   }
 }
 
