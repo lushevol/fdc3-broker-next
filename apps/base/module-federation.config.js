@@ -13,46 +13,50 @@ module.exports = {
   //   "./GenerativeUI": "./src/components/ChatbotSidebar/common/GenerativeUI",
   // },
   shared: {
-    // react: {
-    //   singleton: true,
-    //   eager: true,
-    //   requiredVersion: dependencies.react,
-    // },
-    // "react-dom": {
-    //   singleton: true,
-    //   eager: true,
-    //   requiredVersion: dependencies["react-dom"],
-    // },
-    // "@emotion/react": {
-    //   singleton: true,
-    //   eager: true,
-    //   requiredVersion: dependencies["@emotion/react"],
-    // },
-    // "@emotion/css": {
-    //   singleton: true,
-    //   eager: true,
-    //   requiredVersion: dependencies["@emotion/css"],
-    // },
-    // "@emotion/styled": {
-    //   singleton: true,
-    //   eager: true,
-    //   requiredVersion: dependencies["@emotion/styled"],
-    // },
-    // "@assistant-ui/react": {
-    //   singleton: true,
-    //   requiredVersion: dependencies["@assistant-ui/react"],
-    // },
-    // "@assistant-ui/react-ai-sdk": {
-    //   singleton: true,
-    //   requiredVersion: dependencies["@assistant-ui/react-ai-sdk"],
-    // },
-    // "ai": {
-    //   singleton: true,
-    //   requiredVersion: dependencies["ai"],
-    // },
-    // "zod": {
-    //   singleton: true,
-    //   requiredVersion: dependencies["zod"],
-    // },
+    react: {
+      singleton: true,
+      eager: true,
+      requiredVersion: dependencies.react,
+    },
+    "react-dom": {
+      singleton: true,
+      eager: true,
+      requiredVersion: dependencies["react-dom"],
+    },
+    "@emotion/react": {
+      singleton: true,
+      eager: true,
+      requiredVersion: dependencies["@emotion/react"],
+    },
+    "@emotion/css": {
+      singleton: true,
+      eager: true,
+      requiredVersion: dependencies["@emotion/css"],
+    },
+    "@emotion/styled": {
+      singleton: true,
+      eager: true,
+      requiredVersion: dependencies["@emotion/styled"],
+    },
+    "@assistant-ui/react": {
+      singleton: true,
+      requiredVersion: dependencies["@assistant-ui/react"],
+    },
+    "@assistant-ui/react-ai-sdk": {
+      singleton: true,
+      requiredVersion: dependencies["@assistant-ui/react-ai-sdk"],
+    },
+    "@assistant-ui/react-markdown": {
+      singleton: true,
+      requiredVersion: dependencies["@assistant-ui/react-markdown"],
+    },
+    "ai": {
+      singleton: true,
+      requiredVersion: dependencies["ai"],
+    },
+    "zod": {
+      singleton: true,
+      requiredVersion: dependencies["zod"],
+    },
   },
 };

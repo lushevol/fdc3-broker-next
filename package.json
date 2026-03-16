@@ -66,5 +66,9 @@
     "*.{md,json,yml,yaml}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "@assistant-ui/react": "^0.12.17",
+    "@assistant-ui/react-markdown": "^0.12.5"
   }
 }

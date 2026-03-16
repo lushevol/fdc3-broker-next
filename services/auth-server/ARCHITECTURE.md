@@ -135,35 +135,35 @@ The Auth-Server is a Spring Boot-based authentication and authorization service 
 
 ### 3.1 V1 API - LoginController
 
-| Endpoint | Method | Description | Request | Response |
-|----------|--------|-------------|---------|----------|
-| `/v1/login` | POST | Authenticate user with OUD credentials | `{"data": {"username": "...", "password": "..."}}` | User info + token + entitlements |
-| `/v1/logout` | POST | End user session | - | `{"responseCode": "SUCCESS"}` |
-| `/v1/heartBeat` | POST | Refresh session token | - | New token |
-| `/v1/user` | GET | Get user by JWT or xToken | Header: `Single-UI-Authorization` or param `xToken` | User info JSON |
-| `/v1/userInfo` | GET | Get user info from session | Header: `X-Token` | User info JSON |
-| `/v1/validateUser` | GET | Validate session & optionally get user info | Header: `X-Token`, param `includeUserInfo` | Validation result |
-| `/v1/authenticate` | POST | Check user entitlements for actions | `{"action": [...]}` | `{"result": true/false}` |
-| `/v1/authenticate` | GET | Get user if session valid | Header: `X-Token` | User info JSON |
+| Endpoint           | Method | Description                                 | Request                                             | Response                         |
+| ------------------ | ------ | ------------------------------------------- | --------------------------------------------------- | -------------------------------- |
+| `/v1/login`        | POST   | Authenticate user with OUD credentials      | `{"data": {"username": "...", "password": "..."}}`  | User info + token + entitlements |
+| `/v1/logout`       | POST   | End user session                            | -                                                   | `{"responseCode": "SUCCESS"}`    |
+| `/v1/heartBeat`    | POST   | Refresh session token                       | -                                                   | New token                        |
+| `/v1/user`         | GET    | Get user by JWT or xToken                   | Header: `Single-UI-Authorization` or param `xToken` | User info JSON                   |
+| `/v1/userInfo`     | GET    | Get user info from session                  | Header: `X-Token`                                   | User info JSON                   |
+| `/v1/validateUser` | GET    | Validate session & optionally get user info | Header: `X-Token`, param `includeUserInfo`          | Validation result                |
+| `/v1/authenticate` | POST   | Check user entitlements for actions         | `{"action": [...]}`                                 | `{"result": true/false}`         |
+| `/v1/authenticate` | GET    | Get user if session valid                   | Header: `X-Token`                                   | User info JSON                   |
 
 ### 3.2 V2 API - V2LoginController
 
-| Endpoint | Method | Description | Request | Response |
-|----------|--------|-------------|---------|----------|
-| `/v2/login` | POST | Simplified login | `{"username": "...", "password": "..."}` | AuthEntity |
-| `/v2/logout` | POST | Logout | - | AuthEntity |
-| `/v2/heartBeat` | POST | Session keepalive | - | AuthEntity with new token |
-| `/v2/user` | GET | Get user by xToken | param `xToken` | User info JSON |
-| `/v2/userInfo` | GET | Get user info | Header: `X-Token` | User info JSON |
-| `/v2/authenticate` | POST | Check entitlements | `{"action": [...]}` | AuthEntity |
+| Endpoint           | Method | Description        | Request                                  | Response                  |
+| ------------------ | ------ | ------------------ | ---------------------------------------- | ------------------------- |
+| `/v2/login`        | POST   | Simplified login   | `{"username": "...", "password": "..."}` | AuthEntity                |
+| `/v2/logout`       | POST   | Logout             | -                                        | AuthEntity                |
+| `/v2/heartBeat`    | POST   | Session keepalive  | -                                        | AuthEntity with new token |
+| `/v2/user`         | GET    | Get user by xToken | param `xToken`                           | User info JSON            |
+| `/v2/userInfo`     | GET    | Get user info      | Header: `X-Token`                        | User info JSON            |
+| `/v2/authenticate` | POST   | Check entitlements | `{"action": [...]}`                      | AuthEntity                |
 
 ### 3.3 V3 API - AuthenticationController
 
-| Endpoint | Method | Description | Headers | Response |
-|----------|--------|-------------|---------|----------|
-| `/v3/authenticate` | POST | Multi-protocol auth | `X-Token` OR `Single-UI-Authorization` OR `FMAA-Token` | AuthenticationResponseDto |
-| `/v3/token` | GET | Get FMAA access token | - | FMAA token |
-| `/v3/kong/token` | GET | Get Kong gateway token | - | Kong access token |
+| Endpoint           | Method | Description            | Headers                                                | Response                  |
+| ------------------ | ------ | ---------------------- | ------------------------------------------------------ | ------------------------- |
+| `/v3/authenticate` | POST   | Multi-protocol auth    | `X-Token` OR `Single-UI-Authorization` OR `FMAA-Token` | AuthenticationResponseDto |
+| `/v3/token`        | GET    | Get FMAA access token  | -                                                      | FMAA token                |
+| `/v3/kong/token`   | GET    | Get Kong gateway token | -                                                      | Kong access token         |
 
 ---
 
@@ -174,6 +174,7 @@ The Auth-Server is a Spring Boot-based authentication and authorization service 
 **Purpose:** Primary data store for sessions, cache, and rate limiting
 
 **Connection Configuration:**
+
 ```yaml
 spring.data.redis:
   cluster.nodes: ${REDIS_CLUSTER_NODES}
@@ -183,15 +184,15 @@ spring.data.redis:
 
 **Redis Key Patterns:**
 
-| Key Pattern | Purpose | TTL |
-|-------------|---------|-----|
-| `ratanone:authentication:token:s:{token}` | Session token → User ID mapping | 15 min |
-| `ratanone:authentication:user_info:s:{userId}` | Cached user information | 15 min |
-| `ratanone:authentication:ems2_authorization:s:{userId}` | Cached EMS2 entitlements | 15 min |
-| `ratanone:authentication:user_actions:s:{userId}` | User action permissions | 15 min |
-| `ratanone:authentication:last_login_time:s:{userId}` | Last login timestamp | 15 min |
-| `ratanone:da:pct2:kong:client:*` | Kong client credentials | Configurable |
-| `ratan:fmaaToken:str` | FMAA token cache | Configurable |
+| Key Pattern                                             | Purpose                         | TTL          |
+| ------------------------------------------------------- | ------------------------------- | ------------ |
+| `ratanone:authentication:token:s:{token}`               | Session token → User ID mapping | 15 min       |
+| `ratanone:authentication:user_info:s:{userId}`          | Cached user information         | 15 min       |
+| `ratanone:authentication:ems2_authorization:s:{userId}` | Cached EMS2 entitlements        | 15 min       |
+| `ratanone:authentication:user_actions:s:{userId}`       | User action permissions         | 15 min       |
+| `ratanone:authentication:last_login_time:s:{userId}`    | Last login timestamp            | 15 min       |
+| `ratanone:da:pct2:kong:client:*`                        | Kong client credentials         | Configurable |
+| `ratan:fmaaToken:str`                                   | FMAA token cache                | Configurable |
 
 **Failure Mode:** Service becomes unavailable; all sessions lost on Redis failure
 
@@ -202,15 +203,18 @@ spring.data.redis:
 **Purpose:** Corporate user authentication and directory lookup
 
 **Connection Configuration:**
+
 ```yaml
 spring.ldap.urls: ${OUD_URL}
 ```
 
 **DN Patterns:**
+
 - **User DN:** `cn={userId},ou=users,o=standardchartered`
 - **System Account DN:** `cn={userId},ou=fmedmi,ou=apps,o=standardchartered`
 
 **Authentication Flow:**
+
 1. Bind to LDAP with user credentials
 2. Search for user entry
 3. Retrieve user attributes
@@ -225,6 +229,7 @@ spring.ldap.urls: ${OUD_URL}
 **Purpose:** User entitlements, roles, and authorization data
 
 **Configuration:**
+
 ```yaml
 scb.ems2:
   host: ${EMS2_HOST}
@@ -233,6 +238,7 @@ scb.ems2:
 ```
 
 **API Endpoints:**
+
 - `GET /ems2/rest/account/{userId}` - Get user roles
 - `GET /ems2/rest/entitlements/entity/name/{entity}/user/{userId}` - Get user entitlements for entity
 
@@ -257,6 +263,7 @@ scb.ems2:
 **Purpose:** OAuth2 token validation and client credentials flow
 
 **Configuration:**
+
 ```yaml
 fmaa.api:
   introspectPoint: ${FMAA_HOST}/introspect
@@ -267,9 +274,11 @@ fmaa.api:
 ```
 
 **API Used:**
+
 - `GET /introspect?access_token={token}&user_id={userId}&app_id={appId}` - Token validation
 
 **Authentication Flow:**
+
 1. Receive FMAA token from `FMAA-Token` header
 2. Call introspect endpoint
 3. Validate token validity and expiration
@@ -285,6 +294,7 @@ fmaa.api:
 **Purpose:** API gateway authentication via client credentials flow
 
 **Configuration:**
+
 ```yaml
 ratanone.authentication.kong:
   account: ${EDMI_OUD}
@@ -296,6 +306,7 @@ ratanone.authentication.kong:
 ```
 
 **Token Acquisition Flow:**
+
 1. Fetch client credentials from `clientEndpoint` using Basic auth
 2. Exchange credentials for access token at `tokenEndpoint`
 3. Cache token in Redis
@@ -311,6 +322,7 @@ ratanone.authentication.kong:
 **Integration:** Via `ratanone-hashicorp-integrator-spring-boot-starter`
 
 **Managed Secrets:**
+
 - Database credentials
 - API keys
 - Certificate passwords
@@ -324,17 +336,20 @@ ratanone.authentication.kong:
 ### 4.7 Observability Stack
 
 #### Zipkin (Distributed Tracing)
+
 ```yaml
 management.zipkin.tracing.endpoint: ${ZIPKIN_SERVER_ENDPOINT}
 management.tracing.sampling.probability: ${TRACING_SAMPLING_PROBABILITY:0.3}
 ```
 
 #### Logstash (Centralized Logging)
+
 ```yaml
 ratanone.logging.logstash.destinations: ${LOGSTASH_URL}
 ```
 
 #### Kafka (Event Streaming)
+
 ```yaml
 spring.kafka.bootstrap-servers: ${KAFKA_CLUSTER_BROKERS}
 ```
@@ -450,13 +465,13 @@ spring.kafka.bootstrap-servers: ${KAFKA_CLUSTER_BROKERS}
 
 ### 6.1 Authentication Methods
 
-| Method | Use Case | Header | Validation |
-|--------|----------|--------|------------|
-| **OUD/LDAP** | Traditional login | Username/Password in body | LDAP bind |
-| **JWT** | SSO/Microservice | `Single-UI-Authorization: Bearer <jwt>` | Local signature validation |
-| **FMAA** | FMO Portal | `FMAA-Token: <token>` | Introspect endpoint |
-| **Session Token** | Web session | `X-Token: <uuid>` | Redis lookup |
-| **Kong** | API Gateway | Token from `/v3/kong/token` | Kong OAuth2 flow |
+| Method            | Use Case          | Header                                  | Validation                 |
+| ----------------- | ----------------- | --------------------------------------- | -------------------------- |
+| **OUD/LDAP**      | Traditional login | Username/Password in body               | LDAP bind                  |
+| **JWT**           | SSO/Microservice  | `Single-UI-Authorization: Bearer <jwt>` | Local signature validation |
+| **FMAA**          | FMO Portal        | `FMAA-Token: <token>`                   | Introspect endpoint        |
+| **Session Token** | Web session       | `X-Token: <uuid>`                       | Redis lookup               |
+| **Kong**          | API Gateway       | Token from `/v3/kong/token`             | Kong OAuth2 flow           |
 
 ### 6.2 Token Lifecycle
 
@@ -541,35 +556,35 @@ spring.kafka.bootstrap-servers: ${KAFKA_CLUSTER_BROKERS}
 
 ### 7.1 Required Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `KAFKA_CLUSTER_BROKERS` | Kafka broker addresses | `kafka1:9092,kafka2:9092` |
-| `OUD_URL` | LDAP/OUD server URL | `ldap://oud-server:389` |
-| `REDIS_CLUSTER_NODES` | Redis cluster nodes | `redis1:6379,redis2:6379` |
-| `REDIS_JANUS` | Redis password | `********` |
-| `LOGSTASH_URL` | Logstash destination | `logstash:5000` |
-| `JKS_KEYSTORE_FILE` | Keystore file path | `/opt/keystore.jks` |
-| `JKS_KEYSTORE_PWD` | Keystore password | `********` |
-| `JKS_TRUSTSTORE_FILE` | Truststore file path | `/opt/truststore.jks` |
-| `JKS_TRUSTSTORE_PWD` | Truststore password | `********` |
-| `EDMI_OUD` | Kong OUD account | `svc_account` |
-| `EDMI_OUD_PWD` | Kong OUD password | `********` |
-| `KONG_APPLICATION_NAME` | Kong application name | `ratanone-auth` |
-| `KONG_IAM_URL` | Kong IAM URL | `https://iam.example.com` |
-| `KONG_TOKEN_ENDPOINT` | Kong token endpoint | `https://kong.example.com/oauth2/token` |
-| `KONG_CLIENT_ID` | Kong client ID | `client-123` |
-| `KONG_CLIENT_SEC` | Kong client secret | `********` |
-| `KONG_CLIENT_ENDPOINT` | Kong client endpoint | `https://kong.example.com/clients` |
-| `KONG_GATEWAY` | Kong gateway URL | `https://api.example.com` |
-| `PCT2_ENDPOINT` | PCT2 endpoint | `https://pct2.example.com` |
-| `RATAN_CIPHER_KEY` | Cipher key for encryption | `********` |
-| `EMS2_HTTPS_HOST` | EMS2 HTTPS host | `https://ems2.example.com` |
-| `EMS2_HOST` | EMS2 host | `https://ems2.example.com` |
-| `FMAA_HOST` | FMAA host URL | `https://fmaa.example.com` |
-| `FMAA_ACCOUNT` | FMAA account | `fmaa_svc` |
-| `FMAA_JANUS` | FMAA password | `********` |
-| `FMAA_CERT_PATH` | FMAA certificate path | `/opt/fmaa-cert.pem` |
-| `ZIPKIN_SERVER_ENDPOINT` | Zipkin server URL | `https://zipkin.example.com:9411` |
+| Variable                 | Description               | Example                                 |
+| ------------------------ | ------------------------- | --------------------------------------- |
+| `KAFKA_CLUSTER_BROKERS`  | Kafka broker addresses    | `kafka1:9092,kafka2:9092`               |
+| `OUD_URL`                | LDAP/OUD server URL       | `ldap://oud-server:389`                 |
+| `REDIS_CLUSTER_NODES`    | Redis cluster nodes       | `redis1:6379,redis2:6379`               |
+| `REDIS_JANUS`            | Redis password            | `********`                              |
+| `LOGSTASH_URL`           | Logstash destination      | `logstash:5000`                         |
+| `JKS_KEYSTORE_FILE`      | Keystore file path        | `/opt/keystore.jks`                     |
+| `JKS_KEYSTORE_PWD`       | Keystore password         | `********`                              |
+| `JKS_TRUSTSTORE_FILE`    | Truststore file path      | `/opt/truststore.jks`                   |
+| `JKS_TRUSTSTORE_PWD`     | Truststore password       | `********`                              |
+| `EDMI_OUD`               | Kong OUD account          | `svc_account`                           |
+| `EDMI_OUD_PWD`           | Kong OUD password         | `********`                              |
+| `KONG_APPLICATION_NAME`  | Kong application name     | `ratanone-auth`                         |
+| `KONG_IAM_URL`           | Kong IAM URL              | `https://iam.example.com`               |
+| `KONG_TOKEN_ENDPOINT`    | Kong token endpoint       | `https://kong.example.com/oauth2/token` |
+| `KONG_CLIENT_ID`         | Kong client ID            | `client-123`                            |
+| `KONG_CLIENT_SEC`        | Kong client secret        | `********`                              |
+| `KONG_CLIENT_ENDPOINT`   | Kong client endpoint      | `https://kong.example.com/clients`      |
+| `KONG_GATEWAY`           | Kong gateway URL          | `https://api.example.com`               |
+| `PCT2_ENDPOINT`          | PCT2 endpoint             | `https://pct2.example.com`              |
+| `RATAN_CIPHER_KEY`       | Cipher key for encryption | `********`                              |
+| `EMS2_HTTPS_HOST`        | EMS2 HTTPS host           | `https://ems2.example.com`              |
+| `EMS2_HOST`              | EMS2 host                 | `https://ems2.example.com`              |
+| `FMAA_HOST`              | FMAA host URL             | `https://fmaa.example.com`              |
+| `FMAA_ACCOUNT`           | FMAA account              | `fmaa_svc`                              |
+| `FMAA_JANUS`             | FMAA password             | `********`                              |
+| `FMAA_CERT_PATH`         | FMAA certificate path     | `/opt/fmaa-cert.pem`                    |
+| `ZIPKIN_SERVER_ENDPOINT` | Zipkin server URL         | `https://zipkin.example.com:9411`       |
 
 ### 7.2 Application Configuration
 
@@ -660,43 +675,45 @@ services/auth-server/
 
 ## 9. Key Dependencies
 
-| Dependency | Version | Purpose |
-|------------|---------|---------|
-| `spring-boot-starter-web` | 3.3.7 | REST API framework |
-| `spring-boot-starter-data-ldap` | 3.3.7 | LDAP/OUD integration |
-| `spring-boot-starter-data-redis` | 3.3.7 | Redis integration |
-| `ratanone-redis-spring-boot-starter` | 6.7.2 | Custom Redis utilities |
-| `ratanone-hashicorp-integrator-spring-boot-starter` | 6.7.2 | HashiCorp Vault integration |
-| `ratanone-service-tracing-spring-boot-starter` | 6.7.2 | Distributed tracing |
-| `fmoportal-auth-sdk` | 1.1.1 | FMO Portal authentication |
-| `fmaa-client` | 1.0 | FMAA OAuth2 client |
-| `nimbus-jose-jwt` | 9.37.3 | JWT parsing & validation |
-| `jasypt-spring-boot-starter` | - | Password encryption |
-| `fastjson` | 2.0.38 | JSON processing |
+| Dependency                                          | Version | Purpose                     |
+| --------------------------------------------------- | ------- | --------------------------- |
+| `spring-boot-starter-web`                           | 3.3.7   | REST API framework          |
+| `spring-boot-starter-data-ldap`                     | 3.3.7   | LDAP/OUD integration        |
+| `spring-boot-starter-data-redis`                    | 3.3.7   | Redis integration           |
+| `ratanone-redis-spring-boot-starter`                | 6.7.2   | Custom Redis utilities      |
+| `ratanone-hashicorp-integrator-spring-boot-starter` | 6.7.2   | HashiCorp Vault integration |
+| `ratanone-service-tracing-spring-boot-starter`      | 6.7.2   | Distributed tracing         |
+| `fmoportal-auth-sdk`                                | 1.1.1   | FMO Portal authentication   |
+| `fmaa-client`                                       | 1.0     | FMAA OAuth2 client          |
+| `nimbus-jose-jwt`                                   | 9.37.3  | JWT parsing & validation    |
+| `jasypt-spring-boot-starter`                        | -       | Password encryption         |
+| `fastjson`                                          | 2.0.38  | JSON processing             |
 
 ---
 
 ## 10. Failure Modes & Resilience
 
-| Dependency | Failure Mode | Impact | Mitigation |
-|------------|--------------|--------|------------|
-| **Redis** | Connection failure | Complete service outage | Circuit breaker, retry, cluster mode |
-| **OUD/LDAP** | Connection failure | Login failures | Multiple LDAP URLs, timeout config |
-| **EMS2** | Connection failure | No entitlements | Graceful degradation, cached data |
-| **FMAA** | Connection failure | FMAA auth unavailable | Other auth methods still work |
-| **Kong** | Connection failure | Kong auth unavailable | Other auth methods still work |
-| **Vault** | Connection failure | Startup failure | Secrets caching, retry |
-| **Kafka** | Connection failure | No event streaming | Non-blocking, auth continues |
+| Dependency   | Failure Mode       | Impact                  | Mitigation                           |
+| ------------ | ------------------ | ----------------------- | ------------------------------------ |
+| **Redis**    | Connection failure | Complete service outage | Circuit breaker, retry, cluster mode |
+| **OUD/LDAP** | Connection failure | Login failures          | Multiple LDAP URLs, timeout config   |
+| **EMS2**     | Connection failure | No entitlements         | Graceful degradation, cached data    |
+| **FMAA**     | Connection failure | FMAA auth unavailable   | Other auth methods still work        |
+| **Kong**     | Connection failure | Kong auth unavailable   | Other auth methods still work        |
+| **Vault**    | Connection failure | Startup failure         | Secrets caching, retry               |
+| **Kafka**    | Connection failure | No event streaming      | Non-blocking, auth continues         |
 
 ---
 
 ## 11. Monitoring & Observability
 
 ### Health Endpoints
+
 - `GET /actuator/health` - Application health status
 - `GET /actuator/info` - Application information
 
 ### Metrics
+
 - Request latency
 - Authentication success/failure rates
 - Redis connection pool status
@@ -704,11 +721,13 @@ services/auth-server/
 - External service call durations
 
 ### Tracing
+
 - Distributed tracing via Zipkin
 - 30% sampling rate by default
 - Trace propagation across services
 
 ### Logging
+
 - Structured JSON logging
 - Logstash integration
 - Request/response logging for audit
@@ -725,4 +744,4 @@ services/auth-server/
 
 ---
 
-*Document generated: 2026-03-14*
+_Document generated: 2026-03-14_

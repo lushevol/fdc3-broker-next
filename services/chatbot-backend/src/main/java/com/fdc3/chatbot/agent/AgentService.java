@@ -34,6 +34,9 @@ public class AgentService {
     @Value("${spring.ai.openai.api-key:}")
     private String openaiApiKey;
 
+    @Value("${spring.ai.openai.base-url:}")
+    private String openaiBaseUrl;
+
     @Value("${spring.ai.openai.model:gpt-4}")
     private String model;
 
@@ -70,21 +73,29 @@ public class AgentService {
         }
 
         if (openaiApiKey != null && !openaiApiKey.isEmpty()) {
-            this.chatModel = OpenAiChatModel.builder()
+            var chatModelBuilder = OpenAiChatModel.builder()
                     .apiKey(openaiApiKey)
                     .modelName(model)
                     .temperature(temperature)
                     .maxTokens(maxTokens)
-                    .timeout(Duration.ofSeconds(60))
-                    .build();
+                    .timeout(Duration.ofSeconds(60));
 
-            this.streamingChatModel = OpenAiStreamingChatModel.builder()
+            var streamingModelBuilder = OpenAiStreamingChatModel.builder()
                     .apiKey(openaiApiKey)
                     .modelName(model)
                     .temperature(temperature)
                     .maxTokens(maxTokens)
-                    .timeout(Duration.ofSeconds(60))
-                    .build();
+                    .timeout(Duration.ofSeconds(60));
+
+            // Add base URL if configured (for OpenAI-compatible APIs like Azure, etc.)
+            if (openaiBaseUrl != null && !openaiBaseUrl.isEmpty()) {
+                chatModelBuilder.baseUrl(openaiBaseUrl);
+                streamingModelBuilder.baseUrl(openaiBaseUrl);
+                log.info("Using custom OpenAI base URL: {}", openaiBaseUrl);
+            }
+
+            this.chatModel = chatModelBuilder.build();
+            this.streamingChatModel = streamingModelBuilder.build();
 
             log.info("Initialized OpenAI chat model with model: {}", model);
         } else {
