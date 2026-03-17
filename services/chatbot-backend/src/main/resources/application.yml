@@ -3,20 +3,20 @@ spring:
     name: chatbot-backend
   ai:
     openai:
-      api-key: ${MY_OPENAI_API_KEY:}
-      base-url: ${MY_OPENAI_BASE_URL:}
-      model: ${MY_OPENAI_MODEL:gpt-4}
-      temperature: ${MY_OPENAI_TEMPERATURE:0.7}
+      api-key: ${CHATBOT_OPENAI_API_KEY:}
+      base-url: ${CHATBOT_OPENAI_BASE_URL:https://coding.dashscope.aliyuncs.com/v1}
+      model: ${CHATBOT_OPENAI_MODEL:qwen3.5-plus}
+      temperature: ${CHATBOT_OPENAI_TEMPERATURE:0.7}
     anthropic:
-      api-key: ${ANTHROPIC_API_KEY:}
-      model: ${ANTHROPIC_MODEL:claude-3-sonnet-20240229}
+      api-key: ${CHATBOT_ANTHROPIC_API_KEY:}
+      model: ${CHATBOT_ANTHROPIC_MODEL:claude-3-sonnet-20240229}
 
 server:
   port: 8080
 
 chatbot:
   mock:
-    enabled: true
+    enabled: false
   agent:
     name: FDC3 Assistant
     max-tokens: 4096

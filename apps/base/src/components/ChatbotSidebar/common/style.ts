@@ -85,8 +85,8 @@ export const sidebarStyles = {
 
   toggleButton: (theme: Theme, position: 'left' | 'right' = 'right') => css`
     position: fixed;
-    ${position === 'right' ? 'right' : 'left'}: 16px;
-    bottom: 16px;
+    ${position === 'right' ? 'right' : 'left'}: -32px;
+    bottom: 64px;
     z-index: ${theme.zIndex.fab};
     border-radius: 50%;
     width: 56px;
