@@ -66,8 +66,13 @@ export function parseSSEEvent(
   data: string,
 ): { type: SSEEventType; payload: unknown } | null {
   try {
-    // Some events like 'message' and 'conversation_id' are plain text
-    if (eventType === 'message' || eventType === 'conversation_id' || eventType === 'done') {
+    // Some events like 'message', 'conversation_id', 'error', and 'done' are plain text
+    if (
+      eventType === 'message' ||
+      eventType === 'conversation_id' ||
+      eventType === 'error' ||
+      eventType === 'done'
+    ) {
       return { type: eventType, payload: data };
     }
 

@@ -1,19 +1,19 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
 import { ChatbotSidebar } from '../index';
 import { ChatbotProvider } from '../common/ChatbotProvider';
 
-// Mock assistant-ui
-jest.mock('@assistant-ui/react', () => ({
-  AssistantRuntimeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useLocalRuntime: () => ({
-    append: jest.fn(),
-    resetThread: jest.fn(),
-  }),
-  Thread: () => <div data-testid="thread">Thread</div>,
-  Composer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  useThread: () => ({ messages: [] }),
-  useThreadRuntime: () => ({ append: jest.fn() }),
-}));
+// Mock MUI Slide component to disable animations in tests
+jest.mock('@mui/material', () => {
+  const actual = jest.requireActual('@mui/material');
+  return {
+    ...actual,
+    Slide: ({ children, in: inProp }: { children: React.ReactNode; in?: boolean }) => {
+      if (!inProp) return null;
+      return <div data-testid="slide-container">{children}</div>;
+    },
+  };
+});
 
 describe('ChatbotSidebar', () => {
   const renderWithProvider = (props = {}) => {
@@ -35,32 +35,30 @@ describe('ChatbotSidebar', () => {
     const toggleButton = screen.getByLabelText('Open chatbot');
     fireEvent.click(toggleButton);
 
-    await waitFor(() => {
-      expect(screen.getByText('AI Assistant')).toBeInTheDocument();
-    });
+    // Use findAllByText since there are multiple elements with "AI Assistant" text
+    // (one in header, one in empty state)
+    const aiAssistants = await screen.findAllByText(/AI Assistant/);
+    expect(aiAssistants.length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders close button when open', async () => {
     renderWithProvider({ isOpen: true });
 
-    await waitFor(() => {
-      expect(screen.getByLabelText('Close')).toBeInTheDocument();
-    });
+    const closeButton = await screen.findByTitle('Close');
+    expect(closeButton).toBeInTheDocument();
   });
 
   it('renders new chat button', async () => {
     renderWithProvider({ isOpen: true });
 
-    await waitFor(() => {
-      expect(screen.getByLabelText('New conversation')).toBeInTheDocument();
-    });
+    const newChatButton = await screen.findByTitle('New conversation');
+    expect(newChatButton).toBeInTheDocument();
   });
 
   it('displays empty state message when no messages', async () => {
     renderWithProvider({ isOpen: true });
 
-    await waitFor(() => {
-      expect(screen.getByText('Ask me anything!')).toBeInTheDocument();
-    });
+    const emptyState = await screen.findByText(/Ask me anything!/);
+    expect(emptyState).toBeInTheDocument();
   });
 });

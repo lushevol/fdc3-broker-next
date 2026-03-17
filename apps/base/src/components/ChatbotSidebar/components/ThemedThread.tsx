@@ -146,6 +146,19 @@ export const ThemedComposer: React.FC = () => {
           <Box sx={{ flex: 1 }}>
             <ComposerPrimitive.Input
               placeholder="Type a message..."
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                borderRadius: 8,
+                border: `1px solid ${theme.palette.divider}`,
+                backgroundColor: theme.palette.background.default,
+                color: theme.palette.text.primary,
+                fontSize: '0.9375rem',
+                fontFamily: theme.typography.fontFamily,
+                lineHeight: 1.5,
+                outline: 'none',
+                transition: 'border-color 0.2s ease',
+              }}
             />
           </Box>
           <ComposerPrimitive.Send />

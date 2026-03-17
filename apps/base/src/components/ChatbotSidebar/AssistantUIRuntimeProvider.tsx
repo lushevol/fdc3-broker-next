@@ -129,6 +129,13 @@ export function AssistantUIRuntimeProvider({
   const streamingStateRef = useRef<StreamingState>(createInitialStreamingState());
   const eventSourceRef = useRef<EventSource | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  // Use a ref to track latest messages to avoid stale closure issues
+  const messagesRef = useRef<AssistantUIMessage[]>([]);
+
+  // Keep messagesRef in sync with messages state
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -151,8 +158,9 @@ export function AssistantUIRuntimeProvider({
 
   const handleStreamMessage = useCallback(
     (eventType: string, data: string) => {
+      // Use messagesRef.current to avoid stale closure issues
       const result = handleSSEEvent(
-        messages,
+        messagesRef.current,
         streamingStateRef.current,
         eventType as Parameters<typeof handleSSEEvent>[2],
         data,
@@ -172,7 +180,7 @@ export function AssistantUIRuntimeProvider({
         streamingStateRef.current.conversationId = result.streamingState.conversationId;
       }
     },
-    [messages, closeEventSource],
+    [closeEventSource],
   );
 
   const sendMessage = useCallback(
@@ -190,9 +198,9 @@ export function AssistantUIRuntimeProvider({
       setIsLoading(true);
       setError(null);
 
-      // Add user message
+      // Add user message - use messagesRef.current to avoid stale closure
       const userMessage = createUserMessage(textContent);
-      const newMessages = [...messages, userMessage];
+      const newMessages = [...messagesRef.current, userMessage];
       setMessages(newMessages);
 
       try {
@@ -256,7 +264,7 @@ export function AssistantUIRuntimeProvider({
         setIsLoading(false);
       }
     },
-    [apiUrl, isLoading, messages, handleStreamMessage, closeEventSource],
+    [apiUrl, isLoading, handleStreamMessage, closeEventSource],
   );
 
   const clearConversation = useCallback(() => {
@@ -267,16 +275,16 @@ export function AssistantUIRuntimeProvider({
   }, [closeEventSource]);
 
   const retryLastMessage = useCallback(() => {
-    // Find last user message
-    const lastUserMessageIndex = [...messages].reverse().findIndex((m) => m.role === 'user');
+    // Find last user message - use messagesRef.current to avoid stale closure
+    const lastUserMessageIndex = [...messagesRef.current].reverse().findIndex((m) => m.role === 'user');
 
     if (lastUserMessageIndex === -1) return;
 
-    const actualIndex = messages.length - 1 - lastUserMessageIndex;
-    const lastUserMessage = messages[actualIndex];
+    const actualIndex = messagesRef.current.length - 1 - lastUserMessageIndex;
+    const lastUserMessage = messagesRef.current[actualIndex];
 
     // Remove messages after the last user message
-    const trimmedMessages = messages.slice(0, actualIndex + 1);
+    const trimmedMessages = messagesRef.current.slice(0, actualIndex + 1);
     setMessages(trimmedMessages);
     setError(null);
 
@@ -304,7 +312,7 @@ export function AssistantUIRuntimeProvider({
         custom: {},
       },
     });
-  }, [messages, sendMessage]);
+  }, [sendMessage]);
 
   // Create assistant-ui external store runtime
   const runtime = useExternalStoreRuntime({

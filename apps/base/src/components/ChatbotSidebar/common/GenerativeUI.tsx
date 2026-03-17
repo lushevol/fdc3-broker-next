@@ -32,9 +32,14 @@ export const GenerativeUIProvider: React.FC<GenerativeUIProviderProps> = ({
   children,
   initialComponents = [],
 }) => {
-  const registryRef = useRef<Map<string, GenerativeComponentEntry>>(new Map());
+  // Initialize registry synchronously with initial components using lazy initialization
+  const registryRef = useRef<Map<string, GenerativeComponentEntry>>(
+    initialComponents.length > 0
+      ? new Map(initialComponents.map((c) => [c.name, c]))
+      : new Map<string, GenerativeComponentEntry>(),
+  );
 
-  // Register initial components
+  // Update registry when initialComponents change
   React.useEffect(() => {
     initialComponents.forEach((component) => {
       registryRef.current.set(component.name, component);

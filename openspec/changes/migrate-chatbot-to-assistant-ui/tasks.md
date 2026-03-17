@@ -50,7 +50,7 @@
 - [x] 7.1 Verify `ChatbotSidebarProps` interface remains unchanged
 - [x] 7.2 Ensure `isOpen`, `onToggle`, `apiUrl`, `position`, `width` props work correctly
 - [x] 7.3 Maintain existing hook exports (mark deprecated if needed)
-- [ ] 7.4 Test that consuming MFEs require no changes
+- [x] 7.4 Test that consuming MFEs require no changes
 
 ## 8. Error Handling & Edge Cases
 
@@ -72,11 +72,11 @@
 - [x] 10.1 Update existing tests in `__tests__/ChatbotSidebar.test.tsx`
 - [x] 10.2 Write tests for SSE adapter transformations
 - [x] 10.3 Write tests for runtime provider
-- [ ] 10.4 Verify streaming works end-to-end
-- [ ] 10.5 Verify tool calls render correctly
-- [ ] 10.6 Verify generative UI components render
-- [ ] 10.7 Run full test suite and ensure >90% coverage
-- [ ] 10.8 Manual UI testing in browser
+- [x] 10.4 Verify streaming works end-to-end
+- [x] 10.5 Verify tool calls render correctly
+- [x] 10.6 Verify generative UI components render
+- [x] 10.7 Run full test suite and ensure >90% coverage
+- [x] 10.8 Manual UI testing in browser
 
 ## 11. Backend Configuration
 
