@@ -54,7 +54,7 @@ Send a chat message and receive a streaming response via SSE.
 | message        | string | Yes      | The message to send      |
 | conversationId | string | No       | Existing conversation ID |
 
-**Response Format (SSE Events):**
+**Response Format (canonical SSE events):**
 
 ```
 event: conversation_id
@@ -66,6 +66,15 @@ data: Hello
 event: message
 data: there
 
+event: tool_call
+data: {"id":"tool-uuid","name":"calculator","arguments":{"expression":"2 + 2"},"status":"running","requiresConfirmation":false}
+
+event: tool_result
+data: {"toolCallId":"tool-uuid","result":{"expression":"2 + 2","result":4}}
+
+event: generative_ui
+data: {"name":"ChartCard","props":{"title":"Revenue"}}
+
 event: done
 data:
 ```
@@ -76,8 +85,9 @@ data:
 | --------------- | ------------------------------------- |
 | conversation_id | Sent first with the conversation UUID |
 | message         | Streamed text chunks                  |
-| tool_call       | When the AI invokes a tool            |
-| tool_result     | Tool execution result                 |
+| tool_call       | Stable tool lifecycle update with tool call ID, tool name, arguments, and status |
+| tool_result     | Tool result or cancellation payload referencing the same tool call ID |
+| generative_ui   | Structured UI directive for assistant-ui data rendering |
 | error           | Error message                         |
 | done            | Stream complete                       |
 
@@ -101,7 +111,27 @@ Get the conversation history.
       "id": "msg-uuid",
       "role": "assistant",
       "content": "Hi there!",
-      "timestamp": "2024-01-15T10:30:05Z"
+      "timestamp": "2024-01-15T10:30:05Z",
+      "toolCalls": [
+        {
+          "id": "tool-uuid",
+          "name": "calculator",
+          "arguments": {
+            "expression": "2 + 2"
+          },
+          "status": "running",
+          "requiresConfirmation": false
+        }
+      ],
+      "toolResults": [
+        {
+          "toolCallId": "tool-uuid",
+          "result": {
+            "expression": "2 + 2",
+            "result": 4
+          }
+        }
+      ]
     }
   ]
 }
@@ -175,14 +205,20 @@ Health check endpoint (no authentication required).
 
 ## Tool System
 
-The backend supports tool execution. When the AI calls a tool, the following events are sent:
+The backend supports tool execution. Tool lifecycle events use stable tool call IDs so the client can correlate pending, running, completed, failed, and cancelled states:
 
 ```
 event: tool_call
-data: {"id":"tool-uuid","name":"get_current_time","arguments":{},"status":"running"}
+data: {"id":"tool-uuid","name":"get_current_time","arguments":{},"status":"pending","requiresConfirmation":true}
+
+event: tool_call
+data: {"id":"tool-uuid","name":"get_current_time","arguments":{},"status":"running","requiresConfirmation":true}
 
 event: tool_result
 data: {"toolCallId":"tool-uuid","result":{"time":"2024-01-15T10:30:00Z"}}
+
+event: tool_result
+data: {"toolCallId":"tool-uuid","error":"Tool execution cancelled by user."}
 ```
 
 ## Example Usage

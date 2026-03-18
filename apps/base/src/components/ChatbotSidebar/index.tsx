@@ -17,6 +17,7 @@ import {
 import { ChatbotSidebarProps } from './common/interface';
 import { sidebarStyles } from './common/style';
 import { GenerativeUIProvider, defaultGenerativeComponents } from './common/GenerativeUI';
+import { useOptionalChatbot } from './common/ChatbotProvider';
 import { AssistantUIRuntimeProvider, useAssistantUIRuntime } from './AssistantUIRuntimeProvider';
 import { ThemedThread, ThemedComposer } from './components/ThemedThread';
 
@@ -84,16 +85,25 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   width = 400,
 }) => {
   const theme = useTheme();
+  const chatbotContext = useOptionalChatbot();
+  const existingRuntime = useAssistantUIRuntime({ optional: true });
   const [internalIsOpen, setInternalIsOpen] = useState(false);
-  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const isOpen =
+    externalIsOpen !== undefined
+      ? externalIsOpen
+      : chatbotContext?.isOpen !== undefined
+        ? chatbotContext.isOpen
+        : internalIsOpen;
 
   const handleToggle = useCallback(() => {
     if (externalOnToggle) {
       externalOnToggle();
+    } else if (chatbotContext) {
+      chatbotContext.toggleSidebar();
     } else {
       setInternalIsOpen((prev) => !prev);
     }
-  }, [externalOnToggle]);
+  }, [externalOnToggle, chatbotContext]);
 
   return (
     <GenerativeUIProvider initialComponents={defaultGenerativeComponents}>
@@ -118,9 +128,13 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
           unmountOnExit
         >
           <Box className={sidebarStyles.container(theme, isOpen, width, position)}>
-            <AssistantUIRuntimeProvider apiUrl={apiUrl}>
+            {existingRuntime ? (
               <ChatbotContent onToggle={handleToggle} />
-            </AssistantUIRuntimeProvider>
+            ) : (
+              <AssistantUIRuntimeProvider apiUrl={apiUrl}>
+                <ChatbotContent onToggle={handleToggle} />
+              </AssistantUIRuntimeProvider>
+            )}
           </Box>
         </Slide>
       </>

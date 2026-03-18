@@ -34,10 +34,14 @@ import type { AssistantUIMessage, StreamingState } from './adapters/types';
 interface AssistantUIRuntimeContextValue {
   /** Current conversation ID */
   conversationId: string | null;
+  /** Current thread messages in assistant-ui-compatible internal format */
+  messages: AssistantUIMessage[];
   /** Whether a message is currently streaming */
   isLoading: boolean;
   /** Current error state */
   error: string | null;
+  /** Send a plain-text user message through the assistant-ui runtime bridge */
+  sendMessage: (content: string) => Promise<void>;
   /** Clear the current conversation */
   clearConversation: () => void;
   /** Retry the last failed message */
@@ -46,9 +50,17 @@ interface AssistantUIRuntimeContextValue {
 
 const AssistantUIRuntimeContext = createContext<AssistantUIRuntimeContextValue | null>(null);
 
-export function useAssistantUIRuntime(): AssistantUIRuntimeContextValue {
+export function useAssistantUIRuntime(options?: {
+  optional?: false | undefined;
+}): AssistantUIRuntimeContextValue;
+export function useAssistantUIRuntime(options?: {
+  optional?: boolean | undefined;
+}): AssistantUIRuntimeContextValue | null;
+export function useAssistantUIRuntime(options?: {
+  optional?: boolean | undefined;
+}): AssistantUIRuntimeContextValue | null {
   const context = useContext(AssistantUIRuntimeContext);
-  if (!context) {
+  if (!context && !options?.optional) {
     throw new Error('useAssistantUIRuntime must be used within AssistantUIRuntimeProvider');
   }
   return context;
@@ -183,7 +195,7 @@ export function AssistantUIRuntimeProvider({
     [closeEventSource],
   );
 
-  const sendMessage = useCallback(
+  const sendRuntimeMessage = useCallback(
     async (message: AppendMessage) => {
       if (!message.content || isLoading) return;
 
@@ -267,6 +279,27 @@ export function AssistantUIRuntimeProvider({
     [apiUrl, isLoading, handleStreamMessage, closeEventSource],
   );
 
+  const sendMessage = useCallback(
+    async (content: string) => {
+      const text = content.trim();
+      if (!text) return;
+
+      await sendRuntimeMessage({
+        role: 'user',
+        content: [{ type: 'text' as const, text }],
+        parentId: null,
+        sourceId: null,
+        runConfig: undefined,
+        attachments: [],
+        createdAt: new Date(),
+        metadata: {
+          custom: {},
+        },
+      });
+    },
+    [sendRuntimeMessage],
+  );
+
   const clearConversation = useCallback(() => {
     setMessages([]);
     setError(null);
@@ -300,7 +333,7 @@ export function AssistantUIRuntimeProvider({
       .map((part) => part.text)
       .join('');
 
-    void sendMessage({
+    void sendRuntimeMessage({
       role: 'user',
       content: [{ type: 'text' as const, text: textContent }],
       parentId: null,
@@ -312,20 +345,22 @@ export function AssistantUIRuntimeProvider({
         custom: {},
       },
     });
-  }, [sendMessage]);
+  }, [sendRuntimeMessage]);
 
   // Create assistant-ui external store runtime
   const runtime = useExternalStoreRuntime({
     isRunning: isLoading,
     messages: messages.map(convertToThreadMessage),
-    onNew: sendMessage,
-    onEdit: sendMessage,
+    onNew: sendRuntimeMessage,
+    onEdit: sendRuntimeMessage,
   });
 
   const contextValue: AssistantUIRuntimeContextValue = {
     conversationId: streamingStateRef.current.conversationId,
+    messages,
     isLoading,
     error,
+    sendMessage,
     clearConversation,
     retryLastMessage,
   };

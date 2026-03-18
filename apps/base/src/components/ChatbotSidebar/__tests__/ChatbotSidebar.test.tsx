@@ -1,7 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { ChatbotSidebar } from '../index';
-import { ChatbotProvider } from '../common/ChatbotProvider';
+import { ChatbotProvider, useChatbot } from '../common/ChatbotProvider';
+import { AssistantUIRuntimeProvider } from '../AssistantUIRuntimeProvider';
 
 // Mock MUI Slide component to disable animations in tests
 jest.mock('@mui/material', () => {
@@ -60,5 +61,38 @@ describe('ChatbotSidebar', () => {
 
     const emptyState = await screen.findByText(/Ask me anything!/);
     expect(emptyState).toBeInTheDocument();
+  });
+
+  it('shares sidebar open state with ChatbotProvider consumers', async () => {
+    const ProviderControl = () => {
+      const { toggleSidebar } = useChatbot();
+      return (
+        <button type="button" data-testid="provider-toggle" onClick={toggleSidebar}>
+          Toggle From Provider
+        </button>
+      );
+    };
+
+    render(
+      <ChatbotProvider>
+        <ProviderControl />
+        <ChatbotSidebar />
+      </ChatbotProvider>,
+    );
+
+    fireEvent.click(screen.getByTestId('provider-toggle'));
+
+    const aiAssistants = await screen.findAllByText(/AI Assistant/);
+    expect(aiAssistants.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('reuses an existing assistant runtime provider instead of nesting a new one', () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="http://localhost:8080/api/chat">
+        <ChatbotSidebar isOpen />
+      </AssistantUIRuntimeProvider>,
+    );
+
+    expect(screen.getAllByTestId('assistant-runtime-provider')).toHaveLength(1);
   });
 });

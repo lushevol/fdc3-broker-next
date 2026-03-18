@@ -73,6 +73,8 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(result.current.conversationId).toBeNull();
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeNull();
+    expect(result.current.messages).toEqual([]);
+    expect(typeof result.current.sendMessage).toBe('function');
     expect(typeof result.current.clearConversation).toBe('function');
     expect(typeof result.current.retryLastMessage).toBe('function');
   });
@@ -117,6 +119,24 @@ describe('AssistantUIRuntimeProvider', () => {
 
       // Should not throw
       expect(result.current.isLoading).toBe(false);
+    });
+  });
+
+  describe('sendMessage', () => {
+    it('exposes message state through the runtime context', async () => {
+      const { result } = renderHook(() => useAssistantUIRuntime(), { wrapper });
+
+      await act(async () => {
+        await result.current.sendMessage('Hello runtime');
+      });
+
+      expect(result.current.messages).toHaveLength(1);
+      expect(result.current.messages[0].role).toBe('user');
+      expect(result.current.messages[0].content[0]).toMatchObject({
+        type: 'text',
+        text: 'Hello runtime',
+      });
+      expect(result.current.isLoading).toBe(true);
     });
   });
 });

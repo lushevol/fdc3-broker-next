@@ -2,6 +2,8 @@
 
 This guide explains how to integrate the ChatbotSidebar component into your Micro-Frontend application.
 
+The current implementation keeps the public `ChatbotSidebar` and `ChatbotProvider` surface stable, but internally routes everything through the assistant-ui runtime. Host MFEs do not need a new integration entry point.
+
 ## Prerequisites
 
 - Your MFE must be able to consume Module Federation remotes from the `@fm/base` MFE
@@ -53,6 +55,13 @@ By default, the chatbot uses `/api/chat` as the backend URL. You can customize t
   <ChatbotSidebar />
 </ChatbotProvider>
 ```
+
+## Runtime Architecture
+
+- `ChatbotProvider` is now a compatibility wrapper over `AssistantUIRuntimeProvider`.
+- `useChatbot` and `useChatbotController` remain available for existing consumers, but both read from the shared assistant-ui runtime path.
+- `ChatbotSidebar` renders assistant-ui composer/thread primitives with the existing Material-UI look and feel.
+- Tool calls and generative UI blocks are rendered inline from the canonical backend SSE event stream.
 
 ## Component Props
 
@@ -109,6 +118,22 @@ const MyComponent = () => {
 | clearConversation | () => void                         | Clear current conversation           |
 | toggleSidebar     | () => void                         | Toggle sidebar open/close            |
 | retryLastMessage  | () => Promise<void>                | Retry the last failed message        |
+
+## Canonical SSE Contract
+
+The frontend expects the backend stream to emit these named events:
+
+| Event | Purpose |
+| ----- | ------- |
+| `conversation_id` | Conversation identifier for new or resumed chats |
+| `message` | Incremental assistant text chunks |
+| `tool_call` | Tool invocation update with stable tool call ID, arguments, and status |
+| `tool_result` | Tool result or cancellation payload for a prior `tool_call` |
+| `generative_ui` | Data payload for inline generative UI rendering |
+| `error` | Terminal stream error |
+| `done` | End-of-turn marker after all text/tool/UI events are emitted |
+
+Tool payloads can enter `pending` status when a tool requires confirmation. The confirmation endpoint uses the same `conversationId` and `toolCallId` to resume or cancel execution.
 
 ## Generative UI
 

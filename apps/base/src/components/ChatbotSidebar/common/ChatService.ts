@@ -98,13 +98,32 @@ export class ChatService {
     const url = `${this.baseUrl}/stream?${params.toString()}`;
     const eventSource = new EventSource(url);
 
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        onEvent(data);
-      } catch (e) {
-        console.error('Failed to parse SSE event:', e);
+    const parseEventData = (type: SSEEvent['type'], rawData: string): unknown => {
+      if (
+        type === 'conversation_id' ||
+        type === 'message' ||
+        type === 'error' ||
+        type === 'done'
+      ) {
+        return rawData;
       }
+
+      return JSON.parse(rawData);
+    };
+
+    const forwardEvent = (type: SSEEvent['type']) => (event: MessageEvent) => {
+      try {
+        onEvent({
+          type,
+          data: parseEventData(type, event.data),
+        });
+      } catch (error) {
+        console.error(`Failed to parse SSE ${type} event:`, error);
+      }
+    };
+
+    eventSource.onmessage = (event) => {
+      forwardEvent('message')(event);
     };
 
     eventSource.onerror = (event) => {
@@ -113,16 +132,29 @@ export class ChatService {
       eventSource.close();
     };
 
+    eventSource.addEventListener('conversation_id', forwardEvent('conversation_id'));
+    eventSource.addEventListener('tool_call', forwardEvent('tool_call'));
+    eventSource.addEventListener('tool_result', forwardEvent('tool_result'));
+    eventSource.addEventListener('generative_ui', forwardEvent('generative_ui'));
+
     // Handle custom event types
     eventSource.addEventListener('done', () => {
+      onEvent({
+        type: 'done',
+        data: '',
+      });
       onComplete();
       eventSource.close();
     });
 
     eventSource.addEventListener('error', (event) => {
       try {
-        const data = JSON.parse((event as MessageEvent).data);
-        onError(new Error(data.message || 'Unknown error'));
+        const data = parseEventData('error', (event as MessageEvent).data);
+        onEvent({
+          type: 'error',
+          data,
+        });
+        onError(new Error(typeof data === 'string' ? data : 'Unknown error'));
       } catch {
         onError(new Error('Stream error'));
       }

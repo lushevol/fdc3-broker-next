@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Backend provides chat API endpoint
 
@@ -15,22 +15,6 @@ The system SHALL provide chat endpoints that preserve conversation context and e
 - **WHEN** client sends a chat request with an existing conversation identifier
 - **THEN** the system SHALL include prior conversation history as context for the LLM
 - **AND** the system SHALL append the new user turn and final assistant turn to that conversation history
-
-### Requirement: Backend integrates with LLM provider
-
-The system SHALL integrate with an LLM provider to generate responses.
-
-#### Scenario: LLM generates response
-
-- **WHEN** the backend receives a chat request
-- **THEN** the system SHALL call the configured LLM provider with the prompt
-- **AND** stream the response back to the client
-
-#### Scenario: LLM request fails
-
-- **WHEN** the LLM provider returns an error
-- **THEN** the system SHALL return an error response to the client
-- **AND** log the error for debugging
 
 ### Requirement: Backend supports streaming responses
 
@@ -77,42 +61,3 @@ The system SHALL allow registration of tools that can be executed by the AI agen
 - **THEN** the system SHALL surface that pending state to the client before execution
 - **AND** the confirmation endpoint SHALL resume or cancel the pending tool call using the same conversation and tool call identifiers
 
-### Requirement: Backend uses Google ADK and LangChain4j
-
-The system SHALL be built using Google ADK Java with LangChain4j for agent orchestration.
-
-#### Scenario: Agent is configured
-
-- **WHEN** the backend initializes
-- **THEN** the system SHALL create an ADK agent with LangChain4j integration
-- **AND** configure the LLM provider
-
-#### Scenario: Agent handles conversation
-
-- **WHEN** a chat request is received
-- **THEN** the system SHALL use the ADK agent to process the request
-- **AND** manage conversation state
-
-### Requirement: Backend validates authentication
-
-The system SHALL validate authentication tokens for chat requests.
-
-#### Scenario: Valid authentication token provided
-
-- **WHEN** client provides a valid authentication token
-- **THEN** the system SHALL process the chat request
-
-#### Scenario: Invalid or missing authentication token
-
-- **WHEN** client provides an invalid or missing authentication token
-- **THEN** the system SHALL return a 401 Unauthorized response
-
-### Requirement: Backend implements rate limiting
-
-The system SHALL implement rate limiting to prevent abuse.
-
-#### Scenario: User exceeds rate limit
-
-- **WHEN** user sends more than the allowed number of requests per minute
-- **THEN** the system SHALL return a 429 Too Many Requests response
-- **AND** include a Retry-After header

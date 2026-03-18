@@ -1,5 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { ChatMessage, ChatState, ToolCall, ToolResult } from './interface';
+import { useAssistantUIRuntime } from '../AssistantUIRuntimeProvider';
+import { useOptionalChatbot } from './ChatbotProvider';
+import type { AssistantUIMessage } from '../adapters/types';
 
 interface UseChatbotControllerProps {
   apiUrl?: string;
@@ -19,6 +22,66 @@ export function useChatbotController(
   props?: UseChatbotControllerProps,
 ): UseChatbotControllerReturn {
   const { apiUrl = DEFAULT_API_URL, conversationId: initialConversationId } = props || {};
+  const runtime = useAssistantUIRuntime({ optional: true });
+  const chatbotContext = useOptionalChatbot();
+
+  if (runtime) {
+    const messages: ChatMessage[] = runtime.messages.map((message: AssistantUIMessage) => {
+      const toolCalls: ToolCall[] = [];
+      const toolResults: ToolResult[] = [];
+      let content = '';
+
+      for (const part of message.content) {
+        if (part.type === 'text') {
+          content += part.text;
+          continue;
+        }
+
+        if (part.type === 'tool-call') {
+          toolCalls.push({
+            id: part.toolCallId,
+            name: part.toolName,
+            arguments: part.args,
+            status: part.status ?? 'running',
+            requiresConfirmation: part.requiresConfirmation,
+          });
+
+          if (part.result !== undefined || part.error !== undefined) {
+            toolResults.push({
+              toolCallId: part.toolCallId,
+              result: part.result,
+              error: part.error,
+            });
+          }
+        }
+      }
+
+      return {
+        id: message.id,
+        role: message.role,
+        content,
+        timestamp: message.createdAt ?? new Date(),
+        toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+        toolResults: toolResults.length > 0 ? toolResults : undefined,
+      };
+    });
+
+    return {
+      messages,
+      isLoading: runtime.isLoading,
+      error: runtime.error,
+      conversationId: runtime.conversationId,
+      isOpen: chatbotContext?.isOpen ?? false,
+      sendMessage: runtime.sendMessage,
+      clearConversation: runtime.clearConversation,
+      retryLastMessage: async () => {
+        runtime.retryLastMessage();
+      },
+      setConversationId: () => {
+        // Conversation identity is owned by the assistant runtime.
+      },
+    };
+  }
 
   const [state, setState] = useState<ChatState>({
     messages: [],

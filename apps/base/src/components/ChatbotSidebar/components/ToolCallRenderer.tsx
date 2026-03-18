@@ -16,6 +16,7 @@ interface ToolCallRendererProps {
   toolCallId?: string;
   toolName?: string;
   args?: Record<string, unknown>;
+  requiresConfirmation?: boolean;
   result?: unknown;
   isError?: boolean;
   error?: string;
@@ -25,6 +26,7 @@ export const ToolCallRenderer: React.FC<ToolCallRendererProps> = ({
   toolCallId,
   toolName,
   args,
+  requiresConfirmation,
   result,
   isError,
   error,
@@ -33,7 +35,7 @@ export const ToolCallRenderer: React.FC<ToolCallRendererProps> = ({
 
   // Determine status
   const hasResult = result !== undefined || isError !== undefined;
-  const status = isError ? 'failed' : hasResult ? 'completed' : 'running';
+  const status = isError ? 'failed' : hasResult ? 'completed' : requiresConfirmation ? 'pending' : 'running';
 
   return (
     <Paper
@@ -90,6 +92,12 @@ export const ToolCallRenderer: React.FC<ToolCallRendererProps> = ({
         >
           {JSON.stringify(args, null, 2)}
         </Box>
+      )}
+
+      {status === 'pending' && (
+        <Typography variant="caption" color="text.secondary">
+          Waiting for confirmation before executing this tool.
+        </Typography>
       )}
 
       {/* Tool Result */}

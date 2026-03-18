@@ -10,9 +10,13 @@ import {
   ThreadPrimitive,
   ComposerPrimitive,
   MessagePrimitive,
+  type DataMessagePartProps,
+  type ToolCallMessagePartProps,
 } from '@assistant-ui/react';
 import { SmartToy as SmartToyIcon, Person as PersonIcon } from '@mui/icons-material';
 import { sidebarStyles } from '../common/style';
+import { ToolCallRenderer } from './ToolCallRenderer';
+import { GenerativeUIRenderer } from './GenerativeUIRenderer';
 
 /**
  * User message component
@@ -53,6 +57,29 @@ const UserMessage: React.FC = () => {
 const AssistantMessage: React.FC = () => {
   const theme = useTheme();
 
+  const ToolPart: React.FC<
+    ToolCallMessagePartProps<Record<string, unknown>, unknown> & {
+      requiresConfirmation?: boolean;
+      error?: string;
+    }
+  > = ({ toolCallId, toolName, args, result, isError, error, interrupt, requiresConfirmation }) => (
+    <ToolCallRenderer
+      toolCallId={toolCallId}
+      toolName={toolName}
+      args={args}
+      result={result}
+      isError={isError}
+      error={error}
+      requiresConfirmation={requiresConfirmation || interrupt?.type === 'human'}
+    />
+  );
+
+  const GenerativeUIPart: React.FC<
+    DataMessagePartProps<{ componentName: string; props: Record<string, unknown> }>
+  > = ({ data }) => (
+    <GenerativeUIRenderer componentName={data.componentName} props={data.props} />
+  );
+
   return (
     <Box
       sx={{
@@ -73,7 +100,16 @@ const AssistantMessage: React.FC = () => {
           borderRadius: 2,
         }}
       >
-        <MessagePrimitive.Content />
+        <MessagePrimitive.Parts
+          components={{
+            tools: { Override: ToolPart },
+            data: {
+              by_name: {
+                'generative-ui': GenerativeUIPart,
+              },
+            },
+          }}
+        />
       </Paper>
     </Box>
   );

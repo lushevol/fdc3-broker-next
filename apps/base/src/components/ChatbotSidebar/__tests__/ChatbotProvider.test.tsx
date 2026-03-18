@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ChatbotProvider, useChatbot } from '../common/ChatbotProvider';
+import { AssistantUIRuntimeProvider } from '../AssistantUIRuntimeProvider';
 
 // Test component to access the context
 const TestComponent = () => {
@@ -58,5 +59,27 @@ describe('ChatbotProvider', () => {
 
     fireEvent.click(screen.getByTestId('clear-btn'));
     expect(screen.getByTestId('message-count')).toHaveTextContent('0');
+  });
+
+  it('creates an assistant runtime provider when used standalone', () => {
+    render(
+      <ChatbotProvider>
+        <TestComponent />
+      </ChatbotProvider>,
+    );
+
+    expect(screen.getAllByTestId('assistant-runtime-provider')).toHaveLength(1);
+  });
+
+  it('reuses an existing assistant runtime provider when already wrapped', () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="http://localhost:8080/api/chat">
+        <ChatbotProvider>
+          <TestComponent />
+        </ChatbotProvider>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    expect(screen.getAllByTestId('assistant-runtime-provider')).toHaveLength(1);
   });
 });

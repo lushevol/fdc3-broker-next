@@ -1,16 +1,24 @@
 package com.fdc3.chatbot.agent;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fdc3.chatbot.model.ChatMessage;
+import com.fdc3.chatbot.model.ToolCall;
+import com.fdc3.chatbot.model.ToolResult;
+import com.fdc3.chatbot.tool.ToolDefinition;
 import com.fdc3.chatbot.tool.ToolRegistry;
+import dev.langchain4j.agent.tool.ToolExecutionRequest;
+import dev.langchain4j.agent.tool.ToolParameters;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
-import dev.langchain4j.model.StreamingResponseHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,10 +27,13 @@ import jakarta.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * AI Agent service using LangChain4j for conversation handling.
@@ -30,6 +41,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 public class AgentService {
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
+    };
 
     @Value("${spring.ai.openai.api-key:}")
     private String openaiApiKey;
@@ -53,6 +66,7 @@ public class AgentService {
     private boolean mockEnabled;
 
     private final ToolRegistry toolRegistry;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private ChatLanguageModel chatModel;
     private StreamingChatLanguageModel streamingChatModel;
@@ -60,6 +74,7 @@ public class AgentService {
 
     // In-memory conversation storage (use Redis/Database in production)
     private final Map<String, List<ChatMessage>> conversations = new ConcurrentHashMap<>();
+    private final Map<String, PendingToolExecution> pendingToolExecutions = new ConcurrentHashMap<>();
 
     public AgentService(ToolRegistry toolRegistry) {
         this.toolRegistry = toolRegistry;
@@ -106,7 +121,7 @@ public class AgentService {
     /**
      * Process a chat message and return a streaming response.
      */
-    public void processMessageStreaming(
+    public Runnable processMessageStreaming(
             String conversationId,
             String userMessage,
             List<ChatMessage> history,
@@ -114,10 +129,61 @@ public class AgentService {
             java.util.function.Consumer<Throwable> onError,
             java.lang.Runnable onComplete
     ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                history,
+                onNext,
+                onError,
+                onComplete,
+                toolCall -> {
+                },
+                toolResult -> {
+                }
+        );
+    }
+
+    /**
+     * Process a chat message and return a streaming response with optional tool lifecycle events.
+     */
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            List<ChatMessage> history,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
+    ) {
+        AtomicBoolean cancelled = new AtomicBoolean(false);
+
         // Mock mode - simulate streaming response
         if (mockEnabled || streamingChatModel == null) {
-            processMockStreaming(userMessage, onNext, onComplete);
-            return;
+            return processMockStreaming(
+                    conversationId,
+                    userMessage,
+                    token -> {
+                        if (!cancelled.get()) {
+                            onNext.accept(token);
+                        }
+                    },
+                    () -> {
+                        if (!cancelled.get()) {
+                            onComplete.run();
+                        }
+                    },
+                    toolCall -> {
+                        if (!cancelled.get()) {
+                            onToolCall.accept(toolCall);
+                        }
+                    },
+                    toolResult -> {
+                        if (!cancelled.get()) {
+                            onToolResult.accept(toolResult);
+                        }
+                    }
+            );
         }
 
         try {
@@ -143,57 +209,326 @@ public class AgentService {
 
             log.debug("Processing message for conversation: {}", conversationId);
 
-            // Generate streaming response
-            streamingChatModel.generate(messages, new StreamingResponseHandler<AiMessage>() {
-                private final StringBuilder responseBuilder = new StringBuilder();
-
-                @Override
-                public void onNext(String token) {
-                    responseBuilder.append(token);
-                    onNext.accept(token);
-                }
-
-                @Override
-                public void onComplete(dev.langchain4j.model.output.Response<AiMessage> response) {
-                    log.debug("Completed streaming response for conversation: {}", conversationId);
-                    onComplete.run();
-                }
-
-                @Override
-                public void onError(Throwable error) {
-                    log.error("Error in streaming response", error);
-                    onError.accept(error);
-                }
-            });
+            streamConversation(
+                    conversationId,
+                    messages,
+                    onNext,
+                    onError,
+                    onComplete,
+                    onToolCall,
+                    onToolResult,
+                    cancelled
+            );
 
         } catch (Exception e) {
             log.error("Error processing message", e);
             onError.accept(e);
+        }
+
+        return () -> cancelled.set(true);
+    }
+
+    private void streamConversation(
+            String conversationId,
+            List<dev.langchain4j.data.message.ChatMessage> messages,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            AtomicBoolean cancelled
+    ) {
+        StreamingResponseHandler<AiMessage> handler = new StreamingResponseHandler<>() {
+            @Override
+            public void onNext(String token) {
+                if (cancelled.get()) {
+                    return;
+                }
+                onNext.accept(token);
+            }
+
+            @Override
+            public void onComplete(dev.langchain4j.model.output.Response<AiMessage> response) {
+                if (cancelled.get()) {
+                    return;
+                }
+
+                AiMessage aiMessage = response.content();
+                if (aiMessage != null && aiMessage.hasToolExecutionRequests()) {
+                    List<dev.langchain4j.data.message.ChatMessage> continuedMessages =
+                            new java.util.ArrayList<>(messages);
+                    continuedMessages.add(aiMessage);
+                    continueWithToolRequests(
+                            conversationId,
+                            continuedMessages,
+                            aiMessage.toolExecutionRequests(),
+                            0,
+                            onNext,
+                            onError,
+                            onComplete,
+                            onToolCall,
+                            onToolResult,
+                            cancelled
+                    );
+                    return;
+                }
+
+                log.debug("Completed streaming response for conversation: {}", conversationId);
+                onComplete.run();
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                if (cancelled.get()) {
+                    return;
+                }
+                log.error("Error in streaming response", error);
+                onError.accept(error);
+            }
+        };
+
+        List<ToolSpecification> toolSpecifications = buildToolSpecifications();
+        if (toolSpecifications.isEmpty()) {
+            streamingChatModel.generate(messages, handler);
+            return;
+        }
+
+        streamingChatModel.generate(messages, toolSpecifications, handler);
+    }
+
+    private void continueWithToolRequests(
+            String conversationId,
+            List<dev.langchain4j.data.message.ChatMessage> messages,
+            List<ToolExecutionRequest> toolExecutionRequests,
+            int index,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            AtomicBoolean cancelled
+    ) {
+        if (cancelled.get()) {
+            return;
+        }
+
+        if (index >= toolExecutionRequests.size()) {
+            streamConversation(conversationId, messages, onNext, onError, onComplete, onToolCall, onToolResult, cancelled);
+            return;
+        }
+
+        ToolExecutionRequest toolExecutionRequest = toolExecutionRequests.get(index);
+        Map<String, Object> arguments = parseToolArguments(toolExecutionRequest.arguments());
+        boolean requiresConfirmation = toolRegistry.requiresConfirmation(toolExecutionRequest.name());
+        ToolCall toolCall = ToolCall.builder()
+                .id(toolExecutionRequest.id())
+                .name(toolExecutionRequest.name())
+                .arguments(arguments)
+                .status(requiresConfirmation ? ToolCall.ToolStatus.PENDING : ToolCall.ToolStatus.RUNNING)
+                .requiresConfirmation(requiresConfirmation)
+                .build();
+        onToolCall.accept(toolCall);
+
+        if (requiresConfirmation) {
+            onError.accept(new UnsupportedOperationException(
+                    "Tool confirmation is not supported for the live streaming model path yet: "
+                            + toolExecutionRequest.name()
+            ));
+            return;
+        }
+
+        toolRegistry.execute(toolExecutionRequest.name(), arguments)
+                .whenComplete((result, error) -> {
+                    if (cancelled.get()) {
+                        return;
+                    }
+
+                    ToolResult toolResult = ToolResult.builder()
+                            .toolCallId(toolExecutionRequest.id())
+                            .result(result)
+                            .error(error != null ? error.getMessage() : extractToolError(result))
+                            .build();
+                    onToolResult.accept(toolResult);
+
+                    List<dev.langchain4j.data.message.ChatMessage> continuedMessages =
+                            new java.util.ArrayList<>(messages);
+                    continuedMessages.add(ToolExecutionResultMessage.from(
+                            toolExecutionRequest,
+                            serializeToolResult(result, error)
+                    ));
+                    continueWithToolRequests(
+                            conversationId,
+                            continuedMessages,
+                            toolExecutionRequests,
+                            index + 1,
+                            onNext,
+                            onError,
+                            onComplete,
+                            onToolCall,
+                            onToolResult,
+                            cancelled
+                    );
+                });
+    }
+
+    private List<ToolSpecification> buildToolSpecifications() {
+        return toolRegistry.getAllTools().values().stream()
+                .map(this::toToolSpecification)
+                .toList();
+    }
+
+    private ToolSpecification toToolSpecification(ToolDefinition toolDefinition) {
+        return ToolSpecification.builder()
+                .name(toolDefinition.getName())
+                .description(toolDefinition.getDescription())
+                .parameters(toToolParameters(toolDefinition.getParameters()))
+                .build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private ToolParameters toToolParameters(Map<String, Object> parameters) {
+        Object properties = parameters.get("properties");
+        Object required = parameters.get("required");
+
+        return ToolParameters.builder()
+                .type(String.valueOf(parameters.getOrDefault("type", "object")))
+                .properties(properties instanceof Map<?, ?> map
+                        ? (Map<String, Map<String, Object>>) map
+                        : Map.of())
+                .required(required instanceof List<?> list
+                        ? list.stream().map(String::valueOf).toList()
+                        : List.of())
+                .build();
+    }
+
+    private Map<String, Object> parseToolArguments(String arguments) {
+        if (arguments == null || arguments.isBlank()) {
+            return Map.of();
+        }
+
+        try {
+            return objectMapper.readValue(arguments, MAP_TYPE);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to parse tool arguments: " + arguments, e);
+        }
+    }
+
+    private String serializeToolResult(Object result, Throwable error) {
+        Object payload = error != null
+                ? Map.of("error", error.getMessage())
+                : result;
+        try {
+            return objectMapper.writeValueAsString(payload);
+        } catch (Exception e) {
+            log.warn("Failed to serialize tool result payload", e);
+            return String.valueOf(payload);
         }
     }
 
     /**
      * Simulate a streaming response for mock mode.
      */
-    private void processMockStreaming(
+    private Runnable processMockStreaming(
+            String conversationId,
             String userMessage,
             java.util.function.Consumer<String> onNext,
-            java.lang.Runnable onComplete
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
     ) {
-        String mockResponse = generateMockResponse(userMessage);
-        String[] words = mockResponse.split(" ");
+        MockStreamHandle streamHandle = new MockStreamHandle();
+        MockToolInvocation toolInvocation = resolveMockToolInvocation(userMessage);
+        if (toolInvocation != null) {
+            String toolCallId = UUID.randomUUID().toString();
+            boolean requiresConfirmation = toolRegistry.requiresConfirmation(toolInvocation.name());
+            ToolCall toolCall = ToolCall.builder()
+                    .id(toolCallId)
+                    .name(toolInvocation.name())
+                    .arguments(toolInvocation.arguments())
+                    .status(requiresConfirmation ? ToolCall.ToolStatus.PENDING : ToolCall.ToolStatus.RUNNING)
+                    .requiresConfirmation(requiresConfirmation)
+                    .build();
+            onToolCall.accept(toolCall);
 
-        // Stream words with delays
+            if (requiresConfirmation) {
+                pendingToolExecutions.put(
+                        pendingKey(conversationId, toolCallId),
+                        new PendingToolExecution(
+                                toolInvocation,
+                                userMessage,
+                                onNext,
+                                onComplete,
+                                onToolCall,
+                                onToolResult,
+                                streamHandle
+                        )
+                );
+                return () -> {
+                    streamHandle.cancel();
+                    pendingToolExecutions.remove(pendingKey(conversationId, toolCallId));
+                };
+            }
+
+            executeMockTool(toolCall, toolInvocation, userMessage, onNext, onComplete, onToolResult, streamHandle);
+            return streamHandle::cancel;
+        }
+
+        String mockResponse = generateMockResponse(userMessage);
+        streamMockResponse(mockResponse, onNext, onComplete, streamHandle);
+        return streamHandle::cancel;
+    }
+
+    private void streamMockResponse(
+            String response,
+            java.util.function.Consumer<String> onNext,
+            java.lang.Runnable onComplete,
+            MockStreamHandle streamHandle
+    ) {
+        String[] words = response.split(" ");
         for (int i = 0; i < words.length; i++) {
             final int index = i;
             final String word = words[i] + (i < words.length - 1 ? " " : "");
-            mockExecutor.schedule(() -> {
+            ScheduledFuture<?> future = mockExecutor.schedule(() -> {
+                if (streamHandle.isCancelled()) {
+                    return;
+                }
                 onNext.accept(word);
                 if (index == words.length - 1) {
                     onComplete.run();
                 }
             }, (i + 1) * 100L, TimeUnit.MILLISECONDS);
+            streamHandle.track(future);
         }
+    }
+
+    private void executeMockTool(
+            ToolCall toolCall,
+            MockToolInvocation toolInvocation,
+            String userMessage,
+            java.util.function.Consumer<String> onNext,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            MockStreamHandle streamHandle
+    ) {
+        toolRegistry.execute(toolInvocation.name(), toolInvocation.arguments())
+                .whenComplete((result, error) -> {
+                    if (streamHandle.isCancelled()) {
+                        return;
+                    }
+                    ToolResult toolResult = ToolResult.builder()
+                            .toolCallId(toolCall.getId())
+                            .result(result)
+                            .error(error != null ? error.getMessage() : extractToolError(result))
+                            .build();
+                    onToolResult.accept(toolResult);
+
+                    String mockResponse = generateToolResponse(userMessage, toolInvocation.name(), result, error);
+                    streamMockResponse(mockResponse, onNext, onComplete, streamHandle);
+                });
+    }
+
+    private String pendingKey(String conversationId, String toolCallId) {
+        return conversationId + ":" + toolCallId;
     }
 
     /**
@@ -222,6 +557,149 @@ public class AgentService {
 
         return String.format("You said: \"%s\"\n\nThis is a mock response. In production, I would " +
                              "provide helpful information about FDC3 and financial workflows.", userMessage);
+    }
+
+    private MockToolInvocation resolveMockToolInvocation(String userMessage) {
+        String lowerMessage = userMessage.toLowerCase();
+
+        if (lowerMessage.contains("weather")) {
+            String location = "Bangkok, TH";
+            int inIndex = lowerMessage.indexOf(" in ");
+            if (inIndex >= 0) {
+                location = userMessage.substring(inIndex + 4).trim();
+            }
+            return new MockToolInvocation("get_weather", Map.of("location", location));
+        }
+
+        if (lowerMessage.contains("time")) {
+            String timezone = "UTC";
+            if (lowerMessage.contains("shanghai")) {
+                timezone = "Asia/Shanghai";
+            } else if (lowerMessage.contains("new york")) {
+                timezone = "America/New_York";
+            } else if (lowerMessage.contains("london")) {
+                timezone = "Europe/London";
+            }
+            return new MockToolInvocation("get_current_time", Map.of("timezone", timezone));
+        }
+
+        if (lowerMessage.contains("calculate") || userMessage.matches(".*\\d+[\\d\\s+\\-*/().]*.*")) {
+            String expression = userMessage.replaceFirst("(?i).*calculate", "").trim();
+            if (expression.isEmpty()) {
+                expression = userMessage.replaceAll("[^0-9+\\-*/(). ]", "").trim();
+            }
+            if (!expression.isEmpty()) {
+                return new MockToolInvocation("calculator", Map.of("expression", expression));
+            }
+        }
+
+        return null;
+    }
+
+    private String generateToolResponse(
+            String userMessage,
+            String toolName,
+            Object result,
+            Throwable error
+    ) {
+        if (error != null) {
+            return "I tried to use " + toolName + " but it failed: " + error.getMessage();
+        }
+
+        if (result instanceof Map<?, ?> resultMap && resultMap.containsKey("error")) {
+            return "I tried to use " + toolName + " but it failed: " + resultMap.get("error");
+        }
+
+        if ("calculator".equals(toolName) && result instanceof Map<?, ?> resultMap) {
+            return "I calculated " + resultMap.get("expression") + " = " + resultMap.get("result") + ".";
+        }
+
+        if ("get_current_time".equals(toolName) && result instanceof Map<?, ?> resultMap) {
+            return "The current time in " + resultMap.get("timezone") + " is " + resultMap.get("formatted") + ".";
+        }
+
+        if ("get_weather".equals(toolName) && result instanceof Map<?, ?> resultMap) {
+            return "The weather in " + resultMap.get("location") + " is " + resultMap.get("conditions")
+                    + " at " + resultMap.get("temperature") + " degrees " + resultMap.get("temperatureUnit") + ".";
+        }
+
+        return "I used " + toolName + " to help answer: " + userMessage;
+    }
+
+    private String extractToolError(Object result) {
+        if (result instanceof Map<?, ?> resultMap && resultMap.containsKey("error")) {
+            Object error = resultMap.get("error");
+            return error != null ? String.valueOf(error) : null;
+        }
+        return null;
+    }
+
+    private void confirmPendingToolExecution(String toolCallId, PendingToolExecution pendingExecution) {
+        ToolCall resumedToolCall = ToolCall.builder()
+                .id(toolCallId)
+                .name(pendingExecution.toolInvocation().name())
+                .arguments(pendingExecution.toolInvocation().arguments())
+                .status(ToolCall.ToolStatus.RUNNING)
+                .requiresConfirmation(true)
+                .build();
+        pendingExecution.onToolCall().accept(resumedToolCall);
+        executeMockTool(
+                resumedToolCall,
+                pendingExecution.toolInvocation(),
+                pendingExecution.userMessage(),
+                pendingExecution.onNext(),
+                pendingExecution.onComplete(),
+                pendingExecution.onToolResult(),
+                pendingExecution.streamHandle()
+        );
+    }
+
+    private void cancelPendingToolExecution(String toolCallId, PendingToolExecution pendingExecution) {
+        pendingExecution.streamHandle().cancel();
+        pendingExecution.onToolResult().accept(ToolResult.builder()
+                .toolCallId(toolCallId)
+                .error("Tool execution cancelled by user.")
+                .build());
+        pendingExecution.onComplete().run();
+    }
+
+    private record MockToolInvocation(String name, Map<String, Object> arguments) {
+    }
+
+    private record PendingToolExecution(
+            MockToolInvocation toolInvocation,
+            String userMessage,
+            java.util.function.Consumer<String> onNext,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            MockStreamHandle streamHandle
+    ) {
+    }
+
+    private static final class MockStreamHandle {
+        private final AtomicBoolean cancelled = new AtomicBoolean(false);
+        private final List<ScheduledFuture<?>> futures = new java.util.concurrent.CopyOnWriteArrayList<>();
+
+        void track(ScheduledFuture<?> future) {
+            if (cancelled.get()) {
+                future.cancel(true);
+                return;
+            }
+            futures.add(future);
+        }
+
+        void cancel() {
+            if (!cancelled.compareAndSet(false, true)) {
+                return;
+            }
+            futures.forEach(future -> future.cancel(true));
+            futures.clear();
+        }
+
+        boolean isCancelled() {
+            return cancelled.get();
+        }
     }
 
     /**
@@ -279,7 +757,9 @@ public class AgentService {
                 Available tools:
                 %s
 
-                When using tools, always explain what you're doing and show the results clearly.
+                When using tools, always use the native tool-calling interface provided by the model.
+                Never emit pseudo-XML tags like <tool_call> or <function>.
+                After tool execution, explain what you're doing and show the results clearly.
                 Be concise but helpful. If you need clarification, ask follow-up questions.
 
                 Always be professional and accurate in your responses.
@@ -307,6 +787,16 @@ public class AgentService {
     public void confirmToolCall(String conversationId, String toolCallId, boolean confirmed) {
         log.info("Tool call {} for conversation {}: {}",
                 toolCallId, conversationId, confirmed ? "confirmed" : "cancelled");
+
+        PendingToolExecution pendingExecution = pendingToolExecutions.remove(pendingKey(conversationId, toolCallId));
+        if (pendingExecution != null) {
+            if (confirmed) {
+                confirmPendingToolExecution(toolCallId, pendingExecution);
+            } else {
+                cancelPendingToolExecution(toolCallId, pendingExecution);
+            }
+            return;
+        }
 
         if (confirmed) {
             // In production: execute the tool and continue the conversation

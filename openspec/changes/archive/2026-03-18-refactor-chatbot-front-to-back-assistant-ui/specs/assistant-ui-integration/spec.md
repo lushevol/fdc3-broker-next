@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: assistant-ui runtime provider is configured
 
@@ -17,30 +17,6 @@ The system SHALL provide a single assistant-ui runtime provider that integrates 
 - **THEN** the system SHALL transform `conversation_id`, `message`, `tool_call`, `tool_result`, `generative_ui`, `error`, and `done` events into assistant-ui runtime updates
 - **AND** streaming text SHALL be appended incrementally to the active assistant message
 - **AND** tool and generative UI payloads SHALL be attached to the correct assistant message or thread state entry
-
-### Requirement: ChatbotSidebar uses assistant-ui components
-
-The system SHALL render the chat interface using assistant-ui's primitive components themed with Material-UI.
-
-#### Scenario: Message thread is displayed
-
-- **WHEN** the chatbot sidebar is open
-- **THEN** the system SHALL render messages using assistant-ui's `<Thread>` and `<Message>` components
-- **AND** user and assistant messages SHALL be visually distinguished
-- **AND** the component SHALL match the existing Material-UI design system
-
-#### Scenario: Composer input is rendered
-
-- **WHEN** the chatbot sidebar is open
-- **THEN** the system SHALL render the input using assistant-ui's `<Composer>` component
-- **AND** the composer SHALL support multiline input with Enter to send
-- **AND** the composer SHALL be themed to match Material-UI TextField appearance
-
-#### Scenario: Loading state is displayed
-
-- **WHEN** the assistant is generating a response
-- **THEN** the system SHALL display assistant-ui's built-in loading indicator
-- **AND** the indicator SHALL replace the custom typing dots animation
 
 ### Requirement: Tool calls are rendered
 
@@ -75,28 +51,6 @@ The system SHALL maintain the existing `ChatbotSidebarProps` interface for consu
 - **AND** their behavior SHALL be backed by the assistant-ui runtime or documented compatibility wrappers
 - **AND** assistant-ui hooks MAY be exported in addition to the compatibility surface
 
-### Requirement: SSE connection management
-
-The system SHALL manage SSE connections properly with cleanup and error handling.
-
-#### Scenario: Connection is established
-
-- **WHEN** a user sends a message
-- **THEN** the system SHALL establish an SSE connection to the backend
-- **AND** the connection SHALL include the message and conversationId as query parameters
-
-#### Scenario: Connection is cleaned up on unmount
-
-- **WHEN** the `ChatbotSidebar` component unmounts during an active stream
-- **THEN** the system SHALL close the SSE connection
-- **AND** any pending message updates SHALL be cancelled
-
-#### Scenario: Connection error is handled
-
-- **WHEN** the SSE connection encounters an error
-- **THEN** the system SHALL display an error message
-- **AND** the error state SHALL be clearable via a retry action
-
 ### Requirement: Thread management functions work
 
 The system SHALL support conversation management via assistant-ui's thread API and keep that behavior aligned with backend conversation state.
@@ -114,13 +68,3 @@ The system SHALL support conversation management via assistant-ui's thread API a
 - **THEN** the system SHALL enable retry for the last user turn through the assistant-ui runtime
 - **AND** clicking retry SHALL resend the last user message against the correct conversation context
 - **AND** stale failed assistant/tool state from the previous attempt SHALL NOT remain attached to the retried turn
-
-### Requirement: Generative UI components render
-
-The system SHALL continue to support generative UI components triggered by the backend.
-
-#### Scenario: Generative UI directive is received
-
-- **WHEN** a `generative_ui` SSE event is received
-- **THEN** the system SHALL render the registered component with the provided props
-- **AND** the component SHALL be displayed inline in the message thread

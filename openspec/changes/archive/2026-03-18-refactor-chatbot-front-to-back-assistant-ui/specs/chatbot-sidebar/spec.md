@@ -1,18 +1,4 @@
-## ADDED Requirements
-
-### Requirement: Chatbot sidebar is accessible from any MFE
-
-The system SHALL provide a collapsible chatbot sidebar component that can be embedded in any MFE consuming the base MFE.
-
-#### Scenario: User opens chatbot sidebar
-
-- **WHEN** user clicks the chatbot toggle button
-- **THEN** the chatbot sidebar SHALL slide open from the right side of the viewport
-
-#### Scenario: User closes chatbot sidebar
-
-- **WHEN** user clicks the close button or toggle button
-- **THEN** the chatbot sidebar SHALL slide closed
+## MODIFIED Requirements
 
 ### Requirement: Chatbot displays message history
 

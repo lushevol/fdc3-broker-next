@@ -141,6 +141,8 @@ describe('SSE Adapter Type Safety', () => {
         toolCallId: 'tool-1',
         toolName: 'calculator',
         args: { a: 1, b: 2 },
+        argsText: '{"a":1,"b":2}',
+        status: 'pending',
       });
     });
   });
@@ -155,10 +157,14 @@ describe('SSE Adapter Type Safety', () => {
       const result = transformToolResult(toolResult);
 
       expect(result).toMatchObject<ContentPart>({
-        type: 'tool-result',
+        type: 'tool-call',
         toolCallId: 'tool-1',
+        toolName: '',
+        args: {},
+        argsText: '{}',
         result: 42,
         isError: false,
+        status: 'completed',
       });
     });
 
@@ -171,8 +177,8 @@ describe('SSE Adapter Type Safety', () => {
 
       const result = transformToolResult(toolResult);
 
-      expect((result as Extract<ContentPart, { type: 'tool-result' }>).isError).toBe(true);
-      expect((result as Extract<ContentPart, { type: 'tool-result' }>).error).toBe('Something went wrong');
+      expect((result as Extract<ContentPart, { type: 'tool-call' }>).isError).toBe(true);
+      expect((result as Extract<ContentPart, { type: 'tool-call' }>).error).toBe('Something went wrong');
     });
   });
 
@@ -186,9 +192,12 @@ describe('SSE Adapter Type Safety', () => {
       const result = transformGenerativeUI(directive);
 
       expect(result).toMatchObject<ContentPart>({
-        type: 'generative-ui',
-        componentName: 'ChartCard',
-        props: { data: [1, 2, 3] },
+        type: 'data',
+        name: 'generative-ui',
+        data: {
+          componentName: 'ChartCard',
+          props: { data: [1, 2, 3] },
+        },
       });
     });
   });
@@ -221,7 +230,7 @@ describe('SSE Adapter Type Safety', () => {
         role: 'assistant',
         content: [
           { type: 'text', text: 'Hello' },
-          { type: 'tool-call', toolCallId: 't1', toolName: 'calc', args: {} },
+          { type: 'tool-call', toolCallId: 't1', toolName: 'calc', args: {}, argsText: '{}' },
         ],
         createdAt: new Date(),
       };
@@ -248,20 +257,28 @@ describe('SSE Adapter Type Safety', () => {
         id: '1',
         role: 'assistant',
         content: [
-          { type: 'tool-call', toolCallId: 't1', toolName: 'calc', args: {} },
+          { type: 'tool-call', toolCallId: 't1', toolName: 'calc', args: {}, argsText: '{}' },
         ],
         createdAt: new Date(),
       };
       const resultPart: ContentPart = {
-        type: 'tool-result',
+        type: 'tool-call',
         toolCallId: 't1',
+        toolName: 'calc',
+        args: {},
+        argsText: '{}',
         result: 42,
+        status: 'completed',
       };
       const updated = addContentPartToAssistantMessage(message, resultPart);
 
-      expect(updated.content).toHaveLength(2);
-      expect(updated.content[0].type).toBe('tool-call');
-      expect(updated.content[1].type).toBe('tool-result');
+      expect(updated.content).toHaveLength(1);
+      expect(updated.content[0]).toMatchObject({
+        type: 'tool-call',
+        toolCallId: 't1',
+        result: 42,
+        status: 'completed',
+      });
     });
   });
 
@@ -345,11 +362,19 @@ describe('SSE Adapter Type Safety', () => {
       const state = createInitialStreamingState();
       state.accumulatedContent = 'Some content';
       state.assistantMessageId = 'msg-1';
+      state.pendingToolCalls.set('tool-1', {
+        type: 'tool-call',
+        toolCallId: 'tool-1',
+        toolName: 'calculator',
+        args: {},
+        argsText: '{}',
+      });
 
       const result = handleSSEEvent(messages, state, 'done', '');
 
       expect(result.streamingState.accumulatedContent).toBe('');
       expect(result.streamingState.assistantMessageId).toBeNull();
+      expect(result.streamingState.pendingToolCalls.size).toBe(0);
     });
 
     it('should handle error event', () => {

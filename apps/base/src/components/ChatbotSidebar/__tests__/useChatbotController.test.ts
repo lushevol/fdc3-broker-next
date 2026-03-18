@@ -1,5 +1,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useChatbotController } from '../common/useController';
+import { ChatbotProvider, useChatbot } from '../common/ChatbotProvider';
+import React from 'react';
 
 // Mock EventSource
 class MockEventSource {
@@ -97,5 +99,25 @@ describe('useChatbotController', () => {
     });
 
     expect(result.current.messages.length).toBe(initialMessages);
+  });
+
+  it('reuses shared provider state when rendered inside ChatbotProvider', async () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(ChatbotProvider, null, children);
+
+    const { result } = renderHook(
+      () => ({
+        controller: useChatbotController(),
+        chatbot: useChatbot(),
+      }),
+      { wrapper },
+    );
+
+    await act(async () => {
+      await result.current.chatbot.sendMessage('Provider message');
+    });
+
+    expect(result.current.controller.messages).toHaveLength(1);
+    expect(result.current.controller.messages[0].content).toBe('Provider message');
   });
 });

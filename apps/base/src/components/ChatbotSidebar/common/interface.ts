@@ -14,6 +14,7 @@ export interface ToolCall {
   name: string;
   arguments: Record<string, unknown>;
   status: 'pending' | 'running' | 'completed' | 'failed';
+  requiresConfirmation?: boolean;
 }
 
 // Tool execution result
@@ -45,6 +46,7 @@ export interface ChatResponse {
 
 // SSE event types
 export type SSEEventType =
+  | 'conversation_id'
   | 'message'
   | 'tool_call'
   | 'tool_result'
