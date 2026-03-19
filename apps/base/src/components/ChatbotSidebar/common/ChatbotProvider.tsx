@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { AssistantUIRuntimeProvider, useAssistantUIRuntime } from '../AssistantUIRuntimeProvider';
+import { useAssistantUIRuntime } from '../AssistantUIRuntimeProvider';
 import type { AssistantUIMessage } from '../adapters/types';
 import type {
   ChatMessage,
@@ -14,11 +14,8 @@ const ChatbotContext = createContext<ChatbotContextValue | null>(null);
 
 interface ChatbotProviderProps {
   children: ReactNode;
-  apiUrl?: string;
   initialOpen?: boolean;
 }
-
-const DEFAULT_API_URL = '/api/chat';
 
 const toChatMessage = (message: AssistantUIMessage): ChatMessage => {
   const toolCalls: ToolCall[] = [];
@@ -60,6 +57,24 @@ const toChatMessage = (message: AssistantUIMessage): ChatMessage => {
   };
 };
 
+const projectRuntimeToChatbotContext = (
+  runtime: NonNullable<ReturnType<typeof useAssistantUIRuntime>>,
+  isOpen: boolean,
+  toggleSidebar: () => void,
+): ChatbotContextValue => ({
+  messages: runtime.messages.map(toChatMessage),
+  isLoading: runtime.isLoading,
+  error: runtime.error,
+  conversationId: runtime.conversationId,
+  isOpen,
+  sendMessage: runtime.sendMessage,
+  clearConversation: runtime.clearConversation,
+  toggleSidebar,
+  retryLastMessage: async () => {
+    runtime.retryLastMessage();
+  },
+});
+
 const ChatbotProviderBridge: React.FC<{
   children: ReactNode;
   initialOpen: boolean;
@@ -72,19 +87,7 @@ const ChatbotProviderBridge: React.FC<{
   }, []);
 
   const value = useMemo<ChatbotContextValue>(
-    () => ({
-      messages: runtime.messages.map(toChatMessage),
-      isLoading: runtime.isLoading,
-      error: runtime.error,
-      conversationId: runtime.conversationId,
-      isOpen,
-      sendMessage: runtime.sendMessage,
-      clearConversation: runtime.clearConversation,
-      toggleSidebar,
-      retryLastMessage: async () => {
-        runtime.retryLastMessage();
-      },
-    }),
+    () => projectRuntimeToChatbotContext(runtime, isOpen, toggleSidebar),
     [isOpen, runtime, toggleSidebar],
   );
 
@@ -93,20 +96,9 @@ const ChatbotProviderBridge: React.FC<{
 
 export const ChatbotProvider: React.FC<ChatbotProviderProps> = ({
   children,
-  apiUrl = DEFAULT_API_URL,
   initialOpen = false,
 }) => {
-  const existingRuntime = useAssistantUIRuntime({ optional: true });
-
-  if (existingRuntime) {
-    return <ChatbotProviderBridge initialOpen={initialOpen}>{children}</ChatbotProviderBridge>;
-  }
-
-  return (
-    <AssistantUIRuntimeProvider apiUrl={apiUrl}>
-      <ChatbotProviderBridge initialOpen={initialOpen}>{children}</ChatbotProviderBridge>
-    </AssistantUIRuntimeProvider>
-  );
+  return <ChatbotProviderBridge initialOpen={initialOpen}>{children}</ChatbotProviderBridge>;
 };
 
 export const useChatbot = (): ChatbotContextValue => {

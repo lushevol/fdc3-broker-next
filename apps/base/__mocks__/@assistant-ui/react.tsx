@@ -99,9 +99,9 @@ const createMockRuntime = (config: any) => {
 };
 
 // Runtime hooks - returns a proper runtime object that matches assistant-ui's expectations
-export const useExternalStoreRuntime = (config: any) => {
+export const useExternalStoreRuntime = jest.fn((config: any) => {
   return createMockRuntime(config);
-};
+});
 
 export const useAssistantRuntime = () => ({
   thread: {

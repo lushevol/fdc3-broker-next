@@ -15,6 +15,57 @@ import type {
   ToolCallContentPart,
 } from './types';
 
+interface AssistantUiSSEHandlers {
+  onEvent: (eventType: SSEEventType, data: string) => void;
+  onConnectionError: () => void;
+}
+
+type AssistantUiEventSourceLike = {
+  addEventListener: (type: string, listener: (event: Event) => void) => void;
+  onerror: ((event: Event) => void) | null;
+};
+
+const ASSISTANT_UI_SSE_EVENT_TYPES: readonly SSEEventType[] = [
+  'conversation_id',
+  'message',
+  'tool_call',
+  'tool_result',
+  'generative_ui',
+  'error',
+  'done',
+];
+
+export function bindAssistantUiSSEStream(
+  eventSource: AssistantUiEventSourceLike,
+  handlers: AssistantUiSSEHandlers,
+): void {
+  ASSISTANT_UI_SSE_EVENT_TYPES.forEach((eventType) => {
+    eventSource.addEventListener(eventType, (event) => {
+      if (eventType === 'error' && event instanceof MessageEvent) {
+        handlers.onEvent('error', event.data);
+        return;
+      }
+
+      if (eventType === 'error') {
+        handlers.onConnectionError();
+        return;
+      }
+
+      const data =
+        eventType === 'done'
+          ? ''
+          : event instanceof MessageEvent
+            ? event.data
+            : '';
+      handlers.onEvent(eventType, data);
+    });
+  });
+
+  eventSource.onerror = () => {
+    handlers.onConnectionError();
+  };
+}
+
 /**
  * Generate a unique ID for messages
  */

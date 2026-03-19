@@ -4,6 +4,9 @@ import { ChatbotSidebar } from '../index';
 import { ChatbotProvider, useChatbot } from '../common/ChatbotProvider';
 import { AssistantUIRuntimeProvider } from '../AssistantUIRuntimeProvider';
 
+const mockEventSource = jest.fn();
+(global as unknown as { EventSource: jest.Mock }).EventSource = mockEventSource;
+
 // Mock MUI Slide component to disable animations in tests
 jest.mock('@mui/material', () => {
   const actual = jest.requireActual('@mui/material');
@@ -17,11 +20,17 @@ jest.mock('@mui/material', () => {
 });
 
 describe('ChatbotSidebar', () => {
+  beforeEach(() => {
+    mockEventSource.mockClear();
+  });
+
   const renderWithProvider = (props = {}) => {
     return render(
-      <ChatbotProvider>
-        <ChatbotSidebar {...props} />
-      </ChatbotProvider>,
+      <AssistantUIRuntimeProvider apiUrl="http://localhost:8080/api/chat">
+        <ChatbotProvider>
+          <ChatbotSidebar {...props} />
+        </ChatbotProvider>
+      </AssistantUIRuntimeProvider>,
     );
   };
 
@@ -74,10 +83,12 @@ describe('ChatbotSidebar', () => {
     };
 
     render(
-      <ChatbotProvider>
-        <ProviderControl />
-        <ChatbotSidebar />
-      </ChatbotProvider>,
+      <AssistantUIRuntimeProvider apiUrl="http://localhost:8080/api/chat">
+        <ChatbotProvider>
+          <ProviderControl />
+          <ChatbotSidebar />
+        </ChatbotProvider>
+      </AssistantUIRuntimeProvider>,
     );
 
     fireEvent.click(screen.getByTestId('provider-toggle'));
@@ -86,13 +97,25 @@ describe('ChatbotSidebar', () => {
     expect(aiAssistants.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('reuses an existing assistant runtime provider instead of nesting a new one', () => {
+  it('renders the sidebar against an app-level runtime provider', () => {
     render(
       <AssistantUIRuntimeProvider apiUrl="http://localhost:8080/api/chat">
-        <ChatbotSidebar isOpen />
+        <ChatbotProvider initialOpen>
+          <ChatbotSidebar isOpen />
+        </ChatbotProvider>
       </AssistantUIRuntimeProvider>,
     );
 
+    expect(screen.getByText(/Ask me anything!/)).toBeInTheDocument();
+    expect(screen.getByTitle('New conversation')).toBeInTheDocument();
+    expect(screen.getAllByTestId('assistant-runtime-provider')).toHaveLength(1);
+  });
+
+  it('bootstraps a local assistant runtime when rendered directly by a host', () => {
+    render(<ChatbotSidebar isOpen apiUrl="http://localhost:8080/embedded-chat" />);
+
+    expect(screen.getByText(/Ask me anything!/)).toBeInTheDocument();
+    expect(screen.getByTitle('New conversation')).toBeInTheDocument();
     expect(screen.getAllByTestId('assistant-runtime-provider')).toHaveLength(1);
   });
 });

@@ -1,4 +1,5 @@
 import { styled } from '@mui/material/styles';
+// import { background } from 'storybook/theming';
 
 export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_appBar`;
 export const classes = {

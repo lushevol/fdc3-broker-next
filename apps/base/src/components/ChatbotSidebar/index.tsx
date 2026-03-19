@@ -76,6 +76,23 @@ const ChatbotContent: React.FC<{
   );
 };
 
+const RuntimeBoundChatbotContent: React.FC<{
+  apiUrl: string;
+  onToggle: () => void;
+}> = ({ apiUrl, onToggle }) => {
+  const existingRuntime = useAssistantUIRuntime({ optional: true });
+
+  if (existingRuntime) {
+    return <ChatbotContent onToggle={onToggle} />;
+  }
+
+  return (
+    <AssistantUIRuntimeProvider apiUrl={apiUrl}>
+      <ChatbotContent onToggle={onToggle} />
+    </AssistantUIRuntimeProvider>
+  );
+};
+
 // Main ChatbotSidebar component
 export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
   isOpen: externalIsOpen,
@@ -86,7 +103,6 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
 }) => {
   const theme = useTheme();
   const chatbotContext = useOptionalChatbot();
-  const existingRuntime = useAssistantUIRuntime({ optional: true });
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const isOpen =
     externalIsOpen !== undefined
@@ -128,13 +144,7 @@ export const ChatbotSidebar: React.FC<ChatbotSidebarProps> = ({
           unmountOnExit
         >
           <Box className={sidebarStyles.container(theme, isOpen, width, position)}>
-            {existingRuntime ? (
-              <ChatbotContent onToggle={handleToggle} />
-            ) : (
-              <AssistantUIRuntimeProvider apiUrl={apiUrl}>
-                <ChatbotContent onToggle={handleToggle} />
-              </AssistantUIRuntimeProvider>
-            )}
+            <RuntimeBoundChatbotContent apiUrl={apiUrl} onToggle={handleToggle} />
           </Box>
         </Slide>
       </>

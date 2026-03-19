@@ -1,123 +1,101 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useChatbotController } from '../common/useController';
-import { ChatbotProvider, useChatbot } from '../common/ChatbotProvider';
-import React from 'react';
+import { useAssistantUIRuntime } from '../AssistantUIRuntimeProvider';
+import { useOptionalChatbot } from '../common/ChatbotProvider';
 
-// Mock EventSource
-class MockEventSource {
-  onmessage: ((event: MessageEvent) => void) | null = null;
-  onerror: (() => void) | null = null;
-  private listeners: Map<string, Function[]> = new Map();
-  close = jest.fn();
+jest.mock('../AssistantUIRuntimeProvider', () => ({
+  useAssistantUIRuntime: jest.fn(),
+}));
 
-  constructor(url: string) {
-    // Simulate successful connection with named events (matching backend format)
-    setTimeout(() => {
-      // Send conversation_id event
-      this.emit('conversation_id', 'test-conv-id');
-    }, 50);
+jest.mock('../common/ChatbotProvider', () => ({
+  useOptionalChatbot: jest.fn(),
+}));
 
-    setTimeout(() => {
-      // Send message event (raw text, not JSON)
-      this.emit('message', 'Hello');
-    }, 100);
-
-    setTimeout(() => {
-      // Send done event
-      this.emit('done', '');
-    }, 200);
-  }
-
-  addEventListener(event: string, callback: Function) {
-    if (!this.listeners.has(event)) {
-      this.listeners.set(event, []);
-    }
-    this.listeners.get(event)!.push(callback);
-  }
-
-  private emit(event: string, data: string) {
-    const callbacks = this.listeners.get(event) || [];
-    callbacks.forEach((cb) => cb({ data }));
-  }
-}
-
-// @ts-ignore
-global.EventSource = MockEventSource;
+const mockedUseAssistantUIRuntime = useAssistantUIRuntime as jest.Mock;
+const mockedUseOptionalChatbot = useOptionalChatbot as jest.Mock;
 
 describe('useChatbotController', () => {
-  it('initializes with default state', () => {
-    const { result } = renderHook(() => useChatbotController());
-
-    expect(result.current.messages).toEqual([]);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBeNull();
-    expect(result.current.conversationId).toBeNull();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (global as unknown as { EventSource: jest.Mock }).EventSource = jest.fn();
   });
 
-  it('sends a message and updates state', async () => {
+  it('projects runtime state instead of opening its own stream', async () => {
+    const runtimeRetryLastMessage = jest.fn();
+    const runtimeSendMessage = jest.fn().mockResolvedValue(undefined);
+    const runtimeClearConversation = jest.fn();
+    const runtimeConversationId = 'conv-123';
+    const createdAt = new Date('2026-03-19T00:00:00.000Z');
+
+    mockedUseOptionalChatbot.mockReturnValue(null);
+    mockedUseAssistantUIRuntime.mockReturnValue({
+      messages: [
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: [
+            { type: 'text', text: 'hello ' },
+            {
+              type: 'tool-call',
+              toolCallId: 'tool-1',
+              toolName: 'lookup',
+              args: { query: 'alpha' },
+              argsText: '{"query":"alpha"}',
+              result: { ok: true },
+              status: 'completed',
+              requiresConfirmation: true,
+            },
+          ],
+          createdAt,
+        },
+      ],
+      isLoading: true,
+      error: 'runtime error',
+      conversationId: runtimeConversationId,
+      sendMessage: runtimeSendMessage,
+      clearConversation: runtimeClearConversation,
+      retryLastMessage: runtimeRetryLastMessage,
+    });
+
     const { result } = renderHook(() => useChatbotController());
+
+    expect(result.current.messages).toEqual([
+      {
+        id: 'assistant-1',
+        role: 'assistant',
+        content: 'hello ',
+        timestamp: createdAt,
+        toolCalls: [
+          {
+            id: 'tool-1',
+            name: 'lookup',
+            arguments: { query: 'alpha' },
+            status: 'completed',
+            requiresConfirmation: true,
+          },
+        ],
+        toolResults: [
+          {
+            toolCallId: 'tool-1',
+            result: { ok: true },
+          },
+        ],
+      },
+    ]);
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.error).toBe('runtime error');
+    expect(result.current.conversationId).toBe(runtimeConversationId);
+    expect(result.current.isOpen).toBe(false);
+    expect(result.current.sendMessage).toBe(runtimeSendMessage);
+    expect(result.current.clearConversation).toBe(runtimeClearConversation);
 
     await act(async () => {
-      await result.current.sendMessage('Hello');
+      await result.current.sendMessage('ignored by the hook');
+      await result.current.retryLastMessage();
     });
 
-    expect(result.current.messages.length).toBeGreaterThan(0);
-    expect(result.current.messages[0].role).toBe('user');
-    expect(result.current.messages[0].content).toBe('Hello');
-  });
-
-  it('clears conversation', () => {
-    const { result } = renderHook(() => useChatbotController());
-
-    act(() => {
-      result.current.clearConversation();
-    });
-
-    expect(result.current.messages).toEqual([]);
-    expect(result.current.conversationId).toBeNull();
-  });
-
-  it('does not send empty messages', async () => {
-    const { result } = renderHook(() => useChatbotController());
-
-    const initialMessages = result.current.messages.length;
-
-    await act(async () => {
-      await result.current.sendMessage('');
-    });
-
-    expect(result.current.messages.length).toBe(initialMessages);
-  });
-
-  it('does not send whitespace-only messages', async () => {
-    const { result } = renderHook(() => useChatbotController());
-
-    const initialMessages = result.current.messages.length;
-
-    await act(async () => {
-      await result.current.sendMessage('   ');
-    });
-
-    expect(result.current.messages.length).toBe(initialMessages);
-  });
-
-  it('reuses shared provider state when rendered inside ChatbotProvider', async () => {
-    const wrapper = ({ children }: { children: React.ReactNode }) =>
-      React.createElement(ChatbotProvider, null, children);
-
-    const { result } = renderHook(
-      () => ({
-        controller: useChatbotController(),
-        chatbot: useChatbot(),
-      }),
-      { wrapper },
-    );
-
-    await act(async () => {
-      await result.current.chatbot.sendMessage('Provider message');
-    });
-
-    expect(result.current.controller.messages).toHaveLength(1);
-    expect(result.current.controller.messages[0].content).toBe('Provider message');
+    expect(runtimeSendMessage).toHaveBeenCalledWith('ignored by the hook');
+    expect(runtimeRetryLastMessage).toHaveBeenCalledTimes(1);
+    expect((global as unknown as { EventSource: jest.Mock }).EventSource).not.toHaveBeenCalled();
   });
 });

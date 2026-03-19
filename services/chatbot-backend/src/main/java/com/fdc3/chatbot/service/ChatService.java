@@ -62,6 +62,7 @@ public class ChatService {
     ) {
         // Get or create conversation
         List<ChatMessage> history = conversations.computeIfAbsent(conversationId, k -> new ArrayList<>());
+        List<ChatMessage> promptHistory = List.copyOf(history);
 
         // Add user message to history
         ChatMessage userMsg = ChatMessage.builder()
@@ -81,7 +82,7 @@ public class ChatService {
         Runnable cancelAgentStream = agentService.processMessageStreaming(
                 conversationId,
                 userMessage,
-                history,
+                promptHistory,
                 token -> {
                     if (cancelled.get()) {
                         return;

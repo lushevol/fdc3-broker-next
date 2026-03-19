@@ -6,8 +6,8 @@ export { default as ChatbotSidebarDefault } from './index';
 export { ChatbotProvider, useChatbot, useToolRegistry } from './common/ChatbotProvider';
 
 /**
- * @deprecated Use `useAssistantUIRuntime` from `@assistant-ui/react` instead.
- * This hook will be removed in a future version.
+ * @deprecated Use the assistant-ui runtime directly where possible.
+ * This export is retained for compile-time compatibility during the cutover.
  */
 export { useChatbotController } from './common/useController';
 
@@ -35,6 +35,14 @@ export {
 // Tool execution display
 export { ToolExecutionCard, ToolExecutionList } from './common/ToolExecutionCard';
 
+// Compatibility helpers
+export {
+  ChatService,
+  RateLimitError,
+  getChatService,
+  initializeChatService,
+} from './common/ChatService';
+
 // Types
 export type {
   ChatMessage,
@@ -58,11 +66,3 @@ export type {
   ErrorComponentProps,
   FormComponentProps,
 } from './common/interface';
-
-// Services
-export {
-  ChatService,
-  RateLimitError,
-  getChatService,
-  initializeChatService,
-} from './common/ChatService';

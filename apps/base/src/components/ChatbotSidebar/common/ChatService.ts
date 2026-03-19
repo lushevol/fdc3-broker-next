@@ -1,12 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import {
-  ChatMessage,
-  ChatRequest,
-  ChatResponse,
-  SSEEvent,
-  ToolCall,
-  ToolResult,
-} from './interface';
+import { ChatMessage } from './interface';
 
 export interface ChatServiceConfig {
   baseUrl: string;
@@ -16,13 +9,11 @@ export interface ChatServiceConfig {
 
 export class ChatService {
   private client: AxiosInstance;
-  private baseUrl: string;
 
   constructor(config: ChatServiceConfig) {
-    this.baseUrl = config.baseUrl;
     this.client = axios.create({
       baseURL: config.baseUrl,
-      timeout: config.timeout || 30000,
+      timeout: config.timeout ?? 30000,
       headers: {
         'Content-Type': 'application/json',
         ...config.headers,
@@ -73,101 +64,6 @@ export class ChatService {
   }
 
   /**
-   * Send a chat message and get a response
-   */
-  async sendMessage(request: ChatRequest): Promise<ChatResponse> {
-    const response = await this.client.post<ChatResponse>('/', request);
-    return response.data;
-  }
-
-  /**
-   * Create an SSE connection for streaming responses
-   */
-  createStreamConnection(
-    message: string,
-    conversationId: string | null,
-    onEvent: (event: SSEEvent) => void,
-    onError: (error: Error) => void,
-    onComplete: () => void,
-  ): () => void {
-    const params = new URLSearchParams({
-      message,
-      ...(conversationId && { conversationId }),
-    });
-
-    const url = `${this.baseUrl}/stream?${params.toString()}`;
-    const eventSource = new EventSource(url);
-
-    const parseEventData = (type: SSEEvent['type'], rawData: string): unknown => {
-      if (
-        type === 'conversation_id' ||
-        type === 'message' ||
-        type === 'error' ||
-        type === 'done'
-      ) {
-        return rawData;
-      }
-
-      return JSON.parse(rawData);
-    };
-
-    const forwardEvent = (type: SSEEvent['type']) => (event: MessageEvent) => {
-      try {
-        onEvent({
-          type,
-          data: parseEventData(type, event.data),
-        });
-      } catch (error) {
-        console.error(`Failed to parse SSE ${type} event:`, error);
-      }
-    };
-
-    eventSource.onmessage = (event) => {
-      forwardEvent('message')(event);
-    };
-
-    eventSource.onerror = (event) => {
-      console.error('SSE error:', event);
-      onError(new Error('Connection lost'));
-      eventSource.close();
-    };
-
-    eventSource.addEventListener('conversation_id', forwardEvent('conversation_id'));
-    eventSource.addEventListener('tool_call', forwardEvent('tool_call'));
-    eventSource.addEventListener('tool_result', forwardEvent('tool_result'));
-    eventSource.addEventListener('generative_ui', forwardEvent('generative_ui'));
-
-    // Handle custom event types
-    eventSource.addEventListener('done', () => {
-      onEvent({
-        type: 'done',
-        data: '',
-      });
-      onComplete();
-      eventSource.close();
-    });
-
-    eventSource.addEventListener('error', (event) => {
-      try {
-        const data = parseEventData('error', (event as MessageEvent).data);
-        onEvent({
-          type: 'error',
-          data,
-        });
-        onError(new Error(typeof data === 'string' ? data : 'Unknown error'));
-      } catch {
-        onError(new Error('Stream error'));
-      }
-      eventSource.close();
-    });
-
-    // Return cleanup function
-    return () => {
-      eventSource.close();
-    };
-  }
-
-  /**
    * Confirm a tool execution
    */
   async confirmToolCall(
@@ -212,26 +108,28 @@ export class RateLimitError extends Error {
   constructor(retryAfter: string | number | null) {
     super('Rate limit exceeded');
     this.name = 'RateLimitError';
-    this.retryAfter = retryAfter ? parseInt(String(retryAfter), 10) : null;
+    const parsed = retryAfter == null ? null : Number.parseInt(String(retryAfter), 10);
+    this.retryAfter = parsed !== null && Number.isFinite(parsed) ? parsed : null;
   }
 }
 
-// Default instance
-let defaultChatService: ChatService | null = null;
-
+/**
+ * Compatibility shim for legacy callers that still import a service factory.
+ * This no longer caches a singleton or owns transport state.
+ */
 export const getChatService = (config?: ChatServiceConfig): ChatService => {
-  if (!defaultChatService && config) {
-    defaultChatService = new ChatService(config);
+  if (!config) {
+    throw new Error('ChatService config is required.');
   }
-  if (!defaultChatService) {
-    throw new Error('ChatService not initialized. Call getChatService with config first.');
-  }
-  return defaultChatService;
+  return new ChatService(config);
 };
 
+/**
+ * Compatibility shim for legacy callers that still initialize a service factory.
+ * This no longer caches a singleton or owns transport state.
+ */
 export const initializeChatService = (config: ChatServiceConfig): ChatService => {
-  defaultChatService = new ChatService(config);
-  return defaultChatService;
+  return new ChatService(config);
 };
 
 export default ChatService;

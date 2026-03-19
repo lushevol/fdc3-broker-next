@@ -23,11 +23,11 @@ import {
   type ThreadUserMessage,
 } from '@assistant-ui/react';
 import {
+  bindAssistantUiSSEStream,
   createUserMessage,
   createInitialStreamingState,
   buildSSEUrl,
   handleSSEEvent,
-  generateMessageId,
 } from './adapters/sseToAssistantUi';
 import type { AssistantUIMessage, StreamingState } from './adapters/types';
 
@@ -74,20 +74,18 @@ interface AssistantUIRuntimeProviderProps {
 /**
  * Convert assistant-ui message format to our internal format
  */
-function convertToThreadMessage(msg: AssistantUIMessage): ThreadMessage {
-  // Extract text content
-  const textParts = msg.content
-    .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
-    .map((part) => part.text);
-
-  const textContent = textParts.join('');
+export function convertToThreadMessage(msg: AssistantUIMessage): ThreadMessage {
   const createdAt = msg.createdAt ?? new Date();
 
   if (msg.role === 'user') {
+    const textParts = msg.content
+      .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
+      .map((part) => part.text);
+
     return {
       id: msg.id,
       role: 'user' as const,
-      content: [{ type: 'text' as const, text: textContent }],
+      content: [{ type: 'text' as const, text: textParts.join('') }],
       createdAt,
       attachments: [],
       metadata: {
@@ -99,7 +97,7 @@ function convertToThreadMessage(msg: AssistantUIMessage): ThreadMessage {
   const assistantMessage = {
     id: msg.id,
     role: 'assistant' as const,
-    content: [{ type: 'text' as const, text: textContent }],
+    content: msg.content as unknown as ThreadAssistantMessage['content'],
     createdAt,
     status: { type: 'complete', reason: 'stop' as const },
     metadata: {
@@ -114,33 +112,16 @@ function convertToThreadMessage(msg: AssistantUIMessage): ThreadMessage {
   return assistantMessage as ThreadMessage;
 }
 
-/**
- * Convert our internal message to assistant-ui message
- */
-function convertFromThreadMessage(msg: ThreadMessage): AssistantUIMessage {
-  const textContent = msg.content
-    .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
-    .map((part) => part.text)
-    .join('');
-
-  return {
-    id: msg.id,
-    role: msg.role,
-    content: textContent ? [{ type: 'text', text: textContent }] : [],
-    createdAt: msg.createdAt,
-  };
-}
-
 export function AssistantUIRuntimeProvider({
   children,
   apiUrl,
 }: AssistantUIRuntimeProviderProps): JSX.Element {
   const [messages, setMessages] = useState<AssistantUIMessage[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const streamingStateRef = useRef<StreamingState>(createInitialStreamingState());
   const eventSourceRef = useRef<EventSource | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
   // Use a ref to track latest messages to avoid stale closure issues
   const messagesRef = useRef<AssistantUIMessage[]>([]);
 
@@ -154,9 +135,6 @@ export function AssistantUIRuntimeProvider({
     return () => {
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
-      }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
       }
     };
   }, []);
@@ -187,19 +165,20 @@ export function AssistantUIRuntimeProvider({
         closeEventSource();
       }
 
-      // Update conversation ID if received
-      if (result.streamingState.conversationId) {
-        streamingStateRef.current.conversationId = result.streamingState.conversationId;
-      }
+      setConversationId(result.streamingState.conversationId);
     },
     [closeEventSource],
   );
 
-  const sendRuntimeMessage = useCallback(
-    async (message: AppendMessage) => {
+  const streamMessage = useCallback(
+    async (
+      message: AppendMessage,
+      options?: {
+        appendUserMessage?: boolean;
+      },
+    ) => {
       if (!message.content || isLoading) return;
 
-      // Extract text content from the message
       const textContent = message.content
         .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
         .map((part) => part.text)
@@ -207,69 +186,35 @@ export function AssistantUIRuntimeProvider({
 
       if (!textContent.trim()) return;
 
+      closeEventSource();
       setIsLoading(true);
       setError(null);
 
-      // Add user message - use messagesRef.current to avoid stale closure
-      const userMessage = createUserMessage(textContent);
-      const newMessages = [...messagesRef.current, userMessage];
-      setMessages(newMessages);
+      if (options?.appendUserMessage !== false) {
+        const userMessage = createUserMessage(textContent);
+        setMessages([...messagesRef.current, userMessage]);
+      }
 
       try {
-        // Build SSE URL
-        const url = buildSSEUrl(
-          apiUrl,
-          textContent,
-          streamingStateRef.current.conversationId,
-        );
-
-        // Create new EventSource
+        const url = buildSSEUrl(apiUrl, textContent, streamingStateRef.current.conversationId);
         const eventSource = new EventSource(url);
         eventSourceRef.current = eventSource;
 
-        // Set up event handlers
-        eventSource.addEventListener('conversation_id', (event) => {
-          handleStreamMessage('conversation_id', event.data);
-        });
+        bindAssistantUiSSEStream(eventSource, {
+          onEvent: (eventType, data) => {
+            handleStreamMessage(eventType, data);
 
-        eventSource.addEventListener('message', (event) => {
-          handleStreamMessage('message', event.data);
-        });
-
-        eventSource.addEventListener('tool_call', (event) => {
-          handleStreamMessage('tool_call', event.data);
-        });
-
-        eventSource.addEventListener('tool_result', (event) => {
-          handleStreamMessage('tool_result', event.data);
-        });
-
-        eventSource.addEventListener('generative_ui', (event) => {
-          handleStreamMessage('generative_ui', event.data);
-        });
-
-        eventSource.addEventListener('error', (event) => {
-          if (event instanceof MessageEvent) {
-            handleStreamMessage('error', event.data);
-          } else {
-            // Connection error
+            if (eventType === 'done') {
+              setIsLoading(false);
+              closeEventSource();
+            }
+          },
+          onConnectionError: () => {
             setError('Connection lost. Please try again.');
             setIsLoading(false);
             closeEventSource();
-          }
+          },
         });
-
-        eventSource.addEventListener('done', () => {
-          handleStreamMessage('done', '');
-          setIsLoading(false);
-          closeEventSource();
-        });
-
-        eventSource.onerror = () => {
-          setError('Connection lost. Please try again.');
-          setIsLoading(false);
-          closeEventSource();
-        };
       } catch (err) {
         console.error('[AssistantUIRuntime] Failed to send message:', err);
         setError(err instanceof Error ? err.message : 'Failed to send message');
@@ -284,7 +229,7 @@ export function AssistantUIRuntimeProvider({
       const text = content.trim();
       if (!text) return;
 
-      await sendRuntimeMessage({
+      await streamMessage({
         role: 'user',
         content: [{ type: 'text' as const, text }],
         parentId: null,
@@ -297,14 +242,16 @@ export function AssistantUIRuntimeProvider({
         },
       });
     },
-    [sendRuntimeMessage],
+    [streamMessage],
   );
 
   const clearConversation = useCallback(() => {
-    setMessages([]);
-    setError(null);
-    streamingStateRef.current = createInitialStreamingState();
     closeEventSource();
+    setMessages([]);
+    setConversationId(null);
+    setError(null);
+    setIsLoading(false);
+    streamingStateRef.current = createInitialStreamingState();
   }, [closeEventSource]);
 
   const retryLastMessage = useCallback(() => {
@@ -318,14 +265,17 @@ export function AssistantUIRuntimeProvider({
 
     // Remove messages after the last user message
     const trimmedMessages = messagesRef.current.slice(0, actualIndex + 1);
+    closeEventSource();
     setMessages(trimmedMessages);
     setError(null);
+    setIsLoading(false);
 
     // Reset streaming state
     streamingStateRef.current = {
       ...createInitialStreamingState(),
       conversationId: streamingStateRef.current.conversationId,
     };
+    setConversationId(streamingStateRef.current.conversationId);
 
     // Retry the message - construct AppendMessage-compatible content
     const textContent = lastUserMessage.content
@@ -333,7 +283,7 @@ export function AssistantUIRuntimeProvider({
       .map((part) => part.text)
       .join('');
 
-    void sendRuntimeMessage({
+    void streamMessage({
       role: 'user',
       content: [{ type: 'text' as const, text: textContent }],
       parentId: null,
@@ -344,19 +294,19 @@ export function AssistantUIRuntimeProvider({
       metadata: {
         custom: {},
       },
-    });
-  }, [sendRuntimeMessage]);
+    }, { appendUserMessage: false });
+  }, [closeEventSource, streamMessage]);
 
   // Create assistant-ui external store runtime
   const runtime = useExternalStoreRuntime({
     isRunning: isLoading,
     messages: messages.map(convertToThreadMessage),
-    onNew: sendRuntimeMessage,
-    onEdit: sendRuntimeMessage,
+    onNew: streamMessage,
+    onEdit: streamMessage,
   });
 
   const contextValue: AssistantUIRuntimeContextValue = {
-    conversationId: streamingStateRef.current.conversationId,
+    conversationId,
     messages,
     isLoading,
     error,

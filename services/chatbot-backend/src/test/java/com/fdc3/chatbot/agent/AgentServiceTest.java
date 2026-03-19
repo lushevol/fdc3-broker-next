@@ -254,6 +254,83 @@ class AgentServiceTest {
         verify(toolRegistry).execute(eq("get_current_time"), eq(Map.of("timezone", "America/New_York")));
     }
 
+    @Test
+    void processMessageStreamingSkipsToolSpecificationsForPlainTextPrompts() throws Exception {
+        ReflectionTestUtils.setField(agentService, "mockEnabled", false);
+        when(toolRegistry.getAllTools()).thenReturn(Map.of(
+                "calculator",
+                new TestToolDefinition("calculator", "Perform calculations", Map.of(
+                        "type", "object",
+                        "properties", Map.of(
+                                "expression", Map.of(
+                                        "type", "string",
+                                        "description", "Math expression"
+                                )
+                        ),
+                        "required", List.of("expression")
+                ))
+        ));
+        when(toolRegistry.getTool("calculator")).thenReturn(
+                new TestToolDefinition("calculator", "Perform calculations", Map.of(
+                        "type", "object",
+                        "properties", Map.of(
+                                "expression", Map.of(
+                                        "type", "string",
+                                        "description", "Math expression"
+                                )
+                        ),
+                        "required", List.of("expression")
+                ))
+        );
+
+        AtomicInteger plainGenerateCalls = new AtomicInteger();
+        AtomicInteger toolGenerateCalls = new AtomicInteger();
+        StreamingChatLanguageModel streamingChatLanguageModel = new StreamingChatLanguageModel() {
+            @Override
+            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
+                                 StreamingResponseHandler<AiMessage> handler) {
+                plainGenerateCalls.incrementAndGet();
+                handler.onNext("Hello!");
+                handler.onComplete(Response.from(
+                        AiMessage.from("Hello!"),
+                        null,
+                        FinishReason.STOP
+                ));
+            }
+
+            @Override
+            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
+                                 List<ToolSpecification> toolSpecifications,
+                                 StreamingResponseHandler<AiMessage> handler) {
+                toolGenerateCalls.incrementAndGet();
+                handler.onComplete(Response.from(
+                        AiMessage.from("Hello!"),
+                        null,
+                        FinishReason.STOP
+                ));
+            }
+        };
+        ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
+
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-plain",
+                "Say hello in one short sentence.",
+                List.of(),
+                token -> {
+                },
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown
+        );
+
+        assertTrue(completed.await(1, TimeUnit.SECONDS));
+        assertEquals(1, plainGenerateCalls.get());
+        assertEquals(0, toolGenerateCalls.get());
+    }
+
     private record TestToolDefinition(String name, String description, Map<String, Object> parameters)
             implements com.fdc3.chatbot.tool.ToolDefinition {
         @Override

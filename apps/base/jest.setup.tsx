@@ -95,7 +95,7 @@ jest.mock('@assistant-ui/react', () => {
       BranchPicker: MockPrimitive,
       If: MockPrimitive,
     },
-    useExternalStoreRuntime: (config: any) => createMockRuntime(config),
+    useExternalStoreRuntime: jest.fn((config: any) => createMockRuntime(config)),
     AssistantRuntimeProvider: ({ children }: { children: any }) =>
       mockReact.createElement('div', { 'data-testid': 'assistant-runtime-provider' }, children),
     useAssistantRuntime: () => ({

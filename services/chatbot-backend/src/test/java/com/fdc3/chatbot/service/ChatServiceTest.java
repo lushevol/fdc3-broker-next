@@ -14,9 +14,11 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -130,6 +132,52 @@ class ChatServiceTest {
 
         verify(onToolCall).accept(toolCall);
         verify(onToolResult).accept(toolResult);
+    }
+
+    @Test
+    void processMessageStreamingDoesNotDuplicateCurrentUserMessageInModelHistory() {
+        doAnswer(invocation -> {
+            Runnable onComplete = invocation.getArgument(5);
+            onComplete.run();
+            return null;
+        }).when(agentService).processMessageStreaming(
+                anyString(),
+                anyString(),
+                anyList(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+
+        String conversationId = chatService.createConversation();
+
+        chatService.processMessageStreaming(
+                conversationId,
+                "Hello there",
+                token -> {
+                },
+                error -> {
+                },
+                () -> {
+                }
+        );
+
+        ArgumentCaptor<List<ChatMessage>> historyCaptor = ArgumentCaptor.forClass(List.class);
+        verify(agentService).processMessageStreaming(
+                eq(conversationId),
+                eq("Hello there"),
+                historyCaptor.capture(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+
+        List<ChatMessage> forwardedHistory = historyCaptor.getValue();
+        assertTrue(forwardedHistory.isEmpty(), "Current user message should not already be present in forwarded history");
     }
 
     @Test

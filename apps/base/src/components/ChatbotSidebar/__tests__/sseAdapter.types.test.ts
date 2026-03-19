@@ -18,6 +18,7 @@ import {
   createInitialStreamingState,
   createUserMessage,
   createAssistantMessage,
+  bindAssistantUiSSEStream,
   parseSSEEvent,
   transformToolCall,
   transformToolResult,
@@ -49,6 +50,69 @@ describe('SSE Adapter Type Safety', () => {
       });
 
       expect(state.pendingToolCalls.size).toBe(0);
+    });
+  });
+
+  describe('handleSSEEvent', () => {
+    it('resets stream-local state on done while preserving the conversation id', () => {
+      const state = createInitialStreamingState();
+      const withConversation = handleSSEEvent([], state, 'conversation_id', 'conv-123');
+      const withMessage = handleSSEEvent(
+        withConversation.messages,
+        withConversation.streamingState,
+        'message',
+        'Hello',
+      );
+
+      const done = handleSSEEvent(
+        withMessage.messages,
+        withMessage.streamingState,
+        'done',
+        '',
+      );
+
+      expect(done.streamingState.conversationId).toBe('conv-123');
+      expect(done.streamingState.assistantMessageId).toBeNull();
+      expect(done.streamingState.accumulatedContent).toBe('');
+      expect(done.streamingState.pendingToolCalls.size).toBe(0);
+    });
+  });
+
+  describe('bindAssistantUiSSEStream', () => {
+    it('registers the backend event contract and routes named events through the adapter callback', () => {
+      const addEventListener = jest.fn();
+      const eventSource = {
+        addEventListener,
+        onerror: null as ((event: Event) => void) | null,
+      };
+      const onEvent = jest.fn();
+      const onConnectionError = jest.fn();
+
+      bindAssistantUiSSEStream(eventSource, {
+        onEvent,
+        onConnectionError,
+      });
+
+      expect(addEventListener).toHaveBeenCalledWith('conversation_id', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('tool_call', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('tool_result', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('generative_ui', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('error', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('done', expect.any(Function));
+
+      const messageListener = addEventListener.mock.calls.find(([eventName]) => eventName === 'message')?.[1];
+      const errorListener = addEventListener.mock.calls.find(([eventName]) => eventName === 'error')?.[1];
+      const doneListener = addEventListener.mock.calls.find(([eventName]) => eventName === 'done')?.[1];
+
+      messageListener(new MessageEvent('message', { data: 'Hello' }));
+      errorListener(new MessageEvent('error', { data: 'Backend failed' }));
+      doneListener(new MessageEvent('done'));
+
+      expect(onEvent).toHaveBeenNthCalledWith(1, 'message', 'Hello');
+      expect(onEvent).toHaveBeenNthCalledWith(2, 'error', 'Backend failed');
+      expect(onEvent).toHaveBeenNthCalledWith(3, 'done', '');
+      expect(onConnectionError).not.toHaveBeenCalled();
     });
   });
 

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -189,9 +190,11 @@ public class AgentService {
         try {
             // Build message list for LangChain4j
             List<dev.langchain4j.data.message.ChatMessage> messages = new java.util.ArrayList<>();
+            Map<String, ToolDefinition> availableTools = toolRegistry.getAllTools();
+            boolean useTools = shouldUseTools(userMessage, availableTools);
 
             // Add system message
-            messages.add(new SystemMessage(buildSystemPrompt()));
+            messages.add(new SystemMessage(buildSystemPrompt(useTools ? availableTools : Map.of())));
 
             // Add history
             if (history != null) {
@@ -212,6 +215,7 @@ public class AgentService {
             streamConversation(
                     conversationId,
                     messages,
+                    useTools ? buildToolSpecifications(availableTools) : List.of(),
                     onNext,
                     onError,
                     onComplete,
@@ -231,6 +235,7 @@ public class AgentService {
     private void streamConversation(
             String conversationId,
             List<dev.langchain4j.data.message.ChatMessage> messages,
+            List<ToolSpecification> toolSpecifications,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
             java.lang.Runnable onComplete,
@@ -287,7 +292,6 @@ public class AgentService {
             }
         };
 
-        List<ToolSpecification> toolSpecifications = buildToolSpecifications();
         if (toolSpecifications.isEmpty()) {
             streamingChatModel.generate(messages, handler);
             return;
@@ -313,7 +317,17 @@ public class AgentService {
         }
 
         if (index >= toolExecutionRequests.size()) {
-            streamConversation(conversationId, messages, onNext, onError, onComplete, onToolCall, onToolResult, cancelled);
+            streamConversation(
+                    conversationId,
+                    messages,
+                    buildToolSpecifications(toolRegistry.getAllTools()),
+                    onNext,
+                    onError,
+                    onComplete,
+                    onToolCall,
+                    onToolResult,
+                    cancelled
+            );
             return;
         }
 
@@ -371,8 +385,8 @@ public class AgentService {
                 });
     }
 
-    private List<ToolSpecification> buildToolSpecifications() {
-        return toolRegistry.getAllTools().values().stream()
+    private List<ToolSpecification> buildToolSpecifications(Map<String, ToolDefinition> tools) {
+        return tools.values().stream()
                 .map(this::toToolSpecification)
                 .toList();
     }
@@ -713,9 +727,11 @@ public class AgentService {
         try {
             // Build message list for LangChain4j
             List<dev.langchain4j.data.message.ChatMessage> messages = new java.util.ArrayList<>();
+            Map<String, ToolDefinition> availableTools = toolRegistry.getAllTools();
+            boolean useTools = shouldUseTools(userMessage, availableTools);
 
             // Add system message
-            messages.add(new SystemMessage(buildSystemPrompt()));
+            messages.add(new SystemMessage(buildSystemPrompt(useTools ? availableTools : Map.of())));
 
             // Add history
             if (history != null) {
@@ -744,7 +760,24 @@ public class AgentService {
         }
     }
 
-    private String buildSystemPrompt() {
+    private String buildSystemPrompt(Map<String, ToolDefinition> availableTools) {
+        String toolSection = availableTools.isEmpty()
+                ? ""
+                : """
+
+                Available tools:
+                %s
+
+                When using tools, always use the native tool-calling interface provided by the model.
+                Never emit pseudo-XML tags like <tool_call> or <function>.
+                After tool execution, explain what you're doing and show the results clearly.
+                """.formatted(
+                        availableTools.values().stream()
+                                .map(tool -> "- " + tool.getName() + ": " + tool.getDescription())
+                                .reduce((a, b) -> a + "\n" + b)
+                                .orElse("No tools currently available")
+                );
+
         return String.format("""
                 You are %s, a helpful AI assistant integrated into an FDC3-enabled financial desktop platform.
 
@@ -753,23 +786,35 @@ public class AgentService {
                 - Executing tools on behalf of the user
                 - Navigating the platform and finding information
                 - Automating repetitive tasks
-
-                Available tools:
                 %s
-
-                When using tools, always use the native tool-calling interface provided by the model.
-                Never emit pseudo-XML tags like <tool_call> or <function>.
-                After tool execution, explain what you're doing and show the results clearly.
                 Be concise but helpful. If you need clarification, ask follow-up questions.
 
                 Always be professional and accurate in your responses.
                 """,
                 agentName,
-                toolRegistry.getAllTools().keySet().stream()
-                        .map(name -> "- " + name + ": " + toolRegistry.getTool(name).getDescription())
-                        .reduce((a, b) -> a + "\n" + b)
-                        .orElse("No tools currently available")
+                toolSection
         );
+    }
+
+    private boolean shouldUseTools(String userMessage, Map<String, ToolDefinition> availableTools) {
+        if (availableTools.isEmpty() || userMessage == null || userMessage.isBlank()) {
+            return false;
+        }
+
+        String normalized = userMessage.toLowerCase(Locale.ROOT);
+        return normalized.contains("weather")
+                || normalized.contains("temperature")
+                || normalized.contains("forecast")
+                || normalized.contains("time")
+                || normalized.contains("timezone")
+                || normalized.contains("clock")
+                || normalized.contains("calculate")
+                || normalized.contains("math")
+                || normalized.contains("sum")
+                || normalized.contains("subtract")
+                || normalized.contains("multiply")
+                || normalized.contains("divide")
+                || normalized.matches(".*\\d\\s*[+\\-*/()]\\s*\\d.*");
     }
 
     /**
