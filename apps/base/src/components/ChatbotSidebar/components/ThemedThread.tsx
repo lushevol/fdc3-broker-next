@@ -1,62 +1,26 @@
-/**
- * Themed Assistant-UI Thread Components
- *
- * These components wrap assistant-ui primitives with Material-UI theming.
- */
-
 import React from 'react';
-import { Box, useTheme, Typography, Paper, Avatar } from '@mui/material';
 import {
-  ThreadPrimitive,
   ComposerPrimitive,
   MessagePrimitive,
+  ThreadPrimitive,
   type DataMessagePartProps,
   type ToolCallMessagePartProps,
 } from '@assistant-ui/react';
-import { SmartToy as SmartToyIcon, Person as PersonIcon } from '@mui/icons-material';
-import { sidebarStyles } from '../common/style';
+import { ArrowUpward, SmartToyOutlined } from '@mui/icons-material';
 import { ToolCallRenderer } from './ToolCallRenderer';
 import { GenerativeUIRenderer } from './GenerativeUIRenderer';
 
-/**
- * User message component
- */
 const UserMessage: React.FC = () => {
-  const theme = useTheme();
-
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'flex-end',
-        mb: 2,
-      }}
-    >
-      <Paper
-        elevation={1}
-        sx={{
-          p: 2,
-          maxWidth: '80%',
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.primary.contrastText,
-          borderRadius: 2,
-        }}
-      >
+    <div className="mx-auto flex w-full max-w-[44rem] justify-end px-2 py-3">
+      <div className="max-w-[85%] rounded-2xl bg-muted px-4 py-2.5 text-sm text-foreground">
         <MessagePrimitive.Content />
-      </Paper>
-      <Avatar sx={{ ml: 1, bgcolor: theme.palette.primary.dark }}>
-        <PersonIcon />
-      </Avatar>
-    </Box>
+      </div>
+    </div>
   );
 };
 
-/**
- * Assistant message component
- */
 const AssistantMessage: React.FC = () => {
-  const theme = useTheme();
-
   const ToolPart: React.FC<
     ToolCallMessagePartProps<Record<string, unknown>, unknown> & {
       requiresConfirmation?: boolean;
@@ -76,30 +40,11 @@ const AssistantMessage: React.FC = () => {
 
   const GenerativeUIPart: React.FC<
     DataMessagePartProps<{ componentName: string; props: Record<string, unknown> }>
-  > = ({ data }) => (
-    <GenerativeUIRenderer componentName={data.componentName} props={data.props} />
-  );
+  > = ({ data }) => <GenerativeUIRenderer componentName={data.componentName} props={data.props} />;
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'flex-start',
-        mb: 2,
-      }}
-    >
-      <Avatar sx={{ mr: 1, bgcolor: theme.palette.secondary.main }}>
-        <SmartToyIcon />
-      </Avatar>
-      <Paper
-        elevation={1}
-        sx={{
-          p: 2,
-          maxWidth: '80%',
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: 2,
-        }}
-      >
+    <div className="mx-auto w-full max-w-[44rem] px-2 py-3">
+      <div className="rounded-2xl bg-background px-2 text-sm leading-relaxed text-foreground">
         <MessagePrimitive.Parts
           components={{
             tools: { Override: ToolPart },
@@ -110,97 +55,65 @@ const AssistantMessage: React.FC = () => {
             },
           }}
         />
-      </Paper>
-    </Box>
+      </div>
+    </div>
   );
 };
 
-/**
- * Themed Thread component
- */
+const EmptyState: React.FC = () => {
+  return (
+    <div className="mx-auto flex h-full w-full max-w-[44rem] flex-1 flex-col justify-center px-4 py-8">
+      <div className="flex items-center gap-3 text-foreground">
+        <SmartToyOutlined className="text-muted-foreground" fontSize="large" />
+        <div>
+          <h2 className="text-2xl font-semibold">Hello there!</h2>
+          <p className="mt-1 text-base text-muted-foreground">How can I help you today?</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const ThemedThread: React.FC = () => {
-  const theme = useTheme();
-
   return (
-    <Box
-      sx={{
-        flex: 1,
-        overflow: 'auto',
-        p: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: theme.palette.background.default,
-      }}
-    >
-      <ThreadPrimitive.Root>
-        <ThreadPrimitive.Viewport>
-          <ThreadPrimitive.Empty>
-            <Box className={sidebarStyles.emptyState(theme)}>
-              <SmartToyIcon className={sidebarStyles.emptyIcon(theme)} />
-              <Typography variant="h6" gutterBottom>
-                AI Assistant
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Ask me anything! I can help with tasks, answer questions, and execute tools.
-              </Typography>
-            </Box>
-          </ThreadPrimitive.Empty>
-          <ThreadPrimitive.Messages
-            components={{
-              UserMessage,
-              AssistantMessage,
-            }}
-          />
-        </ThreadPrimitive.Viewport>
-      </ThreadPrimitive.Root>
-    </Box>
+    <ThreadPrimitive.Root className="flex h-full flex-1 flex-col bg-background">
+      <ThreadPrimitive.Viewport className="flex flex-1 flex-col overflow-y-auto px-4 pt-4">
+        <ThreadPrimitive.Empty>
+          <EmptyState />
+        </ThreadPrimitive.Empty>
+        <ThreadPrimitive.Messages
+          components={{
+            UserMessage,
+            AssistantMessage,
+          }}
+        />
+      </ThreadPrimitive.Viewport>
+    </ThreadPrimitive.Root>
   );
 };
 
-/**
- * Themed Composer component
- */
 export const ThemedComposer: React.FC = () => {
-  const theme = useTheme();
-
   return (
-    <Box
-      sx={{
-        p: 2,
-        borderTop: `1px solid ${theme.palette.divider}`,
-        backgroundColor: theme.palette.background.paper,
-      }}
-    >
-      <ComposerPrimitive.Root>
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 1,
-            alignItems: 'flex-end',
-          }}
-        >
-          <Box sx={{ flex: 1 }}>
-            <ComposerPrimitive.Input
-              placeholder="Type a message..."
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                borderRadius: 8,
-                border: `1px solid ${theme.palette.divider}`,
-                backgroundColor: theme.palette.background.default,
-                color: theme.palette.text.primary,
-                fontSize: '0.9375rem',
-                fontFamily: theme.typography.fontFamily,
-                lineHeight: 1.5,
-                outline: 'none',
-                transition: 'border-color 0.2s ease',
-              }}
-            />
-          </Box>
-          <ComposerPrimitive.Send />
-        </Box>
+    <div className="border-t border-border bg-background px-4 py-4">
+      <ComposerPrimitive.Root className="mx-auto flex w-full max-w-[44rem] flex-col">
+        <div className="flex items-end gap-2 rounded-[24px] border border-border bg-background p-2 shadow-sm">
+          <ComposerPrimitive.Input
+            placeholder="Send a message..."
+            aria-label="Message input"
+            className="min-h-10 flex-1 resize-none bg-transparent px-2 py-1 text-sm outline-none placeholder:text-muted-foreground/80"
+          />
+          <ComposerPrimitive.Send asChild>
+            <button
+              type="button"
+              aria-label="Send message"
+              className="inline-flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:bg-primary/90"
+            >
+              <ArrowUpward fontSize="small" />
+            </button>
+          </ComposerPrimitive.Send>
+        </div>
       </ComposerPrimitive.Root>
-    </Box>
+    </div>
   );
 };
 

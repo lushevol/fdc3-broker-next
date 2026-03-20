@@ -5,14 +5,7 @@
  * It uses assistant-ui's ExternalStoreAdapter pattern to bridge our custom backend.
  */
 
-import React, {
-  createContext,
-  useContext,
-  useCallback,
-  useRef,
-  useState,
-  useEffect,
-} from 'react';
+import React, { createContext, useContext, useCallback, useRef, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import {
   AssistantRuntimeProvider,
@@ -256,7 +249,9 @@ export function AssistantUIRuntimeProvider({
 
   const retryLastMessage = useCallback(() => {
     // Find last user message - use messagesRef.current to avoid stale closure
-    const lastUserMessageIndex = [...messagesRef.current].reverse().findIndex((m) => m.role === 'user');
+    const lastUserMessageIndex = [...messagesRef.current]
+      .reverse()
+      .findIndex((m) => m.role === 'user');
 
     if (lastUserMessageIndex === -1) return;
 
@@ -283,18 +278,21 @@ export function AssistantUIRuntimeProvider({
       .map((part) => part.text)
       .join('');
 
-    void streamMessage({
-      role: 'user',
-      content: [{ type: 'text' as const, text: textContent }],
-      parentId: null,
-      sourceId: lastUserMessage.id,
-      runConfig: undefined,
-      attachments: [],
-      createdAt: lastUserMessage.createdAt ?? new Date(),
-      metadata: {
-        custom: {},
+    void streamMessage(
+      {
+        role: 'user',
+        content: [{ type: 'text' as const, text: textContent }],
+        parentId: null,
+        sourceId: lastUserMessage.id,
+        runConfig: undefined,
+        attachments: [],
+        createdAt: lastUserMessage.createdAt ?? new Date(),
+        metadata: {
+          custom: {},
+        },
       },
-    }, { appendUserMessage: false });
+      { appendUserMessage: false },
+    );
   }, [closeEventSource, streamMessage]);
 
   // Create assistant-ui external store runtime

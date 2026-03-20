@@ -99,7 +99,8 @@ describe('AssistantUIRuntimeProvider', () => {
         await result.current.sendMessage('Hello runtime');
       });
 
-      const activeStream = (global as unknown as { __mockEventSource: MockEventSource }).__mockEventSource;
+      const activeStream = (global as unknown as { __mockEventSource: MockEventSource })
+        .__mockEventSource;
 
       act(() => {
         activeStream.triggerEvent('conversation_id', 'conv-123');
@@ -140,7 +141,8 @@ describe('AssistantUIRuntimeProvider', () => {
         await result.current.sendMessage('Retry me');
       });
 
-      const firstStream = (global as unknown as { __mockEventSource: MockEventSource }).__mockEventSource;
+      const firstStream = (global as unknown as { __mockEventSource: MockEventSource })
+        .__mockEventSource;
 
       act(() => {
         firstStream.triggerEvent('conversation_id', 'conv-123');
@@ -157,12 +159,13 @@ describe('AssistantUIRuntimeProvider', () => {
       });
 
       await waitFor(() => {
-        expect((global as unknown as { __mockEventSource: MockEventSource }).__mockEventSource.url).toContain(
-          'message=Retry+me',
-        );
+        expect(
+          (global as unknown as { __mockEventSource: MockEventSource }).__mockEventSource.url,
+        ).toContain('message=Retry+me');
       });
 
-      const retryStream = (global as unknown as { __mockEventSource: MockEventSource }).__mockEventSource;
+      const retryStream = (global as unknown as { __mockEventSource: MockEventSource })
+        .__mockEventSource;
 
       expect(firstStream.close).toHaveBeenCalledTimes(1);
       expect(retryStream).not.toBe(firstStream);
@@ -202,11 +205,10 @@ describe('AssistantUIRuntimeProvider', () => {
         await result.current.sendMessage('Hello runtime');
       });
 
-      const eventSource = (global as unknown as { __mockEventSource: MockEventSource }).__mockEventSource;
+      const eventSource = (global as unknown as { __mockEventSource: MockEventSource })
+        .__mockEventSource;
 
-      expect(eventSource.url).toBe(
-        'http://localhost:8080/api/chat/stream?message=Hello+runtime',
-      );
+      expect(eventSource.url).toBe('http://localhost:8080/api/chat/stream?message=Hello+runtime');
     });
   });
 
@@ -218,7 +220,8 @@ describe('AssistantUIRuntimeProvider', () => {
         await result.current.sendMessage('Show enriched assistant content');
       });
 
-      const stream = (global as unknown as { __mockEventSource: MockEventSource }).__mockEventSource;
+      const stream = (global as unknown as { __mockEventSource: MockEventSource })
+        .__mockEventSource;
 
       act(() => {
         stream.triggerEvent('message', 'I used a tool.');
@@ -241,7 +244,9 @@ describe('AssistantUIRuntimeProvider', () => {
       });
 
       await waitFor(() => {
-        const assistantMessage = result.current.messages.find((message) => message.role === 'assistant');
+        const assistantMessage = result.current.messages.find(
+          (message) => message.role === 'assistant',
+        );
         expect(assistantMessage?.content.some((part) => part.type === 'tool-call')).toBe(true);
       });
 
@@ -256,7 +261,9 @@ describe('AssistantUIRuntimeProvider', () => {
       });
 
       await waitFor(() => {
-        const assistantMessage = result.current.messages.find((message) => message.role === 'assistant');
+        const assistantMessage = result.current.messages.find(
+          (message) => message.role === 'assistant',
+        );
         const toolCallPart = assistantMessage?.content.find((part) => part.type === 'tool-call');
         expect(toolCallPart).toMatchObject({
           type: 'tool-call',
@@ -276,7 +283,9 @@ describe('AssistantUIRuntimeProvider', () => {
       });
 
       await waitFor(() => {
-        const assistantMessage = result.current.messages.find((message) => message.role === 'assistant');
+        const assistantMessage = result.current.messages.find(
+          (message) => message.role === 'assistant',
+        );
         expect(assistantMessage?.content.some((part) => part.type === 'data')).toBe(true);
       });
 
@@ -284,7 +293,9 @@ describe('AssistantUIRuntimeProvider', () => {
         stream.triggerEvent('done', '');
       });
 
-      const assistantMessage = result.current.messages.find((message) => message.role === 'assistant');
+      const assistantMessage = result.current.messages.find(
+        (message) => message.role === 'assistant',
+      );
 
       expect(assistantMessage).toBeDefined();
       if (!assistantMessage) {

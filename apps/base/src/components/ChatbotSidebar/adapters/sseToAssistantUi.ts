@@ -51,12 +51,7 @@ export function bindAssistantUiSSEStream(
         return;
       }
 
-      const data =
-        eventType === 'done'
-          ? ''
-          : event instanceof MessageEvent
-            ? event.data
-            : '';
+      const data = eventType === 'done' ? '' : event instanceof MessageEvent ? event.data : '';
       handlers.onEvent(eventType, data);
     });
   });
@@ -217,10 +212,12 @@ export function addContentPartToAssistantMessage(
   message: AssistantUIMessage,
   part: ContentPart,
 ): AssistantUIMessage {
-  if (part.type === 'tool-call' && ('result' in part || part.status === 'completed' || part.status === 'failed')) {
+  if (
+    part.type === 'tool-call' &&
+    ('result' in part || part.status === 'completed' || part.status === 'failed')
+  ) {
     const toolCallIndex = message.content.findIndex(
-      (p): p is ToolCallContentPart =>
-        p.type === 'tool-call' && p.toolCallId === part.toolCallId,
+      (p): p is ToolCallContentPart => p.type === 'tool-call' && p.toolCallId === part.toolCallId,
     );
 
     if (toolCallIndex !== -1) {

@@ -42,10 +42,7 @@ export interface GenerativeUIDirective {
  * Assistant UI Content Part Types
  * Based on assistant-ui's expected format
  */
-export type ContentPartType =
-  | 'text'
-  | 'tool-call'
-  | 'data';
+export type ContentPartType = 'text' | 'tool-call' | 'data';
 
 export interface TextContentPart {
   type: 'text';
@@ -74,10 +71,7 @@ export interface GenerativeUIContentPart {
   };
 }
 
-export type ContentPart =
-  | TextContentPart
-  | ToolCallContentPart
-  | GenerativeUIContentPart;
+export type ContentPart = TextContentPart | ToolCallContentPart | GenerativeUIContentPart;
 
 /**
  * Assistant UI Message Format

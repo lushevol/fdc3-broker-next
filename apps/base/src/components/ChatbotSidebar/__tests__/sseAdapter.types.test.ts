@@ -64,12 +64,7 @@ describe('SSE Adapter Type Safety', () => {
         'Hello',
       );
 
-      const done = handleSSEEvent(
-        withMessage.messages,
-        withMessage.streamingState,
-        'done',
-        '',
-      );
+      const done = handleSSEEvent(withMessage.messages, withMessage.streamingState, 'done', '');
 
       expect(done.streamingState.conversationId).toBe('conv-123');
       expect(done.streamingState.assistantMessageId).toBeNull();
@@ -101,9 +96,15 @@ describe('SSE Adapter Type Safety', () => {
       expect(addEventListener).toHaveBeenCalledWith('error', expect.any(Function));
       expect(addEventListener).toHaveBeenCalledWith('done', expect.any(Function));
 
-      const messageListener = addEventListener.mock.calls.find(([eventName]) => eventName === 'message')?.[1];
-      const errorListener = addEventListener.mock.calls.find(([eventName]) => eventName === 'error')?.[1];
-      const doneListener = addEventListener.mock.calls.find(([eventName]) => eventName === 'done')?.[1];
+      const messageListener = addEventListener.mock.calls.find(
+        ([eventName]) => eventName === 'message',
+      )?.[1];
+      const errorListener = addEventListener.mock.calls.find(
+        ([eventName]) => eventName === 'error',
+      )?.[1];
+      const doneListener = addEventListener.mock.calls.find(
+        ([eventName]) => eventName === 'done',
+      )?.[1];
 
       messageListener(new MessageEvent('message', { data: 'Hello' }));
       errorListener(new MessageEvent('error', { data: 'Backend failed' }));
@@ -242,7 +243,9 @@ describe('SSE Adapter Type Safety', () => {
       const result = transformToolResult(toolResult);
 
       expect((result as Extract<ContentPart, { type: 'tool-call' }>).isError).toBe(true);
-      expect((result as Extract<ContentPart, { type: 'tool-call' }>).error).toBe('Something went wrong');
+      expect((result as Extract<ContentPart, { type: 'tool-call' }>).error).toBe(
+        'Something went wrong',
+      );
     });
   });
 

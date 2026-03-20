@@ -65,11 +65,17 @@ describe('ChatbotSidebar', () => {
     expect(newChatButton).toBeInTheDocument();
   });
 
-  it('displays empty state message when no messages', async () => {
+  it('displays the assistant-ui welcome state when no messages', async () => {
     renderWithProvider({ isOpen: true });
 
-    const emptyState = await screen.findByText(/Ask me anything!/);
-    expect(emptyState).toBeInTheDocument();
+    expect(await screen.findByText(/Hello there!/)).toBeInTheDocument();
+    expect(screen.getByText(/How can I help you today\?/)).toBeInTheDocument();
+  });
+
+  it('renders the assistant-ui composer placeholder', async () => {
+    renderWithProvider({ isOpen: true });
+
+    expect(await screen.findByPlaceholderText(/Send a message/i)).toBeInTheDocument();
   });
 
   it('shares sidebar open state with ChatbotProvider consumers', async () => {
@@ -106,7 +112,7 @@ describe('ChatbotSidebar', () => {
       </AssistantUIRuntimeProvider>,
     );
 
-    expect(screen.getByText(/Ask me anything!/)).toBeInTheDocument();
+    expect(screen.getByText(/Hello there!/)).toBeInTheDocument();
     expect(screen.getByTitle('New conversation')).toBeInTheDocument();
     expect(screen.getAllByTestId('assistant-runtime-provider')).toHaveLength(1);
   });
@@ -114,7 +120,7 @@ describe('ChatbotSidebar', () => {
   it('bootstraps a local assistant runtime when rendered directly by a host', () => {
     render(<ChatbotSidebar isOpen apiUrl="http://localhost:8080/embedded-chat" />);
 
-    expect(screen.getByText(/Ask me anything!/)).toBeInTheDocument();
+    expect(screen.getByText(/Hello there!/)).toBeInTheDocument();
     expect(screen.getByTitle('New conversation')).toBeInTheDocument();
     expect(screen.getAllByTestId('assistant-runtime-provider')).toHaveLength(1);
   });

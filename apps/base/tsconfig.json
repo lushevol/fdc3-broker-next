@@ -29,5 +29,5 @@
   },
   "files": ["src/root.tsx"],
   "include": ["src/**/*"],
-  "exclude": ["*.ts", "*.tsx", "*.json", "*.js", ".jsx"]
+  "exclude": ["*.ts", "*.tsx", "*.json", "*.js", ".jsx", "src/next-packages/**/*"]
 }

@@ -1,11 +1,6 @@
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
-import {
-  ChatService,
-  RateLimitError,
-  getChatService,
-  initializeChatService,
-} from '../exports';
+import { ChatService, RateLimitError, getChatService, initializeChatService } from '../exports';
 import type { ChatMessage } from '../common/interface';
 
 jest.mock('axios', () => ({
@@ -75,9 +70,9 @@ describe('ChatService', () => {
 
     const service = new ChatService({ baseUrl: 'http://localhost:8080/api/chat' });
 
-    const requestInterceptor = client.interceptors.request.use.mock.calls[0][0] as (
-      config: { headers?: Record<string, string> },
-    ) => { headers?: Record<string, string> };
+    const requestInterceptor = client.interceptors.request.use.mock.calls[0][0] as (config: {
+      headers?: Record<string, string>;
+    }) => { headers?: Record<string, string> };
 
     expect(
       requestInterceptor({
@@ -99,9 +94,9 @@ describe('ChatService', () => {
     const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem');
     const dispatchSpy = jest.spyOn(window, 'dispatchEvent').mockImplementation(() => true);
     const service = new ChatService({ baseUrl: 'http://localhost:8080/api/chat' });
-    const responseRejected = client.interceptors.response.use.mock.calls[0][1] as (
-      error: { response?: { status?: number } },
-    ) => Promise<never>;
+    const responseRejected = client.interceptors.response.use.mock.calls[0][1] as (error: {
+      response?: { status?: number };
+    }) => Promise<never>;
 
     const error = { response: { status: 401 } };
 
@@ -121,9 +116,9 @@ describe('ChatService', () => {
     mockedAxios.create.mockReturnValue(client);
 
     new ChatService({ baseUrl: 'http://localhost:8080/api/chat' });
-    const responseRejected = client.interceptors.response.use.mock.calls[0][1] as (
-      error: { response?: { status?: number; headers?: Record<string, string> } },
-    ) => Promise<never>;
+    const responseRejected = client.interceptors.response.use.mock.calls[0][1] as (error: {
+      response?: { status?: number; headers?: Record<string, string> };
+    }) => Promise<never>;
 
     await expect(
       responseRejected({
@@ -182,7 +177,9 @@ describe('ChatService', () => {
 
     const service = new ChatService({ baseUrl: 'http://localhost:8080/api/chat' });
 
-    expect((service as unknown as { createStreamConnection?: unknown }).createStreamConnection).toBeUndefined();
+    expect(
+      (service as unknown as { createStreamConnection?: unknown }).createStreamConnection,
+    ).toBeUndefined();
     expect((service as unknown as { sendMessage?: unknown }).sendMessage).toBeUndefined();
   });
 

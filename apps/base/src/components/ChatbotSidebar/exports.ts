@@ -12,10 +12,7 @@ export { ChatbotProvider, useChatbot, useToolRegistry } from './common/ChatbotPr
 export { useChatbotController } from './common/useController';
 
 // Assistant-UI Runtime
-export {
-  AssistantUIRuntimeProvider,
-  useAssistantUIRuntime,
-} from './AssistantUIRuntimeProvider';
+export { AssistantUIRuntimeProvider, useAssistantUIRuntime } from './AssistantUIRuntimeProvider';
 
 // Generative UI
 export {

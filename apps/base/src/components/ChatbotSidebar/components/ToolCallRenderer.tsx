@@ -35,7 +35,13 @@ export const ToolCallRenderer: React.FC<ToolCallRendererProps> = ({
 
   // Determine status
   const hasResult = result !== undefined || isError !== undefined;
-  const status = isError ? 'failed' : hasResult ? 'completed' : requiresConfirmation ? 'pending' : 'running';
+  const status = isError
+    ? 'failed'
+    : hasResult
+      ? 'completed'
+      : requiresConfirmation
+        ? 'pending'
+        : 'running';
 
   return (
     <Paper
