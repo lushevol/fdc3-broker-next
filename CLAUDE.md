@@ -85,6 +85,12 @@ This project is a micro front-end architecture, multiple services will be starte
 # Start all services
 npm run dev
 
+# Only start UI services
+npm run dev:ui
+
+# Only start backend services
+npm run dev:services
+
 # Stop all services
 npm run stop
 

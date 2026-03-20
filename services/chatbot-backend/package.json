@@ -1,0 +1,7 @@
+{
+  "name": "chatbot-backend",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8080 -Dspring.profiles.active=local'"
+  }
+}
