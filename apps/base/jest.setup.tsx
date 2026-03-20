@@ -59,6 +59,12 @@ jest.mock('@assistant-ui/react', () => {
   };
 
   return {
+    AssistantModalPrimitive: {
+      Root: MockPrimitive,
+      Anchor: MockPrimitive,
+      Trigger: MockPrimitive,
+      Content: MockPrimitive,
+    },
     ThreadPrimitive: {
       Root: MockPrimitive,
       Viewport: MockPrimitive,

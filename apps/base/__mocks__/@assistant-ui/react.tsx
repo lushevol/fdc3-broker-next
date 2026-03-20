@@ -69,6 +69,13 @@ export const BranchPickerPrimitive = {
   Count: MockPrimitive,
 };
 
+export const AssistantModalPrimitive = {
+  Root: MockPrimitive,
+  Anchor: MockPrimitive,
+  Trigger: MockPrimitive,
+  Content: MockPrimitive,
+};
+
 // Create a mock runtime that matches assistant-ui's expected structure
 const createMockRuntime = (config: any) => {
   const messages = config.messages || [];

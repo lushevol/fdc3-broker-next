@@ -101,11 +101,7 @@ export interface RegisteredComponentProps {
 
 // Chatbot sidebar props
 export interface ChatbotSidebarProps {
-  isOpen?: boolean;
-  onToggle?: () => void;
-  apiUrl?: string;
-  position?: 'left' | 'right';
-  width?: number | string;
+  className?: string;
 }
 
 // Default generative component props

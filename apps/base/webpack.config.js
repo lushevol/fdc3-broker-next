@@ -44,6 +44,13 @@ module.exports = (webpackConfigEnv, argv) => {
     mode,
     devtool,
     entry: path.resolve(__dirname, "src", "root"),
+    resolve: {
+      ...defaultConfig.resolve,
+      alias: {
+        ...(defaultConfig.resolve?.alias || {}),
+        "@": path.resolve(__dirname, "src", "next-packages"),
+      },
+    },
     devServer: {
       port,
       // headers: {

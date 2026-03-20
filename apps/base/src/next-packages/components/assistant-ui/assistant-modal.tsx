@@ -11,14 +11,14 @@ import { TooltipIconButton } from '@/components/assistant-ui/tooltip-icon-button
 export const AssistantModal: FC = () => {
   return (
     <AssistantModalPrimitive.Root>
-      <AssistantModalPrimitive.Anchor className="aui-root aui-modal-anchor fixed right-4 bottom-4 size-11">
+      <AssistantModalPrimitive.Anchor className="aui-root aui-modal-anchor fixed right-4 bottom-4 size-12">
         <AssistantModalPrimitive.Trigger asChild>
           <AssistantModalButton />
         </AssistantModalPrimitive.Trigger>
       </AssistantModalPrimitive.Anchor>
       <AssistantModalPrimitive.Content
         sideOffset={16}
-        className="aui-root aui-modal-content data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom-1/2 data-[state=closed]:slide-out-to-right-1/2 data-[state=closed]:zoom-out data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-1/2 data-[state=open]:slide-in-from-right-1/2 data-[state=open]:zoom-in z-50 h-125 w-100 overflow-clip overscroll-contain rounded-xl border bg-popover p-0 text-popover-foreground shadow-md outline-none data-[state=closed]:animate-out data-[state=open]:animate-in [&>.aui-thread-root]:bg-inherit [&>.aui-thread-root_.aui-thread-viewport-footer]:bg-inherit"
+        className="aui-root aui-modal-content data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom-1/2 data-[state=closed]:slide-out-to-right-1/2 data-[state=closed]:zoom-out data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-1/2 data-[state=open]:slide-in-from-right-1/2 data-[state=open]:zoom-in z-50 h-[min(46rem,calc(100vh-5rem))] w-[min(26rem,calc(100vw-2rem))] overflow-clip overscroll-contain rounded-[1.75rem] border border-border/70 bg-popover/95 p-0 text-popover-foreground shadow-[0_24px_80px_-28px_rgba(15,23,42,0.45)] backdrop-blur-xl outline-none data-[state=closed]:animate-out data-[state=open]:animate-in [&>.aui-thread-root]:bg-inherit [&>.aui-thread-root_.aui-thread-viewport-footer]:bg-inherit"
       >
         <Thread />
       </AssistantModalPrimitive.Content>
@@ -38,17 +38,17 @@ const AssistantModalButton = forwardRef<HTMLButtonElement, AssistantModalButtonP
         tooltip={tooltip}
         side="left"
         {...rest}
-        className="aui-modal-button size-full rounded-full shadow transition-transform hover:scale-110 active:scale-90"
+        className="aui-modal-button size-full rounded-full border border-border/60 bg-[linear-gradient(180deg,color-mix(in_oklab,var(--aui-primary)_92%,white_8%)_0%,var(--aui-primary)_100%)] text-primary-foreground shadow-[0_18px_38px_-18px_rgba(15,23,42,0.55)] transition-[transform,box-shadow,filter] duration-200 hover:scale-[1.03] hover:shadow-[0_22px_44px_-18px_rgba(15,23,42,0.6)] active:scale-[0.97]"
         ref={ref}
       >
         <BotIcon
           data-state={state}
-          className="aui-modal-button-closed-icon absolute size-6 transition-all data-[state=closed]:rotate-0 data-[state=open]:rotate-90 data-[state=closed]:scale-100 data-[state=open]:scale-0"
+          className="aui-modal-button-closed-icon absolute size-6 transition-all duration-200 data-[state=closed]:rotate-0 data-[state=open]:rotate-90 data-[state=closed]:scale-100 data-[state=open]:scale-0"
         />
 
         <ChevronDownIcon
           data-state={state}
-          className="aui-modal-button-open-icon absolute size-6 transition-all data-[state=closed]:-rotate-90 data-[state=open]:rotate-0 data-[state=closed]:scale-0 data-[state=open]:scale-100"
+          className="aui-modal-button-open-icon absolute size-6 transition-all duration-200 data-[state=closed]:-rotate-90 data-[state=open]:rotate-0 data-[state=closed]:scale-0 data-[state=open]:scale-100"
         />
         <span className="aui-sr-only sr-only">{tooltip}</span>
       </TooltipIconButton>
