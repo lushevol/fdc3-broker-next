@@ -1,13 +1,32 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Purpose: Micro-frontend platform for financial desktop applications, focused
+  on FDC3 2.2 interoperability across tiles and containers.
+
+  Tech stack:
+  - TypeScript and JavaScript
+  - React
+  - Single-SPA and Webpack 5 Module Federation
+  - Material UI (@mui/material, @mui/x-data-grid)
+  - RxJS
+  - npm workspaces and Turbo Repo
+  - Webpack for apps, tsup for packages
+  - Jest for apps, Vitest for packages
+  - ESLint, Prettier, and Biome
+
+  Project conventions:
+  - Keep a clear separation between apps/ and packages/
+  - Shared FDC3-related workspace packages use the ratan- import conventions
+  - Pre-commit hooks run through Husky
+  - Follow the existing Module Federation and Single-SPA orchestration patterns
+
+  Domain context:
+  - FDC3 2.2 compliance is a core requirement
+  - The platform targets financial desktop interoperability workflows
+  - OpenFin compatibility matters where relevant
+  - Core packages include fdc3-broker, fdc3-agent, fdc3-app-directory, and
+    fdc3-resolver-ui
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
