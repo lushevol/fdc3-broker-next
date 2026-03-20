@@ -60,4 +60,3 @@ The system SHALL allow registration of tools that can be executed by the AI agen
 - **WHEN** a tool is marked as requiring user confirmation
 - **THEN** the system SHALL surface that pending state to the client before execution
 - **AND** the confirmation endpoint SHALL resume or cancel the pending tool call using the same conversation and tool call identifiers
-

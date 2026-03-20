@@ -123,15 +123,15 @@ const MyComponent = () => {
 
 The frontend expects the backend stream to emit these named events:
 
-| Event | Purpose |
-| ----- | ------- |
-| `conversation_id` | Conversation identifier for new or resumed chats |
-| `message` | Incremental assistant text chunks |
-| `tool_call` | Tool invocation update with stable tool call ID, arguments, and status |
-| `tool_result` | Tool result or cancellation payload for a prior `tool_call` |
-| `generative_ui` | Data payload for inline generative UI rendering |
-| `error` | Terminal stream error |
-| `done` | End-of-turn marker after all text/tool/UI events are emitted |
+| Event             | Purpose                                                                |
+| ----------------- | ---------------------------------------------------------------------- |
+| `conversation_id` | Conversation identifier for new or resumed chats                       |
+| `message`         | Incremental assistant text chunks                                      |
+| `tool_call`       | Tool invocation update with stable tool call ID, arguments, and status |
+| `tool_result`     | Tool result or cancellation payload for a prior `tool_call`            |
+| `generative_ui`   | Data payload for inline generative UI rendering                        |
+| `error`           | Terminal stream error                                                  |
+| `done`            | End-of-turn marker after all text/tool/UI events are emitted           |
 
 Tool payloads can enter `pending` status when a tool requires confirmation. The confirmation endpoint uses the same `conversationId` and `toolCallId` to resume or cancel execution.
 

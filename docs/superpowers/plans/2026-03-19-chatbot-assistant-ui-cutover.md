@@ -12,29 +12,30 @@
 
 ## File Structure
 
-| File | Purpose |
-| --- | --- |
-| `apps/base/src/components/ChatbotSidebar/AssistantUIRuntimeProvider.tsx` | MODIFY: make assistant-ui runtime the only chat state/stream owner |
-| `apps/base/src/components/ChatbotSidebar/index.tsx` | MODIFY: render sidebar directly against the single runtime path |
-| `apps/base/src/components/ChatbotSidebar/common/useController.ts` | MODIFY or DELETE: remove independent SSE/state logic; leave only a thin compatibility projection if required |
-| `apps/base/src/components/ChatbotSidebar/common/ChatbotProvider.tsx` | MODIFY: stop behaving like an alternate chat runtime; keep only sidebar/open-state context responsibilities |
-| `apps/base/src/components/ChatbotSidebar/common/ChatService.ts` | MODIFY or STOP EXPORTING: remove legacy runtime coupling if it is no longer needed |
-| `apps/base/src/components/ChatbotSidebar/exports.ts` | MODIFY: narrow public surface to the single-runtime architecture |
-| `apps/base/src/components/ChatbotSidebar/adapters/sseToAssistantUi.ts` | MODIFY: ensure adapter remains the only SSE event translation layer |
-| `apps/base/src/components/ChatbotSidebar/__tests__/AssistantUIRuntimeProvider.test.tsx` | MODIFY: cover streaming, retry, clear conversation, error handling |
-| `apps/base/src/components/ChatbotSidebar/__tests__/ChatbotSidebar.test.tsx` | MODIFY: verify sidebar behavior through assistant-ui path only |
-| `apps/base/src/components/ChatbotSidebar/__tests__/ChatbotProvider.test.tsx` | MODIFY: verify reduced provider behavior or delete obsolete coverage |
-| `apps/base/src/components/ChatbotSidebar/__tests__/useChatbotController.test.ts` | MODIFY: verify compatibility projection only, or delete if hook is removed |
-| `apps/base/src/components/ChatbotSidebar/__tests__/ChatService.test.ts` | MODIFY or DELETE: match the post-cutover service surface |
-| `services/chatbot-backend/src/main/java/com/fdc3/chatbot/service/ChatService.java` | MODIFY: keep assistant message completion/tool event semantics stable if needed |
-| `services/chatbot-backend/src/main/java/com/fdc3/chatbot/agent/AgentService.java` | MODIFY: keep explicit live-tool-confirmation limitation and stable tool event flow |
-| `services/chatbot-backend/src/test/java/com/fdc3/chatbot/service/ChatServiceTest.java` | MODIFY: validate stream/history behavior expected by frontend |
-| `services/chatbot-backend/src/test/java/com/fdc3/chatbot/controller/ChatControllerTest.java` | MODIFY: validate SSE event contract stability |
-| `docs/superpowers/specs/2026-03-18-chatbot-assistant-ui-cutover-design.md` | REFERENCE: approved design for this plan |
+| File                                                                                         | Purpose                                                                                                      |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `apps/base/src/components/ChatbotSidebar/AssistantUIRuntimeProvider.tsx`                     | MODIFY: make assistant-ui runtime the only chat state/stream owner                                           |
+| `apps/base/src/components/ChatbotSidebar/index.tsx`                                          | MODIFY: render sidebar directly against the single runtime path                                              |
+| `apps/base/src/components/ChatbotSidebar/common/useController.ts`                            | MODIFY or DELETE: remove independent SSE/state logic; leave only a thin compatibility projection if required |
+| `apps/base/src/components/ChatbotSidebar/common/ChatbotProvider.tsx`                         | MODIFY: stop behaving like an alternate chat runtime; keep only sidebar/open-state context responsibilities  |
+| `apps/base/src/components/ChatbotSidebar/common/ChatService.ts`                              | MODIFY or STOP EXPORTING: remove legacy runtime coupling if it is no longer needed                           |
+| `apps/base/src/components/ChatbotSidebar/exports.ts`                                         | MODIFY: narrow public surface to the single-runtime architecture                                             |
+| `apps/base/src/components/ChatbotSidebar/adapters/sseToAssistantUi.ts`                       | MODIFY: ensure adapter remains the only SSE event translation layer                                          |
+| `apps/base/src/components/ChatbotSidebar/__tests__/AssistantUIRuntimeProvider.test.tsx`      | MODIFY: cover streaming, retry, clear conversation, error handling                                           |
+| `apps/base/src/components/ChatbotSidebar/__tests__/ChatbotSidebar.test.tsx`                  | MODIFY: verify sidebar behavior through assistant-ui path only                                               |
+| `apps/base/src/components/ChatbotSidebar/__tests__/ChatbotProvider.test.tsx`                 | MODIFY: verify reduced provider behavior or delete obsolete coverage                                         |
+| `apps/base/src/components/ChatbotSidebar/__tests__/useChatbotController.test.ts`             | MODIFY: verify compatibility projection only, or delete if hook is removed                                   |
+| `apps/base/src/components/ChatbotSidebar/__tests__/ChatService.test.ts`                      | MODIFY or DELETE: match the post-cutover service surface                                                     |
+| `services/chatbot-backend/src/main/java/com/fdc3/chatbot/service/ChatService.java`           | MODIFY: keep assistant message completion/tool event semantics stable if needed                              |
+| `services/chatbot-backend/src/main/java/com/fdc3/chatbot/agent/AgentService.java`            | MODIFY: keep explicit live-tool-confirmation limitation and stable tool event flow                           |
+| `services/chatbot-backend/src/test/java/com/fdc3/chatbot/service/ChatServiceTest.java`       | MODIFY: validate stream/history behavior expected by frontend                                                |
+| `services/chatbot-backend/src/test/java/com/fdc3/chatbot/controller/ChatControllerTest.java` | MODIFY: validate SSE event contract stability                                                                |
+| `docs/superpowers/specs/2026-03-18-chatbot-assistant-ui-cutover-design.md`                   | REFERENCE: approved design for this plan                                                                     |
 
 ## Task 1: Lock the Public Frontend Cutover Surface
 
 **Files:**
+
 - Modify: `apps/base/src/components/ChatbotSidebar/exports.ts`
 - Modify: `apps/base/src/components/ChatbotSidebar/common/useController.ts`
 - Modify: `apps/base/src/components/ChatbotSidebar/common/ChatbotProvider.tsx`
@@ -154,6 +155,7 @@ git commit -m "refactor: remove legacy chatbot runtime surface"
 ## Task 2: Make the Sidebar Use Only the Assistant-UI Runtime Path
 
 **Files:**
+
 - Modify: `apps/base/src/components/ChatbotSidebar/index.tsx`
 - Modify: `apps/base/src/components/ChatbotSidebar/AssistantUIRuntimeProvider.tsx`
 - Modify: `apps/base/src/components/ChatbotSidebar/adapters/sseToAssistantUi.ts`
@@ -254,6 +256,7 @@ git commit -m "refactor: route chatbot sidebar through assistant-ui runtime"
 ## Task 3: Delete or Narrow Legacy Service Layer Pieces
 
 **Files:**
+
 - Modify: `apps/base/src/components/ChatbotSidebar/common/ChatService.ts`
 - Modify: `apps/base/src/components/ChatbotSidebar/exports.ts`
 - Test: `apps/base/src/components/ChatbotSidebar/__tests__/ChatService.test.ts`
@@ -324,6 +327,7 @@ git commit -m "refactor: narrow legacy chatbot service surface"
 ## Task 4: Keep the Backend SSE Contract Predictable for the Cutover
 
 **Files:**
+
 - Modify: `services/chatbot-backend/src/main/java/com/fdc3/chatbot/service/ChatService.java`
 - Modify: `services/chatbot-backend/src/main/java/com/fdc3/chatbot/agent/AgentService.java`
 - Test: `services/chatbot-backend/src/test/java/com/fdc3/chatbot/service/ChatServiceTest.java`
@@ -405,6 +409,7 @@ git commit -m "test: lock chatbot streaming contract for assistant-ui cutover"
 ## Task 5: Run End-to-End Verification for the Cutover
 
 **Files:**
+
 - Modify as needed: any files above based on final integration failures
 - Reference: `docs/superpowers/specs/2026-03-18-chatbot-assistant-ui-cutover-design.md`
 

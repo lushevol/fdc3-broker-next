@@ -23,14 +23,14 @@ A Spring Boot-based AI chatbot backend service that provides conversational AI c
 
 The service uses the following environment variables for configuration:
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `CHATBOT_OPENAI_API_KEY` | Yes* | - | Your OpenAI API key |
-| `CHATBOT_OPENAI_BASE_URL` | No | `https://api.openai.com` | OpenAI API base URL |
-| `CHATBOT_OPENAI_MODEL` | No | `gpt-4` | OpenAI model to use |
-| `CHATBOT_OPENAI_TEMPERATURE` | No | `0.7` | Temperature for response generation |
-| `CHATBOT_ANTHROPIC_API_KEY` | No | - | Anthropic API key (optional) |
-| `CHATBOT_ANTHROPIC_MODEL` | No | `claude-3-sonnet-20240229` | Anthropic model to use |
+| Variable                     | Required | Default                    | Description                         |
+| ---------------------------- | -------- | -------------------------- | ----------------------------------- |
+| `CHATBOT_OPENAI_API_KEY`     | Yes\*    | -                          | Your OpenAI API key                 |
+| `CHATBOT_OPENAI_BASE_URL`    | No       | `https://api.openai.com`   | OpenAI API base URL                 |
+| `CHATBOT_OPENAI_MODEL`       | No       | `gpt-4`                    | OpenAI model to use                 |
+| `CHATBOT_OPENAI_TEMPERATURE` | No       | `0.7`                      | Temperature for response generation |
+| `CHATBOT_ANTHROPIC_API_KEY`  | No       | -                          | Anthropic API key (optional)        |
+| `CHATBOT_ANTHROPIC_MODEL`    | No       | `claude-3-sonnet-20240229` | Anthropic model to use              |
 
 \* Required when `chatbot.mock.enabled=false`
 
@@ -51,12 +51,14 @@ In mock mode, the service simulates AI responses without calling external APIs.
 ### Local Development
 
 1. **Set environment variables:**
+
    ```bash
    export CHATBOT_OPENAI_API_KEY="your-api-key-here"
    export CHATBOT_OPENAI_BASE_URL="https://api.openai.com"
    ```
 
 2. **Build and run with Maven:**
+
    ```bash
    cd services/chatbot-backend
    ./mvnw spring-boot:run
@@ -81,6 +83,7 @@ CHATBOT_OPENAI_TEMPERATURE=0.7
 ```
 
 Then source it before running:
+
 ```bash
 source .env
 ./mvnw spring-boot:run
@@ -101,15 +104,18 @@ ENTRYPOINT ["java", "-jar", "/app.jar"]
 The service exposes the following REST endpoints:
 
 ### Health Check
+
 - **GET** `/api/chat/health` - Service health check
 
 ### Chat Endpoints
+
 - **POST** `/api/chat` - Send a message and get a complete response
 - **GET** `/api/chat/stream` - Send a message and receive streaming SSE response
 - **GET** `/api/chat/{conversationId}/history` - Get conversation history
 - **DELETE** `/api/chat/{conversationId}` - Clear a conversation
 
 ### Tool Management
+
 - **POST** `/api/chat/{conversationId}/tools/{toolCallId}/confirm` - Confirm/cancel tool execution
 
 For full API documentation, see [API.md](docs/API.md).

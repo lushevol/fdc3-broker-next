@@ -134,7 +134,9 @@ const Home: React.FC = (): ReactElement => {
             </Box>
           </main>
           {showTimeout && <Timeout setOpen={setShowTimeout} />}
-          {channelMessage && <Snackbar message={channelMessage} open={true} onClose={clearMessage} />}
+          {channelMessage && (
+            <Snackbar message={channelMessage} open={true} onClose={clearMessage} />
+          )}
           <ChatbotSidebar />
         </Root>
       </ChatbotProvider>

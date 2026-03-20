@@ -13,9 +13,11 @@ The current chatbot flow is split between custom sidebar UI, bespoke frontend st
 ## Capabilities
 
 ### New Capabilities
+
 <!-- None -->
 
 ### Modified Capabilities
+
 - `assistant-ui-integration`: Expand the runtime adapter and component requirements to support full assistant-ui adoption, including hooks, streaming lifecycle, and tool-call rendering semantics.
 - `chatbot-backend`: Update chat streaming and tool execution requirements so backend events, conversation state, and error handling support the assistant-ui runtime contract.
 - `chatbot-sidebar`: Update sidebar behavior and exported hook/component requirements to reflect the new assistant-ui-driven UX and interaction model.

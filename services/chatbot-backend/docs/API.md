@@ -81,15 +81,15 @@ data:
 
 **Event Types:**
 
-| Event           | Description                           |
-| --------------- | ------------------------------------- |
-| conversation_id | Sent first with the conversation UUID |
-| message         | Streamed text chunks                  |
+| Event           | Description                                                                      |
+| --------------- | -------------------------------------------------------------------------------- |
+| conversation_id | Sent first with the conversation UUID                                            |
+| message         | Streamed text chunks                                                             |
 | tool_call       | Stable tool lifecycle update with tool call ID, tool name, arguments, and status |
-| tool_result     | Tool result or cancellation payload referencing the same tool call ID |
-| generative_ui   | Structured UI directive for assistant-ui data rendering |
-| error           | Error message                         |
-| done            | Stream complete                       |
+| tool_result     | Tool result or cancellation payload referencing the same tool call ID            |
+| generative_ui   | Structured UI directive for assistant-ui data rendering                          |
+| error           | Error message                                                                    |
+| done            | Stream complete                                                                  |
 
 ### GET /api/chat/{conversationId}/history
 
