@@ -302,7 +302,7 @@ export function handleSSEEvent(
         (m) => m.id === streamingState.assistantMessageId,
       );
 
-      let updatedMessages = [...messages];
+      const updatedMessages = [...messages];
 
       if (assistantMessageIndex === -1) {
         // Create new assistant message

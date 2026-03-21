@@ -5,7 +5,6 @@
  */
 
 import type {
-  SSEEventType,
   ToolCall,
   ToolResult,
   GenerativeUIDirective,

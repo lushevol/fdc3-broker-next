@@ -358,11 +358,6 @@ describe('AssistantUIRuntime - SSE Integration', () => {
   });
 
   it('should establish EventSource connection with correct URL', () => {
-    const TestComponent = () => {
-      const runtime = useAssistantUIRuntime();
-      return <div data-testid="runtime">{runtime.isLoading ? 'loading' : 'idle'}</div>;
-    };
-
     // This test would need more complex setup to verify EventSource URL
     // For now, just verify the component renders
     expect(true).toBe(true);
