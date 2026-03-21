@@ -22,11 +22,35 @@ module.exports = (webpackConfigEnv, argv) => {
     webpackConfigEnv,
     argv,
   });
+  const isStandalone = Boolean(webpackConfigEnv && webpackConfigEnv.standalone);
+
+  defaultConfig.module.rules = defaultConfig.module.rules.map((rule) => {
+    if (String(rule.test) === "/\\.css$/i" || String(rule.test) === "/\\.module\\.css$/i") {
+      return {
+        ...rule,
+        use: [
+          ...rule.use,
+          {
+            loader: require.resolve("postcss-loader"),
+          },
+        ],
+      };
+    }
+
+    return rule;
+  });
 
   return merge(defaultConfig, {
     mode,
     devtool,
     entry: path.resolve(__dirname, "src", "root"),
+    resolve: {
+      ...defaultConfig.resolve,
+      alias: {
+        ...(defaultConfig.resolve?.alias || {}),
+        "@": path.resolve(__dirname, "src", "next-packages"),
+      },
+    },
     devServer: {
       port,
       // headers: {
@@ -36,7 +60,7 @@ module.exports = (webpackConfigEnv, argv) => {
     },
     output: {
       filename: "base.js",
-      publicPath: `http://localhost:${port}/`,
+      publicPath: isStandalone ? "" : `http://localhost:${port}/`,
       chunkFilename: "[chunkhash].[name].base.js",
     },
     // optimization: {

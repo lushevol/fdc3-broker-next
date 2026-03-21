@@ -33,7 +33,6 @@ const Root = styled('section')(({ theme }) => ({
     [`& .${classes.bg}`]: {
       width: '399px',
       height: '353px',
-      backgroundImage: `url(${bg})`,
     },
   },
   [`& .${classes.button}`]: {

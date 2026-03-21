@@ -10,6 +10,8 @@ module.exports = (webpackConfigEnv, argv) => {
   const port = process.env.port;
   const mode = process.env.mode;
   const orgName = process.env.orgName;
+  const useBackendAuth =
+    process.env.useBackendAuth?.toLocaleLowerCase() === "true";
   const devtool =
     process.env.devtool.toLocaleLowerCase() === "false"
       ? false
@@ -60,8 +62,16 @@ module.exports = (webpackConfigEnv, argv) => {
           throw new Error("webpack-dev-server is not defined");
         }
 
-        const exp = Math.floor(Date.now() / 1000) + 12 * 60 * 60;
-        const token = generateJWT({ exp, iat: Math.floor(Date.now() / 1000) });
+        const issuedAt = Math.floor(Date.now() / 1000);
+        const expiresAt = issuedAt + 12 * 60 * 60;
+        const token = generateJWT({
+          sub: "1481696",
+          iat: issuedAt,
+          auth_time: issuedAt,
+          exp: expiresAt,
+          max_age: expiresAt,
+          oud: mockLoginResp.oud,
+        });
 
         // In-memory store for FDC3 data
         const fdc3Store = {
@@ -99,17 +109,57 @@ module.exports = (webpackConfigEnv, argv) => {
           res.end(JSON.stringify({ code: 200, message: "success", data }));
         };
 
-        // Login Mock
-        middlewares.unshift({
-          name: "mock-login",
-          path: "/api/auth/v2/sso/login",
-          middleware: (req, res) => {
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "application/json");
-            res.setHeader("single-ui-authorization", `Bearer ${token}`);
-            res.end(JSON.stringify(mockLoginResp));
-          },
-        });
+        const sendAuthResponse = (res, extraHeaders = {}) => {
+          res.statusCode = 200;
+          res.setHeader("Content-Type", "application/json");
+          res.setHeader("single-ui-authorization", `Bearer ${token}`);
+          Object.entries(extraHeaders).forEach(([headerName, headerValue]) => {
+            res.setHeader(headerName, headerValue);
+          });
+          res.end(JSON.stringify(mockLoginResp));
+        };
+
+        if (!useBackendAuth) {
+          middlewares.unshift({
+            name: "mock-login",
+            path: "/api/auth/v2/sso/login",
+            middleware: (req, res) => {
+              sendAuthResponse(res);
+            },
+          });
+
+          middlewares.unshift({
+            name: "mock-validate",
+            path: "/api/auth/v2/sso/validate",
+            middleware: (req, res) => {
+              sendAuthResponse(res);
+            },
+          });
+
+          middlewares.unshift({
+            name: "mock-extend",
+            path: "/api/auth/v2/sso/extend",
+            middleware: (req, res) => {
+              sendAuthResponse(res);
+            },
+          });
+
+          middlewares.unshift({
+            name: "mock-refresh-token",
+            path: "/api/auth/v2/sso/refreshtoken",
+            middleware: (req, res) => {
+              sendAuthResponse(res, { "single-ui-refresh": "mock-refresh-token" });
+            },
+          });
+
+          middlewares.unshift({
+            name: "mock-relogin",
+            path: "/api/auth/v2/sso/relogin",
+            middleware: (req, res) => {
+              sendAuthResponse(res, { "single-ui-refresh": "mock-refresh-token" });
+            },
+          });
+        }
 
         // --- FDC3 Intents Mocks ---
         middlewares.unshift({
@@ -275,6 +325,13 @@ module.exports = (webpackConfigEnv, argv) => {
         {
           context: ["/api/auth/"],
           pathRewrite: { "^/api/auth": "" },
+          target: "http://localhost:8088",
+          secure: false,
+          changeOrigin: true,
+        },
+        {
+          context: ["/api/analytics/"],
+          pathRewrite: { "^/api/analytics": "" },
           target: "http://localhost:8088",
           secure: false,
           changeOrigin: true,

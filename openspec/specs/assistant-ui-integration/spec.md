@@ -2,19 +2,21 @@
 
 ### Requirement: assistant-ui runtime provider is configured
 
-The system SHALL provide a runtime provider that integrates assistant-ui's ThreadRuntime with the existing SSE backend.
+The system SHALL provide a single assistant-ui runtime provider that integrates assistant-ui's thread runtime with the chatbot SSE backend and serves as the canonical source of frontend chat state.
 
 #### Scenario: Runtime is initialized with API URL
 
 - **WHEN** the `ChatbotSidebar` component is mounted with an `apiUrl` prop
-- **THEN** the system SHALL initialize an assistant-ui `ThreadRuntime` with a custom adapter
+- **THEN** the system SHALL initialize one assistant-ui thread runtime with a custom adapter
 - **AND** the adapter SHALL connect to the SSE stream endpoint at `{apiUrl}/stream`
+- **AND** no parallel legacy runtime SHALL manage the same conversation state
 
 #### Scenario: SSE events are transformed to assistant-ui messages
 
 - **WHEN** SSE events are received from the backend
-- **THEN** the system SHALL transform custom SSE events (`message`, `tool_call`, `tool_result`, `done`) into assistant-ui message format
-- **AND** streaming content SHALL be appended incrementally to the assistant message
+- **THEN** the system SHALL transform `conversation_id`, `message`, `tool_call`, `tool_result`, `generative_ui`, `error`, and `done` events into assistant-ui runtime updates
+- **AND** streaming text SHALL be appended incrementally to the active assistant message
+- **AND** tool and generative UI payloads SHALL be attached to the correct assistant message or thread state entry
 
 ### Requirement: ChatbotSidebar uses assistant-ui components
 
@@ -42,35 +44,36 @@ The system SHALL render the chat interface using assistant-ui's primitive compon
 
 ### Requirement: Tool calls are rendered
 
-The system SHALL display tool execution status using assistant-ui's tool rendering capabilities.
+The system SHALL display tool execution status using assistant-ui's tool rendering capabilities and the project's custom renderers.
 
 #### Scenario: Tool call is initiated
 
 - **WHEN** the assistant initiates a tool call via SSE `tool_call` event
-- **THEN** the system SHALL render a tool call card with the tool name and "running" status
-- **AND** the card SHALL be displayed inline within the assistant message
+- **THEN** the system SHALL render the tool call inline within the relevant assistant turn
+- **AND** the renderer SHALL display the tool name, call identifier, and current execution status
 
 #### Scenario: Tool result is received
 
 - **WHEN** a `tool_result` SSE event is received
-- **THEN** the system SHALL update the tool call status to "completed" or "failed"
-- **AND** the result or error SHALL be displayed in the tool call card
+- **THEN** the system SHALL update the matching tool call entry using the tool call identifier
+- **AND** the renderer SHALL display the completed result, failure state, or confirmation-needed state without losing previously streamed assistant text
 
 ### Requirement: Backward compatibility is maintained
 
-The system SHALL maintain the existing `ChatbotSidebarProps` interface for consuming MFEs.
+The system SHALL maintain the existing `ChatbotSidebarProps` interface for consuming MFEs while routing exported chatbot behavior through the assistant-ui runtime.
 
 #### Scenario: Component accepts existing props
 
 - **WHEN** an MFE imports and uses `ChatbotSidebar` with `isOpen`, `onToggle`, `apiUrl`, `position`, or `width` props
 - **THEN** the component SHALL accept and respect these props
-- **AND** the behavior SHALL match the pre-migration implementation
+- **AND** the assistant-ui runtime SHALL be configured internally without requiring consumer changes
 
 #### Scenario: Module Federation exports remain compatible
 
-- **WHEN** an MFE imports `ChatbotSidebar` or `useChatbot` from the base MFE
-- **THEN** the exports SHALL be available and functional
-- **AND** assistant-ui hooks SHALL be additionally exported for optional use
+- **WHEN** an MFE imports `ChatbotSidebar`, `useChatbot`, or `useChatbotController` from the base MFE
+- **THEN** the exports SHALL remain available
+- **AND** their behavior SHALL be backed by the assistant-ui runtime or documented compatibility wrappers
+- **AND** assistant-ui hooks MAY be exported in addition to the compatibility surface
 
 ### Requirement: SSE connection management
 
@@ -96,19 +99,21 @@ The system SHALL manage SSE connections properly with cleanup and error handling
 
 ### Requirement: Thread management functions work
 
-The system SHALL support conversation management via assistant-ui's thread API.
+The system SHALL support conversation management via assistant-ui's thread API and keep that behavior aligned with backend conversation state.
 
 #### Scenario: New conversation is started
 
 - **WHEN** user clicks the "New Chat" button
-- **THEN** the system SHALL clear the current thread state
-- **AND** the conversationId SHALL be reset to null
+- **THEN** the system SHALL clear the current assistant-ui thread state
+- **AND** the conversationId SHALL be reset before the next message is sent
+- **AND** subsequent messages SHALL start a new backend conversation
 
 #### Scenario: Message retry is supported
 
 - **WHEN** an error occurs during message streaming
-- **THEN** the system SHALL enable the retry button
-- **AND** clicking retry SHALL resend the last user message
+- **THEN** the system SHALL enable retry for the last user turn through the assistant-ui runtime
+- **AND** clicking retry SHALL resend the last user message against the correct conversation context
+- **AND** stale failed assistant/tool state from the previous attempt SHALL NOT remain attached to the retried turn
 
 ### Requirement: Generative UI components render
 
