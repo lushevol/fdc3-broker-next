@@ -50,12 +50,14 @@ describe('root-config local integration', () => {
 
     const middlewarePaths = middlewares.map((middleware) => middleware.path).filter(Boolean);
 
-    expect(middlewarePaths).toEqual(expect.arrayContaining([
-      '/api/auth/v2/sso/login',
-      '/api/auth/v2/sso/validate',
-      '/api/auth/v2/sso/extend',
-      '/api/auth/v2/sso/refreshtoken',
-      '/api/auth/v2/sso/relogin',
-    ]));
+    expect(middlewarePaths).toEqual(
+      expect.arrayContaining([
+        '/api/auth/v2/sso/login',
+        '/api/auth/v2/sso/validate',
+        '/api/auth/v2/sso/extend',
+        '/api/auth/v2/sso/refreshtoken',
+        '/api/auth/v2/sso/relogin',
+      ]),
+    );
   });
 });

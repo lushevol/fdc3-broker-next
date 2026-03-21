@@ -1,13 +1,12 @@
 package com.scb.sso.singleuibff.config;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.scb.sso.singleuibff.dto.elastic.Hits;
 import com.scb.sso.singleuibff.dto.elastic.Response;
-import com.scb.sso.singleuibff.dto.ems2.v2.Action;
 import com.scb.sso.singleuibff.dto.ems2.v2.Ems2Result;
 import com.scb.sso.singleuibff.dto.ems2.v2.Entity;
-import com.scb.sso.singleuibff.dto.ems2.v2.Subject;
 import com.scb.sso.singleuibff.dto.request.RequestOfAnalytics;
 import com.scb.sso.singleuibff.dto.request.RequestOfAuthenticate;
 import com.scb.sso.singleuibff.entity.ApplicationCategory;
@@ -19,8 +18,11 @@ import com.scb.sso.singleuibff.repository.Elasticsearch;
 import com.scb.sso.singleuibff.service.v1.AnalyticService;
 import com.scb.sso.singleuibff.service.v1.ApplicationCategoryService;
 import com.scb.sso.singleuibff.service.v1.AuthenticationService;
+import com.scb.sso.singleuibff.service.v1.SessionService;
 import com.scb.sso.singleuibff.service.v1.implementation.MFAAuthenticationService;
 import com.scb.sso.singleuibff.service.v2.AuthorizationService;
+import com.scb.sso.singleuibff.util.AdminModuleUtil;
+import com.scb.sso.singleuibff.util.JwtTokenUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -30,6 +32,9 @@ import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -45,23 +50,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Profile("local")
 public class LocalConfig {
 
-    private static final String MOCK_USER_TITLE = "Test Developer";
-    private static final String MOCK_ENTITY_NAME = "FMO PORTAL ADMIN";
-    private static final String MOCK_ROLE_NAME = "Admin";
-    private static final String MOCK_SUBJECT_NAME = "workspace";
-    private static final String MOCK_SUBJECT_LABEL = "Workspace";
-    private static final String MOCK_DRAWER_LABEL = "Workspace";
-    private static final String MOCK_TILE_TITLE = "Dashboard";
-    private static final String MOCK_TILE_SUBTITLE = "Local backend tile";
-    private static final String MOCK_TILE_CONTAINER = "dashboard";
-    private static final String MOCK_TILE_PATH = "home";
-    private static final long MOCK_ENTITY_ID = 1001L;
-    private static final long MOCK_ROLE_ID = 2001L;
-    private static final long MOCK_SUBJECT_ID = 3001L;
-    private static final long MOCK_ACTION_ID = 4001L;
-    private static final long MOCK_ENTITLEMENT_ID = 5001L;
     private static final long MOCK_CATEGORY_ID = 6001L;
-    private static final long MOCK_TILE_ID = 7001L;
+    private static final Path LOGIN_RESPONSE_FIXTURE_PATH =
+            Path.of(System.getProperty("user.dir"), "..", "..", "apps", "root-config", "login-resp.mock.json");
 
     @Bean
     @Primary
@@ -89,20 +80,27 @@ public class LocalConfig {
 
     @Bean
     @Primary
-    public AuthenticationService authenticationService() {
-        return new LocalAuthenticationService();
+    public LocalLoginFixture localLoginFixture(ObjectMapper objectMapper) {
+        return LocalLoginFixture.load(objectMapper);
     }
 
     @Bean
     @Primary
-    public MFAAuthenticationService mfaAuthenticationService(ObjectMapper objectMapper) {
-        return new LocalMFAAuthenticationService(objectMapper);
+    public AuthenticationService authenticationService(LocalLoginFixture localLoginFixture) {
+        return new LocalAuthenticationService(localLoginFixture);
     }
 
     @Bean
     @Primary
-    public AuthorizationService authorizationService() {
-        return new LocalAuthorizationService();
+    public MFAAuthenticationService mfaAuthenticationService(ObjectMapper objectMapper,
+            LocalLoginFixture localLoginFixture) {
+        return new LocalMFAAuthenticationService(objectMapper, localLoginFixture);
+    }
+
+    @Bean
+    @Primary
+    public AuthorizationService authorizationService(LocalLoginFixture localLoginFixture) {
+        return new LocalAuthorizationService(localLoginFixture);
     }
 
     @Bean
@@ -113,61 +111,30 @@ public class LocalConfig {
 
     @Bean
     @Primary
+    public AdminModuleUtil adminModuleUtil(
+            JwtTokenUtil jwtTokenUtil,
+            ObjectMapper objectMapper,
+            SessionService sessionService,
+            EMS2ConfigProperties ems2ConfigProperties,
+            LocalLoginFixture localLoginFixture) {
+        return new AdminModuleUtil(jwtTokenUtil, objectMapper, sessionService, ems2ConfigProperties) {
+            @Override
+            public List<String> getEntityFromApplicationCategory(List<Map<String, Object>> applicationCategories) {
+                return localLoginFixture.getEntityNames();
+            }
+
+            @Override
+            public List<Map<String, Object>> getDrawer(List<Map<String, Object>> applicationCategories, List<Entity> entities) {
+                return localLoginFixture.copyDrawers(objectMapper);
+            }
+        };
+    }
+
+    @Bean
+    @Primary
     public LdapTemplate ldapTemplate() {
         LdapContextSource contextSource = new LdapContextSource();
         return new LdapTemplate(contextSource);
-    }
-
-    private static Map<String, String> buildUserInfo(String username) {
-        Map<String, String> userInfo = Maps.newHashMap();
-        userInfo.put("uid", username);
-        userInfo.put("cn", username);
-        userInfo.put("mail", username + "@test.com");
-        userInfo.put("fullName", "Test User " + username);
-        userInfo.put("preferredLocale", "en_US");
-        userInfo.put("title", MOCK_USER_TITLE);
-        return userInfo;
-    }
-
-    private static Entity buildMockEntity() {
-        Action action = new Action();
-        action.setId(MOCK_ACTION_ID);
-        action.setEntitlementId(MOCK_ENTITLEMENT_ID);
-        action.setName("view");
-
-        Subject subject = new Subject();
-        subject.setId(MOCK_SUBJECT_ID);
-        subject.setName(MOCK_SUBJECT_NAME);
-        subject.setLongName(MOCK_SUBJECT_LABEL);
-        subject.setActions(List.of(action));
-
-        Entity entity = new Entity();
-        entity.setId(MOCK_ENTITY_ID);
-        entity.setName(MOCK_ENTITY_NAME);
-        entity.setApplicationName("Single UI");
-        entity.setRoleId(MOCK_ROLE_ID);
-        entity.setRoleName(MOCK_ROLE_NAME);
-        entity.setSubjects(List.of(subject));
-        return entity;
-    }
-
-    private static List<Map<String, Object>> buildMockDrawers() {
-        Map<String, Object> drawerRecord = new LinkedHashMap<>();
-        drawerRecord.put("application_category_id", MOCK_CATEGORY_ID);
-        drawerRecord.put("application_tile_id", MOCK_TILE_ID);
-        drawerRecord.put("label", MOCK_DRAWER_LABEL);
-        drawerRecord.put("key_name", MOCK_TILE_CONTAINER);
-        drawerRecord.put("module", MOCK_TILE_CONTAINER);
-        drawerRecord.put("tile", MOCK_TILE_PATH);
-        drawerRecord.put("title", MOCK_TILE_TITLE);
-        drawerRecord.put("subtitle", MOCK_TILE_SUBTITLE);
-        drawerRecord.put("image_dark_theme", "");
-        drawerRecord.put("image_light_theme", "");
-        drawerRecord.put("email_support", "devnull@test.com");
-        drawerRecord.put("ems2_entities", MOCK_ENTITY_NAME);
-        drawerRecord.put("ems2_subject", MOCK_SUBJECT_LABEL);
-        drawerRecord.put("is_template", false);
-        return List.of(drawerRecord);
     }
 
     private static final class LocalAnalyticService implements AnalyticService {
@@ -226,33 +193,47 @@ public class LocalConfig {
     }
 
     private static final class LocalAuthenticationService implements AuthenticationService {
+        private final LocalLoginFixture localLoginFixture;
+
+        private LocalAuthenticationService(LocalLoginFixture localLoginFixture) {
+            this.localLoginFixture = localLoginFixture;
+        }
+
         @Override
         public Map<String, String> authenticate(RequestOfAuthenticate requestOfAuthenticate) throws AuthenticationException {
-            return buildUserInfo(requestOfAuthenticate.getUsername());
+            requestOfAuthenticate.setUsername(localLoginFixture.getSubject());
+            return localLoginFixture.copyOud();
         }
     }
 
     private static final class LocalMFAAuthenticationService extends MFAAuthenticationService {
-        private LocalMFAAuthenticationService(ObjectMapper objectMapper) {
+        private final LocalLoginFixture localLoginFixture;
+
+        private LocalMFAAuthenticationService(ObjectMapper objectMapper, LocalLoginFixture localLoginFixture) {
             super(new RestTemplate(), objectMapper, new MFAConfigProperties());
+            this.localLoginFixture = localLoginFixture;
         }
 
         @Override
         public Map<String, String> authenticate(RequestOfAuthenticate requestOfAuthenticate) {
-            String username = Optional.ofNullable(requestOfAuthenticate.getUsername())
-                    .filter(value -> !value.isBlank())
-                    .orElse("mfa-user");
-            return buildUserInfo(username);
+            requestOfAuthenticate.setUsername(localLoginFixture.getSubject());
+            return localLoginFixture.copyOud();
         }
     }
 
     private static final class LocalAuthorizationService implements AuthorizationService {
+        private final LocalLoginFixture localLoginFixture;
+
+        private LocalAuthorizationService(LocalLoginFixture localLoginFixture) {
+            this.localLoginFixture = localLoginFixture;
+        }
+
         @Override
         public Ems2Result getEntitlements(String userId, List<String> tileEntities) {
             Ems2Result result = new Ems2Result();
-            result.setEntities(List.of(buildMockEntity()));
+            result.setEntities(localLoginFixture.copyEntities());
             result.setAccountName(userId);
-            result.setFullName("Test User " + userId);
+            result.setFullName(localLoginFixture.getFullName());
             result.setAccountOwner(userId);
             result.setAccountStatus("ACTIVE");
             result.setAccountType("LOCAL");
@@ -305,12 +286,92 @@ public class LocalConfig {
 
         @Override
         public Optional<List<Map<String, Object>>> getDrawers() {
-            return Optional.of(new ArrayList<>(buildMockDrawers()));
+            return Optional.of(List.of(new LinkedHashMap<>()));
         }
 
         @Override
         public Optional<Long> setApplicationCategorySeq() {
             return Optional.of(MOCK_CATEGORY_ID);
+        }
+    }
+
+    private static final class LocalLoginFixture {
+        private final String subject;
+        private final String fullName;
+        private final LinkedHashMap<String, String> oud;
+        private final List<Entity> entities;
+        private final List<Map<String, Object>> drawers;
+
+        private LocalLoginFixture(
+                String subject,
+                String fullName,
+                LinkedHashMap<String, String> oud,
+                List<Entity> entities,
+                List<Map<String, Object>> drawers) {
+            this.subject = subject;
+            this.fullName = fullName;
+            this.oud = oud;
+            this.entities = entities;
+            this.drawers = drawers;
+        }
+
+        private static LocalLoginFixture load(ObjectMapper objectMapper) {
+            try {
+                Map<String, Object> payload = objectMapper.readValue(
+                        Files.readString(LOGIN_RESPONSE_FIXTURE_PATH),
+                        new TypeReference<>() {
+                        });
+                LinkedHashMap<String, String> userInfoPayload = objectMapper.readValue(
+                        (String) payload.get("userInfo"),
+                        new TypeReference<>() {
+                        });
+                LinkedHashMap<String, String> oudPayload = objectMapper.readValue(
+                        (String) payload.get("oud"),
+                        new TypeReference<>() {
+                        });
+                List<Entity> entities = objectMapper.convertValue(
+                        payload.get("entities"),
+                        new TypeReference<>() {
+                        });
+                List<Map<String, Object>> drawers = objectMapper.convertValue(
+                        payload.get("drawers"),
+                        new TypeReference<>() {
+                        });
+                return new LocalLoginFixture(
+                        userInfoPayload.get("sub"),
+                        oudPayload.get("fullName"),
+                        oudPayload,
+                        entities,
+                        drawers);
+            } catch (IOException exception) {
+                throw new IllegalStateException("Unable to load local login fixture from " + LOGIN_RESPONSE_FIXTURE_PATH,
+                        exception);
+            }
+        }
+
+        private String getSubject() {
+            return subject;
+        }
+
+        private String getFullName() {
+            return fullName;
+        }
+
+        private LinkedHashMap<String, String> copyOud() {
+            return new LinkedHashMap<>(oud);
+        }
+
+        private List<Entity> copyEntities() {
+            return new ArrayList<>(entities);
+        }
+
+        private List<Map<String, Object>> copyDrawers(ObjectMapper objectMapper) {
+            return objectMapper.convertValue(drawers, new TypeReference<>() {
+            });
+        }
+
+        private List<String> getEntityNames() {
+            return entities.stream().map(Entity::getName).toList();
         }
     }
 }
