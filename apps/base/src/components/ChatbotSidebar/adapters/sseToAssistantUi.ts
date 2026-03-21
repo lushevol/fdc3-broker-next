@@ -159,8 +159,7 @@ export function addContentPartToAssistantMessage(
   // For tool results, find and update the corresponding tool call
   if (part.type === 'tool-result') {
     const toolCallIndex = message.content.findIndex(
-      (p): p is ToolCallContentPart =>
-        p.type === 'tool-call' && p.toolCallId === part.toolCallId,
+      (p): p is ToolCallContentPart => p.type === 'tool-call' && p.toolCallId === part.toolCallId,
     );
 
     if (toolCallIndex !== -1) {

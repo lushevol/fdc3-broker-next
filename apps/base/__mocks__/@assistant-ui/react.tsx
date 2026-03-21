@@ -110,7 +110,13 @@ export const useAssistantRuntime = () => ({
 });
 
 // Providers
-export const AssistantRuntimeProvider = ({ children, runtime }: { children: React.ReactNode; runtime: any }) => {
+export const AssistantRuntimeProvider = ({
+  children,
+  runtime,
+}: {
+  children: React.ReactNode;
+  runtime: any;
+}) => {
   // Ensure runtime is valid even in tests
   const safeRuntime = runtime || createMockRuntime({});
   return <div data-testid="assistant-runtime-provider">{children}</div>;

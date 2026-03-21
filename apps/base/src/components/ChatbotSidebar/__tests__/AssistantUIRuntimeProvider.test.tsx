@@ -4,10 +4,7 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
-import {
-  AssistantUIRuntimeProvider,
-  useAssistantUIRuntime,
-} from '../AssistantUIRuntimeProvider';
+import { AssistantUIRuntimeProvider, useAssistantUIRuntime } from '../AssistantUIRuntimeProvider';
 
 // Mock EventSource
 class MockEventSource {

@@ -5,14 +5,7 @@
  * It uses assistant-ui's ExternalStoreAdapter pattern to bridge our custom backend.
  */
 
-import React, {
-  createContext,
-  useContext,
-  useCallback,
-  useRef,
-  useState,
-  useEffect,
-} from 'react';
+import React, { createContext, useContext, useCallback, useRef, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import {
   AssistantRuntimeProvider,
@@ -205,11 +198,7 @@ export function AssistantUIRuntimeProvider({
 
       try {
         // Build SSE URL
-        const url = buildSSEUrl(
-          apiUrl,
-          textContent,
-          streamingStateRef.current.conversationId,
-        );
+        const url = buildSSEUrl(apiUrl, textContent, streamingStateRef.current.conversationId);
 
         // Create new EventSource
         const eventSource = new EventSource(url);
@@ -276,7 +265,9 @@ export function AssistantUIRuntimeProvider({
 
   const retryLastMessage = useCallback(() => {
     // Find last user message - use messagesRef.current to avoid stale closure
-    const lastUserMessageIndex = [...messagesRef.current].reverse().findIndex((m) => m.role === 'user');
+    const lastUserMessageIndex = [...messagesRef.current]
+      .reverse()
+      .findIndex((m) => m.role === 'user');
 
     if (lastUserMessageIndex === -1) return;
 

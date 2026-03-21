@@ -1,12 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import {
-  Box,
-  IconButton,
-  Typography,
-  Slide,
-  Fab,
-  useTheme,
-} from '@mui/material';
+import { Box, IconButton, Typography, Slide, Fab, useTheme } from '@mui/material';
 import {
   Close as CloseIcon,
   SmartToy as SmartToyIcon,

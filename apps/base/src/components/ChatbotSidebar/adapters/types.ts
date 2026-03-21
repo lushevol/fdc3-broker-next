@@ -41,11 +41,7 @@ export interface GenerativeUIDirective {
  * Assistant UI Content Part Types
  * Based on assistant-ui's expected format
  */
-export type ContentPartType =
-  | 'text'
-  | 'tool-call'
-  | 'tool-result'
-  | 'generative-ui';
+export type ContentPartType = 'text' | 'tool-call' | 'tool-result' | 'generative-ui';
 
 export interface TextContentPart {
   type: 'text';

@@ -17,9 +17,11 @@ The current chatbot sidebar uses custom-built UI components and state management
 ## Capabilities
 
 ### New Capabilities
+
 - `assistant-ui-integration`: Integration of assistant-ui library with MFE architecture, including runtime configuration and Module Federation exports
 
 ### Modified Capabilities
+
 <!-- No spec-level behavior changes - purely implementation migration -->
 
 ## Impact
