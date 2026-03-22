@@ -109,14 +109,21 @@ module.exports = (webpackConfigEnv, argv) => {
           res.end(JSON.stringify({ code: 200, message: "success", data }));
         };
 
-        const sendAuthResponse = (res, extraHeaders = {}) => {
+        const sendAuthResponse = (
+          res,
+          {
+            responseBody = mockLoginResp,
+            extraHeaders = {},
+          } = {},
+        ) => {
           res.statusCode = 200;
           res.setHeader("Content-Type", "application/json");
           res.setHeader("single-ui-authorization", `Bearer ${token}`);
+          res.setHeader("single-ui-refresh", `Bearer ${token}`);
           Object.entries(extraHeaders).forEach(([headerName, headerValue]) => {
             res.setHeader(headerName, headerValue);
           });
-          res.end(JSON.stringify(mockLoginResp));
+          res.end(JSON.stringify(responseBody));
         };
 
         if (!useBackendAuth) {
@@ -148,7 +155,7 @@ module.exports = (webpackConfigEnv, argv) => {
             name: "mock-refresh-token",
             path: "/api/auth/v2/sso/refreshtoken",
             middleware: (req, res) => {
-              sendAuthResponse(res, { "single-ui-refresh": "mock-refresh-token" });
+              sendAuthResponse(res, { responseBody: { result: true } });
             },
           });
 
@@ -156,7 +163,7 @@ module.exports = (webpackConfigEnv, argv) => {
             name: "mock-relogin",
             path: "/api/auth/v2/sso/relogin",
             middleware: (req, res) => {
-              sendAuthResponse(res, { "single-ui-refresh": "mock-refresh-token" });
+              sendAuthResponse(res);
             },
           });
         }
