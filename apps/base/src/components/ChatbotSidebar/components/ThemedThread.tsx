@@ -6,11 +6,7 @@
 
 import React from 'react';
 import { Box, useTheme, Typography, Paper, Avatar } from '@mui/material';
-import {
-  ThreadPrimitive,
-  ComposerPrimitive,
-  MessagePrimitive,
-} from '@assistant-ui/react';
+import { ThreadPrimitive, ComposerPrimitive, MessagePrimitive } from '@assistant-ui/react';
 import { SmartToy as SmartToyIcon, Person as PersonIcon } from '@mui/icons-material';
 import { sidebarStyles } from '../common/style';
 

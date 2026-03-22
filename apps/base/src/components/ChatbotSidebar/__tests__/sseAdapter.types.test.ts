@@ -172,7 +172,9 @@ describe('SSE Adapter Type Safety', () => {
       const result = transformToolResult(toolResult);
 
       expect((result as Extract<ContentPart, { type: 'tool-result' }>).isError).toBe(true);
-      expect((result as Extract<ContentPart, { type: 'tool-result' }>).error).toBe('Something went wrong');
+      expect((result as Extract<ContentPart, { type: 'tool-result' }>).error).toBe(
+        'Something went wrong',
+      );
     });
   });
 
@@ -247,9 +249,7 @@ describe('SSE Adapter Type Safety', () => {
       const message: AssistantUIMessage = {
         id: '1',
         role: 'assistant',
-        content: [
-          { type: 'tool-call', toolCallId: 't1', toolName: 'calc', args: {} },
-        ],
+        content: [{ type: 'tool-call', toolCallId: 't1', toolName: 'calc', args: {} }],
         createdAt: new Date(),
       };
       const resultPart: ContentPart = {

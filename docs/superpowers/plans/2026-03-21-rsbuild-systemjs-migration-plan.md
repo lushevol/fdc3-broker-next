@@ -13,6 +13,7 @@
 ### Task 1: Add a SystemJS Regression Harness Before Changing Builders
 
 **Files:**
+
 - Create: `playwright.config.ts`
 - Create: `tests/e2e/systemjs-smoke.spec.ts`
 - Create: `apps/root-config/public/systemjs-smoke.html`
@@ -152,6 +153,7 @@ git commit -m "test: add SystemJS smoke verification harness"
 ### Task 2: Migrate `apps/base` to Rsbuild While Keeping `base.js`
 
 **Files:**
+
 - Create: `apps/base/rsbuild.config.ts`
 - Modify: `apps/base/package.json`
 - Modify: `apps/base/src/root.tsx`
@@ -265,7 +267,7 @@ npm run dev --workspace apps/base
 Then, in a browser or using devtools console:
 
 ```js
-await System.import('@fm/base')
+await System.import('@fm/base');
 ```
 
 Expected: resolves successfully, exports include `bootstrap`, `mount`, and `unmount`, and the served URL remains `http://localhost:8002/base.js`.
@@ -293,6 +295,7 @@ git commit -m "build: migrate base from webpack to rsbuild"
 ### Task 3: Migrate `apps/container` to Rsbuild and Preserve Lazy System Import of `@fm/template`
 
 **Files:**
+
 - Create: `apps/container/rsbuild.config.ts`
 - Modify: `apps/container/package.json`
 - Modify: `apps/container/src/root.tsx`
@@ -376,9 +379,7 @@ During migration, verify whether the consuming path only needs a default React c
 Keep `apps/container/src/Root/import/TemplateTile.tsx` functionally equivalent to:
 
 ```ts
-const Mfe = React.lazy(() =>
-  System.import('@fm/template').then((a) => a),
-);
+const Mfe = React.lazy(() => System.import('@fm/template').then((a) => a));
 ```
 
 The migration must not replace this with federation or a static import.
@@ -414,6 +415,7 @@ git commit -m "build: migrate template container from webpack to rsbuild"
 ### Task 4: Migrate `apps/tile` to Rsbuild and Preserve `template.js`
 
 **Files:**
+
 - Create: `apps/tile/rsbuild.config.ts`
 - Modify: `apps/tile/package.json`
 - Modify: `apps/tile/src/root.tsx`
@@ -513,6 +515,7 @@ git commit -m "build: migrate template tile from webpack to rsbuild"
 ### Task 5: Clean Up Builder-Specific Debt and Lock the Final Scripts
 
 **Files:**
+
 - Modify: `apps/base/package.json`
 - Modify: `apps/container/package.json`
 - Modify: `apps/tile/package.json`
@@ -568,6 +571,7 @@ git commit -m "chore: remove legacy webpack build wiring"
 ### Task 6: Perform Final Integration Verification Through `root-config`
 
 **Files:**
+
 - Test: `tests/e2e/systemjs-smoke.spec.ts`
 
 - [ ] **Step 1: Start the full local stack**

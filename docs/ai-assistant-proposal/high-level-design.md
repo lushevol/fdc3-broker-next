@@ -1,6 +1,7 @@
 System Architecture Design: AI-Driven Platform Interoperability
+
 1. User Interface (Client) Layer
-This layer handles all user interactions, UI rendering, and state visualization. It acts as the bridge between the user, the AI, and the tenant applications.
+   This layer handles all user interactions, UI rendering, and state visualization. It acts as the bridge between the user, the AI, and the tenant applications.
 
 Platform Shell: The main application container. It handles the OpenID SSO login, renders the navigation menu, and enforces RBAC for displaying available tiles.
 
@@ -9,7 +10,7 @@ Tile Sandbox (Micro-Frontends): Secure containers where tenant web applications 
 AI Chatbot & Flow Widget: A persistent UI component. It captures natural language input, renders the conversational responses, and includes a Workflow Visualizer (e.g., a node-graph UI) that allows users to inspect parameters, track real-time execution states, and click "Approve."
 
 2. AI Agent Layer (The "Brain")
-This is where the typical AI Agent pattern is implemented. Instead of a basic LLM wrapper, it acts as an autonomous planner that uses your platform's tiles as its "Tools."
+   This is where the typical AI Agent pattern is implemented. Instead of a basic LLM wrapper, it acts as an autonomous planner that uses your platform's tiles as its "Tools."
 
 Agent Controller: The central manager for the AI. It maintains the conversational state (Short-Term Memory) and handles the back-and-forth with the user.
 
@@ -20,7 +21,7 @@ Tool Retriever (RAG): When the Planner identifies a step (e.g., "I need to look 
 Workflow Synthesizer: Converts the Planner's logical steps and selected Tools into a strict, machine-readable Directed Acyclic Graph (DAG) schema. This maps the outputs of one tool to the inputs of the next and sends it to the UI for user approval.
 
 3. Orchestration & Execution Layer (The "Muscle")
-Once the user approves the AI's proposed workflow, this layer takes over to execute it reliably across the platform.
+   Once the user approves the AI's proposed workflow, this layer takes over to execute it reliably across the platform.
 
 Workflow Engine: The state machine responsible for traversing the approved workflow graph. It tracks the status of each node (Pending, Running, Completed, Failed) and pushes real-time state updates via WebSockets back to the UI.
 
@@ -29,7 +30,7 @@ Data Context Manager: Acts as the short-term storage during execution. It catche
 Event Bus / Message Broker: The communication backbone. The Workflow Engine publishes messages here (e.g., "Open Tile X and trigger Action Y"). The Platform Shell listens to this bus, physically opens the tile on the screen, passes the payload, and waits for the Tile SDK to publish a "Success/Fail" event back to the bus.
 
 4. Capability & Persistence Layer
-The foundational data layer that allows the ecosystem to scale dynamically as new tiles are onboarded.
+   The foundational data layer that allows the ecosystem to scale dynamically as new tiles are onboarded.
 
 Capability Registry: A specialized database (potentially a vector database for semantic search) storing all registered Tile Actions. It holds the Action Names, human-readable Descriptions (crucial for the AI Tool Retriever), and the JSON Schemas for inputs/outputs.
 

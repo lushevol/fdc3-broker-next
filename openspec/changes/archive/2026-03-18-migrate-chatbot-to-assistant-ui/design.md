@@ -3,6 +3,7 @@
 The chatbot sidebar in `apps/base/src/components/ChatbotSidebar/` currently uses custom React hooks (`useChatbotController`) and Material-UI components for message rendering, input handling, and streaming state management. The backend service (`chatbot-backend`) uses SSE (Server-Sent Events) for streaming responses with a custom event protocol.
 
 assistant-ui is a React library specifically designed for AI chat interfaces that provides:
+
 - `useChatRuntime` hook for managing chat state
 - `<Thread />`, `<Message />`, `<Composer />` components for UI
 - Built-in streaming support with standard protocols
@@ -14,6 +15,7 @@ The challenge is integrating assistant-ui's opinionated patterns with our existi
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Replace custom `useChatbotController` with assistant-ui's runtime API
 - Maintain SSE streaming compatibility with existing backend
 - Preserve `ChatbotSidebarProps` interface (backward compatible for consuming MFEs)
@@ -22,6 +24,7 @@ The challenge is integrating assistant-ui's opinionated patterns with our existi
 - Follow MFE Module Federation patterns for exports
 
 **Non-Goals:**
+
 - No backend API changes
 - No changes to consuming MFEs
 - No migration of conversation history storage
@@ -61,13 +64,13 @@ The challenge is integrating assistant-ui's opinionated patterns with our existi
 
 ## Risks / Trade-offs
 
-| Risk | Mitigation |
-|------|------------|
-| SSE event format mismatch | Implement adapter layer in runtime configuration to transform events |
-| Bundle size increase | Tree-shake assistant-ui imports; monitor with bundle analyzer |
-| Breaking change in assistant-ui APIs | Pin exact version in package.json; plan for upgrade path |
-| Thread state persistence mismatch | Document that conversationId is managed by backend; thread state is ephemeral |
-| Generative UI component rendering | Custom `MessageContent` component that handles both assistant-ui content parts and our generative UI registry |
+| Risk                                 | Mitigation                                                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| SSE event format mismatch            | Implement adapter layer in runtime configuration to transform events                                          |
+| Bundle size increase                 | Tree-shake assistant-ui imports; monitor with bundle analyzer                                                 |
+| Breaking change in assistant-ui APIs | Pin exact version in package.json; plan for upgrade path                                                      |
+| Thread state persistence mismatch    | Document that conversationId is managed by backend; thread state is ephemeral                                 |
+| Generative UI component rendering    | Custom `MessageContent` component that handles both assistant-ui content parts and our generative UI registry |
 
 ## Migration Plan
 
