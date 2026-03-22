@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [pluginReact({ splitChunks: false })],
   source: {
     entry: {
-      'template-app': {
+      template: {
         import: './src/system-entry.ts',
         html: false,
       },
@@ -40,9 +40,10 @@ export default defineConfig({
   tools: {
     htmlPlugin: false,
     rspack: {
+      externalsType: 'system',
       externals: {
-        react: 'React',
-        '@fm/base': 'TileBase',
+        react: 'react',
+        '@fm/base': '@fm/base',
       },
       optimization: {
         runtimeChunk: false,
@@ -50,6 +51,9 @@ export default defineConfig({
       },
       output: {
         uniqueName: '@fm/template',
+        library: {
+          type: 'system',
+        },
         chunkFilename: '[chunkhash].[name].template.js',
       },
     },

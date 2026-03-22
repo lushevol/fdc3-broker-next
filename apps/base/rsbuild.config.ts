@@ -52,7 +52,7 @@ export default defineConfig({
   plugins: [pluginReact({ splitChunks: false })],
   source: {
     entry: {
-      'base-app': {
+      base: {
         import: './src/system-entry.ts',
         html: false,
       },
@@ -91,11 +91,12 @@ export default defineConfig({
   tools: {
     htmlPlugin: false,
     rspack: {
+      externalsType: 'system',
       externals: {
-        react: 'React',
-        'react-dom': 'ReactDOM',
-        'react-dom/client': 'ReactDOM',
-        'single-spa': 'singleSpa',
+        react: 'react',
+        'react-dom': 'react-dom',
+        'react-dom/client': 'react-dom/client',
+        'single-spa': 'single-spa',
       },
       optimization: {
         runtimeChunk: false,
@@ -103,6 +104,9 @@ export default defineConfig({
       },
       output: {
         uniqueName: '@fm/base',
+        library: {
+          type: 'system',
+        },
         chunkFilename: '[chunkhash].[name].base.js',
       },
     },

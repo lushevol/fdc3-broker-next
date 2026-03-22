@@ -78,8 +78,12 @@ test('host login flow mounts template container and tile through SystemJS', asyn
 
   expect(assetStatuses.get('base.js')).toBeTruthy();
   expect([200, 304]).toContain(assetStatuses.get('template_container.js'));
-  expect([200, 304]).toContain(assetStatuses.get('template_container-app.js'));
+  if (assetStatuses.has('template_container-app.js')) {
+    expect([200, 304]).toContain(assetStatuses.get('template_container-app.js'));
+  }
   expect([200, 304]).toContain(assetStatuses.get('template.js'));
-  expect([200, 304]).toContain(assetStatuses.get('template-app.js'));
+  if (assetStatuses.has('template-app.js')) {
+    expect([200, 304]).toContain(assetStatuses.get('template-app.js'));
+  }
   expect(fatalErrors).toEqual([]);
 });

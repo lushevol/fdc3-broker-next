@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [pluginReact({ splitChunks: false }), pluginLess()],
   source: {
     entry: {
-      'template_container-app': {
+      template_container: {
         import: './src/system-entry.ts',
         html: false,
       },
@@ -41,11 +41,12 @@ export default defineConfig({
   tools: {
     htmlPlugin: false,
     rspack: {
+      externalsType: 'system',
       externals: {
-        react: 'React',
-        'react-dom': 'ReactDOM',
-        'react-dom/client': 'ReactDOM',
-        '@fm/base': 'ContainerBase',
+        react: 'react',
+        'react-dom': 'react-dom',
+        'react-dom/client': 'react-dom/client',
+        '@fm/base': '@fm/base',
       },
       optimization: {
         runtimeChunk: false,
@@ -53,6 +54,9 @@ export default defineConfig({
       },
       output: {
         uniqueName: '@fm/template_container',
+        library: {
+          type: 'system',
+        },
         chunkFilename: '[chunkhash].[name].template_container.js',
       },
     },
