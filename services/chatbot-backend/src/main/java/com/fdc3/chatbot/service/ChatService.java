@@ -2,6 +2,8 @@ package com.fdc3.chatbot.service;
 
 import com.fdc3.chatbot.agent.AgentService;
 import com.fdc3.chatbot.model.ChatMessage;
+import com.fdc3.chatbot.model.ToolCall;
+import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.tool.ToolRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Service for managing chat conversations.
@@ -28,15 +31,38 @@ public class ChatService {
     /**
      * Process a chat message and stream the response.
      */
-    public void processMessageStreaming(
+    public Runnable processMessageStreaming(
             String conversationId,
             String userMessage,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
             java.lang.Runnable onComplete
     ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                onNext,
+                onError,
+                onComplete,
+                toolCall -> {
+                },
+                toolResult -> {
+                }
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
+    ) {
         // Get or create conversation
         List<ChatMessage> history = conversations.computeIfAbsent(conversationId, k -> new ArrayList<>());
+        List<ChatMessage> promptHistory = List.copyOf(history);
 
         // Add user message to history
         ChatMessage userMsg = ChatMessage.builder()
@@ -47,18 +73,65 @@ public class ChatService {
                 .build();
         history.add(userMsg);
 
+        StringBuilder assistantResponse = new StringBuilder();
+        List<ToolCall> toolCalls = new ArrayList<>();
+        List<ToolResult> toolResults = new ArrayList<>();
+        AtomicBoolean cancelled = new AtomicBoolean(false);
+
         // Process with agent
-        agentService.processMessageStreaming(
+        Runnable cancelAgentStream = agentService.processMessageStreaming(
                 conversationId,
                 userMessage,
-                history,
-                onNext,
-                onError,
+                promptHistory,
+                token -> {
+                    if (cancelled.get()) {
+                        return;
+                    }
+                    assistantResponse.append(token);
+                    onNext.accept(token);
+                },
+                error -> {
+                    if (cancelled.get()) {
+                        return;
+                    }
+                    onError.accept(error);
+                },
                 () -> {
+                    if (cancelled.get()) {
+                        return;
+                    }
+                    history.add(ChatMessage.builder()
+                            .id(UUID.randomUUID().toString())
+                            .role(ChatMessage.Role.ASSISTANT)
+                            .content(assistantResponse.toString())
+                            .timestamp(Instant.now())
+                            .toolCalls(toolCalls.isEmpty() ? null : List.copyOf(toolCalls))
+                            .toolResults(toolResults.isEmpty() ? null : List.copyOf(toolResults))
+                            .build());
                     onComplete.run();
-                    // Note: In production, you'd save the assistant message here
+                },
+                toolCall -> {
+                    if (cancelled.get()) {
+                        return;
+                    }
+                    toolCalls.add(toolCall);
+                    onToolCall.accept(toolCall);
+                },
+                toolResult -> {
+                    if (cancelled.get()) {
+                        return;
+                    }
+                    toolResults.add(toolResult);
+                    onToolResult.accept(toolResult);
                 }
         );
+
+        return () -> {
+            if (!cancelled.compareAndSet(false, true)) {
+                return;
+            }
+            cancelAgentStream.run();
+        };
     }
 
     /**

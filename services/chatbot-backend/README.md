@@ -124,9 +124,9 @@ For full API documentation, see [API.md](docs/API.md).
 
 ### Key Components
 
-- **ChatController**: REST API endpoints
-- **ChatService**: Conversation management and orchestration
-- **AgentService**: AI model integration via LangChain4j
+- **ChatController**: REST API endpoints and canonical SSE event emission
+- **ChatService**: Conversation management, assistant turn persistence, and stream orchestration
+- **AgentService**: AI model integration via LangChain4j and tool lifecycle coordination
 - **ToolRegistry**: Tool definitions and execution
 
 ### Technologies
@@ -163,17 +163,19 @@ See [TOOL_CREATION_GUIDE.md](docs/TOOL_CREATION_GUIDE.md) for details.
 
 ## Integration with Frontend
 
-The chatbot backend integrates with the `@fm/base` MFE's ChatbotSidebar component.
+The chatbot backend integrates with the `@fm/base` MFE's assistant-ui modal surface. The frontend mounts `AssistantUIRuntimeProvider` once near the app root and renders `ChatbotSidebar` as the floating assistant modal trigger.
 
 Configure the frontend to connect to this service:
 
 ```tsx
-<ChatbotProvider apiUrl="http://localhost:8080/api/chat">
+<AssistantUIRuntimeProvider apiUrl="http://localhost:8080/api/chat">
+  <AppShell />
   <ChatbotSidebar />
-</ChatbotProvider>
+</AssistantUIRuntimeProvider>
 ```
 
 See [MFE_INTEGRATION.md](docs/MFE_INTEGRATION.md) for full integration details.
+See [API.md](docs/API.md) for the canonical SSE event contract (`conversation_id`, `message`, `tool_call`, `tool_result`, `generative_ui`, `error`, `done`).
 
 ## Troubleshooting
 

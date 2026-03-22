@@ -24,10 +24,15 @@
     "typeRoots": ["./src/@types", "./node_modules/@types", "../../node_modules/@types"],
     "moduleResolution": "bundler",
     "paths": {
+      "@/*": ["./src/next-packages/*"],
       "*": ["./@mf-types/*"]
     }
   },
-  "files": ["src/root.tsx"],
-  "include": ["src/**/*"],
+  "files": [
+    "src/root.tsx",
+    "src/next-packages/components/assistant-ui/assistant-modal.tsx",
+    "src/next-packages/components/assistant-ui/thread.tsx"
+  ],
+  "include": ["src/**/*.d.ts"],
   "exclude": ["*.ts", "*.tsx", "*.json", "*.js", ".jsx"]
 }

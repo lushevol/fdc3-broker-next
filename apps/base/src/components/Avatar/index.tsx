@@ -26,12 +26,6 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
   // Track image loading error to prevent console errors
   const [imageError, setImageError] = useState(false);
 
-  // Generate avatar URL with error handling
-  const imgUrl =
-    store?.user?.id && !imageError
-      ? `https://axess.sc.net/scb-axess-cms/api/users/${store?.user?.id}/photo`
-      : '';
-
   // Get user initials for fallback avatar
   const userInitials = store?.user?.fullName
     ? store.user.fullName
@@ -58,10 +52,9 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
             <AvatarMui
               className={classes.img}
               alt={store?.user?.fullName ?? store?.user?.userId ?? 'User'}
-              src={imgUrl}
               onError={handleImageError}
             >
-              {!imgUrl || imageError ? userInitials : null}
+              {store?.user?.userId ?? <></>}
             </AvatarMui>
           </IconButton>
         </Tooltip>

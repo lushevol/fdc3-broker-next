@@ -15,6 +15,7 @@ export default {
     '^.+\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/src/fileMock.js',
     'single-spa-react/parcel': 'single-spa-react/lib/cjs/parcel.cjs',
+    '^@/(.*)$': '<rootDir>/src/next-packages/$1',
     '^@assistant-ui/react$': '<rootDir>/__mocks__/@assistant-ui/react.tsx',
   },
   setupFilesAfterEnv: ['@testing-library/jest-dom', './jest.setup.tsx'],

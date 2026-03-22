@@ -1,6 +1,8 @@
 package com.fdc3.chatbot.controller;
 
 import com.fdc3.chatbot.model.ChatRequest;
+import com.fdc3.chatbot.model.ToolCall;
+import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,7 @@ import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,6 +47,8 @@ public class ChatController {
         String convId = conversationId != null && !conversationId.isEmpty()
                 ? conversationId
                 : chatService.createConversation();
+        AtomicReference<Runnable> cancelStreamRef = new AtomicReference<>(() -> {
+        });
 
         executor.execute(() -> {
             try {
@@ -53,7 +58,7 @@ public class ChatController {
                         .data(convId));
 
                 // Stream the response
-                chatService.processMessageStreaming(
+                Runnable cancelStream = chatService.processMessageStreaming(
                         convId,
                         message,
                         token -> {
@@ -84,8 +89,27 @@ public class ChatController {
                             } catch (IOException e) {
                                 log.error("Error sending done event", e);
                             }
+                        },
+                        toolCall -> {
+                            try {
+                                emitter.send(SseEmitter.event()
+                                        .name("tool_call")
+                                        .data(toolCall));
+                            } catch (IOException e) {
+                                log.error("Error sending tool_call event", e);
+                            }
+                        },
+                        toolResult -> {
+                            try {
+                                emitter.send(SseEmitter.event()
+                                        .name("tool_result")
+                                        .data(toolResult));
+                            } catch (IOException e) {
+                                log.error("Error sending tool_result event", e);
+                            }
                         }
                 );
+                cancelStreamRef.set(cancelStream);
             } catch (Exception e) {
                 log.error("Error in streaming response", e);
                 emitter.completeWithError(e);
@@ -94,10 +118,12 @@ public class ChatController {
 
         emitter.onTimeout(() -> {
             log.warn("SSE connection timed out for conversation: {}", convId);
+            cancelStreamRef.get().run();
             emitter.complete();
         });
 
         emitter.onCompletion(() -> {
+            cancelStreamRef.get().run();
             log.debug("SSE connection completed for conversation: {}", convId);
         });
 

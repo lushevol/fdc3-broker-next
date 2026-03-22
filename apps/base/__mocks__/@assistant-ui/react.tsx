@@ -69,6 +69,13 @@ export const BranchPickerPrimitive = {
   Count: MockPrimitive,
 };
 
+export const AssistantModalPrimitive = {
+  Root: MockPrimitive,
+  Anchor: MockPrimitive,
+  Trigger: MockPrimitive,
+  Content: MockPrimitive,
+};
+
 // Create a mock runtime that matches assistant-ui's expected structure
 const createMockRuntime = (config: any) => {
   const messages = config.messages || [];
@@ -99,9 +106,9 @@ const createMockRuntime = (config: any) => {
 };
 
 // Runtime hooks - returns a proper runtime object that matches assistant-ui's expectations
-export const useExternalStoreRuntime = (config: any) => {
+export const useExternalStoreRuntime = jest.fn((config: any) => {
   return createMockRuntime(config);
-};
+});
 
 export const useAssistantRuntime = () => ({
   thread: {

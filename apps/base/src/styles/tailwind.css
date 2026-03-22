@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--aui-background);
+  --color-foreground: var(--aui-foreground);
+  --color-card: var(--aui-card);
+  --color-card-foreground: var(--aui-card-foreground);
+  --color-popover: var(--aui-popover);
+  --color-popover-foreground: var(--aui-popover-foreground);
+  --color-primary: var(--aui-primary);
+  --color-primary-foreground: var(--aui-primary-foreground);
+  --color-secondary: var(--aui-secondary);
+  --color-secondary-foreground: var(--aui-secondary-foreground);
+  --color-muted: var(--aui-muted);
+  --color-muted-foreground: var(--aui-muted-foreground);
+  --color-accent: var(--aui-accent);
+  --color-accent-foreground: var(--aui-accent-foreground);
+  --color-destructive: var(--aui-destructive);
+  --color-border: var(--aui-border);
+  --color-input: var(--aui-input);
+  --color-ring: var(--aui-ring);
+}
+
+@layer base {
+  .aui-root {
+    --aui-background: oklch(0.985 0.004 286.32);
+    --aui-foreground: oklch(0.2 0.015 286.067);
+    --aui-card: oklch(1 0 0);
+    --aui-card-foreground: oklch(0.2 0.015 286.067);
+    --aui-popover: oklch(0.99 0.002 286.32 / 0.94);
+    --aui-popover-foreground: oklch(0.2 0.015 286.067);
+    --aui-primary: oklch(0.246 0.03 264.4);
+    --aui-primary-foreground: oklch(0.985 0 0);
+    --aui-secondary: oklch(0.958 0.006 286.28);
+    --aui-secondary-foreground: oklch(0.28 0.02 286.03);
+    --aui-muted: oklch(0.965 0.006 286.28);
+    --aui-muted-foreground: oklch(0.54 0.02 286.05);
+    --aui-accent: oklch(0.952 0.012 286.2);
+    --aui-accent-foreground: oklch(0.24 0.02 286.08);
+    --aui-destructive: oklch(0.577 0.245 27.325);
+    --aui-border: oklch(0.906 0.008 286.24);
+    --aui-input: oklch(0.906 0.008 286.24);
+    --aui-ring: oklch(0.707 0.022 286.12);
+    color: var(--aui-foreground);
+    color-scheme: light;
+  }
+
+  html.dark .aui-root {
+    --aui-background: oklch(0.179 0.018 286.08);
+    --aui-foreground: oklch(0.968 0.003 286.35);
+    --aui-card: oklch(0.215 0.018 286.09);
+    --aui-card-foreground: oklch(0.968 0.003 286.35);
+    --aui-popover: oklch(0.215 0.018 286.09 / 0.94);
+    --aui-popover-foreground: oklch(0.968 0.003 286.35);
+    --aui-primary: oklch(0.922 0.009 286.18);
+    --aui-primary-foreground: oklch(0.215 0.018 286.09);
+    --aui-secondary: oklch(0.276 0.018 286.07);
+    --aui-secondary-foreground: oklch(0.968 0.003 286.35);
+    --aui-muted: oklch(0.268 0.014 286.02);
+    --aui-muted-foreground: oklch(0.724 0.012 286.13);
+    --aui-accent: oklch(0.312 0.018 286.05);
+    --aui-accent-foreground: oklch(0.968 0.003 286.35);
+    --aui-destructive: oklch(0.704 0.191 22.216);
+    --aui-border: oklch(0.307 0.013 286.06);
+    --aui-input: oklch(0.307 0.013 286.06);
+    --aui-ring: oklch(0.556 0.02 286.08);
+    color-scheme: dark;
+  }
+}
+
+@layer components {
+  .aui-modal-anchor {
+    filter: drop-shadow(0 12px 30px rgba(15, 23, 42, 0.18));
+  }
+
+  .aui-modal-content {
+    background-image:
+      radial-gradient(circle at top, color-mix(in oklab, var(--aui-primary) 12%, transparent) 0%, transparent 52%),
+      linear-gradient(180deg, color-mix(in oklab, var(--aui-popover) 96%, white 4%) 0%, var(--aui-popover) 100%);
+    box-shadow:
+      0 28px 90px -34px rgba(15, 23, 42, 0.45),
+      0 18px 42px -26px rgba(15, 23, 42, 0.35);
+  }
+
+  html.dark .aui-modal-content {
+    box-shadow:
+      0 36px 110px -38px rgba(0, 0, 0, 0.72),
+      0 20px 44px -30px rgba(0, 0, 0, 0.6);
+  }
+
+  .aui-thread-viewport::-webkit-scrollbar,
+  .aui-md-pre::-webkit-scrollbar,
+  .aui-composer-attachments::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .aui-thread-viewport::-webkit-scrollbar-thumb,
+  .aui-md-pre::-webkit-scrollbar-thumb,
+  .aui-composer-attachments::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--aui-muted-foreground) 22%, transparent);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+  }
+
+  .aui-thread-viewport::-webkit-scrollbar-track,
+  .aui-md-pre::-webkit-scrollbar-track,
+  .aui-composer-attachments::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .aui-md a {
+    text-decoration-thickness: 1.25px;
+  }
+}

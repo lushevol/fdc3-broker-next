@@ -31,8 +31,6 @@ export const backgroundCss = (props: TileProps, theme?: string) => {
       opacity: ${props.disabled ? 0.5 : 1};
     }
     & .${classes.main} {
-      background-color: ${props.disabled ? 'rgba(0,0,0,0.05)' : 'transparent'};
-      background-image: url(/${theme === 'light' ? imageLightTheme : imageDarkTheme});
       background-size: contain;
       background-repeat: no-repeat;
       background-position: bottom right;

@@ -2,15 +2,6 @@
 export { ChatbotSidebar } from './index';
 export { default as ChatbotSidebarDefault } from './index';
 
-// Context and hooks
-export { ChatbotProvider, useChatbot, useToolRegistry } from './common/ChatbotProvider';
-
-/**
- * @deprecated Use `useAssistantUIRuntime` from `@assistant-ui/react` instead.
- * This hook will be removed in a future version.
- */
-export { useChatbotController } from './common/useController';
-
 // Assistant-UI Runtime
 export { AssistantUIRuntimeProvider, useAssistantUIRuntime } from './AssistantUIRuntimeProvider';
 
@@ -43,7 +34,6 @@ export type {
   SSEEventType,
   SSEEvent,
   ChatState,
-  ChatbotContextValue,
   ToolDefinition,
   GenerativeComponentEntry,
   RegisteredComponentProps,
@@ -55,11 +45,3 @@ export type {
   ErrorComponentProps,
   FormComponentProps,
 } from './common/interface';
-
-// Services
-export {
-  ChatService,
-  RateLimitError,
-  getChatService,
-  initializeChatService,
-} from './common/ChatService';

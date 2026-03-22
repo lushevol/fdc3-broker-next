@@ -16,6 +16,8 @@ public class ToolCall {
     private String name;
     private Map<String, Object> arguments;
     private ToolStatus status;
+    @Builder.Default
+    private boolean requiresConfirmation = false;
 
     public enum ToolStatus {
         PENDING, RUNNING, COMPLETED, FAILED

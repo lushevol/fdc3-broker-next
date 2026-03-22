@@ -5,7 +5,6 @@
  */
 
 import type {
-  SSEEventType,
   ToolCall,
   ToolResult,
   GenerativeUIDirective,
@@ -18,6 +17,7 @@ import {
   createInitialStreamingState,
   createUserMessage,
   createAssistantMessage,
+  bindAssistantUiSSEStream,
   parseSSEEvent,
   transformToolCall,
   transformToolResult,
@@ -49,6 +49,70 @@ describe('SSE Adapter Type Safety', () => {
       });
 
       expect(state.pendingToolCalls.size).toBe(0);
+    });
+  });
+
+  describe('handleSSEEvent', () => {
+    it('resets stream-local state on done while preserving the conversation id', () => {
+      const state = createInitialStreamingState();
+      const withConversation = handleSSEEvent([], state, 'conversation_id', 'conv-123');
+      const withMessage = handleSSEEvent(
+        withConversation.messages,
+        withConversation.streamingState,
+        'message',
+        'Hello',
+      );
+
+      const done = handleSSEEvent(withMessage.messages, withMessage.streamingState, 'done', '');
+
+      expect(done.streamingState.conversationId).toBe('conv-123');
+      expect(done.streamingState.assistantMessageId).toBeNull();
+      expect(done.streamingState.accumulatedContent).toBe('');
+      expect(done.streamingState.pendingToolCalls.size).toBe(0);
+    });
+  });
+
+  describe('bindAssistantUiSSEStream', () => {
+    it('registers the backend event contract and routes named events through the adapter callback', () => {
+      const addEventListener = jest.fn();
+      const eventSource = {
+        addEventListener,
+        onerror: null as ((event: Event) => void) | null,
+      };
+      const onEvent = jest.fn();
+      const onConnectionError = jest.fn();
+
+      bindAssistantUiSSEStream(eventSource, {
+        onEvent,
+        onConnectionError,
+      });
+
+      expect(addEventListener).toHaveBeenCalledWith('conversation_id', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('tool_call', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('tool_result', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('generative_ui', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('error', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('done', expect.any(Function));
+
+      const messageListener = addEventListener.mock.calls.find(
+        ([eventName]) => eventName === 'message',
+      )?.[1];
+      const errorListener = addEventListener.mock.calls.find(
+        ([eventName]) => eventName === 'error',
+      )?.[1];
+      const doneListener = addEventListener.mock.calls.find(
+        ([eventName]) => eventName === 'done',
+      )?.[1];
+
+      messageListener(new MessageEvent('message', { data: 'Hello' }));
+      errorListener(new MessageEvent('error', { data: 'Backend failed' }));
+      doneListener(new MessageEvent('done'));
+
+      expect(onEvent).toHaveBeenNthCalledWith(1, 'message', 'Hello');
+      expect(onEvent).toHaveBeenNthCalledWith(2, 'error', 'Backend failed');
+      expect(onEvent).toHaveBeenNthCalledWith(3, 'done', '');
+      expect(onConnectionError).not.toHaveBeenCalled();
     });
   });
 
@@ -141,6 +205,8 @@ describe('SSE Adapter Type Safety', () => {
         toolCallId: 'tool-1',
         toolName: 'calculator',
         args: { a: 1, b: 2 },
+        argsText: '{"a":1,"b":2}',
+        status: 'pending',
       });
     });
   });
@@ -155,10 +221,14 @@ describe('SSE Adapter Type Safety', () => {
       const result = transformToolResult(toolResult);
 
       expect(result).toMatchObject<ContentPart>({
-        type: 'tool-result',
+        type: 'tool-call',
         toolCallId: 'tool-1',
+        toolName: '',
+        args: {},
+        argsText: '{}',
         result: 42,
         isError: false,
+        status: 'completed',
       });
     });
 
@@ -171,8 +241,8 @@ describe('SSE Adapter Type Safety', () => {
 
       const result = transformToolResult(toolResult);
 
-      expect((result as Extract<ContentPart, { type: 'tool-result' }>).isError).toBe(true);
-      expect((result as Extract<ContentPart, { type: 'tool-result' }>).error).toBe(
+      expect((result as Extract<ContentPart, { type: 'tool-call' }>).isError).toBe(true);
+      expect((result as Extract<ContentPart, { type: 'tool-call' }>).error).toBe(
         'Something went wrong',
       );
     });
@@ -188,9 +258,12 @@ describe('SSE Adapter Type Safety', () => {
       const result = transformGenerativeUI(directive);
 
       expect(result).toMatchObject<ContentPart>({
-        type: 'generative-ui',
-        componentName: 'ChartCard',
-        props: { data: [1, 2, 3] },
+        type: 'data',
+        name: 'generative-ui',
+        data: {
+          componentName: 'ChartCard',
+          props: { data: [1, 2, 3] },
+        },
       });
     });
   });
@@ -223,7 +296,7 @@ describe('SSE Adapter Type Safety', () => {
         role: 'assistant',
         content: [
           { type: 'text', text: 'Hello' },
-          { type: 'tool-call', toolCallId: 't1', toolName: 'calc', args: {} },
+          { type: 'tool-call', toolCallId: 't1', toolName: 'calc', args: {}, argsText: '{}' },
         ],
         createdAt: new Date(),
       };
@@ -249,19 +322,29 @@ describe('SSE Adapter Type Safety', () => {
       const message: AssistantUIMessage = {
         id: '1',
         role: 'assistant',
-        content: [{ type: 'tool-call', toolCallId: 't1', toolName: 'calc', args: {} }],
+        content: [
+          { type: 'tool-call', toolCallId: 't1', toolName: 'calc', args: {}, argsText: '{}' },
+        ],
         createdAt: new Date(),
       };
       const resultPart: ContentPart = {
-        type: 'tool-result',
+        type: 'tool-call',
         toolCallId: 't1',
+        toolName: 'calc',
+        args: {},
+        argsText: '{}',
         result: 42,
+        status: 'completed',
       };
       const updated = addContentPartToAssistantMessage(message, resultPart);
 
-      expect(updated.content).toHaveLength(2);
-      expect(updated.content[0].type).toBe('tool-call');
-      expect(updated.content[1].type).toBe('tool-result');
+      expect(updated.content).toHaveLength(1);
+      expect(updated.content[0]).toMatchObject({
+        type: 'tool-call',
+        toolCallId: 't1',
+        result: 42,
+        status: 'completed',
+      });
     });
   });
 
@@ -345,11 +428,19 @@ describe('SSE Adapter Type Safety', () => {
       const state = createInitialStreamingState();
       state.accumulatedContent = 'Some content';
       state.assistantMessageId = 'msg-1';
+      state.pendingToolCalls.set('tool-1', {
+        type: 'tool-call',
+        toolCallId: 'tool-1',
+        toolName: 'calculator',
+        args: {},
+        argsText: '{}',
+      });
 
       const result = handleSSEEvent(messages, state, 'done', '');
 
       expect(result.streamingState.accumulatedContent).toBe('');
       expect(result.streamingState.assistantMessageId).toBeNull();
+      expect(result.streamingState.pendingToolCalls.size).toBe(0);
     });
 
     it('should handle error event', () => {

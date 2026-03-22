@@ -24,6 +24,7 @@ export interface ToolCall {
   name: string;
   arguments: Record<string, unknown>;
   status: 'pending' | 'running' | 'completed' | 'failed';
+  requiresConfirmation?: boolean;
 }
 
 export interface ToolResult {
@@ -41,7 +42,7 @@ export interface GenerativeUIDirective {
  * Assistant UI Content Part Types
  * Based on assistant-ui's expected format
  */
-export type ContentPartType = 'text' | 'tool-call' | 'tool-result' | 'generative-ui';
+export type ContentPartType = 'text' | 'tool-call' | 'data';
 
 export interface TextContentPart {
   type: 'text';
@@ -53,27 +54,24 @@ export interface ToolCallContentPart {
   toolCallId: string;
   toolName: string;
   args: Record<string, unknown>;
-}
-
-export interface ToolResultContentPart {
-  type: 'tool-result';
-  toolCallId: string;
-  result: unknown;
+  argsText: string;
+  result?: unknown;
   isError?: boolean;
   error?: string;
+  status?: ToolCall['status'];
+  requiresConfirmation?: boolean;
 }
 
 export interface GenerativeUIContentPart {
-  type: 'generative-ui';
-  componentName: string;
-  props: Record<string, unknown>;
+  type: 'data';
+  name: 'generative-ui';
+  data: {
+    componentName: string;
+    props: Record<string, unknown>;
+  };
 }
 
-export type ContentPart =
-  | TextContentPart
-  | ToolCallContentPart
-  | ToolResultContentPart
-  | GenerativeUIContentPart;
+export type ContentPart = TextContentPart | ToolCallContentPart | GenerativeUIContentPart;
 
 /**
  * Assistant UI Message Format

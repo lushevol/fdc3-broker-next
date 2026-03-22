@@ -15,6 +15,52 @@ import type {
   ToolCallContentPart,
 } from './types';
 
+interface AssistantUiSSEHandlers {
+  onEvent: (eventType: SSEEventType, data: string) => void;
+  onConnectionError: () => void;
+}
+
+type AssistantUiEventSourceLike = {
+  addEventListener: (type: string, listener: (event: Event) => void) => void;
+  onerror: ((event: Event) => void) | null;
+};
+
+const ASSISTANT_UI_SSE_EVENT_TYPES: readonly SSEEventType[] = [
+  'conversation_id',
+  'message',
+  'tool_call',
+  'tool_result',
+  'generative_ui',
+  'error',
+  'done',
+];
+
+export function bindAssistantUiSSEStream(
+  eventSource: AssistantUiEventSourceLike,
+  handlers: AssistantUiSSEHandlers,
+): void {
+  ASSISTANT_UI_SSE_EVENT_TYPES.forEach((eventType) => {
+    eventSource.addEventListener(eventType, (event) => {
+      if (eventType === 'error' && event instanceof MessageEvent) {
+        handlers.onEvent('error', event.data);
+        return;
+      }
+
+      if (eventType === 'error') {
+        handlers.onConnectionError();
+        return;
+      }
+
+      const data = eventType === 'done' ? '' : event instanceof MessageEvent ? event.data : '';
+      handlers.onEvent(eventType, data);
+    });
+  });
+
+  eventSource.onerror = () => {
+    handlers.onConnectionError();
+  };
+}
+
 /**
  * Generate a unique ID for messages
  */
@@ -94,6 +140,9 @@ export function transformToolCall(toolCall: ToolCall): ContentPart {
     toolCallId: toolCall.id,
     toolName: toolCall.name,
     args: toolCall.arguments,
+    argsText: JSON.stringify(toolCall.arguments),
+    status: toolCall.status,
+    requiresConfirmation: toolCall.requiresConfirmation,
   };
 }
 
@@ -102,11 +151,15 @@ export function transformToolCall(toolCall: ToolCall): ContentPart {
  */
 export function transformToolResult(toolResult: ToolResult): ContentPart {
   return {
-    type: 'tool-result',
+    type: 'tool-call',
     toolCallId: toolResult.toolCallId,
+    toolName: '',
+    args: {},
+    argsText: '{}',
     result: toolResult.result,
     isError: !!toolResult.error,
     error: toolResult.error,
+    status: toolResult.error ? 'failed' : 'completed',
   };
 }
 
@@ -115,9 +168,12 @@ export function transformToolResult(toolResult: ToolResult): ContentPart {
  */
 export function transformGenerativeUI(directive: GenerativeUIDirective): ContentPart {
   return {
-    type: 'generative-ui',
-    componentName: directive.name,
-    props: directive.props,
+    type: 'data',
+    name: 'generative-ui',
+    data: {
+      componentName: directive.name,
+      props: directive.props,
+    },
   };
 }
 
@@ -156,16 +212,24 @@ export function addContentPartToAssistantMessage(
   message: AssistantUIMessage,
   part: ContentPart,
 ): AssistantUIMessage {
-  // For tool results, find and update the corresponding tool call
-  if (part.type === 'tool-result') {
+  if (
+    part.type === 'tool-call' &&
+    ('result' in part || part.status === 'completed' || part.status === 'failed')
+  ) {
     const toolCallIndex = message.content.findIndex(
       (p): p is ToolCallContentPart => p.type === 'tool-call' && p.toolCallId === part.toolCallId,
     );
 
     if (toolCallIndex !== -1) {
-      // Insert result after the tool call
+      const existingToolCall = message.content[toolCallIndex] as ToolCallContentPart;
       const newContent = [...message.content];
-      newContent.splice(toolCallIndex + 1, 0, part);
+      newContent[toolCallIndex] = {
+        ...existingToolCall,
+        result: part.result,
+        isError: part.isError,
+        error: part.error,
+        status: part.status,
+      };
       return {
         ...message,
         content: newContent,
@@ -238,7 +302,7 @@ export function handleSSEEvent(
         (m) => m.id === streamingState.assistantMessageId,
       );
 
-      let updatedMessages = [...messages];
+      const updatedMessages = [...messages];
 
       if (assistantMessageIndex === -1) {
         // Create new assistant message
@@ -265,10 +329,10 @@ export function handleSSEEvent(
 
     case 'tool_call': {
       const toolCall = event.payload as ToolCall;
-      const toolCallPart = transformToolCall(toolCall);
+      const toolCallPart = transformToolCall(toolCall) as ToolCallContentPart;
 
       // Track pending tool call
-      streamingState.pendingToolCalls.set(toolCall.id, toolCallPart as ToolCallContentPart);
+      streamingState.pendingToolCalls.set(toolCall.id, toolCallPart);
 
       // Find assistant message and add tool call
       const assistantMessageIndex = messages.findIndex(
@@ -351,6 +415,7 @@ export function handleSSEEvent(
           ...streamingState,
           assistantMessageId: null,
           accumulatedContent: '',
+          pendingToolCalls: new Map(),
         },
       };
     }

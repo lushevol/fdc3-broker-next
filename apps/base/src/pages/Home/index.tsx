@@ -16,7 +16,10 @@ import Root, { classes, PREFIX } from './common/style';
 import useController from './common/useController';
 import useOpenfin from './common/useOpenfin';
 import useParameters from './common/useParameters';
-import { ChatbotProvider, ChatbotSidebar } from '../../components/ChatbotSidebar/exports';
+import {
+  AssistantUIRuntimeProvider,
+  ChatbotSidebar,
+} from '../../components/ChatbotSidebar/exports';
 
 export const ContainerComponent = (validation: boolean, item, i) =>
   validation ? (
@@ -56,7 +59,7 @@ const Home: React.FC = (): ReactElement => {
   }
 
   return (
-    <ChatbotProvider>
+    <AssistantUIRuntimeProvider apiUrl="/api/chat">
       <Root data-testid={PREFIX} onMouseMove={mouseMove}>
         <header>
           <AppBar />
@@ -132,7 +135,7 @@ const Home: React.FC = (): ReactElement => {
         {channelMessage && <Snackbar message={channelMessage} open={true} onClose={clearMessage} />}
         <ChatbotSidebar />
       </Root>
-    </ChatbotProvider>
+    </AssistantUIRuntimeProvider>
   );
 };
 
