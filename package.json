@@ -5,6 +5,8 @@
   "scripts": {
     "build": "turbo run build --continue",
     "build:packages": "turbo run build --filter=\"./packages/*\"",
+    "test:e2e:systemjs": "playwright test tests/e2e",
+    "test:e2e:systemjs:headed": "playwright test tests/e2e --headed",
     "test": "turbo run test",
     "test:packages": "turbo run test --filter=\"./packages/*\"",
     "lint": "turbo run lint --continue",
@@ -19,6 +21,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
+    "@playwright/test": "^1.58.2",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.0.0",

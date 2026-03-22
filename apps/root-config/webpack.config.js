@@ -99,15 +99,52 @@ module.exports = (webpackConfigEnv, argv) => {
           res.end(JSON.stringify({ code: 200, message: "success", data }));
         };
 
+        const sendAuthResponse = (res, responseBody = mockLoginResp) => {
+          res.statusCode = 200;
+          res.setHeader("Content-Type", "application/json");
+          res.setHeader("single-ui-authorization", `Bearer ${token}`);
+          res.setHeader("single-ui-refresh", `Bearer ${token}`);
+          res.end(JSON.stringify(responseBody));
+        };
+
         // Login Mock
         middlewares.unshift({
           name: "mock-login",
           path: "/api/auth/v2/sso/login",
           middleware: (req, res) => {
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "application/json");
-            res.setHeader("single-ui-authorization", `Bearer ${token}`);
-            res.end(JSON.stringify(mockLoginResp));
+            sendAuthResponse(res);
+          },
+        });
+
+        middlewares.unshift({
+          name: "mock-validate",
+          path: "/api/auth/v2/sso/validate",
+          middleware: (req, res) => {
+            sendAuthResponse(res);
+          },
+        });
+
+        middlewares.unshift({
+          name: "mock-extend",
+          path: "/api/auth/v2/sso/extend",
+          middleware: (req, res) => {
+            sendAuthResponse(res);
+          },
+        });
+
+        middlewares.unshift({
+          name: "mock-relogin",
+          path: "/api/auth/v2/sso/relogin",
+          middleware: (req, res) => {
+            sendAuthResponse(res);
+          },
+        });
+
+        middlewares.unshift({
+          name: "mock-refresh-token",
+          path: "/api/auth/v2/sso/refreshtoken",
+          middleware: (req, res) => {
+            sendAuthResponse(res, { result: true });
           },
         });
 
