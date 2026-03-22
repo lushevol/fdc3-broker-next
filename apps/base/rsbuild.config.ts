@@ -43,9 +43,7 @@ function readMfeEnv(): Record<string, string> {
 const injectedEnv = {
   NODE_ENV: envMode,
   ...readMfeEnv(),
-  ...Object.fromEntries(
-    Object.entries(process.env).filter(([, value]) => value !== undefined),
-  ),
+  ...Object.fromEntries(Object.entries(process.env).filter(([, value]) => value !== undefined)),
 };
 
 export default defineConfig({
@@ -72,8 +70,12 @@ export default defineConfig({
   },
   dev: {
     hmr: false,
-    liveReload: false,
+    liveReload: true,
     lazyCompilation: false,
+    client: {
+      host: 'localhost',
+      port: String(port),
+    },
   },
   output: {
     assetPrefix: `http://localhost:${port}/`,

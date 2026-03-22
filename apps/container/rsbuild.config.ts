@@ -22,8 +22,12 @@ export default defineConfig({
   },
   dev: {
     hmr: false,
-    liveReload: false,
+    liveReload: true,
     lazyCompilation: false,
+    client: {
+      host: 'localhost',
+      port: String(port),
+    },
   },
   output: {
     assetPrefix: `http://localhost:${port}/`,
