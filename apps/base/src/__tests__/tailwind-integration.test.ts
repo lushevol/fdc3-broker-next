@@ -2,25 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 describe('apps/base Tailwind integration', () => {
-  it('configures webpack css handling with postcss-loader', () => {
-    process.env.orgName = 'fm';
-    process.env.port = '8080';
+  it('keeps Tailwind wired through the shared stylesheet entrypoint', () => {
+    const tailwindPath = path.resolve(__dirname, '..', 'styles', 'tailwind.css');
+    const tailwindSource = fs.readFileSync(tailwindPath, 'utf8');
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
-    const configFactory = require('../../webpack.config.js');
-    const config = configFactory({}, { mode: 'development' });
-    const cssRule = config.module.rules.find(
-      (rule: { test?: RegExp }) => String(rule.test) === '/\\.css$/i',
-    );
-
-    expect(cssRule).toBeDefined();
-    expect(cssRule.use).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          loader: expect.stringContaining('postcss-loader'),
-        }),
-      ]),
-    );
+    expect(tailwindSource).toContain('@import "tailwindcss/theme" layer(theme);');
+    expect(tailwindSource).toContain('@import "tailwindcss/utilities" layer(utilities);');
+    expect(tailwindSource).not.toContain('@import "tailwindcss";');
+    expect(tailwindSource).toContain(':where(.aui-root :where(button, input, textarea, select))');
   });
 
   it('imports the global Tailwind stylesheet from the root entrypoint', () => {
@@ -30,14 +19,18 @@ describe('apps/base Tailwind integration', () => {
     expect(rootSource).toContain("import './styles/tailwind.css';");
   });
 
-  it('keeps standalone publicPath relative so single-spa standalone loading works', () => {
-    process.env.orgName = 'fm';
-    process.env.port = '8001';
+  it('injects emitted CSS through the SystemJS-loaded JavaScript bundle', () => {
+    const rsbuildConfigPath = path.resolve(__dirname, '..', '..', 'rsbuild.config.ts');
+    const rsbuildConfigSource = fs.readFileSync(rsbuildConfigPath, 'utf8');
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
-    const configFactory = require('../../webpack.config.js');
-    const config = configFactory({ standalone: true }, { mode: 'development' });
+    expect(rsbuildConfigSource).toContain('injectStyles: true');
+  });
 
-    expect(config.output.publicPath).toBe('');
+  it('keeps emitted JavaScript and CSS at the asset root for the remote entry', () => {
+    const rsbuildConfigPath = path.resolve(__dirname, '..', '..', 'rsbuild.config.ts');
+    const rsbuildConfigSource = fs.readFileSync(rsbuildConfigPath, 'utf8');
+
+    expect(rsbuildConfigSource).toContain('js: \'\'');
+    expect(rsbuildConfigSource).toContain('css: \'\'');
   });
 });

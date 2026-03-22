@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme" layer(theme);
 
 @theme inline {
   --color-background: var(--aui-background);
@@ -43,6 +45,25 @@
     --aui-ring: oklch(0.707 0.022 286.12);
     color: var(--aui-foreground);
     color-scheme: light;
+  }
+
+  :where(.aui-root :where(button, input, textarea, select)) {
+    font: inherit;
+    color: inherit;
+  }
+
+  :where(.aui-root :where(button, input, textarea, select))::placeholder {
+    color: inherit;
+    opacity: 1;
+  }
+
+  :where(.aui-root :where(button, input, textarea, select)) {
+    margin: 0;
+    border: 0 solid transparent;
+    border-radius: 0;
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
   }
 
   html.dark .aui-root {
@@ -114,3 +135,5 @@
     text-decoration-thickness: 1.25px;
   }
 }
+
+@import "tailwindcss/utilities" layer(utilities);

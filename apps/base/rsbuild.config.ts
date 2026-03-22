@@ -79,6 +79,7 @@ export default defineConfig({
   },
   output: {
     assetPrefix: `http://localhost:${port}/`,
+    injectStyles: true,
     distPath: {
       js: '',
       css: '',
