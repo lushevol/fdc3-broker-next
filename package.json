@@ -14,7 +14,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md,json,yml,yaml}\"",
     "dev": "concurrently \"npm run dev:ui\" \"npm run dev:services\"",
     "dev:ui": "turbo run dev --filter=\"./apps/base\" --filter=\"./apps/root-config\" --filter=\"./apps/container\" --filter=\"./apps/tile\"",
-    "dev:services": "turbo run dev --filter=\"./services/*\"",
+    "dev:services": "turbo run dev --filter=\"./services/backend\" --filter=\"./services/chatbot-backend\"",
     "stop": "lsof -ti:8001,8002,8006,8007,3000,3001,8088,8080 | xargs kill -9",
     "changeset": "changeset",
     "version": "changeset version",

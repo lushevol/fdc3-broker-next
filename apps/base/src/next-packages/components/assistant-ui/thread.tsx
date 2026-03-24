@@ -34,6 +34,7 @@ import {
   SquareIcon,
 } from 'lucide-react';
 import type { FC } from 'react';
+import { GenerativeUIRenderer } from '../../../components/ChatbotSidebar/components/GenerativeUIRenderer';
 
 export const Thread: FC = () => {
   return (
@@ -208,6 +209,20 @@ const AssistantMessage: FC = () => {
           {({ part }) => {
             if (part.type === 'text') return <MarkdownText />;
             if (part.type === 'tool-call') return part.toolUI ?? <ToolFallback {...part} />;
+            if (part.type === 'data' && part.name === 'generative-ui') {
+              const data = part.data as {
+                componentName?: string;
+                props?: Record<string, unknown>;
+              };
+
+              if (!data.componentName) {
+                return null;
+              }
+
+              return (
+                <GenerativeUIRenderer componentName={data.componentName} props={data.props ?? {}} />
+              );
+            }
             return null;
           }}
         </MessagePrimitive.Parts>

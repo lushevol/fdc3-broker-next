@@ -3,7 +3,21 @@ export { ChatbotSidebar } from './index';
 export { default as ChatbotSidebarDefault } from './index';
 
 // Assistant-UI Runtime
-export { AssistantUIRuntimeProvider, useAssistantUIRuntime } from './AssistantUIRuntimeProvider';
+export {
+  AssistantUIRuntimeProvider,
+  useAssistantToolMetadata,
+  useAssistantToolRoutingDebug,
+  useAssistantUIRuntime,
+  useRegisterAssistantTools,
+} from './AssistantUIRuntimeProvider';
+export type { AssistantUIRuntimeProviderValue } from './AssistantUIRuntimeProvider';
+export { ToolRegistryDebugPanel } from './ToolRegistryDebugPanel';
+export { WorkspaceSummaryToolRegistrationExample } from './WorkspaceSummaryToolRegistrationExample';
+export type {
+  AssistantRegisteredToolkit,
+  AssistantToolMetadata,
+  AssistantToolResolutionDebug,
+} from './tools/toolRouting';
 
 // Generative UI
 export {
@@ -19,6 +33,10 @@ export {
   FormComponent,
   defaultGenerativeComponents,
 } from './common/GenerativeUI';
+
+// Demo frontend tools
+export { createDemoToolkit } from './tools/demoToolkit';
+export { createWorkspaceSummaryToolkit } from './tools/workspaceSummaryTool';
 
 // Tool execution display
 export { ToolExecutionCard, ToolExecutionList } from './common/ToolExecutionCard';

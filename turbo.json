@@ -1,5 +1,13 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "CHATBOT_OPENAI_API_KEY",
+    "CHATBOT_OPENAI_BASE_URL",
+    "CHATBOT_OPENAI_MODEL",
+    "CHATBOT_OPENAI_TEMPERATURE",
+    "CHATBOT_ANTHROPIC_API_KEY",
+    "CHATBOT_ANTHROPIC_MODEL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
