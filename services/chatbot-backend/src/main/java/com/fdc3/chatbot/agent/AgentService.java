@@ -3,6 +3,7 @@ package com.fdc3.chatbot.agent;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fdc3.chatbot.model.ChatMessage;
+import com.fdc3.chatbot.model.FrontendToolManifestEntry;
 import com.fdc3.chatbot.model.FrontendToolContinuation;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
@@ -29,6 +30,8 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -77,6 +80,8 @@ public class AgentService {
     // In-memory conversation storage (use Redis/Database in production)
     private final Map<String, List<ChatMessage>> conversations = new ConcurrentHashMap<>();
     private final Map<String, PendingToolExecution> pendingToolExecutions = new ConcurrentHashMap<>();
+    private final Map<String, List<FrontendToolManifestEntry>> frontendToolManifestsByConversation =
+            new ConcurrentHashMap<>();
 
     public AgentService(ToolRegistry toolRegistry) {
         this.toolRegistry = toolRegistry;
@@ -135,6 +140,7 @@ public class AgentService {
                 conversationId,
                 userMessage,
                 null,
+                null,
                 history,
                 onNext,
                 onError,
@@ -155,6 +161,7 @@ public class AgentService {
         return processMessageStreaming(
                 conversationId,
                 userMessage,
+                null,
                 null,
                 history,
                 onNext,
@@ -178,6 +185,33 @@ public class AgentService {
                 conversationId,
                 userMessage,
                 toolContext,
+                null,
+                history,
+                onNext,
+                onError,
+                onComplete,
+                toolCall -> {
+                },
+                toolResult -> {
+                }
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            String toolContext,
+            String frontendTools,
+            List<ChatMessage> history,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                toolContext,
+                frontendTools,
                 history,
                 onNext,
                 onError,
@@ -196,6 +230,7 @@ public class AgentService {
             String conversationId,
             String userMessage,
             String toolContext,
+            String frontendTools,
             List<ChatMessage> history,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
@@ -238,7 +273,18 @@ public class AgentService {
             List<dev.langchain4j.data.message.ChatMessage> messages = new java.util.ArrayList<>();
             Map<String, ToolDefinition> availableTools = toolRegistry.getAllTools();
             FrontendToolContinuation frontendToolContinuation = parseFrontendToolContinuation(toolContext);
-            boolean useTools = frontendToolContinuation != null || shouldUseTools(userMessage, availableTools);
+            List<FrontendToolManifestEntry> frontendToolManifest =
+                    resolveFrontendToolManifest(conversationId, frontendTools);
+            Set<String> blockedFrontendTools = frontendToolContinuation != null
+                    ? Set.of(frontendToolContinuation.getToolName())
+                    : Set.of();
+            boolean useTools = frontendToolContinuation != null
+                    || shouldUseTools(userMessage, availableTools)
+                    || !frontendToolManifest.isEmpty();
+
+            if (!frontendToolManifest.isEmpty()) {
+                log.debug("Received {} frontend tool manifest entries", frontendToolManifest.size());
+            }
 
             // Add system message
             messages.add(new SystemMessage(buildSystemPrompt(useTools ? availableTools : Map.of())));
@@ -280,7 +326,10 @@ public class AgentService {
             streamConversation(
                     conversationId,
                     messages,
-                    useTools ? buildToolSpecifications(availableTools) : List.of(),
+                    useTools ? buildToolSpecifications(availableTools, frontendToolManifest, blockedFrontendTools) : List.of(),
+                    frontendToolManifest,
+                    blockedFrontendTools,
+                    frontendToolContinuation != null ? "frontend-continuation" : "initial",
                     onNext,
                     onError,
                     onComplete,
@@ -310,6 +359,36 @@ public class AgentService {
         }
     }
 
+    private List<com.fdc3.chatbot.model.FrontendToolManifestEntry> parseFrontendToolManifest(String frontendTools) {
+        if (frontendTools == null || frontendTools.isBlank()) {
+            return List.of();
+        }
+
+        try {
+            return objectMapper.readValue(
+                    frontendTools,
+                    objectMapper.getTypeFactory()
+                            .constructCollectionType(List.class, com.fdc3.chatbot.model.FrontendToolManifestEntry.class)
+            );
+        } catch (Exception exception) {
+            log.warn("Failed to parse frontend tool manifest", exception);
+            return List.of();
+        }
+    }
+
+    private List<FrontendToolManifestEntry> resolveFrontendToolManifest(
+            String conversationId,
+            String frontendTools
+    ) {
+        List<FrontendToolManifestEntry> parsedManifest = parseFrontendToolManifest(frontendTools);
+        if (!parsedManifest.isEmpty()) {
+            frontendToolManifestsByConversation.put(conversationId, List.copyOf(parsedManifest));
+            return parsedManifest;
+        }
+
+        return frontendToolManifestsByConversation.getOrDefault(conversationId, List.of());
+    }
+
     private String writeJson(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
@@ -322,6 +401,9 @@ public class AgentService {
             String conversationId,
             List<dev.langchain4j.data.message.ChatMessage> messages,
             List<ToolSpecification> toolSpecifications,
+            List<FrontendToolManifestEntry> frontendToolManifest,
+            Set<String> blockedFrontendTools,
+            String turnPhase,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
             java.lang.Runnable onComplete,
@@ -329,12 +411,15 @@ public class AgentService {
             java.util.function.Consumer<ToolResult> onToolResult,
             AtomicBoolean cancelled
     ) {
+        StringBuilder streamedAssistantText = new StringBuilder();
+
         StreamingResponseHandler<AiMessage> handler = new StreamingResponseHandler<>() {
             @Override
             public void onNext(String token) {
                 if (cancelled.get()) {
                     return;
                 }
+                streamedAssistantText.append(token);
                 onNext.accept(token);
             }
 
@@ -346,6 +431,11 @@ public class AgentService {
 
                 AiMessage aiMessage = response.content();
                 if (aiMessage != null && aiMessage.hasToolExecutionRequests()) {
+                    emitRemainingAssistantText(aiMessage, streamedAssistantText, onNext);
+                    logAssistantTurnDiagnostics(
+                            conversationId,
+                            buildAssistantTurnDiagnostics(turnPhase, aiMessage, streamedAssistantText.toString())
+                    );
                     List<dev.langchain4j.data.message.ChatMessage> continuedMessages =
                             new java.util.ArrayList<>(messages);
                     continuedMessages.add(aiMessage);
@@ -353,6 +443,8 @@ public class AgentService {
                             conversationId,
                             continuedMessages,
                             aiMessage.toolExecutionRequests(),
+                            frontendToolManifest,
+                            blockedFrontendTools,
                             0,
                             onNext,
                             onError,
@@ -362,6 +454,13 @@ public class AgentService {
                             cancelled
                     );
                     return;
+                }
+
+                if (aiMessage != null) {
+                    logAssistantTurnDiagnostics(
+                            conversationId,
+                            buildAssistantTurnDiagnostics(turnPhase, aiMessage, streamedAssistantText.toString())
+                    );
                 }
 
                 log.debug("Completed streaming response for conversation: {}", conversationId);
@@ -386,10 +485,38 @@ public class AgentService {
         streamingChatModel.generate(messages, toolSpecifications, handler);
     }
 
+    private void emitRemainingAssistantText(
+            AiMessage aiMessage,
+            StringBuilder streamedAssistantText,
+            java.util.function.Consumer<String> onNext
+    ) {
+        String assistantText = aiMessage.text();
+        if (assistantText == null || assistantText.isBlank()) {
+            return;
+        }
+
+        String alreadyStreamed = streamedAssistantText.toString();
+        if (alreadyStreamed.isEmpty()) {
+            onNext.accept(assistantText);
+            streamedAssistantText.append(assistantText);
+            return;
+        }
+
+        if (assistantText.startsWith(alreadyStreamed)) {
+            String remainingText = assistantText.substring(alreadyStreamed.length());
+            if (!remainingText.isEmpty()) {
+                onNext.accept(remainingText);
+                streamedAssistantText.append(remainingText);
+            }
+        }
+    }
+
     private void continueWithToolRequests(
             String conversationId,
             List<dev.langchain4j.data.message.ChatMessage> messages,
             List<ToolExecutionRequest> toolExecutionRequests,
+            List<FrontendToolManifestEntry> frontendToolManifest,
+            Set<String> blockedFrontendTools,
             int index,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
@@ -406,7 +533,10 @@ public class AgentService {
             streamConversation(
                     conversationId,
                     messages,
-                    buildToolSpecifications(toolRegistry.getAllTools()),
+                    buildToolSpecifications(toolRegistry.getAllTools(), frontendToolManifest, blockedFrontendTools),
+                    frontendToolManifest,
+                    blockedFrontendTools,
+                    "tool-loop",
                     onNext,
                     onError,
                     onComplete,
@@ -419,12 +549,29 @@ public class AgentService {
 
         ToolExecutionRequest toolExecutionRequest = toolExecutionRequests.get(index);
         Map<String, Object> arguments = parseToolArguments(toolExecutionRequest.arguments());
+        FrontendToolManifestEntry frontendTool = findFrontendTool(frontendToolManifest, toolExecutionRequest.name());
+
+        if (frontendTool != null) {
+            ToolCall frontendToolCall = ToolCall.builder()
+                    .id(toolExecutionRequest.id())
+                    .name(toolExecutionRequest.name())
+                    .arguments(arguments)
+                    .status(frontendTool.isHumanInTheLoop() ? ToolCall.ToolStatus.PENDING : ToolCall.ToolStatus.RUNNING)
+                    .executionTarget(ToolCall.ExecutionTarget.FRONTEND)
+                    .requiresConfirmation(frontendTool.isHumanInTheLoop())
+                    .build();
+            onToolCall.accept(frontendToolCall);
+            onComplete.run();
+            return;
+        }
+
         boolean requiresConfirmation = toolRegistry.requiresConfirmation(toolExecutionRequest.name());
         ToolCall toolCall = ToolCall.builder()
                 .id(toolExecutionRequest.id())
                 .name(toolExecutionRequest.name())
                 .arguments(arguments)
                 .status(requiresConfirmation ? ToolCall.ToolStatus.PENDING : ToolCall.ToolStatus.RUNNING)
+                .executionTarget(ToolCall.ExecutionTarget.BACKEND)
                 .requiresConfirmation(requiresConfirmation)
                 .build();
         onToolCall.accept(toolCall);
@@ -460,6 +607,8 @@ public class AgentService {
                             conversationId,
                             continuedMessages,
                             toolExecutionRequests,
+                            frontendToolManifest,
+                            blockedFrontendTools,
                             index + 1,
                             onNext,
                             onError,
@@ -471,10 +620,19 @@ public class AgentService {
                 });
     }
 
-    private List<ToolSpecification> buildToolSpecifications(Map<String, ToolDefinition> tools) {
-        return tools.values().stream()
+    private List<ToolSpecification> buildToolSpecifications(
+            Map<String, ToolDefinition> tools,
+            List<FrontendToolManifestEntry> frontendTools,
+            Set<String> blockedFrontendTools
+    ) {
+        List<ToolSpecification> backendSpecs = tools.values().stream()
                 .map(this::toToolSpecification)
                 .toList();
+        List<ToolSpecification> frontendSpecs = frontendTools.stream()
+                .filter(frontendTool -> !blockedFrontendTools.contains(frontendTool.getName()))
+                .map(this::toToolSpecification)
+                .toList();
+        return java.util.stream.Stream.concat(backendSpecs.stream(), frontendSpecs.stream()).toList();
     }
 
     private ToolSpecification toToolSpecification(ToolDefinition toolDefinition) {
@@ -483,6 +641,24 @@ public class AgentService {
                 .description(toolDefinition.getDescription())
                 .parameters(toToolParameters(toolDefinition.getParameters()))
                 .build();
+    }
+
+    private ToolSpecification toToolSpecification(FrontendToolManifestEntry frontendTool) {
+        return ToolSpecification.builder()
+                .name(frontendTool.getName())
+                .description(frontendTool.getDescription())
+                .parameters(toToolParameters(frontendTool.getInputSchema() == null ? Map.of("type", "object") : frontendTool.getInputSchema()))
+                .build();
+    }
+
+    private FrontendToolManifestEntry findFrontendTool(
+            List<FrontendToolManifestEntry> frontendTools,
+            String toolName
+    ) {
+        return frontendTools.stream()
+                .filter(tool -> toolName.equals(tool.getName()))
+                .findFirst()
+                .orElse(null);
     }
 
     @SuppressWarnings("unchecked")
@@ -511,6 +687,59 @@ public class AgentService {
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to parse tool arguments: " + arguments, e);
         }
+    }
+
+    private Map<String, Object> buildAssistantTurnDiagnostics(
+            String turnPhase,
+            AiMessage aiMessage,
+            String visibleAssistantText
+    ) {
+        List<String> toolNames = aiMessage.toolExecutionRequests() == null
+                ? List.of()
+                : aiMessage.toolExecutionRequests().stream()
+                .map(ToolExecutionRequest::name)
+                .filter(Objects::nonNull)
+                .toList();
+
+        boolean hasToolRequests = !toolNames.isEmpty();
+        boolean hasVisibleText = (visibleAssistantText != null && !visibleAssistantText.isBlank())
+                || (aiMessage.text() != null && !aiMessage.text().isBlank());
+        boolean silentToolCall = hasToolRequests && !hasVisibleText;
+        boolean emptyAssistantAnswer = !hasToolRequests && !hasVisibleText;
+
+        return Map.of(
+                "phase", turnPhase,
+                "toolNames", toolNames,
+                "hasToolRequests", hasToolRequests,
+                "hasVisibleText", hasVisibleText,
+                "silentToolCall", silentToolCall,
+                "emptyAssistantAnswer", emptyAssistantAnswer
+        );
+    }
+
+    private void logAssistantTurnDiagnostics(String conversationId, Map<String, Object> diagnostics) {
+        boolean silentToolCall = Boolean.TRUE.equals(diagnostics.get("silentToolCall"));
+        boolean emptyAssistantAnswer = Boolean.TRUE.equals(diagnostics.get("emptyAssistantAnswer"));
+
+        if (!silentToolCall && !emptyAssistantAnswer) {
+            log.debug(
+                    "Assistant turn diagnostics for conversation {}: phase={}, tools={}, hasVisibleText={}",
+                    conversationId,
+                    diagnostics.get("phase"),
+                    diagnostics.get("toolNames"),
+                    diagnostics.get("hasVisibleText")
+            );
+            return;
+        }
+
+        log.warn(
+                "Silent assistant turn detected for conversation {}: phase={}, tools={}, silentToolCall={}, emptyAssistantAnswer={}",
+                conversationId,
+                diagnostics.get("phase"),
+                diagnostics.get("toolNames"),
+                silentToolCall,
+                emptyAssistantAnswer
+        );
     }
 
     private String serializeToolResult(Object result, Throwable error) {
@@ -734,6 +963,11 @@ public class AgentService {
         return null;
     }
 
+    public void clearConversationContext(String conversationId) {
+        frontendToolManifestsByConversation.remove(conversationId);
+        pendingToolExecutions.keySet().removeIf(key -> key.startsWith(conversationId + ":"));
+    }
+
     private void confirmPendingToolExecution(String toolCallId, PendingToolExecution pendingExecution) {
         ToolCall resumedToolCall = ToolCall.builder()
                 .id(toolCallId)
@@ -856,6 +1090,11 @@ public class AgentService {
 
                 When using tools, always use the native tool-calling interface provided by the model.
                 Never emit pseudo-XML tags like <tool_call> or <function>.
+                Before calling a tool, give the user one short visible progress update about what you are checking.
+                After each tool result, briefly state what you learned before deciding whether another tool is needed.
+                Keep these progress updates concise and user-facing; do not reveal hidden chain-of-thought.
+                Avoid markdown headings, labels like "ProgressUpdate", and bold section titles for these short updates unless the user explicitly asked for structured markdown.
+                Prefer natural prose over document-style formatting when you are mixing tool results with conversational reasoning.
                 After tool execution, explain what you're doing and show the results clearly.
                 """.formatted(
                         availableTools.values().stream()
@@ -900,6 +1139,7 @@ public class AgentService {
                 Treat its result as authoritative context in the reasoning chain.
                 Do not say you lack access to this tool; you already have its output in the conversation.
                 If the result fully answers the question, use it. If it is only partial, build on it and explain what remains unknown.%s
+                Give the user a short visible progress update that connects this tool result to your next step.
 
                 Completed client-side tool:
                 - name: %s
@@ -923,12 +1163,18 @@ public class AgentService {
                 : "The client-side tool succeeded. Use its returned data directly in your answer.";
 
         return """
-                Continue answering my original request using the completed client-side tool result above.
-                My original request was: "%s"
-                The client-side tool name was: %s
-                The client-side tool arguments were: %s
-                The client-side tool result was: %s
+                Continue answering the user's original request using the completed client-side tool result already present in the conversation.
+                The user's request was: "%s"
+                The completed client-side tool was: %s
+                The completed tool arguments were: %s
+                The completed tool result was: %s
                 Do not claim that the client-side tool is unavailable; its output is already present in the conversation.
+                Before deciding to call another tool, provide one short visible progress update about what the completed result tells you.
+                Keep that visible update to one short natural sentence.
+                Avoid markdown headings, labels like "ProgressUpdate", and bold section titles unless the user explicitly asked for structured markdown.
+                Do not turn a short tool follow-up into a structured document with sections or headings.
+                If the completed result is enough, answer directly instead of calling another tool.
+                Do not call the same client-side tool again unless you genuinely need a materially different invocation that the completed result does not already satisfy.
                 %s
                 """.formatted(
                 frontendToolContinuation.getOriginalUserMessage(),

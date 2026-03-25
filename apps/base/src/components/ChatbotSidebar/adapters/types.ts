@@ -24,6 +24,7 @@ export interface ToolCall {
   name: string;
   arguments: Record<string, unknown>;
   status: 'pending' | 'running' | 'completed' | 'failed';
+  executionTarget?: 'backend' | 'frontend';
   requiresConfirmation?: boolean;
 }
 
@@ -60,6 +61,7 @@ export interface ToolCallContentPart {
   isError?: boolean;
   error?: string;
   status?: ToolCall['status'];
+  executionTarget?: ToolCall['executionTarget'];
   requiresConfirmation?: boolean;
 }
 

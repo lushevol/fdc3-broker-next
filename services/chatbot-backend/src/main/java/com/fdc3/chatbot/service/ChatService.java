@@ -43,6 +43,7 @@ public class ChatService {
                 conversationId,
                 userMessage,
                 null,
+                null,
                 onNext,
                 onError,
                 onComplete,
@@ -68,6 +69,7 @@ public class ChatService {
                 conversationId,
                 userMessage,
                 null,
+                null,
                 onNext,
                 onError,
                 onComplete,
@@ -92,6 +94,56 @@ public class ChatService {
                 conversationId,
                 userMessage,
                 toolContext,
+                null,
+                onNext,
+                onError,
+                onComplete,
+                onToolCall,
+                onToolResult
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            String toolContext,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            java.util.function.Consumer<GenerativeUIDirective> onGenerativeUi
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                toolContext,
+                null,
+                onNext,
+                onError,
+                onComplete,
+                onToolCall,
+                onToolResult,
+                onGenerativeUi
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            String toolContext,
+            String frontendTools,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                toolContext,
+                frontendTools,
                 onNext,
                 onError,
                 onComplete,
@@ -106,6 +158,7 @@ public class ChatService {
             String conversationId,
             String userMessage,
             String toolContext,
+            String frontendTools,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
             java.lang.Runnable onComplete,
@@ -136,6 +189,7 @@ public class ChatService {
                 conversationId,
                 userMessage,
                 toolContext,
+                frontendTools,
                 promptHistory,
                 token -> {
                     if (cancelled.get()) {
@@ -201,6 +255,7 @@ public class ChatService {
      */
     public void clearConversation(String conversationId) {
         conversations.remove(conversationId);
+        agentService.clearConversationContext(conversationId);
         log.info("Cleared conversation: {}", conversationId);
     }
 

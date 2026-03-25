@@ -15,6 +15,61 @@ import type {
   ToolCallContentPart,
 } from './types';
 
+function normalizeToolCallStatus(status: unknown): ToolCall['status'] {
+  const normalizedStatus = typeof status === 'string' ? status.trim().toLowerCase() : 'running';
+
+  switch (normalizedStatus) {
+    case 'pending':
+    case 'running':
+    case 'completed':
+    case 'failed':
+      return normalizedStatus;
+    default:
+      return 'running';
+  }
+}
+
+function normalizeToolExecutionTarget(target: unknown): ToolCall['executionTarget'] {
+  if (typeof target !== 'string') {
+    return undefined;
+  }
+
+  const normalizedTarget = target.trim().toLowerCase();
+  if (normalizedTarget === 'frontend' || normalizedTarget === 'backend') {
+    return normalizedTarget;
+  }
+
+  return undefined;
+}
+
+function normalizeToolCallPayload(payload: unknown): ToolCall | null {
+  if (typeof payload !== 'object' || payload === null) {
+    return null;
+  }
+
+  const candidate = payload as Record<string, unknown>;
+  if (typeof candidate.id !== 'string' || typeof candidate.name !== 'string') {
+    return null;
+  }
+
+  return {
+    id: candidate.id,
+    name: candidate.name,
+    arguments:
+      typeof candidate.arguments === 'object' &&
+      candidate.arguments !== null &&
+      !Array.isArray(candidate.arguments)
+        ? (candidate.arguments as Record<string, unknown>)
+        : {},
+    status: normalizeToolCallStatus(candidate.status),
+    executionTarget: normalizeToolExecutionTarget(candidate.executionTarget),
+    requiresConfirmation:
+      typeof candidate.requiresConfirmation === 'boolean'
+        ? candidate.requiresConfirmation
+        : undefined,
+  };
+}
+
 interface AssistantUiSSEHandlers {
   onEvent: (eventType: SSEEventType, data: string) => void;
   onConnectionError: () => void;
@@ -124,6 +179,12 @@ export function parseSSEEvent(
 
     // Other events are JSON
     const payload = JSON.parse(data);
+
+    if (eventType === 'tool_call') {
+      const normalizedToolCall = normalizeToolCallPayload(payload);
+      return normalizedToolCall ? { type: eventType, payload: normalizedToolCall } : null;
+    }
+
     return { type: eventType, payload };
   } catch (error) {
     console.error(`[SSE Adapter] Failed to parse ${eventType} event:`, error);
@@ -142,6 +203,7 @@ export function transformToolCall(toolCall: ToolCall): ContentPart {
     args: toolCall.arguments,
     argsText: JSON.stringify(toolCall.arguments),
     status: toolCall.status,
+    executionTarget: toolCall.executionTarget,
     requiresConfirmation: toolCall.requiresConfirmation,
   };
 }
@@ -174,6 +236,14 @@ export function transformGenerativeUI(directive: GenerativeUIDirective): Content
       componentName: directive.name,
       props: directive.props,
     },
+  };
+}
+
+function toToolProgressStub(toolName: string): ContentPart {
+  const humanizedToolName = toolName.replace(/_/g, ' ');
+  return {
+    type: 'text',
+    text: `Checking with ${humanizedToolName}...`,
   };
 }
 
@@ -293,6 +363,7 @@ export function buildSSEUrl(
   message: string,
   conversationId?: string | null,
   toolContext?: string,
+  frontendTools?: string,
 ): string {
   const streamUrl = `${baseUrl}/stream`;
   const params = new URLSearchParams({ message: message.trim() });
@@ -303,6 +374,10 @@ export function buildSSEUrl(
 
   if (toolContext) {
     params.set('toolContext', toolContext);
+  }
+
+  if (frontendTools) {
+    params.set('frontendTools', frontendTools);
   }
 
   return `${streamUrl}?${params.toString()}`;
@@ -395,8 +470,14 @@ export function handleSSEEvent(
         updatedMessages.push(newAssistantMessage);
       }
 
+      const assistantMessage = updatedMessages[assistantMessageIndex];
+      const needsLeadingToolStub = assistantMessage.content.length === 0;
+      const messageWithLeadingStub = needsLeadingToolStub
+        ? addContentPartToAssistantMessage(assistantMessage, toToolProgressStub(toolCall.name))
+        : assistantMessage;
+
       updatedMessages[assistantMessageIndex] = addContentPartToAssistantMessage(
-        updatedMessages[assistantMessageIndex],
+        messageWithLeadingStub,
         toolCallPart,
       );
 

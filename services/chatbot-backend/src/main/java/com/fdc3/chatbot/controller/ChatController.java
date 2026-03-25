@@ -39,7 +39,8 @@ public class ChatController {
     public SseEmitter streamChat(
             @RequestParam String message,
             @RequestParam(required = false) String conversationId,
-            @RequestParam(required = false) String toolContext
+            @RequestParam(required = false) String toolContext,
+            @RequestParam(required = false) String frontendTools
     ) {
         log.info("Received streaming chat request for conversation: {}", conversationId);
 
@@ -64,6 +65,7 @@ public class ChatController {
                         convId,
                         message,
                         toolContext,
+                        frontendTools,
                         token -> {
                             try {
                                 emitter.send(SseEmitter.event()

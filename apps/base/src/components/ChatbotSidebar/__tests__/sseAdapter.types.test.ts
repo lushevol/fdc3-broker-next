@@ -141,8 +141,12 @@ describe('SSE Adapter Type Safety', () => {
         (message) => message.role === 'assistant',
       );
 
-      expect(assistantMessage?.content).toHaveLength(1);
+      expect(assistantMessage?.content).toHaveLength(2);
       expect(assistantMessage?.content[0]).toMatchObject({
+        type: 'text',
+        text: 'Checking with get weather...',
+      });
+      expect(assistantMessage?.content[1]).toMatchObject({
         type: 'tool-call',
         toolCallId: 'tool-456',
         result: {
@@ -266,6 +270,32 @@ describe('SSE Adapter Type Safety', () => {
       const result = parseSSEEvent('tool_call', JSON.stringify(toolCall));
       expect(result?.type).toBe('tool_call');
       expect(result?.payload).toMatchObject(toolCall);
+    });
+
+    it('should normalize backend tool_call enums to assistant-ui payload shape', () => {
+      const result = parseSSEEvent(
+        'tool_call',
+        JSON.stringify({
+          id: 'tool-frontend-1',
+          name: 'generate_status_card',
+          arguments: {},
+          status: 'RUNNING',
+          executionTarget: 'FRONTEND',
+          requiresConfirmation: false,
+        }),
+      );
+
+      expect(result).toEqual({
+        type: 'tool_call',
+        payload: {
+          id: 'tool-frontend-1',
+          name: 'generate_status_card',
+          arguments: {},
+          status: 'running',
+          executionTarget: 'frontend',
+          requiresConfirmation: false,
+        },
+      });
     });
 
     it('should handle invalid JSON', () => {
@@ -449,6 +479,28 @@ describe('SSE Adapter Type Safety', () => {
       const url = buildSSEUrl('http://api.example.com', '  Hello World  ');
       expect(url).toBe('http://api.example.com/stream?message=Hello+World');
     });
+
+    it('should include serialized frontend tool manifest when provided', () => {
+      const url = buildSSEUrl(
+        'http://api.example.com',
+        'Hello',
+        'conv-123',
+        undefined,
+        JSON.stringify([
+          {
+            name: 'send_workspace_announcement',
+            description: 'Prepare a workspace announcement',
+            humanInTheLoop: true,
+          },
+        ]),
+      );
+
+      const parsed = new URL(url);
+      expect(parsed.searchParams.get('conversationId')).toBe('conv-123');
+      expect(parsed.searchParams.get('frontendTools')).toBe(
+        '[{"name":"send_workspace_announcement","description":"Prepare a workspace announcement","humanInTheLoop":true}]',
+      );
+    });
   });
 
   describe('handleSSEEvent', () => {
@@ -505,9 +557,42 @@ describe('SSE Adapter Type Safety', () => {
 
       const result = handleSSEEvent(messages, state, 'tool_call', JSON.stringify(toolCall));
 
-      expect(result.messages[0].content).toHaveLength(1);
-      expect(result.messages[0].content[0].type).toBe('tool-call');
+      expect(result.messages[0].content).toHaveLength(2);
+      expect(result.messages[0].content[0]).toMatchObject({
+        type: 'text',
+        text: 'Checking with calculator...',
+      });
+      expect(result.messages[0].content[1].type).toBe('tool-call');
       expect(result.streamingState.accumulatedContent).toBe('');
+    });
+
+    it('should prepend a visible progress stub when a tool call arrives before any assistant text', () => {
+      const messages: AssistantUIMessage[] = [];
+      const state = createInitialStreamingState();
+
+      const toolCall: ToolCall = {
+        id: 'tool-leading-1',
+        name: 'generate_status_card',
+        arguments: { title: 'Workspace Health Status' },
+        status: 'running',
+      };
+
+      const result = handleSSEEvent(messages, state, 'tool_call', JSON.stringify(toolCall));
+
+      expect(result.messages).toHaveLength(1);
+      expect(result.messages[0].content).toEqual([
+        { type: 'text', text: 'Checking with generate status card...' },
+        {
+          type: 'tool-call',
+          toolCallId: 'tool-leading-1',
+          toolName: 'generate_status_card',
+          args: { title: 'Workspace Health Status' },
+          argsText: '{"title":"Workspace Health Status"}',
+          status: 'running',
+          executionTarget: undefined,
+          requiresConfirmation: undefined,
+        },
+      ]);
     });
 
     it('should interleave text around tool calls in arrival order', () => {

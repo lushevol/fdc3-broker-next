@@ -1,4 +1,6 @@
 import type { Toolkit } from '@assistant-ui/react';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import type { ZodTypeAny } from 'zod';
 
 type AssistantJsonValue =
   | string
@@ -28,6 +30,14 @@ export interface AssistantToolMetadata {
   humanInTheLoop: boolean;
 }
 
+export interface FrontendToolManifestEntry {
+  name: string;
+  description: string;
+  inputSchema: Record<string, unknown>;
+  humanInTheLoop: boolean;
+  hasRender: boolean;
+}
+
 export interface AssistantToolResolutionDebug {
   toolName: string;
   input: string;
@@ -45,6 +55,45 @@ type AssistantToolExecutionContext = Parameters<NonNullable<AssistantRegisteredT
 
 export type AssistantRegisteredToolkit = Record<string, AssistantRegisteredTool>;
 
+function isZodSchema(value: unknown): value is ZodTypeAny {
+  return typeof value === 'object' && value !== null && '_def' in value && 'parse' in value;
+}
+
+function normalizeManifestSchema(schema: unknown): Record<string, unknown> {
+  if (typeof schema !== 'object' || schema === null || Array.isArray(schema)) {
+    return { type: 'object' };
+  }
+
+  return schema as Record<string, unknown>;
+}
+
+function toFrontendManifestSchema(parameters: unknown, toolName: string): Record<string, unknown> {
+  if (isZodSchema(parameters)) {
+    const jsonSchema = zodToJsonSchema(parameters, {
+      name: `${toolName}Parameters`,
+      $refStrategy: 'none',
+    });
+
+    if (
+      typeof jsonSchema === 'object' &&
+      jsonSchema !== null &&
+      'definitions' in jsonSchema &&
+      typeof jsonSchema.definitions === 'object' &&
+      jsonSchema.definitions !== null &&
+      !Array.isArray(jsonSchema.definitions)
+    ) {
+      const definitionEntries = Object.values(jsonSchema.definitions);
+      if (definitionEntries.length > 0) {
+        return normalizeManifestSchema(definitionEntries[0]);
+      }
+    }
+
+    return normalizeManifestSchema(jsonSchema);
+  }
+
+  return normalizeManifestSchema(parameters);
+}
+
 export function describeAssistantToolkit(
   toolkit: AssistantRegisteredToolkit,
 ): AssistantToolMetadata[] {
@@ -60,6 +109,20 @@ export function getHumanInTheLoopToolNames(toolkit: AssistantRegisteredToolkit):
   return Object.entries(toolkit)
     .filter(([, toolDefinition]) => toolDefinition.humanInTheLoop)
     .map(([toolName]) => toolName);
+}
+
+export function getFrontendToolManifest(
+  toolkit: AssistantRegisteredToolkit,
+): FrontendToolManifestEntry[] {
+  return Object.entries(toolkit)
+    .filter(([, toolDefinition]) => toolDefinition.type === 'frontend')
+    .map(([toolName, toolDefinition]) => ({
+      name: toolName,
+      description: toolDefinition.description ?? '',
+      inputSchema: toFrontendManifestSchema(toolDefinition.parameters, toolName),
+      humanInTheLoop: toolDefinition.humanInTheLoop ?? false,
+      hasRender: typeof toolDefinition.render === 'function',
+    }));
 }
 
 function logAssistantToolResolution(match: {

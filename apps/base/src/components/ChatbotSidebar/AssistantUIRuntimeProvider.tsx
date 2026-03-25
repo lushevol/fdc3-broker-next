@@ -23,15 +23,19 @@ import {
   buildSSEUrl,
   createInitialStreamingState,
   handleSSEEvent,
+  parseSSEEvent,
 } from './adapters/sseToAssistantUi';
-import type { AssistantUIMessage, ContentPart as StreamingContentPart } from './adapters/types';
+import type {
+  AssistantUIMessage,
+  ContentPart as StreamingContentPart,
+  ToolCall as StreamingToolCall,
+} from './adapters/types';
 import { createBackendToolUiToolkit } from './tools/backendToolUiToolkit';
 import { createDemoToolkit } from './tools/demoToolkit';
 import {
   describeAssistantToolkit,
-  executeAssistantTool,
+  getFrontendToolManifest,
   getHumanInTheLoopToolNames,
-  resolveAssistantToolInvocation,
   type AssistantToolResolutionDebug,
   type AssistantToolMetadata,
   type AssistantRegisteredToolkit,
@@ -188,10 +192,6 @@ interface CompletedAssistantToolCallPart extends ToolCallContinuationPart {
   error?: string;
 }
 
-function createToolCallId(toolName: string): string {
-  return `${toolName}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
 function getTextFromMessage(message: ThreadMessage): string {
   return message.content
     .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
@@ -254,6 +254,11 @@ function findLatestUserText(messages: readonly ThreadMessage[]): string | null {
 
 function serializeToolContinuationPayload(payload: FrontendToolContinuationPayload): string {
   return JSON.stringify(payload);
+}
+
+function serializeFrontendToolManifest(toolkit: AssistantRegisteredToolkit): string | undefined {
+  const manifest = getFrontendToolManifest(toolkit);
+  return manifest.length > 0 ? JSON.stringify(manifest) : undefined;
 }
 
 function buildToolRoundtripContinuationPayload(
@@ -358,6 +363,27 @@ function toAssistantMessageContent(content: StreamingContentPart[]): AssistantRu
   });
 }
 
+function updateToolCallContentWithResult(
+  content: AssistantRunContent,
+  toolCallId: string,
+  result: unknown,
+  isError: boolean,
+  error?: string,
+): AssistantRunContent {
+  return content.map((part) => {
+    if (part.type !== 'tool-call' || part.toolCallId !== toolCallId) {
+      return part;
+    }
+
+    return {
+      ...part,
+      result,
+      isError,
+      ...(error ? { error } : {}),
+    };
+  });
+}
+
 function getLatestAssistantContent(messages: AssistantUIMessage[]): AssistantRunContent {
   const latestAssistantMessage = [...messages]
     .reverse()
@@ -438,13 +464,17 @@ function createChatModelAdapter(
         messageText: string,
         toolContext?: string,
         initialContent: AssistantRunContent = [],
+        frontendToolManifest?: string,
       ): AsyncGenerator<ChatModelRunResult, void, unknown> {
         const streamQueue = createStreamQueue();
         let streamingMessages: AssistantUIMessage[] = [];
         let streamingState = createInitialStreamingState();
         streamingState.conversationId = conversationIdRef.current;
         let pendingStructuredUpdate = false;
+        let pendingFrontendToolCall: StreamingToolCall | null = null;
         let streamError: Error | null = null;
+        let isStreamTerminal = false;
+        let isEventSourceClosedIntentionally = false;
 
         const emitVisibleState = (status?: ChatModelRunResult['status']) => {
           const latestContent = getLatestAssistantContent(streamingMessages);
@@ -456,8 +486,19 @@ function createChatModelAdapter(
           });
         };
 
+        const closeEventSource = () => {
+          isEventSourceClosedIntentionally = true;
+          eventSource.close();
+        };
+
         const eventSource = new EventSource(
-          buildSSEUrl(apiUrl, messageText, conversationIdRef.current, toolContext),
+          buildSSEUrl(
+            apiUrl,
+            messageText,
+            conversationIdRef.current,
+            toolContext,
+            frontendToolManifest,
+          ),
         );
 
         bindAssistantUiSSEStream(eventSource, {
@@ -469,9 +510,21 @@ function createChatModelAdapter(
 
             if (next.error) {
               streamError = new Error(next.error);
-              eventSource.close();
+              closeEventSource();
               streamQueue.close();
               return;
+            }
+
+            if (eventType === 'tool_call') {
+              const parsedToolCall = parseSSEEvent(eventType, data);
+              if (
+                parsedToolCall?.type === 'tool_call' &&
+                typeof parsedToolCall.payload === 'object' &&
+                parsedToolCall.payload !== null &&
+                (parsedToolCall.payload as StreamingToolCall).executionTarget === 'frontend'
+              ) {
+                pendingFrontendToolCall = parsedToolCall.payload as StreamingToolCall;
+              }
             }
 
             if (eventType === 'conversation_id') {
@@ -497,7 +550,99 @@ function createChatModelAdapter(
               const combinedContent =
                 initialContent.length > 0 ? [...initialContent, ...latestContent] : latestContent;
 
+              if (pendingFrontendToolCall) {
+                const frontendToolDefinition = toolkit[pendingFrontendToolCall.name];
+
+                if (frontendToolDefinition?.humanInTheLoop) {
+                  isStreamTerminal = true;
+                  streamQueue.push({
+                    content: combinedContent,
+                    status: {
+                      type: 'requires-action',
+                      reason: 'tool-calls',
+                    },
+                  });
+                  closeEventSource();
+                  streamQueue.close();
+                  return;
+                }
+
+                void (async () => {
+                  let toolResult: unknown;
+                  let toolError: string | undefined;
+
+                  streamQueue.push({
+                    content: combinedContent,
+                    status: {
+                      type: 'requires-action',
+                      reason: 'tool-calls',
+                    },
+                  });
+
+                  try {
+                    if (!frontendToolDefinition?.execute) {
+                      throw new Error(
+                        `Frontend tool is not executable: ${pendingFrontendToolCall?.name ?? 'unknown'}`,
+                      );
+                    }
+
+                    toolResult = await frontendToolDefinition.execute(
+                      pendingFrontendToolCall.arguments,
+                      {} as never,
+                    );
+                  } catch (error) {
+                    toolError =
+                      error instanceof Error ? error.message : 'Frontend tool execution failed';
+                    toolResult = { message: toolError };
+                  }
+
+                  const resolvedContent = updateToolCallContentWithResult(
+                    combinedContent,
+                    pendingFrontendToolCall.id,
+                    toolResult,
+                    !!toolError,
+                    toolError,
+                  );
+
+                  streamQueue.push({
+                    content: resolvedContent,
+                  });
+
+                  const continuationPayload: FrontendToolContinuationPayload = {
+                    originalUserMessage: messageText,
+                    toolName: pendingFrontendToolCall.name,
+                    toolCallId: pendingFrontendToolCall.id,
+                    args: pendingFrontendToolCall.arguments as ReadonlyJSONObject,
+                    result: toolResult,
+                    isError: !!toolError,
+                    ...(toolError ? { error: toolError } : {}),
+                  };
+
+                  try {
+                    for await (const chunk of streamResponsesWithToolContext(
+                      messageText,
+                      serializeToolContinuationPayload(continuationPayload),
+                      resolvedContent,
+                      undefined,
+                    )) {
+                      streamQueue.push(chunk);
+                    }
+                  } catch (error) {
+                    streamError =
+                      error instanceof Error
+                        ? error
+                        : new Error('Frontend tool continuation failed');
+                  } finally {
+                    streamQueue.close();
+                  }
+                })();
+
+                closeEventSource();
+                return;
+              }
+
               if (pendingStructuredUpdate || (combinedContent?.length ?? 0) > 0) {
+                isStreamTerminal = true;
                 streamQueue.push({
                   content: combinedContent,
                   status: {
@@ -507,27 +652,27 @@ function createChatModelAdapter(
                 });
               }
 
-              eventSource.close();
+              closeEventSource();
               streamQueue.close();
             }
           },
           onConnectionError() {
-            if (abortSignal.aborted) {
-              eventSource.close();
+            if (abortSignal.aborted || isStreamTerminal || isEventSourceClosedIntentionally) {
+              closeEventSource();
               streamQueue.close();
               return;
             }
 
             streamError = new Error('Chat stream connection failed');
-            eventSource.close();
+            closeEventSource();
             streamQueue.close();
           },
         });
 
-        abortSignal.addEventListener(
+        abortSignal?.addEventListener(
           'abort',
           () => {
-            eventSource.close();
+            closeEventSource();
             streamQueue.close();
           },
           { once: true },
@@ -543,7 +688,7 @@ function createChatModelAdapter(
             yield next.value;
           }
         } finally {
-          eventSource.close();
+          closeEventSource();
         }
 
         if (streamError) {
@@ -555,6 +700,7 @@ function createChatModelAdapter(
         messages,
         currentAssistantMessage,
       );
+      const frontendToolManifest = serializeFrontendToolManifest(toolkit);
 
       if (continuationPayload) {
         onToolRouteChange(null);
@@ -562,6 +708,8 @@ function createChatModelAdapter(
         return streamResponsesWithToolContext(
           continuationPayload.originalUserMessage,
           serializeToolContinuationPayload(continuationPayload),
+          [],
+          undefined,
         );
       }
 
@@ -573,86 +721,9 @@ function createChatModelAdapter(
       }
 
       const currentUserText = getTextFromMessage(latestMessage);
-      const demoInvocation = resolveAssistantToolInvocation(currentUserText, toolkit);
-
-      if (demoInvocation) {
-        const invocation = demoInvocation;
-        const toolDefinition = toolkit[invocation.toolName];
-        onToolRouteChange(invocation.debug);
-
-        const runFrontendToolWithReAct = async function* (): AsyncGenerator<
-          ChatModelRunResult,
-          void,
-          unknown
-        > {
-          const toolCallId = createToolCallId(invocation.toolName);
-          const toolCall = {
-            type: 'tool-call' as const,
-            toolCallId,
-            toolName: invocation.toolName,
-            args: invocation.args as ReadonlyJSONObject,
-            argsText: JSON.stringify(invocation.args),
-          };
-
-          // Step 1: Yield tool call for UI display
-          yield {
-            content: [toolCall],
-            status: {
-              type: 'requires-action',
-              reason: 'tool-calls',
-            },
-          };
-
-          if (toolDefinition?.humanInTheLoop) {
-            return;
-          }
-
-          // Step 2: Execute the tool
-          let toolResult: unknown;
-          let toolError: string | undefined;
-          try {
-            toolResult = await executeAssistantTool(toolkit, invocation);
-          } catch (error) {
-            toolError = error instanceof Error ? error.message : 'Frontend tool execution failed';
-            toolResult = { message: toolError };
-          }
-
-          const toolResultPart = {
-            ...toolCall,
-            result: toolResult,
-            isError: !!toolError,
-            error: toolError,
-          };
-
-          yield {
-            content: [toolResultPart],
-          };
-
-          const continuationPayload: FrontendToolContinuationPayload = {
-            originalUserMessage: currentUserText,
-            toolName: invocation.toolName,
-            toolCallId,
-            args: invocation.args as ReadonlyJSONObject,
-            result: toolResult,
-            isError: !!toolError,
-            ...(toolError ? { error: toolError } : {}),
-          };
-
-          for await (const chunk of streamResponsesWithToolContext(
-            currentUserText,
-            serializeToolContinuationPayload(continuationPayload),
-            [toolResultPart],
-          )) {
-            yield chunk;
-          }
-        };
-
-        return runFrontendToolWithReAct();
-      }
-
       onToolRouteChange(null);
       async function* streamResponses(): AsyncGenerator<ChatModelRunResult, void, unknown> {
-        yield* streamResponsesWithToolContext(currentUserText);
+        yield* streamResponsesWithToolContext(currentUserText, undefined, [], frontendToolManifest);
       }
 
       return streamResponses();

@@ -285,7 +285,7 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(screen.getByTestId('tool-metadata-hook')).toHaveTextContent('"matchPriority":12');
   });
 
-  it('exposes the last matched tool route through a dedicated hook', async () => {
+  it('keeps the route debug hook empty during backend-driven frontend tool routing', async () => {
     const customToolkit: AssistantRegisteredToolkit = {
       custom_client_tool: {
         type: 'frontend',
@@ -342,22 +342,20 @@ describe('AssistantUIRuntimeProvider', () => {
             content: [{ type: 'text', text: 'please run the debug route flow' }],
           },
         ],
+        abortSignal: new AbortController().signal,
       });
 
-      await stream.next();
+      const firstYield = stream.next();
+      expect(mockEventSourceInstances.length).toBe(1);
+      mockEventSourceInstances[0]?.emit('message', 'Backend response');
+      mockEventSourceInstances[0]?.emit('done');
+      await firstYield;
     });
 
-    expect(screen.getByTestId('tool-route-hook')).toHaveTextContent(
-      '"toolName":"custom_client_tool"',
-    );
-    expect(screen.getByTestId('tool-route-hook')).toHaveTextContent('"priority":55');
-    expect(screen.getByTestId('tool-route-hook')).toHaveTextContent('"confidence":0.85');
-    expect(screen.getByTestId('tool-route-hook')).toHaveTextContent(
-      '"input":"please run the debug route flow"',
-    );
+    expect(screen.getByTestId('tool-route-hook')).toHaveTextContent('null');
   });
 
-  it('routes a registered tool from its prompt matcher inside the local adapter', async () => {
+  it('sends the current frontend tool manifest to the backend instead of executing prompt-matched tools locally', async () => {
     const routedExecute = jest.fn(async () => ({ routed: true }));
     const customToolkit: AssistantRegisteredToolkit = {
       custom_client_tool: {
@@ -405,7 +403,6 @@ describe('AssistantUIRuntimeProvider', () => {
 
     let firstResult;
     let secondResult;
-    let thirdResultPromise;
     await act(async () => {
       const stream = adapter.run({
         messages: [
@@ -418,40 +415,191 @@ describe('AssistantUIRuntimeProvider', () => {
         abortSignal: new AbortController().signal,
       });
 
-      firstResult = await stream.next();
-      secondResult = await stream.next();
-      thirdResultPromise = stream.next(); // Triggers backend connection (outside act)
+      firstResult = stream.next();
+      secondResult = stream.next();
     });
 
-    expect(routedExecute).toHaveBeenCalledWith({}, expect.any(Object));
-    expect(firstResult.value.content[0]).toMatchObject({
-      type: 'tool-call',
-      toolName: 'custom_client_tool',
-    });
-    expect(firstResult.value.status).toMatchObject({
-      type: 'requires-action',
-      reason: 'tool-calls',
-    });
-    expect(secondResult.value.content[0]).toMatchObject({
-      type: 'tool-call',
-      toolName: 'custom_client_tool',
-      result: { routed: true },
-    });
-    expect(secondResult.value.status).toBeUndefined();
-
-    // Third yield triggers backend connection for ReAct pattern
-    // Backend is called for AI analysis
+    expect(routedExecute).not.toHaveBeenCalled();
     expect(mockEventSourceInstances.length).toBe(1);
     const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
     expect(continuationUrl.searchParams.get('message')).toBe('please run custom tool now');
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
-      expect.stringContaining('"originalUserMessage":"please run custom tool now"'),
+    expect(continuationUrl.searchParams.get('toolContext')).toBeNull();
+    expect(continuationUrl.searchParams.get('frontendTools')).toEqual(
+      expect.stringContaining('"name":"custom_client_tool"'),
+    );
+    expect(continuationUrl.searchParams.get('frontendTools')).toEqual(
+      expect.stringContaining('"name":"send_workspace_announcement"'),
     );
     expect(mockFetch).not.toHaveBeenCalled();
 
-    // Clean up: emit done to complete the stream
+    mockEventSourceInstances[0]?.emit('message', 'Backend response');
     mockEventSourceInstances[0]?.emit('done');
-    await thirdResultPromise;
+
+    await expect(firstResult).resolves.toMatchObject({
+      value: {
+        content: [{ type: 'text', text: 'Backend response' }],
+      },
+      done: false,
+    });
+    await expect(secondResult).resolves.toMatchObject({
+      value: {
+        status: { type: 'complete', reason: 'stop' },
+      },
+      done: false,
+    });
+  });
+
+  it('executes backend-requested frontend tools locally and continues the conversation with tool context', async () => {
+    const routedExecute = jest.fn(async () => ({ routed: true }));
+    const customToolkit: AssistantRegisteredToolkit = {
+      custom_client_tool: {
+        type: 'frontend',
+        description: 'Custom tool',
+        parameters: {
+          type: 'object',
+          properties: {},
+        },
+        execute: routedExecute,
+      },
+    };
+
+    const RegisterTools = () => {
+      useRegisterAssistantTools(customToolkit);
+      return null;
+    };
+
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <RegisterTools />
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
+      run: (input: {
+        messages: Array<{
+          id: string;
+          role: 'user';
+          content: Array<{ type: 'text'; text: string }>;
+        }>;
+        abortSignal?: AbortSignal;
+      }) => AsyncGenerator<{
+        content?: Array<{
+          type: string;
+          toolName?: string;
+          result?: unknown;
+          text?: string;
+        }>;
+        status?: {
+          type: string;
+          reason?: string;
+        };
+      }>;
+    };
+
+    const stream = adapter.run({
+      messages: [
+        {
+          id: 'msg-frontend-tool',
+          role: 'user',
+          content: [{ type: 'text', text: 'please use the frontend tool' }],
+        },
+      ],
+      abortSignal: new AbortController().signal,
+    });
+
+    let firstYieldPromise: Promise<
+      IteratorResult<{
+        content?: Array<{ type: string; toolName?: string; result?: unknown; text?: string }>;
+        status?: { type: string; reason?: string };
+      }>
+    >;
+
+    await act(async () => {
+      firstYieldPromise = stream.next();
+    });
+
+    expect(mockEventSourceInstances.length).toBe(1);
+
+    await act(async () => {
+      mockEventSourceInstances[0]?.emit(
+        'tool_call',
+        JSON.stringify({
+          id: 'frontend-tool-1',
+          name: 'custom_client_tool',
+          arguments: { query: 'workspace' },
+          status: 'RUNNING',
+          executionTarget: 'FRONTEND',
+        }),
+      );
+      mockEventSourceInstances[0]?.emit('done');
+    });
+
+    const firstYield = await firstYieldPromise!;
+    expect(firstYield.done).toBe(false);
+    expect(firstYield.value.status).toMatchObject({
+      type: 'requires-action',
+      reason: 'tool-calls',
+    });
+    expect(firstYield.value.content).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'text',
+          text: 'Checking with custom client tool...',
+        }),
+        expect.objectContaining({
+          type: 'tool-call',
+          toolName: 'custom_client_tool',
+        }),
+      ]),
+    );
+
+    const secondYield = await stream.next();
+    expect(secondYield.done).toBe(false);
+    expect(routedExecute).toHaveBeenCalledWith({ query: 'workspace' }, expect.any(Object));
+    expect(secondYield.value.content).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'text',
+          text: 'Checking with custom client tool...',
+        }),
+        expect.objectContaining({
+          type: 'tool-call',
+          toolName: 'custom_client_tool',
+          result: { routed: true },
+        }),
+      ]),
+    );
+
+    expect(mockEventSourceInstances.length).toBe(2);
+    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[1]?.url ?? '');
+    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+      expect.stringContaining('"toolName":"custom_client_tool"'),
+    );
+    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+      expect.stringContaining('"routed":true'),
+    );
+    expect(continuationUrl.searchParams.get('frontendTools')).toBeNull();
+
+    await act(async () => {
+      mockEventSourceInstances[1]?.emit('message', 'The frontend tool completed.');
+      mockEventSourceInstances[1]?.emit('done');
+    });
+
+    const thirdYield = await stream.next();
+    expect(thirdYield.done).toBe(false);
+    expect(thirdYield.value.content).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'tool-call',
+          toolName: 'custom_client_tool',
+          result: { routed: true },
+        }),
+        expect.objectContaining({
+          type: 'text',
+          text: 'The frontend tool completed.',
+        }),
+      ]),
+    );
   });
 
   it('pauses human-in-the-loop tools for explicit approval instead of auto-executing them', async () => {
@@ -460,12 +608,6 @@ describe('AssistantUIRuntimeProvider', () => {
         <div>child</div>
       </AssistantUIRuntimeProvider>,
     );
-
-    const hitlTool = (
-      mockTools.mock.calls.at(-1)?.[0] as {
-        toolkit: AssistantRegisteredToolkit;
-      }
-    ).toolkit.send_workspace_announcement;
 
     const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
       run: (input: {
@@ -498,29 +640,40 @@ describe('AssistantUIRuntimeProvider', () => {
             content: [{ type: 'text', text: 'please send a workspace announcement' }],
           },
         ],
+        abortSignal: new AbortController().signal,
       });
 
-      firstResult = await stream.next();
-      secondResult = await stream.next();
+      firstResult = stream.next();
+      secondResult = stream.next();
     });
 
-    expect(firstResult.value.content[0]).toMatchObject({
-      type: 'tool-call',
-      toolName: 'send_workspace_announcement',
-      args: expect.objectContaining({
-        audience: 'Operations Desk',
-      }),
+    expect(mockEventSourceInstances).toHaveLength(1);
+    const url = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
+    expect(url.searchParams.get('frontendTools')).toEqual(
+      expect.stringContaining('"name":"send_workspace_announcement"'),
+    );
+    expect(url.searchParams.get('frontendTools')).toEqual(
+      expect.stringContaining('"humanInTheLoop":true'),
+    );
+
+    mockEventSourceInstances[0]?.emit('message', 'Backend approval step');
+    mockEventSourceInstances[0]?.emit('done');
+
+    await expect(firstResult).resolves.toMatchObject({
+      value: {
+        content: [{ type: 'text', text: 'Backend approval step' }],
+      },
+      done: false,
     });
-    expect(firstResult.value.status).toMatchObject({
-      type: 'requires-action',
-      reason: 'tool-calls',
+    await expect(secondResult).resolves.toMatchObject({
+      value: {
+        status: { type: 'complete', reason: 'stop' },
+      },
+      done: false,
     });
-    expect(hitlTool.humanInTheLoop).toBe(true);
-    expect(secondResult.done).toBe(true);
-    expect(mockEventSourceInstances).toHaveLength(0);
   });
 
-  it('prefers the highest-priority matching tool when multiple tools match', async () => {
+  it('sends all matching frontend tools in the manifest instead of resolving one locally by priority', async () => {
     const lowerPriorityExecute = jest.fn(async () => ({ source: 'lower' }));
     const higherPriorityExecute = jest.fn(async () => ({ source: 'higher' }));
     const customToolkit: AssistantRegisteredToolkit = {
@@ -590,30 +743,42 @@ describe('AssistantUIRuntimeProvider', () => {
             content: [{ type: 'text', text: 'please use the shared match flow' }],
           },
         ],
+        abortSignal: new AbortController().signal,
       });
 
-      firstResult = await stream.next();
-      finalResult = await stream.next();
+      firstResult = stream.next();
+      finalResult = stream.next();
     });
 
     expect(lowerPriorityExecute).not.toHaveBeenCalled();
-    expect(higherPriorityExecute).toHaveBeenCalledWith({}, expect.any(Object));
-    expect(firstResult.value.content[0]).toMatchObject({
-      type: 'tool-call',
-      toolName: 'higher_priority_tool',
+    expect(higherPriorityExecute).not.toHaveBeenCalled();
+    expect(mockEventSourceInstances.length).toBe(1);
+    const url = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
+    expect(url.searchParams.get('frontendTools')).toEqual(
+      expect.stringContaining('"name":"lower_priority_tool"'),
+    );
+    expect(url.searchParams.get('frontendTools')).toEqual(
+      expect.stringContaining('"name":"higher_priority_tool"'),
+    );
+
+    mockEventSourceInstances[0]?.emit('message', 'Backend chose a tool');
+    mockEventSourceInstances[0]?.emit('done');
+
+    await expect(firstResult).resolves.toMatchObject({
+      value: {
+        content: [{ type: 'text', text: 'Backend chose a tool' }],
+      },
+      done: false,
     });
-    expect(firstResult.value.status).toMatchObject({
-      type: 'requires-action',
-      reason: 'tool-calls',
-    });
-    expect(finalResult.value.content[0]).toMatchObject({
-      type: 'tool-call',
-      toolName: 'higher_priority_tool',
-      result: { source: 'higher' },
+    await expect(finalResult).resolves.toMatchObject({
+      value: {
+        status: { type: 'complete', reason: 'stop' },
+      },
+      done: false,
     });
   });
 
-  it('prefers the higher-confidence match when priorities are equal', async () => {
+  it('sends all equal-priority frontend tools in the manifest instead of resolving by confidence locally', async () => {
     const lowerConfidenceExecute = jest.fn(async () => ({ source: 'lower' }));
     const higherConfidenceExecute = jest.fn(async () => ({ source: 'higher' }));
     const customToolkit: AssistantRegisteredToolkit = {
@@ -695,26 +860,38 @@ describe('AssistantUIRuntimeProvider', () => {
             content: [{ type: 'text', text: 'please handle this confidence request' }],
           },
         ],
+        abortSignal: new AbortController().signal,
       });
 
-      firstResult = await stream.next();
-      finalResult = await stream.next();
+      firstResult = stream.next();
+      finalResult = stream.next();
     });
 
     expect(lowerConfidenceExecute).not.toHaveBeenCalled();
-    expect(higherConfidenceExecute).toHaveBeenCalledWith({ source: 'higher' }, expect.any(Object));
-    expect(firstResult.value.content[0]).toMatchObject({
-      type: 'tool-call',
-      toolName: 'higher_confidence_tool',
+    expect(higherConfidenceExecute).not.toHaveBeenCalled();
+    expect(mockEventSourceInstances.length).toBe(1);
+    const url = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
+    expect(url.searchParams.get('frontendTools')).toEqual(
+      expect.stringContaining('"name":"lower_confidence_tool"'),
+    );
+    expect(url.searchParams.get('frontendTools')).toEqual(
+      expect.stringContaining('"name":"higher_confidence_tool"'),
+    );
+
+    mockEventSourceInstances[0]?.emit('message', 'Backend kept control');
+    mockEventSourceInstances[0]?.emit('done');
+
+    await expect(firstResult).resolves.toMatchObject({
+      value: {
+        content: [{ type: 'text', text: 'Backend kept control' }],
+      },
+      done: false,
     });
-    expect(firstResult.value.status).toMatchObject({
-      type: 'requires-action',
-      reason: 'tool-calls',
-    });
-    expect(finalResult.value.content[0]).toMatchObject({
-      type: 'tool-call',
-      toolName: 'higher_confidence_tool',
-      result: { source: 'higher' },
+    await expect(finalResult).resolves.toMatchObject({
+      value: {
+        status: { type: 'complete', reason: 'stop' },
+      },
+      done: false,
     });
   });
 
@@ -829,6 +1006,77 @@ describe('AssistantUIRuntimeProvider', () => {
             },
           },
         ],
+        status: {
+          type: 'complete',
+          reason: 'stop',
+        },
+      },
+      done: false,
+    });
+    await expect(doneYieldPromise).resolves.toMatchObject({
+      value: undefined,
+      done: true,
+    });
+  });
+
+  it('does not surface a connection error after the stream has already completed', async () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
+      run: (input: {
+        messages: Array<{
+          id: string;
+          role: 'user';
+          content: Array<{ type: 'text'; text: string }>;
+        }>;
+        abortSignal?: AbortSignal;
+      }) => AsyncGenerator<{
+        content?: Array<{
+          type: string;
+          text?: string;
+        }>;
+        status?: {
+          type: string;
+          reason?: string;
+        };
+      }>;
+    };
+
+    const stream = adapter.run({
+      messages: [
+        {
+          id: 'msg-stream-complete',
+          role: 'user',
+          content: [{ type: 'text', text: 'plain backend prompt' }],
+        },
+      ],
+      abortSignal: new AbortController().signal,
+    });
+
+    const firstYieldPromise = stream.next();
+    const secondYieldPromise = stream.next();
+    const doneYieldPromise = stream.next();
+
+    expect(mockEventSourceInstances).toHaveLength(1);
+
+    act(() => {
+      mockEventSourceInstances[0]?.emit('message', 'backend reply');
+      mockEventSourceInstances[0]?.emit('done');
+      mockEventSourceInstances[0]?.failConnection();
+    });
+
+    await expect(firstYieldPromise).resolves.toMatchObject({
+      value: {
+        content: [{ type: 'text', text: 'backend reply' }],
+      },
+      done: false,
+    });
+    await expect(secondYieldPromise).resolves.toMatchObject({
+      value: {
         status: {
           type: 'complete',
           reason: 'stop',
