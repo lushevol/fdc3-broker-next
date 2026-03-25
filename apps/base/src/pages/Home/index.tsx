@@ -19,6 +19,8 @@ import useParameters from './common/useParameters';
 import {
   AssistantUIRuntimeProvider,
   ChatbotSidebar,
+  ToolRegistryDebugPanel,
+  WorkspaceSummaryToolRegistrationExample,
 } from '../../components/ChatbotSidebar/exports';
 
 export const ContainerComponent = (validation: boolean, item, i) =>
@@ -60,6 +62,10 @@ const Home: React.FC = (): ReactElement => {
 
   return (
     <AssistantUIRuntimeProvider apiUrl="/api/chat">
+      <WorkspaceSummaryToolRegistrationExample
+        workspaceLabel={store?.currentWorkspace?.label ?? 'Current workspace'}
+        tileCount={store?.currentWorkspace?.containers?.length ?? 0}
+      />
       <Root data-testid={PREFIX} onMouseMove={mouseMove}>
         <header>
           <AppBar />
@@ -134,6 +140,7 @@ const Home: React.FC = (): ReactElement => {
         {showTimeout && <Timeout setOpen={setShowTimeout} />}
         {channelMessage && <Snackbar message={channelMessage} open={true} onClose={clearMessage} />}
         <ChatbotSidebar />
+        <ToolRegistryDebugPanel />
       </Root>
     </AssistantUIRuntimeProvider>
   );

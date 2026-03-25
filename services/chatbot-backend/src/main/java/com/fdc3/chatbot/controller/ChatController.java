@@ -1,6 +1,7 @@
 package com.fdc3.chatbot.controller;
 
 import com.fdc3.chatbot.model.ChatRequest;
+import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.service.ChatService;
@@ -37,7 +38,9 @@ public class ChatController {
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamChat(
             @RequestParam String message,
-            @RequestParam(required = false) String conversationId
+            @RequestParam(required = false) String conversationId,
+            @RequestParam(required = false) String toolContext,
+            @RequestParam(required = false) String frontendTools
     ) {
         log.info("Received streaming chat request for conversation: {}", conversationId);
 
@@ -61,6 +64,8 @@ public class ChatController {
                 Runnable cancelStream = chatService.processMessageStreaming(
                         convId,
                         message,
+                        toolContext,
+                        frontendTools,
                         token -> {
                             try {
                                 emitter.send(SseEmitter.event()
@@ -106,6 +111,15 @@ public class ChatController {
                                         .data(toolResult));
                             } catch (IOException e) {
                                 log.error("Error sending tool_result event", e);
+                            }
+                        },
+                        generativeUiDirective -> {
+                            try {
+                                emitter.send(SseEmitter.event()
+                                        .name("generative_ui")
+                                        .data(generativeUiDirective));
+                            } catch (IOException e) {
+                                log.error("Error sending generative_ui event", e);
                             }
                         }
                 );

@@ -2,6 +2,7 @@ package com.fdc3.chatbot.service;
 
 import com.fdc3.chatbot.agent.AgentService;
 import com.fdc3.chatbot.model.ChatMessage;
+import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.tool.ToolRegistry;
@@ -41,12 +42,16 @@ public class ChatService {
         return processMessageStreaming(
                 conversationId,
                 userMessage,
+                null,
+                null,
                 onNext,
                 onError,
                 onComplete,
                 toolCall -> {
                 },
                 toolResult -> {
+                },
+                generativeUiDirective -> {
                 }
         );
     }
@@ -59,6 +64,107 @@ public class ChatService {
             java.lang.Runnable onComplete,
             java.util.function.Consumer<ToolCall> onToolCall,
             java.util.function.Consumer<ToolResult> onToolResult
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                null,
+                null,
+                onNext,
+                onError,
+                onComplete,
+                onToolCall,
+                onToolResult,
+                generativeUiDirective -> {
+                }
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            String toolContext,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                toolContext,
+                null,
+                onNext,
+                onError,
+                onComplete,
+                onToolCall,
+                onToolResult
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            String toolContext,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            java.util.function.Consumer<GenerativeUIDirective> onGenerativeUi
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                toolContext,
+                null,
+                onNext,
+                onError,
+                onComplete,
+                onToolCall,
+                onToolResult,
+                onGenerativeUi
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            String toolContext,
+            String frontendTools,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                toolContext,
+                frontendTools,
+                onNext,
+                onError,
+                onComplete,
+                onToolCall,
+                onToolResult,
+                generativeUiDirective -> {
+                }
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            String toolContext,
+            String frontendTools,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            java.util.function.Consumer<GenerativeUIDirective> onGenerativeUi
     ) {
         // Get or create conversation
         List<ChatMessage> history = conversations.computeIfAbsent(conversationId, k -> new ArrayList<>());
@@ -82,6 +188,8 @@ public class ChatService {
         Runnable cancelAgentStream = agentService.processMessageStreaming(
                 conversationId,
                 userMessage,
+                toolContext,
+                frontendTools,
                 promptHistory,
                 token -> {
                     if (cancelled.get()) {
@@ -123,6 +231,7 @@ public class ChatService {
                     }
                     toolResults.add(toolResult);
                     onToolResult.accept(toolResult);
+                    findGenerativeUiDirective(toolCalls, toolResult).ifPresent(onGenerativeUi);
                 }
         );
 
@@ -146,6 +255,7 @@ public class ChatService {
      */
     public void clearConversation(String conversationId) {
         conversations.remove(conversationId);
+        agentService.clearConversationContext(conversationId);
         log.info("Cleared conversation: {}", conversationId);
     }
 
@@ -164,6 +274,84 @@ public class ChatService {
      */
     public boolean isReady() {
         return agentService.isReady();
+    }
+
+    private Optional<GenerativeUIDirective> findGenerativeUiDirective(
+            List<ToolCall> toolCalls,
+            ToolResult toolResult
+    ) {
+        return toolCalls.stream()
+                .filter(toolCall -> Objects.equals(toolCall.getId(), toolResult.getToolCallId()))
+                .findFirst()
+                .flatMap(toolCall -> buildGenerativeUiDirective(toolCall, toolResult));
+    }
+
+    private Optional<GenerativeUIDirective> buildGenerativeUiDirective(
+            ToolCall toolCall,
+            ToolResult toolResult
+    ) {
+        if (toolResult.getError() != null || !(toolResult.getResult() instanceof Map<?, ?> resultMap)) {
+            return Optional.empty();
+        }
+
+        if ("calculator".equals(toolCall.getName())) {
+            Object expression = resultMap.get("expression");
+            Object result = resultMap.get("result");
+            if (expression == null || result == null) {
+                return Optional.empty();
+            }
+
+            return Optional.of(GenerativeUIDirective.builder()
+                    .name("Card")
+                    .toolCallId(toolCall.getId())
+                    .props(Map.of(
+                            "title", "Calculation Complete",
+                            "content", expression + " = " + result,
+                            "variant", "success"
+                    ))
+                    .build());
+        }
+
+        if ("get_weather".equals(toolCall.getName())) {
+            Object location = resultMap.get("location");
+            Object temperature = resultMap.get("temperature");
+            Object temperatureUnit = resultMap.get("temperatureUnit");
+            Object conditions = resultMap.get("conditions");
+
+            if (location == null || temperature == null || temperatureUnit == null || conditions == null) {
+                return Optional.empty();
+            }
+
+            return Optional.of(GenerativeUIDirective.builder()
+                    .name("Card")
+                    .toolCallId(toolCall.getId())
+                    .props(Map.of(
+                            "title", "Weather Summary",
+                            "content", location + ": " + temperature + " " + temperatureUnit + ", " + conditions,
+                            "variant", "default"
+                    ))
+                    .build());
+        }
+
+        if ("get_current_time".equals(toolCall.getName())) {
+            Object timezone = resultMap.get("timezone");
+            Object formatted = resultMap.get("formatted");
+            if (timezone == null || formatted == null) {
+                return Optional.empty();
+            }
+
+            return Optional.of(GenerativeUIDirective.builder()
+                    .name("Card")
+                    .toolCallId(toolCall.getId())
+                    .props(Map.of(
+                            "title", "Current Time",
+                            "content", timezone + ": " + formatted,
+                            "variant", "info"
+                    ))
+                    .build());
+        }
+
+        return Optional.empty();
     }
 
     /**

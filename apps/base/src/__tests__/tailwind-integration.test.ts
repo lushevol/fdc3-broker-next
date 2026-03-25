@@ -30,7 +30,7 @@ describe('apps/base Tailwind integration', () => {
     const rsbuildConfigPath = path.resolve(__dirname, '..', '..', 'rsbuild.config.ts');
     const rsbuildConfigSource = fs.readFileSync(rsbuildConfigPath, 'utf8');
 
-    expect(rsbuildConfigSource).toContain('js: \'\'');
-    expect(rsbuildConfigSource).toContain('css: \'\'');
+    expect(rsbuildConfigSource).toContain("js: ''");
+    expect(rsbuildConfigSource).toContain("css: ''");
   });
 });

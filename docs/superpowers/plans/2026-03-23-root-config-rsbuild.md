@@ -13,6 +13,7 @@
 ### Task 1: Lock current behavior with tests
 
 **Files:**
+
 - Create: `apps/root-config/rsbuild.config.test.ts`
 - Delete: `apps/root-config/webpack.config.test.ts`
 - Test: `apps/root-config/rsbuild.config.test.ts`
@@ -25,6 +26,7 @@
 ### Task 2: Replace webpack config with Rsbuild
 
 **Files:**
+
 - Create: `apps/root-config/rsbuild.config.ts`
 - Create: `apps/root-config/dev-server.ts`
 - Delete: `apps/root-config/webpack.config.js`
@@ -37,6 +39,7 @@
 ### Task 3: Update package scripts and dependencies
 
 **Files:**
+
 - Modify: `apps/root-config/package.json`
 
 - [ ] **Step 1: Replace webpack scripts with rsbuild equivalents**
@@ -47,6 +50,7 @@
 ### Task 4: Verify migration end to end
 
 **Files:**
+
 - Modify: `apps/root-config/README.md`
 
 - [ ] **Step 1: Run root-config Jest tests**

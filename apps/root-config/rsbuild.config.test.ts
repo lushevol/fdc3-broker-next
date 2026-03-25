@@ -38,7 +38,9 @@ describe('root-config rsbuild integration', () => {
       {} as never,
     );
 
-    const middlewarePaths = registeredMiddlewares.map((middleware) => middleware.path).filter(Boolean);
+    const middlewarePaths = registeredMiddlewares
+      .map((middleware) => middleware.path)
+      .filter(Boolean);
     const proxyContexts = rootConfigProxy.map((entry) => entry.context).flat();
 
     expect(middlewarePaths).not.toEqual(expect.arrayContaining(['/api/auth/v2/sso/login']));
@@ -64,7 +66,9 @@ describe('root-config rsbuild integration', () => {
       {} as never,
     );
 
-    const middlewarePaths = registeredMiddlewares.map((middleware) => middleware.path).filter(Boolean);
+    const middlewarePaths = registeredMiddlewares
+      .map((middleware) => middleware.path)
+      .filter(Boolean);
 
     expect(middlewarePaths).toEqual(
       expect.arrayContaining([
@@ -84,11 +88,7 @@ describe('root-config rsbuild integration', () => {
 
     const registeredMiddlewares: Array<{
       path?: string;
-      (
-        req: { url?: string },
-        res: unknown,
-        next?: jest.Mock,
-      ): unknown;
+      (req: { url?: string }, res: unknown, next?: jest.Mock): unknown;
     }> = [];
 
     rootConfigDevSetup(

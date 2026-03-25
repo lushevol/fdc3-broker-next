@@ -1,5 +1,6 @@
 package com.fdc3.chatbot.controller;
 
+import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.service.ChatService;
@@ -46,21 +47,31 @@ class ChatControllerTest {
                 .toolCallId("tool-1")
                 .result(Map.of("result", 4))
                 .build();
+        GenerativeUIDirective generativeUiDirective = GenerativeUIDirective.builder()
+                .name("Card")
+                .toolCallId("tool-1")
+                .props(Map.of("title", "Calculation Complete"))
+                .build();
 
         doAnswer((Answer<Void>) invocation -> {
-            Consumer<String> onNext = invocation.getArgument(2);
-            Runnable onComplete = invocation.getArgument(4);
-            Consumer<ToolCall> onToolCall = invocation.getArgument(5);
-            Consumer<ToolResult> onToolResult = invocation.getArgument(6);
+            Consumer<String> onNext = invocation.getArgument(4);
+            Runnable onComplete = invocation.getArgument(6);
+            Consumer<ToolCall> onToolCall = invocation.getArgument(7);
+            Consumer<ToolResult> onToolResult = invocation.getArgument(8);
+            Consumer<GenerativeUIDirective> onGenerativeUi = invocation.getArgument(9);
 
             onToolCall.accept(toolCall);
             onNext.accept("Hello");
             onToolResult.accept(toolResult);
+            onGenerativeUi.accept(generativeUiDirective);
             onComplete.run();
             return null;
         }).when(chatService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
+                any(),
+                any(),
                 any(),
                 any(),
                 any(),
@@ -72,6 +83,7 @@ class ChatControllerTest {
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
+        result.getAsyncResult();
         String body = result.getResponse().getContentAsString();
 
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:conversation_id"));
@@ -80,6 +92,49 @@ class ChatControllerTest {
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:message"));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("data:Hello"));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:tool_result"));
+        org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:generative_ui"));
+        org.junit.jupiter.api.Assertions.assertTrue(body.contains("\"toolCallId\":\"tool-1\""));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:done"));
+    }
+
+    @Test
+    void streamChatForwardsFrontendToolManifest() throws Exception {
+        when(chatService.createConversation()).thenReturn("conversation-123");
+
+        doAnswer((Answer<Void>) invocation -> {
+            Runnable onComplete = invocation.getArgument(6);
+            onComplete.run();
+            return null;
+        }).when(chatService).processMessageStreaming(
+                anyString(),
+                anyString(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+
+        mockMvc.perform(get("/api/chat/stream")
+                        .param("message", "Hi")
+                        .param("frontendTools", "[{\"name\":\"custom_client_tool\"}]"))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        org.mockito.Mockito.verify(chatService).processMessageStreaming(
+                anyString(),
+                anyString(),
+                any(),
+                org.mockito.ArgumentMatchers.eq("[{\"name\":\"custom_client_tool\"}]"),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
     }
 }

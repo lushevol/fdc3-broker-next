@@ -311,10 +311,7 @@ export const rootConfigDevSetup: SetupMiddlewaresFn = (middlewares) => {
       const body = await parseJsonBody(req);
       const newItem: Fdc3Declaration = {
         ...body,
-        appId:
-          typeof body.appId === 'string' && body.appId
-            ? body.appId
-            : `app-${Date.now()}`,
+        appId: typeof body.appId === 'string' && body.appId ? body.appId : `app-${Date.now()}`,
       };
 
       fdc3Store.declarations.unshift(newItem);

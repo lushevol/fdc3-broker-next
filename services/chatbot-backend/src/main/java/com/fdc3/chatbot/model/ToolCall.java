@@ -17,9 +17,15 @@ public class ToolCall {
     private Map<String, Object> arguments;
     private ToolStatus status;
     @Builder.Default
+    private ExecutionTarget executionTarget = ExecutionTarget.BACKEND;
+    @Builder.Default
     private boolean requiresConfirmation = false;
 
     public enum ToolStatus {
         PENDING, RUNNING, COMPLETED, FAILED
+    }
+
+    public enum ExecutionTarget {
+        BACKEND, FRONTEND
     }
 }

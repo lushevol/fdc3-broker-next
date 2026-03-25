@@ -15,6 +15,61 @@ import type {
   ToolCallContentPart,
 } from './types';
 
+function normalizeToolCallStatus(status: unknown): ToolCall['status'] {
+  const normalizedStatus = typeof status === 'string' ? status.trim().toLowerCase() : 'running';
+
+  switch (normalizedStatus) {
+    case 'pending':
+    case 'running':
+    case 'completed':
+    case 'failed':
+      return normalizedStatus;
+    default:
+      return 'running';
+  }
+}
+
+function normalizeToolExecutionTarget(target: unknown): ToolCall['executionTarget'] {
+  if (typeof target !== 'string') {
+    return undefined;
+  }
+
+  const normalizedTarget = target.trim().toLowerCase();
+  if (normalizedTarget === 'frontend' || normalizedTarget === 'backend') {
+    return normalizedTarget;
+  }
+
+  return undefined;
+}
+
+function normalizeToolCallPayload(payload: unknown): ToolCall | null {
+  if (typeof payload !== 'object' || payload === null) {
+    return null;
+  }
+
+  const candidate = payload as Record<string, unknown>;
+  if (typeof candidate.id !== 'string' || typeof candidate.name !== 'string') {
+    return null;
+  }
+
+  return {
+    id: candidate.id,
+    name: candidate.name,
+    arguments:
+      typeof candidate.arguments === 'object' &&
+      candidate.arguments !== null &&
+      !Array.isArray(candidate.arguments)
+        ? (candidate.arguments as Record<string, unknown>)
+        : {},
+    status: normalizeToolCallStatus(candidate.status),
+    executionTarget: normalizeToolExecutionTarget(candidate.executionTarget),
+    requiresConfirmation:
+      typeof candidate.requiresConfirmation === 'boolean'
+        ? candidate.requiresConfirmation
+        : undefined,
+  };
+}
+
 interface AssistantUiSSEHandlers {
   onEvent: (eventType: SSEEventType, data: string) => void;
   onConnectionError: () => void;
@@ -124,6 +179,12 @@ export function parseSSEEvent(
 
     // Other events are JSON
     const payload = JSON.parse(data);
+
+    if (eventType === 'tool_call') {
+      const normalizedToolCall = normalizeToolCallPayload(payload);
+      return normalizedToolCall ? { type: eventType, payload: normalizedToolCall } : null;
+    }
+
     return { type: eventType, payload };
   } catch (error) {
     console.error(`[SSE Adapter] Failed to parse ${eventType} event:`, error);
@@ -142,6 +203,7 @@ export function transformToolCall(toolCall: ToolCall): ContentPart {
     args: toolCall.arguments,
     argsText: JSON.stringify(toolCall.arguments),
     status: toolCall.status,
+    executionTarget: toolCall.executionTarget,
     requiresConfirmation: toolCall.requiresConfirmation,
   };
 }
@@ -177,6 +239,59 @@ export function transformGenerativeUI(directive: GenerativeUIDirective): Content
   };
 }
 
+function toToolProgressStub(toolName: string): ContentPart {
+  const humanizedToolName = toolName.replace(/_/g, ' ');
+  return {
+    type: 'text',
+    text: `Checking with ${humanizedToolName}...`,
+  };
+}
+
+function mergeToolLinkedGenerativeUI(
+  message: AssistantUIMessage,
+  directive: GenerativeUIDirective,
+): AssistantUIMessage {
+  if (!directive.toolCallId) {
+    return addContentPartToAssistantMessage(message, transformGenerativeUI(directive));
+  }
+
+  const toolCallIndex = message.content.findIndex(
+    (part): part is ToolCallContentPart =>
+      part.type === 'tool-call' && part.toolCallId === directive.toolCallId,
+  );
+
+  if (toolCallIndex === -1) {
+    return addContentPartToAssistantMessage(message, transformGenerativeUI(directive));
+  }
+
+  const toolCallPart = message.content[toolCallIndex] as ToolCallContentPart;
+  const existingResult =
+    typeof toolCallPart.result === 'object' &&
+    toolCallPart.result !== null &&
+    !Array.isArray(toolCallPart.result)
+      ? (toolCallPart.result as Record<string, unknown>)
+      : {};
+
+  const updatedToolCall: ToolCallContentPart = {
+    ...toolCallPart,
+    result: {
+      ...existingResult,
+      __assistantUiGenerativeUi: {
+        componentName: directive.name,
+        props: directive.props,
+      },
+    },
+  };
+
+  const nextContent = [...message.content];
+  nextContent[toolCallIndex] = updatedToolCall;
+
+  return {
+    ...message,
+    content: nextContent,
+  };
+}
+
 /**
  * Update assistant message with new text content
  */
@@ -184,21 +299,17 @@ export function updateAssistantMessageContent(
   message: AssistantUIMessage,
   newText: string,
 ): AssistantUIMessage {
-  const existingTextPart = message.content.find(
-    (part): part is { type: 'text'; text: string } => part.type === 'text',
-  );
+  const lastPart = message.content.at(-1);
 
-  if (existingTextPart) {
-    // Update existing text part
+  if (lastPart?.type === 'text') {
+    // Only extend the trailing text segment so tool/data parts remain interleaved
     return {
       ...message,
-      content: message.content.map((part) =>
-        part.type === 'text' ? { ...part, text: newText } : part,
-      ),
+      content: [...message.content.slice(0, -1), { ...lastPart, text: newText }],
     };
   }
 
-  // Add new text part
+  // Start a new text segment after the latest structured part
   return {
     ...message,
     content: [...message.content, { type: 'text', text: newText }],
@@ -251,12 +362,22 @@ export function buildSSEUrl(
   baseUrl: string,
   message: string,
   conversationId?: string | null,
+  toolContext?: string,
+  frontendTools?: string,
 ): string {
   const streamUrl = `${baseUrl}/stream`;
   const params = new URLSearchParams({ message: message.trim() });
 
   if (conversationId) {
     params.set('conversationId', conversationId);
+  }
+
+  if (toolContext) {
+    params.set('toolContext', toolContext);
+  }
+
+  if (frontendTools) {
+    params.set('frontendTools', frontendTools);
   }
 
   return `${streamUrl}?${params.toString()}`;
@@ -334,22 +455,39 @@ export function handleSSEEvent(
       // Track pending tool call
       streamingState.pendingToolCalls.set(toolCall.id, toolCallPart);
 
-      // Find assistant message and add tool call
-      const assistantMessageIndex = messages.findIndex(
+      // Find or create assistant message
+      let assistantMessageIndex = messages.findIndex(
         (m) => m.id === streamingState.assistantMessageId,
       );
 
+      const updatedMessages = [...messages];
+
       if (assistantMessageIndex === -1) {
-        return { messages, streamingState };
+        // Create new assistant message
+        const newAssistantMessage = createAssistantMessage();
+        streamingState.assistantMessageId = newAssistantMessage.id;
+        assistantMessageIndex = updatedMessages.length;
+        updatedMessages.push(newAssistantMessage);
       }
 
-      const updatedMessages = [...messages];
+      const assistantMessage = updatedMessages[assistantMessageIndex];
+      const needsLeadingToolStub = assistantMessage.content.length === 0;
+      const messageWithLeadingStub = needsLeadingToolStub
+        ? addContentPartToAssistantMessage(assistantMessage, toToolProgressStub(toolCall.name))
+        : assistantMessage;
+
       updatedMessages[assistantMessageIndex] = addContentPartToAssistantMessage(
-        updatedMessages[assistantMessageIndex],
+        messageWithLeadingStub,
         toolCallPart,
       );
 
-      return { messages: updatedMessages, streamingState };
+      return {
+        messages: updatedMessages,
+        streamingState: {
+          ...streamingState,
+          accumulatedContent: '',
+        },
+      };
     }
 
     case 'tool_result': {
@@ -359,44 +497,65 @@ export function handleSSEEvent(
       // Remove from pending
       streamingState.pendingToolCalls.delete(toolResult.toolCallId);
 
-      // Find assistant message and add tool result
-      const assistantMessageIndex = messages.findIndex(
+      // Find or create assistant message
+      let assistantMessageIndex = messages.findIndex(
         (m) => m.id === streamingState.assistantMessageId,
       );
 
+      const updatedMessages = [...messages];
+
       if (assistantMessageIndex === -1) {
-        return { messages, streamingState };
+        // Create new assistant message
+        const newAssistantMessage = createAssistantMessage();
+        streamingState.assistantMessageId = newAssistantMessage.id;
+        assistantMessageIndex = updatedMessages.length;
+        updatedMessages.push(newAssistantMessage);
       }
 
-      const updatedMessages = [...messages];
       updatedMessages[assistantMessageIndex] = addContentPartToAssistantMessage(
         updatedMessages[assistantMessageIndex],
         toolResultPart,
       );
 
-      return { messages: updatedMessages, streamingState };
+      return {
+        messages: updatedMessages,
+        streamingState: {
+          ...streamingState,
+          accumulatedContent: '',
+        },
+      };
     }
 
     case 'generative_ui': {
       const directive = event.payload as GenerativeUIDirective;
-      const uiPart = transformGenerativeUI(directive);
 
-      // Find assistant message and add generative UI
-      const assistantMessageIndex = messages.findIndex(
+      // Find or create assistant message
+      let assistantMessageIndex = messages.findIndex(
         (m) => m.id === streamingState.assistantMessageId,
       );
 
+      const updatedMessages = [...messages];
+
       if (assistantMessageIndex === -1) {
-        return { messages, streamingState };
+        // Create new assistant message
+        const newAssistantMessage = createAssistantMessage();
+        streamingState.assistantMessageId = newAssistantMessage.id;
+        assistantMessageIndex = updatedMessages.length;
+        updatedMessages.push(newAssistantMessage);
       }
 
-      const updatedMessages = [...messages];
-      updatedMessages[assistantMessageIndex] = addContentPartToAssistantMessage(
+      updatedMessages[assistantMessageIndex] = mergeToolLinkedGenerativeUI(
         updatedMessages[assistantMessageIndex],
-        uiPart,
+        directive,
       );
 
-      return { messages: updatedMessages, streamingState };
+      return {
+        messages: updatedMessages,
+        streamingState: {
+          ...streamingState,
+          accumulatedContent: '',
+        },
+      };
     }
 
     case 'error': {
