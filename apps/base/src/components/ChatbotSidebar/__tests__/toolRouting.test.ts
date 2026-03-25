@@ -1,5 +1,7 @@
+import { z } from 'zod';
 import {
   executeAssistantTool,
+  getFrontendToolManifest,
   resolveAssistantToolInvocation,
   type AssistantRegisteredToolkit,
 } from '../tools/toolRouting';
@@ -148,6 +150,41 @@ describe('toolRouting', () => {
       ),
     ).resolves.toMatchObject({ ok: true });
     expect(execute).toHaveBeenCalledWith({ source: 'test' }, expect.any(Object));
+  });
+
+  it('serializes frontend tool manifests with concrete parameter schemas', () => {
+    const toolkit: AssistantRegisteredToolkit = {
+      send_workspace_announcement: {
+        type: 'frontend',
+        description: 'Prepare a workspace announcement',
+        parameters: z.object({
+          title: z.string(),
+          audience: z.string(),
+          summary: z.string(),
+        }),
+        humanInTheLoop: true,
+        execute: async () => ({ ok: true }),
+      },
+    };
+
+    expect(getFrontendToolManifest(toolkit)).toEqual([
+      {
+        name: 'send_workspace_announcement',
+        description: 'Prepare a workspace announcement',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            title: { type: 'string' },
+            audience: { type: 'string' },
+            summary: { type: 'string' },
+          },
+          required: ['title', 'audience', 'summary'],
+          additionalProperties: false,
+        },
+        humanInTheLoop: true,
+        hasRender: false,
+      },
+    ]);
   });
 
   it('logs the winning match in development', () => {
