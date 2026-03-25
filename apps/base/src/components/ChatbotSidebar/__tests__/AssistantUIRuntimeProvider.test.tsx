@@ -42,6 +42,10 @@ class MockEventSource {
   close = jest.fn();
 }
 
+function parseEventSourceUrl(url: string): URL {
+  return new URL(url, 'http://localhost');
+}
+
 Object.defineProperty(global, 'fetch', {
   writable: true,
   value: mockFetch,
@@ -98,9 +102,18 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(mockUseLocalRuntime).toHaveBeenCalledTimes(1);
     expect(mockUseAui).toHaveBeenCalledTimes(1);
     expect(mockTools).toHaveBeenCalledTimes(1);
+    expect(mockUseLocalRuntime.mock.calls[0]?.[1]).toMatchObject({
+      unstable_humanToolNames: expect.arrayContaining(['send_workspace_announcement']),
+    });
 
     expect(mockTools.mock.calls[0]?.[0]).toMatchObject({
       toolkit: expect.any(Object),
+    });
+    expect(mockTools.mock.calls[0]?.[0]).toMatchObject({
+      toolkit: expect.objectContaining({
+        calculator: expect.any(Object),
+        get_weather: expect.any(Object),
+      }),
     });
 
     const provider = screen.getByTestId('assistant-runtime-provider');
@@ -137,6 +150,7 @@ describe('AssistantUIRuntimeProvider', () => {
       toolkit: expect.objectContaining({
         get_current_time: expect.any(Object),
         generate_status_card: expect.any(Object),
+        send_workspace_announcement: expect.any(Object),
         custom_client_tool: expect.any(Object),
       }),
     });
@@ -232,6 +246,7 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(screen.getByTestId('tool-metadata-probe')).toHaveTextContent('"custom_client_tool"');
     expect(screen.getByTestId('tool-metadata-probe')).toHaveTextContent('"matchPriority":25');
     expect(screen.getByTestId('tool-metadata-probe')).toHaveTextContent('"hasPromptMatcher":true');
+    expect(screen.getByTestId('tool-metadata-probe')).toHaveTextContent('"humanInTheLoop":true');
   });
 
   it('exposes tool metadata through a dedicated hook', () => {
@@ -389,7 +404,8 @@ describe('AssistantUIRuntimeProvider', () => {
     };
 
     let firstResult;
-    let finalResult;
+    let secondResult;
+    let thirdResultPromise;
     await act(async () => {
       const stream = adapter.run({
         messages: [
@@ -399,10 +415,12 @@ describe('AssistantUIRuntimeProvider', () => {
             content: [{ type: 'text', text: 'please run custom tool now' }],
           },
         ],
+        abortSignal: new AbortController().signal,
       });
 
       firstResult = await stream.next();
-      finalResult = await stream.next();
+      secondResult = await stream.next();
+      thirdResultPromise = stream.next(); // Triggers backend connection (outside act)
     });
 
     expect(routedExecute).toHaveBeenCalledWith({}, expect.any(Object));
@@ -414,16 +432,92 @@ describe('AssistantUIRuntimeProvider', () => {
       type: 'requires-action',
       reason: 'tool-calls',
     });
-    expect(finalResult.value.content[0]).toMatchObject({
+    expect(secondResult.value.content[0]).toMatchObject({
       type: 'tool-call',
       toolName: 'custom_client_tool',
       result: { routed: true },
     });
-    expect(finalResult.value.status).toMatchObject({
-      type: 'complete',
-      reason: 'stop',
-    });
+    expect(secondResult.value.status).toBeUndefined();
+
+    // Third yield triggers backend connection for ReAct pattern
+    // Backend is called for AI analysis
+    expect(mockEventSourceInstances.length).toBe(1);
+    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
+    expect(continuationUrl.searchParams.get('message')).toBe('please run custom tool now');
+    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+      expect.stringContaining('"originalUserMessage":"please run custom tool now"'),
+    );
     expect(mockFetch).not.toHaveBeenCalled();
+
+    // Clean up: emit done to complete the stream
+    mockEventSourceInstances[0]?.emit('done');
+    await thirdResultPromise;
+  });
+
+  it('pauses human-in-the-loop tools for explicit approval instead of auto-executing them', async () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const hitlTool = (
+      mockTools.mock.calls.at(-1)?.[0] as {
+        toolkit: AssistantRegisteredToolkit;
+      }
+    ).toolkit.send_workspace_announcement;
+
+    const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
+      run: (input: {
+        messages: Array<{
+          id: string;
+          role: 'user';
+          content: Array<{ type: 'text'; text: string }>;
+        }>;
+      }) => AsyncGenerator<{
+        content: Array<{
+          type: string;
+          toolName?: string;
+          args?: Record<string, unknown>;
+        }>;
+        status?: {
+          type: string;
+          reason?: string;
+        };
+      }>;
+    };
+
+    let firstResult;
+    let secondResult;
+    await act(async () => {
+      const stream = adapter.run({
+        messages: [
+          {
+            id: 'msg-hitl',
+            role: 'user',
+            content: [{ type: 'text', text: 'please send a workspace announcement' }],
+          },
+        ],
+      });
+
+      firstResult = await stream.next();
+      secondResult = await stream.next();
+    });
+
+    expect(firstResult.value.content[0]).toMatchObject({
+      type: 'tool-call',
+      toolName: 'send_workspace_announcement',
+      args: expect.objectContaining({
+        audience: 'Operations Desk',
+      }),
+    });
+    expect(firstResult.value.status).toMatchObject({
+      type: 'requires-action',
+      reason: 'tool-calls',
+    });
+    expect(hitlTool.humanInTheLoop).toBe(true);
+    expect(secondResult.done).toBe(true);
+    expect(mockEventSourceInstances).toHaveLength(0);
   });
 
   it('prefers the highest-priority matching tool when multiple tools match', async () => {
@@ -748,7 +842,7 @@ describe('AssistantUIRuntimeProvider', () => {
     });
   });
 
-  it('completes the local tool roundtrip without synthesizing a demo follow-up message', async () => {
+  it('completes the local tool roundtrip by continuing to backend for AI analysis (ReAct)', async () => {
     render(
       <AssistantUIRuntimeProvider apiUrl="/api/chat">
         <div>child</div>
@@ -759,15 +853,25 @@ describe('AssistantUIRuntimeProvider', () => {
       run: (input: {
         messages: Array<{
           id: string;
-          role: 'tool';
-          content: Array<{
-            type: 'tool-result';
-            toolCallId: string;
-            result: unknown;
-            isError?: boolean;
-          }>;
+          role: 'user' | 'assistant' | 'tool';
+          content: Array<
+            | { type: 'text'; text: string }
+            | {
+                type: 'tool-call';
+                toolCallId: string;
+                toolName: string;
+                args: Record<string, unknown>;
+              }
+            | {
+                type: 'tool-result';
+                toolCallId: string;
+                result: unknown;
+                isError?: boolean;
+              }
+          >;
         }>;
-      }) => Promise<{
+        abortSignal?: AbortSignal;
+      }) => AsyncGenerator<{
         content?: Array<{
           type: string;
           text?: string;
@@ -779,8 +883,25 @@ describe('AssistantUIRuntimeProvider', () => {
       }>;
     };
 
-    const result = await adapter.run({
+    const stream = adapter.run({
       messages: [
+        {
+          id: 'user-msg-1',
+          role: 'user',
+          content: [{ type: 'text', text: 'summarize my workspace' }],
+        },
+        {
+          id: 'assistant-msg-1',
+          role: 'assistant',
+          content: [
+            {
+              type: 'tool-call',
+              toolCallId: 'tool-call-1',
+              toolName: 'summarize_workspace_state',
+              args: { scope: 'active' },
+            },
+          ],
+        },
         {
           id: 'tool-msg-1',
           role: 'tool',
@@ -793,15 +914,155 @@ describe('AssistantUIRuntimeProvider', () => {
           ],
         },
       ],
+      abortSignal: new AbortController().signal,
     });
 
-    expect(result).toMatchObject({
-      status: {
-        type: 'complete',
-        reason: 'stop',
-      },
+    // ReAct pattern: Tool roundtrip continues to backend for AI analysis
+    const firstYieldPromise = stream.next();
+
+    // Backend should be called with tool context
+    expect(mockEventSourceInstances.length).toBe(1);
+    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
+    expect(continuationUrl.searchParams.get('message')).toBe('summarize my workspace');
+    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+      expect.stringContaining('"toolCallId":"tool-call-1"'),
+    );
+    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+      expect.stringContaining('"originalUserMessage":"summarize my workspace"'),
+    );
+    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+      expect.stringContaining('"toolName":"summarize_workspace_state"'),
+    );
+
+    // Simulate backend response
+    mockEventSourceInstances[0]?.emit('conversation_id', 'conv-123');
+    mockEventSourceInstances[0]?.emit('message', 'The tool executed successfully.');
+    mockEventSourceInstances[0]?.emit('done');
+
+    const firstYield = await firstYieldPromise;
+    expect(firstYield.done).toBe(false);
+    expect(firstYield.value.content).toHaveLength(1);
+    expect(firstYield.value.content[0]).toMatchObject({
+      type: 'text',
+      text: 'The tool executed successfully.',
     });
-    expect(result.content ?? []).toHaveLength(0);
+
+    // Final status
+    const secondYield = await stream.next();
+    expect(secondYield.done).toBe(false);
+    expect(secondYield.value.status).toMatchObject({
+      type: 'complete',
+      reason: 'stop',
+    });
+
+    // Generator completes
+    const thirdYield = await stream.next();
+    expect(thirdYield.done).toBe(true);
+  });
+
+  it('continues HITL tool approvals when assistant-ui reruns with a completed assistant tool-call part', async () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
+      run: (input: {
+        messages: Array<{
+          id: string;
+          role: 'user' | 'assistant';
+          content: Array<
+            | { type: 'text'; text: string }
+            | {
+                type: 'tool-call';
+                toolCallId: string;
+                toolName: string;
+                args: Record<string, unknown>;
+                result?: unknown;
+              }
+          >;
+        }>;
+        abortSignal?: AbortSignal;
+        unstable_getMessage?: () => {
+          id: string;
+          role: 'assistant';
+          content: Array<{
+            type: 'tool-call';
+            toolCallId: string;
+            toolName: string;
+            args: Record<string, unknown>;
+            result?: unknown;
+          }>;
+        };
+      }) => Promise<
+        AsyncGenerator<{
+          content?: Array<{
+            type: string;
+            text?: string;
+          }>;
+          status?: {
+            type: string;
+            reason?: string;
+          };
+        }>
+      >;
+    };
+
+    const stream = await adapter.run({
+      messages: [
+        {
+          id: 'user-msg-hitl',
+          role: 'user',
+          content: [{ type: 'text', text: 'please send a workspace announcement' }],
+        },
+      ],
+      abortSignal: new AbortController().signal,
+      unstable_getMessage: () => ({
+        id: 'assistant-msg-hitl',
+        role: 'assistant',
+        content: [
+          {
+            type: 'tool-call',
+            toolCallId: 'tool-hitl-1',
+            toolName: 'send_workspace_announcement',
+            args: {
+              title: 'Workspace Update Ready',
+              audience: 'Operations Desk',
+              summary: 'The active workspace was updated and is ready to be shared with the desk.',
+            },
+            result: {
+              approved: true,
+              audience: 'Operations Desk',
+            },
+          },
+        ],
+      }),
+    });
+
+    const firstYieldPromise = stream.next();
+
+    expect(mockEventSourceInstances.length).toBe(1);
+    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
+    expect(continuationUrl.searchParams.get('message')).toBe(
+      'please send a workspace announcement',
+    );
+    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+      expect.stringContaining('"toolName":"send_workspace_announcement"'),
+    );
+    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+      expect.stringContaining('"approved":true'),
+    );
+
+    mockEventSourceInstances[0]?.emit('message', 'The announcement was approved.');
+    mockEventSourceInstances[0]?.emit('done');
+
+    await expect(firstYieldPromise).resolves.toMatchObject({
+      value: {
+        content: [{ type: 'text', text: 'The announcement was approved.' }],
+      },
+      done: false,
+    });
   });
 
   it('persists the backend conversation id across streamed turns', async () => {

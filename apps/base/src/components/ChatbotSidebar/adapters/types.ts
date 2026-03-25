@@ -36,6 +36,7 @@ export interface ToolResult {
 export interface GenerativeUIDirective {
   name: string;
   props: Record<string, unknown>;
+  toolCallId?: string;
 }
 
 /**

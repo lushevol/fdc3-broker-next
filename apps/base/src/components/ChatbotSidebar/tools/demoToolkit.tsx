@@ -1,6 +1,14 @@
 import { z } from 'zod';
-import { executeStatusCardTool, executeTimeTool } from './demoToolLogic';
-import { DemoStatusCardToolUi, DemoTimeToolUi } from './demoToolUi';
+import {
+  createWorkspaceAnnouncementDecision,
+  executeStatusCardTool,
+  executeTimeTool,
+} from './demoToolLogic';
+import {
+  DemoStatusCardToolUi,
+  DemoTimeToolUi,
+  DemoWorkspaceAnnouncementApprovalToolUi,
+} from './demoToolUi';
 import type { AssistantRegisteredToolkit } from './toolRouting';
 
 type DemoToolkitFactory = () => AssistantRegisteredToolkit;
@@ -38,6 +46,30 @@ export const createDemoToolkit: DemoToolkitFactory = () => ({
         ? {
             title: 'Workspace',
             tone: 'success',
+          }
+        : null;
+    },
+  },
+  send_workspace_announcement: {
+    type: 'frontend',
+    description: 'Prepare a workspace announcement and require human approval before sending it.',
+    parameters: z.object({
+      title: z.string(),
+      audience: z.string(),
+      summary: z.string(),
+    }),
+    humanInTheLoop: true,
+    execute: async (args) => createWorkspaceAnnouncementDecision(args, true),
+    render: DemoWorkspaceAnnouncementApprovalToolUi,
+    matchPrompt: (input: string) => {
+      const normalizedInput = input.toLowerCase();
+      return normalizedInput.includes('workspace announcement') ||
+        normalizedInput.includes('announce workspace') ||
+        normalizedInput.includes('send workspace update')
+        ? {
+            title: 'Workspace Update Ready',
+            audience: 'Operations Desk',
+            summary: 'The active workspace was updated and is ready to be shared with the desk.',
           }
         : null;
     },

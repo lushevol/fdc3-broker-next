@@ -25,6 +25,7 @@ export interface AssistantToolMetadata {
   toolName: string;
   hasPromptMatcher: boolean;
   matchPriority: number;
+  humanInTheLoop: boolean;
 }
 
 export interface AssistantToolResolutionDebug {
@@ -37,6 +38,7 @@ export interface AssistantToolResolutionDebug {
 export type AssistantRegisteredTool = Toolkit[string] & {
   matchPrompt?: (input: string) => AssistantToolArgs | AssistantToolMatch | null;
   matchPriority?: number;
+  humanInTheLoop?: boolean;
 };
 
 type AssistantToolExecutionContext = Parameters<NonNullable<AssistantRegisteredTool['execute']>>[1];
@@ -50,7 +52,14 @@ export function describeAssistantToolkit(
     toolName,
     hasPromptMatcher: typeof toolDefinition.matchPrompt === 'function',
     matchPriority: toolDefinition.matchPriority ?? 0,
+    humanInTheLoop: toolDefinition.humanInTheLoop ?? false,
   }));
+}
+
+export function getHumanInTheLoopToolNames(toolkit: AssistantRegisteredToolkit): string[] {
+  return Object.entries(toolkit)
+    .filter(([, toolDefinition]) => toolDefinition.humanInTheLoop)
+    .map(([toolName]) => toolName);
 }
 
 function logAssistantToolResolution(match: {

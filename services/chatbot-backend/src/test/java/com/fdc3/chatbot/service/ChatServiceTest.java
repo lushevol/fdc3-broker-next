@@ -2,6 +2,7 @@ package com.fdc3.chatbot.service;
 
 import com.fdc3.chatbot.agent.AgentService;
 import com.fdc3.chatbot.model.ChatMessage;
+import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.tool.ToolRegistry;
@@ -19,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -38,8 +40,8 @@ class ChatServiceTest {
     @Test
     void processMessageStreamingPersistsAssistantMessageOnCompletion() {
         doAnswer(invocation -> {
-            Consumer<String> onNext = invocation.getArgument(3);
-            Runnable onComplete = invocation.getArgument(5);
+            Consumer<String> onNext = invocation.getArgument(4);
+            Runnable onComplete = invocation.getArgument(6);
 
             onNext.accept("Hello ");
             onNext.accept("world");
@@ -48,6 +50,7 @@ class ChatServiceTest {
         }).when(agentService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 anyList(),
                 any(),
                 any(),
@@ -94,9 +97,9 @@ class ChatServiceTest {
                 .build();
 
         doAnswer(invocation -> {
-            Consumer<ToolCall> onToolCall = invocation.getArgument(6);
-            Consumer<ToolResult> onToolResult = invocation.getArgument(7);
-            Runnable onComplete = invocation.getArgument(5);
+            Consumer<ToolCall> onToolCall = invocation.getArgument(7);
+            Consumer<ToolResult> onToolResult = invocation.getArgument(8);
+            Runnable onComplete = invocation.getArgument(6);
 
             onToolCall.accept(toolCall);
             onToolResult.accept(toolResult);
@@ -105,6 +108,7 @@ class ChatServiceTest {
         }).when(agentService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 anyList(),
                 any(),
                 any(),
@@ -135,14 +139,84 @@ class ChatServiceTest {
     }
 
     @Test
-    void processMessageStreamingDoesNotDuplicateCurrentUserMessageInModelHistory() {
+    void processMessageStreamingEmitsToolLinkedGenerativeUiForSupportedBackendTools() {
+        ToolCall toolCall = ToolCall.builder()
+                .id("tool-1")
+                .name("get_weather")
+                .arguments(java.util.Map.of("location", "Shanghai, China"))
+                .status(ToolCall.ToolStatus.RUNNING)
+                .build();
+        ToolResult toolResult = ToolResult.builder()
+                .toolCallId("tool-1")
+                .result(java.util.Map.of(
+                        "location", "Shanghai, China",
+                        "temperature", 22,
+                        "temperatureUnit", "Celsius",
+                        "conditions", "Partly Cloudy"
+                ))
+                .build();
+
         doAnswer(invocation -> {
-            Runnable onComplete = invocation.getArgument(5);
+            Consumer<ToolCall> onToolCall = invocation.getArgument(7);
+            Consumer<ToolResult> onToolResult = invocation.getArgument(8);
+            Runnable onComplete = invocation.getArgument(6);
+
+            onToolCall.accept(toolCall);
+            onToolResult.accept(toolResult);
             onComplete.run();
             return null;
         }).when(agentService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
+                anyList(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+
+        Consumer<GenerativeUIDirective> onGenerativeUi = mock(Consumer.class);
+        String conversationId = chatService.createConversation();
+
+        chatService.processMessageStreaming(
+                conversationId,
+                "weather in shanghai",
+                null,
+                token -> {
+                },
+                error -> {
+                },
+                () -> {
+                },
+                toolCallEvent -> {
+                },
+                toolResultEvent -> {
+                },
+                onGenerativeUi
+        );
+
+        ArgumentCaptor<GenerativeUIDirective> directiveCaptor = ArgumentCaptor.forClass(GenerativeUIDirective.class);
+        verify(onGenerativeUi).accept(directiveCaptor.capture());
+
+        GenerativeUIDirective directive = directiveCaptor.getValue();
+        assertEquals("Card", directive.getName());
+        assertEquals("tool-1", directive.getToolCallId());
+        assertEquals("Weather Summary", directive.getProps().get("title"));
+        assertTrue(String.valueOf(directive.getProps().get("content")).contains("Partly Cloudy"));
+    }
+
+    @Test
+    void processMessageStreamingDoesNotDuplicateCurrentUserMessageInModelHistory() {
+        doAnswer(invocation -> {
+            Runnable onComplete = invocation.getArgument(6);
+            onComplete.run();
+            return null;
+        }).when(agentService).processMessageStreaming(
+                anyString(),
+                anyString(),
+                any(),
                 anyList(),
                 any(),
                 any(),
@@ -168,6 +242,7 @@ class ChatServiceTest {
         verify(agentService).processMessageStreaming(
                 eq(conversationId),
                 eq("Hello there"),
+                isNull(),
                 historyCaptor.capture(),
                 any(),
                 any(),
@@ -186,13 +261,14 @@ class ChatServiceTest {
         final Consumer<String>[] onNextRef = new Consumer[1];
 
         doAnswer((org.mockito.stubbing.Answer<Runnable>) invocation -> {
-            onNextRef[0] = invocation.getArgument(3);
-            onCompleteRef[0] = invocation.getArgument(5);
+            onNextRef[0] = invocation.getArgument(4);
+            onCompleteRef[0] = invocation.getArgument(6);
             return () -> {
             };
         }).when(agentService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 anyList(),
                 any(),
                 any(),

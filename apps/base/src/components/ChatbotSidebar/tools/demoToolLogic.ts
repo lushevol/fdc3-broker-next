@@ -1,11 +1,17 @@
 export type TimeToolArgs = {
-  locale: string;
+  locale?: string;
+  timezone?: string;
 };
 
 export type TimeToolResult = {
-  locale: string;
+  locale?: string;
   timezone: string;
-  formattedTime: string;
+  formattedTime?: string;
+  formatted?: string;
+  __assistantUiGenerativeUi?: {
+    componentName?: string;
+    props?: Record<string, unknown>;
+  };
 };
 
 export type StatusCardArgs = {
@@ -20,18 +26,36 @@ export type StatusCardResult = {
   generatedAt: string;
 };
 
+export type WorkspaceAnnouncementArgs = {
+  title: string;
+  audience: string;
+  summary: string;
+};
+
+export type WorkspaceAnnouncementResult = {
+  approved: boolean;
+  audience: string;
+  title: string;
+  summary: string;
+  reviewedAt: string;
+  reviewer: string;
+};
+
 export async function executeTimeTool({ locale }: TimeToolArgs): Promise<TimeToolResult> {
   const now = new Date();
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  const resolvedLocale = locale ?? 'en-US';
+  const formattedTime = new Intl.DateTimeFormat(resolvedLocale, {
+    dateStyle: 'medium',
+    timeStyle: 'medium',
+    timeZone: timezone,
+  }).format(now);
 
   return {
-    locale,
+    locale: resolvedLocale,
     timezone,
-    formattedTime: new Intl.DateTimeFormat(locale, {
-      dateStyle: 'medium',
-      timeStyle: 'medium',
-      timeZone: timezone,
-    }).format(now),
+    formattedTime,
+    formatted: formattedTime,
   };
 }
 
@@ -52,5 +76,22 @@ export async function executeStatusCardTool({
       hour: '2-digit',
       minute: '2-digit',
     }),
+  };
+}
+
+export function createWorkspaceAnnouncementDecision(
+  args: WorkspaceAnnouncementArgs,
+  approved: boolean,
+): WorkspaceAnnouncementResult {
+  return {
+    approved,
+    audience: args.audience,
+    title: args.title,
+    summary: args.summary,
+    reviewedAt: new Date().toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    reviewer: 'Operator',
   };
 }

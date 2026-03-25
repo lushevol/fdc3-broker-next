@@ -1,5 +1,6 @@
 package com.fdc3.chatbot.controller;
 
+import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.service.ChatService;
@@ -46,21 +47,30 @@ class ChatControllerTest {
                 .toolCallId("tool-1")
                 .result(Map.of("result", 4))
                 .build();
+        GenerativeUIDirective generativeUiDirective = GenerativeUIDirective.builder()
+                .name("Card")
+                .toolCallId("tool-1")
+                .props(Map.of("title", "Calculation Complete"))
+                .build();
 
         doAnswer((Answer<Void>) invocation -> {
-            Consumer<String> onNext = invocation.getArgument(2);
-            Runnable onComplete = invocation.getArgument(4);
-            Consumer<ToolCall> onToolCall = invocation.getArgument(5);
-            Consumer<ToolResult> onToolResult = invocation.getArgument(6);
+            Consumer<String> onNext = invocation.getArgument(3);
+            Runnable onComplete = invocation.getArgument(5);
+            Consumer<ToolCall> onToolCall = invocation.getArgument(6);
+            Consumer<ToolResult> onToolResult = invocation.getArgument(7);
+            Consumer<GenerativeUIDirective> onGenerativeUi = invocation.getArgument(8);
 
             onToolCall.accept(toolCall);
             onNext.accept("Hello");
             onToolResult.accept(toolResult);
+            onGenerativeUi.accept(generativeUiDirective);
             onComplete.run();
             return null;
         }).when(chatService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
+                any(),
                 any(),
                 any(),
                 any(),
@@ -80,6 +90,8 @@ class ChatControllerTest {
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:message"));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("data:Hello"));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:tool_result"));
+        org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:generative_ui"));
+        org.junit.jupiter.api.Assertions.assertTrue(body.contains("\"toolCallId\":\"tool-1\""));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:done"));
     }
 }

@@ -70,6 +70,91 @@ describe('SSE Adapter Type Safety', () => {
       expect(done.streamingState.accumulatedContent).toBe('');
       expect(done.streamingState.pendingToolCalls.size).toBe(0);
     });
+
+    it('preserves tool metadata when a tool_result resolves a prior tool_call', () => {
+      const state = createInitialStreamingState();
+      const toolCall: ToolCall = {
+        id: 'tool-123',
+        name: 'get_weather',
+        arguments: { location: 'Singapore' },
+        status: 'running',
+      };
+
+      const afterToolCall = handleSSEEvent([], state, 'tool_call', JSON.stringify(toolCall));
+      const afterToolResult = handleSSEEvent(
+        afterToolCall.messages,
+        afterToolCall.streamingState,
+        'tool_result',
+        JSON.stringify({
+          toolCallId: 'tool-123',
+          result: { location: 'Singapore', temperature: 31 },
+        } satisfies ToolResult),
+      );
+
+      const assistantMessage = afterToolResult.messages.find(
+        (message) => message.role === 'assistant',
+      );
+      const toolPart = assistantMessage?.content.find(
+        (part): part is Extract<ContentPart, { type: 'tool-call' }> => part.type === 'tool-call',
+      );
+
+      expect(toolPart).toMatchObject({
+        type: 'tool-call',
+        toolCallId: 'tool-123',
+        toolName: 'get_weather',
+        args: { location: 'Singapore' },
+        result: { location: 'Singapore', temperature: 31 },
+      });
+    });
+
+    it('merges tool-linked generative_ui directives into the existing tool-call part', () => {
+      const state = createInitialStreamingState();
+      const toolCall: ToolCall = {
+        id: 'tool-456',
+        name: 'get_weather',
+        arguments: { location: 'Shanghai, China' },
+        status: 'completed',
+      };
+
+      const afterToolCall = handleSSEEvent([], state, 'tool_call', JSON.stringify(toolCall));
+      const afterToolResult = handleSSEEvent(
+        afterToolCall.messages,
+        afterToolCall.streamingState,
+        'tool_result',
+        JSON.stringify({
+          toolCallId: 'tool-456',
+          result: { location: 'Shanghai, China', temperature: 22 },
+        } satisfies ToolResult),
+      );
+      const afterGenerativeUi = handleSSEEvent(
+        afterToolResult.messages,
+        afterToolResult.streamingState,
+        'generative_ui',
+        JSON.stringify({
+          name: 'ChartCard',
+          toolCallId: 'tool-456',
+          props: { title: 'Weather Summary' },
+        } satisfies GenerativeUIDirective),
+      );
+
+      const assistantMessage = afterGenerativeUi.messages.find(
+        (message) => message.role === 'assistant',
+      );
+
+      expect(assistantMessage?.content).toHaveLength(1);
+      expect(assistantMessage?.content[0]).toMatchObject({
+        type: 'tool-call',
+        toolCallId: 'tool-456',
+        result: {
+          location: 'Shanghai, China',
+          temperature: 22,
+          __assistantUiGenerativeUi: {
+            componentName: 'ChartCard',
+            props: { title: 'Weather Summary' },
+          },
+        },
+      });
+    });
   });
 
   describe('bindAssistantUiSSEStream', () => {
@@ -277,7 +362,7 @@ describe('SSE Adapter Type Safety', () => {
       expect(updated.content[0]).toMatchObject({ type: 'text', text: 'Hello' });
     });
 
-    it('should update existing text part', () => {
+    it('should update trailing text part', () => {
       const message: AssistantUIMessage = {
         id: '1',
         role: 'assistant',
@@ -290,7 +375,7 @@ describe('SSE Adapter Type Safety', () => {
       expect(updated.content[0]).toMatchObject({ type: 'text', text: 'Hello World' });
     });
 
-    it('should preserve other content parts', () => {
+    it('should start a new text part after structured content', () => {
       const message: AssistantUIMessage = {
         id: '1',
         role: 'assistant',
@@ -302,9 +387,10 @@ describe('SSE Adapter Type Safety', () => {
       };
       const updated = updateAssistantMessageContent(message, 'Hello World');
 
-      expect(updated.content).toHaveLength(2);
-      expect(updated.content[0]).toMatchObject({ type: 'text', text: 'Hello World' });
+      expect(updated.content).toHaveLength(3);
+      expect(updated.content[0]).toMatchObject({ type: 'text', text: 'Hello' });
       expect(updated.content[1]).toMatchObject({ type: 'tool-call', toolCallId: 't1' });
+      expect(updated.content[2]).toMatchObject({ type: 'text', text: 'Hello World' });
     });
   });
 
@@ -421,6 +507,78 @@ describe('SSE Adapter Type Safety', () => {
 
       expect(result.messages[0].content).toHaveLength(1);
       expect(result.messages[0].content[0].type).toBe('tool-call');
+      expect(result.streamingState.accumulatedContent).toBe('');
+    });
+
+    it('should interleave text around tool calls in arrival order', () => {
+      let messages: AssistantUIMessage[] = [];
+      let state = createInitialStreamingState();
+
+      const firstText = handleSSEEvent(messages, state, 'message', 'First thought. ');
+      messages = firstText.messages;
+      state = firstText.streamingState;
+
+      const toolCall: ToolCall = {
+        id: 'tool-ordered-1',
+        name: 'get_weather',
+        arguments: { location: 'Shanghai' },
+        status: 'running',
+      };
+      const afterToolCall = handleSSEEvent(messages, state, 'tool_call', JSON.stringify(toolCall));
+      messages = afterToolCall.messages;
+      state = afterToolCall.streamingState;
+
+      const secondText = handleSSEEvent(messages, state, 'message', 'After tool result.');
+
+      expect(secondText.messages[0].content).toEqual([
+        { type: 'text', text: 'First thought. ' },
+        {
+          type: 'tool-call',
+          toolCallId: 'tool-ordered-1',
+          toolName: 'get_weather',
+          args: { location: 'Shanghai' },
+          argsText: '{"location":"Shanghai"}',
+          status: 'running',
+          requiresConfirmation: undefined,
+        },
+        { type: 'text', text: 'After tool result.' },
+      ]);
+    });
+
+    it('should interleave text around standalone generative ui in arrival order', () => {
+      let messages: AssistantUIMessage[] = [];
+      let state = createInitialStreamingState();
+
+      const firstText = handleSSEEvent(messages, state, 'message', 'Thinking...');
+      messages = firstText.messages;
+      state = firstText.streamingState;
+
+      const afterGenerativeUi = handleSSEEvent(
+        messages,
+        state,
+        'generative_ui',
+        JSON.stringify({
+          name: 'ChartCard',
+          props: { title: 'Summary' },
+        } satisfies GenerativeUIDirective),
+      );
+      messages = afterGenerativeUi.messages;
+      state = afterGenerativeUi.streamingState;
+
+      const secondText = handleSSEEvent(messages, state, 'message', 'Done reasoning.');
+
+      expect(secondText.messages[0].content).toEqual([
+        { type: 'text', text: 'Thinking...' },
+        {
+          type: 'data',
+          name: 'generative-ui',
+          data: {
+            componentName: 'ChartCard',
+            props: { title: 'Summary' },
+          },
+        },
+        { type: 'text', text: 'Done reasoning.' },
+      ]);
     });
 
     it('should handle done event', () => {

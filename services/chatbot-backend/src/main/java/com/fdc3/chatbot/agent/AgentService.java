@@ -3,6 +3,7 @@ package com.fdc3.chatbot.agent;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fdc3.chatbot.model.ChatMessage;
+import com.fdc3.chatbot.model.FrontendToolContinuation;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.tool.ToolDefinition;
@@ -133,6 +134,50 @@ public class AgentService {
         return processMessageStreaming(
                 conversationId,
                 userMessage,
+                null,
+                history,
+                onNext,
+                onError,
+                onComplete
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            List<ChatMessage> history,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                null,
+                history,
+                onNext,
+                onError,
+                onComplete,
+                onToolCall,
+                onToolResult
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            String toolContext,
+            List<ChatMessage> history,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                toolContext,
                 history,
                 onNext,
                 onError,
@@ -150,6 +195,7 @@ public class AgentService {
     public Runnable processMessageStreaming(
             String conversationId,
             String userMessage,
+            String toolContext,
             List<ChatMessage> history,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
@@ -191,10 +237,14 @@ public class AgentService {
             // Build message list for LangChain4j
             List<dev.langchain4j.data.message.ChatMessage> messages = new java.util.ArrayList<>();
             Map<String, ToolDefinition> availableTools = toolRegistry.getAllTools();
-            boolean useTools = shouldUseTools(userMessage, availableTools);
+            FrontendToolContinuation frontendToolContinuation = parseFrontendToolContinuation(toolContext);
+            boolean useTools = frontendToolContinuation != null || shouldUseTools(userMessage, availableTools);
 
             // Add system message
             messages.add(new SystemMessage(buildSystemPrompt(useTools ? availableTools : Map.of())));
+            if (frontendToolContinuation != null) {
+                messages.add(new SystemMessage(buildFrontendToolContinuationPrompt(frontendToolContinuation)));
+            }
 
             // Add history
             if (history != null) {
@@ -207,8 +257,23 @@ public class AgentService {
                 }
             }
 
-            // Add current user message
-            messages.add(new UserMessage(userMessage));
+            if (frontendToolContinuation != null) {
+                messages.add(new UserMessage(frontendToolContinuation.getOriginalUserMessage()));
+                messages.add(AiMessage.from(ToolExecutionRequest.builder()
+                        .id(frontendToolContinuation.getToolCallId())
+                        .name(frontendToolContinuation.getToolName())
+                        .arguments(writeJson(frontendToolContinuation.getArgs()))
+                        .build()));
+                messages.add(ToolExecutionResultMessage.from(
+                        frontendToolContinuation.getToolCallId(),
+                        frontendToolContinuation.getToolName(),
+                        writeJson(frontendToolContinuation.getResult())
+                ));
+                messages.add(new UserMessage(buildFrontendToolContinuationResumePrompt(frontendToolContinuation)));
+            } else {
+                // Add current user message
+                messages.add(new UserMessage(userMessage));
+            }
 
             log.debug("Processing message for conversation: {}", conversationId);
 
@@ -230,6 +295,27 @@ public class AgentService {
         }
 
         return () -> cancelled.set(true);
+    }
+
+    private FrontendToolContinuation parseFrontendToolContinuation(String toolContext) {
+        if (toolContext == null || toolContext.isBlank()) {
+            return null;
+        }
+
+        try {
+            return objectMapper.readValue(toolContext, FrontendToolContinuation.class);
+        } catch (Exception exception) {
+            log.warn("Failed to parse frontend tool continuation payload", exception);
+            return null;
+        }
+    }
+
+    private String writeJson(Object value) {
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Failed to serialize frontend tool continuation", exception);
+        }
     }
 
     private void streamConversation(
@@ -793,6 +879,63 @@ public class AgentService {
                 """,
                 agentName,
                 toolSection
+        );
+    }
+
+    private String buildFrontendToolContinuationPrompt(FrontendToolContinuation frontendToolContinuation) {
+        String argumentsJson = writeJson(frontendToolContinuation.getArgs());
+        String resultJson = writeJson(frontendToolContinuation.getResult());
+        String errorInstruction = frontendToolContinuation.isError()
+                ? """
+
+                The client-side tool reported an error. Explain that failure clearly and use it as part of your reasoning.
+                """
+                : """
+
+                The client-side tool completed successfully. Use its result directly when answering the user.
+                """;
+
+        return """
+                A client-side tool has already been executed as part of the current request.
+                Treat its result as authoritative context in the reasoning chain.
+                Do not say you lack access to this tool; you already have its output in the conversation.
+                If the result fully answers the question, use it. If it is only partial, build on it and explain what remains unknown.%s
+
+                Completed client-side tool:
+                - name: %s
+                - toolCallId: %s
+                - arguments: %s
+                - result: %s
+                """.formatted(
+                errorInstruction,
+                frontendToolContinuation.getToolName(),
+                frontendToolContinuation.getToolCallId(),
+                argumentsJson,
+                resultJson
+        );
+    }
+
+    private String buildFrontendToolContinuationResumePrompt(FrontendToolContinuation frontendToolContinuation) {
+        String argumentsJson = writeJson(frontendToolContinuation.getArgs());
+        String resultJson = writeJson(frontendToolContinuation.getResult());
+        String errorInstruction = frontendToolContinuation.isError()
+                ? "The client-side tool failed. Explain the failure in context and describe the best next step."
+                : "The client-side tool succeeded. Use its returned data directly in your answer.";
+
+        return """
+                Continue answering my original request using the completed client-side tool result above.
+                My original request was: "%s"
+                The client-side tool name was: %s
+                The client-side tool arguments were: %s
+                The client-side tool result was: %s
+                Do not claim that the client-side tool is unavailable; its output is already present in the conversation.
+                %s
+                """.formatted(
+                frontendToolContinuation.getOriginalUserMessage(),
+                frontendToolContinuation.getToolName(),
+                argumentsJson,
+                resultJson,
+                errorInstruction
         );
     }
 

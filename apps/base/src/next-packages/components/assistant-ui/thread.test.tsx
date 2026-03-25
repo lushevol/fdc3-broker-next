@@ -128,4 +128,20 @@ describe('Thread', () => {
 
     expect(screen.getByTestId('generative-ui-renderer')).toHaveTextContent('ChartCard:Revenue');
   });
+
+  it('renders tool-call parts through toolUI before falling back to ToolFallback', () => {
+    Object.assign(currentPart, {
+      type: 'tool-call',
+      toolName: 'get_weather',
+      toolCallId: 'tool-1',
+      args: { location: 'Singapore' },
+      argsText: '{"location":"Singapore"}',
+      toolUI: <div data-testid="tool-ui">Weather Tool UI</div>,
+    });
+
+    render(<Thread />);
+
+    expect(screen.getByTestId('tool-ui')).toHaveTextContent('Weather Tool UI');
+    expect(screen.queryByTestId('tool-fallback')).not.toBeInTheDocument();
+  });
 });
