@@ -19,12 +19,12 @@ import {
   type Toolkit,
 } from '@assistant-ui/react';
 import {
-  bindAssistantUiSSEStream,
   buildSSEUrl,
   createInitialStreamingState,
   handleSSEEvent,
   parseSSEEvent,
 } from './adapters/sseToAssistantUi';
+import { startFetchSSE } from './adapters/fetchSSE';
 import type {
   AssistantUIMessage,
   ContentPart as StreamingContentPart,
@@ -451,16 +451,36 @@ function createChatModelAdapter(
   apiUrl: string,
   toolkit: AssistantRegisteredToolkit,
   onToolRouteChange: (debug: AssistantToolResolutionDebug | null) => void,
-  conversationIdRef: React.MutableRefObject<string | null>,
+  conversationIdsByThreadRef: React.MutableRefObject<Map<string, string>>,
+  fallbackConversationIdRef: React.MutableRefObject<string | null>,
 ): ChatModelAdapter {
   return {
     run(runOptions) {
-      const { messages, abortSignal } = runOptions;
+      const { messages, abortSignal, unstable_threadId: threadId } = runOptions;
       const currentAssistantMessage =
         'unstable_getMessage' in runOptions && typeof runOptions.unstable_getMessage === 'function'
           ? runOptions.unstable_getMessage()
           : undefined;
       const latestMessage = messages[messages.length - 1];
+      const getConversationIdForThread = (): string | null => {
+        if (threadId) {
+          return conversationIdsByThreadRef.current.get(threadId) ?? null;
+        }
+
+        return fallbackConversationIdRef.current;
+      };
+      const setConversationIdForThread = (conversationId: string | null) => {
+        if (threadId) {
+          if (conversationId) {
+            conversationIdsByThreadRef.current.set(threadId, conversationId);
+          } else {
+            conversationIdsByThreadRef.current.delete(threadId);
+          }
+          return;
+        }
+
+        fallbackConversationIdRef.current = conversationId;
+      };
 
       if (process.env.NODE_ENV !== 'production') {
         console.debug('[assistant-tools] adapter run', {
@@ -481,12 +501,12 @@ function createChatModelAdapter(
         const streamQueue = createStreamQueue();
         let streamingMessages: AssistantUIMessage[] = [];
         let streamingState = createInitialStreamingState();
-        streamingState.conversationId = conversationIdRef.current;
+        streamingState.conversationId = getConversationIdForThread();
         let pendingStructuredUpdate = false;
         let pendingFrontendToolCall: StreamingToolCall | null = null;
         let streamError: Error | null = null;
         let isStreamTerminal = false;
-        let isEventSourceClosedIntentionally = false;
+        let isStreamClosedIntentionally = false;
         let hasEmittedContent = false;
 
         const emitVisibleState = (status?: ChatModelRunResult['status']) => {
@@ -516,31 +536,36 @@ function createChatModelAdapter(
           });
         };
 
-        const closeEventSource = () => {
-          isEventSourceClosedIntentionally = true;
-          eventSource.close();
-        };
+        let streamRequest: ReturnType<typeof startFetchSSE> | null = null;
 
-        const eventSource = new EventSource(
-          buildSSEUrl(
+        streamRequest = startFetchSSE({
+          url: buildSSEUrl(
             apiUrl,
             messageText,
-            conversationIdRef.current,
+            getConversationIdForThread(),
             toolContext,
             frontendToolManifest,
           ),
-        );
-
-        bindAssistantUiSSEStream(eventSource, {
+          body: {
+            message: messageText,
+            ...(getConversationIdForThread()
+              ? { conversationId: getConversationIdForThread() }
+              : {}),
+            ...(toolContext ? { toolContext } : {}),
+            ...(frontendToolManifest ? { frontendTools: frontendToolManifest } : {}),
+          },
+          signal: abortSignal,
+          handlers: {
           onEvent(eventType, data) {
             const next = handleSSEEvent(streamingMessages, streamingState, eventType, data);
             streamingMessages = next.messages;
             streamingState = next.streamingState;
-            conversationIdRef.current = streamingState.conversationId;
+            setConversationIdForThread(streamingState.conversationId);
 
             if (next.error) {
               streamError = new Error(next.error);
-              closeEventSource();
+              isStreamClosedIntentionally = true;
+              streamRequest?.close();
               streamQueue.close();
               return;
             }
@@ -607,7 +632,8 @@ function createChatModelAdapter(
                       reason: 'tool-calls',
                     },
                   });
-                  closeEventSource();
+                  isStreamClosedIntentionally = true;
+                  streamRequest?.close();
                   streamQueue.close();
                   return;
                 }
@@ -682,7 +708,8 @@ function createChatModelAdapter(
                   }
                 })();
 
-                closeEventSource();
+                isStreamClosedIntentionally = true;
+                streamRequest?.close();
                 return;
               }
 
@@ -716,13 +743,15 @@ function createChatModelAdapter(
                 });
               }
 
-              closeEventSource();
+              isStreamClosedIntentionally = true;
+              streamRequest?.close();
               streamQueue.close();
             }
           },
           onConnectionError() {
-            if (abortSignal.aborted || isStreamTerminal || isEventSourceClosedIntentionally) {
-              closeEventSource();
+            if (abortSignal.aborted || isStreamTerminal || isStreamClosedIntentionally) {
+              isStreamClosedIntentionally = true;
+              streamRequest?.close();
               streamQueue.close();
               return;
             }
@@ -740,21 +769,25 @@ function createChatModelAdapter(
                   reason: 'stop',
                 },
               });
-              closeEventSource();
+              isStreamClosedIntentionally = true;
+              streamRequest?.close();
               streamQueue.close();
               return;
             }
 
             streamError = new Error('Chat stream connection failed');
-            closeEventSource();
+            isStreamClosedIntentionally = true;
+            streamRequest?.close();
             streamQueue.close();
+          },
           },
         });
 
         abortSignal?.addEventListener(
           'abort',
           () => {
-            closeEventSource();
+            isStreamClosedIntentionally = true;
+            streamRequest?.close();
             streamQueue.close();
           },
           { once: true },
@@ -770,7 +803,8 @@ function createChatModelAdapter(
             yield next.value;
           }
         } finally {
-          closeEventSource();
+          isStreamClosedIntentionally = true;
+          streamRequest?.close();
         }
 
         if (streamError) {
@@ -876,10 +910,18 @@ export function AssistantUIRuntimeProvider({
     [baseToolkit, registeredToolkits],
   );
   const [lastToolRoute, setLastToolRoute] = useState<AssistantToolResolutionDebug | null>(null);
-  const conversationIdRef = useRef<string | null>(null);
+  const conversationIdsByThreadRef = useRef<Map<string, string>>(new Map());
+  const fallbackConversationIdRef = useRef<string | null>(null);
   const toolMetadata = useMemo(() => describeAssistantToolkit(toolkit), [toolkit]);
   const modelAdapter = useMemo(
-    () => createChatModelAdapter(apiUrl, toolkit, setLastToolRoute, conversationIdRef),
+    () =>
+      createChatModelAdapter(
+        apiUrl,
+        toolkit,
+        setLastToolRoute,
+        conversationIdsByThreadRef,
+        fallbackConversationIdRef,
+      ),
     [apiUrl, toolkit],
   );
   const humanInTheLoopToolNames = useMemo(() => getHumanInTheLoopToolNames(toolkit), [toolkit]);

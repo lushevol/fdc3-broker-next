@@ -14,6 +14,8 @@ import java.util.List;
 public class ChatRequest {
     private String conversationId;
     private String message;
+    private String toolContext;
+    private String frontendTools;
     private List<ChatMessage> history;
     private boolean stream = true;
 }

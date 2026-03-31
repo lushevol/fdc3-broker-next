@@ -13,37 +13,95 @@ const mockUseLocalRuntime = jest.fn(() => ({ kind: 'local-runtime' }));
 const mockUseAui = jest.fn(() => ({ kind: 'aui-instance' }));
 const mockTools = jest.fn((config: unknown) => ({ kind: 'tools-resource', config }));
 const mockFetch = jest.fn();
+const mockStartFetchSSE = jest.fn();
 const mockEventSourceInstances: MockEventSource[] = [];
 
 class MockEventSource {
-  public onerror: ((event: Event) => void) | null = null;
-
-  private readonly listeners = new Map<string, Array<(event: MessageEvent) => void>>();
-
-  constructor(public readonly url: string) {
+  constructor(
+    public readonly url: string,
+    public readonly init?: {
+      body?: Record<string, unknown>;
+      signal?: AbortSignal;
+      handlers: {
+        onEvent: (eventType: string, data: string) => void;
+        onConnectionError: () => void;
+      };
+    },
+  ) {
     mockEventSourceInstances.push(this);
-  }
-
-  addEventListener(type: string, listener: (event: MessageEvent) => void): void {
-    const currentListeners = this.listeners.get(type) ?? [];
-    currentListeners.push(listener);
-    this.listeners.set(type, currentListeners);
+    if (init?.signal) {
+      if (init.signal.aborted) {
+        this.close();
+      } else {
+        init.signal.addEventListener('abort', this.close, { once: true });
+      }
+    }
   }
 
   emit(type: string, data = ''): void {
-    const event = new MessageEvent(type, { data });
-    (this.listeners.get(type) ?? []).forEach((listener) => listener(event));
+    this.init?.handlers.onEvent(type, data);
   }
 
   failConnection(): void {
-    this.onerror?.({} as Event);
+    this.init?.handlers.onConnectionError();
   }
 
-  close = jest.fn();
+  close = jest.fn(() => {
+    return;
+  });
 }
 
 function parseEventSourceUrl(url: string): URL {
   return new URL(url, 'http://localhost');
+}
+
+function parseStreamRequestBody(instance: MockEventSource): Record<string, unknown> {
+  const rawBody = instance.init?.body;
+  if (!rawBody || typeof rawBody !== 'object') {
+    throw new Error('Expected stream request body to be an object');
+  }
+
+  return rawBody;
+}
+
+type MinimalThreadMessage = {
+  role: 'user' | 'assistant';
+  content: Array<{ type: 'text'; text: string }>;
+};
+
+type CapturedChatModelAdapter = {
+  run: (options: {
+    messages: MinimalThreadMessage[];
+    abortSignal: AbortSignal;
+    unstable_getMessage?: () => unknown;
+  }) => AsyncGenerator<unknown, void, unknown>;
+};
+
+function getCapturedChatModelAdapter(): CapturedChatModelAdapter {
+  const adapter = mockUseLocalRuntime.mock.calls[0]?.[0];
+
+  if (!adapter || typeof adapter !== 'object' || !('run' in adapter)) {
+    throw new Error('Chat model adapter was not captured');
+  }
+
+  return adapter as CapturedChatModelAdapter;
+}
+
+function createUserThreadMessage(text: string): MinimalThreadMessage {
+  return {
+    role: 'user',
+    content: [{ type: 'text', text }],
+  };
+}
+
+function startChatRun(messages: MinimalThreadMessage[]): AsyncGenerator<unknown, void, unknown> {
+  const run = getCapturedChatModelAdapter().run({
+    messages,
+    abortSignal: new AbortController().signal,
+  });
+
+  void run.next();
+  return run;
 }
 
 Object.defineProperty(global, 'fetch', {
@@ -51,10 +109,24 @@ Object.defineProperty(global, 'fetch', {
   value: mockFetch,
 });
 
-Object.defineProperty(global, 'EventSource', {
-  writable: true,
-  value: MockEventSource,
-});
+jest.mock('../adapters/fetchSSE', () => ({
+  startFetchSSE: (options: {
+    url: string;
+    body: Record<string, unknown>;
+    signal?: AbortSignal;
+    handlers: {
+      onEvent: (eventType: string, data: string) => void;
+      onConnectionError: () => void;
+    };
+  }) => {
+    const session = new MockEventSource(options.url, options);
+    mockStartFetchSSE(options);
+    return {
+      close: session.close,
+      completed: Promise.resolve(),
+    };
+  },
+}));
 
 jest.mock('@assistant-ui/react', () => {
   const React = jest.requireActual('react');
@@ -89,6 +161,7 @@ describe('AssistantUIRuntimeProvider', () => {
     mockUseAui.mockClear();
     mockTools.mockClear();
     mockFetch.mockReset();
+    mockStartFetchSSE.mockReset();
     mockEventSourceInstances.length = 0;
   });
 
@@ -185,6 +258,75 @@ describe('AssistantUIRuntimeProvider', () => {
     ).toThrow('Duplicate assistant tool registration: get_current_time');
 
     consoleSpy.mockRestore();
+  });
+
+  it('does not put streaming inputs into the SSE query string', async () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const abortController = new AbortController();
+    const run = getCapturedChatModelAdapter().run({
+      messages: [createUserThreadMessage('Hello from the user')],
+      abortSignal: abortController.signal,
+    });
+    void run.next();
+    await Promise.resolve();
+
+    expect(mockStartFetchSSE).toHaveBeenCalledTimes(1);
+    expect(mockEventSourceInstances).toHaveLength(1);
+
+    const streamUrl = parseEventSourceUrl(mockEventSourceInstances[0].url);
+    const requestBody = parseStreamRequestBody(mockEventSourceInstances[0]);
+
+    expect(streamUrl.pathname).toBe('/api/chat/stream');
+    expect(streamUrl.searchParams.has('message')).toBe(false);
+    expect(streamUrl.searchParams.has('toolContext')).toBe(false);
+    expect(streamUrl.searchParams.has('frontendTools')).toBe(false);
+    expect(requestBody).toMatchObject({
+      message: 'Hello from the user',
+    });
+
+    abortController.abort();
+  });
+
+  it('starts a fresh thread without reusing the previous backend conversation id', async () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const firstAbortController = new AbortController();
+    const firstRun = getCapturedChatModelAdapter().run({
+      messages: [createUserThreadMessage('Thread A')],
+      abortSignal: firstAbortController.signal,
+      unstable_threadId: 'thread-a',
+    });
+    void firstRun.next();
+    await Promise.resolve();
+    expect(mockEventSourceInstances).toHaveLength(1);
+
+    mockEventSourceInstances[0].emit('conversation_id', 'conversation-a');
+    mockEventSourceInstances[0].emit('done');
+
+    const secondAbortController = new AbortController();
+    const secondRun = getCapturedChatModelAdapter().run({
+      messages: [createUserThreadMessage('Thread B')],
+      abortSignal: secondAbortController.signal,
+      unstable_threadId: 'thread-b',
+    });
+    void secondRun.next();
+    await Promise.resolve();
+    expect(mockEventSourceInstances).toHaveLength(2);
+
+    const secondRequestBody = parseStreamRequestBody(mockEventSourceInstances[1]);
+
+    expect(secondRequestBody.conversationId).toBeUndefined();
+
+    secondAbortController.abort();
   });
 
   it('exposes the local runtime value through context', () => {
@@ -533,16 +675,16 @@ describe('AssistantUIRuntimeProvider', () => {
 
     expect(routedExecute).not.toHaveBeenCalled();
     expect(mockEventSourceInstances.length).toBe(1);
-    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
-    expect(continuationUrl.searchParams.get('message')).toBe('please run custom tool now');
-    expect(continuationUrl.searchParams.get('toolContext')).toBeNull();
-    expect(continuationUrl.searchParams.get('frontendTools')).toEqual(
+    const initialRequestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(initialRequestBody.message).toBe('please run custom tool now');
+    expect(initialRequestBody.toolContext).toBeUndefined();
+    expect(initialRequestBody.frontendTools).toEqual(
       expect.stringContaining('"name":"custom_client_tool"'),
     );
-    expect(continuationUrl.searchParams.get('frontendTools')).toEqual(
+    expect(initialRequestBody.frontendTools).toEqual(
       expect.stringContaining('"name":"send_workspace_announcement"'),
     );
-    expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockStartFetchSSE).toHaveBeenCalled();
 
     mockEventSourceInstances[0]?.emit('message', 'Backend response');
     mockEventSourceInstances[0]?.emit('done');
@@ -683,14 +825,14 @@ describe('AssistantUIRuntimeProvider', () => {
     );
 
     expect(mockEventSourceInstances.length).toBe(2);
-    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[1]?.url ?? '');
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+    const continuationRequestBody = parseStreamRequestBody(mockEventSourceInstances[1]!);
+    expect(continuationRequestBody.toolContext).toEqual(
       expect.stringContaining('"toolName":"custom_client_tool"'),
     );
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+    expect(continuationRequestBody.toolContext).toEqual(
       expect.stringContaining('"routed":true'),
     );
-    expect(continuationUrl.searchParams.get('frontendTools')).toBeNull();
+    expect(continuationRequestBody.frontendTools).toBeUndefined();
 
     await act(async () => {
       mockEventSourceInstances[1]?.emit('message', 'The frontend tool completed.');
@@ -760,11 +902,11 @@ describe('AssistantUIRuntimeProvider', () => {
     });
 
     expect(mockEventSourceInstances).toHaveLength(1);
-    const url = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
-    expect(url.searchParams.get('frontendTools')).toEqual(
+    const requestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(requestBody.frontendTools).toEqual(
       expect.stringContaining('"name":"send_workspace_announcement"'),
     );
-    expect(url.searchParams.get('frontendTools')).toEqual(
+    expect(requestBody.frontendTools).toEqual(
       expect.stringContaining('"humanInTheLoop":true'),
     );
 
@@ -865,11 +1007,11 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(lowerPriorityExecute).not.toHaveBeenCalled();
     expect(higherPriorityExecute).not.toHaveBeenCalled();
     expect(mockEventSourceInstances.length).toBe(1);
-    const url = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
-    expect(url.searchParams.get('frontendTools')).toEqual(
+    const requestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(requestBody.frontendTools).toEqual(
       expect.stringContaining('"name":"lower_priority_tool"'),
     );
-    expect(url.searchParams.get('frontendTools')).toEqual(
+    expect(requestBody.frontendTools).toEqual(
       expect.stringContaining('"name":"higher_priority_tool"'),
     );
 
@@ -982,11 +1124,11 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(lowerConfidenceExecute).not.toHaveBeenCalled();
     expect(higherConfidenceExecute).not.toHaveBeenCalled();
     expect(mockEventSourceInstances.length).toBe(1);
-    const url = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
-    expect(url.searchParams.get('frontendTools')).toEqual(
+    const requestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(requestBody.frontendTools).toEqual(
       expect.stringContaining('"name":"lower_confidence_tool"'),
     );
-    expect(url.searchParams.get('frontendTools')).toEqual(
+    expect(requestBody.frontendTools).toEqual(
       expect.stringContaining('"name":"higher_confidence_tool"'),
     );
 
@@ -1050,8 +1192,6 @@ describe('AssistantUIRuntimeProvider', () => {
     });
 
     expect(typeof stream[Symbol.asyncIterator]).toBe('function');
-    expect(mockFetch).not.toHaveBeenCalled();
-
     const firstYieldPromise = stream.next();
     const secondYieldPromise = stream.next();
     const thirdYieldPromise = stream.next();
@@ -1059,9 +1199,10 @@ describe('AssistantUIRuntimeProvider', () => {
     const doneYieldPromise = stream.next();
 
     expect(mockEventSourceInstances).toHaveLength(1);
-    expect(mockEventSourceInstances[0]?.url).toContain(
-      '/api/chat/stream?message=plain+backend+prompt',
-    );
+    expect(mockEventSourceInstances[0]?.url).toContain('/api/chat/stream');
+    expect(parseStreamRequestBody(mockEventSourceInstances[0]!)).toMatchObject({
+      message: 'plain backend prompt',
+    });
 
     act(() => {
       mockEventSourceInstances[0]?.emit('conversation_id', 'conversation-1');
@@ -1363,15 +1504,15 @@ describe('AssistantUIRuntimeProvider', () => {
 
     // Backend should be called with tool context
     expect(mockEventSourceInstances.length).toBe(1);
-    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
-    expect(continuationUrl.searchParams.get('message')).toBe('summarize my workspace');
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+    const continuationRequestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(continuationRequestBody.message).toBe('summarize my workspace');
+    expect(continuationRequestBody.toolContext).toEqual(
       expect.stringContaining('"toolCallId":"tool-call-1"'),
     );
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+    expect(continuationRequestBody.toolContext).toEqual(
       expect.stringContaining('"originalUserMessage":"summarize my workspace"'),
     );
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+    expect(continuationRequestBody.toolContext).toEqual(
       expect.stringContaining('"toolName":"summarize_workspace_state"'),
     );
 
@@ -1487,14 +1628,14 @@ describe('AssistantUIRuntimeProvider', () => {
     const firstYieldPromise = stream.next();
 
     expect(mockEventSourceInstances.length).toBe(1);
-    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
-    expect(continuationUrl.searchParams.get('message')).toBe(
+    const continuationRequestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(continuationRequestBody.message).toBe(
       'please send a workspace announcement',
     );
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+    expect(continuationRequestBody.toolContext).toEqual(
       expect.stringContaining('"toolName":"send_workspace_announcement"'),
     );
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+    expect(continuationRequestBody.toolContext).toEqual(
       expect.stringContaining('"approved":true'),
     );
 
@@ -1594,9 +1735,9 @@ describe('AssistantUIRuntimeProvider', () => {
     const nextPromise = stream.next();
 
     expect(mockEventSourceInstances).toHaveLength(1);
-    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
-    expect(continuationUrl.searchParams.get('message')).toBe('weather in shanghai');
-    expect(continuationUrl.searchParams.get('toolContext')).toBeNull();
+    const continuationRequestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(continuationRequestBody.message).toBe('weather in shanghai');
+    expect(continuationRequestBody.toolContext).toBeUndefined();
 
     act(() => {
       mockEventSourceInstances[0]?.emit('message', 'Fresh backend response.');
@@ -1638,6 +1779,7 @@ describe('AssistantUIRuntimeProvider', () => {
         },
       ],
       abortSignal: new AbortController().signal,
+      unstable_threadId: 'persistent-thread',
     });
 
     const firstYieldPromise = firstStream.next();
@@ -1661,10 +1803,14 @@ describe('AssistantUIRuntimeProvider', () => {
         },
       ],
       abortSignal: new AbortController().signal,
+      unstable_threadId: 'persistent-thread',
     });
 
     const secondDonePromise = secondStream.next();
-    expect(mockEventSourceInstances[1]?.url).toContain('conversationId=conversation-keep');
+    expect(parseStreamRequestBody(mockEventSourceInstances[1]!)).toMatchObject({
+      message: 'second turn',
+      conversationId: 'conversation-keep',
+    });
 
     act(() => {
       mockEventSourceInstances[1]?.emit('done');

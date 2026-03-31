@@ -7,6 +7,7 @@ import com.fdc3.chatbot.service.ChatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -19,8 +20,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ChatControllerTest {
 
@@ -90,11 +94,43 @@ class ChatControllerTest {
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("data:conversation-123"));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:tool_call"));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:message"));
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("\"text\":\"Hello\""));
+        org.junit.jupiter.api.Assertions.assertTrue(body.contains("data:{\"text\":\"Hello\"}"));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:tool_result"));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:generative_ui"));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("\"toolCallId\":\"tool-1\""));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:done"));
+    }
+
+    @Test
+    void postStreamAcceptsJsonAndReturnsTextEventStream() throws Exception {
+        when(chatService.createConversation()).thenReturn("conversation-123");
+
+        doAnswer((Answer<Void>) invocation -> {
+            Consumer<String> onNext = invocation.getArgument(4);
+            Runnable onComplete = invocation.getArgument(6);
+
+            onNext.accept("Hello");
+            onComplete.run();
+            return null;
+        }).when(chatService).processMessageStreaming(
+                anyString(),
+                anyString(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+
+        mockMvc.perform(post("/api/chat/stream")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"message\":\"Hi\"}"))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM));
     }
 
     @Test
@@ -136,5 +172,74 @@ class ChatControllerTest {
                 any(),
                 any()
         );
+    }
+
+    @Test
+    void streamChatEmitsStructuredMessageChunks() throws Exception {
+        when(chatService.createConversation()).thenReturn("conversation-123");
+
+        doAnswer((Answer<Void>) invocation -> {
+            Consumer<String> onNext = invocation.getArgument(4);
+            Runnable onComplete = invocation.getArgument(6);
+
+            onNext.accept("Hello");
+            onComplete.run();
+            return null;
+        }).when(chatService).processMessageStreaming(
+                anyString(),
+                anyString(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+
+        MvcResult result = mockMvc.perform(get("/api/chat/stream").param("message", "Hi"))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        result.getAsyncResult();
+        String body = result.getResponse().getContentAsString();
+
+        org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:message"));
+        org.junit.jupiter.api.Assertions.assertTrue(body.contains("data:{\"text\":\"Hello\"}"));
+    }
+
+    @Test
+    void streamChatPreservesLeadingSpacesInMessageChunks() throws Exception {
+        when(chatService.createConversation()).thenReturn("conversation-123");
+
+        doAnswer((Answer<Void>) invocation -> {
+            Consumer<String> onNext = invocation.getArgument(4);
+            Runnable onComplete = invocation.getArgument(6);
+
+            onNext.accept(" from");
+            onComplete.run();
+            return null;
+        }).when(chatService).processMessageStreaming(
+                anyString(),
+                anyString(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+        );
+
+        MvcResult result = mockMvc.perform(get("/api/chat/stream").param("message", "Hi"))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        result.getAsyncResult();
+        String body = result.getResponse().getContentAsString();
+
+        org.junit.jupiter.api.Assertions.assertTrue(body.contains("data:{\"text\":\" from\"}"));
     }
 }

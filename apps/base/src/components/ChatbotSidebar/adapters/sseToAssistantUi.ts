@@ -376,22 +376,11 @@ export function buildSSEUrl(
   toolContext?: string,
   frontendTools?: string,
 ): string {
-  const streamUrl = `${baseUrl}/stream`;
-  const params = new URLSearchParams({ message: message.trim() });
-
-  if (conversationId) {
-    params.set('conversationId', conversationId);
-  }
-
-  if (toolContext) {
-    params.set('toolContext', toolContext);
-  }
-
-  if (frontendTools) {
-    params.set('frontendTools', frontendTools);
-  }
-
-  return `${streamUrl}?${params.toString()}`;
+  void message;
+  void conversationId;
+  void toolContext;
+  void frontendTools;
+  return `${baseUrl}/stream`;
 }
 
 /**

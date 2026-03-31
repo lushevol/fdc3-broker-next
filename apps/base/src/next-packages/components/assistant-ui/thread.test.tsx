@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { Thread } from './thread';
 
@@ -10,6 +10,9 @@ const currentPart = {
     props: { title: 'Revenue' },
   },
 };
+
+const mockEditComposerSend = jest.fn();
+const mockEditComposerCancel = jest.fn();
 
 jest.mock('@/components/assistant-ui/attachment', () => ({
   ComposerAddAttachment: () => <div data-testid="composer-add-attachment" />,
@@ -47,13 +50,14 @@ jest.mock('../../../components/ChatbotSidebar/components/GenerativeUIRenderer', 
 
 jest.mock('@assistant-ui/react', () => {
   const React = jest.requireActual('react');
+  let isEditing = false;
 
   const passthrough =
     (Tag = 'div') =>
-    ({ children }) =>
+    ({ children, ...props }) =>
       React.createElement(
         Tag,
-        {},
+        props,
         typeof children === 'function' ? children({ part: currentPart }) : children,
       );
 
@@ -61,14 +65,14 @@ jest.mock('@assistant-ui/react', () => {
     AuiIf: ({ condition, children }) => {
       const state = {
         thread: { isEmpty: false, isRunning: false },
-        message: { role: 'assistant', composer: { isEditing: false }, isCopied: false },
+        message: { role: 'assistant', composer: { isEditing }, isCopied: false },
       };
       return condition(state) ? <>{children}</> : null;
     },
     useAuiState: (selector) =>
       selector({
         thread: { isEmpty: false, isRunning: false },
-        message: { role: 'assistant', composer: { isEditing: false }, isCopied: false },
+        message: { role: 'assistant', composer: { isEditing }, isCopied: false },
       }),
     ThreadPrimitive: {
       Root: passthrough(),
@@ -84,7 +88,7 @@ jest.mock('@assistant-ui/react', () => {
       Description: () => <span>Description</span>,
     },
     ComposerPrimitive: {
-      Root: passthrough(),
+      Root: passthrough('form'),
       AttachmentDropzone: ({ children }) => children,
       Input: passthrough('textarea'),
       Send: ({ children }) => children,
@@ -119,10 +123,32 @@ jest.mock('@assistant-ui/react', () => {
       Number: () => <span>1</span>,
       Count: () => <span>1</span>,
     },
+    __threadTest: {
+      setIsEditing: (value: boolean) => {
+        isEditing = value;
+      },
+    },
   };
 });
 
+jest.mock('@assistant-ui/core/react', () => ({
+  useEditComposerSend: () => ({ send: mockEditComposerSend, disabled: false }),
+  useEditComposerCancel: () => ({ cancel: mockEditComposerCancel }),
+}));
+
+const assistantUiModule = jest.requireMock('@assistant-ui/react') as {
+  __threadTest: {
+    setIsEditing: (value: boolean) => void;
+  };
+};
+
 describe('Thread', () => {
+  beforeEach(() => {
+    assistantUiModule.__threadTest.setIsEditing(false);
+    mockEditComposerSend.mockClear();
+    mockEditComposerCancel.mockClear();
+  });
+
   it('renders generative-ui data parts through the generative UI renderer', () => {
     render(<Thread />);
 
@@ -143,5 +169,17 @@ describe('Thread', () => {
 
     expect(screen.getByTestId('tool-ui')).toHaveTextContent('Weather Tool UI');
     expect(screen.queryByTestId('tool-fallback')).not.toBeInTheDocument();
+  });
+
+  it('submits and cancels the inline edit composer through edit-specific hooks', () => {
+    assistantUiModule.__threadTest.setIsEditing(true);
+
+    render(<Thread />);
+
+    fireEvent.submit(screen.getByRole('button', { name: 'Update' }).closest('form')!);
+    expect(mockEditComposerSend).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(mockEditComposerCancel).toHaveBeenCalledTimes(1);
   });
 });
