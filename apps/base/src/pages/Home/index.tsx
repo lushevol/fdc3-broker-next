@@ -19,6 +19,7 @@ import useParameters from './common/useParameters';
 import {
   AssistantUIRuntimeProvider,
   ChatbotSidebar,
+  Fdc3IntentToolRegistration,
   ToolRegistryDebugPanel,
   WorkspaceSummaryToolRegistrationExample,
 } from '../../components/ChatbotSidebar/exports';
@@ -62,6 +63,7 @@ const Home: React.FC = (): ReactElement => {
 
   return (
     <AssistantUIRuntimeProvider apiUrl="/api/chat">
+      <Fdc3IntentToolRegistration />
       <WorkspaceSummaryToolRegistrationExample
         workspaceLabel={store?.currentWorkspace?.label ?? 'Current workspace'}
         tileCount={store?.currentWorkspace?.containers?.length ?? 0}

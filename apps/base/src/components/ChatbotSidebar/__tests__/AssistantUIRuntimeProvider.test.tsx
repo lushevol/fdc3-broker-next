@@ -355,6 +355,118 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(screen.getByTestId('tool-route-hook')).toHaveTextContent('null');
   });
 
+  it('routes the declaration-backed FDC3 intent tool locally before hitting the backend', async () => {
+    const customToolkit: AssistantRegisteredToolkit = {
+      process_fdc3_intent: {
+        type: 'frontend',
+        description: 'Process FDC3 intent',
+        parameters: {
+          type: 'object',
+          properties: {
+            matchedIntent: { type: 'string' },
+            targetAppId: { type: 'string' },
+            targetContexts: {
+              type: 'array',
+              items: { type: 'string' },
+            },
+            payload: {
+              type: 'object',
+              properties: {
+                type: { type: 'string' },
+                id: {
+                  type: 'object',
+                  properties: {
+                    ticker: { type: 'string' },
+                  },
+                },
+              },
+            },
+            canProcess: { type: 'boolean' },
+            sourcePrompt: { type: 'string' },
+          },
+        },
+        humanInTheLoop: true,
+        execute: async () => ({ ok: true }),
+        matchPriority: 100,
+        matchPrompt: (input: string) =>
+          input.includes('view chart')
+            ? {
+                matchedIntent: 'ViewChart',
+                targetAppId: 'template_tile_fdc3_2',
+                targetContexts: ['fdc3.instrument'],
+                payload: {
+                  type: 'fdc3.instrument',
+                  id: {
+                    ticker: 'AAPL',
+                  },
+                },
+                canProcess: true,
+                sourcePrompt: input,
+              }
+            : null,
+      },
+    };
+
+    const RegisterTools = () => {
+      useRegisterAssistantTools(customToolkit);
+      return null;
+    };
+
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <RegisterTools />
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
+      run: (input: {
+        messages: Array<{
+          id: string;
+          role: 'user';
+          content: Array<{ type: 'text'; text: string }>;
+        }>;
+        abortSignal?: AbortSignal;
+      }) => AsyncGenerator<{
+        content?: Array<{
+          type: string;
+          toolName?: string;
+          executionTarget?: string;
+        }>;
+        status?: {
+          type: string;
+          reason?: string;
+        };
+      }>;
+    };
+
+    const stream = adapter.run({
+      messages: [
+        {
+          id: 'msg-fdc3',
+          role: 'user',
+          content: [{ type: 'text', text: 'I want to view chart' }],
+        },
+      ],
+      abortSignal: new AbortController().signal,
+    });
+
+    const firstYield = await stream.next();
+
+    expect(firstYield.value).toMatchObject({
+      content: [
+        {
+          type: 'tool-call',
+          toolName: 'process_fdc3_intent',
+        },
+      ],
+      status: {
+        type: 'requires-action',
+        reason: 'tool-calls',
+      },
+    });
+    expect(mockEventSourceInstances.length).toBe(0);
+  });
+
   it('sends the current frontend tool manifest to the backend instead of executing prompt-matched tools locally', async () => {
     const routedExecute = jest.fn(async () => ({ routed: true }));
     const customToolkit: AssistantRegisteredToolkit = {
@@ -943,6 +1055,7 @@ describe('AssistantUIRuntimeProvider', () => {
     const firstYieldPromise = stream.next();
     const secondYieldPromise = stream.next();
     const thirdYieldPromise = stream.next();
+    const fourthYieldPromise = stream.next();
     const doneYieldPromise = stream.next();
 
     expect(mockEventSourceInstances).toHaveLength(1);
@@ -977,6 +1090,7 @@ describe('AssistantUIRuntimeProvider', () => {
           props: { title: 'Revenue' },
         }),
       );
+      mockEventSourceInstances[0]?.emit('message', ' with details');
       mockEventSourceInstances[0]?.emit('done');
     });
 
@@ -1005,7 +1119,13 @@ describe('AssistantUIRuntimeProvider', () => {
               props: { title: 'Revenue' },
             },
           },
+          { type: 'text', text: ' with details' },
         ],
+      },
+      done: false,
+    });
+    await expect(fourthYieldPromise).resolves.toMatchObject({
+      value: {
         status: {
           type: 'complete',
           reason: 'stop',
@@ -1090,6 +1210,77 @@ describe('AssistantUIRuntimeProvider', () => {
     });
   });
 
+  it('treats a connection close after streamed assistant text as a completed turn', async () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
+      run: (input: {
+        messages: Array<{
+          id: string;
+          role: 'user';
+          content: Array<{ type: 'text'; text: string }>;
+        }>;
+        abortSignal?: AbortSignal;
+      }) => AsyncGenerator<{
+        content?: Array<{
+          type: string;
+          text?: string;
+        }>;
+        status?: {
+          type: string;
+          reason?: string;
+        };
+      }>;
+    };
+
+    const stream = adapter.run({
+      messages: [
+        {
+          id: 'msg-stream-close-after-text',
+          role: 'user',
+          content: [{ type: 'text', text: 'hi' }],
+        },
+      ],
+      abortSignal: new AbortController().signal,
+    });
+
+    const firstYieldPromise = stream.next();
+    const secondYieldPromise = stream.next();
+    const doneYieldPromise = stream.next();
+
+    expect(mockEventSourceInstances).toHaveLength(1);
+
+    act(() => {
+      mockEventSourceInstances[0]?.emit('message', 'Hello there');
+      mockEventSourceInstances[0]?.failConnection();
+    });
+
+    await expect(firstYieldPromise).resolves.toMatchObject({
+      value: {
+        content: [{ type: 'text', text: 'Hello there' }],
+      },
+      done: false,
+    });
+    await expect(secondYieldPromise).resolves.toMatchObject({
+      value: {
+        content: [{ type: 'text', text: 'Hello there' }],
+        status: {
+          type: 'complete',
+          reason: 'stop',
+        },
+      },
+      done: false,
+    });
+    await expect(doneYieldPromise).resolves.toMatchObject({
+      value: undefined,
+      done: true,
+    });
+  });
+
   it('completes the local tool roundtrip by continuing to backend for AI analysis (ReAct)', async () => {
     render(
       <AssistantUIRuntimeProvider apiUrl="/api/chat">
@@ -1109,6 +1300,7 @@ describe('AssistantUIRuntimeProvider', () => {
                 toolCallId: string;
                 toolName: string;
                 args: Record<string, unknown>;
+                executionTarget?: 'frontend' | 'backend';
               }
             | {
                 type: 'tool-result';
@@ -1147,6 +1339,7 @@ describe('AssistantUIRuntimeProvider', () => {
               toolCallId: 'tool-call-1',
               toolName: 'summarize_workspace_state',
               args: { scope: 'active' },
+              executionTarget: 'frontend',
             },
           ],
         },
@@ -1227,6 +1420,7 @@ describe('AssistantUIRuntimeProvider', () => {
                 toolCallId: string;
                 toolName: string;
                 args: Record<string, unknown>;
+                executionTarget?: 'frontend' | 'backend';
                 result?: unknown;
               }
           >;
@@ -1240,6 +1434,7 @@ describe('AssistantUIRuntimeProvider', () => {
             toolCallId: string;
             toolName: string;
             args: Record<string, unknown>;
+            executionTarget?: 'frontend' | 'backend';
             result?: unknown;
           }>;
         };
@@ -1279,6 +1474,7 @@ describe('AssistantUIRuntimeProvider', () => {
               audience: 'Operations Desk',
               summary: 'The active workspace was updated and is ready to be shared with the desk.',
             },
+            executionTarget: 'frontend',
             result: {
               approved: true,
               audience: 'Operations Desk',
@@ -1308,6 +1504,108 @@ describe('AssistantUIRuntimeProvider', () => {
     await expect(firstYieldPromise).resolves.toMatchObject({
       value: {
         content: [{ type: 'text', text: 'The announcement was approved.' }],
+      },
+      done: false,
+    });
+  });
+
+  it('does not trigger continuation for completed backend tool-call parts', async () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
+      run: (input: {
+        messages: Array<{
+          id: string;
+          role: 'user' | 'assistant';
+          content: Array<
+            | { type: 'text'; text: string }
+            | {
+                type: 'tool-call';
+                toolCallId: string;
+                toolName: string;
+                args: Record<string, unknown>;
+                executionTarget?: 'frontend' | 'backend';
+                result?: unknown;
+              }
+          >;
+        }>;
+        abortSignal?: AbortSignal;
+        unstable_getMessage?: () => {
+          id: string;
+          role: 'assistant';
+          content: Array<{
+            type: 'tool-call';
+            toolCallId: string;
+            toolName: string;
+            args: Record<string, unknown>;
+            executionTarget?: 'frontend' | 'backend';
+            result?: unknown;
+          }>;
+        };
+      }) => Promise<
+        | {
+            content?: Array<{ type: string; text?: string }>;
+            status?: {
+              type: string;
+              reason?: string;
+            };
+          }
+        | AsyncGenerator<{
+            content?: Array<{ type: string; text?: string }>;
+            status?: {
+              type: string;
+              reason?: string;
+            };
+          }>
+      >;
+    };
+
+    const stream = await adapter.run({
+      messages: [
+        {
+          id: 'user-msg-weather',
+          role: 'user',
+          content: [{ type: 'text', text: 'weather in shanghai' }],
+        },
+      ],
+      abortSignal: new AbortController().signal,
+      unstable_getMessage: () => ({
+        id: 'assistant-msg-weather',
+        role: 'assistant',
+        content: [
+          {
+            type: 'tool-call',
+            toolCallId: 'tool-weather-1',
+            toolName: 'get_weather',
+            args: { location: 'Shanghai' },
+            executionTarget: 'backend',
+            result: { location: 'Shanghai', temperature: 22 },
+          },
+        ],
+      }),
+    });
+
+    expect(mockEventSourceInstances).toHaveLength(0);
+
+    const nextPromise = stream.next();
+
+    expect(mockEventSourceInstances).toHaveLength(1);
+    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
+    expect(continuationUrl.searchParams.get('message')).toBe('weather in shanghai');
+    expect(continuationUrl.searchParams.get('toolContext')).toBeNull();
+
+    act(() => {
+      mockEventSourceInstances[0]?.emit('message', 'Fresh backend response.');
+      mockEventSourceInstances[0]?.emit('done');
+    });
+
+    await expect(nextPromise).resolves.toMatchObject({
+      value: {
+        content: [{ type: 'text', text: 'Fresh backend response.' }],
       },
       done: false,
     });

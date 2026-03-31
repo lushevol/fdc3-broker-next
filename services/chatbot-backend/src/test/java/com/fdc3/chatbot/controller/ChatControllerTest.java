@@ -90,7 +90,7 @@ class ChatControllerTest {
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("data:conversation-123"));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:tool_call"));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:message"));
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("data:Hello"));
+        org.junit.jupiter.api.Assertions.assertTrue(body.contains("\"text\":\"Hello\""));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:tool_result"));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:generative_ui"));
         org.junit.jupiter.api.Assertions.assertTrue(body.contains("\"toolCallId\":\"tool-1\""));

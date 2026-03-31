@@ -70,7 +70,7 @@ public class ChatController {
                             try {
                                 emitter.send(SseEmitter.event()
                                         .name("message")
-                                        .data(token));
+                                        .data(Map.of("text", token)));
                             } catch (IOException e) {
                                 log.error("Error sending SSE event", e);
                             }

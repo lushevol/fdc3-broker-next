@@ -167,13 +167,24 @@ export function parseSSEEvent(
   data: string,
 ): { type: SSEEventType; payload: unknown } | null {
   try {
-    // Some events like 'message', 'conversation_id', 'error', and 'done' are plain text
-    if (
-      eventType === 'message' ||
-      eventType === 'conversation_id' ||
-      eventType === 'error' ||
-      eventType === 'done'
-    ) {
+    // Some events like 'conversation_id', 'error', and 'done' are plain text
+    if (eventType === 'conversation_id' || eventType === 'error' || eventType === 'done') {
+      return { type: eventType, payload: data };
+    }
+
+    if (eventType === 'message') {
+      if (data.startsWith('{')) {
+        const payload = JSON.parse(data);
+        if (
+          typeof payload === 'object' &&
+          payload !== null &&
+          'text' in payload &&
+          typeof (payload as { text: unknown }).text === 'string'
+        ) {
+          return { type: eventType, payload: (payload as { text: string }).text };
+        }
+      }
+
       return { type: eventType, payload: data };
     }
 

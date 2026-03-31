@@ -12,6 +12,7 @@ export {
 } from './AssistantUIRuntimeProvider';
 export type { AssistantUIRuntimeProviderValue } from './AssistantUIRuntimeProvider';
 export { ToolRegistryDebugPanel } from './ToolRegistryDebugPanel';
+export { Fdc3IntentToolRegistration } from './Fdc3IntentToolRegistration';
 export { WorkspaceSummaryToolRegistrationExample } from './WorkspaceSummaryToolRegistrationExample';
 export type {
   AssistantRegisteredToolkit,
@@ -36,6 +37,7 @@ export {
 
 // Demo frontend tools
 export { createDemoToolkit } from './tools/demoToolkit';
+export { createFdc3IntentToolkit } from './tools/fdc3IntentTool';
 export { createWorkspaceSummaryToolkit } from './tools/workspaceSummaryTool';
 
 // Tool execution display

@@ -325,7 +325,9 @@ public class AgentService {
 
             streamConversation(
                     conversationId,
+                    userMessage,
                     messages,
+                    availableTools,
                     useTools ? buildToolSpecifications(availableTools, frontendToolManifest, blockedFrontendTools) : List.of(),
                     frontendToolManifest,
                     blockedFrontendTools,
@@ -399,7 +401,9 @@ public class AgentService {
 
     private void streamConversation(
             String conversationId,
+            String userMessage,
             List<dev.langchain4j.data.message.ChatMessage> messages,
+            Map<String, ToolDefinition> availableTools,
             List<ToolSpecification> toolSpecifications,
             List<FrontendToolManifestEntry> frontendToolManifest,
             Set<String> blockedFrontendTools,
@@ -441,11 +445,13 @@ public class AgentService {
                     continuedMessages.add(aiMessage);
                     continueWithToolRequests(
                             conversationId,
+                            userMessage,
                             continuedMessages,
                             aiMessage.toolExecutionRequests(),
                             frontendToolManifest,
                             blockedFrontendTools,
                             0,
+                            true,
                             onNext,
                             onError,
                             onComplete,
@@ -454,6 +460,41 @@ public class AgentService {
                             cancelled
                     );
                     return;
+                }
+
+                if ("initial".equals(turnPhase)) {
+                    ToolExecutionRequest fallbackToolRequest = inferFallbackToolExecutionRequest(userMessage, availableTools);
+                    if (fallbackToolRequest != null) {
+                        AiMessage fallbackAiMessage = buildFallbackToolCallMessage(aiMessage, fallbackToolRequest);
+                        if (aiMessage != null) {
+                            logAssistantTurnDiagnostics(
+                                    conversationId,
+                                    buildAssistantTurnDiagnostics(turnPhase, fallbackAiMessage, streamedAssistantText.toString())
+                            );
+                        }
+
+                        List<dev.langchain4j.data.message.ChatMessage> continuedMessages =
+                                new java.util.ArrayList<>(messages);
+                        continuedMessages.add(fallbackAiMessage);
+
+                        continueWithToolRequests(
+                                conversationId,
+                                userMessage,
+                                continuedMessages,
+                                List.of(fallbackToolRequest),
+                                frontendToolManifest,
+                                blockedFrontendTools,
+                                0,
+                                false,
+                                onNext,
+                                onError,
+                                onComplete,
+                                onToolCall,
+                                onToolResult,
+                                cancelled
+                        );
+                        return;
+                    }
                 }
 
                 if (aiMessage != null) {
@@ -513,11 +554,13 @@ public class AgentService {
 
     private void continueWithToolRequests(
             String conversationId,
+            String userMessage,
             List<dev.langchain4j.data.message.ChatMessage> messages,
             List<ToolExecutionRequest> toolExecutionRequests,
             List<FrontendToolManifestEntry> frontendToolManifest,
             Set<String> blockedFrontendTools,
             int index,
+            boolean continueAfterToolLoop,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
             java.lang.Runnable onComplete,
@@ -530,9 +573,16 @@ public class AgentService {
         }
 
         if (index >= toolExecutionRequests.size()) {
+            if (!continueAfterToolLoop) {
+                onComplete.run();
+                return;
+            }
+
             streamConversation(
                     conversationId,
+                    userMessage,
                     messages,
+                    toolRegistry.getAllTools(),
                     buildToolSpecifications(toolRegistry.getAllTools(), frontendToolManifest, blockedFrontendTools),
                     frontendToolManifest,
                     blockedFrontendTools,
@@ -605,11 +655,13 @@ public class AgentService {
                     ));
                     continueWithToolRequests(
                             conversationId,
+                            userMessage,
                             continuedMessages,
                             toolExecutionRequests,
                             frontendToolManifest,
                             blockedFrontendTools,
                             index + 1,
+                            continueAfterToolLoop,
                             onNext,
                             onError,
                             onComplete,
@@ -620,19 +672,81 @@ public class AgentService {
                 });
     }
 
+    private ToolExecutionRequest inferFallbackToolExecutionRequest(
+            String userMessage,
+            Map<String, ToolDefinition> availableTools
+    ) {
+        if (userMessage == null || userMessage.isBlank()) {
+            return null;
+        }
+
+        String normalized = userMessage.toLowerCase(Locale.ROOT).trim();
+        if (!availableTools.containsKey("get_weather")) {
+            return null;
+        }
+
+        if (!(normalized.contains("weather")
+                || normalized.contains("temperature")
+                || normalized.contains("forecast"))) {
+            return null;
+        }
+
+        String location = extractWeatherLocation(userMessage);
+        if (location == null || location.isBlank()) {
+            return null;
+        }
+
+        return ToolExecutionRequest.builder()
+                .id(UUID.randomUUID().toString())
+                .name("get_weather")
+                .arguments(writeJson(Map.of("location", location)))
+                .build();
+    }
+
+    private AiMessage buildFallbackToolCallMessage(AiMessage aiMessage, ToolExecutionRequest fallbackToolRequest) {
+        if (aiMessage == null) {
+            return AiMessage.from(List.of(fallbackToolRequest));
+        }
+
+        String assistantText = aiMessage.text();
+        if (assistantText == null || assistantText.isBlank()) {
+            return AiMessage.from(List.of(fallbackToolRequest));
+        }
+
+        return AiMessage.from(assistantText, List.of(fallbackToolRequest));
+    }
+
+    private String extractWeatherLocation(String userMessage) {
+        String normalized = userMessage.trim();
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(
+                "(?i)(?:weather|temperature|forecast)(?:\\s+(?:in|for|at))?\\s+(.+)"
+        ).matcher(normalized);
+
+        if (!matcher.find()) {
+            return null;
+        }
+
+        String location = matcher.group(1).trim();
+        return location.isEmpty() ? null : location.substring(0, 1).toUpperCase(Locale.ROOT) + location.substring(1);
+    }
+
     private List<ToolSpecification> buildToolSpecifications(
             Map<String, ToolDefinition> tools,
             List<FrontendToolManifestEntry> frontendTools,
             Set<String> blockedFrontendTools
     ) {
-        List<ToolSpecification> backendSpecs = tools.values().stream()
+        Map<String, ToolSpecification> uniqueSpecs = new java.util.LinkedHashMap<>();
+
+        tools.values().stream()
                 .map(this::toToolSpecification)
-                .toList();
-        List<ToolSpecification> frontendSpecs = frontendTools.stream()
+                .forEach(toolSpecification -> uniqueSpecs.put(toolSpecification.name(), toolSpecification));
+
+        frontendTools.stream()
                 .filter(frontendTool -> !blockedFrontendTools.contains(frontendTool.getName()))
                 .map(this::toToolSpecification)
-                .toList();
-        return java.util.stream.Stream.concat(backendSpecs.stream(), frontendSpecs.stream()).toList();
+                .forEach(toolSpecification -> uniqueSpecs.putIfAbsent(toolSpecification.name(), toolSpecification));
+
+        return List.copyOf(uniqueSpecs.values());
     }
 
     private ToolSpecification toToolSpecification(ToolDefinition toolDefinition) {

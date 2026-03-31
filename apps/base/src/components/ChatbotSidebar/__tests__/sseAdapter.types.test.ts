@@ -252,6 +252,14 @@ describe('SSE Adapter Type Safety', () => {
       });
     });
 
+    it('should parse JSON-wrapped message chunks without losing leading spaces', () => {
+      const result = parseSSEEvent('message', '{"text":" check"}');
+      expect(result).toEqual({
+        type: 'message',
+        payload: ' check',
+      });
+    });
+
     it('should parse conversation_id event', () => {
       const result = parseSSEEvent('conversation_id', 'conv-123');
       expect(result).toEqual({

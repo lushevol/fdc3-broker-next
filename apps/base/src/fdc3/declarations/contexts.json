@@ -4,6 +4,38 @@
       "type": "object",
       "properties": {
         "type": {
+          "const": "fdc3.instrument"
+        },
+        "id": {
+          "type": "object",
+          "properties": {
+            "ticker": {
+              "type": "string"
+            }
+          },
+          "required": ["ticker"]
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "simples": [
+      {
+        "type": "fdc3.instrument",
+        "id": {
+          "ticker": "AAPL"
+        },
+        "name": "Apple Inc."
+      }
+    ],
+    "description": "Financial Instrument Context"
+  },
+  {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "type": {
           "const": "scb.fmptp.cashflow"
         },
         "id": {

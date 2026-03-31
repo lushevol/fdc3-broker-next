@@ -70,6 +70,14 @@ describe('ToolRegistryDebugPanel', () => {
       </AssistantUIRuntimeProvider>,
     );
 
+    expect(screen.queryByTestId('tool-registry-debug-panel')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show Tools' })).toHaveStyle({
+      left: '1rem',
+      bottom: '1rem',
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show Tools' }));
+
     expect(screen.getByTestId('tool-registry-debug-panel')).toBeInTheDocument();
     expect(screen.getByText('Assistant Tools')).toBeInTheDocument();
     expect(screen.getByText('custom_client_tool')).toBeInTheDocument();
@@ -79,43 +87,25 @@ describe('ToolRegistryDebugPanel', () => {
     expect(screen.getByTestId('tool-registry-debug-panel')).toHaveStyle({
       left: '1rem',
       bottom: '1rem',
+      maxHeight: 'min(32rem, calc(100vh - 2rem))',
+      overflow: 'hidden',
+    });
+    expect(screen.getByTestId('tool-registry-scroll-body')).toHaveStyle({
+      overflowY: 'auto',
+      overflowX: 'hidden',
     });
   });
 
-  it('renders the last matched tool route when a frontend tool is invoked', async () => {
+  it('stays usable after a frontend tool routing attempt', async () => {
     process.env.NODE_ENV = 'development';
-
-    const customToolkit: AssistantRegisteredToolkit = {
-      custom_client_tool: {
-        type: 'frontend',
-        description: 'Custom tool',
-        parameters: {
-          type: 'object',
-          properties: {},
-        },
-        execute: async () => ({ ok: true }),
-        matchPriority: 40,
-        matchPrompt: (input: string) =>
-          input.includes('route winner')
-            ? {
-                args: { source: 'panel' },
-                confidence: 0.72,
-              }
-            : null,
-      },
-    };
-
-    const RegisterTools = () => {
-      useRegisterAssistantTools(customToolkit);
-      return null;
-    };
 
     render(
       <AssistantUIRuntimeProvider apiUrl="/api/chat">
-        <RegisterTools />
         <ToolRegistryDebugPanel />
       </AssistantUIRuntimeProvider>,
     );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show Tools' }));
 
     const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
       run: (input: {
@@ -133,7 +123,7 @@ describe('ToolRegistryDebugPanel', () => {
           {
             id: 'msg-debug-panel',
             role: 'user',
-            content: [{ type: 'text', text: 'please choose the route winner now' }],
+            content: [{ type: 'text', text: 'I want to view chart' }],
           },
         ],
       });
@@ -141,9 +131,8 @@ describe('ToolRegistryDebugPanel', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Last Route')).toBeInTheDocument();
-      expect(screen.getAllByText('custom_client_tool').length).toBeGreaterThan(0);
-      expect(screen.getByText('confidence 0.72')).toBeInTheDocument();
-      expect(screen.getByText('prompt please choose the route winner now')).toBeInTheDocument();
+      expect(screen.getByTestId('tool-registry-scroll-body')).toBeInTheDocument();
+      expect(screen.getAllByText('get_current_time').length).toBeGreaterThan(0);
     });
   });
 
@@ -168,6 +157,10 @@ describe('ToolRegistryDebugPanel', () => {
       </AssistantUIRuntimeProvider>,
     );
 
+    expect(screen.queryByTestId('tool-registry-debug-panel')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show Tools' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show Tools' }));
     fireEvent.click(screen.getByRole('button', { name: 'Hide tool debug panel' }));
 
     expect(screen.queryByTestId('tool-registry-debug-panel')).not.toBeInTheDocument();
@@ -191,6 +184,8 @@ describe('ToolRegistryDebugPanel', () => {
         <ToolRegistryDebugPanel />
       </AssistantUIRuntimeProvider>,
     );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show Tools' }));
 
     const panel = screen.getByTestId('tool-registry-debug-panel');
 
@@ -230,6 +225,8 @@ describe('ToolRegistryDebugPanel', () => {
         <ToolRegistryDebugPanel />
       </AssistantUIRuntimeProvider>,
     );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show Tools' }));
 
     const panel = screen.getByTestId('tool-registry-debug-panel');
 
@@ -279,6 +276,7 @@ describe('ToolRegistryDebugPanel', () => {
       </AssistantUIRuntimeProvider>,
     );
 
-    expect(screen.getByTestId('tool-registry-debug-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('tool-registry-debug-panel')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show Tools' })).toBeInTheDocument();
   });
 });

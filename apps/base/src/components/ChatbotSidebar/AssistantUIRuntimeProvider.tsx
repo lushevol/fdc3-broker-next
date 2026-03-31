@@ -34,6 +34,7 @@ import { createBackendToolUiToolkit } from './tools/backendToolUiToolkit';
 import { createDemoToolkit } from './tools/demoToolkit';
 import {
   describeAssistantToolkit,
+  resolveAssistantToolInvocation,
   getFrontendToolManifest,
   getHumanInTheLoopToolNames,
   type AssistantToolResolutionDebug,
@@ -227,7 +228,8 @@ function isToolCallContinuationPart(part: unknown): part is ToolCallContinuation
     part.type === 'tool-call' &&
     typeof part.toolCallId === 'string' &&
     typeof part.toolName === 'string' &&
-    isObjectRecord(part.args)
+    isObjectRecord(part.args) &&
+    part.executionTarget === 'frontend'
   );
 }
 
@@ -350,6 +352,7 @@ function toAssistantMessageContent(content: StreamingContentPart[]): AssistantRu
         toolName: part.toolName,
         args: part.args as ReadonlyJSONObject,
         argsText: part.argsText,
+        executionTarget: part.executionTarget,
         result: part.result,
         isError: part.isError,
       };
@@ -389,6 +392,15 @@ function getLatestAssistantContent(messages: AssistantUIMessage[]): AssistantRun
     .reverse()
     .find((message) => message.role === 'assistant');
   return latestAssistantMessage ? toAssistantMessageContent(latestAssistantMessage.content) : [];
+}
+
+function hasStructuredAssistantContent(content: AssistantRunContent): boolean {
+  return content.some((part) => part.type !== 'text');
+}
+
+function getLatestAssistantTrailingTextContent(content: AssistantRunContent): AssistantRunContent {
+  const trailingPart = content.at(-1);
+  return trailingPart?.type === 'text' ? [trailingPart] : [];
 }
 
 function createStreamQueue() {
@@ -475,14 +487,32 @@ function createChatModelAdapter(
         let streamError: Error | null = null;
         let isStreamTerminal = false;
         let isEventSourceClosedIntentionally = false;
+        let hasEmittedContent = false;
 
         const emitVisibleState = (status?: ChatModelRunResult['status']) => {
           const latestContent = getLatestAssistantContent(streamingMessages);
           const combinedContent =
             initialContent.length > 0 ? [...initialContent, ...latestContent] : latestContent;
+          if ((combinedContent?.length ?? 0) > 0) {
+            hasEmittedContent = true;
+          }
           streamQueue.push({
             content: combinedContent,
             ...(status ? { status } : {}),
+          });
+        };
+
+        const emitTrailingStructuredTextState = () => {
+          const latestContent = getLatestAssistantContent(streamingMessages);
+          const trailingContent = getLatestAssistantTrailingTextContent(latestContent);
+
+          if (trailingContent.length === 0) {
+            return;
+          }
+
+          hasEmittedContent = true;
+          streamQueue.push({
+            content: trailingContent,
           });
         };
 
@@ -521,7 +551,8 @@ function createChatModelAdapter(
                 parsedToolCall?.type === 'tool_call' &&
                 typeof parsedToolCall.payload === 'object' &&
                 parsedToolCall.payload !== null &&
-                (parsedToolCall.payload as StreamingToolCall).executionTarget === 'frontend'
+                (parsedToolCall.payload as StreamingToolCall).executionTarget === 'frontend' &&
+                !toolkit[(parsedToolCall.payload as StreamingToolCall).name]?.renderOnly
               ) {
                 pendingFrontendToolCall = parsedToolCall.payload as StreamingToolCall;
               }
@@ -532,6 +563,20 @@ function createChatModelAdapter(
             }
 
             if (eventType === 'message') {
+              const latestContent = getLatestAssistantContent(streamingMessages);
+              const containsStructuredContent = hasStructuredAssistantContent(latestContent);
+
+              if (pendingStructuredUpdate) {
+                pendingStructuredUpdate = false;
+                emitVisibleState();
+                return;
+              }
+
+              if (containsStructuredContent) {
+                emitTrailingStructuredTextState();
+                return;
+              }
+
               emitVisibleState();
               return;
             }
@@ -641,8 +686,27 @@ function createChatModelAdapter(
                 return;
               }
 
-              if (pendingStructuredUpdate || (combinedContent?.length ?? 0) > 0) {
+              if (pendingStructuredUpdate && (combinedContent?.length ?? 0) > 0) {
                 isStreamTerminal = true;
+                hasEmittedContent = true;
+                streamQueue.push({
+                  content: combinedContent,
+                  status: {
+                    type: 'complete',
+                    reason: 'stop',
+                  },
+                });
+              } else if (hasEmittedContent) {
+                isStreamTerminal = true;
+                streamQueue.push({
+                  status: {
+                    type: 'complete',
+                    reason: 'stop',
+                  },
+                });
+              } else if ((combinedContent?.length ?? 0) > 0) {
+                isStreamTerminal = true;
+                hasEmittedContent = true;
                 streamQueue.push({
                   content: combinedContent,
                   status: {
@@ -658,6 +722,24 @@ function createChatModelAdapter(
           },
           onConnectionError() {
             if (abortSignal.aborted || isStreamTerminal || isEventSourceClosedIntentionally) {
+              closeEventSource();
+              streamQueue.close();
+              return;
+            }
+
+            const latestContent = getLatestAssistantContent(streamingMessages);
+            const combinedContent =
+              initialContent.length > 0 ? [...initialContent, ...latestContent] : latestContent;
+
+            if ((combinedContent?.length ?? 0) > 0) {
+              isStreamTerminal = true;
+              streamQueue.push({
+                content: combinedContent,
+                status: {
+                  type: 'complete',
+                  reason: 'stop',
+                },
+              });
               closeEventSource();
               streamQueue.close();
               return;
@@ -721,6 +803,32 @@ function createChatModelAdapter(
       }
 
       const currentUserText = getTextFromMessage(latestMessage);
+      const localInvocation = resolveAssistantToolInvocation(currentUserText, toolkit);
+      if (localInvocation?.toolName === 'process_fdc3_intent') {
+        const matchedLocalInvocation = localInvocation;
+        onToolRouteChange(matchedLocalInvocation.debug);
+
+        const routeLocally = async function* (): AsyncGenerator<ChatModelRunResult, void, unknown> {
+          yield {
+            content: [
+              {
+                type: 'tool-call',
+                toolCallId: `frontend-tool-${Date.now()}`,
+                toolName: matchedLocalInvocation.toolName,
+                args: matchedLocalInvocation.args as ReadonlyJSONObject,
+                argsText: JSON.stringify(matchedLocalInvocation.args),
+              },
+            ],
+            status: {
+              type: 'requires-action',
+              reason: 'tool-calls',
+            },
+          };
+        };
+
+        return routeLocally();
+      }
+
       onToolRouteChange(null);
       async function* streamResponses(): AsyncGenerator<ChatModelRunResult, void, unknown> {
         yield* streamResponsesWithToolContext(currentUserText, undefined, [], frontendToolManifest);

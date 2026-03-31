@@ -171,6 +171,7 @@ export function createBackendToolUiToolkit(): AssistantRegisteredToolkit {
   return {
     calculator: {
       type: 'frontend',
+      renderOnly: true,
       description: 'Render backend calculator tool calls inline in the assistant thread.',
       parameters: z.object({
         expression: z.string().optional(),
@@ -180,6 +181,7 @@ export function createBackendToolUiToolkit(): AssistantRegisteredToolkit {
     },
     get_weather: {
       type: 'frontend',
+      renderOnly: true,
       description: 'Render backend weather tool calls inline in the assistant thread.',
       parameters: z.object({
         location: z.string().optional(),

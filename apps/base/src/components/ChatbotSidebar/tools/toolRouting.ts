@@ -49,6 +49,7 @@ export type AssistantRegisteredTool = Toolkit[string] & {
   matchPrompt?: (input: string) => AssistantToolArgs | AssistantToolMatch | null;
   matchPriority?: number;
   humanInTheLoop?: boolean;
+  renderOnly?: boolean;
 };
 
 type AssistantToolExecutionContext = Parameters<NonNullable<AssistantRegisteredTool['execute']>>[1];
@@ -115,7 +116,9 @@ export function getFrontendToolManifest(
   toolkit: AssistantRegisteredToolkit,
 ): FrontendToolManifestEntry[] {
   return Object.entries(toolkit)
-    .filter(([, toolDefinition]) => toolDefinition.type === 'frontend')
+    .filter(
+      ([, toolDefinition]) => toolDefinition.type === 'frontend' && !toolDefinition.renderOnly,
+    )
     .map(([toolName, toolDefinition]) => ({
       name: toolName,
       description: toolDefinition.description ?? '',
