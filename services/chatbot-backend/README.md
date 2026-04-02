@@ -61,15 +61,55 @@ In mock mode, the service simulates AI responses without calling external APIs.
 
    ```bash
    cd services/chatbot-backend
-   ./mvnw spring-boot:run
+   mvn spring-boot:run
    ```
 
 3. **Or build the JAR and run:**
    ```bash
    cd services/chatbot-backend
-   ./mvnw clean package
+   mvn clean package
    java -jar target/chatbot-backend.jar
    ```
+
+### Build a CentOS Deploy Bundle
+
+To compile the service on macOS, upload it manually to a CentOS server, and run it there:
+
+1. **Build the deploy archive locally:**
+
+   ```bash
+   cd services/chatbot-backend
+   npm run bundle:centos
+   ```
+
+2. **Upload the archive to the target CentOS server:**
+
+   ```bash
+   scp dist/chatbot-backend-centos.tar.gz your-user@your-server:/path/to/deploy/
+   ```
+
+3. **Extract it on the server:**
+
+   ```bash
+   cd /path/to/deploy
+   tar -xzf chatbot-backend-centos.tar.gz
+   cd chatbot-backend-centos
+   ```
+
+4. **Create the runtime environment file:**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+5. **Start the service:**
+
+   ```bash
+   chmod +x run.sh
+   ./run.sh
+   ```
+
+`run.sh` stops early with explicit errors if Java 17+, `.env`, or `chatbot-backend.jar` is missing.
 
 ### Using Environment File
 
