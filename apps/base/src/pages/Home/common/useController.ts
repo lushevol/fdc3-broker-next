@@ -151,6 +151,24 @@ const useController = () => {
     refreshTabUtil(store?.refreshTab, store?.workspaces, item.id, setDetail, ButtonEvent);
   };
 
+  const closeAllTiles = React.useCallback(() => {
+    const workspaces = [...(store?.workspaces as Workspace[])].map((workspace) => ({
+      ...workspace,
+      containers: [],
+    }));
+
+    dispacthWorkspaces(workspaces);
+
+    if (workspaces.length > 0) {
+      dispacthCurrentWorkspace(workspaces[0]);
+    }
+
+    dispacthErrorMessage(undefined);
+    ButtonEvent('click', { name: 'close all tiles', ...analyticsData });
+
+    return workspaces;
+  }, [ButtonEvent, dispacthCurrentWorkspace, dispacthErrorMessage, dispacthWorkspaces, store?.workspaces]);
+
   const focus = (id) => () => {
     const workspaces = [...(store?.workspaces as Workspace[])];
     const workspace = workspaces[id - 1];
@@ -193,6 +211,7 @@ const useController = () => {
     runExtend,
     updateValue,
     refreshTab,
+    closeAllTiles,
   };
 };
 

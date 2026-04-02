@@ -103,6 +103,7 @@ export const RegisteredComponent: React.FC<RegisteredComponentProps> = ({
   props,
   onAction,
 }) => {
+  void onAction;
   const { getComponent } = useGenerativeUI();
   const Component = getComponent(name);
 

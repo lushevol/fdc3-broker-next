@@ -154,11 +154,13 @@ class ChatControllerTest {
                 any()
         );
 
-        mockMvc.perform(get("/api/chat/stream")
+        MvcResult result = mockMvc.perform(get("/api/chat/stream")
                         .param("message", "Hi")
                         .param("frontendTools", "[{\"name\":\"custom_client_tool\"}]"))
                 .andExpect(request().asyncStarted())
                 .andReturn();
+
+        result.getAsyncResult();
 
         org.mockito.Mockito.verify(chatService).processMessageStreaming(
                 anyString(),

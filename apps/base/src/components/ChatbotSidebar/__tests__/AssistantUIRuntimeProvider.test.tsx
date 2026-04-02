@@ -165,7 +165,7 @@ describe('AssistantUIRuntimeProvider', () => {
     mockEventSourceInstances.length = 0;
   });
 
-  it('creates a local runtime and registers the demo toolkit with assistant-ui tools', () => {
+  it('creates a local runtime and registers the centralized frontend toolkit with assistant-ui tools', () => {
     render(
       <AssistantUIRuntimeProvider apiUrl="/api/chat">
         <div>child</div>
@@ -176,7 +176,10 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(mockUseAui).toHaveBeenCalledTimes(1);
     expect(mockTools).toHaveBeenCalledTimes(1);
     expect(mockUseLocalRuntime.mock.calls[0]?.[1]).toMatchObject({
-      unstable_humanToolNames: expect.arrayContaining(['send_workspace_announcement']),
+      unstable_humanToolNames: expect.arrayContaining([
+        'process_fdc3_intent',
+        'report_workspace_status',
+      ]),
     });
 
     expect(mockTools.mock.calls[0]?.[0]).toMatchObject({
@@ -221,9 +224,8 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(mockTools).toHaveBeenCalled();
     expect(mockTools.mock.calls.at(-1)?.[0]).toMatchObject({
       toolkit: expect.objectContaining({
-        get_current_time: expect.any(Object),
-        generate_status_card: expect.any(Object),
-        send_workspace_announcement: expect.any(Object),
+        summarize_workspace_state: expect.any(Object),
+        process_fdc3_intent: expect.any(Object),
         custom_client_tool: expect.any(Object),
       }),
     });
@@ -231,9 +233,9 @@ describe('AssistantUIRuntimeProvider', () => {
 
   it('throws when active registrations define the same tool name', () => {
     const duplicateToolkit: AssistantRegisteredToolkit = {
-      get_current_time: {
+      summarize_workspace_state: {
         type: 'frontend',
-        description: 'Duplicate time tool',
+        description: 'Duplicate workspace summary tool',
         parameters: {
           type: 'object',
           properties: {},
@@ -255,7 +257,7 @@ describe('AssistantUIRuntimeProvider', () => {
           <RegisterDuplicate />
         </AssistantUIRuntimeProvider>,
       ),
-    ).toThrow('Duplicate assistant tool registration: get_current_time');
+    ).toThrow('Duplicate assistant tool registration: summarize_workspace_state');
 
     consoleSpy.mockRestore();
   });
@@ -344,7 +346,7 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(screen.getByTestId('runtime-probe')).toHaveTextContent('"apiUrl":"/api/chat"');
     expect(screen.getByTestId('runtime-probe')).toHaveTextContent('"hasToolkit":true');
     expect(screen.getByTestId('runtime-probe')).toHaveTextContent('"toolNames"');
-    expect(screen.getByTestId('runtime-probe')).toHaveTextContent('"get_current_time"');
+    expect(screen.getByTestId('runtime-probe')).toHaveTextContent('"summarize_workspace_state"');
   });
 
   it('exposes tool metadata for registered tools through context', () => {
@@ -498,65 +500,9 @@ describe('AssistantUIRuntimeProvider', () => {
   });
 
   it('routes the declaration-backed FDC3 intent tool locally before hitting the backend', async () => {
-    const customToolkit: AssistantRegisteredToolkit = {
-      process_fdc3_intent: {
-        type: 'frontend',
-        description: 'Process FDC3 intent',
-        parameters: {
-          type: 'object',
-          properties: {
-            matchedIntent: { type: 'string' },
-            targetAppId: { type: 'string' },
-            targetContexts: {
-              type: 'array',
-              items: { type: 'string' },
-            },
-            payload: {
-              type: 'object',
-              properties: {
-                type: { type: 'string' },
-                id: {
-                  type: 'object',
-                  properties: {
-                    ticker: { type: 'string' },
-                  },
-                },
-              },
-            },
-            canProcess: { type: 'boolean' },
-            sourcePrompt: { type: 'string' },
-          },
-        },
-        humanInTheLoop: true,
-        execute: async () => ({ ok: true }),
-        matchPriority: 100,
-        matchPrompt: (input: string) =>
-          input.includes('view chart')
-            ? {
-                matchedIntent: 'ViewChart',
-                targetAppId: 'template_tile_fdc3_2',
-                targetContexts: ['fdc3.instrument'],
-                payload: {
-                  type: 'fdc3.instrument',
-                  id: {
-                    ticker: 'AAPL',
-                  },
-                },
-                canProcess: true,
-                sourcePrompt: input,
-              }
-            : null,
-      },
-    };
-
-    const RegisterTools = () => {
-      useRegisterAssistantTools(customToolkit);
-      return null;
-    };
-
     render(
       <AssistantUIRuntimeProvider apiUrl="/api/chat">
-        <RegisterTools />
+        <div>child</div>
       </AssistantUIRuntimeProvider>,
     );
 
@@ -599,6 +545,96 @@ describe('AssistantUIRuntimeProvider', () => {
         {
           type: 'tool-call',
           toolName: 'process_fdc3_intent',
+        },
+      ],
+      status: {
+        type: 'requires-action',
+        reason: 'tool-calls',
+      },
+    });
+    expect(mockEventSourceInstances.length).toBe(0);
+  });
+
+  it('routes the workspace status tool locally before hitting the backend', async () => {
+    render(
+      <AssistantUIRuntimeProvider
+        apiUrl="/api/chat"
+        toolRegistryConfig={{
+          getWorkspaceSnapshot: () => ({
+            activeWorkspaceId: 'workspace-1',
+            activeWorkspaceLabel: 'Workspace 1',
+            activeTileTitle: 'Tile A',
+            totalWorkspaces: 1,
+            totalTiles: 1,
+            workspaces: [
+              {
+                id: 'workspace-1',
+                label: 'Workspace 1',
+                tileCount: 1,
+                isActive: true,
+              },
+            ],
+          }),
+          closeAllTiles: async () => ({
+            activeWorkspaceId: 'workspace-1',
+            activeWorkspaceLabel: 'Workspace 1',
+            activeTileTitle: null,
+            totalWorkspaces: 1,
+            totalTiles: 0,
+            workspaces: [
+              {
+                id: 'workspace-1',
+                label: 'Workspace 1',
+                tileCount: 0,
+                isActive: true,
+              },
+            ],
+            actionMessage: 'Closed all tiles across 1 workspace.',
+          }),
+        }}
+      >
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
+      run: (input: {
+        messages: Array<{
+          id: string;
+          role: 'user';
+          content: Array<{ type: 'text'; text: string }>;
+        }>;
+        abortSignal?: AbortSignal;
+      }) => AsyncGenerator<{
+        content?: Array<{
+          type: string;
+          toolName?: string;
+        }>;
+        status?: {
+          type: string;
+          reason?: string;
+        };
+      }>;
+    };
+
+    const stream = adapter.run({
+      messages: [
+        {
+          id: 'msg-workspace-status',
+          role: 'user',
+          content: [{ type: 'text', text: 'workspace status' }],
+        },
+      ],
+      abortSignal: new AbortController().signal,
+    });
+
+    const firstYield = await stream.next();
+
+    expect(firstYield.value).toMatchObject({
+      content: [
+        {
+          type: 'tool-call',
+          toolName: 'report_workspace_status',
         },
       ],
       status: {
@@ -682,7 +718,7 @@ describe('AssistantUIRuntimeProvider', () => {
       expect.stringContaining('"name":"custom_client_tool"'),
     );
     expect(initialRequestBody.frontendTools).toEqual(
-      expect.stringContaining('"name":"send_workspace_announcement"'),
+      expect.stringContaining('"name":"process_fdc3_intent"'),
     );
     expect(mockStartFetchSSE).toHaveBeenCalled();
 
@@ -891,7 +927,7 @@ describe('AssistantUIRuntimeProvider', () => {
           {
             id: 'msg-hitl',
             role: 'user',
-            content: [{ type: 'text', text: 'please send a workspace announcement' }],
+            content: [{ type: 'text', text: 'please process an fdc3 intent' }],
           },
         ],
         abortSignal: new AbortController().signal,
@@ -904,7 +940,7 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(mockEventSourceInstances).toHaveLength(1);
     const requestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
     expect(requestBody.frontendTools).toEqual(
-      expect.stringContaining('"name":"send_workspace_announcement"'),
+      expect.stringContaining('"name":"process_fdc3_intent"'),
     );
     expect(requestBody.frontendTools).toEqual(
       expect.stringContaining('"humanInTheLoop":true'),
@@ -1598,7 +1634,7 @@ describe('AssistantUIRuntimeProvider', () => {
         {
           id: 'user-msg-hitl',
           role: 'user',
-          content: [{ type: 'text', text: 'please send a workspace announcement' }],
+          content: [{ type: 'text', text: 'please process an fdc3 intent' }],
         },
       ],
       abortSignal: new AbortController().signal,
@@ -1609,16 +1645,27 @@ describe('AssistantUIRuntimeProvider', () => {
           {
             type: 'tool-call',
             toolCallId: 'tool-hitl-1',
-            toolName: 'send_workspace_announcement',
+            toolName: 'process_fdc3_intent',
             args: {
-              title: 'Workspace Update Ready',
-              audience: 'Operations Desk',
-              summary: 'The active workspace was updated and is ready to be shared with the desk.',
+              matchedIntent: 'ViewChart',
+              targetAppId: 'test.chart',
+              targetContexts: ['fdc3.instrument'],
+              payload: {
+                type: 'fdc3.instrument',
+                id: { ticker: 'AAPL' },
+              },
+              canProcess: true,
+              sourcePrompt: 'please process an fdc3 intent',
             },
             executionTarget: 'frontend',
             result: {
-              approved: true,
-              audience: 'Operations Desk',
+              outcome: 'success',
+              matchedIntent: 'ViewChart',
+              targetAppId: 'test.chart',
+              payload: {
+                type: 'fdc3.instrument',
+                id: { ticker: 'AAPL' },
+              },
             },
           },
         ],
@@ -1629,14 +1676,12 @@ describe('AssistantUIRuntimeProvider', () => {
 
     expect(mockEventSourceInstances.length).toBe(1);
     const continuationRequestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
-    expect(continuationRequestBody.message).toBe(
-      'please send a workspace announcement',
+    expect(continuationRequestBody.message).toBe('please process an fdc3 intent');
+    expect(continuationRequestBody.toolContext).toEqual(
+      expect.stringContaining('"toolName":"process_fdc3_intent"'),
     );
     expect(continuationRequestBody.toolContext).toEqual(
-      expect.stringContaining('"toolName":"send_workspace_announcement"'),
-    );
-    expect(continuationRequestBody.toolContext).toEqual(
-      expect.stringContaining('"approved":true'),
+      expect.stringContaining('"matchedIntent":"ViewChart"'),
     );
 
     mockEventSourceInstances[0]?.emit('message', 'The announcement was approved.');

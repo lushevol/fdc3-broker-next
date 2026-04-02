@@ -55,6 +55,7 @@ describe('fdc3IntentTool', () => {
 
     const ToolUi = toolkit.process_fdc3_intent.render;
     const addResult = jest.fn();
+    const resume = jest.fn();
 
     render(
       <ToolUi
@@ -78,7 +79,7 @@ describe('fdc3IntentTool', () => {
         result={undefined}
         isError={false}
         addResult={addResult}
-        resume={jest.fn()}
+        resume={resume}
       />,
     );
 

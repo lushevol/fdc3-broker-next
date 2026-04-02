@@ -30,19 +30,22 @@ import type {
   ContentPart as StreamingContentPart,
   ToolCall as StreamingToolCall,
 } from './adapters/types';
-import { createBackendToolUiToolkit } from './tools/backendToolUiToolkit';
-import { createDemoToolkit } from './tools/demoToolkit';
 import {
   describeAssistantToolkit,
   resolveAssistantToolInvocation,
   getFrontendToolManifest,
   getHumanInTheLoopToolNames,
+  mergeRegisteredToolkits,
   type AssistantToolResolutionDebug,
   type AssistantToolMetadata,
   type AssistantRegisteredToolkit,
 } from './tools/toolRouting';
 import { GenerativeUIProvider, defaultGenerativeComponents } from './common/GenerativeUI';
 import type { ReadonlyJSONObject } from 'assistant-stream/utils';
+import {
+  createFrontendToolRegistry,
+  type FrontendToolRegistryConfig,
+} from './tools/createFrontendToolRegistry';
 
 export interface AssistantUIRuntimeProviderValue {
   apiUrl: string;
@@ -105,32 +108,6 @@ function createToolkitRegistrationId(): string {
   return `assistant-tools-${toolkitRegistrationSequence}`;
 }
 
-function mergeToolkits(
-  baseToolkit: AssistantRegisteredToolkit,
-  registeredToolkits: readonly AssistantRegisteredToolkit[],
-): AssistantRegisteredToolkit {
-  const mergedToolkit: AssistantRegisteredToolkit = { ...baseToolkit };
-  const duplicateToolNames = new Set<string>();
-
-  registeredToolkits.forEach((toolkit) => {
-    Object.entries(toolkit).forEach(([toolName, toolDefinition]) => {
-      if (toolName in mergedToolkit) {
-        duplicateToolNames.add(toolName);
-      }
-
-      mergedToolkit[toolName] = toolDefinition;
-    });
-  });
-
-  if (duplicateToolNames.size > 0 && process.env.NODE_ENV !== 'production') {
-    throw new Error(
-      `Duplicate assistant tool registration: ${Array.from(duplicateToolNames).sort().join(', ')}`,
-    );
-  }
-
-  return mergedToolkit;
-}
-
 export function useRegisterAssistantTools(toolkit: AssistantRegisteredToolkit): void {
   const context = useContext(AssistantToolRegistrationContext);
   const registrationIdRef = useRef<string | null>(null);
@@ -148,6 +125,7 @@ export function useRegisterAssistantTools(toolkit: AssistantRegisteredToolkit): 
     if (!registrationId) {
       return undefined;
     }
+
     context.registerToolkit(registrationId, toolkit);
 
     return () => {
@@ -159,6 +137,7 @@ export function useRegisterAssistantTools(toolkit: AssistantRegisteredToolkit): 
 interface AssistantUIRuntimeProviderProps {
   children: ReactNode;
   apiUrl: string;
+  toolRegistryConfig?: FrontendToolRegistryConfig;
 }
 
 interface FrontendToolContinuationPayload {
@@ -838,7 +817,7 @@ function createChatModelAdapter(
 
       const currentUserText = getTextFromMessage(latestMessage);
       const localInvocation = resolveAssistantToolInvocation(currentUserText, toolkit);
-      if (localInvocation?.toolName === 'process_fdc3_intent') {
+      if (localInvocation && toolkit[localInvocation.toolName]?.humanInTheLoop) {
         const matchedLocalInvocation = localInvocation;
         onToolRouteChange(matchedLocalInvocation.debug);
 
@@ -876,10 +855,11 @@ function createChatModelAdapter(
 export function AssistantUIRuntimeProvider({
   children,
   apiUrl,
+  toolRegistryConfig,
 }: AssistantUIRuntimeProviderProps): JSX.Element {
   const baseToolkit = useMemo(
-    () => mergeToolkits(createDemoToolkit(), [createBackendToolUiToolkit()]),
-    [],
+    () => createFrontendToolRegistry(toolRegistryConfig),
+    [toolRegistryConfig],
   );
   const [registeredToolkits, setRegisteredToolkits] = useState<
     Map<string, AssistantRegisteredToolkit>
@@ -906,7 +886,7 @@ export function AssistantUIRuntimeProvider({
     });
   }, []);
   const toolkit = useMemo(
-    () => mergeToolkits(baseToolkit, Array.from(registeredToolkits.values())),
+    () => mergeRegisteredToolkits([baseToolkit, ...Array.from(registeredToolkits.values())]),
     [baseToolkit, registeredToolkits],
   );
   const [lastToolRoute, setLastToolRoute] = useState<AssistantToolResolutionDebug | null>(null);

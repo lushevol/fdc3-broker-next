@@ -11,9 +11,6 @@ export {
   useRegisterAssistantTools,
 } from './AssistantUIRuntimeProvider';
 export type { AssistantUIRuntimeProviderValue } from './AssistantUIRuntimeProvider';
-export { ToolRegistryDebugPanel } from './ToolRegistryDebugPanel';
-export { Fdc3IntentToolRegistration } from './Fdc3IntentToolRegistration';
-export { WorkspaceSummaryToolRegistrationExample } from './WorkspaceSummaryToolRegistrationExample';
 export type {
   AssistantRegisteredToolkit,
   AssistantToolMetadata,
@@ -35,10 +32,10 @@ export {
   defaultGenerativeComponents,
 } from './common/GenerativeUI';
 
-// Demo frontend tools
-export { createDemoToolkit } from './tools/demoToolkit';
+// Frontend tools
 export { createFdc3IntentToolkit } from './tools/fdc3IntentTool';
 export { createWorkspaceSummaryToolkit } from './tools/workspaceSummaryTool';
+export { createFrontendToolRegistry } from './tools/createFrontendToolRegistry';
 
 // Tool execution display
 export { ToolExecutionCard, ToolExecutionList } from './common/ToolExecutionCard';

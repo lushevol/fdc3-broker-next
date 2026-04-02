@@ -5,7 +5,6 @@ import com.fdc3.chatbot.model.ChatMessage;
 import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
-import com.fdc3.chatbot.tool.ToolRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -33,8 +32,7 @@ class ChatServiceTest {
     @BeforeEach
     void setUp() {
         agentService = mock(AgentService.class);
-        ToolRegistry toolRegistry = mock(ToolRegistry.class);
-        chatService = new ChatService(agentService, toolRegistry);
+        chatService = new ChatService(agentService);
     }
 
     @Test

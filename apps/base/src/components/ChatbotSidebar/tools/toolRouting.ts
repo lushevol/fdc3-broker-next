@@ -56,6 +56,31 @@ type AssistantToolExecutionContext = Parameters<NonNullable<AssistantRegisteredT
 
 export type AssistantRegisteredToolkit = Record<string, AssistantRegisteredTool>;
 
+export function mergeRegisteredToolkits(
+  toolkits: readonly AssistantRegisteredToolkit[],
+): AssistantRegisteredToolkit {
+  const mergedToolkit: AssistantRegisteredToolkit = {};
+  const duplicateToolNames = new Set<string>();
+
+  toolkits.forEach((toolkit) => {
+    Object.entries(toolkit).forEach(([toolName, toolDefinition]) => {
+      if (toolName in mergedToolkit) {
+        duplicateToolNames.add(toolName);
+      }
+
+      mergedToolkit[toolName] = toolDefinition;
+    });
+  });
+
+  if (duplicateToolNames.size > 0 && process.env.NODE_ENV !== 'production') {
+    throw new Error(
+      `Duplicate assistant tool registration: ${Array.from(duplicateToolNames).sort().join(', ')}`,
+    );
+  }
+
+  return mergedToolkit;
+}
+
 function isZodSchema(value: unknown): value is ZodTypeAny {
   return typeof value === 'object' && value !== null && '_def' in value && 'parse' in value;
 }

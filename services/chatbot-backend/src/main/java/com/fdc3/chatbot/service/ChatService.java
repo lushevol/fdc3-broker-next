@@ -5,7 +5,6 @@ import com.fdc3.chatbot.model.ChatMessage;
 import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
-import com.fdc3.chatbot.tool.ToolRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ChatService {
 
     private final AgentService agentService;
-    private final ToolRegistry toolRegistry;
 
     // In-memory conversation storage (use Redis/Database in production)
     private final Map<String, List<ChatMessage>> conversations = new ConcurrentHashMap<>();
@@ -166,11 +164,9 @@ public class ChatService {
             java.util.function.Consumer<ToolResult> onToolResult,
             java.util.function.Consumer<GenerativeUIDirective> onGenerativeUi
     ) {
-        // Get or create conversation
         List<ChatMessage> history = conversations.computeIfAbsent(conversationId, k -> new ArrayList<>());
         List<ChatMessage> promptHistory = List.copyOf(history);
 
-        // Add user message to history
         ChatMessage userMsg = ChatMessage.builder()
                 .id(UUID.randomUUID().toString())
                 .role(ChatMessage.Role.USER)
@@ -184,7 +180,6 @@ public class ChatService {
         List<ToolResult> toolResults = new ArrayList<>();
         AtomicBoolean cancelled = new AtomicBoolean(false);
 
-        // Process with agent
         Runnable cancelAgentStream = agentService.processMessageStreaming(
                 conversationId,
                 userMessage,
@@ -208,14 +203,7 @@ public class ChatService {
                     if (cancelled.get()) {
                         return;
                     }
-                    history.add(ChatMessage.builder()
-                            .id(UUID.randomUUID().toString())
-                            .role(ChatMessage.Role.ASSISTANT)
-                            .content(assistantResponse.toString())
-                            .timestamp(Instant.now())
-                            .toolCalls(toolCalls.isEmpty() ? null : List.copyOf(toolCalls))
-                            .toolResults(toolResults.isEmpty() ? null : List.copyOf(toolResults))
-                            .build());
+                    history.add(buildAssistantMessage(assistantResponse, toolCalls, toolResults));
                     onComplete.run();
                 },
                 toolCall -> {
@@ -241,6 +229,21 @@ public class ChatService {
             }
             cancelAgentStream.run();
         };
+    }
+
+    private ChatMessage buildAssistantMessage(
+            StringBuilder assistantResponse,
+            List<ToolCall> toolCalls,
+            List<ToolResult> toolResults
+    ) {
+        return ChatMessage.builder()
+                .id(UUID.randomUUID().toString())
+                .role(ChatMessage.Role.ASSISTANT)
+                .content(assistantResponse.toString())
+                .timestamp(Instant.now())
+                .toolCalls(toolCalls.isEmpty() ? null : List.copyOf(toolCalls))
+                .toolResults(toolResults.isEmpty() ? null : List.copyOf(toolResults))
+                .build();
     }
 
     /**
