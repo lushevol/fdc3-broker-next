@@ -47,6 +47,7 @@ describe('stream error frame behavior', () => {
 
     const res = {
       setHeader: jest.fn(),
+      flushHeaders: jest.fn(),
       write: jest.fn(),
       end: jest.fn(),
     };
@@ -59,6 +60,7 @@ describe('stream error frame behavior', () => {
     ).resolves.toBeUndefined();
 
     expect(adapter.toOpenAIErrorSseFrame).toHaveBeenCalled();
+    expect(res.flushHeaders).toHaveBeenCalledTimes(1);
     expect(res.write).toHaveBeenCalledWith('data: {"error":{}}\\n\\n');
     expect(res.end).toHaveBeenCalled();
   });
@@ -89,6 +91,7 @@ describe('stream error frame behavior', () => {
 
     const res = {
       setHeader: jest.fn(),
+      flushHeaders: jest.fn(),
       write: jest.fn(),
       end: jest.fn(),
     };
@@ -98,6 +101,7 @@ describe('stream error frame behavior', () => {
     ).resolves.toBeUndefined();
 
     expect(adapter.toClaudeErrorSseFrame).toHaveBeenCalled();
+    expect(res.flushHeaders).toHaveBeenCalledTimes(1);
     expect(res.write).toHaveBeenCalledWith('event: error\\ndata:{}\\n\\n');
     expect(res.end).toHaveBeenCalled();
   });
