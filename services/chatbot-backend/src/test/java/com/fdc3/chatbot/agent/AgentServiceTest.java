@@ -9,10 +9,11 @@ import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessageType;
-import dev.langchain4j.model.StreamingResponseHandler;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.output.FinishReason;
-import dev.langchain4j.model.output.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -47,6 +48,13 @@ class AgentServiceTest {
         toolRegistry = mock(ToolRegistry.class);
         agentService = new AgentService(toolRegistry);
         ReflectionTestUtils.setField(agentService, "mockEnabled", true);
+    }
+
+    private static ChatResponse chatResponse(AiMessage aiMessage, FinishReason finishReason) {
+        return ChatResponse.builder()
+                .aiMessage(aiMessage)
+                .finishReason(finishReason)
+                .build();
     }
 
     @Test
@@ -187,37 +195,27 @@ class AgentServiceTest {
 
         AtomicInteger invocationCount = new AtomicInteger();
         List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
-        StreamingChatLanguageModel streamingChatLanguageModel = new StreamingChatLanguageModel() {
+        StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 StreamingResponseHandler<AiMessage> handler) {
-                throw new AssertionError("Tool-aware generate overload should be used");
-            }
-
-            @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 List<ToolSpecification> toolSpecifications,
-                                 StreamingResponseHandler<AiMessage> handler) {
-                capturedToolSpecs.addAll(toolSpecifications);
+            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+                capturedToolSpecs.addAll(request.toolSpecifications());
                 if (invocationCount.getAndIncrement() == 0) {
                     ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
                             .id("tool-1")
                             .name("get_current_time")
                             .arguments("{\"timezone\":\"America/New_York\"}")
                             .build();
-                    handler.onComplete(Response.from(
+                    handler.onCompleteResponse(chatResponse(
                             AiMessage.from(List.of(toolExecutionRequest)),
-                            null,
                             FinishReason.TOOL_EXECUTION
                     ));
                     return;
                 }
 
-                assertTrue(messages.stream().anyMatch(message -> message.type() == ChatMessageType.TOOL_EXECUTION_RESULT));
-                handler.onNext("The current time in America/New_York is 2026-03-18 09:31.");
-                handler.onComplete(Response.from(
+                assertTrue(request.messages().stream().anyMatch(message -> message.type() == ChatMessageType.TOOL_EXECUTION_RESULT));
+                handler.onPartialResponse("The current time in America/New_York is 2026-03-18 09:31.");
+                handler.onCompleteResponse(chatResponse(
                         AiMessage.from("The current time in America/New_York is 2026-03-18 09:31."),
-                        null,
                         FinishReason.STOP
                 ));
             }
@@ -262,26 +260,17 @@ class AgentServiceTest {
         when(toolRegistry.getAllTools()).thenReturn(Map.of());
 
         List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
-        StreamingChatLanguageModel streamingChatLanguageModel = new StreamingChatLanguageModel() {
+        StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 StreamingResponseHandler<AiMessage> handler) {
-                throw new AssertionError("Tool-aware generate overload should be used");
-            }
-
-            @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 List<ToolSpecification> toolSpecifications,
-                                 StreamingResponseHandler<AiMessage> handler) {
-                capturedToolSpecs.addAll(toolSpecifications);
+            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+                capturedToolSpecs.addAll(request.toolSpecifications());
                 ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
                         .id("frontend-tool-1")
                         .name("custom_client_tool")
                         .arguments("{\"query\":\"workspace\"}")
                         .build();
-                handler.onComplete(Response.from(
+                handler.onCompleteResponse(chatResponse(
                         AiMessage.from(List.of(toolExecutionRequest)),
-                        null,
                         FinishReason.TOOL_EXECUTION
                 ));
             }
@@ -328,22 +317,13 @@ class AgentServiceTest {
         ));
 
         List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
-        StreamingChatLanguageModel streamingChatLanguageModel = new StreamingChatLanguageModel() {
+        StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 StreamingResponseHandler<AiMessage> handler) {
-                throw new AssertionError("Tool-aware generate overload should be used");
-            }
-
-            @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 List<ToolSpecification> toolSpecifications,
-                                 StreamingResponseHandler<AiMessage> handler) {
-                capturedToolSpecs.addAll(toolSpecifications);
-                handler.onNext("Hello");
-                handler.onComplete(Response.from(
+            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+                capturedToolSpecs.addAll(request.toolSpecifications());
+                handler.onPartialResponse("Hello");
+                handler.onCompleteResponse(chatResponse(
                         AiMessage.from("Hello"),
-                        null,
                         FinishReason.STOP
                 ));
             }
@@ -402,22 +382,13 @@ class AgentServiceTest {
                 )));
 
         AtomicInteger invocationCount = new AtomicInteger();
-        StreamingChatLanguageModel streamingChatLanguageModel = new StreamingChatLanguageModel() {
+        StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 StreamingResponseHandler<AiMessage> handler) {
-                throw new AssertionError("Tool-aware generate overload should be used");
-            }
-
-            @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 List<ToolSpecification> toolSpecifications,
-                                 StreamingResponseHandler<AiMessage> handler) {
+            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
                 invocationCount.incrementAndGet();
-                handler.onNext("I'll check the current weather in Shanghai for you.");
-                handler.onComplete(Response.from(
+                handler.onPartialResponse("I'll check the current weather in Shanghai for you.");
+                handler.onCompleteResponse(chatResponse(
                         AiMessage.from("I'll check the current weather in Shanghai for you."),
-                        null,
                         FinishReason.STOP
                 ));
             }
@@ -467,35 +438,25 @@ class AgentServiceTest {
                 )));
 
         AtomicInteger invocationCount = new AtomicInteger();
-        StreamingChatLanguageModel streamingChatLanguageModel = new StreamingChatLanguageModel() {
+        StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 StreamingResponseHandler<AiMessage> handler) {
-                throw new AssertionError("Tool-aware generate overload should be used");
-            }
-
-            @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 List<ToolSpecification> toolSpecifications,
-                                 StreamingResponseHandler<AiMessage> handler) {
+            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
                 if (invocationCount.getAndIncrement() == 0) {
                     ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
                             .id("tool-visible-preamble")
                             .name("get_current_time")
                             .arguments("{\"timezone\":\"Asia/Shanghai\"}")
                             .build();
-                    handler.onComplete(Response.from(
+                    handler.onCompleteResponse(chatResponse(
                             AiMessage.from("I’ll check the current Shanghai time first.", List.of(toolExecutionRequest)),
-                            null,
                             FinishReason.TOOL_EXECUTION
                     ));
                     return;
                 }
 
-                handler.onNext("It is currently 2026-03-25 12:30 in Shanghai.");
-                handler.onComplete(Response.from(
+                handler.onPartialResponse("It is currently 2026-03-25 12:30 in Shanghai.");
+                handler.onCompleteResponse(chatResponse(
                         AiMessage.from("It is currently 2026-03-25 12:30 in Shanghai."),
-                        null,
                         FinishReason.STOP
                 ));
             }
@@ -535,33 +496,24 @@ class AgentServiceTest {
 
         List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
         AtomicInteger invocationCount = new AtomicInteger();
-        StreamingChatLanguageModel streamingChatLanguageModel = new StreamingChatLanguageModel() {
+        StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 StreamingResponseHandler<AiMessage> handler) {
-                throw new AssertionError("Tool-aware generate overload should be used");
-            }
-
-            @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 List<ToolSpecification> toolSpecifications,
-                                 StreamingResponseHandler<AiMessage> handler) {
+            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
                 capturedToolSpecs.clear();
-                capturedToolSpecs.addAll(toolSpecifications);
+                capturedToolSpecs.addAll(request.toolSpecifications());
                 invocationCount.incrementAndGet();
 
-                assertTrue(messages.stream().anyMatch(message -> message.type() == ChatMessageType.TOOL_EXECUTION_RESULT));
-                assertTrue(toolSpecifications.stream().anyMatch(toolSpecification ->
+                assertTrue(request.messages().stream().anyMatch(message -> message.type() == ChatMessageType.TOOL_EXECUTION_RESULT));
+                assertTrue(request.toolSpecifications().stream().anyMatch(toolSpecification ->
                         "calculator".equals(toolSpecification.name())));
-                assertTrue(toolSpecifications.stream().anyMatch(toolSpecification ->
+                assertTrue(request.toolSpecifications().stream().anyMatch(toolSpecification ->
                         "other_client_tool".equals(toolSpecification.name())));
-                assertFalse(toolSpecifications.stream().anyMatch(toolSpecification ->
+                assertFalse(request.toolSpecifications().stream().anyMatch(toolSpecification ->
                         "custom_client_tool".equals(toolSpecification.name())));
 
-                handler.onNext("I used the completed client-side tool result to answer the request.");
-                handler.onComplete(Response.from(
+                handler.onPartialResponse("I used the completed client-side tool result to answer the request.");
+                handler.onCompleteResponse(chatResponse(
                         AiMessage.from("I used the completed client-side tool result to answer the request."),
-                        null,
                         FinishReason.STOP
                 ));
             }
@@ -649,29 +601,16 @@ class AgentServiceTest {
                 ))
         );
 
-        AtomicInteger plainGenerateCalls = new AtomicInteger();
-        AtomicInteger toolGenerateCalls = new AtomicInteger();
-        StreamingChatLanguageModel streamingChatLanguageModel = new StreamingChatLanguageModel() {
+        AtomicInteger requestCount = new AtomicInteger();
+        List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
+        StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 StreamingResponseHandler<AiMessage> handler) {
-                plainGenerateCalls.incrementAndGet();
-                handler.onNext("Hello!");
-                handler.onComplete(Response.from(
+            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+                requestCount.incrementAndGet();
+                capturedToolSpecs.addAll(request.toolSpecifications());
+                handler.onPartialResponse("Hello!");
+                handler.onCompleteResponse(chatResponse(
                         AiMessage.from("Hello!"),
-                        null,
-                        FinishReason.STOP
-                ));
-            }
-
-            @Override
-            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
-                                 List<ToolSpecification> toolSpecifications,
-                                 StreamingResponseHandler<AiMessage> handler) {
-                toolGenerateCalls.incrementAndGet();
-                handler.onComplete(Response.from(
-                        AiMessage.from("Hello!"),
-                        null,
                         FinishReason.STOP
                 ));
             }
@@ -693,8 +632,8 @@ class AgentServiceTest {
         );
 
         assertTrue(completed.await(1, TimeUnit.SECONDS));
-        assertEquals(1, plainGenerateCalls.get());
-        assertEquals(0, toolGenerateCalls.get());
+        assertEquals(1, requestCount.get());
+        assertEquals(0, capturedToolSpecs.size());
     }
 
     @Test

@@ -10,15 +10,25 @@ import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.tool.ToolDefinition;
 import com.fdc3.chatbot.tool.ToolRegistry;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
-import dev.langchain4j.agent.tool.ToolParameters;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.StreamingResponseHandler;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.request.json.JsonArraySchema;
+import dev.langchain4j.model.chat.request.json.JsonBooleanSchema;
+import dev.langchain4j.model.chat.request.json.JsonEnumSchema;
+import dev.langchain4j.model.chat.request.json.JsonIntegerSchema;
+import dev.langchain4j.model.chat.request.json.JsonNumberSchema;
+import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
+import dev.langchain4j.model.chat.request.json.JsonRawSchema;
+import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
+import dev.langchain4j.model.chat.request.json.JsonStringSchema;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import lombok.extern.slf4j.Slf4j;
@@ -73,8 +83,8 @@ public class AgentService {
     private final ToolRegistry toolRegistry;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private ChatLanguageModel chatModel;
-    private StreamingChatLanguageModel streamingChatModel;
+    private ChatModel chatModel;
+    private StreamingChatModel streamingChatModel;
     private final ScheduledExecutorService mockExecutor = Executors.newScheduledThreadPool(1);
 
     // In-memory conversation storage (use Redis/Database in production)
@@ -417,9 +427,9 @@ public class AgentService {
     ) {
         StringBuilder streamedAssistantText = new StringBuilder();
 
-        StreamingResponseHandler<AiMessage> handler = new StreamingResponseHandler<>() {
+        StreamingChatResponseHandler handler = new StreamingChatResponseHandler() {
             @Override
-            public void onNext(String token) {
+            public void onPartialResponse(String token) {
                 if (cancelled.get()) {
                     return;
                 }
@@ -428,12 +438,12 @@ public class AgentService {
             }
 
             @Override
-            public void onComplete(dev.langchain4j.model.output.Response<AiMessage> response) {
+            public void onCompleteResponse(ChatResponse response) {
                 if (cancelled.get()) {
                     return;
                 }
 
-                AiMessage aiMessage = response.content();
+                AiMessage aiMessage = response.aiMessage();
                 if (aiMessage != null && aiMessage.hasToolExecutionRequests()) {
                     emitRemainingAssistantText(aiMessage, streamedAssistantText, onNext);
                     logAssistantTurnDiagnostics(
@@ -518,12 +528,7 @@ public class AgentService {
             }
         };
 
-        if (toolSpecifications.isEmpty()) {
-            streamingChatModel.generate(messages, handler);
-            return;
-        }
-
-        streamingChatModel.generate(messages, toolSpecifications, handler);
+        streamingChatModel.chat(buildChatRequest(messages, toolSpecifications), handler);
     }
 
     private void emitRemainingAssistantText(
@@ -776,19 +781,117 @@ public class AgentService {
     }
 
     @SuppressWarnings("unchecked")
-    private ToolParameters toToolParameters(Map<String, Object> parameters) {
-        Object properties = parameters.get("properties");
-        Object required = parameters.get("required");
+    private JsonObjectSchema toToolParameters(Map<String, Object> parameters) {
+        JsonObjectSchema.Builder builder = JsonObjectSchema.builder();
+        Object description = parameters.get("description");
+        if (description != null) {
+            builder.description(String.valueOf(description));
+        }
 
-        return ToolParameters.builder()
-                .type(String.valueOf(parameters.getOrDefault("type", "object")))
-                .properties(properties instanceof Map<?, ?> map
-                        ? (Map<String, Map<String, Object>>) map
-                        : Map.of())
-                .required(required instanceof List<?> list
-                        ? list.stream().map(String::valueOf).toList()
-                        : List.of())
-                .build();
+        Object properties = parameters.get("properties");
+        if (properties instanceof Map<?, ?> map) {
+            map.forEach((key, value) -> {
+                if (key != null && value instanceof Map<?, ?> propertySchema) {
+                    builder.addProperty(String.valueOf(key), toJsonSchemaElement(castSchemaMap(propertySchema)));
+                }
+            });
+        }
+
+        Object required = parameters.get("required");
+        if (required instanceof List<?> list) {
+            builder.required(list.stream().map(String::valueOf).toList());
+        }
+
+        Object additionalProperties = parameters.get("additionalProperties");
+        if (additionalProperties instanceof Boolean bool) {
+            builder.additionalProperties(bool);
+        }
+
+        return builder.build();
+    }
+
+    private ChatRequest buildChatRequest(
+            List<dev.langchain4j.data.message.ChatMessage> messages,
+            List<ToolSpecification> toolSpecifications
+    ) {
+        ChatRequest.Builder builder = ChatRequest.builder().messages(messages);
+        if (!toolSpecifications.isEmpty()) {
+            builder.toolSpecifications(toolSpecifications);
+        }
+        return builder.build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> castSchemaMap(Map<?, ?> schema) {
+        return (Map<String, Object>) schema;
+    }
+
+    private JsonSchemaElement toJsonSchemaElement(Map<String, Object> schema) {
+        String description = schema.get("description") == null ? null : String.valueOf(schema.get("description"));
+        Object enumValues = schema.get("enum");
+        if (enumValues instanceof List<?> values && !values.isEmpty()) {
+            JsonEnumSchema.Builder builder = JsonEnumSchema.builder()
+                    .enumValues(values.stream().map(String::valueOf).toList());
+            if (description != null) {
+                builder.description(description);
+            }
+            return builder.build();
+        }
+
+        String type = schema.get("type") == null ? "string" : String.valueOf(schema.get("type"));
+        return switch (type) {
+            case "object" -> toToolParameters(schema);
+            case "array" -> {
+                JsonArraySchema.Builder builder = JsonArraySchema.builder();
+                if (description != null) {
+                    builder.description(description);
+                }
+                Object items = schema.get("items");
+                if (items instanceof Map<?, ?> itemSchema) {
+                    builder.items(toJsonSchemaElement(castSchemaMap(itemSchema)));
+                } else {
+                    builder.items(JsonRawSchema.from(items == null ? "{\"type\":\"string\"}" : writeJson(items)));
+                }
+                yield builder.build();
+            }
+            case "integer" -> buildIntegerSchema(description);
+            case "number" -> buildNumberSchema(description);
+            case "boolean" -> buildBooleanSchema(description);
+            case "string" -> buildStringSchema(description);
+            default -> JsonRawSchema.from(writeJson(schema));
+        };
+    }
+
+    private JsonStringSchema buildStringSchema(String description) {
+        JsonStringSchema.Builder builder = JsonStringSchema.builder();
+        if (description != null) {
+            builder.description(description);
+        }
+        return builder.build();
+    }
+
+    private JsonIntegerSchema buildIntegerSchema(String description) {
+        JsonIntegerSchema.Builder builder = JsonIntegerSchema.builder();
+        if (description != null) {
+            builder.description(description);
+        }
+        return builder.build();
+    }
+
+    private JsonNumberSchema buildNumberSchema(String description) {
+        JsonNumberSchema.Builder builder = JsonNumberSchema.builder();
+        if (description != null) {
+            builder.description(description);
+        }
+        return builder.build();
+    }
+
+    private JsonBooleanSchema buildBooleanSchema(String description) {
+        JsonBooleanSchema.Builder builder = JsonBooleanSchema.builder();
+        if (description != null) {
+            builder.description(description);
+        }
+        return builder.build();
     }
 
     private Map<String, Object> parseToolArguments(String arguments) {
@@ -1184,9 +1287,8 @@ public class AgentService {
             log.debug("Processing message for conversation: {}", conversationId);
 
             // Generate response
-            dev.langchain4j.model.output.Response<AiMessage> response = chatModel.generate(messages);
-
-            return response.content().text();
+            ChatResponse response = chatModel.chat(buildChatRequest(messages, List.of()));
+            return response.aiMessage().text();
 
         } catch (Exception e) {
             log.error("Error processing message", e);

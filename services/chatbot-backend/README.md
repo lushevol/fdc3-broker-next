@@ -172,7 +172,7 @@ For full API documentation, see [API.md](docs/API.md).
 ### Technologies
 
 - **Spring Boot 3.2.0**: Web framework
-- **LangChain4j 0.35.0**: AI model abstraction
+- **LangChain4j 1.12.2**: AI model abstraction
 - **Project Reactor**: Reactive programming for streaming
 - **Bucket4j**: Rate limiting
 - **Lombok**: Boilerplate reduction
