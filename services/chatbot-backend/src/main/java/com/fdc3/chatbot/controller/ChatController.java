@@ -8,16 +8,14 @@ import com.fdc3.chatbot.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * REST Controller for chat operations.
@@ -42,106 +40,20 @@ public class ChatController {
             @RequestParam(required = false) String toolContext,
             @RequestParam(required = false) String frontendTools
     ) {
-        log.info("Received streaming chat request for conversation: {}", conversationId);
+        return streamChatInternal(message, conversationId, toolContext, frontendTools);
+    }
 
-        SseEmitter emitter = new SseEmitter(300000L); // 5 minute timeout
-
-        // Create conversation if not provided
-        String convId = conversationId != null && !conversationId.isEmpty()
-                ? conversationId
-                : chatService.createConversation();
-        AtomicReference<Runnable> cancelStreamRef = new AtomicReference<>(() -> {
-        });
-
-        executor.execute(() -> {
-            try {
-                // Send conversation ID
-                emitter.send(SseEmitter.event()
-                        .name("conversation_id")
-                        .data(convId));
-
-                // Stream the response
-                Runnable cancelStream = chatService.processMessageStreaming(
-                        convId,
-                        message,
-                        toolContext,
-                        frontendTools,
-                        token -> {
-                            try {
-                                emitter.send(SseEmitter.event()
-                                        .name("message")
-                                        .data(token));
-                            } catch (IOException e) {
-                                log.error("Error sending SSE event", e);
-                            }
-                        },
-                        error -> {
-                            try {
-                                emitter.send(SseEmitter.event()
-                                        .name("error")
-                                        .data(error.getMessage()));
-                                emitter.complete();
-                            } catch (IOException e) {
-                                log.error("Error sending error event", e);
-                            }
-                        },
-                        () -> {
-                            try {
-                                emitter.send(SseEmitter.event()
-                                        .name("done")
-                                        .data(""));
-                                emitter.complete();
-                            } catch (IOException e) {
-                                log.error("Error sending done event", e);
-                            }
-                        },
-                        toolCall -> {
-                            try {
-                                emitter.send(SseEmitter.event()
-                                        .name("tool_call")
-                                        .data(toolCall));
-                            } catch (IOException e) {
-                                log.error("Error sending tool_call event", e);
-                            }
-                        },
-                        toolResult -> {
-                            try {
-                                emitter.send(SseEmitter.event()
-                                        .name("tool_result")
-                                        .data(toolResult));
-                            } catch (IOException e) {
-                                log.error("Error sending tool_result event", e);
-                            }
-                        },
-                        generativeUiDirective -> {
-                            try {
-                                emitter.send(SseEmitter.event()
-                                        .name("generative_ui")
-                                        .data(generativeUiDirective));
-                            } catch (IOException e) {
-                                log.error("Error sending generative_ui event", e);
-                            }
-                        }
-                );
-                cancelStreamRef.set(cancelStream);
-            } catch (Exception e) {
-                log.error("Error in streaming response", e);
-                emitter.completeWithError(e);
-            }
-        });
-
-        emitter.onTimeout(() -> {
-            log.warn("SSE connection timed out for conversation: {}", convId);
-            cancelStreamRef.get().run();
-            emitter.complete();
-        });
-
-        emitter.onCompletion(() -> {
-            cancelStreamRef.get().run();
-            log.debug("SSE connection completed for conversation: {}", convId);
-        });
-
-        return emitter;
+    /**
+     * Send a chat message and receive a streaming response via SSE using a JSON request body.
+     */
+    @PostMapping(value = "/stream", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamChat(@RequestBody ChatRequest request) {
+        return streamChatInternal(
+                request.getMessage(),
+                request.getConversationId(),
+                request.getToolContext(),
+                request.getFrontendTools()
+        );
     }
 
     /**
@@ -242,5 +154,75 @@ public class ChatController {
         result.put("success", true);
         result.put("message", confirmed ? "Tool execution confirmed" : "Tool execution cancelled");
         return result;
+    }
+
+    private SseEmitter streamChatInternal(
+            String message,
+            String conversationId,
+            String toolContext,
+            String frontendTools
+    ) {
+        log.info("Received streaming chat request for conversation: {}", conversationId);
+
+        SseEmitter emitter = new SseEmitter(300000L); // 5 minute timeout
+        String convId = conversationId != null && !conversationId.isEmpty()
+                ? conversationId
+                : chatService.createConversation();
+        AtomicReference<Runnable> cancelStreamRef = new AtomicReference<>(() -> {
+        });
+
+        executor.execute(() -> {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("conversation_id")
+                        .data(convId));
+
+                Runnable cancelStream = chatService.processMessageStreaming(
+                        convId,
+                        message,
+                        toolContext,
+                        frontendTools,
+                        token -> sendSseEvent(emitter, "message", Map.of("text", token), "message"),
+                        error -> {
+                            sendSseEvent(emitter, "error", error.getMessage(), "error");
+                            emitter.complete();
+                        },
+                        () -> {
+                            sendSseEvent(emitter, "done", "", "done");
+                            emitter.complete();
+                        },
+                        toolCall -> sendSseEvent(emitter, "tool_call", toolCall, "tool_call"),
+                        toolResult -> sendSseEvent(emitter, "tool_result", toolResult, "tool_result"),
+                        generativeUiDirective -> sendSseEvent(emitter, "generative_ui", generativeUiDirective, "generative_ui")
+                );
+                cancelStreamRef.set(cancelStream);
+            } catch (Exception e) {
+                log.error("Error in streaming response", e);
+                emitter.completeWithError(e);
+            }
+        });
+
+        emitter.onTimeout(() -> {
+            log.warn("SSE connection timed out for conversation: {}", convId);
+            cancelStreamRef.get().run();
+            emitter.complete();
+        });
+
+        emitter.onCompletion(() -> {
+            cancelStreamRef.get().run();
+            log.debug("SSE connection completed for conversation: {}", convId);
+        });
+
+        return emitter;
+    }
+
+    private void sendSseEvent(SseEmitter emitter, String eventName, Object data, String logLabel) {
+        try {
+            emitter.send(SseEmitter.event()
+                    .name(eventName)
+                    .data(data));
+        } catch (IOException e) {
+            log.error("Error sending {} event", logLabel, e);
+        }
     }
 }

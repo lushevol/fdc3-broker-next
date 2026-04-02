@@ -18,8 +18,8 @@ describe('chatbot exports', () => {
     expect(typeof ChatbotExports.useAssistantToolRoutingDebug).toBe('function');
   });
 
-  it('exposes the tool registry debug panel', () => {
-    expect(typeof ChatbotExports.ToolRegistryDebugPanel).toBe('function');
+  it('exposes the central frontend tool registry factory', () => {
+    expect(typeof ChatbotExports.createFrontendToolRegistry).toBe('function');
   });
 
   it('does not expose legacy sidebar compatibility helpers', () => {

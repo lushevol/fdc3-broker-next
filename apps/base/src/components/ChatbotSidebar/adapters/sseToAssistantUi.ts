@@ -159,6 +159,36 @@ export function createAssistantMessage(id?: string): AssistantUIMessage {
   };
 }
 
+function ensureAssistantMessage(
+  messages: AssistantUIMessage[],
+  streamingState: StreamingState,
+): {
+  messages: AssistantUIMessage[];
+  assistantMessageIndex: number;
+  streamingState: StreamingState;
+} {
+  const assistantMessageIndex = messages.findIndex((message) => message.id === streamingState.assistantMessageId);
+
+  if (assistantMessageIndex !== -1) {
+    return {
+      messages: [...messages],
+      assistantMessageIndex,
+      streamingState,
+    };
+  }
+
+  const nextAssistantMessage = createAssistantMessage();
+
+  return {
+    messages: [...messages, nextAssistantMessage],
+    assistantMessageIndex: messages.length,
+    streamingState: {
+      ...streamingState,
+      assistantMessageId: nextAssistantMessage.id,
+    },
+  };
+}
+
 /**
  * Parse SSE event data
  */
@@ -167,13 +197,24 @@ export function parseSSEEvent(
   data: string,
 ): { type: SSEEventType; payload: unknown } | null {
   try {
-    // Some events like 'message', 'conversation_id', 'error', and 'done' are plain text
-    if (
-      eventType === 'message' ||
-      eventType === 'conversation_id' ||
-      eventType === 'error' ||
-      eventType === 'done'
-    ) {
+    // Some events like 'conversation_id', 'error', and 'done' are plain text
+    if (eventType === 'conversation_id' || eventType === 'error' || eventType === 'done') {
+      return { type: eventType, payload: data };
+    }
+
+    if (eventType === 'message') {
+      if (data.startsWith('{')) {
+        const payload = JSON.parse(data);
+        if (
+          typeof payload === 'object' &&
+          payload !== null &&
+          'text' in payload &&
+          typeof (payload as { text: unknown }).text === 'string'
+        ) {
+          return { type: eventType, payload: (payload as { text: string }).text };
+        }
+      }
+
       return { type: eventType, payload: data };
     }
 
@@ -365,22 +406,11 @@ export function buildSSEUrl(
   toolContext?: string,
   frontendTools?: string,
 ): string {
-  const streamUrl = `${baseUrl}/stream`;
-  const params = new URLSearchParams({ message: message.trim() });
-
-  if (conversationId) {
-    params.set('conversationId', conversationId);
-  }
-
-  if (toolContext) {
-    params.set('toolContext', toolContext);
-  }
-
-  if (frontendTools) {
-    params.set('frontendTools', frontendTools);
-  }
-
-  return `${streamUrl}?${params.toString()}`;
+  void message;
+  void conversationId;
+  void toolContext;
+  void frontendTools;
+  return `${baseUrl}/stream`;
 }
 
 /**
@@ -417,32 +447,17 @@ export function handleSSEEvent(
     case 'message': {
       const textChunk = event.payload as string;
       const newAccumulatedContent = streamingState.accumulatedContent + textChunk;
+      const ensuredMessage = ensureAssistantMessage(messages, streamingState);
 
-      // Find or create assistant message
-      let assistantMessageIndex = messages.findIndex(
-        (m) => m.id === streamingState.assistantMessageId,
-      );
-
-      const updatedMessages = [...messages];
-
-      if (assistantMessageIndex === -1) {
-        // Create new assistant message
-        const newAssistantMessage = createAssistantMessage();
-        streamingState.assistantMessageId = newAssistantMessage.id;
-        assistantMessageIndex = updatedMessages.length;
-        updatedMessages.push(newAssistantMessage);
-      }
-
-      // Update message content
-      updatedMessages[assistantMessageIndex] = updateAssistantMessageContent(
-        updatedMessages[assistantMessageIndex],
+      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] = updateAssistantMessageContent(
+        ensuredMessage.messages[ensuredMessage.assistantMessageIndex],
         newAccumulatedContent,
       );
 
       return {
-        messages: updatedMessages,
+        messages: ensuredMessage.messages,
         streamingState: {
-          ...streamingState,
+          ...ensuredMessage.streamingState,
           accumulatedContent: newAccumulatedContent,
         },
       };
@@ -454,37 +469,22 @@ export function handleSSEEvent(
 
       // Track pending tool call
       streamingState.pendingToolCalls.set(toolCall.id, toolCallPart);
-
-      // Find or create assistant message
-      let assistantMessageIndex = messages.findIndex(
-        (m) => m.id === streamingState.assistantMessageId,
-      );
-
-      const updatedMessages = [...messages];
-
-      if (assistantMessageIndex === -1) {
-        // Create new assistant message
-        const newAssistantMessage = createAssistantMessage();
-        streamingState.assistantMessageId = newAssistantMessage.id;
-        assistantMessageIndex = updatedMessages.length;
-        updatedMessages.push(newAssistantMessage);
-      }
-
-      const assistantMessage = updatedMessages[assistantMessageIndex];
+      const ensuredMessage = ensureAssistantMessage(messages, streamingState);
+      const assistantMessage = ensuredMessage.messages[ensuredMessage.assistantMessageIndex];
       const needsLeadingToolStub = assistantMessage.content.length === 0;
       const messageWithLeadingStub = needsLeadingToolStub
         ? addContentPartToAssistantMessage(assistantMessage, toToolProgressStub(toolCall.name))
         : assistantMessage;
 
-      updatedMessages[assistantMessageIndex] = addContentPartToAssistantMessage(
+      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] = addContentPartToAssistantMessage(
         messageWithLeadingStub,
         toolCallPart,
       );
 
       return {
-        messages: updatedMessages,
+        messages: ensuredMessage.messages,
         streamingState: {
-          ...streamingState,
+          ...ensuredMessage.streamingState,
           accumulatedContent: '',
         },
       };
@@ -496,31 +496,17 @@ export function handleSSEEvent(
 
       // Remove from pending
       streamingState.pendingToolCalls.delete(toolResult.toolCallId);
+      const ensuredMessage = ensureAssistantMessage(messages, streamingState);
 
-      // Find or create assistant message
-      let assistantMessageIndex = messages.findIndex(
-        (m) => m.id === streamingState.assistantMessageId,
-      );
-
-      const updatedMessages = [...messages];
-
-      if (assistantMessageIndex === -1) {
-        // Create new assistant message
-        const newAssistantMessage = createAssistantMessage();
-        streamingState.assistantMessageId = newAssistantMessage.id;
-        assistantMessageIndex = updatedMessages.length;
-        updatedMessages.push(newAssistantMessage);
-      }
-
-      updatedMessages[assistantMessageIndex] = addContentPartToAssistantMessage(
-        updatedMessages[assistantMessageIndex],
+      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] = addContentPartToAssistantMessage(
+        ensuredMessage.messages[ensuredMessage.assistantMessageIndex],
         toolResultPart,
       );
 
       return {
-        messages: updatedMessages,
+        messages: ensuredMessage.messages,
         streamingState: {
-          ...streamingState,
+          ...ensuredMessage.streamingState,
           accumulatedContent: '',
         },
       };
@@ -528,31 +514,17 @@ export function handleSSEEvent(
 
     case 'generative_ui': {
       const directive = event.payload as GenerativeUIDirective;
+      const ensuredMessage = ensureAssistantMessage(messages, streamingState);
 
-      // Find or create assistant message
-      let assistantMessageIndex = messages.findIndex(
-        (m) => m.id === streamingState.assistantMessageId,
-      );
-
-      const updatedMessages = [...messages];
-
-      if (assistantMessageIndex === -1) {
-        // Create new assistant message
-        const newAssistantMessage = createAssistantMessage();
-        streamingState.assistantMessageId = newAssistantMessage.id;
-        assistantMessageIndex = updatedMessages.length;
-        updatedMessages.push(newAssistantMessage);
-      }
-
-      updatedMessages[assistantMessageIndex] = mergeToolLinkedGenerativeUI(
-        updatedMessages[assistantMessageIndex],
+      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] = mergeToolLinkedGenerativeUI(
+        ensuredMessage.messages[ensuredMessage.assistantMessageIndex],
         directive,
       );
 
       return {
-        messages: updatedMessages,
+        messages: ensuredMessage.messages,
         streamingState: {
-          ...streamingState,
+          ...ensuredMessage.streamingState,
           accumulatedContent: '',
         },
       };

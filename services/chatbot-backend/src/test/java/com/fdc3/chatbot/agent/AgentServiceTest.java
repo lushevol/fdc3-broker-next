@@ -320,6 +320,139 @@ class AgentServiceTest {
     }
 
     @Test
+    void processMessageStreamingDeduplicatesFrontendToolNamesThatOverlapBackendTools() throws Exception {
+        ReflectionTestUtils.setField(agentService, "mockEnabled", false);
+        when(toolRegistry.getAllTools()).thenReturn(Map.of(
+                "calculator",
+                new TestToolDefinition("calculator", "Perform calculations", Map.of("type", "object"))
+        ));
+
+        List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
+        StreamingChatLanguageModel streamingChatLanguageModel = new StreamingChatLanguageModel() {
+            @Override
+            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
+                                 StreamingResponseHandler<AiMessage> handler) {
+                throw new AssertionError("Tool-aware generate overload should be used");
+            }
+
+            @Override
+            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
+                                 List<ToolSpecification> toolSpecifications,
+                                 StreamingResponseHandler<AiMessage> handler) {
+                capturedToolSpecs.addAll(toolSpecifications);
+                handler.onNext("Hello");
+                handler.onComplete(Response.from(
+                        AiMessage.from("Hello"),
+                        null,
+                        FinishReason.STOP
+                ));
+            }
+        };
+        ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
+
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-dedup-tools",
+                "hi",
+                null,
+                """
+                        [{"name":"calculator","description":"Frontend calculator","inputSchema":{"type":"object"},"humanInTheLoop":false,"hasRender":true},
+                        {"name":"custom_client_tool","description":"Custom client tool","inputSchema":{"type":"object"},"humanInTheLoop":false,"hasRender":true}]
+                        """,
+                List.of(),
+                token -> {
+                },
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown,
+                toolCall -> {
+                },
+                toolResult -> {
+                }
+        );
+
+        assertTrue(completed.await(1, TimeUnit.SECONDS));
+        assertEquals(2, capturedToolSpecs.size());
+        assertEquals(1, capturedToolSpecs.stream()
+                .filter(toolSpecification -> "calculator".equals(toolSpecification.name()))
+                .count());
+        assertTrue(capturedToolSpecs.stream().anyMatch(toolSpecification ->
+                "custom_client_tool".equals(toolSpecification.name())));
+    }
+
+    @Test
+    void processMessageStreamingFallsBackToWeatherToolWhenModelSkipsToolCall() throws Exception {
+        ReflectionTestUtils.setField(agentService, "mockEnabled", false);
+        when(toolRegistry.getAllTools()).thenReturn(Map.of(
+                "get_weather",
+                new TestToolDefinition("get_weather", "Get the current weather", Map.of(
+                        "type", "object",
+                        "properties", Map.of("location", Map.of("type", "string")),
+                        "required", List.of("location")
+                ))
+        ));
+        when(toolRegistry.requiresConfirmation("get_weather")).thenReturn(false);
+        when(toolRegistry.execute(eq("get_weather"), eq(Map.of("location", "Shanghai"))))
+                .thenReturn(CompletableFuture.completedFuture(Map.of(
+                        "location", "Shanghai",
+                        "temperature", 22,
+                        "conditions", "Partly Cloudy"
+                )));
+
+        AtomicInteger invocationCount = new AtomicInteger();
+        StreamingChatLanguageModel streamingChatLanguageModel = new StreamingChatLanguageModel() {
+            @Override
+            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
+                                 StreamingResponseHandler<AiMessage> handler) {
+                throw new AssertionError("Tool-aware generate overload should be used");
+            }
+
+            @Override
+            public void generate(List<dev.langchain4j.data.message.ChatMessage> messages,
+                                 List<ToolSpecification> toolSpecifications,
+                                 StreamingResponseHandler<AiMessage> handler) {
+                invocationCount.incrementAndGet();
+                handler.onNext("I'll check the current weather in Shanghai for you.");
+                handler.onComplete(Response.from(
+                        AiMessage.from("I'll check the current weather in Shanghai for you."),
+                        null,
+                        FinishReason.STOP
+                ));
+            }
+        };
+        ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
+
+        List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
+        List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
+        StringBuilder streamedText = new StringBuilder();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-weather-fallback",
+                "weather in shanghai",
+                List.of(),
+                streamedText::append,
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown,
+                toolCalls::add,
+                toolResults::add
+        );
+
+        assertTrue(completed.await(1, TimeUnit.SECONDS));
+        assertEquals(1, invocationCount.get());
+        assertEquals(1, toolCalls.size());
+        assertEquals("get_weather", toolCalls.get(0).getName());
+        assertEquals(1, toolResults.size());
+        assertEquals("Shanghai", ((Map<?, ?>) toolResults.get(0).getResult()).get("location"));
+        assertTrue(streamedText.toString().contains("I'll check the current weather in Shanghai for you."));
+        verify(toolRegistry).execute(eq("get_weather"), eq(Map.of("location", "Shanghai")));
+    }
+
+    @Test
     void processMessageStreamingPreservesVisibleAssistantTextBeforeToolCalls() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
         when(toolRegistry.getAllTools()).thenReturn(Map.of(

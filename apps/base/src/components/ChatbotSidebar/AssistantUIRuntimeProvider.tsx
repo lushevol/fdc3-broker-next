@@ -19,29 +19,33 @@ import {
   type Toolkit,
 } from '@assistant-ui/react';
 import {
-  bindAssistantUiSSEStream,
   buildSSEUrl,
   createInitialStreamingState,
   handleSSEEvent,
   parseSSEEvent,
 } from './adapters/sseToAssistantUi';
+import { startFetchSSE } from './adapters/fetchSSE';
 import type {
   AssistantUIMessage,
   ContentPart as StreamingContentPart,
   ToolCall as StreamingToolCall,
 } from './adapters/types';
-import { createBackendToolUiToolkit } from './tools/backendToolUiToolkit';
-import { createDemoToolkit } from './tools/demoToolkit';
 import {
   describeAssistantToolkit,
+  resolveAssistantToolInvocation,
   getFrontendToolManifest,
   getHumanInTheLoopToolNames,
+  mergeRegisteredToolkits,
   type AssistantToolResolutionDebug,
   type AssistantToolMetadata,
   type AssistantRegisteredToolkit,
 } from './tools/toolRouting';
 import { GenerativeUIProvider, defaultGenerativeComponents } from './common/GenerativeUI';
 import type { ReadonlyJSONObject } from 'assistant-stream/utils';
+import {
+  createFrontendToolRegistry,
+  type FrontendToolRegistryConfig,
+} from './tools/createFrontendToolRegistry';
 
 export interface AssistantUIRuntimeProviderValue {
   apiUrl: string;
@@ -104,32 +108,6 @@ function createToolkitRegistrationId(): string {
   return `assistant-tools-${toolkitRegistrationSequence}`;
 }
 
-function mergeToolkits(
-  baseToolkit: AssistantRegisteredToolkit,
-  registeredToolkits: readonly AssistantRegisteredToolkit[],
-): AssistantRegisteredToolkit {
-  const mergedToolkit: AssistantRegisteredToolkit = { ...baseToolkit };
-  const duplicateToolNames = new Set<string>();
-
-  registeredToolkits.forEach((toolkit) => {
-    Object.entries(toolkit).forEach(([toolName, toolDefinition]) => {
-      if (toolName in mergedToolkit) {
-        duplicateToolNames.add(toolName);
-      }
-
-      mergedToolkit[toolName] = toolDefinition;
-    });
-  });
-
-  if (duplicateToolNames.size > 0 && process.env.NODE_ENV !== 'production') {
-    throw new Error(
-      `Duplicate assistant tool registration: ${Array.from(duplicateToolNames).sort().join(', ')}`,
-    );
-  }
-
-  return mergedToolkit;
-}
-
 export function useRegisterAssistantTools(toolkit: AssistantRegisteredToolkit): void {
   const context = useContext(AssistantToolRegistrationContext);
   const registrationIdRef = useRef<string | null>(null);
@@ -147,6 +125,7 @@ export function useRegisterAssistantTools(toolkit: AssistantRegisteredToolkit): 
     if (!registrationId) {
       return undefined;
     }
+
     context.registerToolkit(registrationId, toolkit);
 
     return () => {
@@ -158,6 +137,7 @@ export function useRegisterAssistantTools(toolkit: AssistantRegisteredToolkit): 
 interface AssistantUIRuntimeProviderProps {
   children: ReactNode;
   apiUrl: string;
+  toolRegistryConfig?: FrontendToolRegistryConfig;
 }
 
 interface FrontendToolContinuationPayload {
@@ -227,7 +207,8 @@ function isToolCallContinuationPart(part: unknown): part is ToolCallContinuation
     part.type === 'tool-call' &&
     typeof part.toolCallId === 'string' &&
     typeof part.toolName === 'string' &&
-    isObjectRecord(part.args)
+    isObjectRecord(part.args) &&
+    part.executionTarget === 'frontend'
   );
 }
 
@@ -350,6 +331,7 @@ function toAssistantMessageContent(content: StreamingContentPart[]): AssistantRu
         toolName: part.toolName,
         args: part.args as ReadonlyJSONObject,
         argsText: part.argsText,
+        executionTarget: part.executionTarget,
         result: part.result,
         isError: part.isError,
       };
@@ -389,6 +371,15 @@ function getLatestAssistantContent(messages: AssistantUIMessage[]): AssistantRun
     .reverse()
     .find((message) => message.role === 'assistant');
   return latestAssistantMessage ? toAssistantMessageContent(latestAssistantMessage.content) : [];
+}
+
+function hasStructuredAssistantContent(content: AssistantRunContent): boolean {
+  return content.some((part) => part.type !== 'text');
+}
+
+function getLatestAssistantTrailingTextContent(content: AssistantRunContent): AssistantRunContent {
+  const trailingPart = content.at(-1);
+  return trailingPart?.type === 'text' ? [trailingPart] : [];
 }
 
 function createStreamQueue() {
@@ -439,16 +430,36 @@ function createChatModelAdapter(
   apiUrl: string,
   toolkit: AssistantRegisteredToolkit,
   onToolRouteChange: (debug: AssistantToolResolutionDebug | null) => void,
-  conversationIdRef: React.MutableRefObject<string | null>,
+  conversationIdsByThreadRef: React.MutableRefObject<Map<string, string>>,
+  fallbackConversationIdRef: React.MutableRefObject<string | null>,
 ): ChatModelAdapter {
   return {
     run(runOptions) {
-      const { messages, abortSignal } = runOptions;
+      const { messages, abortSignal, unstable_threadId: threadId } = runOptions;
       const currentAssistantMessage =
         'unstable_getMessage' in runOptions && typeof runOptions.unstable_getMessage === 'function'
           ? runOptions.unstable_getMessage()
           : undefined;
       const latestMessage = messages[messages.length - 1];
+      const getConversationIdForThread = (): string | null => {
+        if (threadId) {
+          return conversationIdsByThreadRef.current.get(threadId) ?? null;
+        }
+
+        return fallbackConversationIdRef.current;
+      };
+      const setConversationIdForThread = (conversationId: string | null) => {
+        if (threadId) {
+          if (conversationId) {
+            conversationIdsByThreadRef.current.set(threadId, conversationId);
+          } else {
+            conversationIdsByThreadRef.current.delete(threadId);
+          }
+          return;
+        }
+
+        fallbackConversationIdRef.current = conversationId;
+      };
 
       if (process.env.NODE_ENV !== 'production') {
         console.debug('[assistant-tools] adapter run', {
@@ -469,48 +480,71 @@ function createChatModelAdapter(
         const streamQueue = createStreamQueue();
         let streamingMessages: AssistantUIMessage[] = [];
         let streamingState = createInitialStreamingState();
-        streamingState.conversationId = conversationIdRef.current;
+        streamingState.conversationId = getConversationIdForThread();
         let pendingStructuredUpdate = false;
         let pendingFrontendToolCall: StreamingToolCall | null = null;
         let streamError: Error | null = null;
         let isStreamTerminal = false;
-        let isEventSourceClosedIntentionally = false;
+        let isStreamClosedIntentionally = false;
+        let hasEmittedContent = false;
 
         const emitVisibleState = (status?: ChatModelRunResult['status']) => {
           const latestContent = getLatestAssistantContent(streamingMessages);
           const combinedContent =
             initialContent.length > 0 ? [...initialContent, ...latestContent] : latestContent;
+          if ((combinedContent?.length ?? 0) > 0) {
+            hasEmittedContent = true;
+          }
           streamQueue.push({
             content: combinedContent,
             ...(status ? { status } : {}),
           });
         };
 
-        const closeEventSource = () => {
-          isEventSourceClosedIntentionally = true;
-          eventSource.close();
+        const emitTrailingStructuredTextState = () => {
+          const latestContent = getLatestAssistantContent(streamingMessages);
+          const trailingContent = getLatestAssistantTrailingTextContent(latestContent);
+
+          if (trailingContent.length === 0) {
+            return;
+          }
+
+          hasEmittedContent = true;
+          streamQueue.push({
+            content: trailingContent,
+          });
         };
 
-        const eventSource = new EventSource(
-          buildSSEUrl(
+        let streamRequest: ReturnType<typeof startFetchSSE> | null = null;
+
+        streamRequest = startFetchSSE({
+          url: buildSSEUrl(
             apiUrl,
             messageText,
-            conversationIdRef.current,
+            getConversationIdForThread(),
             toolContext,
             frontendToolManifest,
           ),
-        );
-
-        bindAssistantUiSSEStream(eventSource, {
+          body: {
+            message: messageText,
+            ...(getConversationIdForThread()
+              ? { conversationId: getConversationIdForThread() }
+              : {}),
+            ...(toolContext ? { toolContext } : {}),
+            ...(frontendToolManifest ? { frontendTools: frontendToolManifest } : {}),
+          },
+          signal: abortSignal,
+          handlers: {
           onEvent(eventType, data) {
             const next = handleSSEEvent(streamingMessages, streamingState, eventType, data);
             streamingMessages = next.messages;
             streamingState = next.streamingState;
-            conversationIdRef.current = streamingState.conversationId;
+            setConversationIdForThread(streamingState.conversationId);
 
             if (next.error) {
               streamError = new Error(next.error);
-              closeEventSource();
+              isStreamClosedIntentionally = true;
+              streamRequest?.close();
               streamQueue.close();
               return;
             }
@@ -521,7 +555,8 @@ function createChatModelAdapter(
                 parsedToolCall?.type === 'tool_call' &&
                 typeof parsedToolCall.payload === 'object' &&
                 parsedToolCall.payload !== null &&
-                (parsedToolCall.payload as StreamingToolCall).executionTarget === 'frontend'
+                (parsedToolCall.payload as StreamingToolCall).executionTarget === 'frontend' &&
+                !toolkit[(parsedToolCall.payload as StreamingToolCall).name]?.renderOnly
               ) {
                 pendingFrontendToolCall = parsedToolCall.payload as StreamingToolCall;
               }
@@ -532,6 +567,20 @@ function createChatModelAdapter(
             }
 
             if (eventType === 'message') {
+              const latestContent = getLatestAssistantContent(streamingMessages);
+              const containsStructuredContent = hasStructuredAssistantContent(latestContent);
+
+              if (pendingStructuredUpdate) {
+                pendingStructuredUpdate = false;
+                emitVisibleState();
+                return;
+              }
+
+              if (containsStructuredContent) {
+                emitTrailingStructuredTextState();
+                return;
+              }
+
               emitVisibleState();
               return;
             }
@@ -562,7 +611,8 @@ function createChatModelAdapter(
                       reason: 'tool-calls',
                     },
                   });
-                  closeEventSource();
+                  isStreamClosedIntentionally = true;
+                  streamRequest?.close();
                   streamQueue.close();
                   return;
                 }
@@ -637,12 +687,32 @@ function createChatModelAdapter(
                   }
                 })();
 
-                closeEventSource();
+                isStreamClosedIntentionally = true;
+                streamRequest?.close();
                 return;
               }
 
-              if (pendingStructuredUpdate || (combinedContent?.length ?? 0) > 0) {
+              if (pendingStructuredUpdate && (combinedContent?.length ?? 0) > 0) {
                 isStreamTerminal = true;
+                hasEmittedContent = true;
+                streamQueue.push({
+                  content: combinedContent,
+                  status: {
+                    type: 'complete',
+                    reason: 'stop',
+                  },
+                });
+              } else if (hasEmittedContent) {
+                isStreamTerminal = true;
+                streamQueue.push({
+                  status: {
+                    type: 'complete',
+                    reason: 'stop',
+                  },
+                });
+              } else if ((combinedContent?.length ?? 0) > 0) {
+                isStreamTerminal = true;
+                hasEmittedContent = true;
                 streamQueue.push({
                   content: combinedContent,
                   status: {
@@ -652,27 +722,51 @@ function createChatModelAdapter(
                 });
               }
 
-              closeEventSource();
+              isStreamClosedIntentionally = true;
+              streamRequest?.close();
               streamQueue.close();
             }
           },
           onConnectionError() {
-            if (abortSignal.aborted || isStreamTerminal || isEventSourceClosedIntentionally) {
-              closeEventSource();
+            if (abortSignal.aborted || isStreamTerminal || isStreamClosedIntentionally) {
+              isStreamClosedIntentionally = true;
+              streamRequest?.close();
+              streamQueue.close();
+              return;
+            }
+
+            const latestContent = getLatestAssistantContent(streamingMessages);
+            const combinedContent =
+              initialContent.length > 0 ? [...initialContent, ...latestContent] : latestContent;
+
+            if ((combinedContent?.length ?? 0) > 0) {
+              isStreamTerminal = true;
+              streamQueue.push({
+                content: combinedContent,
+                status: {
+                  type: 'complete',
+                  reason: 'stop',
+                },
+              });
+              isStreamClosedIntentionally = true;
+              streamRequest?.close();
               streamQueue.close();
               return;
             }
 
             streamError = new Error('Chat stream connection failed');
-            closeEventSource();
+            isStreamClosedIntentionally = true;
+            streamRequest?.close();
             streamQueue.close();
+          },
           },
         });
 
         abortSignal?.addEventListener(
           'abort',
           () => {
-            closeEventSource();
+            isStreamClosedIntentionally = true;
+            streamRequest?.close();
             streamQueue.close();
           },
           { once: true },
@@ -688,7 +782,8 @@ function createChatModelAdapter(
             yield next.value;
           }
         } finally {
-          closeEventSource();
+          isStreamClosedIntentionally = true;
+          streamRequest?.close();
         }
 
         if (streamError) {
@@ -721,6 +816,32 @@ function createChatModelAdapter(
       }
 
       const currentUserText = getTextFromMessage(latestMessage);
+      const localInvocation = resolveAssistantToolInvocation(currentUserText, toolkit);
+      if (localInvocation && toolkit[localInvocation.toolName]?.humanInTheLoop) {
+        const matchedLocalInvocation = localInvocation;
+        onToolRouteChange(matchedLocalInvocation.debug);
+
+        const routeLocally = async function* (): AsyncGenerator<ChatModelRunResult, void, unknown> {
+          yield {
+            content: [
+              {
+                type: 'tool-call',
+                toolCallId: `frontend-tool-${Date.now()}`,
+                toolName: matchedLocalInvocation.toolName,
+                args: matchedLocalInvocation.args as ReadonlyJSONObject,
+                argsText: JSON.stringify(matchedLocalInvocation.args),
+              },
+            ],
+            status: {
+              type: 'requires-action',
+              reason: 'tool-calls',
+            },
+          };
+        };
+
+        return routeLocally();
+      }
+
       onToolRouteChange(null);
       async function* streamResponses(): AsyncGenerator<ChatModelRunResult, void, unknown> {
         yield* streamResponsesWithToolContext(currentUserText, undefined, [], frontendToolManifest);
@@ -734,10 +855,11 @@ function createChatModelAdapter(
 export function AssistantUIRuntimeProvider({
   children,
   apiUrl,
+  toolRegistryConfig,
 }: AssistantUIRuntimeProviderProps): JSX.Element {
   const baseToolkit = useMemo(
-    () => mergeToolkits(createDemoToolkit(), [createBackendToolUiToolkit()]),
-    [],
+    () => createFrontendToolRegistry(toolRegistryConfig),
+    [toolRegistryConfig],
   );
   const [registeredToolkits, setRegisteredToolkits] = useState<
     Map<string, AssistantRegisteredToolkit>
@@ -764,14 +886,22 @@ export function AssistantUIRuntimeProvider({
     });
   }, []);
   const toolkit = useMemo(
-    () => mergeToolkits(baseToolkit, Array.from(registeredToolkits.values())),
+    () => mergeRegisteredToolkits([baseToolkit, ...Array.from(registeredToolkits.values())]),
     [baseToolkit, registeredToolkits],
   );
   const [lastToolRoute, setLastToolRoute] = useState<AssistantToolResolutionDebug | null>(null);
-  const conversationIdRef = useRef<string | null>(null);
+  const conversationIdsByThreadRef = useRef<Map<string, string>>(new Map());
+  const fallbackConversationIdRef = useRef<string | null>(null);
   const toolMetadata = useMemo(() => describeAssistantToolkit(toolkit), [toolkit]);
   const modelAdapter = useMemo(
-    () => createChatModelAdapter(apiUrl, toolkit, setLastToolRoute, conversationIdRef),
+    () =>
+      createChatModelAdapter(
+        apiUrl,
+        toolkit,
+        setLastToolRoute,
+        conversationIdsByThreadRef,
+        fallbackConversationIdRef,
+      ),
     [apiUrl, toolkit],
   );
   const humanInTheLoopToolNames = useMemo(() => getHumanInTheLoopToolNames(toolkit), [toolkit]);

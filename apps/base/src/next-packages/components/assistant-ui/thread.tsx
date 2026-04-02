@@ -20,6 +20,7 @@ import {
   ThreadPrimitive,
   useAuiState,
 } from '@assistant-ui/react';
+import { useEditComposerCancel, useEditComposerSend } from '@assistant-ui/core/react';
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -324,22 +325,31 @@ const UserActionBar: FC = () => {
 };
 
 const EditComposer: FC = () => {
+  const { send, disabled } = useEditComposerSend();
+  const { cancel } = useEditComposerCancel();
+
   return (
     <MessagePrimitive.Root className="aui-edit-composer-wrapper mx-auto flex w-full max-w-(--thread-max-width) flex-col px-2 py-3">
-      <ComposerPrimitive.Root className="aui-edit-composer-root ml-auto flex w-full max-w-[85%] flex-col rounded-[1.35rem] border border-border/70 bg-muted/90 shadow-[0_14px_32px_-24px_rgba(15,23,42,0.5)]">
+      <ComposerPrimitive.Root
+        className="aui-edit-composer-root ml-auto flex w-full max-w-[85%] flex-col rounded-[1.35rem] border border-border/70 bg-muted/90 shadow-[0_14px_32px_-24px_rgba(15,23,42,0.5)]"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (!disabled) {
+            send();
+          }
+        }}
+      >
         <ComposerPrimitive.Input
           className="aui-edit-composer-input min-h-14 w-full resize-none bg-transparent p-4 text-[15px] text-foreground outline-none"
           autoFocus
         />
         <div className="aui-edit-composer-footer mx-3 mb-3 flex items-center gap-2 self-end">
-          <ComposerPrimitive.Cancel asChild>
-            <Button variant="ghost" size="sm">
-              Cancel
-            </Button>
-          </ComposerPrimitive.Cancel>
-          <ComposerPrimitive.Send asChild>
-            <Button size="sm">Update</Button>
-          </ComposerPrimitive.Send>
+          <Button variant="ghost" size="sm" type="button" onClick={cancel}>
+            Cancel
+          </Button>
+          <Button size="sm" type="submit" disabled={disabled}>
+            Update
+          </Button>
         </div>
       </ComposerPrimitive.Root>
     </MessagePrimitive.Root>

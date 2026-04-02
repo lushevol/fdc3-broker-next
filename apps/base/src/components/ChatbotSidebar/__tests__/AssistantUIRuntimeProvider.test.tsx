@@ -13,37 +13,95 @@ const mockUseLocalRuntime = jest.fn(() => ({ kind: 'local-runtime' }));
 const mockUseAui = jest.fn(() => ({ kind: 'aui-instance' }));
 const mockTools = jest.fn((config: unknown) => ({ kind: 'tools-resource', config }));
 const mockFetch = jest.fn();
+const mockStartFetchSSE = jest.fn();
 const mockEventSourceInstances: MockEventSource[] = [];
 
 class MockEventSource {
-  public onerror: ((event: Event) => void) | null = null;
-
-  private readonly listeners = new Map<string, Array<(event: MessageEvent) => void>>();
-
-  constructor(public readonly url: string) {
+  constructor(
+    public readonly url: string,
+    public readonly init?: {
+      body?: Record<string, unknown>;
+      signal?: AbortSignal;
+      handlers: {
+        onEvent: (eventType: string, data: string) => void;
+        onConnectionError: () => void;
+      };
+    },
+  ) {
     mockEventSourceInstances.push(this);
-  }
-
-  addEventListener(type: string, listener: (event: MessageEvent) => void): void {
-    const currentListeners = this.listeners.get(type) ?? [];
-    currentListeners.push(listener);
-    this.listeners.set(type, currentListeners);
+    if (init?.signal) {
+      if (init.signal.aborted) {
+        this.close();
+      } else {
+        init.signal.addEventListener('abort', this.close, { once: true });
+      }
+    }
   }
 
   emit(type: string, data = ''): void {
-    const event = new MessageEvent(type, { data });
-    (this.listeners.get(type) ?? []).forEach((listener) => listener(event));
+    this.init?.handlers.onEvent(type, data);
   }
 
   failConnection(): void {
-    this.onerror?.({} as Event);
+    this.init?.handlers.onConnectionError();
   }
 
-  close = jest.fn();
+  close = jest.fn(() => {
+    return;
+  });
 }
 
 function parseEventSourceUrl(url: string): URL {
   return new URL(url, 'http://localhost');
+}
+
+function parseStreamRequestBody(instance: MockEventSource): Record<string, unknown> {
+  const rawBody = instance.init?.body;
+  if (!rawBody || typeof rawBody !== 'object') {
+    throw new Error('Expected stream request body to be an object');
+  }
+
+  return rawBody;
+}
+
+type MinimalThreadMessage = {
+  role: 'user' | 'assistant';
+  content: Array<{ type: 'text'; text: string }>;
+};
+
+type CapturedChatModelAdapter = {
+  run: (options: {
+    messages: MinimalThreadMessage[];
+    abortSignal: AbortSignal;
+    unstable_getMessage?: () => unknown;
+  }) => AsyncGenerator<unknown, void, unknown>;
+};
+
+function getCapturedChatModelAdapter(): CapturedChatModelAdapter {
+  const adapter = mockUseLocalRuntime.mock.calls[0]?.[0];
+
+  if (!adapter || typeof adapter !== 'object' || !('run' in adapter)) {
+    throw new Error('Chat model adapter was not captured');
+  }
+
+  return adapter as CapturedChatModelAdapter;
+}
+
+function createUserThreadMessage(text: string): MinimalThreadMessage {
+  return {
+    role: 'user',
+    content: [{ type: 'text', text }],
+  };
+}
+
+function startChatRun(messages: MinimalThreadMessage[]): AsyncGenerator<unknown, void, unknown> {
+  const run = getCapturedChatModelAdapter().run({
+    messages,
+    abortSignal: new AbortController().signal,
+  });
+
+  void run.next();
+  return run;
 }
 
 Object.defineProperty(global, 'fetch', {
@@ -51,10 +109,24 @@ Object.defineProperty(global, 'fetch', {
   value: mockFetch,
 });
 
-Object.defineProperty(global, 'EventSource', {
-  writable: true,
-  value: MockEventSource,
-});
+jest.mock('../adapters/fetchSSE', () => ({
+  startFetchSSE: (options: {
+    url: string;
+    body: Record<string, unknown>;
+    signal?: AbortSignal;
+    handlers: {
+      onEvent: (eventType: string, data: string) => void;
+      onConnectionError: () => void;
+    };
+  }) => {
+    const session = new MockEventSource(options.url, options);
+    mockStartFetchSSE(options);
+    return {
+      close: session.close,
+      completed: Promise.resolve(),
+    };
+  },
+}));
 
 jest.mock('@assistant-ui/react', () => {
   const React = jest.requireActual('react');
@@ -89,10 +161,11 @@ describe('AssistantUIRuntimeProvider', () => {
     mockUseAui.mockClear();
     mockTools.mockClear();
     mockFetch.mockReset();
+    mockStartFetchSSE.mockReset();
     mockEventSourceInstances.length = 0;
   });
 
-  it('creates a local runtime and registers the demo toolkit with assistant-ui tools', () => {
+  it('creates a local runtime and registers the centralized frontend toolkit with assistant-ui tools', () => {
     render(
       <AssistantUIRuntimeProvider apiUrl="/api/chat">
         <div>child</div>
@@ -103,7 +176,10 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(mockUseAui).toHaveBeenCalledTimes(1);
     expect(mockTools).toHaveBeenCalledTimes(1);
     expect(mockUseLocalRuntime.mock.calls[0]?.[1]).toMatchObject({
-      unstable_humanToolNames: expect.arrayContaining(['send_workspace_announcement']),
+      unstable_humanToolNames: expect.arrayContaining([
+        'process_fdc3_intent',
+        'report_workspace_status',
+      ]),
     });
 
     expect(mockTools.mock.calls[0]?.[0]).toMatchObject({
@@ -148,9 +224,8 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(mockTools).toHaveBeenCalled();
     expect(mockTools.mock.calls.at(-1)?.[0]).toMatchObject({
       toolkit: expect.objectContaining({
-        get_current_time: expect.any(Object),
-        generate_status_card: expect.any(Object),
-        send_workspace_announcement: expect.any(Object),
+        summarize_workspace_state: expect.any(Object),
+        process_fdc3_intent: expect.any(Object),
         custom_client_tool: expect.any(Object),
       }),
     });
@@ -158,9 +233,9 @@ describe('AssistantUIRuntimeProvider', () => {
 
   it('throws when active registrations define the same tool name', () => {
     const duplicateToolkit: AssistantRegisteredToolkit = {
-      get_current_time: {
+      summarize_workspace_state: {
         type: 'frontend',
-        description: 'Duplicate time tool',
+        description: 'Duplicate workspace summary tool',
         parameters: {
           type: 'object',
           properties: {},
@@ -182,9 +257,78 @@ describe('AssistantUIRuntimeProvider', () => {
           <RegisterDuplicate />
         </AssistantUIRuntimeProvider>,
       ),
-    ).toThrow('Duplicate assistant tool registration: get_current_time');
+    ).toThrow('Duplicate assistant tool registration: summarize_workspace_state');
 
     consoleSpy.mockRestore();
+  });
+
+  it('does not put streaming inputs into the SSE query string', async () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const abortController = new AbortController();
+    const run = getCapturedChatModelAdapter().run({
+      messages: [createUserThreadMessage('Hello from the user')],
+      abortSignal: abortController.signal,
+    });
+    void run.next();
+    await Promise.resolve();
+
+    expect(mockStartFetchSSE).toHaveBeenCalledTimes(1);
+    expect(mockEventSourceInstances).toHaveLength(1);
+
+    const streamUrl = parseEventSourceUrl(mockEventSourceInstances[0].url);
+    const requestBody = parseStreamRequestBody(mockEventSourceInstances[0]);
+
+    expect(streamUrl.pathname).toBe('/api/chat/stream');
+    expect(streamUrl.searchParams.has('message')).toBe(false);
+    expect(streamUrl.searchParams.has('toolContext')).toBe(false);
+    expect(streamUrl.searchParams.has('frontendTools')).toBe(false);
+    expect(requestBody).toMatchObject({
+      message: 'Hello from the user',
+    });
+
+    abortController.abort();
+  });
+
+  it('starts a fresh thread without reusing the previous backend conversation id', async () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const firstAbortController = new AbortController();
+    const firstRun = getCapturedChatModelAdapter().run({
+      messages: [createUserThreadMessage('Thread A')],
+      abortSignal: firstAbortController.signal,
+      unstable_threadId: 'thread-a',
+    });
+    void firstRun.next();
+    await Promise.resolve();
+    expect(mockEventSourceInstances).toHaveLength(1);
+
+    mockEventSourceInstances[0].emit('conversation_id', 'conversation-a');
+    mockEventSourceInstances[0].emit('done');
+
+    const secondAbortController = new AbortController();
+    const secondRun = getCapturedChatModelAdapter().run({
+      messages: [createUserThreadMessage('Thread B')],
+      abortSignal: secondAbortController.signal,
+      unstable_threadId: 'thread-b',
+    });
+    void secondRun.next();
+    await Promise.resolve();
+    expect(mockEventSourceInstances).toHaveLength(2);
+
+    const secondRequestBody = parseStreamRequestBody(mockEventSourceInstances[1]);
+
+    expect(secondRequestBody.conversationId).toBeUndefined();
+
+    secondAbortController.abort();
   });
 
   it('exposes the local runtime value through context', () => {
@@ -202,7 +346,7 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(screen.getByTestId('runtime-probe')).toHaveTextContent('"apiUrl":"/api/chat"');
     expect(screen.getByTestId('runtime-probe')).toHaveTextContent('"hasToolkit":true');
     expect(screen.getByTestId('runtime-probe')).toHaveTextContent('"toolNames"');
-    expect(screen.getByTestId('runtime-probe')).toHaveTextContent('"get_current_time"');
+    expect(screen.getByTestId('runtime-probe')).toHaveTextContent('"summarize_workspace_state"');
   });
 
   it('exposes tool metadata for registered tools through context', () => {
@@ -355,6 +499,152 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(screen.getByTestId('tool-route-hook')).toHaveTextContent('null');
   });
 
+  it('routes the declaration-backed FDC3 intent tool locally before hitting the backend', async () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
+      run: (input: {
+        messages: Array<{
+          id: string;
+          role: 'user';
+          content: Array<{ type: 'text'; text: string }>;
+        }>;
+        abortSignal?: AbortSignal;
+      }) => AsyncGenerator<{
+        content?: Array<{
+          type: string;
+          toolName?: string;
+          executionTarget?: string;
+        }>;
+        status?: {
+          type: string;
+          reason?: string;
+        };
+      }>;
+    };
+
+    const stream = adapter.run({
+      messages: [
+        {
+          id: 'msg-fdc3',
+          role: 'user',
+          content: [{ type: 'text', text: 'I want to view chart' }],
+        },
+      ],
+      abortSignal: new AbortController().signal,
+    });
+
+    const firstYield = await stream.next();
+
+    expect(firstYield.value).toMatchObject({
+      content: [
+        {
+          type: 'tool-call',
+          toolName: 'process_fdc3_intent',
+        },
+      ],
+      status: {
+        type: 'requires-action',
+        reason: 'tool-calls',
+      },
+    });
+    expect(mockEventSourceInstances.length).toBe(0);
+  });
+
+  it('routes the workspace status tool locally before hitting the backend', async () => {
+    render(
+      <AssistantUIRuntimeProvider
+        apiUrl="/api/chat"
+        toolRegistryConfig={{
+          getWorkspaceSnapshot: () => ({
+            activeWorkspaceId: 'workspace-1',
+            activeWorkspaceLabel: 'Workspace 1',
+            activeTileTitle: 'Tile A',
+            totalWorkspaces: 1,
+            totalTiles: 1,
+            workspaces: [
+              {
+                id: 'workspace-1',
+                label: 'Workspace 1',
+                tileCount: 1,
+                isActive: true,
+              },
+            ],
+          }),
+          closeAllTiles: async () => ({
+            activeWorkspaceId: 'workspace-1',
+            activeWorkspaceLabel: 'Workspace 1',
+            activeTileTitle: null,
+            totalWorkspaces: 1,
+            totalTiles: 0,
+            workspaces: [
+              {
+                id: 'workspace-1',
+                label: 'Workspace 1',
+                tileCount: 0,
+                isActive: true,
+              },
+            ],
+            actionMessage: 'Closed all tiles across 1 workspace.',
+          }),
+        }}
+      >
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
+      run: (input: {
+        messages: Array<{
+          id: string;
+          role: 'user';
+          content: Array<{ type: 'text'; text: string }>;
+        }>;
+        abortSignal?: AbortSignal;
+      }) => AsyncGenerator<{
+        content?: Array<{
+          type: string;
+          toolName?: string;
+        }>;
+        status?: {
+          type: string;
+          reason?: string;
+        };
+      }>;
+    };
+
+    const stream = adapter.run({
+      messages: [
+        {
+          id: 'msg-workspace-status',
+          role: 'user',
+          content: [{ type: 'text', text: 'workspace status' }],
+        },
+      ],
+      abortSignal: new AbortController().signal,
+    });
+
+    const firstYield = await stream.next();
+
+    expect(firstYield.value).toMatchObject({
+      content: [
+        {
+          type: 'tool-call',
+          toolName: 'report_workspace_status',
+        },
+      ],
+      status: {
+        type: 'requires-action',
+        reason: 'tool-calls',
+      },
+    });
+    expect(mockEventSourceInstances.length).toBe(0);
+  });
+
   it('sends the current frontend tool manifest to the backend instead of executing prompt-matched tools locally', async () => {
     const routedExecute = jest.fn(async () => ({ routed: true }));
     const customToolkit: AssistantRegisteredToolkit = {
@@ -421,16 +711,16 @@ describe('AssistantUIRuntimeProvider', () => {
 
     expect(routedExecute).not.toHaveBeenCalled();
     expect(mockEventSourceInstances.length).toBe(1);
-    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
-    expect(continuationUrl.searchParams.get('message')).toBe('please run custom tool now');
-    expect(continuationUrl.searchParams.get('toolContext')).toBeNull();
-    expect(continuationUrl.searchParams.get('frontendTools')).toEqual(
+    const initialRequestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(initialRequestBody.message).toBe('please run custom tool now');
+    expect(initialRequestBody.toolContext).toBeUndefined();
+    expect(initialRequestBody.frontendTools).toEqual(
       expect.stringContaining('"name":"custom_client_tool"'),
     );
-    expect(continuationUrl.searchParams.get('frontendTools')).toEqual(
-      expect.stringContaining('"name":"send_workspace_announcement"'),
+    expect(initialRequestBody.frontendTools).toEqual(
+      expect.stringContaining('"name":"process_fdc3_intent"'),
     );
-    expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockStartFetchSSE).toHaveBeenCalled();
 
     mockEventSourceInstances[0]?.emit('message', 'Backend response');
     mockEventSourceInstances[0]?.emit('done');
@@ -571,14 +861,14 @@ describe('AssistantUIRuntimeProvider', () => {
     );
 
     expect(mockEventSourceInstances.length).toBe(2);
-    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[1]?.url ?? '');
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+    const continuationRequestBody = parseStreamRequestBody(mockEventSourceInstances[1]!);
+    expect(continuationRequestBody.toolContext).toEqual(
       expect.stringContaining('"toolName":"custom_client_tool"'),
     );
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+    expect(continuationRequestBody.toolContext).toEqual(
       expect.stringContaining('"routed":true'),
     );
-    expect(continuationUrl.searchParams.get('frontendTools')).toBeNull();
+    expect(continuationRequestBody.frontendTools).toBeUndefined();
 
     await act(async () => {
       mockEventSourceInstances[1]?.emit('message', 'The frontend tool completed.');
@@ -637,7 +927,7 @@ describe('AssistantUIRuntimeProvider', () => {
           {
             id: 'msg-hitl',
             role: 'user',
-            content: [{ type: 'text', text: 'please send a workspace announcement' }],
+            content: [{ type: 'text', text: 'please process an fdc3 intent' }],
           },
         ],
         abortSignal: new AbortController().signal,
@@ -648,11 +938,11 @@ describe('AssistantUIRuntimeProvider', () => {
     });
 
     expect(mockEventSourceInstances).toHaveLength(1);
-    const url = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
-    expect(url.searchParams.get('frontendTools')).toEqual(
-      expect.stringContaining('"name":"send_workspace_announcement"'),
+    const requestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(requestBody.frontendTools).toEqual(
+      expect.stringContaining('"name":"process_fdc3_intent"'),
     );
-    expect(url.searchParams.get('frontendTools')).toEqual(
+    expect(requestBody.frontendTools).toEqual(
       expect.stringContaining('"humanInTheLoop":true'),
     );
 
@@ -753,11 +1043,11 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(lowerPriorityExecute).not.toHaveBeenCalled();
     expect(higherPriorityExecute).not.toHaveBeenCalled();
     expect(mockEventSourceInstances.length).toBe(1);
-    const url = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
-    expect(url.searchParams.get('frontendTools')).toEqual(
+    const requestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(requestBody.frontendTools).toEqual(
       expect.stringContaining('"name":"lower_priority_tool"'),
     );
-    expect(url.searchParams.get('frontendTools')).toEqual(
+    expect(requestBody.frontendTools).toEqual(
       expect.stringContaining('"name":"higher_priority_tool"'),
     );
 
@@ -870,11 +1160,11 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(lowerConfidenceExecute).not.toHaveBeenCalled();
     expect(higherConfidenceExecute).not.toHaveBeenCalled();
     expect(mockEventSourceInstances.length).toBe(1);
-    const url = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
-    expect(url.searchParams.get('frontendTools')).toEqual(
+    const requestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(requestBody.frontendTools).toEqual(
       expect.stringContaining('"name":"lower_confidence_tool"'),
     );
-    expect(url.searchParams.get('frontendTools')).toEqual(
+    expect(requestBody.frontendTools).toEqual(
       expect.stringContaining('"name":"higher_confidence_tool"'),
     );
 
@@ -938,17 +1228,17 @@ describe('AssistantUIRuntimeProvider', () => {
     });
 
     expect(typeof stream[Symbol.asyncIterator]).toBe('function');
-    expect(mockFetch).not.toHaveBeenCalled();
-
     const firstYieldPromise = stream.next();
     const secondYieldPromise = stream.next();
     const thirdYieldPromise = stream.next();
+    const fourthYieldPromise = stream.next();
     const doneYieldPromise = stream.next();
 
     expect(mockEventSourceInstances).toHaveLength(1);
-    expect(mockEventSourceInstances[0]?.url).toContain(
-      '/api/chat/stream?message=plain+backend+prompt',
-    );
+    expect(mockEventSourceInstances[0]?.url).toContain('/api/chat/stream');
+    expect(parseStreamRequestBody(mockEventSourceInstances[0]!)).toMatchObject({
+      message: 'plain backend prompt',
+    });
 
     act(() => {
       mockEventSourceInstances[0]?.emit('conversation_id', 'conversation-1');
@@ -977,6 +1267,7 @@ describe('AssistantUIRuntimeProvider', () => {
           props: { title: 'Revenue' },
         }),
       );
+      mockEventSourceInstances[0]?.emit('message', ' with details');
       mockEventSourceInstances[0]?.emit('done');
     });
 
@@ -1005,7 +1296,13 @@ describe('AssistantUIRuntimeProvider', () => {
               props: { title: 'Revenue' },
             },
           },
+          { type: 'text', text: ' with details' },
         ],
+      },
+      done: false,
+    });
+    await expect(fourthYieldPromise).resolves.toMatchObject({
+      value: {
         status: {
           type: 'complete',
           reason: 'stop',
@@ -1090,6 +1387,77 @@ describe('AssistantUIRuntimeProvider', () => {
     });
   });
 
+  it('treats a connection close after streamed assistant text as a completed turn', async () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
+      run: (input: {
+        messages: Array<{
+          id: string;
+          role: 'user';
+          content: Array<{ type: 'text'; text: string }>;
+        }>;
+        abortSignal?: AbortSignal;
+      }) => AsyncGenerator<{
+        content?: Array<{
+          type: string;
+          text?: string;
+        }>;
+        status?: {
+          type: string;
+          reason?: string;
+        };
+      }>;
+    };
+
+    const stream = adapter.run({
+      messages: [
+        {
+          id: 'msg-stream-close-after-text',
+          role: 'user',
+          content: [{ type: 'text', text: 'hi' }],
+        },
+      ],
+      abortSignal: new AbortController().signal,
+    });
+
+    const firstYieldPromise = stream.next();
+    const secondYieldPromise = stream.next();
+    const doneYieldPromise = stream.next();
+
+    expect(mockEventSourceInstances).toHaveLength(1);
+
+    act(() => {
+      mockEventSourceInstances[0]?.emit('message', 'Hello there');
+      mockEventSourceInstances[0]?.failConnection();
+    });
+
+    await expect(firstYieldPromise).resolves.toMatchObject({
+      value: {
+        content: [{ type: 'text', text: 'Hello there' }],
+      },
+      done: false,
+    });
+    await expect(secondYieldPromise).resolves.toMatchObject({
+      value: {
+        content: [{ type: 'text', text: 'Hello there' }],
+        status: {
+          type: 'complete',
+          reason: 'stop',
+        },
+      },
+      done: false,
+    });
+    await expect(doneYieldPromise).resolves.toMatchObject({
+      value: undefined,
+      done: true,
+    });
+  });
+
   it('completes the local tool roundtrip by continuing to backend for AI analysis (ReAct)', async () => {
     render(
       <AssistantUIRuntimeProvider apiUrl="/api/chat">
@@ -1109,6 +1477,7 @@ describe('AssistantUIRuntimeProvider', () => {
                 toolCallId: string;
                 toolName: string;
                 args: Record<string, unknown>;
+                executionTarget?: 'frontend' | 'backend';
               }
             | {
                 type: 'tool-result';
@@ -1147,6 +1516,7 @@ describe('AssistantUIRuntimeProvider', () => {
               toolCallId: 'tool-call-1',
               toolName: 'summarize_workspace_state',
               args: { scope: 'active' },
+              executionTarget: 'frontend',
             },
           ],
         },
@@ -1170,15 +1540,15 @@ describe('AssistantUIRuntimeProvider', () => {
 
     // Backend should be called with tool context
     expect(mockEventSourceInstances.length).toBe(1);
-    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
-    expect(continuationUrl.searchParams.get('message')).toBe('summarize my workspace');
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+    const continuationRequestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(continuationRequestBody.message).toBe('summarize my workspace');
+    expect(continuationRequestBody.toolContext).toEqual(
       expect.stringContaining('"toolCallId":"tool-call-1"'),
     );
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+    expect(continuationRequestBody.toolContext).toEqual(
       expect.stringContaining('"originalUserMessage":"summarize my workspace"'),
     );
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
+    expect(continuationRequestBody.toolContext).toEqual(
       expect.stringContaining('"toolName":"summarize_workspace_state"'),
     );
 
@@ -1227,6 +1597,7 @@ describe('AssistantUIRuntimeProvider', () => {
                 toolCallId: string;
                 toolName: string;
                 args: Record<string, unknown>;
+                executionTarget?: 'frontend' | 'backend';
                 result?: unknown;
               }
           >;
@@ -1240,6 +1611,7 @@ describe('AssistantUIRuntimeProvider', () => {
             toolCallId: string;
             toolName: string;
             args: Record<string, unknown>;
+            executionTarget?: 'frontend' | 'backend';
             result?: unknown;
           }>;
         };
@@ -1262,7 +1634,7 @@ describe('AssistantUIRuntimeProvider', () => {
         {
           id: 'user-msg-hitl',
           role: 'user',
-          content: [{ type: 'text', text: 'please send a workspace announcement' }],
+          content: [{ type: 'text', text: 'please process an fdc3 intent' }],
         },
       ],
       abortSignal: new AbortController().signal,
@@ -1273,15 +1645,27 @@ describe('AssistantUIRuntimeProvider', () => {
           {
             type: 'tool-call',
             toolCallId: 'tool-hitl-1',
-            toolName: 'send_workspace_announcement',
+            toolName: 'process_fdc3_intent',
             args: {
-              title: 'Workspace Update Ready',
-              audience: 'Operations Desk',
-              summary: 'The active workspace was updated and is ready to be shared with the desk.',
+              matchedIntent: 'ViewChart',
+              targetAppId: 'test.chart',
+              targetContexts: ['fdc3.instrument'],
+              payload: {
+                type: 'fdc3.instrument',
+                id: { ticker: 'AAPL' },
+              },
+              canProcess: true,
+              sourcePrompt: 'please process an fdc3 intent',
             },
+            executionTarget: 'frontend',
             result: {
-              approved: true,
-              audience: 'Operations Desk',
+              outcome: 'success',
+              matchedIntent: 'ViewChart',
+              targetAppId: 'test.chart',
+              payload: {
+                type: 'fdc3.instrument',
+                id: { ticker: 'AAPL' },
+              },
             },
           },
         ],
@@ -1291,15 +1675,13 @@ describe('AssistantUIRuntimeProvider', () => {
     const firstYieldPromise = stream.next();
 
     expect(mockEventSourceInstances.length).toBe(1);
-    const continuationUrl = parseEventSourceUrl(mockEventSourceInstances[0]?.url ?? '');
-    expect(continuationUrl.searchParams.get('message')).toBe(
-      'please send a workspace announcement',
+    const continuationRequestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(continuationRequestBody.message).toBe('please process an fdc3 intent');
+    expect(continuationRequestBody.toolContext).toEqual(
+      expect.stringContaining('"toolName":"process_fdc3_intent"'),
     );
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
-      expect.stringContaining('"toolName":"send_workspace_announcement"'),
-    );
-    expect(continuationUrl.searchParams.get('toolContext')).toEqual(
-      expect.stringContaining('"approved":true'),
+    expect(continuationRequestBody.toolContext).toEqual(
+      expect.stringContaining('"matchedIntent":"ViewChart"'),
     );
 
     mockEventSourceInstances[0]?.emit('message', 'The announcement was approved.');
@@ -1308,6 +1690,108 @@ describe('AssistantUIRuntimeProvider', () => {
     await expect(firstYieldPromise).resolves.toMatchObject({
       value: {
         content: [{ type: 'text', text: 'The announcement was approved.' }],
+      },
+      done: false,
+    });
+  });
+
+  it('does not trigger continuation for completed backend tool-call parts', async () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
+      run: (input: {
+        messages: Array<{
+          id: string;
+          role: 'user' | 'assistant';
+          content: Array<
+            | { type: 'text'; text: string }
+            | {
+                type: 'tool-call';
+                toolCallId: string;
+                toolName: string;
+                args: Record<string, unknown>;
+                executionTarget?: 'frontend' | 'backend';
+                result?: unknown;
+              }
+          >;
+        }>;
+        abortSignal?: AbortSignal;
+        unstable_getMessage?: () => {
+          id: string;
+          role: 'assistant';
+          content: Array<{
+            type: 'tool-call';
+            toolCallId: string;
+            toolName: string;
+            args: Record<string, unknown>;
+            executionTarget?: 'frontend' | 'backend';
+            result?: unknown;
+          }>;
+        };
+      }) => Promise<
+        | {
+            content?: Array<{ type: string; text?: string }>;
+            status?: {
+              type: string;
+              reason?: string;
+            };
+          }
+        | AsyncGenerator<{
+            content?: Array<{ type: string; text?: string }>;
+            status?: {
+              type: string;
+              reason?: string;
+            };
+          }>
+      >;
+    };
+
+    const stream = await adapter.run({
+      messages: [
+        {
+          id: 'user-msg-weather',
+          role: 'user',
+          content: [{ type: 'text', text: 'weather in shanghai' }],
+        },
+      ],
+      abortSignal: new AbortController().signal,
+      unstable_getMessage: () => ({
+        id: 'assistant-msg-weather',
+        role: 'assistant',
+        content: [
+          {
+            type: 'tool-call',
+            toolCallId: 'tool-weather-1',
+            toolName: 'get_weather',
+            args: { location: 'Shanghai' },
+            executionTarget: 'backend',
+            result: { location: 'Shanghai', temperature: 22 },
+          },
+        ],
+      }),
+    });
+
+    expect(mockEventSourceInstances).toHaveLength(0);
+
+    const nextPromise = stream.next();
+
+    expect(mockEventSourceInstances).toHaveLength(1);
+    const continuationRequestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+    expect(continuationRequestBody.message).toBe('weather in shanghai');
+    expect(continuationRequestBody.toolContext).toBeUndefined();
+
+    act(() => {
+      mockEventSourceInstances[0]?.emit('message', 'Fresh backend response.');
+      mockEventSourceInstances[0]?.emit('done');
+    });
+
+    await expect(nextPromise).resolves.toMatchObject({
+      value: {
+        content: [{ type: 'text', text: 'Fresh backend response.' }],
       },
       done: false,
     });
@@ -1340,6 +1824,7 @@ describe('AssistantUIRuntimeProvider', () => {
         },
       ],
       abortSignal: new AbortController().signal,
+      unstable_threadId: 'persistent-thread',
     });
 
     const firstYieldPromise = firstStream.next();
@@ -1363,10 +1848,14 @@ describe('AssistantUIRuntimeProvider', () => {
         },
       ],
       abortSignal: new AbortController().signal,
+      unstable_threadId: 'persistent-thread',
     });
 
     const secondDonePromise = secondStream.next();
-    expect(mockEventSourceInstances[1]?.url).toContain('conversationId=conversation-keep');
+    expect(parseStreamRequestBody(mockEventSourceInstances[1]!)).toMatchObject({
+      message: 'second turn',
+      conversationId: 'conversation-keep',
+    });
 
     act(() => {
       mockEventSourceInstances[1]?.emit('done');

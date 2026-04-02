@@ -205,6 +205,24 @@ describe('SSE Adapter Type Safety', () => {
     });
   });
 
+  describe('buildSSEUrl', () => {
+    it('keeps streaming payloads out of the query string', () => {
+      const url = buildSSEUrl(
+        '/api/chat',
+        'Hello world',
+        'conversation-123',
+        JSON.stringify({ tool: 'calculator' }),
+        JSON.stringify([{ name: 'custom_client_tool' }]),
+      );
+      const parsed = new URL(url, 'http://localhost');
+
+      expect(parsed.pathname).toBe('/api/chat/stream');
+      expect(parsed.searchParams.has('message')).toBe(false);
+      expect(parsed.searchParams.has('toolContext')).toBe(false);
+      expect(parsed.searchParams.has('frontendTools')).toBe(false);
+    });
+  });
+
   describe('createUserMessage', () => {
     it('should create valid AssistantUIMessage with user role', () => {
       const message = createUserMessage('Hello world');
@@ -249,6 +267,14 @@ describe('SSE Adapter Type Safety', () => {
       expect(result).toEqual({
         type: 'message',
         payload: 'Hello',
+      });
+    });
+
+    it('should parse JSON-wrapped message chunks without losing leading spaces', () => {
+      const result = parseSSEEvent('message', '{"text":" check"}');
+      expect(result).toEqual({
+        type: 'message',
+        payload: ' check',
       });
     });
 
@@ -465,22 +491,22 @@ describe('SSE Adapter Type Safety', () => {
   });
 
   describe('buildSSEUrl', () => {
-    it('should build URL with message only', () => {
+    it('should build the canonical stream endpoint URL', () => {
       const url = buildSSEUrl('http://api.example.com', 'Hello');
-      expect(url).toBe('http://api.example.com/stream?message=Hello');
+      expect(url).toBe('http://api.example.com/stream');
     });
 
-    it('should include conversationId when provided', () => {
+    it('should ignore conversation state in the URL', () => {
       const url = buildSSEUrl('http://api.example.com', 'Hello', 'conv-123');
-      expect(url).toBe('http://api.example.com/stream?message=Hello&conversationId=conv-123');
+      expect(url).toBe('http://api.example.com/stream');
     });
 
-    it('should trim message whitespace', () => {
+    it('should ignore message payloads in the URL', () => {
       const url = buildSSEUrl('http://api.example.com', '  Hello World  ');
-      expect(url).toBe('http://api.example.com/stream?message=Hello+World');
+      expect(url).toBe('http://api.example.com/stream');
     });
 
-    it('should include serialized frontend tool manifest when provided', () => {
+    it('should keep tool manifest payloads out of the URL', () => {
       const url = buildSSEUrl(
         'http://api.example.com',
         'Hello',
@@ -496,10 +522,8 @@ describe('SSE Adapter Type Safety', () => {
       );
 
       const parsed = new URL(url);
-      expect(parsed.searchParams.get('conversationId')).toBe('conv-123');
-      expect(parsed.searchParams.get('frontendTools')).toBe(
-        '[{"name":"send_workspace_announcement","description":"Prepare a workspace announcement","humanInTheLoop":true}]',
-      );
+      expect(parsed.pathname).toBe('/stream');
+      expect(parsed.searchParams.toString()).toBe('');
     });
   });
 

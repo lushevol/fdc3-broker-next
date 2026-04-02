@@ -1,5 +1,9 @@
 [
   {
+    "name": "ViewChart",
+    "description": "View Chart"
+  },
+  {
     "name": "SearchCashflows",
     "description": "Search Cashflows"
   },

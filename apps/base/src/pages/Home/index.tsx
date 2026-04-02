@@ -19,9 +19,8 @@ import useParameters from './common/useParameters';
 import {
   AssistantUIRuntimeProvider,
   ChatbotSidebar,
-  ToolRegistryDebugPanel,
-  WorkspaceSummaryToolRegistrationExample,
 } from '../../components/ChatbotSidebar/exports';
+import { useFDC3WorkspaceHelper } from '../../fdc3/useFDC3WorkspaceHelper';
 
 export const ContainerComponent = (validation: boolean, item, i) =>
   validation ? (
@@ -51,21 +50,77 @@ const Home: React.FC = (): ReactElement => {
     setShowTimeout,
     mouseMove,
     validateWorkspaceReady,
+    closeAllTiles,
   } = useController();
   const { openTile } = useParameters();
   const { channelMessage, clearMessage } = useOpenfin(openTile);
+  const { workspaceOpenTile } = useFDC3WorkspaceHelper();
   const length = store?.workspaces?.length ?? 0;
+  const toolRegistryConfig = React.useMemo(
+    () => ({
+      workspaceLabel: store?.currentWorkspace?.label ?? 'Current workspace',
+      tileCount: store?.currentWorkspace?.containers?.length ?? 0,
+      getWorkspaceSnapshot: () => ({
+        activeWorkspaceId: store?.currentWorkspace?.id ?? null,
+        activeWorkspaceLabel: store?.currentWorkspace?.label ?? null,
+        activeTileTitle: store?.currentWorkspace?.containers?.[0]?.title ?? null,
+        totalWorkspaces: store?.workspaces?.length ?? 0,
+        totalTiles:
+          store?.workspaces?.reduce(
+            (count, workspace) => count + (workspace.containers?.length ?? 0),
+            0,
+          ) ?? 0,
+        workspaces:
+          store?.workspaces?.map((workspace) => ({
+            id: workspace.id,
+            label: workspace.label,
+            tileCount: workspace.containers?.length ?? 0,
+            isActive: workspace.id === store?.currentWorkspace?.id,
+          })) ?? [],
+      }),
+      closeAllTiles: async () => {
+        const workspaces = closeAllTiles();
+        return {
+          activeWorkspaceId: workspaces[0]?.id ?? null,
+          activeWorkspaceLabel: workspaces[0]?.label ?? null,
+          activeTileTitle: null,
+          totalWorkspaces: workspaces.length,
+          totalTiles: 0,
+          workspaces: workspaces.map((workspace) => ({
+            id: workspace.id,
+            label: workspace.label,
+            tileCount: 0,
+            isActive: workspace.id === workspaces[0]?.id,
+          })),
+          actionMessage: `Closed all tiles across ${workspaces.length} ${
+            workspaces.length === 1 ? 'workspace' : 'workspaces'
+          }.`,
+        };
+      },
+      openTile: async ({ tile }: { tile: string }) => {
+        const openStatus = await workspaceOpenTile({ tile });
+        return {
+          ...openStatus,
+          workspaceId: openStatus.workspaceId ?? '',
+        };
+      },
+    }),
+    [
+      closeAllTiles,
+      store?.currentWorkspace?.containers,
+      store?.currentWorkspace?.id,
+      store?.currentWorkspace?.label,
+      store?.workspaces,
+      workspaceOpenTile,
+    ],
+  );
 
   if (!validateWorkspaceReady || !ready) {
     return <></>;
   }
 
   return (
-    <AssistantUIRuntimeProvider apiUrl="/api/chat">
-      <WorkspaceSummaryToolRegistrationExample
-        workspaceLabel={store?.currentWorkspace?.label ?? 'Current workspace'}
-        tileCount={store?.currentWorkspace?.containers?.length ?? 0}
-      />
+    <AssistantUIRuntimeProvider apiUrl="/api/chat" toolRegistryConfig={toolRegistryConfig}>
       <Root data-testid={PREFIX} onMouseMove={mouseMove}>
         <header>
           <AppBar />
@@ -140,7 +195,6 @@ const Home: React.FC = (): ReactElement => {
         {showTimeout && <Timeout setOpen={setShowTimeout} />}
         {channelMessage && <Snackbar message={channelMessage} open={true} onClose={clearMessage} />}
         <ChatbotSidebar />
-        <ToolRegistryDebugPanel />
       </Root>
     </AssistantUIRuntimeProvider>
   );
