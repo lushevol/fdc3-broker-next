@@ -13,6 +13,7 @@
 ### Task 1: Add Workspace Status Tool
 
 **Files:**
+
 - Create: `apps/base/src/components/ChatbotSidebar/tools/workspaceStatusTool.tsx`
 - Modify: `apps/base/src/components/ChatbotSidebar/tools/createFrontendToolRegistry.ts`
 - Test: `apps/base/src/components/ChatbotSidebar/__tests__/workspaceStatusTool.test.tsx`
@@ -25,6 +26,7 @@
 ### Task 2: Wire Workspace Dependencies From Existing App State
 
 **Files:**
+
 - Modify: `apps/base/src/components/ChatbotSidebar/tools/createFrontendToolRegistry.ts`
 - Modify: `apps/base/src/pages/Home/index.tsx`
 - Modify: `apps/base/src/pages/Home/common/useController.ts`
@@ -38,6 +40,7 @@
 ### Task 3: Verify Main Flow
 
 **Files:**
+
 - Modify: tests only if needed for supported behavior changes
 
 - [ ] **Step 1: Run focused chatbot frontend tests**

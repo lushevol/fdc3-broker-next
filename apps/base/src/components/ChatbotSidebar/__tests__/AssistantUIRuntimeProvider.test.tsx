@@ -865,9 +865,7 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(continuationRequestBody.toolContext).toEqual(
       expect.stringContaining('"toolName":"custom_client_tool"'),
     );
-    expect(continuationRequestBody.toolContext).toEqual(
-      expect.stringContaining('"routed":true'),
-    );
+    expect(continuationRequestBody.toolContext).toEqual(expect.stringContaining('"routed":true'));
     expect(continuationRequestBody.frontendTools).toBeUndefined();
 
     await act(async () => {
@@ -942,9 +940,7 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(requestBody.frontendTools).toEqual(
       expect.stringContaining('"name":"process_fdc3_intent"'),
     );
-    expect(requestBody.frontendTools).toEqual(
-      expect.stringContaining('"humanInTheLoop":true'),
-    );
+    expect(requestBody.frontendTools).toEqual(expect.stringContaining('"humanInTheLoop":true'));
 
     mockEventSourceInstances[0]?.emit('message', 'Backend approval step');
     mockEventSourceInstances[0]?.emit('done');

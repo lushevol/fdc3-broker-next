@@ -17,14 +17,12 @@ describe('fetchSSE', () => {
           done: true,
         }),
     };
-    const fetchImpl = jest.fn<typeof fetch>().mockResolvedValue(
-      {
-        ok: true,
-        body: {
-          getReader: () => reader,
-        },
-      } as Response,
-    );
+    const fetchImpl = jest.fn<typeof fetch>().mockResolvedValue({
+      ok: true,
+      body: {
+        getReader: () => reader,
+      },
+    } as Response);
 
     const request = startFetchSSE({
       url: '/api/chat/stream',

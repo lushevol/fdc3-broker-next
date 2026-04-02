@@ -167,7 +167,9 @@ function ensureAssistantMessage(
   assistantMessageIndex: number;
   streamingState: StreamingState;
 } {
-  const assistantMessageIndex = messages.findIndex((message) => message.id === streamingState.assistantMessageId);
+  const assistantMessageIndex = messages.findIndex(
+    (message) => message.id === streamingState.assistantMessageId,
+  );
 
   if (assistantMessageIndex !== -1) {
     return {
@@ -476,10 +478,8 @@ export function handleSSEEvent(
         ? addContentPartToAssistantMessage(assistantMessage, toToolProgressStub(toolCall.name))
         : assistantMessage;
 
-      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] = addContentPartToAssistantMessage(
-        messageWithLeadingStub,
-        toolCallPart,
-      );
+      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] =
+        addContentPartToAssistantMessage(messageWithLeadingStub, toolCallPart);
 
       return {
         messages: ensuredMessage.messages,
@@ -498,10 +498,11 @@ export function handleSSEEvent(
       streamingState.pendingToolCalls.delete(toolResult.toolCallId);
       const ensuredMessage = ensureAssistantMessage(messages, streamingState);
 
-      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] = addContentPartToAssistantMessage(
-        ensuredMessage.messages[ensuredMessage.assistantMessageIndex],
-        toolResultPart,
-      );
+      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] =
+        addContentPartToAssistantMessage(
+          ensuredMessage.messages[ensuredMessage.assistantMessageIndex],
+          toolResultPart,
+        );
 
       return {
         messages: ensuredMessage.messages,

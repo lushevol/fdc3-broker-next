@@ -77,9 +77,11 @@ export function WorkspaceStatusToolUi({
   }, [result]);
 
   const resolvedResult = optimisticResult ?? result ?? args;
-  const typedResult = resolvedResult as (WorkspaceStatusSnapshot & {
-    __dependencies?: WorkspaceStatusToolUiDependencies;
-  }) | null;
+  const typedResult = resolvedResult as
+    | (WorkspaceStatusSnapshot & {
+        __dependencies?: WorkspaceStatusToolUiDependencies;
+      })
+    | null;
   const hasError = !!typedResult?.actionError;
 
   const handleCloseAllTiles = async () => {

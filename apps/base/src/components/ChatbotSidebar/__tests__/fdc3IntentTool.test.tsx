@@ -1,9 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import {
-  createBrowserFdc3IntentToolkit,
-  createFdc3IntentToolkit,
-} from '../tools/fdc3IntentTool';
+import { createBrowserFdc3IntentToolkit, createFdc3IntentToolkit } from '../tools/fdc3IntentTool';
 
 describe('fdc3IntentTool', () => {
   it('matches a declared ViewChart intent and builds declaration-backed payload args', () => {
@@ -159,7 +156,9 @@ describe('fdc3IntentTool', () => {
     );
 
     expect(screen.getByRole('button', { name: 'Process Intent' })).toBeDisabled();
-    expect(screen.getByText('Missing required payload identifiers in declarations.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Missing required payload identifiers in declarations.'),
+    ).toBeInTheDocument();
   });
 
   it('uses the shared broker agent when processing intent in the browser toolkit', async () => {
@@ -172,9 +171,13 @@ describe('fdc3IntentTool', () => {
     const raiseIntent = jest.fn().mockResolvedValue(undefined);
     const waitForIntentListener = jest.fn().mockResolvedValue(undefined);
 
-    const toolkit = createBrowserFdc3IntentToolkit(openTile, () => ({
-      raiseIntent,
-    }), waitForIntentListener);
+    const toolkit = createBrowserFdc3IntentToolkit(
+      openTile,
+      () => ({
+        raiseIntent,
+      }),
+      waitForIntentListener,
+    );
     const ToolUi = toolkit.process_fdc3_intent.render;
 
     render(

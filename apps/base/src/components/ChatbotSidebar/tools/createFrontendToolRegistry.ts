@@ -1,13 +1,7 @@
 import { createBackendToolUiToolkit } from './backendToolUiToolkit';
-import {
-  createBrowserFdc3IntentToolkit,
-  type Fdc3IntentToolResult,
-} from './fdc3IntentTool';
+import { createBrowserFdc3IntentToolkit, type Fdc3IntentToolResult } from './fdc3IntentTool';
 import { mergeRegisteredToolkits, type AssistantRegisteredToolkit } from './toolRouting';
-import {
-  createWorkspaceStatusToolkit,
-  type WorkspaceStatusSnapshot,
-} from './workspaceStatusTool';
+import { createWorkspaceStatusToolkit, type WorkspaceStatusSnapshot } from './workspaceStatusTool';
 import { createWorkspaceSummaryToolkit } from './workspaceSummaryTool';
 
 export interface FrontendToolRegistryConfig {
@@ -15,9 +9,7 @@ export interface FrontendToolRegistryConfig {
   tileCount?: number;
   getWorkspaceSnapshot?: () => WorkspaceStatusSnapshot;
   closeAllTiles?: () => Promise<WorkspaceStatusSnapshot> | WorkspaceStatusSnapshot;
-  openTile?: (args: {
-    tile: string;
-  }) => Promise<{
+  openTile?: (args: { tile: string }) => Promise<{
     workspaceId: string;
     opened: boolean;
     newTile: boolean;
@@ -46,9 +38,7 @@ const defaultOpenTile: NonNullable<FrontendToolRegistryConfig['openTile']> = asy
   failedReason: 'FDC3 tile opening is not configured.',
 });
 
-function createBusinessToolkits(
-  config: FrontendToolRegistryConfig,
-): AssistantRegisteredToolkit[] {
+function createBusinessToolkits(config: FrontendToolRegistryConfig): AssistantRegisteredToolkit[] {
   const toolkits: AssistantRegisteredToolkit[] = [
     createWorkspaceSummaryToolkit({
       workspaceLabel: config.workspaceLabel ?? DEFAULT_WORKSPACE_LABEL,
@@ -68,10 +58,7 @@ function createBusinessToolkits(
 export function createFrontendToolRegistry(
   config: FrontendToolRegistryConfig = {},
 ): AssistantRegisteredToolkit {
-  return mergeRegisteredToolkits([
-    createBackendToolUiToolkit(),
-    ...createBusinessToolkits(config),
-  ]);
+  return mergeRegisteredToolkits([createBackendToolUiToolkit(), ...createBusinessToolkits(config)]);
 }
 
 export function isFdc3IntentResult(value: unknown): value is Fdc3IntentToolResult {

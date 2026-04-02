@@ -66,10 +66,7 @@ interface Fdc3IntentToolkitDependencies {
     newTile: boolean;
     failedReason: string;
   }>;
-  waitForIntentListener: (args: {
-    appId: string;
-    intent: string;
-  }) => Promise<void>;
+  waitForIntentListener: (args: { appId: string; intent: string }) => Promise<void>;
   raiseIntent: (intent: string, context: Context, target: AppIdentifier) => Promise<unknown>;
 }
 
@@ -121,10 +118,8 @@ async function waitForBrowserIntentListener(args: {
   while (Date.now() - startedAt < timeoutMs) {
     const tiles = getBrowserBrokerRuntime()?.tileRegistry?.getAllTiles?.() ?? [];
     const hasMatchingListener = tiles.some(
-      (tile: {
-        appId?: string;
-        intentListeners?: Set<string>;
-      }) => tile.appId === args.appId && tile.intentListeners?.has(args.intent),
+      (tile: { appId?: string; intentListeners?: Set<string> }) =>
+        tile.appId === args.appId && tile.intentListeners?.has(args.intent),
     );
 
     if (hasMatchingListener) {
@@ -160,7 +155,10 @@ const fdc3IntentToolParameters = z.object({
 });
 
 function normalizeText(value: string): string {
-  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ');
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ');
 }
 
 function humanizeIntentName(intentName: string): string {
@@ -323,7 +321,9 @@ export function Fdc3IntentToolUi({
   addResult,
 }: ToolCallMessagePartProps<Fdc3IntentToolArgs, Fdc3IntentToolResult>): JSX.Element {
   const [pending, setPending] = useState(false);
-  const [optimisticResult, setOptimisticResult] = useState<Fdc3IntentToolResult | null>(result ?? null);
+  const [optimisticResult, setOptimisticResult] = useState<Fdc3IntentToolResult | null>(
+    result ?? null,
+  );
 
   useEffect(() => {
     setOptimisticResult(result ?? null);
@@ -448,8 +448,7 @@ export function Fdc3IntentToolUi({
               padding: '0.55rem 0.95rem',
               backgroundColor: '#1565c0',
               color: '#ffffff',
-              cursor:
-                !args.canProcess || pending || !!resolvedResult ? 'not-allowed' : 'pointer',
+              cursor: !args.canProcess || pending || !!resolvedResult ? 'not-allowed' : 'pointer',
               opacity: !args.canProcess || pending || !!resolvedResult ? 0.6 : 1,
               fontWeight: 600,
             }}
@@ -500,8 +499,7 @@ export function createFdc3IntentToolkit(
 export function createBrowserFdc3IntentToolkit(
   openTile: Fdc3IntentToolkitDependencies['openTile'],
   getFdc3Agent: () => BrowserFdc3Agent = getBrowserFdc3Agent,
-  waitForIntentListener: Fdc3IntentToolkitDependencies['waitForIntentListener'] =
-    waitForBrowserIntentListener,
+  waitForIntentListener: Fdc3IntentToolkitDependencies['waitForIntentListener'] = waitForBrowserIntentListener,
 ): AssistantRegisteredToolkit {
   return createFdc3IntentToolkit({
     openTile,

@@ -13,6 +13,7 @@
 ### Task 1: Add deploy bundle assets
 
 **Files:**
+
 - Create: `services/chatbot-backend/scripts/bundle-centos.sh`
 - Create: `services/chatbot-backend/scripts/run-centos.sh`
 - Create: `services/chatbot-backend/.env.example`
@@ -23,6 +24,7 @@
 ### Task 2: Wire workspace scripts
 
 **Files:**
+
 - Modify: `services/chatbot-backend/package.json`
 
 - [ ] Step 1: Add `build`, `bundle:centos`, and `run:bundle` scripts.
@@ -31,6 +33,7 @@
 ### Task 3: Document the workflow
 
 **Files:**
+
 - Modify: `services/chatbot-backend/README.md`
 
 - [ ] Step 1: Document how to build the archive.
@@ -39,6 +42,7 @@
 ### Task 4: Verify
 
 **Files:**
+
 - None
 
 - [ ] Step 1: Run the chatbot backend package build.

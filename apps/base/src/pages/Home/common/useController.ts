@@ -167,7 +167,13 @@ const useController = () => {
     ButtonEvent('click', { name: 'close all tiles', ...analyticsData });
 
     return workspaces;
-  }, [ButtonEvent, dispacthCurrentWorkspace, dispacthErrorMessage, dispacthWorkspaces, store?.workspaces]);
+  }, [
+    ButtonEvent,
+    dispacthCurrentWorkspace,
+    dispacthErrorMessage,
+    dispacthWorkspaces,
+    store?.workspaces,
+  ]);
 
   const focus = (id) => () => {
     const workspaces = [...(store?.workspaces as Workspace[])];

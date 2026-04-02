@@ -13,6 +13,7 @@
 ### Task 1: Lock Down The Current Contract With Tests
 
 **Files:**
+
 - Modify: `apps/base/src/components/ChatbotSidebar/__tests__/AssistantUIRuntimeProvider.test.tsx`
 - Modify: `apps/base/src/components/ChatbotSidebar/__tests__/sseAdapter.types.test.ts`
 - Modify: `services/chatbot-backend/src/test/java/com/fdc3/chatbot/controller/ChatControllerTest.java`
@@ -20,6 +21,7 @@
 - [ ] **Step 1: Write failing frontend tests for the current broken assumptions**
 
 Add tests that assert:
+
 - streaming requests should not rely on query params for `message`, `toolContext`, or `frontendTools`
 - new thread state should not reuse an old backend conversation
 - retry/reload should use active thread routing, not a stale global id
@@ -32,6 +34,7 @@ Expected: FAIL on request-building and conversation lifecycle assertions
 - [ ] **Step 3: Write failing backend tests for canonical POST streaming**
 
 Add tests that assert:
+
 - `POST /api/chat/stream` accepts JSON and returns `text/event-stream`
 - `message` SSE payload is plain text, not wrapped JSON
 
@@ -50,6 +53,7 @@ git commit -m "test: cover chatbot transport and thread lifecycle"
 ### Task 2: Add Canonical POST Streaming Endpoint On The Backend
 
 **Files:**
+
 - Modify: `services/chatbot-backend/src/main/java/com/fdc3/chatbot/controller/ChatController.java`
 - Modify: `services/chatbot-backend/src/main/java/com/fdc3/chatbot/model/ChatRequest.java`
 - Test: `services/chatbot-backend/src/test/java/com/fdc3/chatbot/controller/ChatControllerTest.java`
@@ -57,6 +61,7 @@ git commit -m "test: cover chatbot transport and thread lifecycle"
 - [ ] **Step 1: Extend the request model for streaming**
 
 Ensure `ChatRequest` can represent:
+
 - `message`
 - `conversationId`
 - `toolContext`
@@ -65,6 +70,7 @@ Ensure `ChatRequest` can represent:
 - [ ] **Step 2: Implement `POST /api/chat/stream`**
 
 Add a controller method that:
+
 - accepts `ChatRequest`
 - creates or reuses a conversation id
 - streams using the existing service callbacks
@@ -77,6 +83,7 @@ Change the stream emitter so `message` events send the token string directly.
 - [ ] **Step 4: Keep `GET /stream` temporarily or delegate it**
 
 Either:
+
 - keep it for compatibility and route it through the same internal implementation, or
 - mark it as compatibility-only while frontend migration happens
 
@@ -95,6 +102,7 @@ git commit -m "feat: add canonical chatbot post stream endpoint"
 ### Task 3: Build A Fetch-Based SSE Client For The Frontend Runtime
 
 **Files:**
+
 - Create: `apps/base/src/components/ChatbotSidebar/adapters/fetchSSE.ts`
 - Modify: `apps/base/src/components/ChatbotSidebar/adapters/sseToAssistantUi.ts`
 - Modify: `apps/base/src/components/ChatbotSidebar/AssistantUIRuntimeProvider.tsx`
@@ -103,6 +111,7 @@ git commit -m "feat: add canonical chatbot post stream endpoint"
 - [ ] **Step 1: Write the failing test for POST request transport**
 
 Add a test that asserts runtime streaming uses fetch with:
+
 - method `POST`
 - JSON body
 - no message-bearing query params
@@ -110,6 +119,7 @@ Add a test that asserts runtime streaming uses fetch with:
 - [ ] **Step 2: Implement a small fetch-based SSE frame reader**
 
 Create a focused helper that:
+
 - accepts URL, headers, body, abort signal
 - reads the response stream
 - parses `event:` and `data:` frames
@@ -138,12 +148,14 @@ git commit -m "feat: migrate chatbot stream transport to fetch sse"
 ### Task 4: Introduce Thread-Aware Backend Conversation Mapping
 
 **Files:**
+
 - Modify: `apps/base/src/components/ChatbotSidebar/AssistantUIRuntimeProvider.tsx`
 - Test: `apps/base/src/components/ChatbotSidebar/__tests__/AssistantUIRuntimeProvider.test.tsx`
 
 - [ ] **Step 1: Write failing tests for thread reset and retry behavior**
 
 Add tests that assert:
+
 - a fresh thread does not reuse a previous backend conversation id
 - retry/reload uses the current thread’s mapped conversation
 - continuation requests still target the correct conversation
@@ -175,6 +187,7 @@ git commit -m "fix: align chatbot backend conversations with assistant-ui thread
 ### Task 5: Move Tool Continuation And Manifest Payloads Into The Request Body
 
 **Files:**
+
 - Modify: `apps/base/src/components/ChatbotSidebar/AssistantUIRuntimeProvider.tsx`
 - Modify: `apps/base/src/components/ChatbotSidebar/adapters/sseToAssistantUi.ts`
 - Modify: `services/chatbot-backend/src/main/java/com/fdc3/chatbot/controller/ChatController.java`
@@ -184,6 +197,7 @@ git commit -m "fix: align chatbot backend conversations with assistant-ui thread
 - [ ] **Step 1: Write failing continuation tests**
 
 Assert that:
+
 - `toolContext` is serialized into JSON body
 - `frontendTools` is serialized into JSON body
 - continuation no longer depends on URL search params
@@ -191,6 +205,7 @@ Assert that:
 - [ ] **Step 2: Update frontend request builder**
 
 Construct a JSON request body with:
+
 - `message`
 - `conversationId`
 - `toolContext`
@@ -218,6 +233,7 @@ git commit -m "fix: send chatbot continuation payloads in request body"
 ### Task 6: Update Docs And Run Final Verification
 
 **Files:**
+
 - Modify: `services/chatbot-backend/docs/API.md`
 - Modify: `openspec/specs/assistant-ui-integration/spec.md`
 - Modify: `openspec/specs/chatbot-backend/spec.md`
@@ -225,6 +241,7 @@ git commit -m "fix: send chatbot continuation payloads in request body"
 - [ ] **Step 1: Update API docs**
 
 Document:
+
 - canonical `POST /api/chat/stream`
 - request body schema
 - plain-text `message` chunks
@@ -233,6 +250,7 @@ Document:
 - [ ] **Step 2: Update OpenSpec docs**
 
 Reflect:
+
 - POST stream transport
 - auth-capable streaming
 - thread-aware conversation lifecycle
@@ -255,12 +273,14 @@ Expected: PASS with zero warnings
 - [ ] **Step 6: Perform manual verification**
 
 Run:
+
 ```bash
 npm run stop
 npm run dev
 ```
 
 Then verify:
+
 - open `http://localhost:8001`
 - login if needed
 - open the assistant UI

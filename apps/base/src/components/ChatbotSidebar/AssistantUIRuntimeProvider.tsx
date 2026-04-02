@@ -535,230 +535,230 @@ function createChatModelAdapter(
           },
           signal: abortSignal,
           handlers: {
-          onEvent(eventType, data) {
-            const next = handleSSEEvent(streamingMessages, streamingState, eventType, data);
-            streamingMessages = next.messages;
-            streamingState = next.streamingState;
-            setConversationIdForThread(streamingState.conversationId);
+            onEvent(eventType, data) {
+              const next = handleSSEEvent(streamingMessages, streamingState, eventType, data);
+              streamingMessages = next.messages;
+              streamingState = next.streamingState;
+              setConversationIdForThread(streamingState.conversationId);
 
-            if (next.error) {
-              streamError = new Error(next.error);
-              isStreamClosedIntentionally = true;
-              streamRequest?.close();
-              streamQueue.close();
-              return;
-            }
-
-            if (eventType === 'tool_call') {
-              const parsedToolCall = parseSSEEvent(eventType, data);
-              if (
-                parsedToolCall?.type === 'tool_call' &&
-                typeof parsedToolCall.payload === 'object' &&
-                parsedToolCall.payload !== null &&
-                (parsedToolCall.payload as StreamingToolCall).executionTarget === 'frontend' &&
-                !toolkit[(parsedToolCall.payload as StreamingToolCall).name]?.renderOnly
-              ) {
-                pendingFrontendToolCall = parsedToolCall.payload as StreamingToolCall;
+              if (next.error) {
+                streamError = new Error(next.error);
+                isStreamClosedIntentionally = true;
+                streamRequest?.close();
+                streamQueue.close();
+                return;
               }
-            }
 
-            if (eventType === 'conversation_id') {
-              return;
-            }
+              if (eventType === 'tool_call') {
+                const parsedToolCall = parseSSEEvent(eventType, data);
+                if (
+                  parsedToolCall?.type === 'tool_call' &&
+                  typeof parsedToolCall.payload === 'object' &&
+                  parsedToolCall.payload !== null &&
+                  (parsedToolCall.payload as StreamingToolCall).executionTarget === 'frontend' &&
+                  !toolkit[(parsedToolCall.payload as StreamingToolCall).name]?.renderOnly
+                ) {
+                  pendingFrontendToolCall = parsedToolCall.payload as StreamingToolCall;
+                }
+              }
 
-            if (eventType === 'message') {
-              const latestContent = getLatestAssistantContent(streamingMessages);
-              const containsStructuredContent = hasStructuredAssistantContent(latestContent);
+              if (eventType === 'conversation_id') {
+                return;
+              }
 
-              if (pendingStructuredUpdate) {
-                pendingStructuredUpdate = false;
+              if (eventType === 'message') {
+                const latestContent = getLatestAssistantContent(streamingMessages);
+                const containsStructuredContent = hasStructuredAssistantContent(latestContent);
+
+                if (pendingStructuredUpdate) {
+                  pendingStructuredUpdate = false;
+                  emitVisibleState();
+                  return;
+                }
+
+                if (containsStructuredContent) {
+                  emitTrailingStructuredTextState();
+                  return;
+                }
+
                 emitVisibleState();
                 return;
               }
 
-              if (containsStructuredContent) {
-                emitTrailingStructuredTextState();
+              if (
+                eventType === 'tool_call' ||
+                eventType === 'tool_result' ||
+                eventType === 'generative_ui'
+              ) {
+                pendingStructuredUpdate = true;
                 return;
               }
 
-              emitVisibleState();
-              return;
-            }
+              if (eventType === 'done') {
+                const latestContent = getLatestAssistantContent(streamingMessages);
+                const combinedContent =
+                  initialContent.length > 0 ? [...initialContent, ...latestContent] : latestContent;
 
-            if (
-              eventType === 'tool_call' ||
-              eventType === 'tool_result' ||
-              eventType === 'generative_ui'
-            ) {
-              pendingStructuredUpdate = true;
-              return;
-            }
+                if (pendingFrontendToolCall) {
+                  const frontendToolDefinition = toolkit[pendingFrontendToolCall.name];
 
-            if (eventType === 'done') {
+                  if (frontendToolDefinition?.humanInTheLoop) {
+                    isStreamTerminal = true;
+                    streamQueue.push({
+                      content: combinedContent,
+                      status: {
+                        type: 'requires-action',
+                        reason: 'tool-calls',
+                      },
+                    });
+                    isStreamClosedIntentionally = true;
+                    streamRequest?.close();
+                    streamQueue.close();
+                    return;
+                  }
+
+                  void (async () => {
+                    let toolResult: unknown;
+                    let toolError: string | undefined;
+
+                    streamQueue.push({
+                      content: combinedContent,
+                      status: {
+                        type: 'requires-action',
+                        reason: 'tool-calls',
+                      },
+                    });
+
+                    try {
+                      if (!frontendToolDefinition?.execute) {
+                        throw new Error(
+                          `Frontend tool is not executable: ${pendingFrontendToolCall?.name ?? 'unknown'}`,
+                        );
+                      }
+
+                      toolResult = await frontendToolDefinition.execute(
+                        pendingFrontendToolCall.arguments,
+                        {} as never,
+                      );
+                    } catch (error) {
+                      toolError =
+                        error instanceof Error ? error.message : 'Frontend tool execution failed';
+                      toolResult = { message: toolError };
+                    }
+
+                    const resolvedContent = updateToolCallContentWithResult(
+                      combinedContent,
+                      pendingFrontendToolCall.id,
+                      toolResult,
+                      !!toolError,
+                      toolError,
+                    );
+
+                    streamQueue.push({
+                      content: resolvedContent,
+                    });
+
+                    const continuationPayload: FrontendToolContinuationPayload = {
+                      originalUserMessage: messageText,
+                      toolName: pendingFrontendToolCall.name,
+                      toolCallId: pendingFrontendToolCall.id,
+                      args: pendingFrontendToolCall.arguments as ReadonlyJSONObject,
+                      result: toolResult,
+                      isError: !!toolError,
+                      ...(toolError ? { error: toolError } : {}),
+                    };
+
+                    try {
+                      for await (const chunk of streamResponsesWithToolContext(
+                        messageText,
+                        serializeToolContinuationPayload(continuationPayload),
+                        resolvedContent,
+                        undefined,
+                      )) {
+                        streamQueue.push(chunk);
+                      }
+                    } catch (error) {
+                      streamError =
+                        error instanceof Error
+                          ? error
+                          : new Error('Frontend tool continuation failed');
+                    } finally {
+                      streamQueue.close();
+                    }
+                  })();
+
+                  isStreamClosedIntentionally = true;
+                  streamRequest?.close();
+                  return;
+                }
+
+                if (pendingStructuredUpdate && (combinedContent?.length ?? 0) > 0) {
+                  isStreamTerminal = true;
+                  hasEmittedContent = true;
+                  streamQueue.push({
+                    content: combinedContent,
+                    status: {
+                      type: 'complete',
+                      reason: 'stop',
+                    },
+                  });
+                } else if (hasEmittedContent) {
+                  isStreamTerminal = true;
+                  streamQueue.push({
+                    status: {
+                      type: 'complete',
+                      reason: 'stop',
+                    },
+                  });
+                } else if ((combinedContent?.length ?? 0) > 0) {
+                  isStreamTerminal = true;
+                  hasEmittedContent = true;
+                  streamQueue.push({
+                    content: combinedContent,
+                    status: {
+                      type: 'complete',
+                      reason: 'stop',
+                    },
+                  });
+                }
+
+                isStreamClosedIntentionally = true;
+                streamRequest?.close();
+                streamQueue.close();
+              }
+            },
+            onConnectionError() {
+              if (abortSignal.aborted || isStreamTerminal || isStreamClosedIntentionally) {
+                isStreamClosedIntentionally = true;
+                streamRequest?.close();
+                streamQueue.close();
+                return;
+              }
+
               const latestContent = getLatestAssistantContent(streamingMessages);
               const combinedContent =
                 initialContent.length > 0 ? [...initialContent, ...latestContent] : latestContent;
 
-              if (pendingFrontendToolCall) {
-                const frontendToolDefinition = toolkit[pendingFrontendToolCall.name];
-
-                if (frontendToolDefinition?.humanInTheLoop) {
-                  isStreamTerminal = true;
-                  streamQueue.push({
-                    content: combinedContent,
-                    status: {
-                      type: 'requires-action',
-                      reason: 'tool-calls',
-                    },
-                  });
-                  isStreamClosedIntentionally = true;
-                  streamRequest?.close();
-                  streamQueue.close();
-                  return;
-                }
-
-                void (async () => {
-                  let toolResult: unknown;
-                  let toolError: string | undefined;
-
-                  streamQueue.push({
-                    content: combinedContent,
-                    status: {
-                      type: 'requires-action',
-                      reason: 'tool-calls',
-                    },
-                  });
-
-                  try {
-                    if (!frontendToolDefinition?.execute) {
-                      throw new Error(
-                        `Frontend tool is not executable: ${pendingFrontendToolCall?.name ?? 'unknown'}`,
-                      );
-                    }
-
-                    toolResult = await frontendToolDefinition.execute(
-                      pendingFrontendToolCall.arguments,
-                      {} as never,
-                    );
-                  } catch (error) {
-                    toolError =
-                      error instanceof Error ? error.message : 'Frontend tool execution failed';
-                    toolResult = { message: toolError };
-                  }
-
-                  const resolvedContent = updateToolCallContentWithResult(
-                    combinedContent,
-                    pendingFrontendToolCall.id,
-                    toolResult,
-                    !!toolError,
-                    toolError,
-                  );
-
-                  streamQueue.push({
-                    content: resolvedContent,
-                  });
-
-                  const continuationPayload: FrontendToolContinuationPayload = {
-                    originalUserMessage: messageText,
-                    toolName: pendingFrontendToolCall.name,
-                    toolCallId: pendingFrontendToolCall.id,
-                    args: pendingFrontendToolCall.arguments as ReadonlyJSONObject,
-                    result: toolResult,
-                    isError: !!toolError,
-                    ...(toolError ? { error: toolError } : {}),
-                  };
-
-                  try {
-                    for await (const chunk of streamResponsesWithToolContext(
-                      messageText,
-                      serializeToolContinuationPayload(continuationPayload),
-                      resolvedContent,
-                      undefined,
-                    )) {
-                      streamQueue.push(chunk);
-                    }
-                  } catch (error) {
-                    streamError =
-                      error instanceof Error
-                        ? error
-                        : new Error('Frontend tool continuation failed');
-                  } finally {
-                    streamQueue.close();
-                  }
-                })();
-
+              if ((combinedContent?.length ?? 0) > 0) {
+                isStreamTerminal = true;
+                streamQueue.push({
+                  content: combinedContent,
+                  status: {
+                    type: 'complete',
+                    reason: 'stop',
+                  },
+                });
                 isStreamClosedIntentionally = true;
                 streamRequest?.close();
+                streamQueue.close();
                 return;
               }
 
-              if (pendingStructuredUpdate && (combinedContent?.length ?? 0) > 0) {
-                isStreamTerminal = true;
-                hasEmittedContent = true;
-                streamQueue.push({
-                  content: combinedContent,
-                  status: {
-                    type: 'complete',
-                    reason: 'stop',
-                  },
-                });
-              } else if (hasEmittedContent) {
-                isStreamTerminal = true;
-                streamQueue.push({
-                  status: {
-                    type: 'complete',
-                    reason: 'stop',
-                  },
-                });
-              } else if ((combinedContent?.length ?? 0) > 0) {
-                isStreamTerminal = true;
-                hasEmittedContent = true;
-                streamQueue.push({
-                  content: combinedContent,
-                  status: {
-                    type: 'complete',
-                    reason: 'stop',
-                  },
-                });
-              }
-
+              streamError = new Error('Chat stream connection failed');
               isStreamClosedIntentionally = true;
               streamRequest?.close();
               streamQueue.close();
-            }
-          },
-          onConnectionError() {
-            if (abortSignal.aborted || isStreamTerminal || isStreamClosedIntentionally) {
-              isStreamClosedIntentionally = true;
-              streamRequest?.close();
-              streamQueue.close();
-              return;
-            }
-
-            const latestContent = getLatestAssistantContent(streamingMessages);
-            const combinedContent =
-              initialContent.length > 0 ? [...initialContent, ...latestContent] : latestContent;
-
-            if ((combinedContent?.length ?? 0) > 0) {
-              isStreamTerminal = true;
-              streamQueue.push({
-                content: combinedContent,
-                status: {
-                  type: 'complete',
-                  reason: 'stop',
-                },
-              });
-              isStreamClosedIntentionally = true;
-              streamRequest?.close();
-              streamQueue.close();
-              return;
-            }
-
-            streamError = new Error('Chat stream connection failed');
-            isStreamClosedIntentionally = true;
-            streamRequest?.close();
-            streamQueue.close();
-          },
+            },
           },
         });
 

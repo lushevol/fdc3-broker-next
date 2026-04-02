@@ -13,6 +13,7 @@
 ### Task 1: Centralize Frontend Tool Registration
 
 **Files:**
+
 - Create: `apps/base/src/components/ChatbotSidebar/tools/createFrontendToolRegistry.ts`
 - Modify: `apps/base/src/components/ChatbotSidebar/AssistantUIRuntimeProvider.tsx`
 - Modify: `apps/base/src/pages/Home/index.tsx`
@@ -27,6 +28,7 @@
 ### Task 2: Remove Demo and Example Chatbot Tool Paths
 
 **Files:**
+
 - Delete: `apps/base/src/components/ChatbotSidebar/tools/demoToolkit.tsx`
 - Delete: `apps/base/src/components/ChatbotSidebar/tools/demoToolLogic.ts`
 - Delete: `apps/base/src/components/ChatbotSidebar/tools/demoToolUi.tsx`
@@ -41,6 +43,7 @@
 ### Task 3: Simplify Frontend Runtime and SSE Handling
 
 **Files:**
+
 - Modify: `apps/base/src/components/ChatbotSidebar/AssistantUIRuntimeProvider.tsx`
 - Modify: `apps/base/src/components/ChatbotSidebar/adapters/sseToAssistantUi.ts`
 - Modify: `apps/base/src/components/ChatbotSidebar/components/GenerativeUIRenderer.tsx`
@@ -59,6 +62,7 @@
 ### Task 4: Simplify Backend Streaming Layers
 
 **Files:**
+
 - Modify: `services/chatbot-backend/src/main/java/com/fdc3/chatbot/service/ChatService.java`
 - Modify: `services/chatbot-backend/src/main/java/com/fdc3/chatbot/agent/AgentService.java`
 - Modify: `services/chatbot-backend/src/main/java/com/fdc3/chatbot/controller/ChatController.java`
@@ -74,6 +78,7 @@
 ### Task 5: Final Verification
 
 **Files:**
+
 - Modify: any snapshots or tests affected by supported API cleanup
 
 - [ ] **Step 1: Run focused frontend chatbot test suite**
