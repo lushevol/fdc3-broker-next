@@ -23,7 +23,11 @@ export class OpenAIController {
     private readonly taskService: ProxyTaskService,
     private readonly adapter: ProviderAdapterService,
     private readonly modelsAggregation: ModelsAggregationService,
-  ) {}
+  ) {
+    this.createChatCompletion = this.createChatCompletion.bind(this);
+    this.createEmbedding = this.createEmbedding.bind(this);
+    this.listModels = this.listModels.bind(this);
+  }
 
   @Post('chat/completions')
   async createChatCompletion(
@@ -46,6 +50,9 @@ export class OpenAIController {
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
+      if (typeof res.flushHeaders === 'function') {
+        res.flushHeaders();
+      }
 
       const unsubscribe = pending.onChunk((chunk) => {
         const payload = chunk.chunk as {

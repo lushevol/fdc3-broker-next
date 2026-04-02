@@ -14,7 +14,11 @@ import {
   TaskErrorPayload,
 } from '../types/proxy-protocol';
 
-@WebSocketGateway({ namespace: '/llm-proxy' })
+@WebSocketGateway({
+  namespace: '/llm-proxy',
+  transports: ['polling'],
+  allowUpgrades: false,
+})
 export class ProxyGateway {
   private readonly logger = new Logger(ProxyGateway.name);
 
@@ -25,7 +29,15 @@ export class ProxyGateway {
     private readonly clientRegistry: ClientRegistryService,
     private readonly taskService: ProxyTaskService,
     private readonly modelsAggregation: ModelsAggregationService,
-  ) {}
+  ) {
+    this.handleRegister = this.handleRegister.bind(this);
+    this.handleHeartbeat = this.handleHeartbeat.bind(this);
+    this.handleTaskChunk = this.handleTaskChunk.bind(this);
+    this.handleTaskComplete = this.handleTaskComplete.bind(this);
+    this.handleTaskError = this.handleTaskError.bind(this);
+    this.handleModelsResponse = this.handleModelsResponse.bind(this);
+    this.handleDisconnect = this.handleDisconnect.bind(this);
+  }
 
   @SubscribeMessage('client:register')
   handleRegister(client: Socket, payload: RegisterPayload): { ok: true; socketId: string } {

@@ -20,7 +20,9 @@ export class ClaudeController {
     private readonly gateway: ProxyGateway,
     private readonly taskService: ProxyTaskService,
     private readonly adapter: ProviderAdapterService,
-  ) {}
+  ) {
+    this.createMessage = this.createMessage.bind(this);
+  }
 
   @Post('messages')
   async createMessage(@Body() body: any, @Res({ passthrough: true }) res?: any): Promise<any> {
@@ -40,6 +42,9 @@ export class ClaudeController {
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
+      if (typeof res.flushHeaders === 'function') {
+        res.flushHeaders();
+      }
 
       const unsubscribe = pending.onChunk((chunk) => {
         const payload = chunk.chunk as { event?: string; data?: unknown };
