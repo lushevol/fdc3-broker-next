@@ -3,6 +3,7 @@ package com.fdc3.chatbot.controller;
 import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
+import com.fdc3.chatbot.security.UserCapabilityContextResolver;
 import com.fdc3.chatbot.service.ChatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ class ChatControllerTest {
     @BeforeEach
     void setUp() {
         chatService = mock(ChatService.class);
-        mockMvc = MockMvcBuilders.standaloneSetup(new ChatController(chatService)).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(new ChatController(chatService, new UserCapabilityContextResolver())).build();
     }
 
     @Test
@@ -58,11 +59,11 @@ class ChatControllerTest {
                 .build();
 
         doAnswer((Answer<Void>) invocation -> {
-            Consumer<String> onNext = invocation.getArgument(4);
-            Runnable onComplete = invocation.getArgument(6);
-            Consumer<ToolCall> onToolCall = invocation.getArgument(7);
-            Consumer<ToolResult> onToolResult = invocation.getArgument(8);
-            Consumer<GenerativeUIDirective> onGenerativeUi = invocation.getArgument(9);
+            Consumer<String> onNext = invocation.getArgument(5);
+            Runnable onComplete = invocation.getArgument(7);
+            Consumer<ToolCall> onToolCall = invocation.getArgument(8);
+            Consumer<ToolResult> onToolResult = invocation.getArgument(9);
+            Consumer<GenerativeUIDirective> onGenerativeUi = invocation.getArgument(10);
 
             onToolCall.accept(toolCall);
             onNext.accept("Hello");
@@ -73,6 +74,7 @@ class ChatControllerTest {
         }).when(chatService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 any(),
                 any(),
                 any(),
@@ -106,8 +108,8 @@ class ChatControllerTest {
         when(chatService.createConversation()).thenReturn("conversation-123");
 
         doAnswer((Answer<Void>) invocation -> {
-            Consumer<String> onNext = invocation.getArgument(4);
-            Runnable onComplete = invocation.getArgument(6);
+            Consumer<String> onNext = invocation.getArgument(5);
+            Runnable onComplete = invocation.getArgument(7);
 
             onNext.accept("Hello");
             onComplete.run();
@@ -115,6 +117,7 @@ class ChatControllerTest {
         }).when(chatService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 any(),
                 any(),
                 any(),
@@ -138,12 +141,13 @@ class ChatControllerTest {
         when(chatService.createConversation()).thenReturn("conversation-123");
 
         doAnswer((Answer<Void>) invocation -> {
-            Runnable onComplete = invocation.getArgument(6);
+            Runnable onComplete = invocation.getArgument(7);
             onComplete.run();
             return null;
         }).when(chatService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 any(),
                 any(),
                 any(),
@@ -166,6 +170,7 @@ class ChatControllerTest {
                 anyString(),
                 anyString(),
                 any(),
+                any(),
                 org.mockito.ArgumentMatchers.eq("[{\"name\":\"custom_client_tool\"}]"),
                 any(),
                 any(),
@@ -181,8 +186,8 @@ class ChatControllerTest {
         when(chatService.createConversation()).thenReturn("conversation-123");
 
         doAnswer((Answer<Void>) invocation -> {
-            Consumer<String> onNext = invocation.getArgument(4);
-            Runnable onComplete = invocation.getArgument(6);
+            Consumer<String> onNext = invocation.getArgument(5);
+            Runnable onComplete = invocation.getArgument(7);
 
             onNext.accept("Hello");
             onComplete.run();
@@ -190,6 +195,7 @@ class ChatControllerTest {
         }).when(chatService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 any(),
                 any(),
                 any(),
@@ -216,8 +222,8 @@ class ChatControllerTest {
         when(chatService.createConversation()).thenReturn("conversation-123");
 
         doAnswer((Answer<Void>) invocation -> {
-            Consumer<String> onNext = invocation.getArgument(4);
-            Runnable onComplete = invocation.getArgument(6);
+            Consumer<String> onNext = invocation.getArgument(5);
+            Runnable onComplete = invocation.getArgument(7);
 
             onNext.accept(" from");
             onComplete.run();
@@ -225,6 +231,7 @@ class ChatControllerTest {
         }).when(chatService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 any(),
                 any(),
                 any(),

@@ -4,10 +4,13 @@ import com.fdc3.chatbot.model.ChatRequest;
 import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
+import com.fdc3.chatbot.model.UserCapabilityContext;
+import com.fdc3.chatbot.security.UserCapabilityContextResolver;
 import com.fdc3.chatbot.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -28,6 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ChatController {
 
     private final ChatService chatService;
+    private final UserCapabilityContextResolver capabilityContextResolver;
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
     /**
@@ -38,21 +42,29 @@ public class ChatController {
             @RequestParam String message,
             @RequestParam(required = false) String conversationId,
             @RequestParam(required = false) String toolContext,
-            @RequestParam(required = false) String frontendTools
+            @RequestParam(required = false) String frontendTools,
+            Authentication authentication
     ) {
-        return streamChatInternal(message, conversationId, toolContext, frontendTools);
+        return streamChatInternal(
+                message,
+                conversationId,
+                toolContext,
+                frontendTools,
+                capabilityContextResolver.resolve(authentication)
+        );
     }
 
     /**
      * Send a chat message and receive a streaming response via SSE using a JSON request body.
      */
     @PostMapping(value = "/stream", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamChat(@RequestBody ChatRequest request) {
+    public SseEmitter streamChat(@RequestBody ChatRequest request, Authentication authentication) {
         return streamChatInternal(
                 request.getMessage(),
                 request.getConversationId(),
                 request.getToolContext(),
-                request.getFrontendTools()
+                request.getFrontendTools(),
+                capabilityContextResolver.resolve(authentication)
         );
     }
 
@@ -60,8 +72,9 @@ public class ChatController {
      * Send a chat message and receive a complete response.
      */
     @PostMapping
-    public Map<String, Object> chat(@RequestBody ChatRequest request) {
+    public Map<String, Object> chat(@RequestBody ChatRequest request, Authentication authentication) {
         log.info("Received chat request for conversation: {}", request.getConversationId());
+        UserCapabilityContext capabilityContext = capabilityContextResolver.resolve(authentication);
 
         // Create conversation if not provided
         String convId = request.getConversationId() != null && !request.getConversationId().isEmpty()
@@ -74,6 +87,9 @@ public class ChatController {
         chatService.processMessageStreaming(
                 convId,
                 request.getMessage(),
+                capabilityContext,
+                null,
+                request.getFrontendTools(),
                 token -> response.append(token),
                 error -> {
                     synchronized (lock) {
@@ -160,7 +176,8 @@ public class ChatController {
             String message,
             String conversationId,
             String toolContext,
-            String frontendTools
+            String frontendTools,
+            UserCapabilityContext capabilityContext
     ) {
         log.info("Received streaming chat request for conversation: {}", conversationId);
 
@@ -180,6 +197,7 @@ public class ChatController {
                 Runnable cancelStream = chatService.processMessageStreaming(
                         convId,
                         message,
+                        capabilityContext,
                         toolContext,
                         frontendTools,
                         token -> sendSseEvent(emitter, "message", Map.of("text", token), "message"),
