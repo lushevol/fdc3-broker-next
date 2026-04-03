@@ -38,8 +38,8 @@ class ChatServiceTest {
     @Test
     void processMessageStreamingPersistsAssistantMessageOnCompletion() {
         doAnswer(invocation -> {
-            Consumer<String> onNext = invocation.getArgument(5);
-            Runnable onComplete = invocation.getArgument(7);
+            Consumer<String> onNext = invocation.getArgument(6);
+            Runnable onComplete = invocation.getArgument(8);
 
             onNext.accept("Hello ");
             onNext.accept("world");
@@ -48,6 +48,7 @@ class ChatServiceTest {
         }).when(agentService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 any(),
                 any(),
                 anyList(),
@@ -96,9 +97,9 @@ class ChatServiceTest {
                 .build();
 
         doAnswer(invocation -> {
-            Consumer<ToolCall> onToolCall = invocation.getArgument(8);
-            Consumer<ToolResult> onToolResult = invocation.getArgument(9);
-            Runnable onComplete = invocation.getArgument(7);
+            Consumer<ToolCall> onToolCall = invocation.getArgument(9);
+            Consumer<ToolResult> onToolResult = invocation.getArgument(10);
+            Runnable onComplete = invocation.getArgument(8);
 
             onToolCall.accept(toolCall);
             onToolResult.accept(toolResult);
@@ -107,6 +108,7 @@ class ChatServiceTest {
         }).when(agentService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 any(),
                 any(),
                 anyList(),
@@ -157,9 +159,9 @@ class ChatServiceTest {
                 .build();
 
         doAnswer(invocation -> {
-            Consumer<ToolCall> onToolCall = invocation.getArgument(8);
-            Consumer<ToolResult> onToolResult = invocation.getArgument(9);
-            Runnable onComplete = invocation.getArgument(7);
+            Consumer<ToolCall> onToolCall = invocation.getArgument(9);
+            Consumer<ToolResult> onToolResult = invocation.getArgument(10);
+            Runnable onComplete = invocation.getArgument(8);
 
             onToolCall.accept(toolCall);
             onToolResult.accept(toolResult);
@@ -168,6 +170,7 @@ class ChatServiceTest {
         }).when(agentService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 any(),
                 any(),
                 anyList(),
@@ -211,12 +214,13 @@ class ChatServiceTest {
     @Test
     void processMessageStreamingDoesNotDuplicateCurrentUserMessageInModelHistory() {
         doAnswer(invocation -> {
-            Runnable onComplete = invocation.getArgument(7);
+            Runnable onComplete = invocation.getArgument(8);
             onComplete.run();
             return null;
         }).when(agentService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 any(),
                 any(),
                 anyList(),
@@ -244,6 +248,7 @@ class ChatServiceTest {
         verify(agentService).processMessageStreaming(
                 eq(conversationId),
                 eq("Hello there"),
+                any(),
                 isNull(),
                 isNull(),
                 historyCaptor.capture(),
@@ -273,13 +278,14 @@ class ChatServiceTest {
         final Consumer<String>[] onNextRef = new Consumer[1];
 
         doAnswer((org.mockito.stubbing.Answer<Runnable>) invocation -> {
-            onNextRef[0] = invocation.getArgument(5);
-            onCompleteRef[0] = invocation.getArgument(7);
+            onNextRef[0] = invocation.getArgument(6);
+            onCompleteRef[0] = invocation.getArgument(8);
             return () -> {
             };
         }).when(agentService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 any(),
                 any(),
                 anyList(),
@@ -315,12 +321,13 @@ class ChatServiceTest {
     @Test
     void processMessageStreamingForwardsFrontendToolManifestToAgent() {
         doAnswer(invocation -> {
-            Runnable onComplete = invocation.getArgument(7);
+            Runnable onComplete = invocation.getArgument(8);
             onComplete.run();
             return null;
         }).when(agentService).processMessageStreaming(
                 anyString(),
                 anyString(),
+                any(),
                 any(),
                 any(),
                 anyList(),
@@ -354,6 +361,7 @@ class ChatServiceTest {
         verify(agentService).processMessageStreaming(
                 eq(conversationId),
                 eq("Hi"),
+                any(),
                 isNull(),
                 eq(frontendTools),
                 anyList(),

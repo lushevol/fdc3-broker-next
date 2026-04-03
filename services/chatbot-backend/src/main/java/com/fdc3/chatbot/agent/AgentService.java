@@ -7,6 +7,7 @@ import com.fdc3.chatbot.model.FrontendToolManifestEntry;
 import com.fdc3.chatbot.model.FrontendToolContinuation;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
+import com.fdc3.chatbot.model.UserCapabilityContext;
 import com.fdc3.chatbot.tool.ToolDefinition;
 import com.fdc3.chatbot.tool.ToolRegistry;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
@@ -149,6 +150,7 @@ public class AgentService {
         return processMessageStreaming(
                 conversationId,
                 userMessage,
+                UserCapabilityContext.anonymous(),
                 null,
                 null,
                 history,
@@ -171,6 +173,7 @@ public class AgentService {
         return processMessageStreaming(
                 conversationId,
                 userMessage,
+                UserCapabilityContext.anonymous(),
                 null,
                 null,
                 history,
@@ -194,6 +197,7 @@ public class AgentService {
         return processMessageStreaming(
                 conversationId,
                 userMessage,
+                UserCapabilityContext.anonymous(),
                 toolContext,
                 null,
                 history,
@@ -220,6 +224,62 @@ public class AgentService {
         return processMessageStreaming(
                 conversationId,
                 userMessage,
+                UserCapabilityContext.anonymous(),
+                toolContext,
+                frontendTools,
+                history,
+                onNext,
+                onError,
+                onComplete,
+                toolCall -> {
+                },
+                toolResult -> {
+                }
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            String toolContext,
+            String frontendTools,
+            List<ChatMessage> history,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                UserCapabilityContext.anonymous(),
+                toolContext,
+                frontendTools,
+                history,
+                onNext,
+                onError,
+                onComplete,
+                onToolCall,
+                onToolResult
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            UserCapabilityContext capabilityContext,
+            String toolContext,
+            String frontendTools,
+            List<ChatMessage> history,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                capabilityContext,
                 toolContext,
                 frontendTools,
                 history,
@@ -239,6 +299,7 @@ public class AgentService {
     public Runnable processMessageStreaming(
             String conversationId,
             String userMessage,
+            UserCapabilityContext capabilityContext,
             String toolContext,
             String frontendTools,
             List<ChatMessage> history,
@@ -249,12 +310,14 @@ public class AgentService {
             java.util.function.Consumer<ToolResult> onToolResult
     ) {
         AtomicBoolean cancelled = new AtomicBoolean(false);
+        Map<String, ToolDefinition> availableTools = toolRegistry.resolveTools(capabilityContext);
 
         // Mock mode - simulate streaming response
         if (mockEnabled || streamingChatModel == null) {
             return processMockStreaming(
                     conversationId,
                     userMessage,
+                    availableTools,
                     token -> {
                         if (!cancelled.get()) {
                             onNext.accept(token);
@@ -281,7 +344,6 @@ public class AgentService {
         try {
             // Build message list for LangChain4j
             List<dev.langchain4j.data.message.ChatMessage> messages = new java.util.ArrayList<>();
-            Map<String, ToolDefinition> availableTools = toolRegistry.getAllTools();
             FrontendToolContinuation frontendToolContinuation = parseFrontendToolContinuation(toolContext);
             List<FrontendToolManifestEntry> frontendToolManifest =
                     resolveFrontendToolManifest(conversationId, frontendTools);
@@ -457,6 +519,7 @@ public class AgentService {
                             conversationId,
                             userMessage,
                             continuedMessages,
+                            availableTools,
                             aiMessage.toolExecutionRequests(),
                             frontendToolManifest,
                             blockedFrontendTools,
@@ -491,6 +554,7 @@ public class AgentService {
                                 conversationId,
                                 userMessage,
                                 continuedMessages,
+                                availableTools,
                                 List.of(fallbackToolRequest),
                                 frontendToolManifest,
                                 blockedFrontendTools,
@@ -561,6 +625,7 @@ public class AgentService {
             String conversationId,
             String userMessage,
             List<dev.langchain4j.data.message.ChatMessage> messages,
+            Map<String, ToolDefinition> availableTools,
             List<ToolExecutionRequest> toolExecutionRequests,
             List<FrontendToolManifestEntry> frontendToolManifest,
             Set<String> blockedFrontendTools,
@@ -587,8 +652,8 @@ public class AgentService {
                     conversationId,
                     userMessage,
                     messages,
-                    toolRegistry.getAllTools(),
-                    buildToolSpecifications(toolRegistry.getAllTools(), frontendToolManifest, blockedFrontendTools),
+                    availableTools,
+                    buildToolSpecifications(availableTools, frontendToolManifest, blockedFrontendTools),
                     frontendToolManifest,
                     blockedFrontendTools,
                     "tool-loop",
@@ -620,7 +685,13 @@ public class AgentService {
             return;
         }
 
-        boolean requiresConfirmation = toolRegistry.requiresConfirmation(toolExecutionRequest.name());
+        ToolDefinition toolDefinition = availableTools.get(toolExecutionRequest.name());
+        if (toolDefinition == null) {
+            onError.accept(new IllegalArgumentException("Tool not available for current user: " + toolExecutionRequest.name()));
+            return;
+        }
+
+        boolean requiresConfirmation = toolDefinition.requiresConfirmation();
         ToolCall toolCall = ToolCall.builder()
                 .id(toolExecutionRequest.id())
                 .name(toolExecutionRequest.name())
@@ -639,7 +710,7 @@ public class AgentService {
             return;
         }
 
-        toolRegistry.execute(toolExecutionRequest.name(), arguments)
+        toolDefinition.execute(arguments)
                 .whenComplete((result, error) -> {
                     if (cancelled.get()) {
                         return;
@@ -662,6 +733,7 @@ public class AgentService {
                             conversationId,
                             userMessage,
                             continuedMessages,
+                            availableTools,
                             toolExecutionRequests,
                             frontendToolManifest,
                             blockedFrontendTools,
@@ -977,6 +1049,7 @@ public class AgentService {
     private Runnable processMockStreaming(
             String conversationId,
             String userMessage,
+            Map<String, ToolDefinition> availableTools,
             java.util.function.Consumer<String> onNext,
             java.lang.Runnable onComplete,
             java.util.function.Consumer<ToolCall> onToolCall,
@@ -985,8 +1058,13 @@ public class AgentService {
         MockStreamHandle streamHandle = new MockStreamHandle();
         MockToolInvocation toolInvocation = resolveMockToolInvocation(userMessage);
         if (toolInvocation != null) {
+            ToolDefinition toolDefinition = availableTools.get(toolInvocation.name());
+            if (toolDefinition == null) {
+                streamMockResponse(generateMockResponse(userMessage), onNext, onComplete, streamHandle);
+                return streamHandle::cancel;
+            }
             String toolCallId = UUID.randomUUID().toString();
-            boolean requiresConfirmation = toolRegistry.requiresConfirmation(toolInvocation.name());
+            boolean requiresConfirmation = toolDefinition.requiresConfirmation();
             ToolCall toolCall = ToolCall.builder()
                     .id(toolCallId)
                     .name(toolInvocation.name())
@@ -1015,7 +1093,7 @@ public class AgentService {
                 };
             }
 
-            executeMockTool(toolCall, toolInvocation, userMessage, onNext, onComplete, onToolResult, streamHandle);
+            executeMockTool(toolCall, toolDefinition, toolInvocation, userMessage, onNext, onComplete, onToolResult, streamHandle);
             return streamHandle::cancel;
         }
 
@@ -1049,6 +1127,7 @@ public class AgentService {
 
     private void executeMockTool(
             ToolCall toolCall,
+            ToolDefinition toolDefinition,
             MockToolInvocation toolInvocation,
             String userMessage,
             java.util.function.Consumer<String> onNext,
@@ -1056,7 +1135,7 @@ public class AgentService {
             java.util.function.Consumer<ToolResult> onToolResult,
             MockStreamHandle streamHandle
     ) {
-        toolRegistry.execute(toolInvocation.name(), toolInvocation.arguments())
+        toolDefinition.execute(toolInvocation.arguments())
                 .whenComplete((result, error) -> {
                     if (streamHandle.isCancelled()) {
                         return;
@@ -1186,6 +1265,15 @@ public class AgentService {
     }
 
     private void confirmPendingToolExecution(String toolCallId, PendingToolExecution pendingExecution) {
+        ToolDefinition toolDefinition = toolRegistry.getTool(pendingExecution.toolInvocation().name());
+        if (toolDefinition == null) {
+            pendingExecution.onToolResult().accept(ToolResult.builder()
+                    .toolCallId(toolCallId)
+                    .error("Tool is no longer available for execution.")
+                    .build());
+            pendingExecution.onComplete().run();
+            return;
+        }
         ToolCall resumedToolCall = ToolCall.builder()
                 .id(toolCallId)
                 .name(pendingExecution.toolInvocation().name())
@@ -1196,6 +1284,7 @@ public class AgentService {
         pendingExecution.onToolCall().accept(resumedToolCall);
         executeMockTool(
                 resumedToolCall,
+                toolDefinition,
                 pendingExecution.toolInvocation(),
                 pendingExecution.userMessage(),
                 pendingExecution.onNext(),
@@ -1264,7 +1353,7 @@ public class AgentService {
         try {
             // Build message list for LangChain4j
             List<dev.langchain4j.data.message.ChatMessage> messages = new java.util.ArrayList<>();
-            Map<String, ToolDefinition> availableTools = toolRegistry.getAllTools();
+            Map<String, ToolDefinition> availableTools = toolRegistry.resolveTools(UserCapabilityContext.anonymous());
             boolean useTools = shouldUseTools(userMessage, availableTools);
 
             // Add system message

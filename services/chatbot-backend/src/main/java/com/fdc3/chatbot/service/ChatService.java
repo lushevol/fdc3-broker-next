@@ -5,6 +5,7 @@ import com.fdc3.chatbot.model.ChatMessage;
 import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
+import com.fdc3.chatbot.model.UserCapabilityContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ public class ChatService {
         return processMessageStreaming(
                 conversationId,
                 userMessage,
+                UserCapabilityContext.anonymous(),
                 null,
                 null,
                 onNext,
@@ -66,6 +68,7 @@ public class ChatService {
         return processMessageStreaming(
                 conversationId,
                 userMessage,
+                UserCapabilityContext.anonymous(),
                 null,
                 null,
                 onNext,
@@ -91,6 +94,7 @@ public class ChatService {
         return processMessageStreaming(
                 conversationId,
                 userMessage,
+                UserCapabilityContext.anonymous(),
                 toolContext,
                 null,
                 onNext,
@@ -115,6 +119,7 @@ public class ChatService {
         return processMessageStreaming(
                 conversationId,
                 userMessage,
+                UserCapabilityContext.anonymous(),
                 toolContext,
                 null,
                 onNext,
@@ -140,6 +145,7 @@ public class ChatService {
         return processMessageStreaming(
                 conversationId,
                 userMessage,
+                UserCapabilityContext.anonymous(),
                 toolContext,
                 frontendTools,
                 onNext,
@@ -155,6 +161,33 @@ public class ChatService {
     public Runnable processMessageStreaming(
             String conversationId,
             String userMessage,
+            UserCapabilityContext capabilityContext,
+            String toolContext,
+            String frontendTools,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                capabilityContext,
+                toolContext,
+                frontendTools,
+                onNext,
+                onError,
+                onComplete,
+                toolCall -> {
+                },
+                toolResult -> {
+                }
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            UserCapabilityContext capabilityContext,
             String toolContext,
             String frontendTools,
             java.util.function.Consumer<String> onNext,
@@ -183,6 +216,7 @@ public class ChatService {
         Runnable cancelAgentStream = agentService.processMessageStreaming(
                 conversationId,
                 userMessage,
+                capabilityContext,
                 toolContext,
                 frontendTools,
                 promptHistory,
@@ -229,6 +263,34 @@ public class ChatService {
             }
             cancelAgentStream.run();
         };
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            UserCapabilityContext capabilityContext,
+            String toolContext,
+            String frontendTools,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                capabilityContext,
+                toolContext,
+                frontendTools,
+                onNext,
+                onError,
+                onComplete,
+                onToolCall,
+                onToolResult,
+                generativeUiDirective -> {
+                }
+        );
     }
 
     private ChatMessage buildAssistantMessage(

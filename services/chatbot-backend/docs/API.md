@@ -18,6 +18,13 @@ All endpoints (except `/health`) require Bearer token authentication:
 Authorization: Bearer <your-token>
 ```
 
+The backend resolves dynamic tool and MCP access from token claims:
+
+- `chatbot_profiles`: array or comma-separated string of user profiles
+- `chatbot_profile_version`: optional profile fingerprint/version string for cache invalidation
+
+If these claims are absent, the backend falls back to the `default` profile.
+
 ## Endpoints
 
 ### POST /api/chat
@@ -53,6 +60,8 @@ Send a chat message and receive a streaming response via SSE.
 | -------------- | ------ | -------- | ------------------------ |
 | message        | string | Yes      | The message to send      |
 | conversationId | string | No       | Existing conversation ID |
+| toolContext    | string | No       | Serialized frontend tool continuation payload |
+| frontendTools  | string | No       | Serialized frontend tool manifest |
 
 **Response Format (canonical SSE events):**
 
@@ -163,6 +172,44 @@ Health check endpoint (no authentication required).
 }
 ```
 
+### POST /api/chat/mcp/providers
+
+Register a remote MCP provider so its tools can be dynamically exposed through the chatbot service.
+
+**Request Body:**
+
+```json
+{
+  "providerId": "portfolio-service",
+  "serviceName": "Portfolio Service",
+  "transportType": "STREAMABLE_HTTP",
+  "url": "http://portfolio-service.internal/mcp",
+  "enabledProfiles": ["advisor"],
+  "description": "Portfolio lookup tools"
+}
+```
+
+**Response:**
+
+```json
+{
+  "providerId": "portfolio-service",
+  "serviceName": "Portfolio Service",
+  "transportType": "STREAMABLE_HTTP",
+  "url": "http://portfolio-service.internal/mcp",
+  "enabledProfiles": ["advisor"],
+  "toolNames": ["portfolio_lookup"]
+}
+```
+
+### GET /api/chat/mcp/providers
+
+List runtime-registered MCP providers.
+
+### DELETE /api/chat/mcp/providers/{providerId}
+
+Unregister a runtime MCP provider.
+
 ## Rate Limiting
 
 - **Limit:** 60 requests per minute per client
@@ -205,7 +252,7 @@ Health check endpoint (no authentication required).
 
 ## Tool System
 
-The backend supports tool execution. Tool lifecycle events use stable tool call IDs so the client can correlate pending, running, completed, failed, and cancelled states:
+The backend supports both built-in tools and remote MCP tools. Tool lifecycle events use stable tool call IDs so the client can correlate pending, running, completed, failed, and cancelled states:
 
 ```
 event: tool_call
@@ -220,6 +267,13 @@ data: {"toolCallId":"tool-uuid","result":{"time":"2024-01-15T10:30:00Z"}}
 event: tool_result
 data: {"toolCallId":"tool-uuid","error":"Tool execution cancelled by user."}
 ```
+
+### MCP Providers
+
+- `STREAMABLE_HTTP` is the preferred transport for current MCP servers.
+- `HTTP_SSE` remains available for legacy MCP endpoints when explicitly requested.
+- Registered MCP tools are filtered per request using `chatbot_profiles` from the authenticated token.
+- Resolved capability sets are cached by user plus profile fingerprint and automatically invalidated when the runtime registry changes.
 
 ## Example Usage
 

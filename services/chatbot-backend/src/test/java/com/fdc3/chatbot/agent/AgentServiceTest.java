@@ -4,6 +4,7 @@ import com.fdc3.chatbot.model.ChatMessage;
 import com.fdc3.chatbot.model.FrontendToolContinuation;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
+import com.fdc3.chatbot.model.UserCapabilityContext;
 import com.fdc3.chatbot.tool.ToolRegistry;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.agent.tool.ToolSpecification;
@@ -42,12 +43,56 @@ class AgentServiceTest {
 
     private ToolRegistry toolRegistry;
     private AgentService agentService;
+    private TestToolDefinition calculatorTool;
+    private TestToolDefinition timeTool;
+    private TestToolDefinition weatherTool;
 
     @BeforeEach
     void setUp() {
         toolRegistry = mock(ToolRegistry.class);
         agentService = new AgentService(toolRegistry);
         ReflectionTestUtils.setField(agentService, "mockEnabled", true);
+
+        calculatorTool = new TestToolDefinition(
+                "calculator",
+                "Perform calculations",
+                Map.of("type", "object"),
+                true,
+                arguments -> CompletableFuture.completedFuture(Map.of(
+                        "expression", arguments.get("expression"),
+                        "result", 4
+                ))
+        );
+        timeTool = new TestToolDefinition(
+                "get_current_time",
+                "Get the current time",
+                Map.of("type", "object"),
+                false,
+                arguments -> CompletableFuture.completedFuture(Map.of(
+                        "timezone", arguments.get("timezone"),
+                        "formatted", "2026-03-18 09:31"
+                ))
+        );
+        weatherTool = new TestToolDefinition(
+                "get_weather",
+                "Get the current weather",
+                Map.of("type", "object"),
+                false,
+                arguments -> CompletableFuture.completedFuture(Map.of(
+                        "location", arguments.get("location"),
+                        "temperature", 22,
+                        "conditions", "Partly Cloudy"
+                ))
+        );
+
+        when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
+                "calculator", calculatorTool,
+                "get_current_time", timeTool,
+                "get_weather", weatherTool
+        ));
+        when(toolRegistry.getTool("calculator")).thenReturn(calculatorTool);
+        when(toolRegistry.getTool("get_current_time")).thenReturn(timeTool);
+        when(toolRegistry.getTool("get_weather")).thenReturn(weatherTool);
     }
 
     private static ChatResponse chatResponse(AiMessage aiMessage, FinishReason finishReason) {
@@ -59,10 +104,6 @@ class AgentServiceTest {
 
     @Test
     void processMessageStreamingWaitsForConfirmationBeforeExecutingTool() throws Exception {
-        when(toolRegistry.requiresConfirmation("calculator")).thenReturn(true);
-        when(toolRegistry.execute(eq("calculator"), anyMap()))
-                .thenReturn(CompletableFuture.completedFuture(Map.of("expression", "2 + 2", "result", 4)));
-
         List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
         List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
         StringBuilder streamedText = new StringBuilder();
@@ -84,7 +125,6 @@ class AgentServiceTest {
         assertEquals(1, toolCalls.size());
         assertEquals(ToolCall.ToolStatus.PENDING, toolCalls.get(0).getStatus());
         assertTrue(toolCalls.get(0).isRequiresConfirmation());
-        verify(toolRegistry, never()).execute(eq("calculator"), anyMap());
         assertEquals(0, toolResults.size());
         assertFalse(completed.await(200, TimeUnit.MILLISECONDS));
 
@@ -98,13 +138,10 @@ class AgentServiceTest {
         assertEquals(toolCalls.get(0).getId(), toolResults.get(0).getToolCallId());
         assertNotNull(toolResults.get(0).getResult());
         assertTrue(streamedText.toString().contains("I calculated"));
-        verify(toolRegistry).execute(eq("calculator"), anyMap());
     }
 
     @Test
     void confirmToolCallFalseCancelsPendingExecution() throws Exception {
-        when(toolRegistry.requiresConfirmation("calculator")).thenReturn(true);
-
         List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
         List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
         CountDownLatch completed = new CountDownLatch(1);
@@ -132,7 +169,6 @@ class AgentServiceTest {
         assertEquals(1, toolResults.size());
         assertEquals(toolCalls.get(0).getId(), toolResults.get(0).getToolCallId());
         assertEquals("Tool execution cancelled by user.", toolResults.get(0).getError());
-        verify(toolRegistry, never()).execute(eq("calculator"), anyMap());
     }
 
     @Test
@@ -161,7 +197,7 @@ class AgentServiceTest {
     @Test
     void processMessageStreamingExecutesToolRequestsFromStreamingModel() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
-        when(toolRegistry.getAllTools()).thenReturn(Map.of(
+        when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
                 "get_current_time",
                 new TestToolDefinition("get_current_time", "Get the current time", Map.of(
                         "type", "object",
@@ -172,26 +208,11 @@ class AgentServiceTest {
                                 )
                         ),
                         "required", List.of("timezone")
-                ))
-        ));
-        when(toolRegistry.getTool("get_current_time")).thenReturn(
-                new TestToolDefinition("get_current_time", "Get the current time", Map.of(
-                        "type", "object",
-                        "properties", Map.of(
-                                "timezone", Map.of(
-                                        "type", "string",
-                                        "description", "IANA timezone name"
-                                )
-                        ),
-                        "required", List.of("timezone")
-                ))
-        );
-        when(toolRegistry.requiresConfirmation("get_current_time")).thenReturn(false);
-        when(toolRegistry.execute(eq("get_current_time"), eq(Map.of("timezone", "America/New_York"))))
-                .thenReturn(CompletableFuture.completedFuture(Map.of(
+                ), false, arguments -> CompletableFuture.completedFuture(Map.of(
                         "timezone", "America/New_York",
                         "formatted", "2026-03-18 09:31"
-                )));
+                )))
+        ));
 
         AtomicInteger invocationCount = new AtomicInteger();
         List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
@@ -251,13 +272,12 @@ class AgentServiceTest {
         assertEquals("tool-1", toolResults.get(0).getToolCallId());
         assertEquals("2026-03-18 09:31", ((Map<?, ?>) toolResults.get(0).getResult()).get("formatted"));
         assertTrue(streamedText.toString().contains("The current time in America/New_York is 2026-03-18 09:31."));
-        verify(toolRegistry).execute(eq("get_current_time"), eq(Map.of("timezone", "America/New_York")));
     }
 
     @Test
     void processMessageStreamingEmitsFrontendToolCallsFromManifestWithoutServerExecution() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
-        when(toolRegistry.getAllTools()).thenReturn(Map.of());
+        when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of());
 
         List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
@@ -284,9 +304,9 @@ class AgentServiceTest {
         agentService.processMessageStreaming(
                 "conversation-frontend-1",
                 "Use the custom client tool",
-                null,
+                (String) null,
                 "[{\"name\":\"custom_client_tool\",\"description\":\"Custom client tool\",\"inputSchema\":{\"type\":\"object\"},\"humanInTheLoop\":false,\"hasRender\":true}]",
-                List.of(),
+                List.<ChatMessage>of(),
                 token -> {
                 },
                 error -> {
@@ -311,7 +331,7 @@ class AgentServiceTest {
     @Test
     void processMessageStreamingDeduplicatesFrontendToolNamesThatOverlapBackendTools() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
-        when(toolRegistry.getAllTools()).thenReturn(Map.of(
+        when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
                 "calculator",
                 new TestToolDefinition("calculator", "Perform calculations", Map.of("type", "object"))
         ));
@@ -335,12 +355,12 @@ class AgentServiceTest {
         agentService.processMessageStreaming(
                 "conversation-dedup-tools",
                 "hi",
-                null,
+                (String) null,
                 """
                         [{"name":"calculator","description":"Frontend calculator","inputSchema":{"type":"object"},"humanInTheLoop":false,"hasRender":true},
                         {"name":"custom_client_tool","description":"Custom client tool","inputSchema":{"type":"object"},"humanInTheLoop":false,"hasRender":true}]
                         """,
-                List.of(),
+                List.<ChatMessage>of(),
                 token -> {
                 },
                 error -> {
@@ -365,21 +385,18 @@ class AgentServiceTest {
     @Test
     void processMessageStreamingFallsBackToWeatherToolWhenModelSkipsToolCall() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
-        when(toolRegistry.getAllTools()).thenReturn(Map.of(
+        when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
                 "get_weather",
                 new TestToolDefinition("get_weather", "Get the current weather", Map.of(
                         "type", "object",
                         "properties", Map.of("location", Map.of("type", "string")),
                         "required", List.of("location")
-                ))
-        ));
-        when(toolRegistry.requiresConfirmation("get_weather")).thenReturn(false);
-        when(toolRegistry.execute(eq("get_weather"), eq(Map.of("location", "Shanghai"))))
-                .thenReturn(CompletableFuture.completedFuture(Map.of(
+                ), false, arguments -> CompletableFuture.completedFuture(Map.of(
                         "location", "Shanghai",
                         "temperature", 22,
                         "conditions", "Partly Cloudy"
-                )));
+                )))
+        ));
 
         AtomicInteger invocationCount = new AtomicInteger();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
@@ -420,22 +437,18 @@ class AgentServiceTest {
         assertEquals(1, toolResults.size());
         assertEquals("Shanghai", ((Map<?, ?>) toolResults.get(0).getResult()).get("location"));
         assertTrue(streamedText.toString().contains("I'll check the current weather in Shanghai for you."));
-        verify(toolRegistry).execute(eq("get_weather"), eq(Map.of("location", "Shanghai")));
     }
 
     @Test
     void processMessageStreamingPreservesVisibleAssistantTextBeforeToolCalls() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
-        when(toolRegistry.getAllTools()).thenReturn(Map.of(
+        when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
                 "get_current_time",
-                new TestToolDefinition("get_current_time", "Get the current time", Map.of("type", "object"))
-        ));
-        when(toolRegistry.requiresConfirmation("get_current_time")).thenReturn(false);
-        when(toolRegistry.execute(eq("get_current_time"), eq(Map.of("timezone", "Asia/Shanghai"))))
-                .thenReturn(CompletableFuture.completedFuture(Map.of(
+                new TestToolDefinition("get_current_time", "Get the current time", Map.of("type", "object"), false, arguments -> CompletableFuture.completedFuture(Map.of(
                         "timezone", "Asia/Shanghai",
                         "formatted", "2026-03-25 12:30"
-                )));
+                )))
+        ));
 
         AtomicInteger invocationCount = new AtomicInteger();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
@@ -489,9 +502,9 @@ class AgentServiceTest {
     @Test
     void processMessageStreamingDoesNotReofferCompletedFrontendToolDuringContinuation() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
-        when(toolRegistry.getAllTools()).thenReturn(Map.of(
+        when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
                 "calculator",
-                new TestToolDefinition("calculator", "Perform calculations", Map.of("type", "object"))
+                new TestToolDefinition("calculator", "Perform calculations", Map.of("type", "object"), true, arguments -> CompletableFuture.completedFuture(Map.of("result", 4)))
         ));
 
         List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
@@ -552,8 +565,8 @@ class AgentServiceTest {
                 """
                         {"originalUserMessage":"Use the custom client tool and then explain the result.","toolCallId":"frontend-tool-1","toolName":"custom_client_tool","args":{"query":"workspace"},"result":{"routed":true},"isError":false}
                         """,
-                null,
-                List.of(),
+                (String) null,
+                List.<ChatMessage>of(),
                 streamedText::append,
                 error -> {
                     throw new AssertionError(error);
@@ -575,7 +588,7 @@ class AgentServiceTest {
     @Test
     void processMessageStreamingSkipsToolSpecificationsForPlainTextPrompts() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
-        when(toolRegistry.getAllTools()).thenReturn(Map.of(
+        when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
                 "calculator",
                 new TestToolDefinition("calculator", "Perform calculations", Map.of(
                         "type", "object",
@@ -586,20 +599,8 @@ class AgentServiceTest {
                                 )
                         ),
                         "required", List.of("expression")
-                ))
+                ), true, arguments -> CompletableFuture.completedFuture(Map.of("result", 4)))
         ));
-        when(toolRegistry.getTool("calculator")).thenReturn(
-                new TestToolDefinition("calculator", "Perform calculations", Map.of(
-                        "type", "object",
-                        "properties", Map.of(
-                                "expression", Map.of(
-                                        "type", "string",
-                                        "description", "Math expression"
-                                )
-                        ),
-                        "required", List.of("expression")
-                ))
-        );
 
         AtomicInteger requestCount = new AtomicInteger();
         List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
@@ -722,8 +723,37 @@ class AgentServiceTest {
         assertEquals(List.of(), diagnostics.get("toolNames"));
     }
 
-    private record TestToolDefinition(String name, String description, Map<String, Object> parameters)
-            implements com.fdc3.chatbot.tool.ToolDefinition {
+    private static final class TestToolDefinition implements com.fdc3.chatbot.tool.ToolDefinition {
+        private final String name;
+        private final String description;
+        private final Map<String, Object> parameters;
+        private final boolean requiresConfirmation;
+        private final java.util.function.Function<Map<String, Object>, CompletableFuture<Object>> executor;
+
+        private TestToolDefinition(
+                String name,
+                String description,
+                Map<String, Object> parameters
+        ) {
+            this(name, description, parameters, false, arguments -> {
+                throw new UnsupportedOperationException("Not used directly in this test");
+            });
+        }
+
+        private TestToolDefinition(
+                String name,
+                String description,
+                Map<String, Object> parameters,
+                boolean requiresConfirmation,
+                java.util.function.Function<Map<String, Object>, CompletableFuture<Object>> executor
+        ) {
+            this.name = name;
+            this.description = description;
+            this.parameters = parameters;
+            this.requiresConfirmation = requiresConfirmation;
+            this.executor = executor;
+        }
+
         @Override
         public String getName() {
             return name;
@@ -740,8 +770,13 @@ class AgentServiceTest {
         }
 
         @Override
+        public boolean requiresConfirmation() {
+            return requiresConfirmation;
+        }
+
+        @Override
         public CompletableFuture<Object> execute(Map<String, Object> arguments) {
-            throw new UnsupportedOperationException("Not used directly in this test");
+            return executor.apply(arguments);
         }
     }
 }

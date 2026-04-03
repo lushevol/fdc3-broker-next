@@ -77,6 +77,67 @@ The system SHALL allow registration of tools that can be executed by the AI agen
 - **THEN** the system SHALL surface that pending state to the client before execution
 - **AND** the confirmation endpoint SHALL resume or cancel the pending tool call using the same conversation and tool call identifiers
 
+### Requirement: Backend registers remote MCP providers
+
+The system SHALL allow other services to register remote Model Context Protocol (MCP) providers with the chatbot backend at runtime so the chatbot backend can discover and execute those remote tools.
+
+#### Scenario: Service registers an MCP provider
+
+- **WHEN** another service submits an MCP provider registration to the chatbot backend
+- **THEN** the chatbot backend SHALL persist that provider in its runtime registry
+- **AND** the chatbot backend SHALL establish an MCP client connection using the configured transport
+- **AND** the chatbot backend SHALL discover the provider's available MCP tools before exposing them to the agent
+
+#### Scenario: Service unregisters an MCP provider
+
+- **WHEN** another service unregisters a previously registered MCP provider
+- **THEN** the chatbot backend SHALL remove that provider from the runtime registry
+- **AND** the chatbot backend SHALL stop exposing the provider's tools to future chat requests
+
+#### Scenario: MCP provider registration fails
+
+- **WHEN** the chatbot backend cannot initialize or discover tools for a submitted MCP provider
+- **THEN** the registration request SHALL fail
+- **AND** the chatbot backend SHALL not expose any partially initialized tools from that provider
+
+### Requirement: Backend supports current MCP transport protocols
+
+The system SHALL support current MCP client transports, including the latest Streamable HTTP protocol, while preserving compatibility for legacy HTTP SSE MCP endpoints when explicitly configured.
+
+#### Scenario: Provider uses Streamable HTTP transport
+
+- **WHEN** an MCP provider is registered with Streamable HTTP transport
+- **THEN** the chatbot backend SHALL connect using a Streamable HTTP MCP client transport
+- **AND** the backend SHALL use the discovered MCP tool schemas when exposing those tools to the agent
+
+#### Scenario: Provider uses legacy HTTP SSE transport
+
+- **WHEN** an MCP provider is registered with legacy HTTP SSE transport
+- **THEN** the chatbot backend SHALL connect using an HTTP SSE MCP client transport
+- **AND** the backend SHALL continue to expose the discovered tools through the same tool execution contract
+
+### Requirement: Backend filters tools by authenticated user profile
+
+The system SHALL dynamically resolve the available backend tool and MCP capability set for each authenticated user based on profile claims carried by the user's authentication token.
+
+#### Scenario: User token includes matching profile claims
+
+- **WHEN** an authenticated user's token contains profile claims that match a tool or MCP provider's allowed profiles
+- **THEN** the chatbot backend SHALL include those capabilities in the tool set exposed for that request
+- **AND** the agent SHALL be able to call those resolved tools during that conversation turn
+
+#### Scenario: User token does not include matching profile claims
+
+- **WHEN** an authenticated user's token does not contain the required profile claims for a tool or MCP provider
+- **THEN** the chatbot backend SHALL exclude those capabilities from the tool set exposed for that request
+- **AND** the agent SHALL not receive those excluded tool schemas
+
+#### Scenario: Tool capability set is reused for repeated requests
+
+- **WHEN** the same authenticated user sends repeated requests with the same profile fingerprint
+- **THEN** the chatbot backend SHALL reuse a cached resolved capability set for that user profile
+- **AND** the cache SHALL be invalidated when the registry changes or the user's profile fingerprint changes
+
 ### Requirement: Backend uses Google ADK and LangChain4j
 
 The system SHALL be built using Google ADK Java with LangChain4j for agent orchestration.

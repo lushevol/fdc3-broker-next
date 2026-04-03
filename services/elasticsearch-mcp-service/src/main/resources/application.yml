@@ -1,0 +1,36 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: elasticsearch-mcp-service
+  ai:
+    mcp:
+      server:
+        name: elasticsearch-mcp-service
+        version: 0.0.1
+        type: SYNC
+        protocol: STREAMABLE
+        instructions: "Provides Elasticsearch-backed application usage analytics"
+        capabilities:
+          tool: true
+        streamable-http:
+          mcp-endpoint: /api/mcp
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+analytics:
+  elasticsearch:
+    url: ${ELASTICSEARCH_URL:http://localhost:9200}
+    api-key: ${ELASTICSEARCH_API_KEY:}
+    username: ${ELASTICSEARCH_USERNAME:}
+    password: ${ELASTICSEARCH_PASSWORD:}
+    index-name: ${ELASTICSEARCH_INDEX:user-operation-logs}
+    timestamp-field: ${ELASTICSEARCH_TIMESTAMP_FIELD:@timestamp}
+    app-id-field: ${ELASTICSEARCH_APP_ID_FIELD:appId}
+    app-name-field: ${ELASTICSEARCH_APP_NAME_FIELD:appName}
+    user-id-field: ${ELASTICSEARCH_USER_ID_FIELD:profileId}
