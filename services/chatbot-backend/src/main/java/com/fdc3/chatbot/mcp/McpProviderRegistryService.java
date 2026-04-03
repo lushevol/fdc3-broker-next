@@ -57,7 +57,7 @@ public class McpProviderRegistryService {
     private record RemoteMcpToolDefinition(
             McpToolDescriptor descriptor,
             McpClientFactory.McpClientSession session
-    ) implements ToolDefinition {
+    ) implements ToolDefinition, AutoCloseable {
 
         @Override
         public String getName() {
@@ -77,6 +77,11 @@ public class McpProviderRegistryService {
         @Override
         public CompletableFuture<Object> execute(Map<String, Object> arguments) {
             return session.execute(descriptor.name(), arguments);
+        }
+
+        @Override
+        public void close() {
+            session.close();
         }
     }
 }

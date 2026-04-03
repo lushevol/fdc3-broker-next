@@ -13,8 +13,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class McpProviderRegistryServiceTest {
@@ -35,7 +37,13 @@ class McpProviderRegistryServiceTest {
                 new McpToolDescriptor(
                         "portfolio_lookup",
                         "Lookup user portfolios",
-                        Map.of("type", "object")
+                        Map.of(
+                                "type", "object",
+                                "properties", Map.of(
+                                        "accountId", Map.of("type", "string", "description", "Account identifier")
+                                ),
+                                "required", List.of("accountId")
+                        )
                 )
         ));
         when(clientSession.execute("portfolio_lookup", Map.of("accountId", "ACC-1")))
@@ -61,9 +69,22 @@ class McpProviderRegistryServiceTest {
 
         assertTrue(advisorTools.containsKey("calculator"));
         assertTrue(advisorTools.containsKey("portfolio_lookup"));
+        assertEquals(
+                Map.of(
+                        "type", "object",
+                        "properties", Map.of(
+                                "accountId", Map.of("type", "string", "description", "Account identifier")
+                        ),
+                        "required", List.of("accountId")
+                ),
+                advisorTools.get("portfolio_lookup").getParameters()
+        );
         assertTrue(registryService.listProviders().stream().anyMatch(provider -> "portfolio-service".equals(provider.getProviderId())));
         assertTrue(defaultTools.containsKey("calculator"));
         assertFalse(defaultTools.containsKey("portfolio_lookup"));
+
+        registryService.unregister("portfolio-service");
+        verify(clientSession).close();
     }
 
     private static final class TestToolDefinition implements ToolDefinition {
