@@ -46,4 +46,27 @@ public class CapabilityResolver {
                 .availableToolNames(List.of(definition.getTargetName()))
                 .build();
     }
+
+    public static List<CapabilityPromptSummary> summarizeForPrompt(List<ResolvedCapability> capabilities) {
+        return capabilities.stream()
+                .map(capability -> new CapabilityPromptSummary(
+                        capability.getCapabilityId(),
+                        capability.getProviderId(),
+                        capability.getTargetName(),
+                        List.copyOf(capability.getRequiredInputs()),
+                        List.copyOf(capability.getOptionalInputs()),
+                        List.copyOf(capability.getPromptHints())
+                ))
+                .toList();
+    }
+
+    public record CapabilityPromptSummary(
+            String capabilityId,
+            String providerId,
+            String targetName,
+            List<String> requiredInputs,
+            List<String> optionalInputs,
+            List<String> promptHints
+    ) {
+    }
 }
