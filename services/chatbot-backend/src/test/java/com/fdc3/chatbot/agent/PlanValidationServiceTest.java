@@ -75,6 +75,7 @@ class PlanValidationServiceTest {
         );
 
         assertThat(result.valid()).isTrue();
+        assertThat(result.reviewRequired()).isFalse();
         assertThat(result.assistantMessage()).isNull();
         assertThat(result.validatedPlan()).isNotNull();
         assertThat(result.validatedPlan().steps()).hasSize(1);
@@ -86,6 +87,80 @@ class PlanValidationServiceTest {
                 .containsEntry("to", "2026-04-08");
         assertThat(result.validatedPlan().steps().get(0).policyDecision().getDecisionType())
                 .isEqualTo(PolicyDecisionType.ALLOW);
+    }
+
+    @Test
+    void markReviewRequiredStepWithExplicitPlanSignal() {
+        PlanValidationService service = new PlanValidationService(new PolicyEvaluator());
+
+        PlanValidationService.PlanValidationResult result = service.validate(
+                decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
+                        "analytics.app-usage.read",
+                        Map.of(
+                                "appName", "cashflow",
+                                "from", "2026-04-01",
+                                "to", "2026-04-08",
+                                "crossTenant", true
+                        )
+                )))),
+                List.of(analyticsReadCapability()),
+                UserCapabilityContext.anonymous()
+        );
+
+        assertThat(result.valid()).isTrue();
+        assertThat(result.reviewRequired()).isTrue();
+        assertThat(result.assistantMessage()).isNull();
+        assertThat(result.validatedPlan()).isNotNull();
+        assertThat(result.validatedPlan().steps()).hasSize(1);
+        assertThat(result.validatedPlan().steps().get(0).policyDecision().getDecisionType())
+                .isEqualTo(PolicyDecisionType.REVIEW_REQUIRED);
+    }
+
+    @Test
+    void rejectNullPlanStepWithoutThrowing() {
+        PlanValidationService service = new PlanValidationService(new PolicyEvaluator());
+
+        PlanValidationService.PlanValidationResult result = service.validate(
+                decisionWithPlan(new AgentPlan(java.util.Collections.singletonList(null))),
+                List.of(analyticsReadCapability()),
+                UserCapabilityContext.anonymous()
+        );
+
+        assertThat(result.valid()).isFalse();
+        assertThat(result.reviewRequired()).isFalse();
+        assertThat(result.validatedPlan()).isNull();
+        assertThat(result.assistantMessage()).isEqualTo(
+                "I can’t execute that request because the proposed plan is invalid."
+        );
+    }
+
+    @Test
+    void allowValidationWhenRequiredInputMetadataIsNull() {
+        PlanValidationService service = new PlanValidationService(new PolicyEvaluator());
+
+        PlanValidationService.PlanValidationResult result = service.validate(
+                decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
+                        "analytics.app-usage.read",
+                        Map.of("crossTenant", false)
+                )))),
+                List.of(ResolvedCapability.builder()
+                        .capabilityId("analytics.app-usage.read")
+                        .providerId("mcp")
+                        .targetName("statistic_count_by_app")
+                        .executionType("mcp")
+                        .accessType("read")
+                        .tenantScope("global")
+                        .requiredInputs(null)
+                        .optionalInputs(List.of("workspaceId"))
+                        .build()),
+                UserCapabilityContext.anonymous()
+        );
+
+        assertThat(result.valid()).isTrue();
+        assertThat(result.reviewRequired()).isFalse();
+        assertThat(result.assistantMessage()).isNull();
+        assertThat(result.validatedPlan()).isNotNull();
+        assertThat(result.validatedPlan().steps()).hasSize(1);
     }
 
     private static ResolvedCapability analyticsReadCapability() {

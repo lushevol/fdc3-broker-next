@@ -31,6 +31,8 @@ public class PlanValidationService {
             "I need more information before I can execute that request.";
     static final String DENIED_BY_POLICY_MESSAGE =
             "I can’t execute that request because it is not allowed.";
+    static final String MALFORMED_PLAN_MESSAGE =
+            "I can’t execute that request because the proposed plan is invalid.";
 
     private final PolicyEvaluator policyEvaluator;
 
@@ -66,8 +68,13 @@ public class PlanValidationService {
                 ));
 
         List<ValidatedExecutionStep> validatedSteps = new ArrayList<>();
+        boolean reviewRequired = false;
 
         for (AgentPlanStep proposedStep : proposedSteps) {
+            if (proposedStep == null || proposedStep.capabilityId() == null || proposedStep.capabilityId().isBlank()) {
+                return PlanValidationResult.invalid(MALFORMED_PLAN_MESSAGE);
+            }
+
             ResolvedCapability resolvedCapability = capabilitiesById.get(proposedStep.capabilityId());
             if (resolvedCapability == null) {
                 return PlanValidationResult.invalid(UNKNOWN_CAPABILITY_MESSAGE);
@@ -85,6 +92,9 @@ public class PlanValidationService {
             if (policyDecision.getDecisionType() == PolicyDecisionType.DENY) {
                 return PlanValidationResult.invalid(DENIED_BY_POLICY_MESSAGE);
             }
+            if (policyDecision.getDecisionType() == PolicyDecisionType.REVIEW_REQUIRED) {
+                reviewRequired = true;
+            }
 
             validatedSteps.add(new ValidatedExecutionStep(
                     resolvedCapability.getCapabilityId(),
@@ -94,13 +104,17 @@ public class PlanValidationService {
             ));
         }
 
-        return PlanValidationResult.valid(new ValidatedExecutionPlan(validatedSteps));
+        return PlanValidationResult.valid(new ValidatedExecutionPlan(validatedSteps), reviewRequired);
     }
 
     private boolean hasMissingRequiredInputs(ResolvedCapability capability, Map<String, Object> arguments) {
         Set<String> providedKeys = arguments == null ? Set.of() : arguments.keySet();
+        List<String> requiredInputs = capability.getRequiredInputs() == null ? List.of() : capability.getRequiredInputs();
 
-        for (String requiredInput : capability.getRequiredInputs()) {
+        for (String requiredInput : requiredInputs) {
+            if (requiredInput == null || requiredInput.isBlank()) {
+                continue;
+            }
             if (!providedKeys.contains(requiredInput) || isMissingValue(arguments.get(requiredInput))) {
                 return true;
             }
@@ -123,16 +137,17 @@ public class PlanValidationService {
 
     public record PlanValidationResult(
             boolean valid,
+            boolean reviewRequired,
             String assistantMessage,
             ValidatedExecutionPlan validatedPlan
     ) {
 
-        static PlanValidationResult valid(ValidatedExecutionPlan validatedPlan) {
-            return new PlanValidationResult(true, null, validatedPlan);
+        static PlanValidationResult valid(ValidatedExecutionPlan validatedPlan, boolean reviewRequired) {
+            return new PlanValidationResult(true, reviewRequired, null, validatedPlan);
         }
 
         static PlanValidationResult invalid(String assistantMessage) {
-            return new PlanValidationResult(false, assistantMessage, null);
+            return new PlanValidationResult(false, false, assistantMessage, null);
         }
     }
 }

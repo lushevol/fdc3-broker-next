@@ -25,6 +25,10 @@ public class PolicyEvaluator {
             UserCapabilityContext userCapabilityContext
     ) {
         List<String> reasons = new ArrayList<>();
+        Map<String, Object> safeArguments = arguments == null ? Map.of() : arguments;
+        UserCapabilityContext safeUserContext = userCapabilityContext == null
+                ? UserCapabilityContext.anonymous()
+                : userCapabilityContext;
 
         if (capability.getTenantScope() != null && !"global".equals(capability.getTenantScope())) {
             reasons.add("Missing tenant scope for capability " + capability.getTenantScope());
@@ -35,6 +39,18 @@ public class PolicyEvaluator {
         }
 
         if ("mcp".equals(capability.getExecutionType()) && !"read".equals(capability.getAccessType())) {
+            return PolicyDecision.builder()
+                    .decisionType(PolicyDecisionType.REVIEW_REQUIRED)
+                    .reasons(reasons)
+                    .build();
+        }
+
+        if ("mcp".equals(capability.getExecutionType())
+                && "read".equals(capability.getAccessType())
+                && Boolean.TRUE.equals(safeArguments.get("crossTenant"))
+                && (safeUserContext.getProfiles() == null
+                || !safeUserContext.getProfiles().contains("cross-tenant-approved"))) {
+            reasons.add("Cross-tenant read requires review for the current user context");
             return PolicyDecision.builder()
                     .decisionType(PolicyDecisionType.REVIEW_REQUIRED)
                     .reasons(reasons)
