@@ -8,6 +8,7 @@ import com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot;
 import com.fdc3.chatbot.model.ChatMessage;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessageType;
+import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -126,6 +127,37 @@ class AgentDecisionServiceTest {
         assertThat(prompt).contains("\"activeAppId\":\"cashflow\"");
         assertThat(request.messages().get(1).type()).isEqualTo(ChatMessageType.USER);
         assertThat(((UserMessage) request.messages().get(1)).singleText()).isEqualTo("hello");
+    }
+
+    @Test
+    void shouldForwardConversationHistoryIntoDecisionRequest() {
+        CapturingChatModel chatModel =
+                new CapturingChatModel("{\"decisionType\":\"respond\",\"assistantText\":\"Using history.\"}");
+        AgentDecisionService service = new AgentDecisionService(chatModel, new AgentDecisionPromptFactory());
+
+        service.decide(
+                "current question",
+                List.of(
+                        ChatMessage.builder().role(ChatMessage.Role.SYSTEM).content("system history").build(),
+                        ChatMessage.builder().role(ChatMessage.Role.USER).content("previous user").build(),
+                        ChatMessage.builder().role(ChatMessage.Role.ASSISTANT).content("previous assistant").build()
+                ),
+                List.of(),
+                null
+        );
+
+        ChatRequest request = chatModel.capturedRequest();
+        assertThat(request.messages()).hasSize(5);
+        assertThat(request.messages().get(0)).isInstanceOf(SystemMessage.class);
+        assertThat(((SystemMessage) request.messages().get(0)).text()).contains("Allowed decisionType values");
+        assertThat(request.messages().get(1)).isInstanceOf(SystemMessage.class);
+        assertThat(((SystemMessage) request.messages().get(1)).text()).isEqualTo("system history");
+        assertThat(request.messages().get(2)).isInstanceOf(UserMessage.class);
+        assertThat(((UserMessage) request.messages().get(2)).singleText()).isEqualTo("previous user");
+        assertThat(request.messages().get(3)).isInstanceOf(AiMessage.class);
+        assertThat(((AiMessage) request.messages().get(3)).text()).isEqualTo("previous assistant");
+        assertThat(request.messages().get(4)).isInstanceOf(UserMessage.class);
+        assertThat(((UserMessage) request.messages().get(4)).singleText()).isEqualTo("current question");
     }
 
     private static final class CapturingChatModel implements ChatModel {
