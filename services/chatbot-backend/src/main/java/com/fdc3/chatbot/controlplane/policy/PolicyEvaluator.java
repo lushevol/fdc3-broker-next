@@ -1,6 +1,7 @@
 package com.fdc3.chatbot.controlplane.policy;
 
 import com.fdc3.chatbot.controlplane.model.ResolvedCapability;
+import com.fdc3.chatbot.model.UserCapabilityContext;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -11,10 +12,18 @@ import java.util.Map;
 public class PolicyEvaluator {
 
     public PolicyDecision evaluate(ResolvedCapability capability) {
-        return evaluate(capability, Map.of());
+        return evaluate(capability, Map.of(), UserCapabilityContext.anonymous());
     }
 
     public PolicyDecision evaluate(ResolvedCapability capability, Map<String, Object> arguments) {
+        return evaluate(capability, arguments, UserCapabilityContext.anonymous());
+    }
+
+    public PolicyDecision evaluate(
+            ResolvedCapability capability,
+            Map<String, Object> arguments,
+            UserCapabilityContext userCapabilityContext
+    ) {
         List<String> reasons = new ArrayList<>();
 
         if (capability.getTenantScope() != null && !"global".equals(capability.getTenantScope())) {

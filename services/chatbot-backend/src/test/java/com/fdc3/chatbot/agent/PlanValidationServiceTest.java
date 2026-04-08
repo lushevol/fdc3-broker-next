@@ -1,10 +1,13 @@
 package com.fdc3.chatbot.agent;
 
+import com.fdc3.chatbot.agent.model.AgentDecision;
+import com.fdc3.chatbot.agent.model.AgentDecisionType;
 import com.fdc3.chatbot.agent.model.AgentPlan;
 import com.fdc3.chatbot.agent.model.AgentPlanStep;
 import com.fdc3.chatbot.controlplane.model.ResolvedCapability;
 import com.fdc3.chatbot.controlplane.policy.PolicyDecisionType;
 import com.fdc3.chatbot.controlplane.policy.PolicyEvaluator;
+import com.fdc3.chatbot.model.UserCapabilityContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -19,11 +22,12 @@ class PlanValidationServiceTest {
         PlanValidationService service = new PlanValidationService(new PolicyEvaluator());
 
         PlanValidationService.PlanValidationResult result = service.validate(
-                new AgentPlan(List.of(new AgentPlanStep(
+                decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
                         "analytics.unknown.read",
                         Map.of("appName", "cashflow")
-                ))),
-                List.of(analyticsReadCapability())
+                )))),
+                List.of(analyticsReadCapability()),
+                UserCapabilityContext.anonymous()
         );
 
         assertThat(result.valid()).isFalse();
@@ -38,11 +42,12 @@ class PlanValidationServiceTest {
         PlanValidationService service = new PlanValidationService(new PolicyEvaluator());
 
         PlanValidationService.PlanValidationResult result = service.validate(
-                new AgentPlan(List.of(new AgentPlanStep(
+                decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
                         "analytics.app-usage.read",
                         Map.of("appName", "cashflow")
-                ))),
-                List.of(analyticsReadCapability())
+                )))),
+                List.of(analyticsReadCapability()),
+                UserCapabilityContext.anonymous()
         );
 
         assertThat(result.valid()).isFalse();
@@ -57,15 +62,16 @@ class PlanValidationServiceTest {
         PlanValidationService service = new PlanValidationService(new PolicyEvaluator());
 
         PlanValidationService.PlanValidationResult result = service.validate(
-                new AgentPlan(List.of(new AgentPlanStep(
+                decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
                         "analytics.app-usage.read",
                         Map.of(
                                 "appName", "cashflow",
                                 "from", "2026-04-01",
                                 "to", "2026-04-08"
                         )
-                ))),
-                List.of(analyticsReadCapability())
+                )))),
+                List.of(analyticsReadCapability()),
+                UserCapabilityContext.anonymous()
         );
 
         assertThat(result.valid()).isTrue();
@@ -73,6 +79,7 @@ class PlanValidationServiceTest {
         assertThat(result.validatedPlan()).isNotNull();
         assertThat(result.validatedPlan().steps()).hasSize(1);
         assertThat(result.validatedPlan().steps().get(0).capabilityId()).isEqualTo("analytics.app-usage.read");
+        assertThat(result.validatedPlan().steps().get(0).capability()).isEqualTo(analyticsReadCapability());
         assertThat(result.validatedPlan().steps().get(0).arguments())
                 .containsEntry("appName", "cashflow")
                 .containsEntry("from", "2026-04-01")
@@ -92,5 +99,9 @@ class PlanValidationServiceTest {
                 .requiredInputs(List.of("appName", "from", "to"))
                 .optionalInputs(List.of("workspaceId"))
                 .build();
+    }
+
+    private static AgentDecision decisionWithPlan(AgentPlan plan) {
+        return new AgentDecision(AgentDecisionType.PLAN, "Working on it.", null, plan);
     }
 }

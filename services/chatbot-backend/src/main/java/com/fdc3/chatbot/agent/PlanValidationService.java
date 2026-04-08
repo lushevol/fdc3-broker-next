@@ -1,5 +1,6 @@
 package com.fdc3.chatbot.agent;
 
+import com.fdc3.chatbot.agent.model.AgentDecision;
 import com.fdc3.chatbot.agent.model.AgentPlan;
 import com.fdc3.chatbot.agent.model.AgentPlanStep;
 import com.fdc3.chatbot.agent.model.ValidatedExecutionPlan;
@@ -8,6 +9,7 @@ import com.fdc3.chatbot.controlplane.model.ResolvedCapability;
 import com.fdc3.chatbot.controlplane.policy.PolicyDecision;
 import com.fdc3.chatbot.controlplane.policy.PolicyDecisionType;
 import com.fdc3.chatbot.controlplane.policy.PolicyEvaluator;
+import com.fdc3.chatbot.model.UserCapabilityContext;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -37,6 +39,19 @@ public class PlanValidationService {
     }
 
     public PlanValidationResult validate(AgentPlan proposedPlan, List<ResolvedCapability> allowedCapabilities) {
+        return validate(
+                new AgentDecision(null, null, null, proposedPlan),
+                allowedCapabilities,
+                UserCapabilityContext.anonymous()
+        );
+    }
+
+    public PlanValidationResult validate(
+            AgentDecision agentDecision,
+            List<ResolvedCapability> allowedCapabilities,
+            UserCapabilityContext userCapabilityContext
+    ) {
+        AgentPlan proposedPlan = agentDecision == null ? null : agentDecision.plan();
         List<AgentPlanStep> proposedSteps = proposedPlan == null || proposedPlan.steps() == null
                 ? List.of()
                 : proposedPlan.steps();
@@ -62,17 +77,18 @@ public class PlanValidationService {
                 return PlanValidationResult.invalid(MISSING_INPUTS_MESSAGE);
             }
 
-            PolicyDecision policyDecision = policyEvaluator.evaluate(resolvedCapability, proposedStep.arguments());
+            PolicyDecision policyDecision = policyEvaluator.evaluate(
+                    resolvedCapability,
+                    proposedStep.arguments(),
+                    userCapabilityContext == null ? UserCapabilityContext.anonymous() : userCapabilityContext
+            );
             if (policyDecision.getDecisionType() == PolicyDecisionType.DENY) {
                 return PlanValidationResult.invalid(DENIED_BY_POLICY_MESSAGE);
             }
 
             validatedSteps.add(new ValidatedExecutionStep(
                     resolvedCapability.getCapabilityId(),
-                    resolvedCapability.getProviderId(),
-                    resolvedCapability.getTargetName(),
-                    resolvedCapability.getExecutionType(),
-                    resolvedCapability.getAccessType(),
+                    resolvedCapability,
                     immutableArguments(proposedStep.arguments()),
                     policyDecision
             ));
