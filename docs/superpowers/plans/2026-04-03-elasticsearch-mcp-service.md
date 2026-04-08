@@ -13,6 +13,7 @@
 ### Task 1: Scaffold the New Service Workspace
 
 **Files:**
+
 - Create: `services/elasticsearch-mcp-service/pom.xml`
 - Create: `services/elasticsearch-mcp-service/package.json`
 - Create: `services/elasticsearch-mcp-service/README.md`
@@ -55,6 +56,7 @@ git commit -m "feat: scaffold elasticsearch mcp service"
 ### Task 2: Add Request and Response Models for Both Tools
 
 **Files:**
+
 - Create: `services/elasticsearch-mcp-service/src/main/java/com/fdc3/elasticsearchmcp/tool/model/AppStatisticCountRequest.java`
 - Create: `services/elasticsearch-mcp-service/src/main/java/com/fdc3/elasticsearchmcp/tool/model/AppStatisticCountResponse.java`
 - Create: `services/elasticsearch-mcp-service/src/main/java/com/fdc3/elasticsearchmcp/tool/model/AppChartRequest.java`
@@ -65,6 +67,7 @@ git commit -m "feat: scaffold elasticsearch mcp service"
 - [ ] **Step 1: Write failing validation tests**
 
 Cover:
+
 - missing both `appId` and `appName`
 - `startTime >= endTime`
 - blank strings rejected
@@ -93,6 +96,7 @@ git commit -m "feat: add analytics tool request models"
 ### Task 3: Implement Analytics Service Logic
 
 **Files:**
+
 - Create: `services/elasticsearch-mcp-service/src/main/java/com/fdc3/elasticsearchmcp/service/AppAnalyticsService.java`
 - Create: `services/elasticsearch-mcp-service/src/main/java/com/fdc3/elasticsearchmcp/service/BucketResolver.java`
 - Create: `services/elasticsearch-mcp-service/src/main/java/com/fdc3/elasticsearchmcp/service/model/AppFilter.java`
@@ -104,6 +108,7 @@ git commit -m "feat: add analytics tool request models"
 - [ ] **Step 1: Write failing service tests**
 
 Cover:
+
 - `appId` overrides `appName`
 - auto bucket selection for short and medium durations
 - repository results map into the two tool response shapes
@@ -132,6 +137,7 @@ git commit -m "feat: add analytics service layer"
 ### Task 4: Implement Elasticsearch Repository and Configuration
 
 **Files:**
+
 - Create: `services/elasticsearch-mcp-service/src/main/java/com/fdc3/elasticsearchmcp/config/ElasticsearchAnalyticsProperties.java`
 - Create: `services/elasticsearch-mcp-service/src/main/java/com/fdc3/elasticsearchmcp/config/ElasticsearchClientConfig.java`
 - Create: `services/elasticsearch-mcp-service/src/main/java/com/fdc3/elasticsearchmcp/repository/ElasticsearchAppAnalyticsRepository.java`
@@ -141,6 +147,7 @@ git commit -m "feat: add analytics service layer"
 - [ ] **Step 1: Write failing repository tests**
 
 Cover:
+
 - canonical app filter produces the expected term query
 - aggregate query includes total count plus user cardinality aggregation
 - chart query includes date histogram plus per-bucket cardinality aggregation
@@ -153,6 +160,7 @@ Expected: FAIL because the repository implementation does not exist.
 - [ ] **Step 3: Implement minimal Elasticsearch client config and repository**
 
 Externalize:
+
 - index name
 - timestamp field
 - app id field
@@ -174,6 +182,7 @@ git commit -m "feat: add elasticsearch analytics repository"
 ### Task 5: Expose MCP Tools
 
 **Files:**
+
 - Create: `services/elasticsearch-mcp-service/src/main/java/com/fdc3/elasticsearchmcp/tool/AppAnalyticsMcpTools.java`
 - Create: `services/elasticsearch-mcp-service/src/main/java/com/fdc3/elasticsearchmcp/config/McpToolConfig.java`
 - Test: `services/elasticsearch-mcp-service/src/test/java/com/fdc3/elasticsearchmcp/tool/AppAnalyticsMcpToolsTest.java`
@@ -181,6 +190,7 @@ git commit -m "feat: add elasticsearch analytics repository"
 - [ ] **Step 1: Write failing tool tests**
 
 Cover:
+
 - `statistic_count_by_app` delegates to service and returns the expected response
 - `chart_by_app` delegates to service and returns the expected response
 - validation errors propagate as deterministic exceptions
@@ -209,6 +219,7 @@ git commit -m "feat: expose app analytics mcp tools"
 ### Task 6: Documentation and Verification
 
 **Files:**
+
 - Modify: `package.json`
 - Modify: `README.md`
 - Modify: `services/elasticsearch-mcp-service/README.md`
@@ -230,6 +241,7 @@ Expected: PASS if the workspace is wired into Turbo execution; otherwise documen
 - [ ] **Step 4: Final review**
 
 Confirm:
+
 - no `any`
 - no hardcoded schema field names outside configuration defaults
 - README covers configuration and sample tool usage

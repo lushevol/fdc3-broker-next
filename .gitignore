@@ -42,3 +42,5 @@ prisma/migrations/*/migration.sql
 
 *storybook.log
 storybook-static
+.playwright-cli/*
+output/playwright/*

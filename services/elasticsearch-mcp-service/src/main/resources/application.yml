@@ -11,7 +11,7 @@ spring:
         version: 0.0.1
         type: SYNC
         protocol: STREAMABLE
-        instructions: "Provides Elasticsearch-backed application usage analytics"
+        instructions: 'Provides Elasticsearch-backed application usage analytics'
         capabilities:
           tool: true
         streamable-http:
