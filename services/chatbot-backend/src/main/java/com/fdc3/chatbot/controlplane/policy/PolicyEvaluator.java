@@ -5,11 +5,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PolicyEvaluator {
 
     public PolicyDecision evaluate(ResolvedCapability capability) {
+        return evaluate(capability, Map.of());
+    }
+
+    public PolicyDecision evaluate(ResolvedCapability capability, Map<String, Object> arguments) {
         List<String> reasons = new ArrayList<>();
 
         if (capability.getTenantScope() != null && !"global".equals(capability.getTenantScope())) {
