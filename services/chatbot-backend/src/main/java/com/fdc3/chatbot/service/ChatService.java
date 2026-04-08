@@ -1,7 +1,10 @@
 package com.fdc3.chatbot.service;
 
 import com.fdc3.chatbot.agent.AgentService;
+import com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot;
 import com.fdc3.chatbot.model.ChatMessage;
+import com.fdc3.chatbot.model.ExecutionPlanEvent;
+import com.fdc3.chatbot.model.ExecutionStepEvent;
 import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
@@ -44,9 +47,14 @@ public class ChatService {
                 UserCapabilityContext.anonymous(),
                 null,
                 null,
+                null,
                 onNext,
                 onError,
                 onComplete,
+                executionPlanEvent -> {
+                },
+                executionStepEvent -> {
+                },
                 toolCall -> {
                 },
                 toolResult -> {
@@ -71,9 +79,14 @@ public class ChatService {
                 UserCapabilityContext.anonymous(),
                 null,
                 null,
+                null,
                 onNext,
                 onError,
                 onComplete,
+                executionPlanEvent -> {
+                },
+                executionStepEvent -> {
+                },
                 onToolCall,
                 onToolResult,
                 generativeUiDirective -> {
@@ -97,9 +110,14 @@ public class ChatService {
                 UserCapabilityContext.anonymous(),
                 toolContext,
                 null,
+                null,
                 onNext,
                 onError,
                 onComplete,
+                executionPlanEvent -> {
+                },
+                executionStepEvent -> {
+                },
                 onToolCall,
                 onToolResult
         );
@@ -122,9 +140,14 @@ public class ChatService {
                 UserCapabilityContext.anonymous(),
                 toolContext,
                 null,
+                null,
                 onNext,
                 onError,
                 onComplete,
+                executionPlanEvent -> {
+                },
+                executionStepEvent -> {
+                },
                 onToolCall,
                 onToolResult,
                 onGenerativeUi
@@ -148,9 +171,14 @@ public class ChatService {
                 UserCapabilityContext.anonymous(),
                 toolContext,
                 frontendTools,
+                null,
                 onNext,
                 onError,
                 onComplete,
+                executionPlanEvent -> {
+                },
+                executionStepEvent -> {
+                },
                 onToolCall,
                 onToolResult,
                 generativeUiDirective -> {
@@ -164,6 +192,7 @@ public class ChatService {
             UserCapabilityContext capabilityContext,
             String toolContext,
             String frontendTools,
+            WorkspaceContextSnapshot workspaceContext,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
             java.lang.Runnable onComplete
@@ -174,9 +203,14 @@ public class ChatService {
                 capabilityContext,
                 toolContext,
                 frontendTools,
+                workspaceContext,
                 onNext,
                 onError,
                 onComplete,
+                executionPlanEvent -> {
+                },
+                executionStepEvent -> {
+                },
                 toolCall -> {
                 },
                 toolResult -> {
@@ -190,9 +224,12 @@ public class ChatService {
             UserCapabilityContext capabilityContext,
             String toolContext,
             String frontendTools,
+            WorkspaceContextSnapshot workspaceContext,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
             java.lang.Runnable onComplete,
+            java.util.function.Consumer<ExecutionPlanEvent> onExecutionPlan,
+            java.util.function.Consumer<ExecutionStepEvent> onExecutionStep,
             java.util.function.Consumer<ToolCall> onToolCall,
             java.util.function.Consumer<ToolResult> onToolResult,
             java.util.function.Consumer<GenerativeUIDirective> onGenerativeUi
@@ -219,6 +256,7 @@ public class ChatService {
                 capabilityContext,
                 toolContext,
                 frontendTools,
+                workspaceContext,
                 promptHistory,
                 token -> {
                     if (cancelled.get()) {
@@ -239,6 +277,18 @@ public class ChatService {
                     }
                     history.add(buildAssistantMessage(assistantResponse, toolCalls, toolResults));
                     onComplete.run();
+                },
+                executionPlanEvent -> {
+                    if (cancelled.get()) {
+                        return;
+                    }
+                    onExecutionPlan.accept(executionPlanEvent);
+                },
+                executionStepEvent -> {
+                    if (cancelled.get()) {
+                        return;
+                    }
+                    onExecutionStep.accept(executionStepEvent);
                 },
                 toolCall -> {
                     if (cancelled.get()) {
@@ -271,9 +321,12 @@ public class ChatService {
             UserCapabilityContext capabilityContext,
             String toolContext,
             String frontendTools,
+            WorkspaceContextSnapshot workspaceContext,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
             java.lang.Runnable onComplete,
+            java.util.function.Consumer<ExecutionPlanEvent> onExecutionPlan,
+            java.util.function.Consumer<ExecutionStepEvent> onExecutionStep,
             java.util.function.Consumer<ToolCall> onToolCall,
             java.util.function.Consumer<ToolResult> onToolResult
     ) {
@@ -283,13 +336,39 @@ public class ChatService {
                 capabilityContext,
                 toolContext,
                 frontendTools,
+                workspaceContext,
                 onNext,
                 onError,
                 onComplete,
+                onExecutionPlan,
+                onExecutionStep,
                 onToolCall,
                 onToolResult,
                 generativeUiDirective -> {
                 }
+        );
+    }
+
+    public Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            UserCapabilityContext capabilityContext,
+            String toolContext,
+            String frontendTools,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                capabilityContext,
+                toolContext,
+                frontendTools,
+                null,
+                onNext,
+                onError,
+                onComplete
         );
     }
 

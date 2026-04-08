@@ -1,6 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { GenerativeUIProvider, useGenerativeUI, RegisteredComponent } from '../common/GenerativeUI';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import {
+  GenerativeUIProvider,
+  useGenerativeUI,
+  RegisteredComponent,
+  DEFAULT_GENERATIVE_COMPONENTS,
+} from '../common/GenerativeUI';
 
 // Test component to access the registry
 const TestComponent = () => {
@@ -64,5 +70,61 @@ describe('GenerativeUI', () => {
     );
 
     expect(screen.getByText(/Unknown component: Unknown/)).toBeInTheDocument();
+  });
+
+  it('renders usage statistics card totals and trend labels', () => {
+    render(
+      <GenerativeUIProvider initialComponents={DEFAULT_GENERATIVE_COMPONENTS}>
+        <RegisteredComponent
+          name="UsageStatisticsCard"
+          props={{
+            appLabel: 'cashflow',
+            startTime: '2026-04-01T00:00:00Z',
+            endTime: '2026-04-08T00:00:00Z',
+            pv: 120,
+            uv: 30,
+            trendPoints: [
+              { timestamp: '2026-04-01T00:00:00Z', pv: 50, uv: 12 },
+              { timestamp: '2026-04-08T00:00:00Z', pv: 70, uv: 18 },
+            ],
+          }}
+        />
+      </GenerativeUIProvider>,
+    );
+
+    expect(screen.getByText('cashflow')).toBeInTheDocument();
+    expect(screen.getByText('PV')).toBeInTheDocument();
+    expect(screen.getByText('UV')).toBeInTheDocument();
+    expect(screen.getByText('120')).toBeInTheDocument();
+    expect(screen.getByText('30')).toBeInTheDocument();
+    expect(screen.getByText('PV Trend')).toBeInTheDocument();
+    expect(screen.getByText('UV Trend')).toBeInTheDocument();
+  });
+
+  it('adapts usage statistics card surfaces for dark theme', () => {
+    render(
+      <ThemeProvider theme={createTheme({ palette: { mode: 'dark' } })}>
+        <GenerativeUIProvider initialComponents={DEFAULT_GENERATIVE_COMPONENTS}>
+          <RegisteredComponent
+            name="UsageStatisticsCard"
+            props={{
+              appLabel: 'cashflow',
+              startTime: '2026-04-01T00:00:00Z',
+              endTime: '2026-04-08T00:00:00Z',
+              pv: 120,
+              uv: 30,
+              trendPoints: [
+                { timestamp: '2026-04-01T00:00:00Z', pv: 50, uv: 12 },
+                { timestamp: '2026-04-08T00:00:00Z', pv: 70, uv: 18 },
+              ],
+            }}
+          />
+        </GenerativeUIProvider>
+      </ThemeProvider>,
+    );
+
+    expect(screen.getByTestId('usage-statistics-card')).toBeInTheDocument();
+    expect(screen.getByTestId('usage-statistics-pv-tile')).toBeInTheDocument();
+    expect(screen.getByTestId('usage-statistics-uv-tile')).toBeInTheDocument();
   });
 });

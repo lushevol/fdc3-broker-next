@@ -294,6 +294,50 @@ describe('AssistantUIRuntimeProvider', () => {
     abortController.abort();
   });
 
+  it('includes a bounded workspace context payload when workspace snapshot data is available', async () => {
+    render(
+      <AssistantUIRuntimeProvider
+        apiUrl="/api/chat"
+        toolRegistryConfig={{
+          getWorkspaceSnapshot: () => ({
+            activeWorkspaceId: 'workspace-1',
+            activeWorkspaceLabel: 'Workspace 1',
+            activeTileTitle: 'Tile A',
+            activeTileId: 'tile-1',
+            activeAppId: 'template_tile_fdc3_2',
+            totalWorkspaces: 1,
+            totalTiles: 1,
+            workspaces: [
+              {
+                id: 'workspace-1',
+                label: 'Workspace 1',
+                tileCount: 1,
+                isActive: true,
+              },
+            ],
+          }),
+        }}
+      >
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const run = getCapturedChatModelAdapter().run({
+      messages: [createUserThreadMessage('show usage stats')],
+      abortSignal: new AbortController().signal,
+    });
+    void run.next();
+    await Promise.resolve();
+
+    const requestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+
+    expect(requestBody.workspaceContext).toEqual({
+      workspaceId: 'workspace-1',
+      activeTileId: 'tile-1',
+      activeAppId: 'template_tile_fdc3_2',
+    });
+  });
+
   it('starts a fresh thread without reusing the previous backend conversation id', async () => {
     render(
       <AssistantUIRuntimeProvider apiUrl="/api/chat">

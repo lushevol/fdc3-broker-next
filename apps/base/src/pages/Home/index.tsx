@@ -56,14 +56,18 @@ const Home: React.FC = (): ReactElement => {
   const { channelMessage, clearMessage } = useOpenfin(openTile);
   const { workspaceOpenTile } = useFDC3WorkspaceHelper();
   const length = store?.workspaces?.length ?? 0;
-  const toolRegistryConfig = React.useMemo(
-    () => ({
+  const toolRegistryConfig = React.useMemo(() => {
+    const activeContainer = store?.currentWorkspace?.containers?.[0];
+
+    return {
       workspaceLabel: store?.currentWorkspace?.label ?? 'Current workspace',
       tileCount: store?.currentWorkspace?.containers?.length ?? 0,
       getWorkspaceSnapshot: () => ({
         activeWorkspaceId: store?.currentWorkspace?.id ?? null,
         activeWorkspaceLabel: store?.currentWorkspace?.label ?? null,
-        activeTileTitle: store?.currentWorkspace?.containers?.[0]?.title ?? null,
+        activeTileTitle: activeContainer?.title ?? null,
+        activeTileId: activeContainer?.id ?? null,
+        activeAppId: activeContainer?.tile?.replace(/^\//, '') ?? null,
         totalWorkspaces: store?.workspaces?.length ?? 0,
         totalTiles:
           store?.workspaces?.reduce(
@@ -104,16 +108,15 @@ const Home: React.FC = (): ReactElement => {
           workspaceId: openStatus.workspaceId ?? '',
         };
       },
-    }),
-    [
-      closeAllTiles,
-      store?.currentWorkspace?.containers,
-      store?.currentWorkspace?.id,
-      store?.currentWorkspace?.label,
-      store?.workspaces,
-      workspaceOpenTile,
-    ],
-  );
+    };
+  }, [
+    closeAllTiles,
+    store?.currentWorkspace?.containers,
+    store?.currentWorkspace?.id,
+    store?.currentWorkspace?.label,
+    store?.workspaces,
+    workspaceOpenTile,
+  ]);
 
   if (!validateWorkspaceReady || !ready) {
     return <></>;

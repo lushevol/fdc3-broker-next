@@ -7,6 +7,8 @@
 import type {
   AssistantUIMessage,
   ContentPart,
+  ExecutionPlanEvent,
+  ExecutionStepEvent,
   GenerativeUIDirective,
   SSEEventType,
   StreamingState,
@@ -83,6 +85,8 @@ type AssistantUiEventSourceLike = {
 const ASSISTANT_UI_SSE_EVENT_TYPES: readonly SSEEventType[] = [
   'conversation_id',
   'message',
+  'execution_plan',
+  'execution_step',
   'tool_call',
   'tool_result',
   'generative_ui',
@@ -268,6 +272,87 @@ export function transformToolResult(toolResult: ToolResult): ContentPart {
   };
 }
 
+function isUsageStatisticsTool(toolName: string | undefined): boolean {
+  return toolName === 'statistic_count_by_app';
+}
+
+function normalizeUsageStatisticsContentPart(
+  toolName: string | undefined,
+  toolResult: ToolResult,
+  toolCall?: ToolCallContentPart,
+): ContentPart | null {
+  if (!isUsageStatisticsTool(toolName)) {
+    return null;
+  }
+
+  if (typeof toolResult.result !== 'object' || toolResult.result === null || Array.isArray(toolResult.result)) {
+    return null;
+  }
+
+  const result = toolResult.result as Record<string, unknown>;
+  const pv = typeof result.pv === 'number' ? result.pv : null;
+  const uv = typeof result.uv === 'number' ? result.uv : null;
+  const startTime = typeof result.startTime === 'string' ? result.startTime : null;
+  const endTime = typeof result.endTime === 'string' ? result.endTime : null;
+  const appLabel =
+    typeof result.filterValue === 'string'
+      ? result.filterValue
+      : typeof result.appName === 'string'
+        ? result.appName
+        : typeof result.appId === 'string'
+          ? result.appId
+          : typeof toolCall?.args.appName === 'string'
+            ? toolCall.args.appName
+            : typeof toolCall?.args.appId === 'string'
+              ? toolCall.args.appId
+              : null;
+
+  if (pv === null || uv === null || startTime === null || endTime === null || appLabel === null) {
+    return null;
+  }
+
+  const trendPoints = Array.isArray(result.trendPoints)
+    ? result.trendPoints
+        .map((point) => {
+          if (typeof point !== 'object' || point === null || Array.isArray(point)) {
+            return null;
+          }
+
+          const candidate = point as Record<string, unknown>;
+          if (
+            typeof candidate.timestamp !== 'string' ||
+            typeof candidate.pv !== 'number' ||
+            typeof candidate.uv !== 'number'
+          ) {
+            return null;
+          }
+
+          return {
+            timestamp: candidate.timestamp,
+            pv: candidate.pv,
+            uv: candidate.uv,
+          };
+        })
+        .filter((point): point is { timestamp: string; pv: number; uv: number } => point !== null)
+    : [];
+
+  return {
+    type: 'data',
+    name: 'generative-ui',
+    data: {
+      componentName: 'UsageStatisticsCard',
+      props: {
+        appLabel,
+        startTime,
+        endTime,
+        pv,
+        uv,
+        trendPoints,
+      },
+    },
+  };
+}
+
 /**
  * Transform generative UI directive to content part
  */
@@ -278,6 +363,42 @@ export function transformGenerativeUI(directive: GenerativeUIDirective): Content
     data: {
       componentName: directive.name,
       props: directive.props,
+    },
+  };
+}
+
+export function transformExecutionPlan(event: ExecutionPlanEvent): ContentPart {
+  return {
+    type: 'data',
+    name: 'generative-ui',
+    data: {
+      componentName: 'ExecutionPlanStatus',
+      props: {
+        kind: 'plan',
+        planId: event.planId,
+        status: event.status,
+        summary: event.summary,
+        totalSteps: event.totalSteps,
+      },
+    },
+  };
+}
+
+export function transformExecutionStep(event: ExecutionStepEvent): ContentPart {
+  return {
+    type: 'data',
+    name: 'generative-ui',
+    data: {
+      componentName: 'ExecutionPlanStatus',
+      props: {
+        kind: 'step',
+        planId: event.planId,
+        stepId: event.stepId,
+        targetName: event.targetName,
+        summary: event.summary,
+        stepType: event.stepType,
+        status: event.status,
+      },
     },
   };
 }
@@ -465,12 +586,49 @@ export function handleSSEEvent(
       };
     }
 
+    case 'execution_plan': {
+      return {
+        messages,
+        streamingState: {
+          ...streamingState,
+          accumulatedContent: '',
+        },
+      };
+    }
+
+    case 'execution_step': {
+      return {
+        messages,
+        streamingState: {
+          ...streamingState,
+          accumulatedContent: '',
+        },
+      };
+    }
+
     case 'tool_call': {
       const toolCall = event.payload as ToolCall;
       const toolCallPart = transformToolCall(toolCall) as ToolCallContentPart;
 
       // Track pending tool call
       streamingState.pendingToolCalls.set(toolCall.id, toolCallPart);
+      if (isUsageStatisticsTool(toolCall.name)) {
+        const ensuredMessage = ensureAssistantMessage(messages, streamingState);
+        ensuredMessage.messages[ensuredMessage.assistantMessageIndex] =
+          addContentPartToAssistantMessage(
+            ensuredMessage.messages[ensuredMessage.assistantMessageIndex],
+            toolCallPart,
+          );
+
+        return {
+          messages: ensuredMessage.messages,
+          streamingState: {
+            ...ensuredMessage.streamingState,
+            accumulatedContent: '',
+          },
+        };
+      }
+
       const ensuredMessage = ensureAssistantMessage(messages, streamingState);
       const assistantMessage = ensuredMessage.messages[ensuredMessage.assistantMessageIndex];
       const needsLeadingToolStub = assistantMessage.content.length === 0;
@@ -492,17 +650,26 @@ export function handleSSEEvent(
 
     case 'tool_result': {
       const toolResult = event.payload as ToolResult;
+      const pendingToolCall = streamingState.pendingToolCalls.get(toolResult.toolCallId);
+      const usageStatisticsPart = normalizeUsageStatisticsContentPart(
+        pendingToolCall?.toolName,
+        toolResult,
+        pendingToolCall,
+      );
       const toolResultPart = transformToolResult(toolResult);
 
       // Remove from pending
       streamingState.pendingToolCalls.delete(toolResult.toolCallId);
       const ensuredMessage = ensureAssistantMessage(messages, streamingState);
 
-      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] =
-        addContentPartToAssistantMessage(
-          ensuredMessage.messages[ensuredMessage.assistantMessageIndex],
-          toolResultPart,
-        );
+      const messageWithToolResult = addContentPartToAssistantMessage(
+        ensuredMessage.messages[ensuredMessage.assistantMessageIndex],
+        toolResultPart,
+      );
+
+      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] = usageStatisticsPart
+        ? addContentPartToAssistantMessage(messageWithToolResult, usageStatisticsPart)
+        : messageWithToolResult;
 
       return {
         messages: ensuredMessage.messages,

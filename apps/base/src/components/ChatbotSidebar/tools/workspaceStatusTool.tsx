@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import type { ToolCallMessagePartProps } from '@assistant-ui/react';
 import { z } from 'zod';
 import type { AssistantRegisteredToolkit } from './toolRouting';
+import type { AssistantToolArgs } from './toolRouting';
 
 export interface WorkspaceStatusWorkspaceSummary {
   id: string;
@@ -14,6 +15,8 @@ export interface WorkspaceStatusSnapshot {
   activeWorkspaceId: string | null;
   activeWorkspaceLabel: string | null;
   activeTileTitle: string | null;
+  activeTileId?: string | null;
+  activeAppId?: string | null;
   totalWorkspaces: number;
   totalTiles: number;
   workspaces: WorkspaceStatusWorkspaceSummary[];
@@ -242,7 +245,9 @@ export function createWorkspaceStatusToolkit(
         />
       ),
       matchPrompt: (input: string) =>
-        matchesWorkspaceStatusPrompt(input) ? config.getWorkspaceSnapshot() : null,
+        matchesWorkspaceStatusPrompt(input)
+          ? (config.getWorkspaceSnapshot() as unknown as AssistantToolArgs)
+          : null,
     },
   };
 }

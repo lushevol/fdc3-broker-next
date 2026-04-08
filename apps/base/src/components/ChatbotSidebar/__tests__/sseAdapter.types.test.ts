@@ -11,6 +11,8 @@ import type {
   ContentPart,
   AssistantUIMessage,
   StreamingState,
+  ExecutionPlanEvent,
+  ExecutionStepEvent,
 } from '../adapters/types';
 import {
   generateMessageId,
@@ -178,6 +180,8 @@ describe('SSE Adapter Type Safety', () => {
 
       expect(addEventListener).toHaveBeenCalledWith('conversation_id', expect.any(Function));
       expect(addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('execution_plan', expect.any(Function));
+      expect(addEventListener).toHaveBeenCalledWith('execution_step', expect.any(Function));
       expect(addEventListener).toHaveBeenCalledWith('tool_call', expect.any(Function));
       expect(addEventListener).toHaveBeenCalledWith('tool_result', expect.any(Function));
       expect(addEventListener).toHaveBeenCalledWith('generative_ui', expect.any(Function));
@@ -283,6 +287,28 @@ describe('SSE Adapter Type Safety', () => {
       expect(result).toEqual({
         type: 'conversation_id',
         payload: 'conv-123',
+      });
+    });
+
+    it('should parse execution_plan event', () => {
+      const result = parseSSEEvent(
+        'execution_plan',
+        JSON.stringify({
+          planId: 'plan-1',
+          summary: 'Fetch PV and UV statistics for cashflow',
+          status: 'running',
+          totalSteps: 1,
+        } satisfies ExecutionPlanEvent),
+      );
+
+      expect(result).toEqual({
+        type: 'execution_plan',
+        payload: {
+          planId: 'plan-1',
+          summary: 'Fetch PV and UV statistics for cashflow',
+          status: 'running',
+          totalSteps: 1,
+        },
       });
     });
 
@@ -687,6 +713,216 @@ describe('SSE Adapter Type Safety', () => {
           },
         },
         { type: 'text', text: 'Done reasoning.' },
+      ]);
+    });
+
+    it('should ignore execution plan and step events for visible rendering', () => {
+      let messages: AssistantUIMessage[] = [];
+      let state = createInitialStreamingState();
+
+      const afterPlan = handleSSEEvent(
+        messages,
+        state,
+        'execution_plan',
+        JSON.stringify({
+          planId: 'plan-1',
+          summary: 'Fetch PV and UV statistics for cashflow',
+          status: 'running',
+          totalSteps: 1,
+        } satisfies ExecutionPlanEvent),
+      );
+      messages = afterPlan.messages;
+      state = afterPlan.streamingState;
+
+      const afterStep = handleSSEEvent(
+        messages,
+        state,
+        'execution_step',
+        JSON.stringify({
+          planId: 'plan-1',
+          stepId: 'step-1',
+          targetName: 'statistic_count_by_app',
+          summary: 'Fetch PV and UV statistics for cashflow',
+          stepType: 'mcp',
+          status: 'completed',
+        } satisfies ExecutionStepEvent),
+      );
+
+      expect(afterStep.messages).toEqual([]);
+    });
+
+    it('should render statistic_count_by_app as tool call, usage card, and summary in order', () => {
+      let messages: AssistantUIMessage[] = [];
+      let state = createInitialStreamingState();
+
+      const afterToolCall = handleSSEEvent(
+        messages,
+        state,
+        'tool_call',
+        JSON.stringify({
+          id: 'tool-analytics-1',
+          name: 'statistic_count_by_app',
+          arguments: {
+            appName: 'cashflow',
+            startTime: '2026-04-01T00:00:00Z',
+            endTime: '2026-04-08T00:00:00Z',
+          },
+          status: 'RUNNING',
+          executionTarget: 'BACKEND',
+          requiresConfirmation: false,
+        } satisfies ToolCall),
+      );
+      messages = afterToolCall.messages;
+      state = afterToolCall.streamingState;
+
+      expect(messages).toHaveLength(1);
+      expect(messages[0].content).toEqual([
+        {
+          type: 'tool-call',
+          toolCallId: 'tool-analytics-1',
+          toolName: 'statistic_count_by_app',
+          args: {
+            appName: 'cashflow',
+            startTime: '2026-04-01T00:00:00Z',
+            endTime: '2026-04-08T00:00:00Z',
+          },
+          argsText:
+            '{"appName":"cashflow","startTime":"2026-04-01T00:00:00Z","endTime":"2026-04-08T00:00:00Z"}',
+          status: 'running',
+          executionTarget: 'backend',
+          requiresConfirmation: false,
+        },
+      ]);
+
+      const afterToolResult = handleSSEEvent(
+        messages,
+        state,
+        'tool_result',
+        JSON.stringify({
+          toolCallId: 'tool-analytics-1',
+          result: {
+            filterValue: 'cashflow',
+            startTime: '2026-04-01T00:00:00Z',
+            endTime: '2026-04-08T00:00:00Z',
+            pv: 120,
+            uv: 30,
+            trendPoints: [
+              { timestamp: '2026-04-01T00:00:00Z', pv: 50, uv: 12 },
+              { timestamp: '2026-04-08T00:00:00Z', pv: 70, uv: 18 },
+            ],
+          },
+        } satisfies ToolResult),
+      );
+      messages = afterToolResult.messages;
+      state = afterToolResult.streamingState;
+
+      expect(messages).toHaveLength(1);
+      expect(messages[0].content).toEqual([
+        {
+          type: 'tool-call',
+          toolCallId: 'tool-analytics-1',
+          toolName: 'statistic_count_by_app',
+          args: {
+            appName: 'cashflow',
+            startTime: '2026-04-01T00:00:00Z',
+            endTime: '2026-04-08T00:00:00Z',
+          },
+          argsText:
+            '{"appName":"cashflow","startTime":"2026-04-01T00:00:00Z","endTime":"2026-04-08T00:00:00Z"}',
+          status: 'completed',
+          executionTarget: 'backend',
+          requiresConfirmation: false,
+          result: {
+            filterValue: 'cashflow',
+            startTime: '2026-04-01T00:00:00Z',
+            endTime: '2026-04-08T00:00:00Z',
+            pv: 120,
+            uv: 30,
+            trendPoints: [
+              { timestamp: '2026-04-01T00:00:00Z', pv: 50, uv: 12 },
+              { timestamp: '2026-04-08T00:00:00Z', pv: 70, uv: 18 },
+            ],
+          },
+          isError: false,
+        },
+        {
+          type: 'data',
+          name: 'generative-ui',
+          data: {
+            componentName: 'UsageStatisticsCard',
+            props: {
+              appLabel: 'cashflow',
+              startTime: '2026-04-01T00:00:00Z',
+              endTime: '2026-04-08T00:00:00Z',
+              pv: 120,
+              uv: 30,
+              trendPoints: [
+                { timestamp: '2026-04-01T00:00:00Z', pv: 50, uv: 12 },
+                { timestamp: '2026-04-08T00:00:00Z', pv: 70, uv: 18 },
+              ],
+            },
+          },
+        },
+      ]);
+
+      const afterSummary = handleSSEEvent(
+        messages,
+        state,
+        'message',
+        'cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.',
+      );
+
+      expect(afterSummary.messages).toHaveLength(1);
+      expect(afterSummary.messages[0].content).toEqual([
+        {
+          type: 'tool-call',
+          toolCallId: 'tool-analytics-1',
+          toolName: 'statistic_count_by_app',
+          args: {
+            appName: 'cashflow',
+            startTime: '2026-04-01T00:00:00Z',
+            endTime: '2026-04-08T00:00:00Z',
+          },
+          argsText:
+            '{"appName":"cashflow","startTime":"2026-04-01T00:00:00Z","endTime":"2026-04-08T00:00:00Z"}',
+          status: 'completed',
+          executionTarget: 'backend',
+          requiresConfirmation: false,
+          result: {
+            filterValue: 'cashflow',
+            startTime: '2026-04-01T00:00:00Z',
+            endTime: '2026-04-08T00:00:00Z',
+            pv: 120,
+            uv: 30,
+            trendPoints: [
+              { timestamp: '2026-04-01T00:00:00Z', pv: 50, uv: 12 },
+              { timestamp: '2026-04-08T00:00:00Z', pv: 70, uv: 18 },
+            ],
+          },
+          isError: false,
+        },
+        {
+          type: 'data',
+          name: 'generative-ui',
+          data: {
+            componentName: 'UsageStatisticsCard',
+            props: {
+              appLabel: 'cashflow',
+              startTime: '2026-04-01T00:00:00Z',
+              endTime: '2026-04-08T00:00:00Z',
+              pv: 120,
+              uv: 30,
+              trendPoints: [
+                { timestamp: '2026-04-01T00:00:00Z', pv: 50, uv: 12 },
+                { timestamp: '2026-04-08T00:00:00Z', pv: 70, uv: 18 },
+              ],
+            },
+          },
+        },
+        {
+          type: 'text',
+          text: 'cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.',
+        },
       ]);
     });
 

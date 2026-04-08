@@ -1,47 +1,67 @@
 package com.fdc3.chatbot.controller;
 
+import com.fdc3.chatbot.agent.AgentService;
+import com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot;
+import com.fdc3.chatbot.model.ExecutionPlanEvent;
+import com.fdc3.chatbot.model.ExecutionStepEvent;
+import com.fdc3.chatbot.model.ChatMessage;
 import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
+import com.fdc3.chatbot.model.UserCapabilityContext;
 import com.fdc3.chatbot.security.UserCapabilityContextResolver;
 import com.fdc3.chatbot.service.ChatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.stubbing.Answer;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ChatControllerTest {
 
-    private ChatService chatService;
+    private RecordingChatService chatService;
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        chatService = mock(ChatService.class);
-        mockMvc = MockMvcBuilders.standaloneSetup(new ChatController(chatService, new UserCapabilityContextResolver())).build();
+        chatService = new RecordingChatService();
+        mockMvc = MockMvcBuilders.standaloneSetup(
+                new ChatController(chatService, new UserCapabilityContextResolver("default", ""))
+        ).build();
     }
 
     @Test
     void streamChatEmitsCanonicalSseEventSequence() throws Exception {
-        when(chatService.createConversation()).thenReturn("conversation-123");
-
+        ExecutionPlanEvent executionPlanEvent = ExecutionPlanEvent.builder()
+                .planId("plan-1")
+                .summary("Fetch PV and UV statistics for cashflow")
+                .status("running")
+                .totalSteps(1)
+                .build();
+        ExecutionStepEvent executionStepEvent = ExecutionStepEvent.builder()
+                .planId("plan-1")
+                .stepId("step-1")
+                .targetName("statistic_count_by_app")
+                .summary("Fetch PV and UV statistics for cashflow")
+                .stepType("mcp")
+                .status("running")
+                .build();
         ToolCall toolCall = ToolCall.builder()
                 .id("tool-1")
                 .name("calculator")
@@ -58,32 +78,15 @@ class ChatControllerTest {
                 .props(Map.of("title", "Calculation Complete"))
                 .build();
 
-        doAnswer((Answer<Void>) invocation -> {
-            Consumer<String> onNext = invocation.getArgument(5);
-            Runnable onComplete = invocation.getArgument(7);
-            Consumer<ToolCall> onToolCall = invocation.getArgument(8);
-            Consumer<ToolResult> onToolResult = invocation.getArgument(9);
-            Consumer<GenerativeUIDirective> onGenerativeUi = invocation.getArgument(10);
-
-            onToolCall.accept(toolCall);
-            onNext.accept("Hello");
-            onToolResult.accept(toolResult);
-            onGenerativeUi.accept(generativeUiDirective);
-            onComplete.run();
-            return null;
-        }).when(chatService).processMessageStreaming(
-                anyString(),
-                anyString(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-        );
+        chatService.behavior = invocation -> {
+            invocation.onExecutionPlan.accept(executionPlanEvent);
+            invocation.onExecutionStep.accept(executionStepEvent);
+            invocation.onToolCall.accept(toolCall);
+            invocation.onNext.accept("Hello");
+            invocation.onToolResult.accept(toolResult);
+            invocation.onGenerativeUi.accept(generativeUiDirective);
+            invocation.onComplete.run();
+        };
 
         MvcResult result = mockMvc.perform(get("/api/chat/stream").param("message", "Hi"))
                 .andExpect(request().asyncStarted())
@@ -92,71 +95,73 @@ class ChatControllerTest {
         result.getAsyncResult();
         String body = result.getResponse().getContentAsString();
 
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:conversation_id"));
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("data:conversation-123"));
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:tool_call"));
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:message"));
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("data:{\"text\":\"Hello\"}"));
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:tool_result"));
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:generative_ui"));
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("\"toolCallId\":\"tool-1\""));
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:done"));
+        assertTrue(body.contains("event:conversation_id"));
+        assertTrue(body.contains("data:conversation-123"));
+        assertTrue(body.contains("event:execution_plan"));
+        assertTrue(body.contains("\"planId\":\"plan-1\""));
+        assertTrue(body.contains("event:execution_step"));
+        assertTrue(body.contains("\"stepId\":\"step-1\""));
+        assertTrue(body.contains("event:tool_call"));
+        assertTrue(body.contains("event:message"));
+        assertTrue(body.contains("data:{\"text\":\"Hello\"}"));
+        assertTrue(body.contains("event:tool_result"));
+        assertTrue(body.contains("event:generative_ui"));
+        assertTrue(body.contains("\"toolCallId\":\"tool-1\""));
+        assertTrue(body.contains("event:done"));
     }
 
     @Test
     void postStreamAcceptsJsonAndReturnsTextEventStream() throws Exception {
-        when(chatService.createConversation()).thenReturn("conversation-123");
+        chatService.behavior = invocation -> {
+            invocation.onNext.accept("Hello");
+            invocation.onComplete.run();
+        };
 
-        doAnswer((Answer<Void>) invocation -> {
-            Consumer<String> onNext = invocation.getArgument(5);
-            Runnable onComplete = invocation.getArgument(7);
-
-            onNext.accept("Hello");
-            onComplete.run();
-            return null;
-        }).when(chatService).processMessageStreaming(
-                anyString(),
-                anyString(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-        );
-
-        mockMvc.perform(post("/api/chat/stream")
+        MvcResult result = mockMvc.perform(post("/api/chat/stream")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"message\":\"Hi\"}"))
                 .andExpect(status().isOk())
                 .andExpect(request().asyncStarted())
+                .andReturn();
+
+        result.getAsyncResult();
+
+        assertTrue(
+                MediaType.TEXT_EVENT_STREAM.isCompatibleWith(
+                        MediaType.parseMediaType(result.getResponse().getContentType())
+                )
+        );
+    }
+
+    @Test
+    void postStreamForwardsWorkspaceContextPayload() throws Exception {
+        chatService.behavior = invocation -> invocation.onComplete.run();
+
+        mockMvc.perform(post("/api/chat/stream")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "message":"Hi",
+                                  "workspaceContext":{
+                                    "workspaceId":"workspace-1",
+                                    "activeTileId":"tile-2",
+                                    "activeAppId":"template_tile_fdc3_2"
+                                  }
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM));
+
+        assertNotNull(chatService.lastInvocation.workspaceContext);
+        assertEquals("workspace-1", chatService.lastInvocation.workspaceContext.getWorkspaceId());
+        assertEquals("tile-2", chatService.lastInvocation.workspaceContext.getActiveTileId());
+        assertEquals("template_tile_fdc3_2", chatService.lastInvocation.workspaceContext.getActiveAppId());
     }
 
     @Test
     void streamChatForwardsFrontendToolManifest() throws Exception {
-        when(chatService.createConversation()).thenReturn("conversation-123");
-
-        doAnswer((Answer<Void>) invocation -> {
-            Runnable onComplete = invocation.getArgument(7);
-            onComplete.run();
-            return null;
-        }).when(chatService).processMessageStreaming(
-                anyString(),
-                anyString(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-        );
+        chatService.behavior = invocation -> invocation.onComplete.run();
 
         MvcResult result = mockMvc.perform(get("/api/chat/stream")
                         .param("message", "Hi")
@@ -166,45 +171,16 @@ class ChatControllerTest {
 
         result.getAsyncResult();
 
-        org.mockito.Mockito.verify(chatService).processMessageStreaming(
-                anyString(),
-                anyString(),
-                any(),
-                any(),
-                org.mockito.ArgumentMatchers.eq("[{\"name\":\"custom_client_tool\"}]"),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-        );
+        assertEquals("[{\"name\":\"custom_client_tool\"}]", chatService.lastInvocation.frontendTools);
+        assertNull(chatService.lastInvocation.workspaceContext);
     }
 
     @Test
     void streamChatEmitsStructuredMessageChunks() throws Exception {
-        when(chatService.createConversation()).thenReturn("conversation-123");
-
-        doAnswer((Answer<Void>) invocation -> {
-            Consumer<String> onNext = invocation.getArgument(5);
-            Runnable onComplete = invocation.getArgument(7);
-
-            onNext.accept("Hello");
-            onComplete.run();
-            return null;
-        }).when(chatService).processMessageStreaming(
-                anyString(),
-                anyString(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-        );
+        chatService.behavior = invocation -> {
+            invocation.onNext.accept("Hello");
+            invocation.onComplete.run();
+        };
 
         MvcResult result = mockMvc.perform(get("/api/chat/stream").param("message", "Hi"))
                 .andExpect(request().asyncStarted())
@@ -213,34 +189,16 @@ class ChatControllerTest {
         result.getAsyncResult();
         String body = result.getResponse().getContentAsString();
 
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("event:message"));
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("data:{\"text\":\"Hello\"}"));
+        assertTrue(body.contains("event:message"));
+        assertTrue(body.contains("data:{\"text\":\"Hello\"}"));
     }
 
     @Test
     void streamChatPreservesLeadingSpacesInMessageChunks() throws Exception {
-        when(chatService.createConversation()).thenReturn("conversation-123");
-
-        doAnswer((Answer<Void>) invocation -> {
-            Consumer<String> onNext = invocation.getArgument(5);
-            Runnable onComplete = invocation.getArgument(7);
-
-            onNext.accept(" from");
-            onComplete.run();
-            return null;
-        }).when(chatService).processMessageStreaming(
-                anyString(),
-                anyString(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-        );
+        chatService.behavior = invocation -> {
+            invocation.onNext.accept(" from");
+            invocation.onComplete.run();
+        };
 
         MvcResult result = mockMvc.perform(get("/api/chat/stream").param("message", "Hi"))
                 .andExpect(request().asyncStarted())
@@ -249,6 +207,92 @@ class ChatControllerTest {
         result.getAsyncResult();
         String body = result.getResponse().getContentAsString();
 
-        org.junit.jupiter.api.Assertions.assertTrue(body.contains("data:{\"text\":\" from\"}"));
+        assertTrue(body.contains("data:{\"text\":\" from\"}"));
+    }
+
+    private static final class RecordingChatService extends ChatService {
+
+        private StreamingInvocation lastInvocation;
+        private StreamingBehavior behavior = invocation -> invocation.onComplete.run();
+
+        private RecordingChatService() {
+            super((AgentService) null);
+        }
+
+        @Override
+        public String createConversation() {
+            return "conversation-123";
+        }
+
+        @Override
+        public boolean isReady() {
+            return true;
+        }
+
+        @Override
+        public List<ChatMessage> getHistory(String conversationId) {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public Runnable processMessageStreaming(
+                String conversationId,
+                String userMessage,
+                UserCapabilityContext capabilityContext,
+                String toolContext,
+                String frontendTools,
+                WorkspaceContextSnapshot workspaceContext,
+                Consumer<String> onNext,
+                Consumer<Throwable> onError,
+                Runnable onComplete,
+                Consumer<ExecutionPlanEvent> onExecutionPlan,
+                Consumer<ExecutionStepEvent> onExecutionStep,
+                Consumer<ToolCall> onToolCall,
+                Consumer<ToolResult> onToolResult,
+                Consumer<GenerativeUIDirective> onGenerativeUi
+        ) {
+            lastInvocation = new StreamingInvocation(
+                    conversationId,
+                    userMessage,
+                    capabilityContext,
+                    toolContext,
+                    frontendTools,
+                    workspaceContext,
+                    onNext,
+                    onError,
+                    onComplete,
+                    onExecutionPlan,
+                    onExecutionStep,
+                    onToolCall,
+                    onToolResult,
+                    onGenerativeUi
+            );
+            behavior.accept(lastInvocation);
+            return () -> {
+            };
+        }
+    }
+
+    @FunctionalInterface
+    private interface StreamingBehavior {
+        void accept(StreamingInvocation invocation);
+    }
+
+    private record StreamingInvocation(
+            String conversationId,
+            String userMessage,
+            UserCapabilityContext capabilityContext,
+            String toolContext,
+            String frontendTools,
+            WorkspaceContextSnapshot workspaceContext,
+            Consumer<String> onNext,
+            Consumer<Throwable> onError,
+            Runnable onComplete,
+            Consumer<ExecutionPlanEvent> onExecutionPlan,
+            Consumer<ExecutionStepEvent> onExecutionStep,
+            Consumer<ToolCall> onToolCall,
+            Consumer<ToolResult> onToolResult,
+            Consumer<GenerativeUIDirective> onGenerativeUi
+    ) {
     }
 }

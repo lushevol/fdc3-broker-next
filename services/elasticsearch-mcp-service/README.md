@@ -36,6 +36,31 @@ npm run dev
 
 The MCP endpoint is exposed at `/api/mcp` by default.
 
+For a local runnable stub that does not require Elasticsearch:
+
+```bash
+cd services/elasticsearch-mcp-service
+npm run dev:stub
+```
+
+To run the local chatbot backend against this MCP service from the repo root without changing the default `npm run dev` flow:
+
+```bash
+npm run dev:chatbot-mcp-stack
+```
+
+That starts:
+
+- `services/elasticsearch-mcp-service` on `http://localhost:8090/api/mcp`
+- `services/chatbot-backend` with `CHATBOT_MCP_ELASTICSEARCH_ENABLED=true`
+- a deterministic analytics stub, enabled with `ANALYTICS_STUB_ENABLED=true`
+
+To run the same stack against a real Elasticsearch-backed MCP service instead of the stub:
+
+```bash
+npm run dev:chatbot-mcp-stack:live
+```
+
 ## Test
 
 ```bash

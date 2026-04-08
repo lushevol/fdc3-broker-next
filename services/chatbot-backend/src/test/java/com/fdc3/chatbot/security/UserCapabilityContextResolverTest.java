@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserCapabilityContextResolverTest {
 
-    private final UserCapabilityContextResolver resolver = new UserCapabilityContextResolver();
+    private final UserCapabilityContextResolver resolver = new UserCapabilityContextResolver("default", "");
 
     @Test
     void resolveExtractsUserProfilesAndFingerprintFromAuthenticationPrincipalMap() {
@@ -43,5 +43,49 @@ class UserCapabilityContextResolverTest {
         assertEquals("anonymous", context.getUserId());
         assertEquals(List.of("default"), context.getProfiles().stream().toList());
         assertEquals("anonymous", context.getProfileVersion());
+    }
+
+    @Test
+    void resolveUsesConfiguredAdditionalProfilesWhenAuthenticationMissing() {
+        UserCapabilityContextResolver customResolver = new UserCapabilityContextResolver("default", "advisor");
+
+        UserCapabilityContext context = customResolver.resolve(null);
+
+        assertEquals("anonymous", context.getUserId());
+        assertEquals(List.of("advisor", "default"), context.getProfiles().stream().sorted().toList());
+        assertEquals("anonymous", context.getProfileVersion());
+        assertTrue(context.getProfileFingerprint().contains("advisor"));
+    }
+
+    @Test
+    void resolveUsesConfiguredFallbackProfilesWhenClaimsDoNotProvideAny() {
+        UserCapabilityContextResolver customResolver = new UserCapabilityContextResolver("advisor,ops", "");
+        TestingAuthenticationToken authentication = new TestingAuthenticationToken(
+                Map.of("sub", "user-123"),
+                null
+        );
+        authentication.setAuthenticated(true);
+
+        UserCapabilityContext context = customResolver.resolve(authentication);
+
+        assertEquals(List.of("advisor", "ops"), context.getProfiles().stream().sorted().toList());
+        assertTrue(context.getProfileFingerprint().contains("advisor"));
+    }
+
+    @Test
+    void resolveAppendsConfiguredAdditionalProfilesToClaimProfiles() {
+        UserCapabilityContextResolver customResolver = new UserCapabilityContextResolver("default", "advisor");
+        TestingAuthenticationToken authentication = new TestingAuthenticationToken(
+                Map.of(
+                        "sub", "user-123",
+                        "profiles", List.of("ops")
+                ),
+                null
+        );
+        authentication.setAuthenticated(true);
+
+        UserCapabilityContext context = customResolver.resolve(authentication);
+
+        assertEquals(List.of("advisor", "ops"), context.getProfiles().stream().sorted().toList());
     }
 }
