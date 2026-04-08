@@ -56,12 +56,12 @@ Send a chat message and receive a streaming response via SSE.
 
 **Query Parameters:**
 
-| Parameter      | Type   | Required | Description              |
-| -------------- | ------ | -------- | ------------------------ |
-| message        | string | Yes      | The message to send      |
-| conversationId | string | No       | Existing conversation ID |
+| Parameter      | Type   | Required | Description                                   |
+| -------------- | ------ | -------- | --------------------------------------------- |
+| message        | string | Yes      | The message to send                           |
+| conversationId | string | No       | Existing conversation ID                      |
 | toolContext    | string | No       | Serialized frontend tool continuation payload |
-| frontendTools  | string | No       | Serialized frontend tool manifest |
+| frontendTools  | string | No       | Serialized frontend tool manifest             |
 
 **Response Format (canonical SSE events):**
 

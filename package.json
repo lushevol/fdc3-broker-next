@@ -39,7 +39,8 @@
   "workspaces": [
     "apps/*",
     "packages/*",
-    "services/*"
+    "services/*",
+    "proxy/*"
   ],
   "dependenciesMeta": {
     "@swc/core": {
