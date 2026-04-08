@@ -160,6 +160,51 @@ class AgentDecisionServiceTest {
         assertThat(((UserMessage) request.messages().get(4)).singleText()).isEqualTo("current question");
     }
 
+    @Test
+    void shouldTreatNullHistoryAsEmptyWhenBuildingDecisionRequest() {
+        CapturingChatModel chatModel =
+                new CapturingChatModel("{\"decisionType\":\"respond\",\"assistantText\":\"No history provided.\"}");
+        AgentDecisionService service = new AgentDecisionService(chatModel, new AgentDecisionPromptFactory());
+
+        AgentDecision decision = service.decide("hello", null, List.of(), null);
+
+        assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.RESPOND);
+        ChatRequest request = chatModel.capturedRequest();
+        assertThat(request.messages()).hasSize(2);
+        assertThat(request.messages().get(0)).isInstanceOf(SystemMessage.class);
+        assertThat(request.messages().get(1)).isInstanceOf(UserMessage.class);
+        assertThat(((UserMessage) request.messages().get(1)).singleText()).isEqualTo("hello");
+    }
+
+    @Test
+    void shouldSkipToolHistoryEntriesWhenBuildingDecisionRequest() {
+        CapturingChatModel chatModel =
+                new CapturingChatModel("{\"decisionType\":\"respond\",\"assistantText\":\"Tool history skipped.\"}");
+        AgentDecisionService service = new AgentDecisionService(chatModel, new AgentDecisionPromptFactory());
+
+        AgentDecision decision = service.decide(
+                "current question",
+                List.of(
+                        ChatMessage.builder().role(ChatMessage.Role.USER).content("previous user").build(),
+                        ChatMessage.builder().role(ChatMessage.Role.TOOL).content("tool result").build(),
+                        ChatMessage.builder().role(ChatMessage.Role.ASSISTANT).content("previous assistant").build()
+                ),
+                List.of(),
+                null
+        );
+
+        assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.RESPOND);
+        ChatRequest request = chatModel.capturedRequest();
+        assertThat(request.messages()).hasSize(4);
+        assertThat(request.messages().get(0)).isInstanceOf(SystemMessage.class);
+        assertThat(request.messages().get(1)).isInstanceOf(UserMessage.class);
+        assertThat(((UserMessage) request.messages().get(1)).singleText()).isEqualTo("previous user");
+        assertThat(request.messages().get(2)).isInstanceOf(AiMessage.class);
+        assertThat(((AiMessage) request.messages().get(2)).text()).isEqualTo("previous assistant");
+        assertThat(request.messages().get(3)).isInstanceOf(UserMessage.class);
+        assertThat(((UserMessage) request.messages().get(3)).singleText()).isEqualTo("current question");
+    }
+
     private static final class CapturingChatModel implements ChatModel {
 
         private final String responseText;

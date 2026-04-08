@@ -75,11 +75,15 @@ public class AgentDecisionService {
             List<ChatMessage> history,
             String userMessage
     ) {
+        List<ChatMessage> normalizedHistory = history == null ? List.of() : history;
         List<dev.langchain4j.data.message.ChatMessage> messages = new ArrayList<>();
         messages.add(SystemMessage.from(prompt));
 
-        for (ChatMessage message : history) {
-            messages.add(toLangChainMessage(message));
+        for (ChatMessage message : normalizedHistory) {
+            dev.langchain4j.data.message.ChatMessage translated = toLangChainMessage(message);
+            if (translated != null) {
+                messages.add(translated);
+            }
         }
 
         messages.add(UserMessage.from(userMessage));
@@ -93,7 +97,7 @@ public class AgentDecisionService {
             case SYSTEM -> SystemMessage.from(content);
             case USER -> UserMessage.from(content);
             case ASSISTANT -> AiMessage.from(content);
-            case TOOL -> throw new IllegalArgumentException("Unsupported chat history role: " + role);
+            case TOOL -> null;
         };
     }
 }
