@@ -122,6 +122,56 @@ class ChatServiceTest {
     }
 
     @Test
+    void processMessageStreamingPersistsToolBackedAssistantTurnAfterCompletion() {
+        ToolCall toolCall = ToolCall.builder()
+                .id("tool-1")
+                .name("statistic_count_by_app")
+                .arguments(Map.of("appName", "cashflow"))
+                .status(ToolCall.ToolStatus.RUNNING)
+                .executionTarget(ToolCall.ExecutionTarget.BACKEND)
+                .build();
+        ToolResult toolResult = ToolResult.builder()
+                .toolCallId("tool-1")
+                .toolName("statistic_count_by_app")
+                .result(Map.of("pv", 120, "uv", 30))
+                .build();
+
+        agentService.behavior = invocation -> {
+            invocation.onToolCall.accept(toolCall);
+            invocation.onToolResult.accept(toolResult);
+            invocation.onNext.accept("cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.");
+            invocation.onComplete.run();
+            return () -> {
+            };
+        };
+
+        String conversationId = chatService.createConversation();
+
+        chatService.processMessageStreaming(
+                conversationId,
+                "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
+                token -> {
+                },
+                error -> {
+                },
+                () -> {
+                },
+                event -> {
+                },
+                event -> {
+                }
+        );
+
+        List<ChatMessage> history = chatService.getHistory(conversationId);
+
+        assertEquals(2, history.size());
+        assertEquals(ChatMessage.Role.ASSISTANT, history.get(1).getRole());
+        assertEquals("cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.", history.get(1).getContent());
+        assertEquals(List.of(toolCall), history.get(1).getToolCalls());
+        assertEquals(List.of(toolResult), history.get(1).getToolResults());
+    }
+
+    @Test
     void processMessageStreamingEmitsToolLinkedGenerativeUiForSupportedBackendTools() {
         ToolCall toolCall = ToolCall.builder()
                 .id("tool-1")

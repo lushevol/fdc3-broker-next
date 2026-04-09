@@ -2,6 +2,12 @@ package com.fdc3.chatbot.agent;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fdc3.chatbot.agent.model.AgentDecision;
+import com.fdc3.chatbot.agent.model.AgentDecisionType;
+import com.fdc3.chatbot.agent.model.ExecutionTranscript;
+import com.fdc3.chatbot.agent.model.ValidatedExecutionPlan;
+import com.fdc3.chatbot.agent.model.ValidatedExecutionStep;
+import com.fdc3.chatbot.agent.prompt.AgentDecisionPromptFactory;
 import com.fdc3.chatbot.controlplane.CapabilityResolver;
 import com.fdc3.chatbot.controlplane.model.ExecutionPlan;
 import com.fdc3.chatbot.controlplane.model.ExecutionStep;
@@ -59,6 +65,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -96,6 +103,9 @@ public class AgentService {
     @Value("${chatbot.mock.enabled:false}")
     private boolean mockEnabled;
 
+    @Value("${chatbot.agent.legacy-governed-planner-enabled:false}")
+    private boolean legacyGovernedPlannerEnabled;
+
     private final ToolRegistry toolRegistry;
     private final CapabilityResolver capabilityResolver;
     private final PolicyEvaluator policyEvaluator;
@@ -104,6 +114,10 @@ public class AgentService {
 
     private ChatModel chatModel;
     private StreamingChatModel streamingChatModel;
+    private AgentDecisionService agentDecisionService;
+    private PlanValidationService planValidationService;
+    private ExecutionOrchestrator executionOrchestrator;
+    private ResultSynthesisService resultSynthesisService;
     private final ScheduledExecutorService mockExecutor = Executors.newScheduledThreadPool(1);
 
     // In-memory conversation storage (use Redis/Database in production)
@@ -113,7 +127,7 @@ public class AgentService {
             new ConcurrentHashMap<>();
 
     public AgentService(ToolRegistry toolRegistry) {
-        this(toolRegistry, null, null, null);
+        this(toolRegistry, null, null, null, null, null, null, null);
     }
 
     @Autowired
@@ -123,20 +137,34 @@ public class AgentService {
             PolicyEvaluator policyEvaluator,
             ExecutionPlanner executionPlanner
     ) {
+        this(toolRegistry, capabilityResolver, policyEvaluator, executionPlanner, null, null, null, null);
+    }
+
+    public AgentService(
+            ToolRegistry toolRegistry,
+            CapabilityResolver capabilityResolver,
+            PolicyEvaluator policyEvaluator,
+            ExecutionPlanner executionPlanner,
+            AgentDecisionService agentDecisionService,
+            PlanValidationService planValidationService,
+            ExecutionOrchestrator executionOrchestrator,
+            ResultSynthesisService resultSynthesisService
+    ) {
         this.toolRegistry = toolRegistry;
         this.capabilityResolver = capabilityResolver;
         this.policyEvaluator = policyEvaluator;
         this.executionPlanner = executionPlanner;
+        this.agentDecisionService = agentDecisionService;
+        this.planValidationService = planValidationService;
+        this.executionOrchestrator = executionOrchestrator;
+        this.resultSynthesisService = resultSynthesisService;
     }
 
     @PostConstruct
     public void init() {
         if (mockEnabled) {
             log.info("Mock mode enabled - using simulated responses");
-            return;
-        }
-
-        if (openaiApiKey != null && !openaiApiKey.isEmpty()) {
+        } else if (openaiApiKey != null && !openaiApiKey.isEmpty()) {
             var chatModelBuilder = OpenAiChatModel.builder()
                     .apiKey(openaiApiKey)
                     .modelName(model)
@@ -164,6 +192,16 @@ public class AgentService {
             log.info("Initialized OpenAI chat model with model: {}", model);
         } else {
             log.warn("OpenAI API key not configured. Chat functionality will be limited.");
+        }
+
+        if (agentDecisionService == null && chatModel != null) {
+            agentDecisionService = new AgentDecisionService(chatModel, new AgentDecisionPromptFactory());
+        }
+        if (planValidationService == null && policyEvaluator != null) {
+            planValidationService = new PlanValidationService(policyEvaluator);
+        }
+        if (resultSynthesisService == null) {
+            resultSynthesisService = new ResultSynthesisService();
         }
     }
 
@@ -372,7 +410,26 @@ public class AgentService {
     ) {
         AtomicBoolean cancelled = new AtomicBoolean(false);
         Map<String, ToolDefinition> availableTools = toolRegistry.resolveTools(capabilityContext);
-        if (shouldUseGovernedReadOnlyMcpFlow()) {
+        if (shouldUseAgenticControlLoop(toolContext, frontendTools)) {
+            executeAgenticControlLoop(
+                    userMessage,
+                    capabilityContext,
+                    workspaceContext,
+                    history,
+                    availableTools,
+                    onNext,
+                    onError,
+                    onComplete,
+                    onExecutionPlan,
+                    onExecutionStep,
+                    onToolCall,
+                    onToolResult,
+                    cancelled
+            );
+            return () -> cancelled.set(true);
+        }
+
+        if (shouldUseLegacyGovernedReadOnlyMcpFlow()) {
             List<ResolvedCapability> resolvedCapabilities = capabilityResolver.resolveCapabilities(capabilityContext);
             ExecutionPlan executionPlan = executionPlanner.plan(userMessage, workspaceContext, resolvedCapabilities);
             if (executionPlan != null && !executionPlan.getSteps().isEmpty()) {
@@ -559,8 +616,248 @@ public class AgentService {
         );
     }
 
-    private boolean shouldUseGovernedReadOnlyMcpFlow() {
-        return capabilityResolver != null && policyEvaluator != null && executionPlanner != null;
+    private boolean shouldUseAgenticControlLoop(String toolContext, String frontendTools) {
+        return capabilityResolver != null
+                && agentDecisionService != null
+                && planValidationService != null
+                && resultSynthesisService != null
+                && (toolContext == null || toolContext.isBlank())
+                && (frontendTools == null || frontendTools.isBlank());
+    }
+
+    private boolean shouldUseLegacyGovernedReadOnlyMcpFlow() {
+        return legacyGovernedPlannerEnabled
+                && capabilityResolver != null
+                && policyEvaluator != null
+                && executionPlanner != null;
+    }
+
+    private void executeAgenticControlLoop(
+            String userMessage,
+            UserCapabilityContext capabilityContext,
+            WorkspaceContextSnapshot workspaceContext,
+            List<ChatMessage> history,
+            Map<String, ToolDefinition> availableTools,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ExecutionPlanEvent> onExecutionPlan,
+            java.util.function.Consumer<ExecutionStepEvent> onExecutionStep,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            AtomicBoolean cancelled
+    ) {
+        try {
+            List<ResolvedCapability> resolvedCapabilities = capabilityResolver.resolveCapabilities(capabilityContext);
+            AgentDecision decision = agentDecisionService.decide(
+                    userMessage,
+                    history == null ? List.of() : history,
+                    resolvedCapabilities,
+                    workspaceContext
+            );
+            if (cancelled.get()) {
+                return;
+            }
+
+            AgentDecisionType decisionType = decision == null || decision.decisionType() == null
+                    ? AgentDecisionType.RESPOND
+                    : decision.decisionType();
+
+            switch (decisionType) {
+                case RESPOND -> {
+                    emitAssistantText(decision == null ? null : decision.assistantText(), onNext);
+                    onComplete.run();
+                }
+                case CLARIFY -> {
+                    emitAssistantText(resolveClarificationText(decision), onNext);
+                    onComplete.run();
+                }
+                case PLAN -> executePlannedDecision(
+                        userMessage,
+                        capabilityContext,
+                        decision,
+                        resolvedCapabilities,
+                        availableTools,
+                        onNext,
+                        onError,
+                        onComplete,
+                        onExecutionPlan,
+                        onExecutionStep,
+                        onToolCall,
+                        onToolResult,
+                        cancelled
+                );
+            }
+        } catch (Exception exception) {
+            log.error("Error executing agentic control loop", exception);
+            onError.accept(exception);
+        }
+    }
+
+    private void executePlannedDecision(
+            String userMessage,
+            UserCapabilityContext capabilityContext,
+            AgentDecision decision,
+            List<ResolvedCapability> resolvedCapabilities,
+            Map<String, ToolDefinition> availableTools,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ExecutionPlanEvent> onExecutionPlan,
+            java.util.function.Consumer<ExecutionStepEvent> onExecutionStep,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            AtomicBoolean cancelled
+    ) {
+        emitAssistantText(decision.assistantText(), onNext);
+
+        PlanValidationService.PlanValidationResult validationResult = planValidationService.validate(
+                decision,
+                resolvedCapabilities,
+                capabilityContext
+        );
+        if (!validationResult.valid()) {
+            emitAssistantText(validationResult.assistantMessage(), onNext);
+            onComplete.run();
+            return;
+        }
+        if (validationResult.reviewRequired()) {
+            emitAssistantText("This request requires approval before execution.", onNext);
+            onComplete.run();
+            return;
+        }
+
+        ValidatedExecutionPlan validatedPlan = validationResult.validatedPlan();
+        String planId = UUID.randomUUID().toString();
+        onExecutionPlan.accept(ExecutionPlanEvent.builder()
+                .planId(planId)
+                .summary(resolvePlanSummary(decision, validatedPlan))
+                .status("running")
+                .totalSteps(validatedPlan.steps().size())
+                .build());
+
+        for (int index = 0; index < validatedPlan.steps().size(); index++) {
+            ValidatedExecutionStep step = validatedPlan.steps().get(index);
+            onExecutionStep.accept(ExecutionStepEvent.builder()
+                    .planId(planId)
+                    .stepId("step-" + (index + 1))
+                    .targetName(step.capability().getTargetName())
+                    .summary(resolveStepSummary(step))
+                    .stepType(step.capability().getExecutionType())
+                    .status("running")
+                    .build());
+        }
+
+        ExecutionTranscript transcript = resolveExecutionOrchestrator(availableTools).execute(
+                validatedPlan,
+                onToolCall,
+                onToolResult
+        );
+        if (cancelled.get()) {
+            return;
+        }
+
+        boolean failed = false;
+        for (int index = 0; index < transcript.plan().steps().size(); index++) {
+            ToolResult toolResult = transcript.toolResults().get(index);
+            ValidatedExecutionStep step = transcript.plan().steps().get(index);
+            String status = toolResult.getError() == null ? "completed" : "failed";
+            onExecutionStep.accept(ExecutionStepEvent.builder()
+                    .planId(planId)
+                    .stepId("step-" + (index + 1))
+                    .targetName(step.capability().getTargetName())
+                    .summary(resolveStepSummary(step))
+                    .stepType(step.capability().getExecutionType())
+                    .status(status)
+                    .build());
+            if (toolResult.getError() != null) {
+                failed = true;
+            }
+        }
+
+        onExecutionPlan.accept(ExecutionPlanEvent.builder()
+                .planId(planId)
+                .summary(resolvePlanSummary(decision, validatedPlan))
+                .status(failed ? "failed" : "completed")
+                .totalSteps(validatedPlan.steps().size())
+                .build());
+
+        if (failed) {
+            onError.accept(new IllegalStateException(firstExecutionError(transcript)));
+            return;
+        }
+
+        emitAssistantText(resultSynthesisService.synthesize(userMessage, decision, transcript), onNext);
+        onComplete.run();
+    }
+
+    private ExecutionOrchestrator resolveExecutionOrchestrator(Map<String, ToolDefinition> availableTools) {
+        if (executionOrchestrator != null) {
+            return executionOrchestrator;
+        }
+
+        return new ExecutionOrchestrator((capability, arguments) -> executeCapability(availableTools, capability, arguments));
+    }
+
+    private Object executeCapability(
+            Map<String, ToolDefinition> availableTools,
+            ResolvedCapability capability,
+            Map<String, Object> arguments
+    ) {
+        ToolDefinition toolDefinition = availableTools.get(capability.getTargetName());
+        if (toolDefinition == null) {
+            throw new IllegalArgumentException("Planned tool not available: " + capability.getTargetName());
+        }
+
+        try {
+            return toolDefinition.execute(arguments).join();
+        } catch (CompletionException exception) {
+            Throwable cause = exception.getCause();
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw new IllegalStateException("Tool execution failed.", cause == null ? exception : cause);
+        }
+    }
+
+    private String resolveClarificationText(AgentDecision decision) {
+        if (decision == null) {
+            return null;
+        }
+        if (decision.clarificationQuestion() != null && !decision.clarificationQuestion().isBlank()) {
+            return decision.clarificationQuestion();
+        }
+        return decision.assistantText();
+    }
+
+    private String resolvePlanSummary(AgentDecision decision, ValidatedExecutionPlan validatedPlan) {
+        if (decision != null && decision.assistantText() != null && !decision.assistantText().isBlank()) {
+            return decision.assistantText();
+        }
+        return "Execute " + validatedPlan.steps().size() + " capability step(s).";
+    }
+
+    private String resolveStepSummary(ValidatedExecutionStep step) {
+        return "Execute " + step.capability().getTargetName() + ".";
+    }
+
+    private String firstExecutionError(ExecutionTranscript transcript) {
+        return transcript.toolResults().stream()
+                .map(ToolResult::getError)
+                .filter(Objects::nonNull)
+                .filter(message -> !message.isBlank())
+                .findFirst()
+                .orElse("Tool execution failed.");
+    }
+
+    private void emitAssistantText(
+            String text,
+            java.util.function.Consumer<String> onNext
+    ) {
+        if (text == null || text.isBlank()) {
+            return;
+        }
+        onNext.accept(text);
     }
 
     private void executeGovernedPlan(
