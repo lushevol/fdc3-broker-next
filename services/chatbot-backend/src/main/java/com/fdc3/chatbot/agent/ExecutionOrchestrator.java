@@ -8,6 +8,8 @@ import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,7 +21,7 @@ public class ExecutionOrchestrator {
     private final ExecutionDependency executionDependency;
 
     public ExecutionOrchestrator(ExecutionDependency executionDependency) {
-        this.executionDependency = executionDependency;
+        this.executionDependency = Objects.requireNonNull(executionDependency, "executionDependency");
     }
 
     public ExecutionTranscript execute(
@@ -49,12 +51,21 @@ public class ExecutionOrchestrator {
             toolCallConsumer.accept(toolCall);
             toolCalls.add(toolCall);
 
-            Object executionResult = executionDependency.execute(step.capability(), step.arguments());
-            ToolResult toolResult = ToolResult.builder()
-                    .toolCallId(toolCall.getId())
-                    .toolName(toolCall.getName())
-                    .result(normalizeResult(executionResult))
-                    .build();
+            ToolResult toolResult;
+            try {
+                Object executionResult = executionDependency.execute(step.capability(), step.arguments());
+                toolResult = ToolResult.builder()
+                        .toolCallId(toolCall.getId())
+                        .toolName(toolCall.getName())
+                        .result(normalizeResult(executionResult))
+                        .build();
+            } catch (RuntimeException exception) {
+                toolResult = ToolResult.builder()
+                        .toolCallId(toolCall.getId())
+                        .toolName(toolCall.getName())
+                        .error(exception.getMessage())
+                        .build();
+            }
             toolResultConsumer.accept(toolResult);
             toolResults.add(toolResult);
         }
@@ -64,9 +75,41 @@ public class ExecutionOrchestrator {
 
     private Object normalizeResult(Object executionResult) {
         if (executionResult instanceof Map<?, ?> resultMap) {
-            return Map.copyOf(resultMap);
+            return immutableCopyMap(resultMap);
+        }
+        if (executionResult instanceof List<?> resultList) {
+            return immutableCopyList(resultList);
         }
         return executionResult;
+    }
+
+    private Map<String, Object> immutableCopyMap(Map<?, ?> resultMap) {
+        Map<String, Object> copiedMap = new LinkedHashMap<>();
+        for (Map.Entry<?, ?> entry : resultMap.entrySet()) {
+            if (!(entry.getKey() instanceof String key)) {
+                throw new IllegalArgumentException("Cannot normalize result map with non-string key: " + entry.getKey());
+            }
+            copiedMap.put(key, normalizeValue(entry.getValue()));
+        }
+        return Collections.unmodifiableMap(copiedMap);
+    }
+
+    private List<Object> immutableCopyList(List<?> resultList) {
+        List<Object> copiedList = new ArrayList<>(resultList.size());
+        for (Object value : resultList) {
+            copiedList.add(normalizeValue(value));
+        }
+        return Collections.unmodifiableList(copiedList);
+    }
+
+    private Object normalizeValue(Object value) {
+        if (value instanceof Map<?, ?> nestedMap) {
+            return immutableCopyMap(nestedMap);
+        }
+        if (value instanceof List<?> nestedList) {
+            return immutableCopyList(nestedList);
+        }
+        return value;
     }
 
     @FunctionalInterface

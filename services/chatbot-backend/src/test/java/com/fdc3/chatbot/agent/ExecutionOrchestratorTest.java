@@ -13,10 +13,12 @@ import com.fdc3.chatbot.model.ToolResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ExecutionOrchestratorTest {
 
@@ -67,6 +69,70 @@ class ExecutionOrchestratorTest {
         assertThat(transcript.plan()).isEqualTo(validatedPlan);
         assertThat(transcript.toolCalls()).containsExactlyElementsOf(toolCalls);
         assertThat(transcript.toolResults()).containsExactlyElementsOf(toolResults);
+    }
+
+    @Test
+    void shouldEmitTerminalToolResultWhenExecutorThrows() {
+        ExecutionOrchestrator orchestrator = new ExecutionOrchestrator((capability, arguments) -> {
+            throw new IllegalStateException("mcp execution failed");
+        });
+
+        List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
+        List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
+
+        ExecutionTranscript transcript = orchestrator.execute(analyticsReadPlan(), toolCalls::add, toolResults::add);
+
+        assertThat(toolCalls).hasSize(1);
+        assertThat(toolResults).hasSize(1);
+        assertThat(toolResults.get(0).getToolCallId()).isEqualTo(toolCalls.get(0).getId());
+        assertThat(toolResults.get(0).getToolName()).isEqualTo(toolCalls.get(0).getName());
+        assertThat(toolResults.get(0).getError()).isEqualTo("mcp execution failed");
+        assertThat(toolResults.get(0).getResult()).isNull();
+        assertThat(transcript.toolResults()).containsExactlyElementsOf(toolResults);
+    }
+
+    @Test
+    void shouldPreserveMapResultsContainingNullFields() {
+        Map<String, Object> rawResult = new LinkedHashMap<>();
+        rawResult.put("appName", "cashflow");
+        rawResult.put("from", "2026-04-01");
+        rawResult.put("to", "2026-04-08");
+        rawResult.put("pvTotal", null);
+        rawResult.put("uvTotal", 30);
+        rawResult.put("trend", null);
+
+        ExecutionOrchestrator orchestrator = new ExecutionOrchestrator((capability, arguments) -> rawResult);
+
+        ExecutionTranscript transcript = orchestrator.execute(analyticsReadPlan(), null, null);
+
+        assertThat(transcript.toolCalls()).hasSize(1);
+        assertThat(transcript.toolResults()).hasSize(1);
+        assertThat(transcript.toolResults().get(0).getError()).isNull();
+        assertThat(transcript.toolResults().get(0).getResult()).isEqualTo(rawResult);
+    }
+
+    @Test
+    void shouldEmitTerminalToolResultWhenNormalizationFails() {
+        ExecutionOrchestrator orchestrator = new ExecutionOrchestrator((capability, arguments) -> Map.of(1, "value"));
+
+        List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
+        List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
+
+        ExecutionTranscript transcript = orchestrator.execute(analyticsReadPlan(), toolCalls::add, toolResults::add);
+
+        assertThat(toolCalls).hasSize(1);
+        assertThat(toolResults).hasSize(1);
+        assertThat(toolResults.get(0).getToolCallId()).isEqualTo(toolCalls.get(0).getId());
+        assertThat(toolResults.get(0).getToolName()).isEqualTo(toolCalls.get(0).getName());
+        assertThat(toolResults.get(0).getError()).contains("Cannot normalize");
+        assertThat(transcript.toolResults()).containsExactlyElementsOf(toolResults);
+    }
+
+    @Test
+    void shouldRejectNullExecutionDependency() {
+        assertThatThrownBy(() -> new ExecutionOrchestrator(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("executionDependency");
     }
 
     private static ValidatedExecutionPlan analyticsReadPlan() {
