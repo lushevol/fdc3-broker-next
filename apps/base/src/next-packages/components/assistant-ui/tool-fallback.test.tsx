@@ -7,7 +7,7 @@ jest.mock('@assistant-ui/react', () => ({
 }));
 
 describe('ToolFallback', () => {
-  it('renders analytics tools as a premium receipt with app and range summary', () => {
+  it('renders a generic tool receipt without analytics-specific narration', () => {
     render(
       <ToolFallback
         toolName="statistic_count_by_app"
@@ -18,10 +18,8 @@ describe('ToolFallback', () => {
 
     expect(screen.getAllByText('Used tool').length).toBeGreaterThan(0);
     expect(screen.getAllByText('statistic_count_by_app').length).toBeGreaterThan(0);
-    expect(screen.getByText('App')).toBeInTheDocument();
-    expect(screen.getByText('cashflow')).toBeInTheDocument();
-    expect(screen.getByText('Range')).toBeInTheDocument();
-    expect(screen.getByText('Apr 1 - Apr 8')).toBeInTheDocument();
+    expect(screen.queryByText('App')).not.toBeInTheDocument();
+    expect(screen.queryByText('Range')).not.toBeInTheDocument();
 
     const root = screen.getByRole('button').closest('[data-slot="tool-fallback-root"]');
     expect(root).toHaveClass('rounded-2xl');

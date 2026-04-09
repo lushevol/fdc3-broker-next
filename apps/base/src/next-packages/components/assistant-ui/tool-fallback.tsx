@@ -73,67 +73,6 @@ function ToolFallbackRoot({
 
 type ToolStatus = ToolCallMessagePartStatus['type'];
 
-type AnalyticsToolSummary = {
-  appLabel?: string;
-  rangeLabel?: string;
-};
-
-function safeParseToolArgs(argsText?: string): Record<string, unknown> | null {
-  if (!argsText) {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(argsText);
-    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-      return parsed as Record<string, unknown>;
-    }
-  } catch {
-    return null;
-  }
-
-  return null;
-}
-
-function formatToolDateLabel(value: unknown): string | null {
-  if (typeof value !== 'string') {
-    return null;
-  }
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-
-  return parsed.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
-}
-
-function getToolSummary(toolName: string, argsText?: string): AnalyticsToolSummary | null {
-  const parsedArgs = safeParseToolArgs(argsText);
-
-  if (toolName === 'statistic_count_by_app') {
-    const appLabel =
-      typeof parsedArgs?.appName === 'string'
-        ? parsedArgs.appName
-        : typeof parsedArgs?.appId === 'string'
-          ? parsedArgs.appId
-          : 'Active app';
-    const startLabel = formatToolDateLabel(parsedArgs?.startTime);
-    const endLabel = formatToolDateLabel(parsedArgs?.endTime);
-
-    return {
-      appLabel,
-      rangeLabel: startLabel && endLabel ? `${startLabel} - ${endLabel}` : undefined,
-    };
-  }
-
-  return null;
-}
-
 const statusIconMap: Record<ToolStatus, React.ElementType> = {
   running: LoaderIcon,
   complete: CheckIcon,
@@ -143,19 +82,16 @@ const statusIconMap: Record<ToolStatus, React.ElementType> = {
 
 function ToolFallbackTrigger({
   toolName,
-  argsText,
   status,
   className,
   ...props
 }: React.ComponentProps<typeof CollapsibleTrigger> & {
   toolName: string;
-  argsText?: string;
   status?: ToolCallMessagePartStatus;
 }) {
   const statusType = status?.type ?? 'complete';
   const isRunning = statusType === 'running';
   const isCancelled = status?.type === 'incomplete' && status.reason === 'cancelled';
-  const toolSummary = getToolSummary(toolName, argsText);
 
   const Icon = statusIconMap[statusType];
   const label = isCancelled ? 'Cancelled tool' : 'Used tool';
@@ -191,20 +127,6 @@ function ToolFallbackTrigger({
         <span className="mt-1.5 block text-xs text-muted-foreground">
           <b>{toolName}</b>
         </span>
-        {toolSummary ? (
-          <span className="mt-3 flex flex-wrap gap-2">
-            <span className="rounded-full border border-border/70 bg-background/70 px-2.5 py-1 text-[11px] font-medium text-foreground shadow-sm">
-              <span className="mr-1 text-muted-foreground">App</span>
-              {toolSummary.appLabel}
-            </span>
-            {toolSummary.rangeLabel ? (
-              <span className="rounded-full border border-border/70 bg-background/70 px-2.5 py-1 text-[11px] font-medium text-foreground shadow-sm">
-                <span className="mr-1 text-muted-foreground">Range</span>
-                {toolSummary.rangeLabel}
-              </span>
-            ) : null}
-          </span>
-        ) : null}
         {isRunning && (
           <span
             aria-hidden
@@ -348,7 +270,7 @@ const ToolFallbackImpl: ToolCallMessagePartComponent = ({ toolName, argsText, re
         isCancelled && 'border-muted-foreground/30 bg-muted/30',
       )}
     >
-      <ToolFallbackTrigger toolName={toolName} argsText={argsText} status={status} />
+      <ToolFallbackTrigger toolName={toolName} status={status} />
       <ToolFallbackContent>
         <ToolFallbackError status={status} />
         <ToolFallbackArgs argsText={argsText} className={cn(isCancelled && 'opacity-60')} />

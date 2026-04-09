@@ -241,7 +241,7 @@ export const ExecutionPlanStatusComponent: React.FC<{
   props: ExecutionPlanStatusComponentProps;
 }> = ({ props }) => {
   const theme = useTheme();
-  const label = props.kind === 'plan' ? 'Governed plan' : 'Execution step';
+  const label = props.kind === 'plan' ? 'Execution plan' : 'Execution step';
   const details = [
     props.kind === 'plan' && typeof props.totalSteps === 'number'
       ? `${props.totalSteps} step${props.totalSteps === 1 ? '' : 's'}`

@@ -72,6 +72,27 @@ describe('GenerativeUI', () => {
     expect(screen.getByText(/Unknown component: Unknown/)).toBeInTheDocument();
   });
 
+  it('renders execution plan status with neutral structural copy', () => {
+    render(
+      <GenerativeUIProvider initialComponents={DEFAULT_GENERATIVE_COMPONENTS}>
+        <RegisteredComponent
+          name="ExecutionPlanStatus"
+          props={{
+            kind: 'plan',
+            status: 'running',
+            summary: 'Backend plan summary',
+            planId: 'plan-1',
+            totalSteps: 2,
+          }}
+        />
+      </GenerativeUIProvider>,
+    );
+
+    expect(screen.getByText('Execution plan')).toBeInTheDocument();
+    expect(screen.getByText('Backend plan summary')).toBeInTheDocument();
+    expect(screen.queryByText('Governed plan')).not.toBeInTheDocument();
+  });
+
   it('renders usage statistics card totals and trend labels', () => {
     render(
       <GenerativeUIProvider initialComponents={DEFAULT_GENERATIVE_COMPONENTS}>

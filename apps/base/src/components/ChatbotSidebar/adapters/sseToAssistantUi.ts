@@ -403,14 +403,6 @@ export function transformExecutionStep(event: ExecutionStepEvent): ContentPart {
   };
 }
 
-function toToolProgressStub(toolName: string): ContentPart {
-  const humanizedToolName = toolName.replace(/_/g, ' ');
-  return {
-    type: 'text',
-    text: `Checking with ${humanizedToolName}...`,
-  };
-}
-
 function mergeToolLinkedGenerativeUI(
   message: AssistantUIMessage,
   directive: GenerativeUIDirective,
@@ -630,14 +622,10 @@ export function handleSSEEvent(
       }
 
       const ensuredMessage = ensureAssistantMessage(messages, streamingState);
-      const assistantMessage = ensuredMessage.messages[ensuredMessage.assistantMessageIndex];
-      const needsLeadingToolStub = assistantMessage.content.length === 0;
-      const messageWithLeadingStub = needsLeadingToolStub
-        ? addContentPartToAssistantMessage(assistantMessage, toToolProgressStub(toolCall.name))
-        : assistantMessage;
-
-      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] =
-        addContentPartToAssistantMessage(messageWithLeadingStub, toolCallPart);
+      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] = addContentPartToAssistantMessage(
+        ensuredMessage.messages[ensuredMessage.assistantMessageIndex],
+        toolCallPart,
+      );
 
       return {
         messages: ensuredMessage.messages,

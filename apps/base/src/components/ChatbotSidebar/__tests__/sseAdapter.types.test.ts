@@ -143,12 +143,8 @@ describe('SSE Adapter Type Safety', () => {
         (message) => message.role === 'assistant',
       );
 
-      expect(assistantMessage?.content).toHaveLength(2);
+      expect(assistantMessage?.content).toHaveLength(1);
       expect(assistantMessage?.content[0]).toMatchObject({
-        type: 'text',
-        text: 'Checking with get weather...',
-      });
-      expect(assistantMessage?.content[1]).toMatchObject({
         type: 'tool-call',
         toolCallId: 'tool-456',
         result: {
@@ -593,7 +589,7 @@ describe('SSE Adapter Type Safety', () => {
       expect(result.streamingState.accumulatedContent).toBe('Hello World');
     });
 
-    it('should handle tool_call event', () => {
+    it('should handle tool_call event without inventing assistant narration', () => {
       const messages: AssistantUIMessage[] = [createAssistantMessage()];
       const state = createInitialStreamingState();
       state.assistantMessageId = messages[0].id;
@@ -607,16 +603,16 @@ describe('SSE Adapter Type Safety', () => {
 
       const result = handleSSEEvent(messages, state, 'tool_call', JSON.stringify(toolCall));
 
-      expect(result.messages[0].content).toHaveLength(2);
+      expect(result.messages[0].content).toHaveLength(1);
       expect(result.messages[0].content[0]).toMatchObject({
-        type: 'text',
-        text: 'Checking with calculator...',
+        type: 'tool-call',
+        toolCallId: 'tool-1',
+        toolName: 'calculator',
       });
-      expect(result.messages[0].content[1].type).toBe('tool-call');
       expect(result.streamingState.accumulatedContent).toBe('');
     });
 
-    it('should prepend a visible progress stub when a tool call arrives before any assistant text', () => {
+    it('should keep tool calls text-free when they arrive before any assistant message text', () => {
       const messages: AssistantUIMessage[] = [];
       const state = createInitialStreamingState();
 
@@ -631,7 +627,6 @@ describe('SSE Adapter Type Safety', () => {
 
       expect(result.messages).toHaveLength(1);
       expect(result.messages[0].content).toEqual([
-        { type: 'text', text: 'Checking with generate status card...' },
         {
           type: 'tool-call',
           toolCallId: 'tool-leading-1',
@@ -751,7 +746,7 @@ describe('SSE Adapter Type Safety', () => {
       expect(afterStep.messages).toEqual([]);
     });
 
-    it('should render statistic_count_by_app as tool call, usage card, and summary in order', () => {
+    it('should render statistic_count_by_app as tool call, usage card, and backend message text in order', () => {
       let messages: AssistantUIMessage[] = [];
       let state = createInitialStreamingState();
 
@@ -869,7 +864,7 @@ describe('SSE Adapter Type Safety', () => {
         messages,
         state,
         'message',
-        'cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.',
+        'Backend message: cashflow usage is ready.',
       );
 
       expect(afterSummary.messages).toHaveLength(1);
@@ -921,7 +916,7 @@ describe('SSE Adapter Type Safety', () => {
         },
         {
           type: 'text',
-          text: 'cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.',
+          text: 'Backend message: cashflow usage is ready.',
         },
       ]);
     });
