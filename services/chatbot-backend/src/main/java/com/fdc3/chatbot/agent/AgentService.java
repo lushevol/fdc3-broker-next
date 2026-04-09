@@ -8,6 +8,7 @@ import com.fdc3.chatbot.agent.model.ExecutionTranscript;
 import com.fdc3.chatbot.agent.model.ValidatedExecutionPlan;
 import com.fdc3.chatbot.agent.model.ValidatedExecutionStep;
 import com.fdc3.chatbot.agent.prompt.AgentDecisionPromptFactory;
+import com.fdc3.chatbot.agent.prompt.ResultSynthesisPromptFactory;
 import com.fdc3.chatbot.controlplane.CapabilityResolver;
 import com.fdc3.chatbot.controlplane.model.ExecutionPlan;
 import com.fdc3.chatbot.controlplane.model.ExecutionStep;
@@ -201,7 +202,9 @@ public class AgentService {
             planValidationService = new PlanValidationService(policyEvaluator);
         }
         if (resultSynthesisService == null) {
-            resultSynthesisService = new ResultSynthesisService();
+            resultSynthesisService = chatModel == null
+                    ? new ResultSynthesisService()
+                    : new ResultSynthesisService(chatModel, new ResultSynthesisPromptFactory());
         }
     }
 

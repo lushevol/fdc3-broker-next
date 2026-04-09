@@ -6,6 +6,7 @@ import com.fdc3.chatbot.agent.model.AgentPlan;
 import com.fdc3.chatbot.agent.model.AgentPlanStep;
 import com.fdc3.chatbot.agent.model.ExecutionTranscript;
 import com.fdc3.chatbot.agent.prompt.AgentDecisionPromptFactory;
+import com.fdc3.chatbot.agent.prompt.ResultSynthesisPromptFactory;
 import com.fdc3.chatbot.controlplane.CapabilityRegistryService;
 import com.fdc3.chatbot.controlplane.CapabilityResolver;
 import com.fdc3.chatbot.controlplane.model.ResolvedCapability;
@@ -158,7 +159,7 @@ class AgentControlPlaneExecutionTest {
                                 )
                         )))
                 ),
-                "cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30."
+                "LLM final summary: cashflow delivered 120 PV and 30 UV for the requested window."
         );
 
         List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
@@ -213,7 +214,10 @@ class AgentControlPlaneExecutionTest {
                 ),
                 ((Map<?, ?>) toolResults.get(0).getResult()).get("trendPoints")
         );
-        assertEquals("cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.", streamedText.toString());
+        assertEquals(
+                "LLM final summary: cashflow delivered 120 PV and 30 UV for the requested window.",
+                streamedText.toString()
+        );
     }
 
     private static AgentService createAgentService(
@@ -238,7 +242,10 @@ class AgentControlPlaneExecutionTest {
                         .get(capability.getTargetName())
                         .execute(arguments)
                         .join()),
-                new StubResultSynthesisService(synthesizedSummary)
+                new ResultSynthesisService(
+                        new FixedResponseChatModel(synthesizedSummary),
+                        new ResultSynthesisPromptFactory()
+                )
         );
     }
 
@@ -299,30 +306,28 @@ class AgentControlPlaneExecutionTest {
         }
     }
 
-    private static final class StubResultSynthesisService extends ResultSynthesisService {
-
-        private final String summary;
-
-        private StubResultSynthesisService(String summary) {
-            this.summary = summary;
-        }
-
-        @Override
-        public String synthesize(
-                String userMessage,
-                AgentDecision decision,
-                ExecutionTranscript transcript
-        ) {
-            return summary;
-        }
-    }
-
-    private static final class NoOpChatModel implements ChatModel {
+    private static class NoOpChatModel implements ChatModel {
 
         @Override
         public ChatResponse doChat(ChatRequest chatRequest) {
             return ChatResponse.builder()
                     .aiMessage(AiMessage.from("{}"))
+                    .build();
+        }
+    }
+
+    private static final class FixedResponseChatModel extends NoOpChatModel {
+
+        private final String responseText;
+
+        private FixedResponseChatModel(String responseText) {
+            this.responseText = responseText;
+        }
+
+        @Override
+        public ChatResponse doChat(ChatRequest chatRequest) {
+            return ChatResponse.builder()
+                    .aiMessage(AiMessage.from(responseText))
                     .build();
         }
     }

@@ -2,7 +2,13 @@ package com.fdc3.chatbot.agent;
 
 import com.fdc3.chatbot.agent.model.AgentDecision;
 import com.fdc3.chatbot.agent.model.ExecutionTranscript;
+import com.fdc3.chatbot.agent.prompt.ResultSynthesisPromptFactory;
 import com.fdc3.chatbot.model.ToolResult;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.response.ChatResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -10,12 +16,48 @@ import java.util.Objects;
 
 @Service
 public class ResultSynthesisService {
+    private static final String SYNTHESIS_REQUEST =
+            "Write the final assistant response using only the executed results.";
+
+    private final ChatModel chatModel;
+    private final ResultSynthesisPromptFactory promptFactory;
+
+    public ResultSynthesisService() {
+        this(null, new ResultSynthesisPromptFactory());
+    }
+
+    public ResultSynthesisService(
+            ChatModel chatModel,
+            ResultSynthesisPromptFactory promptFactory
+    ) {
+        this.chatModel = chatModel;
+        this.promptFactory = Objects.requireNonNull(promptFactory, "promptFactory");
+    }
 
     public String synthesize(
             String userMessage,
             AgentDecision decision,
             ExecutionTranscript transcript
     ) {
+        if (chatModel != null) {
+            try {
+                String prompt = promptFactory.build(userMessage, decision, transcript);
+                ChatResponse response = chatModel.chat(ChatRequest.builder()
+                        .messages(java.util.List.of(
+                                SystemMessage.from(prompt),
+                                UserMessage.from(SYNTHESIS_REQUEST)
+                        ))
+                        .build());
+
+                String modelText = response.aiMessage() == null ? null : response.aiMessage().text();
+                if (modelText != null && !modelText.isBlank()) {
+                    return modelText.trim();
+                }
+            } catch (Exception ignored) {
+                // Deterministic fallback is resilience only when synthesis model output is unavailable.
+            }
+        }
+
         if (transcript == null || transcript.toolResults().isEmpty()) {
             return defaultSummary(decision);
         }
