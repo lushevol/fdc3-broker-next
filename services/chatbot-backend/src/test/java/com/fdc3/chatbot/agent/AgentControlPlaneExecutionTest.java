@@ -220,11 +220,98 @@ class AgentControlPlaneExecutionTest {
         );
     }
 
+    @Test
+    void processMessageStreamingSynthesizesFailureTranscriptInsteadOfShortCircuitingToError() throws Exception {
+        ToolRegistry toolRegistry = analyticsToolRegistry();
+        UserCapabilityContext capabilityContext = advisorContext();
+        AgentService agentService = createAgentService(
+                toolRegistry,
+                capabilityContext,
+                new AgentDecision(
+                        AgentDecisionType.PLAN,
+                        null,
+                        null,
+                        new AgentPlan(List.of(new AgentPlanStep(
+                                "app-usage-statistics",
+                                Map.of(
+                                        "appName", "cashflow",
+                                        "startTime", "2026-04-01",
+                                        "endTime", "2026-04-08"
+                                )
+                        )))
+                ),
+                "LLM failure summary: the analytics provider timed out, so no usage totals are available.",
+                new ExecutionOrchestrator((capability, arguments) -> {
+                    throw new IllegalStateException("analytics provider timed out");
+                })
+        );
+
+        List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
+        List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
+        List<ExecutionPlanEvent> executionPlans = new CopyOnWriteArrayList<>();
+        List<ExecutionStepEvent> executionSteps = new CopyOnWriteArrayList<>();
+        List<Throwable> errors = new CopyOnWriteArrayList<>();
+        StringBuilder streamedText = new StringBuilder();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-plan-failure",
+                "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
+                capabilityContext,
+                null,
+                null,
+                null,
+                List.<ChatMessage>of(),
+                streamedText::append,
+                errors::add,
+                completed::countDown,
+                executionPlans::add,
+                executionSteps::add,
+                toolCalls::add,
+                toolResults::add
+        );
+
+        assertTrue(completed.await(1, TimeUnit.SECONDS));
+        assertTrue(errors.isEmpty());
+        assertEquals(2, executionPlans.size());
+        assertEquals("running", executionPlans.get(0).getStatus());
+        assertEquals("failed", executionPlans.get(1).getStatus());
+        assertEquals(2, executionSteps.size());
+        assertEquals("running", executionSteps.get(0).getStatus());
+        assertEquals("failed", executionSteps.get(1).getStatus());
+        assertEquals(1, toolCalls.size());
+        assertEquals(1, toolResults.size());
+        assertEquals("analytics provider timed out", toolResults.get(0).getError());
+        assertEquals(
+                "LLM failure summary: the analytics provider timed out, so no usage totals are available.",
+                streamedText.toString()
+        );
+    }
+
     private static AgentService createAgentService(
             ToolRegistry toolRegistry,
             UserCapabilityContext capabilityContext,
             AgentDecision decision,
             String synthesizedSummary
+    ) {
+        return createAgentService(
+                toolRegistry,
+                capabilityContext,
+                decision,
+                synthesizedSummary,
+                new ExecutionOrchestrator((capability, arguments) -> toolRegistry.resolveTools(capabilityContext)
+                        .get(capability.getTargetName())
+                        .execute(arguments)
+                        .join())
+        );
+    }
+
+    private static AgentService createAgentService(
+            ToolRegistry toolRegistry,
+            UserCapabilityContext capabilityContext,
+            AgentDecision decision,
+            String synthesizedSummary,
+            ExecutionOrchestrator executionOrchestrator
     ) {
         CapabilityResolver capabilityResolver = new CapabilityResolver(
                 new CapabilityRegistryService(new ObjectMapper()),
@@ -238,10 +325,7 @@ class AgentControlPlaneExecutionTest {
                 new ExecutionPlanner(),
                 new StubAgentDecisionService(decision),
                 new PlanValidationService(policyEvaluator),
-                new ExecutionOrchestrator((capability, arguments) -> toolRegistry.resolveTools(capabilityContext)
-                        .get(capability.getTargetName())
-                        .execute(arguments)
-                        .join()),
+                executionOrchestrator,
                 new ResultSynthesisService(
                         new FixedResponseChatModel(synthesizedSummary),
                         new ResultSynthesisPromptFactory()

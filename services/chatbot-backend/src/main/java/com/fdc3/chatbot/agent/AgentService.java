@@ -785,11 +785,6 @@ public class AgentService {
                 .totalSteps(validatedPlan.steps().size())
                 .build());
 
-        if (failed) {
-            onError.accept(new IllegalStateException(firstExecutionError(transcript)));
-            return;
-        }
-
         emitAssistantText(resultSynthesisService.synthesize(userMessage, decision, transcript), onNext);
         onComplete.run();
     }
@@ -842,15 +837,6 @@ public class AgentService {
 
     private String resolveStepSummary(ValidatedExecutionStep step) {
         return "Execute " + step.capability().getTargetName() + ".";
-    }
-
-    private String firstExecutionError(ExecutionTranscript transcript) {
-        return transcript.toolResults().stream()
-                .map(ToolResult::getError)
-                .filter(Objects::nonNull)
-                .filter(message -> !message.isBlank())
-                .findFirst()
-                .orElse("Tool execution failed.");
     }
 
     private void emitAssistantText(
