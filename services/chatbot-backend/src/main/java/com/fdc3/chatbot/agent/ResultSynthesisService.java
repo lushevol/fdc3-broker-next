@@ -62,11 +62,12 @@ public class ResultSynthesisService {
             return defaultSummary(decision);
         }
 
-        ToolResult finalResult = transcript.toolResults().get(transcript.toolResults().size() - 1);
-        if (finalResult.getError() != null && !finalResult.getError().isBlank()) {
-            return finalResult.getError();
+        String transcriptError = firstTranscriptError(transcript);
+        if (transcriptError != null) {
+            return transcriptError;
         }
 
+        ToolResult finalResult = transcript.toolResults().get(transcript.toolResults().size() - 1);
         if (!(finalResult.getResult() instanceof Map<?, ?> rawResult)) {
             return defaultSummary(decision);
         }
@@ -86,6 +87,15 @@ public class ResultSynthesisService {
         }
 
         return defaultSummary(decision);
+    }
+
+    private String firstTranscriptError(ExecutionTranscript transcript) {
+        return transcript.toolResults().stream()
+                .map(ToolResult::getError)
+                .filter(Objects::nonNull)
+                .filter(error -> !error.isBlank())
+                .findFirst()
+                .orElse(null);
     }
 
     private String defaultSummary(AgentDecision decision) {

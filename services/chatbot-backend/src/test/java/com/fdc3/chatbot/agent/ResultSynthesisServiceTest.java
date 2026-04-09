@@ -86,6 +86,35 @@ class ResultSynthesisServiceTest {
                 .contains("\"error\":\"provider timed out\"");
     }
 
+    @Test
+    void shouldReturnFailureOrientedFallbackWhenNoModelAndTranscriptFailed() {
+        ResultSynthesisService service = new ResultSynthesisService();
+
+        String result = service.synthesize(
+                "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
+                analyticsPlanDecision(),
+                failedTranscript()
+        );
+
+        assertThat(result).contains("provider timed out");
+        assertThat(result).doesNotContain("Completed the requested action.");
+    }
+
+    @Test
+    void shouldReturnFailureOrientedFallbackWhenEarlierStepFailedButLastStepSucceeded() {
+        ResultSynthesisService service = new ResultSynthesisService();
+
+        String result = service.synthesize(
+                "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
+                analyticsPlanDecision(),
+                partialFailureTranscript()
+        );
+
+        assertThat(result).contains("provider timed out");
+        assertThat(result).doesNotContain("PV 120");
+        assertThat(result).doesNotContain("Completed the requested action.");
+    }
+
     private static AgentDecision analyticsPlanDecision() {
         return new AgentDecision(
                 AgentDecisionType.PLAN,
@@ -146,6 +175,52 @@ class ResultSynthesisServiceTest {
                 .error("provider timed out")
                 .build();
         return new ExecutionTranscript(validatedPlan(), List.of(toolCall), List.of(toolResult));
+    }
+
+    private static ExecutionTranscript partialFailureTranscript() {
+        ToolCall failedToolCall = ToolCall.builder()
+                .id("tool-1")
+                .name("statistic_count_by_app")
+                .arguments(Map.of(
+                        "appName", "cashflow",
+                        "startTime", "2026-04-01",
+                        "endTime", "2026-04-08"
+                ))
+                .status(ToolCall.ToolStatus.FAILED)
+                .executionTarget(ToolCall.ExecutionTarget.BACKEND)
+                .build();
+        ToolCall successfulToolCall = ToolCall.builder()
+                .id("tool-2")
+                .name("statistic_count_by_app")
+                .arguments(Map.of(
+                        "appName", "cashflow",
+                        "startTime", "2026-04-01",
+                        "endTime", "2026-04-08"
+                ))
+                .status(ToolCall.ToolStatus.COMPLETED)
+                .executionTarget(ToolCall.ExecutionTarget.BACKEND)
+                .build();
+        ToolResult failedToolResult = ToolResult.builder()
+                .toolCallId("tool-1")
+                .toolName("statistic_count_by_app")
+                .error("provider timed out")
+                .build();
+        ToolResult successfulToolResult = ToolResult.builder()
+                .toolCallId("tool-2")
+                .toolName("statistic_count_by_app")
+                .result(Map.of(
+                        "appName", "cashflow",
+                        "startTime", "2026-04-01",
+                        "endTime", "2026-04-08",
+                        "pv", 120,
+                        "uv", 30
+                ))
+                .build();
+        return new ExecutionTranscript(
+                validatedPlan(),
+                List.of(failedToolCall, successfulToolCall),
+                List.of(failedToolResult, successfulToolResult)
+        );
     }
 
     private static ValidatedExecutionPlan validatedPlan() {
