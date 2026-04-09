@@ -379,11 +379,6 @@ function hasStructuredAssistantContent(content: AssistantRunContent): boolean {
   return content.some((part) => part.type !== 'text');
 }
 
-function getLatestAssistantTrailingTextContent(content: AssistantRunContent): AssistantRunContent {
-  const trailingPart = content.at(-1);
-  return trailingPart?.type === 'text' ? [trailingPart] : [];
-}
-
 function createStreamQueue() {
   const values: ChatModelRunResult[] = [];
   const resolvers: Array<(value: IteratorResult<ChatModelRunResult, void>) => void> = [];
@@ -504,20 +499,6 @@ function createChatModelAdapter(
           });
         };
 
-        const emitTrailingStructuredTextState = () => {
-          const latestContent = getLatestAssistantContent(streamingMessages);
-          const trailingContent = getLatestAssistantTrailingTextContent(latestContent);
-
-          if (trailingContent.length === 0) {
-            return;
-          }
-
-          hasEmittedContent = true;
-          streamQueue.push({
-            content: trailingContent,
-          });
-        };
-
         let streamRequest: ReturnType<typeof startFetchSSE> | null = null;
 
         streamRequest = startFetchSSE({
@@ -581,7 +562,7 @@ function createChatModelAdapter(
                 }
 
                 if (containsStructuredContent) {
-                  emitTrailingStructuredTextState();
+                  emitVisibleState();
                   return;
                 }
 

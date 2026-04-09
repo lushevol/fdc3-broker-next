@@ -56,6 +56,140 @@ class AgentDecisionServiceTest {
     }
 
     @Test
+    void shouldDeserializeWrappedPlanDecisionWithPlanArrayAndInputs() {
+        String json = """
+                {
+                  "response": {
+                    "decisionType": "plan",
+                    "assistantText": "I'll get the usage data.",
+                    "plan": [
+                      {
+                        "capabilityId": "app-usage-statistics",
+                        "providerId": "elasticsearch-analytics",
+                        "targetName": "statistic_count_by_app",
+                        "inputs": {
+                          "appName": "cashflow",
+                          "startTime": "2026-04-01T00:00:00.000Z",
+                          "endTime": "2026-04-08T23:59:59.999Z"
+                        }
+                      }
+                    ]
+                  }
+                }
+                """;
+
+        AgentDecision decision = AgentDecisionService.parseDecision(json);
+
+        assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.PLAN);
+        assertThat(decision.assistantText()).isEqualTo("I'll get the usage data.");
+        assertThat(decision.plan()).isNotNull();
+        assertThat(decision.plan().steps()).hasSize(1);
+        assertThat(decision.plan().steps().get(0).capabilityId()).isEqualTo("app-usage-statistics");
+        assertThat(decision.plan().steps().get(0).arguments())
+                .containsEntry("appName", "cashflow")
+                .containsEntry("startTime", "2026-04-01T00:00:00.000Z")
+                .containsEntry("endTime", "2026-04-08T23:59:59.999Z");
+    }
+
+    @Test
+    void shouldDeserializeWrappedPlanDecisionWithStepsObjectAndInputs() {
+        String json = """
+                {
+                  "response": {
+                    "decisionType": "plan",
+                    "plan": {
+                      "steps": [
+                        {
+                          "capabilityId": "app-usage-statistics",
+                          "inputs": {
+                            "appName": "cashflow",
+                            "startTime": "2026-04-01",
+                            "endTime": "2026-04-08"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+                """;
+
+        AgentDecision decision = AgentDecisionService.parseDecision(json);
+
+        assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.PLAN);
+        assertThat(decision.plan()).isNotNull();
+        assertThat(decision.plan().steps()).hasSize(1);
+        assertThat(decision.plan().steps().get(0).arguments())
+                .containsEntry("appName", "cashflow")
+                .containsEntry("startTime", "2026-04-01")
+                .containsEntry("endTime", "2026-04-08");
+    }
+
+    @Test
+    void shouldDeserializeMarkdownFencedWrappedPlanDecision() {
+        String json = """
+                ```json
+                {
+                  "response": {
+                    "decisionType": "plan",
+                    "assistantText": "I'll fetch the usage data.",
+                    "plan": [
+                      {
+                        "capabilityId": "app-usage-statistics",
+                        "inputs": {
+                          "appName": "cashflow",
+                          "startTime": "2026-04-01",
+                          "endTime": "2026-04-08"
+                        }
+                      }
+                    ]
+                  }
+                }
+                ```
+                """;
+
+        AgentDecision decision = AgentDecisionService.parseDecision(json);
+
+        assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.PLAN);
+        assertThat(decision.assistantText()).isEqualTo("I'll fetch the usage data.");
+        assertThat(decision.plan()).isNotNull();
+        assertThat(decision.plan().steps()).hasSize(1);
+        assertThat(decision.plan().steps().get(0).capabilityId()).isEqualTo("app-usage-statistics");
+        assertThat(decision.plan().steps().get(0).arguments())
+                .containsEntry("appName", "cashflow")
+                .containsEntry("startTime", "2026-04-01")
+                .containsEntry("endTime", "2026-04-08");
+    }
+
+    @Test
+    void shouldDeserializePlanDecisionWithPrefixedText() {
+        String json = """
+                Here is the structured decision:
+                {
+                  "response": {
+                    "decisionType": "plan",
+                    "plan": [
+                      {
+                        "capabilityId": "app-usage-statistics",
+                        "inputs": {
+                          "appName": "cashflow",
+                          "startTime": "2026-04-01",
+                          "endTime": "2026-04-08"
+                        }
+                      }
+                    ]
+                  }
+                }
+                """;
+
+        AgentDecision decision = AgentDecisionService.parseDecision(json);
+
+        assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.PLAN);
+        assertThat(decision.plan()).isNotNull();
+        assertThat(decision.plan().steps()).hasSize(1);
+        assertThat(decision.plan().steps().get(0).capabilityId()).isEqualTo("app-usage-statistics");
+    }
+
+    @Test
     void shouldRejectDecisionWithoutDecisionType() {
         String json = "{\"assistantText\":\"missing type\"}";
 
@@ -63,6 +197,54 @@ class AgentDecisionServiceTest {
 
         assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.RESPOND);
         assertThat(decision.assistantText()).contains("missing type");
+    }
+
+    @Test
+    void shouldDeserializeRespondDecisionUsingTextField() {
+        String json = """
+                {
+                  "decisionType": "respond",
+                  "text": "Hello! How can I help?"
+                }
+                """;
+
+        AgentDecision decision = AgentDecisionService.parseDecision(json);
+
+        assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.RESPOND);
+        assertThat(decision.assistantText()).isEqualTo("Hello! How can I help?");
+    }
+
+    @Test
+    void shouldDeserializeWrappedRespondDecisionUsingResponseTextField() {
+        String json = """
+                {
+                  "response": {
+                    "decisionType": "respond",
+                    "message": "Hello! How can I help?"
+                  }
+                }
+                """;
+
+        AgentDecision decision = AgentDecisionService.parseDecision(json);
+
+        assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.RESPOND);
+        assertThat(decision.assistantText()).isEqualTo("Hello! How can I help?");
+    }
+
+    @Test
+    void shouldDeserializeRespondDecisionUsingRootResponseTextField() {
+        String json = """
+                {
+                  "decisionType": "respond",
+                  "thoughtProcess": "This is a greeting.",
+                  "response": "Hello! How can I help you today?"
+                }
+                """;
+
+        AgentDecision decision = AgentDecisionService.parseDecision(json);
+
+        assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.RESPOND);
+        assertThat(decision.assistantText()).isEqualTo("Hello! How can I help you today?");
     }
 
     @Test

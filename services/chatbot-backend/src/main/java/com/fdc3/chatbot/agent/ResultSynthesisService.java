@@ -7,8 +7,10 @@ import com.fdc3.chatbot.model.ToolResult;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -20,17 +22,27 @@ public class ResultSynthesisService {
             "Write the final assistant response using only the executed results.";
 
     private final ChatModel chatModel;
+    private final StreamingChatModel streamingChatModel;
     private final ResultSynthesisPromptFactory promptFactory;
 
     public ResultSynthesisService() {
-        this(null, new ResultSynthesisPromptFactory());
+        this(null, null, new ResultSynthesisPromptFactory());
     }
 
     public ResultSynthesisService(
             ChatModel chatModel,
             ResultSynthesisPromptFactory promptFactory
     ) {
+        this(chatModel, null, promptFactory);
+    }
+
+    public ResultSynthesisService(
+            ChatModel chatModel,
+            StreamingChatModel streamingChatModel,
+            ResultSynthesisPromptFactory promptFactory
+    ) {
         this.chatModel = chatModel;
+        this.streamingChatModel = streamingChatModel;
         this.promptFactory = Objects.requireNonNull(promptFactory, "promptFactory");
     }
 
@@ -89,6 +101,53 @@ public class ResultSynthesisService {
         return defaultSummary(decision);
     }
 
+    public void synthesizeStreaming(
+            String userMessage,
+            AgentDecision decision,
+            ExecutionTranscript transcript,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            Runnable onComplete
+    ) {
+        if (streamingChatModel == null) {
+            emitFallbackSynthesis(userMessage, decision, transcript, onNext, onComplete);
+            return;
+        }
+
+        try {
+            String prompt = promptFactory.build(userMessage, decision, transcript);
+            StringBuilder streamedText = new StringBuilder();
+            streamingChatModel.chat(ChatRequest.builder()
+                    .messages(java.util.List.of(
+                            SystemMessage.from(prompt),
+                            UserMessage.from(SYNTHESIS_REQUEST)
+                    ))
+                    .build(), new StreamingChatResponseHandler() {
+                        @Override
+                        public void onPartialResponse(String partialResponse) {
+                            streamedText.append(partialResponse);
+                            onNext.accept(partialResponse);
+                        }
+
+                        @Override
+                        public void onCompleteResponse(ChatResponse completeResponse) {
+                            String completeText = completeResponse.aiMessage() == null
+                                    ? null
+                                    : completeResponse.aiMessage().text();
+                            emitRemainingAssistantText(streamedText, completeText, onNext);
+                            onComplete.run();
+                        }
+
+                        @Override
+                        public void onError(Throwable error) {
+                            onError.accept(error);
+                        }
+                    });
+        } catch (Exception exception) {
+            onError.accept(exception);
+        }
+    }
+
     private String firstTranscriptError(ExecutionTranscript transcript) {
         return transcript.toolResults().stream()
                 .map(ToolResult::getError)
@@ -118,5 +177,40 @@ public class ResultSynthesisService {
             }
         }
         return null;
+    }
+
+    private void emitFallbackSynthesis(
+            String userMessage,
+            AgentDecision decision,
+            ExecutionTranscript transcript,
+            java.util.function.Consumer<String> onNext,
+            Runnable onComplete
+    ) {
+        String text = synthesize(userMessage, decision, transcript);
+        if (text != null && !text.isBlank()) {
+            onNext.accept(text);
+        }
+        onComplete.run();
+    }
+
+    private void emitRemainingAssistantText(
+            StringBuilder streamedText,
+            String completeText,
+            java.util.function.Consumer<String> onNext
+    ) {
+        if (completeText == null || completeText.isBlank()) {
+            return;
+        }
+        String alreadyStreamed = streamedText.toString();
+        if (completeText.startsWith(alreadyStreamed)) {
+            String suffix = completeText.substring(alreadyStreamed.length());
+            if (!suffix.isEmpty()) {
+                onNext.accept(suffix);
+            }
+            return;
+        }
+        if (alreadyStreamed.isBlank()) {
+            onNext.accept(completeText);
+        }
     }
 }

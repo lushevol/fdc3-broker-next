@@ -12,6 +12,8 @@ import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -73,6 +75,24 @@ class ExecutionOrchestratorTest {
         assertThat(transcript.toolCalls().get(0).getName()).isEqualTo(toolCalls.get(0).getName());
         assertThat(transcript.toolResults()).containsExactlyElementsOf(toolResults);
         assertThat(transcript.toolCalls().get(0).getStatus()).isEqualTo(ToolCall.ToolStatus.COMPLETED);
+    }
+
+    @Test
+    void shouldNormalizeDateOnlyTimeArgumentsBeforeExecution() {
+        CapturingExecutionDependency executionDependency = new CapturingExecutionDependency();
+        ExecutionOrchestrator orchestrator = new ExecutionOrchestrator(executionDependency);
+        ValidatedExecutionPlan validatedPlan = analyticsReadPlanWithIsoTimeInputs();
+
+        orchestrator.execute(validatedPlan, null, null);
+
+        assertThat(executionDependency.arguments()).containsEntry(
+                "startTime",
+                LocalDate.parse("2026-04-01").atStartOfDay().toInstant(ZoneOffset.UTC).toString()
+        );
+        assertThat(executionDependency.arguments()).containsEntry(
+                "endTime",
+                LocalDate.parse("2026-04-08").plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toString()
+        );
     }
 
     @Test
@@ -182,6 +202,35 @@ class ExecutionOrchestratorTest {
         return new ValidatedExecutionPlan(List.of(step));
     }
 
+    private static ValidatedExecutionPlan analyticsReadPlanWithIsoTimeInputs() {
+        ResolvedCapability capability = ResolvedCapability.builder()
+                .capabilityId("app-usage-statistics")
+                .providerId("elasticsearch-analytics")
+                .targetName("statistic_count_by_app")
+                .executionType("mcp")
+                .accessType("read")
+                .tenantScope("global")
+                .requiredInputs(List.of("startTime", "endTime"))
+                .optionalInputs(List.of("appName"))
+                .availableToolNames(List.of("statistic_count_by_app"))
+                .build();
+
+        ValidatedExecutionStep step = new ValidatedExecutionStep(
+                capability.getCapabilityId(),
+                capability,
+                Map.of(
+                        "appName", "cashflow",
+                        "startTime", "2026-04-01",
+                        "endTime", "2026-04-08"
+                ),
+                PolicyDecision.builder()
+                        .decisionType(PolicyDecisionType.ALLOW)
+                        .build()
+        );
+
+        return new ValidatedExecutionPlan(List.of(step));
+    }
+
     private static final class FakeMcpExecutor implements ExecutionOrchestrator.ExecutionDependency {
 
         private final String json;
@@ -198,6 +247,20 @@ class ExecutionOrchestratorTest {
             } catch (Exception exception) {
                 throw new IllegalStateException(exception);
             }
+        }
+    }
+
+    private static final class CapturingExecutionDependency implements ExecutionOrchestrator.ExecutionDependency {
+        private Map<String, Object> arguments;
+
+        @Override
+        public Object execute(ResolvedCapability capability, Map<String, Object> arguments) {
+            this.arguments = arguments;
+            return Map.of("ok", true);
+        }
+
+        private Map<String, Object> arguments() {
+            return arguments;
         }
     }
 }

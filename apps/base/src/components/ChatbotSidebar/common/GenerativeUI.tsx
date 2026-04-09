@@ -329,7 +329,13 @@ const TrendChart: React.FC<{
           boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
         }}
       >
-        <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="160" role="img" aria-label={label}>
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          width="100%"
+          height="160"
+          role="img"
+          aria-label={label}
+        >
           <line
             x1={padding}
             y1={height - padding}
@@ -439,7 +445,13 @@ export const UsageStatisticsCardComponent: React.FC<{
               : '0 10px 24px -24px rgba(15,23,42,0.28)',
           }}
         >
-          <div style={{ color: theme.palette.text.secondary, fontSize: '0.75rem', textTransform: 'uppercase' }}>
+          <div
+            style={{
+              color: theme.palette.text.secondary,
+              fontSize: '0.75rem',
+              textTransform: 'uppercase',
+            }}
+          >
             PV
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: 700, letterSpacing: '-0.03em' }}>
@@ -458,7 +470,13 @@ export const UsageStatisticsCardComponent: React.FC<{
               : '0 10px 24px -24px rgba(15,23,42,0.28)',
           }}
         >
-          <div style={{ color: theme.palette.text.secondary, fontSize: '0.75rem', textTransform: 'uppercase' }}>
+          <div
+            style={{
+              color: theme.palette.text.secondary,
+              fontSize: '0.75rem',
+              textTransform: 'uppercase',
+            }}
+          >
             UV
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: 700, letterSpacing: '-0.03em' }}>
@@ -476,8 +494,18 @@ export const UsageStatisticsCardComponent: React.FC<{
           padding: theme.spacing(1.5),
         }}
       >
-        <TrendChart label="PV Trend" color={theme.palette.primary.main} values={pvValues} ticks={ticks} />
-        <TrendChart label="UV Trend" color={theme.palette.success.main} values={uvValues} ticks={ticks} />
+        <TrendChart
+          label="PV Trend"
+          color={theme.palette.primary.main}
+          values={pvValues}
+          ticks={ticks}
+        />
+        <TrendChart
+          label="UV Trend"
+          color={theme.palette.success.main}
+          values={uvValues}
+          ticks={ticks}
+        />
       </div>
     </div>
   );

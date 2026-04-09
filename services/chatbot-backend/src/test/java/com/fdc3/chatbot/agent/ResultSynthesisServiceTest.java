@@ -17,13 +17,18 @@ import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -84,6 +89,41 @@ class ResultSynthesisServiceTest {
         assertThat(((SystemMessage) request.messages().get(0)).text())
                 .contains("provider timed out")
                 .contains("\"error\":\"provider timed out\"");
+    }
+
+    @Test
+    void shouldStreamModelOutputForSuccessfulTranscript() throws Exception {
+        CapturingStreamingChatModel streamingChatModel = new CapturingStreamingChatModel(
+                List.of("cashflow produced ", "120 PV and 30 UV.")
+        );
+        ResultSynthesisService service = new ResultSynthesisService(
+                null,
+                streamingChatModel,
+                new ResultSynthesisPromptFactory()
+        );
+        List<String> streamedTokens = new CopyOnWriteArrayList<>();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        service.synthesizeStreaming(
+                "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
+                analyticsPlanDecision(),
+                successfulTranscript(),
+                streamedTokens::add,
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown
+        );
+
+        assertThat(completed.await(1, TimeUnit.SECONDS)).isTrue();
+        assertThat(streamedTokens).containsExactly("cashflow produced ", "120 PV and 30 UV.");
+        ChatRequest request = streamingChatModel.capturedRequest();
+        assertThat(request.messages()).hasSize(2);
+        assertThat(request.messages().get(0)).isInstanceOf(SystemMessage.class);
+        assertThat(((SystemMessage) request.messages().get(0)).text())
+                .contains("Get app usage count for cashflow from 2026-04-01 to 2026-04-08")
+                .contains("\"pv\":120")
+                .contains("\"uv\":30");
     }
 
     @Test
@@ -266,6 +306,33 @@ class ResultSynthesisServiceTest {
             return ChatResponse.builder()
                     .aiMessage(AiMessage.from(responseText))
                     .build();
+        }
+
+        private ChatRequest capturedRequest() {
+            return Objects.requireNonNull(capturedRequest, "Chat request was not captured");
+        }
+    }
+
+    private static final class CapturingStreamingChatModel implements StreamingChatModel {
+
+        private final List<String> partialTokens;
+        private ChatRequest capturedRequest;
+
+        private CapturingStreamingChatModel(List<String> partialTokens) {
+            this.partialTokens = partialTokens;
+        }
+
+        @Override
+        public void chat(ChatRequest chatRequest, StreamingChatResponseHandler handler) {
+            this.capturedRequest = chatRequest;
+            StringBuilder fullText = new StringBuilder();
+            for (String token : partialTokens) {
+                fullText.append(token);
+                handler.onPartialResponse(token);
+            }
+            handler.onCompleteResponse(ChatResponse.builder()
+                    .aiMessage(AiMessage.from(fullText.toString()))
+                    .build());
         }
 
         private ChatRequest capturedRequest() {

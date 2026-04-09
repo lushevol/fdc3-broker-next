@@ -23,13 +23,17 @@ import com.fdc3.chatbot.tool.ToolRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -40,6 +44,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AgentControlPlaneExecutionTest {
+    private static final String FRONTEND_TOOL_MANIFEST = "[{\"name\":\"report_workspace_status\"}]";
+
 
     @Test
     void processMessageStreamingEmitsDirectAssistantResponseWithoutToolExecution() throws Exception {
@@ -89,6 +95,55 @@ class AgentControlPlaneExecutionTest {
         assertTrue(executionSteps.isEmpty());
         assertTrue(toolCalls.isEmpty());
         assertTrue(toolResults.isEmpty());
+    }
+
+    @Test
+    void processMessageStreamingStreamsDirectAssistantResponseInMultipleChunks() throws Exception {
+        ToolRegistry toolRegistry = analyticsToolRegistry();
+        UserCapabilityContext capabilityContext = advisorContext();
+        AgentService agentService = createAgentService(
+                toolRegistry,
+                capabilityContext,
+                new AgentDecision(
+                        AgentDecisionType.RESPOND,
+                        "You have access to analytics for cashflow.",
+                        null,
+                        null
+                ),
+                null
+        );
+        ReflectionTestUtils.setField(agentService, "streamingChatModel", new FixedStreamingChatModel(
+                List.of("You have access ", "to analytics for cashflow.")
+        ));
+
+        List<String> streamedChunks = new CopyOnWriteArrayList<>();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-respond-streaming",
+                "Do I have analytics access?",
+                capabilityContext,
+                null,
+                null,
+                null,
+                List.<ChatMessage>of(),
+                streamedChunks::add,
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown,
+                executionPlanEvent -> {
+                },
+                executionStepEvent -> {
+                },
+                toolCall -> {
+                },
+                toolResult -> {
+                }
+        );
+
+        assertTrue(completed.await(1, TimeUnit.SECONDS));
+        assertEquals(List.of("You have access ", "to analytics for cashflow."), streamedChunks);
     }
 
     @Test
@@ -174,7 +229,7 @@ class AgentControlPlaneExecutionTest {
                 "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
                 capabilityContext,
                 null,
-                null,
+                FRONTEND_TOOL_MANIFEST,
                 null,
                 List.<ChatMessage>of(),
                 streamedText::append,
@@ -200,20 +255,93 @@ class AgentControlPlaneExecutionTest {
         assertEquals(ToolCall.ToolStatus.RUNNING, toolCalls.get(0).getStatus());
         assertFalse(toolCalls.get(0).isRequiresConfirmation());
         assertEquals("cashflow", toolCalls.get(0).getArguments().get("appName"));
-        assertEquals("2026-04-01", toolCalls.get(0).getArguments().get("startTime"));
-        assertEquals("2026-04-08", toolCalls.get(0).getArguments().get("endTime"));
+        assertEquals("2026-04-01T00:00:00Z", toolCalls.get(0).getArguments().get("startTime"));
+        assertEquals("2026-04-09T00:00:00Z", toolCalls.get(0).getArguments().get("endTime"));
         assertEquals(1, toolResults.size());
         assertEquals(toolCalls.get(0).getId(), toolResults.get(0).getToolCallId());
         assertEquals("statistic_count_by_app", toolResults.get(0).getToolName());
         assertEquals("appName", ((Map<?, ?>) toolResults.get(0).getResult()).get("appFilterType"));
         assertEquals("cashflow", ((Map<?, ?>) toolResults.get(0).getResult()).get("appFilterValue"));
-        assertEquals("2026-04-01", ((Map<?, ?>) toolResults.get(0).getResult()).get("startTime"));
-        assertEquals("2026-04-08", ((Map<?, ?>) toolResults.get(0).getResult()).get("endTime"));
+        assertEquals("2026-04-01T00:00:00Z", ((Map<?, ?>) toolResults.get(0).getResult()).get("startTime"));
+        assertEquals("2026-04-09T00:00:00Z", ((Map<?, ?>) toolResults.get(0).getResult()).get("endTime"));
         assertEquals(120, ((Map<?, ?>) toolResults.get(0).getResult()).get("pv"));
         assertEquals(30, ((Map<?, ?>) toolResults.get(0).getResult()).get("uv"));
         assertEquals(
+                List.of(
+                        Map.of("timestamp", "2026-04-01T00:00:00Z", "pv", 50, "uv", 12),
+                        Map.of("timestamp", "2026-04-08T00:00:00Z", "pv", 70, "uv", 18)
+                ),
+                ((Map<?, ?>) toolResults.get(0).getResult()).get("trendPoints")
+        );
+        assertEquals(
                 "cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.",
                 streamedText.toString()
+        );
+    }
+
+    @Test
+    void shouldStreamSynthesizedSummaryAfterPlanExecution() throws Exception {
+        ToolRegistry toolRegistry = analyticsToolRegistry();
+        UserCapabilityContext capabilityContext = advisorContext();
+        AgentService agentService = createAgentService(
+                toolRegistry,
+                capabilityContext,
+                new AgentDecision(
+                        AgentDecisionType.PLAN,
+                        null,
+                        null,
+                        new AgentPlan(List.of(new AgentPlanStep(
+                                "app-usage-statistics",
+                                Map.of(
+                                        "appName", "cashflow",
+                                        "startTime", "2026-04-01",
+                                        "endTime", "2026-04-08"
+                                )
+                        )))
+                ),
+                null,
+                new ExecutionPlanner(),
+                null,
+                new ResultSynthesisService(
+                        null,
+                        new FixedStreamingChatModel(List.of(
+                                "cashflow usage from ",
+                                "2026-04-01 to 2026-04-08: PV 120, UV 30."
+                        )),
+                        new ResultSynthesisPromptFactory()
+                )
+        );
+
+        List<String> streamedChunks = new CopyOnWriteArrayList<>();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-plan-streaming",
+                "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
+                capabilityContext,
+                null,
+                FRONTEND_TOOL_MANIFEST,
+                null,
+                List.<ChatMessage>of(),
+                streamedChunks::add,
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown,
+                executionPlanEvent -> {
+                },
+                executionStepEvent -> {
+                },
+                toolCall -> {
+                },
+                toolResult -> {
+                }
+        );
+
+        assertTrue(completed.await(1, TimeUnit.SECONDS));
+        assertEquals(
+                List.of("cashflow usage from ", "2026-04-01 to 2026-04-08: PV 120, UV 30."),
+                streamedChunks
         );
     }
 
@@ -258,7 +386,7 @@ class AgentControlPlaneExecutionTest {
                 "Get app usage count from 2026-04-01 to 2026-04-08",
                 capabilityContext,
                 null,
-                null,
+                FRONTEND_TOOL_MANIFEST,
                 workspaceContext,
                 List.<ChatMessage>of(),
                 streamedText::append,
@@ -284,17 +412,24 @@ class AgentControlPlaneExecutionTest {
         assertEquals(ToolCall.ToolStatus.RUNNING, toolCalls.get(0).getStatus());
         assertFalse(toolCalls.get(0).isRequiresConfirmation());
         assertEquals("template_tile_fdc3_2", toolCalls.get(0).getArguments().get("appId"));
-        assertEquals("2026-04-01", toolCalls.get(0).getArguments().get("startTime"));
-        assertEquals("2026-04-08", toolCalls.get(0).getArguments().get("endTime"));
+        assertEquals("2026-04-01T00:00:00Z", toolCalls.get(0).getArguments().get("startTime"));
+        assertEquals("2026-04-09T00:00:00Z", toolCalls.get(0).getArguments().get("endTime"));
         assertEquals(1, toolResults.size());
         assertEquals(toolCalls.get(0).getId(), toolResults.get(0).getToolCallId());
         assertEquals("statistic_count_by_app", toolResults.get(0).getToolName());
         assertEquals("appId", ((Map<?, ?>) toolResults.get(0).getResult()).get("appFilterType"));
         assertEquals("template_tile_fdc3_2", ((Map<?, ?>) toolResults.get(0).getResult()).get("appFilterValue"));
-        assertEquals("2026-04-01", ((Map<?, ?>) toolResults.get(0).getResult()).get("startTime"));
-        assertEquals("2026-04-08", ((Map<?, ?>) toolResults.get(0).getResult()).get("endTime"));
+        assertEquals("2026-04-01T00:00:00Z", ((Map<?, ?>) toolResults.get(0).getResult()).get("startTime"));
+        assertEquals("2026-04-09T00:00:00Z", ((Map<?, ?>) toolResults.get(0).getResult()).get("endTime"));
         assertEquals(80, ((Map<?, ?>) toolResults.get(0).getResult()).get("pv"));
         assertEquals(24, ((Map<?, ?>) toolResults.get(0).getResult()).get("uv"));
+        assertEquals(
+                List.of(
+                        Map.of("timestamp", "2026-04-01T00:00:00Z", "pv", 32, "uv", 10),
+                        Map.of("timestamp", "2026-04-08T00:00:00Z", "pv", 48, "uv", 14)
+                ),
+                ((Map<?, ?>) toolResults.get(0).getResult()).get("trendPoints")
+        );
         assertEquals(
                 "template_tile_fdc3_2 usage from 2026-04-01 to 2026-04-08: PV 80, UV 24.",
                 streamedText.toString()
@@ -369,6 +504,57 @@ class AgentControlPlaneExecutionTest {
         );
     }
 
+    @Test
+    void shouldNotUseLegacyExecutionPlannerWhenAgentLoopIsEnabled() throws Exception {
+        ToolRegistry toolRegistry = analyticsToolRegistry();
+        UserCapabilityContext capabilityContext = advisorContext();
+        CountingExecutionPlanner executionPlanner = new CountingExecutionPlanner();
+        AgentService agentService = createAgentService(
+                toolRegistry,
+                capabilityContext,
+                new AgentDecision(
+                        AgentDecisionType.RESPOND,
+                        "You have access to analytics for cashflow.",
+                        null,
+                        null
+                ),
+                null,
+                executionPlanner
+        );
+
+        List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
+        List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
+        StringBuilder streamedText = new StringBuilder();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-legacy-planner",
+                "Do I have analytics access?",
+                capabilityContext,
+                null,
+                null,
+                null,
+                List.<ChatMessage>of(),
+                streamedText::append,
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown,
+                executionPlanEvent -> {
+                },
+                executionStepEvent -> {
+                },
+                toolCalls::add,
+                toolResults::add
+        );
+
+        assertTrue(completed.await(1, TimeUnit.SECONDS));
+        assertEquals("You have access to analytics for cashflow.", streamedText.toString());
+        assertEquals(0, executionPlanner.invocationCount());
+        assertTrue(toolCalls.isEmpty());
+        assertTrue(toolResults.isEmpty());
+    }
+
     private static AgentService createAgentService(
             ToolRegistry toolRegistry,
             UserCapabilityContext capabilityContext,
@@ -380,11 +566,63 @@ class AgentControlPlaneExecutionTest {
                 capabilityContext,
                 decision,
                 synthesizedSummary,
-                new ExecutionOrchestrator((capability, arguments) -> toolRegistry.resolveTools(capabilityContext)
-                        .get(capability.getTargetName())
-                        .execute(arguments)
-                        .join())
+                new ExecutionPlanner(),
+                null,
+                null
         );
+    }
+
+    private static AgentService createAgentService(
+            ToolRegistry toolRegistry,
+            UserCapabilityContext capabilityContext,
+            AgentDecision decision,
+            String synthesizedSummary,
+            ExecutionPlanner executionPlanner
+    ) {
+        return createAgentService(
+                toolRegistry,
+                capabilityContext,
+                decision,
+                synthesizedSummary,
+                executionPlanner,
+                null,
+                null
+        );
+    }
+
+    private static AgentService createAgentService(
+            ToolRegistry toolRegistry,
+            UserCapabilityContext capabilityContext,
+            AgentDecision decision,
+            String synthesizedSummary,
+            ExecutionPlanner executionPlanner,
+            StreamingChatModel streamingChatModel,
+            ResultSynthesisService resultSynthesisService
+    ) {
+        CapabilityResolver capabilityResolver = new CapabilityResolver(
+                new CapabilityRegistryService(new ObjectMapper()),
+                toolRegistry
+        );
+        PolicyEvaluator policyEvaluator = new PolicyEvaluator();
+        AgentService agentService = new AgentService(
+                toolRegistry,
+                capabilityResolver,
+                policyEvaluator,
+                executionPlanner,
+                new StubAgentDecisionService(decision),
+                new PlanValidationService(policyEvaluator),
+                null,
+                resultSynthesisService == null
+                        ? new ResultSynthesisService(
+                        new FixedResponseChatModel(synthesizedSummary),
+                        new ResultSynthesisPromptFactory()
+                )
+                        : resultSynthesisService
+        );
+        if (streamingChatModel != null) {
+            ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatModel);
+        }
+        return agentService;
     }
 
     private static AgentService createAgentService(
@@ -443,6 +681,51 @@ class AgentControlPlaneExecutionTest {
                                     result.put("uv", uv);
                                     return result;
                                 }
+                        ),
+                        "chart_by_app",
+                        new TestToolDefinition(
+                                "chart_by_app",
+                                "Return PV and UV trend points for an app within a time window",
+                                Map.of("type", "object"),
+                                arguments -> {
+                                    boolean usesAppId = arguments.containsKey("appId") && arguments.get("appId") != null;
+                                    boolean usesAppName = arguments.containsKey("appName") && arguments.get("appName") != null;
+                                    boolean workspaceFallback = usesAppId && !usesAppName;
+
+                                    if (workspaceFallback) {
+                                        return Map.of(
+                                                "bucket", "DAY",
+                                                "points", List.of(
+                                                        Map.of(
+                                                                "timestamp", "2026-04-01T00:00:00Z",
+                                                                "pv", 32,
+                                                                "uv", 10
+                                                        ),
+                                                        Map.of(
+                                                                "timestamp", "2026-04-08T00:00:00Z",
+                                                                "pv", 48,
+                                                                "uv", 14
+                                                        )
+                                                )
+                                        );
+                                    }
+
+                                    return Map.of(
+                                            "bucket", "DAY",
+                                            "points", List.of(
+                                                    Map.of(
+                                                            "timestamp", "2026-04-01T00:00:00Z",
+                                                            "pv", 50,
+                                                            "uv", 12
+                                                    ),
+                                                    Map.of(
+                                                            "timestamp", "2026-04-08T00:00:00Z",
+                                                            "pv", 70,
+                                                            "uv", 18
+                                                    )
+                                            )
+                                    );
+                                }
                         )
                 )
         );
@@ -478,6 +761,25 @@ class AgentControlPlaneExecutionTest {
         }
     }
 
+    private static final class CountingExecutionPlanner extends ExecutionPlanner {
+
+        private final AtomicInteger invocationCount = new AtomicInteger();
+
+        @Override
+        public com.fdc3.chatbot.controlplane.model.ExecutionPlan plan(
+                String userMessage,
+                com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot workspaceContext,
+                List<ResolvedCapability> capabilities
+        ) {
+            invocationCount.incrementAndGet();
+            return null;
+        }
+
+        private int invocationCount() {
+            return invocationCount.get();
+        }
+    }
+
     private static class NoOpChatModel implements ChatModel {
 
         @Override
@@ -501,6 +803,27 @@ class AgentControlPlaneExecutionTest {
             return ChatResponse.builder()
                     .aiMessage(AiMessage.from(responseText))
                     .build();
+        }
+    }
+
+    private static final class FixedStreamingChatModel implements StreamingChatModel {
+
+        private final List<String> partialTokens;
+
+        private FixedStreamingChatModel(List<String> partialTokens) {
+            this.partialTokens = partialTokens;
+        }
+
+        @Override
+        public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+            StringBuilder fullText = new StringBuilder();
+            for (String token : partialTokens) {
+                fullText.append(token);
+                handler.onPartialResponse(token);
+            }
+            handler.onCompleteResponse(ChatResponse.builder()
+                    .aiMessage(AiMessage.from(fullText.toString()))
+                    .build());
         }
     }
 

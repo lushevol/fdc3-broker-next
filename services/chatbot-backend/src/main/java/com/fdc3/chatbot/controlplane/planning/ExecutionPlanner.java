@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Legacy compatibility planner retained only as a fallback when the agentic control loop is disabled.
+ */
 @Service
 public class ExecutionPlanner {
 

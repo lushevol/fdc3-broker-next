@@ -132,7 +132,10 @@ function getToolArgsSummary(argsText?: string): ToolArgsSummary | null {
 
   return {
     primary,
-    secondary: startLabel && endLabel ? `${startLabel} - ${endLabel}` : startLabel ?? endLabel ?? undefined,
+    secondary:
+      startLabel && endLabel
+        ? `${startLabel} - ${endLabel}`
+        : (startLabel ?? endLabel ?? undefined),
   };
 }
 
@@ -213,9 +216,11 @@ function ToolFallbackTrigger({
             data-slot="tool-fallback-trigger-shimmer"
             className="aui-tool-fallback-trigger-shimmer shimmer pointer-events-none absolute inset-0 motion-reduce:animate-none"
           >
-              <span className="block text-[11px] font-medium uppercase tracking-[0.14em]">{label}</span>
-              <span className="mt-1 block text-sm font-semibold leading-5">{toolName}</span>
+            <span className="block text-[11px] font-medium uppercase tracking-[0.14em]">
+              {label}
             </span>
+            <span className="mt-1 block text-sm font-semibold leading-5">{toolName}</span>
+          </span>
         )}
       </span>
       <ChevronDownIcon
@@ -294,7 +299,10 @@ function ToolFallbackResult({
   return (
     <div
       data-slot="tool-fallback-result"
-      className={cn('aui-tool-fallback-result border-t border-dashed border-border/70 pt-3', className)}
+      className={cn(
+        'aui-tool-fallback-result border-t border-dashed border-border/70 pt-3',
+        className,
+      )}
       {...props}
     >
       <p className="aui-tool-fallback-result-header text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">

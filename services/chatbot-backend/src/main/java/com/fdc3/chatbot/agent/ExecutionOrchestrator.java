@@ -7,6 +7,9 @@ import com.fdc3.chatbot.controlplane.model.ResolvedCapability;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -41,10 +44,11 @@ public class ExecutionOrchestrator {
         List<ToolResult> toolResults = new ArrayList<>();
 
         for (ValidatedExecutionStep step : validatedPlan.steps()) {
+            Map<String, Object> normalizedArguments = normalizeExecutionArguments(step);
             ToolCall runningToolCall = ToolCall.builder()
                     .id(UUID.randomUUID().toString())
                     .name(step.capability().getTargetName())
-                    .arguments(step.arguments())
+                    .arguments(normalizedArguments)
                     .status(ToolCall.ToolStatus.RUNNING)
                     .executionTarget(ToolCall.ExecutionTarget.BACKEND)
                     .requiresConfirmation(false)
@@ -54,7 +58,7 @@ public class ExecutionOrchestrator {
             ToolResult toolResult;
             ToolCall terminalToolCall;
             try {
-                Object executionResult = executionDependency.execute(step.capability(), step.arguments());
+                Object executionResult = executionDependency.execute(step.capability(), normalizedArguments);
                 toolResult = ToolResult.builder()
                         .toolCallId(runningToolCall.getId())
                         .toolName(runningToolCall.getName())
@@ -75,6 +79,35 @@ public class ExecutionOrchestrator {
         }
 
         return new ExecutionTranscript(validatedPlan, toolCalls, toolResults);
+    }
+
+    private Map<String, Object> normalizeExecutionArguments(ValidatedExecutionStep step) {
+        Map<String, Object> arguments = step.arguments();
+        if (arguments.isEmpty()) {
+            return arguments;
+        }
+
+        Map<String, Object> normalizedArguments = new LinkedHashMap<>(arguments);
+        normalizeDateOnlyInstant(normalizedArguments, "startTime", false);
+        normalizeDateOnlyInstant(normalizedArguments, "endTime", true);
+        return Collections.unmodifiableMap(normalizedArguments);
+    }
+
+    private void normalizeDateOnlyInstant(Map<String, Object> arguments, String key, boolean exclusiveEnd) {
+        Object rawValue = arguments.get(key);
+        if (!(rawValue instanceof String textValue)) {
+            return;
+        }
+
+        try {
+            LocalDate parsedDate = LocalDate.parse(textValue);
+            if (exclusiveEnd) {
+                parsedDate = parsedDate.plusDays(1);
+            }
+            arguments.put(key, parsedDate.atStartOfDay().toInstant(ZoneOffset.UTC).toString());
+        } catch (DateTimeParseException ignored) {
+            // Keep non-date-only values unchanged. MCP tools handle full ISO instants directly.
+        }
     }
 
     private Object normalizeResult(Object executionResult) {

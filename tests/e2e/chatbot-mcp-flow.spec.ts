@@ -163,7 +163,9 @@ async function fulfillAgenticMcpRoute(
 }
 
 test.describe('chatbot agentic MCP flow', () => {
-  test('renders the explicit app agentic flow with backend-authored text and chart card', async ({ page }) => {
+  test('renders the explicit app agentic flow with backend-authored text and chart card', async ({
+    page,
+  }) => {
     const streamRequests: StreamRequestBody[] = [];
 
     await page.route('**/api/chat/stream', async (route) => {
@@ -212,7 +214,9 @@ test.describe('chatbot agentic MCP flow', () => {
     await expect(page.getByTestId('usage-statistics-uv-tile')).toBeVisible();
     await expect(page.getByText('PV Trend')).toBeVisible();
     await expect(page.getByText('UV Trend')).toBeVisible();
-    await expect(page.getByText('cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.')).toBeVisible();
+    await expect(
+      page.getByText('cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.'),
+    ).toBeVisible();
 
     expect(streamRequests).toHaveLength(1);
     expect(streamRequests[0]?.message).toBe(message);
@@ -276,6 +280,8 @@ test.describe('chatbot agentic MCP flow', () => {
     await expect(page.getByTestId('usage-statistics-uv-tile')).toBeVisible();
     await expect(page.getByText('PV Trend')).toBeVisible();
     await expect(page.getByText('UV Trend')).toBeVisible();
-    await expect(page.getByText(`${expectedAppId} usage from 2026-04-01 to 2026-04-08: PV 80, UV 24.`)).toBeVisible();
+    await expect(
+      page.getByText(`${expectedAppId} usage from 2026-04-01 to 2026-04-08: PV 80, UV 24.`),
+    ).toBeVisible();
   });
 });

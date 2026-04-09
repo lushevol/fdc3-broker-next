@@ -82,6 +82,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AgentService {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
+    private static final String STREAMED_ASSISTANT_TEXT_REQUEST = """
+            You are writing the user-visible assistant reply for a chat turn.
+            Respond with plain assistant text only.
+            Preserve the meaning of the drafted reply.
+            Do not add new facts, tool names, or formatting that are not already implied by the draft.
+            """;
 
     @Value("${spring.ai.openai.api-key:}")
     private String openaiApiKey;
@@ -204,7 +210,7 @@ public class AgentService {
         if (resultSynthesisService == null) {
             resultSynthesisService = chatModel == null
                     ? new ResultSynthesisService()
-                    : new ResultSynthesisService(chatModel, new ResultSynthesisPromptFactory());
+                    : new ResultSynthesisService(chatModel, streamingChatModel, new ResultSynthesisPromptFactory());
         }
     }
 
@@ -624,8 +630,7 @@ public class AgentService {
                 && agentDecisionService != null
                 && planValidationService != null
                 && resultSynthesisService != null
-                && (toolContext == null || toolContext.isBlank())
-                && (frontendTools == null || frontendTools.isBlank());
+                && (toolContext == null || toolContext.isBlank());
     }
 
     private boolean shouldUseLegacyGovernedReadOnlyMcpFlow() {
@@ -658,6 +663,14 @@ public class AgentService {
                     resolvedCapabilities,
                     workspaceContext
             );
+            log.debug(
+                    "Agent decision resolved. type={}, assistantTextPresent={}, planSteps={}",
+                    decision == null ? null : decision.decisionType(),
+                    decision != null && decision.assistantText() != null && !decision.assistantText().isBlank(),
+                    decision == null || decision.plan() == null || decision.plan().steps() == null
+                            ? 0
+                            : decision.plan().steps().size()
+            );
             if (cancelled.get()) {
                 return;
             }
@@ -667,14 +680,20 @@ public class AgentService {
                     : decision.decisionType();
 
             switch (decisionType) {
-                case RESPOND -> {
-                    emitAssistantText(decision == null ? null : decision.assistantText(), onNext);
-                    onComplete.run();
-                }
-                case CLARIFY -> {
-                    emitAssistantText(resolveClarificationText(decision), onNext);
-                    onComplete.run();
-                }
+                case RESPOND -> streamAssistantReply(
+                        decision == null ? null : decision.assistantText(),
+                        onNext,
+                        onError,
+                        onComplete,
+                        cancelled
+                );
+                case CLARIFY -> streamAssistantReply(
+                        resolveClarificationText(decision),
+                        onNext,
+                        onError,
+                        onComplete,
+                        cancelled
+                );
                 case PLAN -> executePlannedDecision(
                         userMessage,
                         capabilityContext,
@@ -712,89 +731,156 @@ public class AgentService {
             java.util.function.Consumer<ToolResult> onToolResult,
             AtomicBoolean cancelled
     ) {
-        emitAssistantText(decision.assistantText(), onNext);
-
-        PlanValidationService.PlanValidationResult validationResult = planValidationService.validate(
-                decision,
-                resolvedCapabilities,
-                capabilityContext
-        );
-        if (!validationResult.valid()) {
-            emitAssistantText(validationResult.assistantMessage(), onNext);
-            onComplete.run();
-            return;
-        }
-        if (validationResult.reviewRequired()) {
-            emitAssistantText("This request requires approval before execution.", onNext);
-            onComplete.run();
-            return;
-        }
-
-        ValidatedExecutionPlan validatedPlan = validationResult.validatedPlan();
-        String planId = UUID.randomUUID().toString();
-        onExecutionPlan.accept(ExecutionPlanEvent.builder()
-                .planId(planId)
-                .summary(resolvePlanSummary(decision, validatedPlan))
-                .status("running")
-                .totalSteps(validatedPlan.steps().size())
-                .build());
-
-        for (int index = 0; index < validatedPlan.steps().size(); index++) {
-            ValidatedExecutionStep step = validatedPlan.steps().get(index);
-            onExecutionStep.accept(ExecutionStepEvent.builder()
-                    .planId(planId)
-                    .stepId("step-" + (index + 1))
-                    .targetName(step.capability().getTargetName())
-                    .summary(resolveStepSummary(step))
-                    .stepType(step.capability().getExecutionType())
-                    .status("running")
-                    .build());
-        }
-
-        ExecutionTranscript transcript = resolveExecutionOrchestrator(availableTools).execute(
-                validatedPlan,
-                onToolCall,
-                onToolResult
-        );
-        if (cancelled.get()) {
-            return;
-        }
-
-        boolean failed = false;
-        for (int index = 0; index < transcript.plan().steps().size(); index++) {
-            ToolResult toolResult = transcript.toolResults().get(index);
-            ValidatedExecutionStep step = transcript.plan().steps().get(index);
-            String status = toolResult.getError() == null ? "completed" : "failed";
-            onExecutionStep.accept(ExecutionStepEvent.builder()
-                    .planId(planId)
-                    .stepId("step-" + (index + 1))
-                    .targetName(step.capability().getTargetName())
-                    .summary(resolveStepSummary(step))
-                    .stepType(step.capability().getExecutionType())
-                    .status(status)
-                    .build());
-            if (toolResult.getError() != null) {
-                failed = true;
+        Runnable validateAndExecute = () -> {
+            PlanValidationService.PlanValidationResult validationResult = planValidationService.validate(
+                    decision,
+                    resolvedCapabilities,
+                    capabilityContext
+            );
+            log.debug(
+                    "Plan validation result. valid={}, reviewRequired={}, message={}, decisionPlan={}",
+                    validationResult.valid(),
+                    validationResult.reviewRequired(),
+                    validationResult.assistantMessage(),
+                    decision == null ? null : decision.plan()
+            );
+            if (!validationResult.valid()) {
+                streamAssistantReply(
+                        validationResult.assistantMessage(),
+                        onNext,
+                        onError,
+                        onComplete,
+                        cancelled
+                );
+                return;
             }
+            if (validationResult.reviewRequired()) {
+                streamAssistantReply(
+                        "This request requires approval before execution.",
+                        onNext,
+                        onError,
+                        onComplete,
+                        cancelled
+                );
+                return;
+            }
+
+            ValidatedExecutionPlan validatedPlan = validationResult.validatedPlan();
+            String planId = UUID.randomUUID().toString();
+            onExecutionPlan.accept(ExecutionPlanEvent.builder()
+                    .planId(planId)
+                    .summary(resolvePlanSummary(decision, validatedPlan))
+                    .status("running")
+                    .totalSteps(validatedPlan.steps().size())
+                    .build());
+
+            for (int index = 0; index < validatedPlan.steps().size(); index++) {
+                ValidatedExecutionStep step = validatedPlan.steps().get(index);
+                onExecutionStep.accept(ExecutionStepEvent.builder()
+                        .planId(planId)
+                        .stepId("step-" + (index + 1))
+                        .targetName(step.capability().getTargetName())
+                        .summary(resolveStepSummary(step))
+                        .stepType(step.capability().getExecutionType())
+                        .status("running")
+                        .build());
+            }
+
+            ExecutionTranscript transcript = resolveExecutionOrchestrator(availableTools, capabilityContext).execute(
+                    validatedPlan,
+                    onToolCall,
+                    onToolResult
+            );
+            if (cancelled.get()) {
+                return;
+            }
+
+            boolean failed = false;
+            for (int index = 0; index < transcript.plan().steps().size(); index++) {
+                ToolResult toolResult = transcript.toolResults().get(index);
+                ValidatedExecutionStep step = transcript.plan().steps().get(index);
+                String status = toolResult.getError() == null ? "completed" : "failed";
+                onExecutionStep.accept(ExecutionStepEvent.builder()
+                        .planId(planId)
+                        .stepId("step-" + (index + 1))
+                        .targetName(step.capability().getTargetName())
+                        .summary(resolveStepSummary(step))
+                        .stepType(step.capability().getExecutionType())
+                        .status(status)
+                        .build());
+                if (toolResult.getError() != null) {
+                    failed = true;
+                }
+            }
+
+            onExecutionPlan.accept(ExecutionPlanEvent.builder()
+                    .planId(planId)
+                    .summary(resolvePlanSummary(decision, validatedPlan))
+                    .status(failed ? "failed" : "completed")
+                    .totalSteps(validatedPlan.steps().size())
+                    .build());
+
+            resultSynthesisService.synthesizeStreaming(
+                    userMessage,
+                    decision,
+                    transcript,
+                    token -> {
+                        if (!cancelled.get()) {
+                            onNext.accept(token);
+                        }
+                    },
+                    onError,
+                    () -> {
+                        if (!cancelled.get()) {
+                            onComplete.run();
+                        }
+                    }
+            );
+        };
+
+        if (decision != null && decision.assistantText() != null && !decision.assistantText().isBlank()) {
+            streamAssistantReply(
+                    decision.assistantText(),
+                    onNext,
+                    onError,
+                    validateAndExecute,
+                    cancelled
+            );
+            return;
         }
 
-        onExecutionPlan.accept(ExecutionPlanEvent.builder()
-                .planId(planId)
-                .summary(resolvePlanSummary(decision, validatedPlan))
-                .status(failed ? "failed" : "completed")
-                .totalSteps(validatedPlan.steps().size())
-                .build());
-
-        emitAssistantText(resultSynthesisService.synthesize(userMessage, decision, transcript), onNext);
-        onComplete.run();
+        validateAndExecute.run();
     }
 
-    private ExecutionOrchestrator resolveExecutionOrchestrator(Map<String, ToolDefinition> availableTools) {
+    private ExecutionOrchestrator resolveExecutionOrchestrator(
+            Map<String, ToolDefinition> availableTools,
+            UserCapabilityContext capabilityContext
+    ) {
         if (executionOrchestrator != null) {
             return executionOrchestrator;
         }
 
-        return new ExecutionOrchestrator((capability, arguments) -> executeCapability(availableTools, capability, arguments));
+        return new ExecutionOrchestrator((capability, arguments) -> executeCapabilityWithEnrichment(
+                availableTools,
+                capability,
+                arguments,
+                capabilityContext
+        ));
+    }
+
+    private Object executeCapabilityWithEnrichment(
+            Map<String, ToolDefinition> availableTools,
+            ResolvedCapability capability,
+            Map<String, Object> arguments,
+            UserCapabilityContext capabilityContext
+    ) {
+        Object result = executeCapability(availableTools, capability, arguments);
+        return enrichGovernedToolResult(
+                capability.getTargetName(),
+                arguments,
+                result,
+                capabilityContext
+        ).join();
     }
 
     private Object executeCapability(
@@ -847,6 +933,81 @@ public class AgentService {
             return;
         }
         onNext.accept(text);
+    }
+
+    private void streamAssistantReply(
+            String draftedReply,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            Runnable onComplete,
+            AtomicBoolean cancelled
+    ) {
+        if (draftedReply == null || draftedReply.isBlank()) {
+            onComplete.run();
+            return;
+        }
+        if (streamingChatModel == null) {
+            emitAssistantText(draftedReply, onNext);
+            onComplete.run();
+            return;
+        }
+
+        StringBuilder streamedText = new StringBuilder();
+        try {
+            streamingChatModel.chat(ChatRequest.builder()
+                    .messages(List.of(
+                            SystemMessage.from(STREAMED_ASSISTANT_TEXT_REQUEST),
+                            UserMessage.from("Draft reply:\n" + draftedReply)
+                    ))
+                    .build(), new StreamingChatResponseHandler() {
+                        @Override
+                        public void onPartialResponse(String token) {
+                            if (cancelled.get()) {
+                                return;
+                            }
+                            streamedText.append(token);
+                            onNext.accept(token);
+                        }
+
+                        @Override
+                        public void onCompleteResponse(ChatResponse response) {
+                            if (cancelled.get()) {
+                                return;
+                            }
+                            String fullText = response.aiMessage() == null ? null : response.aiMessage().text();
+                            emitRemainingAssistantText(fullText, streamedText.toString(), onNext);
+                            onComplete.run();
+                        }
+
+                        @Override
+                        public void onError(Throwable error) {
+                            onError.accept(error);
+                        }
+                    });
+        } catch (Exception exception) {
+            onError.accept(exception);
+        }
+    }
+
+    private void emitRemainingAssistantText(
+            String fullText,
+            String streamedText,
+            java.util.function.Consumer<String> onNext
+    ) {
+        if (fullText == null || fullText.isBlank()) {
+            return;
+        }
+        String streamedPrefix = streamedText == null ? "" : streamedText;
+        if (fullText.startsWith(streamedPrefix)) {
+            String suffix = fullText.substring(streamedPrefix.length());
+            if (!suffix.isEmpty()) {
+                onNext.accept(suffix);
+            }
+            return;
+        }
+        if (streamedPrefix.isBlank()) {
+            onNext.accept(fullText);
+        }
     }
 
     private void executeGovernedPlan(
@@ -940,7 +1101,12 @@ public class AgentService {
         }
 
         toolDefinition.execute(step.getArguments())
-                .thenCompose(result -> enrichGovernedToolResult(step, result, capabilityContext))
+                .thenCompose(result -> enrichGovernedToolResult(
+                        step.getTargetName(),
+                        step.getArguments(),
+                        result,
+                        capabilityContext
+                ))
                 .whenComplete((result, error) -> {
             if (cancelled.get()) {
                 return;
@@ -1014,11 +1180,12 @@ public class AgentService {
     }
 
     private java.util.concurrent.CompletableFuture<Object> enrichGovernedToolResult(
-            ExecutionStep step,
+            String targetName,
+            Map<String, Object> arguments,
             Object result,
             UserCapabilityContext capabilityContext
     ) {
-        if (!"statistic_count_by_app".equals(step.getTargetName())) {
+        if (!"statistic_count_by_app".equals(targetName)) {
             return java.util.concurrent.CompletableFuture.completedFuture(result);
         }
 
@@ -1031,7 +1198,7 @@ public class AgentService {
             return java.util.concurrent.CompletableFuture.completedFuture(result);
         }
 
-        return chartTool.execute(new LinkedHashMap<>(step.getArguments()))
+        return chartTool.execute(new LinkedHashMap<>(arguments))
                 .handle((chartResult, error) -> {
                     if (error != null) {
                         log.warn("Failed to enrich usage statistics with chart data", error);

@@ -285,7 +285,11 @@ function normalizeUsageStatisticsContentPart(
     return null;
   }
 
-  if (typeof toolResult.result !== 'object' || toolResult.result === null || Array.isArray(toolResult.result)) {
+  if (
+    typeof toolResult.result !== 'object' ||
+    toolResult.result === null ||
+    Array.isArray(toolResult.result)
+  ) {
     return null;
   }
 
@@ -622,10 +626,11 @@ export function handleSSEEvent(
       }
 
       const ensuredMessage = ensureAssistantMessage(messages, streamingState);
-      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] = addContentPartToAssistantMessage(
-        ensuredMessage.messages[ensuredMessage.assistantMessageIndex],
-        toolCallPart,
-      );
+      ensuredMessage.messages[ensuredMessage.assistantMessageIndex] =
+        addContentPartToAssistantMessage(
+          ensuredMessage.messages[ensuredMessage.assistantMessageIndex],
+          toolCallPart,
+        );
 
       return {
         messages: ensuredMessage.messages,

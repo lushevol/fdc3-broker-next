@@ -12,7 +12,7 @@
     "lint": "turbo run lint --continue",
     "clean": "turbo run clean",
     "format": "prettier --write \"**/*.{ts,tsx,md,json,yml,yaml}\"",
-    "dev": "concurrently \"npm run dev:ui\" \"npm run dev:services\"",
+    "dev": "concurrently \"npm run dev:ui\" \"npm run dev:chatbot-mcp-stack:live\"",
     "dev:mcp": "concurrently \"npm run dev:ui\" \"npm run dev:chatbot-mcp-stack\"",
     "dev:ui": "turbo run dev --filter=\"./apps/base\" --filter=\"./apps/root-config\" --filter=\"./apps/container\" --filter=\"./apps/tile\"",
     "dev:services": "turbo run dev --filter=\"./services/backend\" --filter=\"./services/chatbot-backend\"",
