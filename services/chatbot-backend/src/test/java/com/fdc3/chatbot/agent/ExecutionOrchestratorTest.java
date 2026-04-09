@@ -50,6 +50,7 @@ class ExecutionOrchestratorTest {
         assertThat(toolCalls.get(0).getName()).isEqualTo("statistic_count_by_app");
         assertThat(toolCalls.get(0).getExecutionTarget()).isEqualTo(ToolCall.ExecutionTarget.BACKEND);
         assertThat(toolCalls.get(0).getArguments()).containsEntry("appName", "cashflow");
+        assertThat(toolCalls.get(0).getStatus()).isEqualTo(ToolCall.ToolStatus.RUNNING);
 
         assertThat(toolResults).hasSize(1);
         assertThat(toolResults.get(0).getToolCallId()).isEqualTo(toolCalls.get(0).getId());
@@ -67,8 +68,11 @@ class ExecutionOrchestratorTest {
         ));
 
         assertThat(transcript.plan()).isEqualTo(validatedPlan);
-        assertThat(transcript.toolCalls()).containsExactlyElementsOf(toolCalls);
+        assertThat(transcript.toolCalls()).hasSize(1);
+        assertThat(transcript.toolCalls().get(0).getId()).isEqualTo(toolCalls.get(0).getId());
+        assertThat(transcript.toolCalls().get(0).getName()).isEqualTo(toolCalls.get(0).getName());
         assertThat(transcript.toolResults()).containsExactlyElementsOf(toolResults);
+        assertThat(transcript.toolCalls().get(0).getStatus()).isEqualTo(ToolCall.ToolStatus.COMPLETED);
     }
 
     @Test
@@ -89,6 +93,7 @@ class ExecutionOrchestratorTest {
         assertThat(toolResults.get(0).getError()).isEqualTo("mcp execution failed");
         assertThat(toolResults.get(0).getResult()).isNull();
         assertThat(transcript.toolResults()).containsExactlyElementsOf(toolResults);
+        assertThat(transcript.toolCalls().get(0).getStatus()).isEqualTo(ToolCall.ToolStatus.FAILED);
     }
 
     @Test
@@ -126,6 +131,20 @@ class ExecutionOrchestratorTest {
         assertThat(toolResults.get(0).getToolName()).isEqualTo(toolCalls.get(0).getName());
         assertThat(toolResults.get(0).getError()).contains("Cannot normalize");
         assertThat(transcript.toolResults()).containsExactlyElementsOf(toolResults);
+        assertThat(transcript.toolCalls().get(0).getStatus()).isEqualTo(ToolCall.ToolStatus.FAILED);
+    }
+
+    @Test
+    void shouldEmitFallbackErrorWhenExceptionMessageIsBlank() {
+        ExecutionOrchestrator orchestrator = new ExecutionOrchestrator((capability, arguments) -> {
+            throw new IllegalStateException();
+        });
+
+        ExecutionTranscript transcript = orchestrator.execute(analyticsReadPlan(), null, null);
+
+        assertThat(transcript.toolResults()).hasSize(1);
+        assertThat(transcript.toolResults().get(0).getError()).isNotBlank();
+        assertThat(transcript.toolCalls().get(0).getStatus()).isEqualTo(ToolCall.ToolStatus.FAILED);
     }
 
     @Test

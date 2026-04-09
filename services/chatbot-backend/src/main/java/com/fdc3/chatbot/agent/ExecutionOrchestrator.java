@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class ExecutionOrchestrator {
+    private static final String DEFAULT_EXECUTION_ERROR = "Tool execution failed.";
 
     private final ExecutionDependency executionDependency;
 
@@ -40,7 +41,7 @@ public class ExecutionOrchestrator {
         List<ToolResult> toolResults = new ArrayList<>();
 
         for (ValidatedExecutionStep step : validatedPlan.steps()) {
-            ToolCall toolCall = ToolCall.builder()
+            ToolCall runningToolCall = ToolCall.builder()
                     .id(UUID.randomUUID().toString())
                     .name(step.capability().getTargetName())
                     .arguments(step.arguments())
@@ -48,25 +49,28 @@ public class ExecutionOrchestrator {
                     .executionTarget(ToolCall.ExecutionTarget.BACKEND)
                     .requiresConfirmation(false)
                     .build();
-            toolCallConsumer.accept(toolCall);
-            toolCalls.add(toolCall);
+            toolCallConsumer.accept(runningToolCall);
 
             ToolResult toolResult;
+            ToolCall terminalToolCall;
             try {
                 Object executionResult = executionDependency.execute(step.capability(), step.arguments());
                 toolResult = ToolResult.builder()
-                        .toolCallId(toolCall.getId())
-                        .toolName(toolCall.getName())
+                        .toolCallId(runningToolCall.getId())
+                        .toolName(runningToolCall.getName())
                         .result(normalizeResult(executionResult))
                         .build();
+                terminalToolCall = copyToolCallWithStatus(runningToolCall, ToolCall.ToolStatus.COMPLETED);
             } catch (RuntimeException exception) {
                 toolResult = ToolResult.builder()
-                        .toolCallId(toolCall.getId())
-                        .toolName(toolCall.getName())
-                        .error(exception.getMessage())
+                        .toolCallId(runningToolCall.getId())
+                        .toolName(runningToolCall.getName())
+                        .error(resolveErrorMessage(exception))
                         .build();
+                terminalToolCall = copyToolCallWithStatus(runningToolCall, ToolCall.ToolStatus.FAILED);
             }
             toolResultConsumer.accept(toolResult);
+            toolCalls.add(terminalToolCall);
             toolResults.add(toolResult);
         }
 
@@ -110,6 +114,22 @@ public class ExecutionOrchestrator {
             return immutableCopyList(nestedList);
         }
         return value;
+    }
+
+    private ToolCall copyToolCallWithStatus(ToolCall toolCall, ToolCall.ToolStatus status) {
+        return ToolCall.builder()
+                .id(toolCall.getId())
+                .name(toolCall.getName())
+                .arguments(toolCall.getArguments())
+                .status(status)
+                .executionTarget(toolCall.getExecutionTarget())
+                .requiresConfirmation(toolCall.isRequiresConfirmation())
+                .build();
+    }
+
+    private String resolveErrorMessage(RuntimeException exception) {
+        String message = exception.getMessage();
+        return message == null || message.isBlank() ? DEFAULT_EXECUTION_ERROR : message;
     }
 
     @FunctionalInterface
