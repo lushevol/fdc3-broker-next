@@ -72,10 +72,35 @@ public record ValidatedExecutionStep(
             return Map.of();
         }
 
-        return Collections.unmodifiableMap(new LinkedHashMap<>(arguments));
+        Map<String, Object> copiedArguments = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : arguments.entrySet()) {
+            copiedArguments.put(entry.getKey(), deepCopyValue(entry.getValue()));
+        }
+
+        return Collections.unmodifiableMap(copiedArguments);
     }
 
     private static <T> List<T> copyList(List<T> values) {
         return values == null ? new ArrayList<>() : new ArrayList<>(values);
+    }
+
+    private static Object deepCopyValue(Object value) {
+        if (value instanceof Map<?, ?> nestedMap) {
+            Map<String, Object> copiedMap = new LinkedHashMap<>();
+            for (Map.Entry<?, ?> entry : nestedMap.entrySet()) {
+                copiedMap.put(String.valueOf(entry.getKey()), deepCopyValue(entry.getValue()));
+            }
+            return Collections.unmodifiableMap(copiedMap);
+        }
+
+        if (value instanceof List<?> nestedList) {
+            List<Object> copiedList = new ArrayList<>(nestedList.size());
+            for (Object nestedValue : nestedList) {
+                copiedList.add(deepCopyValue(nestedValue));
+            }
+            return Collections.unmodifiableList(copiedList);
+        }
+
+        return value;
     }
 }

@@ -53,7 +53,10 @@ public class PlanValidationService {
             List<ResolvedCapability> allowedCapabilities,
             UserCapabilityContext userCapabilityContext
     ) {
-        if (agentDecision == null || agentDecision.plan() == null || agentDecision.plan().steps() == null) {
+        if (agentDecision == null
+                || agentDecision.plan() == null
+                || agentDecision.plan().steps() == null
+                || agentDecision.plan().steps().isEmpty()) {
             return PlanValidationResult.invalid(MALFORMED_PLAN_MESSAGE);
         }
 
