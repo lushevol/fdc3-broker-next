@@ -76,4 +76,51 @@ class PolicyEvaluatorTest {
         assertEquals(PolicyDecisionType.REVIEW_REQUIRED, decision.getDecisionType());
         assertEquals(List.of("Cross-tenant read requires review for the current user context"), decision.getReasons());
     }
+
+    @Test
+    void allowsCrossTenantReadWhenApprovalProfileIsPresent() {
+        PolicyEvaluator evaluator = new PolicyEvaluator();
+
+        PolicyDecision decision = evaluator.evaluate(
+                ResolvedCapability.builder()
+                        .capabilityId("app-usage-statistics")
+                        .executionType("mcp")
+                        .accessType("read")
+                        .tenantScope("global")
+                        .build(),
+                Map.of("crossTenant", true),
+                UserCapabilityContext.builder()
+                        .userId("user-1")
+                        .profiles(Set.of("default", "cross-tenant-approved"))
+                        .build()
+        );
+
+        assertEquals(PolicyDecisionType.ALLOW, decision.getDecisionType());
+        assertEquals(List.of(), decision.getReasons());
+    }
+
+    @Test
+    void allowsStepAwareCrossTenantReadForApprovedProfile() {
+        PolicyEvaluator evaluator = new PolicyEvaluator();
+
+        PolicyDecision decision = evaluator.evaluate(
+                ResolvedCapability.builder()
+                        .capabilityId("step-aware-analytics-read")
+                        .executionType("mcp")
+                        .accessType("read")
+                        .tenantScope("global")
+                        .build(),
+                Map.of(
+                        "crossTenant", true,
+                        "appName", "cashflow"
+                ),
+                UserCapabilityContext.builder()
+                        .userId("user-2")
+                        .profiles(Set.of("cross-tenant-approved"))
+                        .build()
+        );
+
+        assertEquals(PolicyDecisionType.ALLOW, decision.getDecisionType());
+        assertEquals(List.of(), decision.getReasons());
+    }
 }

@@ -53,10 +53,12 @@ public class PlanValidationService {
             List<ResolvedCapability> allowedCapabilities,
             UserCapabilityContext userCapabilityContext
     ) {
-        AgentPlan proposedPlan = agentDecision == null ? null : agentDecision.plan();
-        List<AgentPlanStep> proposedSteps = proposedPlan == null || proposedPlan.steps() == null
-                ? List.of()
-                : proposedPlan.steps();
+        if (agentDecision == null || agentDecision.plan() == null || agentDecision.plan().steps() == null) {
+            return PlanValidationResult.invalid(MALFORMED_PLAN_MESSAGE);
+        }
+
+        AgentPlan proposedPlan = agentDecision.plan();
+        List<AgentPlanStep> proposedSteps = proposedPlan.steps();
         Map<String, ResolvedCapability> capabilitiesById = allowedCapabilities == null
                 ? Map.of()
                 : allowedCapabilities.stream()

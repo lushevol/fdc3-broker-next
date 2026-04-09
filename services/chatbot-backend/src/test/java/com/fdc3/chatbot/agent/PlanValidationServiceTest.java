@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -132,6 +133,85 @@ class PlanValidationServiceTest {
         assertThat(result.assistantMessage()).isEqualTo(
                 "I can’t execute that request because the proposed plan is invalid."
         );
+    }
+
+    @Test
+    void rejectMissingPlanAsMalformed() {
+        PlanValidationService service = new PlanValidationService(new PolicyEvaluator());
+
+        PlanValidationService.PlanValidationResult result = service.validate(
+                new AgentDecision(AgentDecisionType.PLAN, "Working on it.", null, null),
+                List.of(analyticsReadCapability()),
+                UserCapabilityContext.anonymous()
+        );
+
+        assertThat(result.valid()).isFalse();
+        assertThat(result.reviewRequired()).isFalse();
+        assertThat(result.validatedPlan()).isNull();
+        assertThat(result.assistantMessage()).isEqualTo(
+                "I can’t execute that request because the proposed plan is invalid."
+        );
+    }
+
+    @Test
+    void rejectNullDecisionAndNullStepListAsMalformed() {
+        PlanValidationService service = new PlanValidationService(new PolicyEvaluator());
+
+        PlanValidationService.PlanValidationResult nullDecisionResult = service.validate(
+                null,
+                List.of(analyticsReadCapability()),
+                UserCapabilityContext.anonymous()
+        );
+        PlanValidationService.PlanValidationResult nullStepListResult = service.validate(
+                decisionWithPlan(new AgentPlan(null)),
+                List.of(analyticsReadCapability()),
+                UserCapabilityContext.anonymous()
+        );
+
+        assertThat(nullDecisionResult.valid()).isFalse();
+        assertThat(nullDecisionResult.reviewRequired()).isFalse();
+        assertThat(nullDecisionResult.validatedPlan()).isNull();
+        assertThat(nullDecisionResult.assistantMessage()).isEqualTo(
+                "I can’t execute that request because the proposed plan is invalid."
+        );
+
+        assertThat(nullStepListResult.valid()).isFalse();
+        assertThat(nullStepListResult.reviewRequired()).isFalse();
+        assertThat(nullStepListResult.validatedPlan()).isNull();
+        assertThat(nullStepListResult.assistantMessage()).isEqualTo(
+                "I can’t execute that request because the proposed plan is invalid."
+        );
+    }
+
+    @Test
+    void validatedStepDefensivelyCopiesAndShieldsMutableState() {
+        PlanValidationService service = new PlanValidationService(new PolicyEvaluator());
+        ResolvedCapability capability = analyticsReadCapability();
+
+        PlanValidationService.PlanValidationResult result = service.validate(
+                decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
+                        "analytics.app-usage.read",
+                        Map.of(
+                                "appName", "cashflow",
+                                "from", "2026-04-01",
+                                "to", "2026-04-08"
+                        )
+                )))),
+                List.of(capability),
+                UserCapabilityContext.anonymous()
+        );
+
+        ResolvedCapability validatedCapability = result.validatedPlan().steps().get(0).capability();
+        validatedCapability.setTargetName("returned-copy-mutation");
+        validatedCapability.setRequiredInputs(new ArrayList<>());
+
+        result.validatedPlan().steps().get(0).policyDecision().setDecisionType(PolicyDecisionType.DENY);
+        capability.setTargetName("mutated-target");
+        capability.setRequiredInputs(new ArrayList<>());
+
+        assertThat(result.validatedPlan().steps().get(0).capability().getTargetName()).isEqualTo("statistic_count_by_app");
+        assertThat(result.validatedPlan().steps().get(0).capability().getRequiredInputs()).containsExactly("appName", "from", "to");
+        assertThat(result.validatedPlan().steps().get(0).policyDecision().getDecisionType()).isEqualTo(PolicyDecisionType.ALLOW);
     }
 
     @Test
