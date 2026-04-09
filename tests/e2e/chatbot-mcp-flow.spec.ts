@@ -13,6 +13,26 @@ type StreamRequestBody = {
   } | null;
 };
 
+type UsageStatisticsToolResult = {
+  appName?: string;
+  appId?: string;
+  pv: number;
+  uv: number;
+};
+
+type UsageStatisticsCardProps = {
+  appLabel: string;
+  startTime: string;
+  endTime: string;
+  pv: number;
+  uv: number;
+  trendPoints: Array<{
+    timestamp: string;
+    pv: number;
+    uv: number;
+  }>;
+};
+
 function toSseEvent(event: string, data?: unknown): string {
   if (event === 'done') {
     return 'event: done\n\n';
@@ -23,18 +43,18 @@ function toSseEvent(event: string, data?: unknown): string {
   return `event: ${event}\ndata: ${serialized}\n\n`;
 }
 
-function buildGovernedMcpStream(options: {
+function buildAgenticMcpStream(options: {
   conversationId: string;
-  planSummary: string;
-  assistantMessage: string;
+  backendText: string;
   toolArguments: Record<string, unknown>;
-  toolResult: Record<string, unknown>;
+  toolResult: UsageStatisticsToolResult;
+  cardProps: UsageStatisticsCardProps;
 }): string {
   return [
     toSseEvent('conversation_id', options.conversationId),
     toSseEvent('execution_plan', {
       planId: `${options.conversationId}-plan`,
-      summary: options.planSummary,
+      summary: 'Fetch PV and UV usage statistics',
       status: 'running',
       totalSteps: 1,
     }),
@@ -42,7 +62,7 @@ function buildGovernedMcpStream(options: {
       planId: `${options.conversationId}-plan`,
       stepId: `${options.conversationId}-step-1`,
       targetName: 'statistic_count_by_app',
-      summary: options.planSummary,
+      summary: 'Fetch PV and UV usage statistics',
       stepType: 'mcp',
       status: 'running',
     }),
@@ -58,21 +78,26 @@ function buildGovernedMcpStream(options: {
       toolCallId: `${options.conversationId}-tool-1`,
       result: options.toolResult,
     }),
+    toSseEvent('generative_ui', {
+      toolCallId: `${options.conversationId}-tool-1`,
+      name: 'UsageStatisticsCard',
+      props: options.cardProps,
+    }),
     toSseEvent('execution_step', {
       planId: `${options.conversationId}-plan`,
       stepId: `${options.conversationId}-step-1`,
       targetName: 'statistic_count_by_app',
-      summary: options.planSummary,
+      summary: 'Fetch PV and UV usage statistics',
       stepType: 'mcp',
       status: 'completed',
     }),
     toSseEvent('execution_plan', {
       planId: `${options.conversationId}-plan`,
-      summary: options.planSummary,
+      summary: 'Fetch PV and UV usage statistics',
       status: 'completed',
       totalSteps: 1,
     }),
-    toSseEvent('message', { text: options.assistantMessage }),
+    toSseEvent('message', { text: options.backendText }),
     toSseEvent('done'),
   ].join('');
 }
@@ -118,7 +143,7 @@ async function openTestTile(page: Page): Promise<void> {
   await expect(page.getByRole('tab', { name: 'Test Tile' })).toBeVisible();
 }
 
-async function fulfillGovernedMcpRoute(
+async function fulfillAgenticMcpRoute(
   route: Route,
   responseFactory: (body: StreamRequestBody) => string,
   requestBodies: StreamRequestBody[],
@@ -137,18 +162,17 @@ async function fulfillGovernedMcpRoute(
   });
 }
 
-test.describe('chatbot governed MCP flow', () => {
-  test('renders governed plan and MCP result for an explicit app query', async ({ page }) => {
+test.describe('chatbot agentic MCP flow', () => {
+  test('renders the explicit app agentic flow with backend-authored text and chart card', async ({ page }) => {
     const streamRequests: StreamRequestBody[] = [];
 
     await page.route('**/api/chat/stream', async (route) => {
-      await fulfillGovernedMcpRoute(
+      await fulfillAgenticMcpRoute(
         route,
         () =>
-          buildGovernedMcpStream({
+          buildAgenticMcpStream({
             conversationId: 'conv-explicit-app',
-            planSummary: 'Fetch PV and UV statistics for cashflow',
-            assistantMessage: 'Usage summary for cashflow: PV 120, UV 30.',
+            backendText: 'cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.',
             toolArguments: {
               appName: 'cashflow',
               startTime: '2026-04-01T00:00:00Z',
@@ -158,6 +182,17 @@ test.describe('chatbot governed MCP flow', () => {
               appName: 'cashflow',
               pv: 120,
               uv: 30,
+            },
+            cardProps: {
+              appLabel: 'cashflow',
+              startTime: '2026-04-01T00:00:00Z',
+              endTime: '2026-04-08T00:00:00Z',
+              pv: 120,
+              uv: 30,
+              trendPoints: [
+                { timestamp: '2026-04-01T00:00:00Z', pv: 50, uv: 12 },
+                { timestamp: '2026-04-08T00:00:00Z', pv: 70, uv: 18 },
+              ],
             },
           }),
         streamRequests,
@@ -170,27 +205,30 @@ test.describe('chatbot governed MCP flow', () => {
     const message = 'Get app usage count for cashflow from 2026-04-01 to 2026-04-08';
     await sendAssistantMessage(page, message);
 
-    await expect(page.getByText('Governed plan')).toBeVisible();
-    await expect(page.getByText('Fetch PV and UV statistics for cashflow')).toBeVisible();
-    await expect(page.getByText('Execution step')).toBeVisible();
-    await expect(page.getByText('Usage summary for cashflow: PV 120, UV 30.')).toBeVisible();
+    await expect(page.getByText('Used tool')).toBeVisible();
+    await expect(page.getByText('statistic_count_by_app')).toBeVisible();
+    await expect(page.getByTestId('usage-statistics-card')).toBeVisible();
+    await expect(page.getByTestId('usage-statistics-pv-tile')).toBeVisible();
+    await expect(page.getByTestId('usage-statistics-uv-tile')).toBeVisible();
+    await expect(page.getByText('PV Trend')).toBeVisible();
+    await expect(page.getByText('UV Trend')).toBeVisible();
+    await expect(page.getByText('cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.')).toBeVisible();
 
     expect(streamRequests).toHaveLength(1);
     expect(streamRequests[0]?.message).toBe(message);
   });
 
-  test('sends workspace active app context for MCP fallback queries', async ({ page }) => {
+  test('uses workspace active app context when the app is omitted', async ({ page }) => {
     const streamRequests: StreamRequestBody[] = [];
 
     await page.route('**/api/chat/stream', async (route) => {
-      await fulfillGovernedMcpRoute(
+      await fulfillAgenticMcpRoute(
         route,
         (body) => {
           const activeAppId = body.workspaceContext?.activeAppId ?? 'missing-app-id';
-          return buildGovernedMcpStream({
+          return buildAgenticMcpStream({
             conversationId: 'conv-workspace-fallback',
-            planSummary: `Fetch PV and UV statistics for ${activeAppId}`,
-            assistantMessage: `Usage summary for ${activeAppId}: PV 80, UV 24.`,
+            backendText: `${activeAppId} usage from 2026-04-01 to 2026-04-08: PV 80, UV 24.`,
             toolArguments: {
               appId: activeAppId,
               startTime: '2026-04-01T00:00:00Z',
@@ -200,6 +238,17 @@ test.describe('chatbot governed MCP flow', () => {
               appId: activeAppId,
               pv: 80,
               uv: 24,
+            },
+            cardProps: {
+              appLabel: activeAppId,
+              startTime: '2026-04-01T00:00:00Z',
+              endTime: '2026-04-08T00:00:00Z',
+              pv: 80,
+              uv: 24,
+              trendPoints: [
+                { timestamp: '2026-04-01T00:00:00Z', pv: 32, uv: 8 },
+                { timestamp: '2026-04-08T00:00:00Z', pv: 48, uv: 16 },
+              ],
             },
           });
         },
@@ -220,7 +269,13 @@ test.describe('chatbot governed MCP flow', () => {
     expect(workspaceContext?.activeTileId).toBeTruthy();
 
     const expectedAppId = workspaceContext?.activeAppId as string;
-    await expect(page.getByText(`Fetch PV and UV statistics for ${expectedAppId}`)).toBeVisible();
-    await expect(page.getByText(`Usage summary for ${expectedAppId}: PV 80, UV 24.`)).toBeVisible();
+    await expect(page.getByText('Used tool')).toBeVisible();
+    await expect(page.getByText('statistic_count_by_app')).toBeVisible();
+    await expect(page.getByTestId('usage-statistics-card')).toBeVisible();
+    await expect(page.getByTestId('usage-statistics-pv-tile')).toBeVisible();
+    await expect(page.getByTestId('usage-statistics-uv-tile')).toBeVisible();
+    await expect(page.getByText('PV Trend')).toBeVisible();
+    await expect(page.getByText('UV Trend')).toBeVisible();
+    await expect(page.getByText(`${expectedAppId} usage from 2026-04-01 to 2026-04-08: PV 80, UV 24.`)).toBeVisible();
   });
 });

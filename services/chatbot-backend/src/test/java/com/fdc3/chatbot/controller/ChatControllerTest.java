@@ -64,27 +64,52 @@ class ChatControllerTest {
                 .build();
         ToolCall toolCall = ToolCall.builder()
                 .id("tool-1")
-                .name("calculator")
-                .arguments(Map.of("expression", "2 + 2"))
+                .name("statistic_count_by_app")
+                .arguments(Map.of(
+                        "appName", "cashflow",
+                        "startTime", "2026-04-01T00:00:00Z",
+                        "endTime", "2026-04-08T00:00:00Z"
+                ))
                 .status(ToolCall.ToolStatus.RUNNING)
                 .build();
         ToolResult toolResult = ToolResult.builder()
                 .toolCallId("tool-1")
-                .result(Map.of("result", 4))
+                .toolName("statistic_count_by_app")
+                .result(Map.of(
+                        "appName", "cashflow",
+                        "startTime", "2026-04-01T00:00:00Z",
+                        "endTime", "2026-04-08T00:00:00Z",
+                        "pv", 120,
+                        "uv", 30,
+                        "trendPoints", List.of(
+                                Map.of("timestamp", "2026-04-01T00:00:00Z", "pv", 50, "uv", 12),
+                                Map.of("timestamp", "2026-04-08T00:00:00Z", "pv", 70, "uv", 18)
+                        )
+                ))
                 .build();
         GenerativeUIDirective generativeUiDirective = GenerativeUIDirective.builder()
-                .name("Card")
+                .name("UsageStatisticsCard")
                 .toolCallId("tool-1")
-                .props(Map.of("title", "Calculation Complete"))
+                .props(Map.of(
+                        "appLabel", "cashflow",
+                        "startTime", "2026-04-01T00:00:00Z",
+                        "endTime", "2026-04-08T00:00:00Z",
+                        "pv", 120,
+                        "uv", 30,
+                        "trendPoints", List.of(
+                                Map.of("timestamp", "2026-04-01T00:00:00Z", "pv", 50, "uv", 12),
+                                Map.of("timestamp", "2026-04-08T00:00:00Z", "pv", 70, "uv", 18)
+                        )
+                ))
                 .build();
 
         chatService.behavior = invocation -> {
             invocation.onExecutionPlan.accept(executionPlanEvent);
             invocation.onExecutionStep.accept(executionStepEvent);
             invocation.onToolCall.accept(toolCall);
-            invocation.onNext.accept("Hello");
             invocation.onToolResult.accept(toolResult);
             invocation.onGenerativeUi.accept(generativeUiDirective);
+            invocation.onNext.accept("cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.");
             invocation.onComplete.run();
         };
 
@@ -103,10 +128,11 @@ class ChatControllerTest {
         assertTrue(body.contains("\"stepId\":\"step-1\""));
         assertTrue(body.contains("event:tool_call"));
         assertTrue(body.contains("event:message"));
-        assertTrue(body.contains("data:{\"text\":\"Hello\"}"));
+        assertTrue(body.contains("data:{\"text\":\"cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.\"}"));
         assertTrue(body.contains("event:tool_result"));
         assertTrue(body.contains("event:generative_ui"));
         assertTrue(body.contains("\"toolCallId\":\"tool-1\""));
+        assertTrue(body.contains("\"name\":\"UsageStatisticsCard\""));
         assertTrue(body.contains("event:done"));
     }
 
