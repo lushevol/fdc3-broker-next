@@ -18,8 +18,11 @@ describe('ToolFallback', () => {
 
     expect(screen.getAllByText('Used tool').length).toBeGreaterThan(0);
     expect(screen.getAllByText('statistic_count_by_app').length).toBeGreaterThan(0);
+    expect(screen.getByText('cashflow')).toBeInTheDocument();
+    expect(screen.getByText('Apr 1 - Apr 8')).toBeInTheDocument();
     expect(screen.queryByText('App')).not.toBeInTheDocument();
     expect(screen.queryByText('Range')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Fetching|usage|analytics/i)).not.toBeInTheDocument();
 
     const root = screen.getByRole('button').closest('[data-slot="tool-fallback-root"]');
     expect(root).toHaveClass('rounded-2xl');
