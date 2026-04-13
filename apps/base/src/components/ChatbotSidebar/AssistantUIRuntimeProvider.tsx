@@ -46,6 +46,8 @@ import {
   createFrontendToolRegistry,
   type FrontendToolRegistryConfig,
 } from './tools/createFrontendToolRegistry';
+import { buildWorkspaceContextSnapshot } from './controlPlane/buildWorkspaceContextSnapshot';
+import type { WorkspaceContextSnapshot } from './controlPlane/types';
 
 export interface AssistantUIRuntimeProviderValue {
   apiUrl: string;
@@ -377,11 +379,6 @@ function hasStructuredAssistantContent(content: AssistantRunContent): boolean {
   return content.some((part) => part.type !== 'text');
 }
 
-function getLatestAssistantTrailingTextContent(content: AssistantRunContent): AssistantRunContent {
-  const trailingPart = content.at(-1);
-  return trailingPart?.type === 'text' ? [trailingPart] : [];
-}
-
 function createStreamQueue() {
   const values: ChatModelRunResult[] = [];
   const resolvers: Array<(value: IteratorResult<ChatModelRunResult, void>) => void> = [];
@@ -429,6 +426,7 @@ function createStreamQueue() {
 function createChatModelAdapter(
   apiUrl: string,
   toolkit: AssistantRegisteredToolkit,
+  getWorkspaceContextSnapshot: () => WorkspaceContextSnapshot | null,
   onToolRouteChange: (debug: AssistantToolResolutionDebug | null) => void,
   conversationIdsByThreadRef: React.MutableRefObject<Map<string, string>>,
   fallbackConversationIdRef: React.MutableRefObject<string | null>,
@@ -501,20 +499,6 @@ function createChatModelAdapter(
           });
         };
 
-        const emitTrailingStructuredTextState = () => {
-          const latestContent = getLatestAssistantContent(streamingMessages);
-          const trailingContent = getLatestAssistantTrailingTextContent(latestContent);
-
-          if (trailingContent.length === 0) {
-            return;
-          }
-
-          hasEmittedContent = true;
-          streamQueue.push({
-            content: trailingContent,
-          });
-        };
-
         let streamRequest: ReturnType<typeof startFetchSSE> | null = null;
 
         streamRequest = startFetchSSE({
@@ -532,6 +516,7 @@ function createChatModelAdapter(
               : {}),
             ...(toolContext ? { toolContext } : {}),
             ...(frontendToolManifest ? { frontendTools: frontendToolManifest } : {}),
+            workspaceContext,
           },
           signal: abortSignal,
           handlers: {
@@ -577,7 +562,7 @@ function createChatModelAdapter(
                 }
 
                 if (containsStructuredContent) {
-                  emitTrailingStructuredTextState();
+                  emitVisibleState();
                   return;
                 }
 
@@ -586,6 +571,8 @@ function createChatModelAdapter(
               }
 
               if (
+                eventType === 'execution_plan' ||
+                eventType === 'execution_step' ||
                 eventType === 'tool_call' ||
                 eventType === 'tool_result' ||
                 eventType === 'generative_ui'
@@ -796,6 +783,7 @@ function createChatModelAdapter(
         currentAssistantMessage,
       );
       const frontendToolManifest = serializeFrontendToolManifest(toolkit);
+      const workspaceContext = getWorkspaceContextSnapshot();
 
       if (continuationPayload) {
         onToolRouteChange(null);
@@ -889,6 +877,10 @@ export function AssistantUIRuntimeProvider({
     () => mergeRegisteredToolkits([baseToolkit, ...Array.from(registeredToolkits.values())]),
     [baseToolkit, registeredToolkits],
   );
+  const getWorkspaceContextSnapshot = useCallback(
+    () => buildWorkspaceContextSnapshot(toolRegistryConfig?.getWorkspaceSnapshot?.() ?? null),
+    [toolRegistryConfig],
+  );
   const [lastToolRoute, setLastToolRoute] = useState<AssistantToolResolutionDebug | null>(null);
   const conversationIdsByThreadRef = useRef<Map<string, string>>(new Map());
   const fallbackConversationIdRef = useRef<string | null>(null);
@@ -898,11 +890,12 @@ export function AssistantUIRuntimeProvider({
       createChatModelAdapter(
         apiUrl,
         toolkit,
+        getWorkspaceContextSnapshot,
         setLastToolRoute,
         conversationIdsByThreadRef,
         fallbackConversationIdRef,
       ),
-    [apiUrl, toolkit],
+    [apiUrl, getWorkspaceContextSnapshot, toolkit],
   );
   const humanInTheLoopToolNames = useMemo(() => getHumanInTheLoopToolNames(toolkit), [toolkit]);
   const runtime = useLocalRuntime(modelAdapter, {

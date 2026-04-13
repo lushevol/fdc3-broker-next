@@ -4,6 +4,8 @@
   "scripts": {
     "build": "mvn -DskipTests clean package",
     "test": "mvn test",
-    "dev": "mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8090'"
+    "dev": "mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8090'",
+    "dev:live": "mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8090'",
+    "dev:stub": "ANALYTICS_STUB_ENABLED=true mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8090'"
   }
 }

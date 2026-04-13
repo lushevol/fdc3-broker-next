@@ -24,6 +24,8 @@ management:
         include: health,info
 
 analytics:
+  stub:
+    enabled: ${ANALYTICS_STUB_ENABLED:false}
   elasticsearch:
     url: ${ELASTICSEARCH_URL:http://localhost:9200}
     api-key: ${ELASTICSEARCH_API_KEY:}

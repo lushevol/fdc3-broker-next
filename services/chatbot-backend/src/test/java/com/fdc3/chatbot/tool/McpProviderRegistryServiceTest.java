@@ -1,23 +1,20 @@
 package com.fdc3.chatbot.tool;
 
-import com.fdc3.chatbot.model.UserCapabilityContext;
 import com.fdc3.chatbot.mcp.McpClientFactory;
 import com.fdc3.chatbot.mcp.McpProviderRegistrationRequest;
 import com.fdc3.chatbot.mcp.McpProviderRegistryService;
 import com.fdc3.chatbot.mcp.McpToolDescriptor;
 import com.fdc3.chatbot.mcp.McpTransportType;
+import com.fdc3.chatbot.model.UserCapabilityContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class McpProviderRegistryServiceTest {
 
@@ -30,24 +27,22 @@ class McpProviderRegistryServiceTest {
         );
         ToolRegistry toolRegistry = new ToolRegistry(List.of(localTool));
 
-        McpClientFactory clientFactory = mock(McpClientFactory.class);
-        McpClientFactory.McpClientSession clientSession = mock(McpClientFactory.McpClientSession.class);
-        when(clientFactory.create(org.mockito.ArgumentMatchers.any())).thenReturn(clientSession);
-        when(clientSession.listTools()).thenReturn(List.of(
-                new McpToolDescriptor(
-                        "portfolio_lookup",
-                        "Lookup user portfolios",
-                        Map.of(
-                                "type", "object",
-                                "properties", Map.of(
-                                        "accountId", Map.of("type", "string", "description", "Account identifier")
-                                ),
-                                "required", List.of("accountId")
+        RecordingMcpClientSession clientSession = new RecordingMcpClientSession(
+                List.of(
+                        new McpToolDescriptor(
+                                "portfolio_lookup",
+                                "Lookup user portfolios",
+                                Map.of(
+                                        "type", "object",
+                                        "properties", Map.of(
+                                                "accountId", Map.of("type", "string", "description", "Account identifier")
+                                        ),
+                                        "required", List.of("accountId")
+                                )
                         )
                 )
-        ));
-        when(clientSession.execute("portfolio_lookup", Map.of("accountId", "ACC-1")))
-                .thenReturn(CompletableFuture.completedFuture(Map.of("accountId", "ACC-1")));
+        );
+        McpClientFactory clientFactory = request -> clientSession;
 
         McpProviderRegistryService registryService = new McpProviderRegistryService(toolRegistry, clientFactory);
         registryService.register(new McpProviderRegistrationRequest(
@@ -79,12 +74,40 @@ class McpProviderRegistryServiceTest {
                 ),
                 advisorTools.get("portfolio_lookup").getParameters()
         );
-        assertTrue(registryService.listProviders().stream().anyMatch(provider -> "portfolio-service".equals(provider.getProviderId())));
+        assertTrue(
+                registryService.listProviders().stream()
+                        .anyMatch(provider -> "portfolio-service".equals(provider.getProviderId()))
+        );
         assertTrue(defaultTools.containsKey("calculator"));
         assertFalse(defaultTools.containsKey("portfolio_lookup"));
 
         registryService.unregister("portfolio-service");
-        verify(clientSession).close();
+        assertTrue(clientSession.closed);
+    }
+
+    private static final class RecordingMcpClientSession implements McpClientFactory.McpClientSession {
+
+        private final List<McpToolDescriptor> tools;
+        private boolean closed;
+
+        private RecordingMcpClientSession(List<McpToolDescriptor> tools) {
+            this.tools = tools;
+        }
+
+        @Override
+        public List<McpToolDescriptor> listTools() {
+            return tools;
+        }
+
+        @Override
+        public CompletableFuture<Object> execute(String toolName, Map<String, Object> arguments) {
+            return CompletableFuture.completedFuture(arguments);
+        }
+
+        @Override
+        public void close() {
+            closed = true;
+        }
     }
 
     private static final class TestToolDefinition implements ToolDefinition {

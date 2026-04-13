@@ -1,6 +1,9 @@
 package com.fdc3.chatbot.controller;
 
+import com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot;
 import com.fdc3.chatbot.model.ChatRequest;
+import com.fdc3.chatbot.model.ExecutionPlanEvent;
+import com.fdc3.chatbot.model.ExecutionStepEvent;
 import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
@@ -50,6 +53,7 @@ public class ChatController {
                 conversationId,
                 toolContext,
                 frontendTools,
+                null,
                 capabilityContextResolver.resolve(authentication)
         );
     }
@@ -64,6 +68,7 @@ public class ChatController {
                 request.getConversationId(),
                 request.getToolContext(),
                 request.getFrontendTools(),
+                request.getWorkspaceContext(),
                 capabilityContextResolver.resolve(authentication)
         );
     }
@@ -90,6 +95,7 @@ public class ChatController {
                 capabilityContext,
                 null,
                 request.getFrontendTools(),
+                request.getWorkspaceContext(),
                 token -> response.append(token),
                 error -> {
                     synchronized (lock) {
@@ -177,6 +183,7 @@ public class ChatController {
             String conversationId,
             String toolContext,
             String frontendTools,
+            WorkspaceContextSnapshot workspaceContext,
             UserCapabilityContext capabilityContext
     ) {
         log.info("Received streaming chat request for conversation: {}", conversationId);
@@ -200,6 +207,7 @@ public class ChatController {
                         capabilityContext,
                         toolContext,
                         frontendTools,
+                        workspaceContext,
                         token -> sendSseEvent(emitter, "message", Map.of("text", token), "message"),
                         error -> {
                             sendSseEvent(emitter, "error", error.getMessage(), "error");
@@ -209,6 +217,10 @@ public class ChatController {
                             sendSseEvent(emitter, "done", "", "done");
                             emitter.complete();
                         },
+                        executionPlanEvent ->
+                                sendSseEvent(emitter, "execution_plan", executionPlanEvent, "execution_plan"),
+                        executionStepEvent ->
+                                sendSseEvent(emitter, "execution_step", executionStepEvent, "execution_step"),
                         toolCall -> sendSseEvent(emitter, "tool_call", toolCall, "tool_call"),
                         toolResult -> sendSseEvent(emitter, "tool_result", toolResult, "tool_result"),
                         generativeUiDirective -> sendSseEvent(emitter, "generative_ui", generativeUiDirective, "generative_ui")

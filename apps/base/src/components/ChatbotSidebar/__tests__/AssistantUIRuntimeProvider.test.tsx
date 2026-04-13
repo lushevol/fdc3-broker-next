@@ -294,6 +294,50 @@ describe('AssistantUIRuntimeProvider', () => {
     abortController.abort();
   });
 
+  it('includes a bounded workspace context payload when workspace snapshot data is available', async () => {
+    render(
+      <AssistantUIRuntimeProvider
+        apiUrl="/api/chat"
+        toolRegistryConfig={{
+          getWorkspaceSnapshot: () => ({
+            activeWorkspaceId: 'workspace-1',
+            activeWorkspaceLabel: 'Workspace 1',
+            activeTileTitle: 'Tile A',
+            activeTileId: 'tile-1',
+            activeAppId: 'template_tile_fdc3_2',
+            totalWorkspaces: 1,
+            totalTiles: 1,
+            workspaces: [
+              {
+                id: 'workspace-1',
+                label: 'Workspace 1',
+                tileCount: 1,
+                isActive: true,
+              },
+            ],
+          }),
+        }}
+      >
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const run = getCapturedChatModelAdapter().run({
+      messages: [createUserThreadMessage('show usage stats')],
+      abortSignal: new AbortController().signal,
+    });
+    void run.next();
+    await Promise.resolve();
+
+    const requestBody = parseStreamRequestBody(mockEventSourceInstances[0]!);
+
+    expect(requestBody.workspaceContext).toEqual({
+      workspaceId: 'workspace-1',
+      activeTileId: 'tile-1',
+      activeAppId: 'template_tile_fdc3_2',
+    });
+  });
+
   it('starts a fresh thread without reusing the previous backend conversation id', async () => {
     render(
       <AssistantUIRuntimeProvider apiUrl="/api/chat">
@@ -833,10 +877,6 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(firstYield.value.content).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          type: 'text',
-          text: 'Checking with custom client tool...',
-        }),
-        expect.objectContaining({
           type: 'tool-call',
           toolName: 'custom_client_tool',
         }),
@@ -848,10 +888,6 @@ describe('AssistantUIRuntimeProvider', () => {
     expect(routedExecute).toHaveBeenCalledWith({ query: 'workspace' }, expect.any(Object));
     expect(secondYield.value.content).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          type: 'text',
-          text: 'Checking with custom client tool...',
-        }),
         expect.objectContaining({
           type: 'tool-call',
           toolName: 'custom_client_tool',
@@ -1305,6 +1341,148 @@ describe('AssistantUIRuntimeProvider', () => {
         },
       },
       done: false,
+    });
+    await expect(doneYieldPromise).resolves.toMatchObject({
+      value: undefined,
+      done: true,
+    });
+  });
+
+  it('preserves structured assistant content across multiple trailing message chunks', async () => {
+    render(
+      <AssistantUIRuntimeProvider apiUrl="/api/chat">
+        <div>child</div>
+      </AssistantUIRuntimeProvider>,
+    );
+
+    const adapter = mockUseLocalRuntime.mock.calls.at(-1)?.[0] as {
+      run: (input: {
+        messages: Array<{
+          id: string;
+          role: 'user';
+          content: Array<{ type: 'text'; text: string }>;
+        }>;
+        abortSignal?: AbortSignal;
+      }) => AsyncGenerator<{
+        content?: Array<{
+          type: string;
+          text?: string;
+          toolName?: string;
+          result?: unknown;
+          name?: string;
+          data?: unknown;
+        }>;
+        status?: {
+          type: string;
+          reason?: string;
+        };
+      }>;
+    };
+
+    const stream = adapter.run({
+      messages: [
+        {
+          id: 'msg-structured-stream',
+          role: 'user',
+          content: [{ type: 'text', text: 'plain backend prompt' }],
+        },
+      ],
+      abortSignal: new AbortController().signal,
+    });
+
+    const firstYieldPromise = stream.next();
+    const secondYieldPromise = stream.next();
+    const thirdYieldPromise = stream.next();
+    const fourthYieldPromise = stream.next();
+    const fifthYieldPromise = stream.next();
+    const doneYieldPromise = stream.next();
+
+    expect(mockEventSourceInstances).toHaveLength(1);
+
+    act(() => {
+      mockEventSourceInstances[0]?.emit('message', 'backend reply');
+      mockEventSourceInstances[0]?.emit(
+        'tool_call',
+        JSON.stringify({
+          id: 'tool-call-2',
+          name: 'backend_tool',
+          arguments: { source: 'backend' },
+          status: 'running',
+        }),
+      );
+      mockEventSourceInstances[0]?.emit(
+        'tool_result',
+        JSON.stringify({
+          toolCallId: 'tool-call-2',
+          result: { ok: true },
+        }),
+      );
+      mockEventSourceInstances[0]?.emit(
+        'generative_ui',
+        JSON.stringify({
+          name: 'ChartCard',
+          props: { title: 'Revenue' },
+        }),
+      );
+      mockEventSourceInstances[0]?.emit('message', ' with');
+      mockEventSourceInstances[0]?.emit('message', ' details');
+      mockEventSourceInstances[0]?.emit('done');
+    });
+
+    await expect(firstYieldPromise).resolves.toMatchObject({
+      value: {
+        content: [{ type: 'text', text: 'backend reply' }],
+      },
+      done: false,
+    });
+    await expect(secondYieldPromise).resolves.toMatchObject({
+      value: {
+        content: [
+          { type: 'text', text: 'backend reply' },
+          { type: 'tool-call', toolName: 'backend_tool', result: { ok: true } },
+          {
+            type: 'data',
+            name: 'generative-ui',
+            data: {
+              componentName: 'ChartCard',
+              props: { title: 'Revenue' },
+            },
+          },
+          { type: 'text', text: ' with' },
+        ],
+      },
+      done: false,
+    });
+    await expect(thirdYieldPromise).resolves.toMatchObject({
+      value: {
+        content: [
+          { type: 'text', text: 'backend reply' },
+          { type: 'tool-call', toolName: 'backend_tool', result: { ok: true } },
+          {
+            type: 'data',
+            name: 'generative-ui',
+            data: {
+              componentName: 'ChartCard',
+              props: { title: 'Revenue' },
+            },
+          },
+          { type: 'text', text: ' with details' },
+        ],
+      },
+      done: false,
+    });
+    await expect(fourthYieldPromise).resolves.toMatchObject({
+      value: {
+        status: {
+          type: 'complete',
+          reason: 'stop',
+        },
+      },
+      done: false,
+    });
+    await expect(fifthYieldPromise).resolves.toMatchObject({
+      value: undefined,
+      done: true,
     });
     await expect(doneYieldPromise).resolves.toMatchObject({
       value: undefined,

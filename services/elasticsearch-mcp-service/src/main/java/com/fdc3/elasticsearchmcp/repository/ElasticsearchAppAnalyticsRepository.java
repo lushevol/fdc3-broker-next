@@ -14,6 +14,7 @@ import com.fdc3.elasticsearchmcp.service.model.AppFilter;
 import com.fdc3.elasticsearchmcp.service.model.AppFilterType;
 import com.fdc3.elasticsearchmcp.service.model.ChartMetricsPoint;
 import com.fdc3.elasticsearchmcp.tool.model.AppChartBucket;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
+@ConditionalOnProperty(prefix = "analytics.stub", name = "enabled", havingValue = "false", matchIfMissing = true)
 public class ElasticsearchAppAnalyticsRepository implements AppAnalyticsRepository {
 
     static final String UNIQUE_USERS_AGG = "unique_users";

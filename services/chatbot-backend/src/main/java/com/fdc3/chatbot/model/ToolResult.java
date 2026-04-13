@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ToolResult {
     private String toolCallId;
+    private String toolName;
     private Object result;
     private String error;
 }

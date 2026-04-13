@@ -48,6 +48,8 @@ export interface ChatResponse {
 export type SSEEventType =
   | 'conversation_id'
   | 'message'
+  | 'execution_plan'
+  | 'execution_step'
   | 'tool_call'
   | 'tool_result'
   | 'generative_ui'
@@ -133,6 +135,32 @@ export interface StatusComponentProps {
   status: 'loading' | 'success' | 'error' | 'warning' | 'info';
   message: string;
   details?: string;
+}
+
+export interface ExecutionPlanStatusComponentProps {
+  kind: 'plan' | 'step';
+  status: 'running' | 'completed' | 'failed' | 'awaiting_review' | 'pending';
+  summary: string;
+  planId: string;
+  totalSteps?: number;
+  stepId?: string;
+  stepType?: string;
+  targetName?: string;
+}
+
+export interface UsageStatisticsTrendPoint {
+  timestamp: string;
+  pv: number;
+  uv: number;
+}
+
+export interface UsageStatisticsCardComponentProps {
+  appLabel: string;
+  startTime: string;
+  endTime: string;
+  pv: number;
+  uv: number;
+  trendPoints: UsageStatisticsTrendPoint[];
 }
 
 export interface ErrorComponentProps {

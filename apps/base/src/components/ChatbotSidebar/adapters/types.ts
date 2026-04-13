@@ -7,6 +7,8 @@
 
 export type SSEEventType =
   | 'message'
+  | 'execution_plan'
+  | 'execution_step'
   | 'tool_call'
   | 'tool_result'
   | 'generative_ui'
@@ -38,6 +40,22 @@ export interface GenerativeUIDirective {
   name: string;
   props: Record<string, unknown>;
   toolCallId?: string;
+}
+
+export interface ExecutionPlanEvent {
+  planId: string;
+  summary: string;
+  status: 'running' | 'completed' | 'failed' | 'awaiting_review';
+  totalSteps: number;
+}
+
+export interface ExecutionStepEvent {
+  planId: string;
+  stepId: string;
+  targetName: string;
+  summary: string;
+  stepType: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
 }
 
 /**

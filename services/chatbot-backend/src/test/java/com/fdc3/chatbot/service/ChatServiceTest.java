@@ -1,63 +1,48 @@
 package com.fdc3.chatbot.service;
 
 import com.fdc3.chatbot.agent.AgentService;
+import com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot;
 import com.fdc3.chatbot.model.ChatMessage;
+import com.fdc3.chatbot.model.ExecutionPlanEvent;
+import com.fdc3.chatbot.model.ExecutionStepEvent;
 import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
+import com.fdc3.chatbot.model.UserCapabilityContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 class ChatServiceTest {
 
-    private AgentService agentService;
+    private RecordingAgentService agentService;
     private ChatService chatService;
 
     @BeforeEach
     void setUp() {
-        agentService = mock(AgentService.class);
+        agentService = new RecordingAgentService();
         chatService = new ChatService(agentService);
     }
 
     @Test
     void processMessageStreamingPersistsAssistantMessageOnCompletion() {
-        doAnswer(invocation -> {
-            Consumer<String> onNext = invocation.getArgument(6);
-            Runnable onComplete = invocation.getArgument(8);
-
-            onNext.accept("Hello ");
-            onNext.accept("world");
-            onComplete.run();
-            return null;
-        }).when(agentService).processMessageStreaming(
-                anyString(),
-                anyString(),
-                any(),
-                any(),
-                any(),
-                anyList(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-        );
+        agentService.behavior = invocation -> {
+            invocation.onNext.accept("Hello ");
+            invocation.onNext.accept("world");
+            invocation.onComplete.run();
+            return () -> {
+            };
+        };
 
         String conversationId = chatService.createConversation();
 
@@ -88,39 +73,27 @@ class ChatServiceTest {
         ToolCall toolCall = ToolCall.builder()
                 .id("tool-1")
                 .name("calculator")
-                .arguments(java.util.Map.of("expression", "2 + 2"))
+                .arguments(Map.of("expression", "2 + 2"))
                 .status(ToolCall.ToolStatus.RUNNING)
                 .build();
         ToolResult toolResult = ToolResult.builder()
                 .toolCallId("tool-1")
-                .result(java.util.Map.of("result", 4))
+                .result(Map.of("result", 4))
                 .build();
 
-        doAnswer(invocation -> {
-            Consumer<ToolCall> onToolCall = invocation.getArgument(9);
-            Consumer<ToolResult> onToolResult = invocation.getArgument(10);
-            Runnable onComplete = invocation.getArgument(8);
+        AtomicInteger toolCallCount = new AtomicInteger();
+        AtomicInteger toolResultCount = new AtomicInteger();
+        ToolCall[] forwardedToolCall = new ToolCall[1];
+        ToolResult[] forwardedToolResult = new ToolResult[1];
 
-            onToolCall.accept(toolCall);
-            onToolResult.accept(toolResult);
-            onComplete.run();
-            return null;
-        }).when(agentService).processMessageStreaming(
-                anyString(),
-                anyString(),
-                any(),
-                any(),
-                any(),
-                anyList(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-        );
+        agentService.behavior = invocation -> {
+            invocation.onToolCall.accept(toolCall);
+            invocation.onToolResult.accept(toolResult);
+            invocation.onComplete.run();
+            return () -> {
+            };
+        };
 
-        Consumer<ToolCall> onToolCall = mock(Consumer.class);
-        Consumer<ToolResult> onToolResult = mock(Consumer.class);
         String conversationId = chatService.createConversation();
 
         chatService.processMessageStreaming(
@@ -132,12 +105,70 @@ class ChatServiceTest {
                 },
                 () -> {
                 },
-                onToolCall,
-                onToolResult
+                event -> {
+                    forwardedToolCall[0] = event;
+                    toolCallCount.incrementAndGet();
+                },
+                event -> {
+                    forwardedToolResult[0] = event;
+                    toolResultCount.incrementAndGet();
+                }
         );
 
-        verify(onToolCall).accept(toolCall);
-        verify(onToolResult).accept(toolResult);
+        assertEquals(1, toolCallCount.get());
+        assertEquals(1, toolResultCount.get());
+        assertSame(toolCall, forwardedToolCall[0]);
+        assertSame(toolResult, forwardedToolResult[0]);
+    }
+
+    @Test
+    void processMessageStreamingPersistsToolBackedAssistantTurnAfterCompletion() {
+        ToolCall toolCall = ToolCall.builder()
+                .id("tool-1")
+                .name("statistic_count_by_app")
+                .arguments(Map.of("appName", "cashflow"))
+                .status(ToolCall.ToolStatus.RUNNING)
+                .executionTarget(ToolCall.ExecutionTarget.BACKEND)
+                .build();
+        ToolResult toolResult = ToolResult.builder()
+                .toolCallId("tool-1")
+                .toolName("statistic_count_by_app")
+                .result(Map.of("pv", 120, "uv", 30))
+                .build();
+
+        agentService.behavior = invocation -> {
+            invocation.onToolCall.accept(toolCall);
+            invocation.onToolResult.accept(toolResult);
+            invocation.onNext.accept("cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.");
+            invocation.onComplete.run();
+            return () -> {
+            };
+        };
+
+        String conversationId = chatService.createConversation();
+
+        chatService.processMessageStreaming(
+                conversationId,
+                "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
+                token -> {
+                },
+                error -> {
+                },
+                () -> {
+                },
+                event -> {
+                },
+                event -> {
+                }
+        );
+
+        List<ChatMessage> history = chatService.getHistory(conversationId);
+
+        assertEquals(2, history.size());
+        assertEquals(ChatMessage.Role.ASSISTANT, history.get(1).getRole());
+        assertEquals("cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.", history.get(1).getContent());
+        assertEquals(List.of(toolCall), history.get(1).getToolCalls());
+        assertEquals(List.of(toolResult), history.get(1).getToolResults());
     }
 
     @Test
@@ -145,12 +176,12 @@ class ChatServiceTest {
         ToolCall toolCall = ToolCall.builder()
                 .id("tool-1")
                 .name("get_weather")
-                .arguments(java.util.Map.of("location", "Shanghai, China"))
+                .arguments(Map.of("location", "Shanghai, China"))
                 .status(ToolCall.ToolStatus.RUNNING)
                 .build();
         ToolResult toolResult = ToolResult.builder()
                 .toolCallId("tool-1")
-                .result(java.util.Map.of(
+                .result(Map.of(
                         "location", "Shanghai, China",
                         "temperature", 22,
                         "temperatureUnit", "Celsius",
@@ -158,30 +189,16 @@ class ChatServiceTest {
                 ))
                 .build();
 
-        doAnswer(invocation -> {
-            Consumer<ToolCall> onToolCall = invocation.getArgument(9);
-            Consumer<ToolResult> onToolResult = invocation.getArgument(10);
-            Runnable onComplete = invocation.getArgument(8);
+        GenerativeUIDirective[] directive = new GenerativeUIDirective[1];
 
-            onToolCall.accept(toolCall);
-            onToolResult.accept(toolResult);
-            onComplete.run();
-            return null;
-        }).when(agentService).processMessageStreaming(
-                anyString(),
-                anyString(),
-                any(),
-                any(),
-                any(),
-                anyList(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-        );
+        agentService.behavior = invocation -> {
+            invocation.onToolCall.accept(toolCall);
+            invocation.onToolResult.accept(toolResult);
+            invocation.onComplete.run();
+            return () -> {
+            };
+        };
 
-        Consumer<GenerativeUIDirective> onGenerativeUi = mock(Consumer.class);
         String conversationId = chatService.createConversation();
 
         chatService.processMessageStreaming(
@@ -198,38 +215,23 @@ class ChatServiceTest {
                 },
                 toolResultEvent -> {
                 },
-                onGenerativeUi
+                event -> directive[0] = event
         );
 
-        ArgumentCaptor<GenerativeUIDirective> directiveCaptor = ArgumentCaptor.forClass(GenerativeUIDirective.class);
-        verify(onGenerativeUi).accept(directiveCaptor.capture());
-
-        GenerativeUIDirective directive = directiveCaptor.getValue();
-        assertEquals("Card", directive.getName());
-        assertEquals("tool-1", directive.getToolCallId());
-        assertEquals("Weather Summary", directive.getProps().get("title"));
-        assertTrue(String.valueOf(directive.getProps().get("content")).contains("Partly Cloudy"));
+        assertNotNull(directive[0]);
+        assertEquals("Card", directive[0].getName());
+        assertEquals("tool-1", directive[0].getToolCallId());
+        assertEquals("Weather Summary", directive[0].getProps().get("title"));
+        assertTrue(String.valueOf(directive[0].getProps().get("content")).contains("Partly Cloudy"));
     }
 
     @Test
     void processMessageStreamingDoesNotDuplicateCurrentUserMessageInModelHistory() {
-        doAnswer(invocation -> {
-            Runnable onComplete = invocation.getArgument(8);
-            onComplete.run();
-            return null;
-        }).when(agentService).processMessageStreaming(
-                anyString(),
-                anyString(),
-                any(),
-                any(),
-                any(),
-                anyList(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-        );
+        agentService.behavior = invocation -> {
+            invocation.onComplete.run();
+            return () -> {
+            };
+        };
 
         String conversationId = chatService.createConversation();
 
@@ -244,23 +246,10 @@ class ChatServiceTest {
                 }
         );
 
-        ArgumentCaptor<List<ChatMessage>> historyCaptor = ArgumentCaptor.forClass(List.class);
-        verify(agentService).processMessageStreaming(
-                eq(conversationId),
-                eq("Hello there"),
-                any(),
-                isNull(),
-                isNull(),
-                historyCaptor.capture(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-        );
-
-        List<ChatMessage> forwardedHistory = historyCaptor.getValue();
-        assertTrue(forwardedHistory.isEmpty(), "Current user message should not already be present in forwarded history");
+        assertEquals(conversationId, agentService.lastInvocation.conversationId);
+        assertEquals("Hello there", agentService.lastInvocation.userMessage);
+        assertTrue(agentService.lastInvocation.history.isEmpty());
+        assertNull(agentService.lastInvocation.workspaceContext);
     }
 
     @Test
@@ -269,32 +258,20 @@ class ChatServiceTest {
 
         chatService.clearConversation(conversationId);
 
-        verify(agentService).clearConversationContext(conversationId);
+        assertEquals(conversationId, agentService.lastClearedConversationId);
     }
 
     @Test
     void cancelledStreamDoesNotPersistPartialAssistantMessage() {
-        final Runnable[] onCompleteRef = new Runnable[1];
-        final Consumer<String>[] onNextRef = new Consumer[1];
+        Runnable[] onCompleteRef = new Runnable[1];
+        Consumer<String>[] onNextRef = new Consumer[1];
 
-        doAnswer((org.mockito.stubbing.Answer<Runnable>) invocation -> {
-            onNextRef[0] = invocation.getArgument(6);
-            onCompleteRef[0] = invocation.getArgument(8);
+        agentService.behavior = invocation -> {
+            onNextRef[0] = invocation.onNext;
+            onCompleteRef[0] = invocation.onComplete;
             return () -> {
             };
-        }).when(agentService).processMessageStreaming(
-                anyString(),
-                anyString(),
-                any(),
-                any(),
-                any(),
-                anyList(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-        );
+        };
 
         String conversationId = chatService.createConversation();
 
@@ -320,23 +297,11 @@ class ChatServiceTest {
 
     @Test
     void processMessageStreamingForwardsFrontendToolManifestToAgent() {
-        doAnswer(invocation -> {
-            Runnable onComplete = invocation.getArgument(8);
-            onComplete.run();
-            return null;
-        }).when(agentService).processMessageStreaming(
-                anyString(),
-                anyString(),
-                any(),
-                any(),
-                any(),
-                anyList(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-        );
+        agentService.behavior = invocation -> {
+            invocation.onComplete.run();
+            return () -> {
+            };
+        };
 
         String conversationId = chatService.createConversation();
         String frontendTools = "[{\"name\":\"custom_client_tool\",\"description\":\"Custom tool\"}]";
@@ -358,18 +323,124 @@ class ChatServiceTest {
                 }
         );
 
-        verify(agentService).processMessageStreaming(
-                eq(conversationId),
-                eq("Hi"),
-                any(),
-                isNull(),
-                eq(frontendTools),
-                anyList(),
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
+        assertEquals(conversationId, agentService.lastInvocation.conversationId);
+        assertEquals("Hi", agentService.lastInvocation.userMessage);
+        assertEquals(frontendTools, agentService.lastInvocation.frontendTools);
+        assertNull(agentService.lastInvocation.workspaceContext);
+    }
+
+    @Test
+    void processMessageStreamingForwardsWorkspaceContextToAgent() {
+        agentService.behavior = invocation -> {
+            invocation.onComplete.run();
+            return () -> {
+            };
+        };
+
+        String conversationId = chatService.createConversation();
+        WorkspaceContextSnapshot workspaceContext = WorkspaceContextSnapshot.builder()
+                .workspaceId("workspace-1")
+                .activeTileId("tile-2")
+                .activeAppId("template_tile_fdc3_2")
+                .build();
+
+        chatService.processMessageStreaming(
+                conversationId,
+                "show app usage",
+                UserCapabilityContext.anonymous(),
+                null,
+                null,
+                workspaceContext,
+                token -> {
+                },
+                error -> {
+                },
+                () -> {
+                }
         );
+
+        assertNotNull(agentService.lastInvocation.workspaceContext);
+        assertEquals("workspace-1", agentService.lastInvocation.workspaceContext.getWorkspaceId());
+        assertEquals("tile-2", agentService.lastInvocation.workspaceContext.getActiveTileId());
+        assertEquals("template_tile_fdc3_2", agentService.lastInvocation.workspaceContext.getActiveAppId());
+    }
+
+    private static final class RecordingAgentService extends AgentService {
+
+        private AgentInvocation lastInvocation;
+        private AgentBehavior behavior = invocation -> {
+            invocation.onComplete.run();
+            return () -> {
+            };
+        };
+        private String lastClearedConversationId;
+
+        private RecordingAgentService() {
+            super(null);
+        }
+
+        @Override
+        public Runnable processMessageStreaming(
+                String conversationId,
+                String userMessage,
+                UserCapabilityContext capabilityContext,
+                String toolContext,
+                String frontendTools,
+                WorkspaceContextSnapshot workspaceContext,
+                List<ChatMessage> history,
+                Consumer<String> onNext,
+                Consumer<Throwable> onError,
+                Runnable onComplete,
+                Consumer<ExecutionPlanEvent> onExecutionPlan,
+                Consumer<ExecutionStepEvent> onExecutionStep,
+                Consumer<ToolCall> onToolCall,
+                Consumer<ToolResult> onToolResult
+        ) {
+            lastInvocation = new AgentInvocation(
+                    conversationId,
+                    userMessage,
+                    capabilityContext,
+                    toolContext,
+                    frontendTools,
+                    workspaceContext,
+                    history,
+                    onNext,
+                    onError,
+                    onComplete,
+                    onExecutionPlan,
+                    onExecutionStep,
+                    onToolCall,
+                    onToolResult
+            );
+            return behavior.apply(lastInvocation);
+        }
+
+        @Override
+        public void clearConversationContext(String conversationId) {
+            lastClearedConversationId = conversationId;
+        }
+    }
+
+    @FunctionalInterface
+    private interface AgentBehavior {
+        Runnable apply(AgentInvocation invocation);
+    }
+
+    private record AgentInvocation(
+            String conversationId,
+            String userMessage,
+            UserCapabilityContext capabilityContext,
+            String toolContext,
+            String frontendTools,
+            WorkspaceContextSnapshot workspaceContext,
+            List<ChatMessage> history,
+            Consumer<String> onNext,
+            Consumer<Throwable> onError,
+            Runnable onComplete,
+            Consumer<ExecutionPlanEvent> onExecutionPlan,
+            Consumer<ExecutionStepEvent> onExecutionStep,
+            Consumer<ToolCall> onToolCall,
+            Consumer<ToolResult> onToolResult
+    ) {
     }
 }

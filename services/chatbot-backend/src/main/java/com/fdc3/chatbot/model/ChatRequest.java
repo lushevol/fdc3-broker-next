@@ -1,5 +1,6 @@
 package com.fdc3.chatbot.model;
 
+import com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +17,7 @@ public class ChatRequest {
     private String message;
     private String toolContext;
     private String frontendTools;
+    private WorkspaceContextSnapshot workspaceContext;
     private List<ChatMessage> history;
     private boolean stream = true;
 }

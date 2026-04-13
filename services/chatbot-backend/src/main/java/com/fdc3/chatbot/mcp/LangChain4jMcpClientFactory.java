@@ -74,7 +74,13 @@ public class LangChain4jMcpClientFactory implements McpClientFactory {
                                     .arguments(writeJson(arguments))
                                     .build()
                     ))
-                    .thenApply(result -> result.isError() ? Map.of("error", result.resultText()) : result.result());
+                    .thenApply(result -> {
+                        String resultText = result.resultText();
+                        if (result.isError()) {
+                            return Map.of("error", resultText);
+                        }
+                        return parseToolResult(resultText, result.result());
+                    });
         }
 
         @Override
@@ -92,6 +98,19 @@ public class LangChain4jMcpClientFactory implements McpClientFactory {
             } catch (Exception exception) {
                 throw new IllegalStateException("Failed to serialize MCP tool arguments", exception);
             }
+        }
+
+        private Object parseToolResult(String resultText, Object fallbackResult) {
+            if (resultText != null && !resultText.isBlank()) {
+                try {
+                    return objectMapper.readValue(resultText, Object.class);
+                } catch (Exception exception) {
+                    log.debug("Failed to parse MCP result text as JSON, returning raw text", exception);
+                    return resultText;
+                }
+            }
+
+            return fallbackResult;
         }
     }
 

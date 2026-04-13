@@ -308,6 +308,8 @@ The single user-facing interface for conversational control.
 - allow approve / reject / amend
 - display execution progress
 - display execution outcome and intermediate results
+- render structured result components from normalized payloads
+- surface typed follow-up actions such as FDC3 app jumps and MCP follow-up actions
 
 ### Architectural position
 
@@ -396,6 +398,7 @@ The unified source of system capabilities.
 
 ### Responsibilities
 
+- serve as the onboarding target for tenant capability metadata
 - register FDC3 app capabilities
 - register MCP tools/resources/prompts
 - describe required and optional inputs
@@ -413,6 +416,17 @@ That keeps the minimal design clean:
 - the agent uses it to map goals to actions
 - policy uses it to validate references and risk
 - runtimes use it as metadata support for discovery and invocation
+
+### Onboarding rule
+
+Tenant providers onboard by registering capability metadata into the **Capability Registry**.
+
+That onboarding must include:
+
+- FDC3 application metadata, including app identity, supported intents, supported context types, and launch metadata
+- MCP capability metadata, including tools, resources, optional prompts, required inputs, execution class, tenant scope, and risk level
+
+The Central Agent consumes the registry at runtime. It is not the source of registration truth and should not own provider onboarding state.
 
 ---
 
@@ -475,11 +489,18 @@ UI-facing capability providers.
 - expose current UI context in structured form
 - register supported FDC3 intents and context types
 - respond to FDC3 runtime requests
+- resolve declared FDC3 context into a meaningful user-visible UI state
 - optionally offer agent-readable interaction hints
 
 ### Design boundary
 
 Tenant apps are responsible for **state exposure and navigation participation**, not backend mutation protocol design.
+
+### Context resolution contract
+
+If a tenant app declares support for an FDC3 intent and context combination, it must be able to transform the received context into a concrete and meaningful application state.
+
+That means the app must do more than accept the payload syntactically. It must land the user in an appropriate view, selection, or detail state that satisfies the declared capability.
 
 ---
 
@@ -853,6 +874,89 @@ The agent and UI need a normalized way to present execution outcomes regardless 
 
 ---
 
+## 10.6 Renderable Result Model
+
+This is the normalized contract for structured chatbot UI rendering.
+
+```json
+{
+  "componentType": "todo-list",
+  "title": "Workflow Todo",
+  "data": {
+    "items": [
+      {
+        "id": "WF-1001",
+        "label": "Approve settlement exception",
+        "status": "OPEN"
+      }
+    ]
+  },
+  "actions": [
+    {
+      "actionType": "fdc3",
+      "label": "Go to app",
+      "intent": "bank.workflow.ViewTodo",
+      "context": {
+        "type": "bank.workflow.todo",
+        "id": "WF-1001"
+      }
+    }
+  ]
+}
+```
+
+### Purpose
+
+The Renderable Result Model allows the Chat UI to render structured responses consistently instead of depending on provider-specific payload shapes.
+
+### Supported component categories
+
+The architecture should support at least these renderable component categories:
+
+- `summary-card`
+- `todo-list`
+- `table`
+- `chart`
+- `form`
+
+### Design rule
+
+MCP results should be normalized into this model before the Chat UI renders them. The UI should not need to understand tenant-specific backend payloads directly.
+
+---
+
+## 10.7 UI Action Model
+
+This is the typed action contract attached to renderable chatbot components.
+
+```json
+{
+  "actionType": "fdc3",
+  "label": "Go to app",
+  "intent": "bank.workflow.ViewTodo",
+  "context": {
+    "type": "bank.workflow.todo",
+    "id": "WF-1001"
+  }
+}
+```
+
+### Supported action kinds
+
+- `fdc3`
+- `mcp`
+- `chat_followup`
+
+### Purpose
+
+The UI Action Model makes follow-up behavior explicit and typed. A rendered button is therefore not view-only decoration; it is a controlled action contract that the Chat UI can hand back to the control plane for execution.
+
+### Design rule
+
+Deferred FDC3 handoff from a rendered chatbot component must be represented through this model rather than through ad hoc UI logic.
+
+---
+
 ## 11. Sequence and Runtime Flow
 
 ## 11.1 End-to-end sequence
@@ -906,6 +1010,41 @@ sequenceDiagram
 
 ---
 
+## 11.3 Canonical scenario: Workflow todo shown in chat, then opened in app
+
+1. The workflow provider onboards by registering workflow MCP read capability metadata and workflow FDC3 intent/context metadata into the Capability Registry
+2. The user asks for their workflow todo list in the chatbot
+3. The agent queries the registry and selects the workflow MCP capability
+4. The MCP Gateway invokes the workflow service and returns structured todo data
+5. The result is normalized into a `todo-list` Renderable Result Model payload
+6. The Chat UI renders the todo list, including a typed `fdc3` UI action such as `Go to app`
+7. When the user clicks the action, the Chat UI submits that typed action for execution
+8. The FDC3 Runtime resolves the target app and delivers the declared context
+9. The workflow app resolves the context into the correct todo detail or worklist state
+
+This scenario is the canonical pattern for chat-driven read followed by app handoff:
+
+- data retrieval via MCP
+- presentation via renderable chat component
+- navigation via FDC3
+
+---
+
+## 11.4 Canonical scenario: Admin telemetry question rendered as chart
+
+1. The telemetry provider onboards by registering telemetry MCP capability metadata into the Capability Registry
+2. The capability is classified with the correct tenant scope, execution class, and policy restrictions
+3. The user asks for workflow page views for yesterday
+4. The agent queries the registry and selects the telemetry MCP capability
+5. The agent submits the planned analytics read to policy for entitlement and risk evaluation
+6. If approved, the MCP Gateway invokes the telemetry service, which queries Elasticsearch and returns hourly page-view data
+7. The result is normalized into a `chart` Renderable Result Model payload
+8. The Chat UI renders the chart directly in the conversation
+
+This scenario stays entirely in the MCP lane because it is an analytics read rather than an application-navigation task.
+
+---
+
 ## 12. Responsibility Matrix
 
 ## 12.1 Planning phase
@@ -925,10 +1064,12 @@ sequenceDiagram
 ### Capability Registry
 
 - provide available capability metadata
+- act as the provider onboarding system of record for FDC3 and MCP capability declarations
 
 ### Tenant Apps
 
 - provide optional current UI context
+- resolve declared FDC3 context into meaningful UI state after handoff
 
 ---
 
@@ -1074,4 +1215,4 @@ It is a governed orchestration architecture.
 
 ## 16. Final Architecture Summary
 
-The final design centers on a single chatbot that acts as the unified control plane for tenant applications. Tenant apps provide current UI context and FDC3 interoperability metadata. Tenant services provide MCP tools, resources, and optionally prompts. The Central Agent interprets user goals and composes a structured action plan. The Policy Service validates tenant scope, entitlement, risk, and approval requirements. The FDC3 Runtime handles application discovery, launch/focus, and context handoff. The MCP Gateway handles structured service-side actions and reads. The result is a minimal but complete architecture that gives users a single conversational control surface without collapsing application logic, authorization, and execution into one unsafe layer. FDC3’s intent/context/app-directory model supports the app-side interoperability layer, and MCP’s server model supports the tool/resource side of the architecture.
+The final design centers on a single chatbot that acts as the unified control plane for tenant applications. Tenant providers onboard by registering both FDC3 and MCP capability metadata into the Capability Registry, which remains the source of registration truth for the platform. Tenant apps provide current UI context, FDC3 interoperability metadata, and explicit context-resolution behavior so declared handoffs land users in meaningful UI state. Tenant services provide MCP tools, resources, and optionally prompts. The Central Agent interprets user goals and composes a structured action plan. The Policy Service validates tenant scope, entitlement, risk, and approval requirements. The FDC3 Runtime handles application discovery, launch/focus, and context handoff. The MCP Gateway handles structured service-side actions and reads. The Chat UI renders normalized result components and typed follow-up actions, which makes scenarios such as workflow todo rendering plus app jump, and policy-gated telemetry chart rendering, first-class architectural flows rather than ad hoc UI behavior. The result is a minimal but complete architecture that gives users a single conversational control surface without collapsing application logic, authorization, and execution into one unsafe layer. FDC3’s intent/context/app-directory model supports the app-side interoperability layer, and MCP’s server model supports the tool/resource side of the architecture.

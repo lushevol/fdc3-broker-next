@@ -27,10 +27,11 @@ describe('ProxyGateway', () => {
     );
 
     const detachedRegister = gateway.handleRegister;
-    const result = detachedRegister(
-      { id: 'socket-1' } as any,
-      { clientName: 'test-client', version: '1.0.0', localBaseUrl: 'http://127.0.0.1:4141' },
-    );
+    const result = detachedRegister({ id: 'socket-1' } as any, {
+      clientName: 'test-client',
+      version: '1.0.0',
+      localBaseUrl: 'http://127.0.0.1:4141',
+    });
 
     expect(result).toEqual({ ok: true, socketId: 'socket-1' });
     expect(clientRegistry.registerSocket).toHaveBeenCalledWith('socket-1', {

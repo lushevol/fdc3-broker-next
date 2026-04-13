@@ -21,8 +21,23 @@ chatbot:
     name: FDC3 Assistant
     max-tokens: 4096
     conversation-timeout: 1800000 # 30 minutes
+  security:
+    fallback-profiles: ${CHATBOT_SECURITY_FALLBACK_PROFILES:default}
+    additional-profiles: ${CHATBOT_SECURITY_ADDITIONAL_PROFILES:}
   tools:
     enabled: true
+  mcp:
+    registration-max-attempts: ${CHATBOT_MCP_REGISTRATION_MAX_ATTEMPTS:10}
+    registration-retry-delay-millis: ${CHATBOT_MCP_REGISTRATION_RETRY_DELAY_MILLIS:1000}
+    providers:
+      - enabled: ${CHATBOT_MCP_ELASTICSEARCH_ENABLED:false}
+        provider-id: elasticsearch-analytics
+        service-name: Elasticsearch Analytics MCP
+        transport-type: STREAMABLE_HTTP
+        url: ${CHATBOT_MCP_ELASTICSEARCH_URL:}
+        enabled-profiles:
+          - advisor
+        description: Read-only analytics MCP provider used for app usage statistics.
   rate-limit:
     requests-per-minute: 60
     tokens-per-minute: 100000

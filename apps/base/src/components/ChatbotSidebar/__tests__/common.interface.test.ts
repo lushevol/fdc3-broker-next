@@ -6,4 +6,12 @@ describe('common chatbot interface types', () => {
 
     expect(eventType).toBe('conversation_id');
   });
+
+  it('includes governed execution events in the shared SSE contract', () => {
+    const planEventType: SSEEventType = 'execution_plan';
+    const stepEventType: SSEEventType = 'execution_step';
+
+    expect(planEventType).toBe('execution_plan');
+    expect(stepEventType).toBe('execution_step');
+  });
 });

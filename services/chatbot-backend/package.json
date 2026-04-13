@@ -5,6 +5,7 @@
     "build": "mvn -DskipTests clean package",
     "bundle:centos": "sh ./scripts/bundle-centos.sh",
     "dev": "mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8080 -Dspring.profiles.active=local'",
+    "dev:with-elasticsearch-mcp": "CHATBOT_MCP_ELASTICSEARCH_ENABLED=true CHATBOT_MCP_ELASTICSEARCH_URL=http://localhost:8090/api/mcp CHATBOT_SECURITY_ADDITIONAL_PROFILES=advisor mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8080 -Dspring.profiles.active=local'",
     "run:bundle": "sh ./scripts/run-centos.sh"
   }
 }

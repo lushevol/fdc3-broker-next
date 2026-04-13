@@ -7,6 +7,8 @@ import {
   ListComponentProps,
   TableComponentProps,
   StatusComponentProps,
+  ExecutionPlanStatusComponentProps,
+  UsageStatisticsCardComponentProps,
   ErrorComponentProps,
   FormComponentProps,
 } from './interface';
@@ -216,6 +218,299 @@ export const StatusComponent: React.FC<{ props: StatusComponentProps }> = ({ pro
   );
 };
 
+function mapExecutionStatusToVisualState(
+  status: ExecutionPlanStatusComponentProps['status'],
+): StatusComponentProps['status'] {
+  switch (status) {
+    case 'running':
+      return 'loading';
+    case 'completed':
+      return 'success';
+    case 'failed':
+      return 'error';
+    case 'awaiting_review':
+      return 'warning';
+    case 'pending':
+      return 'info';
+    default:
+      return 'info';
+  }
+}
+
+export const ExecutionPlanStatusComponent: React.FC<{
+  props: ExecutionPlanStatusComponentProps;
+}> = ({ props }) => {
+  const theme = useTheme();
+  const label = props.kind === 'plan' ? 'Execution plan' : 'Execution step';
+  const details = [
+    props.kind === 'plan' && typeof props.totalSteps === 'number'
+      ? `${props.totalSteps} step${props.totalSteps === 1 ? '' : 's'}`
+      : null,
+    props.stepType ? props.stepType.toUpperCase() : null,
+    props.targetName ?? null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  return (
+    <div className={generativeStyles.card(theme, 'default')}>
+      <div className={generativeStyles.cardTitle(theme)}>{label}</div>
+      <StatusComponent
+        props={{
+          status: mapExecutionStatusToVisualState(props.status),
+          message: props.summary,
+          details,
+        }}
+      />
+    </div>
+  );
+};
+
+function formatUsageDateLabel(timestamp: string): string {
+  const parsed = new Date(timestamp);
+  if (Number.isNaN(parsed.getTime())) {
+    return timestamp;
+  }
+
+  return parsed.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+}
+
+function buildTrendPolyline(
+  values: number[],
+  width: number,
+  height: number,
+  padding: number,
+): string {
+  if (values.length === 0) {
+    return '';
+  }
+
+  const maxValue = Math.max(...values, 1);
+  const minValue = Math.min(...values, 0);
+  const range = Math.max(maxValue - minValue, 1);
+
+  return values
+    .map((value, index) => {
+      const x =
+        values.length === 1
+          ? width / 2
+          : padding + (index * (width - padding * 2)) / (values.length - 1);
+      const y = height - padding - ((value - minValue) / range) * (height - padding * 2);
+      return `${x},${y}`;
+    })
+    .join(' ');
+}
+
+const TrendChart: React.FC<{
+  label: string;
+  color: string;
+  values: number[];
+  ticks: string[];
+}> = ({ label, color, values, ticks }) => {
+  const width = 320;
+  const height = 160;
+  const padding = 20;
+  const points = buildTrendPolyline(values, width, height, padding);
+
+  return (
+    <div>
+      <div style={{ marginBottom: 8, fontWeight: 600, letterSpacing: '-0.01em' }}>{label}</div>
+      <div
+        data-testid={`usage-statistics-${label.toLowerCase().replace(/\s+/g, '-')}-panel`}
+        style={{
+          borderRadius: 18,
+          background: color ? 'transparent' : 'transparent',
+          padding: 14,
+          border: '1px solid rgba(148, 163, 184, 0.18)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+        }}
+      >
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          width="100%"
+          height="160"
+          role="img"
+          aria-label={label}
+        >
+          <line
+            x1={padding}
+            y1={height - padding}
+            x2={width - padding}
+            y2={height - padding}
+            stroke="currentColor"
+            opacity="0.2"
+          />
+          <line
+            x1={padding}
+            y1={padding}
+            x2={padding}
+            y2={height - padding}
+            stroke="currentColor"
+            opacity="0.2"
+          />
+          {points ? (
+            <polyline
+              fill="none"
+              stroke={color}
+              strokeWidth="3"
+              points={points}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          ) : null}
+        </svg>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: 8,
+            color: 'inherit',
+            fontSize: '0.75rem',
+            opacity: 0.75,
+          }}
+        >
+          {ticks.map((tick) => (
+            <span key={tick}>{tick}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const UsageStatisticsCardComponent: React.FC<{
+  props: UsageStatisticsCardComponentProps;
+}> = ({ props }) => {
+  const theme = useTheme();
+  const ticks = props.trendPoints.map((point) => formatUsageDateLabel(point.timestamp));
+  const pvValues = props.trendPoints.map((point) => point.pv);
+  const uvValues = props.trendPoints.map((point) => point.uv);
+  const isDarkMode = theme.palette.mode === 'dark';
+  const shellBackground = isDarkMode
+    ? `linear-gradient(180deg, ${theme.palette.background.paper} 0%, rgba(15, 23, 42, 0.88) 100%)`
+    : `linear-gradient(180deg, ${theme.palette.common.white} 0%, ${theme.palette.grey[50]} 100%)`;
+  const shellBorder = isDarkMode ? 'rgba(148, 163, 184, 0.18)' : 'rgba(148, 163, 184, 0.22)';
+  const tileBackground = isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.86)';
+  const chartBackground = isDarkMode ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.02)';
+
+  return (
+    <div
+      data-testid="usage-statistics-card"
+      className={generativeStyles.card(theme, 'default')}
+      style={{
+        borderRadius: 24,
+        background: shellBackground,
+        border: `1px solid ${shellBorder}`,
+        boxShadow: isDarkMode
+          ? '0 18px 44px -28px rgba(15, 23, 42, 0.75)'
+          : '0 20px 48px -30px rgba(15, 23, 42, 0.24)',
+      }}
+    >
+      <div
+        className={generativeStyles.cardTitle(theme)}
+        style={{ marginBottom: theme.spacing(0.75), fontSize: '1rem', letterSpacing: '-0.02em' }}
+      >
+        {props.appLabel}
+      </div>
+      <div
+        style={{
+          marginBottom: theme.spacing(2),
+          color: theme.palette.text.secondary,
+          fontSize: '0.875rem',
+        }}
+      >
+        {formatUsageDateLabel(props.startTime)} - {formatUsageDateLabel(props.endTime)}
+      </div>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+          gap: theme.spacing(1.5),
+          marginBottom: theme.spacing(2),
+        }}
+      >
+        <div
+          data-testid="usage-statistics-pv-tile"
+          style={{
+            padding: theme.spacing(1.75),
+            borderRadius: 18,
+            background: tileBackground,
+            border: `1px solid ${shellBorder}`,
+            boxShadow: isDarkMode
+              ? 'inset 0 1px 0 rgba(255,255,255,0.04)'
+              : '0 10px 24px -24px rgba(15,23,42,0.28)',
+          }}
+        >
+          <div
+            style={{
+              color: theme.palette.text.secondary,
+              fontSize: '0.75rem',
+              textTransform: 'uppercase',
+            }}
+          >
+            PV
+          </div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 700, letterSpacing: '-0.03em' }}>
+            {props.pv.toLocaleString()}
+          </div>
+        </div>
+        <div
+          data-testid="usage-statistics-uv-tile"
+          style={{
+            padding: theme.spacing(1.75),
+            borderRadius: 18,
+            background: tileBackground,
+            border: `1px solid ${shellBorder}`,
+            boxShadow: isDarkMode
+              ? 'inset 0 1px 0 rgba(255,255,255,0.04)'
+              : '0 10px 24px -24px rgba(15,23,42,0.28)',
+          }}
+        >
+          <div
+            style={{
+              color: theme.palette.text.secondary,
+              fontSize: '0.75rem',
+              textTransform: 'uppercase',
+            }}
+          >
+            UV
+          </div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 700, letterSpacing: '-0.03em' }}>
+            {props.uv.toLocaleString()}
+          </div>
+        </div>
+      </div>
+      <div
+        style={{
+          display: 'grid',
+          gap: theme.spacing(2),
+          borderRadius: 20,
+          background: chartBackground,
+          border: `1px solid ${shellBorder}`,
+          padding: theme.spacing(1.5),
+        }}
+      >
+        <TrendChart
+          label="PV Trend"
+          color={theme.palette.primary.main}
+          values={pvValues}
+          ticks={ticks}
+        />
+        <TrendChart
+          label="UV Trend"
+          color={theme.palette.success.main}
+          values={uvValues}
+          ticks={ticks}
+        />
+      </div>
+    </div>
+  );
+};
+
 export const ErrorComponent: React.FC<{ props: ErrorComponentProps }> = ({ props }) => {
   const theme = useTheme();
   const { title, message, code, retryable, onRetry } = props;
@@ -359,6 +654,18 @@ export const defaultGenerativeComponents: GenerativeComponentEntry[] = [
     }>,
   },
   {
+    name: 'ExecutionPlanStatus',
+    component: ExecutionPlanStatusComponent as unknown as React.ComponentType<{
+      props: Record<string, unknown>;
+    }>,
+  },
+  {
+    name: 'UsageStatisticsCard',
+    component: UsageStatisticsCardComponent as unknown as React.ComponentType<{
+      props: Record<string, unknown>;
+    }>,
+  },
+  {
     name: 'Error',
     component: ErrorComponent as unknown as React.ComponentType<{ props: Record<string, unknown> }>,
   },
@@ -367,5 +674,7 @@ export const defaultGenerativeComponents: GenerativeComponentEntry[] = [
     component: FormComponent as unknown as React.ComponentType<{ props: Record<string, unknown> }>,
   },
 ];
+
+export const DEFAULT_GENERATIVE_COMPONENTS = defaultGenerativeComponents;
 
 export default GenerativeUIProvider;
