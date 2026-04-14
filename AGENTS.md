@@ -143,3 +143,37 @@ cd services/backend && npm run dev
 
 - `apps/container` and `apps/tile` are **templates** for creating new MFE apps. Copy and rename to scaffold new business tiles/containers.
 - `apps/mf_container` and `apps/mf_tile` are Module Federation variants (simpler setup, no SystemJS).
+
+## Workspace Documentation
+
+Each workspace has unified context docs under its `docs/` directory:
+
+| Workspace                            | PROJECT.md                                                    | ARCHITECTURE.md                                                 | RULES.md                                                  |
+| ------------------------------------ | ------------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------- |
+| **Apps**                             |                                                               |                                                                 |                                                           |
+| `apps/root-config`                   | [PROJECT](apps/root-config/docs/PROJECT.md)                   | [ARCH](apps/root-config/docs/ARCHITECTURE.md)                   | [RULES](apps/root-config/docs/RULES.md)                   |
+| `apps/base`                          | [PROJECT](apps/base/docs/PROJECT.md)                          | [ARCH](apps/base/docs/ARCHITECTURE.md)                          | [RULES](apps/base/docs/RULES.md)                          |
+| `apps/container`                     | [PROJECT](apps/container/docs/PROJECT.md)                     | [ARCH](apps/container/docs/ARCHITECTURE.md)                     | [RULES](apps/container/docs/RULES.md)                     |
+| `apps/tile`                          | [PROJECT](apps/tile/docs/PROJECT.md)                          | [ARCH](apps/tile/docs/ARCHITECTURE.md)                          | [RULES](apps/tile/docs/RULES.md)                          |
+| `apps/mf_container`                  | [PROJECT](apps/mf_container/docs/PROJECT.md)                  | [ARCH](apps/mf_container/docs/ARCHITECTURE.md)                  | [RULES](apps/mf_container/docs/RULES.md)                  |
+| `apps/mf_tile`                       | [PROJECT](apps/mf_tile/docs/PROJECT.md)                       | [ARCH](apps/mf_tile/docs/ARCHITECTURE.md)                       | [RULES](apps/mf_tile/docs/RULES.md)                       |
+| **Packages**                         |                                                               |                                                                 |                                                           |
+| `packages/mf_lib`                    | [PROJECT](packages/mf_lib/docs/PROJECT.md)                    | [ARCH](packages/mf_lib/docs/ARCHITECTURE.md)                    | [RULES](packages/mf_lib/docs/RULES.md)                    |
+| `packages/ratan-design`              | [PROJECT](packages/ratan-design/docs/PROJECT.md)              | [ARCH](packages/ratan-design/docs/ARCHITECTURE.md)              | [RULES](packages/ratan-design/docs/RULES.md)              |
+| `packages/fdc3-agent`                | [PROJECT](packages/fdc3-agent/docs/PROJECT.md)                | [ARCH](packages/fdc3-agent/docs/ARCHITECTURE.md)                | [RULES](packages/fdc3-agent/docs/RULES.md)                |
+| `packages/fdc3-app-directory`        | [PROJECT](packages/fdc3-app-directory/docs/PROJECT.md)        | [ARCH](packages/fdc3-app-directory/docs/ARCHITECTURE.md)        | [RULES](packages/fdc3-app-directory/docs/RULES.md)        |
+| `packages/fdc3-broker`               | [PROJECT](packages/fdc3-broker/docs/PROJECT.md)               | [ARCH](packages/fdc3-broker/docs/ARCHITECTURE.md)               | [RULES](packages/fdc3-broker/docs/RULES.md)               |
+| `packages/fdc3-resolver-ui`          | [PROJECT](packages/fdc3-resolver-ui/docs/PROJECT.md)          | [ARCH](packages/fdc3-resolver-ui/docs/ARCHITECTURE.md)          | [RULES](packages/fdc3-resolver-ui/docs/RULES.md)          |
+| **Services**                         |                                                               |                                                                 |                                                           |
+| `services/backend`                   | [PROJECT](services/backend/docs/PROJECT.md)                   | [ARCH](services/backend/docs/ARCHITECTURE.md)                   | [RULES](services/backend/docs/RULES.md)                   |
+| `services/chatbot-backend`           | [PROJECT](services/chatbot-backend/docs/PROJECT.md)           | [ARCH](services/chatbot-backend/docs/ARCHITECTURE.md)           | [RULES](services/chatbot-backend/docs/RULES.md)           |
+| `services/elasticsearch-mcp-service` | [PROJECT](services/elasticsearch-mcp-service/docs/PROJECT.md) | [ARCH](services/elasticsearch-mcp-service/docs/ARCHITECTURE.md) | [RULES](services/elasticsearch-mcp-service/docs/RULES.md) |
+| **Proxy**                            |                                                               |                                                                 |                                                           |
+| `proxy/ws-gateway-server`            | [PROJECT](proxy/ws-gateway-server/docs/PROJECT.md)            | [ARCH](proxy/ws-gateway-server/docs/ARCHITECTURE.md)            | [RULES](proxy/ws-gateway-server/docs/RULES.md)            |
+| `proxy/local-llm-ws-client`          | [PROJECT](proxy/local-llm-ws-client/docs/PROJECT.md)          | [ARCH](proxy/local-llm-ws-client/docs/ARCHITECTURE.md)          | [RULES](proxy/local-llm-ws-client/docs/RULES.md)          |
+
+Each `docs/` directory follows the same structure:
+
+- **PROJECT.md** — Purpose, key features, quick start, environment, dependencies
+- **ARCHITECTURE.md** — Tech stack, directory structure, data flow, build config, testing
+- **RULES.md** — Development conventions, naming, patterns, module format, testing requirements
