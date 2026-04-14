@@ -41,6 +41,21 @@ describe('protocol stream adapter', () => {
     });
   });
 
+  it('maps reasoning and planning frames into assistant parts', () => {
+    const message = applyFrameSequenceToMessage([
+      { type: 'reasoning-summary', text: 'Resolve date, then location.' },
+      { type: 'plan-available', planId: 'plan_1', summary: 'Resolve and summarize weather.' },
+      { type: 'start-step', stepId: 'step_1', title: 'Resolve date' },
+      { type: 'finish-step', stepId: 'step_1', status: 'completed' },
+    ]);
+
+    expect(message.content).toEqual([
+      { type: 'reasoning-summary', text: 'Resolve date, then location.' },
+      { type: 'plan', planId: 'plan_1', summary: 'Resolve and summarize weather.' },
+      { type: 'step', stepId: 'step_1', title: 'Resolve date', status: 'completed' },
+    ]);
+  });
+
   it('keeps separate text parts stable by partId across streamed frames', () => {
     const adapter = createProtocolStreamAdapter();
 

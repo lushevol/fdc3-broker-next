@@ -326,6 +326,42 @@ function updateMessageStatus(
   return current;
 }
 
+function upsertStepPart(
+  content: readonly ProtocolAssistantContentPart[],
+  stepId: string,
+  status: 'running' | 'completed' | 'failed',
+  title?: string,
+  detail?: string,
+): ProtocolAssistantContentPart[] {
+  const nextContent = [...content];
+  const index = nextContent.findIndex(
+    (part) =>
+      (part.type === 'step-start' || part.type === 'step') &&
+      part.stepId === stepId,
+  );
+  const existingPart = index !== -1 ? nextContent[index] : null;
+  const existingTitle =
+    existingPart && (existingPart.type === 'step-start' || existingPart.type === 'step')
+      ? existingPart.title
+      : undefined;
+
+  const nextPart = {
+    type: 'step',
+    stepId,
+    title: title ?? existingTitle ?? stepId,
+    status,
+    ...(detail ? { detail } : {}),
+  } as const;
+
+  if (index === -1) {
+    nextContent.push(nextPart);
+  } else {
+    nextContent[index] = nextPart;
+  }
+
+  return nextContent;
+}
+
 function convertToThreadAssistantPart(part: ProtocolAssistantContentPart): ThreadAssistantMessagePart {
   switch (part.type) {
     case 'text':
@@ -458,6 +494,50 @@ function applyFrame(
   const nextStatus = updateMessageStatus(message.status, frame);
 
   switch (frame.type) {
+    case 'reasoning-summary': {
+      nextContent = [...nextContent, { type: 'reasoning-summary', text: frame.text }];
+      break;
+    }
+    case 'plan-available': {
+      nextContent = [
+        ...nextContent,
+        {
+          type: 'plan',
+          planId: frame.planId,
+          summary: frame.summary,
+        },
+      ];
+      break;
+    }
+    case 'start-step': {
+      nextContent = [
+        ...nextContent,
+        {
+          type: 'step-start',
+          stepId: frame.stepId,
+          title: frame.title,
+        },
+      ];
+      break;
+    }
+    case 'step-status': {
+      nextContent = upsertStepPart(
+        nextContent,
+        frame.stepId,
+        frame.status === 'pending' ? 'running' : frame.status,
+        undefined,
+        frame.detail,
+      );
+      break;
+    }
+    case 'finish-step': {
+      nextContent = upsertStepPart(
+        nextContent,
+        frame.stepId,
+        frame.status ?? 'completed',
+      );
+      break;
+    }
     case 'text-start': {
       nextContent = updateTextContent(nextContent, state.textPartIndexes, frame.partId, '', false);
       break;

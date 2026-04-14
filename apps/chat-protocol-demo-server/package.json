@@ -1,0 +1,27 @@
+{
+  "name": "@fm/chat-protocol-demo-server",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsup src/server.ts --format esm --target es2020 --out-dir dist --clean",
+    "test": "vitest run --reporter=verbose",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@fm/chat-protocol-backend": "0.0.1",
+    "@fm/chat-protocol-contract": "0.0.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^25.0.3",
+    "tsup": "^8.5.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}
