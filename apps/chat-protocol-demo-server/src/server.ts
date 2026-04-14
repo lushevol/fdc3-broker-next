@@ -1,10 +1,10 @@
 import cors from 'cors';
 import express from 'express';
 import type { ChatRunRequest } from '@fm/chat-protocol-contract';
-import { DeterministicWeatherRunService, writeSseFrames } from '@fm/chat-protocol-backend';
+import { DeterministicWeatherDemoRunService, writeSseFrames } from '@fm/chat-protocol-demo-support';
 
 const app = express();
-const service = new DeterministicWeatherRunService();
+const service = new DeterministicWeatherDemoRunService();
 const port = Number.parseInt(process.env.PORT ?? '4111', 10);
 
 app.use(cors());

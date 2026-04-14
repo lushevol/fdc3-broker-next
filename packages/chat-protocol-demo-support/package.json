@@ -1,7 +1,7 @@
 {
-  "name": "@fm/chat-protocol-backend",
+  "name": "@fm/chat-protocol-demo-support",
   "version": "0.0.1",
-  "description": "Backend protocol helpers and deterministic demo flow for chat runs",
+  "description": "Deterministic demo transport helpers for the chat protocol showcase",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

@@ -382,7 +382,7 @@ export class DemoProtocolCardFactory implements ProtocolCardFactory {
   }
 }
 
-export class DeterministicWeatherRunService implements ProtocolRunService {
+export class DeterministicWeatherDemoRunService implements ProtocolRunService {
   async *streamRun(rawRequest: ChatRunRequest): AsyncIterable<ChatStreamFrame> {
     const validation = validateRunRequest(rawRequest);
     if (!validation.success) {

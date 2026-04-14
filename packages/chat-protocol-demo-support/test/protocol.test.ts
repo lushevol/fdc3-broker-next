@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { DeterministicWeatherRunService, serializeSseFrame } from '../src';
+import { DeterministicWeatherDemoRunService, serializeSseFrame } from '../src';
 import type { ChatRunRequest, ChatAssistantMessage } from '@fm/chat-protocol-contract';
 
-describe('DeterministicWeatherRunService', () => {
+describe('DeterministicWeatherDemoRunService', () => {
   it('streams an initial weather flow that pauses for frontend tools', async () => {
-    const service = new DeterministicWeatherRunService();
+    const service = new DeterministicWeatherDemoRunService();
     const request: ChatRunRequest = {
       conversationId: 'conv_demo',
       trigger: 'submit-message',
@@ -42,7 +42,7 @@ describe('DeterministicWeatherRunService', () => {
   });
 
   it('continues a resumed run into weather output and summary text', async () => {
-    const service = new DeterministicWeatherRunService();
+    const service = new DeterministicWeatherDemoRunService();
     const assistantMessage: ChatAssistantMessage = {
       id: 'msg_asst_weather_demo',
       role: 'assistant',

@@ -86,7 +86,7 @@ The protocol is split into three layers:
 packages/
   chat-protocol-contract/
   chat-protocol-frontend/
-  chat-protocol-backend/
+  chat-protocol-demo-support/
 
 apps/
   chat-protocol-demo-web/
@@ -164,7 +164,7 @@ Constraints:
 - no dependency on current `ChatbotSidebar` business logic
 - no FDC3-specific assumptions
 
-### `packages/chat-protocol-backend`
+### LangChain4j Backend Adapter
 
 Purpose:
 
@@ -179,18 +179,30 @@ Responsibilities:
 - map approval requirements into protocol actions
 - support resuming runs after frontend tools or HITL
 
-Exports:
-
-- `ProtocolRunService`
-- `ProtocolFrameEmitter`
-- `ProtocolResumeService`
-- `ProtocolToolAdapter`
-- `ProtocolCardFactory`
-
 Notes:
 
-- if the production implementation remains in Java/Spring, this package can be implemented as a backend module rather than a TS package
+- this adapter belongs in the Java/Spring backend, not in the TS demo packages
 - the logical boundary is the important part
+
+Suggested home:
+
+- `services/chatbot-backend` as a LangChain4j/Spring module that maps LangChain4j planning, tool, approval, and UI directives into protocol frames
+
+### `packages/chat-protocol-demo-support`
+
+Purpose:
+
+- provide deterministic TS helpers used only by the isolated demo server and browser tests
+
+Responsibilities:
+
+- stream a scripted weather scenario over the public protocol
+- keep demo-only fixtures, SSE helpers, and scripted run state out of the LangChain4j adapter boundary
+
+Constraints:
+
+- demo-only
+- not the production backend adapter
 
 ## Canonical Request Model
 
@@ -746,7 +758,7 @@ Proceed with the isolated protocol-first build:
 
 - `chat-protocol-contract`
 - `chat-protocol-frontend`
-- `chat-protocol-backend`
+- `chat-protocol-demo-support`
 - `chat-protocol-demo-web`
 - `chat-protocol-demo-server`
 
