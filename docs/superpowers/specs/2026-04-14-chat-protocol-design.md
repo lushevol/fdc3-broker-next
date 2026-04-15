@@ -500,9 +500,7 @@ This explicitly removes the current “frontend tool shortcut” behavior.
     {
       "id": "msg_user_1",
       "role": "user",
-      "parts": [
-        { "type": "text", "text": "how is the weather in Beijing yesterday?" }
-      ]
+      "parts": [{ "type": "text", "text": "how is the weather in Beijing yesterday?" }]
     },
     {
       "id": "msg_asst_1",

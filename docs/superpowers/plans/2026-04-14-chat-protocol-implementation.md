@@ -13,6 +13,7 @@
 ### Task 1: Scaffold the shared protocol contract package
 
 **Files:**
+
 - Create: `packages/chat-protocol-contract/package.json`
 - Create: `packages/chat-protocol-contract/tsconfig.json`
 - Create: `packages/chat-protocol-contract/tsup.config.ts`
@@ -28,46 +29,46 @@
 - [ ] **Step 1: Write the failing contract validation tests**
 
 ```ts
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 import {
   createWeatherRunRequestFixture,
   createToolPauseFrameFixture,
   validateRunRequest,
   validateStreamFrame,
-} from "../src";
+} from '../src';
 
-describe("chat-protocol-contract validation", () => {
-  it("accepts a valid run request fixture", () => {
+describe('chat-protocol-contract validation', () => {
+  it('accepts a valid run request fixture', () => {
     const result = validateRunRequest(createWeatherRunRequestFixture());
     expect(result.success).toBe(true);
   });
 
-  it("rejects a run request without messages", () => {
+  it('rejects a run request without messages', () => {
     const result = validateRunRequest({
-      conversationId: "conv_1",
-      trigger: "submit-message",
+      conversationId: 'conv_1',
+      trigger: 'submit-message',
       messages: [],
     });
 
     expect(result.success).toBe(false);
-    expect(result.errors[0]).toContain("messages");
+    expect(result.errors[0]).toContain('messages');
   });
 
-  it("accepts a valid tool pause frame fixture", () => {
+  it('accepts a valid tool pause frame fixture', () => {
     const result = validateStreamFrame(createToolPauseFrameFixture());
     expect(result.success).toBe(true);
   });
 
-  it("rejects a finish frame without finishReason", () => {
+  it('rejects a finish frame without finishReason', () => {
     const result = validateStreamFrame({
-      type: "finish",
-      runId: "run_1",
-      conversationId: "conv_1",
+      type: 'finish',
+      runId: 'run_1',
+      conversationId: 'conv_1',
       payload: {},
     });
 
     expect(result.success).toBe(false);
-    expect(result.errors[0]).toContain("finishReason");
+    expect(result.errors[0]).toContain('finishReason');
   });
 });
 ```
@@ -118,11 +119,11 @@ Expected: FAIL with missing workspace files and/or missing exports such as `vali
 
 ```ts
 // packages/chat-protocol-contract/tsup.config.ts
-import { defineConfig } from "tsup";
+import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["esm"],
+  entry: ['src/index.ts'],
+  format: ['esm'],
   dts: true,
   sourcemap: true,
   clean: true,
@@ -133,47 +134,47 @@ export default defineConfig({
 
 ```ts
 // packages/chat-protocol-contract/src/types.ts
-export type ChatRole = "system" | "user" | "assistant";
+export type ChatRole = 'system' | 'user' | 'assistant';
 
-export type ChatFinishReason = "stop" | "tool-calls" | "action-required" | "error";
+export type ChatFinishReason = 'stop' | 'tool-calls' | 'action-required' | 'error';
 
 export type ChatPart =
-  | { type: "text"; text: string }
-  | { type: "reasoning-summary"; text: string }
-  | { type: "plan"; planId: string; summary: string }
-  | { type: "step-start"; stepId: string; title: string }
+  | { type: 'text'; text: string }
+  | { type: 'reasoning-summary'; text: string }
+  | { type: 'plan'; planId: string; summary: string }
+  | { type: 'step-start'; stepId: string; title: string }
   | {
-      type: "tool-call";
+      type: 'tool-call';
       toolCallId: string;
       toolName: string;
-      executionTarget?: "backend" | "frontend";
+      executionTarget?: 'backend' | 'frontend';
       state:
-        | "input-streaming"
-        | "input-available"
-        | "awaiting-frontend"
-        | "awaiting-approval"
-        | "output-available"
-        | "output-error";
+        | 'input-streaming'
+        | 'input-available'
+        | 'awaiting-frontend'
+        | 'awaiting-approval'
+        | 'output-available'
+        | 'output-error';
       input?: Record<string, unknown>;
       output?: unknown;
       errorText?: string;
     }
   | {
-      type: "card";
+      type: 'card';
       cardType: string;
       props: Record<string, unknown>;
     }
   | {
-      type: "action";
+      type: 'action';
       actionId: string;
-      actionType: "tool-approval";
-      status: "pending" | "resolved";
+      actionType: 'tool-approval';
+      status: 'pending' | 'resolved';
       toolCallId: string;
       title: string;
       description: string;
-      options: Array<{ id: "approve" | "reject"; label: string }>;
+      options: Array<{ id: 'approve' | 'reject'; label: string }>;
     }
-  | { type: "error"; message: string };
+  | { type: 'error'; message: string };
 
 export interface ChatMessage {
   id: string;
@@ -185,10 +186,10 @@ export interface ChatMessage {
 export interface ChatRunRequest {
   conversationId?: string;
   runId?: string | null;
-  trigger: "submit-message" | "submit-tool-result" | "submit-action";
+  trigger: 'submit-message' | 'submit-tool-result' | 'submit-action';
   config?: {
     modelName?: string;
-    reasoningVisibility?: "summary";
+    reasoningVisibility?: 'summary';
   };
   context?: {
     workspace?: Record<string, unknown>;
@@ -196,7 +197,7 @@ export interface ChatRunRequest {
       name: string;
       description: string;
       parameters: Record<string, unknown>;
-      interactionMode: "auto" | "approval-required";
+      interactionMode: 'auto' | 'approval-required';
     }>;
   };
   messages: ChatMessage[];
@@ -205,27 +206,27 @@ export interface ChatRunRequest {
 
 export interface ChatStreamFrame {
   type:
-    | "start"
-    | "message-start"
-    | "message-metadata"
-    | "start-step"
-    | "reasoning-summary"
-    | "plan-available"
-    | "step-status"
-    | "finish-step"
-    | "text-start"
-    | "text-delta"
-    | "text-end"
-    | "tool-input-start"
-    | "tool-input-delta"
-    | "tool-input-available"
-    | "tool-output-available"
-    | "tool-output-error"
-    | "ui-part-available"
-    | "action-required"
-    | "action-resolved"
-    | "finish"
-    | "error";
+    | 'start'
+    | 'message-start'
+    | 'message-metadata'
+    | 'start-step'
+    | 'reasoning-summary'
+    | 'plan-available'
+    | 'step-status'
+    | 'finish-step'
+    | 'text-start'
+    | 'text-delta'
+    | 'text-end'
+    | 'tool-input-start'
+    | 'tool-input-delta'
+    | 'tool-input-available'
+    | 'tool-output-available'
+    | 'tool-output-error'
+    | 'ui-part-available'
+    | 'action-required'
+    | 'action-resolved'
+    | 'finish'
+    | 'error';
   runId: string;
   conversationId: string;
   messageId?: string;
@@ -235,13 +236,13 @@ export interface ChatStreamFrame {
 
 ```ts
 // packages/chat-protocol-contract/src/validation.ts
-import { z } from "zod";
-import type { ChatRunRequest, ChatStreamFrame } from "./types";
+import { z } from 'zod';
+import type { ChatRunRequest, ChatStreamFrame } from './types';
 
 const partSchema = z.object({ type: z.string() }).passthrough();
 const messageSchema = z.object({
   id: z.string().min(1),
-  role: z.enum(["system", "user", "assistant"]),
+  role: z.enum(['system', 'user', 'assistant']),
   parts: z.array(partSchema).min(1),
   metadata: z.record(z.unknown()).optional(),
 });
@@ -249,11 +250,11 @@ const messageSchema = z.object({
 const runRequestSchema = z.object({
   conversationId: z.string().optional(),
   runId: z.string().nullable().optional(),
-  trigger: z.enum(["submit-message", "submit-tool-result", "submit-action"]),
+  trigger: z.enum(['submit-message', 'submit-tool-result', 'submit-action']),
   config: z
     .object({
       modelName: z.string().optional(),
-      reasoningVisibility: z.literal("summary").optional(),
+      reasoningVisibility: z.literal('summary').optional(),
     })
     .optional(),
   context: z.record(z.unknown()).optional(),
@@ -270,22 +271,26 @@ const streamFrameSchema = z
     payload: z.record(z.unknown()).optional(),
   })
   .superRefine((value, ctx) => {
-    if (value.type === "finish" && value.payload?.finishReason == null) {
+    if (value.type === 'finish' && value.payload?.finishReason == null) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "finish payload.finishReason is required",
+        message: 'finish payload.finishReason is required',
       });
     }
   });
 
-export function validateRunRequest(input: unknown): { success: true; data: ChatRunRequest } | { success: false; errors: string[] } {
+export function validateRunRequest(
+  input: unknown,
+): { success: true; data: ChatRunRequest } | { success: false; errors: string[] } {
   const result = runRequestSchema.safeParse(input);
   return result.success
     ? { success: true, data: result.data as ChatRunRequest }
     : { success: false, errors: result.error.issues.map((issue) => issue.message) };
 }
 
-export function validateStreamFrame(input: unknown): { success: true; data: ChatStreamFrame } | { success: false; errors: string[] } {
+export function validateStreamFrame(
+  input: unknown,
+): { success: true; data: ChatStreamFrame } | { success: false; errors: string[] } {
   const result = streamFrameSchema.safeParse(input);
   return result.success
     ? { success: true, data: result.data as ChatStreamFrame }
@@ -297,19 +302,19 @@ export function validateStreamFrame(input: unknown): { success: true; data: Chat
 
 ```ts
 // packages/chat-protocol-contract/src/fixtures.ts
-import type { ChatRunRequest, ChatStreamFrame } from "./types";
+import type { ChatRunRequest, ChatStreamFrame } from './types';
 
 export function createWeatherRunRequestFixture(): ChatRunRequest {
   return {
-    conversationId: "conv_weather_demo",
+    conversationId: 'conv_weather_demo',
     runId: null,
-    trigger: "submit-message",
-    config: { modelName: "demo/weather", reasoningVisibility: "summary" },
+    trigger: 'submit-message',
+    config: { modelName: 'demo/weather', reasoningVisibility: 'summary' },
     messages: [
       {
-        id: "msg_user_weather",
-        role: "user",
-        parts: [{ type: "text", text: "how is the weather in Beijing yesterday?" }],
+        id: 'msg_user_weather',
+        role: 'user',
+        parts: [{ type: 'text', text: 'how is the weather in Beijing yesterday?' }],
       },
     ],
   };
@@ -317,12 +322,12 @@ export function createWeatherRunRequestFixture(): ChatRunRequest {
 
 export function createToolPauseFrameFixture(): ChatStreamFrame {
   return {
-    type: "finish",
-    runId: "run_weather_demo",
-    conversationId: "conv_weather_demo",
-    messageId: "msg_asst_weather",
+    type: 'finish',
+    runId: 'run_weather_demo',
+    conversationId: 'conv_weather_demo',
+    messageId: 'msg_asst_weather',
     payload: {
-      finishReason: "tool-calls",
+      finishReason: 'tool-calls',
     },
   };
 }
@@ -330,9 +335,9 @@ export function createToolPauseFrameFixture(): ChatStreamFrame {
 
 ```ts
 // packages/chat-protocol-contract/src/index.ts
-export * from "./types";
-export * from "./validation";
-export * from "./fixtures";
+export * from './types';
+export * from './validation';
+export * from './fixtures';
 ```
 
 - [ ] **Step 6: Run tests to verify the package passes**
@@ -351,6 +356,7 @@ git commit -m "feat: add standalone chat protocol contract package"
 ### Task 2: Build the frontend protocol runtime package
 
 **Files:**
+
 - Create: `packages/chat-protocol-frontend/package.json`
 - Create: `packages/chat-protocol-frontend/tsconfig.json`
 - Create: `packages/chat-protocol-frontend/tsup.config.ts`
@@ -366,47 +372,53 @@ git commit -m "feat: add standalone chat protocol contract package"
 - [ ] **Step 1: Write the failing frontend stream adapter tests**
 
 ```tsx
-import { describe, expect, it } from "vitest";
-import { applyFrameSequenceToMessage } from "../src/runtime/createProtocolStreamAdapter";
+import { describe, expect, it } from 'vitest';
+import { applyFrameSequenceToMessage } from '../src/runtime/createProtocolStreamAdapter';
 
-describe("protocol frontend stream adapter", () => {
-  it("builds assistant text from text delta frames", () => {
-    const message = applyFrameSequenceToMessage([], [
-      { type: "message-start", runId: "run_1", conversationId: "conv_1", messageId: "msg_1" },
-      { type: "text-start", runId: "run_1", conversationId: "conv_1", messageId: "msg_1" },
-      {
-        type: "text-delta",
-        runId: "run_1",
-        conversationId: "conv_1",
-        messageId: "msg_1",
-        payload: { text: "Hello" },
-      },
-    ]);
+describe('protocol frontend stream adapter', () => {
+  it('builds assistant text from text delta frames', () => {
+    const message = applyFrameSequenceToMessage(
+      [],
+      [
+        { type: 'message-start', runId: 'run_1', conversationId: 'conv_1', messageId: 'msg_1' },
+        { type: 'text-start', runId: 'run_1', conversationId: 'conv_1', messageId: 'msg_1' },
+        {
+          type: 'text-delta',
+          runId: 'run_1',
+          conversationId: 'conv_1',
+          messageId: 'msg_1',
+          payload: { text: 'Hello' },
+        },
+      ],
+    );
 
-    expect(message[0]?.parts).toEqual([{ type: "text", text: "Hello" }]);
+    expect(message[0]?.parts).toEqual([{ type: 'text', text: 'Hello' }]);
   });
 
-  it("records tool pauses as tool-call parts", () => {
-    const message = applyFrameSequenceToMessage([], [
-      { type: "message-start", runId: "run_1", conversationId: "conv_1", messageId: "msg_1" },
-      {
-        type: "tool-input-available",
-        runId: "run_1",
-        conversationId: "conv_1",
-        messageId: "msg_1",
-        payload: {
-          toolCallId: "tc_1",
-          toolName: "location.resolve",
-          executionTarget: "frontend",
-          input: { query: "Beijing" },
+  it('records tool pauses as tool-call parts', () => {
+    const message = applyFrameSequenceToMessage(
+      [],
+      [
+        { type: 'message-start', runId: 'run_1', conversationId: 'conv_1', messageId: 'msg_1' },
+        {
+          type: 'tool-input-available',
+          runId: 'run_1',
+          conversationId: 'conv_1',
+          messageId: 'msg_1',
+          payload: {
+            toolCallId: 'tc_1',
+            toolName: 'location.resolve',
+            executionTarget: 'frontend',
+            input: { query: 'Beijing' },
+          },
         },
-      },
-    ]);
+      ],
+    );
 
     expect(message[0]?.parts[0]).toMatchObject({
-      type: "tool-call",
-      toolCallId: "tc_1",
-      toolName: "location.resolve",
+      type: 'tool-call',
+      toolCallId: 'tc_1',
+      toolName: 'location.resolve',
     });
   });
 });
@@ -466,11 +478,11 @@ Expected: FAIL with missing workspace files or missing `applyFrameSequenceToMess
 
 ```ts
 // packages/chat-protocol-frontend/src/runtime/createProtocolStreamAdapter.ts
-import type { ChatMessage, ChatPart, ChatStreamFrame } from "@fm/chat-protocol-contract";
+import type { ChatMessage, ChatPart, ChatStreamFrame } from '@fm/chat-protocol-contract';
 
 function ensureAssistantMessage(messages: ChatMessage[], messageId: string): ChatMessage[] {
   if (messages.some((message) => message.id === messageId)) return messages;
-  return [...messages, { id: messageId, role: "assistant", parts: [] }];
+  return [...messages, { id: messageId, role: 'assistant', parts: [] }];
 }
 
 export function applyFrameSequenceToMessage(
@@ -487,40 +499,44 @@ export function applyFrameSequenceToMessage(
 
     let nextParts: ChatPart[] = current.parts;
 
-    if (frame.type === "text-delta") {
-      const delta = String(frame.payload?.text ?? "");
+    if (frame.type === 'text-delta') {
+      const delta = String(frame.payload?.text ?? '');
       const previous = nextParts[nextParts.length - 1];
-      if (previous?.type === "text") {
-        nextParts = [...nextParts.slice(0, -1), { type: "text", text: previous.text + delta }];
+      if (previous?.type === 'text') {
+        nextParts = [...nextParts.slice(0, -1), { type: 'text', text: previous.text + delta }];
       } else {
-        nextParts = [...nextParts, { type: "text", text: delta }];
+        nextParts = [...nextParts, { type: 'text', text: delta }];
       }
     }
 
-    if (frame.type === "reasoning-summary") {
-      nextParts = [...nextParts, { type: "reasoning-summary", text: String(frame.payload?.text ?? "") }];
+    if (frame.type === 'reasoning-summary') {
+      nextParts = [
+        ...nextParts,
+        { type: 'reasoning-summary', text: String(frame.payload?.text ?? '') },
+      ];
     }
 
-    if (frame.type === "tool-input-available") {
+    if (frame.type === 'tool-input-available') {
       nextParts = [
         ...nextParts,
         {
-          type: "tool-call",
-          toolCallId: String(frame.payload?.toolCallId ?? ""),
-          toolName: String(frame.payload?.toolName ?? ""),
-          executionTarget: (frame.payload?.executionTarget as "backend" | "frontend" | undefined) ?? "backend",
-          state: "input-available",
+          type: 'tool-call',
+          toolCallId: String(frame.payload?.toolCallId ?? ''),
+          toolName: String(frame.payload?.toolName ?? ''),
+          executionTarget:
+            (frame.payload?.executionTarget as 'backend' | 'frontend' | undefined) ?? 'backend',
+          state: 'input-available',
           input: (frame.payload?.input as Record<string, unknown> | undefined) ?? {},
         },
       ];
     }
 
-    if (frame.type === "ui-part-available") {
+    if (frame.type === 'ui-part-available') {
       nextParts = [
         ...nextParts,
         {
-          type: "card",
-          cardType: String(frame.payload?.cardType ?? "unknown-card"),
+          type: 'card',
+          cardType: String(frame.payload?.cardType ?? 'unknown-card'),
           props: (frame.payload?.props as Record<string, unknown> | undefined) ?? {},
         },
       ];
@@ -537,12 +553,12 @@ export function applyFrameSequenceToMessage(
 
 ```ts
 // packages/chat-protocol-frontend/src/runtime/resume.ts
-import type { ChatMessage } from "@fm/chat-protocol-contract";
+import type { ChatMessage } from '@fm/chat-protocol-contract';
 
 export interface ResumeRequest {
   conversationId: string;
   runId: string;
-  trigger: "submit-tool-result" | "submit-action";
+  trigger: 'submit-tool-result' | 'submit-action';
   messages: ChatMessage[];
 }
 
@@ -554,7 +570,7 @@ export function buildToolResumeRequest(args: {
   return {
     conversationId: args.conversationId,
     runId: args.runId,
-    trigger: "submit-tool-result",
+    trigger: 'submit-tool-result',
     messages: args.messages,
   };
 }
@@ -562,18 +578,18 @@ export function buildToolResumeRequest(args: {
 
 ```tsx
 // packages/chat-protocol-frontend/src/render/ProtocolMessageRenderer.tsx
-import type { ChatMessage } from "@fm/chat-protocol-contract";
-import React from "react";
+import type { ChatMessage } from '@fm/chat-protocol-contract';
+import React from 'react';
 
 export function ProtocolMessageRenderer({ message }: { message: ChatMessage }): JSX.Element {
   return (
     <div data-testid={`message-${message.id}`}>
       {message.parts.map((part, index) => {
-        if (part.type === "text") return <p key={index}>{part.text}</p>;
-        if (part.type === "reasoning-summary") return <div key={index}>Thinking: {part.text}</div>;
-        if (part.type === "card") return <div key={index}>{part.cardType}</div>;
-        if (part.type === "tool-call") return <div key={index}>{part.toolName}</div>;
-        if (part.type === "action") return <div key={index}>{part.title}</div>;
+        if (part.type === 'text') return <p key={index}>{part.text}</p>;
+        if (part.type === 'reasoning-summary') return <div key={index}>Thinking: {part.text}</div>;
+        if (part.type === 'card') return <div key={index}>{part.cardType}</div>;
+        if (part.type === 'tool-call') return <div key={index}>{part.toolName}</div>;
+        if (part.type === 'action') return <div key={index}>{part.title}</div>;
         return <div key={index}>{part.type}</div>;
       })}
     </div>
@@ -597,6 +613,7 @@ git commit -m "feat: add standalone chat protocol frontend runtime"
 ### Task 3: Build the demo server with deterministic SSE scenarios
 
 **Files:**
+
 - Create: `apps/chat-protocol-demo-server/package.json`
 - Create: `apps/chat-protocol-demo-server/tsconfig.json`
 - Create: `apps/chat-protocol-demo-server/src/server.ts`
@@ -609,14 +626,14 @@ git commit -m "feat: add standalone chat protocol frontend runtime"
 - [ ] **Step 1: Write the failing demo server scenario test**
 
 ```ts
-import { describe, expect, it } from "vitest";
-import { createWeatherFrontendLocationFrames } from "../src/scenarios/weatherFrontendLocation";
+import { describe, expect, it } from 'vitest';
+import { createWeatherFrontendLocationFrames } from '../src/scenarios/weatherFrontendLocation';
 
-describe("chat protocol demo server scenarios", () => {
-  it("emits a tool-calls finish reason for the frontend location scenario", () => {
+describe('chat protocol demo server scenarios', () => {
+  it('emits a tool-calls finish reason for the frontend location scenario', () => {
     const frames = createWeatherFrontendLocationFrames();
-    expect(frames.at(-1)?.type).toBe("finish");
-    expect(frames.at(-1)?.payload?.finishReason).toBe("tool-calls");
+    expect(frames.at(-1)?.type).toBe('finish');
+    expect(frames.at(-1)?.payload?.finishReason).toBe('tool-calls');
   });
 });
 ```
@@ -660,42 +677,42 @@ Expected: FAIL with missing scenario implementation.
 
 ```ts
 // apps/chat-protocol-demo-server/src/scenarios/weatherFrontendLocation.ts
-import type { ChatStreamFrame } from "@fm/chat-protocol-contract";
+import type { ChatStreamFrame } from '@fm/chat-protocol-contract';
 
 export function createWeatherFrontendLocationFrames(): ChatStreamFrame[] {
   return [
-    { type: "start", runId: "run_weather_frontend", conversationId: "conv_weather_frontend" },
+    { type: 'start', runId: 'run_weather_frontend', conversationId: 'conv_weather_frontend' },
     {
-      type: "message-start",
-      runId: "run_weather_frontend",
-      conversationId: "conv_weather_frontend",
-      messageId: "msg_asst_weather_frontend",
+      type: 'message-start',
+      runId: 'run_weather_frontend',
+      conversationId: 'conv_weather_frontend',
+      messageId: 'msg_asst_weather_frontend',
     },
     {
-      type: "reasoning-summary",
-      runId: "run_weather_frontend",
-      conversationId: "conv_weather_frontend",
-      messageId: "msg_asst_weather_frontend",
-      payload: { text: "I need the date first, then the location, then the weather." },
+      type: 'reasoning-summary',
+      runId: 'run_weather_frontend',
+      conversationId: 'conv_weather_frontend',
+      messageId: 'msg_asst_weather_frontend',
+      payload: { text: 'I need the date first, then the location, then the weather.' },
     },
     {
-      type: "tool-input-available",
-      runId: "run_weather_frontend",
-      conversationId: "conv_weather_frontend",
-      messageId: "msg_asst_weather_frontend",
+      type: 'tool-input-available',
+      runId: 'run_weather_frontend',
+      conversationId: 'conv_weather_frontend',
+      messageId: 'msg_asst_weather_frontend',
       payload: {
-        toolCallId: "tc_frontend_location",
-        toolName: "location.resolve",
-        executionTarget: "frontend",
-        input: { query: "Beijing" },
+        toolCallId: 'tc_frontend_location',
+        toolName: 'location.resolve',
+        executionTarget: 'frontend',
+        input: { query: 'Beijing' },
       },
     },
     {
-      type: "finish",
-      runId: "run_weather_frontend",
-      conversationId: "conv_weather_frontend",
-      messageId: "msg_asst_weather_frontend",
-      payload: { finishReason: "tool-calls" },
+      type: 'finish',
+      runId: 'run_weather_frontend',
+      conversationId: 'conv_weather_frontend',
+      messageId: 'msg_asst_weather_frontend',
+      payload: { finishReason: 'tool-calls' },
     },
   ];
 }
@@ -703,34 +720,34 @@ export function createWeatherFrontendLocationFrames(): ChatStreamFrame[] {
 
 ```ts
 // apps/chat-protocol-demo-server/src/scenarios/approvalRequired.ts
-import type { ChatStreamFrame } from "@fm/chat-protocol-contract";
+import type { ChatStreamFrame } from '@fm/chat-protocol-contract';
 
 export function createApprovalRequiredFrames(): ChatStreamFrame[] {
   return [
-    { type: "start", runId: "run_approval", conversationId: "conv_approval" },
+    { type: 'start', runId: 'run_approval', conversationId: 'conv_approval' },
     {
-      type: "message-start",
-      runId: "run_approval",
-      conversationId: "conv_approval",
-      messageId: "msg_asst_approval",
+      type: 'message-start',
+      runId: 'run_approval',
+      conversationId: 'conv_approval',
+      messageId: 'msg_asst_approval',
     },
     {
-      type: "action-required",
-      runId: "run_approval",
-      conversationId: "conv_approval",
-      messageId: "msg_asst_approval",
+      type: 'action-required',
+      runId: 'run_approval',
+      conversationId: 'conv_approval',
+      messageId: 'msg_asst_approval',
       payload: {
-        actionId: "act_approve_trade",
-        title: "Approve tool execution",
-        description: "This tool performs a side-effecting action.",
+        actionId: 'act_approve_trade',
+        title: 'Approve tool execution',
+        description: 'This tool performs a side-effecting action.',
       },
     },
     {
-      type: "finish",
-      runId: "run_approval",
-      conversationId: "conv_approval",
-      messageId: "msg_asst_approval",
-      payload: { finishReason: "action-required" },
+      type: 'finish',
+      runId: 'run_approval',
+      conversationId: 'conv_approval',
+      messageId: 'msg_asst_approval',
+      payload: { finishReason: 'action-required' },
     },
   ];
 }
@@ -740,10 +757,10 @@ export function createApprovalRequiredFrames(): ChatStreamFrame[] {
 
 ```ts
 // apps/chat-protocol-demo-server/src/server.ts
-import express from "express";
-import cors from "cors";
-import { createWeatherFrontendLocationFrames } from "./scenarios/weatherFrontendLocation";
-import { createApprovalRequiredFrames } from "./scenarios/approvalRequired";
+import express from 'express';
+import cors from 'cors';
+import { createWeatherFrontendLocationFrames } from './scenarios/weatherFrontendLocation';
+import { createApprovalRequiredFrames } from './scenarios/approvalRequired';
 
 const app = express();
 app.use(cors());
@@ -753,14 +770,14 @@ function writeFrame(res: express.Response, frame: unknown) {
   res.write(`data: ${JSON.stringify(frame)}\n\n`);
 }
 
-app.post("/api/chat/runs", (req, res) => {
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
+app.post('/api/chat/runs', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
 
-  const scenario = req.query.scenario ?? "weather-frontend-location";
+  const scenario = req.query.scenario ?? 'weather-frontend-location';
   const frames =
-    scenario === "approval-required"
+    scenario === 'approval-required'
       ? createApprovalRequiredFrames()
       : createWeatherFrontendLocationFrames();
 
@@ -768,12 +785,12 @@ app.post("/api/chat/runs", (req, res) => {
   res.end();
 });
 
-app.post("/api/chat/runs/:runId/actions/:actionId", (_req, res) => {
+app.post('/api/chat/runs/:runId/actions/:actionId', (_req, res) => {
   res.json({ ok: true });
 });
 
 app.listen(4111, () => {
-  console.log("chat protocol demo server listening on http://localhost:4111");
+  console.log('chat protocol demo server listening on http://localhost:4111');
 });
 ```
 
@@ -799,6 +816,7 @@ git commit -m "feat: add deterministic chat protocol demo server"
 ### Task 4: Build the minimal demo web app
 
 **Files:**
+
 - Create: `apps/chat-protocol-demo-web/package.json`
 - Create: `apps/chat-protocol-demo-web/tsconfig.json`
 - Create: `apps/chat-protocol-demo-web/vite.config.ts`
@@ -813,14 +831,14 @@ git commit -m "feat: add deterministic chat protocol demo server"
 - [ ] **Step 1: Write the failing demo web test**
 
 ```tsx
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
-import App from "./App";
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+import App from './App';
 
-describe("chat protocol demo web", () => {
-  it("renders the protocol demo heading", () => {
+describe('chat protocol demo web', () => {
+  it('renders the protocol demo heading', () => {
     render(<App />);
-    expect(screen.getByText("Chat Protocol Demo")).toBeInTheDocument();
+    expect(screen.getByText('Chat Protocol Demo')).toBeInTheDocument();
   });
 });
 ```
@@ -869,13 +887,16 @@ Expected: FAIL with missing app files or missing heading.
 
 ```tsx
 // apps/chat-protocol-demo-web/src/App.tsx
-import React from "react";
+import React from 'react';
 
 export default function App(): JSX.Element {
   return (
-    <main style={{ padding: 24, fontFamily: "sans-serif" }}>
+    <main style={{ padding: 24, fontFamily: 'sans-serif' }}>
       <h1>Chat Protocol Demo</h1>
-      <p>Use this app to verify structured chat protocol streaming, tool pauses, cards, and approvals.</p>
+      <p>
+        Use this app to verify structured chat protocol streaming, tool pauses, cards, and
+        approvals.
+      </p>
       <button type="button">Run Weather Frontend Tool Scenario</button>
       <button type="button">Run Approval Scenario</button>
       <section aria-label="thread-output" />
@@ -886,7 +907,7 @@ export default function App(): JSX.Element {
 
 ```tsx
 // apps/chat-protocol-demo-web/src/cards/WeatherSummaryCard.tsx
-import React from "react";
+import React from 'react';
 
 export function WeatherSummaryCard(props: {
   location: string;
@@ -912,11 +933,11 @@ export function WeatherSummaryCard(props: {
 
 ```tsx
 // apps/chat-protocol-demo-web/src/main.tsx
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
@@ -926,17 +947,17 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 Add a small fetch helper in `App.tsx`:
 
 ```tsx
-async function runScenario(scenario: "weather-frontend-location" | "approval-required") {
+async function runScenario(scenario: 'weather-frontend-location' | 'approval-required') {
   const response = await fetch(`http://localhost:4111/api/chat/runs?scenario=${scenario}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      trigger: "submit-message",
+      trigger: 'submit-message',
       messages: [
         {
-          id: "msg_user_demo",
-          role: "user",
-          parts: [{ type: "text", text: "demo message" }],
+          id: 'msg_user_demo',
+          role: 'user',
+          parts: [{ type: 'text', text: 'demo message' }],
         },
       ],
     }),
@@ -968,6 +989,7 @@ git commit -m "feat: add standalone chat protocol demo web app"
 ### Task 5: Build the backend adapter package boundary
 
 **Files:**
+
 - Create: `packages/chat-protocol-backend/package.json`
 - Create: `packages/chat-protocol-backend/README.md`
 - Create: `packages/chat-protocol-backend/src/index.ts`
@@ -979,14 +1001,14 @@ git commit -m "feat: add standalone chat protocol demo web app"
 - [ ] **Step 1: Write the failing backend adapter test**
 
 ```ts
-import { describe, expect, it } from "vitest";
-import { ProtocolFrameEmitter } from "../src/ProtocolFrameEmitter";
+import { describe, expect, it } from 'vitest';
+import { ProtocolFrameEmitter } from '../src/ProtocolFrameEmitter';
 
-describe("chat protocol backend emitter", () => {
-  it("builds a finish frame with a finish reason", () => {
-    const emitter = new ProtocolFrameEmitter("run_1", "conv_1");
-    const frame = emitter.finish("tool-calls", "msg_asst_1");
-    expect(frame.payload?.finishReason).toBe("tool-calls");
+describe('chat protocol backend emitter', () => {
+  it('builds a finish frame with a finish reason', () => {
+    const emitter = new ProtocolFrameEmitter('run_1', 'conv_1');
+    const frame = emitter.finish('tool-calls', 'msg_asst_1');
+    expect(frame.payload?.finishReason).toBe('tool-calls');
   });
 });
 ```
@@ -1001,18 +1023,21 @@ Expected: FAIL with missing emitter class.
 
 ```ts
 // packages/chat-protocol-backend/src/ProtocolFrameEmitter.ts
-import type { ChatFinishReason, ChatStreamFrame } from "@fm/chat-protocol-contract";
+import type { ChatFinishReason, ChatStreamFrame } from '@fm/chat-protocol-contract';
 
 export class ProtocolFrameEmitter {
-  constructor(private readonly runId: string, private readonly conversationId: string) {}
+  constructor(
+    private readonly runId: string,
+    private readonly conversationId: string,
+  ) {}
 
   start(): ChatStreamFrame {
-    return { type: "start", runId: this.runId, conversationId: this.conversationId };
+    return { type: 'start', runId: this.runId, conversationId: this.conversationId };
   }
 
   finish(finishReason: ChatFinishReason, messageId?: string): ChatStreamFrame {
     return {
-      type: "finish",
+      type: 'finish',
       runId: this.runId,
       conversationId: this.conversationId,
       ...(messageId ? { messageId } : {}),
@@ -1024,7 +1049,7 @@ export class ProtocolFrameEmitter {
 
 ```ts
 // packages/chat-protocol-backend/src/index.ts
-export * from "./ProtocolFrameEmitter";
+export * from './ProtocolFrameEmitter';
 ```
 
 - [ ] **Step 4: Run tests to verify the backend adapter package passes**
@@ -1043,13 +1068,14 @@ git commit -m "feat: add standalone chat protocol backend adapter boundary"
 ### Task 6: Verify the isolated stack end to end and document usage
 
 **Files:**
+
 - Modify: `docs/superpowers/specs/2026-04-14-chat-protocol-design.md`
 - Create: `apps/chat-protocol-demo-web/README.md`
 - Create: `apps/chat-protocol-demo-server/README.md`
 
 - [ ] **Step 1: Add explicit demo run instructions**
 
-```md
+````md
 # Chat Protocol Demo Web
 
 ## Run
@@ -1058,6 +1084,7 @@ git commit -m "feat: add standalone chat protocol backend adapter boundary"
 npm --workspace apps/chat-protocol-demo-server run dev
 npm --workspace apps/chat-protocol-demo-web run dev
 ```
+````
 
 ## Verify
 
@@ -1066,7 +1093,9 @@ npm --workspace apps/chat-protocol-demo-web run dev
 3. Verify the assistant shows reasoning, tool pause, and final card output.
 4. Run the approval scenario.
 5. Verify the assistant pauses for approve/reject and resumes after a decision.
+
 ```
+
 ```
 
 - [ ] **Step 2: Run the focused package and app test suite**
@@ -1093,6 +1122,7 @@ npm --workspace apps/chat-protocol-demo-web run dev
 ```
 
 Expected:
+
 - server prints a localhost URL on port `4111`
 - web app prints a localhost Vite URL
 - weather scenario visibly pauses on frontend tool flow
@@ -1108,6 +1138,7 @@ git commit -m "docs: add chat protocol demo verification guide"
 ### Task 7: Add isolated Playwright E2E coverage for the demo protocol flow
 
 **Files:**
+
 - Create: `tests/e2e/chat-protocol-demo.spec.ts`
 - Modify: `playwright.config.ts`
 - Modify: `package.json`

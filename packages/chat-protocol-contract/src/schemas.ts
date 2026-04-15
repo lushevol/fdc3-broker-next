@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const chatRoleSchema = z.enum(['system', 'user', 'assistant']);
+export const chatRoleSchema = z.enum(['system', 'user', 'assistant', 'tool']);
 export const chatFinishReasonSchema = z.enum(['stop', 'tool-calls', 'action-required', 'error']);
 export const chatToolCallStateSchema = z.enum([
   'input-streaming',
@@ -179,10 +179,22 @@ const chatAssistantMessageSchema = z
   })
   .strict();
 
+const chatToolMessageSchema = z
+  .object({
+    id: z.string().min(1),
+    role: z.literal('tool'),
+    toolCallId: z.string().min(1),
+    toolName: z.string().min(1),
+    parts: z.array(chatToolResultPartSchema).min(1),
+    metadata: z.record(z.unknown()).default({}),
+  })
+  .strict();
+
 export const chatMessageSchema = z.discriminatedUnion('role', [
   chatSystemMessageSchema,
   chatUserMessageSchema,
   chatAssistantMessageSchema,
+  chatToolMessageSchema,
 ]);
 
 export const chatRunConfigSchema = z

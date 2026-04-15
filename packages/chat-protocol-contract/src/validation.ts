@@ -13,7 +13,9 @@ export type ValidationFailure = {
 
 export type ValidationResult<T> = ValidationSuccess<T> | ValidationFailure;
 
-function formatIssues(error: { issues: Array<{ path: Array<string | number>; message: string }> }): string[] {
+function formatIssues(error: {
+  issues: Array<{ path: Array<string | number>; message: string }>;
+}): string[] {
   return error.issues.map((issue) => {
     const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
     return path + ': ' + issue.message;

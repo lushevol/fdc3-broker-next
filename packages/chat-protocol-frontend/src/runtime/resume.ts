@@ -12,14 +12,10 @@ export type ActionResumeRequest = {
   payload?: unknown;
 };
 
-export function createToolCallResumeRequest(
-  input: ToolCallResumeRequest,
-): ToolCallResumeRequest {
+export function createToolCallResumeRequest(input: ToolCallResumeRequest): ToolCallResumeRequest {
   return input;
 }
 
-export function createActionResumeRequest(
-  input: ActionResumeRequest,
-): ActionResumeRequest {
+export function createActionResumeRequest(input: ActionResumeRequest): ActionResumeRequest {
   return input;
 }

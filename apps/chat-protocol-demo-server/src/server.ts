@@ -32,7 +32,9 @@ app.post('/api/chat/runs', async (request, response) => {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown streaming error';
-    response.write(`data: ${JSON.stringify({ type: 'error', message, code: 'demo_stream_failed' })}\n\n`);
+    response.write(
+      `data: ${JSON.stringify({ type: 'error', message, code: 'demo_stream_failed' })}\n\n`,
+    );
   } finally {
     response.end();
   }

@@ -68,7 +68,8 @@ function renderPart(part: ProtocolRenderablePart, cardRegistry: CardRegistry): R
       );
     case 'card': {
       const cardPart = part as ChatCardPart;
-      const Card = cardRegistry[cardPart.cardType] ?? cardRegistry.default ?? defaultCardRegistry.default;
+      const Card =
+        cardRegistry[cardPart.cardType] ?? cardRegistry.default ?? defaultCardRegistry.default;
       return <Card key={cardPart.cardType} card={cardPart} />;
     }
     case 'action': {
@@ -97,7 +98,9 @@ export function ProtocolMessageRenderer({
   message,
   cardRegistry = defaultCardRegistry,
 }: ProtocolRendererProps) {
-  const parts = ('content' in message ? message.content : message.parts) as readonly ProtocolRenderablePart[];
+  const parts = (
+    'content' in message ? message.content : message.parts
+  ) as readonly ProtocolRenderablePart[];
   const rendered = parts.map((part: ProtocolRenderablePart) => renderPart(part, cardRegistry));
   return (
     <section data-message-id={message.id} data-message-role={message.role}>

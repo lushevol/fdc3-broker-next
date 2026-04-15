@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  createWeatherContinuationRunRequestFixture,
   createToolPauseFrameFixture,
   createWeatherRunRequestFixture,
   validateRunRequest,
@@ -22,6 +23,61 @@ describe('chat protocol contract validation', () => {
         text: 'how is the weather in Beijing yesterday?',
       });
     }
+  });
+
+  it('validates continuation requests with assistant and tool history', () => {
+    const result = validateRunRequest({
+      conversationId: 'conv_123',
+      trigger: 'submit-tool-result',
+      messages: [
+        {
+          id: 'msg_user_1',
+          role: 'user',
+          parts: [
+            {
+              type: 'text',
+              text: 'weather in san francisco',
+            },
+          ],
+        },
+        {
+          id: 'msg_assistant_1',
+          role: 'assistant',
+          parts: [
+            {
+              type: 'tool-call',
+              toolCallId: 'call_1',
+              toolName: 'geocode_location',
+              executionTarget: 'backend',
+              state: 'input-available',
+              input: { query: 'San Francisco, CA' },
+            },
+          ],
+        },
+        {
+          id: 'msg_tool_1',
+          role: 'tool',
+          toolCallId: 'call_1',
+          toolName: 'geocode_location',
+          parts: [
+            {
+              type: 'tool-result',
+              toolCallId: 'call_1',
+              output: { latitude: 37.7749, longitude: -122.4194 },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('provides a continuation fixture with assistant and tool history', () => {
+    const request = createWeatherContinuationRunRequestFixture();
+
+    expect(request.messages.some((message) => message.role === 'assistant')).toBe(true);
+    expect(request.messages.some((message) => message.role === 'tool')).toBe(true);
   });
 
   it('rejects an empty message list', () => {

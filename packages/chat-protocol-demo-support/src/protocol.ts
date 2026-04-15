@@ -74,9 +74,7 @@ const LOCATION_FIXTURES: Record<string, Omit<WeatherSnapshot, 'date'>> = {
 };
 
 function getLatestUserQuestion(messages: readonly ChatMessage[]): string {
-  const latestUser = [...messages]
-    .reverse()
-    .find((message) => message.role === 'user');
+  const latestUser = [...messages].reverse().find((message) => message.role === 'user');
 
   if (!latestUser) {
     return '';
@@ -127,7 +125,10 @@ function getWeatherSnapshot(locationName: string, date: string): WeatherSnapshot
   };
 }
 
-function getAssistantToolOutput(messages: readonly ChatMessage[], toolName: string): Record<string, unknown> | null {
+function getAssistantToolOutput(
+  messages: readonly ChatMessage[],
+  toolName: string,
+): Record<string, unknown> | null {
   const assistantMessages = messages.filter(
     (message): message is ChatAssistantMessage => message.role === 'assistant',
   );
@@ -252,7 +253,10 @@ function buildWeatherCard(snapshot: WeatherSnapshot): ChatUiPartAvailableFrame {
   };
 }
 
-function buildResumeFrames(state: DemoConversationState, locationOutput: Record<string, unknown>): ChatStreamFrame[] {
+function buildResumeFrames(
+  state: DemoConversationState,
+  locationOutput: Record<string, unknown>,
+): ChatStreamFrame[] {
   const snapshot = getWeatherSnapshot(state.requestedLocation, state.resolvedDate);
   const resolvedName =
     typeof locationOutput.name === 'string' ? locationOutput.name : snapshot.locationName;

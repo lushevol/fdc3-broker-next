@@ -1,4 +1,4 @@
-export type ChatRole = 'system' | 'user' | 'assistant';
+export type ChatRole = 'system' | 'user' | 'assistant' | 'tool';
 
 export type ChatFinishReason = 'stop' | 'tool-calls' | 'action-required' | 'error';
 
@@ -145,7 +145,20 @@ export type ChatAssistantMessage = {
   metadata?: ChatMessageMetadata;
 };
 
-export type ChatMessage = ChatSystemMessage | ChatUserMessage | ChatAssistantMessage;
+export type ChatToolMessage = {
+  id: string;
+  role: 'tool';
+  toolCallId: string;
+  toolName: string;
+  parts: ChatToolResultPart[];
+  metadata?: ChatMessageMetadata;
+};
+
+export type ChatMessage =
+  | ChatSystemMessage
+  | ChatUserMessage
+  | ChatAssistantMessage
+  | ChatToolMessage;
 
 export type ChatRunConfig = {
   modelName?: string;

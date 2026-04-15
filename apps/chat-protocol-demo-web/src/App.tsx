@@ -14,6 +14,7 @@ import type {
   ChatRunRequest,
   ChatStreamFrame,
   ChatToolCallPart,
+  ChatToolMessage,
 } from '@fm/chat-protocol-contract';
 import {
   createProtocolLocalRuntime,
@@ -32,24 +33,184 @@ type WeatherCardData = {
   lowC: number;
 };
 
+type ToolResultContentPartLike = {
+  type: 'tool-result';
+  toolCallId: string;
+  result?: unknown;
+  output?: unknown;
+};
+
+type ToolThreadMessageLike = {
+  id: string;
+  role: 'tool';
+  content: readonly ToolResultContentPartLike[];
+  metadata: {
+    custom: Record<string, unknown>;
+  };
+};
+
+type ProtocolCompatibleThreadMessage = ThreadMessage | ToolThreadMessageLike;
+
 function getTextParts(message: ThreadMessage): string[] {
   return message.content
-    .filter((part): part is Extract<ThreadMessage['content'][number], { type: 'text' }> => part.type === 'text')
+    .filter(
+      (part): part is Extract<ThreadMessage['content'][number], { type: 'text' }> =>
+        part.type === 'text',
+    )
     .map((part) => part.text);
 }
 
-function toProtocolMessages(messages: readonly ThreadMessage[]): ChatMessage[] {
-  return messages
-    .filter((message) => message.role === 'user')
-    .map((message) => ({
-      id: message.id,
-      role: 'user' as const,
-      parts: getTextParts(message).map((text) => ({
+function isToolThreadMessageLike(
+  message: ProtocolCompatibleThreadMessage,
+): message is ToolThreadMessageLike {
+  return message.role === 'tool';
+}
+
+function getExecutionTarget(
+  part: Extract<ThreadMessage['content'][number], { type: 'tool-call' }>,
+): 'frontend' | 'backend' {
+  const candidate = (part as { executionTarget?: unknown }).executionTarget;
+  return candidate === 'frontend' ? 'frontend' : 'backend';
+}
+
+function getToolError(
+  part: Extract<ThreadMessage['content'][number], { type: 'tool-call' }>,
+): unknown {
+  return (part as { error?: unknown }).error;
+}
+
+function toRecord(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function toErrorMessage(value: unknown): string | undefined {
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value;
+  }
+
+  return undefined;
+}
+
+function getToolResultOutput(part: ToolResultContentPartLike): Record<string, unknown> | undefined {
+  return toRecord(part.output) ?? toRecord(part.result);
+}
+
+function toProtocolMessages(messages: readonly ProtocolCompatibleThreadMessage[]): ChatMessage[] {
+  const protocolMessages: ChatMessage[] = [];
+
+  for (const message of messages) {
+    if (message.role === 'user' || message.role === 'system') {
+      const parts = getTextParts(message).map((text) => ({
         type: 'text' as const,
         text,
-      })),
-      metadata: message.metadata.custom,
-    }));
+      }));
+
+      if (parts.length === 0) {
+        continue;
+      }
+
+      protocolMessages.push({
+        id: message.id,
+        role: message.role,
+        parts,
+        metadata: message.metadata.custom,
+      });
+      continue;
+    }
+
+    if (message.role === 'assistant') {
+      const parts: ChatAssistantMessage['parts'] = [];
+
+      for (const part of message.content) {
+        if (part.type === 'text') {
+          parts.push({
+            type: 'text',
+            text: part.text,
+          });
+          continue;
+        }
+
+        if (part.type === 'tool-call') {
+          const error = toErrorMessage(getToolError(part));
+          const output = toRecord(part.result);
+          parts.push({
+            type: 'tool-call',
+            toolCallId: part.toolCallId,
+            toolName: part.toolName,
+            executionTarget: getExecutionTarget(part),
+            state:
+              part.result !== undefined
+                ? part.isError
+                  ? 'output-error'
+                  : 'output-available'
+                : 'input-available',
+            input: part.args,
+            ...(output ? { output } : {}),
+            ...(error !== undefined ? { error } : {}),
+          });
+          continue;
+        }
+      }
+
+      if (parts.length === 0) {
+        continue;
+      }
+
+      protocolMessages.push({
+        id: message.id,
+        role: 'assistant',
+        parts,
+        metadata: message.metadata.custom,
+      });
+      continue;
+    }
+
+    if (isToolThreadMessageLike(message)) {
+      const toolResultPart = message.content.find(
+        (part): part is ToolResultContentPartLike => part.type === 'tool-result',
+      );
+
+      if (!toolResultPart) {
+        continue;
+      }
+
+      const matchingAssistantTool = [...messages]
+        .reverse()
+        .filter((candidate) => candidate.role === 'assistant')
+        .flatMap((candidate) => candidate.content)
+        .find(
+          (
+            candidate,
+          ): candidate is Extract<
+            ThreadMessage['content'][number],
+            { type: 'tool-call'; toolCallId: string; toolName: string }
+          > => candidate.type === 'tool-call' && candidate.toolCallId === toolResultPart.toolCallId,
+        );
+
+      const toolMessage: ChatToolMessage = {
+        id: message.id,
+        role: 'tool',
+        toolCallId: toolResultPart.toolCallId,
+        toolName: matchingAssistantTool?.toolName ?? 'unknown',
+        parts: [
+          {
+            type: 'tool-result',
+            toolCallId: toolResultPart.toolCallId,
+            output: getToolResultOutput(toolResultPart) ?? {},
+          },
+        ],
+        metadata: message.metadata.custom,
+      };
+
+      protocolMessages.push(toolMessage);
+    }
+  }
+
+  return protocolMessages;
 }
 
 function encodeLocationToolResult(part: ChatToolCallPart): ChatToolCallPart {
@@ -83,7 +244,9 @@ function extractDataLines(event: string): string[] {
   return event
     .split('\n')
     .filter((line) => line.startsWith('data:'))
-    .map((line) => (line.startsWith('data: ') ? line.slice('data: '.length) : line.slice('data:'.length)));
+    .map((line) =>
+      line.startsWith('data: ') ? line.slice('data: '.length) : line.slice('data:'.length),
+    );
 }
 
 async function* parseSseFrames(response: Response): AsyncGenerator<ChatStreamFrame, void> {
@@ -218,11 +381,30 @@ async function* streamProtocolFrames(
       };
     }
 
+    const resumedToolMessage: ChatToolMessage | null = resolvedTool?.output
+      ? {
+          id: `${resolvedTool.toolCallId}-tool-result`,
+          role: 'tool',
+          toolCallId: resolvedTool.toolCallId,
+          toolName: resolvedTool.toolName,
+          parts: [
+            {
+              type: 'tool-result',
+              toolCallId: resolvedTool.toolCallId,
+              output: resolvedTool.output,
+            },
+          ],
+          metadata: {},
+        }
+      : null;
+
     nextRequest = {
       conversationId: request.conversationId,
       runId: currentRunId,
       trigger: 'submit-tool-result',
-      messages: [...request.messages, resumedAssistantMessage],
+      messages: resumedToolMessage
+        ? [...request.messages, resumedAssistantMessage, resumedToolMessage]
+        : [...request.messages, resumedAssistantMessage],
       metadata: request.metadata,
     };
   }
@@ -249,7 +431,11 @@ function MessageContent() {
   return parts.map((part, index) => {
     if (part.type === 'text') {
       return (
-        <p className="bubble bubble-assistant" data-testid="final-summary" key={`${part.type}-${index}`}>
+        <p
+          className="bubble bubble-assistant"
+          data-testid="final-summary"
+          key={`${part.type}-${index}`}
+        >
           {part.text}
         </p>
       );
@@ -257,7 +443,11 @@ function MessageContent() {
 
     if (part.type === 'reasoning') {
       return (
-        <div className="trace-card reasoning-card" data-testid="reasoning-summary" key={`${part.type}-${index}`}>
+        <div
+          className="trace-card reasoning-card"
+          data-testid="reasoning-summary"
+          key={`${part.type}-${index}`}
+        >
           <span className="trace-label">Reasoning</span>
           <p>{part.text}</p>
         </div>
@@ -285,7 +475,11 @@ function MessageContent() {
 
     if (part.type === 'data' && part.name === 'plan') {
       return (
-        <div className="trace-card plan-card" data-testid="plan-summary" key={`${part.name}-${index}`}>
+        <div
+          className="trace-card plan-card"
+          data-testid="plan-summary"
+          key={`${part.name}-${index}`}
+        >
           <span className="trace-label">Plan</span>
           <p>{String((part.data as { summary?: string }).summary ?? '')}</p>
         </div>
@@ -371,9 +565,7 @@ function DemoThread() {
           </div>
         </AuiIf>
 
-        <ThreadPrimitive.Messages>
-          {() => <ThreadMessageView />}
-        </ThreadPrimitive.Messages>
+        <ThreadPrimitive.Messages>{() => <ThreadMessageView />}</ThreadPrimitive.Messages>
 
         <ThreadPrimitive.ViewportFooter className="thread-footer">
           <ComposerPrimitive.Root className="composer-root">
@@ -426,9 +618,9 @@ export function App() {
           <span className="eyebrow">assistant-ui + LocalRuntime</span>
           <h1>Chat protocol demo</h1>
           <p>
-            Streams reasoning, plan steps, backend and frontend tools, a card payload, and the final answer
-            over the standalone protocol. Point <code>VITE_PROTOCOL_DEMO_API_URL</code> at the demo server or
-            the real LangChain4j backend.
+            Streams reasoning, plan steps, backend and frontend tools, a card payload, and the final
+            answer over the standalone protocol. Point <code>VITE_PROTOCOL_DEMO_API_URL</code> at
+            the demo server or the real LangChain4j backend.
           </p>
         </section>
         <section className="thread-panel">

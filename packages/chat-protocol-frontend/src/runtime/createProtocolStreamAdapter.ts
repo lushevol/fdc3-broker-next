@@ -126,7 +126,10 @@ function parseBufferedInput(buffer: string): Record<string, unknown> {
   }
 }
 
-function findToolCallIndex(content: readonly ProtocolAssistantContentPart[], toolCallId: string): number {
+function findToolCallIndex(
+  content: readonly ProtocolAssistantContentPart[],
+  toolCallId: string,
+): number {
   return content.findIndex(
     (part): part is ChatToolCallPart => part.type === 'tool-call' && part.toolCallId === toolCallId,
   );
@@ -182,7 +185,12 @@ function updateTextContent(
 
 function ensureToolCallPart(
   content: readonly ProtocolAssistantContentPart[],
-  frame: ChatToolInputStartFrame | ChatToolInputDeltaFrame | ChatToolInputAvailableFrame | ChatToolOutputAvailableFrame | ChatToolOutputErrorFrame,
+  frame:
+    | ChatToolInputStartFrame
+    | ChatToolInputDeltaFrame
+    | ChatToolInputAvailableFrame
+    | ChatToolOutputAvailableFrame
+    | ChatToolOutputErrorFrame,
   toolState: ToolState,
 ): ProtocolAssistantContentPart[] {
   const index = findToolCallIndex(content, frame.toolCallId);
@@ -280,10 +288,7 @@ function ensureToolCallPart(
   return nextContent;
 }
 
-function updateMessageStatus(
-  current: MessageStatus,
-  frame: ChatStreamFrame,
-): MessageStatus {
+function updateMessageStatus(current: MessageStatus, frame: ChatStreamFrame): MessageStatus {
   if (frame.type === 'finish') {
     if (frame.finishReason === 'tool-calls') {
       return { type: 'requires-action', reason: 'tool-calls' };
@@ -327,9 +332,7 @@ function upsertStepPart(
 ): ProtocolAssistantContentPart[] {
   const nextContent = [...content];
   const index = nextContent.findIndex(
-    (part) =>
-      (part.type === 'step-start' || part.type === 'step') &&
-      part.stepId === stepId,
+    (part) => (part.type === 'step-start' || part.type === 'step') && part.stepId === stepId,
   );
   const existingPart = index !== -1 ? nextContent[index] : null;
   const existingTitle =
@@ -354,7 +357,9 @@ function upsertStepPart(
   return nextContent;
 }
 
-function convertToThreadAssistantPart(part: ProtocolAssistantContentPart): ThreadAssistantMessagePart {
+function convertToThreadAssistantPart(
+  part: ProtocolAssistantContentPart,
+): ThreadAssistantMessagePart {
   switch (part.type) {
     case 'text':
       return { type: 'text', text: part.text };
@@ -523,11 +528,7 @@ function applyFrame(
       break;
     }
     case 'finish-step': {
-      nextContent = upsertStepPart(
-        nextContent,
-        frame.stepId,
-        frame.status ?? 'completed',
-      );
+      nextContent = upsertStepPart(nextContent, frame.stepId, frame.status ?? 'completed');
       break;
     }
     case 'text-start': {
@@ -535,7 +536,13 @@ function applyFrame(
       break;
     }
     case 'text-delta': {
-      nextContent = updateTextContent(nextContent, state.textPartIndexes, frame.partId, frame.delta, true);
+      nextContent = updateTextContent(
+        nextContent,
+        state.textPartIndexes,
+        frame.partId,
+        frame.delta,
+        true,
+      );
       break;
     }
     case 'text-end':
@@ -546,11 +553,7 @@ function applyFrame(
         executionTarget: frame.executionTarget ?? 'backend',
         inputText: '',
       });
-      nextContent = ensureToolCallPart(
-        nextContent,
-        frame,
-        state.toolStates.get(frame.toolCallId)!,
-      );
+      nextContent = ensureToolCallPart(nextContent, frame, state.toolStates.get(frame.toolCallId)!);
       break;
     }
     case 'tool-input-delta': {
@@ -614,7 +617,8 @@ function applyFrame(
     }
     case 'action-resolved': {
       const actionIndex = nextContent.findIndex(
-        (part): part is ChatActionPart => part.type === 'action' && part.actionId === frame.actionId,
+        (part): part is ChatActionPart =>
+          part.type === 'action' && part.actionId === frame.actionId,
       );
       if (actionIndex !== -1) {
         const currentAction = nextContent[actionIndex] as ChatActionPart;
@@ -706,7 +710,10 @@ export function createProtocolStreamAdapter(
 export type ProtocolLocalRuntimeOptions = {
   stream: (
     options: ChatModelRunOptions,
-  ) => Promise<AsyncIterable<ChatStreamFrame> | Iterable<ChatStreamFrame>> | AsyncIterable<ChatStreamFrame> | Iterable<ChatStreamFrame>;
+  ) =>
+    | Promise<AsyncIterable<ChatStreamFrame> | Iterable<ChatStreamFrame>>
+    | AsyncIterable<ChatStreamFrame>
+    | Iterable<ChatStreamFrame>;
   initialMessageId?: string;
 };
 
@@ -737,16 +744,12 @@ export function createProtocolStreamResult(
   return toRunResult(applyFrameSequenceToMessage(frames, initialMessage));
 }
 
-export function createProtocolLocalRuntime(
-  options: ProtocolLocalRuntimeOptions,
-): ChatModelAdapter {
+export function createProtocolLocalRuntime(options: ProtocolLocalRuntimeOptions): ChatModelAdapter {
   return {
     async *run(runOptions) {
       const stream = await options.stream(runOptions);
       const adapter = createProtocolStreamAdapter(
-        createAssistantMessage(
-          runOptions.unstable_assistantMessageId ?? options.initialMessageId,
-        ),
+        createAssistantMessage(runOptions.unstable_assistantMessageId ?? options.initialMessageId),
       );
 
       for await (const frame of stream) {

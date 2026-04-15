@@ -60,10 +60,25 @@ describe('protocol stream adapter', () => {
     const adapter = createProtocolStreamAdapter();
 
     adapter.applyFrame({ type: 'text-start', messageId: 'msg_asst_1', partId: 'intro' });
-    adapter.applyFrame({ type: 'text-delta', messageId: 'msg_asst_1', partId: 'intro', delta: 'Hello' });
+    adapter.applyFrame({
+      type: 'text-delta',
+      messageId: 'msg_asst_1',
+      partId: 'intro',
+      delta: 'Hello',
+    });
     adapter.applyFrame({ type: 'text-start', messageId: 'msg_asst_1', partId: 'summary' });
-    adapter.applyFrame({ type: 'text-delta', messageId: 'msg_asst_1', partId: 'summary', delta: 'World' });
-    adapter.applyFrame({ type: 'text-delta', messageId: 'msg_asst_1', partId: 'intro', delta: ' again' });
+    adapter.applyFrame({
+      type: 'text-delta',
+      messageId: 'msg_asst_1',
+      partId: 'summary',
+      delta: 'World',
+    });
+    adapter.applyFrame({
+      type: 'text-delta',
+      messageId: 'msg_asst_1',
+      partId: 'intro',
+      delta: ' again',
+    });
 
     expect(adapter.getMessage().content).toEqual([
       { type: 'text', text: 'Hello again' },

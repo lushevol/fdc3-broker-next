@@ -160,6 +160,61 @@ class ChatControllerTest {
     }
 
     @Test
+    void postStreamAcceptsStructuredProtocolMessagesAlongsideLegacyFields() throws Exception {
+        chatService.behavior = invocation -> invocation.onComplete.run();
+
+        MvcResult result = mockMvc.perform(post("/api/chat/stream")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "message":"summarize my workspace",
+                                  "trigger":"submit-tool-result",
+                                  "messages":[
+                                    {
+                                      "id":"msg-user-1",
+                                      "role":"user",
+                                      "parts":[{ "type":"text", "text":"summarize my workspace" }]
+                                    },
+                                    {
+                                      "id":"msg-asst-1",
+                                      "role":"assistant",
+                                      "parts":[
+                                        {
+                                          "type":"tool-call",
+                                          "toolCallId":"tool-call-1",
+                                          "toolName":"summarize_workspace_state",
+                                          "executionTarget":"frontend",
+                                          "state":"input-available",
+                                          "input":{ "scope":"active" }
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "id":"msg-tool-1",
+                                      "role":"tool",
+                                      "toolCallId":"tool-call-1",
+                                      "toolName":"summarize_workspace_state",
+                                      "parts":[
+                                        {
+                                          "type":"tool-result",
+                                          "toolCallId":"tool-call-1",
+                                          "output":{ "ok":true }
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        result.getAsyncResult();
+
+        assertEquals("summarize my workspace", chatService.lastInvocation.userMessage);
+    }
+
+    @Test
     void postStreamForwardsWorkspaceContextPayload() throws Exception {
         chatService.behavior = invocation -> invocation.onComplete.run();
 
