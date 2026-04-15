@@ -68,7 +68,7 @@ public class ProtocolChatService {
         Set<String> startedSteps = new java.util.HashSet<>();
         String[] pendingFinishReason = new String[]{"stop"};
 
-        Runnable cancel = agentService.processMessageStreaming(
+        Runnable cancel = agentService.processProtocolMessageStreaming(
                 invocation.conversationId(),
                 invocation.userMessage(),
                 capabilityContext,

@@ -417,9 +417,85 @@ public class AgentService {
             java.util.function.Consumer<ToolCall> onToolCall,
             java.util.function.Consumer<ToolResult> onToolResult
     ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                capabilityContext,
+                toolContext,
+                frontendTools,
+                workspaceContext,
+                history,
+                onNext,
+                onError,
+                onComplete,
+                onExecutionPlan,
+                onExecutionStep,
+                onToolCall,
+                onToolResult,
+                true
+        );
+    }
+
+    /**
+     * Process a chat message through the LangChain4j tool-calling path without the top-level agentic planner shortcut.
+     * This is used by the standalone protocol endpoint so tool execution and frontend resume are always observable
+     * through the protocol frame stream.
+     */
+    public Runnable processProtocolMessageStreaming(
+            String conversationId,
+            String userMessage,
+            UserCapabilityContext capabilityContext,
+            String toolContext,
+            String frontendTools,
+            WorkspaceContextSnapshot workspaceContext,
+            List<ChatMessage> history,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ExecutionPlanEvent> onExecutionPlan,
+            java.util.function.Consumer<ExecutionStepEvent> onExecutionStep,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                capabilityContext,
+                toolContext,
+                frontendTools,
+                workspaceContext,
+                history,
+                onNext,
+                onError,
+                onComplete,
+                onExecutionPlan,
+                onExecutionStep,
+                onToolCall,
+                onToolResult,
+                false
+        );
+    }
+
+    private Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            UserCapabilityContext capabilityContext,
+            String toolContext,
+            String frontendTools,
+            WorkspaceContextSnapshot workspaceContext,
+            List<ChatMessage> history,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ExecutionPlanEvent> onExecutionPlan,
+            java.util.function.Consumer<ExecutionStepEvent> onExecutionStep,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            boolean allowAgenticControlLoop
+    ) {
         AtomicBoolean cancelled = new AtomicBoolean(false);
         Map<String, ToolDefinition> availableTools = toolRegistry.resolveTools(capabilityContext);
-        if (shouldUseAgenticControlLoop(toolContext, frontendTools)) {
+        if (allowAgenticControlLoop && shouldUseAgenticControlLoop(toolContext, frontendTools)) {
             executeAgenticControlLoop(
                     userMessage,
                     capabilityContext,

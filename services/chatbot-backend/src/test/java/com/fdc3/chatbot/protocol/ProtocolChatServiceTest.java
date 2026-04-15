@@ -237,7 +237,7 @@ class ProtocolChatServiceTest {
         }
 
         @Override
-        public Runnable processMessageStreaming(
+        public Runnable processProtocolMessageStreaming(
                 String conversationId,
                 String userMessage,
                 UserCapabilityContext capabilityContext,

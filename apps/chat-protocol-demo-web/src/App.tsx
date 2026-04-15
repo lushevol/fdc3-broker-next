@@ -415,8 +415,9 @@ export function App() {
           <span className="eyebrow">assistant-ui + LocalRuntime</span>
           <h1>Chat protocol demo</h1>
           <p>
-            A deterministic weather scenario that streams reasoning, plan steps, backend and frontend tools,
-            a card payload, and the final answer over the standalone protocol.
+            Streams reasoning, plan steps, backend and frontend tools, a card payload, and the final answer
+            over the standalone protocol. Point <code>VITE_PROTOCOL_DEMO_API_URL</code> at the demo server or
+            the real LangChain4j backend.
           </p>
         </section>
         <section className="thread-panel">
