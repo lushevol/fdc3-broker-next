@@ -339,6 +339,50 @@ public class ProtocolChatService {
                     .build());
         }
 
+        if ("get_weather_history".equals(toolCall.getName())) {
+            Object location = resultMap.get("location");
+            Object date = resultMap.get("date");
+            Object condition = resultMap.get("condition");
+            Object highC = resultMap.get("highC");
+            Object lowC = resultMap.get("lowC");
+            Object summary = resultMap.get("summary");
+            if (location == null || date == null) {
+                return java.util.Optional.empty();
+            }
+            LinkedHashMap<String, Object> cardProps = new LinkedHashMap<>();
+            cardProps.put("title", "Historical Weather");
+            cardProps.put("content", summary != null ? summary.toString() : location + " on " + date);
+            cardProps.put("variant", "info");
+            if (location != null) cardProps.put("location", location);
+            if (date != null) cardProps.put("date", date);
+            if (condition != null) cardProps.put("condition", condition);
+            if (highC != null) cardProps.put("highC", highC);
+            if (lowC != null) cardProps.put("lowC", lowC);
+            return java.util.Optional.of(GenerativeUIDirective.builder()
+                    .name("weather-summary")
+                    .toolCallId(toolCall.getId())
+                    .props(cardProps)
+                    .build());
+        }
+
+        if ("resolve_relative_date".equals(toolCall.getName())) {
+            Object resolvedDate = resultMap.get("resolvedDate");
+            Object readable = resultMap.get("readable");
+            Object dayOfWeek = resultMap.get("dayOfWeek");
+            if (resolvedDate == null) {
+                return java.util.Optional.empty();
+            }
+            return java.util.Optional.of(GenerativeUIDirective.builder()
+                    .name("Card")
+                    .toolCallId(toolCall.getId())
+                    .props(Map.of(
+                            "title", "Date Resolved",
+                            "content", resolvedDate + " (" + (readable != null ? readable : dayOfWeek) + ")",
+                            "variant", "info"
+                    ))
+                    .build());
+        }
+
         return java.util.Optional.empty();
     }
 

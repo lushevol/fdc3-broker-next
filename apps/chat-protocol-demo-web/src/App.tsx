@@ -79,6 +79,13 @@ function encodeLocationToolResult(part: ChatToolCallPart): ChatToolCallPart {
   };
 }
 
+function extractDataLines(event: string): string[] {
+  return event
+    .split('\n')
+    .filter((line) => line.startsWith('data:'))
+    .map((line) => (line.startsWith('data: ') ? line.slice('data: '.length) : line.slice('data:'.length)));
+}
+
 async function* parseSseFrames(response: Response): AsyncGenerator<ChatStreamFrame, void> {
   if (!response.ok || !response.body) {
     throw new Error(`Chat protocol request failed with status ${response.status}`);
@@ -103,10 +110,7 @@ async function* parseSseFrames(response: Response): AsyncGenerator<ChatStreamFra
     buffer = events.pop() ?? '';
 
     for (const event of events) {
-      const dataLines = event
-        .split('\n')
-        .filter((line) => line.startsWith('data: '))
-        .map((line) => line.slice('data: '.length));
+      const dataLines = extractDataLines(event);
 
       if (dataLines.length === 0) {
         continue;
@@ -118,10 +122,7 @@ async function* parseSseFrames(response: Response): AsyncGenerator<ChatStreamFra
 
   const finalEvents = buffer.split('\n\n').filter(Boolean);
   for (const event of finalEvents) {
-    const dataLines = event
-      .split('\n')
-      .filter((line) => line.startsWith('data: '))
-      .map((line) => line.slice('data: '.length));
+    const dataLines = extractDataLines(event);
 
     if (dataLines.length === 0) {
       continue;
@@ -337,11 +338,21 @@ function MessageContent() {
       );
     }
 
+    if (part.type === 'data' && part.name === 'Card') {
+      const data = part.data as { title?: string; content?: string; variant?: string };
+      return (
+        <div className="trace-card" key={`${part.name}-${index}`}>
+          <span className="trace-label">{data.title ?? 'Info'}</span>
+          <p>{data.content ?? ''}</p>
+        </div>
+      );
+    }
+
     return null;
   });
 }
 
-function ThreadMessage() {
+function ThreadMessageView() {
   return (
     <MessagePrimitive.Root className="message-row">
       <MessageContent />
@@ -361,7 +372,7 @@ function DemoThread() {
         </AuiIf>
 
         <ThreadPrimitive.Messages>
-          {() => <ThreadMessage />}
+          {() => <ThreadMessageView />}
         </ThreadPrimitive.Messages>
 
         <ThreadPrimitive.ViewportFooter className="thread-footer">

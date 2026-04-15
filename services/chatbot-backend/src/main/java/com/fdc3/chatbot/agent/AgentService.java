@@ -2293,6 +2293,9 @@ public class AgentService {
                 Avoid markdown headings, labels like "ProgressUpdate", and bold section titles for these short updates unless the user explicitly asked for structured markdown.
                 Prefer natural prose over document-style formatting when you are mixing tool results with conversational reasoning.
                 After tool execution, explain what you're doing and show the results clearly.
+
+                Multi-tool chaining:
+                When the user asks about past or future weather (e.g. "weather in Beijing yesterday"), you MUST call resolve_relative_date first to get the absolute date, then call get_weather_history with that date and the location. Never use get_weather (current weather) for historical queries. Example chain: resolve_relative_date(expression="yesterday") → get_weather_history(location="Beijing, CN", date=<resolved date>).
                 """.formatted(
                         availableTools.values().stream()
                                 .map(tool -> "- " + tool.getName() + ": " + tool.getDescription())

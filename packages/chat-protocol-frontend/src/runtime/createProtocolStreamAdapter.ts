@@ -303,14 +303,6 @@ function updateMessageStatus(
     };
   }
 
-  if (
-    frame.type === 'tool-input-start' ||
-    frame.type === 'tool-input-delta' ||
-    frame.type === 'tool-input-available'
-  ) {
-    return { type: 'requires-action', reason: 'tool-calls' };
-  }
-
   if (frame.type === 'action-required') {
     return { type: 'requires-action', reason: 'interrupt' };
   }

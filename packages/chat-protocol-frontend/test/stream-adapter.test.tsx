@@ -103,4 +103,35 @@ describe('protocol stream adapter', () => {
       },
     ]);
   });
+
+  it('keeps backend tool frames in running state until the stream finishes', () => {
+    const adapter = createProtocolStreamAdapter();
+
+    adapter.applyFrame({
+      type: 'tool-input-start',
+      toolCallId: 'tool_backend_1',
+      toolName: 'get_weather',
+      executionTarget: 'backend',
+    });
+    adapter.applyFrame({
+      type: 'tool-input-available',
+      toolCallId: 'tool_backend_1',
+      input: { location: 'San Francisco, US' },
+    });
+
+    expect(adapter.getMessage().status).toEqual({ type: 'running' });
+
+    adapter.applyFrame({
+      type: 'tool-output-available',
+      toolCallId: 'tool_backend_1',
+      output: { location: 'San Francisco, US', temperature: 22 },
+    });
+    adapter.applyFrame({
+      type: 'finish',
+      finishReason: 'stop',
+      messageId: 'msg_asst_1',
+    });
+
+    expect(adapter.getMessage().status).toEqual({ type: 'complete', reason: 'stop' });
+  });
 });
