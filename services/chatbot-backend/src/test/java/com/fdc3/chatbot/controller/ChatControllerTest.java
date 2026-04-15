@@ -163,7 +163,7 @@ class ChatControllerTest {
     void postStreamForwardsWorkspaceContextPayload() throws Exception {
         chatService.behavior = invocation -> invocation.onComplete.run();
 
-        mockMvc.perform(post("/api/chat/stream")
+        MvcResult result = mockMvc.perform(post("/api/chat/stream")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -177,7 +177,12 @@ class ChatControllerTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(request().asyncStarted())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM));
+                .andReturn();
+
+        result.getAsyncResult();
+
+        MediaType contentType = MediaType.parseMediaType(result.getResponse().getContentType());
+        assertTrue(MediaType.TEXT_EVENT_STREAM.isCompatibleWith(contentType));
 
         assertNotNull(chatService.lastInvocation.workspaceContext);
         assertEquals("workspace-1", chatService.lastInvocation.workspaceContext.getWorkspaceId());
