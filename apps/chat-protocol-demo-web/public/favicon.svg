@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bubble" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#1c4d7c" />
+      <stop offset="100%" stop-color="#102a45" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#edf4fa" />
+  <path
+    d="M16 18c0-4.418 3.582-8 8-8h16c4.418 0 8 3.582 8 8v13c0 4.418-3.582 8-8 8H28l-10 9v-9h-2c-4.418 0-8-3.582-8-8V18Z"
+    fill="url(#bubble)"
+  />
+  <path
+    d="M28 24l4-4 4 4M32 20v16"
+    fill="none"
+    stroke="#f7fbff"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="4"
+  />
+</svg>
