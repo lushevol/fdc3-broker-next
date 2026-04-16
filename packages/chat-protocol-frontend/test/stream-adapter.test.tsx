@@ -180,6 +180,92 @@ describe('protocol stream adapter', () => {
     expect(adapter.getMessage().status).toEqual({ type: 'complete', reason: 'stop' });
   });
 
+
+  it('maps human source to awaiting-human state', () => {
+    const adapter = createProtocolStreamAdapter();
+    adapter.applyFrame({ type: 'start', conversationId: 'conv_human_test', runId: 'run_1' });
+    adapter.applyFrame({ type: 'message-start', messageId: 'msg_asst_1', role: 'assistant' });
+    adapter.applyFrame({
+      type: 'tool-input-start',
+      toolCallId: 'tool_human_1',
+      toolName: 'approval.confirm',
+      source: 'human',
+    });
+    adapter.applyFrame({
+      type: 'tool-input-available',
+      toolCallId: 'tool_human_1',
+      input: { decision: 'approve analytics lookup' },
+      source: 'human',
+    });
+
+    const message = adapter.getMessage();
+    const toolPart = message.content.find((part) => part.type === 'tool-call');
+    expect(toolPart).toMatchObject({
+      type: 'tool-call',
+      toolCallId: 'tool_human_1',
+      toolName: 'approval.confirm',
+      source: 'human',
+      state: 'awaiting-human',
+    });
+  });
+
+  it('uses inline source on tool-input-start when no metadata is present', () => {
+    const adapter = createProtocolStreamAdapter();
+    adapter.applyFrame({ type: 'start', conversationId: 'conv_inline_test', runId: 'run_1' });
+    adapter.applyFrame({ type: 'message-start', messageId: 'msg_asst_1', role: 'assistant' });
+    adapter.applyFrame({
+      type: 'tool-input-start',
+      toolCallId: 'tool_mcp_inline',
+      toolName: 'analytics.lookup',
+      source: 'mcp',
+      providerId: 'analytics-mcp',
+    });
+    adapter.applyFrame({
+      type: 'tool-input-available',
+      toolCallId: 'tool_mcp_inline',
+      input: { appId: 'weather-tile' },
+    });
+
+    const message = adapter.getMessage();
+    const toolPart = message.content.find((part) => part.type === 'tool-call');
+    expect(toolPart).toMatchObject({
+      type: 'tool-call',
+      toolCallId: 'tool_mcp_inline',
+      toolName: 'analytics.lookup',
+      source: 'mcp',
+      providerId: 'analytics-mcp',
+      state: 'awaiting-execution',
+    });
+  });
+
+  it('uses inline source on tool-input-available for backend tools', () => {
+    const adapter = createProtocolStreamAdapter();
+    adapter.applyFrame({ type: 'start', conversationId: 'conv_backend_test', runId: 'run_1' });
+    adapter.applyFrame({ type: 'message-start', messageId: 'msg_asst_1', role: 'assistant' });
+    adapter.applyFrame({
+      type: 'tool-input-start',
+      toolCallId: 'tool_backend_1',
+      toolName: 'summary.compose',
+      source: 'backend',
+    });
+    adapter.applyFrame({
+      type: 'tool-input-available',
+      toolCallId: 'tool_backend_1',
+      input: { text: 'compose' },
+      source: 'backend',
+    });
+
+    const message = adapter.getMessage();
+    const toolPart = message.content.find((part) => part.type === 'tool-call');
+    expect(toolPart).toMatchObject({
+      type: 'tool-call',
+      toolCallId: 'tool_backend_1',
+      toolName: 'summary.compose',
+      source: 'backend',
+      state: 'awaiting-execution',
+    });
+  });
+
   it('patches an already rendered tool call when source metadata arrives later', () => {
     const adapter = createProtocolStreamAdapter();
 

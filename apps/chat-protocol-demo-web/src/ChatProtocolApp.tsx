@@ -12,6 +12,7 @@ import type {
   ChatStreamFrame,
   ChatToolCallPart,
   ChatToolMessage,
+  ChatToolOutputAvailableFrame,
 } from '@fm/chat-protocol-contract';
 import {
   createProtocolLocalRuntime,
@@ -19,7 +20,15 @@ import {
 } from '@fm/chat-protocol-frontend';
 import { AssistantModal } from '@/components/assistant-ui/assistant-modal';
 
-const API_URL = import.meta.env.VITE_PROTOCOL_DEMO_API_URL ?? 'http://127.0.0.1:4111/api/chat/runs';
+type PendingHumanTool = {
+  toolCallId: string;
+  toolName: string;
+  source: ChatToolCallPart['source'];
+  input: Record<string, unknown>;
+  providerId?: string;
+};
+
+const API_URL = import.meta.env.VITE_PROTOCOL_DEMO_API_URL ?? 'http://127.0.0.1:8080/api/chat/runs';
 
 type ToolPreset = 'minimal' | 'full';
 
@@ -86,15 +95,6 @@ function getToolsForPreset(preset: ToolPreset) {
   return preset === 'minimal' ? MINIMAL_TOOLS : FULL_TOOLS;
 }
 
-type WeatherCardData = {
-  location: string;
-  date: string;
-  condition: string;
-  summary: string;
-  highC: number;
-  lowC: number;
-};
-
 type ToolResultContentPartLike = {
   type: 'tool-result';
   toolCallId: string;
@@ -138,12 +138,6 @@ function getToolSource(
 
   const candidate = (part as { executionTarget?: unknown }).executionTarget;
   return candidate === 'frontend' ? 'frontend' : 'backend';
-}
-
-function getToolError(
-  part: Extract<import('@assistant-ui/react').ThreadMessage['content'][number], { type: 'tool-call' }>,
-): unknown {
-  return (part as { error?: unknown }).error;
 }
 
 function toRecord(value: unknown): Record<string, unknown> | undefined {
@@ -202,20 +196,20 @@ function toProtocolMessages(messages: readonly ProtocolCompatibleThreadMessage[]
         }
 
         if (part.type === 'tool-call') {
-          const error = toErrorMessage(getToolError(part));
-          const output = toRecord(part.result);
+          const error = toErrorMessage((part as { error?: unknown }).error);
+          const output = toRecord((part as { result?: unknown }).result);
           parts.push({
             type: 'tool-call',
             toolCallId: part.toolCallId,
             toolName: part.toolName,
             source: getToolSource(part),
             state:
-              part.result !== undefined
-                ? part.isError
+              (part as { result?: unknown }).result !== undefined
+                ? (part as { isError?: boolean }).isError
                   ? 'output-error'
                   : 'output-available'
                 : 'input-available',
-            input: part.args,
+            input: part.args as Record<string, unknown>,
             ...(output ? { output } : {}),
             ...(error !== undefined ? { error } : {}),
           });
@@ -280,7 +274,7 @@ function toProtocolMessages(messages: readonly ProtocolCompatibleThreadMessage[]
   return protocolMessages;
 }
 
-function encodeLocationToolResult(part: ChatToolCallPart): ChatToolCallPart {
+function encodeLocationToolResult(part: ChatToolCallPart): ChatToolCallPart & { output: Record<string, unknown> } {
   const query = typeof part.input.query === 'string' ? part.input.query : 'San Francisco';
   const normalized = query.toLowerCase();
 
@@ -305,6 +299,35 @@ function encodeLocationToolResult(part: ChatToolCallPart): ChatToolCallPart {
       longitude: -122.4194,
     },
   };
+}
+
+function resolveFrontendTool(
+  part: ChatToolCallPart,
+): ChatToolCallPart & { output: Record<string, unknown> } {
+  if (part.toolName === 'location.resolve') {
+    return encodeLocationToolResult(part);
+  }
+
+  return {
+    ...part,
+    state: 'output-available',
+    output: { result: `Simulated result from frontend tool: ${part.toolName}` },
+  };
+}
+
+function findPendingToolBySource(
+  parts: readonly ChatAssistantMessage['parts'][number][],
+  source: ChatToolCallPart['source'],
+): ChatToolCallPart | undefined {
+  return [...parts]
+    .reverse()
+    .find(
+      (part): part is ChatToolCallPart =>
+        part.type === 'tool-call' &&
+        part.source === source &&
+        (part.state === 'input-available' || part.state === 'awaiting-human') &&
+        !part.output,
+    );
 }
 
 function extractDataLines(event: string): string[] {
@@ -372,9 +395,8 @@ async function postRunRequest(request: ChatRunRequest): Promise<Response> {
   });
 }
 
-async function* streamProtocolFrames(
+async function* autoResolveFrontendTools(
   request: ChatRunRequest,
-  adapter = createProtocolStreamAdapter(),
 ): AsyncGenerator<ChatStreamFrame, void> {
   let nextRequest: ChatRunRequest | null = request;
   let currentRunId = request.runId ?? null;
@@ -386,7 +408,7 @@ async function* streamProtocolFrames(
     });
 
     let finishReason: string | null = null;
-    let pendingFinishFrame: ChatStreamFrame | null = null;
+    const adapter = createProtocolStreamAdapter();
 
     for await (const frame of parseSseFrames(response)) {
       adapter.applyFrame(frame);
@@ -397,14 +419,13 @@ async function* streamProtocolFrames(
 
       if (frame.type === 'finish') {
         finishReason = frame.finishReason;
-
-        if (frame.finishReason === 'tool-calls') {
-          pendingFinishFrame = frame;
-          break;
-        }
       }
 
       yield frame;
+    }
+
+    if (finishReason === 'action-required') {
+      break;
     }
 
     if (finishReason !== 'tool-calls') {
@@ -412,28 +433,17 @@ async function* streamProtocolFrames(
     }
 
     const assistantMessage = adapter.getMessage();
-    const pendingTool = [...assistantMessage.content]
-      .reverse()
-      .find(
-        (part): part is ChatToolCallPart =>
-          part.type === 'tool-call' &&
-          (part.source === 'frontend' ||
-            (part as ChatToolCallPart & { executionTarget?: unknown }).executionTarget ===
-              'frontend') &&
-          part.state === 'input-available' &&
-          !part.output,
-      );
+    const pendingFrontendTool = findPendingToolBySource(assistantMessage.content, 'frontend');
 
-    if (!pendingTool) {
-      if (pendingFinishFrame) {
-        yield pendingFinishFrame;
-      }
+    if (!pendingFrontendTool) {
       break;
     }
 
+    const resolvedTool = resolveFrontendTool(pendingFrontendTool);
+
     const resumedParts = assistantMessage.content.map((part) => {
-      if (part.type === 'tool-call' && part.toolCallId === pendingTool.toolCallId) {
-        return encodeLocationToolResult(part);
+      if (part.type === 'tool-call' && part.toolCallId === resolvedTool.toolCallId) {
+        return resolvedTool;
       }
 
       return part;
@@ -446,47 +456,102 @@ async function* streamProtocolFrames(
       metadata: assistantMessage.metadata,
     };
 
-    const resolvedTool = resumedParts.find(
-      (part): part is ChatToolCallPart =>
-        part.type === 'tool-call' && part.toolCallId === pendingTool.toolCallId,
-    );
+    yield {
+      type: 'tool-output-available',
+      toolCallId: resolvedTool.toolCallId,
+      output: resolvedTool.output,
+      source: 'frontend',
+    } as ChatToolOutputAvailableFrame;
 
-    if (resolvedTool?.output) {
-      yield {
-        type: 'tool-output-available',
-        toolCallId: resolvedTool.toolCallId,
-        output: resolvedTool.output,
-      };
-    }
-
-    const resumedToolMessage: ChatToolMessage | null = resolvedTool?.output
-      ? {
-          id: `${resolvedTool.toolCallId}-tool-result`,
-          role: 'tool',
+    const resumedToolMessage: ChatToolMessage = {
+      id: `${resolvedTool.toolCallId}-tool-result`,
+      role: 'tool',
+      toolCallId: resolvedTool.toolCallId,
+      toolName: resolvedTool.toolName,
+      parts: [
+        {
+          type: 'tool-result',
           toolCallId: resolvedTool.toolCallId,
-          toolName: resolvedTool.toolName,
-          parts: [
-            {
-              type: 'tool-result',
-              toolCallId: resolvedTool.toolCallId,
-              output: resolvedTool.output,
-            },
-          ],
-          metadata: {},
-        }
-      : null;
+          output: resolvedTool.output,
+        },
+      ],
+      metadata: {},
+    };
 
     nextRequest = {
       conversationId: request.conversationId,
       runId: currentRunId,
       trigger: 'submit-tool-result',
       context: request.context,
-      messages: resumedToolMessage
-        ? [...request.messages, resumedAssistantMessage, resumedToolMessage]
-        : [...request.messages, resumedAssistantMessage],
+      messages: [...request.messages, resumedAssistantMessage, resumedToolMessage],
       metadata: request.metadata,
     };
   }
+}
+
+function HumanToolApprovalCard({
+  tool,
+  onApprove,
+  onReject,
+}: {
+  tool: PendingHumanTool;
+  onApprove: (decision: Record<string, unknown>) => void;
+  onReject: () => void;
+}) {
+  return (
+    <div className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-4 shadow-sm">
+      <div className="mb-2 flex items-center gap-2">
+        <svg
+          className="h-5 w-5 text-amber-600"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+          />
+        </svg>
+        <span className="text-sm font-semibold text-amber-800">
+          Human Approval Required
+        </span>
+      </div>
+      <div className="mb-3 text-sm text-amber-900">
+        <p>
+          Tool: <strong>{tool.toolName}</strong>
+        </p>
+        <p className="mt-1 text-xs text-amber-700">
+          {Object.keys(tool.input).length > 0
+            ? `Input: ${JSON.stringify(tool.input)}`
+            : 'No input parameters'}
+        </p>
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() =>
+            onApprove({
+              decision: 'approved',
+              confirmed: true,
+              ...tool.input,
+            })
+          }
+          className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+        >
+          Approve
+        </button>
+        <button
+          type="button"
+          onClick={onReject}
+          className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+        >
+          Reject
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function createConversationId(threadId?: string): string {
@@ -520,7 +585,7 @@ export function ChatProtocolApp() {
             metadata: runOptions.runConfig.custom ?? {},
           };
 
-          return streamProtocolFrames(request);
+          return autoResolveFrontendTools(request);
         },
       }),
     [],
@@ -540,7 +605,8 @@ export function ChatProtocolApp() {
           <p className="mb-4 max-w-[36rem] text-[1.05rem] leading-[1.7] text-[#4c6680]">
             Floating button that opens an AI assistant chat box. This demo streams reasoning, plan
             steps, backend and frontend tools, and the final response through the chat protocol
-            runtime.
+            runtime. Human-in-the-loop (HITL) approval tools pause for user confirmation before
+            continuing.
           </p>
           <p className="mb-4 max-w-[36rem] text-[1.05rem] leading-[1.7] text-[#4c6680]">
             Configure <code>VITE_PROTOCOL_DEMO_API_URL</code> to point at the mock demo server or
@@ -566,6 +632,35 @@ export function ChatProtocolApp() {
             >
               Use full tools
             </button>
+          </div>
+          <div className="mb-4 max-w-[36rem] space-y-2">
+            <h2 className="text-[1.05rem] font-semibold text-[#173b60]">Demo Test Cases</h2>
+            <ul className="list-inside list-disc space-y-1 text-[0.95rem] text-[#4c6680]">
+              <li>
+                <strong>TC1 Frontend delegation:</strong> Ask &ldquo;What is the weather in San
+                Francisco?&rdquo; with minimal preset — validates{' '}
+                <code>location.resolve</code> &rarr; <code>get_weather</code> chain.
+              </li>
+              <li>
+                <strong>TC2 Backend multi-tool:</strong> Ask &ldquo;What is the weather and current
+                time?&rdquo; with full preset — validates <code>get_weather</code> +{' '}
+                <code>get_current_time</code> backend tools.
+              </li>
+              <li>
+                <strong>TC3 HITL approval:</strong> Ask &ldquo;Should I proceed with this
+                action?&rdquo; with full preset — validates{' '}
+                <code>approval.confirm</code> human tool pause/resume.
+              </li>
+              <li>
+                <strong>TC4 Dynamic preset:</strong> Send a message with minimal preset, switch to
+                full preset, send another message — validates tool set change without restart.
+              </li>
+              <li>
+                <strong>TC5 Mixed sources:</strong> Ask &ldquo;Give me a full briefing with weather,
+                approval, and analytics&rdquo; with full preset — validates all four source types in
+                one run.
+              </li>
+            </ul>
           </div>
           <p className="max-w-[36rem] text-[1.05rem] font-semibold leading-[1.7] text-[#173b60]">
             The assistant modal is available in the bottom right corner of the screen.

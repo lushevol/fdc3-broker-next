@@ -112,6 +112,21 @@ export function createMixedToolRunRequestFixture(): ChatRunRequest {
             required: ['appId'],
           },
         },
+        {
+          name: 'profile.lookup',
+          source: 'mcp',
+          providerId: 'profile-mcp',
+          description: 'Look up user profile context',
+          parameters: {
+            type: 'object',
+            properties: {
+              userId: {
+                type: 'string',
+              },
+            },
+            required: ['userId'],
+          },
+        },
       ],
     },
     messages: [

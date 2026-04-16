@@ -271,6 +271,8 @@ export type ChatToolInputStartFrame = {
   type: 'tool-input-start';
   toolCallId: string;
   toolName: string;
+  source?: ChatToolSource;
+  providerId?: string;
   executionTarget?: ChatExecutionTarget;
 };
 
@@ -284,18 +286,24 @@ export type ChatToolInputAvailableFrame = {
   type: 'tool-input-available';
   toolCallId: string;
   input: Record<string, unknown>;
+  source?: ChatToolSource;
+  providerId?: string;
 };
 
 export type ChatToolOutputAvailableFrame = {
   type: 'tool-output-available';
   toolCallId: string;
   output: Record<string, unknown>;
+  source?: ChatToolSource;
+  providerId?: string;
 };
 
 export type ChatToolOutputErrorFrame = {
   type: 'tool-output-error';
   toolCallId: string;
   error: string;
+  source?: ChatToolSource;
+  providerId?: string;
 };
 
 export type ChatUiPartAvailableFrame = {

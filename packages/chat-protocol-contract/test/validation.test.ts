@@ -86,11 +86,16 @@ describe('chat protocol contract validation', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.context?.tools).toHaveLength(4);
+      expect(result.data.context?.tools).toHaveLength(5);
       expect(result.data.context?.tools?.[3]).toMatchObject({
         name: 'analytics.lookup',
         source: 'mcp',
         providerId: 'analytics-mcp',
+      });
+      expect(result.data.context?.tools?.[4]).toMatchObject({
+        name: 'profile.lookup',
+        source: 'mcp',
+        providerId: 'profile-mcp',
       });
     }
   });

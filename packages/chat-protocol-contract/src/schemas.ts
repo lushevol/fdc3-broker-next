@@ -357,6 +357,8 @@ export const chatToolInputStartFrameSchema = z
     type: z.literal('tool-input-start'),
     toolCallId: z.string().min(1),
     toolName: z.string().min(1),
+    source: chatToolSourceSchema.optional(),
+    providerId: z.string().min(1).optional(),
     executionTarget: chatExecutionTargetSchema.optional(),
   })
   .strict();
@@ -374,6 +376,8 @@ export const chatToolInputAvailableFrameSchema = z
     type: z.literal('tool-input-available'),
     toolCallId: z.string().min(1),
     input: chatStructuredPayloadSchema,
+    source: chatToolSourceSchema.optional(),
+    providerId: z.string().min(1).optional(),
   })
   .strict();
 
@@ -382,6 +386,8 @@ export const chatToolOutputAvailableFrameSchema = z
     type: z.literal('tool-output-available'),
     toolCallId: z.string().min(1),
     output: chatStructuredPayloadSchema,
+    source: chatToolSourceSchema.optional(),
+    providerId: z.string().min(1).optional(),
   })
   .strict();
 
@@ -390,6 +396,8 @@ export const chatToolOutputErrorFrameSchema = z
     type: z.literal('tool-output-error'),
     toolCallId: z.string().min(1),
     error: z.string().min(1),
+    source: chatToolSourceSchema.optional(),
+    providerId: z.string().min(1).optional(),
   })
   .strict();
 

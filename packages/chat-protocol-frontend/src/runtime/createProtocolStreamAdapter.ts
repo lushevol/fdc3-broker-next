@@ -736,10 +736,15 @@ function applyFrame(
       break;
     case 'tool-input-start': {
       const identity = state.toolIdentities.get(frame.toolCallId);
+      const sourceFromFrame = 'source' in frame ? (frame as { source?: string }).source : undefined;
+      const resolvedSource = (sourceFromFrame === 'frontend' || sourceFromFrame === 'backend' || sourceFromFrame === 'human' || sourceFromFrame === 'mcp')
+        ? sourceFromFrame as ChatToolSource
+        : identity?.source ?? getDefaultToolSource();
+      const providerIdFromFrame = 'providerId' in frame ? (frame as { providerId?: string }).providerId : undefined;
       const toolState = {
         toolName: frame.toolName || identity?.toolName || '',
-        source: identity?.source ?? getDefaultToolSource(),
-        ...(identity?.providerId ? { providerId: identity.providerId } : {}),
+        source: resolvedSource,
+        ...(identity?.providerId ?? providerIdFromFrame ? { providerId: identity?.providerId ?? providerIdFromFrame } : {}),
         inputText: '',
       };
       state.toolStates.set(frame.toolCallId, toolState);
@@ -758,19 +763,50 @@ function applyFrame(
     }
     case 'tool-input-available': {
       const current = getToolState(state, frame.toolCallId);
-      const updated = current;
+      const sourceFromFrame = 'source' in frame ? (frame as { source?: string }).source : undefined;
+      const providerIdFromFrame = 'providerId' in frame ? (frame as { providerId?: string }).providerId : undefined;
+      const resolvedSource = (sourceFromFrame === 'frontend' || sourceFromFrame === 'backend' || sourceFromFrame === 'human' || sourceFromFrame === 'mcp')
+        ? sourceFromFrame as ChatToolSource
+        : current.source;
+      const updated = {
+        ...current,
+        source: resolvedSource,
+        ...(providerIdFromFrame ? { providerId: providerIdFromFrame } : (current.providerId ? { providerId: current.providerId } : {})),
+      };
       state.toolStates.set(frame.toolCallId, updated);
       nextContent = ensureToolCallPart(nextContent, frame, updated);
       break;
     }
     case 'tool-output-available': {
       const current = getToolState(state, frame.toolCallId);
-      nextContent = ensureToolCallPart(nextContent, frame, current);
+      const sourceFromFrame = 'source' in frame ? (frame as { source?: string }).source : undefined;
+      const providerIdFromFrame = 'providerId' in frame ? (frame as { providerId?: string }).providerId : undefined;
+      const resolvedSource = (sourceFromFrame === 'frontend' || sourceFromFrame === 'backend' || sourceFromFrame === 'human' || sourceFromFrame === 'mcp')
+        ? sourceFromFrame as ChatToolSource
+        : current.source;
+      const updated = {
+        ...current,
+        source: resolvedSource,
+        ...(providerIdFromFrame ? { providerId: providerIdFromFrame } : (current.providerId ? { providerId: current.providerId } : {})),
+      };
+      state.toolStates.set(frame.toolCallId, updated);
+      nextContent = ensureToolCallPart(nextContent, frame, updated);
       break;
     }
     case 'tool-output-error': {
       const current = getToolState(state, frame.toolCallId);
-      nextContent = ensureToolCallPart(nextContent, frame, current);
+      const sourceFromFrame = 'source' in frame ? (frame as { source?: string }).source : undefined;
+      const providerIdFromFrame = 'providerId' in frame ? (frame as { providerId?: string }).providerId : undefined;
+      const resolvedSource = (sourceFromFrame === 'frontend' || sourceFromFrame === 'backend' || sourceFromFrame === 'human' || sourceFromFrame === 'mcp')
+        ? sourceFromFrame as ChatToolSource
+        : current.source;
+      const updated = {
+        ...current,
+        source: resolvedSource,
+        ...(providerIdFromFrame ? { providerId: providerIdFromFrame } : (current.providerId ? { providerId: current.providerId } : {})),
+      };
+      state.toolStates.set(frame.toolCallId, updated);
+      nextContent = ensureToolCallPart(nextContent, frame, updated);
       break;
     }
     case 'action-required': {

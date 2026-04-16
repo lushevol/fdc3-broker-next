@@ -14,10 +14,12 @@ import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.model.UserCapabilityContext;
+import com.fdc3.chatbot.protocol.model.ChatToolSource;
 import com.fdc3.chatbot.protocol.model.ProtocolFrontendTool;
 import com.fdc3.chatbot.protocol.model.ProtocolMessage;
 import com.fdc3.chatbot.protocol.model.ProtocolPart;
 import com.fdc3.chatbot.protocol.model.ProtocolRunRequest;
+import com.fdc3.chatbot.protocol.model.ProtocolToolDescriptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -49,6 +51,12 @@ public class ProtocolChatService {
             Runnable onComplete
     ) {
         ProtocolInvocation invocation = ProtocolInvocation.from(request, objectMapper);
+
+        List<ProtocolToolDescriptor> allTools = mergeTools(request);
+        Map<String, ProtocolToolDescriptor> toolLookup = new java.util.HashMap<>();
+        for (ProtocolToolDescriptor tool : allTools) {
+            toolLookup.put(tool.getName(), tool);
+        }
 
         onFrame.accept(Map.of(
                 "type", "start",
@@ -124,28 +132,33 @@ public class ProtocolChatService {
                 plan -> emitPlanFrames(onFrame, reasoningSummarySent, plan),
                 step -> emitStepFrames(onFrame, startedSteps, step),
                 toolCall -> {
+                    enrichToolCallFromDescriptor(toolCall, toolLookup);
                     toolCalls.add(toolCall);
                     emitToolCallFrames(onFrame, toolCall);
-                    if (toolCall.getExecutionTarget() == ToolCall.ExecutionTarget.FRONTEND) {
-                        pendingFinishReason[0] = toolCall.isRequiresConfirmation() ? "action-required" : "tool-calls";
-                        if (toolCall.isRequiresConfirmation()) {
-                            onFrame.accept(Map.of(
-                                    "type", "action-required",
-                                    "actionId", toolCall.getId(),
-                                    "actionType", "tool-approval",
-                                    "title", "Approve " + toolCall.getName(),
-                                    "description", "Approve the frontend tool before it executes.",
-                                    "options", List.of(
-                                            Map.of("id", "approve", "label", "Approve"),
-                                            Map.of("id", "reject", "label", "Reject")
-                                    )
-                            ));
-                        }
+                    if (toolCall.getSource() == ChatToolSource.HUMAN || (toolCall.getSource() == null && toolCall.isRequiresConfirmation())) {
+                        pendingFinishReason[0] = "action-required";
+                        onFrame.accept(Map.of(
+                                "type", "action-required",
+                                "actionId", toolCall.getId(),
+                                "actionType", "tool-approval",
+                                "title", "Approve " + toolCall.getName(),
+                                "description", "Approve the tool before it executes.",
+                                "options", List.of(
+                                        Map.of("id", "approve", "label", "Approve"),
+                                        Map.of("id", "reject", "label", "Reject")
+                                )
+                        ));
+                    } else if (toolCall.getSource() == ChatToolSource.FRONTEND || (toolCall.getSource() == null && toolCall.getExecutionTarget() == ToolCall.ExecutionTarget.FRONTEND)) {
+                        pendingFinishReason[0] = "tool-calls";
                     }
                 },
                 toolResult -> {
                     pendingFinishReason[0] = "stop";
-                    emitToolResultFrames(onFrame, toolResult);
+                    ToolCall matchingCall = toolCalls.stream()
+                            .filter(tc -> tc.getId() != null && tc.getId().equals(toolResult.getToolCallId()))
+                            .findFirst()
+                            .orElse(null);
+                    emitToolResultFrames(onFrame, toolResult, matchingCall);
                     findGenerativeUiDirective(toolCalls, toolResult).ifPresent(directive ->
                             emitUiPartFrame(onFrame, invocation.assistantMessageId(), directive));
                 }
@@ -218,34 +231,59 @@ public class ProtocolChatService {
     }
 
     private void emitToolCallFrames(Consumer<Map<String, Object>> onFrame, ToolCall toolCall) {
-        onFrame.accept(Map.of(
-                "type", "tool-input-start",
-                "toolCallId", toolCall.getId(),
-                "toolName", toolCall.getName(),
-                "executionTarget", mapExecutionTarget(toolCall.getExecutionTarget())
-        ));
-        onFrame.accept(Map.of(
-                "type", "tool-input-available",
-                "toolCallId", toolCall.getId(),
-                "input", toolCall.getArguments() == null ? Map.of() : toolCall.getArguments()
-        ));
+        LinkedHashMap<String, Object> startFrame = new LinkedHashMap<>();
+        startFrame.put("type", "tool-input-start");
+        startFrame.put("toolCallId", toolCall.getId());
+        startFrame.put("toolName", toolCall.getName());
+        if (toolCall.getSource() != null) {
+            startFrame.put("source", mapSourceToString(toolCall.getSource()));
+        }
+        if (toolCall.getProviderId() != null) {
+            startFrame.put("providerId", toolCall.getProviderId());
+        }
+        startFrame.put("executionTarget", mapExecutionTarget(toolCall.getExecutionTarget()));
+        onFrame.accept(startFrame);
+
+        LinkedHashMap<String, Object> availableFrame = new LinkedHashMap<>();
+        availableFrame.put("type", "tool-input-available");
+        availableFrame.put("toolCallId", toolCall.getId());
+        availableFrame.put("input", toolCall.getArguments() == null ? Map.of() : toolCall.getArguments());
+        if (toolCall.getSource() != null) {
+            availableFrame.put("source", mapSourceToString(toolCall.getSource()));
+        }
+        if (toolCall.getProviderId() != null) {
+            availableFrame.put("providerId", toolCall.getProviderId());
+        }
+        onFrame.accept(availableFrame);
     }
 
-    private void emitToolResultFrames(Consumer<Map<String, Object>> onFrame, ToolResult toolResult) {
+    private void emitToolResultFrames(Consumer<Map<String, Object>> onFrame, ToolResult toolResult, ToolCall toolCall) {
         if (toolResult.getError() != null && !toolResult.getError().isBlank()) {
-            onFrame.accept(Map.of(
-                    "type", "tool-output-error",
-                    "toolCallId", toolResult.getToolCallId(),
-                    "error", toolResult.getError()
-            ));
+            LinkedHashMap<String, Object> errorFrame = new LinkedHashMap<>();
+            errorFrame.put("type", "tool-output-error");
+            errorFrame.put("toolCallId", toolResult.getToolCallId());
+            errorFrame.put("error", toolResult.getError());
+            if (toolCall != null && toolCall.getSource() != null) {
+                errorFrame.put("source", mapSourceToString(toolCall.getSource()));
+            }
+            if (toolCall != null && toolCall.getProviderId() != null) {
+                errorFrame.put("providerId", toolCall.getProviderId());
+            }
+            onFrame.accept(errorFrame);
             return;
         }
 
-        onFrame.accept(Map.of(
-                "type", "tool-output-available",
-                "toolCallId", toolResult.getToolCallId(),
-                "output", toolResult.getResult() == null ? Map.of() : toolResult.getResult()
-        ));
+        LinkedHashMap<String, Object> outputFrame = new LinkedHashMap<>();
+        outputFrame.put("type", "tool-output-available");
+        outputFrame.put("toolCallId", toolResult.getToolCallId());
+        outputFrame.put("output", toolResult.getResult() == null ? Map.of() : toolResult.getResult());
+        if (toolCall != null && toolCall.getSource() != null) {
+            outputFrame.put("source", mapSourceToString(toolCall.getSource()));
+        }
+        if (toolCall != null && toolCall.getProviderId() != null) {
+            outputFrame.put("providerId", toolCall.getProviderId());
+        }
+        onFrame.accept(outputFrame);
     }
 
     private void emitUiPartFrame(
@@ -404,6 +442,73 @@ public class ProtocolChatService {
             return "frontend";
         }
         return "backend";
+    }
+
+    static String mapSourceToString(ChatToolSource source) {
+        return switch (source) {
+            case FRONTEND -> "frontend";
+            case BACKEND -> "backend";
+            case HUMAN -> "human";
+            case MCP -> "mcp";
+        };
+    }
+
+    static String mapSourceToExecutionTarget(ChatToolSource source) {
+        return switch (source) {
+            case FRONTEND, HUMAN -> "frontend";
+            case BACKEND, MCP -> "backend";
+        };
+    }
+
+    private void enrichToolCallFromDescriptor(ToolCall toolCall, Map<String, ProtocolToolDescriptor> toolLookup) {
+        if (toolCall.getSource() != null) {
+            return;
+        }
+        ProtocolToolDescriptor descriptor = toolLookup.get(toolCall.getName());
+        if (descriptor != null) {
+            toolCall.setSource(descriptor.getSource());
+            if (descriptor.getProviderId() != null) {
+                toolCall.setProviderId(descriptor.getProviderId());
+            }
+            if (Boolean.TRUE.equals(descriptor.getRequiresConfirmation())) {
+                toolCall.setRequiresConfirmation(true);
+            }
+            if (descriptor.getSource() == ChatToolSource.HUMAN) {
+                toolCall.setExecutionTarget(ToolCall.ExecutionTarget.FRONTEND);
+            } else if (descriptor.getSource() == ChatToolSource.FRONTEND) {
+                toolCall.setExecutionTarget(ToolCall.ExecutionTarget.FRONTEND);
+            } else {
+                toolCall.setExecutionTarget(ToolCall.ExecutionTarget.BACKEND);
+            }
+        }
+    }
+
+    List<ProtocolToolDescriptor> mergeTools(ProtocolRunRequest request) {
+        List<ProtocolToolDescriptor> merged = new ArrayList<>();
+
+        if (request.getContext() != null && request.getContext().getTools() != null) {
+            merged.addAll(request.getContext().getTools());
+        }
+
+        if (request.getContext() != null && request.getContext().getFrontendTools() != null) {
+            for (ProtocolFrontendTool legacy : request.getContext().getFrontendTools()) {
+                boolean alreadyPresent = merged.stream()
+                        .anyMatch(t -> t.getName().equals(legacy.getName()));
+                if (!alreadyPresent) {
+                    merged.add(ProtocolToolDescriptor.builder()
+                            .name(legacy.getName())
+                            .source("manual".equalsIgnoreCase(legacy.getInteractionMode())
+                                    ? ChatToolSource.HUMAN : ChatToolSource.FRONTEND)
+                            .description(legacy.getDescription())
+                            .parameters(legacy.getParameters() != null
+                                    ? objectMapper.valueToTree(legacy.getParameters()) : null)
+                            .requiresConfirmation("manual".equalsIgnoreCase(legacy.getInteractionMode()))
+                            .build());
+                }
+            }
+        }
+
+        return merged;
     }
 
     private String nullToEmpty(String value) {

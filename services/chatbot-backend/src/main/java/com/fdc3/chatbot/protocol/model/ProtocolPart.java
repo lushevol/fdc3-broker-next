@@ -26,6 +26,8 @@ public class ProtocolPart {
     private String toolCallId;
     private String toolName;
     private String executionTarget;
+    private String source;
+    private String providerId;
     private String state;
     private JsonNode input;
     private JsonNode output;
