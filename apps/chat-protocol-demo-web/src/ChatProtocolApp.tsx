@@ -1,9 +1,11 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   AssistantRuntimeProvider,
   useLocalRuntime,
+  useAui,
+  Tools,
 } from '@assistant-ui/react';
 import type {
   ChatAssistantMessage,
@@ -11,89 +13,21 @@ import type {
   ChatRunRequest,
   ChatStreamFrame,
   ChatToolCallPart,
+  ChatToolInputStartFrame,
   ChatToolMessage,
   ChatToolOutputAvailableFrame,
+  ChatToolOutputErrorFrame,
 } from '@fm/chat-protocol-contract';
 import {
   createProtocolLocalRuntime,
   createProtocolStreamAdapter,
 } from '@fm/chat-protocol-frontend';
 import { AssistantModal } from '@/components/assistant-ui/assistant-modal';
-
-type PendingHumanTool = {
-  toolCallId: string;
-  toolName: string;
-  source: ChatToolCallPart['source'];
-  input: Record<string, unknown>;
-  providerId?: string;
-};
+import { ToolRegistryPanel, useToolInvocationTracker } from '@/ToolRegistryPanel';
+import type { ToolInvocation } from '@/ToolRegistryPanel';
+import { getToolkitForPreset, getToolDescriptors, type ToolPreset } from '@/toolkit';
 
 const API_URL = import.meta.env.VITE_PROTOCOL_DEMO_API_URL ?? 'http://127.0.0.1:8080/api/chat/runs';
-
-type ToolPreset = 'minimal' | 'full';
-
-const MINIMAL_TOOLS = [
-  {
-    name: 'location.resolve',
-    source: 'frontend' as const,
-    description: 'Resolve a location in the runtime',
-    parameters: {
-      type: 'object',
-      properties: { query: { type: 'string' } },
-      required: ['query'],
-    },
-  },
-];
-
-const FULL_TOOLS = [
-  ...MINIMAL_TOOLS,
-  {
-    name: 'approval.confirm',
-    source: 'human' as const,
-    description: 'Confirm a user decision',
-    parameters: {
-      type: 'object',
-      properties: { decision: { type: 'string' } },
-      required: ['decision'],
-    },
-  },
-  {
-    name: 'summary.compose',
-    source: 'backend' as const,
-    description: 'Compose a final summary',
-    parameters: {
-      type: 'object',
-      properties: { text: { type: 'string' } },
-      required: ['text'],
-    },
-  },
-  {
-    name: 'analytics.lookup',
-    source: 'mcp' as const,
-    providerId: 'analytics-mcp',
-    description: 'Look up analytics',
-    parameters: {
-      type: 'object',
-      properties: { appId: { type: 'string' } },
-      required: ['appId'],
-    },
-  },
-  {
-    name: 'profile.lookup',
-    source: 'mcp' as const,
-    providerId: 'profile-mcp',
-    description: 'Look up user profile context',
-    parameters: {
-      type: 'object',
-      properties: { userId: { type: 'string' } },
-      required: ['userId'],
-    },
-  },
-];
-
-function getToolsForPreset(preset: ToolPreset) {
-  return preset === 'minimal' ? MINIMAL_TOOLS : FULL_TOOLS;
-}
 
 type ToolResultContentPartLike = {
   type: 'tool-result';
@@ -274,47 +208,6 @@ function toProtocolMessages(messages: readonly ProtocolCompatibleThreadMessage[]
   return protocolMessages;
 }
 
-function encodeLocationToolResult(part: ChatToolCallPart): ChatToolCallPart & { output: Record<string, unknown> } {
-  const query = typeof part.input.query === 'string' ? part.input.query : 'San Francisco';
-  const normalized = query.toLowerCase();
-
-  if (normalized.includes('beijing')) {
-    return {
-      ...part,
-      state: 'output-available',
-      output: {
-        name: 'Beijing, CN',
-        latitude: 39.9042,
-        longitude: 116.4074,
-      },
-    };
-  }
-
-  return {
-    ...part,
-    state: 'output-available',
-    output: {
-      name: 'San Francisco, CA',
-      latitude: 37.7749,
-      longitude: -122.4194,
-    },
-  };
-}
-
-function resolveFrontendTool(
-  part: ChatToolCallPart,
-): ChatToolCallPart & { output: Record<string, unknown> } {
-  if (part.toolName === 'location.resolve') {
-    return encodeLocationToolResult(part);
-  }
-
-  return {
-    ...part,
-    state: 'output-available',
-    output: { result: `Simulated result from frontend tool: ${part.toolName}` },
-  };
-}
-
 function findPendingToolBySource(
   parts: readonly ChatAssistantMessage['parts'][number][],
   source: ChatToolCallPart['source'],
@@ -397,6 +290,7 @@ async function postRunRequest(request: ChatRunRequest): Promise<Response> {
 
 async function* autoResolveFrontendTools(
   request: ChatRunRequest,
+  onFrame?: (frame: ChatStreamFrame) => void,
 ): AsyncGenerator<ChatStreamFrame, void> {
   let nextRequest: ChatRunRequest | null = request;
   let currentRunId = request.runId ?? null;
@@ -412,6 +306,7 @@ async function* autoResolveFrontendTools(
 
     for await (const frame of parseSseFrames(response)) {
       adapter.applyFrame(frame);
+      onFrame?.(frame);
 
       if (frame.type === 'start' && frame.runId) {
         currentRunId = frame.runId;
@@ -439,13 +334,34 @@ async function* autoResolveFrontendTools(
       break;
     }
 
-    const resolvedTool = resolveFrontendTool(pendingFrontendTool);
+    const resolvedTool = (() => {
+      if (pendingFrontendTool.toolName === 'location.resolve') {
+        const query = typeof pendingFrontendTool.input.query === 'string' ? pendingFrontendTool.input.query : 'San Francisco';
+        const normalized = query.toLowerCase();
+        if (normalized.includes('beijing')) {
+          return {
+            ...pendingFrontendTool,
+            state: 'output-available' as const,
+            output: { name: 'Beijing, CN', latitude: 39.9042, longitude: 116.4074 },
+          };
+        }
+        return {
+          ...pendingFrontendTool,
+          state: 'output-available' as const,
+          output: { name: 'San Francisco, CA', latitude: 37.7749, longitude: -122.4194 },
+        };
+      }
+      return {
+        ...pendingFrontendTool,
+        state: 'output-available' as const,
+        output: { result: `Simulated result from frontend tool: ${pendingFrontendTool.toolName}` },
+      };
+    })();
 
     const resumedParts = assistantMessage.content.map((part) => {
       if (part.type === 'tool-call' && part.toolCallId === resolvedTool.toolCallId) {
         return resolvedTool;
       }
-
       return part;
     });
 
@@ -489,83 +405,53 @@ async function* autoResolveFrontendTools(
   }
 }
 
-function HumanToolApprovalCard({
-  tool,
-  onApprove,
-  onReject,
-}: {
-  tool: PendingHumanTool;
-  onApprove: (decision: Record<string, unknown>) => void;
-  onReject: () => void;
-}) {
-  return (
-    <div className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-4 shadow-sm">
-      <div className="mb-2 flex items-center gap-2">
-        <svg
-          className="h-5 w-5 text-amber-600"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-          />
-        </svg>
-        <span className="text-sm font-semibold text-amber-800">
-          Human Approval Required
-        </span>
-      </div>
-      <div className="mb-3 text-sm text-amber-900">
-        <p>
-          Tool: <strong>{tool.toolName}</strong>
-        </p>
-        <p className="mt-1 text-xs text-amber-700">
-          {Object.keys(tool.input).length > 0
-            ? `Input: ${JSON.stringify(tool.input)}`
-            : 'No input parameters'}
-        </p>
-      </div>
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() =>
-            onApprove({
-              decision: 'approved',
-              confirmed: true,
-              ...tool.input,
-            })
-          }
-          className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-        >
-          Approve
-        </button>
-        <button
-          type="button"
-          onClick={onReject}
-          className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-        >
-          Reject
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function createConversationId(threadId?: string): string {
   return threadId ? `conv-${threadId}` : 'conv-chat-protocol-demo';
 }
 
-export function ChatProtocolApp() {
-  const [activeToolPreset, setActiveToolPreset] = useState<ToolPreset>('minimal');
-  const activeToolPresetRef = useRef<ToolPreset>('minimal');
+function ChatProtocolAppContent({ activeToolPreset, selectToolPreset }: { activeToolPreset: ToolPreset; selectToolPreset: (preset: ToolPreset) => void }) {
+  const { invocations, trackInvocation, updateInvocation, resetInvocations } = useToolInvocationTracker();
 
-  function selectToolPreset(nextPreset: ToolPreset) {
-    activeToolPresetRef.current = nextPreset;
-    setActiveToolPreset(nextPreset);
-  }
+  const onFrame = useCallback(
+    (frame: ChatStreamFrame) => {
+      if (frame.type === 'tool-input-start') {
+        const f = frame as ChatToolInputStartFrame & { source?: string; providerId?: string };
+        trackInvocation({
+          toolCallId: f.toolCallId,
+          toolName: f.toolName,
+          source: (f.source as ToolInvocation['source']) ?? (f.executionTarget === 'frontend' ? 'frontend' : 'backend'),
+          providerId: f.providerId,
+          input: undefined,
+          state: 'input-available',
+        });
+      } else if (frame.type === 'tool-input-available') {
+        updateInvocation(frame.toolCallId, {
+          input: frame.input,
+          state: 'input-available',
+        });
+      } else if (frame.type === 'tool-output-available') {
+        const f = frame as ChatToolOutputAvailableFrame & { source?: string; providerId?: string };
+        updateInvocation(f.toolCallId, {
+          output: f.output,
+          state: 'output-available',
+          source: (f.source as ToolInvocation['source']) ?? 'backend',
+          providerId: f.providerId,
+        });
+      } else if (frame.type === 'tool-output-error') {
+        const f = frame as ChatToolOutputErrorFrame & { source?: string; providerId?: string };
+        updateInvocation(f.toolCallId, {
+          error: f.error,
+          state: 'output-error',
+          source: (f.source as ToolInvocation['source']) ?? 'backend',
+          providerId: f.providerId,
+        });
+      }
+    },
+    [trackInvocation, updateInvocation],
+  );
+
+  const toolkit = getToolkitForPreset(activeToolPreset);
+  const currentTools = getToolDescriptors(activeToolPreset);
 
   const modelAdapter = useMemo(
     () =>
@@ -573,27 +459,35 @@ export function ChatProtocolApp() {
         stream: (runOptions) => {
           const conversationId = createConversationId(runOptions.unstable_threadId);
           const messages = toProtocolMessages(runOptions.messages);
-          const tools = getToolsForPreset(activeToolPresetRef.current);
+
+          const contextTools = currentTools.map((t) => ({
+            name: t.name,
+            source: t.source === 'frontend' ? 'frontend' as const : t.source === 'human' ? 'human' as const : 'backend' as const,
+            description: t.description,
+            parameters: { type: 'object', properties: {}, required: [] },
+          }));
 
           const request: ChatRunRequest = {
             conversationId,
             trigger: 'submit-message',
-            context: {
-              tools,
-            },
+            context: { tools: contextTools },
             messages,
             metadata: runOptions.runConfig.custom ?? {},
           };
 
-          return autoResolveFrontendTools(request);
+          return autoResolveFrontendTools(request, onFrame);
         },
       }),
-    [],
+    [onFrame, currentTools],
   );
+
   const runtime = useLocalRuntime(modelAdapter);
+  const aui = useAui({
+    tools: Tools({ toolkit }),
+  });
 
   return (
-    <AssistantRuntimeProvider runtime={runtime}>
+    <AssistantRuntimeProvider runtime={runtime} aui={aui}>
       <main className="grid min-h-screen grid-cols-1 items-center gap-8 px-5 py-10 md:px-8 lg:grid-cols-[minmax(320px,520px)_minmax(320px,1fr)] lg:px-16">
         <section className="min-w-0">
           <span className="inline-flex w-fit rounded-full bg-[rgba(120,164,203,0.16)] px-3 py-1 text-xs font-medium uppercase tracking-[0.08em] text-[#37516a]">
@@ -666,21 +560,29 @@ export function ChatProtocolApp() {
             The assistant modal is available in the bottom right corner of the screen.
           </p>
         </section>
-        <section className="flex min-w-0 items-center justify-center" aria-hidden="true">
-          <div className="w-full max-w-[42rem] rounded-[2rem] border border-[rgba(16,32,51,0.08)] bg-[rgba(255,255,255,0.72)] p-6 shadow-[0_30px_80px_-50px_rgba(16,32,51,0.45)] backdrop-blur-[12px]">
-            <div className="inline-flex items-center rounded-full bg-[rgba(220,233,246,0.75)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#345069]">
-              Official modal pattern
-            </div>
-            <div className="mt-5 min-h-[18rem] rounded-[1.5rem] border border-[rgba(16,32,51,0.07)] bg-[linear-gradient(180deg,rgba(255,255,255,0.85)_0%,rgba(240,246,251,0.85)_100%)] p-6 text-[#486179]">
-              <p className="mb-3">Open the floating assistant and ask:</p>
-              <code className="inline-block rounded-[0.9rem] bg-[#edf4fa] px-3 py-2 text-[#173b60]">
-                What is the weather in San Francisco yesterday?
-              </code>
-            </div>
-          </div>
+        <section className="flex min-w-0 flex-col items-center justify-start lg:items-start lg:justify-center" aria-hidden="true">
+          <ToolRegistryPanel
+            tools={currentTools}
+            invocations={invocations}
+            onResetInvocations={resetInvocations}
+          />
         </section>
       </main>
       <AssistantModal />
     </AssistantRuntimeProvider>
+  );
+}
+
+export function ChatProtocolApp() {
+  const [activeToolPreset, setActiveToolPreset] = useState<ToolPreset>('minimal');
+  const activeToolPresetRef = useRef<ToolPreset>('minimal');
+
+  const handlePresetChange = useCallback((preset: ToolPreset) => {
+    activeToolPresetRef.current = preset;
+    setActiveToolPreset(preset);
+  }, []);
+
+  return (
+    <ChatProtocolAppContent activeToolPreset={activeToolPreset} selectToolPreset={handlePresetChange} />
   );
 }

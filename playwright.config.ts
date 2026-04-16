@@ -33,14 +33,14 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: '**/chat-protocol-demo.spec.ts',
+      testIgnore: '**/chat-protocol-demo*.spec.ts',
       use: {
         browserName: 'chromium',
       },
     },
     {
       name: 'chat-protocol-demo',
-      testMatch: '**/chat-protocol-demo.spec.ts',
+      testMatch: '**/chat-protocol-demo*.spec.ts',
       use: {
         browserName: 'chromium',
         baseURL: 'http://127.0.0.1:4173',
