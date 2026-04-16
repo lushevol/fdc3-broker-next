@@ -8,6 +8,8 @@ import type {
   ChatToolOutputAvailableFrame,
   ChatToolOutputErrorFrame,
   ChatToolCallPart,
+  ChatToolCallState,
+  ChatToolSource,
 } from '@fm/chat-protocol-contract';
 import type {
   ChatModelAdapter,
@@ -40,16 +42,19 @@ export type ProtocolStreamAdapter = {
 
 type ToolState = {
   toolName: string;
-  executionTarget: 'backend' | 'frontend';
+  source: ChatToolSource;
+  providerId?: string;
   inputText: string;
 };
 
 type StreamState = {
   toolStates: Map<string, ToolState>;
+  toolIdentities: Map<string, Pick<ToolState, 'source' | 'providerId' | 'toolName'>>;
   textPartIndexes: Map<string, number>;
 };
 
 const TEXT_PART_INDEXES_KEY = '__protocolTextPartIndexes';
+const TOOL_IDENTITY_INDEXES_KEY = '__protocolToolIdentities';
 
 const DEFAULT_STATUS: MessageStatus = {
   type: 'running',
@@ -83,13 +88,158 @@ function readTextPartIndexes(metadata: Record<string, unknown>): Map<string, num
   return new Map<string, number>(entries);
 }
 
-function writeTextPartIndexes(
+function readToolIdentities(
+  metadata: Record<string, unknown>,
+): Map<string, Pick<ToolState, 'source' | 'providerId' | 'toolName'>> {
+  const raw = metadata[TOOL_IDENTITY_INDEXES_KEY];
+  if (!isObjectRecord(raw)) {
+    return new Map<string, Pick<ToolState, 'source' | 'providerId' | 'toolName'>>();
+  }
+
+  const entries = Object.entries(raw).flatMap(
+    ([toolCallId, value]): Array<[string, Pick<ToolState, 'source' | 'providerId' | 'toolName'>]> => {
+      if (!isObjectRecord(value)) {
+        return [];
+      }
+
+      const source = value.source;
+      if (
+        source !== 'frontend' &&
+        source !== 'backend' &&
+        source !== 'human' &&
+        source !== 'mcp'
+      ) {
+        return [];
+      }
+
+      return [
+        [
+          toolCallId,
+          {
+            source,
+            ...(typeof value.providerId === 'string' ? { providerId: value.providerId } : {}),
+            ...(typeof value.toolName === 'string' ? { toolName: value.toolName } : {}),
+          },
+        ],
+      ];
+    },
+  );
+
+  return new Map<string, Pick<ToolState, 'source' | 'providerId' | 'toolName'>>(entries);
+}
+
+function writeProtocolMetadata(
   metadata: Record<string, unknown>,
   textPartIndexes: Map<string, number>,
+  toolIdentities: Map<string, Pick<ToolState, 'source' | 'providerId' | 'toolName'>>,
 ): Record<string, unknown> {
   return {
     ...metadata,
     [TEXT_PART_INDEXES_KEY]: Object.fromEntries(textPartIndexes.entries()),
+    [TOOL_IDENTITY_INDEXES_KEY]: Object.fromEntries(toolIdentities.entries()),
+  };
+}
+
+function resolveAvailableToolState(source: ChatToolSource): ChatToolCallState {
+  if (source === 'human') {
+    return 'awaiting-human';
+  }
+
+  if (source === 'backend' || source === 'mcp') {
+    return 'awaiting-execution';
+  }
+
+  return 'input-available';
+}
+
+function getDefaultToolSource(): ChatToolSource {
+  return 'frontend';
+}
+
+function readToolIdentityMetadata(
+  value: unknown,
+): (Pick<ToolState, 'source' | 'providerId' | 'toolName'> & { toolCallId: string }) | null {
+  if (!isObjectRecord(value)) {
+    return null;
+  }
+
+  const source = value.source;
+  if (
+    source !== 'frontend' &&
+    source !== 'backend' &&
+    source !== 'human' &&
+    source !== 'mcp'
+  ) {
+    return null;
+  }
+
+  if (typeof value.toolCallId !== 'string' || value.toolCallId.length === 0) {
+    return null;
+  }
+
+  return {
+    toolCallId: value.toolCallId,
+    source,
+    ...(typeof value.providerId === 'string' ? { providerId: value.providerId } : {}),
+    ...(typeof value.toolName === 'string' ? { toolName: value.toolName } : {}),
+  };
+}
+
+function syncToolIdentity(
+  state: StreamState,
+  toolCallId: string,
+  identity: Pick<ToolState, 'source' | 'providerId' | 'toolName'>,
+) {
+  state.toolIdentities.set(toolCallId, identity);
+
+  const existing = state.toolStates.get(toolCallId);
+  if (existing) {
+    state.toolStates.set(toolCallId, {
+      ...existing,
+      ...identity,
+      toolName: identity.toolName ?? existing.toolName,
+    });
+  }
+}
+
+function updateToolCallPart(
+  content: readonly ProtocolAssistantContentPart[],
+  toolCallId: string,
+  updater: (part: ChatToolCallPart) => ChatToolCallPart,
+): ProtocolAssistantContentPart[] {
+  const index = findToolCallIndex(content, toolCallId);
+  if (index === -1) {
+    return [...content];
+  }
+
+  const currentPart = content[index];
+  if (currentPart.type !== 'tool-call') {
+    return [...content];
+  }
+
+  const nextContent = [...content];
+  nextContent[index] = updater(currentPart);
+  return nextContent;
+}
+
+function getToolState(
+  state: StreamState,
+  toolCallId: string,
+  fallback: Partial<ToolState> = {},
+): ToolState {
+  const existing = state.toolStates.get(toolCallId);
+  if (existing) {
+    return existing;
+  }
+
+  const identity = state.toolIdentities.get(toolCallId);
+  return {
+    toolName: fallback.toolName ?? identity?.toolName ?? '',
+    source: fallback.source ?? identity?.source ?? getDefaultToolSource(),
+    ...(fallback.providerId ?? identity?.providerId
+      ? { providerId: fallback.providerId ?? identity?.providerId }
+      : {}),
+    inputText: fallback.inputText ?? '',
   };
 }
 
@@ -199,8 +349,9 @@ function ensureToolCallPart(
     type: 'tool-call',
     toolCallId: frame.toolCallId,
     toolName: toolState.toolName,
-    executionTarget: toolState.executionTarget,
-    state: 'input-streaming',
+    source: toolState.source,
+    ...(toolState.providerId ? { providerId: toolState.providerId } : {}),
+    state: resolveAvailableToolState(toolState.source),
     input: {},
   };
 
@@ -210,8 +361,9 @@ function ensureToolCallPart(
     const nextToolPart: ChatToolCallPart = {
       ...currentPart,
       toolName: toolState.toolName,
-      executionTarget: toolState.executionTarget,
-      state: 'input-streaming',
+      source: toolState.source,
+      ...(toolState.providerId ? { providerId: toolState.providerId } : {}),
+      state: resolveAvailableToolState(toolState.source),
       input: parseBufferedInput(toolState.inputText),
     };
 
@@ -228,8 +380,9 @@ function ensureToolCallPart(
     const nextToolPart: ChatToolCallPart = {
       ...currentPart,
       toolName: toolState.toolName,
-      executionTarget: toolState.executionTarget,
-      state: 'input-available',
+      source: toolState.source,
+      ...(toolState.providerId ? { providerId: toolState.providerId } : {}),
+      state: resolveAvailableToolState(toolState.source),
       input: normalizeRecord(frame.input),
     };
 
@@ -246,7 +399,8 @@ function ensureToolCallPart(
     const nextToolPart: ChatToolCallPart = {
       ...currentPart,
       toolName: toolState.toolName,
-      executionTarget: toolState.executionTarget,
+      source: toolState.source,
+      ...(toolState.providerId ? { providerId: toolState.providerId } : {}),
       state: 'output-available',
       input: currentPart.input,
       output: normalizeRecord(frame.output),
@@ -266,7 +420,8 @@ function ensureToolCallPart(
       ? {
           ...currentPart,
           toolName: toolState.toolName,
-          executionTarget: toolState.executionTarget,
+          source: toolState.source,
+          ...(toolState.providerId ? { providerId: toolState.providerId } : {}),
           state: 'output-error',
           input: currentPart.input,
           error: frame.error,
@@ -274,8 +429,9 @@ function ensureToolCallPart(
       : {
           ...currentPart,
           toolName: toolState.toolName,
-          executionTarget: toolState.executionTarget,
-          state: 'input-streaming',
+          source: toolState.source,
+          ...(toolState.providerId ? { providerId: toolState.providerId } : {}),
+          state: resolveAvailableToolState(toolState.source),
           input: currentPart.input,
         };
 
@@ -463,14 +619,22 @@ function toThreadMessage(message: ProtocolAssistantMessage): ThreadMessage {
 
 function createStreamState(message?: ProtocolAssistantMessage): StreamState {
   const toolStates = new Map<string, ToolState>();
+  const toolIdentities = message ? readToolIdentities(message.metadata) : new Map();
 
   if (message) {
     for (const part of message.content) {
       if (part.type === 'tool-call') {
+        const source = part.source;
         toolStates.set(part.toolCallId, {
           toolName: part.toolName,
-          executionTarget: part.executionTarget,
+          source,
+          ...(part.providerId ? { providerId: part.providerId } : {}),
           inputText: stringifyInput(part.input),
+        });
+        toolIdentities.set(part.toolCallId, {
+          source,
+          ...(part.providerId ? { providerId: part.providerId } : {}),
+          toolName: part.toolName,
         });
       }
     }
@@ -478,6 +642,7 @@ function createStreamState(message?: ProtocolAssistantMessage): StreamState {
 
   return {
     toolStates,
+    toolIdentities,
     textPartIndexes: message ? readTextPartIndexes(message.metadata) : new Map<string, number>(),
   };
 }
@@ -488,9 +653,31 @@ function applyFrame(
   state: StreamState,
 ): ProtocolAssistantMessage {
   let nextContent: ProtocolAssistantContentPart[] = [...message.content];
+  let nextMetadata = message.metadata;
   const nextStatus = updateMessageStatus(message.status, frame);
 
   switch (frame.type) {
+    case 'message-metadata': {
+      nextMetadata = {
+        ...nextMetadata,
+        ...frame.metadata,
+      };
+      const toolIdentity = readToolIdentityMetadata(frame.metadata['toolIdentity']);
+      if (toolIdentity) {
+        syncToolIdentity(state, toolIdentity.toolCallId, toolIdentity);
+        nextContent = updateToolCallPart(nextContent, toolIdentity.toolCallId, (currentPart) => ({
+          ...currentPart,
+          toolName: toolIdentity.toolName ?? currentPart.toolName,
+          source: toolIdentity.source,
+          ...(toolIdentity.providerId ? { providerId: toolIdentity.providerId } : {}),
+          state:
+            currentPart.state === 'output-available' || currentPart.state === 'output-error'
+              ? currentPart.state
+              : resolveAvailableToolState(toolIdentity.source),
+        }));
+      }
+      break;
+    }
     case 'reasoning-summary': {
       nextContent = [...nextContent, { type: 'reasoning-summary', text: frame.text }];
       break;
@@ -548,20 +735,19 @@ function applyFrame(
     case 'text-end':
       break;
     case 'tool-input-start': {
-      state.toolStates.set(frame.toolCallId, {
-        toolName: frame.toolName,
-        executionTarget: frame.executionTarget ?? 'backend',
+      const identity = state.toolIdentities.get(frame.toolCallId);
+      const toolState = {
+        toolName: frame.toolName || identity?.toolName || '',
+        source: identity?.source ?? getDefaultToolSource(),
+        ...(identity?.providerId ? { providerId: identity.providerId } : {}),
         inputText: '',
-      });
-      nextContent = ensureToolCallPart(nextContent, frame, state.toolStates.get(frame.toolCallId)!);
+      };
+      state.toolStates.set(frame.toolCallId, toolState);
+      nextContent = ensureToolCallPart(nextContent, frame, toolState);
       break;
     }
     case 'tool-input-delta': {
-      const current = state.toolStates.get(frame.toolCallId) ?? {
-        toolName: '',
-        executionTarget: 'backend' as const,
-        inputText: '',
-      };
+      const current = getToolState(state, frame.toolCallId);
       const updated = {
         ...current,
         inputText: `${current.inputText}${frame.delta}`,
@@ -571,31 +757,19 @@ function applyFrame(
       break;
     }
     case 'tool-input-available': {
-      const current = state.toolStates.get(frame.toolCallId) ?? {
-        toolName: '',
-        executionTarget: 'backend' as const,
-        inputText: '',
-      };
+      const current = getToolState(state, frame.toolCallId);
       const updated = current;
       state.toolStates.set(frame.toolCallId, updated);
       nextContent = ensureToolCallPart(nextContent, frame, updated);
       break;
     }
     case 'tool-output-available': {
-      const current = state.toolStates.get(frame.toolCallId) ?? {
-        toolName: '',
-        executionTarget: 'backend' as const,
-        inputText: '',
-      };
+      const current = getToolState(state, frame.toolCallId);
       nextContent = ensureToolCallPart(nextContent, frame, current);
       break;
     }
     case 'tool-output-error': {
-      const current = state.toolStates.get(frame.toolCallId) ?? {
-        toolName: '',
-        executionTarget: 'backend' as const,
-        inputText: '',
-      };
+      const current = getToolState(state, frame.toolCallId);
       nextContent = ensureToolCallPart(nextContent, frame, current);
       break;
     }
@@ -661,7 +835,7 @@ function applyFrame(
     ...message,
     content: nextContent,
     status: nextStatus,
-    metadata: writeTextPartIndexes(message.metadata, state.textPartIndexes),
+    metadata: writeProtocolMetadata(nextMetadata, state.textPartIndexes, state.toolIdentities),
   };
 }
 

@@ -3,10 +3,9 @@ import { z } from 'zod';
 export const chatRoleSchema = z.enum(['system', 'user', 'assistant', 'tool']);
 export const chatFinishReasonSchema = z.enum(['stop', 'tool-calls', 'action-required', 'error']);
 export const chatToolCallStateSchema = z.enum([
-  'input-streaming',
   'input-available',
-  'awaiting-frontend',
-  'awaiting-approval',
+  'awaiting-execution',
+  'awaiting-human',
   'output-available',
   'output-error',
 ]);
@@ -15,6 +14,7 @@ export const chatStepStatusSchema = z.enum(['pending', 'running', 'completed', '
 export const chatActionStatusSchema = z.enum(['pending', 'resolved']);
 export const chatFrameMetadataSchema = z.record(z.unknown());
 const chatStructuredPayloadSchema = z.record(z.unknown());
+export const chatToolSourceSchema = z.enum(['frontend', 'backend', 'human', 'mcp']);
 
 const chatTextPartSchema = z
   .object({
@@ -61,13 +61,23 @@ const chatToolCallPartSchema = z
     type: z.literal('tool-call'),
     toolCallId: z.string().min(1),
     toolName: z.string().min(1),
-    executionTarget: chatExecutionTargetSchema,
+    source: chatToolSourceSchema,
     state: chatToolCallStateSchema,
     input: chatStructuredPayloadSchema,
+    providerId: z.string().min(1).optional(),
     output: chatStructuredPayloadSchema.optional(),
     error: z.string().min(1).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.source === 'mcp' && !value.providerId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['providerId'],
+        message: 'providerId is required for MCP tools',
+      });
+    }
+  });
 
 const chatToolResultPartSchema = z
   .object({
@@ -139,7 +149,7 @@ export const chatUserPartSchema = z.discriminatedUnion('type', [
   chatImagePartSchema,
 ]);
 
-export const chatAssistantPartSchema = z.discriminatedUnion('type', [
+export const chatAssistantPartSchema = z.union([
   chatTextPartSchema,
   chatReasoningSummaryPartSchema,
   chatPlanPartSchema,
@@ -204,14 +214,26 @@ export const chatRunConfigSchema = z
   })
   .strict();
 
-export const chatFrontendToolSchema = z
+export const chatToolDescriptorSchema = z
   .object({
     name: z.string().min(1),
+    source: chatToolSourceSchema,
     description: z.string().min(1),
     parameters: z.record(z.unknown()),
-    interactionMode: z.enum(['auto', 'manual']).optional(),
+    providerId: z.string().min(1).optional(),
+    requiresConfirmation: z.boolean().optional(),
+    ui: z.record(z.unknown()).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.source === 'mcp' && !value.providerId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['providerId'],
+        message: 'providerId is required for MCP tools',
+      });
+    }
+  });
 
 export const chatRunContextSchema = z
   .object({
@@ -222,7 +244,7 @@ export const chatRunContextSchema = z
       })
       .strict()
       .optional(),
-    frontendTools: z.array(chatFrontendToolSchema).optional(),
+    tools: z.array(chatToolDescriptorSchema).optional(),
   })
   .catchall(z.unknown())
   .strict();

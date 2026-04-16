@@ -21,10 +21,20 @@ describe('protocol stream adapter', () => {
   it('turns tool input frames into tool-call parts', () => {
     const message = applyFrameSequenceToMessage([
       {
+        type: 'message-metadata',
+        messageId: 'msg_asst_1',
+        metadata: {
+          toolIdentity: {
+            source: 'frontend',
+            toolCallId: 'tool_1',
+            toolName: 'lookup_weather',
+          },
+        },
+      },
+      {
         type: 'tool-input-start',
         toolCallId: 'tool_1',
         toolName: 'lookup_weather',
-        executionTarget: 'frontend',
       },
       { type: 'tool-input-delta', toolCallId: 'tool_1', delta: '{"location":"' },
       { type: 'tool-input-delta', toolCallId: 'tool_1', delta: 'Beijing"}' },
@@ -36,7 +46,7 @@ describe('protocol stream adapter', () => {
       type: 'tool-call',
       toolCallId: 'tool_1',
       toolName: 'lookup_weather',
-      executionTarget: 'frontend',
+      source: 'frontend',
       input: { location: 'Beijing' },
     });
   });
@@ -88,13 +98,23 @@ describe('protocol stream adapter', () => {
 
   it('preserves text and tool state when continuing from an existing message', () => {
     const initialMessage = applyFrameSequenceToMessage([
+      {
+        type: 'message-metadata',
+        messageId: 'msg_asst_1',
+        metadata: {
+          toolIdentity: {
+            source: 'frontend',
+            toolCallId: 'tool_1',
+            toolName: 'lookup_weather',
+          },
+        },
+      },
       { type: 'text-start', messageId: 'msg_asst_1', partId: 'intro' },
       { type: 'text-delta', messageId: 'msg_asst_1', partId: 'intro', delta: 'Hello' },
       {
         type: 'tool-input-start',
         toolCallId: 'tool_1',
         toolName: 'lookup_weather',
-        executionTarget: 'frontend',
       },
       { type: 'tool-input-available', toolCallId: 'tool_1', input: { location: 'Beijing' } },
     ]);
@@ -111,7 +131,7 @@ describe('protocol stream adapter', () => {
         type: 'tool-call',
         toolCallId: 'tool_1',
         toolName: 'lookup_weather',
-        executionTarget: 'frontend',
+        source: 'frontend',
         state: 'output-available',
         input: { location: 'Beijing' },
         output: { temperatureC: 22 },
@@ -123,10 +143,20 @@ describe('protocol stream adapter', () => {
     const adapter = createProtocolStreamAdapter();
 
     adapter.applyFrame({
+      type: 'message-metadata',
+      messageId: 'msg_asst_1',
+      metadata: {
+        toolIdentity: {
+          source: 'backend',
+          toolCallId: 'tool_backend_1',
+          toolName: 'get_weather',
+        },
+      },
+    });
+    adapter.applyFrame({
       type: 'tool-input-start',
       toolCallId: 'tool_backend_1',
       toolName: 'get_weather',
-      executionTarget: 'backend',
     });
     adapter.applyFrame({
       type: 'tool-input-available',
@@ -148,5 +178,38 @@ describe('protocol stream adapter', () => {
     });
 
     expect(adapter.getMessage().status).toEqual({ type: 'complete', reason: 'stop' });
+  });
+
+  it('patches an already rendered tool call when source metadata arrives later', () => {
+    const adapter = createProtocolStreamAdapter();
+
+    adapter.applyFrame({
+      type: 'tool-input-available',
+      toolCallId: 'tool_mcp_1',
+      input: { appId: 'weather-tile' },
+    });
+    adapter.applyFrame({
+      type: 'message-metadata',
+      messageId: 'msg_asst_1',
+      metadata: {
+        toolIdentity: {
+          source: 'mcp',
+          toolCallId: 'tool_mcp_1',
+          toolName: 'analytics.lookup',
+          providerId: 'analytics-mcp',
+        },
+      },
+    });
+
+    const message = adapter.getMessage();
+    const toolPart = message.content.find((part) => part.type === 'tool-call');
+    expect(toolPart).toMatchObject({
+      type: 'tool-call',
+      toolCallId: 'tool_mcp_1',
+      toolName: 'analytics.lookup',
+      source: 'mcp',
+      providerId: 'analytics-mcp',
+      state: 'awaiting-execution',
+    });
   });
 });

@@ -3,10 +3,9 @@ export type ChatRole = 'system' | 'user' | 'assistant' | 'tool';
 export type ChatFinishReason = 'stop' | 'tool-calls' | 'action-required' | 'error';
 
 export type ChatToolCallState =
-  | 'input-streaming'
   | 'input-available'
-  | 'awaiting-frontend'
-  | 'awaiting-approval'
+  | 'awaiting-execution'
+  | 'awaiting-human'
   | 'output-available'
   | 'output-error';
 
@@ -15,6 +14,8 @@ export type ChatExecutionTarget = 'backend' | 'frontend';
 export type ChatStepStatus = 'pending' | 'running' | 'completed' | 'failed';
 
 export type ChatActionStatus = 'pending' | 'resolved';
+
+export type ChatToolSource = 'frontend' | 'backend' | 'human' | 'mcp';
 
 export type ChatTextPart = {
   type: 'text';
@@ -50,9 +51,10 @@ export type ChatToolCallPart = {
   type: 'tool-call';
   toolCallId: string;
   toolName: string;
-  executionTarget: ChatExecutionTarget;
+  source: ChatToolSource;
   state: ChatToolCallState;
   input: Record<string, unknown>;
+  providerId?: string;
   output?: Record<string, unknown>;
   error?: string;
 };
@@ -165,11 +167,14 @@ export type ChatRunConfig = {
   reasoningVisibility?: 'summary' | 'hidden';
 };
 
-export type ChatFrontendTool = {
+export type ChatToolDescriptor = {
   name: string;
+  source: ChatToolSource;
   description: string;
   parameters: Record<string, unknown>;
-  interactionMode?: 'auto' | 'manual';
+  providerId?: string;
+  requiresConfirmation?: boolean;
+  ui?: Record<string, unknown>;
 };
 
 export type ChatRunContext = {
@@ -177,7 +182,7 @@ export type ChatRunContext = {
     activeWorkspaceId?: string;
     activeAppId?: string;
   };
-  frontendTools?: ChatFrontendTool[];
+  tools?: ChatToolDescriptor[];
   [key: string]: unknown;
 };
 
@@ -278,13 +283,13 @@ export type ChatToolInputDeltaFrame = {
 export type ChatToolInputAvailableFrame = {
   type: 'tool-input-available';
   toolCallId: string;
-  input: unknown;
+  input: Record<string, unknown>;
 };
 
 export type ChatToolOutputAvailableFrame = {
   type: 'tool-output-available';
   toolCallId: string;
-  output: unknown;
+  output: Record<string, unknown>;
 };
 
 export type ChatToolOutputErrorFrame = {

@@ -1,3 +1,5 @@
+import type { ChatMessage } from '@fm/chat-protocol-contract';
+
 export type ToolCallResumeRequest = {
   conversationId: string;
   toolCallId: string;
@@ -18,4 +20,18 @@ export function createToolCallResumeRequest(input: ToolCallResumeRequest): ToolC
 
 export function createActionResumeRequest(input: ActionResumeRequest): ActionResumeRequest {
   return input;
+}
+
+export function appendResolvedToolResult(
+  messages: ChatMessage[],
+  toolResultMessage: ChatMessage,
+): ChatMessage[] {
+  return [...messages, toolResultMessage];
+}
+
+export function appendHumanDecision(
+  messages: ChatMessage[],
+  decisionMessage: ChatMessage,
+): ChatMessage[] {
+  return [...messages, decisionMessage];
 }

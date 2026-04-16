@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   createWeatherContinuationRunRequestFixture,
+  createMixedToolRunRequestFixture,
   createToolPauseFrameFixture,
   createWeatherRunRequestFixture,
   validateRunRequest,
@@ -48,7 +49,7 @@ describe('chat protocol contract validation', () => {
               type: 'tool-call',
               toolCallId: 'call_1',
               toolName: 'geocode_location',
-              executionTarget: 'backend',
+              source: 'backend',
               state: 'input-available',
               input: { query: 'San Francisco, CA' },
             },
@@ -78,6 +79,94 @@ describe('chat protocol contract validation', () => {
 
     expect(request.messages.some((message) => message.role === 'assistant')).toBe(true);
     expect(request.messages.some((message) => message.role === 'tool')).toBe(true);
+  });
+
+  it('accepts mixed-source tools and validates MCP provider metadata', () => {
+    const result = validateRunRequest(createMixedToolRunRequestFixture());
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.context?.tools).toHaveLength(4);
+      expect(result.data.context?.tools?.[3]).toMatchObject({
+        name: 'analytics.lookup',
+        source: 'mcp',
+        providerId: 'analytics-mcp',
+      });
+    }
+  });
+
+  it('rejects an MCP tool without providerId', () => {
+    const result = validateRunRequest({
+      conversationId: 'conv_tools_poc',
+      trigger: 'submit-message',
+      context: {
+        tools: [
+          {
+            name: 'analytics.lookup',
+            source: 'mcp',
+            description: 'Look up analytics',
+            parameters: {},
+          },
+        ],
+      },
+      messages: [
+        {
+          id: 'msg_user_1',
+          role: 'user',
+          parts: [
+            {
+              type: 'text',
+              text: 'run the tool demo',
+            },
+          ],
+        },
+      ],
+      metadata: {},
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.errors.join('\n')).toContain('providerId');
+    }
+  });
+
+  it('rejects an MCP tool call without providerId', () => {
+    const result = validateRunRequest({
+      conversationId: 'conv_tools_poc',
+      trigger: 'submit-message',
+      messages: [
+        {
+          id: 'msg_user_1',
+          role: 'user',
+          parts: [
+            {
+              type: 'text',
+              text: 'run the tool demo',
+            },
+          ],
+        },
+        {
+          id: 'msg_assistant_1',
+          role: 'assistant',
+          parts: [
+            {
+              type: 'tool-call',
+              toolCallId: 'call_mcp_1',
+              toolName: 'analytics.lookup',
+              source: 'mcp',
+              state: 'input-available',
+              input: { appId: 'analytics' },
+            },
+          ],
+        },
+      ],
+      metadata: {},
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.errors.join('\n')).toContain('providerId');
+    }
   });
 
   it('rejects an empty message list', () => {

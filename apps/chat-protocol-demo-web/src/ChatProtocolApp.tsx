@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   AssistantRuntimeProvider,
   useLocalRuntime,
@@ -20,6 +20,71 @@ import {
 import { AssistantModal } from '@/components/assistant-ui/assistant-modal';
 
 const API_URL = import.meta.env.VITE_PROTOCOL_DEMO_API_URL ?? 'http://127.0.0.1:4111/api/chat/runs';
+
+type ToolPreset = 'minimal' | 'full';
+
+const MINIMAL_TOOLS = [
+  {
+    name: 'location.resolve',
+    source: 'frontend' as const,
+    description: 'Resolve a location in the runtime',
+    parameters: {
+      type: 'object',
+      properties: { query: { type: 'string' } },
+      required: ['query'],
+    },
+  },
+];
+
+const FULL_TOOLS = [
+  ...MINIMAL_TOOLS,
+  {
+    name: 'approval.confirm',
+    source: 'human' as const,
+    description: 'Confirm a user decision',
+    parameters: {
+      type: 'object',
+      properties: { decision: { type: 'string' } },
+      required: ['decision'],
+    },
+  },
+  {
+    name: 'summary.compose',
+    source: 'backend' as const,
+    description: 'Compose a final summary',
+    parameters: {
+      type: 'object',
+      properties: { text: { type: 'string' } },
+      required: ['text'],
+    },
+  },
+  {
+    name: 'analytics.lookup',
+    source: 'mcp' as const,
+    providerId: 'analytics-mcp',
+    description: 'Look up analytics',
+    parameters: {
+      type: 'object',
+      properties: { appId: { type: 'string' } },
+      required: ['appId'],
+    },
+  },
+  {
+    name: 'profile.lookup',
+    source: 'mcp' as const,
+    providerId: 'profile-mcp',
+    description: 'Look up user profile context',
+    parameters: {
+      type: 'object',
+      properties: { userId: { type: 'string' } },
+      required: ['userId'],
+    },
+  },
+];
+
+function getToolsForPreset(preset: ToolPreset) {
+  return preset === 'minimal' ? MINIMAL_TOOLS : FULL_TOOLS;
+}
 
 type WeatherCardData = {
   location: string;
@@ -63,9 +128,14 @@ function isToolThreadMessageLike(
   return message.role === 'tool';
 }
 
-function getExecutionTarget(
+function getToolSource(
   part: Extract<import('@assistant-ui/react').ThreadMessage['content'][number], { type: 'tool-call' }>,
-): 'frontend' | 'backend' {
+): ChatToolCallPart['source'] {
+  const source = (part as { source?: unknown }).source;
+  if (source === 'frontend' || source === 'backend' || source === 'human' || source === 'mcp') {
+    return source;
+  }
+
   const candidate = (part as { executionTarget?: unknown }).executionTarget;
   return candidate === 'frontend' ? 'frontend' : 'backend';
 }
@@ -138,7 +208,7 @@ function toProtocolMessages(messages: readonly ProtocolCompatibleThreadMessage[]
             type: 'tool-call',
             toolCallId: part.toolCallId,
             toolName: part.toolName,
-            executionTarget: getExecutionTarget(part),
+            source: getToolSource(part),
             state:
               part.result !== undefined
                 ? part.isError
@@ -316,6 +386,7 @@ async function* streamProtocolFrames(
     });
 
     let finishReason: string | null = null;
+    let pendingFinishFrame: ChatStreamFrame | null = null;
 
     for await (const frame of parseSseFrames(response)) {
       adapter.applyFrame(frame);
@@ -326,6 +397,11 @@ async function* streamProtocolFrames(
 
       if (frame.type === 'finish') {
         finishReason = frame.finishReason;
+
+        if (frame.finishReason === 'tool-calls') {
+          pendingFinishFrame = frame;
+          break;
+        }
       }
 
       yield frame;
@@ -341,12 +417,17 @@ async function* streamProtocolFrames(
       .find(
         (part): part is ChatToolCallPart =>
           part.type === 'tool-call' &&
-          part.executionTarget === 'frontend' &&
+          (part.source === 'frontend' ||
+            (part as ChatToolCallPart & { executionTarget?: unknown }).executionTarget ===
+              'frontend') &&
           part.state === 'input-available' &&
           !part.output,
       );
 
     if (!pendingTool) {
+      if (pendingFinishFrame) {
+        yield pendingFinishFrame;
+      }
       break;
     }
 
@@ -399,6 +480,7 @@ async function* streamProtocolFrames(
       conversationId: request.conversationId,
       runId: currentRunId,
       trigger: 'submit-tool-result',
+      context: request.context,
       messages: resumedToolMessage
         ? [...request.messages, resumedAssistantMessage, resumedToolMessage]
         : [...request.messages, resumedAssistantMessage],
@@ -412,16 +494,28 @@ function createConversationId(threadId?: string): string {
 }
 
 export function ChatProtocolApp() {
+  const [activeToolPreset, setActiveToolPreset] = useState<ToolPreset>('minimal');
+  const activeToolPresetRef = useRef<ToolPreset>('minimal');
+
+  function selectToolPreset(nextPreset: ToolPreset) {
+    activeToolPresetRef.current = nextPreset;
+    setActiveToolPreset(nextPreset);
+  }
+
   const modelAdapter = useMemo(
     () =>
       createProtocolLocalRuntime({
         stream: (runOptions) => {
           const conversationId = createConversationId(runOptions.unstable_threadId);
           const messages = toProtocolMessages(runOptions.messages);
+          const tools = getToolsForPreset(activeToolPresetRef.current);
 
           const request: ChatRunRequest = {
             conversationId,
             trigger: 'submit-message',
+            context: {
+              tools,
+            },
             messages,
             metadata: runOptions.runConfig.custom ?? {},
           };
@@ -452,6 +546,27 @@ export function ChatProtocolApp() {
             Configure <code>VITE_PROTOCOL_DEMO_API_URL</code> to point at the mock demo server or
             the real LangChain4j backend.
           </p>
+          <div className="mb-5 inline-flex flex-wrap items-center gap-2 rounded-[1.25rem] border border-[rgba(16,32,51,0.1)] bg-[rgba(255,255,255,0.7)] p-2 text-sm text-[#173b60] shadow-[0_10px_30px_-24px_rgba(16,32,51,0.35)]">
+            <span className="px-2 font-semibold uppercase tracking-[0.08em] text-[#4c6680]">
+              Active preset
+            </span>
+            <button
+              type="button"
+              onClick={() => selectToolPreset('minimal')}
+              aria-pressed={activeToolPreset === 'minimal'}
+              className="rounded-full border px-3 py-1.5 transition-colors aria-pressed:border-[#173b60] aria-pressed:bg-[#173b60] aria-pressed:text-white"
+            >
+              Use minimal tools
+            </button>
+            <button
+              type="button"
+              onClick={() => selectToolPreset('full')}
+              aria-pressed={activeToolPreset === 'full'}
+              className="rounded-full border px-3 py-1.5 transition-colors aria-pressed:border-[#173b60] aria-pressed:bg-[#173b60] aria-pressed:text-white"
+            >
+              Use full tools
+            </button>
+          </div>
           <p className="max-w-[36rem] text-[1.05rem] font-semibold leading-[1.7] text-[#173b60]">
             The assistant modal is available in the bottom right corner of the screen.
           </p>

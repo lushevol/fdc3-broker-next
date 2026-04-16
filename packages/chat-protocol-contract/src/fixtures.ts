@@ -14,9 +14,10 @@ export function createWeatherRunRequestFixture(): ChatRunRequest {
         activeWorkspaceId: 'ws_1',
         activeAppId: 'weather-tile',
       },
-      frontendTools: [
+      tools: [
         {
           name: 'location.resolve',
+          source: 'frontend',
           description: 'Resolve a location in the frontend/runtime context',
           parameters: {
             type: 'object',
@@ -27,7 +28,6 @@ export function createWeatherRunRequestFixture(): ChatRunRequest {
             },
             required: ['query'],
           },
-          interactionMode: 'auto',
         },
       ],
     },
@@ -39,6 +39,89 @@ export function createWeatherRunRequestFixture(): ChatRunRequest {
           {
             type: 'text',
             text: 'how is the weather in Beijing yesterday?',
+          },
+        ],
+        metadata: {},
+      },
+    ],
+    metadata: {},
+  };
+}
+
+export function createMixedToolRunRequestFixture(): ChatRunRequest {
+  return {
+    conversationId: 'conv_tools_fixture',
+    runId: null,
+    trigger: 'submit-message',
+    context: {
+      tools: [
+        {
+          name: 'location.resolve',
+          source: 'frontend',
+          description: 'Resolve a location in the runtime',
+          parameters: {
+            type: 'object',
+            properties: {
+              query: {
+                type: 'string',
+              },
+            },
+            required: ['query'],
+          },
+        },
+        {
+          name: 'approval.confirm',
+          source: 'human',
+          description: 'Confirm a user decision',
+          parameters: {
+            type: 'object',
+            properties: {
+              decision: {
+                type: 'string',
+              },
+            },
+            required: ['decision'],
+          },
+        },
+        {
+          name: 'summary.compose',
+          source: 'backend',
+          description: 'Compose a final summary',
+          parameters: {
+            type: 'object',
+            properties: {
+              text: {
+                type: 'string',
+              },
+            },
+            required: ['text'],
+          },
+        },
+        {
+          name: 'analytics.lookup',
+          source: 'mcp',
+          providerId: 'analytics-mcp',
+          description: 'Look up analytics',
+          parameters: {
+            type: 'object',
+            properties: {
+              appId: {
+                type: 'string',
+              },
+            },
+            required: ['appId'],
+          },
+        },
+      ],
+    },
+    messages: [
+      {
+        id: 'msg_user_1',
+        role: 'user',
+        parts: [
+          {
+            type: 'text',
+            text: 'run the tool demo',
           },
         ],
         metadata: {},
@@ -82,7 +165,7 @@ export function createWeatherContinuationRunRequestFixture(): ChatRunRequest {
             type: 'tool-call',
             toolCallId: 'call_geocode_1',
             toolName: 'geocode_location',
-            executionTarget: 'backend',
+            source: 'backend',
             state: 'output-available',
             input: {
               query: 'San Francisco',
@@ -127,7 +210,7 @@ export function createWeatherContinuationRunRequestFixture(): ChatRunRequest {
             type: 'tool-call',
             toolCallId: 'call_weather_1',
             toolName: 'weather_search',
-            executionTarget: 'backend',
+            source: 'backend',
             state: 'input-available',
             input: {
               query: 'San Francisco, CA',
