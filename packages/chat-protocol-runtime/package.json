@@ -1,5 +1,5 @@
 {
-  "name": "@fm/chat-protocol-frontend",
+  "name": "@fm/chat-protocol-runtime",
   "version": "0.0.1",
   "description": "Frontend runtime helpers for the chat protocol",
   "type": "module",

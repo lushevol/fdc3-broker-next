@@ -118,7 +118,7 @@ function readToolIdentities(
           {
             source,
             ...(typeof value.providerId === 'string' ? { providerId: value.providerId } : {}),
-            ...(typeof value.toolName === 'string' ? { toolName: value.toolName } : {}),
+            toolName: typeof value.toolName === 'string' ? value.toolName : '',
           },
         ],
       ];
@@ -181,7 +181,7 @@ function readToolIdentityMetadata(
     toolCallId: value.toolCallId,
     source,
     ...(typeof value.providerId === 'string' ? { providerId: value.providerId } : {}),
-    ...(typeof value.toolName === 'string' ? { toolName: value.toolName } : {}),
+    toolName: typeof value.toolName === 'string' ? value.toolName : '',
   };
 }
 

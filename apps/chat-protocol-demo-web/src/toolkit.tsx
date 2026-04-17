@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { Toolkit } from '@assistant-ui/react';
+import type { ChatToolDescriptor } from '@fm/chat-protocol-contract';
 import {
   AnalyticsTool,
   ApprovalConfirmTool,
@@ -16,6 +17,7 @@ const sharedToolDefinitions = {
     parameters: z.object({
       query: z.string().describe('City name or location query'),
     }),
+    execute: async () => ({}),
     render: LocationResolveTool,
   },
   'approval.confirm': {
@@ -59,7 +61,7 @@ const sharedToolDefinitions = {
     }),
     render: ResolveRelativeDateTool,
   },
-} satisfies Toolkit;
+};
 
 const presetToolNames: Record<ToolPreset, string[]> = {
   minimal: ['location.resolve'],
@@ -72,7 +74,7 @@ const presetToolNames: Record<ToolPreset, string[]> = {
   ],
 };
 
-export const runtimeToolkit: Toolkit = sharedToolDefinitions;
+export const runtimeToolkit = sharedToolDefinitions as unknown as Toolkit;
 
 export function getToolkitForPreset(_preset: ToolPreset): Toolkit {
   return runtimeToolkit;
@@ -98,6 +100,24 @@ export function getToolDescriptors(preset: ToolPreset): ToolDescriptorForPanel[]
   });
 }
 
+export function getProtocolToolDescriptors(preset: ToolPreset): ChatToolDescriptor[] {
+  return presetToolNames[preset].map((name) => {
+    const definition = runtimeToolkit[name];
+
+    return {
+      name,
+      source:
+        definition.type === 'frontend'
+          ? 'frontend'
+          : definition.type === 'human'
+            ? 'human'
+            : 'backend',
+      description: definition.description ?? '',
+      parameters: extractParamInfo(definition.parameters),
+    };
+  });
+}
+
 type ParamInfo = Record<string, { type: string; description?: string; required: boolean }>;
 
 function extractParamInfo(schema: unknown): ParamInfo {
@@ -105,7 +125,7 @@ function extractParamInfo(schema: unknown): ParamInfo {
 
   let shape: Record<string, unknown> | undefined;
 
-  const s = schema as { _def?: { shape?: () => Record<string, unknown>; shape?: Record<string, unknown> } };
+  const s = schema as { _def?: { shape?: (() => Record<string, unknown>) | Record<string, unknown> } };
   if (typeof s._def?.shape === 'function') {
     shape = s._def.shape();
   } else if (s._def?.shape) {

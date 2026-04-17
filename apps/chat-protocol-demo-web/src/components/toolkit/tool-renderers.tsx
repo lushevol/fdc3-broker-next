@@ -10,7 +10,7 @@ import {
 
 type ToolRenderProps = {
   args: Record<string, unknown>;
-  result: unknown;
+  result?: unknown;
 };
 
 type UsageTrendPoint = {

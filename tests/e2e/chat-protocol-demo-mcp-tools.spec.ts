@@ -1125,13 +1125,47 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
     await expect(page.getByText('template_tile_fdc3_2')).toBeVisible();
   });
 
-  test('chart_by_app (ts data) rendered via MCP with trend points', async ({ page }) => {
+  test('real statistic_count_by_app tool name renders completed analytics card in minimal preset', async ({ page }) => {
+    await page.route('**/api/chat/runs', async (route) => {
+      await fulfillRun(
+        route,
+        createMcpToolFrames({
+          toolCallId: 'tool_mcp_stats_real_1',
+          toolName: 'statistic_count_by_app',
+          providerId: 'analytics-mcp',
+          input: {
+            appId: 'cashflow_blotter',
+            startTime: '2026-04-15T00:00:00Z',
+            endTime: '2026-04-16T00:00:00Z',
+          },
+          output: {
+            appName: 'Cashflow Blotter',
+            appId: 'cashflow_blotter',
+            pv: 42,
+            uv: 12,
+            startTime: '2026-04-15T00:00:00Z',
+            endTime: '2026-04-16T00:00:00Z',
+          },
+          textAfter: 'Cashflow Blotter usage yesterday: 42 PV, 12 UV.',
+        }),
+      );
+    });
+
+    await openAssistant(page);
+    await sendMessage(page, "what's the pv and uv of cashflow_blotter yesterday ?");
+
+    await expect(page.getByTestId('usage-statistics-card')).toBeVisible();
+    await expect(page.getByTestId('usage-statistics-pv-tile')).toContainText('42');
+    await expect(page.getByTestId('usage-statistics-uv-tile')).toContainText('12');
+  });
+
+  test('real chart_by_app tool name renders trend card in minimal preset', async ({ page }) => {
     await page.route('**/api/chat/runs', async (route) => {
       await fulfillRun(
         route,
         createMcpToolFrames({
           toolCallId: 'tool_mcp_chart_1',
-          toolName: 'analytics.lookup',
+          toolName: 'chart_by_app',
           providerId: 'analytics-mcp',
           input: {
             appId: 'cashflow',
@@ -1160,15 +1194,13 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
     });
 
     await openAssistant(page);
-    await selectToolPreset(page, 'full');
     await sendMessage(page, 'Show daily PV/UV for cashflow');
 
-    await expect(page.getByText('Used tool: analytics.lookup')).toBeVisible();
-
-    const toolTrigger = page.getByText('Used tool: analytics.lookup');
-    await toolTrigger.click();
-    await expect(page.getByText('cashflow')).toBeVisible();
-    await expect(page.getByText('450')).toBeVisible();
+    await expect(page.getByTestId('usage-statistics-card')).toBeVisible();
+    await expect(page.getByText('PV Trend')).toBeVisible();
+    await expect(page.getByText('UV Trend')).toBeVisible();
+    await expect(page.getByTestId('usage-statistics-pv-tile')).toContainText('450');
+    await expect(page.getByTestId('usage-statistics-uv-tile')).toContainText('95');
   });
 
   test('MCP tool with execution plan shows step lifecycle', async ({ page }) => {
