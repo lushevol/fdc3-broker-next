@@ -4,21 +4,36 @@ import type { ChatToolDescriptor } from '@fm/chat-protocol-contract';
 import {
   AnalyticsTool,
   ApprovalConfirmTool,
-  LocationResolveTool,
   ProfileLookupTool,
   ResolveRelativeDateTool,
   SummaryComposeTool,
+  TimezoneCurrentTool,
 } from '@/components/toolkit/tool-renderers';
 
 const sharedToolDefinitions: Toolkit = {
-  'location.resolve': {
+  'timezone.current': {
     type: 'frontend',
-    description: 'Resolve a geographic location from a query string',
-    parameters: z.object({
-      query: z.string().describe('City name or location query'),
-    }),
-    execute: async () => ({}),
-    render: LocationResolveTool,
+    description: "Get the user's current timezone",
+    parameters: z.object({}),
+    execute: async () => {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const now = new Date();
+      const offset = -now.getTimezoneOffset();
+      const hours = Math.floor(Math.abs(offset) / 60);
+      const minutes = Math.abs(offset) % 60;
+      const sign = offset >= 0 ? '+' : '-';
+      const gmtOffset = `GMT${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      const abbr = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' })
+        .formatToParts(now)
+        .find((p) => p.type === 'timeZoneName')?.value;
+
+      return {
+        timezone,
+        offset: gmtOffset,
+        abbr,
+      };
+    },
+    render: TimezoneCurrentTool,
   },
   'approval.confirm': {
     type: 'human',
@@ -57,9 +72,9 @@ const sharedToolDefinitions: Toolkit = {
 };
 
 const presetToolNames: Record<ToolPreset, string[]> = {
-  minimal: ['location.resolve'],
+  minimal: ['timezone.current'],
   full: [
-    'location.resolve',
+    'timezone.current',
     'approval.confirm',
     'summary.compose',
     'analytics.lookup',

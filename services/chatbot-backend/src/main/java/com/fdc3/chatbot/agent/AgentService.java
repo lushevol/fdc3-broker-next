@@ -2079,6 +2079,11 @@ public class AgentService {
     private MockToolInvocation resolveMockToolInvocation(String userMessage) {
         String lowerMessage = userMessage.toLowerCase();
 
+        // Skip mock for timezone queries - frontend tool will handle it
+        if (lowerMessage.contains("timezone") || lowerMessage.contains("current time zone")) {
+            return null;
+        }
+
         if (lowerMessage.contains("weather")) {
             String location = "Bangkok, TH";
             int inIndex = lowerMessage.indexOf(" in ");

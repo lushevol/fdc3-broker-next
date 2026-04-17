@@ -219,24 +219,36 @@ function JsonToolCard({
   );
 }
 
-export function LocationResolveTool({ args, result }: ToolRenderProps) {
+export function TimezoneCurrentTool({ result }: ToolRenderProps) {
   const record = asRecord(result);
+
   if (!record) {
     return (
-      <LoadingToolCard
-        toolName="location.resolve"
-        message={`Resolving "${String(args.query ?? '')}"...`}
-      />
+      <LoadingToolCard toolName="timezone.current" message="Getting current timezone..." />
     );
   }
 
+  const timezone = asString(record.timezone) ?? asString(record.tz) ?? 'Unknown';
+  const offset = asString(record.offset) ?? asString(record.gmtOffset);
+  const abbr = asString(record.abbr) ?? asString(record.timezoneAbbr);
+
   return (
-    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm shadow-sm">
-      <div className="font-semibold text-emerald-900">
-        {String(record.name ?? 'Resolved location')}
-      </div>
-      <div className="mt-1 text-emerald-700">
-        {String(record.latitude ?? '')}, {String(record.longitude ?? '')}
+    <div className="rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm shadow-sm">
+      <div className="font-semibold text-violet-900">Current Timezone</div>
+      <div className="mt-2 text-violet-800">
+        <div>
+          <span className="font-medium">Timezone:</span> {timezone}
+        </div>
+        {offset && (
+          <div className="mt-1">
+            <span className="font-medium">Offset:</span> {offset}
+          </div>
+        )}
+        {abbr && (
+          <div className="mt-1">
+            <span className="font-medium">Abbreviation:</span> {abbr}
+          </div>
+        )}
       </div>
     </div>
   );
