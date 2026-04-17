@@ -23,6 +23,7 @@ root-config (port 8001)        ← Single-SPA orchestrator, loads import map
 
 - `mf_lib` – Rslib-built shared React component library (Module Federation remote)
 - `ratan-design` – Design system (Ant Design + Emotion + tokens, Vitest + Storybook)
+- `chat-protocol-contract` – Shared TypeScript/Zod types for chat runs, stream frames, fixtures, validation
 - `fdc3-agent`, `fdc3-app-directory`, `fdc3-broker`, `fdc3-resolver-ui` – FDC3 2.2 interop
 
 **Services** (backends):
@@ -139,6 +140,24 @@ cd services/backend && npm run dev
 # Equivalent to: mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8088 -Dspring.profiles.active=local'
 ```
 
+## Chat Protocol Contract
+
+`packages/chat-protocol-contract` – Shared TypeScript/Zod types for chat runs, stream frames, and validation.
+
+### Key conventions (agent must know)
+
+- **Message field**: Use `parts`, NOT `content`, for request messages
+- **History roles**: `system`, `user`, `assistant`, `tool` – `tool` role is for historical tool outputs in continuation requests, not streaming frames
+- **Build**: `npm run build` in the package (tsup)
+- **Test**: `npm run test` runs vitest
+
+### Test and lint commands (single package)
+
+```bash
+cd packages/chat-protocol-contract && npm run test
+cd packages/chat-protocol-contract && npm run lint
+```
+
 ## Container/Tile templates
 
 - `apps/container` and `apps/tile` are **templates** for creating new MFE apps. Copy and rename to scaffold new business tiles/containers.
@@ -160,6 +179,7 @@ Each workspace has unified context docs under its `docs/` directory:
 | **Packages**                         |                                                               |                                                                 |                                                           |
 | `packages/mf_lib`                    | [PROJECT](packages/mf_lib/docs/PROJECT.md)                    | [ARCH](packages/mf_lib/docs/ARCHITECTURE.md)                    | [RULES](packages/mf_lib/docs/RULES.md)                    |
 | `packages/ratan-design`              | [PROJECT](packages/ratan-design/docs/PROJECT.md)              | [ARCH](packages/ratan-design/docs/ARCHITECTURE.md)              | [RULES](packages/ratan-design/docs/RULES.md)              |
+| `packages/chat-protocol-contract`    | [README](packages/chat-protocol-contract/README.md)           | (types + Zod schemas)                                           | (vitest)                                                  |
 | `packages/fdc3-agent`                | [PROJECT](packages/fdc3-agent/docs/PROJECT.md)                | [ARCH](packages/fdc3-agent/docs/ARCHITECTURE.md)                | [RULES](packages/fdc3-agent/docs/RULES.md)                |
 | `packages/fdc3-app-directory`        | [PROJECT](packages/fdc3-app-directory/docs/PROJECT.md)        | [ARCH](packages/fdc3-app-directory/docs/ARCHITECTURE.md)        | [RULES](packages/fdc3-app-directory/docs/RULES.md)        |
 | `packages/fdc3-broker`               | [PROJECT](packages/fdc3-broker/docs/PROJECT.md)               | [ARCH](packages/fdc3-broker/docs/ARCHITECTURE.md)               | [RULES](packages/fdc3-broker/docs/RULES.md)               |

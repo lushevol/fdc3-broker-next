@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { Toolkit } from '@assistant-ui/react';
+import type { Toolkit } from '@fm/chat-protocol-ui';
 import type { ChatToolDescriptor } from '@fm/chat-protocol-contract';
 import {
   AnalyticsTool,
@@ -10,7 +10,7 @@ import {
   SummaryComposeTool,
 } from '@/components/toolkit/tool-renderers';
 
-const sharedToolDefinitions = {
+const sharedToolDefinitions: Toolkit = {
   'location.resolve': {
     type: 'frontend',
     description: 'Resolve a geographic location from a query string',
@@ -22,43 +22,36 @@ const sharedToolDefinitions = {
   },
   'approval.confirm': {
     type: 'human',
-    description: 'Confirm a user decision before proceeding with an action',
+    description: 'Send an email with confirmation',
     parameters: z.object({
-      decision: z.string().describe('The decision to confirm'),
+      to: z.string().describe('Recipient email address'),
+      subject: z.string().describe('Email subject'),
+      body: z.string().describe('Email body content'),
     }),
     render: ApprovalConfirmTool,
   },
   'summary.compose': {
     type: 'backend',
-    description: 'Compose a concise summary from structured backend data',
     render: SummaryComposeTool,
   },
   'analytics.lookup': {
     type: 'backend',
-    description: 'Lookup app analytics through the analytics MCP provider',
     render: AnalyticsTool,
   },
   statistic_count_by_app: {
     type: 'backend',
-    description: 'Return PV and UV counts for an app within a time window',
     render: AnalyticsTool,
   },
   chart_by_app: {
     type: 'backend',
-    description: 'Return PV and UV trend points for an app within a time window',
     render: AnalyticsTool,
   },
   'profile.lookup': {
     type: 'backend',
-    description: 'Lookup a profile by user id',
     render: ProfileLookupTool,
   },
   resolve_relative_date: {
     type: 'backend',
-    description: 'Resolve relative date expressions like yesterday into an ISO date',
-    parameters: z.object({
-      expression: z.string().describe('Relative date expression such as yesterday or last week'),
-    }),
     render: ResolveRelativeDateTool,
   },
 };
@@ -74,7 +67,7 @@ const presetToolNames: Record<ToolPreset, string[]> = {
   ],
 };
 
-export const runtimeToolkit = sharedToolDefinitions as unknown as Toolkit;
+export const runtimeToolkit = sharedToolDefinitions;
 
 export function getToolkitForPreset(_preset: ToolPreset): Toolkit {
   return runtimeToolkit;

@@ -1,12 +1,15 @@
-
 export { ChatProtocolProvider, type ChatProtocolProviderProps } from './provider';
-export { AssistantModal } from './components/assistant-ui/assistant-modal';
-export { Thread } from './components/assistant-ui/thread';
 
 export { cn } from './lib/utils';
 
+export { AssistantModal } from './components/assistant-ui/assistant-modal';
+export { Thread } from './components/assistant-ui/thread';
 export { AssistantSidebar } from './components/assistant-ui/assistant-sidebar';
-export { ComposerAttachments, ComposerAddAttachment, UserMessageAttachments } from './components/assistant-ui/attachment';
+export {
+  ComposerAttachments,
+  ComposerAddAttachment,
+  UserMessageAttachments,
+} from './components/assistant-ui/attachment';
 export { Badge } from './components/assistant-ui/badge';
 export { ThreadFollowupSuggestions } from './components/assistant-ui/follow-up-suggestions';
 export { HeatGraph } from './components/assistant-ui/heat-graph';
@@ -81,3 +84,6 @@ export * from './components/ui/tooltip';
 
 export { useIsMobile } from './hooks/use-mobile';
 
+export { Tools, type Toolkit } from '@assistant-ui/react';
+
+export type { ChatToolDescriptor } from '@fm/chat-protocol-contract';
