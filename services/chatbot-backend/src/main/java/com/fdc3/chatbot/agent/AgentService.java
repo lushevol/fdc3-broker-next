@@ -2391,6 +2391,20 @@ public class AgentService {
         }
 
         String normalized = userMessage.toLowerCase(Locale.ROOT);
+        boolean hasAnalyticsTools = availableTools.containsKey("statistic_count_by_app")
+                || availableTools.containsKey("chart_by_app");
+        if (hasAnalyticsTools && (
+                normalized.contains("analytics")
+                        || normalized.contains("usage")
+                        || normalized.contains("pv")
+                        || normalized.contains("uv")
+                        || normalized.contains("page view")
+                        || normalized.contains("unique visitor")
+                        || normalized.contains("unique user")
+        )) {
+            return true;
+        }
+
         return normalized.contains("weather")
                 || normalized.contains("temperature")
                 || normalized.contains("forecast")

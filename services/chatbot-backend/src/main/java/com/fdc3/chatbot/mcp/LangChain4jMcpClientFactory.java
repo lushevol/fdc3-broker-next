@@ -18,6 +18,7 @@ import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.request.json.JsonReferenceSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
 import dev.langchain4j.model.chat.request.json.JsonStringSchema;
+import dev.langchain4j.mcp.protocol.McpCallToolResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -79,7 +80,7 @@ public class LangChain4jMcpClientFactory implements McpClientFactory {
                         if (result.isError()) {
                             return Map.of("error", resultText);
                         }
-                        return parseToolResult(resultText, result.result());
+                        return normalizeToolResult(objectMapper, resultText, result.result());
                     });
         }
 
@@ -100,18 +101,61 @@ public class LangChain4jMcpClientFactory implements McpClientFactory {
             }
         }
 
-        private Object parseToolResult(String resultText, Object fallbackResult) {
-            if (resultText != null && !resultText.isBlank()) {
-                try {
-                    return objectMapper.readValue(resultText, Object.class);
-                } catch (Exception exception) {
-                    log.debug("Failed to parse MCP result text as JSON, returning raw text", exception);
-                    return resultText;
-                }
-            }
+    }
 
+    static Object normalizeToolResult(ObjectMapper objectMapper, String resultText, Object fallbackResult) {
+        if (resultText != null && !resultText.isBlank()) {
+            try {
+                return objectMapper.readValue(resultText, Object.class);
+            } catch (Exception exception) {
+                log.debug("Failed to parse MCP result text as JSON, returning raw text", exception);
+                return resultText;
+            }
+        }
+
+        if (fallbackResult instanceof McpCallToolResult.Result result) {
+            Object structuredContent = result.getStructuredContent();
+            if (structuredContent != null) {
+                return objectMapper.convertValue(structuredContent, Object.class);
+            }
+            Object parsedContent = extractContentPayload(objectMapper, result.getContent());
+            if (parsedContent != null) {
+                return parsedContent;
+            }
+        }
+
+        if (fallbackResult == null) {
+            return null;
+        }
+
+        try {
+            return objectMapper.convertValue(fallbackResult, Object.class);
+        } catch (IllegalArgumentException exception) {
+            log.debug("Failed to normalize MCP fallback result, returning raw object", exception);
             return fallbackResult;
         }
+    }
+
+    private static Object extractContentPayload(
+            ObjectMapper objectMapper,
+            List<McpCallToolResult.Content> content
+    ) {
+        if (content == null || content.isEmpty()) {
+            return null;
+        }
+
+        if (content.size() == 1 && "text".equalsIgnoreCase(content.get(0).getType())) {
+            String text = content.get(0).getText();
+            if (text != null && !text.isBlank()) {
+                try {
+                    return objectMapper.readValue(text, Object.class);
+                } catch (Exception exception) {
+                    return text;
+                }
+            }
+        }
+
+        return objectMapper.convertValue(content, Object.class);
     }
 
     static McpToolDescriptor toToolDescriptor(ToolSpecification toolSpecification, ObjectMapper objectMapper) {
