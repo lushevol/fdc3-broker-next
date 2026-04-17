@@ -2,11 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { Toolkit } from '@assistant-ui/react';
 import type { ChatToolDescriptor } from '@fm/chat-protocol-contract';
-import {
-  ChatProtocolModal,
-  ChatProtocolProvider,
-  ChatProtocolThread,
-} from '../src';
+import { ChatProtocolModal, ChatProtocolProvider, ChatProtocolThread } from '../src';
 
 const toolkit: Toolkit = {};
 const tools: ChatToolDescriptor[] = [];

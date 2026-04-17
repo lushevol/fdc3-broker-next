@@ -53,9 +53,7 @@ export type StreamProtocolRunOptions = {
 function getTextParts(message: ThreadMessage): string[] {
   return message.content
     .filter(
-      (
-        part,
-      ): part is Extract<ThreadMessage['content'][number], { type: 'text'; text: string }> =>
+      (part): part is Extract<ThreadMessage['content'][number], { type: 'text'; text: string }> =>
         part.type === 'text',
     )
     .map((part) => part.text);
@@ -418,7 +416,11 @@ export async function* streamProtocolRun({
       runId: currentRunId,
       trigger: 'submit-tool-result',
       context: request.context,
-      messages: [...nextRequest.messages, resumedAssistantMessage, createToolResultMessage(resolvedTool)],
+      messages: [
+        ...nextRequest.messages,
+        resumedAssistantMessage,
+        createToolResultMessage(resolvedTool),
+      ],
       metadata: request.metadata,
     };
   }

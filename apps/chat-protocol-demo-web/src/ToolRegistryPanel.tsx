@@ -17,7 +17,12 @@ type ToolInvocation = {
   input?: Record<string, unknown>;
   output?: Record<string, unknown>;
   error?: string;
-  state: 'input-available' | 'awaiting-execution' | 'awaiting-human' | 'output-available' | 'output-error';
+  state:
+    | 'input-available'
+    | 'awaiting-execution'
+    | 'awaiting-human'
+    | 'output-available'
+    | 'output-error';
   timestamp: number;
 };
 
@@ -56,7 +61,11 @@ const STATE_ICONS: Record<string, string> = {
   'output-error': '❌',
 };
 
-function ParamList({ parameters }: { parameters: Record<string, { type: string; description?: string; required: boolean }> }) {
+function ParamList({
+  parameters,
+}: {
+  parameters: Record<string, { type: string; description?: string; required: boolean }>;
+}) {
   const entries = Object.entries(parameters);
   if (entries.length === 0) return null;
 
@@ -66,12 +75,8 @@ function ParamList({ parameters }: { parameters: Record<string, { type: string; 
         <div key={key} className="flex items-start gap-1 text-[0.7rem] leading-tight">
           <code className="font-mono text-[#475569]">{key}</code>
           <span className="text-[#94a3b8]">{val.type}</span>
-          {val.required && (
-            <span className="text-[#e11d48] text-[0.6rem] leading-none">*</span>
-          )}
-          {val.description && (
-            <span className="text-[#64748b]">({val.description})</span>
-          )}
+          {val.required && <span className="text-[#e11d48] text-[0.6rem] leading-none">*</span>}
+          {val.description && <span className="text-[#64748b]">({val.description})</span>}
         </div>
       ))}
     </div>
@@ -110,9 +115,7 @@ function InvocationItem({ invocation }: { invocation: ToolInvocation }) {
         </details>
       )}
       {invocation.error && (
-        <div className="mt-0.5 text-[0.65rem] text-[#dc2626]">
-          Error: {invocation.error}
-        </div>
+        <div className="mt-0.5 text-[0.65rem] text-[#dc2626]">Error: {invocation.error}</div>
       )}
     </div>
   );
@@ -232,9 +235,7 @@ export function ToolRegistryPanel({
 
         {invocations.length > 0 && (
           <div className="mt-4 border-t border-[rgba(16,32,51,0.08)] pt-3">
-            <h4 className="mb-2 text-[0.75rem] font-semibold text-[#132744]">
-              Invocation History
-            </h4>
+            <h4 className="mb-2 text-[0.75rem] font-semibold text-[#132744]">Invocation History</h4>
             <div className="space-y-1.5">
               {invocations.map((inv) => (
                 <InvocationItem key={inv.toolCallId} invocation={inv} />
@@ -251,17 +252,12 @@ export function useToolInvocationTracker() {
   const [invocations, setInvocations] = useState<ToolInvocation[]>([]);
 
   const trackInvocation = useCallback((invocation: Omit<ToolInvocation, 'timestamp'>) => {
-    setInvocations((prev) => [
-      ...prev,
-      { ...invocation, timestamp: Date.now() },
-    ]);
+    setInvocations((prev) => [...prev, { ...invocation, timestamp: Date.now() }]);
   }, []);
 
   const updateInvocation = useCallback((toolCallId: string, updates: Partial<ToolInvocation>) => {
     setInvocations((prev) =>
-      prev.map((inv) =>
-        inv.toolCallId === toolCallId ? { ...inv, ...updates } : inv,
-      ),
+      prev.map((inv) => (inv.toolCallId === toolCallId ? { ...inv, ...updates } : inv)),
     );
   }, []);
 

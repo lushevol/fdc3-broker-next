@@ -17,8 +17,7 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "vite.config.ts"]
-  ,
+  "include": ["src/**/*", "vite.config.ts"],
   "exclude": [
     "src/components/assistant-ui/composer-trigger-popover.tsx",
     "src/components/assistant-ui/directive-text.tsx",

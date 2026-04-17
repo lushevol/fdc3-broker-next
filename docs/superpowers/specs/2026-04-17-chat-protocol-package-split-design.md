@@ -18,11 +18,7 @@ The new toolkit should be complete enough that a consumer app can mount it direc
 Target usage should look roughly like:
 
 ```tsx
-<ChatProtocolProvider
-  apiUrl={apiUrl}
-  tools={toolkit}
-  toolContext={toolContext}
->
+<ChatProtocolProvider apiUrl={apiUrl} tools={toolkit} toolContext={toolContext}>
   <ChatProtocolModal />
 </ChatProtocolProvider>
 ```

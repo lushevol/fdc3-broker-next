@@ -38,12 +38,12 @@ const sharedToolDefinitions = {
     description: 'Lookup app analytics through the analytics MCP provider',
     render: AnalyticsTool,
   },
-  'statistic_count_by_app': {
+  statistic_count_by_app: {
     type: 'backend',
     description: 'Return PV and UV counts for an app within a time window',
     render: AnalyticsTool,
   },
-  'chart_by_app': {
+  chart_by_app: {
     type: 'backend',
     description: 'Return PV and UV trend points for an app within a time window',
     render: AnalyticsTool,
@@ -125,7 +125,9 @@ function extractParamInfo(schema: unknown): ParamInfo {
 
   let shape: Record<string, unknown> | undefined;
 
-  const s = schema as { _def?: { shape?: (() => Record<string, unknown>) | Record<string, unknown> } };
+  const s = schema as {
+    _def?: { shape?: (() => Record<string, unknown>) | Record<string, unknown> };
+  };
   if (typeof s._def?.shape === 'function') {
     shape = s._def.shape();
   } else if (s._def?.shape) {

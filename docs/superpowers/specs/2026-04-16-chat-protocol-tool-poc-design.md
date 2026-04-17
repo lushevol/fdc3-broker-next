@@ -174,12 +174,12 @@ Minimal state set:
 
 The POC adds `source` to `ProtocolPart` frames. During the transition, `executionTarget` is also emitted as a fallback derived from `source`:
 
-| source    | executionTarget |
-|-----------|----------------|
-| frontend  | frontend        |
-| human     | frontend        |
-| backend   | backend         |
-| mcp       | backend         |
+| source   | executionTarget |
+| -------- | --------------- |
+| frontend | frontend        |
+| human    | frontend        |
+| backend  | backend         |
+| mcp      | backend         |
 
 ### 4. `ResumeSubmission`
 

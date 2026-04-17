@@ -473,7 +473,8 @@ function createMultiToolInterplayFrames(options: {
         toolName: tool.toolName,
         source: tool.source,
         providerId: tool.source === 'mcp' ? tool.providerId : undefined,
-        executionTarget: tool.executionTarget ?? (tool.source === 'frontend' ? 'frontend' : 'backend'),
+        executionTarget:
+          tool.executionTarget ?? (tool.source === 'frontend' ? 'frontend' : 'backend'),
       },
       {
         type: 'tool-input-available',
@@ -512,12 +513,8 @@ function createMultiToolInterplayFrames(options: {
     );
   }
 
-  const hasFrontendTool = tools.some(
-    (t) => t.source === 'frontend' && !t.error,
-  );
-  const hasHumanTool = tools.some(
-    (t) => t.source === 'human',
-  );
+  const hasFrontendTool = tools.some((t) => t.source === 'frontend' && !t.error);
+  const hasHumanTool = tools.some((t) => t.source === 'human');
 
   if (hasHumanTool) {
     frames.push({
@@ -616,7 +613,9 @@ test.describe('MCP tool in conversation (elasticsearch-mcp-service example)', ()
     await expect(page.getByText('1,234')).toBeVisible();
     await expect(page.getByText('567')).toBeVisible();
     await expect(page.getByText('template_tile_fdc3_2')).toBeVisible();
-    await expect(page.getByText('The app template_tile_fdc3_2 had 1,234 PV and 567 UV')).toBeVisible();
+    await expect(
+      page.getByText('The app template_tile_fdc3_2 had 1,234 PV and 567 UV'),
+    ).toBeVisible();
   });
 
   test('MCP tool error renders error message in conversation', async ({ page }) => {
@@ -816,14 +815,14 @@ test.describe('Frontend tool in conversation', () => {
       requests.push(route.request().postDataJSON() as RunRequestBody);
 
       if (runCount === 1) {
-        await fulfillRun(
-          route,
-          createFrontendToolFrames({ query: 'Beijing' }),
-        );
+        await fulfillRun(route, createFrontendToolFrames({ query: 'Beijing' }));
         return;
       }
 
-      await fulfillRun(route, createTextResponseFrames('Beijing coordinates resolved.', 'msg_asst_final'));
+      await fulfillRun(
+        route,
+        createTextResponseFrames('Beijing coordinates resolved.', 'msg_asst_final'),
+      );
     });
 
     await openAssistant(page);
@@ -858,7 +857,10 @@ test.describe('Frontend tool in conversation', () => {
 
       await fulfillRun(
         route,
-        createTextResponseFrames('The weather in San Francisco is sunny and 72F.', 'msg_asst_final'),
+        createTextResponseFrames(
+          'The weather in San Francisco is sunny and 72F.',
+          'msg_asst_final',
+        ),
       );
     });
 
@@ -904,7 +906,9 @@ test.describe('Human approval tool in conversation', () => {
     expect(requests[0]?.trigger).toBe('submit-message');
   });
 
-  test('approval.confirm preserves full tool inventory in context on approval', async ({ page }) => {
+  test('approval.confirm preserves full tool inventory in context on approval', async ({
+    page,
+  }) => {
     const requests: RunRequestBody[] = [];
     let runCount = 0;
 
@@ -964,7 +968,11 @@ test.describe('MCP + frontend + backend tool interplay', () => {
             toolCallId: 'tool_mcp_analytics_followup',
             toolName: 'analytics.lookup',
             providerId: 'analytics-mcp',
-            input: { appId: 'dashboards-ny', startTime: '2026-04-01T00:00:00Z', endTime: '2026-04-08T00:00:00Z' },
+            input: {
+              appId: 'dashboards-ny',
+              startTime: '2026-04-01T00:00:00Z',
+              endTime: '2026-04-08T00:00:00Z',
+            },
             output: { appName: 'dashboards-ny', pv: 890, uv: 234 },
             textBefore: 'Based on the New York location, here are the analytics:',
             textAfter: '',
@@ -973,7 +981,10 @@ test.describe('MCP + frontend + backend tool interplay', () => {
         return;
       }
 
-      await fulfillRun(route, createTextResponseFrames('Complete analysis done.', 'msg_asst_final_2'));
+      await fulfillRun(
+        route,
+        createTextResponseFrames('Complete analysis done.', 'msg_asst_final_2'),
+      );
     });
 
     await openAssistant(page);
@@ -1125,7 +1136,9 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
     await expect(page.getByText('template_tile_fdc3_2')).toBeVisible();
   });
 
-  test('real statistic_count_by_app tool name renders completed analytics card in minimal preset', async ({ page }) => {
+  test('real statistic_count_by_app tool name renders completed analytics card in minimal preset', async ({
+    page,
+  }) => {
     await page.route('**/api/chat/runs', async (route) => {
       await fulfillRun(
         route,
@@ -1237,7 +1250,9 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
     await sendMessage(page, 'Get risk dashboard usage with execution plan');
 
     await expect(page.getByText('Used tool: analytics.lookup')).toBeVisible();
-    await expect(page.getByText('Risk Dashboard analytics retrieved via elasticsearch-mcp')).toBeVisible();
+    await expect(
+      page.getByText('Risk Dashboard analytics retrieved via elasticsearch-mcp'),
+    ).toBeVisible();
   });
 
   test('MCP tool error from elasticsearch-mcp-service renders correctly', async ({ page }) => {
@@ -1281,7 +1296,11 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
             toolCallId: 'tool_mcp_compare_1',
             toolName: 'analytics.lookup',
             providerId: 'analytics-mcp',
-            input: { appId: 'cashflow', startTime: '2026-04-01T00:00:00Z', endTime: '2026-04-08T00:00:00Z' },
+            input: {
+              appId: 'cashflow',
+              startTime: '2026-04-01T00:00:00Z',
+              endTime: '2026-04-08T00:00:00Z',
+            },
             output: { pv: 120, uv: 30 },
             textAfter: 'Cashflow analytics retrieved. Now querying the second app...',
             messageId: 'msg_asst_compare_1',
@@ -1296,7 +1315,11 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
           toolCallId: 'tool_mcp_compare_2',
           toolName: 'analytics.lookup',
           providerId: 'analytics-mcp',
-          input: { appId: 'risk-dashboard', startTime: '2026-04-01T00:00:00Z', endTime: '2026-04-08T00:00:00Z' },
+          input: {
+            appId: 'risk-dashboard',
+            startTime: '2026-04-01T00:00:00Z',
+            endTime: '2026-04-08T00:00:00Z',
+          },
           output: { pv: 85, uv: 18 },
           textAfter: 'Comparison complete: Cashflow had higher engagement.',
           messageId: 'msg_asst_compare_2',
@@ -1398,6 +1421,8 @@ test.describe('Tool source and execution target validation', () => {
 
     const mcpTools = tools.filter((t) => t.providerId);
     expect(mcpTools).toHaveLength(2);
-    expect(mcpTools.map((t) => t.name)).toEqual(expect.arrayContaining(['analytics.lookup', 'profile.lookup']));
+    expect(mcpTools.map((t) => t.name)).toEqual(
+      expect.arrayContaining(['analytics.lookup', 'profile.lookup']),
+    );
   });
 });

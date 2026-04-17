@@ -8,10 +8,7 @@ import type {
   ChatToolOutputAvailableFrame,
   ChatToolOutputErrorFrame,
 } from '@fm/chat-protocol-contract';
-import {
-  ChatProtocolModal,
-  ChatProtocolProvider,
-} from '@fm/chat-protocol-ui';
+import { AssistantModal, ChatProtocolProvider } from '@fm/chat-protocol-ui';
 import { ToolRegistryPanel, useToolInvocationTracker } from '@/ToolRegistryPanel';
 import type { ToolInvocation } from '@/ToolRegistryPanel';
 import {
@@ -62,12 +59,16 @@ function ChatProtocolAppContent({
   activeToolPreset: ToolPreset;
   selectToolPreset: (preset: ToolPreset) => void;
 }) {
-  const { invocations, trackInvocation, updateInvocation, resetInvocations } = useToolInvocationTracker();
+  const { invocations, trackInvocation, updateInvocation, resetInvocations } =
+    useToolInvocationTracker();
 
   const onFrame = useCallback(
     (frame: ChatStreamFrame) => {
       if (frame.type === 'tool-input-start') {
-        const toolFrame = frame as ChatToolInputStartFrame & { source?: string; providerId?: string };
+        const toolFrame = frame as ChatToolInputStartFrame & {
+          source?: string;
+          providerId?: string;
+        };
         trackInvocation({
           toolCallId: toolFrame.toolCallId,
           toolName: toolFrame.toolName,
@@ -90,7 +91,10 @@ function ChatProtocolAppContent({
       }
 
       if (frame.type === 'tool-output-available') {
-        const toolFrame = frame as ChatToolOutputAvailableFrame & { source?: string; providerId?: string };
+        const toolFrame = frame as ChatToolOutputAvailableFrame & {
+          source?: string;
+          providerId?: string;
+        };
         updateInvocation(toolFrame.toolCallId, {
           output: toolFrame.output,
           state: 'output-available',
@@ -101,7 +105,10 @@ function ChatProtocolAppContent({
       }
 
       if (frame.type === 'tool-output-error') {
-        const toolFrame = frame as ChatToolOutputErrorFrame & { source?: string; providerId?: string };
+        const toolFrame = frame as ChatToolOutputErrorFrame & {
+          source?: string;
+          providerId?: string;
+        };
         updateInvocation(toolFrame.toolCallId, {
           error: toolFrame.error,
           state: 'output-error',
@@ -170,8 +177,8 @@ function ChatProtocolAppContent({
             <ul className="list-inside list-disc space-y-1 text-[0.95rem] text-[#4c6680]">
               <li>
                 <strong>TC1 Frontend delegation:</strong> Ask &ldquo;What is the weather in San
-                Francisco?&rdquo; with minimal preset — validates{' '}
-                <code>location.resolve</code> &rarr; <code>get_weather</code> chain.
+                Francisco?&rdquo; with minimal preset — validates <code>location.resolve</code>{' '}
+                &rarr; <code>get_weather</code> chain.
               </li>
               <li>
                 <strong>TC2 Backend multi-tool:</strong> Ask &ldquo;What is the weather and current
@@ -180,8 +187,8 @@ function ChatProtocolAppContent({
               </li>
               <li>
                 <strong>TC3 HITL approval:</strong> Ask &ldquo;Should I proceed with this
-                action?&rdquo; with full preset — validates{' '}
-                <code>approval.confirm</code> human tool pause/resume.
+                action?&rdquo; with full preset — validates <code>approval.confirm</code> human tool
+                pause/resume.
               </li>
               <li>
                 <strong>TC4 Dynamic preset:</strong> Send a message with minimal preset, switch to
@@ -209,7 +216,7 @@ function ChatProtocolAppContent({
           />
         </section>
       </main>
-      <ChatProtocolModal />
+      <AssistantModal />
     </ChatProtocolProvider>
   );
 }

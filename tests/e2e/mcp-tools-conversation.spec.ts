@@ -145,10 +145,7 @@ function buildAgenticMcpStream(options: {
   ].join('');
 }
 
-function buildTextOnlyStream(options: {
-  conversationId: string;
-  text: string;
-}): string {
+function buildTextOnlyStream(options: { conversationId: string; text: string }): string {
   return [
     toSseEvent('conversation_id', options.conversationId),
     toSseEvent('message', { text: options.text }),
@@ -232,7 +229,9 @@ function buildMultiStepMcpStream(options: {
       status: 'running',
       totalSteps: options.tools.length,
     }),
-    ...steps.map((step) => toSseEvent('execution_step', { planId: `${options.conversationId}-plan`, ...step })),
+    ...steps.map((step) =>
+      toSseEvent('execution_step', { planId: `${options.conversationId}-plan`, ...step }),
+    ),
   ];
 
   options.tools.forEach((tool, index) => {
@@ -546,7 +545,8 @@ test.describe('MCP backend tools in conversation', () => {
               startTime: '2026-04-01T00:00:00Z',
               endTime: '2026-04-08T00:00:00Z',
             },
-            errorMessage: 'At least one of appId or appName must be provided and startTime must be before endTime',
+            errorMessage:
+              'At least one of appId or appName must be provided and startTime must be before endTime',
           }),
         streamRequests,
       );
@@ -706,9 +706,7 @@ test.describe('frontend tools in conversation', () => {
               activeTileTitle: 'Test Tile',
               totalWorkspaces: 1,
               totalTiles: 1,
-              workspaces: [
-                { id: 'ws-1', label: 'My Workspace', tileCount: 1, isActive: true },
-              ],
+              workspaces: [{ id: 'ws-1', label: 'My Workspace', tileCount: 1, isActive: true }],
             },
             backendText: 'Here is the current workspace status.',
           }),
@@ -866,7 +864,7 @@ test.describe('frontend + backend tool interplay in conversation', () => {
           headers: {
             'content-type': 'text/event-stream',
             'cache-control': 'no-cache',
-            'connection': 'keep-alive',
+            connection: 'keep-alive',
           },
           body: buildAgenticMcpStream({
             conversationId: 'conv-follow-up',
@@ -901,7 +899,7 @@ test.describe('frontend + backend tool interplay in conversation', () => {
           headers: {
             'content-type': 'text/event-stream',
             'cache-control': 'no-cache',
-            'connection': 'keep-alive',
+            connection: 'keep-alive',
           },
           body: buildTextOnlyStream({
             conversationId: 'conv-follow-up',
@@ -927,11 +925,7 @@ test.describe('frontend + backend tool interplay in conversation', () => {
 
     if (streamRequests[1]?.messages && streamRequests[1].messages.length > 0) {
       const hasToolResult = streamRequests[1].messages.some((msg) =>
-        msg.parts?.some(
-          (part) =>
-            part.type === 'tool-call' ||
-            (part.toolCallId && part.toolName),
-        ),
+        msg.parts?.some((part) => part.type === 'tool-call' || (part.toolCallId && part.toolName)),
       );
       expect(hasToolResult || streamRequests[1].messages.length >= 2).toBe(true);
     }
@@ -951,7 +945,7 @@ test.describe('MCP conversation protocol validation', () => {
         headers: {
           'content-type': 'text/event-stream',
           'cache-control': 'no-cache',
-          'connection': 'keep-alive',
+          connection: 'keep-alive',
         },
         body: buildTextOnlyStream({
           conversationId: 'conv-reuse-123',

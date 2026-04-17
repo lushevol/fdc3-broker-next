@@ -7,7 +7,11 @@ import {
   useLocalRuntime,
   type Toolkit,
 } from '@assistant-ui/react';
-import type { ChatRunRequest, ChatToolCallPart, ChatToolDescriptor } from '@fm/chat-protocol-contract';
+import type {
+  ChatRunRequest,
+  ChatToolCallPart,
+  ChatToolDescriptor,
+} from '@fm/chat-protocol-contract';
 import {
   buildChatProtocolRequest,
   createProtocolLocalRuntime,

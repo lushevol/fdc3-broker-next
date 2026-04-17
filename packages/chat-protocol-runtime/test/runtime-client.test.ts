@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ThreadMessage } from '@assistant-ui/react';
-import type { ChatRunRequest, ChatStreamFrame, ChatToolDescriptor } from '@fm/chat-protocol-contract';
+import type {
+  ChatRunRequest,
+  ChatStreamFrame,
+  ChatToolDescriptor,
+} from '@fm/chat-protocol-contract';
 import {
   buildChatProtocolRequest,
   parseSseFrames,
@@ -166,7 +170,9 @@ describe('runtime client', () => {
       { type: 'finish', finishReason: 'stop', messageId: 'msg_asst_1' },
     ];
 
-    await expect(Array.fromAsync(parseSseFrames(createSseResponse(frames)))) .resolves.toEqual(frames);
+    await expect(Array.fromAsync(parseSseFrames(createSseResponse(frames)))).resolves.toEqual(
+      frames,
+    );
   });
 
   it('auto-resolves frontend tools and resumes the run', async () => {

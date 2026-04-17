@@ -180,7 +180,6 @@ describe('protocol stream adapter', () => {
     expect(adapter.getMessage().status).toEqual({ type: 'complete', reason: 'stop' });
   });
 
-
   it('maps human source to awaiting-human state', () => {
     const adapter = createProtocolStreamAdapter();
     adapter.applyFrame({ type: 'start', conversationId: 'conv_human_test', runId: 'run_1' });

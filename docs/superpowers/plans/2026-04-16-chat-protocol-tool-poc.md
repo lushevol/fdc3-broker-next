@@ -15,6 +15,7 @@
 ### Task 1: Verify and extend the contract package for all four tool sources
 
 **Files:**
+
 - Modify: `packages/chat-protocol-contract/src/types.ts`
 - Modify: `packages/chat-protocol-contract/src/schemas.ts`
 - Modify: `packages/chat-protocol-contract/src/fixtures.ts`
@@ -93,6 +94,7 @@ export const chatToolDescriptorSchema = z
 - [ ] **Step 4: Verify the mixed-tool fixture exists and covers all four sources**
 
 The `createMixedToolRunRequestFixture()` must include at least:
+
 - one `frontend` tool (`location.resolve`)
 - one `human` tool (`approval.confirm`)
 - one `backend` tool (`summary.compose`)
@@ -118,6 +120,7 @@ git commit -m "feat: verify and extend chat protocol contract for unified tool s
 ### Task 2: Extend chatbot-backend protocol models for the unified tool model
 
 **Files:**
+
 - Add: `services/chatbot-backend/src/main/java/com/fdc3/chatbot/protocol/model/ProtocolToolDescriptor.java`
 - Add: `services/chatbot-backend/src/main/java/com/fdc3/chatbot/protocol/model/ChatToolSource.java`
 - Modify: `services/chatbot-backend/src/main/java/com/fdc3/chatbot/protocol/model/ProtocolRunContext.java`
@@ -300,11 +303,13 @@ git commit -m "feat: add unified tool source model to chatbot-backend protocol"
 ### Task 3: Update ProtocolChatService for source-aware tool dispatch
 
 **Files:**
+
 - Modify: `services/chatbot-backend/src/main/java/com/fdc3/chatbot/protocol/ProtocolChatService.java`
 - Modify: `services/chatbot-backend/src/main/java/com/fdc3/chatbot/protocol/model/ProtocolInvocation.java` (extracted inner record)
 - Test: `services/chatbot-backend/src/test/java/com/fdc3/chatbot/protocol/ProtocolChatServiceTest.java`
 
 This task updates the core service to:
+
 1. Merge `context.tools` with `context.frontendTools` into a unified list
 2. Emit `source` on tool-call frames alongside `executionTarget`
 3. Route `human` tool calls to `action-required` finish reason
@@ -471,6 +476,7 @@ git commit -m "feat: add source-aware tool dispatch to ProtocolChatService"
 ### Task 4: Verify frontend runtime source-based dispatch and update demo web app
 
 **Files:**
+
 - Modify: `packages/chat-protocol-frontend/src/runtime/createProtocolStreamAdapter.ts`
 - Test: `packages/chat-protocol-frontend/test/stream-adapter.test.tsx`
 - Modify: `apps/chat-protocol-demo-web/src/ChatProtocolApp.tsx`
@@ -577,6 +583,7 @@ git commit -m "feat: verify source-based dispatch and connect demo to chatbot-ba
 ### Task 5: Prove request-level dynamic registration end-to-end
 
 **Files:**
+
 - Modify: `tests/e2e/chat-protocol-demo.spec.ts` (new or updated Playwright test)
 
 This task verifies the complete flow through the chatbot-backend with real LLM orchestration.

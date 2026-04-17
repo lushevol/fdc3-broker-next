@@ -6,7 +6,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from '@/components/ui/chart';
+} from '@fm/chat-protocol-ui';
 
 type ToolRenderProps = {
   args: Record<string, unknown>;
@@ -153,7 +153,8 @@ function normalizeUsageStatistics(
     asString(args.bucket) ??
     (normalizeTrendPoints(resultRecord).length > 1 ? 'DAY' : undefined);
   const trendPoints = normalizeTrendPoints(resultRecord, bucket);
-  const supportsTrend = Array.isArray(resultRecord.trendPoints) || Array.isArray(resultRecord.points);
+  const supportsTrend =
+    Array.isArray(resultRecord.trendPoints) || Array.isArray(resultRecord.points);
 
   const pv = asNumber(resultRecord.pv) ?? summarizeTrend(trendPoints, 'pv');
   const uv = asNumber(resultRecord.uv) ?? summarizeTrend(trendPoints, 'uv');
@@ -231,7 +232,9 @@ export function LocationResolveTool({ args, result }: ToolRenderProps) {
 
   return (
     <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm shadow-sm">
-      <div className="font-semibold text-emerald-900">{String(record.name ?? 'Resolved location')}</div>
+      <div className="font-semibold text-emerald-900">
+        {String(record.name ?? 'Resolved location')}
+      </div>
       <div className="mt-1 text-emerald-700">
         {String(record.latitude ?? '')}, {String(record.longitude ?? '')}
       </div>
@@ -245,7 +248,8 @@ export function SummaryComposeTool({ result }: ToolRenderProps) {
   }
 
   const record = asRecord(result);
-  const summary = typeof result === 'string' ? result : asString(record?.summary) ?? asString(record?.text);
+  const summary =
+    typeof result === 'string' ? result : (asString(record?.summary) ?? asString(record?.text));
 
   return (
     <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm shadow-sm">
@@ -303,7 +307,9 @@ function UsageStatisticsCard({ usage }: { usage: UsageStatisticsViewModel }) {
       data-testid="usage-statistics-card"
       className="rounded-[28px] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-4 shadow-[0_20px_48px_-32px_rgba(15,23,42,0.28)]"
     >
-      <div className="text-base font-semibold tracking-[-0.02em] text-slate-900">{usage.appLabel}</div>
+      <div className="text-base font-semibold tracking-[-0.02em] text-slate-900">
+        {usage.appLabel}
+      </div>
       <div className="mt-1 text-sm text-slate-500">
         {formatUsageDateLabel(usage.startTime)} - {formatUsageDateLabel(usage.endTime)}
       </div>
@@ -332,8 +338,18 @@ function UsageStatisticsCard({ usage }: { usage: UsageStatisticsViewModel }) {
       {usage.supportsTrend ? (
         chartData.length > 0 ? (
           <div className="mt-4 grid gap-4 rounded-[22px] border border-slate-200 bg-slate-50 p-4">
-            <UsageTrendChart label="PV Trend" data={chartData} dataKey="pv" stroke="var(--color-pv)" />
-            <UsageTrendChart label="UV Trend" data={chartData} dataKey="uv" stroke="var(--color-uv)" />
+            <UsageTrendChart
+              label="PV Trend"
+              data={chartData}
+              dataKey="pv"
+              stroke="var(--color-pv)"
+            />
+            <UsageTrendChart
+              label="UV Trend"
+              data={chartData}
+              dataKey="uv"
+              stroke="var(--color-uv)"
+            />
           </div>
         ) : (
           <div className="mt-4 rounded-[22px] border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
@@ -364,13 +380,7 @@ function UsageTrendChart({
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis axisLine={false} dataKey="tick" tickLine={false} minTickGap={20} />
           <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
-          <Line
-            dataKey={dataKey}
-            dot={false}
-            stroke={stroke}
-            strokeWidth={2.5}
-            type="monotone"
-          />
+          <Line dataKey={dataKey} dot={false} stroke={stroke} strokeWidth={2.5} type="monotone" />
         </LineChart>
       </ChartContainer>
     </div>
@@ -447,7 +457,8 @@ export function ApprovalConfirmTool({
             : 'border-rose-200 bg-rose-50 text-rose-900'
         }`}
       >
-        <span className="font-medium">{confirmed ? 'Approved' : 'Rejected'}</span>: {String(args.decision ?? '')}
+        <span className="font-medium">{confirmed ? 'Approved' : 'Rejected'}</span>:{' '}
+        {String(args.decision ?? '')}
       </div>
     );
   }

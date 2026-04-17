@@ -97,18 +97,15 @@ function readToolIdentities(
   }
 
   const entries = Object.entries(raw).flatMap(
-    ([toolCallId, value]): Array<[string, Pick<ToolState, 'source' | 'providerId' | 'toolName'>]> => {
+    ([toolCallId, value]): Array<
+      [string, Pick<ToolState, 'source' | 'providerId' | 'toolName'>]
+    > => {
       if (!isObjectRecord(value)) {
         return [];
       }
 
       const source = value.source;
-      if (
-        source !== 'frontend' &&
-        source !== 'backend' &&
-        source !== 'human' &&
-        source !== 'mcp'
-      ) {
+      if (source !== 'frontend' && source !== 'backend' && source !== 'human' && source !== 'mcp') {
         return [];
       }
 
@@ -164,12 +161,7 @@ function readToolIdentityMetadata(
   }
 
   const source = value.source;
-  if (
-    source !== 'frontend' &&
-    source !== 'backend' &&
-    source !== 'human' &&
-    source !== 'mcp'
-  ) {
+  if (source !== 'frontend' && source !== 'backend' && source !== 'human' && source !== 'mcp') {
     return null;
   }
 
@@ -236,7 +228,7 @@ function getToolState(
   return {
     toolName: fallback.toolName ?? identity?.toolName ?? '',
     source: fallback.source ?? identity?.source ?? getDefaultToolSource(),
-    ...(fallback.providerId ?? identity?.providerId
+    ...((fallback.providerId ?? identity?.providerId)
       ? { providerId: fallback.providerId ?? identity?.providerId }
       : {}),
     inputText: fallback.inputText ?? '',
@@ -737,14 +729,21 @@ function applyFrame(
     case 'tool-input-start': {
       const identity = state.toolIdentities.get(frame.toolCallId);
       const sourceFromFrame = 'source' in frame ? (frame as { source?: string }).source : undefined;
-      const resolvedSource = (sourceFromFrame === 'frontend' || sourceFromFrame === 'backend' || sourceFromFrame === 'human' || sourceFromFrame === 'mcp')
-        ? sourceFromFrame as ChatToolSource
-        : identity?.source ?? getDefaultToolSource();
-      const providerIdFromFrame = 'providerId' in frame ? (frame as { providerId?: string }).providerId : undefined;
+      const resolvedSource =
+        sourceFromFrame === 'frontend' ||
+        sourceFromFrame === 'backend' ||
+        sourceFromFrame === 'human' ||
+        sourceFromFrame === 'mcp'
+          ? (sourceFromFrame as ChatToolSource)
+          : (identity?.source ?? getDefaultToolSource());
+      const providerIdFromFrame =
+        'providerId' in frame ? (frame as { providerId?: string }).providerId : undefined;
       const toolState = {
         toolName: frame.toolName || identity?.toolName || '',
         source: resolvedSource,
-        ...(identity?.providerId ?? providerIdFromFrame ? { providerId: identity?.providerId ?? providerIdFromFrame } : {}),
+        ...((identity?.providerId ?? providerIdFromFrame)
+          ? { providerId: identity?.providerId ?? providerIdFromFrame }
+          : {}),
         inputText: '',
       };
       state.toolStates.set(frame.toolCallId, toolState);
@@ -764,14 +763,23 @@ function applyFrame(
     case 'tool-input-available': {
       const current = getToolState(state, frame.toolCallId);
       const sourceFromFrame = 'source' in frame ? (frame as { source?: string }).source : undefined;
-      const providerIdFromFrame = 'providerId' in frame ? (frame as { providerId?: string }).providerId : undefined;
-      const resolvedSource = (sourceFromFrame === 'frontend' || sourceFromFrame === 'backend' || sourceFromFrame === 'human' || sourceFromFrame === 'mcp')
-        ? sourceFromFrame as ChatToolSource
-        : current.source;
+      const providerIdFromFrame =
+        'providerId' in frame ? (frame as { providerId?: string }).providerId : undefined;
+      const resolvedSource =
+        sourceFromFrame === 'frontend' ||
+        sourceFromFrame === 'backend' ||
+        sourceFromFrame === 'human' ||
+        sourceFromFrame === 'mcp'
+          ? (sourceFromFrame as ChatToolSource)
+          : current.source;
       const updated = {
         ...current,
         source: resolvedSource,
-        ...(providerIdFromFrame ? { providerId: providerIdFromFrame } : (current.providerId ? { providerId: current.providerId } : {})),
+        ...(providerIdFromFrame
+          ? { providerId: providerIdFromFrame }
+          : current.providerId
+            ? { providerId: current.providerId }
+            : {}),
       };
       state.toolStates.set(frame.toolCallId, updated);
       nextContent = ensureToolCallPart(nextContent, frame, updated);
@@ -780,14 +788,23 @@ function applyFrame(
     case 'tool-output-available': {
       const current = getToolState(state, frame.toolCallId);
       const sourceFromFrame = 'source' in frame ? (frame as { source?: string }).source : undefined;
-      const providerIdFromFrame = 'providerId' in frame ? (frame as { providerId?: string }).providerId : undefined;
-      const resolvedSource = (sourceFromFrame === 'frontend' || sourceFromFrame === 'backend' || sourceFromFrame === 'human' || sourceFromFrame === 'mcp')
-        ? sourceFromFrame as ChatToolSource
-        : current.source;
+      const providerIdFromFrame =
+        'providerId' in frame ? (frame as { providerId?: string }).providerId : undefined;
+      const resolvedSource =
+        sourceFromFrame === 'frontend' ||
+        sourceFromFrame === 'backend' ||
+        sourceFromFrame === 'human' ||
+        sourceFromFrame === 'mcp'
+          ? (sourceFromFrame as ChatToolSource)
+          : current.source;
       const updated = {
         ...current,
         source: resolvedSource,
-        ...(providerIdFromFrame ? { providerId: providerIdFromFrame } : (current.providerId ? { providerId: current.providerId } : {})),
+        ...(providerIdFromFrame
+          ? { providerId: providerIdFromFrame }
+          : current.providerId
+            ? { providerId: current.providerId }
+            : {}),
       };
       state.toolStates.set(frame.toolCallId, updated);
       nextContent = ensureToolCallPart(nextContent, frame, updated);
@@ -796,14 +813,23 @@ function applyFrame(
     case 'tool-output-error': {
       const current = getToolState(state, frame.toolCallId);
       const sourceFromFrame = 'source' in frame ? (frame as { source?: string }).source : undefined;
-      const providerIdFromFrame = 'providerId' in frame ? (frame as { providerId?: string }).providerId : undefined;
-      const resolvedSource = (sourceFromFrame === 'frontend' || sourceFromFrame === 'backend' || sourceFromFrame === 'human' || sourceFromFrame === 'mcp')
-        ? sourceFromFrame as ChatToolSource
-        : current.source;
+      const providerIdFromFrame =
+        'providerId' in frame ? (frame as { providerId?: string }).providerId : undefined;
+      const resolvedSource =
+        sourceFromFrame === 'frontend' ||
+        sourceFromFrame === 'backend' ||
+        sourceFromFrame === 'human' ||
+        sourceFromFrame === 'mcp'
+          ? (sourceFromFrame as ChatToolSource)
+          : current.source;
       const updated = {
         ...current,
         source: resolvedSource,
-        ...(providerIdFromFrame ? { providerId: providerIdFromFrame } : (current.providerId ? { providerId: current.providerId } : {})),
+        ...(providerIdFromFrame
+          ? { providerId: providerIdFromFrame }
+          : current.providerId
+            ? { providerId: current.providerId }
+            : {}),
       };
       state.toolStates.set(frame.toolCallId, updated);
       nextContent = ensureToolCallPart(nextContent, frame, updated);
