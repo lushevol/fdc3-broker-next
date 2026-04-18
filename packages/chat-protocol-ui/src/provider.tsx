@@ -20,6 +20,7 @@ import {
   streamProtocolRun,
   toProtocolMessages,
 } from '@fm/chat-protocol-runtime';
+import type { ToolkitBridge } from '@fm/chat-protocol-runtime';
 
 export type ChatProtocolProviderProps = {
   apiUrl: string;
@@ -29,10 +30,34 @@ export type ChatProtocolProviderProps = {
   metadata?: ChatRunRequest['metadata'];
   fetch?: typeof globalThis.fetch;
   onFrame?: (frame: import('@fm/chat-protocol-contract').ChatStreamFrame) => void;
+
+  /**
+   * @deprecated Use toolkitBridge instead for unified tool execution.
+   * This will be removed in v3.0.0.
+   */
   resolveFrontendTool?: (
     toolCall: ChatToolCallPart,
     request: ChatRunRequest,
   ) => Promise<Record<string, unknown>> | Record<string, unknown>;
+
+  /**
+   * Toolkit bridge for unified frontend tool execution.
+   * When provided, the protocol will use this bridge to execute frontend tools
+   * through the app's toolkit, eliminating the need for resolveFrontendTool.
+   *
+   * @example
+   * ```typescript
+   * import { createToolkitBridge } from '@/lib/toolkitBridge';
+   *
+   * const toolkitBridge = createToolkitBridge(toolkit);
+   *
+   * <ChatProtocolProvider
+   *   toolkitBridge={toolkitBridge}
+   * >
+   * ```
+   */
+  toolkitBridge?: ToolkitBridge;
+
   createConversationId?: (threadId?: string) => string;
   children: ReactNode;
 };
@@ -58,6 +83,7 @@ export function ChatProtocolProvider({
   fetch,
   onFrame,
   resolveFrontendTool,
+  toolkitBridge,
   createConversationId = defaultCreateConversationId,
   children,
 }: ChatProtocolProviderProps): JSX.Element {
