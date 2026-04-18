@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { createToolkitBridge } from '@/lib/toolkitBridge';
 import type {
   ChatStreamFrame,
   ChatToolCallPart,
@@ -28,40 +29,6 @@ function createConversationId(threadId?: string): string {
   return threadId ? `conv-${threadId}` : 'conv-chat-protocol-demo';
 }
 
-const resolveFrontendTool: ResolveFrontendTool = async (toolCall) => {
-  if (toolCall.toolName === 'location.resolve') {
-    const query = typeof toolCall.input.query === 'string' ? toolCall.input.query : 'San Francisco';
-    const normalized = query.toLowerCase();
-    if (normalized.includes('beijing')) {
-      return {
-        name: 'Beijing, CN',
-        latitude: 39.9042,
-        longitude: 116.4074,
-      };
-    }
-
-    return {
-      name: 'San Francisco, CA',
-      latitude: 37.7749,
-      longitude: -122.4194,
-    };
-  } else if (toolCall.toolName === 'profile_lookup') {
-    const userId = typeof toolCall.input.userId === 'string' ? toolCall.input.userId : '';
-    try {
-      return {
-        userId,
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-      };
-    } catch (error) {
-      return { error: 'Invalid userId' };
-    }
-  }
-
-  return {
-    result: `Simulated result from frontend tool: ${toolCall.toolName}`,
-  };
-};
 
 function ChatProtocolAppContent({
   activeToolPreset,
@@ -72,6 +39,10 @@ function ChatProtocolAppContent({
 }) {
   const { invocations, trackInvocation, updateInvocation, resetInvocations } =
     useToolInvocationTracker();
+
+  // Create toolkit bridge for unified tool execution
+  const toolkit = getToolkitForPreset(activeToolPreset);
+  const toolkitBridge = useMemo(() => createToolkitBridge(toolkit), [toolkit]);
 
   const onFrame = useCallback(
     (frame: ChatStreamFrame) => {
@@ -131,7 +102,6 @@ function ChatProtocolAppContent({
     [trackInvocation, updateInvocation],
   );
 
-  const toolkit = getToolkitForPreset(activeToolPreset);
   const currentTools = getToolDescriptors(activeToolPreset);
   const protocolTools = getProtocolToolDescriptors(activeToolPreset);
 
@@ -141,7 +111,7 @@ function ChatProtocolAppContent({
       toolkit={toolkit}
       tools={protocolTools}
       onFrame={onFrame}
-      resolveFrontendTool={resolveFrontendTool}
+      toolkitBridge={toolkitBridge}
       createConversationId={createConversationId}
     >
       <main className="flex min-h-screen flex-col gap-8 p-5 md:p-8">
