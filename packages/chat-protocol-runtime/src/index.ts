@@ -4,3 +4,4 @@ export * from './runtime/client';
 export * from './runtime/createProtocolLocalRuntime';
 export * from './runtime/createProtocolStreamAdapter';
 export * from './runtime/resume';
+export { type ToolkitBridge, isToolkitBridge } from './runtime/toolkitBridge';

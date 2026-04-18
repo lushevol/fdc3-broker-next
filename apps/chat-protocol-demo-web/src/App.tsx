@@ -45,6 +45,17 @@ const resolveFrontendTool: ResolveFrontendTool = async (toolCall) => {
       latitude: 37.7749,
       longitude: -122.4194,
     };
+  } else if (toolCall.toolName === 'profile_lookup') {
+    const userId = typeof toolCall.input.userId === 'string' ? toolCall.input.userId : '';
+    try {
+      return {
+        userId,
+        name: 'John Doe',
+        email: 'john.doe@example.com',
+      };
+    } catch (error) {
+      return { error: 'Invalid userId' };
+    }
   }
 
   return {
