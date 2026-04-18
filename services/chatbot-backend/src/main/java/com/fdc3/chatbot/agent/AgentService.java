@@ -536,6 +536,8 @@ public class AgentService {
         }
 
         // Mock mode - simulate streaming response
+        log.info("[DEBUG] Profile lookup - mockEnabled={}, streamingChatModel={}",
+                mockEnabled, streamingChatModel != null ? streamingChatModel.getClass().getSimpleName() : "null");
         if (mockEnabled || streamingChatModel == null) {
             return processMockStreaming(
                     conversationId,
@@ -583,6 +585,8 @@ public class AgentService {
 
             // Add system message
             messages.add(new SystemMessage(buildSystemPrompt(useTools ? availableTools : Map.of())));
+            log.debug("Processing message for conversation: {}", conversationId);
+
             if (frontendToolContinuation != null) {
                 messages.add(new SystemMessage(buildFrontendToolContinuationPrompt(frontendToolContinuation)));
             }
@@ -618,7 +622,12 @@ public class AgentService {
 
             log.debug("Processing message for conversation: {}", conversationId);
 
-            streamConversation(
+            log.debug("streamConversation - useTools={}, toolSpecs size={}, frontendToolManifest size={}, blockedFrontendTools={}",
+            useTools,
+            useTools ? buildToolSpecifications(availableTools, frontendToolManifest, blockedFrontendTools).size() : 0,
+            frontendToolManifest.size(),
+            blockedFrontendTools);
+        streamConversation(
                     conversationId,
                     userMessage,
                     messages,
@@ -1346,7 +1355,11 @@ public class AgentService {
             String conversationId,
             String frontendTools
     ) {
+        log.debug("resolveFrontendToolManifest - conversationId={}, frontendTools input length={}",
+                conversationId, frontendTools != null ? frontendTools.length() : 0);
         List<FrontendToolManifestEntry> parsedManifest = parseFrontendToolManifest(frontendTools);
+        log.debug("Frontend tools parsed: {}", parsedManifest.stream()
+                .map(FrontendToolManifestEntry::getName).toList());
         if (!parsedManifest.isEmpty()) {
             frontendToolManifestsByConversation.put(conversationId, List.copyOf(parsedManifest));
             return parsedManifest;
@@ -1744,8 +1757,11 @@ public class AgentService {
                 .orElse(null);
     }
 
-    @SuppressWarnings("unchecked")
+@SuppressWarnings("unchecked")
     private JsonObjectSchema toToolParameters(Map<String, Object> parameters) {
+        if (log.isDebugEnabled()) {
+            log.debug("[DEBUG] toToolParameters input: {}", parameters);
+        }
         JsonObjectSchema.Builder builder = JsonObjectSchema.builder();
         Object description = parameters.get("description");
         if (description != null) {
@@ -1753,10 +1769,19 @@ public class AgentService {
         }
 
         Object properties = parameters.get("properties");
+        if (log.isDebugEnabled()) {
+            log.debug("[DEBUG] toToolParameters - properties: {}", properties);
+        }
         if (properties instanceof Map<?, ?> map) {
             map.forEach((key, value) -> {
                 if (key != null && value instanceof Map<?, ?> propertySchema) {
-                    builder.addProperty(String.valueOf(key), toJsonSchemaElement(castSchemaMap(propertySchema)));
+                    Map<String, Object> cleanedSchema = cleanSchemaMap(propertySchema);
+                    builder.addProperty(String.valueOf(key), toJsonSchemaElement(cleanedSchema));
+                } else if (key != null && (value instanceof String || value instanceof Number || value instanceof Boolean)) {
+                    JsonSchemaElement element = buildSimpleSchema(value);
+                    builder.addProperty(String.valueOf(key), element);
+                } else if (key != null) {
+                    log.warn("[DEBUG] toToolParameters - property {} has non-Map value: {} type={}", key, value, value != null ? value.getClass().getSimpleName() : "null");
                 }
             });
         }
@@ -1788,6 +1813,17 @@ public class AgentService {
     @SuppressWarnings("unchecked")
     private Map<String, Object> castSchemaMap(Map<?, ?> schema) {
         return (Map<String, Object>) schema;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> cleanSchemaMap(Map<?, ?> schema) {
+        Map<String, Object> result = new java.util.LinkedHashMap<>();
+        for (Map.Entry<?, ?> entry : schema.entrySet()) {
+            if (!"required".equals(entry.getKey())) {
+                result.put(String.valueOf(entry.getKey()), entry.getValue());
+            }
+        }
+        return result;
     }
 
     private JsonSchemaElement toJsonSchemaElement(Map<String, Object> schema) {
@@ -1824,6 +1860,15 @@ public class AgentService {
             case "string" -> buildStringSchema(description);
             default -> JsonRawSchema.from(writeJson(schema));
         };
+    }
+
+    private JsonSchemaElement buildSimpleSchema(Object value) {
+        if (value instanceof Boolean) {
+            return buildBooleanSchema(null);
+        } else if (value instanceof Number) {
+            return buildStringSchema(null);
+        }
+        return buildStringSchema(null);
     }
 
     private JsonStringSchema buildStringSchema(String description) {

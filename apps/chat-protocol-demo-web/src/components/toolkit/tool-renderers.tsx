@@ -223,9 +223,7 @@ export function TimezoneCurrentTool({ result }: ToolRenderProps) {
   const record = asRecord(result);
 
   if (!record) {
-    return (
-      <LoadingToolCard toolName="timezone.current" message="Getting current timezone..." />
-    );
+    return <LoadingToolCard toolName="timezone_current" message="Getting current timezone..." />;
   }
 
   const timezone = asString(record.timezone) ?? asString(record.tz) ?? 'Unknown';
@@ -256,7 +254,7 @@ export function TimezoneCurrentTool({ result }: ToolRenderProps) {
 
 export function SummaryComposeTool({ result }: ToolRenderProps) {
   if (result === undefined) {
-    return <LoadingToolCard toolName="summary.compose" message="Composing summary..." />;
+    return <LoadingToolCard toolName="summary_compose" message="Composing summary..." />;
   }
 
   const record = asRecord(result);
@@ -274,7 +272,7 @@ export function SummaryComposeTool({ result }: ToolRenderProps) {
 export function ProfileLookupTool({ args, result }: ToolRenderProps) {
   return (
     <JsonToolCard
-      toolName="profile.lookup"
+      toolName="profile_lookup"
       title={`Profile: ${String(args.userId ?? 'unknown')}`}
       result={result}
       emptyMessage="No profile details were returned."
@@ -434,6 +432,24 @@ export function ApprovalConfirmTool({
   resume?: (payload: { confirmed: boolean }) => void;
 }) {
   const toolArgs = args as { to?: string; subject?: string; body?: string } | undefined;
+  const record = asRecord(result);
+  const confirmed = record?.confirmed === true;
+
+  if (record) {
+    return (
+      <div
+        className={`rounded-2xl border px-4 py-3 text-sm shadow-sm ${
+          confirmed
+            ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+            : 'border-rose-200 bg-rose-50 text-rose-900'
+        }`}
+      >
+        <span className="font-medium">{confirmed ? 'Email Sent' : 'Cancelled'}</span>
+        {confirmed && toolArgs?.to && <span> to {toolArgs.to}</span>}
+      </div>
+    );
+  }
+
   if (interrupt) {
     return (
       <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 shadow-sm">
@@ -462,26 +478,9 @@ export function ApprovalConfirmTool({
     );
   }
 
-  const record = asRecord(result);
-  const confirmed = record?.confirmed === true;
-  if (record) {
-    return (
-      <div
-        className={`rounded-2xl border px-4 py-3 text-sm shadow-sm ${
-          confirmed
-            ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
-            : 'border-rose-200 bg-rose-50 text-rose-900'
-        }`}
-      >
-        <span className="font-medium">{confirmed ? 'Email Sent' : 'Cancelled'}</span>
-        {confirmed && toolArgs?.to && <span> to {toolArgs.to}</span>}
-      </div>
-    );
-  }
-
   return (
     <LoadingToolCard
-      toolName="approval.confirm"
+      toolName="approval_confirm"
       message={`Preparing email to ${toolArgs?.to ?? '...'}...`}
     />
   );

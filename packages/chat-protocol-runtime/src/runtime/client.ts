@@ -50,6 +50,18 @@ export type StreamProtocolRunOptions = {
   ) => Promise<Record<string, unknown>> | Record<string, unknown>;
 };
 
+export type BuildHumanToolResumeRequestOptions = {
+  conversationId: string;
+  messages: ChatMessage[];
+  toolCallId: string;
+  toolName: string;
+  result: Record<string, unknown>;
+  runId?: string | null;
+  tools?: ChatToolDescriptor[];
+  metadata?: ChatRunRequest['metadata'];
+  context?: ChatRunRequest['context'];
+};
+
 function getTextParts(message: ThreadMessage): string[] {
   return message.content
     .filter(
@@ -315,6 +327,55 @@ function createToolResultMessage(toolCall: ChatToolCallPart): ChatToolMessage {
       },
     ],
     metadata: {},
+  };
+}
+
+function createToolResultMessageFromResult(options: {
+  toolCallId: string;
+  toolName: string;
+  result: Record<string, unknown>;
+}): ChatToolMessage {
+  return {
+    id: `${options.toolCallId}-tool-result`,
+    role: 'tool',
+    toolCallId: options.toolCallId,
+    toolName: options.toolName,
+    parts: [
+      {
+        type: 'tool-result',
+        toolCallId: options.toolCallId,
+        output: options.result,
+      },
+    ],
+    metadata: {},
+  };
+}
+
+export function buildHumanToolResumeRequest({
+  conversationId,
+  messages,
+  toolCallId,
+  toolName,
+  result,
+  runId,
+  tools,
+  metadata,
+  context,
+}: BuildHumanToolResumeRequestOptions): ChatRunRequest {
+  return {
+    conversationId,
+    ...(runId !== undefined ? { runId } : {}),
+    trigger: 'submit-tool-result',
+    ...(tools || context ? { context: { ...context, ...(tools ? { tools } : {}) } } : {}),
+    messages: [
+      ...messages,
+      createToolResultMessageFromResult({
+        toolCallId,
+        toolName,
+        result,
+      }),
+    ],
+    ...(metadata ? { metadata } : {}),
   };
 }
 

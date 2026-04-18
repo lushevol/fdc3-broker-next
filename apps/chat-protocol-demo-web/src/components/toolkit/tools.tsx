@@ -11,7 +11,24 @@ import {
 } from '@/components/toolkit/tool-renderers';
 
 const sharedToolDefinitions: Toolkit = {
-  'timezone.current': {
+  profile_lookup: {
+    type: 'frontend',
+    description: 'Lookup user profile information',
+    parameters: z.object({
+      userId: z.string().describe('The ID of the user to look up'),
+    }),
+    execute: async (input) => {
+      const { userId } = input as { userId: string };
+      // Simulate a user profile lookup
+      return {
+        userId,
+        name: 'John Doe',
+        email: 'john.doe@example.com',
+      };
+    },
+    render: ProfileLookupTool,
+  },
+  timezone_current: {
     type: 'frontend',
     description: "Get the user's current timezone",
     parameters: z.object({}),
@@ -35,7 +52,7 @@ const sharedToolDefinitions: Toolkit = {
     },
     render: TimezoneCurrentTool,
   },
-  'approval.confirm': {
+  approval_confirm: {
     type: 'human',
     description: 'Send an email with confirmation',
     parameters: z.object({
@@ -45,14 +62,6 @@ const sharedToolDefinitions: Toolkit = {
     }),
     render: ApprovalConfirmTool,
   },
-  'summary.compose': {
-    type: 'backend',
-    render: SummaryComposeTool,
-  },
-  'analytics.lookup': {
-    type: 'backend',
-    render: AnalyticsTool,
-  },
   statistic_count_by_app: {
     type: 'backend',
     render: AnalyticsTool,
@@ -61,10 +70,6 @@ const sharedToolDefinitions: Toolkit = {
     type: 'backend',
     render: AnalyticsTool,
   },
-  'profile.lookup': {
-    type: 'backend',
-    render: ProfileLookupTool,
-  },
   resolve_relative_date: {
     type: 'backend',
     render: ResolveRelativeDateTool,
@@ -72,13 +77,14 @@ const sharedToolDefinitions: Toolkit = {
 };
 
 const presetToolNames: Record<ToolPreset, string[]> = {
-  minimal: ['timezone.current'],
+  minimal: ['timezone_current'],
   full: [
-    'timezone.current',
-    'approval.confirm',
-    'summary.compose',
-    'analytics.lookup',
-    'profile.lookup',
+    'timezone_current',
+    'approval_confirm',
+    'profile_lookup',
+    'statistic_count_by_app',
+    'chart_by_app',
+    'resolve_relative_date',
   ],
 };
 
@@ -156,7 +162,7 @@ function extractParamInfo(schema: unknown): ParamInfo {
       ZodEnum: 'enum',
     };
     result[key] = {
-      type: typeMap[typeName] ?? 'any',
+      type: typeMap[typeName] ?? 'string',
       description: f.description,
       required: true,
     };

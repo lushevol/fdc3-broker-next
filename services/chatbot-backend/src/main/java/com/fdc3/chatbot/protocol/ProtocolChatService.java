@@ -593,14 +593,28 @@ public class ProtocolChatService {
         }
 
         private static String serializeFrontendTools(ProtocolRunRequest request, ObjectMapper objectMapper) {
-            if (request.getContext() == null || request.getContext().getFrontendTools() == null
-                    || request.getContext().getFrontendTools().isEmpty()) {
+            List<FrontendToolManifestEntry> manifest = new java.util.ArrayList<>();
+
+            // Add tools from context.getFrontendTools() (legacy field)
+            if (request.getContext() != null && request.getContext().getFrontendTools() != null) {
+                for (ProtocolFrontendTool tool : request.getContext().getFrontendTools()) {
+                    manifest.add(toFrontendToolManifestEntry(tool));
+                }
+            }
+
+            // Add tools from context.getTools() (new contract field)
+            if (request.getContext() != null && request.getContext().getTools() != null) {
+                for (ProtocolToolDescriptor tool : request.getContext().getTools()) {
+                    if (!manifest.stream().anyMatch(m -> m.getName().equals(tool.getName()))) {
+                        manifest.add(toolDescriptorToManifestEntry(tool));
+                    }
+                }
+            }
+
+            if (manifest.isEmpty()) {
                 return null;
             }
 
-            List<FrontendToolManifestEntry> manifest = request.getContext().getFrontendTools().stream()
-                    .map(ProtocolInvocation::toFrontendToolManifestEntry)
-                    .toList();
             try {
                 return objectMapper.writeValueAsString(manifest);
             } catch (JsonProcessingException exception) {
@@ -614,6 +628,23 @@ public class ProtocolChatService {
                     .name(tool.getName())
                     .description(tool.getDescription())
                     .inputSchema(tool.getParameters() == null ? Map.of() : tool.getParameters())
+                    .humanInTheLoop(humanInTheLoop)
+                    .hasRender(true)
+                    .build();
+        }
+
+        private static FrontendToolManifestEntry toolDescriptorToManifestEntry(ProtocolToolDescriptor tool) {
+            Map<String, Object> inputSchema = new java.util.LinkedHashMap<>();
+            if (tool.getParameters() != null) {
+                inputSchema.put("properties", tool.getParameters());
+            }
+            boolean humanInTheLoop = "human".equalsIgnoreCase(String.valueOf(tool.getSource()));
+            String toolName = tool.getName();
+            String llmCompatibleName = toolName != null ? toolName.replace('.', '_').replace('-', '_') : toolName;
+            return FrontendToolManifestEntry.builder()
+                    .name(llmCompatibleName)
+                    .description(tool.getDescription() != null ? tool.getDescription() : "")
+                    .inputSchema(inputSchema.isEmpty() ? Map.of() : inputSchema)
                     .humanInTheLoop(humanInTheLoop)
                     .hasRender(true)
                     .build();

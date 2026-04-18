@@ -187,7 +187,7 @@ describe('protocol stream adapter', () => {
     adapter.applyFrame({
       type: 'tool-input-start',
       toolCallId: 'tool_human_1',
-      toolName: 'approval.confirm',
+      toolName: 'approval_confirm',
       source: 'human',
     });
     adapter.applyFrame({
@@ -202,9 +202,63 @@ describe('protocol stream adapter', () => {
     expect(toolPart).toMatchObject({
       type: 'tool-call',
       toolCallId: 'tool_human_1',
-      toolName: 'approval.confirm',
+      toolName: 'approval_confirm',
       source: 'human',
       state: 'awaiting-human',
+    });
+  });
+
+  it('emits interrupt metadata for pending human tools when action is required', () => {
+    const adapter = createProtocolStreamAdapter();
+    adapter.applyFrame({ type: 'start', conversationId: 'conv_human_test', runId: 'run_1' });
+    adapter.applyFrame({ type: 'message-start', messageId: 'msg_asst_human', role: 'assistant' });
+    adapter.applyFrame({
+      type: 'tool-input-start',
+      toolCallId: 'tool_human_1',
+      toolName: 'approval_confirm',
+      source: 'human',
+    });
+    adapter.applyFrame({
+      type: 'tool-input-available',
+      toolCallId: 'tool_human_1',
+      input: {
+        to: 'ops@example.com',
+        subject: 'Daily report',
+      },
+      source: 'human',
+    });
+    adapter.applyFrame({
+      type: 'finish',
+      finishReason: 'action-required',
+      messageId: 'msg_asst_human',
+    });
+
+    const threadMessage = adapter.toThreadMessage();
+    const toolPart = threadMessage.content.find(
+      (part) => part.type === 'tool-call' && part.toolCallId === 'tool_human_1',
+    );
+
+    expect(threadMessage.status).toEqual({ type: 'requires-action', reason: 'interrupt' });
+    expect(toolPart).toMatchObject({
+      type: 'tool-call',
+      toolCallId: 'tool_human_1',
+      toolName: 'approval_confirm',
+      args: {
+        to: 'ops@example.com',
+        subject: 'Daily report',
+      },
+      interrupt: {
+        type: 'human',
+        payload: {
+          toolCallId: 'tool_human_1',
+          toolName: 'approval_confirm',
+          source: 'human',
+          input: {
+            to: 'ops@example.com',
+            subject: 'Daily report',
+          },
+        },
+      },
     });
   });
 
@@ -215,7 +269,7 @@ describe('protocol stream adapter', () => {
     adapter.applyFrame({
       type: 'tool-input-start',
       toolCallId: 'tool_mcp_inline',
-      toolName: 'analytics.lookup',
+      toolName: 'analytics_lookup',
       source: 'mcp',
       providerId: 'analytics-mcp',
     });
@@ -230,7 +284,7 @@ describe('protocol stream adapter', () => {
     expect(toolPart).toMatchObject({
       type: 'tool-call',
       toolCallId: 'tool_mcp_inline',
-      toolName: 'analytics.lookup',
+      toolName: 'analytics_lookup',
       source: 'mcp',
       providerId: 'analytics-mcp',
       state: 'awaiting-execution',
@@ -244,7 +298,7 @@ describe('protocol stream adapter', () => {
     adapter.applyFrame({
       type: 'tool-input-start',
       toolCallId: 'tool_backend_1',
-      toolName: 'summary.compose',
+      toolName: 'summary_compose',
       source: 'backend',
     });
     adapter.applyFrame({
@@ -259,7 +313,7 @@ describe('protocol stream adapter', () => {
     expect(toolPart).toMatchObject({
       type: 'tool-call',
       toolCallId: 'tool_backend_1',
-      toolName: 'summary.compose',
+      toolName: 'summary_compose',
       source: 'backend',
       state: 'awaiting-execution',
     });
@@ -280,7 +334,7 @@ describe('protocol stream adapter', () => {
         toolIdentity: {
           source: 'mcp',
           toolCallId: 'tool_mcp_1',
-          toolName: 'analytics.lookup',
+          toolName: 'analytics_lookup',
           providerId: 'analytics-mcp',
         },
       },
@@ -291,7 +345,7 @@ describe('protocol stream adapter', () => {
     expect(toolPart).toMatchObject({
       type: 'tool-call',
       toolCallId: 'tool_mcp_1',
-      toolName: 'analytics.lookup',
+      toolName: 'analytics_lookup',
       source: 'mcp',
       providerId: 'analytics-mcp',
       state: 'awaiting-execution',

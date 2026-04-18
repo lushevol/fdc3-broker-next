@@ -294,11 +294,11 @@ The POC should prove one LLM-driven conversation like this:
 4. backend emits `tool-input-available` with `source: "frontend"`, finishes with `finishReason: "tool-calls"`
 5. frontend executes the tool locally, appends the result, and resumes the run
 6. backend feeds the result back to the LLM session
-7. LLM calls a human tool (e.g., `approval.confirm`)
+7. LLM calls a human tool (e.g., `approval_confirm`)
 8. backend emits `tool-input-available` with `source: "human"`, finishes with `finishReason: "action-required"`
 9. user approves, frontend appends the result, and resumes the run
-10. LLM calls backend tool (e.g., `summary.compose`) — backend executes via `@Tool` and streams result
-11. LLM calls MCP tools from different providers (e.g., `analytics.lookup` from `analytics-mcp`, `profile.lookup` from `profile-mcp`) — backend executes via LangChain4j MCP client
+10. LLM calls backend tool (e.g., `summary_compose`) — backend executes via `@Tool` and streams result
+11. LLM calls MCP tools from different providers (e.g., `analytics_lookup` from `analytics-mcp`, `profile_lookup` from `profile-mcp`) — backend executes via LangChain4j MCP client
 12. LLM returns a final assistant summary synthesizing all outputs
 
 This single scenario covers all five requested capabilities.
