@@ -18,13 +18,17 @@ const sharedToolDefinitions: Toolkit = {
       userId: z.string().describe('The ID of the user to look up'),
     }),
     execute: async (input) => {
+      console.log('[DEBUG profile_lookup] execute called with input:', input);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       const { userId } = input as { userId: string };
       // Simulate a user profile lookup
-      return {
+      const result = {
         userId,
         name: 'John Doe',
         email: 'john.doe@example.com',
       };
+      console.log('[DEBUG profile_lookup] execute returning result:', result);
+      return result;
     },
     render: ProfileLookupTool,
   },

@@ -139,11 +139,11 @@ export type StreamProtocolRunOptions = {
   fetch?: typeof globalThis.fetch;
   onFrame?: (frame: ChatStreamFrame) => void;
 
-/**
-    * @deprecated Use toolkitBridge instead for unified tool execution.
-    * This will be removed in v3.0.0.
-    * @see packages/chat-protocol-runtime/README.md
-    */
+  /**
+   * @deprecated Use toolkitBridge instead for unified tool execution.
+   * This will be removed in v3.0.0.
+   * @see packages/chat-protocol-runtime/README.md
+   */
   resolveFrontendTool?: (
     toolCall: ChatToolCallPart,
     request: ChatRunRequest,
@@ -297,7 +297,7 @@ Refs: #unified-tool-execution"
 
 > **Note:** Before implementing, verify the `Toolkit` type exists in `@fm/chat-protocol-ui` by checking the package exports. If it doesn't exist, use a generic `Record<string, unknown>` type and adjust accordingly.
 
-```typescript
+````typescript
 /**
  * Application-layer ToolkitBridge implementation.
  *
@@ -340,9 +340,7 @@ export class ToolkitBridgeError extends Error {
  * @returns A ToolkitBridge implementation
  * @throws ToolkitBridgeError if toolkit is invalid
  */
-export function createToolkitBridge(
-  toolkit: Record<string, unknown>,
-): ToolkitBridge {
+export function createToolkitBridge(toolkit: Record<string, unknown>): ToolkitBridge {
   if (!toolkit || typeof toolkit !== 'object') {
     throw new ToolkitBridgeError('Invalid toolkit: expected object', 'unknown');
   }
@@ -544,8 +542,12 @@ describe('createToolkitBridge', () => {
   });
 
   it('should throw for invalid toolkit', () => {
-    expect(() => createToolkitBridge(null as unknown as Record<string, unknown>)).toThrow(ToolkitBridgeError);
-    expect(() => createToolkitBridge({} as unknown as Record<string, unknown>)).toThrow(ToolkitBridgeError);
+    expect(() => createToolkitBridge(null as unknown as Record<string, unknown>)).toThrow(
+      ToolkitBridgeError,
+    );
+    expect(() => createToolkitBridge({} as unknown as Record<string, unknown>)).toThrow(
+      ToolkitBridgeError,
+    );
   });
 });
 

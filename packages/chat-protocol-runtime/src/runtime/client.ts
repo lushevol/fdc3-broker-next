@@ -322,7 +322,7 @@ function findPendingToolBySource(
   parts: readonly ChatAssistantMessage['parts'][number][],
   source: ChatToolCallPart['source'],
 ): ChatToolCallPart | undefined {
-  return [...parts]
+  const found = [...parts]
     .reverse()
     .find(
       (part): part is ChatToolCallPart =>
@@ -331,6 +331,35 @@ function findPendingToolBySource(
         (part.state === 'input-available' || part.state === 'awaiting-human') &&
         !part.output,
     );
+  if (found) {
+    console.log(
+      '[DEBUG findPendingToolBySource] FOUND tool:',
+      found.toolName,
+      'state:',
+      found.state,
+      'source:',
+      found.source,
+    );
+  } else {
+    console.log('[DEBUG findPendingToolBySource] NOT FOUND - checking all tool-call parts:');
+    parts.forEach((part, i) => {
+      if (part.type === 'tool-call') {
+        console.log(
+          '  part',
+          i,
+          ':',
+          part.toolName,
+          'state:',
+          part.state,
+          'source:',
+          part.source,
+          'hasOutput:',
+          !!part.output,
+        );
+      }
+    });
+  }
+  return found;
 }
 
 function createToolResultMessage(toolCall: ChatToolCallPart): ChatToolMessage {
@@ -479,6 +508,24 @@ export async function* streamProtocolRun({
 
     let output: Record<string, unknown>;
 
+    // Track if we've already executed tools in this stream iteration to prevent infinite loops
+    const hasFrontendToolInMessages = assistantMessage.content.some(
+      (part) => part.type === 'tool-call' && part.source === 'frontend',
+    );
+    if (
+      hasFrontendToolInMessages &&
+      assistantMessage.content.some(
+        (part) =>
+          part.type === 'tool-call' &&
+          part.source === 'frontend' &&
+          'output' in part &&
+          part.output !== undefined,
+      )
+    ) {
+      console.log('[DEBUG client.ts] Frontend tool already executed, breaking to prevent loop');
+      break;
+    }
+
     // NEW: Prefer toolkitBridge over resolveFrontendTool
     if (toolkitBridge) {
       try {
@@ -486,6 +533,7 @@ export async function* streamProtocolRun({
           pendingFrontendTool.toolName,
           pendingFrontendTool.input,
         );
+        console.log('[DEBUG client.ts] executeTool returned:', output);
       } catch (error) {
         // Yield error frame and break
         yield {
@@ -532,6 +580,14 @@ export async function* streamProtocolRun({
       output,
       source: 'frontend',
     } as ChatStreamFrame;
+
+    // Apply the frame to adapter so message is updated with output (prevents re-execution)
+    adapter.applyFrame({
+      type: 'tool-output-available',
+      toolCallId: resolvedTool.toolCallId,
+      output,
+      source: 'frontend',
+    });
 
     nextRequest = {
       conversationId: request.conversationId,

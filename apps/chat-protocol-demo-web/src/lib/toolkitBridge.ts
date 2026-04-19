@@ -40,9 +40,7 @@ export class ToolkitBridgeError extends Error {
  * @returns A ToolkitBridge implementation
  * @throws ToolkitBridgeError if toolkit is invalid
  */
-export function createToolkitBridge(
-  toolkit: Record<string, unknown>,
-): ToolkitBridge {
+export function createToolkitBridge(toolkit: Record<string, unknown>): ToolkitBridge {
   if (!toolkit || typeof toolkit !== 'object') {
     throw new ToolkitBridgeError('Invalid toolkit: expected object', 'unknown');
   }

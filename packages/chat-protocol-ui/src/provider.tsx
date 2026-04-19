@@ -124,12 +124,17 @@ export function ChatProtocolProvider({
             },
           });
 
+          console.log(
+            '[DEBUG provider] Calling streamProtocolRun with toolkitBridge:',
+            toolkitBridge ? 'defined' : 'undefined',
+          );
           return streamProtocolRun({
             request,
             url: apiUrl,
             fetch,
             onFrame: handleFrame,
             resolveFrontendTool,
+            toolkitBridge,
           });
         },
       }),
@@ -141,6 +146,7 @@ export function ChatProtocolProvider({
       handleFrame,
       metadata,
       resolveFrontendTool,
+      toolkitBridge,
       tools,
     ],
   );

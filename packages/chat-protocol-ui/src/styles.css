@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @source "./";
 
 :root {
@@ -55,10 +55,7 @@ body {
   background:
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.95), transparent 28%),
     linear-gradient(180deg, #eef4fa 0%, #dae6f2 100%);
-  font-family:
-    "IBM Plex Sans",
-    "Segoe UI",
-    sans-serif;
+  font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
 }
 
 * {

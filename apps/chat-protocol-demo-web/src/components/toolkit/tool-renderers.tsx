@@ -198,6 +198,7 @@ function JsonToolCard({
   result: unknown;
   emptyMessage: string;
 }) {
+  console.log('[DEBUG JsonToolCard] received:', { toolName, title, result, emptyMessage });
   if (result === undefined) {
     return <LoadingToolCard toolName={toolName} message={`${title} is running...`} />;
   }
@@ -270,6 +271,7 @@ export function SummaryComposeTool({ result }: ToolRenderProps) {
 }
 
 export function ProfileLookupTool({ args, result }: ToolRenderProps) {
+  console.log('[DEBUG ProfileLookupTool] render props:', { args, result });
   return (
     <JsonToolCard
       toolName="profile_lookup"

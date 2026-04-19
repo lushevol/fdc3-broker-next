@@ -29,7 +29,6 @@ function createConversationId(threadId?: string): string {
   return threadId ? `conv-${threadId}` : 'conv-chat-protocol-demo';
 }
 
-
 function ChatProtocolAppContent({
   activeToolPreset,
   selectToolPreset,
