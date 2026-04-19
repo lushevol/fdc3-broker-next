@@ -672,7 +672,7 @@ public class ProtocolChatService {
                 }
                 for (int partIndex = message.getParts().size() - 1; partIndex >= 0; partIndex--) {
                     ProtocolPart part = message.getParts().get(partIndex);
-                    if (!"tool-call".equals(part.getType()) || !"frontend".equalsIgnoreCase(part.getExecutionTarget())) {
+                    if (!"tool-call".equals(part.getType()) || !isFrontendToolPart(part)) {
                         continue;
                     }
                     boolean completed = "output-available".equalsIgnoreCase(part.getState())
@@ -702,6 +702,11 @@ public class ProtocolChatService {
                 }
             }
             return null;
+        }
+
+        private static boolean isFrontendToolPart(ProtocolPart part) {
+            return "frontend".equalsIgnoreCase(part.getSource())
+                    || "frontend".equalsIgnoreCase(part.getExecutionTarget());
         }
 
         private static int findLastUserIndex(List<ProtocolMessage> messages) {

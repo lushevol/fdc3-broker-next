@@ -246,6 +246,81 @@ describe('runtime client', () => {
     });
   });
 
+  it('stops when the backend re-issues an already resolved frontend tool', async () => {
+    const firstResponse = createSseResponse([
+      { type: 'start', conversationId: 'conv_demo', runId: 'run_1' },
+      { type: 'message-start', messageId: 'msg_asst_1', role: 'assistant' },
+      {
+        type: 'tool-input-start',
+        toolCallId: 'tool_1',
+        toolName: 'profile_lookup',
+        source: 'frontend',
+      },
+      {
+        type: 'tool-input-available',
+        toolCallId: 'tool_1',
+        input: { userId: '123' },
+        source: 'frontend',
+      },
+      { type: 'finish', finishReason: 'tool-calls', messageId: 'msg_asst_1' },
+    ]);
+
+    const repeatedToolResponse = createSseResponse([
+      { type: 'start', conversationId: 'conv_demo', runId: 'run_1' },
+      { type: 'message-start', messageId: 'msg_asst_2', role: 'assistant' },
+      {
+        type: 'tool-input-start',
+        toolCallId: 'tool_1',
+        toolName: 'profile_lookup',
+        source: 'frontend',
+      },
+      {
+        type: 'tool-input-available',
+        toolCallId: 'tool_1',
+        input: { userId: '123' },
+        source: 'frontend',
+      },
+      { type: 'finish', finishReason: 'tool-calls', messageId: 'msg_asst_2' },
+    ]);
+
+    const fetchMock = vi
+      .fn<(_: RequestInfo | URL, __?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(firstResponse)
+      .mockResolvedValueOnce(repeatedToolResponse);
+
+    const resolveFrontendTool = vi.fn(async () => ({ id: '123', name: 'Ada Lovelace' }));
+
+    const request = buildChatProtocolRequest({
+      conversationId: 'conv_demo',
+      messages: [
+        {
+          id: 'msg_user_1',
+          role: 'user',
+          parts: [{ type: 'text', text: 'Show profile 123' }],
+        },
+      ],
+    });
+
+    const frames = await Array.fromAsync(
+      streamProtocolRun({
+        request,
+        fetch: fetchMock,
+        url: 'http://127.0.0.1:8080/api/chat/runs',
+        resolveFrontendTool,
+      }),
+    );
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(resolveFrontendTool).toHaveBeenCalledTimes(1);
+    expect(frames).toContainEqual({
+      type: 'tool-output-error',
+      toolCallId: 'tool_1',
+      error:
+        'Frontend tool "profile_lookup" was already resolved earlier in this run. Refusing to execute it again.',
+      source: 'frontend',
+    });
+  });
+
   it('builds a submit-tool-result request for human tool approval continuations', () => {
     const request = buildHumanToolResumeRequest({
       conversationId: 'conv_demo',
