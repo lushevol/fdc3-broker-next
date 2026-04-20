@@ -58,6 +58,7 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -630,11 +631,15 @@ public class AgentService {
         streamConversation(
                     conversationId,
                     userMessage,
+                    history,
                     messages,
                     availableTools,
                     useTools ? buildToolSpecifications(availableTools, frontendToolManifest, blockedFrontendTools) : List.of(),
                     frontendToolManifest,
                     blockedFrontendTools,
+                    frontendToolContinuation == null
+                            ? null
+                            : FallbackToolContext.fromFrontendToolContinuation(frontendToolContinuation),
                     frontendToolContinuation != null ? "frontend-continuation" : "initial",
                     onNext,
                     onError,
@@ -1379,11 +1384,13 @@ public class AgentService {
     private void streamConversation(
             String conversationId,
             String userMessage,
+            List<ChatMessage> history,
             List<dev.langchain4j.data.message.ChatMessage> messages,
             Map<String, ToolDefinition> availableTools,
             List<ToolSpecification> toolSpecifications,
             List<FrontendToolManifestEntry> frontendToolManifest,
-            Set<String> blockedFrontendTools,
+            Set<String> blockedToolNames,
+            FallbackToolContext fallbackToolContext,
             String turnPhase,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
@@ -1392,6 +1399,22 @@ public class AgentService {
             java.util.function.Consumer<ToolResult> onToolResult,
             AtomicBoolean cancelled
     ) {
+        Set<String> effectiveBlockedToolNames = blockedToolNames;
+        if (fallbackToolContext != null && "resolve_relative_date".equals(fallbackToolContext.toolName())) {
+            ToolExecutionRequest resolvedDateFollowup = inferResolvedDateFollowup(
+                    userMessage,
+                    history,
+                    availableTools,
+                    frontendToolManifest,
+                    fallbackToolContext
+            );
+            if (resolvedDateFollowup != null) {
+                java.util.LinkedHashSet<String> nextBlockedToolNames = new java.util.LinkedHashSet<>(blockedToolNames);
+                nextBlockedToolNames.add(resolvedDateFollowup.name());
+                effectiveBlockedToolNames = Set.copyOf(nextBlockedToolNames);
+            }
+        }
+
         StringBuilder streamedAssistantText = new StringBuilder();
 
         StreamingChatResponseHandler handler = new StreamingChatResponseHandler() {
@@ -1423,12 +1446,14 @@ public class AgentService {
                     continueWithToolRequests(
                             conversationId,
                             userMessage,
+                            history,
                             continuedMessages,
                             availableTools,
                             aiMessage.toolExecutionRequests(),
                             frontendToolManifest,
-                            blockedFrontendTools,
+                            effectiveBlockedToolNames,
                             0,
+                            fallbackToolContext,
                             true,
                             onNext,
                             onError,
@@ -1440,40 +1465,47 @@ public class AgentService {
                     return;
                 }
 
-                if ("initial".equals(turnPhase)) {
-                    ToolExecutionRequest fallbackToolRequest = inferFallbackToolExecutionRequest(userMessage, availableTools);
-                    if (fallbackToolRequest != null) {
-                        AiMessage fallbackAiMessage = buildFallbackToolCallMessage(aiMessage, fallbackToolRequest);
-                        if (aiMessage != null) {
-                            logAssistantTurnDiagnostics(
-                                    conversationId,
-                                    buildAssistantTurnDiagnostics(turnPhase, fallbackAiMessage, streamedAssistantText.toString())
-                            );
-                        }
-
-                        List<dev.langchain4j.data.message.ChatMessage> continuedMessages =
-                                new java.util.ArrayList<>(messages);
-                        continuedMessages.add(fallbackAiMessage);
-
-                        continueWithToolRequests(
+                FallbackToolPlan fallbackToolPlan = inferFallbackToolPlan(
+                        userMessage,
+                        history,
+                        availableTools,
+                        frontendToolManifest,
+                        fallbackToolContext
+                );
+                if (fallbackToolPlan != null) {
+                    ToolExecutionRequest fallbackToolRequest = fallbackToolPlan.request();
+                    AiMessage fallbackAiMessage = buildFallbackToolCallMessage(aiMessage, fallbackToolRequest);
+                    if (aiMessage != null) {
+                        logAssistantTurnDiagnostics(
                                 conversationId,
-                                userMessage,
-                                continuedMessages,
-                                availableTools,
-                                List.of(fallbackToolRequest),
-                                frontendToolManifest,
-                                blockedFrontendTools,
-                                0,
-                                false,
-                                onNext,
-                                onError,
-                                onComplete,
-                                onToolCall,
-                                onToolResult,
-                                cancelled
+                                buildAssistantTurnDiagnostics(turnPhase, fallbackAiMessage, streamedAssistantText.toString())
                         );
-                        return;
                     }
+
+                    List<dev.langchain4j.data.message.ChatMessage> continuedMessages =
+                            new java.util.ArrayList<>(messages);
+                    continuedMessages.add(fallbackAiMessage);
+
+                    continueWithToolRequests(
+                            conversationId,
+                            userMessage,
+                            history,
+                            continuedMessages,
+                            availableTools,
+                            List.of(fallbackToolRequest),
+                            frontendToolManifest,
+                            effectiveBlockedToolNames,
+                            0,
+                            fallbackToolContext,
+                            fallbackToolPlan.continueAfterToolLoop(),
+                            onNext,
+                            onError,
+                            onComplete,
+                            onToolCall,
+                            onToolResult,
+                            cancelled
+                    );
+                    return;
                 }
 
                 if (aiMessage != null) {
@@ -1497,7 +1529,12 @@ public class AgentService {
             }
         };
 
-        streamingChatModel.chat(buildChatRequest(messages, toolSpecifications), handler);
+        List<ToolSpecification> effectiveToolSpecifications =
+                effectiveBlockedToolNames.equals(blockedToolNames)
+                        ? toolSpecifications
+                        : buildToolSpecifications(availableTools, frontendToolManifest, effectiveBlockedToolNames);
+
+        streamingChatModel.chat(buildChatRequest(messages, effectiveToolSpecifications), handler);
     }
 
     private void emitRemainingAssistantText(
@@ -1529,12 +1566,14 @@ public class AgentService {
     private void continueWithToolRequests(
             String conversationId,
             String userMessage,
+            List<ChatMessage> history,
             List<dev.langchain4j.data.message.ChatMessage> messages,
             Map<String, ToolDefinition> availableTools,
             List<ToolExecutionRequest> toolExecutionRequests,
             List<FrontendToolManifestEntry> frontendToolManifest,
-            Set<String> blockedFrontendTools,
+            Set<String> blockedToolNames,
             int index,
+            FallbackToolContext fallbackToolContext,
             boolean continueAfterToolLoop,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
@@ -1556,11 +1595,13 @@ public class AgentService {
             streamConversation(
                     conversationId,
                     userMessage,
+                    history,
                     messages,
                     availableTools,
-                    buildToolSpecifications(availableTools, frontendToolManifest, blockedFrontendTools),
+                    buildToolSpecifications(availableTools, frontendToolManifest, blockedToolNames),
                     frontendToolManifest,
-                    blockedFrontendTools,
+                    blockedToolNames,
+                    fallbackToolContext,
                     "tool-loop",
                     onNext,
                     onError,
@@ -1634,15 +1675,20 @@ public class AgentService {
                             toolExecutionRequest,
                             serializeToolResult(result, error)
                     ));
+                    Set<String> nextBlockedToolNames = new java.util.LinkedHashSet<>(blockedToolNames);
+                    nextBlockedToolNames.add(toolExecutionRequest.name());
+
                     continueWithToolRequests(
                             conversationId,
                             userMessage,
+                            history,
                             continuedMessages,
                             availableTools,
                             toolExecutionRequests,
                             frontendToolManifest,
-                            blockedFrontendTools,
+                            Set.copyOf(nextBlockedToolNames),
                             index + 1,
+                            FallbackToolContext.fromToolExecution(toolExecutionRequest.name(), arguments, result),
                             continueAfterToolLoop,
                             onNext,
                             onError,
@@ -1654,15 +1700,45 @@ public class AgentService {
                 });
     }
 
-    private ToolExecutionRequest inferFallbackToolExecutionRequest(
+    private FallbackToolPlan inferFallbackToolPlan(
             String userMessage,
-            Map<String, ToolDefinition> availableTools
+            List<ChatMessage> history,
+            Map<String, ToolDefinition> availableTools,
+            List<FrontendToolManifestEntry> frontendToolManifest,
+            FallbackToolContext fallbackToolContext
     ) {
         if (userMessage == null || userMessage.isBlank()) {
             return null;
         }
 
         String normalized = userMessage.toLowerCase(Locale.ROOT).trim();
+        if (fallbackToolContext != null && "resolve_relative_date".equals(fallbackToolContext.toolName())) {
+            ToolExecutionRequest chainedRequest = inferResolvedDateFollowup(
+                    userMessage,
+                    history,
+                    availableTools,
+                    frontendToolManifest,
+                    fallbackToolContext
+            );
+            if (chainedRequest != null) {
+                return new FallbackToolPlan(chainedRequest, false);
+            }
+        }
+
+        String relativeDateExpression = extractRelativeDateExpression(userMessage);
+        if (relativeDateExpression != null
+                && availableTools.containsKey("resolve_relative_date")
+                && (isEmailApprovalIntent(normalized) || isTemporalWeatherIntent(normalized) || isAnalyticsIntent(normalized))) {
+            return new FallbackToolPlan(
+                    ToolExecutionRequest.builder()
+                            .id(UUID.randomUUID().toString())
+                            .name("resolve_relative_date")
+                            .arguments(writeJson(Map.of("expression", relativeDateExpression)))
+                            .build(),
+                    true
+            );
+        }
+
         if (!availableTools.containsKey("get_weather")) {
             return null;
         }
@@ -1678,11 +1754,83 @@ public class AgentService {
             return null;
         }
 
-        return ToolExecutionRequest.builder()
-                .id(UUID.randomUUID().toString())
-                .name("get_weather")
-                .arguments(writeJson(Map.of("location", location)))
-                .build();
+        return new FallbackToolPlan(
+                ToolExecutionRequest.builder()
+                        .id(UUID.randomUUID().toString())
+                        .name("get_weather")
+                        .arguments(writeJson(Map.of("location", location)))
+                        .build(),
+                false
+        );
+    }
+
+    private ToolExecutionRequest inferResolvedDateFollowup(
+            String userMessage,
+            List<ChatMessage> history,
+            Map<String, ToolDefinition> availableTools,
+            List<FrontendToolManifestEntry> frontendToolManifest,
+            FallbackToolContext fallbackToolContext
+    ) {
+        String resolvedDate = fallbackToolContext.resolvedDate();
+        if (resolvedDate == null || resolvedDate.isBlank()) {
+            return null;
+        }
+
+        String normalized = userMessage.toLowerCase(Locale.ROOT).trim();
+        if (isEmailApprovalIntent(normalized) && hasFrontendTool(frontendToolManifest, "approval_confirm")) {
+            String recipient = extractRecipientEmail(history);
+            if (recipient == null || recipient.isBlank()) {
+                return null;
+            }
+            String recipientName = extractRecipientName(history);
+            String readableDate = fallbackToolContext.readableDate() == null
+                    ? resolvedDate
+                    : fallbackToolContext.readableDate();
+            return ToolExecutionRequest.builder()
+                    .id(UUID.randomUUID().toString())
+                    .name("approval_confirm")
+                    .arguments(writeJson(Map.of(
+                            "to", recipient,
+                            "subject", "Sick leave request for " + resolvedDate,
+                            "body", buildSickLeaveEmailBody(recipientName, readableDate)
+                    )))
+                    .build();
+        }
+
+        if (isTemporalWeatherIntent(normalized) && availableTools.containsKey("get_weather_history")) {
+            String location = extractWeatherLocation(stripDateExpression(userMessage));
+            if (location == null || location.isBlank()) {
+                return null;
+            }
+            return ToolExecutionRequest.builder()
+                    .id(UUID.randomUUID().toString())
+                    .name("get_weather_history")
+                    .arguments(writeJson(Map.of(
+                            "location", location,
+                            "date", resolvedDate
+                    )))
+                    .build();
+        }
+
+        if (isAnalyticsIntent(normalized) && availableTools.containsKey("statistic_count_by_app")) {
+            String appId = extractAnalyticsAppId(userMessage);
+            if (appId == null || appId.isBlank()) {
+                return null;
+            }
+            LocalDate startDate = LocalDate.parse(resolvedDate);
+            LocalDate endDate = startDate.plusDays(1);
+            return ToolExecutionRequest.builder()
+                    .id(UUID.randomUUID().toString())
+                    .name("statistic_count_by_app")
+                    .arguments(writeJson(Map.of(
+                            "appId", appId,
+                            "startTime", startDate + "T00:00:00Z",
+                            "endTime", endDate + "T00:00:00Z"
+                    )))
+                    .build();
+        }
+
+        return null;
     }
 
     private AiMessage buildFallbackToolCallMessage(AiMessage aiMessage, ToolExecutionRequest fallbackToolRequest) {
@@ -1709,22 +1857,127 @@ public class AgentService {
         }
 
         String location = matcher.group(1).trim();
+        location = location.replaceAll("[?.!,]+$", "").trim();
         return location.isEmpty() ? null : location.substring(0, 1).toUpperCase(Locale.ROOT) + location.substring(1);
+    }
+
+    private boolean isTemporalWeatherIntent(String normalizedUserMessage) {
+        return normalizedUserMessage.contains("weather")
+                || normalizedUserMessage.contains("temperature")
+                || normalizedUserMessage.contains("forecast");
+    }
+
+    private boolean isEmailApprovalIntent(String normalizedUserMessage) {
+        return normalizedUserMessage.contains("email") || normalizedUserMessage.contains("mail");
+    }
+
+    private boolean isAnalyticsIntent(String normalizedUserMessage) {
+        return normalizedUserMessage.contains("analytics")
+                || normalizedUserMessage.contains("usage")
+                || normalizedUserMessage.contains("pv")
+                || normalizedUserMessage.contains("uv")
+                || normalizedUserMessage.contains("page view")
+                || normalizedUserMessage.contains("unique visitor")
+                || normalizedUserMessage.contains("unique user");
+    }
+
+    private boolean hasFrontendTool(List<FrontendToolManifestEntry> frontendToolManifest, String toolName) {
+        return frontendToolManifest.stream().anyMatch(tool -> toolName.equals(tool.getName()));
+    }
+
+    private String extractRelativeDateExpression(String userMessage) {
+        String normalized = userMessage.toLowerCase(Locale.ROOT);
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(
+                "(day before yesterday|day after tomorrow|the day before yesterday|the day after tomorrow|yesterday|tomorrow|today|last\\s+[a-z]+|next\\s+[a-z]+|this\\s+[a-z]+|\\d+\\s+days?\\s+ago|in\\s+\\d+\\s+days?|\\d+\\s+weeks?\\s+ago|in\\s+\\d+\\s+weeks?)"
+        ).matcher(normalized);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    private String stripDateExpression(String userMessage) {
+        String expression = extractRelativeDateExpression(userMessage);
+        if (expression == null) {
+            return userMessage;
+        }
+        return userMessage.replaceFirst("(?i)" + java.util.regex.Pattern.quote(expression), "").trim();
+    }
+
+    private String extractRecipientEmail(List<ChatMessage> history) {
+        if (history == null) {
+            return null;
+        }
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
+                "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+        );
+        for (int i = history.size() - 1; i >= 0; i--) {
+            ChatMessage message = history.get(i);
+            if (message.getContent() == null) {
+                continue;
+            }
+            java.util.regex.Matcher matcher = pattern.matcher(message.getContent());
+            if (matcher.find()) {
+                return matcher.group();
+            }
+        }
+        return null;
+    }
+
+    private String extractRecipientName(List<ChatMessage> history) {
+        if (history == null) {
+            return null;
+        }
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(?i)name:\\s*([A-Za-z][A-Za-z .'-]+)");
+        for (int i = history.size() - 1; i >= 0; i--) {
+            ChatMessage message = history.get(i);
+            if (message.getContent() == null) {
+                continue;
+            }
+            java.util.regex.Matcher matcher = pattern.matcher(message.getContent());
+            if (matcher.find()) {
+                return matcher.group(1).trim();
+            }
+        }
+        return null;
+    }
+
+    private String buildSickLeaveEmailBody(String recipientName, String readableDate) {
+        String salutation = (recipientName == null || recipientName.isBlank())
+                ? "Hi,"
+                : "Hi " + recipientName + ",";
+        return salutation
+                + "\n\n"
+                + "I am feeling unwell and would like to request sick leave for "
+                + readableDate
+                + ".\n\n"
+                + "Please let me know if you need any additional information.\n\n"
+                + "Best regards";
+    }
+
+    private String extractAnalyticsAppId(String userMessage) {
+        String withoutDate = stripDateExpression(userMessage).replace('?', ' ').trim();
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(
+                "(?i)(?:pv|uv|page views?|unique visitors?|unique users?).*?(?:of|for)\\s+([a-zA-Z0-9_\\- ]+)"
+        ).matcher(withoutDate);
+        if (!matcher.find()) {
+            return null;
+        }
+        String rawValue = matcher.group(1).trim().replaceAll("\\s+", "_");
+        return rawValue.replaceAll("[^A-Za-z0-9_\\-]", "");
     }
 
     private List<ToolSpecification> buildToolSpecifications(
             Map<String, ToolDefinition> tools,
             List<FrontendToolManifestEntry> frontendTools,
-            Set<String> blockedFrontendTools
+            Set<String> blockedToolNames
     ) {
         Map<String, ToolSpecification> uniqueSpecs = new java.util.LinkedHashMap<>();
 
         tools.values().stream()
+                .filter(toolDefinition -> !blockedToolNames.contains(toolDefinition.getName()))
                 .map(this::toToolSpecification)
                 .forEach(toolSpecification -> uniqueSpecs.put(toolSpecification.name(), toolSpecification));
 
         frontendTools.stream()
-                .filter(frontendTool -> !blockedFrontendTools.contains(frontendTool.getName()))
+                .filter(frontendTool -> !blockedToolNames.contains(frontendTool.getName()))
                 .map(this::toToolSpecification)
                 .forEach(toolSpecification -> uniqueSpecs.putIfAbsent(toolSpecification.name(), toolSpecification));
 
@@ -2259,6 +2512,46 @@ public class AgentService {
     ) {
     }
 
+    private record FallbackToolPlan(
+            ToolExecutionRequest request,
+            boolean continueAfterToolLoop
+    ) {
+    }
+
+    private record FallbackToolContext(
+            String toolName,
+            Map<String, Object> arguments,
+            Object result
+    ) {
+        static FallbackToolContext fromFrontendToolContinuation(FrontendToolContinuation continuation) {
+            return new FallbackToolContext(
+                    continuation.getToolName(),
+                    continuation.getArgs() == null ? Map.of() : continuation.getArgs(),
+                    continuation.getResult()
+            );
+        }
+
+        static FallbackToolContext fromToolExecution(String toolName, Map<String, Object> arguments, Object result) {
+            return new FallbackToolContext(toolName, arguments == null ? Map.of() : Map.copyOf(arguments), result);
+        }
+
+        String resolvedDate() {
+            if (!(result instanceof Map<?, ?> resultMap)) {
+                return null;
+            }
+            Object value = resultMap.get("resolvedDate");
+            return value == null ? null : String.valueOf(value);
+        }
+
+        String readableDate() {
+            if (!(result instanceof Map<?, ?> resultMap)) {
+                return null;
+            }
+            Object value = resultMap.get("readable");
+            return value == null ? null : String.valueOf(value);
+        }
+    }
+
     private static final class MockStreamHandle {
         private final AtomicBoolean cancelled = new AtomicBoolean(false);
         private final List<ScheduledFuture<?>> futures = new java.util.concurrent.CopyOnWriteArrayList<>();
@@ -2346,6 +2639,9 @@ public class AgentService {
 
                 Multi-tool chaining:
                 When the user asks about past or future weather (e.g. "weather in Beijing yesterday"), you MUST call resolve_relative_date first to get the absolute date, then call get_weather_history with that date and the location. Never use get_weather (current weather) for historical queries. Example chain: resolve_relative_date(expression="yesterday") → get_weather_history(location="Beijing, CN", date=<resolved date>).
+                When the user asks to send or draft an email that mentions a relative date (e.g. "send an email to him to ask for sick leave tomorrow"), you MUST call resolve_relative_date first and then call approval_confirm with the composed email fields. Do not ask the user to manually resolve "tomorrow" if resolve_relative_date is available.
+                When the user asks for PV/UV or usage analytics with a relative date (e.g. "what's the pv and uv of cashflow_blotter yesterday"), you MUST call resolve_relative_date first and then call statistic_count_by_app using the resolved date window.
+                If a prior assistant message already identified a person and included an email address, you may reuse that recent context to resolve pronouns like "him" or "her" in a follow-up email request.
                 """.formatted(
                         availableTools.values().stream()
                                 .map(tool -> "- " + tool.getName() + ": " + tool.getDescription())

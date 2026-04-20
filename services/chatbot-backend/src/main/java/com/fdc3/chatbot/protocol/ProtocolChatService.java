@@ -531,10 +531,15 @@ public class ProtocolChatService {
                 throw new IllegalArgumentException("messages must not be empty");
             }
 
-            ResumableToolContext resumableToolContext = findLatestResumableToolContext(messages, objectMapper);
+            int lastUserIndex = findLastUserIndex(messages);
+            ResumableToolContext resumableToolContext = findLatestResumableToolContext(
+                    messages,
+                    objectMapper,
+                    lastUserIndex
+            );
             int currentUserIndex = resumableToolContext != null
                     ? findPrecedingUserIndex(messages, resumableToolContext.assistantMessageIndex())
-                    : findLastUserIndex(messages);
+                    : lastUserIndex;
 
             if (currentUserIndex < 0) {
                 throw new IllegalArgumentException("messages must contain a user message for the active turn");
@@ -605,6 +610,9 @@ public class ProtocolChatService {
             // Add tools from context.getTools() (new contract field)
             if (request.getContext() != null && request.getContext().getTools() != null) {
                 for (ProtocolToolDescriptor tool : request.getContext().getTools()) {
+                    if (!isFrontendToolDescriptor(tool)) {
+                        continue;
+                    }
                     if (!manifest.stream().anyMatch(m -> m.getName().equals(tool.getName()))) {
                         manifest.add(toolDescriptorToManifestEntry(tool));
                     }
@@ -650,6 +658,13 @@ public class ProtocolChatService {
                     .build();
         }
 
+        private static boolean isFrontendToolDescriptor(ProtocolToolDescriptor tool) {
+            if (tool == null || tool.getSource() == null) {
+                return false;
+            }
+            return tool.getSource() == ChatToolSource.FRONTEND || tool.getSource() == ChatToolSource.HUMAN;
+        }
+
         private static WorkspaceContextSnapshot toWorkspaceContext(ProtocolRunRequest request) {
             if (request.getContext() == null || request.getContext().getWorkspace() == null) {
                 return null;
@@ -663,9 +678,13 @@ public class ProtocolChatService {
 
         private static ResumableToolContext findLatestResumableToolContext(
                 List<ProtocolMessage> messages,
-                ObjectMapper objectMapper
+                ObjectMapper objectMapper,
+                int lastUserIndex
         ) {
             for (int messageIndex = messages.size() - 1; messageIndex >= 0; messageIndex--) {
+                if (messageIndex <= lastUserIndex) {
+                    break;
+                }
                 ProtocolMessage message = messages.get(messageIndex);
                 if (!"assistant".equals(message.getRole()) || message.getParts() == null) {
                     continue;
