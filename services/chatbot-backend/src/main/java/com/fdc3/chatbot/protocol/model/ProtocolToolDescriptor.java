@@ -1,0 +1,23 @@
+package com.fdc3.chatbot.protocol.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.JsonNode;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ProtocolToolDescriptor {
+    private String name;
+    private ChatToolSource source;
+    private String description;
+    private JsonNode parameters;
+    private String providerId;
+    private Boolean requiresConfirmation;
+    private JsonNode ui;
+}

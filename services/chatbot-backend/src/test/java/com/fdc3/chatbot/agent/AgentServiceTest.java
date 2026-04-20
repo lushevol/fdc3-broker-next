@@ -440,6 +440,102 @@ class AgentServiceTest {
     }
 
     @Test
+    void processMessageStreamingIncludesAnalyticsToolsForPvUvQueries() throws Exception {
+        ReflectionTestUtils.setField(agentService, "mockEnabled", false);
+        TestToolDefinition analyticsTool = new TestToolDefinition(
+                "statistic_count_by_app",
+                "Return PV and UV counts for an app within a time window",
+                Map.of(
+                        "type", "object",
+                        "properties", Map.of(
+                                "appName", Map.of("type", "string"),
+                                "startTime", Map.of("type", "string"),
+                                "endTime", Map.of("type", "string")
+                        ),
+                        "required", List.of("startTime", "endTime")
+                ),
+                false,
+                arguments -> CompletableFuture.completedFuture(Map.of(
+                        "filterValue", "cashflow_blotter",
+                        "pv", 95,
+                        "uv", 18
+                ))
+        );
+        when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
+                "statistic_count_by_app", analyticsTool
+        ));
+        when(toolRegistry.getTool("statistic_count_by_app")).thenReturn(analyticsTool);
+
+        AtomicInteger invocationCount = new AtomicInteger();
+        List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
+        StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
+            @Override
+            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+                capturedToolSpecs.clear();
+                capturedToolSpecs.addAll(request.toolSpecifications());
+
+                if (invocationCount.getAndIncrement() == 0) {
+                    if (request.toolSpecifications().isEmpty()) {
+                        handler.onCompleteResponse(chatResponse(
+                                AiMessage.from("I can describe the analytics request, but I do not have a tool available."),
+                                FinishReason.STOP
+                        ));
+                        return;
+                    }
+
+                    ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
+                            .id("tool-analytics-1")
+                            .name("statistic_count_by_app")
+                            .arguments("""
+                                    {"appName":"cashflow_blotter","startTime":"2026-04-16T00:00:00Z","endTime":"2026-04-17T00:00:00Z"}
+                                    """)
+                            .build();
+                    handler.onCompleteResponse(chatResponse(
+                            AiMessage.from("Let me retrieve the usage statistics for cashflow_blotter.", List.of(toolExecutionRequest)),
+                            FinishReason.TOOL_EXECUTION
+                    ));
+                    return;
+                }
+
+                handler.onPartialResponse("cashflow_blotter usage yesterday: PV 95, UV 18.");
+                handler.onCompleteResponse(chatResponse(
+                        AiMessage.from("cashflow_blotter usage yesterday: PV 95, UV 18."),
+                        FinishReason.STOP
+                ));
+            }
+        };
+        ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
+
+        List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
+        List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
+        StringBuilder streamedText = new StringBuilder();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-analytics-tools",
+                "what's the pv and uv of cashflow_blotter yesterday ?",
+                List.of(),
+                streamedText::append,
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown,
+                toolCalls::add,
+                toolResults::add
+        );
+
+        assertTrue(completed.await(1, TimeUnit.SECONDS));
+        assertTrue(capturedToolSpecs.stream().anyMatch(toolSpecification ->
+                "statistic_count_by_app".equals(toolSpecification.name())));
+        assertEquals(1, toolCalls.size());
+        assertEquals("statistic_count_by_app", toolCalls.get(0).getName());
+        assertEquals(1, toolResults.size());
+        assertEquals(95, ((Map<?, ?>) toolResults.get(0).getResult()).get("pv"));
+        assertEquals(18, ((Map<?, ?>) toolResults.get(0).getResult()).get("uv"));
+        assertTrue(streamedText.toString().contains("cashflow_blotter usage yesterday: PV 95, UV 18."));
+    }
+
+    @Test
     void processMessageStreamingPreservesVisibleAssistantTextBeforeToolCalls() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
         when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(

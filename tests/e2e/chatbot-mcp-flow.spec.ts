@@ -2,6 +2,19 @@ import { expect, test, type Page, type Route } from '@playwright/test';
 
 type StreamRequestBody = {
   message?: string;
+  trigger?: string;
+  messages?: Array<{
+    role?: string;
+    parts?: Array<{
+      type?: string;
+      text?: string;
+      toolCallId?: string;
+      toolName?: string;
+      executionTarget?: string;
+      input?: Record<string, unknown>;
+      output?: unknown;
+    }>;
+  }>;
   workspaceContext?: {
     activeWorkspaceId?: string | null;
     activeWorkspaceLabel?: string | null;
@@ -220,6 +233,13 @@ test.describe('chatbot agentic MCP flow', () => {
 
     expect(streamRequests).toHaveLength(1);
     expect(streamRequests[0]?.message).toBe(message);
+    expect(streamRequests[0]?.trigger).toBe('submit-message');
+    expect(streamRequests[0]?.messages).toMatchObject([
+      {
+        role: 'user',
+        parts: [{ type: 'text', text: message }],
+      },
+    ]);
   });
 
   test('uses workspace active app context when the app is omitted', async ({ page }) => {

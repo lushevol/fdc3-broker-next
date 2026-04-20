@@ -417,9 +417,85 @@ public class AgentService {
             java.util.function.Consumer<ToolCall> onToolCall,
             java.util.function.Consumer<ToolResult> onToolResult
     ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                capabilityContext,
+                toolContext,
+                frontendTools,
+                workspaceContext,
+                history,
+                onNext,
+                onError,
+                onComplete,
+                onExecutionPlan,
+                onExecutionStep,
+                onToolCall,
+                onToolResult,
+                true
+        );
+    }
+
+    /**
+     * Process a chat message through the LangChain4j tool-calling path without the top-level agentic planner shortcut.
+     * This is used by the standalone protocol endpoint so tool execution and frontend resume are always observable
+     * through the protocol frame stream.
+     */
+    public Runnable processProtocolMessageStreaming(
+            String conversationId,
+            String userMessage,
+            UserCapabilityContext capabilityContext,
+            String toolContext,
+            String frontendTools,
+            WorkspaceContextSnapshot workspaceContext,
+            List<ChatMessage> history,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ExecutionPlanEvent> onExecutionPlan,
+            java.util.function.Consumer<ExecutionStepEvent> onExecutionStep,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
+    ) {
+        return processMessageStreaming(
+                conversationId,
+                userMessage,
+                capabilityContext,
+                toolContext,
+                frontendTools,
+                workspaceContext,
+                history,
+                onNext,
+                onError,
+                onComplete,
+                onExecutionPlan,
+                onExecutionStep,
+                onToolCall,
+                onToolResult,
+                false
+        );
+    }
+
+    private Runnable processMessageStreaming(
+            String conversationId,
+            String userMessage,
+            UserCapabilityContext capabilityContext,
+            String toolContext,
+            String frontendTools,
+            WorkspaceContextSnapshot workspaceContext,
+            List<ChatMessage> history,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ExecutionPlanEvent> onExecutionPlan,
+            java.util.function.Consumer<ExecutionStepEvent> onExecutionStep,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            boolean allowAgenticControlLoop
+    ) {
         AtomicBoolean cancelled = new AtomicBoolean(false);
         Map<String, ToolDefinition> availableTools = toolRegistry.resolveTools(capabilityContext);
-        if (shouldUseAgenticControlLoop(toolContext, frontendTools)) {
+        if (allowAgenticControlLoop && shouldUseAgenticControlLoop(toolContext, frontendTools)) {
             executeAgenticControlLoop(
                     userMessage,
                     capabilityContext,
@@ -2217,6 +2293,9 @@ public class AgentService {
                 Avoid markdown headings, labels like "ProgressUpdate", and bold section titles for these short updates unless the user explicitly asked for structured markdown.
                 Prefer natural prose over document-style formatting when you are mixing tool results with conversational reasoning.
                 After tool execution, explain what you're doing and show the results clearly.
+
+                Multi-tool chaining:
+                When the user asks about past or future weather (e.g. "weather in Beijing yesterday"), you MUST call resolve_relative_date first to get the absolute date, then call get_weather_history with that date and the location. Never use get_weather (current weather) for historical queries. Example chain: resolve_relative_date(expression="yesterday") → get_weather_history(location="Beijing, CN", date=<resolved date>).
                 """.formatted(
                         availableTools.values().stream()
                                 .map(tool -> "- " + tool.getName() + ": " + tool.getDescription())
@@ -2312,6 +2391,20 @@ public class AgentService {
         }
 
         String normalized = userMessage.toLowerCase(Locale.ROOT);
+        boolean hasAnalyticsTools = availableTools.containsKey("statistic_count_by_app")
+                || availableTools.containsKey("chart_by_app");
+        if (hasAnalyticsTools && (
+                normalized.contains("analytics")
+                        || normalized.contains("usage")
+                        || normalized.contains("pv")
+                        || normalized.contains("uv")
+                        || normalized.contains("page view")
+                        || normalized.contains("unique visitor")
+                        || normalized.contains("unique user")
+        )) {
+            return true;
+        }
+
         return normalized.contains("weather")
                 || normalized.contains("temperature")
                 || normalized.contains("forecast")

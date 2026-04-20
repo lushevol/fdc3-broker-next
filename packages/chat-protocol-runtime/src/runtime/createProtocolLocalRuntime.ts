@@ -1,0 +1,1 @@
+export { createProtocolLocalRuntime } from './createProtocolStreamAdapter';

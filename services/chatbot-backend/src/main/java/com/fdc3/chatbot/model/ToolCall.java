@@ -1,5 +1,6 @@
 package com.fdc3.chatbot.model;
 
+import com.fdc3.chatbot.protocol.model.ChatToolSource;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,9 @@ public class ToolCall {
     private ToolStatus status;
     @Builder.Default
     private ExecutionTarget executionTarget = ExecutionTarget.BACKEND;
+    private ChatToolSource source;
+    private String providerId;
+
     @Builder.Default
     private boolean requiresConfirmation = false;
 
