@@ -4,23 +4,59 @@ import type { ChatToolDescriptor } from '@fm/chat-protocol-contract';
 import {
   AnalyticsTool,
   ApprovalConfirmTool,
-  LocationResolveTool,
   ProfileLookupTool,
   ResolveRelativeDateTool,
   SummaryComposeTool,
+  TimezoneCurrentTool,
 } from '@/components/toolkit/tool-renderers';
 
 const sharedToolDefinitions: Toolkit = {
-  'location.resolve': {
+  profile_lookup: {
     type: 'frontend',
-    description: 'Resolve a geographic location from a query string',
+    description: 'Lookup user profile information',
     parameters: z.object({
-      query: z.string().describe('City name or location query'),
+      userId: z.string().describe('The ID of the user to look up'),
     }),
-    execute: async () => ({}),
-    render: LocationResolveTool,
+    execute: async (input) => {
+      console.log('[DEBUG profile_lookup] execute called with input:', input);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      const { userId } = input as { userId: string };
+      // Simulate a user profile lookup
+      const result = {
+        userId,
+        name: 'John Doe',
+        email: 'john.doe@example.com',
+      };
+      console.log('[DEBUG profile_lookup] execute returning result:', result);
+      return result;
+    },
+    render: ProfileLookupTool,
   },
-  'approval.confirm': {
+  timezone_current: {
+    type: 'frontend',
+    description: "Get the user's current timezone",
+    parameters: z.object({}),
+    execute: async () => {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const now = new Date();
+      const offset = -now.getTimezoneOffset();
+      const hours = Math.floor(Math.abs(offset) / 60);
+      const minutes = Math.abs(offset) % 60;
+      const sign = offset >= 0 ? '+' : '-';
+      const gmtOffset = `GMT${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      const abbr = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' })
+        .formatToParts(now)
+        .find((p) => p.type === 'timeZoneName')?.value;
+
+      return {
+        timezone,
+        offset: gmtOffset,
+        abbr,
+      };
+    },
+    render: TimezoneCurrentTool,
+  },
+  approval_confirm: {
     type: 'human',
     description: 'Send an email with confirmation',
     parameters: z.object({
@@ -30,14 +66,6 @@ const sharedToolDefinitions: Toolkit = {
     }),
     render: ApprovalConfirmTool,
   },
-  'summary.compose': {
-    type: 'backend',
-    render: SummaryComposeTool,
-  },
-  'analytics.lookup': {
-    type: 'backend',
-    render: AnalyticsTool,
-  },
   statistic_count_by_app: {
     type: 'backend',
     render: AnalyticsTool,
@@ -46,10 +74,6 @@ const sharedToolDefinitions: Toolkit = {
     type: 'backend',
     render: AnalyticsTool,
   },
-  'profile.lookup': {
-    type: 'backend',
-    render: ProfileLookupTool,
-  },
   resolve_relative_date: {
     type: 'backend',
     render: ResolveRelativeDateTool,
@@ -57,13 +81,14 @@ const sharedToolDefinitions: Toolkit = {
 };
 
 const presetToolNames: Record<ToolPreset, string[]> = {
-  minimal: ['location.resolve'],
+  minimal: ['timezone_current'],
   full: [
-    'location.resolve',
-    'approval.confirm',
-    'summary.compose',
-    'analytics.lookup',
-    'profile.lookup',
+    'timezone_current',
+    'approval_confirm',
+    'profile_lookup',
+    'statistic_count_by_app',
+    'chart_by_app',
+    'resolve_relative_date',
   ],
 };
 
@@ -141,7 +166,7 @@ function extractParamInfo(schema: unknown): ParamInfo {
       ZodEnum: 'enum',
     };
     result[key] = {
-      type: typeMap[typeName] ?? 'any',
+      type: typeMap[typeName] ?? 'string',
       description: f.description,
       required: true,
     };

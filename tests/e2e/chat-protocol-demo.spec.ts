@@ -27,10 +27,10 @@ type SseFrame = Record<string, unknown>;
 const MINIMAL_TOOL_NAMES = ['location.resolve'];
 const FULL_TOOL_NAMES = [
   'location.resolve',
-  'approval.confirm',
-  'summary.compose',
-  'analytics.lookup',
-  'profile.lookup',
+  'approval_confirm',
+  'summary_compose',
+  'analytics_lookup',
+  'profile_lookup',
 ];
 
 function toSseBody(frames: readonly SseFrame[]): string {
@@ -89,7 +89,7 @@ function createToolActionRequiredFrames(messageId = 'msg_asst_human'): SseFrame[
     {
       type: 'tool-input-start',
       toolCallId: 'tool_human_1',
-      toolName: 'approval.confirm',
+      toolName: 'approval_confirm',
     },
     {
       type: 'tool-input-available',
@@ -103,7 +103,7 @@ function createToolActionRequiredFrames(messageId = 'msg_asst_human'): SseFrame[
         stage: 'human',
         toolIdentity: {
           toolCallId: 'tool_human_1',
-          toolName: 'approval.confirm',
+          toolName: 'approval_confirm',
           source: 'human',
         },
       },
@@ -153,8 +153,8 @@ test('chat protocol demo changes visible tools between runs', async ({ page }) =
       ?.filter((tool) => tool.name.endsWith('.lookup'))
       .map((tool) => ({ name: tool.name, providerId: tool.providerId })),
   ).toEqual([
-    { name: 'analytics.lookup', providerId: 'analytics-mcp' },
-    { name: 'profile.lookup', providerId: 'profile-mcp' },
+    { name: 'analytics_lookup', providerId: 'analytics-mcp' },
+    { name: 'profile_lookup', providerId: 'profile-mcp' },
   ]);
 });
 

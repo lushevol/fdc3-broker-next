@@ -96,9 +96,9 @@ export const chatToolDescriptorSchema = z
 The `createMixedToolRunRequestFixture()` must include at least:
 
 - one `frontend` tool (`location.resolve`)
-- one `human` tool (`approval.confirm`)
-- one `backend` tool (`summary.compose`)
-- two `mcp` tools from different providers (`analytics.lookup` from `analytics-mcp`, `profile.lookup` from `profile-mcp`)
+- one `human` tool (`approval_confirm`)
+- one `backend` tool (`summary_compose`)
+- two `mcp` tools from different providers (`analytics_lookup` from `analytics-mcp`, `profile_lookup` from `profile-mcp`)
 
 Verify. If fixture is incomplete, add the missing entries.
 
@@ -242,7 +242,7 @@ class ProtocolToolDescriptorTest {
     void shouldDeserializeMcpToolWithProviderId() throws Exception {
         String json = """
             {
-              "name": "analytics.lookup",
+              "name": "analytics_lookup",
               "source": "mcp",
               "providerId": "analytics-mcp",
               "description": "Look up analytics",
@@ -250,7 +250,7 @@ class ProtocolToolDescriptorTest {
             }
             """;
         ProtocolToolDescriptor descriptor = objectMapper.readValue(json, ProtocolToolDescriptor.class);
-        assertEquals("analytics.lookup", descriptor.getName());
+        assertEquals("analytics_lookup", descriptor.getName());
         assertEquals(ChatToolSource.MCP, descriptor.getSource());
         assertEquals("analytics-mcp", descriptor.getProviderId());
     }
@@ -262,9 +262,9 @@ class ProtocolToolDescriptorTest {
               "workspace": {"activeWorkspaceId": "ws-1", "activeAppId": "app-1"},
               "tools": [
                 {"name": "location.resolve", "source": "frontend", "description": "Resolve", "parameters": {}},
-                {"name": "approval.confirm", "source": "human", "description": "Confirm", "parameters": {}},
-                {"name": "summary.compose", "source": "backend", "description": "Compose", "parameters": {}},
-                {"name": "analytics.lookup", "source": "mcp", "providerId": "analytics-mcp", "description": "Analytics", "parameters": {}}
+                {"name": "approval_confirm", "source": "human", "description": "Confirm", "parameters": {}},
+                {"name": "summary_compose", "source": "backend", "description": "Compose", "parameters": {}},
+                {"name": "analytics_lookup", "source": "mcp", "providerId": "analytics-mcp", "description": "Analytics", "parameters": {}}
               ]
             }
             """;
@@ -519,7 +519,7 @@ it('maps mcp source to awaiting-execution', () => {
   adapter.applyFrame({
     type: 'tool-input-available',
     toolCallId: 'tool_mcp_1',
-    toolName: 'analytics.lookup',
+    toolName: 'analytics_lookup',
     source: 'mcp',
     providerId: 'analytics-mcp',
     input: { appId: 'weather-tile' },

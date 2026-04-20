@@ -1,0 +1,27 @@
+{
+  "name": "fdc3-demo",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@fm/fdc3-agent": "file:../../packages/fdc3-agent",
+    "@fm/fdc3-broker": "file:../../packages/fdc3-broker",
+    "@fm/fdc3-app-directory": "file:../../packages/fdc3-app-directory",
+    "@finos/fdc3": "^2.2.0"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "^1.7.3",
+    "@rsbuild/plugin-react": "^1.4.5",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "~18.3.1",
+    "typescript": "^5.9.3"
+  }
+}

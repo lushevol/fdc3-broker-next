@@ -153,6 +153,238 @@ class ProtocolChatServiceTest {
     }
 
     @Test
+    void streamRunBuildsFrontendToolContinuationFromAssistantToolPartSourceField() throws Exception {
+        ProtocolRunRequest request = objectMapper.readValue("""
+                {
+                  "conversationId": "conv-2-source",
+                  "messages": [
+                    {
+                      "id": "msg-user-1",
+                      "role": "user",
+                      "parts": [{ "type": "text", "text": "what's the profile of user 123" }]
+                    },
+                    {
+                      "id": "msg-asst-1",
+                      "role": "assistant",
+                      "parts": [
+                        {
+                          "type": "text",
+                          "text": "I'll look up the profile information for user 123."
+                        },
+                        {
+                          "type": "tool-call",
+                          "toolCallId": "tool-front-1",
+                          "toolName": "profile_lookup",
+                          "source": "frontend",
+                          "state": "output-available",
+                          "input": { "userId": "123" },
+                          "output": {
+                            "userId": "123",
+                            "name": "John Doe",
+                            "email": "john.doe@example.com"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "msg-tool-1",
+                      "role": "tool",
+                      "toolCallId": "tool-front-1",
+                      "toolName": "profile_lookup",
+                      "parts": [
+                        {
+                          "type": "tool-result",
+                          "toolCallId": "tool-front-1",
+                          "output": {
+                            "userId": "123",
+                            "name": "John Doe",
+                            "email": "john.doe@example.com"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """, ProtocolRunRequest.class);
+
+        protocolChatService.streamRun(
+                request,
+                UserCapabilityContext.anonymous(),
+                frame -> {
+                },
+                error -> {
+                    throw new AssertionError(error);
+                },
+                () -> {
+                }
+        );
+
+        assertEquals("what's the profile of user 123", agentService.lastInvocation.userMessage());
+        assertNotNull(agentService.lastInvocation.toolContext());
+        assertTrue(agentService.lastInvocation.toolContext().contains("\"toolName\":\"profile_lookup\""));
+        assertTrue(agentService.lastInvocation.toolContext().contains("\"originalUserMessage\":\"what's the profile of user 123\""));
+        assertTrue(agentService.lastInvocation.history().isEmpty());
+    }
+
+    @Test
+    void streamRunUsesLatestUserTurnInsteadOfOldFrontendContinuation() throws Exception {
+        ProtocolRunRequest request = objectMapper.readValue("""
+                {
+                  "conversationId": "conv-follow-up",
+                  "trigger": "submit-message",
+                  "messages": [
+                    {
+                      "id": "msg-user-1",
+                      "role": "user",
+                      "parts": [{ "type": "text", "text": "what's the profile of user 123" }]
+                    },
+                    {
+                      "id": "msg-asst-1",
+                      "role": "assistant",
+                      "parts": [
+                        { "type": "text", "text": "I'll look up the profile information for user 123." },
+                        {
+                          "type": "tool-call",
+                          "toolCallId": "tool-front-1",
+                          "toolName": "profile_lookup",
+                          "source": "frontend",
+                          "state": "output-available",
+                          "input": { "userId": "123" },
+                          "output": {
+                            "userId": "123",
+                            "name": "John Doe",
+                            "email": "john.doe@example.com"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "msg-tool-1",
+                      "role": "tool",
+                      "toolCallId": "tool-front-1",
+                      "toolName": "profile_lookup",
+                      "parts": [
+                        {
+                          "type": "tool-result",
+                          "toolCallId": "tool-front-1",
+                          "output": {
+                            "userId": "123",
+                            "name": "John Doe",
+                            "email": "john.doe@example.com"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "msg-asst-2",
+                      "role": "assistant",
+                      "parts": [
+                        {
+                          "type": "text",
+                          "text": "I can see the profile information for user 123 from the completed lookup."
+                        }
+                      ]
+                    },
+                    {
+                      "id": "msg-user-2",
+                      "role": "user",
+                      "parts": [{ "type": "text", "text": "send an email to him to ask for sick leave tomorrow." }]
+                    }
+                  ]
+                }
+                """, ProtocolRunRequest.class);
+
+        protocolChatService.streamRun(
+                request,
+                UserCapabilityContext.anonymous(),
+                frame -> {
+                },
+                error -> {
+                    throw new AssertionError(error);
+                },
+                () -> {
+                }
+        );
+
+        assertEquals("send an email to him to ask for sick leave tomorrow.", agentService.lastInvocation.userMessage());
+        assertEquals(null, agentService.lastInvocation.toolContext());
+        assertEquals(3, agentService.lastInvocation.history().size());
+        assertEquals("what's the profile of user 123", agentService.lastInvocation.history().get(0).getContent());
+        assertEquals("I'll look up the profile information for user 123.", agentService.lastInvocation.history().get(1).getContent());
+        assertEquals("I can see the profile information for user 123 from the completed lookup.", agentService.lastInvocation.history().get(2).getContent());
+    }
+
+    @Test
+    void streamRunSerializesOnlyFrontendAndHumanToolsIntoFrontendManifest() throws Exception {
+        ProtocolRunRequest request = objectMapper.readValue("""
+                {
+                  "conversationId": "conv-tool-manifest",
+                  "context": {
+                    "tools": [
+                      {
+                        "name": "approval_confirm",
+                        "source": "human",
+                        "description": "Send an email with confirmation",
+                        "parameters": {
+                          "to": { "type": "string" }
+                        }
+                      },
+                      {
+                        "name": "profile_lookup",
+                        "source": "frontend",
+                        "description": "Lookup user profile information",
+                        "parameters": {
+                          "userId": { "type": "string" }
+                        }
+                      },
+                      {
+                        "name": "resolve_relative_date",
+                        "source": "backend",
+                        "description": "Resolve a relative date",
+                        "parameters": {
+                          "expression": { "type": "string" }
+                        }
+                      },
+                      {
+                        "name": "statistic_count_by_app",
+                        "source": "backend",
+                        "description": "Fetch PV and UV",
+                        "parameters": {
+                          "appId": { "type": "string" }
+                        }
+                      }
+                    ]
+                  },
+                  "messages": [
+                    {
+                      "id": "msg-user-1",
+                      "role": "user",
+                      "parts": [{ "type": "text", "text": "send an email to him to ask for sick leave tomorrow." }]
+                    }
+                  ]
+                }
+                """, ProtocolRunRequest.class);
+
+        protocolChatService.streamRun(
+                request,
+                UserCapabilityContext.anonymous(),
+                frame -> {
+                },
+                error -> {
+                    throw new AssertionError(error);
+                },
+                () -> {
+                }
+        );
+
+        assertNotNull(agentService.lastInvocation.frontendTools());
+        assertTrue(agentService.lastInvocation.frontendTools().contains("\"name\":\"approval_confirm\""));
+        assertTrue(agentService.lastInvocation.frontendTools().contains("\"name\":\"profile_lookup\""));
+        assertTrue(!agentService.lastInvocation.frontendTools().contains("\"name\":\"resolve_relative_date\""));
+        assertTrue(!agentService.lastInvocation.frontendTools().contains("\"name\":\"statistic_count_by_app\""));
+    }
+
+    @Test
     void streamRunEmitsAssistantUiStyleFrames() throws Exception {
         agentService.behavior = invocation -> {
             invocation.onExecutionPlan().accept(ExecutionPlanEvent.builder()

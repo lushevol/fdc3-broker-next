@@ -70,7 +70,7 @@ export function createMixedToolRunRequestFixture(): ChatRunRequest {
           },
         },
         {
-          name: 'approval.confirm',
+          name: 'approval_confirm',
           source: 'human',
           description: 'Confirm a user decision',
           parameters: {
@@ -84,7 +84,7 @@ export function createMixedToolRunRequestFixture(): ChatRunRequest {
           },
         },
         {
-          name: 'summary.compose',
+          name: 'summary_compose',
           source: 'backend',
           description: 'Compose a final summary',
           parameters: {
@@ -98,7 +98,7 @@ export function createMixedToolRunRequestFixture(): ChatRunRequest {
           },
         },
         {
-          name: 'analytics.lookup',
+          name: 'analytics_lookup',
           source: 'mcp',
           providerId: 'analytics-mcp',
           description: 'Look up analytics',
@@ -113,7 +113,7 @@ export function createMixedToolRunRequestFixture(): ChatRunRequest {
           },
         },
         {
-          name: 'profile.lookup',
+          name: 'profile_lookup',
           source: 'mcp',
           providerId: 'profile-mcp',
           description: 'Look up user profile context',

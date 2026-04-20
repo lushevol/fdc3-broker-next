@@ -467,12 +467,13 @@ class AgentServiceTest {
         when(toolRegistry.getTool("statistic_count_by_app")).thenReturn(analyticsTool);
 
         AtomicInteger invocationCount = new AtomicInteger();
-        List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
+        List<List<String>> toolNamesPerInvocation = new CopyOnWriteArrayList<>();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
             public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
-                capturedToolSpecs.clear();
-                capturedToolSpecs.addAll(request.toolSpecifications());
+                toolNamesPerInvocation.add(request.toolSpecifications().stream()
+                        .map(ToolSpecification::name)
+                        .toList());
 
                 if (invocationCount.getAndIncrement() == 0) {
                     if (request.toolSpecifications().isEmpty()) {
@@ -525,8 +526,7 @@ class AgentServiceTest {
         );
 
         assertTrue(completed.await(1, TimeUnit.SECONDS));
-        assertTrue(capturedToolSpecs.stream().anyMatch(toolSpecification ->
-                "statistic_count_by_app".equals(toolSpecification.name())));
+        assertTrue(toolNamesPerInvocation.get(0).contains("statistic_count_by_app"));
         assertEquals(1, toolCalls.size());
         assertEquals("statistic_count_by_app", toolCalls.get(0).getName());
         assertEquals(1, toolResults.size());
@@ -817,6 +817,258 @@ class AgentServiceTest {
         assertEquals(false, diagnostics.get("silentToolCall"));
         assertEquals(true, diagnostics.get("emptyAssistantAnswer"));
         assertEquals(List.of(), diagnostics.get("toolNames"));
+    }
+
+    @Test
+    void processMessageStreamingFallsBackToEmailApprovalChainAfterResolvedDate() throws Exception {
+        ReflectionTestUtils.setField(agentService, "mockEnabled", false);
+        TestToolDefinition resolveDateTool = new TestToolDefinition(
+                "resolve_relative_date",
+                "Resolve a relative date",
+                Map.of("type", "object"),
+                false,
+                arguments -> CompletableFuture.completedFuture(Map.of(
+                        "expression", arguments.get("expression"),
+                        "resolvedDate", "2026-04-20",
+                        "readable", "Monday, April 20, 2026"
+                ))
+        );
+        when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
+                "resolve_relative_date", resolveDateTool
+        ));
+
+        AtomicInteger invocationCount = new AtomicInteger();
+        StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
+            @Override
+            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+                invocationCount.incrementAndGet();
+                handler.onCompleteResponse(chatResponse(
+                        AiMessage.from("I need to clarify the date before I can send that email."),
+                        FinishReason.STOP
+                ));
+            }
+        };
+        ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
+
+        List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
+        List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        List<ChatMessage> history = List.of(
+                ChatMessage.builder()
+                        .role(ChatMessage.Role.USER)
+                        .content("what's the profile of user 123")
+                        .build(),
+                ChatMessage.builder()
+                        .role(ChatMessage.Role.ASSISTANT)
+                        .content("""
+                                User Profile for ID 123:
+                                Name: John Doe
+                                Email: john.doe@example.com
+                                """)
+                        .build()
+        );
+
+        agentService.processMessageStreaming(
+                "conversation-email-fallback",
+                "send an email to him to ask for sick leave tomorrow.",
+                UserCapabilityContext.anonymous(),
+                null,
+                """
+                        [
+                          {
+                            "name": "approval_confirm",
+                            "description": "Send an email with confirmation",
+                            "humanInTheLoop": true,
+                            "inputSchema": {
+                              "properties": {
+                                "to": { "type": "string" },
+                                "subject": { "type": "string" },
+                                "body": { "type": "string" }
+                              }
+                            }
+                          }
+                        ]
+                        """,
+                history,
+                token -> {
+                },
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown,
+                toolCalls::add,
+                toolResults::add
+        );
+
+        assertTrue(completed.await(1, TimeUnit.SECONDS));
+        assertEquals(2, invocationCount.get());
+        assertEquals(2, toolCalls.size());
+        assertEquals("resolve_relative_date", toolCalls.get(0).getName());
+        assertEquals("approval_confirm", toolCalls.get(1).getName());
+        assertEquals(ToolCall.ToolStatus.PENDING, toolCalls.get(1).getStatus());
+        assertEquals("john.doe@example.com", toolCalls.get(1).getArguments().get("to"));
+        assertTrue(String.valueOf(toolCalls.get(1).getArguments().get("subject")).contains("2026-04-20"));
+        assertEquals(1, toolResults.size());
+    }
+
+    @Test
+    void processMessageStreamingFallsBackToWeatherHistoryAfterResolvedDate() throws Exception {
+        ReflectionTestUtils.setField(agentService, "mockEnabled", false);
+        TestToolDefinition resolveDateTool = new TestToolDefinition(
+                "resolve_relative_date",
+                "Resolve a relative date",
+                Map.of("type", "object"),
+                false,
+                arguments -> CompletableFuture.completedFuture(Map.of(
+                        "expression", arguments.get("expression"),
+                        "resolvedDate", "2026-04-20",
+                        "readable", "Monday, April 20, 2026"
+                ))
+        );
+        TestToolDefinition weatherHistoryTool = new TestToolDefinition(
+                "get_weather_history",
+                "Get historical weather",
+                Map.of("type", "object"),
+                false,
+                arguments -> CompletableFuture.completedFuture(Map.of(
+                        "location", arguments.get("location"),
+                        "date", arguments.get("date"),
+                        "condition", "Sunny",
+                        "highC", 26,
+                        "lowC", 14
+                ))
+        );
+        when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
+                "resolve_relative_date", resolveDateTool,
+                "get_weather_history", weatherHistoryTool
+        ));
+
+        AtomicInteger invocationCount = new AtomicInteger();
+        List<List<String>> toolNamesPerInvocation = new CopyOnWriteArrayList<>();
+        StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
+            @Override
+            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+                invocationCount.incrementAndGet();
+                toolNamesPerInvocation.add(request.toolSpecifications().stream()
+                        .map(ToolSpecification::name)
+                        .toList());
+                handler.onCompleteResponse(chatResponse(
+                        AiMessage.from("I should clarify the date first."),
+                        FinishReason.STOP
+                ));
+            }
+        };
+        ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
+
+        List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
+        List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-weather-history-fallback",
+                "what's the weather for Beijing tomorrow?",
+                List.of(),
+                token -> {
+                },
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown,
+                toolCalls::add,
+                toolResults::add
+        );
+
+        assertTrue(completed.await(1, TimeUnit.SECONDS));
+        assertEquals(2, invocationCount.get());
+        assertTrue(toolNamesPerInvocation.get(0).contains("resolve_relative_date"));
+        assertTrue(toolNamesPerInvocation.get(1).contains("get_weather_history"));
+        assertFalse(toolNamesPerInvocation.get(1).contains("resolve_relative_date"));
+        assertEquals(2, toolCalls.size());
+        assertEquals("resolve_relative_date", toolCalls.get(0).getName());
+        assertEquals("get_weather_history", toolCalls.get(1).getName());
+        assertEquals("Beijing", toolCalls.get(1).getArguments().get("location"));
+        assertEquals("2026-04-20", toolCalls.get(1).getArguments().get("date"));
+        assertEquals(2, toolResults.size());
+    }
+
+    @Test
+    void processMessageStreamingFallsBackToAnalyticsAfterResolvedDate() throws Exception {
+        ReflectionTestUtils.setField(agentService, "mockEnabled", false);
+        TestToolDefinition resolveDateTool = new TestToolDefinition(
+                "resolve_relative_date",
+                "Resolve a relative date",
+                Map.of("type", "object"),
+                false,
+                arguments -> CompletableFuture.completedFuture(Map.of(
+                        "expression", arguments.get("expression"),
+                        "resolvedDate", "2026-04-18",
+                        "readable", "Saturday, April 18, 2026"
+                ))
+        );
+        TestToolDefinition analyticsTool = new TestToolDefinition(
+                "statistic_count_by_app",
+                "Return PV and UV counts",
+                Map.of("type", "object"),
+                false,
+                arguments -> CompletableFuture.completedFuture(Map.of(
+                        "appId", arguments.get("appId"),
+                        "pv", 42,
+                        "uv", 12
+                ))
+        );
+        when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
+                "resolve_relative_date", resolveDateTool,
+                "statistic_count_by_app", analyticsTool
+        ));
+
+        AtomicInteger invocationCount = new AtomicInteger();
+        List<List<String>> toolNamesPerInvocation = new CopyOnWriteArrayList<>();
+        StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
+            @Override
+            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+                invocationCount.incrementAndGet();
+                toolNamesPerInvocation.add(request.toolSpecifications().stream()
+                        .map(ToolSpecification::name)
+                        .toList());
+                handler.onCompleteResponse(chatResponse(
+                        AiMessage.from("I can answer that once I know the exact date."),
+                        FinishReason.STOP
+                ));
+            }
+        };
+        ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
+
+        List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
+        List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-analytics-fallback",
+                "what's the pv and uv of cashflow blotter yesterday ?",
+                List.of(),
+                token -> {
+                },
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown,
+                toolCalls::add,
+                toolResults::add
+        );
+
+        assertTrue(completed.await(1, TimeUnit.SECONDS));
+        assertEquals(2, invocationCount.get());
+        assertTrue(toolNamesPerInvocation.get(0).contains("resolve_relative_date"));
+        assertTrue(toolNamesPerInvocation.get(1).contains("statistic_count_by_app"));
+        assertFalse(toolNamesPerInvocation.get(1).contains("resolve_relative_date"));
+        assertEquals(2, toolCalls.size());
+        assertEquals("resolve_relative_date", toolCalls.get(0).getName());
+        assertEquals("statistic_count_by_app", toolCalls.get(1).getName());
+        assertEquals("cashflow_blotter", toolCalls.get(1).getArguments().get("appId"));
+        assertEquals("2026-04-18T00:00:00Z", toolCalls.get(1).getArguments().get("startTime"));
+        assertEquals("2026-04-19T00:00:00Z", toolCalls.get(1).getArguments().get("endTime"));
+        assertEquals(2, toolResults.size());
     }
 
     private static final class TestToolDefinition implements com.fdc3.chatbot.tool.ToolDefinition {

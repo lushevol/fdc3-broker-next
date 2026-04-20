@@ -35,25 +35,12 @@ type RunRequestBody = {
 
 type SseFrame = Record<string, unknown>;
 
-const MINIMAL_TOOLS = ['location.resolve'];
 const FULL_TOOLS = [
   'location.resolve',
-  'approval.confirm',
-  'summary.compose',
-  'analytics.lookup',
-  'profile.lookup',
-];
-
-const FULL_TOOL_DESCRIPTORS: ToolDescriptor[] = [
-  { name: 'location.resolve' },
-  { name: 'approval.confirm' },
-  { name: 'summary.compose' },
-  { name: 'analytics.lookup', providerId: 'analytics-mcp' },
-  { name: 'profile.lookup', providerId: 'profile-mcp' },
-];
-
-const ANALYTICS_MCP_TOOLS: ToolDescriptor[] = [
-  { name: 'analytics.lookup', providerId: 'analytics-mcp' },
+  'approval_confirm',
+  'summary_compose',
+  'analytics_lookup',
+  'profile_lookup',
 ];
 
 function toSseBody(frames: readonly SseFrame[]): string {
@@ -296,8 +283,12 @@ function createHumanApprovalFrames(options: {
 }): SseFrame[] {
   const {
     toolCallId = 'tool_human_approval_1',
-    toolName = 'approval.confirm',
-    input = { decision: 'approve' },
+    toolName = 'approval_confirm',
+    input = {
+      to: 'ops@example.com',
+      subject: 'Daily report',
+      body: 'Send the daily report to operations.',
+    },
     conversationId = 'conv-mcp-e2e',
     runId = 'run-mcp-e2e',
     messageId = 'msg_asst_human',
@@ -575,7 +566,7 @@ async function selectToolPreset(page: Page, preset: 'minimal' | 'full') {
 }
 
 test.describe('MCP tool in conversation (elasticsearch-mcp-service example)', () => {
-  test('analytics.lookup (MCP) tool call renders with providerId and source=mcp', async ({
+  test('analytics_lookup (MCP) tool call renders with providerId and source=mcp', async ({
     page,
   }) => {
     await page.route('**/api/chat/runs', async (route) => {
@@ -583,7 +574,7 @@ test.describe('MCP tool in conversation (elasticsearch-mcp-service example)', ()
         route,
         createMcpToolFrames({
           toolCallId: 'tool_mcp_analytics_1',
-          toolName: 'analytics.lookup',
+          toolName: 'analytics_lookup',
           providerId: 'analytics-mcp',
           input: {
             appId: 'template_tile_fdc3_2',
@@ -609,7 +600,7 @@ test.describe('MCP tool in conversation (elasticsearch-mcp-service example)', ()
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Get usage for template_tile_fdc3_2');
 
-    await expect(page.getByText('Used tool: analytics.lookup')).toBeVisible();
+    await expect(page.getByText('Used tool: analytics_lookup')).toBeVisible();
     await expect(page.getByText('1,234')).toBeVisible();
     await expect(page.getByText('567')).toBeVisible();
     await expect(page.getByText('template_tile_fdc3_2')).toBeVisible();
@@ -624,7 +615,7 @@ test.describe('MCP tool in conversation (elasticsearch-mcp-service example)', ()
         route,
         createMcpToolErrorFrames({
           toolCallId: 'tool_mcp_error_1',
-          toolName: 'analytics.lookup',
+          toolName: 'analytics_lookup',
           providerId: 'analytics-mcp',
           input: { appId: 'nonexistent_app' },
           errorMessage: 'App not found: nonexistent_app',
@@ -637,7 +628,7 @@ test.describe('MCP tool in conversation (elasticsearch-mcp-service example)', ()
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Get usage for nonexistent_app');
 
-    await expect(page.getByText('analytics.lookup')).toBeVisible();
+    await expect(page.getByText('analytics_lookup')).toBeVisible();
     await expect(page.getByText('App not found: nonexistent_app')).toBeVisible();
     await expect(page.getByText('Sorry, I could not find analytics')).toBeVisible();
   });
@@ -659,8 +650,8 @@ test.describe('MCP tool in conversation (elasticsearch-mcp-service example)', ()
     await expect.poll(() => requests.length).toBeGreaterThanOrEqual(1);
 
     const tools = requests[0]?.context?.tools ?? [];
-    const analyticsTool = tools.find((t) => t.name === 'analytics.lookup');
-    const profileTool = tools.find((t) => t.name === 'profile.lookup');
+    const analyticsTool = tools.find((t) => t.name === 'analytics_lookup');
+    const profileTool = tools.find((t) => t.name === 'profile_lookup');
 
     expect(analyticsTool).toBeDefined();
     expect(analyticsTool?.providerId).toBe('analytics-mcp');
@@ -676,7 +667,7 @@ test.describe('MCP tool in conversation (elasticsearch-mcp-service example)', ()
           planSummary: 'Execute elasticsearch analytics query',
           stepTitle: 'Query elasticsearch-mcp-service for usage statistics',
           toolCallId: 'tool_mcp_plan_1',
-          toolName: 'analytics.lookup',
+          toolName: 'analytics_lookup',
           providerId: 'analytics-mcp',
           input: {
             appId: 'cashflow',
@@ -701,7 +692,7 @@ test.describe('MCP tool in conversation (elasticsearch-mcp-service example)', ()
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Get cashflow analytics with execution plan');
 
-    await expect(page.getByText('Used tool: analytics.lookup')).toBeVisible();
+    await expect(page.getByText('Used tool: analytics_lookup')).toBeVisible();
     await expect(page.getByText('Cashflow analytics query completed')).toBeVisible();
   });
 
@@ -713,7 +704,7 @@ test.describe('MCP tool in conversation (elasticsearch-mcp-service example)', ()
       await fulfillRun(
         route,
         createMcpToolFrames({
-          toolName: 'analytics.lookup',
+          toolName: 'analytics_lookup',
           input: { appId: 'test-app' },
           output: { pv: 100, uv: 25 },
           textAfter: 'Done.',
@@ -725,7 +716,7 @@ test.describe('MCP tool in conversation (elasticsearch-mcp-service example)', ()
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Get analytics for test-app');
 
-    await expect(page.getByText('Used tool: analytics.lookup')).toBeVisible();
+    await expect(page.getByText('Used tool: analytics_lookup')).toBeVisible();
 
     expect(requests.length).toBeGreaterThanOrEqual(1);
     expect(requests[0]?.trigger).toBe('submit-message');
@@ -733,13 +724,13 @@ test.describe('MCP tool in conversation (elasticsearch-mcp-service example)', ()
 });
 
 test.describe('Backend tool in conversation', () => {
-  test('summary.compose (backend) tool call renders with source=backend', async ({ page }) => {
+  test('summary_compose (backend) tool call renders with source=backend', async ({ page }) => {
     await page.route('**/api/chat/runs', async (route) => {
       await fulfillRun(
         route,
         createBackendToolFrames({
           toolCallId: 'tool_backend_summary_1',
-          toolName: 'summary.compose',
+          toolName: 'summary_compose',
           input: { text: 'Dashboard usage increased by 15%' },
           output: { summary: 'Usage of the dashboard increased by 15% over the reporting period.' },
           textBefore: 'Composing summary...',
@@ -752,9 +743,9 @@ test.describe('Backend tool in conversation', () => {
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Summarize dashboard usage');
 
-    await expect(page.getByText('Used tool: summary.compose')).toBeVisible();
+    await expect(page.getByText('Used tool: summary_compose')).toBeVisible();
 
-    const toolTrigger = page.getByText('Used tool: summary.compose');
+    const toolTrigger = page.getByText('Used tool: summary_compose');
     await toolTrigger.click();
     await expect(page.getByText('Dashboard usage increased by 15%')).toBeVisible();
   });
@@ -767,7 +758,7 @@ test.describe('Backend tool in conversation', () => {
         {
           type: 'tool-input-start',
           toolCallId: 'tool_backend_err_1',
-          toolName: 'summary.compose',
+          toolName: 'summary_compose',
           source: 'backend',
           executionTarget: 'backend',
         },
@@ -800,7 +791,7 @@ test.describe('Backend tool in conversation', () => {
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Summarize something');
 
-    await expect(page.getByText('summary.compose')).toBeVisible();
+    await expect(page.getByText('summary_compose')).toBeVisible();
     await expect(page.getByText('Backend service temporarily unavailable')).toBeVisible();
   });
 });
@@ -877,18 +868,28 @@ test.describe('Frontend tool in conversation', () => {
 });
 
 test.describe('Human approval tool in conversation', () => {
-  test('approval.confirm requires human action and can be approved', async ({ page }) => {
+  test('approval_confirm requires human action and can be approved', async ({ page }) => {
     const requests: RunRequestBody[] = [];
+    let runCount = 0;
 
     await page.route('**/api/chat/runs', async (route) => {
+      runCount += 1;
       requests.push(route.request().postDataJSON() as RunRequestBody);
+
+      if (runCount === 1) {
+        await fulfillRun(
+          route,
+          createHumanApprovalFrames({
+            toolCallId: 'tool_human_approval_1',
+            toolName: 'approval_confirm',
+          }),
+        );
+        return;
+      }
+
       await fulfillRun(
         route,
-        createHumanApprovalFrames({
-          toolCallId: 'tool_human_approval_1',
-          toolName: 'approval.confirm',
-          input: { decision: 'approve' },
-        }),
+        createTextResponseFrames('Action approved and executed.', 'msg_asst_final'),
       );
     });
 
@@ -896,17 +897,22 @@ test.describe('Human approval tool in conversation', () => {
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Should I proceed?');
 
-    await expect(page.getByText('Human Approval Required')).toBeVisible();
-    await expect(page.getByText('approval.confirm')).toBeVisible();
+    await expect(page.getByText('Confirm Email')).toBeVisible();
+    await expect(page.getByText('To: ops@example.com')).toBeVisible();
+    await expect(page.getByText('Subject: Daily report')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Send' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Cancel' })).toBeVisible();
 
-    const approveButton = page.getByRole('button', { name: 'Approve' });
-    await expect(approveButton).toBeVisible();
+    await page.getByRole('button', { name: 'Send' }).click();
+
+    await expect.poll(() => requests.length).toBeGreaterThanOrEqual(2);
 
     expect(requests.length).toBeGreaterThanOrEqual(1);
     expect(requests[0]?.trigger).toBe('submit-message');
+    expect(requests[1]?.trigger).toBe('submit-tool-result');
   });
 
-  test('approval.confirm preserves full tool inventory in context on approval', async ({
+  test('approval_confirm preserves full tool inventory in context on approval', async ({
     page,
   }) => {
     const requests: RunRequestBody[] = [];
@@ -936,9 +942,9 @@ test.describe('Human approval tool in conversation', () => {
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Proceed with action');
 
-    await expect(page.getByText('Human Approval Required')).toBeVisible();
+    await expect(page.getByText('Confirm Email')).toBeVisible();
 
-    const approveButton = page.getByRole('button', { name: 'Approve' });
+    const approveButton = page.getByRole('button', { name: 'Send' });
     await approveButton.click();
 
     await expect.poll(() => requests.length).toBeGreaterThanOrEqual(2);
@@ -966,7 +972,7 @@ test.describe('MCP + frontend + backend tool interplay', () => {
           route,
           createMcpToolFrames({
             toolCallId: 'tool_mcp_analytics_followup',
-            toolName: 'analytics.lookup',
+            toolName: 'analytics_lookup',
             providerId: 'analytics-mcp',
             input: {
               appId: 'dashboards-ny',
@@ -1015,7 +1021,7 @@ test.describe('MCP + frontend + backend tool interplay', () => {
             },
             {
               toolCallId: 'tool_mcp_analytics_1',
-              toolName: 'analytics.lookup',
+              toolName: 'analytics_lookup',
               source: 'mcp',
               providerId: 'analytics-mcp',
               input: { appId: 'london-app' },
@@ -1023,7 +1029,7 @@ test.describe('MCP + frontend + backend tool interplay', () => {
             },
             {
               toolCallId: 'tool_backend_summary_1',
-              toolName: 'summary.compose',
+              toolName: 'summary_compose',
               source: 'backend',
               input: { text: 'London dashboard usage report' },
               output: { summary: 'London dashboard shows strong engagement.' },
@@ -1040,8 +1046,8 @@ test.describe('MCP + frontend + backend tool interplay', () => {
     await sendMessage(page, 'Give me a full briefing for London');
 
     await expect(page.getByText('Processing your request with multiple tools')).toBeVisible();
-    await expect(page.getByText('analytics.lookup')).toBeVisible();
-    await expect(page.getByText('summary.compose')).toBeVisible();
+    await expect(page.getByText('analytics_lookup')).toBeVisible();
+    await expect(page.getByText('summary_compose')).toBeVisible();
     await expect(page.getByText('location.resolve')).toBeVisible();
   });
 
@@ -1059,7 +1065,7 @@ test.describe('MCP + frontend + backend tool interplay', () => {
         await fulfillRun(
           route,
           createMcpToolFrames({
-            toolName: 'analytics.lookup',
+            toolName: 'analytics_lookup',
             input: { appId: 'cashflow' },
             output: { pv: 300, uv: 75 },
             textAfter: 'Cashflow analytics retrieved.',
@@ -1075,7 +1081,7 @@ test.describe('MCP + frontend + backend tool interplay', () => {
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Get cashflow analytics');
 
-    await expect(page.getByText('Used tool: analytics.lookup')).toBeVisible();
+    await expect(page.getByText('Used tool: analytics_lookup')).toBeVisible();
 
     await sendMessage(page, 'Tell me more');
 
@@ -1084,11 +1090,11 @@ test.describe('MCP + frontend + backend tool interplay', () => {
     expect(requests.length).toBeGreaterThanOrEqual(2);
 
     const firstTools = requests[0]?.context?.tools ?? [];
-    expect(firstTools.find((t) => t.name === 'analytics.lookup')).toBeDefined();
+    expect(firstTools.find((t) => t.name === 'analytics_lookup')).toBeDefined();
 
     if (requests[1]) {
       const secondTools = requests[1]?.context?.tools ?? [];
-      expect(secondTools.find((t) => t.name === 'analytics.lookup')).toBeDefined();
+      expect(secondTools.find((t) => t.name === 'analytics_lookup')).toBeDefined();
     }
   });
 });
@@ -1100,7 +1106,7 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
         route,
         createMcpToolFrames({
           toolCallId: 'tool_mcp_stats_1',
-          toolName: 'analytics.lookup',
+          toolName: 'analytics_lookup',
           providerId: 'analytics-mcp',
           input: {
             appId: 'template_tile_fdc3_2',
@@ -1128,9 +1134,9 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Get usage statistics for template_tile_fdc3_2');
 
-    await expect(page.getByText('Used tool: analytics.lookup')).toBeVisible();
+    await expect(page.getByText('Used tool: analytics_lookup')).toBeVisible();
 
-    const toolTrigger = page.getByText('Used tool: analytics.lookup');
+    const toolTrigger = page.getByText('Used tool: analytics_lookup');
     await toolTrigger.click();
     await expect(page.getByText('appId')).toBeVisible();
     await expect(page.getByText('template_tile_fdc3_2')).toBeVisible();
@@ -1224,7 +1230,7 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
           planSummary: 'Query elasticsearch-mcp-service for app usage',
           stepTitle: 'Call statistic_count_by_app via analytics MCP',
           toolCallId: 'tool_mcp_analytics_plan',
-          toolName: 'analytics.lookup',
+          toolName: 'analytics_lookup',
           providerId: 'analytics-mcp',
           input: {
             appId: 'risk-dashboard',
@@ -1249,7 +1255,7 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Get risk dashboard usage with execution plan');
 
-    await expect(page.getByText('Used tool: analytics.lookup')).toBeVisible();
+    await expect(page.getByText('Used tool: analytics_lookup')).toBeVisible();
     await expect(
       page.getByText('Risk Dashboard analytics retrieved via elasticsearch-mcp'),
     ).toBeVisible();
@@ -1261,7 +1267,7 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
         route,
         createMcpToolErrorFrames({
           toolCallId: 'tool_mcp_err_elastic',
-          toolName: 'analytics.lookup',
+          toolName: 'analytics_lookup',
           providerId: 'analytics-mcp',
           input: {
             startTime: '2026-04-01T00:00:00Z',
@@ -1277,7 +1283,7 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Get analytics without specifying an app');
 
-    await expect(page.getByText('analytics.lookup')).toBeVisible();
+    await expect(page.getByText('analytics_lookup')).toBeVisible();
     await expect(page.getByText('At least one of appId or appName must be provided')).toBeVisible();
   });
 
@@ -1294,7 +1300,7 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
           route,
           createMcpToolFrames({
             toolCallId: 'tool_mcp_compare_1',
-            toolName: 'analytics.lookup',
+            toolName: 'analytics_lookup',
             providerId: 'analytics-mcp',
             input: {
               appId: 'cashflow',
@@ -1313,7 +1319,7 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
         route,
         createMcpToolFrames({
           toolCallId: 'tool_mcp_compare_2',
-          toolName: 'analytics.lookup',
+          toolName: 'analytics_lookup',
           providerId: 'analytics-mcp',
           input: {
             appId: 'risk-dashboard',
@@ -1331,11 +1337,11 @@ test.describe('Elasticsearch MCP service tool scenarios', () => {
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Compare cashflow and risk-dashboard analytics');
 
-    await expect(page.getByText('Used tool: analytics.lookup')).toBeVisible();
+    await expect(page.getByText('Used tool: analytics_lookup')).toBeVisible();
 
     expect(requests.length).toBeGreaterThanOrEqual(1);
     const firstToolContext = requests[0]?.context?.tools ?? [];
-    expect(firstToolContext.find((t) => t.name === 'analytics.lookup')).toBeDefined();
+    expect(firstToolContext.find((t) => t.name === 'analytics_lookup')).toBeDefined();
   });
 });
 
@@ -1348,7 +1354,7 @@ test.describe('Tool source and execution target validation', () => {
       await fulfillRun(
         route,
         createMcpToolFrames({
-          toolName: 'analytics.lookup',
+          toolName: 'analytics_lookup',
           providerId: 'analytics-mcp',
           input: { appId: 'test-app' },
           output: { pv: 100, uv: 25 },
@@ -1361,11 +1367,11 @@ test.describe('Tool source and execution target validation', () => {
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Get analytics');
 
-    await expect(page.getByText('Used tool: analytics.lookup')).toBeVisible();
+    await expect(page.getByText('Used tool: analytics_lookup')).toBeVisible();
 
     expect(requests.length).toBeGreaterThanOrEqual(1);
     const tools = requests[0]?.context?.tools ?? [];
-    const analyticsLookup = tools.find((t) => t.name === 'analytics.lookup');
+    const analyticsLookup = tools.find((t) => t.name === 'analytics_lookup');
     expect(analyticsLookup?.providerId).toBe('analytics-mcp');
   });
 
@@ -1377,7 +1383,7 @@ test.describe('Tool source and execution target validation', () => {
       await fulfillRun(
         route,
         createBackendToolFrames({
-          toolName: 'summary.compose',
+          toolName: 'summary_compose',
           input: { text: 'test' },
           output: { summary: 'Test summary' },
           textAfter: 'Summary composed.',
@@ -1389,11 +1395,11 @@ test.describe('Tool source and execution target validation', () => {
     await selectToolPreset(page, 'full');
     await sendMessage(page, 'Summarize test');
 
-    await expect(page.getByText('Used tool: summary.compose')).toBeVisible();
+    await expect(page.getByText('Used tool: summary_compose')).toBeVisible();
 
     expect(requests.length).toBeGreaterThanOrEqual(1);
     const tools = requests[0]?.context?.tools ?? [];
-    const summaryCompose = tools.find((t) => t.name === 'summary.compose');
+    const summaryCompose = tools.find((t) => t.name === 'summary_compose');
 
     expect(summaryCompose).toBeDefined();
     expect(summaryCompose?.providerId).toBeUndefined();
@@ -1422,7 +1428,7 @@ test.describe('Tool source and execution target validation', () => {
     const mcpTools = tools.filter((t) => t.providerId);
     expect(mcpTools).toHaveLength(2);
     expect(mcpTools.map((t) => t.name)).toEqual(
-      expect.arrayContaining(['analytics.lookup', 'profile.lookup']),
+      expect.arrayContaining(['analytics_lookup', 'profile_lookup']),
     );
   });
 });

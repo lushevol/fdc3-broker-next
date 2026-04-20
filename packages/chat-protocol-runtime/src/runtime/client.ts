@@ -10,6 +10,7 @@ import type {
 } from '@fm/chat-protocol-contract';
 import type { ThreadMessage } from '@assistant-ui/react';
 import { createProtocolStreamAdapter } from './createProtocolStreamAdapter';
+import type { ToolkitBridge } from './toolkitBridge';
 
 type ToolResultContentPartLike = {
   type: 'tool-result';
@@ -44,10 +45,41 @@ export type StreamProtocolRunOptions = {
   url: string;
   fetch?: typeof globalThis.fetch;
   onFrame?: (frame: ChatStreamFrame) => void;
+
+  /**
+   * @deprecated Use toolkitBridge instead for unified tool execution.
+   * This will be removed in v3.0.0.
+   * @see packages/chat-protocol-runtime/README.md
+   */
   resolveFrontendTool?: (
     toolCall: ChatToolCallPart,
     request: ChatRunRequest,
   ) => Promise<Record<string, unknown>> | Record<string, unknown>;
+
+  /**
+   * Toolkit bridge for unified frontend tool execution.
+   * This allows the protocol to execute tools using the app's toolkit,
+   * eliminating the need for a separate resolveFrontendTool callback.
+   *
+   * @example
+   * ```typescript
+   * const toolkitBridge = createToolkitBridge(toolkit);
+   * yield* streamProtocolRun({ request, url, toolkitBridge });
+   * ```
+   */
+  toolkitBridge?: ToolkitBridge;
+};
+
+export type BuildHumanToolResumeRequestOptions = {
+  conversationId: string;
+  messages: ChatMessage[];
+  toolCallId: string;
+  toolName: string;
+  result: Record<string, unknown>;
+  runId?: string | null;
+  tools?: ChatToolDescriptor[];
+  metadata?: ChatRunRequest['metadata'];
+  context?: ChatRunRequest['context'];
 };
 
 function getTextParts(message: ThreadMessage): string[] {
@@ -318,6 +350,82 @@ function createToolResultMessage(toolCall: ChatToolCallPart): ChatToolMessage {
   };
 }
 
+function createToolResultMessageFromResult(options: {
+  toolCallId: string;
+  toolName: string;
+  result: Record<string, unknown>;
+}): ChatToolMessage {
+  return {
+    id: `${options.toolCallId}-tool-result`,
+    role: 'tool',
+    toolCallId: options.toolCallId,
+    toolName: options.toolName,
+    parts: [
+      {
+        type: 'tool-result',
+        toolCallId: options.toolCallId,
+        output: options.result,
+      },
+    ],
+    metadata: {},
+  };
+}
+
+function hasToolResultMessage(messages: readonly ChatMessage[], toolCallId: string): boolean {
+  return messages.some(
+    (message): message is ChatToolMessage =>
+      message.role === 'tool' && message.toolCallId === toolCallId,
+  );
+}
+
+function stableSerialize(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => stableSerialize(item)).join(',')}]`;
+  }
+
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    const entries = Object.keys(record)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableSerialize(record[key])}`);
+    return `{${entries.join(',')}}`;
+  }
+
+  return JSON.stringify(value);
+}
+
+function getFrontendToolExecutionKey(toolCall: ChatToolCallPart): string {
+  return `${toolCall.toolName}:${stableSerialize(toolCall.input)}`;
+}
+
+export function buildHumanToolResumeRequest({
+  conversationId,
+  messages,
+  toolCallId,
+  toolName,
+  result,
+  runId,
+  tools,
+  metadata,
+  context,
+}: BuildHumanToolResumeRequestOptions): ChatRunRequest {
+  return {
+    conversationId,
+    ...(runId !== undefined ? { runId } : {}),
+    trigger: 'submit-tool-result',
+    ...(tools || context ? { context: { ...context, ...(tools ? { tools } : {}) } } : {}),
+    messages: [
+      ...messages,
+      createToolResultMessageFromResult({
+        toolCallId,
+        toolName,
+        result,
+      }),
+    ],
+    ...(metadata ? { metadata } : {}),
+  };
+}
+
 async function postRunRequest(
   request: ChatRunRequest,
   url: string,
@@ -338,13 +446,25 @@ export async function* streamProtocolRun({
   fetch = globalThis.fetch,
   onFrame,
   resolveFrontendTool,
+  toolkitBridge,
 }: StreamProtocolRunOptions): AsyncGenerator<ChatStreamFrame, void> {
   if (!fetch) {
     throw new Error('Fetch implementation is required for streamProtocolRun');
   }
 
+  // Deprecation warning for resolveFrontendTool
+  if (resolveFrontendTool && !toolkitBridge) {
+    console.warn(
+      '[@fm/chat-protocol-runtime] Deprecation Warning: ' +
+        'resolveFrontendTool is deprecated and will be removed in v3.0.0. ' +
+        'Use toolkitBridge for unified tool execution. ' +
+        'See migration guide in chat-protocol-runtime/README.md',
+    );
+  }
+
   let nextRequest: ChatRunRequest | null = request;
   let currentRunId = request.runId ?? null;
+  const executedFrontendTools = new Set<string>();
 
   while (nextRequest) {
     const response = await postRunRequest(
@@ -381,11 +501,60 @@ export async function* streamProtocolRun({
     const assistantMessage = adapter.getMessage();
     const pendingFrontendTool = findPendingToolBySource(assistantMessage.content, 'frontend');
 
-    if (!pendingFrontendTool || !resolveFrontendTool) {
+    if (!pendingFrontendTool) {
       break;
     }
 
-    const output = await resolveFrontendTool(pendingFrontendTool, nextRequest);
+    let output: Record<string, unknown>;
+
+    const toolExecutionKey = getFrontendToolExecutionKey(pendingFrontendTool);
+    const alreadyResolvedInHistory =
+      hasToolResultMessage(nextRequest.messages, pendingFrontendTool.toolCallId) ||
+      executedFrontendTools.has(toolExecutionKey);
+
+    if (alreadyResolvedInHistory) {
+      yield {
+        type: 'tool-output-error',
+        toolCallId: pendingFrontendTool.toolCallId,
+        error:
+          `Frontend tool "${pendingFrontendTool.toolName}" was already resolved earlier in this run. ` +
+          'Refusing to execute it again.',
+        source: 'frontend',
+      } as ChatStreamFrame;
+      break;
+    }
+
+    // NEW: Prefer toolkitBridge over resolveFrontendTool
+    if (toolkitBridge) {
+      try {
+        output = await toolkitBridge.executeTool(
+          pendingFrontendTool.toolName,
+          pendingFrontendTool.input,
+        );
+      } catch (error) {
+        // Yield error frame and break
+        yield {
+          type: 'tool-output-error',
+          toolCallId: pendingFrontendTool.toolCallId,
+          error: error instanceof Error ? error.message : String(error),
+          source: 'frontend',
+        } as ChatStreamFrame;
+        break;
+      }
+    }
+    // DEPRECATED: Fallback to resolveFrontendTool
+    else if (resolveFrontendTool) {
+      output = await resolveFrontendTool(pendingFrontendTool, nextRequest);
+    } else {
+      // Neither mechanism available - error
+      throw new Error(
+        'Frontend tool detected but no execution mechanism available. ' +
+          'Provide either toolkitBridge (recommended) or resolveFrontendTool (deprecated).',
+      );
+    }
+
+    executedFrontendTools.add(toolExecutionKey);
+
     const resolvedTool: ChatToolCallPart = {
       ...pendingFrontendTool,
       state: 'output-available',
@@ -410,6 +579,14 @@ export async function* streamProtocolRun({
       output,
       source: 'frontend',
     } as ChatStreamFrame;
+
+    // Apply the frame to adapter so message is updated with output (prevents re-execution)
+    adapter.applyFrame({
+      type: 'tool-output-available',
+      toolCallId: resolvedTool.toolCallId,
+      output,
+      source: 'frontend',
+    });
 
     nextRequest = {
       conversationId: request.conversationId,

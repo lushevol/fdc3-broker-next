@@ -531,10 +531,15 @@ public class ProtocolChatService {
                 throw new IllegalArgumentException("messages must not be empty");
             }
 
-            ResumableToolContext resumableToolContext = findLatestResumableToolContext(messages, objectMapper);
+            int lastUserIndex = findLastUserIndex(messages);
+            ResumableToolContext resumableToolContext = findLatestResumableToolContext(
+                    messages,
+                    objectMapper,
+                    lastUserIndex
+            );
             int currentUserIndex = resumableToolContext != null
                     ? findPrecedingUserIndex(messages, resumableToolContext.assistantMessageIndex())
-                    : findLastUserIndex(messages);
+                    : lastUserIndex;
 
             if (currentUserIndex < 0) {
                 throw new IllegalArgumentException("messages must contain a user message for the active turn");
@@ -593,14 +598,31 @@ public class ProtocolChatService {
         }
 
         private static String serializeFrontendTools(ProtocolRunRequest request, ObjectMapper objectMapper) {
-            if (request.getContext() == null || request.getContext().getFrontendTools() == null
-                    || request.getContext().getFrontendTools().isEmpty()) {
+            List<FrontendToolManifestEntry> manifest = new java.util.ArrayList<>();
+
+            // Add tools from context.getFrontendTools() (legacy field)
+            if (request.getContext() != null && request.getContext().getFrontendTools() != null) {
+                for (ProtocolFrontendTool tool : request.getContext().getFrontendTools()) {
+                    manifest.add(toFrontendToolManifestEntry(tool));
+                }
+            }
+
+            // Add tools from context.getTools() (new contract field)
+            if (request.getContext() != null && request.getContext().getTools() != null) {
+                for (ProtocolToolDescriptor tool : request.getContext().getTools()) {
+                    if (!isFrontendToolDescriptor(tool)) {
+                        continue;
+                    }
+                    if (!manifest.stream().anyMatch(m -> m.getName().equals(tool.getName()))) {
+                        manifest.add(toolDescriptorToManifestEntry(tool));
+                    }
+                }
+            }
+
+            if (manifest.isEmpty()) {
                 return null;
             }
 
-            List<FrontendToolManifestEntry> manifest = request.getContext().getFrontendTools().stream()
-                    .map(ProtocolInvocation::toFrontendToolManifestEntry)
-                    .toList();
             try {
                 return objectMapper.writeValueAsString(manifest);
             } catch (JsonProcessingException exception) {
@@ -619,6 +641,30 @@ public class ProtocolChatService {
                     .build();
         }
 
+        private static FrontendToolManifestEntry toolDescriptorToManifestEntry(ProtocolToolDescriptor tool) {
+            Map<String, Object> inputSchema = new java.util.LinkedHashMap<>();
+            if (tool.getParameters() != null) {
+                inputSchema.put("properties", tool.getParameters());
+            }
+            boolean humanInTheLoop = "human".equalsIgnoreCase(String.valueOf(tool.getSource()));
+            String toolName = tool.getName();
+            String llmCompatibleName = toolName != null ? toolName.replace('.', '_').replace('-', '_') : toolName;
+            return FrontendToolManifestEntry.builder()
+                    .name(llmCompatibleName)
+                    .description(tool.getDescription() != null ? tool.getDescription() : "")
+                    .inputSchema(inputSchema.isEmpty() ? Map.of() : inputSchema)
+                    .humanInTheLoop(humanInTheLoop)
+                    .hasRender(true)
+                    .build();
+        }
+
+        private static boolean isFrontendToolDescriptor(ProtocolToolDescriptor tool) {
+            if (tool == null || tool.getSource() == null) {
+                return false;
+            }
+            return tool.getSource() == ChatToolSource.FRONTEND || tool.getSource() == ChatToolSource.HUMAN;
+        }
+
         private static WorkspaceContextSnapshot toWorkspaceContext(ProtocolRunRequest request) {
             if (request.getContext() == null || request.getContext().getWorkspace() == null) {
                 return null;
@@ -632,16 +678,20 @@ public class ProtocolChatService {
 
         private static ResumableToolContext findLatestResumableToolContext(
                 List<ProtocolMessage> messages,
-                ObjectMapper objectMapper
+                ObjectMapper objectMapper,
+                int lastUserIndex
         ) {
             for (int messageIndex = messages.size() - 1; messageIndex >= 0; messageIndex--) {
+                if (messageIndex <= lastUserIndex) {
+                    break;
+                }
                 ProtocolMessage message = messages.get(messageIndex);
                 if (!"assistant".equals(message.getRole()) || message.getParts() == null) {
                     continue;
                 }
                 for (int partIndex = message.getParts().size() - 1; partIndex >= 0; partIndex--) {
                     ProtocolPart part = message.getParts().get(partIndex);
-                    if (!"tool-call".equals(part.getType()) || !"frontend".equalsIgnoreCase(part.getExecutionTarget())) {
+                    if (!"tool-call".equals(part.getType()) || !isFrontendToolPart(part)) {
                         continue;
                     }
                     boolean completed = "output-available".equalsIgnoreCase(part.getState())
@@ -671,6 +721,11 @@ public class ProtocolChatService {
                 }
             }
             return null;
+        }
+
+        private static boolean isFrontendToolPart(ProtocolPart part) {
+            return "frontend".equalsIgnoreCase(part.getSource())
+                    || "frontend".equalsIgnoreCase(part.getExecutionTarget());
         }
 
         private static int findLastUserIndex(List<ProtocolMessage> messages) {

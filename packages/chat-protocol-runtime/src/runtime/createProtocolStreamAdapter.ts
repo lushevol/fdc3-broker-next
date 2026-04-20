@@ -507,6 +507,7 @@ function upsertStepPart(
 
 function convertToThreadAssistantPart(
   part: ProtocolAssistantContentPart,
+  message: ProtocolAssistantMessage,
 ): ThreadAssistantMessagePart {
   switch (part.type) {
     case 'text':
@@ -545,8 +546,27 @@ function convertToThreadAssistantPart(
         argsText: stringifyInput(part.input),
         result: part.output,
         isError: part.state === 'output-error',
+        source: part.source,
+        ...(part.providerId ? { providerId: part.providerId } : {}),
+        ...(part.source === 'human' &&
+        part.output === undefined &&
+        message.status.type === 'requires-action' &&
+        message.status.reason === 'interrupt'
+          ? {
+              interrupt: {
+                type: 'human' as const,
+                payload: {
+                  toolCallId: part.toolCallId,
+                  toolName: part.toolName,
+                  source: part.source,
+                  ...(part.providerId ? { providerId: part.providerId } : {}),
+                  input: part.input,
+                },
+              },
+            }
+          : {}),
         ...(part.error ? { artifact: { error: part.error } } : {}),
-      };
+      } as ThreadAssistantMessagePart;
     case 'tool-result':
       return {
         type: 'data',
@@ -605,7 +625,7 @@ function toThreadMessage(message: ProtocolAssistantMessage): ThreadMessage {
       unstable_data: [],
       steps: [],
     },
-    content: message.content.map(convertToThreadAssistantPart),
+    content: message.content.map((part) => convertToThreadAssistantPart(part, message)),
   };
 }
 
@@ -955,7 +975,7 @@ export type ProtocolLocalRuntimeOptions = {
 
 function toRunResult(message: ProtocolAssistantMessage): ChatModelRunResult {
   return {
-    content: message.content.map(convertToThreadAssistantPart),
+    content: message.content.map((part) => convertToThreadAssistantPart(part, message)),
     status: message.status,
     metadata: {
       custom: message.metadata,
@@ -978,6 +998,18 @@ export function createProtocolStreamResult(
   initialMessage?: ProtocolAssistantMessage,
 ): ChatModelRunResult {
   return toRunResult(applyFrameSequenceToMessage(frames, initialMessage));
+}
+
+export async function* createProtocolResultStream(
+  frames: AsyncIterable<ChatStreamFrame> | Iterable<ChatStreamFrame>,
+  initialMessageId?: string,
+): AsyncGenerator<ChatModelRunResult, void> {
+  const adapter = createProtocolStreamAdapter(createAssistantMessage(initialMessageId));
+
+  for await (const frame of frames) {
+    adapter.applyFrame(frame);
+    yield toRunResult(adapter.getMessage());
+  }
 }
 
 export function createProtocolLocalRuntime(options: ProtocolLocalRuntimeOptions): ChatModelAdapter {
