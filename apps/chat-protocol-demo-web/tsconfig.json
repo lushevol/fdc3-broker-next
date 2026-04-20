@@ -11,13 +11,13 @@
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["node", "vite/client"],
+    "types": ["node", "@rsbuild/core/types"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "vite.config.ts"],
+  "include": ["src/**/*", "rsbuild.config.ts"],
   "exclude": [
     "src/components/assistant-ui/composer-trigger-popover.tsx",
     "src/components/assistant-ui/directive-text.tsx",

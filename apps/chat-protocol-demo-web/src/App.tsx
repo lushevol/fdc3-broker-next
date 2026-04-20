@@ -19,7 +19,7 @@ import {
   type ToolPreset,
 } from '@/components/toolkit/tools';
 
-const API_URL = import.meta.env.VITE_PROTOCOL_DEMO_API_URL ?? 'http://127.0.0.1:8080/api/chat/runs';
+const API_URL = import.meta.env.RSBOARD_PROTOCOL_DEMO_API_URL ?? 'http://127.0.0.1:8080/api/chat/runs';
 
 type ResolveFrontendTool = (
   toolCall: ChatToolCallPart,
