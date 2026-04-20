@@ -17,9 +17,8 @@ import useController from './common/useController';
 import useOpenfin from './common/useOpenfin';
 import useParameters from './common/useParameters';
 import {
-  AssistantUIRuntimeProvider,
-  ChatbotSidebar,
-} from '../../components/ChatbotSidebar/exports';
+  ChatbotSidebarV2,
+} from '../../components/ChatbotSidebarV2/exports';
 import { useFDC3WorkspaceHelper } from '../../fdc3/useFDC3WorkspaceHelper';
 
 export const ContainerComponent = (validation: boolean, item, i) =>
@@ -123,8 +122,7 @@ const Home: React.FC = (): ReactElement => {
   }
 
   return (
-    <AssistantUIRuntimeProvider apiUrl="/api/chat" toolRegistryConfig={toolRegistryConfig}>
-      <Root data-testid={PREFIX} onMouseMove={mouseMove}>
+    <Root data-testid={PREFIX} onMouseMove={mouseMove}>
         <header>
           <AppBar />
         </header>
@@ -197,9 +195,8 @@ const Home: React.FC = (): ReactElement => {
         </main>
         {showTimeout && <Timeout setOpen={setShowTimeout} />}
         {channelMessage && <Snackbar message={channelMessage} open={true} onClose={clearMessage} />}
-        <ChatbotSidebar />
+        <ChatbotSidebarV2 />
       </Root>
-    </AssistantUIRuntimeProvider>
   );
 };
 

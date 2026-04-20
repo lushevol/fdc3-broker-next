@@ -11,7 +11,10 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./styles.css": "./src/styles.css"
+    "./styles.css": {
+      "import": "./dist/styles.css",
+      "default": "./dist/styles.css"
+    }
   },
   "files": [
     "dist",
@@ -19,7 +22,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && node scripts/build-css.mjs",
     "dev": "tsup --watch",
     "test": "vitest run",
     "lint": "eslint .",
