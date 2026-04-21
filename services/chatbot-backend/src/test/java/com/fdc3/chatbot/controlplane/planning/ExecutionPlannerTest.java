@@ -19,16 +19,15 @@ class ExecutionPlannerTest {
         ExecutionPlanner planner = new ExecutionPlanner();
 
         ExecutionPlan plan = planner.plan(
-                "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
+                "Get visited user count for cashflow blotter from 2026-04-01 to 2026-04-08",
                 null,
                 List.of(ResolvedCapability.builder()
-                        .capabilityId("app-usage-statistics")
+                        .capabilityId("application-visited-user-count")
                         .providerId("elasticsearch-analytics")
-                        .targetName("statistic_count_by_app")
+                        .targetName("visited_user_count_by_application")
                         .executionType("mcp")
                         .accessType("read")
-                        .requiredInputs(List.of("startTime", "endTime"))
-                        .optionalInputs(List.of("appId", "appName"))
+                        .requiredInputs(List.of("application", "startTime", "endTime"))
                         .build())
         );
 
@@ -37,31 +36,26 @@ class ExecutionPlannerTest {
 
         ExecutionStep step = plan.getSteps().get(0);
         assertEquals("mcp", step.getStepType());
-        assertEquals("statistic_count_by_app", step.getTargetName());
-        assertEquals("cashflow", step.getArguments().get("appName"));
+        assertEquals("visited_user_count_by_application", step.getTargetName());
+        assertEquals("cashflow blotter", step.getArguments().get("application"));
         assertEquals("2026-04-01T00:00:00Z", step.getArguments().get("startTime"));
         assertEquals("2026-04-08T00:00:00Z", step.getArguments().get("endTime"));
     }
 
     @Test
-    void fallsBackToWorkspaceActiveAppWhenPromptOmitsExplicitAppName() {
+    void selectsHourlyCapabilityForTrendPrompt() {
         ExecutionPlanner planner = new ExecutionPlanner();
 
         ExecutionPlan plan = planner.plan(
-                "Get app usage count from 2026-04-01 to 2026-04-08",
-                WorkspaceContextSnapshot.builder()
-                        .workspaceId("workspace-1")
-                        .activeTileId("tile-2")
-                        .activeAppId("template_tile_fdc3_2")
-                        .build(),
+                "Show trades hourly UV trend from 2026-04-01 to 2026-04-08",
+                WorkspaceContextSnapshot.builder().build(),
                 List.of(ResolvedCapability.builder()
-                        .capabilityId("app-usage-statistics")
+                        .capabilityId("application-visited-user-hourly")
                         .providerId("elasticsearch-analytics")
-                        .targetName("statistic_count_by_app")
+                        .targetName("visited_user_hourly_by_application")
                         .executionType("mcp")
                         .accessType("read")
-                        .requiredInputs(List.of("startTime", "endTime"))
-                        .optionalInputs(List.of("appId", "appName"))
+                        .requiredInputs(List.of("application", "startTime", "endTime"))
                         .build())
         );
 
@@ -69,8 +63,8 @@ class ExecutionPlannerTest {
         assertEquals(1, plan.getSteps().size());
 
         ExecutionStep step = plan.getSteps().get(0);
-        assertEquals("statistic_count_by_app", step.getTargetName());
-        assertEquals("template_tile_fdc3_2", step.getArguments().get("appId"));
+        assertEquals("visited_user_hourly_by_application", step.getTargetName());
+        assertEquals("trades", step.getArguments().get("application"));
         assertEquals("2026-04-01T00:00:00Z", step.getArguments().get("startTime"));
         assertEquals("2026-04-08T00:00:00Z", step.getArguments().get("endTime"));
     }
@@ -83,8 +77,8 @@ class ExecutionPlannerTest {
                 "Tell me a joke",
                 null,
                 List.of(ResolvedCapability.builder()
-                        .capabilityId("app-usage-statistics")
-                        .targetName("statistic_count_by_app")
+                        .capabilityId("application-visited-user-count")
+                        .targetName("visited_user_count_by_application")
                         .executionType("mcp")
                         .accessType("read")
                         .build())

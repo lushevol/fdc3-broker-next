@@ -1,7 +1,6 @@
 package com.fdc3.elasticsearchmcp.tool;
 
 import com.fdc3.elasticsearchmcp.service.AppAnalyticsService;
-import com.fdc3.elasticsearchmcp.tool.model.AppChartBucket;
 import com.fdc3.elasticsearchmcp.tool.model.AppChartRequest;
 import com.fdc3.elasticsearchmcp.tool.model.AppChartResponse;
 import com.fdc3.elasticsearchmcp.tool.model.AppStatisticCountRequest;
@@ -29,16 +28,14 @@ public class AppAnalyticsMcpTools {
         this.validator = validator;
     }
 
-    @McpTool(name = "statistic_count_by_app", description = "Return PV and UV counts for an app within a time window")
-    public AppStatisticCountResponse statisticCountByApp(
-            @McpToolParam(description = "App identifier. Preferred when both filters are provided", required = false) String appId,
-            @McpToolParam(description = "App display name. Used when appId is omitted", required = false) String appName,
+    @McpTool(name = "visited_user_count_by_application", description = "Return UV count for an application within a time window. Supported applications: cashflow blotter, trades")
+    public AppStatisticCountResponse visitedUserCountByApplication(
+            @McpToolParam(description = "Application name. Supported values: cashflow blotter, trades", required = true) String application,
             @McpToolParam(description = "Inclusive start timestamp in ISO-8601 format", required = true) String startTime,
-            @McpToolParam(description = "Exclusive end timestamp in ISO-8601 format", required = true) String endTime
+            @McpToolParam(description = "Inclusive end timestamp in ISO-8601 format", required = true) String endTime
     ) {
         AppStatisticCountRequest request = new AppStatisticCountRequest(
-                normalize(appId),
-                normalize(appName),
+                normalize(application),
                 parseInstant(startTime, "startTime"),
                 parseInstant(endTime, "endTime")
         );
@@ -46,20 +43,16 @@ public class AppAnalyticsMcpTools {
         return analyticsService.statisticCountByApp(request);
     }
 
-    @McpTool(name = "chart_by_app", description = "Return PV and UV trend points for an app within a time window")
-    public AppChartResponse chartByApp(
-            @McpToolParam(description = "App identifier. Preferred when both filters are provided", required = false) String appId,
-            @McpToolParam(description = "App display name. Used when appId is omitted", required = false) String appName,
+    @McpTool(name = "visited_user_hourly_by_application", description = "Return hourly UV data for an application within a time window. Supported applications: cashflow blotter, trades")
+    public AppChartResponse visitedUserHourlyByApplication(
+            @McpToolParam(description = "Application name. Supported values: cashflow blotter, trades", required = true) String application,
             @McpToolParam(description = "Inclusive start timestamp in ISO-8601 format", required = true) String startTime,
-            @McpToolParam(description = "Exclusive end timestamp in ISO-8601 format", required = true) String endTime,
-            @McpToolParam(description = "Optional bucket override: HOUR, DAY, or WEEK", required = false) String bucket
+            @McpToolParam(description = "Inclusive end timestamp in ISO-8601 format", required = true) String endTime
     ) {
         AppChartRequest request = new AppChartRequest(
-                normalize(appId),
-                normalize(appName),
+                normalize(application),
                 parseInstant(startTime, "startTime"),
-                parseInstant(endTime, "endTime"),
-                parseBucket(bucket)
+                parseInstant(endTime, "endTime")
         );
         validate(request);
         return analyticsService.chartByApp(request);
@@ -85,17 +78,6 @@ public class AppAnalyticsMcpTools {
             return Instant.parse(value);
         } catch (DateTimeParseException exception) {
             throw new IllegalArgumentException(fieldName + " must be a valid ISO-8601 instant", exception);
-        }
-    }
-
-    private AppChartBucket parseBucket(String bucket) {
-        if (!StringUtils.hasText(bucket)) {
-            return null;
-        }
-        try {
-            return AppChartBucket.valueOf(bucket.trim().toUpperCase());
-        } catch (IllegalArgumentException exception) {
-            throw new IllegalArgumentException("bucket must be one of HOUR, DAY, or WEEK", exception);
         }
     }
 }

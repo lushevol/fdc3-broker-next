@@ -2,10 +2,8 @@ package com.fdc3.elasticsearchmcp.service;
 
 import com.fdc3.elasticsearchmcp.repository.AppAnalyticsRepository;
 import com.fdc3.elasticsearchmcp.service.model.AggregateMetrics;
-import com.fdc3.elasticsearchmcp.service.model.AppFilter;
-import com.fdc3.elasticsearchmcp.service.model.AppFilterType;
+import com.fdc3.elasticsearchmcp.service.model.ApplicationVisitTarget;
 import com.fdc3.elasticsearchmcp.service.model.ChartMetricsPoint;
-import com.fdc3.elasticsearchmcp.tool.model.AppChartBucket;
 import com.fdc3.elasticsearchmcp.tool.model.AppChartRequest;
 import com.fdc3.elasticsearchmcp.tool.model.AppStatisticCountRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,60 +36,39 @@ class AppAnalyticsServiceTest {
     }
 
     @Test
-    void statisticCountPrefersAppIdWhenBothFiltersArePresent() {
-        when(repository.fetchAggregateMetrics(any(), any(), any())).thenReturn(new AggregateMetrics(42L, 10L));
+    void statisticCountMapsApplicationToVisitTarget() {
+        when(repository.fetchVisitedUserCount(any(), any(), any())).thenReturn(new AggregateMetrics(0L, 30L));
         AppStatisticCountRequest request = new AppStatisticCountRequest(
-                "app-1",
-                "App One",
+                "cashflow blotter",
                 Instant.parse("2026-04-01T00:00:00Z"),
-                Instant.parse("2026-04-02T00:00:00Z")
+                Instant.parse("2026-04-08T23:59:59Z")
         );
 
         var response = service.statisticCountByApp(request);
 
-        ArgumentCaptor<AppFilter> captor = ArgumentCaptor.forClass(AppFilter.class);
-        verify(repository).fetchAggregateMetrics(captor.capture(), eq(request.startTime()), eq(request.endTime()));
-        assertThat(captor.getValue()).isEqualTo(new AppFilter(AppFilterType.APP_ID, "app-1"));
-        assertThat(response.pv()).isEqualTo(42L);
-        assertThat(response.uv()).isEqualTo(10L);
-        assertThat(response.appFilterType()).isEqualTo("appId");
+        ArgumentCaptor<ApplicationVisitTarget> captor = ArgumentCaptor.forClass(ApplicationVisitTarget.class);
+        verify(repository).fetchVisitedUserCount(captor.capture(), eq(request.startTime()), eq(request.endTime()));
+        assertThat(captor.getValue()).isEqualTo(ApplicationVisitTarget.CASHFLOW_BLOTTER);
+        assertThat(response.application()).isEqualTo("cashflow blotter");
+        assertThat(response.uv()).isEqualTo(30L);
     }
 
     @Test
-    void chartUsesAutomaticBucketSelectionWhenNoOverrideIsProvided() {
-        when(repository.fetchChartMetrics(any(), any(), any(), eq(AppChartBucket.HOUR)))
-                .thenReturn(List.of(new ChartMetricsPoint(Instant.parse("2026-04-01T01:00:00Z"), 10L, 6L)));
+    void chartReturnsHourlyUvPointsForApplication() {
+        when(repository.fetchVisitedUserHourly(any(), any(), any()))
+                .thenReturn(List.of(new ChartMetricsPoint(Instant.parse("2026-04-01T01:00:00Z"), 6L)));
         AppChartRequest request = new AppChartRequest(
-                null,
-                "App One",
+                "trades",
                 Instant.parse("2026-04-01T00:00:00Z"),
-                Instant.parse("2026-04-01T12:00:00Z"),
-                null
+                Instant.parse("2026-04-01T12:00:00Z")
         );
 
         var response = service.chartByApp(request);
 
-        verify(repository).fetchChartMetrics(any(), eq(request.startTime()), eq(request.endTime()), eq(AppChartBucket.HOUR));
-        assertThat(response.bucket()).isEqualTo(AppChartBucket.HOUR);
+        verify(repository).fetchVisitedUserHourly(eq(ApplicationVisitTarget.TRADES), eq(request.startTime()), eq(request.endTime()));
+        assertThat(response.application()).isEqualTo("trades");
+        assertThat(response.bucket().name()).isEqualTo("HOUR");
         assertThat(response.points()).hasSize(1);
         assertThat(response.points().get(0).uv()).isEqualTo(6L);
-        assertThat(response.appFilterType()).isEqualTo("appName");
-    }
-
-    @Test
-    void chartHonorsExplicitBucketOverride() {
-        when(repository.fetchChartMetrics(any(), any(), any(), eq(AppChartBucket.DAY))).thenReturn(List.of());
-        AppChartRequest request = new AppChartRequest(
-                "app-2",
-                "Ignored",
-                Instant.parse("2026-01-01T00:00:00Z"),
-                Instant.parse("2026-03-01T00:00:00Z"),
-                AppChartBucket.DAY
-        );
-
-        var response = service.chartByApp(request);
-
-        verify(repository).fetchChartMetrics(any(), eq(request.startTime()), eq(request.endTime()), eq(AppChartBucket.DAY));
-        assertThat(response.bucket()).isEqualTo(AppChartBucket.DAY);
     }
 }

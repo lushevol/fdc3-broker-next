@@ -9,91 +9,83 @@ import org.springframework.validation.annotation.Validated;
 public class ElasticsearchAnalyticsProperties {
 
     @NotBlank
-    private String url = "http://localhost:9200";
-
-    private String apiKey;
-
-    private String username;
-
-    private String password;
+    private String kibanaSearchUrl = "http://10.4.197.146:5601/api/console/proxy?path=%2Fsingle-ui-bff-analytic%2F_search&method=GET";
 
     @NotBlank
-    private String indexName = "user-operation-logs";
+    private String createdAtField = "createdAt";
 
     @NotBlank
-    private String timestampField = "@timestamp";
+    private String userIdField = "userId";
 
     @NotBlank
-    private String appIdField = "appId";
+    private String tileField = "tile";
 
     @NotBlank
-    private String appNameField = "appName";
+    private String containerField = "container";
 
     @NotBlank
-    private String userIdField = "profileId";
+    private String nameField = "name";
 
-    public String getUrl() {
-        return url;
+    @NotBlank
+    private String eventField = "event";
+
+    @NotBlank
+    private String keyField = "key";
+
+    public String getKibanaSearchUrl() {
+        return kibanaSearchUrl;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setKibanaSearchUrl(String kibanaSearchUrl) {
+        this.kibanaSearchUrl = kibanaSearchUrl;
     }
 
-    public String getApiKey() {
-        return apiKey;
+    public String getCreatedAtField() {
+        return createdAtField;
     }
 
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
+    public void setCreatedAtField(String createdAtField) {
+        this.createdAtField = createdAtField;
     }
 
-    public String getUsername() {
-        return username;
+    public String getKeyField() {
+        return keyField;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setKeyField(String keyField) {
+        this.keyField = keyField;
     }
 
-    public String getPassword() {
-        return password;
+    public String getEventField() {
+        return eventField;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setEventField(String eventField) {
+        this.eventField = eventField;
     }
 
-    public String getIndexName() {
-        return indexName;
+    public String getContainerField() {
+        return containerField;
     }
 
-    public void setIndexName(String indexName) {
-        this.indexName = indexName;
+    public void setContainerField(String containerField) {
+        this.containerField = containerField;
     }
 
-    public String getTimestampField() {
-        return timestampField;
+    public String getTileField() {
+        return tileField;
     }
 
-    public void setTimestampField(String timestampField) {
-        this.timestampField = timestampField;
+    public void setTileField(String tileField) {
+        this.tileField = tileField;
     }
 
-    public String getAppIdField() {
-        return appIdField;
+    public String getNameField() {
+        return nameField;
     }
 
-    public void setAppIdField(String appIdField) {
-        this.appIdField = appIdField;
-    }
-
-    public String getAppNameField() {
-        return appNameField;
-    }
-
-    public void setAppNameField(String appNameField) {
-        this.appNameField = appNameField;
+    public void setNameField(String nameField) {
+        this.nameField = nameField;
     }
 
     public String getUserIdField() {

@@ -11,7 +11,7 @@ spring:
         version: 0.0.1
         type: SYNC
         protocol: STREAMABLE
-        instructions: 'Provides Elasticsearch-backed application usage analytics'
+        instructions: 'Provides Kibana-backed visited user analytics for supported applications'
         capabilities:
           tool: true
         streamable-http:
@@ -27,12 +27,11 @@ analytics:
   stub:
     enabled: ${ANALYTICS_STUB_ENABLED:false}
   elasticsearch:
-    url: ${ELASTICSEARCH_URL:http://localhost:9200}
-    api-key: ${ELASTICSEARCH_API_KEY:}
-    username: ${ELASTICSEARCH_USERNAME:}
-    password: ${ELASTICSEARCH_PASSWORD:}
-    index-name: ${ELASTICSEARCH_INDEX:user-operation-logs}
-    timestamp-field: ${ELASTICSEARCH_TIMESTAMP_FIELD:@timestamp}
-    app-id-field: ${ELASTICSEARCH_APP_ID_FIELD:appId}
-    app-name-field: ${ELASTICSEARCH_APP_NAME_FIELD:appName}
-    user-id-field: ${ELASTICSEARCH_USER_ID_FIELD:profileId}
+    kibana-search-url: ${ELASTICSEARCH_KIBANA_SEARCH_URL:http://10.4.197.146:5601/api/console/proxy?path=%2Fsingle-ui-bff-analytic%2F_search&method=GET}
+    created-at-field: ${ELASTICSEARCH_CREATED_AT_FIELD:createdAt}
+    user-id-field: ${ELASTICSEARCH_USER_ID_FIELD:userId}
+    tile-field: ${ELASTICSEARCH_TILE_FIELD:tile}
+    container-field: ${ELASTICSEARCH_CONTAINER_FIELD:container}
+    name-field: ${ELASTICSEARCH_NAME_FIELD:name}
+    event-field: ${ELASTICSEARCH_EVENT_FIELD:event}
+    key-field: ${ELASTICSEARCH_KEY_FIELD:key}

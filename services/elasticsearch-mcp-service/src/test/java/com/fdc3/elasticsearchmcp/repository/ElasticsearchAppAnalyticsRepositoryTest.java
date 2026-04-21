@@ -1,20 +1,17 @@
 package com.fdc3.elasticsearchmcp.repository;
 
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.core.SearchRequest;
-import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fdc3.elasticsearchmcp.config.ElasticsearchAnalyticsProperties;
-import com.fdc3.elasticsearchmcp.service.model.AppFilter;
-import com.fdc3.elasticsearchmcp.service.model.AppFilterType;
-import com.fdc3.elasticsearchmcp.tool.model.AppChartBucket;
+import com.fdc3.elasticsearchmcp.service.model.ApplicationVisitTarget;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import java.io.StringWriter;
+import java.net.http.HttpClient;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 class ElasticsearchAppAnalyticsRepositoryTest {
 
@@ -23,57 +20,48 @@ class ElasticsearchAppAnalyticsRepositoryTest {
     @BeforeEach
     void setUp() {
         ElasticsearchAnalyticsProperties properties = new ElasticsearchAnalyticsProperties();
-        properties.setIndexName("logs-index");
-        properties.setTimestampField("@timestamp");
-        properties.setAppIdField("appId.keyword");
-        properties.setAppNameField("appName.keyword");
-        properties.setUserIdField("profileId.keyword");
-        repository = new ElasticsearchAppAnalyticsRepository(Mockito.mock(ElasticsearchClient.class), properties);
+        properties.setKibanaSearchUrl("http://localhost:5601/api/console/proxy?path=%2Fsingle-ui-bff-analytic%2F_search&method=GET");
+        properties.setCreatedAtField("createdAt");
+        properties.setUserIdField("userId");
+        properties.setTileField("tile");
+        properties.setContainerField("container");
+        properties.setNameField("name");
+        repository = new ElasticsearchAppAnalyticsRepository(mock(HttpClient.class), new ObjectMapper(), properties);
     }
 
     @Test
-    void aggregateQueryUsesCanonicalAppFilterAndCardinalityAggregation() {
-        SearchRequest request = repository.buildAggregateRequest(
-                new AppFilter(AppFilterType.APP_ID, "app-1"),
+    void countRequestUsesExpectedCashflowFiltersAndCardinalityAggregation() {
+        String requestJson = repository.buildCountRequest(
+                ApplicationVisitTarget.CASHFLOW_BLOTTER,
                 Instant.parse("2026-04-01T00:00:00Z"),
-                Instant.parse("2026-04-02T00:00:00Z")
+                Instant.parse("2026-04-08T23:59:59Z")
         );
 
-        String json = serialize(request);
+        JsonNode json = repository.parseJson(requestJson);
 
-        assertThat(request.index()).containsExactly("logs-index");
-        assertThat(json).contains("\"appId.keyword\"");
-        assertThat(json).contains("\"app-1\"");
-        assertThat(json).contains("\"profileId.keyword\"");
-        assertThat(json).contains("\"unique_users\"");
-        assertThat(json).contains("\"track_total_hits\"");
+        assertThat(json.path("size").asInt()).isEqualTo(0);
+        assertThat(requestJson).contains("\"tile\":\"cashflow_cn\"");
+        assertThat(requestJson).contains("\"container\":\"cashflow_blotter_cn\"");
+        assertThat(requestJson).contains("\"name\":\"Page View\"");
+        assertThat(requestJson).contains("\"userId\"");
+        assertThat(json.path("aggs").has("unique_users")).isTrue();
     }
 
     @Test
-    void chartQueryUsesDateHistogramAndNestedUvAggregation() {
-        SearchRequest request = repository.buildChartRequest(
-                new AppFilter(AppFilterType.APP_NAME, "App One"),
+    void hourlyRequestUsesUtcHourlyHistogram() {
+        String requestJson = repository.buildHourlyRequest(
+                ApplicationVisitTarget.TRADES,
                 Instant.parse("2026-04-01T00:00:00Z"),
-                Instant.parse("2026-04-08T00:00:00Z"),
-                AppChartBucket.DAY
+                Instant.parse("2026-04-01T23:59:59Z")
         );
 
-        String json = serialize(request);
+        JsonNode json = repository.parseJson(requestJson);
 
-        assertThat(json).contains("\"appName.keyword\"");
-        assertThat(json).contains("\"App One\"");
-        assertThat(json).contains("\"date_histogram\"");
-        assertThat(json).contains("\"day\"");
-        assertThat(json).contains("\"pv_uv_over_time\"");
-        assertThat(json).contains("\"unique_users\"");
-    }
-
-    private String serialize(SearchRequest request) {
-        StringWriter writer = new StringWriter();
-        JacksonJsonpMapper mapper = new JacksonJsonpMapper();
-        var generator = mapper.jsonProvider().createGenerator(writer);
-        request.serialize(generator, mapper);
-        generator.close();
-        return writer.toString();
+        assertThat(requestJson).contains("\"tile\":\"trade\"");
+        assertThat(requestJson).contains("\"container\":\"trade_blotter\"");
+        assertThat(json.path("aggs").path("uv_over_time").path("date_histogram").path("calendar_interval").asText())
+                .isEqualTo("1h");
+        assertThat(json.path("aggs").path("uv_over_time").path("date_histogram").path("time_zone").asText())
+                .isEqualTo("UTC");
     }
 }

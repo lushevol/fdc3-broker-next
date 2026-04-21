@@ -61,11 +61,11 @@ export const runtimeToolkit: Toolkit = {
     }),
     render: ApprovalConfirmTool,
   },
-  statistic_count_by_app: {
+  visited_user_count_by_application: {
     type: 'backend',
     render: AnalyticsTool,
   },
-  chart_by_app: {
+  visited_user_hourly_by_application: {
     type: 'backend',
     render: AnalyticsTool,
   },

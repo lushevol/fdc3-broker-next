@@ -66,11 +66,11 @@ const sharedToolDefinitions: Toolkit = {
     }),
     render: ApprovalConfirmTool,
   },
-  statistic_count_by_app: {
+  visited_user_count_by_application: {
     type: 'backend',
     render: AnalyticsTool,
   },
-  chart_by_app: {
+  visited_user_hourly_by_application: {
     type: 'backend',
     render: AnalyticsTool,
   },
@@ -86,8 +86,8 @@ const presetToolNames: Record<ToolPreset, string[]> = {
     'timezone_current',
     'approval_confirm',
     'profile_lookup',
-    'statistic_count_by_app',
-    'chart_by_app',
+    'visited_user_count_by_application',
+    'visited_user_hourly_by_application',
     'resolve_relative_date',
   ],
 };

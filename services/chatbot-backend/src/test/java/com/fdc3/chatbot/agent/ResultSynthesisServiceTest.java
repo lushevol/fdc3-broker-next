@@ -37,7 +37,7 @@ class ResultSynthesisServiceTest {
     @Test
     void shouldUseModelOutputForSuccessfulTranscript() {
         CapturingChatModel chatModel = new CapturingChatModel(
-                "LLM summary: cashflow produced 120 PV and 30 UV."
+                "LLM summary: cashflow blotter visited users were 30."
         );
         ResultSynthesisService service = new ResultSynthesisService(
                 chatModel,
@@ -45,20 +45,19 @@ class ResultSynthesisServiceTest {
         );
 
         String result = service.synthesize(
-                "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
+                "Get visited users for cashflow blotter from 2026-04-01 to 2026-04-08",
                 analyticsPlanDecision(),
                 successfulTranscript()
         );
 
-        assertThat(result).isEqualTo("LLM summary: cashflow produced 120 PV and 30 UV.");
+        assertThat(result).isEqualTo("LLM summary: cashflow blotter visited users were 30.");
         ChatRequest request = chatModel.capturedRequest();
         assertThat(request.messages()).hasSize(2);
         assertThat(request.messages().get(0)).isInstanceOf(SystemMessage.class);
         assertThat(((SystemMessage) request.messages().get(0)).text())
-                .contains("Get app usage count for cashflow from 2026-04-01 to 2026-04-08")
-                .contains("app-usage-statistics")
-                .contains("statistic_count_by_app")
-                .contains("\"pv\":120")
+                .contains("Get visited users for cashflow blotter from 2026-04-01 to 2026-04-08")
+                .contains("application-visited-user-count")
+                .contains("visited_user_count_by_application")
                 .contains("\"uv\":30");
         assertThat(request.messages().get(1)).isInstanceOf(UserMessage.class);
         assertThat(((UserMessage) request.messages().get(1)).singleText()).isEqualTo(
@@ -77,7 +76,7 @@ class ResultSynthesisServiceTest {
         );
 
         String result = service.synthesize(
-                "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
+                "Get visited users for cashflow blotter from 2026-04-01 to 2026-04-08",
                 analyticsPlanDecision(),
                 failedTranscript()
         );
@@ -94,7 +93,7 @@ class ResultSynthesisServiceTest {
     @Test
     void shouldStreamModelOutputForSuccessfulTranscript() throws Exception {
         CapturingStreamingChatModel streamingChatModel = new CapturingStreamingChatModel(
-                List.of("cashflow produced ", "120 PV and 30 UV.")
+                List.of("cashflow blotter visited users ", "were 30.")
         );
         ResultSynthesisService service = new ResultSynthesisService(
                 null,
@@ -105,7 +104,7 @@ class ResultSynthesisServiceTest {
         CountDownLatch completed = new CountDownLatch(1);
 
         service.synthesizeStreaming(
-                "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
+                "Get visited users for cashflow blotter from 2026-04-01 to 2026-04-08",
                 analyticsPlanDecision(),
                 successfulTranscript(),
                 streamedTokens::add,
@@ -116,13 +115,12 @@ class ResultSynthesisServiceTest {
         );
 
         assertThat(completed.await(1, TimeUnit.SECONDS)).isTrue();
-        assertThat(streamedTokens).containsExactly("cashflow produced ", "120 PV and 30 UV.");
+        assertThat(streamedTokens).containsExactly("cashflow blotter visited users ", "were 30.");
         ChatRequest request = streamingChatModel.capturedRequest();
         assertThat(request.messages()).hasSize(2);
         assertThat(request.messages().get(0)).isInstanceOf(SystemMessage.class);
         assertThat(((SystemMessage) request.messages().get(0)).text())
-                .contains("Get app usage count for cashflow from 2026-04-01 to 2026-04-08")
-                .contains("\"pv\":120")
+                .contains("Get visited users for cashflow blotter from 2026-04-01 to 2026-04-08")
                 .contains("\"uv\":30");
     }
 
@@ -131,7 +129,7 @@ class ResultSynthesisServiceTest {
         ResultSynthesisService service = new ResultSynthesisService();
 
         String result = service.synthesize(
-                "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
+                "Get visited users for cashflow blotter from 2026-04-01 to 2026-04-08",
                 analyticsPlanDecision(),
                 failedTranscript()
         );
@@ -145,13 +143,13 @@ class ResultSynthesisServiceTest {
         ResultSynthesisService service = new ResultSynthesisService();
 
         String result = service.synthesize(
-                "Get app usage count for cashflow from 2026-04-01 to 2026-04-08",
+                "Get visited users for cashflow blotter from 2026-04-01 to 2026-04-08",
                 analyticsPlanDecision(),
                 partialFailureTranscript()
         );
 
         assertThat(result).contains("provider timed out");
-        assertThat(result).doesNotContain("PV 120");
+        assertThat(result).doesNotContain("PV");
         assertThat(result).doesNotContain("Completed the requested action.");
     }
 
@@ -161,9 +159,9 @@ class ResultSynthesisServiceTest {
                 null,
                 null,
                 new AgentPlan(List.of(new AgentPlanStep(
-                        "app-usage-statistics",
+                        "application-visited-user-count",
                         Map.of(
-                                "appName", "cashflow",
+                                "application", "cashflow blotter",
                                 "startTime", "2026-04-01",
                                 "endTime", "2026-04-08"
                         )
@@ -174,9 +172,9 @@ class ResultSynthesisServiceTest {
     private static ExecutionTranscript successfulTranscript() {
         ToolCall toolCall = ToolCall.builder()
                 .id("tool-1")
-                .name("statistic_count_by_app")
+                .name("visited_user_count_by_application")
                 .arguments(Map.of(
-                        "appName", "cashflow",
+                        "application", "cashflow blotter",
                         "startTime", "2026-04-01",
                         "endTime", "2026-04-08"
                 ))
@@ -185,12 +183,11 @@ class ResultSynthesisServiceTest {
                 .build();
         ToolResult toolResult = ToolResult.builder()
                 .toolCallId("tool-1")
-                .toolName("statistic_count_by_app")
+                .toolName("visited_user_count_by_application")
                 .result(Map.of(
-                        "appName", "cashflow",
+                        "application", "cashflow blotter",
                         "startTime", "2026-04-01",
                         "endTime", "2026-04-08",
-                        "pv", 120,
                         "uv", 30
                 ))
                 .build();
@@ -200,9 +197,9 @@ class ResultSynthesisServiceTest {
     private static ExecutionTranscript failedTranscript() {
         ToolCall toolCall = ToolCall.builder()
                 .id("tool-1")
-                .name("statistic_count_by_app")
+                .name("visited_user_count_by_application")
                 .arguments(Map.of(
-                        "appName", "cashflow",
+                        "application", "cashflow blotter",
                         "startTime", "2026-04-01",
                         "endTime", "2026-04-08"
                 ))
@@ -211,7 +208,7 @@ class ResultSynthesisServiceTest {
                 .build();
         ToolResult toolResult = ToolResult.builder()
                 .toolCallId("tool-1")
-                .toolName("statistic_count_by_app")
+                .toolName("visited_user_count_by_application")
                 .error("provider timed out")
                 .build();
         return new ExecutionTranscript(validatedPlan(), List.of(toolCall), List.of(toolResult));
@@ -220,9 +217,9 @@ class ResultSynthesisServiceTest {
     private static ExecutionTranscript partialFailureTranscript() {
         ToolCall failedToolCall = ToolCall.builder()
                 .id("tool-1")
-                .name("statistic_count_by_app")
+                .name("visited_user_count_by_application")
                 .arguments(Map.of(
-                        "appName", "cashflow",
+                        "application", "cashflow blotter",
                         "startTime", "2026-04-01",
                         "endTime", "2026-04-08"
                 ))
@@ -231,9 +228,9 @@ class ResultSynthesisServiceTest {
                 .build();
         ToolCall successfulToolCall = ToolCall.builder()
                 .id("tool-2")
-                .name("statistic_count_by_app")
+                .name("visited_user_count_by_application")
                 .arguments(Map.of(
-                        "appName", "cashflow",
+                        "application", "cashflow blotter",
                         "startTime", "2026-04-01",
                         "endTime", "2026-04-08"
                 ))
@@ -242,17 +239,16 @@ class ResultSynthesisServiceTest {
                 .build();
         ToolResult failedToolResult = ToolResult.builder()
                 .toolCallId("tool-1")
-                .toolName("statistic_count_by_app")
+                .toolName("visited_user_count_by_application")
                 .error("provider timed out")
                 .build();
         ToolResult successfulToolResult = ToolResult.builder()
                 .toolCallId("tool-2")
-                .toolName("statistic_count_by_app")
+                .toolName("visited_user_count_by_application")
                 .result(Map.of(
-                        "appName", "cashflow",
+                        "application", "cashflow blotter",
                         "startTime", "2026-04-01",
                         "endTime", "2026-04-08",
-                        "pv", 120,
                         "uv", 30
                 ))
                 .build();
@@ -265,21 +261,20 @@ class ResultSynthesisServiceTest {
 
     private static ValidatedExecutionPlan validatedPlan() {
         ResolvedCapability capability = ResolvedCapability.builder()
-                .capabilityId("app-usage-statistics")
+                .capabilityId("application-visited-user-count")
                 .providerId("elasticsearch-analytics")
-                .targetName("statistic_count_by_app")
+                .targetName("visited_user_count_by_application")
                 .executionType("mcp")
                 .accessType("read")
                 .tenantScope("global")
-                .requiredInputs(List.of("startTime", "endTime"))
-                .optionalInputs(List.of("appName"))
+                .requiredInputs(List.of("application", "startTime", "endTime"))
                 .build();
 
         ValidatedExecutionStep step = new ValidatedExecutionStep(
                 capability.getCapabilityId(),
                 capability,
                 Map.of(
-                        "appName", "cashflow",
+                        "application", "cashflow blotter",
                         "startTime", "2026-04-01",
                         "endTime", "2026-04-08"
                 ),

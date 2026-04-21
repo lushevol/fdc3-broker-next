@@ -83,6 +83,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AgentService {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
+    private static final String VISITED_USER_COUNT_TOOL = "visited_user_count_by_application";
+    private static final String VISITED_USER_HOURLY_TOOL = "visited_user_hourly_by_application";
     private static final String STREAMED_ASSISTANT_TEXT_REQUEST = """
             You are writing the user-visible assistant reply for a chat turn.
             Respond with plain assistant text only.
@@ -1254,19 +1256,21 @@ public class AgentService {
         }
 
         Map<String, Object> resultMap = objectMapper.convertValue(rawResultMap, MAP_TYPE);
-        Object appName = resultMap.containsKey("filterValue")
-                ? resultMap.get("filterValue")
-                : step.getArguments().getOrDefault("appName", step.getArguments().get("appId"));
+        Object application = resultMap.getOrDefault("application", step.getArguments().get("application"));
         Object startTime = resultMap.containsKey("startTime")
                 ? resultMap.get("startTime")
                 : step.getArguments().get("startTime");
         Object endTime = resultMap.containsKey("endTime")
                 ? resultMap.get("endTime")
                 : step.getArguments().get("endTime");
-        Object pv = resultMap.get("pv");
         Object uv = resultMap.get("uv");
-        return appName + " usage from " + formatSummaryDate(startTime) + " to " + formatSummaryDate(endTime)
-                + ": PV " + pv + ", UV " + uv + ".";
+        Object points = resultMap.get("points");
+        if (VISITED_USER_HOURLY_TOOL.equals(step.getTargetName()) && points instanceof List<?> pointList) {
+            return application + " hourly visited user trend from " + formatSummaryDate(startTime) + " to "
+                    + formatSummaryDate(endTime) + ": " + pointList.size() + " points.";
+        }
+        return application + " visited users from " + formatSummaryDate(startTime) + " to "
+                + formatSummaryDate(endTime) + ": UV " + uv + ".";
     }
 
     private java.util.concurrent.CompletableFuture<Object> enrichGovernedToolResult(
@@ -1275,7 +1279,7 @@ public class AgentService {
             Object result,
             UserCapabilityContext capabilityContext
     ) {
-        if (!"statistic_count_by_app".equals(targetName)) {
+        if (!VISITED_USER_COUNT_TOOL.equals(targetName)) {
             return java.util.concurrent.CompletableFuture.completedFuture(result);
         }
 
@@ -1283,7 +1287,7 @@ public class AgentService {
             return java.util.concurrent.CompletableFuture.completedFuture(result);
         }
 
-        ToolDefinition chartTool = toolRegistry.resolveTools(capabilityContext).get("chart_by_app");
+        ToolDefinition chartTool = toolRegistry.resolveTools(capabilityContext).get(VISITED_USER_HOURLY_TOOL);
         if (chartTool == null) {
             return java.util.concurrent.CompletableFuture.completedFuture(result);
         }
@@ -1308,7 +1312,7 @@ public class AgentService {
                         enrichedResult.put("trendPoints", pointList);
                     }
                     if (chartResultMap.containsKey("bucket")) {
-                        enrichedResult.put("trendBucket", chartResultMap.get("bucket"));
+                        enrichedResult.put("bucket", chartResultMap.get("bucket"));
                     }
                     return enrichedResult;
                 });
@@ -1817,18 +1821,19 @@ public class AgentService {
                     .build();
         }
 
-        if (isAnalyticsIntent(normalized) && availableTools.containsKey("statistic_count_by_app")) {
-            String appId = extractAnalyticsAppId(userMessage);
-            if (appId == null || appId.isBlank()) {
+        if (isAnalyticsIntent(normalized)) {
+            String application = extractAnalyticsApplication(userMessage);
+            String targetTool = selectAnalyticsToolName(normalized, availableTools);
+            if (application == null || application.isBlank() || targetTool == null) {
                 return null;
             }
             LocalDate startDate = LocalDate.parse(resolvedDate);
             LocalDate endDate = startDate.plusDays(1);
             return ToolExecutionRequest.builder()
                     .id(UUID.randomUUID().toString())
-                    .name("statistic_count_by_app")
+                    .name(targetTool)
                     .arguments(writeJson(Map.of(
-                            "appId", appId,
+                            "application", application,
                             "startTime", startDate + "T00:00:00Z",
                             "endTime", endDate + "T00:00:00Z"
                     )))
@@ -1879,11 +1884,12 @@ public class AgentService {
     private boolean isAnalyticsIntent(String normalizedUserMessage) {
         return normalizedUserMessage.contains("analytics")
                 || normalizedUserMessage.contains("usage")
-                || normalizedUserMessage.contains("pv")
                 || normalizedUserMessage.contains("uv")
-                || normalizedUserMessage.contains("page view")
                 || normalizedUserMessage.contains("unique visitor")
-                || normalizedUserMessage.contains("unique user");
+                || normalizedUserMessage.contains("unique user")
+                || normalizedUserMessage.contains("visited user")
+                || normalizedUserMessage.contains("cashflow blotter")
+                || normalizedUserMessage.contains("trades");
     }
 
     private boolean hasFrontendTool(List<FrontendToolManifestEntry> frontendToolManifest, String toolName) {
@@ -1957,16 +1963,33 @@ public class AgentService {
                 + "Best regards";
     }
 
-    private String extractAnalyticsAppId(String userMessage) {
-        String withoutDate = stripDateExpression(userMessage).replace('?', ' ').trim();
-        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(
-                "(?i)(?:pv|uv|page views?|unique visitors?|unique users?).*?(?:of|for)\\s+([a-zA-Z0-9_\\- ]+)"
-        ).matcher(withoutDate);
-        if (!matcher.find()) {
-            return null;
+    private String extractAnalyticsApplication(String userMessage) {
+        String normalized = stripDateExpression(userMessage).toLowerCase(Locale.ROOT);
+        if (normalized.contains("cashflow blotter")) {
+            return "cashflow blotter";
         }
-        String rawValue = matcher.group(1).trim().replaceAll("\\s+", "_");
-        return rawValue.replaceAll("[^A-Za-z0-9_\\-]", "");
+        if (normalized.contains("trades")) {
+            return "trades";
+        }
+        return null;
+    }
+
+    private String selectAnalyticsToolName(String normalizedUserMessage, Map<String, ToolDefinition> availableTools) {
+        boolean wantsHourly = normalizedUserMessage.contains("hourly")
+                || normalizedUserMessage.contains("per hour")
+                || normalizedUserMessage.contains("each hour")
+                || normalizedUserMessage.contains("trend")
+                || normalizedUserMessage.contains("chart");
+        if (wantsHourly && availableTools.containsKey(VISITED_USER_HOURLY_TOOL)) {
+            return VISITED_USER_HOURLY_TOOL;
+        }
+        if (availableTools.containsKey(VISITED_USER_COUNT_TOOL)) {
+            return VISITED_USER_COUNT_TOOL;
+        }
+        if (availableTools.containsKey(VISITED_USER_HOURLY_TOOL)) {
+            return VISITED_USER_HOURLY_TOOL;
+        }
+        return null;
     }
 
     private List<ToolSpecification> buildToolSpecifications(
@@ -2645,7 +2668,7 @@ public class AgentService {
                 Multi-tool chaining:
                 When the user asks about past or future weather (e.g. "weather in Beijing yesterday"), you MUST call resolve_relative_date first to get the absolute date, then call get_weather_history with that date and the location. Never use get_weather (current weather) for historical queries. Example chain: resolve_relative_date(expression="yesterday") → get_weather_history(location="Beijing, CN", date=<resolved date>).
                 When the user asks to send or draft an email that mentions a relative date (e.g. "send an email to him to ask for sick leave tomorrow"), you MUST call resolve_relative_date first and then call approval_confirm with the composed email fields. Do not ask the user to manually resolve "tomorrow" if resolve_relative_date is available.
-                When the user asks for PV/UV or usage analytics with a relative date (e.g. "what's the pv and uv of cashflow_blotter yesterday"), you MUST call resolve_relative_date first and then call statistic_count_by_app using the resolved date window.
+                When the user asks for visited user analytics with a relative date (e.g. "what's the uv of cashflow blotter yesterday" or "show trades hourly uv yesterday"), you MUST call resolve_relative_date first and then call either visited_user_count_by_application or visited_user_hourly_by_application using the resolved UTC date window.
                 If a prior assistant message already identified a person and included an email address, you may reuse that recent context to resolve pronouns like "him" or "her" in a follow-up email request.
                 """.formatted(
                         availableTools.values().stream()
@@ -2742,16 +2765,17 @@ public class AgentService {
         }
 
         String normalized = userMessage.toLowerCase(Locale.ROOT);
-        boolean hasAnalyticsTools = availableTools.containsKey("statistic_count_by_app")
-                || availableTools.containsKey("chart_by_app");
+        boolean hasAnalyticsTools = availableTools.containsKey(VISITED_USER_COUNT_TOOL)
+                || availableTools.containsKey(VISITED_USER_HOURLY_TOOL);
         if (hasAnalyticsTools && (
                 normalized.contains("analytics")
                         || normalized.contains("usage")
-                        || normalized.contains("pv")
                         || normalized.contains("uv")
-                        || normalized.contains("page view")
                         || normalized.contains("unique visitor")
                         || normalized.contains("unique user")
+                        || normalized.contains("visited user")
+                        || normalized.contains("cashflow blotter")
+                        || normalized.contains("trades")
         )) {
             return true;
         }

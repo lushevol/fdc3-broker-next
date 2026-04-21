@@ -19,27 +19,24 @@ class RequestValidationTest {
     }
 
     @Test
-    void rejectsRequestWithoutAppIdOrAppName() {
+    void rejectsUnsupportedApplication() {
         AppStatisticCountRequest request = new AppStatisticCountRequest(
-                null,
-                "   ",
+                "cashflow",
                 Instant.parse("2026-04-01T00:00:00Z"),
                 Instant.parse("2026-04-02T00:00:00Z")
         );
 
         assertThat(validator.validate(request))
                 .extracting("message")
-                .contains("Either appId or appName must be provided");
+                .contains("application must be one of: cashflow blotter, trades");
     }
 
     @Test
-    void rejectsRequestWhenStartTimeIsNotBeforeEndTime() {
+    void rejectsInvalidRange() {
         AppChartRequest request = new AppChartRequest(
-                "app-1",
-                null,
+                "trades",
                 Instant.parse("2026-04-02T00:00:00Z"),
-                Instant.parse("2026-04-02T00:00:00Z"),
-                null
+                Instant.parse("2026-04-02T00:00:00Z")
         );
 
         assertThat(validator.validate(request))
@@ -48,10 +45,9 @@ class RequestValidationTest {
     }
 
     @Test
-    void acceptsRequestWhenAtLeastOneFilterIsPresentAndRangeIsValid() {
+    void acceptsSupportedApplicationAndValidRange() {
         AppStatisticCountRequest request = new AppStatisticCountRequest(
-                null,
-                "App One",
+                "cashflow blotter",
                 Instant.parse("2026-04-01T00:00:00Z"),
                 Instant.parse("2026-04-02T00:00:00Z")
         );

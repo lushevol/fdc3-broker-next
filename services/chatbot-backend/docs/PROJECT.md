@@ -34,7 +34,7 @@ npm run dev:services
 # Or standalone
 cd services/chatbot-backend && npm run dev
 
-# With Elasticsearch MCP service
+# With Elasticsearch MCP service (starts the stub MCP service automatically)
 npm run dev:with-elasticsearch-mcp
 
 # Build / test

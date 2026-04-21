@@ -1,16 +1,30 @@
 [
   {
-    "capabilityId": "app-usage-statistics",
+    "capabilityId": "application-visited-user-count",
     "providerId": "elasticsearch-analytics",
-    "targetName": "statistic_count_by_app",
+    "targetName": "visited_user_count_by_application",
     "executionType": "mcp",
     "accessType": "read",
     "tenantScope": "global",
-    "requiredInputs": ["startTime", "endTime"],
-    "optionalInputs": ["appId", "appName"],
+    "requiredInputs": ["application", "startTime", "endTime"],
+    "optionalInputs": [],
     "promptHints": [
-      "Show PV and UV for an app over a time range",
-      "Get app usage count for a selected app"
+      "Show visited user count for an application over a time range",
+      "Get the UV card data for cashflow blotter or trades"
+    ]
+  },
+  {
+    "capabilityId": "application-visited-user-hourly",
+    "providerId": "elasticsearch-analytics",
+    "targetName": "visited_user_hourly_by_application",
+    "executionType": "mcp",
+    "accessType": "read",
+    "tenantScope": "global",
+    "requiredInputs": ["application", "startTime", "endTime"],
+    "optionalInputs": [],
+    "promptHints": [
+      "Show hourly visited user trend for an application over a time range",
+      "Get the hourly UV chart data for cashflow blotter or trades"
     ]
   }
 ]

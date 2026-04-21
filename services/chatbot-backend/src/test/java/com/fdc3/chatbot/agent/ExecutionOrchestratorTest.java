@@ -27,18 +27,13 @@ class ExecutionOrchestratorTest {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
-    void shouldExecuteStatisticCountByAppAndReturnExecutionTranscript() throws Exception {
+    void shouldExecuteVisitedUserCountByApplicationAndReturnExecutionTranscript() throws Exception {
         ExecutionOrchestrator orchestrator = new ExecutionOrchestrator(new FakeMcpExecutor("""
                 {
-                  "appName": "cashflow",
-                  "from": "2026-04-01",
-                  "to": "2026-04-08",
-                  "pvTotal": 120,
-                  "uvTotal": 30,
-                  "trend": [
-                    {"date":"2026-04-01","pv":40,"uv":10},
-                    {"date":"2026-04-08","pv":80,"uv":20}
-                  ]
+                  "application": "cashflow blotter",
+                  "startTime": "2026-04-01T00:00:00Z",
+                  "endTime": "2026-04-08T00:00:00Z",
+                  "uv": 30
                 }
                 """));
 
@@ -49,24 +44,19 @@ class ExecutionOrchestratorTest {
         ExecutionTranscript transcript = orchestrator.execute(validatedPlan, toolCalls::add, toolResults::add);
 
         assertThat(toolCalls).hasSize(1);
-        assertThat(toolCalls.get(0).getName()).isEqualTo("statistic_count_by_app");
+        assertThat(toolCalls.get(0).getName()).isEqualTo("visited_user_count_by_application");
         assertThat(toolCalls.get(0).getExecutionTarget()).isEqualTo(ToolCall.ExecutionTarget.BACKEND);
-        assertThat(toolCalls.get(0).getArguments()).containsEntry("appName", "cashflow");
+        assertThat(toolCalls.get(0).getArguments()).containsEntry("application", "cashflow blotter");
         assertThat(toolCalls.get(0).getStatus()).isEqualTo(ToolCall.ToolStatus.RUNNING);
 
         assertThat(toolResults).hasSize(1);
         assertThat(toolResults.get(0).getToolCallId()).isEqualTo(toolCalls.get(0).getId());
-        assertThat(toolResults.get(0).getToolName()).isEqualTo("statistic_count_by_app");
+        assertThat(toolResults.get(0).getToolName()).isEqualTo("visited_user_count_by_application");
         assertThat(toolResults.get(0).getResult()).isEqualTo(Map.of(
-                "appName", "cashflow",
-                "from", "2026-04-01",
-                "to", "2026-04-08",
-                "pvTotal", 120,
-                "uvTotal", 30,
-                "trend", List.of(
-                        Map.of("date", "2026-04-01", "pv", 40, "uv", 10),
-                        Map.of("date", "2026-04-08", "pv", 80, "uv", 20)
-                )
+                "application", "cashflow blotter",
+                "startTime", "2026-04-01T00:00:00Z",
+                "endTime", "2026-04-08T00:00:00Z",
+                "uv", 30
         ));
 
         assertThat(transcript.plan()).isEqualTo(validatedPlan);
@@ -119,12 +109,11 @@ class ExecutionOrchestratorTest {
     @Test
     void shouldPreserveMapResultsContainingNullFields() {
         Map<String, Object> rawResult = new LinkedHashMap<>();
-        rawResult.put("appName", "cashflow");
-        rawResult.put("from", "2026-04-01");
-        rawResult.put("to", "2026-04-08");
-        rawResult.put("pvTotal", null);
-        rawResult.put("uvTotal", 30);
-        rawResult.put("trend", null);
+        rawResult.put("application", "cashflow blotter");
+        rawResult.put("startTime", "2026-04-01T00:00:00Z");
+        rawResult.put("endTime", "2026-04-08T00:00:00Z");
+        rawResult.put("uv", 30);
+        rawResult.put("points", null);
 
         ExecutionOrchestrator orchestrator = new ExecutionOrchestrator((capability, arguments) -> rawResult);
 
@@ -178,21 +167,21 @@ class ExecutionOrchestratorTest {
         ResolvedCapability capability = ResolvedCapability.builder()
                 .capabilityId("analytics.app-usage.read")
                 .providerId("elasticsearch-analytics")
-                .targetName("statistic_count_by_app")
+                .targetName("visited_user_count_by_application")
                 .executionType("mcp")
                 .accessType("read")
                 .tenantScope("global")
-                .requiredInputs(List.of("appName", "from", "to"))
-                .availableToolNames(List.of("statistic_count_by_app"))
+                .requiredInputs(List.of("application", "startTime", "endTime"))
+                .availableToolNames(List.of("visited_user_count_by_application"))
                 .build();
 
         ValidatedExecutionStep step = new ValidatedExecutionStep(
                 capability.getCapabilityId(),
                 capability,
                 Map.of(
-                        "appName", "cashflow",
-                        "from", "2026-04-01",
-                        "to", "2026-04-08"
+                        "application", "cashflow blotter",
+                        "startTime", "2026-04-01T00:00:00Z",
+                        "endTime", "2026-04-08T00:00:00Z"
                 ),
                 PolicyDecision.builder()
                         .decisionType(PolicyDecisionType.ALLOW)
@@ -206,20 +195,20 @@ class ExecutionOrchestratorTest {
         ResolvedCapability capability = ResolvedCapability.builder()
                 .capabilityId("app-usage-statistics")
                 .providerId("elasticsearch-analytics")
-                .targetName("statistic_count_by_app")
+                .targetName("visited_user_count_by_application")
                 .executionType("mcp")
                 .accessType("read")
                 .tenantScope("global")
                 .requiredInputs(List.of("startTime", "endTime"))
-                .optionalInputs(List.of("appName"))
-                .availableToolNames(List.of("statistic_count_by_app"))
+                .optionalInputs(List.of("application"))
+                .availableToolNames(List.of("visited_user_count_by_application"))
                 .build();
 
         ValidatedExecutionStep step = new ValidatedExecutionStep(
                 capability.getCapabilityId(),
                 capability,
                 Map.of(
-                        "appName", "cashflow",
+                        "application", "cashflow blotter",
                         "startTime", "2026-04-01",
                         "endTime", "2026-04-08"
                 ),

@@ -23,17 +23,17 @@ class CapabilityRegistryServiceTest {
 
         assertFalse(definitions.isEmpty());
         CapabilityDefinition statisticsCapability = definitions.stream()
-                .filter(definition -> "app-usage-statistics".equals(definition.getCapabilityId()))
+                .filter(definition -> "application-visited-user-count".equals(definition.getCapabilityId()))
                 .findFirst()
                 .orElseThrow();
 
         assertEquals("mcp", statisticsCapability.getExecutionType());
         assertEquals("read", statisticsCapability.getAccessType());
         assertEquals("elasticsearch-analytics", statisticsCapability.getProviderId());
-        assertEquals("statistic_count_by_app", statisticsCapability.getTargetName());
+        assertEquals("visited_user_count_by_application", statisticsCapability.getTargetName());
+        assertTrue(statisticsCapability.getRequiredInputs().contains("application"));
         assertTrue(statisticsCapability.getRequiredInputs().contains("startTime"));
         assertTrue(statisticsCapability.getRequiredInputs().contains("endTime"));
-        assertTrue(statisticsCapability.getOptionalInputs().contains("appId"));
-        assertTrue(statisticsCapability.getOptionalInputs().contains("appName"));
+        assertTrue(statisticsCapability.getOptionalInputs().isEmpty());
     }
 }

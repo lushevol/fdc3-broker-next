@@ -15,7 +15,6 @@ type ToolRenderProps = {
 
 type UsageTrendPoint = {
   timestamp: string;
-  pv: number;
   uv: number;
 };
 
@@ -23,7 +22,6 @@ type UsageStatisticsViewModel = {
   appLabel: string;
   startTime?: string;
   endTime?: string;
-  pv?: number;
   uv?: number;
   trendPoints: UsageTrendPoint[];
   bucket?: string;
@@ -31,7 +29,6 @@ type UsageStatisticsViewModel = {
 };
 
 const usageTrendChartConfig = {
-  pv: { label: 'PV', color: '#1d4ed8' },
   uv: { label: 'UV', color: '#059669' },
 } satisfies ChartConfig;
 
@@ -97,18 +94,15 @@ function formatUsageTick(value: string, bucket?: string): string {
   return formatUsageDateLabel(value);
 }
 
-function summarizeTrend(values: UsageTrendPoint[], key: 'pv' | 'uv'): number | undefined {
+function summarizeTrend(values: UsageTrendPoint[]): number | undefined {
   if (values.length === 0) {
     return undefined;
   }
 
-  return values.reduce((sum, point) => sum + point[key], 0);
+  return values.reduce((sum, point) => sum + point.uv, 0);
 }
 
-function normalizeTrendPoints(
-  resultRecord: Record<string, unknown>,
-  bucket?: string,
-): UsageTrendPoint[] {
+function normalizeTrendPoints(resultRecord: Record<string, unknown>): UsageTrendPoint[] {
   const trendPoints = Array.isArray(resultRecord.trendPoints) ? resultRecord.trendPoints : [];
   if (trendPoints.length > 0) {
     return trendPoints
@@ -116,7 +110,6 @@ function normalizeTrendPoints(
       .filter((point): point is Record<string, unknown> => Boolean(point))
       .map((point) => ({
         timestamp: asString(point.timestamp) ?? '',
-        pv: asNumber(point.pv) ?? 0,
         uv: asNumber(point.uv) ?? 0,
       }))
       .filter((point) => point.timestamp);
@@ -132,7 +125,6 @@ function normalizeTrendPoints(
         asString(point.startTime) ??
         asString(point.bucketStartTime) ??
         '',
-      pv: asNumber(point.pv) ?? 0,
       uv: asNumber(point.uv) ?? 0,
     }))
     .filter((point) => point.timestamp)
@@ -151,26 +143,19 @@ function normalizeUsageStatistics(
   const bucket =
     asString(resultRecord.bucket) ??
     asString(args.bucket) ??
-    (normalizeTrendPoints(resultRecord).length > 1 ? 'DAY' : undefined);
-  const trendPoints = normalizeTrendPoints(resultRecord, bucket);
+    (normalizeTrendPoints(resultRecord).length > 1 ? 'HOUR' : undefined);
+  const trendPoints = normalizeTrendPoints(resultRecord);
   const supportsTrend =
     Array.isArray(resultRecord.trendPoints) || Array.isArray(resultRecord.points);
 
-  const pv = asNumber(resultRecord.pv) ?? summarizeTrend(trendPoints, 'pv');
-  const uv = asNumber(resultRecord.uv) ?? summarizeTrend(trendPoints, 'uv');
+  const uv = asNumber(resultRecord.uv) ?? summarizeTrend(trendPoints);
   const appLabel =
-    asString(resultRecord.appName) ??
-    asString(resultRecord.appId) ??
-    asString(resultRecord.appFilterValue) ??
-    asString(args.appId) ??
-    asString(args.appName) ??
-    'Unknown app';
+    asString(resultRecord.application) ?? asString(args.application) ?? 'Unknown application';
 
   return {
     appLabel,
     startTime: asString(resultRecord.startTime) ?? asString(args.startTime),
     endTime: asString(resultRecord.endTime) ?? asString(args.endTime),
-    pv,
     uv,
     trendPoints,
     bucket,
@@ -310,7 +295,6 @@ export function ResolveRelativeDateTool({ args, result }: ToolRenderProps) {
 function UsageStatisticsCard({ usage }: { usage: UsageStatisticsViewModel }) {
   const chartData = usage.trendPoints.map((point) => ({
     tick: formatUsageTick(point.timestamp, usage.bucket),
-    pv: point.pv,
     uv: point.uv,
   }));
 
@@ -326,21 +310,12 @@ function UsageStatisticsCard({ usage }: { usage: UsageStatisticsViewModel }) {
         {formatUsageDateLabel(usage.startTime)} - {formatUsageDateLabel(usage.endTime)}
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <div
-          data-testid="usage-statistics-pv-tile"
-          className="rounded-[20px] border border-slate-200 bg-white px-4 py-3 shadow-[0_10px_24px_-24px_rgba(15,23,42,0.28)]"
-        >
-          <div className="text-xs uppercase tracking-[0.12em] text-slate-500">PV</div>
-          <div className="mt-1 text-3xl font-semibold tracking-[-0.03em] text-slate-950">
-            {(usage.pv ?? 0).toLocaleString()}
-          </div>
-        </div>
+      <div className="mt-4">
         <div
           data-testid="usage-statistics-uv-tile"
           className="rounded-[20px] border border-slate-200 bg-white px-4 py-3 shadow-[0_10px_24px_-24px_rgba(15,23,42,0.28)]"
         >
-          <div className="text-xs uppercase tracking-[0.12em] text-slate-500">UV</div>
+          <div className="text-xs uppercase tracking-[0.12em] text-slate-500">Visited Users</div>
           <div className="mt-1 text-3xl font-semibold tracking-[-0.03em] text-slate-950">
             {(usage.uv ?? 0).toLocaleString()}
           </div>
@@ -351,13 +326,7 @@ function UsageStatisticsCard({ usage }: { usage: UsageStatisticsViewModel }) {
         chartData.length > 0 ? (
           <div className="mt-4 grid gap-4 rounded-[22px] border border-slate-200 bg-slate-50 p-4">
             <UsageTrendChart
-              label="PV Trend"
-              data={chartData}
-              dataKey="pv"
-              stroke="var(--color-pv)"
-            />
-            <UsageTrendChart
-              label="UV Trend"
+              label="Hourly UV Trend"
               data={chartData}
               dataKey="uv"
               stroke="var(--color-uv)"
@@ -380,8 +349,8 @@ function UsageTrendChart({
   stroke,
 }: {
   label: string;
-  data: Array<{ tick: string; pv: number; uv: number }>;
-  dataKey: 'pv' | 'uv';
+  data: Array<{ tick: string; uv: number }>;
+  dataKey: 'uv';
   stroke: string;
 }) {
   return (
@@ -404,7 +373,7 @@ export function AnalyticsTool({ args, result }: ToolRenderProps) {
     return (
       <LoadingToolCard
         toolName="analytics"
-        message={`Looking up analytics for ${String(args.appId ?? args.appName ?? 'the selected app')}...`}
+        message={`Looking up analytics for ${String(args.application ?? 'the selected application')}...`}
       />
     );
   }
@@ -414,7 +383,7 @@ export function AnalyticsTool({ args, result }: ToolRenderProps) {
     return (
       <JsonToolCard
         toolName="analytics"
-        title={`Analytics: ${String(args.appId ?? args.appName ?? 'unknown')}`}
+        title={`Analytics: ${String(args.application ?? 'unknown')}`}
         result={result}
         emptyMessage="No analytics data was returned."
       />
