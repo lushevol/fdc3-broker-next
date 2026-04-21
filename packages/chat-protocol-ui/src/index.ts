@@ -86,4 +86,4 @@ export { useIsMobile } from './hooks/use-mobile';
 
 export { Tools, type Toolkit } from '@assistant-ui/react';
 
-export type { ChatToolDescriptor } from '@fm/chat-protocol-contract';
+export type { ChatToolDescriptor } from 'chat-protocol-contract';

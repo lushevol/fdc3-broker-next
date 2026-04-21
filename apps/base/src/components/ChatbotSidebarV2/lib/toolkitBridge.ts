@@ -1,4 +1,4 @@
-import type { ToolkitBridge } from '@fm/chat-protocol-runtime';
+import type { ToolkitBridge } from 'chat-protocol-runtime';
 
 export class ToolkitBridgeError extends Error {
   constructor(

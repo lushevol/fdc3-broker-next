@@ -6,7 +6,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from '@fm/chat-protocol-ui';
+} from 'chat-protocol-ui';
 
 type ToolRenderProps = {
   args: Record<string, unknown>;

@@ -10,7 +10,7 @@ import type {
   ChatToolCallPart,
   ChatToolCallState,
   ChatToolSource,
-} from '@fm/chat-protocol-contract';
+} from 'chat-protocol-contract';
 import type {
   ChatModelAdapter,
   ChatModelRunOptions,

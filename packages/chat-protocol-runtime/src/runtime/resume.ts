@@ -1,4 +1,4 @@
-import type { ChatMessage } from '@fm/chat-protocol-contract';
+import type { ChatMessage } from 'chat-protocol-contract';
 
 export type ToolCallResumeRequest = {
   conversationId: string;

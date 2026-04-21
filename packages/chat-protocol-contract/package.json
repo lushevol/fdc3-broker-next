@@ -1,5 +1,5 @@
 {
-  "name": "@fm/chat-protocol-contract",
+  "name": "chat-protocol-contract",
   "version": "0.0.1",
   "description": "Shared protocol contract for chat runs and stream frames",
   "type": "module",

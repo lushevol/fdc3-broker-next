@@ -8,7 +8,7 @@ import type {
   ChatMessage,
   ChatUserPart,
   ChatToolCallPart,
-} from '@fm/chat-protocol-contract';
+} from 'chat-protocol-contract';
 
 import { defaultCardRegistry, type CardRegistry } from './defaultCardRegistry';
 

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import type { Toolkit } from '@fm/chat-protocol-ui';
-import type { ChatToolDescriptor } from '@fm/chat-protocol-contract';
+import type { Toolkit } from 'chat-protocol-ui';
+import type { ChatToolDescriptor } from 'chat-protocol-contract';
 import {
   AnalyticsTool,
   ApprovalConfirmTool,
