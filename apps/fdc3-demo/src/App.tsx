@@ -1,15 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import type { AppIdentifier, Context, IntentResolution } from '@fm/fdc3-agent';
+import type { Context } from '@fm/fdc3-agent';
 import {
   useFDC3,
   useIntentListener,
   useContextListener,
   useUserChannels,
   useCurrentChannel,
-  useAppIdentifier,
 } from '@fm/fdc3-agent';
 
-// Sample instrument context
 const sampleInstrument: Context = {
   type: 'fdc3.instrument',
   name: 'Apple Inc.',
@@ -27,34 +25,6 @@ const sampleContact: Context = {
   },
 };
 
-/**
- * FDC3 Tile Register Hook
- * Registers and unregisters the tile with the FDC3 broker
- */
-const useFDC3TileRegister = (appIdentifier: AppIdentifier) => {
-  const fdc3 = useFDC3();
-
-  useEffect(() => {
-    try {
-      fdc3.registerTile(appIdentifier.instanceId!, appIdentifier.appId);
-    } catch (error) {
-      console.error('Failed to register tile:', error);
-    }
-
-    return () => {
-      try {
-        fdc3.unregisterTile(appIdentifier.instanceId!, appIdentifier.appId);
-      } catch (error) {
-        console.error('Failed to unregister tile:', error);
-      }
-    };
-  }, [fdc3, appIdentifier.instanceId, appIdentifier.appId]);
-};
-
-/**
- * Context Selection Panel
- * Allows selecting between different context types
- */
 function ContextSelectionPanel({
   selectedContext,
   onSelectContext,
@@ -87,10 +57,6 @@ function ContextSelectionPanel({
   );
 }
 
-/**
- * Actions Panel
- * Provides FDC3 action buttons
- */
 function ActionsPanel({
   selectedContext,
   currentChannel,
@@ -174,10 +140,6 @@ function ActionsPanel({
   );
 }
 
-/**
- * Activity Log Panel
- * Displays FDC3 operation logs
- */
 function ActivityLogPanel({ logs }: { logs: string[] }) {
   return (
     <div className="panel">
@@ -197,53 +159,47 @@ function ActivityLogPanel({ logs }: { logs: string[] }) {
   );
 }
 
-/**
- * Main App Component
- */
 function App(): React.ReactElement {
   const fdc3 = useFDC3();
   const channels = useUserChannels();
   const currentChannel = useCurrentChannel();
-  const appIdentifier = useAppIdentifier();
 
   const [logs, setLogs] = useState<string[]>([]);
   const [selectedContext, setSelectedContext] = useState<Context>(sampleInstrument);
-
-  // Register tile with FDC3 broker
-  useFDC3TileRegister(appIdentifier);
 
   const addLog = useCallback((message: string) => {
     setLogs((prev) => [`${new Date().toLocaleTimeString()}: ${message}`, ...prev].slice(0, 50));
   }, []);
 
-  // Listen for ViewChart intent
+  useEffect(() => {
+    addLog('FDC3 Agent connected');
+  }, [addLog]);
+
   useIntentListener(
     'ViewChart',
     useCallback(
       (context: Context) => {
-        addLog(`Received ViewChart intent with context: ${JSON.stringify(context)}`);
+        addLog(`Received ViewChart intent: ${JSON.stringify(context)}`);
       },
       [addLog],
     ),
   );
 
-  // Listen for ViewInstrument intent
   useIntentListener(
     'ViewInstrument',
     useCallback(
       (context: Context) => {
-        addLog(`Received ViewInstrument intent with context: ${JSON.stringify(context)}`);
+        addLog(`Received ViewInstrument intent: ${JSON.stringify(context)}`);
       },
       [addLog],
     ),
   );
 
-  // Listen for all context broadcasts
   useContextListener(
     null,
     useCallback(
       (context: Context) => {
-        addLog(`Received context broadcast: ${JSON.stringify(context)}`);
+        addLog(`Received context: ${JSON.stringify(context)}`);
       },
       [addLog],
     ),
@@ -254,34 +210,34 @@ function App(): React.ReactElement {
       await fdc3.broadcast(selectedContext);
       addLog(`Broadcasted context: ${selectedContext.type}`);
     } catch (error) {
-      addLog(`Error broadcasting: ${error instanceof Error ? error.message : String(error)}`);
+      addLog(`Error: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
   const handleRaiseIntent = async (intent: string) => {
     try {
-      const resolution: IntentResolution = await fdc3.raiseIntent(intent, selectedContext);
-      addLog(`Intent ${intent} raised successfully. Source: ${resolution.source.appId}`);
+      const resolution = await fdc3.raiseIntent(intent, selectedContext);
+      addLog(`Intent ${intent} raised. Source: ${resolution.source?.appId || 'unknown'}`);
     } catch (error) {
-      addLog(`Error raising intent: ${error instanceof Error ? error.message : String(error)}`);
+      addLog(`Error: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
   const handleJoinChannel = async (channelId: string) => {
     try {
-      await fdc3.joinChannel(channelId);
+      await fdc3.joinUserChannel(channelId);
       addLog(`Joined channel: ${channelId}`);
     } catch (error) {
-      addLog(`Error joining channel: ${error instanceof Error ? error.message : String(error)}`);
+      addLog(`Error: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
   const handleGetInfo = async () => {
     try {
       const info = await fdc3.getInfo();
-      addLog(`FDC3 Info: ${JSON.stringify(info)}`);
+      addLog(`FDC3 Version: ${info.fdc3Version}`);
     } catch (error) {
-      addLog(`Error getting info: ${error instanceof Error ? error.message : String(error)}`);
+      addLog(`Error: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 

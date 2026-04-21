@@ -1,5 +1,7 @@
+import { cn } from '@/lib/utils';
+import React, { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AssistantRuntimeProvider,
   Tools,
@@ -21,6 +23,36 @@ import {
   toProtocolMessages,
 } from '@fm/chat-protocol-runtime';
 import type { ToolkitBridge } from '@fm/chat-protocol-runtime';
+
+const PortalContainerContext = createContext<React.RefObject<HTMLElement | null> | null>(null);
+
+export function usePortalContainer(): HTMLElement | null {
+  const ref = useContext(PortalContainerContext);
+  return ref?.current ?? null;
+}
+
+function useHtmlDarkMode(): boolean {
+  const [isDark, setIsDark] = useState(() =>
+    typeof document !== 'undefined' && document.documentElement.classList.contains('dark'),
+  );
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+}
 
 export type ChatProtocolProviderProps = {
   apiUrl: string;
@@ -59,6 +91,7 @@ export type ChatProtocolProviderProps = {
   toolkitBridge?: ToolkitBridge;
 
   createConversationId?: (threadId?: string) => string;
+  dark?: boolean;
   children: ReactNode;
 };
 
@@ -85,6 +118,7 @@ export function ChatProtocolProvider({
   resolveFrontendTool,
   toolkitBridge,
   createConversationId = defaultCreateConversationId,
+  dark,
   children,
 }: ChatProtocolProviderProps): JSX.Element {
   const latestConversationIdRef = useRef<string>();
@@ -219,9 +253,17 @@ export function ChatProtocolProvider({
     tools: Tools({ toolkit: wrappedToolkit }),
   });
 
+  const portalContainerRef = useRef<HTMLDivElement>(null);
+  const htmlDark = useHtmlDarkMode();
+  const isDark = dark ?? htmlDark;
+
   return (
-    <AssistantRuntimeProvider runtime={runtime} aui={aui}>
-      {children}
-    </AssistantRuntimeProvider>
+    <PortalContainerContext.Provider value={portalContainerRef}>
+      <div ref={portalContainerRef} className={cn('cp-root', isDark && 'dark')}>
+        <AssistantRuntimeProvider runtime={runtime} aui={aui}>
+          {children}
+        </AssistantRuntimeProvider>
+      </div>
+    </PortalContainerContext.Provider>
   );
 }

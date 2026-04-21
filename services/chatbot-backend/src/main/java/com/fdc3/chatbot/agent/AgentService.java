@@ -1399,7 +1399,7 @@ public class AgentService {
             java.util.function.Consumer<ToolResult> onToolResult,
             AtomicBoolean cancelled
     ) {
-        Set<String> effectiveBlockedToolNames = blockedToolNames;
+        Set<String> effectiveBlockedToolNames;
         if (fallbackToolContext != null && "resolve_relative_date".equals(fallbackToolContext.toolName())) {
             ToolExecutionRequest resolvedDateFollowup = inferResolvedDateFollowup(
                     userMessage,
@@ -1412,8 +1412,13 @@ public class AgentService {
                 java.util.LinkedHashSet<String> nextBlockedToolNames = new java.util.LinkedHashSet<>(blockedToolNames);
                 nextBlockedToolNames.add(resolvedDateFollowup.name());
                 effectiveBlockedToolNames = Set.copyOf(nextBlockedToolNames);
+            } else {
+                effectiveBlockedToolNames = blockedToolNames;
             }
+        } else {
+            effectiveBlockedToolNames = blockedToolNames;
         }
+        final Set<String> finalBlockedToolNames = effectiveBlockedToolNames;
 
         StringBuilder streamedAssistantText = new StringBuilder();
 
@@ -1451,7 +1456,7 @@ public class AgentService {
                             availableTools,
                             aiMessage.toolExecutionRequests(),
                             frontendToolManifest,
-                            effectiveBlockedToolNames,
+                            finalBlockedToolNames,
                             0,
                             fallbackToolContext,
                             true,
@@ -1494,7 +1499,7 @@ public class AgentService {
                             availableTools,
                             List.of(fallbackToolRequest),
                             frontendToolManifest,
-                            effectiveBlockedToolNames,
+                            finalBlockedToolNames,
                             0,
                             fallbackToolContext,
                             fallbackToolPlan.continueAfterToolLoop(),
@@ -1530,9 +1535,9 @@ public class AgentService {
         };
 
         List<ToolSpecification> effectiveToolSpecifications =
-                effectiveBlockedToolNames.equals(blockedToolNames)
+                finalBlockedToolNames.equals(blockedToolNames)
                         ? toolSpecifications
-                        : buildToolSpecifications(availableTools, frontendToolManifest, effectiveBlockedToolNames);
+                        : buildToolSpecifications(availableTools, frontendToolManifest, finalBlockedToolNames);
 
         streamingChatModel.chat(buildChatRequest(messages, effectiveToolSpecifications), handler);
     }

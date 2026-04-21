@@ -5,6 +5,7 @@ import { Combobox as ComboboxPrimitive } from '@base-ui/react';
 import { CheckIcon, ChevronDownIcon, XIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { usePortalContainer } from '@/provider';
 import { Button } from '@/components/ui/button';
 import {
   InputGroup,
@@ -95,8 +96,9 @@ function ComboboxContent({
     ComboboxPrimitive.Positioner.Props,
     'side' | 'align' | 'sideOffset' | 'alignOffset' | 'anchor'
   >) {
+  const portalContainer = usePortalContainer();
   return (
-    <ComboboxPrimitive.Portal>
+    <ComboboxPrimitive.Portal container={portalContainer}>
       <ComboboxPrimitive.Positioner
         side={side}
         sideOffset={sideOffset}

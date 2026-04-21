@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1 --port 4173 --strictPort",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview",
     "lint": "eslint ."
   },
   "dependencies": {
@@ -63,14 +63,14 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.14",
+    "@rsbuild/core": "^1.7.3",
+    "@rsbuild/plugin-react": "^1.4.5",
+    "@tailwindcss/postcss": "^4.1.14",
     "@types/node": "^25.0.3",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^5.1.2",
     "eslint": "^9.39.2",
     "tailwindcss": "^4.1.14",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.1"
+    "typescript": "^5.9.3"
   }
 }
