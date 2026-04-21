@@ -1,4 +1,4 @@
-export { ChatProtocolProvider, type ChatProtocolProviderProps } from './provider';
+export { ChatProtocolProvider, type ChatProtocolProviderProps, usePortalContainer } from './provider';
 
 export { cn } from './lib/utils';
 

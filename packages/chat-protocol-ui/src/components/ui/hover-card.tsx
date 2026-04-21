@@ -4,6 +4,7 @@ import type * as React from 'react';
 import { HoverCard as HoverCardPrimitive } from 'radix-ui';
 
 import { cn } from '@/lib/utils';
+import { usePortalContainer } from '@/provider';
 
 function HoverCard({ ...props }: React.ComponentProps<typeof HoverCardPrimitive.Root>) {
   return <HoverCardPrimitive.Root data-slot="hover-card" {...props} />;
@@ -19,8 +20,9 @@ function HoverCardContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof HoverCardPrimitive.Content>) {
+  const portalContainer = usePortalContainer();
   return (
-    <HoverCardPrimitive.Portal data-slot="hover-card-portal">
+    <HoverCardPrimitive.Portal container={portalContainer} data-slot="hover-card-portal">
       <HoverCardPrimitive.Content
         data-slot="hover-card-content"
         align={align}

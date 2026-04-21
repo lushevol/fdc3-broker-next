@@ -5,6 +5,7 @@ import { Select as SelectPrimitive } from 'radix-ui';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePortalContainer } from '@/provider';
 
 const SelectRoot = SelectPrimitive.Root;
 
@@ -86,9 +87,13 @@ const SelectContent = ({
   className,
   children,
   position = 'popper',
+  container: containerProp,
   ...props
-}: ComponentPropsWithoutRef<typeof SelectPrimitive.Content>) => (
-  <SelectPrimitive.Portal>
+}: ComponentPropsWithoutRef<typeof SelectPrimitive.Content> & { container?: HTMLElement | null }) => {
+  const portalContainer = usePortalContainer();
+  const container = containerProp ?? portalContainer;
+  return (
+  <SelectPrimitive.Portal container={container}>
     <SelectPrimitive.Content
       data-slot="select-content"
       position={position}
@@ -116,7 +121,8 @@ const SelectContent = ({
       <SelectScrollDownButton />
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>
-);
+  );
+};
 
 const SelectLabel = ({
   className,
