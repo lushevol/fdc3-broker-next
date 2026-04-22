@@ -17,7 +17,7 @@
 
 ## Request Validation
 
-- All analytics requests require either `appId` or `appName`
+- All analytics requests require at least one monitoring filter from the top-level fields or nested `propertyData`
 - `startTime` must be before `endTime`
 - Use `@ValidAppAnalyticsRequest` annotation — do not bypass validation
 
@@ -30,17 +30,25 @@
 ## Field Mapping
 
 - All ES index field names are configurable via env vars:
-  - `ELASTICSEARCH_APP_ID_FIELD` (default: `appId`)
-  - `ELASTICSEARCH_APP_NAME_FIELD` (default: `appName`)
-  - `ELASTICSEARCH_PV_FIELD` (default: `pv`)
-  - `ELASTICSEARCH_UV_FIELD` (default: `uv`)
+  - `ELASTICSEARCH_KEY_FIELD` (default: `key.keyword`)
+  - `ELASTICSEARCH_EVENT_FIELD` (default: `event.keyword`)
+  - `ELASTICSEARCH_CONTAINER_FIELD` (default: `container.keyword`)
+  - `ELASTICSEARCH_TILE_FIELD` (default: `tile.keyword`)
+  - `ELASTICSEARCH_NAME_FIELD` (default: `name.keyword`)
+  - `ELASTICSEARCH_VALUE_FIELD` (default: `value.keyword`)
+  - `ELASTICSEARCH_USER_ID_FIELD` (default: `userId.keyword`)
+  - `ELASTICSEARCH_SESSION_ID_FIELD` (default: `singleUIAuthorization.keyword`)
+  - `ELASTICSEARCH_IP_ADDRESS_FIELD` (default: `ipAddress.keyword`)
+  - `ELASTICSEARCH_PROPERTY_DATA_PATH` (default: `propertyData`)
+  - `ELASTICSEARCH_PROPERTY_NAME_FIELD` (default: `propertyData.name.keyword`)
+  - `ELASTICSEARCH_PROPERTY_VALUE_FIELD` (default: `propertyData.value.keyword`)
 - Do not hard-code field names in queries
 
 ## Bucket Resolution
 
 - `BucketResolver` auto-selects `HOUR` (<7 days), `DAY` (<90 days), or `WEEK` (≥90 days)
 - Do not override unless there is a specific requirement
-- The `bucket` parameter on `chart_by_app` allows manual override
+- The `bucket` parameter on `chart_by_filters` allows manual override
 
 ## Conditional Beans
 

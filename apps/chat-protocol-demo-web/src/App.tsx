@@ -8,8 +8,8 @@ import type {
   ChatToolInputStartFrame,
   ChatToolOutputAvailableFrame,
   ChatToolOutputErrorFrame,
-} from '@fm/chat-protocol-contract';
-import { AssistantModal, ChatProtocolProvider } from '@fm/chat-protocol-ui';
+} from 'chat-protocol-contract';
+import { AssistantModal, ChatProtocolProvider } from 'chat-protocol-ui';
 import { ToolRegistryPanel, useToolInvocationTracker } from '@/components/ToolRegistryPanel';
 import type { ToolInvocation } from '@/components/ToolRegistryPanel';
 import {

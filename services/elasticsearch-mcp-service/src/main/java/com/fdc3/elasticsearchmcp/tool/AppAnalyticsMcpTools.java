@@ -1,13 +1,14 @@
 package com.fdc3.elasticsearchmcp.tool;
 
 import com.fdc3.elasticsearchmcp.service.AppAnalyticsService;
-import com.fdc3.elasticsearchmcp.tool.model.AppChartBucket;
 import com.fdc3.elasticsearchmcp.tool.model.AppChartRequest;
 import com.fdc3.elasticsearchmcp.tool.model.AppChartResponse;
 import com.fdc3.elasticsearchmcp.tool.model.AppStatisticCountRequest;
 import com.fdc3.elasticsearchmcp.tool.model.AppStatisticCountResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,8 @@ import java.util.stream.Collectors;
 @Component
 public class AppAnalyticsMcpTools {
 
+    private static final Logger log = LoggerFactory.getLogger(AppAnalyticsMcpTools.class);
+
     private final AppAnalyticsService analyticsService;
     private final Validator validator;
 
@@ -29,40 +32,60 @@ public class AppAnalyticsMcpTools {
         this.validator = validator;
     }
 
-    @McpTool(name = "statistic_count_by_app", description = "Return PV and UV counts for an app within a time window")
-    public AppStatisticCountResponse statisticCountByApp(
-            @McpToolParam(description = "App identifier. Preferred when both filters are provided", required = false) String appId,
-            @McpToolParam(description = "App display name. Used when appId is omitted", required = false) String appName,
+    @McpTool(name = "visited_user_count_by_application", description = "Return UV count for an application within a time window. Supported applications: cashflow blotter, trades")
+    public AppStatisticCountResponse visitedUserCountByApplication(
+            @McpToolParam(description = "Application name. Supported values: cashflow blotter, trades", required = true) String application,
             @McpToolParam(description = "Inclusive start timestamp in ISO-8601 format", required = true) String startTime,
-            @McpToolParam(description = "Exclusive end timestamp in ISO-8601 format", required = true) String endTime
+            @McpToolParam(description = "Inclusive end timestamp in ISO-8601 format", required = true) String endTime
     ) {
-        AppStatisticCountRequest request = new AppStatisticCountRequest(
-                normalize(appId),
-                normalize(appName),
-                parseInstant(startTime, "startTime"),
-                parseInstant(endTime, "endTime")
-        );
-        validate(request);
-        return analyticsService.statisticCountByApp(request);
+        log.info("visitedUserCountByApplication called: application={}, startTime={}, endTime={}", application, startTime, endTime);
+        try {
+            AppStatisticCountRequest request = new AppStatisticCountRequest(
+                    normalize(application),
+                    parseInstant(startTime, "startTime"),
+                    parseInstant(endTime, "endTime")
+            );
+            log.debug("Parsed request: application={}, startTime={}, endTime={}", request.application(), request.startTime(), request.endTime());
+            validate(request);
+            log.debug("Request validated successfully");
+            AppStatisticCountResponse response = analyticsService.statisticCountByApp(request);
+            log.debug("Returning response: uv={}", response.uv());
+            return response;
+        } catch (IllegalArgumentException e) {
+            log.error("Validation error in visitedUserCountByApplication: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Error in visitedUserCountByApplication: application={}, error={}", application, e.getMessage(), e);
+            throw e;
+        }
     }
 
-    @McpTool(name = "chart_by_app", description = "Return PV and UV trend points for an app within a time window")
-    public AppChartResponse chartByApp(
-            @McpToolParam(description = "App identifier. Preferred when both filters are provided", required = false) String appId,
-            @McpToolParam(description = "App display name. Used when appId is omitted", required = false) String appName,
+    @McpTool(name = "visited_user_hourly_by_application", description = "Return hourly UV data for an application within a time window. Supported applications: cashflow blotter, trades")
+    public AppChartResponse visitedUserHourlyByApplication(
+            @McpToolParam(description = "Application name. Supported values: cashflow blotter, trades", required = true) String application,
             @McpToolParam(description = "Inclusive start timestamp in ISO-8601 format", required = true) String startTime,
-            @McpToolParam(description = "Exclusive end timestamp in ISO-8601 format", required = true) String endTime,
-            @McpToolParam(description = "Optional bucket override: HOUR, DAY, or WEEK", required = false) String bucket
+            @McpToolParam(description = "Inclusive end timestamp in ISO-8601 format", required = true) String endTime
     ) {
-        AppChartRequest request = new AppChartRequest(
-                normalize(appId),
-                normalize(appName),
-                parseInstant(startTime, "startTime"),
-                parseInstant(endTime, "endTime"),
-                parseBucket(bucket)
-        );
-        validate(request);
-        return analyticsService.chartByApp(request);
+        log.info("visitedUserHourlyByApplication called: application={}, startTime={}, endTime={}", application, startTime, endTime);
+        try {
+            AppChartRequest request = new AppChartRequest(
+                    normalize(application),
+                    parseInstant(startTime, "startTime"),
+                    parseInstant(endTime, "endTime")
+            );
+            log.debug("Parsed request: application={}, startTime={}, endTime={}", request.application(), request.startTime(), request.endTime());
+            validate(request);
+            log.debug("Request validated successfully");
+            AppChartResponse response = analyticsService.chartByApp(request);
+            log.debug("Returning response: bucket={}, pointCount={}", response.bucket(), response.points() != null ? response.points().size() : 0);
+            return response;
+        } catch (IllegalArgumentException e) {
+            log.error("Validation error in visitedUserHourlyByApplication: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Error in visitedUserHourlyByApplication: application={}, error={}", application, e.getMessage(), e);
+            throw e;
+        }
     }
 
     private void validate(Object request) {
@@ -85,17 +108,6 @@ public class AppAnalyticsMcpTools {
             return Instant.parse(value);
         } catch (DateTimeParseException exception) {
             throw new IllegalArgumentException(fieldName + " must be a valid ISO-8601 instant", exception);
-        }
-    }
-
-    private AppChartBucket parseBucket(String bucket) {
-        if (!StringUtils.hasText(bucket)) {
-            return null;
-        }
-        try {
-            return AppChartBucket.valueOf(bucket.trim().toUpperCase());
-        } catch (IllegalArgumentException exception) {
-            throw new IllegalArgumentException("bucket must be one of HOUR, DAY, or WEEK", exception);
         }
     }
 }

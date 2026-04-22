@@ -1,14 +1,14 @@
 # Elasticsearch MCP Service
 
-Standalone Java MCP server for Elasticsearch-backed application usage analytics.
+Standalone Java MCP server for Elasticsearch-backed user monitoring analytics.
 
 ## Tools
 
-- `statistic_count_by_app`
-  - Inputs: `appId?`, `appName?`, `startTime`, `endTime`
-  - Output: `pv`, `uv` for the selected app and duration
-- `chart_by_app`
-  - Inputs: `appId?`, `appName?`, `startTime`, `endTime`, `bucket?`
+- `statistic_count_by_filters`
+  - Inputs: `startTime`, `endTime`, one or more monitoring filters from `key`, `event`, `container`, `tile`, `name`, `value`, `userId`, `sessionId`, `ipAddress`, `propertyFilters`
+  - Output: `pv`, `uv` for matching real monitoring events
+- `chart_by_filters`
+  - Inputs: same filters as above plus optional `bucket`
   - Output: time-series points of `pv`, `uv`
 
 ## Configuration
@@ -23,9 +23,24 @@ Configure the Elasticsearch connection and log field mapping through environment
 | `analytics.elasticsearch.password`        | Optional basic auth password   |
 | `analytics.elasticsearch.index-name`      | Log index name                 |
 | `analytics.elasticsearch.timestamp-field` | Timestamp field                |
-| `analytics.elasticsearch.app-id-field`    | App ID field                   |
-| `analytics.elasticsearch.app-name-field`  | App name field                 |
-| `analytics.elasticsearch.user-id-field`   | User/profile field used for UV |
+| `analytics.elasticsearch.key-field`       | Monitoring key field           |
+| `analytics.elasticsearch.event-field`     | Monitoring event field         |
+| `analytics.elasticsearch.container-field` | Container field                |
+| `analytics.elasticsearch.tile-field`      | Tile field                     |
+| `analytics.elasticsearch.name-field`      | Top-level name field           |
+| `analytics.elasticsearch.value-field`     | Top-level value field          |
+| `analytics.elasticsearch.user-id-field`   | User identifier field for UV   |
+| `analytics.elasticsearch.session-id-field`| Session/authorization field    |
+| `analytics.elasticsearch.ip-address-field`| IP address field               |
+| `analytics.elasticsearch.property-data-path` | Nested property array path  |
+| `analytics.elasticsearch.property-name-field` | Nested property name field |
+| `analytics.elasticsearch.property-value-field` | Nested property value field |
+
+`propertyFilters` is passed to MCP as a JSON array string, for example:
+
+```json
+[{"name":"content_name","value":"Cashflow"},{"name":"route","value":"/workspace"}]
+```
 
 ## Run
 

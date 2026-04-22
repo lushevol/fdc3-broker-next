@@ -31,11 +31,11 @@ class AgentDecisionServiceTest {
                   "plan": {
                     "steps": [
                       {
-                        "capabilityId": "analytics.app-usage.read",
+                        "capabilityId": "visited_user_count_by_application",
                         "arguments": {
-                          "appName": "cashflow",
-                          "from": "2026-04-01",
-                          "to": "2026-04-08"
+                          "application": "cashflow",
+                          "startTime": "2026-04-01",
+                          "endTime": "2026-04-08"
                         }
                       }
                     ]
@@ -48,11 +48,11 @@ class AgentDecisionServiceTest {
         assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.PLAN);
         assertThat(decision.assistantText()).isEqualTo("I can pull that data.");
         assertThat(decision.plan().steps()).hasSize(1);
-        assertThat(decision.plan().steps().get(0).capabilityId()).isEqualTo("analytics.app-usage.read");
+        assertThat(decision.plan().steps().get(0).capabilityId()).isEqualTo("visited_user_count_by_application");
         assertThat(decision.plan().steps().get(0).arguments())
-                .containsEntry("appName", "cashflow")
-                .containsEntry("from", "2026-04-01")
-                .containsEntry("to", "2026-04-08");
+                .containsEntry("application", "cashflow")
+                .containsEntry("startTime", "2026-04-01")
+                .containsEntry("endTime", "2026-04-08");
     }
 
     @Test
@@ -64,11 +64,11 @@ class AgentDecisionServiceTest {
                     "assistantText": "I'll get the usage data.",
                     "plan": [
                       {
-                        "capabilityId": "app-usage-statistics",
+                        "capabilityId": "visited_user_count_by_application",
                         "providerId": "elasticsearch-analytics",
-                        "targetName": "statistic_count_by_app",
+                        "targetName": "visited_user_count_by_application",
                         "inputs": {
-                          "appName": "cashflow",
+                          "application": "cashflow",
                           "startTime": "2026-04-01T00:00:00.000Z",
                           "endTime": "2026-04-08T23:59:59.999Z"
                         }
@@ -84,9 +84,9 @@ class AgentDecisionServiceTest {
         assertThat(decision.assistantText()).isEqualTo("I'll get the usage data.");
         assertThat(decision.plan()).isNotNull();
         assertThat(decision.plan().steps()).hasSize(1);
-        assertThat(decision.plan().steps().get(0).capabilityId()).isEqualTo("app-usage-statistics");
+        assertThat(decision.plan().steps().get(0).capabilityId()).isEqualTo("visited_user_count_by_application");
         assertThat(decision.plan().steps().get(0).arguments())
-                .containsEntry("appName", "cashflow")
+                .containsEntry("application", "cashflow")
                 .containsEntry("startTime", "2026-04-01T00:00:00.000Z")
                 .containsEntry("endTime", "2026-04-08T23:59:59.999Z");
     }
@@ -100,9 +100,9 @@ class AgentDecisionServiceTest {
                     "plan": {
                       "steps": [
                         {
-                          "capabilityId": "app-usage-statistics",
+                          "capabilityId": "visited_user_count_by_application",
                           "inputs": {
-                            "appName": "cashflow",
+                            "application": "cashflow",
                             "startTime": "2026-04-01",
                             "endTime": "2026-04-08"
                           }
@@ -119,7 +119,7 @@ class AgentDecisionServiceTest {
         assertThat(decision.plan()).isNotNull();
         assertThat(decision.plan().steps()).hasSize(1);
         assertThat(decision.plan().steps().get(0).arguments())
-                .containsEntry("appName", "cashflow")
+                .containsEntry("application", "cashflow")
                 .containsEntry("startTime", "2026-04-01")
                 .containsEntry("endTime", "2026-04-08");
     }
@@ -134,9 +134,9 @@ class AgentDecisionServiceTest {
                     "assistantText": "I'll fetch the usage data.",
                     "plan": [
                       {
-                        "capabilityId": "app-usage-statistics",
+                        "capabilityId": "visited_user_count_by_application",
                         "inputs": {
-                          "appName": "cashflow",
+                          "application": "cashflow",
                           "startTime": "2026-04-01",
                           "endTime": "2026-04-08"
                         }
@@ -153,9 +153,9 @@ class AgentDecisionServiceTest {
         assertThat(decision.assistantText()).isEqualTo("I'll fetch the usage data.");
         assertThat(decision.plan()).isNotNull();
         assertThat(decision.plan().steps()).hasSize(1);
-        assertThat(decision.plan().steps().get(0).capabilityId()).isEqualTo("app-usage-statistics");
+        assertThat(decision.plan().steps().get(0).capabilityId()).isEqualTo("visited_user_count_by_application");
         assertThat(decision.plan().steps().get(0).arguments())
-                .containsEntry("appName", "cashflow")
+                .containsEntry("application", "cashflow")
                 .containsEntry("startTime", "2026-04-01")
                 .containsEntry("endTime", "2026-04-08");
     }
@@ -169,9 +169,9 @@ class AgentDecisionServiceTest {
                     "decisionType": "plan",
                     "plan": [
                       {
-                        "capabilityId": "app-usage-statistics",
+                        "capabilityId": "visited_user_count_by_application",
                         "inputs": {
-                          "appName": "cashflow",
+                          "application": "cashflow",
                           "startTime": "2026-04-01",
                           "endTime": "2026-04-08"
                         }
@@ -186,7 +186,7 @@ class AgentDecisionServiceTest {
         assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.PLAN);
         assertThat(decision.plan()).isNotNull();
         assertThat(decision.plan().steps()).hasSize(1);
-        assertThat(decision.plan().steps().get(0).capabilityId()).isEqualTo("app-usage-statistics");
+        assertThat(decision.plan().steps().get(0).capabilityId()).isEqualTo("visited_user_count_by_application");
     }
 
     @Test
@@ -261,10 +261,10 @@ class AgentDecisionServiceTest {
                 "Get app usage count",
                 List.<ChatMessage>of(),
                 List.of(ResolvedCapability.builder()
-                        .capabilityId("analytics.app-usage.read")
+                        .capabilityId("visited_user_count_by_application")
                         .providerId("mcp")
-                        .targetName("statistic_count_by_app")
-                        .requiredInputs(List.of("appName", "from", "to"))
+                        .targetName("visited_user_count_by_application")
+                        .requiredInputs(List.of("application", "startTime", "endTime"))
                         .promptHints(List.of("Use for app PV/UV counts"))
                         .build()),
                 WorkspaceContextSnapshot.builder()
@@ -287,10 +287,10 @@ class AgentDecisionServiceTest {
                 "hello",
                 List.<ChatMessage>of(),
                 List.of(ResolvedCapability.builder()
-                        .capabilityId("analytics.app-usage.read")
+                        .capabilityId("visited_user_count_by_application")
                         .providerId("mcp")
-                        .targetName("statistic_count_by_app")
-                        .requiredInputs(List.of("appName"))
+                        .targetName("visited_user_count_by_application")
+                        .requiredInputs(List.of("application"))
                         .build()),
                 WorkspaceContextSnapshot.builder()
                         .workspaceId("workspace-1")
@@ -303,7 +303,7 @@ class AgentDecisionServiceTest {
         assertThat(request.messages()).hasSize(2);
         assertThat(request.messages().get(0)).isInstanceOf(dev.langchain4j.data.message.SystemMessage.class);
         String prompt = ((dev.langchain4j.data.message.SystemMessage) request.messages().get(0)).text();
-        assertThat(prompt).contains("analytics.app-usage.read");
+        assertThat(prompt).contains("toolName: visited_user_count_by_application");
         assertThat(prompt).doesNotContain("internal-only-capability");
         assertThat(prompt).contains("\"workspaceId\":\"workspace-1\"");
         assertThat(prompt).contains("\"activeAppId\":\"cashflow\"");

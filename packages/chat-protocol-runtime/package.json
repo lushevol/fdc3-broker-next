@@ -1,5 +1,5 @@
 {
-  "name": "@fm/chat-protocol-runtime",
+  "name": "chat-protocol-runtime",
   "version": "0.0.1",
   "description": "Frontend runtime helpers for the chat protocol",
   "type": "module",
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@assistant-ui/react": "^0.12.17",
-    "@fm/chat-protocol-contract": "0.0.1",
+    "chat-protocol-contract": "0.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

@@ -29,9 +29,9 @@ src/main/java/com/fdc3/elasticsearchmcp/
 │   ├── BucketResolver.java               # Auto HOUR/DAY/WEEK selection
 │   └── model/
 │       ├── AggregateMetrics.java
-│       ├── AppFilter.java
-│       ├── AppFilterType.java
-│       └── ChartMetricsPoint.java
+│       ├── ChartMetricsPoint.java
+│       ├── MonitoringPropertyFilter.java
+│       └── MonitoringQuery.java
 ├── tool/
 │   ├── AppAnalyticsMcpTools.java          # @McpTool annotated endpoints
 │   └── model/
@@ -55,7 +55,7 @@ AI Agent
   │
 AppAnalyticsMcpTools (@McpTool)
   │
-  ├── statistic_count_by_app(appId?, appName?, startTime, endTime)
+  ├── statistic_count_by_filters(filters..., startTime, endTime, propertyFilters?)
   │       │
   │       └── AppAnalyticsService.statisticCountByApp()
   │               │
@@ -63,7 +63,7 @@ AppAnalyticsMcpTools (@McpTool)
   │                     ├── StubAppAnalyticsRepository (ANALYTICS_STUB_ENABLED=true)
   │                     └── ElasticsearchAppAnalyticsRepository (production)
   │
-  └── chart_by_app(appId?, appName?, startTime, endTime, bucket?)
+  └── chart_by_filters(filters..., startTime, endTime, bucket?, propertyFilters?)
           │
           └── AppAnalyticsService.chartByApp()
                   │
@@ -77,28 +77,28 @@ AppAnalyticsMcpTools (@McpTool)
 
 ## MCP Tools
 
-### `statistic_count_by_app`
+### `statistic_count_by_filters`
 
 Returns aggregate page-view (PV) and unique-visitor (UV) counts.
 
 Parameters:
 
-- `appId` (optional, preferred) — App identifier
-- `appName` (optional) — App display name
+- one or more top-level monitoring filters from `key`, `event`, `container`, `tile`, `name`, `value`, `userId`, `sessionId`, `ipAddress`
 - `startTime` (required) — Inclusive start, ISO-8601
 - `endTime` (required) — Exclusive end, ISO-8601
+- `propertyFilters` (optional) — JSON array of nested `propertyData` name/value filters
 
-### `chart_by_app`
+### `chart_by_filters`
 
 Returns time-series PV/UV data points.
 
 Parameters:
 
-- `appId` (optional, preferred) — App identifier
-- `appName` (optional) — App display name
+- same top-level monitoring filters as `statistic_count_by_filters`
 - `startTime` (required) — Inclusive start, ISO-8601
 - `endTime` (required) — Exclusive end, ISO-8601
 - `bucket` (optional) — Override: `HOUR`, `DAY`, or `WEEK`
+- `propertyFilters` (optional) — JSON array of nested `propertyData` name/value filters
 
 ## Stub Mode
 
@@ -125,7 +125,7 @@ spring:
 
 `@ValidAppAnalyticsRequest` custom validator enforces:
 
-- At least one of `appId` or `appName` must be provided
+- At least one top-level monitoring filter or nested `propertyData` filter must be provided
 - `startTime` must be before `endTime`
 
 ## Build

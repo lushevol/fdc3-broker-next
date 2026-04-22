@@ -1,89 +1,49 @@
 package com.fdc3.elasticsearchmcp.repository;
 
 import com.fdc3.elasticsearchmcp.service.model.AggregateMetrics;
-import com.fdc3.elasticsearchmcp.service.model.AppFilter;
-import com.fdc3.elasticsearchmcp.service.model.AppFilterType;
+import com.fdc3.elasticsearchmcp.service.model.ApplicationVisitTarget;
 import com.fdc3.elasticsearchmcp.service.model.ChartMetricsPoint;
-import com.fdc3.elasticsearchmcp.tool.model.AppChartBucket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 @Repository
 @ConditionalOnProperty(prefix = "analytics.stub", name = "enabled", havingValue = "true")
 public class StubAppAnalyticsRepository implements AppAnalyticsRepository {
 
-    private static final AggregateMetrics DEFAULT_METRICS = new AggregateMetrics(42L, 12L);
+    private static final Logger log = LoggerFactory.getLogger(StubAppAnalyticsRepository.class);
 
-    private static final Map<String, AggregateMetrics> FIXTURES_BY_APP_ID = Map.of(
-            "template_tile_fdc3_2", new AggregateMetrics(80L, 24L),
-            "cashflow", new AggregateMetrics(120L, 30L)
-    );
-
-    private static final Map<String, AggregateMetrics> FIXTURES_BY_APP_NAME = Map.of(
-            "fdc3 tile 2", new AggregateMetrics(80L, 24L),
-            "cash flow", new AggregateMetrics(120L, 30L),
-            "cashflow", new AggregateMetrics(120L, 30L)
+    private static final Map<ApplicationVisitTarget, AggregateMetrics> METRICS_BY_APPLICATION = Map.of(
+            ApplicationVisitTarget.CASHFLOW_BLOTTER, new AggregateMetrics(0L, 30L),
+            ApplicationVisitTarget.TRADES, new AggregateMetrics(0L, 18L)
     );
 
     @Override
-    public AggregateMetrics fetchAggregateMetrics(AppFilter filter, Instant startTime, Instant endTime) {
-        return resolveMetrics(filter);
+    public AggregateMetrics fetchVisitedUserCount(ApplicationVisitTarget target, Instant startTime, Instant endTime) {
+        log.debug("[STUB] fetchVisitedUserCount: target={}, startTime={}, endTime={}", target.applicationName(), startTime, endTime);
+        AggregateMetrics result = METRICS_BY_APPLICATION.getOrDefault(target, new AggregateMetrics(0L, 0L));
+        log.debug("[STUB] Returning metrics: uv={}", result.uv());
+        return result;
     }
 
     @Override
-    public List<ChartMetricsPoint> fetchChartMetrics(
-            AppFilter filter,
-            Instant startTime,
-            Instant endTime,
-            AppChartBucket bucket
-    ) {
-        AggregateMetrics metrics = resolveMetrics(filter);
-        Instant firstBucketTimestamp = truncate(startTime, bucket);
-        Instant secondBucketTimestamp = truncate(firstBucketTimestamp.plus(1L, toChronoUnit(bucket)), bucket);
-
-        long firstBucketPv = Math.max(1L, metrics.pv() / 2L);
-        long firstBucketUv = Math.max(1L, metrics.uv() / 2L);
-
+    public List<ChartMetricsPoint> fetchVisitedUserHourly(ApplicationVisitTarget target, Instant startTime, Instant endTime) {
+        log.debug("[STUB] fetchVisitedUserHourly: target={}, startTime={}, endTime={}", target.applicationName(), startTime, endTime);
+        AggregateMetrics metrics = fetchVisitedUserCount(target, startTime, endTime);
+        Instant firstBucket = startTime.truncatedTo(ChronoUnit.HOURS);
+        Instant secondBucket = firstBucket.plus(1, ChronoUnit.HOURS);
+        long firstUv = Math.max(1L, metrics.uv() / 2L);
+        long secondUv = Math.max(0L, metrics.uv() - firstUv);
+        log.debug("[STUB] Returning chart points: firstBucket={} uv={}, secondBucket={} uv={}", firstBucket, firstUv, secondBucket, secondUv);
         return List.of(
-                new ChartMetricsPoint(firstBucketTimestamp, firstBucketPv, firstBucketUv),
-                new ChartMetricsPoint(
-                        secondBucketTimestamp,
-                        Math.max(0L, metrics.pv() - firstBucketPv),
-                        Math.max(0L, metrics.uv() - firstBucketUv)
-                )
+                new ChartMetricsPoint(firstBucket, firstUv),
+                new ChartMetricsPoint(secondBucket, secondUv)
         );
-    }
-
-    private AggregateMetrics resolveMetrics(AppFilter filter) {
-        if (filter.type() == AppFilterType.APP_ID) {
-            return FIXTURES_BY_APP_ID.getOrDefault(normalize(filter.value()), DEFAULT_METRICS);
-        }
-        return FIXTURES_BY_APP_NAME.getOrDefault(normalize(filter.value()), DEFAULT_METRICS);
-    }
-
-    private String normalize(String value) {
-        return value.trim().toLowerCase(Locale.ROOT);
-    }
-
-    private Instant truncate(Instant timestamp, AppChartBucket bucket) {
-        return switch (bucket) {
-            case HOUR -> timestamp.truncatedTo(ChronoUnit.HOURS);
-            case DAY -> timestamp.truncatedTo(ChronoUnit.DAYS);
-            case WEEK -> timestamp.truncatedTo(ChronoUnit.DAYS);
-        };
-    }
-
-    private ChronoUnit toChronoUnit(AppChartBucket bucket) {
-        return switch (bucket) {
-            case HOUR -> ChronoUnit.HOURS;
-            case DAY -> ChronoUnit.DAYS;
-            case WEEK -> ChronoUnit.WEEKS;
-        };
     }
 }

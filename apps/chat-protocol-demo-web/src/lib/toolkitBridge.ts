@@ -17,7 +17,7 @@
  * ```
  */
 
-import type { ToolkitBridge } from '@fm/chat-protocol-runtime';
+import type { ToolkitBridge } from 'chat-protocol-runtime';
 
 /**
  * Error thrown when a tool is not found or cannot be executed.

@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react';
 
-import type { ChatCardPart } from '@fm/chat-protocol-contract';
+import type { ChatCardPart } from 'chat-protocol-contract';
 
 type CardRendererProps = {
   card: ChatCardPart;

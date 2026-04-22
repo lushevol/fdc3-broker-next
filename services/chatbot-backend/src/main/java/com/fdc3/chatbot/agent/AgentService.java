@@ -10,13 +10,8 @@ import com.fdc3.chatbot.agent.model.ValidatedExecutionStep;
 import com.fdc3.chatbot.agent.prompt.AgentDecisionPromptFactory;
 import com.fdc3.chatbot.agent.prompt.ResultSynthesisPromptFactory;
 import com.fdc3.chatbot.controlplane.CapabilityResolver;
-import com.fdc3.chatbot.controlplane.model.ExecutionPlan;
-import com.fdc3.chatbot.controlplane.model.ExecutionStep;
 import com.fdc3.chatbot.controlplane.model.ResolvedCapability;
 import com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot;
-import com.fdc3.chatbot.controlplane.planning.ExecutionPlanner;
-import com.fdc3.chatbot.controlplane.policy.PolicyDecision;
-import com.fdc3.chatbot.controlplane.policy.PolicyDecisionType;
 import com.fdc3.chatbot.controlplane.policy.PolicyEvaluator;
 import com.fdc3.chatbot.model.ChatMessage;
 import com.fdc3.chatbot.model.ExecutionPlanEvent;
@@ -58,11 +53,8 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Objects;
@@ -111,13 +103,9 @@ public class AgentService {
     @Value("${chatbot.mock.enabled:false}")
     private boolean mockEnabled;
 
-    @Value("${chatbot.agent.legacy-governed-planner-enabled:false}")
-    private boolean legacyGovernedPlannerEnabled;
-
     private final ToolRegistry toolRegistry;
     private final CapabilityResolver capabilityResolver;
     private final PolicyEvaluator policyEvaluator;
-    private final ExecutionPlanner executionPlanner;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private ChatModel chatModel;
@@ -135,24 +123,22 @@ public class AgentService {
             new ConcurrentHashMap<>();
 
     public AgentService(ToolRegistry toolRegistry) {
-        this(toolRegistry, null, null, null, null, null, null, null);
+        this(toolRegistry, null, null, null, null, null, null);
     }
 
     @Autowired
     public AgentService(
             ToolRegistry toolRegistry,
             CapabilityResolver capabilityResolver,
-            PolicyEvaluator policyEvaluator,
-            ExecutionPlanner executionPlanner
+            PolicyEvaluator policyEvaluator
     ) {
-        this(toolRegistry, capabilityResolver, policyEvaluator, executionPlanner, null, null, null, null);
+        this(toolRegistry, capabilityResolver, policyEvaluator, null, null, null, null);
     }
 
     public AgentService(
             ToolRegistry toolRegistry,
             CapabilityResolver capabilityResolver,
             PolicyEvaluator policyEvaluator,
-            ExecutionPlanner executionPlanner,
             AgentDecisionService agentDecisionService,
             PlanValidationService planValidationService,
             ExecutionOrchestrator executionOrchestrator,
@@ -161,7 +147,6 @@ public class AgentService {
         this.toolRegistry = toolRegistry;
         this.capabilityResolver = capabilityResolver;
         this.policyEvaluator = policyEvaluator;
-        this.executionPlanner = executionPlanner;
         this.agentDecisionService = agentDecisionService;
         this.planValidationService = planValidationService;
         this.executionOrchestrator = executionOrchestrator;
@@ -515,27 +500,6 @@ public class AgentService {
             return () -> cancelled.set(true);
         }
 
-        if (shouldUseLegacyGovernedReadOnlyMcpFlow()) {
-            List<ResolvedCapability> resolvedCapabilities = capabilityResolver.resolveCapabilities(capabilityContext);
-            ExecutionPlan executionPlan = executionPlanner.plan(userMessage, workspaceContext, resolvedCapabilities);
-            if (executionPlan != null && !executionPlan.getSteps().isEmpty()) {
-                executeGovernedPlan(
-                        executionPlan,
-                        availableTools,
-                        capabilityContext,
-                        onNext,
-                        onError,
-                        onComplete,
-                        onExecutionPlan,
-                        onExecutionStep,
-                        onToolCall,
-                        onToolResult,
-                        cancelled
-                );
-                return () -> cancelled.set(true);
-            }
-        }
-
         // Mock mode - simulate streaming response
         log.info("[DEBUG] Profile lookup - mockEnabled={}, streamingChatModel={}",
                 mockEnabled, streamingChatModel != null ? streamingChatModel.getClass().getSimpleName() : "null");
@@ -577,7 +541,7 @@ public class AgentService {
                     ? Set.of(frontendToolContinuation.getToolName())
                     : Set.of();
             boolean useTools = frontendToolContinuation != null
-                    || shouldUseTools(userMessage, availableTools)
+                    || !availableTools.isEmpty()
                     || !frontendToolManifest.isEmpty();
 
             if (!frontendToolManifest.isEmpty()) {
@@ -637,9 +601,6 @@ public class AgentService {
                     useTools ? buildToolSpecifications(availableTools, frontendToolManifest, blockedFrontendTools) : List.of(),
                     frontendToolManifest,
                     blockedFrontendTools,
-                    frontendToolContinuation == null
-                            ? null
-                            : FallbackToolContext.fromFrontendToolContinuation(frontendToolContinuation),
                     frontendToolContinuation != null ? "frontend-continuation" : "initial",
                     onNext,
                     onError,
@@ -721,13 +682,6 @@ public class AgentService {
                 && planValidationService != null
                 && resultSynthesisService != null
                 && (toolContext == null || toolContext.isBlank());
-    }
-
-    private boolean shouldUseLegacyGovernedReadOnlyMcpFlow() {
-        return legacyGovernedPlannerEnabled
-                && capabilityResolver != null
-                && policyEvaluator != null
-                && executionPlanner != null;
     }
 
     private void executeAgenticControlLoop(
@@ -964,13 +918,7 @@ public class AgentService {
             Map<String, Object> arguments,
             UserCapabilityContext capabilityContext
     ) {
-        Object result = executeCapability(availableTools, capability, arguments);
-        return enrichGovernedToolResult(
-                capability.getTargetName(),
-                arguments,
-                result,
-                capabilityContext
-        ).join();
+        return executeCapability(availableTools, capability, arguments);
     }
 
     private Object executeCapability(
@@ -1100,232 +1048,6 @@ public class AgentService {
         }
     }
 
-    private void executeGovernedPlan(
-            ExecutionPlan executionPlan,
-            Map<String, ToolDefinition> availableTools,
-            UserCapabilityContext capabilityContext,
-            java.util.function.Consumer<String> onNext,
-            java.util.function.Consumer<Throwable> onError,
-            java.lang.Runnable onComplete,
-            java.util.function.Consumer<ExecutionPlanEvent> onExecutionPlan,
-            java.util.function.Consumer<ExecutionStepEvent> onExecutionStep,
-            java.util.function.Consumer<ToolCall> onToolCall,
-            java.util.function.Consumer<ToolResult> onToolResult,
-            AtomicBoolean cancelled
-    ) {
-        ExecutionStep step = executionPlan.getSteps().get(0);
-        String planId = UUID.randomUUID().toString();
-        String stepId = "step-1";
-        onExecutionPlan.accept(ExecutionPlanEvent.builder()
-                .planId(planId)
-                .summary(step.getSummary())
-                .status("running")
-                .totalSteps(executionPlan.getSteps().size())
-                .build());
-        PolicyDecision policyDecision = policyEvaluator.evaluate(ResolvedCapability.builder()
-                .capabilityId(step.getCapabilityId())
-                .providerId(step.getProviderId())
-                .targetName(step.getTargetName())
-                .executionType(step.getStepType())
-                .accessType("read")
-                .tenantScope("global")
-                .build());
-
-        if (policyDecision.getDecisionType() == PolicyDecisionType.DENY) {
-            onExecutionStep.accept(ExecutionStepEvent.builder()
-                    .planId(planId)
-                    .stepId(stepId)
-                    .targetName(step.getTargetName())
-                    .summary(step.getSummary())
-                    .stepType(step.getStepType())
-                    .status("failed")
-                    .build());
-            onError.accept(new IllegalStateException(String.join("; ", policyDecision.getReasons())));
-            return;
-        }
-
-        ToolDefinition toolDefinition = availableTools.get(step.getTargetName());
-        if (toolDefinition == null) {
-            onExecutionStep.accept(ExecutionStepEvent.builder()
-                    .planId(planId)
-                    .stepId(stepId)
-                    .targetName(step.getTargetName())
-                    .summary(step.getSummary())
-                    .stepType(step.getStepType())
-                    .status("failed")
-                    .build());
-            onError.accept(new IllegalArgumentException("Planned tool not available: " + step.getTargetName()));
-            return;
-        }
-
-        onExecutionStep.accept(ExecutionStepEvent.builder()
-                .planId(planId)
-                .stepId(stepId)
-                .targetName(step.getTargetName())
-                .summary(step.getSummary())
-                .stepType(step.getStepType())
-                .status(policyDecision.getDecisionType() == PolicyDecisionType.REVIEW_REQUIRED ? "pending" : "running")
-                .build());
-
-        String toolCallId = UUID.randomUUID().toString();
-        onToolCall.accept(ToolCall.builder()
-                .id(toolCallId)
-                .name(step.getTargetName())
-                .arguments(step.getArguments())
-                .status(policyDecision.getDecisionType() == PolicyDecisionType.REVIEW_REQUIRED
-                        ? ToolCall.ToolStatus.PENDING
-                        : ToolCall.ToolStatus.RUNNING)
-                .executionTarget(ToolCall.ExecutionTarget.BACKEND)
-                .requiresConfirmation(policyDecision.getDecisionType() == PolicyDecisionType.REVIEW_REQUIRED)
-                .build());
-
-        if (policyDecision.getDecisionType() == PolicyDecisionType.REVIEW_REQUIRED) {
-            onExecutionPlan.accept(ExecutionPlanEvent.builder()
-                    .planId(planId)
-                    .summary(step.getSummary())
-                    .status("awaiting_review")
-                    .totalSteps(executionPlan.getSteps().size())
-                    .build());
-            onComplete.run();
-            return;
-        }
-
-        toolDefinition.execute(step.getArguments())
-                .thenCompose(result -> enrichGovernedToolResult(
-                        step.getTargetName(),
-                        step.getArguments(),
-                        result,
-                        capabilityContext
-                ))
-                .whenComplete((result, error) -> {
-            if (cancelled.get()) {
-                return;
-            }
-
-            if (error != null) {
-                onExecutionStep.accept(ExecutionStepEvent.builder()
-                        .planId(planId)
-                        .stepId(stepId)
-                        .targetName(step.getTargetName())
-                        .summary(step.getSummary())
-                        .stepType(step.getStepType())
-                        .status("failed")
-                        .build());
-                onExecutionPlan.accept(ExecutionPlanEvent.builder()
-                        .planId(planId)
-                        .summary(step.getSummary())
-                        .status("failed")
-                        .totalSteps(executionPlan.getSteps().size())
-                        .build());
-                onToolResult.accept(ToolResult.builder()
-                        .toolCallId(toolCallId)
-                        .error(error.getMessage())
-                        .build());
-                onError.accept(error);
-                return;
-            }
-
-            onExecutionStep.accept(ExecutionStepEvent.builder()
-                    .planId(planId)
-                    .stepId(stepId)
-                    .targetName(step.getTargetName())
-                    .summary(step.getSummary())
-                    .stepType(step.getStepType())
-                    .status("completed")
-                    .build());
-            onExecutionPlan.accept(ExecutionPlanEvent.builder()
-                    .planId(planId)
-                    .summary(step.getSummary())
-                    .status("completed")
-                    .totalSteps(executionPlan.getSteps().size())
-                    .build());
-            onToolResult.accept(ToolResult.builder()
-                    .toolCallId(toolCallId)
-                    .result(result)
-                    .build());
-            onNext.accept(buildGovernedPlanSummary(step, result));
-            onComplete.run();
-        });
-    }
-
-    private String buildGovernedPlanSummary(ExecutionStep step, Object result) {
-        if (!(result instanceof Map<?, ?> rawResultMap)) {
-            return "Completed " + step.getSummary() + ".";
-        }
-
-        Map<String, Object> resultMap = objectMapper.convertValue(rawResultMap, MAP_TYPE);
-        Object appName = resultMap.containsKey("filterValue")
-                ? resultMap.get("filterValue")
-                : step.getArguments().getOrDefault("appName", step.getArguments().get("appId"));
-        Object startTime = resultMap.containsKey("startTime")
-                ? resultMap.get("startTime")
-                : step.getArguments().get("startTime");
-        Object endTime = resultMap.containsKey("endTime")
-                ? resultMap.get("endTime")
-                : step.getArguments().get("endTime");
-        Object pv = resultMap.get("pv");
-        Object uv = resultMap.get("uv");
-        return appName + " usage from " + formatSummaryDate(startTime) + " to " + formatSummaryDate(endTime)
-                + ": PV " + pv + ", UV " + uv + ".";
-    }
-
-    private java.util.concurrent.CompletableFuture<Object> enrichGovernedToolResult(
-            String targetName,
-            Map<String, Object> arguments,
-            Object result,
-            UserCapabilityContext capabilityContext
-    ) {
-        if (!"statistic_count_by_app".equals(targetName)) {
-            return java.util.concurrent.CompletableFuture.completedFuture(result);
-        }
-
-        if (!(result instanceof Map<?, ?> rawResultMap)) {
-            return java.util.concurrent.CompletableFuture.completedFuture(result);
-        }
-
-        ToolDefinition chartTool = toolRegistry.resolveTools(capabilityContext).get("chart_by_app");
-        if (chartTool == null) {
-            return java.util.concurrent.CompletableFuture.completedFuture(result);
-        }
-
-        return chartTool.execute(new LinkedHashMap<>(arguments))
-                .handle((chartResult, error) -> {
-                    if (error != null) {
-                        log.warn("Failed to enrich usage statistics with chart data", error);
-                        return result;
-                    }
-
-                    if (!(chartResult instanceof Map<?, ?> rawChartResultMap)) {
-                        return result;
-                    }
-
-                    LinkedHashMap<String, Object> enrichedResult = new LinkedHashMap<>(
-                            objectMapper.convertValue(rawResultMap, MAP_TYPE)
-                    );
-                    Map<String, Object> chartResultMap = objectMapper.convertValue(rawChartResultMap, MAP_TYPE);
-                    Object points = chartResultMap.get("points");
-                    if (points instanceof List<?> pointList) {
-                        enrichedResult.put("trendPoints", pointList);
-                    }
-                    if (chartResultMap.containsKey("bucket")) {
-                        enrichedResult.put("trendBucket", chartResultMap.get("bucket"));
-                    }
-                    return enrichedResult;
-                });
-    }
-
-    private String formatSummaryDate(Object value) {
-        if (!(value instanceof String dateValue) || dateValue.isBlank()) {
-            return "the selected range";
-        }
-
-        try {
-            return Instant.parse(dateValue).toString().substring(0, 10);
-        } catch (DateTimeParseException exception) {
-            return dateValue;
-        }
-    }
-
     private FrontendToolContinuation parseFrontendToolContinuation(String toolContext) {
         if (toolContext == null || toolContext.isBlank()) {
             return null;
@@ -1390,7 +1112,6 @@ public class AgentService {
             List<ToolSpecification> toolSpecifications,
             List<FrontendToolManifestEntry> frontendToolManifest,
             Set<String> blockedToolNames,
-            FallbackToolContext fallbackToolContext,
             String turnPhase,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
@@ -1399,27 +1120,6 @@ public class AgentService {
             java.util.function.Consumer<ToolResult> onToolResult,
             AtomicBoolean cancelled
     ) {
-        Set<String> effectiveBlockedToolNames;
-        if (fallbackToolContext != null && "resolve_relative_date".equals(fallbackToolContext.toolName())) {
-            ToolExecutionRequest resolvedDateFollowup = inferResolvedDateFollowup(
-                    userMessage,
-                    history,
-                    availableTools,
-                    frontendToolManifest,
-                    fallbackToolContext
-            );
-            if (resolvedDateFollowup != null) {
-                java.util.LinkedHashSet<String> nextBlockedToolNames = new java.util.LinkedHashSet<>(blockedToolNames);
-                nextBlockedToolNames.add(resolvedDateFollowup.name());
-                effectiveBlockedToolNames = Set.copyOf(nextBlockedToolNames);
-            } else {
-                effectiveBlockedToolNames = blockedToolNames;
-            }
-        } else {
-            effectiveBlockedToolNames = blockedToolNames;
-        }
-        final Set<String> finalBlockedToolNames = effectiveBlockedToolNames;
-
         StringBuilder streamedAssistantText = new StringBuilder();
 
         StreamingChatResponseHandler handler = new StreamingChatResponseHandler() {
@@ -1456,53 +1156,9 @@ public class AgentService {
                             availableTools,
                             aiMessage.toolExecutionRequests(),
                             frontendToolManifest,
-                            finalBlockedToolNames,
+                            blockedToolNames,
                             0,
-                            fallbackToolContext,
                             true,
-                            onNext,
-                            onError,
-                            onComplete,
-                            onToolCall,
-                            onToolResult,
-                            cancelled
-                    );
-                    return;
-                }
-
-                FallbackToolPlan fallbackToolPlan = inferFallbackToolPlan(
-                        userMessage,
-                        history,
-                        availableTools,
-                        frontendToolManifest,
-                        fallbackToolContext
-                );
-                if (fallbackToolPlan != null) {
-                    ToolExecutionRequest fallbackToolRequest = fallbackToolPlan.request();
-                    AiMessage fallbackAiMessage = buildFallbackToolCallMessage(aiMessage, fallbackToolRequest);
-                    if (aiMessage != null) {
-                        logAssistantTurnDiagnostics(
-                                conversationId,
-                                buildAssistantTurnDiagnostics(turnPhase, fallbackAiMessage, streamedAssistantText.toString())
-                        );
-                    }
-
-                    List<dev.langchain4j.data.message.ChatMessage> continuedMessages =
-                            new java.util.ArrayList<>(messages);
-                    continuedMessages.add(fallbackAiMessage);
-
-                    continueWithToolRequests(
-                            conversationId,
-                            userMessage,
-                            history,
-                            continuedMessages,
-                            availableTools,
-                            List.of(fallbackToolRequest),
-                            frontendToolManifest,
-                            finalBlockedToolNames,
-                            0,
-                            fallbackToolContext,
-                            fallbackToolPlan.continueAfterToolLoop(),
                             onNext,
                             onError,
                             onComplete,
@@ -1533,13 +1189,7 @@ public class AgentService {
                 onError.accept(error);
             }
         };
-
-        List<ToolSpecification> effectiveToolSpecifications =
-                finalBlockedToolNames.equals(blockedToolNames)
-                        ? toolSpecifications
-                        : buildToolSpecifications(availableTools, frontendToolManifest, finalBlockedToolNames);
-
-        streamingChatModel.chat(buildChatRequest(messages, effectiveToolSpecifications), handler);
+        streamingChatModel.chat(buildChatRequest(messages, toolSpecifications), handler);
     }
 
     private void emitRemainingAssistantText(
@@ -1578,7 +1228,6 @@ public class AgentService {
             List<FrontendToolManifestEntry> frontendToolManifest,
             Set<String> blockedToolNames,
             int index,
-            FallbackToolContext fallbackToolContext,
             boolean continueAfterToolLoop,
             java.util.function.Consumer<String> onNext,
             java.util.function.Consumer<Throwable> onError,
@@ -1606,7 +1255,6 @@ public class AgentService {
                     buildToolSpecifications(availableTools, frontendToolManifest, blockedToolNames),
                     frontendToolManifest,
                     blockedToolNames,
-                    fallbackToolContext,
                     "tool-loop",
                     onNext,
                     onError,
@@ -1693,7 +1341,6 @@ public class AgentService {
                             frontendToolManifest,
                             Set.copyOf(nextBlockedToolNames),
                             index + 1,
-                            FallbackToolContext.fromToolExecution(toolExecutionRequest.name(), arguments, result),
                             continueAfterToolLoop,
                             onNext,
                             onError,
@@ -1703,270 +1350,6 @@ public class AgentService {
                             cancelled
                     );
                 });
-    }
-
-    private FallbackToolPlan inferFallbackToolPlan(
-            String userMessage,
-            List<ChatMessage> history,
-            Map<String, ToolDefinition> availableTools,
-            List<FrontendToolManifestEntry> frontendToolManifest,
-            FallbackToolContext fallbackToolContext
-    ) {
-        if (userMessage == null || userMessage.isBlank()) {
-            return null;
-        }
-
-        String normalized = userMessage.toLowerCase(Locale.ROOT).trim();
-        if (fallbackToolContext != null && "resolve_relative_date".equals(fallbackToolContext.toolName())) {
-            ToolExecutionRequest chainedRequest = inferResolvedDateFollowup(
-                    userMessage,
-                    history,
-                    availableTools,
-                    frontendToolManifest,
-                    fallbackToolContext
-            );
-            if (chainedRequest != null) {
-                return new FallbackToolPlan(chainedRequest, false);
-            }
-        }
-
-        String relativeDateExpression = extractRelativeDateExpression(userMessage);
-        if (relativeDateExpression != null
-                && availableTools.containsKey("resolve_relative_date")
-                && (isEmailApprovalIntent(normalized) || isTemporalWeatherIntent(normalized) || isAnalyticsIntent(normalized))) {
-            return new FallbackToolPlan(
-                    ToolExecutionRequest.builder()
-                            .id(UUID.randomUUID().toString())
-                            .name("resolve_relative_date")
-                            .arguments(writeJson(Map.of("expression", relativeDateExpression)))
-                            .build(),
-                    true
-            );
-        }
-
-        if (!availableTools.containsKey("get_weather")) {
-            return null;
-        }
-
-        if (!(normalized.contains("weather")
-                || normalized.contains("temperature")
-                || normalized.contains("forecast"))) {
-            return null;
-        }
-
-        String location = extractWeatherLocation(userMessage);
-        if (location == null || location.isBlank()) {
-            return null;
-        }
-
-        return new FallbackToolPlan(
-                ToolExecutionRequest.builder()
-                        .id(UUID.randomUUID().toString())
-                        .name("get_weather")
-                        .arguments(writeJson(Map.of("location", location)))
-                        .build(),
-                false
-        );
-    }
-
-    private ToolExecutionRequest inferResolvedDateFollowup(
-            String userMessage,
-            List<ChatMessage> history,
-            Map<String, ToolDefinition> availableTools,
-            List<FrontendToolManifestEntry> frontendToolManifest,
-            FallbackToolContext fallbackToolContext
-    ) {
-        String resolvedDate = fallbackToolContext.resolvedDate();
-        if (resolvedDate == null || resolvedDate.isBlank()) {
-            return null;
-        }
-
-        String normalized = userMessage.toLowerCase(Locale.ROOT).trim();
-        if (isEmailApprovalIntent(normalized) && hasFrontendTool(frontendToolManifest, "approval_confirm")) {
-            String recipient = extractRecipientEmail(history);
-            if (recipient == null || recipient.isBlank()) {
-                return null;
-            }
-            String recipientName = extractRecipientName(history);
-            String readableDate = fallbackToolContext.readableDate() == null
-                    ? resolvedDate
-                    : fallbackToolContext.readableDate();
-            return ToolExecutionRequest.builder()
-                    .id(UUID.randomUUID().toString())
-                    .name("approval_confirm")
-                    .arguments(writeJson(Map.of(
-                            "to", recipient,
-                            "subject", "Sick leave request for " + resolvedDate,
-                            "body", buildSickLeaveEmailBody(recipientName, readableDate)
-                    )))
-                    .build();
-        }
-
-        if (isTemporalWeatherIntent(normalized) && availableTools.containsKey("get_weather_history")) {
-            String location = extractWeatherLocation(stripDateExpression(userMessage));
-            if (location == null || location.isBlank()) {
-                return null;
-            }
-            return ToolExecutionRequest.builder()
-                    .id(UUID.randomUUID().toString())
-                    .name("get_weather_history")
-                    .arguments(writeJson(Map.of(
-                            "location", location,
-                            "date", resolvedDate
-                    )))
-                    .build();
-        }
-
-        if (isAnalyticsIntent(normalized) && availableTools.containsKey("statistic_count_by_app")) {
-            String appId = extractAnalyticsAppId(userMessage);
-            if (appId == null || appId.isBlank()) {
-                return null;
-            }
-            LocalDate startDate = LocalDate.parse(resolvedDate);
-            LocalDate endDate = startDate.plusDays(1);
-            return ToolExecutionRequest.builder()
-                    .id(UUID.randomUUID().toString())
-                    .name("statistic_count_by_app")
-                    .arguments(writeJson(Map.of(
-                            "appId", appId,
-                            "startTime", startDate + "T00:00:00Z",
-                            "endTime", endDate + "T00:00:00Z"
-                    )))
-                    .build();
-        }
-
-        return null;
-    }
-
-    private AiMessage buildFallbackToolCallMessage(AiMessage aiMessage, ToolExecutionRequest fallbackToolRequest) {
-        if (aiMessage == null) {
-            return AiMessage.from(List.of(fallbackToolRequest));
-        }
-
-        String assistantText = aiMessage.text();
-        if (assistantText == null || assistantText.isBlank()) {
-            return AiMessage.from(List.of(fallbackToolRequest));
-        }
-
-        return AiMessage.from(assistantText, List.of(fallbackToolRequest));
-    }
-
-    private String extractWeatherLocation(String userMessage) {
-        String normalized = userMessage.trim();
-        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(
-                "(?i)(?:weather|temperature|forecast)(?:\\s+(?:in|for|at))?\\s+(.+)"
-        ).matcher(normalized);
-
-        if (!matcher.find()) {
-            return null;
-        }
-
-        String location = matcher.group(1).trim();
-        location = location.replaceAll("[?.!,]+$", "").trim();
-        return location.isEmpty() ? null : location.substring(0, 1).toUpperCase(Locale.ROOT) + location.substring(1);
-    }
-
-    private boolean isTemporalWeatherIntent(String normalizedUserMessage) {
-        return normalizedUserMessage.contains("weather")
-                || normalizedUserMessage.contains("temperature")
-                || normalizedUserMessage.contains("forecast");
-    }
-
-    private boolean isEmailApprovalIntent(String normalizedUserMessage) {
-        return normalizedUserMessage.contains("email") || normalizedUserMessage.contains("mail");
-    }
-
-    private boolean isAnalyticsIntent(String normalizedUserMessage) {
-        return normalizedUserMessage.contains("analytics")
-                || normalizedUserMessage.contains("usage")
-                || normalizedUserMessage.contains("pv")
-                || normalizedUserMessage.contains("uv")
-                || normalizedUserMessage.contains("page view")
-                || normalizedUserMessage.contains("unique visitor")
-                || normalizedUserMessage.contains("unique user");
-    }
-
-    private boolean hasFrontendTool(List<FrontendToolManifestEntry> frontendToolManifest, String toolName) {
-        return frontendToolManifest.stream().anyMatch(tool -> toolName.equals(tool.getName()));
-    }
-
-    private String extractRelativeDateExpression(String userMessage) {
-        String normalized = userMessage.toLowerCase(Locale.ROOT);
-        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(
-                "(day before yesterday|day after tomorrow|the day before yesterday|the day after tomorrow|yesterday|tomorrow|today|last\\s+[a-z]+|next\\s+[a-z]+|this\\s+[a-z]+|\\d+\\s+days?\\s+ago|in\\s+\\d+\\s+days?|\\d+\\s+weeks?\\s+ago|in\\s+\\d+\\s+weeks?)"
-        ).matcher(normalized);
-        return matcher.find() ? matcher.group(1) : null;
-    }
-
-    private String stripDateExpression(String userMessage) {
-        String expression = extractRelativeDateExpression(userMessage);
-        if (expression == null) {
-            return userMessage;
-        }
-        return userMessage.replaceFirst("(?i)" + java.util.regex.Pattern.quote(expression), "").trim();
-    }
-
-    private String extractRecipientEmail(List<ChatMessage> history) {
-        if (history == null) {
-            return null;
-        }
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
-                "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
-        );
-        for (int i = history.size() - 1; i >= 0; i--) {
-            ChatMessage message = history.get(i);
-            if (message.getContent() == null) {
-                continue;
-            }
-            java.util.regex.Matcher matcher = pattern.matcher(message.getContent());
-            if (matcher.find()) {
-                return matcher.group();
-            }
-        }
-        return null;
-    }
-
-    private String extractRecipientName(List<ChatMessage> history) {
-        if (history == null) {
-            return null;
-        }
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(?i)name:\\s*([A-Za-z][A-Za-z .'-]+)");
-        for (int i = history.size() - 1; i >= 0; i--) {
-            ChatMessage message = history.get(i);
-            if (message.getContent() == null) {
-                continue;
-            }
-            java.util.regex.Matcher matcher = pattern.matcher(message.getContent());
-            if (matcher.find()) {
-                return matcher.group(1).trim();
-            }
-        }
-        return null;
-    }
-
-    private String buildSickLeaveEmailBody(String recipientName, String readableDate) {
-        String salutation = (recipientName == null || recipientName.isBlank())
-                ? "Hi,"
-                : "Hi " + recipientName + ",";
-        return salutation
-                + "\n\n"
-                + "I am feeling unwell and would like to request sick leave for "
-                + readableDate
-                + ".\n\n"
-                + "Please let me know if you need any additional information.\n\n"
-                + "Best regards";
-    }
-
-    private String extractAnalyticsAppId(String userMessage) {
-        String withoutDate = stripDateExpression(userMessage).replace('?', ' ').trim();
-        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(
-                "(?i)(?:pv|uv|page views?|unique visitors?|unique users?).*?(?:of|for)\\s+([a-zA-Z0-9_\\- ]+)"
-        ).matcher(withoutDate);
-        if (!matcher.find()) {
-            return null;
-        }
-        String rawValue = matcher.group(1).trim().replaceAll("\\s+", "_");
-        return rawValue.replaceAll("[^A-Za-z0-9_\\-]", "");
     }
 
     private List<ToolSpecification> buildToolSpecifications(
@@ -2517,46 +1900,6 @@ public class AgentService {
     ) {
     }
 
-    private record FallbackToolPlan(
-            ToolExecutionRequest request,
-            boolean continueAfterToolLoop
-    ) {
-    }
-
-    private record FallbackToolContext(
-            String toolName,
-            Map<String, Object> arguments,
-            Object result
-    ) {
-        static FallbackToolContext fromFrontendToolContinuation(FrontendToolContinuation continuation) {
-            return new FallbackToolContext(
-                    continuation.getToolName(),
-                    continuation.getArgs() == null ? Map.of() : continuation.getArgs(),
-                    continuation.getResult()
-            );
-        }
-
-        static FallbackToolContext fromToolExecution(String toolName, Map<String, Object> arguments, Object result) {
-            return new FallbackToolContext(toolName, arguments == null ? Map.of() : Map.copyOf(arguments), result);
-        }
-
-        String resolvedDate() {
-            if (!(result instanceof Map<?, ?> resultMap)) {
-                return null;
-            }
-            Object value = resultMap.get("resolvedDate");
-            return value == null ? null : String.valueOf(value);
-        }
-
-        String readableDate() {
-            if (!(result instanceof Map<?, ?> resultMap)) {
-                return null;
-            }
-            Object value = resultMap.get("readable");
-            return value == null ? null : String.valueOf(value);
-        }
-    }
-
     private static final class MockStreamHandle {
         private final AtomicBoolean cancelled = new AtomicBoolean(false);
         private final List<ScheduledFuture<?>> futures = new java.util.concurrent.CopyOnWriteArrayList<>();
@@ -2594,7 +1937,7 @@ public class AgentService {
             // Build message list for LangChain4j
             List<dev.langchain4j.data.message.ChatMessage> messages = new java.util.ArrayList<>();
             Map<String, ToolDefinition> availableTools = toolRegistry.resolveTools(UserCapabilityContext.anonymous());
-            boolean useTools = shouldUseTools(userMessage, availableTools);
+            boolean useTools = !availableTools.isEmpty();
 
             // Add system message
             messages.add(new SystemMessage(buildSystemPrompt(useTools ? availableTools : Map.of())));
@@ -2641,12 +1984,6 @@ public class AgentService {
                 Avoid markdown headings, labels like "ProgressUpdate", and bold section titles for these short updates unless the user explicitly asked for structured markdown.
                 Prefer natural prose over document-style formatting when you are mixing tool results with conversational reasoning.
                 After tool execution, explain what you're doing and show the results clearly.
-
-                Multi-tool chaining:
-                When the user asks about past or future weather (e.g. "weather in Beijing yesterday"), you MUST call resolve_relative_date first to get the absolute date, then call get_weather_history with that date and the location. Never use get_weather (current weather) for historical queries. Example chain: resolve_relative_date(expression="yesterday") → get_weather_history(location="Beijing, CN", date=<resolved date>).
-                When the user asks to send or draft an email that mentions a relative date (e.g. "send an email to him to ask for sick leave tomorrow"), you MUST call resolve_relative_date first and then call approval_confirm with the composed email fields. Do not ask the user to manually resolve "tomorrow" if resolve_relative_date is available.
-                When the user asks for PV/UV or usage analytics with a relative date (e.g. "what's the pv and uv of cashflow_blotter yesterday"), you MUST call resolve_relative_date first and then call statistic_count_by_app using the resolved date window.
-                If a prior assistant message already identified a person and included an email address, you may reuse that recent context to resolve pronouns like "him" or "her" in a follow-up email request.
                 """.formatted(
                         availableTools.values().stream()
                                 .map(tool -> "- " + tool.getName() + ": " + tool.getDescription())
@@ -2734,41 +2071,6 @@ public class AgentService {
                 resultJson,
                 errorInstruction
         );
-    }
-
-    private boolean shouldUseTools(String userMessage, Map<String, ToolDefinition> availableTools) {
-        if (availableTools.isEmpty() || userMessage == null || userMessage.isBlank()) {
-            return false;
-        }
-
-        String normalized = userMessage.toLowerCase(Locale.ROOT);
-        boolean hasAnalyticsTools = availableTools.containsKey("statistic_count_by_app")
-                || availableTools.containsKey("chart_by_app");
-        if (hasAnalyticsTools && (
-                normalized.contains("analytics")
-                        || normalized.contains("usage")
-                        || normalized.contains("pv")
-                        || normalized.contains("uv")
-                        || normalized.contains("page view")
-                        || normalized.contains("unique visitor")
-                        || normalized.contains("unique user")
-        )) {
-            return true;
-        }
-
-        return normalized.contains("weather")
-                || normalized.contains("temperature")
-                || normalized.contains("forecast")
-                || normalized.contains("time")
-                || normalized.contains("timezone")
-                || normalized.contains("clock")
-                || normalized.contains("calculate")
-                || normalized.contains("math")
-                || normalized.contains("sum")
-                || normalized.contains("subtract")
-                || normalized.contains("multiply")
-                || normalized.contains("divide")
-                || normalized.matches(".*\\d\\s*[+\\-*/()]\\s*\\d.*");
     }
 
     /**

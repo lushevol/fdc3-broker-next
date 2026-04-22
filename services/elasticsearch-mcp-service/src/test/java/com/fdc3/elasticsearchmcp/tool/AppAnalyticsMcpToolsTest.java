@@ -36,72 +36,53 @@ class AppAnalyticsMcpToolsTest {
     }
 
     @Test
-    void statisticCountDelegatesToServiceWithParsedRequest() {
+    void visitedUserCountDelegatesWithParsedRequest() {
         when(analyticsService.statisticCountByApp(any())).thenReturn(new AppStatisticCountResponse(
-                "appId",
-                "app-1",
+                "cashflow blotter",
                 Instant.parse("2026-04-01T00:00:00Z"),
-                Instant.parse("2026-04-02T00:00:00Z"),
-                100L,
-                25L
+                Instant.parse("2026-04-08T23:59:59Z"),
+                30L
         ));
 
-        var response = tools.statisticCountByApp(
-                "app-1",
-                null,
+        var response = tools.visitedUserCountByApplication(
+                "cashflow blotter",
                 "2026-04-01T00:00:00Z",
-                "2026-04-02T00:00:00Z"
+                "2026-04-08T23:59:59Z"
         );
 
         ArgumentCaptor<AppStatisticCountRequest> captor = ArgumentCaptor.forClass(AppStatisticCountRequest.class);
         verify(analyticsService).statisticCountByApp(captor.capture());
-        assertThat(captor.getValue().appId()).isEqualTo("app-1");
-        assertThat(response.uv()).isEqualTo(25L);
+        assertThat(captor.getValue().application()).isEqualTo("cashflow blotter");
+        assertThat(response.uv()).isEqualTo(30L);
     }
 
     @Test
-    void chartDelegatesToServiceWithParsedBucket() {
+    void visitedUserHourlyDelegatesWithParsedRequest() {
         when(analyticsService.chartByApp(any())).thenReturn(new AppChartResponse(
-                "appName",
-                "App One",
+                "trades",
                 Instant.parse("2026-04-01T00:00:00Z"),
-                Instant.parse("2026-04-03T00:00:00Z"),
-                AppChartBucket.DAY,
+                Instant.parse("2026-04-01T12:00:00Z"),
+                AppChartBucket.HOUR,
                 List.of()
         ));
 
-        var response = tools.chartByApp(
-                null,
-                "App One",
+        var response = tools.visitedUserHourlyByApplication(
+                "trades",
                 "2026-04-01T00:00:00Z",
-                "2026-04-03T00:00:00Z",
-                "day"
+                "2026-04-01T12:00:00Z"
         );
 
-        assertThat(response.bucket()).isEqualTo(AppChartBucket.DAY);
+        assertThat(response.application()).isEqualTo("trades");
         verify(analyticsService).chartByApp(any());
     }
 
     @Test
-    void rejectsMissingAppFilter() {
-        assertThatThrownBy(() -> tools.statisticCountByApp(
-                null,
-                " ",
+    void rejectsUnsupportedApplication() {
+        assertThatThrownBy(() -> tools.visitedUserCountByApplication(
+                "cashflow",
                 "2026-04-01T00:00:00Z",
-                "2026-04-02T00:00:00Z"
+                "2026-04-01T23:59:59Z"
         )).isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Either appId or appName must be provided");
-    }
-
-    @Test
-    void rejectsUnknownBucket() {
-        assertThatThrownBy(() -> tools.chartByApp(
-                "app-1",
-                null,
-                "2026-04-01T00:00:00Z",
-                "2026-04-02T00:00:00Z",
-                "month"
-        )).isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("bucket must be one of HOUR, DAY, or WEEK");
+                .hasMessageContaining("application must be one of");
     }
 }

@@ -61,6 +61,42 @@ public class ToolRegistry {
         return resolveTools(UserCapabilityContext.anonymous());
     }
 
+    public Map<String, ResolvedToolMetadata> resolveToolMetadata(UserCapabilityContext context) {
+        String cacheKey = context.getUserId() + "|" + context.getProfileFingerprint() + "|" + registryVersion.get();
+        Map<String, ToolDefinition> resolvedTools = resolveTools(context);
+        Map<String, ResolvedToolMetadata> metadata = new LinkedHashMap<>();
+
+        resolvedTools.forEach((name, definition) -> {
+            RegisteredTool localTool = localTools.get(name);
+            if (localTool != null) {
+                metadata.put(name, new ResolvedToolMetadata(
+                        name,
+                        definition,
+                        "local",
+                        "local",
+                        defaultAccessType(definition),
+                        "global"
+                ));
+                return;
+            }
+
+            mcpProviders.forEach((providerId, providerState) -> {
+                if (!metadata.containsKey(name) && providerState.tools().containsKey(name)) {
+                    metadata.put(name, new ResolvedToolMetadata(
+                            name,
+                            definition,
+                            providerId,
+                            "mcp",
+                            "read",
+                            "global"
+                    ));
+                }
+            });
+        });
+
+        return Map.copyOf(metadata);
+    }
+
     public Map<String, ToolDefinition> resolveTools(UserCapabilityContext context) {
         String cacheKey = context.getUserId() + "|" + context.getProfileFingerprint() + "|" + registryVersion.get();
         return resolvedToolCache.computeIfAbsent(cacheKey, ignored -> {
@@ -202,6 +238,10 @@ public class ToolRegistry {
         }
     }
 
+    private String defaultAccessType(ToolDefinition toolDefinition) {
+        return toolDefinition.requiresConfirmation() ? "write" : "read";
+    }
+
     private record RegisteredTool(ToolDefinition definition, Set<String> enabledProfiles) {
     }
 
@@ -209,6 +249,16 @@ public class ToolRegistry {
             RegisteredMcpProvider provider,
             Map<String, ToolDefinition> tools,
             Set<String> enabledProfiles
+    ) {
+    }
+
+    public record ResolvedToolMetadata(
+            String name,
+            ToolDefinition definition,
+            String providerId,
+            String executionType,
+            String accessType,
+            String tenantScope
     ) {
     }
 }

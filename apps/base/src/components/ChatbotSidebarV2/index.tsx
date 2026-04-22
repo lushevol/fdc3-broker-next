@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { ChatProtocolProvider, AssistantModal, type Toolkit } from '@fm/chat-protocol-ui';
+import { ChatProtocolProvider, AssistantModal, type Toolkit } from 'chat-protocol-ui';
 import { createToolkitBridge } from './lib/toolkitBridge';
 import { runtimeToolkit, getProtocolToolDescriptors } from './toolkit/tools';
-// import '@fm/chat-protocol-ui/styles.css';
+import 'chat-protocol-ui/styles.css';
 
 const API_URL = process.env.CHAT_API_URL || 'http://127.0.0.1:8080/api/chat/runs';
 

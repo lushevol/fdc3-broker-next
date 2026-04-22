@@ -387,7 +387,6 @@ export const UsageStatisticsCardComponent: React.FC<{
 }> = ({ props }) => {
   const theme = useTheme();
   const ticks = props.trendPoints.map((point) => formatUsageDateLabel(point.timestamp));
-  const pvValues = props.trendPoints.map((point) => point.pv);
   const uvValues = props.trendPoints.map((point) => point.uv);
   const isDarkMode = theme.palette.mode === 'dark';
   const shellBackground = isDarkMode
@@ -427,37 +426,9 @@ export const UsageStatisticsCardComponent: React.FC<{
       </div>
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-          gap: theme.spacing(1.5),
           marginBottom: theme.spacing(2),
         }}
       >
-        <div
-          data-testid="usage-statistics-pv-tile"
-          style={{
-            padding: theme.spacing(1.75),
-            borderRadius: 18,
-            background: tileBackground,
-            border: `1px solid ${shellBorder}`,
-            boxShadow: isDarkMode
-              ? 'inset 0 1px 0 rgba(255,255,255,0.04)'
-              : '0 10px 24px -24px rgba(15,23,42,0.28)',
-          }}
-        >
-          <div
-            style={{
-              color: theme.palette.text.secondary,
-              fontSize: '0.75rem',
-              textTransform: 'uppercase',
-            }}
-          >
-            PV
-          </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, letterSpacing: '-0.03em' }}>
-            {props.pv.toLocaleString()}
-          </div>
-        </div>
         <div
           data-testid="usage-statistics-uv-tile"
           style={{
@@ -477,36 +448,32 @@ export const UsageStatisticsCardComponent: React.FC<{
               textTransform: 'uppercase',
             }}
           >
-            UV
+            Visited Users
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: 700, letterSpacing: '-0.03em' }}>
             {props.uv.toLocaleString()}
           </div>
         </div>
       </div>
-      <div
-        style={{
-          display: 'grid',
-          gap: theme.spacing(2),
-          borderRadius: 20,
-          background: chartBackground,
-          border: `1px solid ${shellBorder}`,
-          padding: theme.spacing(1.5),
-        }}
-      >
-        <TrendChart
-          label="PV Trend"
-          color={theme.palette.primary.main}
-          values={pvValues}
-          ticks={ticks}
-        />
-        <TrendChart
-          label="UV Trend"
-          color={theme.palette.success.main}
-          values={uvValues}
-          ticks={ticks}
-        />
-      </div>
+      {props.supportsTrend !== false && props.trendPoints.length > 0 ? (
+        <div
+          style={{
+            display: 'grid',
+            gap: theme.spacing(2),
+            borderRadius: 20,
+            background: chartBackground,
+            border: `1px solid ${shellBorder}`,
+            padding: theme.spacing(1.5),
+          }}
+        >
+          <TrendChart
+            label="Hourly UV Trend"
+            color={theme.palette.success.main}
+            values={uvValues}
+            ticks={ticks}
+          />
+        </div>
+      ) : null}
     </div>
   );
 };

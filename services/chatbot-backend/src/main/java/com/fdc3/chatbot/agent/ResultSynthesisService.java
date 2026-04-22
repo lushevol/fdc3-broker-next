@@ -84,18 +84,19 @@ public class ResultSynthesisService {
             return defaultSummary(decision);
         }
 
-        Object appName = firstNonBlank(
-                rawResult.get("appName"),
-                rawResult.get("appId"),
-                rawResult.get("filterValue")
-        );
+        Object application = rawResult.get("application");
         Object from = firstNonBlank(rawResult.get("from"), rawResult.get("startTime"));
         Object to = firstNonBlank(rawResult.get("to"), rawResult.get("endTime"));
-        Object pv = firstNonBlank(rawResult.get("pv"), rawResult.get("pvTotal"));
         Object uv = firstNonBlank(rawResult.get("uv"), rawResult.get("uvTotal"));
+        Object points = rawResult.get("points");
 
-        if (appName != null && from != null && to != null && pv != null && uv != null) {
-            return appName + " usage from " + from + " to " + to + ": PV " + pv + ", UV " + uv + ".";
+        if (application != null && from != null && to != null && uv != null) {
+            return application + " visited users from " + from + " to " + to + ": UV " + uv + ".";
+        }
+
+        if (application != null && from != null && to != null && points instanceof java.util.List<?> pointList) {
+            return application + " hourly visited user trend from " + from + " to " + to
+                    + " returned " + pointList.size() + " points.";
         }
 
         return defaultSummary(decision);

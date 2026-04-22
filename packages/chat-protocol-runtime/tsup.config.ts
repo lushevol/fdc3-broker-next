@@ -7,7 +7,7 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   target: 'es2020',
-  external: ['react', 'react-dom', '@assistant-ui/react', '@fm/chat-protocol-contract'],
+  external: ['react', 'react-dom', '@assistant-ui/react', 'chat-protocol-contract'],
   splitting: false,
   minify: process.env.NODE_ENV === 'production',
 });

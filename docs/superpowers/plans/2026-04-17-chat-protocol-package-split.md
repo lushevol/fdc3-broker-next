@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Split the current protocol-native demo stack into two reusable packages, `@fm/chat-protocol-runtime` and `@fm/chat-protocol-ui`, then refactor `apps/chat-protocol-demo-web` to consume them as a thin proving client.
+**Goal:** Split the current protocol-native demo stack into two reusable packages, `chat-protocol-runtime` and `chat-protocol-ui`, then refactor `apps/chat-protocol-demo-web` to consume them as a thin proving client.
 
 **Architecture:** Evolve the existing `packages/chat-protocol-frontend` code into the runtime package, extract reusable protocol-facing UI from `apps/chat-protocol-demo-web` into a second UI package, then make the demo app a consumer of both packages. Ignore `apps/base` as an extraction source; it is only a future adopter.
 
@@ -22,7 +22,7 @@
 - Test: `packages/chat-protocol-frontend/test/*`
 
 - [ ] **Step 1: Write failing runtime-package tests for request building, resume flows, and thread conversation bookkeeping**
-- [ ] **Step 2: Keep the existing folder temporarily, but evolve the package name/export surface toward `@fm/chat-protocol-runtime`**
+- [ ] **Step 2: Keep the existing folder temporarily, but evolve the package name/export surface toward `chat-protocol-runtime`**
 - [ ] **Step 3: Move protocol request submission and resume helper logic out of `apps/chat-protocol-demo-web/src/ChatProtocolApp.tsx` into runtime package modules**
 - [ ] **Step 4: Extend the runtime package exports so consumer apps can build submit-message and submit-tool-result flows without reimplementing them**
 - [ ] **Step 5: Run the runtime package tests**
@@ -103,14 +103,14 @@
 
 After completion:
 
-- `@fm/chat-protocol-runtime` owns generic runtime, transport, frame adaptation, request building, and continuation logic
-- `@fm/chat-protocol-ui` owns generic React provider, modal, thread, and rendering shell code
+- `chat-protocol-runtime` owns generic runtime, transport, frame adaptation, request building, and continuation logic
+- `chat-protocol-ui` owns generic React provider, modal, thread, and rendering shell code
 - `apps/chat-protocol-demo-web` owns only demo-specific presets, sample tools, and debug/explanatory surfaces
 
 ## Open Implementation Decisions
 
 These decisions should be resolved at the start of execution, not deferred mid-refactor:
 
-1. The folder stays as `packages/chat-protocol-frontend` temporarily, but the package surface should shift toward `@fm/chat-protocol-runtime`
+1. The folder stays as `packages/chat-protocol-frontend` temporarily, but the package surface should shift toward `chat-protocol-runtime`
 2. Which current demo components are generic enough to move untouched versus needing package-safe cleanup first
 3. Whether any demo-only helper should remain in the app even if it looks superficially reusable

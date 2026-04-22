@@ -99,27 +99,23 @@ describe('GenerativeUI', () => {
         <RegisteredComponent
           name="UsageStatisticsCard"
           props={{
-            appLabel: 'cashflow',
+            appLabel: 'cashflow blotter',
             startTime: '2026-04-01T00:00:00Z',
             endTime: '2026-04-08T00:00:00Z',
-            pv: 120,
             uv: 30,
             trendPoints: [
-              { timestamp: '2026-04-01T00:00:00Z', pv: 50, uv: 12 },
-              { timestamp: '2026-04-08T00:00:00Z', pv: 70, uv: 18 },
+              { timestamp: '2026-04-01T00:00:00Z', uv: 12 },
+              { timestamp: '2026-04-08T00:00:00Z', uv: 18 },
             ],
           }}
         />
       </GenerativeUIProvider>,
     );
 
-    expect(screen.getByText('cashflow')).toBeInTheDocument();
-    expect(screen.getByText('PV')).toBeInTheDocument();
-    expect(screen.getByText('UV')).toBeInTheDocument();
-    expect(screen.getByText('120')).toBeInTheDocument();
+    expect(screen.getByText('cashflow blotter')).toBeInTheDocument();
+    expect(screen.getByText('Visited Users')).toBeInTheDocument();
     expect(screen.getByText('30')).toBeInTheDocument();
-    expect(screen.getByText('PV Trend')).toBeInTheDocument();
-    expect(screen.getByText('UV Trend')).toBeInTheDocument();
+    expect(screen.getByText('Hourly UV Trend')).toBeInTheDocument();
   });
 
   it('adapts usage statistics card surfaces for dark theme', () => {
@@ -129,14 +125,13 @@ describe('GenerativeUI', () => {
           <RegisteredComponent
             name="UsageStatisticsCard"
             props={{
-              appLabel: 'cashflow',
+              appLabel: 'cashflow blotter',
               startTime: '2026-04-01T00:00:00Z',
               endTime: '2026-04-08T00:00:00Z',
-              pv: 120,
               uv: 30,
               trendPoints: [
-                { timestamp: '2026-04-01T00:00:00Z', pv: 50, uv: 12 },
-                { timestamp: '2026-04-08T00:00:00Z', pv: 70, uv: 18 },
+                { timestamp: '2026-04-01T00:00:00Z', uv: 12 },
+                { timestamp: '2026-04-08T00:00:00Z', uv: 18 },
               ],
             }}
           />
@@ -145,7 +140,6 @@ describe('GenerativeUI', () => {
     );
 
     expect(screen.getByTestId('usage-statistics-card')).toBeInTheDocument();
-    expect(screen.getByTestId('usage-statistics-pv-tile')).toBeInTheDocument();
     expect(screen.getByTestId('usage-statistics-uv-tile')).toBeInTheDocument();
   });
 });

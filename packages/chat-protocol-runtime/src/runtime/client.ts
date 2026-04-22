@@ -7,7 +7,7 @@ import type {
   ChatToolCallPart,
   ChatToolDescriptor,
   ChatToolMessage,
-} from '@fm/chat-protocol-contract';
+} from 'chat-protocol-contract';
 import type { ThreadMessage } from '@assistant-ui/react';
 import { createProtocolStreamAdapter } from './createProtocolStreamAdapter';
 import type { ToolkitBridge } from './toolkitBridge';
@@ -455,7 +455,7 @@ export async function* streamProtocolRun({
   // Deprecation warning for resolveFrontendTool
   if (resolveFrontendTool && !toolkitBridge) {
     console.warn(
-      '[@fm/chat-protocol-runtime] Deprecation Warning: ' +
+      '[chat-protocol-runtime] Deprecation Warning: ' +
         'resolveFrontendTool is deprecated and will be removed in v3.0.0. ' +
         'Use toolkitBridge for unified tool execution. ' +
         'See migration guide in chat-protocol-runtime/README.md',

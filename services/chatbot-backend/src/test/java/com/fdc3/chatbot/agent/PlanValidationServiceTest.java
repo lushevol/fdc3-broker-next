@@ -27,7 +27,7 @@ class PlanValidationServiceTest {
         PlanValidationService.PlanValidationResult result = service.validate(
                 decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
                         "analytics.unknown.read",
-                        Map.of("appName", "cashflow")
+                        Map.of("application", "cashflow")
                 )))),
                 List.of(analyticsReadCapability()),
                 UserCapabilityContext.anonymous()
@@ -46,8 +46,8 @@ class PlanValidationServiceTest {
 
         PlanValidationService.PlanValidationResult result = service.validate(
                 decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
-                        "analytics.app-usage.read",
-                        Map.of("appName", "cashflow")
+                        "visited_user_count_by_application",
+                        Map.of("application", "cashflow")
                 )))),
                 List.of(analyticsReadCapability()),
                 UserCapabilityContext.anonymous()
@@ -66,11 +66,11 @@ class PlanValidationServiceTest {
 
         PlanValidationService.PlanValidationResult result = service.validate(
                 decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
-                        "analytics.app-usage.read",
+                        "visited_user_count_by_application",
                         Map.of(
-                                "appName", "cashflow",
-                                "from", "2026-04-01",
-                                "to", "2026-04-08"
+                                "application", "cashflow",
+                                "startTime", "2026-04-01",
+                                "endTime", "2026-04-08"
                         )
                 )))),
                 List.of(analyticsReadCapability()),
@@ -82,12 +82,12 @@ class PlanValidationServiceTest {
         assertThat(result.assistantMessage()).isNull();
         assertThat(result.validatedPlan()).isNotNull();
         assertThat(result.validatedPlan().steps()).hasSize(1);
-        assertThat(result.validatedPlan().steps().get(0).capabilityId()).isEqualTo("analytics.app-usage.read");
+        assertThat(result.validatedPlan().steps().get(0).capabilityId()).isEqualTo("visited_user_count_by_application");
         assertThat(result.validatedPlan().steps().get(0).capability()).isEqualTo(analyticsReadCapability());
         assertThat(result.validatedPlan().steps().get(0).arguments())
-                .containsEntry("appName", "cashflow")
-                .containsEntry("from", "2026-04-01")
-                .containsEntry("to", "2026-04-08");
+                .containsEntry("application", "cashflow")
+                .containsEntry("startTime", "2026-04-01")
+                .containsEntry("endTime", "2026-04-08");
         assertThat(result.validatedPlan().steps().get(0).policyDecision().getDecisionType())
                 .isEqualTo(PolicyDecisionType.ALLOW);
     }
@@ -98,11 +98,11 @@ class PlanValidationServiceTest {
 
         PlanValidationService.PlanValidationResult result = service.validate(
                 decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
-                        "analytics.app-usage.read",
+                        "visited_user_count_by_application",
                         Map.of(
-                                "appName", "cashflow",
-                                "from", "2026-04-01",
-                                "to", "2026-04-08",
+                                "application", "cashflow",
+                                "startTime", "2026-04-01",
+                                "endTime", "2026-04-08",
                                 "crossTenant", true
                         )
                 )))),
@@ -210,11 +210,11 @@ class PlanValidationServiceTest {
 
         PlanValidationService.PlanValidationResult result = service.validate(
                 decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
-                        "analytics.app-usage.read",
+                        "visited_user_count_by_application",
                         Map.of(
-                                "appName", "cashflow",
-                                "from", "2026-04-01",
-                                "to", "2026-04-08"
+                                "application", "cashflow",
+                                "startTime", "2026-04-01",
+                                "endTime", "2026-04-08"
                         )
                 )))),
                 List.of(capability),
@@ -229,8 +229,8 @@ class PlanValidationServiceTest {
         capability.setTargetName("mutated-target");
         capability.setRequiredInputs(new ArrayList<>());
 
-        assertThat(result.validatedPlan().steps().get(0).capability().getTargetName()).isEqualTo("statistic_count_by_app");
-        assertThat(result.validatedPlan().steps().get(0).capability().getRequiredInputs()).containsExactly("appName", "from", "to");
+        assertThat(result.validatedPlan().steps().get(0).capability().getTargetName()).isEqualTo("visited_user_count_by_application");
+        assertThat(result.validatedPlan().steps().get(0).capability().getRequiredInputs()).containsExactly("application", "startTime", "endTime");
         assertThat(result.validatedPlan().steps().get(0).policyDecision().getDecisionType()).isEqualTo(PolicyDecisionType.ALLOW);
     }
 
@@ -242,15 +242,15 @@ class PlanValidationServiceTest {
         mutableWindow.put("from", "2026-04-01");
         mutableWindow.put("to", "2026-04-08");
         Map<String, Object> mutableArguments = new HashMap<>();
-        mutableArguments.put("appName", "cashflow");
-        mutableArguments.put("from", "2026-04-01");
-        mutableArguments.put("to", "2026-04-08");
+        mutableArguments.put("application", "cashflow");
+        mutableArguments.put("startTime", "2026-04-01");
+        mutableArguments.put("endTime", "2026-04-08");
         mutableArguments.put("filters", mutableFilters);
         mutableArguments.put("window", mutableWindow);
 
         PlanValidationService.PlanValidationResult result = service.validate(
                 decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
-                        "analytics.app-usage.read",
+                        "visited_user_count_by_application",
                         mutableArguments
                 )))),
                 List.of(analyticsReadCapability()),
@@ -286,21 +286,21 @@ class PlanValidationServiceTest {
 
         PlanValidationService.PlanValidationResult result = service.validate(
                 decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
-                        "analytics.app-usage.read",
+                        "visited_user_count_by_application",
                         Map.of(
-                                "appName", "cashflow",
-                                "from", "2026-04-01",
-                                "to", "2026-04-08"
+                                "application", "cashflow",
+                                "startTime", "2026-04-01",
+                                "endTime", "2026-04-08"
                         )
                 )))),
                 List.of(ResolvedCapability.builder()
-                        .capabilityId("analytics.app-usage.read")
+                        .capabilityId("visited_user_count_by_application")
                         .providerId("mcp")
-                        .targetName("statistic_count_by_app")
+                        .targetName("visited_user_count_by_application")
                         .executionType("mcp")
                         .accessType("read")
                         .tenantScope("tenant-a")
-                        .requiredInputs(List.of("appName", "from", "to"))
+                        .requiredInputs(List.of("application", "startTime", "endTime"))
                         .optionalInputs(List.of("workspaceId"))
                         .build()),
                 UserCapabilityContext.anonymous()
@@ -320,13 +320,13 @@ class PlanValidationServiceTest {
 
         PlanValidationService.PlanValidationResult result = service.validate(
                 decisionWithPlan(new AgentPlan(List.of(new AgentPlanStep(
-                        "analytics.app-usage.read",
+                        "visited_user_count_by_application",
                         Map.of("crossTenant", false)
                 )))),
                 List.of(ResolvedCapability.builder()
-                        .capabilityId("analytics.app-usage.read")
+                        .capabilityId("visited_user_count_by_application")
                         .providerId("mcp")
-                        .targetName("statistic_count_by_app")
+                        .targetName("visited_user_count_by_application")
                         .executionType("mcp")
                         .accessType("read")
                         .tenantScope("global")
@@ -345,13 +345,13 @@ class PlanValidationServiceTest {
 
     private static ResolvedCapability analyticsReadCapability() {
         return ResolvedCapability.builder()
-                .capabilityId("analytics.app-usage.read")
+                .capabilityId("visited_user_count_by_application")
                 .providerId("mcp")
-                .targetName("statistic_count_by_app")
+                .targetName("visited_user_count_by_application")
                 .executionType("mcp")
                 .accessType("read")
                 .tenantScope("global")
-                .requiredInputs(List.of("appName", "from", "to"))
+                .requiredInputs(List.of("application", "startTime", "endTime"))
                 .optionalInputs(List.of("workspaceId"))
                 .build();
     }

@@ -13,7 +13,7 @@ import type {
   ChatRunRequest,
   ChatToolCallPart,
   ChatToolDescriptor,
-} from '@fm/chat-protocol-contract';
+} from 'chat-protocol-contract';
 import {
   buildChatProtocolRequest,
   buildHumanToolResumeRequest,
@@ -21,8 +21,8 @@ import {
   createProtocolResultStream,
   streamProtocolRun,
   toProtocolMessages,
-} from '@fm/chat-protocol-runtime';
-import type { ToolkitBridge } from '@fm/chat-protocol-runtime';
+} from 'chat-protocol-runtime';
+import type { ToolkitBridge } from 'chat-protocol-runtime';
 
 const PortalContainerContext = createContext<React.RefObject<HTMLElement | null> | null>(null);
 
@@ -61,7 +61,7 @@ export type ChatProtocolProviderProps = {
   context?: ChatRunRequest['context'];
   metadata?: ChatRunRequest['metadata'];
   fetch?: typeof globalThis.fetch;
-  onFrame?: (frame: import('@fm/chat-protocol-contract').ChatStreamFrame) => void;
+  onFrame?: (frame: import('chat-protocol-contract').ChatStreamFrame) => void;
 
   /**
    * @deprecated Use toolkitBridge instead for unified tool execution.
@@ -125,7 +125,7 @@ export function ChatProtocolProvider({
   const latestRunIdRef = useRef<string | null>();
 
   const handleFrame = useCallback(
-    (frame: import('@fm/chat-protocol-contract').ChatStreamFrame) => {
+    (frame: import('chat-protocol-contract').ChatStreamFrame) => {
       if (frame.type === 'start') {
         if (frame.conversationId) {
           latestConversationIdRef.current = frame.conversationId;

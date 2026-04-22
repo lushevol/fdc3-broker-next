@@ -4,8 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 public record AppChartResponse(
-        String appFilterType,
-        String appFilterValue,
+        String application,
         Instant startTime,
         Instant endTime,
         AppChartBucket bucket,

@@ -6,7 +6,7 @@
 
 **Architecture:** Create a `ToolkitBridge` interface that allows the chat-protocol runtime to delegate frontend tool execution to the app-layer toolkit. This eliminates the need for `resolveFrontendTool` while maintaining the protocol's ability to pause/resume streaming runs.
 
-**Tech Stack:** TypeScript, React, @assistant-ui/react, @fm/chat-protocol-runtime, @fm/chat-protocol-ui
+**Tech Stack:** TypeScript, React, @assistant-ui/react, chat-protocol-runtime, chat-protocol-ui
 
 ---
 
@@ -196,7 +196,7 @@ At the beginning of the function (after the fetch check), add:
 // Deprecation warning for resolveFrontendTool
 if (resolveFrontendTool && !toolkitBridge) {
   console.warn(
-    '[@fm/chat-protocol-runtime] Deprecation Warning: ' +
+    '[chat-protocol-runtime] Deprecation Warning: ' +
       'resolveFrontendTool is deprecated and will be removed in v3.0.0. ' +
       'Use toolkitBridge for unified tool execution. ' +
       'See migration guide in chat-protocol-runtime/README.md',
@@ -295,7 +295,7 @@ Refs: #unified-tool-execution"
 
 - [ ] **Step 1: Create the toolkit bridge implementation**
 
-> **Note:** Before implementing, verify the `Toolkit` type exists in `@fm/chat-protocol-ui` by checking the package exports. If it doesn't exist, use a generic `Record<string, unknown>` type and adjust accordingly.
+> **Note:** Before implementing, verify the `Toolkit` type exists in `chat-protocol-ui` by checking the package exports. If it doesn't exist, use a generic `Record<string, unknown>` type and adjust accordingly.
 
 ````typescript
 /**
@@ -317,7 +317,7 @@ Refs: #unified-tool-execution"
  * ```
  */
 
-import type { ToolkitBridge } from '@fm/chat-protocol-runtime';
+import type { ToolkitBridge } from 'chat-protocol-runtime';
 
 /**
  * Error thrown when a tool is not found or cannot be executed.
@@ -670,7 +670,7 @@ Refs: #unified-tool-execution"
 At the top of `packages/chat-protocol-ui/src/provider.tsx`, add to existing imports:
 
 ```typescript
-import type { ToolkitBridge } from '@fm/chat-protocol-runtime';
+import type { ToolkitBridge } from 'chat-protocol-runtime';
 ```
 
 - [ ] **Step 2: Update ChatProtocolProviderProps type**
@@ -685,7 +685,7 @@ export type ChatProtocolProviderProps = {
   context?: ChatRunRequest['context'];
   metadata?: ChatRunRequest['metadata'];
   fetch?: typeof globalThis.fetch;
-  onFrame?: (frame: import('@fm/chat-protocol-contract').ChatStreamFrame) => void;
+  onFrame?: (frame: import('chat-protocol-contract').ChatStreamFrame) => void;
 
   /**
    * @deprecated Use toolkitBridge instead for unified tool execution.

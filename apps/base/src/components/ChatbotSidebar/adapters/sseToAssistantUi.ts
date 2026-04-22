@@ -273,7 +273,10 @@ export function transformToolResult(toolResult: ToolResult): ContentPart {
 }
 
 function isUsageStatisticsTool(toolName: string | undefined): boolean {
-  return toolName === 'statistic_count_by_app';
+  return (
+    toolName === 'visited_user_count_by_application' ||
+    toolName === 'visited_user_hourly_by_application'
+  );
 }
 
 function normalizeUsageStatisticsContentPart(
@@ -294,24 +297,17 @@ function normalizeUsageStatisticsContentPart(
   }
 
   const result = toolResult.result as Record<string, unknown>;
-  const pv = typeof result.pv === 'number' ? result.pv : null;
   const uv = typeof result.uv === 'number' ? result.uv : null;
   const startTime = typeof result.startTime === 'string' ? result.startTime : null;
   const endTime = typeof result.endTime === 'string' ? result.endTime : null;
   const appLabel =
-    typeof result.filterValue === 'string'
-      ? result.filterValue
-      : typeof result.appName === 'string'
-        ? result.appName
-        : typeof result.appId === 'string'
-          ? result.appId
-          : typeof toolCall?.args.appName === 'string'
-            ? toolCall.args.appName
-            : typeof toolCall?.args.appId === 'string'
-              ? toolCall.args.appId
-              : null;
+    typeof result.application === 'string'
+      ? result.application
+      : typeof toolCall?.args.application === 'string'
+        ? toolCall.args.application
+        : null;
 
-  if (pv === null || uv === null || startTime === null || endTime === null || appLabel === null) {
+  if (startTime === null || endTime === null || appLabel === null) {
     return null;
   }
 
@@ -323,22 +319,35 @@ function normalizeUsageStatisticsContentPart(
           }
 
           const candidate = point as Record<string, unknown>;
-          if (
-            typeof candidate.timestamp !== 'string' ||
-            typeof candidate.pv !== 'number' ||
-            typeof candidate.uv !== 'number'
-          ) {
+          if (typeof candidate.timestamp !== 'string' || typeof candidate.uv !== 'number') {
             return null;
           }
 
           return {
             timestamp: candidate.timestamp,
-            pv: candidate.pv,
             uv: candidate.uv,
           };
         })
-        .filter((point): point is { timestamp: string; pv: number; uv: number } => point !== null)
-    : [];
+        .filter((point): point is { timestamp: string; uv: number } => point !== null)
+    : Array.isArray(result.points)
+      ? result.points
+          .map((point) => {
+            if (typeof point !== 'object' || point === null || Array.isArray(point)) {
+              return null;
+            }
+
+            const candidate = point as Record<string, unknown>;
+            if (typeof candidate.timestamp !== 'string' || typeof candidate.uv !== 'number') {
+              return null;
+            }
+
+            return {
+              timestamp: candidate.timestamp,
+              uv: candidate.uv,
+            };
+          })
+          .filter((point): point is { timestamp: string; uv: number } => point !== null)
+      : [];
 
   return {
     type: 'data',
@@ -349,9 +358,10 @@ function normalizeUsageStatisticsContentPart(
         appLabel,
         startTime,
         endTime,
-        pv,
-        uv,
+        uv: uv ?? trendPoints.reduce((sum, point) => sum + point.uv, 0),
         trendPoints,
+        bucket: typeof result.bucket === 'string' ? result.bucket : undefined,
+        supportsTrend: trendPoints.length > 0,
       },
     },
   };

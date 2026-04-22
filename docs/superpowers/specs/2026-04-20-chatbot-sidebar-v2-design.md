@@ -2,12 +2,12 @@
 
 ## Summary
 
-Replace the custom SSE-based chatbot in `apps/base` with the `@fm/chat-protocol-ui` / `@fm/chat-protocol-runtime` stack, matching the working pattern from `chat-protocol-demo-web`. Start minimal (no custom tools), migrate base-specific features incrementally.
+Replace the custom SSE-based chatbot in `apps/base` with the `chat-protocol-ui` / `chat-protocol-runtime` stack, matching the working pattern from `chat-protocol-demo-web`. Start minimal (no custom tools), migrate base-specific features incrementally.
 
 ## Context
 
 - `apps/base` currently has a 940-line `AssistantUIRuntimeProvider` with custom SSE adapters (`fetchSSE.ts`, `sseToAssistantUi.ts`) talking to `/api/chat`
-- `chat-protocol-demo-web` demonstrates a working integration using `ChatProtocolProvider` + `AssistantModal` from `@fm/chat-protocol-ui`
+- `chat-protocol-demo-web` demonstrates a working integration using `ChatProtocolProvider` + `AssistantModal` from `chat-protocol-ui`
 - The `chat-protocol-contract` package defines the protocol types; `chat-protocol-runtime` handles streaming
 
 ## Approach: New v2 alongside old
@@ -15,19 +15,19 @@ Replace the custom SSE-based chatbot in `apps/base` with the `@fm/chat-protocol-
 ### 1. Add dependencies to `apps/base/package.json`
 
 ```
-@fm/chat-protocol-contract: 0.0.1
-@fm/chat-protocol-runtime: 0.0.1
-@fm/chat-protocol-ui: 0.0.1
+chat-protocol-contract: 0.0.1
+chat-protocol-runtime: 0.0.1
+chat-protocol-ui: 0.0.1
 ```
 
 ### 2. Create `src/components/ChatbotSidebarV2/`
 
-**`ChatbotProvider.tsx`** — Wraps `ChatProtocolProvider` from `@fm/chat-protocol-ui`:
+**`ChatbotProvider.tsx`** — Wraps `ChatProtocolProvider` from `chat-protocol-ui`:
 - Reads API URL from env (`process.env.REACT_APP_CHAT_API_URL` or similar)
 - Passes empty toolkit `{}` for initial release
 - No custom tools, no GenerativeUI, no workspace context yet
 
-**`index.tsx`** — Renders `<AssistantModal />` from `@fm/chat-protocol-ui`
+**`index.tsx`** — Renders `<AssistantModal />` from `chat-protocol-ui`
 
 **`exports.ts`** — Public API: `ChatbotSidebarV2`, `ChatbotProvider`
 
@@ -52,7 +52,7 @@ Replace the custom SSE-based chatbot in `apps/base` with the `@fm/chat-protocol-
 ## API endpoint
 
 - Dev: `http://localhost:8080/api/chat/runs` (chatbot-backend)
-- Uses `ChatRunRequest` / `ChatStreamFrame` protocol from `@fm/chat-protocol-contract`
+- Uses `ChatRunRequest` / `ChatStreamFrame` protocol from `chat-protocol-contract`
 
 ## Future work (not in scope)
 

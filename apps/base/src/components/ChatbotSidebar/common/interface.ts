@@ -150,7 +150,6 @@ export interface ExecutionPlanStatusComponentProps {
 
 export interface UsageStatisticsTrendPoint {
   timestamp: string;
-  pv: number;
   uv: number;
 }
 
@@ -158,9 +157,10 @@ export interface UsageStatisticsCardComponentProps {
   appLabel: string;
   startTime: string;
   endTime: string;
-  pv: number;
   uv: number;
   trendPoints: UsageStatisticsTrendPoint[];
+  bucket?: string;
+  supportsTrend?: boolean;
 }
 
 export interface ErrorComponentProps {
