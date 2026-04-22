@@ -83,7 +83,7 @@ Expected: FAIL with missing workspace files and/or missing exports such as `vali
 
 ```json
 {
-  "name": "@fm/chat-protocol-contract",
+  "name": "chat-protocol-contract",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -458,7 +458,7 @@ Expected: FAIL with missing workspace files or missing `applyFrameSequenceToMess
     "@assistant-ui/react": "^0.12.19",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "@fm/chat-protocol-contract": "*"
+    "chat-protocol-contract": "*"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.1",
@@ -478,7 +478,7 @@ Expected: FAIL with missing workspace files or missing `applyFrameSequenceToMess
 
 ```ts
 // packages/chat-protocol-frontend/src/runtime/createProtocolStreamAdapter.ts
-import type { ChatMessage, ChatPart, ChatStreamFrame } from '@fm/chat-protocol-contract';
+import type { ChatMessage, ChatPart, ChatStreamFrame } from 'chat-protocol-contract';
 
 function ensureAssistantMessage(messages: ChatMessage[], messageId: string): ChatMessage[] {
   if (messages.some((message) => message.id === messageId)) return messages;
@@ -553,7 +553,7 @@ export function applyFrameSequenceToMessage(
 
 ```ts
 // packages/chat-protocol-frontend/src/runtime/resume.ts
-import type { ChatMessage } from '@fm/chat-protocol-contract';
+import type { ChatMessage } from 'chat-protocol-contract';
 
 export interface ResumeRequest {
   conversationId: string;
@@ -578,7 +578,7 @@ export function buildToolResumeRequest(args: {
 
 ```tsx
 // packages/chat-protocol-frontend/src/render/ProtocolMessageRenderer.tsx
-import type { ChatMessage } from '@fm/chat-protocol-contract';
+import type { ChatMessage } from 'chat-protocol-contract';
 import React from 'react';
 
 export function ProtocolMessageRenderer({ message }: { message: ChatMessage }): JSX.Element {
@@ -659,7 +659,7 @@ Expected: FAIL with missing scenario implementation.
     "lint": "eslint ."
   },
   "dependencies": {
-    "@fm/chat-protocol-contract": "*",
+    "chat-protocol-contract": "*",
     "cors": "^2.8.5",
     "express": "^4.21.2"
   },
@@ -677,7 +677,7 @@ Expected: FAIL with missing scenario implementation.
 
 ```ts
 // apps/chat-protocol-demo-server/src/scenarios/weatherFrontendLocation.ts
-import type { ChatStreamFrame } from '@fm/chat-protocol-contract';
+import type { ChatStreamFrame } from 'chat-protocol-contract';
 
 export function createWeatherFrontendLocationFrames(): ChatStreamFrame[] {
   return [
@@ -720,7 +720,7 @@ export function createWeatherFrontendLocationFrames(): ChatStreamFrame[] {
 
 ```ts
 // apps/chat-protocol-demo-server/src/scenarios/approvalRequired.ts
-import type { ChatStreamFrame } from '@fm/chat-protocol-contract';
+import type { ChatStreamFrame } from 'chat-protocol-contract';
 
 export function createApprovalRequiredFrames(): ChatStreamFrame[] {
   return [
@@ -865,7 +865,7 @@ Expected: FAIL with missing app files or missing heading.
   },
   "dependencies": {
     "@assistant-ui/react": "^0.12.19",
-    "@fm/chat-protocol-contract": "*",
+    "chat-protocol-contract": "*",
     "@fm/chat-protocol-frontend": "*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
@@ -1023,7 +1023,7 @@ Expected: FAIL with missing emitter class.
 
 ```ts
 // packages/chat-protocol-backend/src/ProtocolFrameEmitter.ts
-import type { ChatFinishReason, ChatStreamFrame } from '@fm/chat-protocol-contract';
+import type { ChatFinishReason, ChatStreamFrame } from 'chat-protocol-contract';
 
 export class ProtocolFrameEmitter {
   constructor(

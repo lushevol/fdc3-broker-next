@@ -6,8 +6,8 @@ Date: 2026-04-17
 
 Split the current protocol-native demo stack into two reusable standalone packages:
 
-- `@fm/chat-protocol-runtime` for protocol transport, runtime orchestration, tool continuation, and assistant-ui runtime adaptation
-- `@fm/chat-protocol-ui` for reusable React UI and provider composition on top of the runtime package
+- `chat-protocol-runtime` for protocol transport, runtime orchestration, tool continuation, and assistant-ui runtime adaptation
+- `chat-protocol-ui` for reusable React UI and provider composition on top of the runtime package
 
 This work should ignore the existing `apps/base` chatbot implementation as a design source. `apps/base` is only a future consumer of the new toolkit.
 
@@ -68,7 +68,7 @@ This split creates two problems:
 
 ## Package Boundaries
 
-### `@fm/chat-protocol-runtime`
+### `chat-protocol-runtime`
 
 Purpose:
 
@@ -98,11 +98,11 @@ Does not own:
 - demo-only preset switchers and explanatory panels
 - app-specific business tools
 
-### `@fm/chat-protocol-ui`
+### `chat-protocol-ui`
 
 Purpose:
 
-- provide reusable React UI on top of `@fm/chat-protocol-runtime`
+- provide reusable React UI on top of `chat-protocol-runtime`
 - package the provider and assistant shell for direct reuse by consumer apps
 
 Responsibilities:
@@ -168,7 +168,7 @@ The provider should accept runtime inputs from the consumer app and should not a
 
 ### Phase 1: Expand the existing frontend package into the runtime package
 
-Start from `packages/chat-protocol-frontend` rather than creating a second runtime implementation. Keep the folder temporarily, but evolve the package API toward `@fm/chat-protocol-runtime`.
+Start from `packages/chat-protocol-frontend` rather than creating a second runtime implementation. Keep the folder temporarily, but evolve the package API toward `chat-protocol-runtime`.
 
 This phase should absorb:
 
@@ -178,7 +178,7 @@ This phase should absorb:
 
 ### Phase 2: Create the UI package from demo-owned protocol UI
 
-Extract reusable protocol-facing UI from `apps/chat-protocol-demo-web` into `@fm/chat-protocol-ui`, then add provider composition that consumes the runtime package.
+Extract reusable protocol-facing UI from `apps/chat-protocol-demo-web` into `chat-protocol-ui`, then add provider composition that consumes the runtime package.
 
 This phase should move generic modal, thread, tool rendering, and shell composition code into the package while leaving demo-specific panels outside.
 
@@ -241,7 +241,7 @@ This keeps the toolkit aligned with the protocol work instead of inheriting olde
 
 Proceed with a demo-first two-package split:
 
-- `@fm/chat-protocol-runtime` built from `packages/chat-protocol-frontend` plus protocol-native orchestration extracted from `apps/chat-protocol-demo-web`
-- `@fm/chat-protocol-ui` built from reusable protocol-facing UI extracted from `apps/chat-protocol-demo-web`
+- `chat-protocol-runtime` built from `packages/chat-protocol-frontend` plus protocol-native orchestration extracted from `apps/chat-protocol-demo-web`
+- `chat-protocol-ui` built from reusable protocol-facing UI extracted from `apps/chat-protocol-demo-web`
 
 `apps/base` is not part of the extraction scope and is only a future consumer.
