@@ -34,6 +34,9 @@ public class ElasticsearchAnalyticsProperties {
     private String eventField = "event";
 
     @NotBlank
+    private String indexName = "single-ui-bff-analytic";
+
+    @NotBlank
     private String keyField = "key";
 
     public String getKibanaSearchUrl() {
@@ -98,6 +101,14 @@ public class ElasticsearchAnalyticsProperties {
     public void setNameField(String nameField) {
         log.info("Setting nameField: {}", nameField);
         this.nameField = nameField;
+    }
+
+    public String getIndexName() {
+        return indexName;
+    }
+
+    public void setIndexName(String indexName) {
+        this.indexName = indexName;
     }
 
     public String getUserIdField() {
