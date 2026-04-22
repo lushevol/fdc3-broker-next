@@ -383,7 +383,7 @@ class AgentServiceTest {
     }
 
     @Test
-    void processMessageStreamingFallsBackToWeatherToolWhenModelSkipsToolCall() throws Exception {
+    void processMessageStreamingDoesNotInventWeatherToolCallsWhenModelSkipsToolCall() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
         when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
                 "get_weather",
@@ -432,10 +432,8 @@ class AgentServiceTest {
 
         assertTrue(completed.await(1, TimeUnit.SECONDS));
         assertEquals(1, invocationCount.get());
-        assertEquals(1, toolCalls.size());
-        assertEquals("get_weather", toolCalls.get(0).getName());
-        assertEquals(1, toolResults.size());
-        assertEquals("Shanghai", ((Map<?, ?>) toolResults.get(0).getResult()).get("location"));
+        assertEquals(0, toolCalls.size());
+        assertEquals(0, toolResults.size());
         assertTrue(streamedText.toString().contains("I'll check the current weather in Shanghai for you."));
     }
 
@@ -682,7 +680,7 @@ class AgentServiceTest {
     }
 
     @Test
-    void processMessageStreamingSkipsToolSpecificationsForPlainTextPrompts() throws Exception {
+    void processMessageStreamingStillOffersToolSpecificationsWhenToolsAreAvailable() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
         when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
                 "calculator",
@@ -730,7 +728,8 @@ class AgentServiceTest {
 
         assertTrue(completed.await(1, TimeUnit.SECONDS));
         assertEquals(1, requestCount.get());
-        assertEquals(0, capturedToolSpecs.size());
+        assertEquals(1, capturedToolSpecs.size());
+        assertEquals("calculator", capturedToolSpecs.get(0).name());
     }
 
     @Test
@@ -820,7 +819,7 @@ class AgentServiceTest {
     }
 
     @Test
-    void processMessageStreamingFallsBackToEmailApprovalChainAfterResolvedDate() throws Exception {
+    void processMessageStreamingDoesNotChainEmailApprovalAfterResolvedDateWithoutModelToolCall() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
         TestToolDefinition resolveDateTool = new TestToolDefinition(
                 "resolve_relative_date",
@@ -902,18 +901,13 @@ class AgentServiceTest {
         );
 
         assertTrue(completed.await(1, TimeUnit.SECONDS));
-        assertEquals(2, invocationCount.get());
-        assertEquals(2, toolCalls.size());
-        assertEquals("resolve_relative_date", toolCalls.get(0).getName());
-        assertEquals("approval_confirm", toolCalls.get(1).getName());
-        assertEquals(ToolCall.ToolStatus.PENDING, toolCalls.get(1).getStatus());
-        assertEquals("john.doe@example.com", toolCalls.get(1).getArguments().get("to"));
-        assertTrue(String.valueOf(toolCalls.get(1).getArguments().get("subject")).contains("2026-04-20"));
-        assertEquals(1, toolResults.size());
+        assertEquals(1, invocationCount.get());
+        assertEquals(0, toolCalls.size());
+        assertEquals(0, toolResults.size());
     }
 
     @Test
-    void processMessageStreamingFallsBackToWeatherHistoryAfterResolvedDate() throws Exception {
+    void processMessageStreamingDoesNotChainWeatherHistoryAfterResolvedDateWithoutModelToolCall() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
         TestToolDefinition resolveDateTool = new TestToolDefinition(
                 "resolve_relative_date",
@@ -980,20 +974,15 @@ class AgentServiceTest {
         );
 
         assertTrue(completed.await(1, TimeUnit.SECONDS));
-        assertEquals(2, invocationCount.get());
+        assertEquals(1, invocationCount.get());
         assertTrue(toolNamesPerInvocation.get(0).contains("resolve_relative_date"));
-        assertTrue(toolNamesPerInvocation.get(1).contains("get_weather_history"));
-        assertFalse(toolNamesPerInvocation.get(1).contains("resolve_relative_date"));
-        assertEquals(2, toolCalls.size());
-        assertEquals("resolve_relative_date", toolCalls.get(0).getName());
-        assertEquals("get_weather_history", toolCalls.get(1).getName());
-        assertEquals("Beijing", toolCalls.get(1).getArguments().get("location"));
-        assertEquals("2026-04-20", toolCalls.get(1).getArguments().get("date"));
-        assertEquals(2, toolResults.size());
+        assertTrue(toolNamesPerInvocation.get(0).contains("get_weather_history"));
+        assertEquals(0, toolCalls.size());
+        assertEquals(0, toolResults.size());
     }
 
     @Test
-    void processMessageStreamingFallsBackToAnalyticsAfterResolvedDate() throws Exception {
+    void processMessageStreamingDoesNotChainAnalyticsAfterResolvedDateWithoutModelToolCall() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
         TestToolDefinition resolveDateTool = new TestToolDefinition(
                 "resolve_relative_date",
@@ -1058,17 +1047,11 @@ class AgentServiceTest {
         );
 
         assertTrue(completed.await(1, TimeUnit.SECONDS));
-        assertEquals(2, invocationCount.get());
+        assertEquals(1, invocationCount.get());
         assertTrue(toolNamesPerInvocation.get(0).contains("resolve_relative_date"));
-        assertTrue(toolNamesPerInvocation.get(1).contains("statistic_count_by_app"));
-        assertFalse(toolNamesPerInvocation.get(1).contains("resolve_relative_date"));
-        assertEquals(2, toolCalls.size());
-        assertEquals("resolve_relative_date", toolCalls.get(0).getName());
-        assertEquals("statistic_count_by_app", toolCalls.get(1).getName());
-        assertEquals("cashflow_blotter", toolCalls.get(1).getArguments().get("appId"));
-        assertEquals("2026-04-18T00:00:00Z", toolCalls.get(1).getArguments().get("startTime"));
-        assertEquals("2026-04-19T00:00:00Z", toolCalls.get(1).getArguments().get("endTime"));
-        assertEquals(2, toolResults.size());
+        assertTrue(toolNamesPerInvocation.get(0).contains("statistic_count_by_app"));
+        assertEquals(0, toolCalls.size());
+        assertEquals(0, toolResults.size());
     }
 
     private static final class TestToolDefinition implements com.fdc3.chatbot.tool.ToolDefinition {

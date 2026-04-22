@@ -10,7 +10,6 @@ import com.fdc3.chatbot.model.ExecutionPlanEvent;
 import com.fdc3.chatbot.model.ExecutionStepEvent;
 import com.fdc3.chatbot.model.FrontendToolContinuation;
 import com.fdc3.chatbot.model.FrontendToolManifestEntry;
-import com.fdc3.chatbot.model.GenerativeUIDirective;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.model.UserCapabilityContext;
@@ -29,7 +28,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -159,8 +157,6 @@ public class ProtocolChatService {
                             .findFirst()
                             .orElse(null);
                     emitToolResultFrames(onFrame, toolResult, matchingCall);
-                    findGenerativeUiDirective(toolCalls, toolResult).ifPresent(directive ->
-                            emitUiPartFrame(onFrame, invocation.assistantMessageId(), directive));
                 }
         );
 
@@ -286,142 +282,11 @@ public class ProtocolChatService {
         onFrame.accept(outputFrame);
     }
 
-    private void emitUiPartFrame(
-            Consumer<Map<String, Object>> onFrame,
-            String messageId,
-            GenerativeUIDirective directive
-    ) {
-        LinkedHashMap<String, Object> frame = new LinkedHashMap<>();
-        frame.put("type", "ui-part-available");
-        frame.put("messageId", messageId);
-        frame.put("cardType", directive.getName());
-        frame.put("props", directive.getProps() == null ? Map.of() : directive.getProps());
-        onFrame.accept(frame);
-    }
-
     private Map<String, Object> frameError(Throwable error) {
         LinkedHashMap<String, Object> frame = new LinkedHashMap<>();
         frame.put("type", "error");
         frame.put("message", error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage());
         return frame;
-    }
-
-    private java.util.Optional<GenerativeUIDirective> findGenerativeUiDirective(
-            List<ToolCall> toolCalls,
-            ToolResult toolResult
-    ) {
-        return toolCalls.stream()
-                .filter(toolCall -> Objects.equals(toolCall.getId(), toolResult.getToolCallId()))
-                .findFirst()
-                .flatMap(toolCall -> buildGenerativeUiDirective(toolCall, toolResult));
-    }
-
-    private java.util.Optional<GenerativeUIDirective> buildGenerativeUiDirective(
-            ToolCall toolCall,
-            ToolResult toolResult
-    ) {
-        if (toolResult.getError() != null || !(toolResult.getResult() instanceof Map<?, ?> resultMap)) {
-            return java.util.Optional.empty();
-        }
-
-        if ("calculator".equals(toolCall.getName())) {
-            Object expression = resultMap.get("expression");
-            Object result = resultMap.get("result");
-            if (expression == null || result == null) {
-                return java.util.Optional.empty();
-            }
-            return java.util.Optional.of(GenerativeUIDirective.builder()
-                    .name("Card")
-                    .toolCallId(toolCall.getId())
-                    .props(Map.of(
-                            "title", "Calculation Complete",
-                            "content", expression + " = " + result,
-                            "variant", "success"
-                    ))
-                    .build());
-        }
-
-        if ("get_weather".equals(toolCall.getName())) {
-            Object location = resultMap.get("location");
-            Object temperature = resultMap.get("temperature");
-            Object temperatureUnit = resultMap.get("temperatureUnit");
-            Object conditions = resultMap.get("conditions");
-            if (location == null || temperature == null || temperatureUnit == null || conditions == null) {
-                return java.util.Optional.empty();
-            }
-            return java.util.Optional.of(GenerativeUIDirective.builder()
-                    .name("Card")
-                    .toolCallId(toolCall.getId())
-                    .props(Map.of(
-                            "title", "Weather Summary",
-                            "content", location + ": " + temperature + " " + temperatureUnit + ", " + conditions,
-                            "variant", "default"
-                    ))
-                    .build());
-        }
-
-        if ("get_current_time".equals(toolCall.getName())) {
-            Object timezone = resultMap.get("timezone");
-            Object formatted = resultMap.get("formatted");
-            if (timezone == null || formatted == null) {
-                return java.util.Optional.empty();
-            }
-            return java.util.Optional.of(GenerativeUIDirective.builder()
-                    .name("Card")
-                    .toolCallId(toolCall.getId())
-                    .props(Map.of(
-                            "title", "Current Time",
-                            "content", timezone + ": " + formatted,
-                            "variant", "info"
-                    ))
-                    .build());
-        }
-
-        if ("get_weather_history".equals(toolCall.getName())) {
-            Object location = resultMap.get("location");
-            Object date = resultMap.get("date");
-            Object condition = resultMap.get("condition");
-            Object highC = resultMap.get("highC");
-            Object lowC = resultMap.get("lowC");
-            Object summary = resultMap.get("summary");
-            if (location == null || date == null) {
-                return java.util.Optional.empty();
-            }
-            LinkedHashMap<String, Object> cardProps = new LinkedHashMap<>();
-            cardProps.put("title", "Historical Weather");
-            cardProps.put("content", summary != null ? summary.toString() : location + " on " + date);
-            cardProps.put("variant", "info");
-            if (location != null) cardProps.put("location", location);
-            if (date != null) cardProps.put("date", date);
-            if (condition != null) cardProps.put("condition", condition);
-            if (highC != null) cardProps.put("highC", highC);
-            if (lowC != null) cardProps.put("lowC", lowC);
-            return java.util.Optional.of(GenerativeUIDirective.builder()
-                    .name("weather-summary")
-                    .toolCallId(toolCall.getId())
-                    .props(cardProps)
-                    .build());
-        }
-
-        if ("resolve_relative_date".equals(toolCall.getName())) {
-            Object resolvedDate = resultMap.get("resolvedDate");
-            Object readable = resultMap.get("readable");
-            Object dayOfWeek = resultMap.get("dayOfWeek");
-            if (resolvedDate == null) {
-                return java.util.Optional.empty();
-            }
-            return java.util.Optional.of(GenerativeUIDirective.builder()
-                    .name("Card")
-                    .toolCallId(toolCall.getId())
-                    .props(Map.of(
-                            "title", "Date Resolved",
-                            "content", resolvedDate + " (" + (readable != null ? readable : dayOfWeek) + ")",
-                            "variant", "info"
-                    ))
-                    .build());
-        }
-
-        return java.util.Optional.empty();
     }
 
     private String mapStepStatus(String status) {

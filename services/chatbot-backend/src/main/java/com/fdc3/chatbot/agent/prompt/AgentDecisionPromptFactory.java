@@ -10,16 +10,14 @@ public class AgentDecisionPromptFactory {
     public String build(String userMessage, String workspaceContextJson, List<ResolvedCapability> capabilities) {
         String capabilityBlock = CapabilityResolver.summarizeForPrompt(capabilities).stream()
                 .map(summary -> """
-                        - capabilityId: %s
+                        - toolName: %s
                           providerId: %s
-                          targetName: %s
                           requiredInputs: %s
                           optionalInputs: %s
-                          promptHints: %s
+                          descriptionHints: %s
                         """.formatted(
                         summary.capabilityId(),
                         summary.providerId(),
-                        summary.targetName(),
                         summary.requiredInputs(),
                         summary.optionalInputs(),
                         summary.promptHints()
@@ -30,9 +28,9 @@ public class AgentDecisionPromptFactory {
                 You are an execution-aware assistant.
                 Return JSON only.
                 Allowed decisionType values: respond, clarify, plan.
-                Only use capabilities from the allowed capability list.
+                Only use tools from the allowed tool list.
 
-                Allowed capabilities:
+                Allowed tools:
                 %s
 
                 Workspace context JSON:

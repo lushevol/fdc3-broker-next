@@ -7,10 +7,8 @@ import com.fdc3.chatbot.agent.model.AgentPlanStep;
 import com.fdc3.chatbot.agent.model.ExecutionTranscript;
 import com.fdc3.chatbot.agent.prompt.AgentDecisionPromptFactory;
 import com.fdc3.chatbot.agent.prompt.ResultSynthesisPromptFactory;
-import com.fdc3.chatbot.controlplane.CapabilityRegistryService;
 import com.fdc3.chatbot.controlplane.CapabilityResolver;
 import com.fdc3.chatbot.controlplane.model.ResolvedCapability;
-import com.fdc3.chatbot.controlplane.planning.ExecutionPlanner;
 import com.fdc3.chatbot.controlplane.policy.PolicyEvaluator;
 import com.fdc3.chatbot.model.ChatMessage;
 import com.fdc3.chatbot.model.ExecutionPlanEvent;
@@ -33,7 +31,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -206,9 +203,9 @@ class AgentControlPlaneExecutionTest {
                         null,
                         null,
                         new AgentPlan(List.of(new AgentPlanStep(
-                                "app-usage-statistics",
+                                "visited_user_count_by_application",
                                 Map.of(
-                                        "appName", "cashflow",
+                                        "application", "cashflow",
                                         "startTime", "2026-04-01",
                                         "endTime", "2026-04-08"
                                 )
@@ -251,28 +248,21 @@ class AgentControlPlaneExecutionTest {
         assertEquals("running", executionSteps.get(0).getStatus());
         assertEquals("completed", executionSteps.get(1).getStatus());
         assertEquals(1, toolCalls.size());
-        assertEquals("statistic_count_by_app", toolCalls.get(0).getName());
+        assertEquals("visited_user_count_by_application", toolCalls.get(0).getName());
         assertEquals(ToolCall.ToolStatus.RUNNING, toolCalls.get(0).getStatus());
         assertFalse(toolCalls.get(0).isRequiresConfirmation());
-        assertEquals("cashflow", toolCalls.get(0).getArguments().get("appName"));
+        assertEquals("cashflow", toolCalls.get(0).getArguments().get("application"));
         assertEquals("2026-04-01T00:00:00Z", toolCalls.get(0).getArguments().get("startTime"));
         assertEquals("2026-04-09T00:00:00Z", toolCalls.get(0).getArguments().get("endTime"));
         assertEquals(1, toolResults.size());
         assertEquals(toolCalls.get(0).getId(), toolResults.get(0).getToolCallId());
-        assertEquals("statistic_count_by_app", toolResults.get(0).getToolName());
-        assertEquals("appName", ((Map<?, ?>) toolResults.get(0).getResult()).get("appFilterType"));
+        assertEquals("visited_user_count_by_application", toolResults.get(0).getToolName());
+        assertEquals("application", ((Map<?, ?>) toolResults.get(0).getResult()).get("appFilterType"));
         assertEquals("cashflow", ((Map<?, ?>) toolResults.get(0).getResult()).get("appFilterValue"));
         assertEquals("2026-04-01T00:00:00Z", ((Map<?, ?>) toolResults.get(0).getResult()).get("startTime"));
         assertEquals("2026-04-09T00:00:00Z", ((Map<?, ?>) toolResults.get(0).getResult()).get("endTime"));
         assertEquals(120, ((Map<?, ?>) toolResults.get(0).getResult()).get("pv"));
         assertEquals(30, ((Map<?, ?>) toolResults.get(0).getResult()).get("uv"));
-        assertEquals(
-                List.of(
-                        Map.of("timestamp", "2026-04-01T00:00:00Z", "pv", 50, "uv", 12),
-                        Map.of("timestamp", "2026-04-08T00:00:00Z", "pv", 70, "uv", 18)
-                ),
-                ((Map<?, ?>) toolResults.get(0).getResult()).get("trendPoints")
-        );
         assertEquals(
                 "cashflow usage from 2026-04-01 to 2026-04-08: PV 120, UV 30.",
                 streamedText.toString()
@@ -291,16 +281,15 @@ class AgentControlPlaneExecutionTest {
                         null,
                         null,
                         new AgentPlan(List.of(new AgentPlanStep(
-                                "app-usage-statistics",
+                                "visited_user_count_by_application",
                                 Map.of(
-                                        "appName", "cashflow",
+                                        "application", "cashflow",
                                         "startTime", "2026-04-01",
                                         "endTime", "2026-04-08"
                                 )
                         )))
                 ),
                 null,
-                new ExecutionPlanner(),
                 null,
                 new ResultSynthesisService(
                         null,
@@ -363,9 +352,9 @@ class AgentControlPlaneExecutionTest {
                         null,
                         null,
                         new AgentPlan(List.of(new AgentPlanStep(
-                                "app-usage-statistics",
+                                "visited_user_count_by_application",
                                 Map.of(
-                                        "appId", "template_tile_fdc3_2",
+                                        "application", "template_tile_fdc3_2",
                                         "startTime", "2026-04-01",
                                         "endTime", "2026-04-08"
                                 )
@@ -408,28 +397,21 @@ class AgentControlPlaneExecutionTest {
         assertEquals("running", executionSteps.get(0).getStatus());
         assertEquals("completed", executionSteps.get(1).getStatus());
         assertEquals(1, toolCalls.size());
-        assertEquals("statistic_count_by_app", toolCalls.get(0).getName());
+        assertEquals("visited_user_count_by_application", toolCalls.get(0).getName());
         assertEquals(ToolCall.ToolStatus.RUNNING, toolCalls.get(0).getStatus());
         assertFalse(toolCalls.get(0).isRequiresConfirmation());
-        assertEquals("template_tile_fdc3_2", toolCalls.get(0).getArguments().get("appId"));
+        assertEquals("template_tile_fdc3_2", toolCalls.get(0).getArguments().get("application"));
         assertEquals("2026-04-01T00:00:00Z", toolCalls.get(0).getArguments().get("startTime"));
         assertEquals("2026-04-09T00:00:00Z", toolCalls.get(0).getArguments().get("endTime"));
         assertEquals(1, toolResults.size());
         assertEquals(toolCalls.get(0).getId(), toolResults.get(0).getToolCallId());
-        assertEquals("statistic_count_by_app", toolResults.get(0).getToolName());
-        assertEquals("appId", ((Map<?, ?>) toolResults.get(0).getResult()).get("appFilterType"));
+        assertEquals("visited_user_count_by_application", toolResults.get(0).getToolName());
+        assertEquals("application", ((Map<?, ?>) toolResults.get(0).getResult()).get("appFilterType"));
         assertEquals("template_tile_fdc3_2", ((Map<?, ?>) toolResults.get(0).getResult()).get("appFilterValue"));
         assertEquals("2026-04-01T00:00:00Z", ((Map<?, ?>) toolResults.get(0).getResult()).get("startTime"));
         assertEquals("2026-04-09T00:00:00Z", ((Map<?, ?>) toolResults.get(0).getResult()).get("endTime"));
         assertEquals(80, ((Map<?, ?>) toolResults.get(0).getResult()).get("pv"));
         assertEquals(24, ((Map<?, ?>) toolResults.get(0).getResult()).get("uv"));
-        assertEquals(
-                List.of(
-                        Map.of("timestamp", "2026-04-01T00:00:00Z", "pv", 32, "uv", 10),
-                        Map.of("timestamp", "2026-04-08T00:00:00Z", "pv", 48, "uv", 14)
-                ),
-                ((Map<?, ?>) toolResults.get(0).getResult()).get("trendPoints")
-        );
         assertEquals(
                 "template_tile_fdc3_2 usage from 2026-04-01 to 2026-04-08: PV 80, UV 24.",
                 streamedText.toString()
@@ -448,9 +430,9 @@ class AgentControlPlaneExecutionTest {
                         null,
                         null,
                         new AgentPlan(List.of(new AgentPlanStep(
-                                "app-usage-statistics",
+                                "visited_user_count_by_application",
                                 Map.of(
-                                        "appName", "cashflow",
+                                        "application", "cashflow",
                                         "startTime", "2026-04-01",
                                         "endTime", "2026-04-08"
                                 )
@@ -504,57 +486,6 @@ class AgentControlPlaneExecutionTest {
         );
     }
 
-    @Test
-    void shouldNotUseLegacyExecutionPlannerWhenAgentLoopIsEnabled() throws Exception {
-        ToolRegistry toolRegistry = analyticsToolRegistry();
-        UserCapabilityContext capabilityContext = advisorContext();
-        CountingExecutionPlanner executionPlanner = new CountingExecutionPlanner();
-        AgentService agentService = createAgentService(
-                toolRegistry,
-                capabilityContext,
-                new AgentDecision(
-                        AgentDecisionType.RESPOND,
-                        "You have access to analytics for cashflow.",
-                        null,
-                        null
-                ),
-                null,
-                executionPlanner
-        );
-
-        List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
-        List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
-        StringBuilder streamedText = new StringBuilder();
-        CountDownLatch completed = new CountDownLatch(1);
-
-        agentService.processMessageStreaming(
-                "conversation-legacy-planner",
-                "Do I have analytics access?",
-                capabilityContext,
-                null,
-                null,
-                null,
-                List.<ChatMessage>of(),
-                streamedText::append,
-                error -> {
-                    throw new AssertionError(error);
-                },
-                completed::countDown,
-                executionPlanEvent -> {
-                },
-                executionStepEvent -> {
-                },
-                toolCalls::add,
-                toolResults::add
-        );
-
-        assertTrue(completed.await(1, TimeUnit.SECONDS));
-        assertEquals("You have access to analytics for cashflow.", streamedText.toString());
-        assertEquals(0, executionPlanner.invocationCount());
-        assertTrue(toolCalls.isEmpty());
-        assertTrue(toolResults.isEmpty());
-    }
-
     private static AgentService createAgentService(
             ToolRegistry toolRegistry,
             UserCapabilityContext capabilityContext,
@@ -566,7 +497,6 @@ class AgentControlPlaneExecutionTest {
                 capabilityContext,
                 decision,
                 synthesizedSummary,
-                new ExecutionPlanner(),
                 null,
                 null
         );
@@ -577,30 +507,10 @@ class AgentControlPlaneExecutionTest {
             UserCapabilityContext capabilityContext,
             AgentDecision decision,
             String synthesizedSummary,
-            ExecutionPlanner executionPlanner
-    ) {
-        return createAgentService(
-                toolRegistry,
-                capabilityContext,
-                decision,
-                synthesizedSummary,
-                executionPlanner,
-                null,
-                null
-        );
-    }
-
-    private static AgentService createAgentService(
-            ToolRegistry toolRegistry,
-            UserCapabilityContext capabilityContext,
-            AgentDecision decision,
-            String synthesizedSummary,
-            ExecutionPlanner executionPlanner,
             StreamingChatModel streamingChatModel,
             ResultSynthesisService resultSynthesisService
     ) {
         CapabilityResolver capabilityResolver = new CapabilityResolver(
-                new CapabilityRegistryService(new ObjectMapper()),
                 toolRegistry
         );
         PolicyEvaluator policyEvaluator = new PolicyEvaluator();
@@ -608,7 +518,6 @@ class AgentControlPlaneExecutionTest {
                 toolRegistry,
                 capabilityResolver,
                 policyEvaluator,
-                executionPlanner,
                 new StubAgentDecisionService(decision),
                 new PlanValidationService(policyEvaluator),
                 null,
@@ -633,7 +542,6 @@ class AgentControlPlaneExecutionTest {
             ExecutionOrchestrator executionOrchestrator
     ) {
         CapabilityResolver capabilityResolver = new CapabilityResolver(
-                new CapabilityRegistryService(new ObjectMapper()),
                 toolRegistry
         );
         PolicyEvaluator policyEvaluator = new PolicyEvaluator();
@@ -641,7 +549,6 @@ class AgentControlPlaneExecutionTest {
                 toolRegistry,
                 capabilityResolver,
                 policyEvaluator,
-                new ExecutionPlanner(),
                 new StubAgentDecisionService(decision),
                 new PlanValidationService(policyEvaluator),
                 executionOrchestrator,
@@ -655,76 +562,27 @@ class AgentControlPlaneExecutionTest {
     private static ToolRegistry analyticsToolRegistry() {
         ToolRegistry toolRegistry = new ToolRegistry(List.of());
         toolRegistry.registerMcpProvider(
-                "elasticsearch-analytics",
-                List.of("advisor"),
-                Map.of(
-                        "statistic_count_by_app",
+                        "elasticsearch-analytics",
+                        List.of("advisor"),
+                        Map.of(
+                        "visited_user_count_by_application",
                         new TestToolDefinition(
-                                "statistic_count_by_app",
+                                "visited_user_count_by_application",
                                 "Return PV and UV counts for an app within a time window",
                                 Map.of("type", "object"),
                                 arguments -> {
-                                    boolean usesAppId = arguments.containsKey("appId") && arguments.get("appId") != null;
-                                    boolean usesAppName = arguments.containsKey("appName") && arguments.get("appName") != null;
-                                    Object appFilterValue = usesAppId
-                                            ? arguments.get("appId")
-                                            : arguments.get("appName");
-                                    boolean workspaceFallback = usesAppId && !usesAppName;
+                                    Object appFilterValue = arguments.get("application");
+                                    boolean workspaceFallback = "template_tile_fdc3_2".equals(appFilterValue);
                                     int pv = workspaceFallback ? 80 : 120;
                                     int uv = workspaceFallback ? 24 : 30;
                                     Map<String, Object> result = new java.util.LinkedHashMap<>();
-                                    result.put("appFilterType", usesAppId ? "appId" : "appName");
+                                    result.put("appFilterType", "application");
                                     result.put("appFilterValue", appFilterValue);
                                     result.put("startTime", arguments.get("startTime"));
                                     result.put("endTime", arguments.get("endTime"));
                                     result.put("pv", pv);
                                     result.put("uv", uv);
                                     return result;
-                                }
-                        ),
-                        "chart_by_app",
-                        new TestToolDefinition(
-                                "chart_by_app",
-                                "Return PV and UV trend points for an app within a time window",
-                                Map.of("type", "object"),
-                                arguments -> {
-                                    boolean usesAppId = arguments.containsKey("appId") && arguments.get("appId") != null;
-                                    boolean usesAppName = arguments.containsKey("appName") && arguments.get("appName") != null;
-                                    boolean workspaceFallback = usesAppId && !usesAppName;
-
-                                    if (workspaceFallback) {
-                                        return Map.of(
-                                                "bucket", "DAY",
-                                                "points", List.of(
-                                                        Map.of(
-                                                                "timestamp", "2026-04-01T00:00:00Z",
-                                                                "pv", 32,
-                                                                "uv", 10
-                                                        ),
-                                                        Map.of(
-                                                                "timestamp", "2026-04-08T00:00:00Z",
-                                                                "pv", 48,
-                                                                "uv", 14
-                                                        )
-                                                )
-                                        );
-                                    }
-
-                                    return Map.of(
-                                            "bucket", "DAY",
-                                            "points", List.of(
-                                                    Map.of(
-                                                            "timestamp", "2026-04-01T00:00:00Z",
-                                                            "pv", 50,
-                                                            "uv", 12
-                                                    ),
-                                                    Map.of(
-                                                            "timestamp", "2026-04-08T00:00:00Z",
-                                                            "pv", 70,
-                                                            "uv", 18
-                                                    )
-                                            )
-                                    );
                                 }
                         )
                 )
@@ -761,24 +619,6 @@ class AgentControlPlaneExecutionTest {
         }
     }
 
-    private static final class CountingExecutionPlanner extends ExecutionPlanner {
-
-        private final AtomicInteger invocationCount = new AtomicInteger();
-
-        @Override
-        public com.fdc3.chatbot.controlplane.model.ExecutionPlan plan(
-                String userMessage,
-                com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot workspaceContext,
-                List<ResolvedCapability> capabilities
-        ) {
-            invocationCount.incrementAndGet();
-            return null;
-        }
-
-        private int invocationCount() {
-            return invocationCount.get();
-        }
-    }
 
     private static class NoOpChatModel implements ChatModel {
 

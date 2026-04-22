@@ -34,16 +34,16 @@ class CapabilityResolverTest {
 
         McpClientFactory clientFactory = new FakeMcpClientFactory(List.of(
                 new McpToolDescriptor(
-                        "statistic_count_by_app",
-                        "Return PV and UV counts for an app within a time window",
+                        "visited_user_count_by_application",
+                        "Return visited user counts for an application within a time window",
                         Map.of(
                                 "type", "object",
                                 "properties", Map.of(
-                                        "appId", Map.of("type", "string"),
+                                        "application", Map.of("type", "string"),
                                         "startTime", Map.of("type", "string"),
                                         "endTime", Map.of("type", "string")
                                 ),
-                                "required", List.of("startTime", "endTime")
+                                "required", List.of("application", "startTime", "endTime")
                         )
                 )
         ));
@@ -58,11 +58,7 @@ class CapabilityResolverTest {
                 "Read-only analytics"
         ));
 
-        CapabilityRegistryService capabilityRegistryService = new CapabilityRegistryService(
-                new ObjectMapper(),
-                "capabilities/control-plane-capabilities.json"
-        );
-        CapabilityResolver resolver = new CapabilityResolver(capabilityRegistryService, toolRegistry);
+        CapabilityResolver resolver = new CapabilityResolver(toolRegistry);
 
         UserCapabilityContext advisorContext = UserCapabilityContext.builder()
                 .userId("user-1")
@@ -74,13 +70,30 @@ class CapabilityResolverTest {
         List<ResolvedCapability> advisorCapabilities = resolver.resolveCapabilities(advisorContext);
         List<ResolvedCapability> defaultCapabilities = resolver.resolveCapabilities(UserCapabilityContext.anonymous());
 
-        assertEquals(1, advisorCapabilities.size());
-        assertEquals("app-usage-statistics", advisorCapabilities.get(0).getCapabilityId());
-        assertEquals("statistic_count_by_app", advisorCapabilities.get(0).getTargetName());
-        assertEquals("mcp", advisorCapabilities.get(0).getExecutionType());
-        assertEquals("read", advisorCapabilities.get(0).getAccessType());
-        assertTrue(advisorCapabilities.get(0).getAvailableToolNames().contains("statistic_count_by_app"));
-        assertFalse(defaultCapabilities.stream().anyMatch(capability -> "app-usage-statistics".equals(capability.getCapabilityId())));
+        assertEquals(2, advisorCapabilities.size());
+        ResolvedCapability analyticsCapability = advisorCapabilities.stream()
+                .filter(capability -> "visited_user_count_by_application".equals(capability.getCapabilityId()))
+                .findFirst()
+                .orElseThrow();
+        ResolvedCapability localCapability = advisorCapabilities.stream()
+                .filter(capability -> "calculator".equals(capability.getCapabilityId()))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals("visited_user_count_by_application", analyticsCapability.getTargetName());
+        assertEquals("mcp", analyticsCapability.getExecutionType());
+        assertEquals("read", analyticsCapability.getAccessType());
+        assertEquals("elasticsearch-analytics", analyticsCapability.getProviderId());
+        assertTrue(analyticsCapability.getRequiredInputs().contains("application"));
+        assertTrue(analyticsCapability.getOptionalInputs().isEmpty());
+        assertTrue(analyticsCapability.getAvailableToolNames().contains("visited_user_count_by_application"));
+
+        assertEquals("local", localCapability.getProviderId());
+        assertEquals("local", localCapability.getExecutionType());
+        assertEquals("read", localCapability.getAccessType());
+
+        assertFalse(defaultCapabilities.stream().anyMatch(capability -> "visited_user_count_by_application".equals(capability.getCapabilityId())));
+        assertTrue(defaultCapabilities.stream().anyMatch(capability -> "calculator".equals(capability.getCapabilityId())));
     }
 
     private static final class TestToolDefinition implements ToolDefinition {

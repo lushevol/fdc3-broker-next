@@ -165,7 +165,7 @@ class ExecutionOrchestratorTest {
 
     private static ValidatedExecutionPlan analyticsReadPlan() {
         ResolvedCapability capability = ResolvedCapability.builder()
-                .capabilityId("analytics.app-usage.read")
+                .capabilityId("visited_user_count_by_application")
                 .providerId("elasticsearch-analytics")
                 .targetName("visited_user_count_by_application")
                 .executionType("mcp")
@@ -193,7 +193,7 @@ class ExecutionOrchestratorTest {
 
     private static ValidatedExecutionPlan analyticsReadPlanWithIsoTimeInputs() {
         ResolvedCapability capability = ResolvedCapability.builder()
-                .capabilityId("app-usage-statistics")
+                .capabilityId("visited_user_count_by_application")
                 .providerId("elasticsearch-analytics")
                 .targetName("visited_user_count_by_application")
                 .executionType("mcp")

@@ -451,7 +451,6 @@ class ProtocolChatServiceTest {
         assertTrue(frames.stream().anyMatch(frame -> "start-step".equals(frame.get("type"))));
         assertTrue(frames.stream().anyMatch(frame -> "tool-input-start".equals(frame.get("type"))));
         assertTrue(frames.stream().anyMatch(frame -> "tool-output-available".equals(frame.get("type"))));
-        assertTrue(frames.stream().anyMatch(frame -> "ui-part-available".equals(frame.get("type"))));
         assertTrue(frames.stream().anyMatch(frame -> "text-delta".equals(frame.get("type"))));
         assertTrue(frames.stream().anyMatch(frame -> "finish".equals(frame.get("type")) && "stop".equals(frame.get("finishReason"))));
     }
