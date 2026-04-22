@@ -1,12 +1,16 @@
 package com.fdc3.elasticsearchmcp.config;
 
 import jakarta.validation.constraints.NotBlank;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(prefix = "analytics.elasticsearch")
 public class ElasticsearchAnalyticsProperties {
+
+    private static final Logger log = LoggerFactory.getLogger(ElasticsearchAnalyticsProperties.class);
 
     @NotBlank
     private String kibanaSearchUrl = "http://10.4.197.146:5601/api/console/proxy?path=%2Fsingle-ui-bff-analytic%2F_search&method=GET";
@@ -33,10 +37,12 @@ public class ElasticsearchAnalyticsProperties {
     private String keyField = "key";
 
     public String getKibanaSearchUrl() {
+        log.info("Getting KibanaSearchUrl: {}", kibanaSearchUrl);
         return kibanaSearchUrl;
     }
 
     public void setKibanaSearchUrl(String kibanaSearchUrl) {
+        log.info("Setting KibanaSearchUrl: {}", kibanaSearchUrl);
         this.kibanaSearchUrl = kibanaSearchUrl;
     }
 
@@ -45,6 +51,7 @@ public class ElasticsearchAnalyticsProperties {
     }
 
     public void setCreatedAtField(String createdAtField) {
+        log.info("Setting createdAtField: {}", createdAtField);
         this.createdAtField = createdAtField;
     }
 
@@ -53,6 +60,7 @@ public class ElasticsearchAnalyticsProperties {
     }
 
     public void setKeyField(String keyField) {
+        log.info("Setting keyField: {}", keyField);
         this.keyField = keyField;
     }
 
@@ -61,6 +69,7 @@ public class ElasticsearchAnalyticsProperties {
     }
 
     public void setEventField(String eventField) {
+        log.info("Setting eventField: {}", eventField);
         this.eventField = eventField;
     }
 
@@ -69,6 +78,7 @@ public class ElasticsearchAnalyticsProperties {
     }
 
     public void setContainerField(String containerField) {
+        log.info("Setting containerField: {}", containerField);
         this.containerField = containerField;
     }
 
@@ -77,6 +87,7 @@ public class ElasticsearchAnalyticsProperties {
     }
 
     public void setTileField(String tileField) {
+        log.info("Setting tileField: {}", tileField);
         this.tileField = tileField;
     }
 
@@ -85,6 +96,7 @@ public class ElasticsearchAnalyticsProperties {
     }
 
     public void setNameField(String nameField) {
+        log.info("Setting nameField: {}", nameField);
         this.nameField = nameField;
     }
 
@@ -93,6 +105,7 @@ public class ElasticsearchAnalyticsProperties {
     }
 
     public void setUserIdField(String userIdField) {
+        log.info("Setting userIdField: {}", userIdField);
         this.userIdField = userIdField;
     }
 }

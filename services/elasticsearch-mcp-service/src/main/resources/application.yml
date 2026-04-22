@@ -23,6 +23,14 @@ management:
       exposure:
         include: health,info
 
+logging:
+  level:
+    root: INFO
+    com.fdc3.elasticsearchmcp: DEBUG
+    com.fdc3.elasticsearchmcp.repository: DEBUG
+    com.fdc3.elasticsearchmcp.service: DEBUG
+    com.fdc3.elasticsearchmcp.tool: DEBUG
+
 analytics:
   stub:
     enabled: ${ANALYTICS_STUB_ENABLED:false}

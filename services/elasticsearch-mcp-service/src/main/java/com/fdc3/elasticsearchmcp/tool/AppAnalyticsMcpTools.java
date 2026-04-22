@@ -7,6 +7,8 @@ import com.fdc3.elasticsearchmcp.tool.model.AppStatisticCountRequest;
 import com.fdc3.elasticsearchmcp.tool.model.AppStatisticCountResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class AppAnalyticsMcpTools {
+
+    private static final Logger log = LoggerFactory.getLogger(AppAnalyticsMcpTools.class);
 
     private final AppAnalyticsService analyticsService;
     private final Validator validator;
@@ -34,13 +38,26 @@ public class AppAnalyticsMcpTools {
             @McpToolParam(description = "Inclusive start timestamp in ISO-8601 format", required = true) String startTime,
             @McpToolParam(description = "Inclusive end timestamp in ISO-8601 format", required = true) String endTime
     ) {
-        AppStatisticCountRequest request = new AppStatisticCountRequest(
-                normalize(application),
-                parseInstant(startTime, "startTime"),
-                parseInstant(endTime, "endTime")
-        );
-        validate(request);
-        return analyticsService.statisticCountByApp(request);
+        log.info("visitedUserCountByApplication called: application={}, startTime={}, endTime={}", application, startTime, endTime);
+        try {
+            AppStatisticCountRequest request = new AppStatisticCountRequest(
+                    normalize(application),
+                    parseInstant(startTime, "startTime"),
+                    parseInstant(endTime, "endTime")
+            );
+            log.debug("Parsed request: application={}, startTime={}, endTime={}", request.application(), request.startTime(), request.endTime());
+            validate(request);
+            log.debug("Request validated successfully");
+            AppStatisticCountResponse response = analyticsService.statisticCountByApp(request);
+            log.debug("Returning response: uv={}", response.uv());
+            return response;
+        } catch (IllegalArgumentException e) {
+            log.error("Validation error in visitedUserCountByApplication: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Error in visitedUserCountByApplication: application={}, error={}", application, e.getMessage(), e);
+            throw e;
+        }
     }
 
     @McpTool(name = "visited_user_hourly_by_application", description = "Return hourly UV data for an application within a time window. Supported applications: cashflow blotter, trades")
@@ -49,13 +66,26 @@ public class AppAnalyticsMcpTools {
             @McpToolParam(description = "Inclusive start timestamp in ISO-8601 format", required = true) String startTime,
             @McpToolParam(description = "Inclusive end timestamp in ISO-8601 format", required = true) String endTime
     ) {
-        AppChartRequest request = new AppChartRequest(
-                normalize(application),
-                parseInstant(startTime, "startTime"),
-                parseInstant(endTime, "endTime")
-        );
-        validate(request);
-        return analyticsService.chartByApp(request);
+        log.info("visitedUserHourlyByApplication called: application={}, startTime={}, endTime={}", application, startTime, endTime);
+        try {
+            AppChartRequest request = new AppChartRequest(
+                    normalize(application),
+                    parseInstant(startTime, "startTime"),
+                    parseInstant(endTime, "endTime")
+            );
+            log.debug("Parsed request: application={}, startTime={}, endTime={}", request.application(), request.startTime(), request.endTime());
+            validate(request);
+            log.debug("Request validated successfully");
+            AppChartResponse response = analyticsService.chartByApp(request);
+            log.debug("Returning response: bucket={}, pointCount={}", response.bucket(), response.points() != null ? response.points().size() : 0);
+            return response;
+        } catch (IllegalArgumentException e) {
+            log.error("Validation error in visitedUserHourlyByApplication: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Error in visitedUserHourlyByApplication: application={}, error={}", application, e.getMessage(), e);
+            throw e;
+        }
     }
 
     private void validate(Object request) {
