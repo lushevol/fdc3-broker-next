@@ -97,7 +97,7 @@ public class ElasticsearchAppAnalyticsRepository implements AppAnalyticsReposito
         request.put("query", buildQuery(target, startTime, endTime));
         request.put("aggs", Map.of(
                 UNIQUE_USERS_AGG, Map.of(
-                        "cardinality", Map.of("field", properties.getUserIdField())
+                        "cardinality", Map.of("field", properties.getUserIdField() + ".keyword")
                 )
         ));
         return writeJson(request);
@@ -118,7 +118,7 @@ public class ElasticsearchAppAnalyticsRepository implements AppAnalyticsReposito
                         ),
                         "aggs", Map.of(
                                 UNIQUE_USERS_AGG, Map.of(
-                                        "cardinality", Map.of("field", properties.getUserIdField())
+                                        "cardinality", Map.of("field", properties.getUserIdField() + ".keyword")
                                 )
                         )
                 )
