@@ -590,6 +590,7 @@ public class ProtocolChatService {
 
         private static boolean isFrontendToolPart(ProtocolPart part) {
             return "frontend".equalsIgnoreCase(part.getSource())
+                    || "human".equalsIgnoreCase(part.getSource())
                     || "frontend".equalsIgnoreCase(part.getExecutionTarget());
         }
 

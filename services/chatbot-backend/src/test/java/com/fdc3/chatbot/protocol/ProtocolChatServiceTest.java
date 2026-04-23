@@ -227,6 +227,65 @@ class ProtocolChatServiceTest {
     }
 
     @Test
+    void streamRunBuildsFrontendToolContinuationFromHumanSourceToolPart() throws Exception {
+        ProtocolRunRequest request = objectMapper.readValue("""
+                {
+                  "conversationId": "conv-human-1",
+                  "trigger": "submit-tool-result",
+                  "context": {
+                    "tools": [
+                      {
+                        "name": "approval_confirm",
+                        "source": "human",
+                        "description": "Send an email with confirmation",
+                        "parameters": {
+                          "to": { "type": "string" },
+                          "subject": { "type": "string" },
+                          "body": { "type": "string" }
+                        }
+                      }
+                    ]
+                  },
+                  "messages": [
+                    {
+                      "id": "msg-user-1",
+                      "role": "user",
+                      "parts": [{ "type": "text", "text": "send an email to John to ask for sick leave tomorrow" }]
+                    },
+                    {
+                      "id": "msg-asst-1",
+                      "role": "assistant",
+                      "parts": [
+                        {
+                          "type": "tool-call",
+                          "toolCallId": "tool-human-1",
+                          "toolName": "approval_confirm",
+                          "source": "human",
+                          "state": "output-available",
+                          "input": { "to": "john@test.com", "subject": "Sick Leave", "body": "I will take sick leave tomorrow." },
+                          "output": { "confirmed": true }
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """, ProtocolRunRequest.class);
+
+        protocolChatService.streamRun(
+                request,
+                UserCapabilityContext.anonymous(),
+                frame -> {},
+                error -> { throw new AssertionError(error); },
+                () -> {}
+        );
+
+        assertNotNull(agentService.lastInvocation.toolContext());
+        assertTrue(agentService.lastInvocation.toolContext().contains("\"toolName\":\"approval_confirm\""));
+        assertTrue(agentService.lastInvocation.toolContext().contains("\"originalUserMessage\":\"send an email to John to ask for sick leave tomorrow\""));
+        assertTrue(agentService.lastInvocation.toolContext().contains("john@test.com"));
+    }
+
+    @Test
     void streamRunUsesLatestUserTurnInsteadOfOldFrontendContinuation() throws Exception {
         ProtocolRunRequest request = objectMapper.readValue("""
                 {
