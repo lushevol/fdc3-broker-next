@@ -4,43 +4,41 @@ Standalone Java MCP server for Elasticsearch-backed user monitoring analytics.
 
 ## Tools
 
-- `statistic_count_by_filters`
-  - Inputs: `startTime`, `endTime`, one or more monitoring filters from `key`, `event`, `container`, `tile`, `name`, `value`, `userId`, `sessionId`, `ipAddress`, `propertyFilters`
-  - Output: `pv`, `uv` for matching real monitoring events
-- `chart_by_filters`
-  - Inputs: same filters as above plus optional `bucket`
-  - Output: time-series points of `pv`, `uv`
+- `visited_user_count_by_application`
+  - Inputs: `application`, `startTime`, `endTime`
+  - Output: UV count for supported applications: `cashflow blotter`, `trades`
+- `visited_user_hourly_by_application`
+  - Inputs: `application`, `startTime`, `endTime`
+  - Output: hourly UV series for supported applications: `cashflow blotter`, `trades`
+- `execute_analytics_sql`
+  - Inputs: read-only `SELECT` SQL generated from `analytics://text2sql/catalog`, optional `limit`
+  - Output: executed SQL, columns, rows, row count, and applied limit
+
+## Resources
+
+- `analytics://text2sql/catalog`
+  - Code-defined schema and semantic catalog for text-to-SQL generation
+  - Defines `function` as the clicked element path stored in `attribute16`
+  - Includes business mappings such as `trades` -> `tile = 'trade' AND container = 'trade_blotter'`
 
 ## Configuration
 
 Configure the Elasticsearch connection and log field mapping through environment variables or `application.yml`.
 
-| Property                                  | Description                    |
-| ----------------------------------------- | ------------------------------ |
-| `analytics.elasticsearch.url`             | Elasticsearch base URL         |
-| `analytics.elasticsearch.api-key`         | Optional API key               |
-| `analytics.elasticsearch.username`        | Optional basic auth username   |
-| `analytics.elasticsearch.password`        | Optional basic auth password   |
-| `analytics.elasticsearch.index-name`      | Log index name                 |
-| `analytics.elasticsearch.timestamp-field` | Timestamp field                |
-| `analytics.elasticsearch.key-field`       | Monitoring key field           |
-| `analytics.elasticsearch.event-field`     | Monitoring event field         |
-| `analytics.elasticsearch.container-field` | Container field                |
-| `analytics.elasticsearch.tile-field`      | Tile field                     |
-| `analytics.elasticsearch.name-field`      | Top-level name field           |
-| `analytics.elasticsearch.value-field`     | Top-level value field          |
-| `analytics.elasticsearch.user-id-field`   | User identifier field for UV   |
-| `analytics.elasticsearch.session-id-field`| Session/authorization field    |
-| `analytics.elasticsearch.ip-address-field`| IP address field               |
-| `analytics.elasticsearch.property-data-path` | Nested property array path  |
-| `analytics.elasticsearch.property-name-field` | Nested property name field |
-| `analytics.elasticsearch.property-value-field` | Nested property value field |
+| Property                                  | Description                         |
+| ----------------------------------------- | ----------------------------------- |
+| `analytics.elasticsearch.kibana-search-url` | Kibana proxy URL for JSON DSL search |
+| `analytics.elasticsearch.kibana-sql-url`  | Kibana proxy URL for Elasticsearch SQL |
+| `analytics.elasticsearch.index-name`      | Log index name                      |
+| `analytics.elasticsearch.created-at-field` | Timestamp field                    |
+| `analytics.elasticsearch.key-field`       | Monitoring key field                |
+| `analytics.elasticsearch.event-field`     | Monitoring event field              |
+| `analytics.elasticsearch.container-field` | Container field                     |
+| `analytics.elasticsearch.tile-field`      | Tile field                          |
+| `analytics.elasticsearch.name-field`      | Event name field                    |
+| `analytics.elasticsearch.user-id-field`   | User identifier field for UV        |
 
-`propertyFilters` is passed to MCP as a JSON array string, for example:
-
-```json
-[{"name":"content_name","value":"Cashflow"},{"name":"route","value":"/workspace"}]
-```
+Text-to-SQL semantics are code-defined under `com.fdc3.elasticsearchmcp.catalog`, not in configuration files.
 
 ## Run
 

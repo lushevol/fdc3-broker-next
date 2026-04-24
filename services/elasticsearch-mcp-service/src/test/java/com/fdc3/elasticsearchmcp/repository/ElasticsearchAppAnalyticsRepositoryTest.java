@@ -43,7 +43,7 @@ class ElasticsearchAppAnalyticsRepositoryTest {
         assertThat(requestJson).contains("\"tile\":\"cashflow_cn\"");
         assertThat(requestJson).contains("\"container\":\"cashflow_blotter_cn\"");
         assertThat(requestJson).contains("\"name\":\"Page View\"");
-        assertThat(requestJson).contains("\"userId\"");
+        assertThat(requestJson).contains("\"userId.keyword\"");
         assertThat(json.path("aggs").has("unique_users")).isTrue();
     }
 

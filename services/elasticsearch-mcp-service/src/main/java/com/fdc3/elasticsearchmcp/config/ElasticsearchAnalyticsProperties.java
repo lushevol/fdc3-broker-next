@@ -16,6 +16,9 @@ public class ElasticsearchAnalyticsProperties {
     private String kibanaSearchUrl = "http://10.4.197.146:5601/api/console/proxy?path=%2Fsingle-ui-bff-analytic%2F_search&method=GET";
 
     @NotBlank
+    private String kibanaSqlUrl = "http://10.4.197.146:5601/api/console/proxy?path=%2F_sql%3Fformat%3Djson&method=POST";
+
+    @NotBlank
     private String createdAtField = "createdAt";
 
     @NotBlank
@@ -47,6 +50,15 @@ public class ElasticsearchAnalyticsProperties {
     public void setKibanaSearchUrl(String kibanaSearchUrl) {
         log.info("Setting KibanaSearchUrl: {}", kibanaSearchUrl);
         this.kibanaSearchUrl = kibanaSearchUrl;
+    }
+
+    public String getKibanaSqlUrl() {
+        return kibanaSqlUrl;
+    }
+
+    public void setKibanaSqlUrl(String kibanaSqlUrl) {
+        log.info("Setting kibanaSqlUrl: {}", kibanaSqlUrl);
+        this.kibanaSqlUrl = kibanaSqlUrl;
     }
 
     public String getCreatedAtField() {
