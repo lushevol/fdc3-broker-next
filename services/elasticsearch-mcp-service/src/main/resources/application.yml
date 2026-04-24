@@ -33,6 +33,9 @@ logging:
     com.fdc3.elasticsearchmcp.tool: DEBUG
 
 analytics:
+  tools:
+    app:
+      enabled: ${ANALYTICS_APP_TOOLS_ENABLED:false}
   stub:
     enabled: ${ANALYTICS_STUB_ENABLED:false}
   elasticsearch:

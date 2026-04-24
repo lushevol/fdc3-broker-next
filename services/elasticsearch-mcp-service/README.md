@@ -20,6 +20,9 @@ Standalone Java MCP server for Elasticsearch-backed user monitoring analytics.
   - Code-defined schema and semantic catalog for text-to-SQL generation
   - Defines `function` as the clicked element path stored in `attribute16`
   - Includes business mappings such as `trades` -> `tile = 'trade' AND container = 'trade_blotter'`
+- `analytics://text2sql/prompt-samples`
+  - Ready-to-use prompt samples for manual testing
+  - Includes expected SQL shapes for common function-usage questions
 
 ## Configuration
 
@@ -80,3 +83,17 @@ npm run dev:chatbot-mcp-stack:live
 cd services/elasticsearch-mcp-service
 npm test
 ```
+
+Run only the text2sql E2E flow in stub mode:
+
+```bash
+cd services/elasticsearch-mcp-service
+npm run test:e2e
+```
+
+Manual prompt samples:
+
+- `what's the most popular function in trades`
+- `what's the top 5 functions in trades`
+- `which function in trades has the most clicks`
+- `show the most popular function paths in cashflow blotter`

@@ -57,6 +57,30 @@ public record Text2SqlCatalog(List<AnalyticsDataset> datasets) {
         return datasets.stream().map(AnalyticsDataset::table).collect(Collectors.toList());
     }
 
+    public String renderPromptSamples() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Resource: analytics://text2sql/prompt-samples\n\n");
+        builder.append("Use these sample prompts to test the analytics text-to-SQL flow.\n");
+        builder.append("Read analytics://text2sql/catalog first, then generate SQL, then call execute_analytics_sql.\n\n");
+
+        for (AnalyticsDataset dataset : datasets) {
+            builder.append("Dataset: ").append(dataset.name()).append('\n');
+            for (QueryExample example : dataset.examples()) {
+                builder.append("- Prompt: ").append(example.question()).append('\n');
+                builder.append("  Expected SQL shape:\n");
+                builder.append(indentSql(example.sql())).append('\n');
+            }
+            builder.append('\n');
+        }
+
+        builder.append("Additional prompt samples:\n");
+        builder.append("- what's the top 5 functions in trades\n");
+        builder.append("- which function in trades has the most clicks\n");
+        builder.append("- show the most popular function paths in cashflow blotter\n");
+        builder.append("- count distinct users for trades in the last 7 days\n");
+        return builder.toString().trim();
+    }
+
     private String indentSql(String sql) {
         return sql.strip().lines()
                 .map(line -> "    " + line)

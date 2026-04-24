@@ -23,4 +23,15 @@ public class AnalyticsText2SqlResources {
     public String text2SqlCatalog() {
         return catalogService.renderCatalog();
     }
+
+    @McpResource(
+            name = "analytics_text2sql_prompt_samples",
+            title = "Analytics Text2SQL Prompt Samples",
+            uri = "analytics://text2sql/prompt-samples",
+            description = "Sample prompts and expected SQL shapes for manually testing analytics text-to-SQL flows.",
+            mimeType = "text/markdown"
+    )
+    public String text2SqlPromptSamples() {
+        return catalogService.catalog().renderPromptSamples();
+    }
 }

@@ -17,4 +17,15 @@ class AnalyticsText2SqlResourcesTest {
         assertThat(catalog).contains("function: field attribute16");
         assertThat(catalog).contains("Only generate SELECT statements");
     }
+
+    @Test
+    void returnsPromptSamplesResource() {
+        AnalyticsText2SqlResources resources = new AnalyticsText2SqlResources(new Text2SqlCatalogService());
+
+        String promptSamples = resources.text2SqlPromptSamples();
+
+        assertThat(promptSamples).contains("analytics://text2sql/prompt-samples");
+        assertThat(promptSamples).contains("what's the most popular function in trades");
+        assertThat(promptSamples).contains("top 5 functions in trades");
+    }
 }
