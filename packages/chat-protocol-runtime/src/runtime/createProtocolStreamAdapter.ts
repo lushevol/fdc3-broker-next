@@ -277,14 +277,9 @@ function findToolCallIndex(
   );
 }
 
-function findLatestTextIndex(content: readonly ProtocolAssistantContentPart[]): number {
-  for (let index = content.length - 1; index >= 0; index -= 1) {
-    if (content[index]?.type === 'text') {
-      return index;
-    }
-  }
-
-  return -1;
+function findTrailingTextIndex(content: readonly ProtocolAssistantContentPart[]): number {
+  const index = content.length - 1;
+  return content[index]?.type === 'text' ? index : -1;
 }
 
 function updateTextContent(
@@ -295,12 +290,13 @@ function updateTextContent(
   append: boolean,
 ): ProtocolAssistantContentPart[] {
   const storedIndex = partId ? textPartIndexes.get(partId) : undefined;
+  const trailingTextIndex = findTrailingTextIndex(content);
   const index =
-    storedIndex !== undefined && content[storedIndex]?.type === 'text'
+    storedIndex !== undefined && storedIndex === trailingTextIndex
       ? storedIndex
       : partId
         ? -1
-        : findLatestTextIndex(content);
+        : trailingTextIndex;
   if (index === -1) {
     const nextContent = [...content, createTextPart(partId, text)];
     if (partId) {

@@ -14,6 +14,7 @@ spring:
         instructions: 'Provides Kibana-backed visited user analytics for supported applications'
         capabilities:
           tool: true
+          resource: true
         streamable-http:
           mcp-endpoint: /api/mcp
 
@@ -32,10 +33,14 @@ logging:
     com.fdc3.elasticsearchmcp.tool: DEBUG
 
 analytics:
+  tools:
+    app:
+      enabled: ${ANALYTICS_APP_TOOLS_ENABLED:false}
   stub:
     enabled: ${ANALYTICS_STUB_ENABLED:false}
   elasticsearch:
     kibana-search-url: ${ELASTICSEARCH_KIBANA_SEARCH_URL:http://10.4.197.146:5601/api/console/proxy?path=%2Fsingle-ui-bff-analytic%2F_search&method=GET}
+    kibana-sql-url: ${ELASTICSEARCH_KIBANA_SQL_URL:http://10.4.197.146:5601/api/console/proxy?path=%2F_sql%3Fformat%3Djson&method=POST}
     created-at-field: ${ELASTICSEARCH_CREATED_AT_FIELD:createdAt}
     user-id-field: ${ELASTICSEARCH_USER_ID_FIELD:userId}
     tile-field: ${ELASTICSEARCH_TILE_FIELD:tile}

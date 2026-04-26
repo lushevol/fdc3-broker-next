@@ -66,7 +66,7 @@ describe('protocol stream adapter', () => {
     ]);
   });
 
-  it('keeps separate text parts stable by partId across streamed frames', () => {
+  it('keeps text deltas in stream order when a partId resumes after another text part', () => {
     const adapter = createProtocolStreamAdapter();
 
     adapter.applyFrame({ type: 'text-start', messageId: 'msg_asst_1', partId: 'intro' });
@@ -91,12 +91,77 @@ describe('protocol stream adapter', () => {
     });
 
     expect(adapter.getMessage().content).toEqual([
-      { type: 'text', text: 'Hello again' },
+      { type: 'text', text: 'Hello' },
       { type: 'text', text: 'World' },
+      { type: 'text', text: ' again' },
     ]);
   });
 
-  it('preserves text and tool state when continuing from an existing message', () => {
+  it('keeps unkeyed text deltas after tool calls in stream order', () => {
+    const message = applyFrameSequenceToMessage([
+      { type: 'text-delta', messageId: 'msg_asst_1', delta: 'Before ' },
+      {
+        type: 'tool-input-start',
+        toolCallId: 'tool_1',
+        toolName: 'lookup_weather',
+      },
+      {
+        type: 'tool-input-available',
+        toolCallId: 'tool_1',
+        input: { location: 'Beijing' },
+      },
+      { type: 'text-delta', messageId: 'msg_asst_1', delta: 'after.' },
+    ]);
+
+    expect(message.content).toEqual([
+      { type: 'text', text: 'Before ' },
+      {
+        type: 'tool-call',
+        toolCallId: 'tool_1',
+        toolName: 'lookup_weather',
+        source: 'frontend',
+        state: 'input-available',
+        input: { location: 'Beijing' },
+      },
+      { type: 'text', text: 'after.' },
+    ]);
+  });
+
+  it('keeps keyed text deltas after tool calls in stream order when providers reuse partId', () => {
+    const message = applyFrameSequenceToMessage([
+      { type: 'text-start', messageId: 'msg_asst_1', partId: 'text-1' },
+      { type: 'text-delta', messageId: 'msg_asst_1', partId: 'text-1', delta: 'Before ' },
+      { type: 'text-end', messageId: 'msg_asst_1', partId: 'text-1' },
+      {
+        type: 'tool-input-start',
+        toolCallId: 'tool_1',
+        toolName: 'lookup_weather',
+      },
+      {
+        type: 'tool-input-available',
+        toolCallId: 'tool_1',
+        input: { location: 'Beijing' },
+      },
+      { type: 'text-start', messageId: 'msg_asst_1', partId: 'text-1' },
+      { type: 'text-delta', messageId: 'msg_asst_1', partId: 'text-1', delta: 'after.' },
+      { type: 'text-end', messageId: 'msg_asst_1', partId: 'text-1' },
+    ]);
+
+    expect(message.content).toEqual([
+      { type: 'text', text: 'Before ' },
+      {
+        type: 'tool-call',
+        toolCallId: 'tool_1',
+        toolName: 'lookup_weather',
+        source: 'frontend',
+        state: 'input-available',
+        input: { location: 'Beijing' },
+      },
+      { type: 'text', text: 'after.' },
+    ]);
+  });
+
+  it('preserves tool state and appends continued text after existing tool parts', () => {
     const initialMessage = applyFrameSequenceToMessage([
       {
         type: 'message-metadata',
@@ -126,7 +191,7 @@ describe('protocol stream adapter', () => {
     ]);
 
     expect(adapter.getMessage().content).toEqual([
-      { type: 'text', text: 'Hello again' },
+      { type: 'text', text: 'Hello' },
       {
         type: 'tool-call',
         toolCallId: 'tool_1',
@@ -136,6 +201,7 @@ describe('protocol stream adapter', () => {
         input: { location: 'Beijing' },
         output: { temperatureC: 22 },
       },
+      { type: 'text', text: ' again' },
     ]);
   });
 
