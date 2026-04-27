@@ -118,6 +118,7 @@ function ChatProtocolAppContent({
           <button
             type="button"
             onClick={() => selectToolPreset('minimal')}
+            aria-label="Use minimal tools"
             aria-pressed={activeToolPreset === 'minimal'}
             className="rounded-md border px-3 py-1.5 text-sm transition-colors aria-pressed:border-[#173b60] aria-pressed:bg-[#173b60] aria-pressed:text-white"
           >
@@ -126,6 +127,7 @@ function ChatProtocolAppContent({
           <button
             type="button"
             onClick={() => selectToolPreset('full')}
+            aria-label="Use full tools"
             aria-pressed={activeToolPreset === 'full'}
             className="rounded-md border px-3 py-1.5 text-sm transition-colors aria-pressed:border-[#173b60] aria-pressed:bg-[#173b60] aria-pressed:text-white"
           >

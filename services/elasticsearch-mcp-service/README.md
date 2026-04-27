@@ -10,11 +10,30 @@ Standalone Java MCP server for Elasticsearch-backed user monitoring analytics.
 - `visited_user_hourly_by_application`
   - Inputs: `application`, `startTime`, `endTime`
   - Output: hourly UV series for supported applications: `cashflow blotter`, `trades`
+- `highest_operation_users_by_application`
+  - Inputs: `application`, optional `startTime`, optional `endTime`, optional `limit`
+  - Defaults: last 1 month, limit 10
+  - Output: `userId` and operation `count`
+- `most_used_functions_by_application`
+  - Inputs: `application`, optional `startTime`, optional `endTime`, optional `limit`
+  - Defaults: last 1 month, limit 10
+  - Output: `functionPath` and usage `count`
+
+## Archived Text2SQL
+
+The generic text-to-SQL MCP surface is archived and disabled by default. The code remains available for reference and targeted testing, but the service no longer exposes it unless explicitly enabled:
+
 - `execute_analytics_sql`
-  - Inputs: read-only `SELECT` SQL generated from `analytics://text2sql/catalog`, optional `limit`
-  - Output: executed SQL, columns, rows, row count, and applied limit
+- `analytics://text2sql/catalog`
+- `analytics://text2sql/prompt-samples`
+
+Enable only for legacy testing with `ANALYTICS_TEXT2SQL_TOOLS_ENABLED=true`.
 
 ## Resources
+
+No MCP resources are exposed by default.
+
+Archived text-to-SQL resources, when `ANALYTICS_TEXT2SQL_TOOLS_ENABLED=true`:
 
 - `analytics://text2sql/catalog`
   - Code-defined schema and semantic catalog for text-to-SQL generation
@@ -40,6 +59,7 @@ Configure the Elasticsearch connection and log field mapping through environment
 | `analytics.elasticsearch.tile-field`      | Tile field                          |
 | `analytics.elasticsearch.name-field`      | Event name field                    |
 | `analytics.elasticsearch.user-id-field`   | User identifier field for UV        |
+| `analytics.tools.text2sql.enabled`        | Enables archived text-to-SQL tool/resources |
 
 Text-to-SQL semantics are code-defined under `com.fdc3.elasticsearchmcp.catalog`, not in configuration files.
 

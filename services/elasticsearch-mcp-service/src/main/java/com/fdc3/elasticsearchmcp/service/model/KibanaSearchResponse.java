@@ -8,21 +8,8 @@ import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record KibanaSearchResponse(
-        Hits hits,
         Map<String, KibanaAggregation> aggregations
 ) {
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record Hits(List<Hit> hits) {
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record Hit(AnalyticRecord source) {
-        @JsonProperty("_source")
-        public AnalyticRecord source() {
-            return source;
-        }
-    }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record KibanaAggregation(

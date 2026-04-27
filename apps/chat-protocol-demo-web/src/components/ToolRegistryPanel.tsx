@@ -4,7 +4,8 @@ import { useState, useCallback } from 'react';
 
 type ToolDescriptor = {
   name: string;
-  source: 'frontend' | 'backend' | 'human';
+  source: 'frontend' | 'backend' | 'human' | 'mcp';
+  providerId?: string;
   description: string;
   parameters: Record<string, { type: string; description?: string; required: boolean }>;
 };
@@ -196,6 +197,11 @@ export function ToolRegistryPanel({
                       </span>
                     </div>
                     <p className="mt-0.5 text-[0.75rem] text-[#4c6680]">{tool.description}</p>
+                    {tool.providerId ? (
+                      <p className="mt-0.5 text-[0.65rem] text-[#7c3aed]">
+                        provider: <code className="font-mono">{tool.providerId}</code>
+                      </p>
+                    ) : null}
                     <ParamList parameters={tool.parameters} />
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">

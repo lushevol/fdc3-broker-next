@@ -2,9 +2,11 @@ package com.fdc3.elasticsearchmcp.resource;
 
 import com.fdc3.elasticsearchmcp.catalog.Text2SqlCatalogService;
 import org.springaicommunity.mcp.annotation.McpResource;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(prefix = "analytics.tools.text2sql", name = "enabled", havingValue = "true")
 public class AnalyticsText2SqlResources {
 
     private final Text2SqlCatalogService catalogService;

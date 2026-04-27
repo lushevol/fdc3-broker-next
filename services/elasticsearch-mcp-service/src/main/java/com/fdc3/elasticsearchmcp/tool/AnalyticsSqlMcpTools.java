@@ -6,9 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(prefix = "analytics.tools.text2sql", name = "enabled", havingValue = "true")
 public class AnalyticsSqlMcpTools {
 
     private static final Logger log = LoggerFactory.getLogger(AnalyticsSqlMcpTools.class);

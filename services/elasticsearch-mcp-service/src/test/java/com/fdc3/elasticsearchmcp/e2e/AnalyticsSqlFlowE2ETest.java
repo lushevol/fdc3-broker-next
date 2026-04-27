@@ -11,7 +11,10 @@ import org.springframework.test.context.TestPropertySource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@TestPropertySource(properties = "analytics.stub.enabled=true")
+@TestPropertySource(properties = {
+        "analytics.stub.enabled=true",
+        "analytics.tools.text2sql.enabled=true"
+})
 class AnalyticsSqlFlowE2ETest {
 
     @Autowired
@@ -42,6 +45,6 @@ class AnalyticsSqlFlowE2ETest {
         assertThat(response.executedSql()).contains("attribute16 AS function_path");
         assertThat(response.columns()).extracting("name").containsExactly("function_path", "usage_count");
         assertThat(response.rows()).isNotEmpty();
-        assertThat(response.rowCount()).isEqualTo(2);
+        assertThat(response.rowCount()).isEqualTo(4);
     }
 }
