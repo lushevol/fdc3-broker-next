@@ -9,6 +9,7 @@ import useController from './common/useController';
 const Tile1 = React.lazy(() => import('../../Tile1'));
 const FDC3Tile1 = React.lazy(() => import('../../FDC3Tile1'));
 const FDC3Tile2 = React.lazy(() => import('../../FDC3Tile2'));
+const TradeBlotterTile = React.lazy(() => import('../../TradeBlotterTile'));
 
 const Routing: React.FC<TileProps> = (props: TileProps): ReactElement => {
   useController(props);
@@ -35,6 +36,14 @@ const Routing: React.FC<TileProps> = (props: TileProps): ReactElement => {
         element={
           <React.Suspense fallback={<Loader />}>
             <FDC3Tile2 {...props} />
+          </React.Suspense>
+        }
+      ></Route>
+      <Route
+        path="/template_tile_trade_blotter/*"
+        element={
+          <React.Suspense fallback={<Loader />}>
+            <TradeBlotterTile {...props} />
           </React.Suspense>
         }
       ></Route>

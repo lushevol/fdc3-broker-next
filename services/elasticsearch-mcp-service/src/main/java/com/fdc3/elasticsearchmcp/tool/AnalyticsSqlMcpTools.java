@@ -6,9 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(prefix = "analytics.tools.text2sql", name = "enabled", havingValue = "true")
 public class AnalyticsSqlMcpTools {
 
     private static final Logger log = LoggerFactory.getLogger(AnalyticsSqlMcpTools.class);
@@ -19,10 +21,11 @@ public class AnalyticsSqlMcpTools {
 
             Dataset user_monitoring:
             - Table: "single-ui-bff-analytic"
-            - Dimension function path: field attribute16, alias function_path. Synonyms: function, feature, clicked element, button, action, path.
-            - Dimension user: field userId. Synonyms: user, visitor, unique user.
+            - Dimension function path: attribute16, alias function_path. Synonyms: function, feature, clicked element, button, action, path.
+            - Dimension user: userId. Synonyms: user, visitor, unique user.
             - Metric popularity/clicks/usage/top/most used: COUNT(*), alias usage_count, sort descending.
             - Metric visited users/UV: COUNT(DISTINCT userId), alias user_count.
+            - Time duration: createdAt, always set a time boundary for query. End time by default is now, start time is 30 days ago.
 
             Entity filters:
             - trades, trade blotter: tile = 'trade' AND container = 'trade_blotter'
@@ -33,6 +36,8 @@ public class AnalyticsSqlMcpTools {
             FROM "single-ui-bff-analytic"
             WHERE <entity filters>
               AND <dimension> IS NOT NULL
+              AND createdAt >= <start time, default 30 days ago>
+              AND createdAt <= <end time, default now>
             GROUP BY <dimension>
             ORDER BY <metric_alias> DESC
             LIMIT <requested N or 10>

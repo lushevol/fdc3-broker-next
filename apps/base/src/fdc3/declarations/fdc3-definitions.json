@@ -24,5 +24,24 @@
         ]
       }
     }
+  },
+  {
+    "appId": "template_tile_trade_blotter",
+    "interop": {
+      "intents": {
+        "listensFor": [
+          {
+            "intent": "SearchTrades",
+            "contexts": ["fdc3.trade.query"],
+            "chatbot": {
+              "actionId": "trade-blotter.pending-validation",
+              "title": "Check Pending Validation Trades",
+              "approvalTitle": "Check Pending Validation Trades",
+              "approvalBody": "I'll look up the pending-validation trades from the trade blotter to show you their current status."
+            }
+          }
+        ]
+      }
+    }
   }
 ]

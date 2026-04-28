@@ -34,6 +34,8 @@ logging:
 
 analytics:
   tools:
+    text2sql:
+      enabled: ${ANALYTICS_TEXT2SQL_TOOLS_ENABLED:false}
     app:
       enabled: ${ANALYTICS_APP_TOOLS_ENABLED:false}
   stub:

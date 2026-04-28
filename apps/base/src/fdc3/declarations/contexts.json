@@ -68,7 +68,7 @@
         "id": {
           "type": "object",
           "properties": {
-            "cashflowId": {
+            "tradeId": {
               "type": "string"
             }
           }
@@ -84,5 +84,39 @@
       }
     ],
     "description": "Specific Single Trade Context"
+  },
+  {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "fdc3.trade.query"
+        },
+        "filters": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "book": {
+              "type": "string"
+            },
+            "desk": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": ["type"]
+    },
+    "simples": [
+      {
+        "type": "fdc3.trade.query",
+        "filters": {
+          "status": "PENDING_VALIDATION"
+        }
+      }
+    ],
+    "description": "Trade blotter search query context"
   }
 ]

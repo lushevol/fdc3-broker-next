@@ -195,7 +195,7 @@ const Home: React.FC = (): ReactElement => {
         </main>
         {showTimeout && <Timeout setOpen={setShowTimeout} />}
         {channelMessage && <Snackbar message={channelMessage} open={true} onClose={clearMessage} />}
-        <ChatbotSidebarV2 />
+        <ChatbotSidebarV2 toolRegistryConfig={toolRegistryConfig} />
       </Root>
   );
 };

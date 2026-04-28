@@ -4,13 +4,20 @@ import type { ChatToolDescriptor } from 'chat-protocol-contract';
 import {
   AnalyticsTool,
   ApprovalConfirmTool,
+  FunctionUsageRankingTool,
+  HighestOperationUsersTool,
   ProfileLookupTool,
   ResolveRelativeDateTool,
   SummaryComposeTool,
   TimezoneCurrentTool,
 } from '@/components/toolkit/tool-renderers';
 
-const sharedToolDefinitions: Toolkit = {
+type ToolkitDefinition = Toolkit[string] & {
+  source?: ChatToolDescriptor['source'];
+  providerId?: string;
+};
+
+const sharedToolDefinitions: Record<string, ToolkitDefinition> = {
   profile_lookup: {
     type: 'frontend',
     description: 'Lookup user profile information',
@@ -74,6 +81,32 @@ const sharedToolDefinitions: Toolkit = {
     type: 'backend',
     render: AnalyticsTool,
   },
+  highest_operation_users_by_application: {
+    type: 'backend',
+    source: 'mcp',
+    providerId: 'analytics-mcp',
+    description: 'Rank users by operation count for an application in a time window.',
+    parameters: z.object({
+      application: z.string().describe('Application name, such as trades or cashflow blotter'),
+      startTime: z.string().optional().describe('Inclusive start time in ISO-8601 format'),
+      endTime: z.string().optional().describe('Inclusive end time in ISO-8601 format'),
+      limit: z.number().optional().describe('Maximum number of ranked users to return'),
+    }),
+    render: HighestOperationUsersTool,
+  },
+  most_used_functions_by_application: {
+    type: 'backend',
+    source: 'mcp',
+    providerId: 'analytics-mcp',
+    description: 'Rank function paths by usage count for an application in a time window.',
+    parameters: z.object({
+      application: z.string().describe('Application name, such as trades or cashflow blotter'),
+      startTime: z.string().optional().describe('Inclusive start time in ISO-8601 format'),
+      endTime: z.string().optional().describe('Inclusive end time in ISO-8601 format'),
+      limit: z.number().optional().describe('Maximum number of ranked functions to return'),
+    }),
+    render: FunctionUsageRankingTool,
+  },
   resolve_relative_date: {
     type: 'backend',
     render: ResolveRelativeDateTool,
@@ -88,6 +121,8 @@ const presetToolNames: Record<ToolPreset, string[]> = {
     'profile_lookup',
     'visited_user_count_by_application',
     'visited_user_hourly_by_application',
+    'highest_operation_users_by_application',
+    'most_used_functions_by_application',
     'resolve_relative_date',
   ],
 };
@@ -106,12 +141,8 @@ export function getToolDescriptors(preset: ToolPreset): ToolDescriptorForPanel[]
     const definition = runtimeToolkit[name];
     return {
       name,
-      source:
-        definition.type === 'frontend'
-          ? 'frontend'
-          : definition.type === 'human'
-            ? 'human'
-            : 'backend',
+      source: resolveToolSource(definition),
+      providerId: definition.providerId,
       description: definition.description ?? '',
       parameters: extractParamInfo(definition.parameters),
     };
@@ -124,12 +155,8 @@ export function getProtocolToolDescriptors(preset: ToolPreset): ChatToolDescript
 
     return {
       name,
-      source:
-        definition.type === 'frontend'
-          ? 'frontend'
-          : definition.type === 'human'
-            ? 'human'
-            : 'backend',
+      source: resolveToolSource(definition),
+      providerId: definition.providerId,
       description: definition.description ?? '',
       parameters: extractParamInfo(definition.parameters),
     };
@@ -157,6 +184,20 @@ function extractParamInfo(schema: unknown): ParamInfo {
   for (const [key, field] of Object.entries(shape)) {
     const f = field as { typeName?: string; description?: string; _def?: { typeName?: string } };
     const typeName = f.typeName ?? f._def?.typeName ?? 'unknown';
+    const unwrappedTypeName =
+      typeName === 'ZodOptional' && f._def && 'innerType' in f._def
+        ? (
+            f._def as {
+              innerType?: { typeName?: string; _def?: { typeName?: string } };
+            }
+          ).innerType?.typeName ??
+          (
+            f._def as {
+              innerType?: { typeName?: string; _def?: { typeName?: string } };
+            }
+          ).innerType?._def?.typeName ??
+          'unknown'
+        : typeName;
     const typeMap: Record<string, string> = {
       ZodString: 'string',
       ZodNumber: 'number',
@@ -166,17 +207,34 @@ function extractParamInfo(schema: unknown): ParamInfo {
       ZodEnum: 'enum',
     };
     result[key] = {
-      type: typeMap[typeName] ?? 'string',
+      type: typeMap[unwrappedTypeName] ?? 'string',
       description: f.description,
-      required: true,
+      required: typeName !== 'ZodOptional',
     };
   }
   return result;
 }
 
+function resolveToolSource(definition: ToolkitDefinition): ChatToolDescriptor['source'] {
+  if (definition.source) {
+    return definition.source;
+  }
+
+  if (definition.type === 'frontend') {
+    return 'frontend';
+  }
+
+  if (definition.type === 'human') {
+    return 'human';
+  }
+
+  return 'backend';
+}
+
 export type ToolDescriptorForPanel = {
   name: string;
-  source: 'frontend' | 'backend' | 'human';
+  source: 'frontend' | 'backend' | 'human' | 'mcp';
+  providerId?: string;
   description: string;
   parameters: ParamInfo;
 };

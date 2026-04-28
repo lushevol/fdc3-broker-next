@@ -41,17 +41,20 @@ root-config (port 8001)        ← Single-SPA orchestrator, loads import map
 ## Commands
 
 ```bash
-npm run dev              # Start UI apps + backend services concurrently
-npm run dev:ui            # Start only UI apps (root-config, base, container, tile)
-npm run dev:services      # Start only backend + chatbot-backend
-npm run stop              # Kill all processes on ports 8001,8002,8006,8007,3000,3001,8088,8080
-npm run build             # Turbo build all workspaces (continues on error)
-npm run build:packages    # Build only packages/*
-npm run test              # Turbo test all workspaces
-npm run test:packages     # Test only packages/*
-npm run lint              # Turbo lint all workspaces (continues on error)
-npm run format            # Prettier write all
-npm run test:e2e:systemjs # Playwright e2e tests (requires dev server running)
+npm run dev              # Start UI apps + full backend stack (live ES MCP)
+npm run dev:stub         # Start UI apps + full backend stack (stub ES MCP)
+npm run dev:ui           # Start only UI apps (root-config, base, container, tile)
+npm run dev:services     # Start only backend + chatbot-backend (no ES MCP)
+npm run dev:stack        # Start backend + ES MCP (live) + chatbot-backend
+npm run dev:stack:stub   # Start backend + ES MCP (stub) + chatbot-backend
+npm run stop             # Kill all processes on ports 8001,8002,8006,8007,3000,3001,8088,8080
+npm run build            # Turbo build all workspaces (continues on error)
+npm run build:packages   # Build only packages/*
+npm run test             # Turbo test all workspaces
+npm run test:packages    # Test only packages/*
+npm run lint             # Turbo lint all workspaces (continues on error)
+npm run format           # Prettier write all
+npm run test:e2e         # Playwright e2e tests (requires dev server running)
 ```
 
 ### Single-workspace commands

@@ -721,6 +721,96 @@ test.describe('MCP tool in conversation (elasticsearch-mcp-service example)', ()
     expect(requests.length).toBeGreaterThanOrEqual(1);
     expect(requests[0]?.trigger).toBe('submit-message');
   });
+
+  test('highest_operation_users_by_application renders ranked users with avatar bars', async ({
+    page,
+  }) => {
+    await page.route('**/api/chat/runs', async (route) => {
+      await fulfillRun(
+        route,
+        createMcpToolFrames({
+          toolCallId: 'tool_mcp_user_rank_1',
+          toolName: 'highest_operation_users_by_application',
+          providerId: 'analytics-mcp',
+          input: {
+            application: 'trades',
+            startTime: '2026-03-27T12:00:00Z',
+            endTime: '2026-04-27T12:00:00Z',
+            limit: 5,
+          },
+          output: {
+            application: 'trades',
+            startTime: '2026-03-27T12:00:00Z',
+            endTime: '2026-04-27T12:00:00Z',
+            limit: 5,
+            users: [
+              { userId: 'trader.max', count: 98 },
+              { userId: 'ops.lena', count: 76 },
+              { userId: 'risk.chen', count: 59 },
+            ],
+          },
+          textAfter: 'Here are the users with the highest number of operations in trades.',
+        }),
+      );
+    });
+
+    await openAssistant(page);
+    await selectToolPreset(page, 'full');
+    await sendMessage(page, 'Show highest operation users in trades');
+
+    await expect(page.getByTestId('user-operation-ranking-card')).toBeVisible();
+    await expect(page.getByText('trader.max')).toBeVisible();
+    await expect(page.getByText('98 ops')).toBeVisible();
+    await expect(page.getByText('ops.lena')).toBeVisible();
+    await expect(page.getByText('76 ops')).toBeVisible();
+  });
+
+  test('most_used_functions_by_application renders ranking table', async ({ page }) => {
+    await page.route('**/api/chat/runs', async (route) => {
+      await fulfillRun(
+        route,
+        createMcpToolFrames({
+          toolCallId: 'tool_mcp_function_rank_1',
+          toolName: 'most_used_functions_by_application',
+          providerId: 'analytics-mcp',
+          input: {
+            application: 'cashflow blotter',
+            startTime: '2026-03-27T12:00:00Z',
+            endTime: '2026-04-27T12:00:00Z',
+            limit: 5,
+          },
+          output: {
+            application: 'cashflow blotter',
+            startTime: '2026-03-27T12:00:00Z',
+            endTime: '2026-04-27T12:00:00Z',
+            limit: 5,
+            functions: [
+              {
+                functionPath: '/cashflow_blotter/cashflow_cn/quick_search/search_btn',
+                count: 31,
+              },
+              {
+                functionPath: '/cashflow_blotter/cashflow_cn/filter/apply_btn',
+                count: 12,
+              },
+            ],
+          },
+          textAfter: 'These are the most used functions in cashflow blotter.',
+        }),
+      );
+    });
+
+    await openAssistant(page);
+    await selectToolPreset(page, 'full');
+    await sendMessage(page, 'Show the most used functions in cashflow blotter');
+
+    await expect(page.getByTestId('function-usage-ranking-table')).toBeVisible();
+    await expect(
+      page.getByText('/cashflow_blotter/cashflow_cn/quick_search/search_btn'),
+    ).toBeVisible();
+    await expect(page.getByText('31')).toBeVisible();
+    await expect(page.getByText('/cashflow_blotter/cashflow_cn/filter/apply_btn')).toBeVisible();
+  });
 });
 
 test.describe('Backend tool in conversation', () => {
