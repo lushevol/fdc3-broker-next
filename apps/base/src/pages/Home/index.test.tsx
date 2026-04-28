@@ -90,18 +90,15 @@ jest.mock('../../components/Snackbar', () => () => null);
 jest.mock('../../components/Timeout', () => () => null);
 jest.mock('../../components/TabItem', () => () => <span>Tab Item</span>);
 jest.mock('./common/Container', () => () => <div>Container</div>);
-jest.mock('../../components/ChatbotSidebar/exports', () => ({
-  AssistantUIRuntimeProvider: ({
-    children,
+jest.mock('../../components/ChatbotSidebarV2/exports', () => ({
+  ChatbotSidebarV2: ({
     toolRegistryConfig,
   }: {
-    children: React.ReactNode;
     toolRegistryConfig: Record<string, unknown>;
   }) => {
     capturedConfigs.push(toolRegistryConfig);
-    return <>{children}</>;
+    return <div>Chatbot Sidebar</div>;
   },
-  ChatbotSidebar: () => <div>Chatbot Sidebar</div>,
 }));
 jest.mock('../../components/TabPanel', () => ({
   __esModule: true,

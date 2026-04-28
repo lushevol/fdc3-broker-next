@@ -13,7 +13,7 @@
   },
   {
     "name": "SearchTrades",
-    "description": "Search Trades"
+    "description": "Search trades in the trade blotter"
   },
   {
     "name": "ViewTrade",

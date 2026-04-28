@@ -1,21 +1,60 @@
 import React, { useMemo } from 'react';
 import { ChatProtocolProvider, AssistantModal, type Toolkit } from 'chat-protocol-ui';
 import { createToolkitBridge } from './lib/toolkitBridge';
-import { runtimeToolkit, getProtocolToolDescriptors } from './toolkit/tools';
+import { createRuntimeToolkit, getProtocolToolDescriptors } from './toolkit/tools';
+import { useFdc3ActionExecutor } from './toolkit/use-fdc3-action-executor';
 import 'chat-protocol-ui/styles.css';
 
 const API_URL = process.env.CHAT_API_URL || 'http://127.0.0.1:8080/api/chat/runs';
 
-export const ChatbotSidebarV2: React.FC = () => {
-  const toolkit = useMemo<Toolkit>(() => runtimeToolkit, []);
+type ChatbotWorkspaceSnapshot = {
+  activeWorkspaceId?: string;
+  activeWorkspaceLabel?: string;
+  activeTileTitle?: string;
+  activeTileId?: string;
+  activeAppId?: string;
+  totalWorkspaces?: number;
+  totalTiles?: number;
+  workspaces?: Array<Record<string, unknown>>;
+};
+
+type ToolRegistryConfig = {
+  getWorkspaceSnapshot?: () => ChatbotWorkspaceSnapshot;
+};
+
+type ChatbotSidebarV2Props = {
+  toolRegistryConfig?: ToolRegistryConfig;
+};
+
+export const ChatbotSidebarV2: React.FC<ChatbotSidebarV2Props> = ({ toolRegistryConfig }) => {
+  const fdc3Executor = useFdc3ActionExecutor();
+  const toolkit = useMemo<Toolkit>(
+    () =>
+      createRuntimeToolkit({
+        fdc3Executor,
+      }),
+    [fdc3Executor],
+  );
   const toolkitBridge = useMemo(() => createToolkitBridge(toolkit), [toolkit]);
-  const tools = useMemo(() => getProtocolToolDescriptors(), []);
+  const tools = useMemo(() => getProtocolToolDescriptors(toolkit), [toolkit]);
+  const context = useMemo(() => {
+    const workspaceSnapshot = toolRegistryConfig?.getWorkspaceSnapshot?.();
+
+    if (!workspaceSnapshot) {
+      return undefined;
+    }
+
+    return {
+      workspace: workspaceSnapshot,
+    };
+  }, [toolRegistryConfig]);
 
   return (
     <ChatProtocolProvider
       apiUrl={API_URL}
       toolkit={toolkit}
       tools={tools}
+      context={context}
       toolkitBridge={toolkitBridge}
     >
       <AssistantModal />
