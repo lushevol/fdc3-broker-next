@@ -10,15 +10,18 @@ import type { BaseFDC3Broker } from './base-broker';
 
 export class FDC3ClientConstructor {
   broker: BaseFDC3Broker;
-  constructor(broker: BaseFDC3Broker) {
+  private appIdentifier?: AppIdentifier;
+
+  constructor(broker: BaseFDC3Broker, appIdentifier?: AppIdentifier) {
     this.broker = broker;
+    this.appIdentifier = appIdentifier;
   }
 
   build(): DesktopAgent {
     return {
       addIntentListener: (intent: string, handler: (context: Context) => void) => {
         console.log(`[FMPTP FDC3] Client addIntentListener for intent: ${intent}`);
-        const res = this.broker.addIntentListenerHandler(intent, handler);
+        const res = this.broker.addIntentListenerHandler(intent, handler, this.appIdentifier);
 
         return res;
       },

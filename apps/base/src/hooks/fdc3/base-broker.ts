@@ -168,14 +168,18 @@ export class BaseFDC3Broker {
     return externalFDC3.raiseIntent(intent, context, app);
   }
 
-  addIntentListenerHandler(intent: string, handler: IntentHandler): Promise<Listener> {
-    console.log(`[BaseFDC3Broker] Adding intent listener for: ${intent}`);
+  addIntentListenerHandler(
+    intent: string,
+    handler: IntentHandler,
+    source?: AppIdentifier,
+  ): Promise<Listener> {
+    console.log(`[BaseFDC3Broker] Adding intent listener for: ${intent}`, source);
     const id = generateId();
     this.intentListeners.set(intent, [
       ...(this.intentListeners.get(intent) ?? []),
-      { id, timestamp: Date.now(), handler },
+      { id, timestamp: Date.now(), handler, source },
     ]);
-    this.intentListenerEvents.next({ id, intent, event: 'add' });
+    this.intentListenerEvents.next({ id, intent, source, event: 'add' });
 
     return Promise.resolve({
       unsubscribe: () => {
@@ -185,7 +189,7 @@ export class BaseFDC3Broker {
           intent,
           handlers.filter((i) => i.id !== id),
         );
-        this.intentListenerEvents.next({ id, intent, event: 'remove' });
+        this.intentListenerEvents.next({ id, intent, source, event: 'remove' });
         return Promise.resolve();
       },
     });
@@ -272,14 +276,29 @@ export class BaseFDC3Broker {
         console.log(
           `[BaseFDC3Broker] proxyIntents: Processing task ${task.id} for intent ${task.intent.intent}`,
         );
-        let processedTask = task;
-        await this.validateLoginStatus(processedTask.intent.intent);
-        processedTask = await this.validateIntent(processedTask);
-        processedTask = await this.handleOpenTile(processedTask);
-        processedTask = await this.publishIntentTillDone(processedTask);
-        if (processedTask.result) {
-          console.log(`[BaseFDC3Broker] Task result for ${task.id}:`, processedTask.result);
-          this.tasks.next(processedTask);
+        try {
+          let processedTask = task;
+          await this.validateLoginStatus(processedTask.intent.intent);
+          processedTask = await this.validateIntent(processedTask);
+          processedTask = await this.handleOpenTile(processedTask);
+          processedTask = await this.publishIntentTillDone(processedTask);
+          if (processedTask.result) {
+            console.log(`[BaseFDC3Broker] Task result for ${task.id}:`, processedTask.result);
+            this.tasks.next(processedTask);
+          }
+        } catch (error) {
+          // publishIntentTillDone can throw on timeout — push as failed task
+          const message = error instanceof Error ? error.message : String(error);
+          console.error(`[BaseFDC3Broker] proxyIntents error for task ${task.id}:`, message);
+          this.tasks.next({
+            ...task,
+            result: {
+              status: 'failed',
+              data: undefined,
+              resolvedApp: null,
+              message,
+            },
+          });
         }
       }
     });
@@ -348,8 +367,21 @@ export class BaseFDC3Broker {
     };
   }
 
-  private async publishIntentTillDone(task: Task, ts: number = Date.now()): Promise<Task> {
+  private listenerTimeoutMs = 10_000;
+
+  /** Set the timeout for waiting for intent listener registration (useful in tests). */
+  setListenerTimeout(ms: number) {
+    this.listenerTimeoutMs = ms;
+  }
+
+  private async publishIntentTillDone(task: Task): Promise<Task> {
+    // If the task already failed (e.g. tile open failed), skip listener lookup
+    if (task.result?.status === 'failed') {
+      return task;
+    }
+
     if (task.intent.app) {
+      // Try to find a listener matching the target app immediately
       const targetListener = (this.intentListeners.get(task.intent.intent) ?? []).find((i) => {
         return (
           i.source?.appId === task.intent.app!.appId &&
@@ -357,26 +389,75 @@ export class BaseFDC3Broker {
         );
       });
       if (targetListener) {
-        const res = await this.publishIntent(task, targetListener.id);
-        return res;
-      } else {
-        console.error(
-          `[BaseFDC3Broker] No target listener found for intent: ${task.intent.intent}`,
-        );
-        throw new Error('No target listener found for the specified app');
+        return this.publishIntent(task, targetListener.id);
       }
-    } else {
-      const newAddedListenerId = await new Promise<string>((resolve) => {
-        const unsubscribe = this.intentListenerEvents.subscribe((event) => {
-          if (event.event === 'add' && event.intent === task.intent.intent) {
-            unsubscribe.unsubscribe();
+
+      // Also check for listeners without source (legacy registration)
+      const legacyListener = (this.intentListeners.get(task.intent.intent) ?? []).find(
+        (i) => !i.source,
+      );
+      if (legacyListener) {
+        return this.publishIntent(task, legacyListener.id);
+      }
+
+      // Listener not registered yet — wait for it (tile may have just opened,
+      // React useEffect has not run yet). This fixes the race condition where
+      // handleOpenTile completes before the tile component registers its listener.
+      const listenerId = await new Promise<string>((resolve, reject) => {
+        let subscription: import('rxjs').Subscription;
+        const timeout = setTimeout(() => {
+          subscription?.unsubscribe();
+          reject(new Error(`Timeout waiting for intent listener: ${task.intent.intent}`));
+        }, this.listenerTimeoutMs);
+
+        subscription = this.intentListenerEvents.subscribe((event) => {
+          if (event.event !== 'add' || event.intent !== task.intent.intent) return;
+
+          // When no source on the event, accept it (legacy listeners without source)
+          if (!event.source) {
+            clearTimeout(timeout);
+            subscription.unsubscribe();
+            resolve(event.id);
+            return;
+          }
+
+          // When source is present, verify it matches the target app
+          if (
+            event.source.appId === task.intent.app!.appId &&
+            event.source.instanceId === task.intent.app!.instanceId
+          ) {
+            clearTimeout(timeout);
+            subscription.unsubscribe();
             resolve(event.id);
           }
-          // TODO: handle timeout case
         });
       });
-      const res = await this.publishIntent(task, newAddedListenerId);
-      return res;
+
+      return this.publishIntent(task, listenerId);
+    } else {
+      // No target app specified — check if any listener is already registered
+      const existingListeners = this.intentListeners.get(task.intent.intent) ?? [];
+      if (existingListeners.length > 0) {
+        return this.publishIntent(task, existingListeners[0].id);
+      }
+
+      // No listener yet — wait for one to register
+      const listenerId = await new Promise<string>((resolve, reject) => {
+        let subscription: import('rxjs').Subscription;
+        const timeout = setTimeout(() => {
+          subscription?.unsubscribe();
+          reject(new Error(`Timeout waiting for intent listener: ${task.intent.intent}`));
+        }, this.listenerTimeoutMs);
+
+        subscription = this.intentListenerEvents.subscribe((event) => {
+          if (event.event === 'add' && event.intent === task.intent.intent) {
+            clearTimeout(timeout);
+            subscription.unsubscribe();
+            resolve(event.id);
+          }
+        });
+      });
+      return this.publishIntent(task, listenerId);
     }
   }
 
@@ -402,11 +483,12 @@ export class BaseFDC3Broker {
   private getTaskResult(id: string): Promise<TaskResult> {
     console.log(`[BaseFDC3Broker] getTaskResult: Waiting for result of task ${id}`);
     return new Promise<TaskResult>((resolve, reject) => {
-      this.tasks.subscribe((task) => {
+      const subscription = this.tasks.subscribe((task) => {
         if (task.id === id && task.result) {
+          subscription.unsubscribe();
           if (task.result.status === 'failed') {
             console.error(`[BaseFDC3Broker] getTaskResult: Task ${id} failed`);
-            reject(task.result);
+            reject(new Error(task.result.message));
           } else if (task.result.status === 'completed') {
             console.log(`[BaseFDC3Broker] getTaskResult: Task ${id} completed`);
             resolve(task.result);
