@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AssistantRuntimeProvider,
+  type SuggestionConfig,
+  Suggestions,
   Tools,
   useAui,
   useLocalRuntime,
@@ -62,6 +64,7 @@ export type ChatProtocolProviderProps = {
   metadata?: ChatRunRequest['metadata'];
   fetch?: typeof globalThis.fetch;
   onFrame?: (frame: import('chat-protocol-contract').ChatStreamFrame) => void;
+  suggestions?: SuggestionConfig[];
 
   /**
    * @deprecated Use toolkitBridge instead for unified tool execution.
@@ -115,6 +118,7 @@ export function ChatProtocolProvider({
   metadata,
   fetch,
   onFrame,
+  suggestions,
   resolveFrontendTool,
   toolkitBridge,
   createConversationId = defaultCreateConversationId,
@@ -246,12 +250,24 @@ export function ChatProtocolProvider({
     metadata,
     resolveFrontendTool,
     runtime,
+    suggestions,
     toolkit,
+    toolkitBridge,
     tools,
   ]);
-  const aui = useAui({
-    tools: Tools({ toolkit: wrappedToolkit }),
-  });
+  const auiClients = useMemo(() => {
+    const clients: Parameters<typeof useAui>[0] = {
+      tools: Tools({ toolkit: wrappedToolkit }),
+    };
+
+    if (suggestions) {
+      clients.suggestions = Suggestions(suggestions);
+    }
+
+    return clients;
+  }, [suggestions, wrappedToolkit]);
+
+  const aui = useAui(auiClients);
 
   const portalContainerRef = useRef<HTMLDivElement>(null);
   const htmlDark = useHtmlDarkMode();

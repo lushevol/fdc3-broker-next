@@ -1,8 +1,16 @@
 import { CartesianGrid, Line, LineChart, XAxis } from 'recharts';
 import {
+  Avatar,
+  AvatarFallback,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   type ChartConfig,
 } from 'chat-protocol-ui';
 import { getFdc3ChatActionDefinitions } from './fdc3-action-definitions';
@@ -25,6 +33,30 @@ type UsageStatisticsViewModel = {
   trendPoints: UsageTrendPoint[];
   bucket?: string;
   supportsTrend: boolean;
+};
+
+type UserOperationRank = {
+  userId: string;
+  count: number;
+};
+
+type UserOperationRankingViewModel = {
+  application: string;
+  startTime?: string;
+  endTime?: string;
+  users: UserOperationRank[];
+};
+
+type FunctionUsageRank = {
+  functionPath: string;
+  count: number;
+};
+
+type FunctionUsageRankingViewModel = {
+  application: string;
+  startTime?: string;
+  endTime?: string;
+  functions: FunctionUsageRank[];
 };
 
 const usageTrendChartConfig = {
@@ -167,6 +199,58 @@ function normalizeUsageStatistics(
     trendPoints,
     bucket,
     supportsTrend,
+  };
+}
+
+function normalizeUserOperationRanking(
+  args: Record<string, unknown>,
+  result: unknown,
+): UserOperationRankingViewModel | undefined {
+  const resultRecord = asRecord(result);
+  if (!resultRecord || !Array.isArray(resultRecord.users)) {
+    return undefined;
+  }
+
+  const users = resultRecord.users
+    .map((entry) => asRecord(entry))
+    .filter((entry): entry is Record<string, unknown> => Boolean(entry))
+    .map((entry) => ({
+      userId: asString(entry.userId) ?? '',
+      count: asNumber(entry.count) ?? 0,
+    }))
+    .filter((entry) => entry.userId.length > 0);
+
+  return {
+    application: asString(resultRecord.application) ?? asString(args.application) ?? 'Unknown application',
+    startTime: asString(resultRecord.startTime) ?? asString(args.startTime),
+    endTime: asString(resultRecord.endTime) ?? asString(args.endTime),
+    users,
+  };
+}
+
+function normalizeFunctionUsageRanking(
+  args: Record<string, unknown>,
+  result: unknown,
+): FunctionUsageRankingViewModel | undefined {
+  const resultRecord = asRecord(result);
+  if (!resultRecord || !Array.isArray(resultRecord.functions)) {
+    return undefined;
+  }
+
+  const functions = resultRecord.functions
+    .map((entry) => asRecord(entry))
+    .filter((entry): entry is Record<string, unknown> => Boolean(entry))
+    .map((entry) => ({
+      functionPath: asString(entry.functionPath) ?? '',
+      count: asNumber(entry.count) ?? 0,
+    }))
+    .filter((entry) => entry.functionPath.length > 0);
+
+  return {
+    application: asString(resultRecord.application) ?? asString(args.application) ?? 'Unknown application',
+    startTime: asString(resultRecord.startTime) ?? asString(args.startTime),
+    endTime: asString(resultRecord.endTime) ?? asString(args.endTime),
+    functions,
   };
 }
 
@@ -369,6 +453,155 @@ function UsageTrendChart({
           <Line dataKey={dataKey} dot={false} stroke={stroke} strokeWidth={2.5} type="monotone" />
         </LineChart>
       </ChartContainer>
+    </div>
+  );
+}
+
+function formatWindowLabel(startTime?: string, endTime?: string): string {
+  return `${formatUsageDateLabel(startTime)} - ${formatUsageDateLabel(endTime)}`;
+}
+
+function initialsForUser(userId: string): string {
+  const segments = userId.split(/[._-]/).filter(Boolean);
+  if (segments.length >= 2) {
+    return `${segments[0][0]}${segments[1][0]}`.toUpperCase();
+  }
+  return userId.slice(0, 2).toUpperCase();
+}
+
+export function HighestOperationUsersTool({ args, result }: ToolRenderProps) {
+  if (result === undefined) {
+    return (
+      <LoadingToolCard
+        toolName="highest_operation_users_by_application"
+        message={`Ranking users for ${String(args.application ?? 'the selected application')}...`}
+      />
+    );
+  }
+
+  const ranking = normalizeUserOperationRanking(args, result);
+  if (!ranking) {
+    return (
+      <JsonToolCard
+        toolName="highest_operation_users_by_application"
+        title={`User ranking: ${String(args.application ?? 'unknown')}`}
+        result={result}
+        emptyMessage="No ranked users were returned."
+      />
+    );
+  }
+
+  const peakCount = Math.max(...ranking.users.map((user) => user.count), 1);
+
+  return (
+    <div
+      data-testid="user-operation-ranking-card"
+      className="rounded-[28px] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-4 shadow-[0_20px_48px_-32px_rgba(15,23,42,0.28)]"
+    >
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <div className="text-base font-semibold tracking-[-0.02em] text-slate-900">
+            Highest operation users
+          </div>
+          <div className="mt-1 text-sm text-slate-500">{ranking.application}</div>
+        </div>
+        <div className="text-right text-xs text-slate-500">{formatWindowLabel(ranking.startTime, ranking.endTime)}</div>
+      </div>
+
+      <div className="mt-4 space-y-3">
+        {ranking.users.map((user, index) => {
+          const widthPercent = Math.max((user.count / peakCount) * 100, 12);
+          return (
+            <div key={`${user.userId}-${index}`} className="grid grid-cols-[auto,1fr,auto] items-center gap-3">
+              <Avatar size="lg" className="border border-slate-200 bg-slate-100">
+                <AvatarFallback className="bg-slate-200 font-semibold text-slate-700">
+                  {initialsForUser(user.userId)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="truncate text-sm font-medium text-slate-900">{user.userId}</div>
+                  <div className="shrink-0 text-xs text-slate-500">#{index + 1}</div>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-slate-200">
+                  <div
+                    className="h-full rounded-full bg-[linear-gradient(90deg,#0f766e_0%,#14b8a6_100%)]"
+                    style={{ width: `${widthPercent}%` }}
+                  />
+                </div>
+              </div>
+              <div className="min-w-[4.5rem] text-right text-sm font-semibold text-slate-900">
+                {user.count.toLocaleString()} ops
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export function FunctionUsageRankingTool({ args, result }: ToolRenderProps) {
+  if (result === undefined) {
+    return (
+      <LoadingToolCard
+        toolName="most_used_functions_by_application"
+        message={`Ranking functions for ${String(args.application ?? 'the selected application')}...`}
+      />
+    );
+  }
+
+  const ranking = normalizeFunctionUsageRanking(args, result);
+  if (!ranking) {
+    return (
+      <JsonToolCard
+        toolName="most_used_functions_by_application"
+        title={`Function ranking: ${String(args.application ?? 'unknown')}`}
+        result={result}
+        emptyMessage="No ranked functions were returned."
+      />
+    );
+  }
+
+  return (
+    <div
+      data-testid="function-usage-ranking-table"
+      className="rounded-[28px] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-4 shadow-[0_20px_48px_-32px_rgba(15,23,42,0.28)]"
+    >
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <div className="text-base font-semibold tracking-[-0.02em] text-slate-900">
+            Most used functions
+          </div>
+          <div className="mt-1 text-sm text-slate-500">{ranking.application}</div>
+        </div>
+        <div className="text-right text-xs text-slate-500">{formatWindowLabel(ranking.startTime, ranking.endTime)}</div>
+      </div>
+
+      <div className="mt-4 rounded-[20px] border border-slate-200 bg-white p-2">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-14">Rank</TableHead>
+              <TableHead>Function Path</TableHead>
+              <TableHead className="w-24 text-right">Usage</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {ranking.functions.map((entry, index) => (
+              <TableRow key={`${entry.functionPath}-${index}`}>
+                <TableCell className="font-medium text-slate-500">{index + 1}</TableCell>
+                <TableCell className="max-w-0 whitespace-normal break-all font-mono text-xs text-slate-900">
+                  {entry.functionPath}
+                </TableCell>
+                <TableCell className="text-right font-semibold text-slate-900">
+                  {entry.count.toLocaleString()}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

@@ -6,6 +6,8 @@ import {
   ApprovalConfirmTool,
   Fdc3ApprovalTool,
   Fdc3ExecutionResultTool,
+  FunctionUsageRankingTool,
+  HighestOperationUsersTool,
   ProfileLookupTool,
   ResolveRelativeDateTool,
   TimezoneCurrentTool,
@@ -15,6 +17,11 @@ import type { Fdc3ActionExecutor } from './fdc3-action-executor';
 
 type RuntimeToolkitDeps = {
   fdc3Executor?: Fdc3ActionExecutor;
+};
+
+type ToolkitDefinition = Toolkit[string] & {
+  source?: ChatToolDescriptor['source'];
+  providerId?: string;
 };
 
 function getFdc3ActionCatalogDescription(): string {
@@ -28,7 +35,7 @@ function getFdc3ActionCatalogDescription(): string {
     .join(' ');
 }
 
-function createBaseToolkit(): Toolkit {
+function createBaseToolkit(): Record<string, ToolkitDefinition> {
   return {
     profile_lookup: {
       type: 'frontend',
@@ -93,6 +100,18 @@ function createBaseToolkit(): Toolkit {
       type: 'backend',
       render: ResolveRelativeDateTool,
     },
+    highest_operation_users_by_application: {
+      type: 'backend',
+      source: 'mcp',
+      providerId: 'analytics-mcp',
+      render: HighestOperationUsersTool,
+    },
+    most_used_functions_by_application: {
+      type: 'backend',
+      source: 'mcp',
+      providerId: 'analytics-mcp',
+      render: FunctionUsageRankingTool,
+    },
   };
 }
 
@@ -100,7 +119,7 @@ export function createRuntimeToolkit({ fdc3Executor }: RuntimeToolkitDeps = {}):
   const toolkit = createBaseToolkit();
   const actionCatalogDescription = getFdc3ActionCatalogDescription();
 
-  const runtimeToolkit: Toolkit = {
+  const runtimeToolkit: Record<string, ToolkitDefinition> = {
     ...toolkit,
     propose_fdc3_action: {
       type: 'human',
@@ -118,7 +137,7 @@ export function createRuntimeToolkit({ fdc3Executor }: RuntimeToolkitDeps = {}):
   };
 
   if (!fdc3Executor) {
-    return runtimeToolkit;
+    return runtimeToolkit as unknown as Toolkit;
   }
 
   return {
@@ -135,7 +154,7 @@ export function createRuntimeToolkit({ fdc3Executor }: RuntimeToolkitDeps = {}):
       execute: async (input) => fdc3Executor.execute(input as { actionId: string }, { continuationPayload: true }),
       render: Fdc3ExecutionResultTool,
     },
-  };
+  } as unknown as Toolkit;
 }
 
 export const runtimeToolkit: Toolkit = createRuntimeToolkit();
@@ -159,8 +178,22 @@ function extractParamInfo(schema: unknown): ParamInfo {
   if (!shape) return {};
   const result: ParamInfo = {};
   for (const [key, field] of Object.entries(shape)) {
-    const f = field as { typeName?: string; description?: string; _def?: { typeName?: string } };
+    const f = field as { typeName?: string; description?: string; _def?: { typeName?: string; innerType?: { typeName?: string; _def?: { typeName?: string } } } };
     const typeName = f.typeName ?? f._def?.typeName ?? 'unknown';
+    const unwrappedTypeName =
+      typeName === 'ZodOptional' && f._def && 'innerType' in f._def
+        ? (
+            f._def as {
+              innerType?: { typeName?: string; _def?: { typeName?: string } };
+            }
+          ).innerType?.typeName ??
+          (
+            f._def as {
+              innerType?: { typeName?: string; _def?: { typeName?: string } };
+            }
+          ).innerType?._def?.typeName ??
+          'unknown'
+        : typeName;
     const typeMap: Record<string, string> = {
       ZodString: 'string',
       ZodNumber: 'number',
@@ -171,24 +204,39 @@ function extractParamInfo(schema: unknown): ParamInfo {
       ZodRecord: 'object',
     };
     result[key] = {
-      type: typeMap[typeName] ?? 'string',
+      type: typeMap[unwrappedTypeName] ?? 'string',
       description: f.description,
-      required: true,
+      required: typeName !== 'ZodOptional',
     };
   }
   return result;
 }
 
 export function getProtocolToolDescriptors(toolkit: Toolkit = runtimeToolkit): ChatToolDescriptor[] {
-  return Object.entries(toolkit).map(([name, definition]) => ({
-    name,
-    source:
-      definition.type === 'frontend'
-        ? 'frontend'
-        : definition.type === 'human'
-          ? 'human'
-          : 'backend',
-    description: definition.description ?? '',
-    parameters: extractParamInfo(definition.parameters),
-  }));
+  return Object.entries(toolkit).map(([name, definition]) => {
+    const def = definition as ToolkitDefinition;
+    return {
+      name,
+      source: resolveToolSource(def),
+      providerId: def.providerId,
+      description: definition.description ?? '',
+      parameters: extractParamInfo(definition.parameters),
+    };
+  });
+}
+
+function resolveToolSource(definition: ToolkitDefinition): ChatToolDescriptor['source'] {
+  if (definition.source) {
+    return definition.source;
+  }
+
+  if (definition.type === 'frontend') {
+    return 'frontend';
+  }
+
+  if (definition.type === 'human') {
+    return 'human';
+  }
+
+  return 'backend';
 }
