@@ -448,6 +448,7 @@ public class ProtocolChatService {
                 ChatMessage.Role role = switch (String.valueOf(message.getRole())) {
                     case "assistant" -> ChatMessage.Role.ASSISTANT;
                     case "user" -> ChatMessage.Role.USER;
+                    case "tool" -> ChatMessage.Role.TOOL;
                     default -> null;
                 };
                 if (role == null) {

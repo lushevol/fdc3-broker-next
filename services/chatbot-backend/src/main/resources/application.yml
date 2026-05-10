@@ -9,8 +9,9 @@ spring:
     openai:
       api-key: ${CHATBOT_OPENAI_API_KEY:}
       base-url: ${CHATBOT_OPENAI_BASE_URL:https://coding.dashscope.aliyuncs.com/v1}
-      model: ${CHATBOT_OPENAI_MODEL:qwen3.5-plus}
-      temperature: ${CHATBOT_OPENAI_TEMPERATURE:0.7}
+      chat:
+        model: ${CHATBOT_OPENAI_MODEL:qwen3.5-plus}
+        temperature: ${CHATBOT_OPENAI_TEMPERATURE:0.7}
     anthropic:
       api-key: ${CHATBOT_ANTHROPIC_API_KEY:}
       model: ${CHATBOT_ANTHROPIC_MODEL:claude-3-sonnet-20240229}

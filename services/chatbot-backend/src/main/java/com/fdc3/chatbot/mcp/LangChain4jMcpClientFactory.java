@@ -140,7 +140,7 @@ public class LangChain4jMcpClientFactory implements McpClientFactory {
         return new McpToolDescriptor(
                 tool.name(),
                 tool.description(),
-                tool.inputSchema()
+                tool.inputSchema() == null ? Map.of("type", "object") : tool.inputSchema()
         );
     }
 }

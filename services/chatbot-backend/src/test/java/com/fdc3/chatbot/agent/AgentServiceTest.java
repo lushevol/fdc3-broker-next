@@ -15,6 +15,7 @@ import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.model.StreamingChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Flux;
 
@@ -286,6 +287,48 @@ class AgentServiceTest {
         assertEquals("tool-1", toolResults.get(0).getToolCallId());
         assertEquals("2026-03-18 09:31", ((Map<?, ?>) toolResults.get(0).getResult()).get("formatted"));
         assertTrue(streamedText.toString().contains("The current time in America/New_York is 2026-03-18 09:31."));
+    }
+
+    @Test
+    void initPrefersSpringAi2ChatPropertiesOverLegacyOpenAiKeys() {
+        ReflectionTestUtils.setField(agentService, "mockEnabled", false);
+        ReflectionTestUtils.setField(agentService, "openaiApiKey", "test-key");
+        ReflectionTestUtils.setField(agentService, "model", "legacy-model");
+        ReflectionTestUtils.setField(agentService, "temperature", 0.7d);
+        ReflectionTestUtils.setField(agentService, "chatModelName", "gpt-4.1-mini");
+        ReflectionTestUtils.setField(agentService, "chatTemperature", 0.2d);
+
+        agentService.init();
+
+        OpenAiChatModel chatModel = (OpenAiChatModel) ReflectionTestUtils.getField(agentService, "chatModel");
+        OpenAiChatModel streamingChatModel =
+                (OpenAiChatModel) ReflectionTestUtils.getField(agentService, "streamingChatModel");
+
+        assertNotNull(chatModel);
+        assertNotNull(streamingChatModel);
+        assertEquals("gpt-4.1-mini", chatModel.getOptions().getModel());
+        assertEquals(0.2d, chatModel.getOptions().getTemperature());
+    }
+
+    @Test
+    void initFallsBackToLegacyOpenAiKeysWhenSpringAi2ChatPropertiesAreUnset() {
+        ReflectionTestUtils.setField(agentService, "mockEnabled", false);
+        ReflectionTestUtils.setField(agentService, "openaiApiKey", "test-key");
+        ReflectionTestUtils.setField(agentService, "model", "legacy-model");
+        ReflectionTestUtils.setField(agentService, "temperature", 0.7d);
+        ReflectionTestUtils.setField(agentService, "chatModelName", null);
+        ReflectionTestUtils.setField(agentService, "chatTemperature", null);
+
+        agentService.init();
+
+        OpenAiChatModel chatModel = (OpenAiChatModel) ReflectionTestUtils.getField(agentService, "chatModel");
+        OpenAiChatModel streamingChatModel =
+                (OpenAiChatModel) ReflectionTestUtils.getField(agentService, "streamingChatModel");
+
+        assertNotNull(chatModel);
+        assertNotNull(streamingChatModel);
+        assertEquals("legacy-model", chatModel.getOptions().getModel());
+        assertEquals(0.7d, chatModel.getOptions().getTemperature());
     }
 
     @Test

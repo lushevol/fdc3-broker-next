@@ -93,6 +93,12 @@ public class AgentService {
     @Value("${spring.ai.openai.temperature:0.7}")
     private Double temperature;
 
+    @Value("${spring.ai.openai.chat.model:}")
+    private String chatModelName;
+
+    @Value("${spring.ai.openai.chat.temperature:#{null}}")
+    private Double chatTemperature;
+
     @Value("${chatbot.agent.max-tokens:4096}")
     private Integer maxTokens;
 
@@ -157,9 +163,11 @@ public class AgentService {
         if (mockEnabled) {
             log.info("Mock mode enabled - using simulated responses");
         } else if (openaiApiKey != null && !openaiApiKey.isEmpty()) {
+            String configuredModel = resolveConfiguredModel();
+            Double configuredTemperature = resolveConfiguredTemperature();
             OpenAiChatOptions options = OpenAiChatOptions.builder()
-                    .model(model)
-                    .temperature(temperature)
+                    .model(configuredModel)
+                    .temperature(configuredTemperature)
                     .maxTokens(maxTokens)
                     .build();
 
@@ -186,7 +194,7 @@ public class AgentService {
             this.chatModel = openAiChatModel;
             this.streamingChatModel = openAiChatModel;
 
-            log.info("Initialized OpenAI chat model with model: {}", model);
+            log.info("Initialized OpenAI chat model with model: {}", configuredModel);
         } else {
             log.warn("OpenAI API key not configured. Chat functionality will be limited.");
         }
@@ -207,6 +215,14 @@ public class AgentService {
     @PreDestroy
     void shutdownExecutors() {
         mockExecutor.shutdownNow();
+    }
+
+    private String resolveConfiguredModel() {
+        return chatModelName != null && !chatModelName.isBlank() ? chatModelName : model;
+    }
+
+    private Double resolveConfiguredTemperature() {
+        return chatTemperature != null ? chatTemperature : temperature;
     }
 
     /**
@@ -1127,7 +1143,11 @@ public class AgentService {
             AtomicBoolean cancelled
     ) {
         StringBuilder streamedAssistantText = new StringBuilder();
-        final AssistantMessage[] finalAssistantMessage = new AssistantMessage[1];
+        // Accumulate tool calls across streaming chunks — the model may send
+        // tool-call deltas (id/name in one chunk, arguments in later chunks).
+        Map<String, String> accumulatedToolCallNames = new LinkedHashMap<>();
+        Map<String, String> accumulatedToolCallTypes = new LinkedHashMap<>();
+        Map<String, StringBuilder> accumulatedToolCallArgs = new LinkedHashMap<>();
 
         Prompt prompt = buildPrompt(messages, toolCallbacks);
         Disposable ignored = streamingChatModel.stream(prompt).subscribe(
@@ -1139,7 +1159,18 @@ public class AgentService {
                     if (assistantMessage == null) {
                         return;
                     }
-                    finalAssistantMessage[0] = assistantMessage;
+                    if (assistantMessage.hasToolCalls()) {
+                        for (AssistantMessage.ToolCall tc : assistantMessage.getToolCalls()) {
+                            if (tc.id() == null) {
+                                continue;
+                            }
+                            accumulatedToolCallNames.putIfAbsent(tc.id(), tc.name());
+                            accumulatedToolCallTypes.putIfAbsent(tc.id(), tc.type());
+                            accumulatedToolCallArgs
+                                    .computeIfAbsent(tc.id(), k -> new StringBuilder())
+                                    .append(tc.arguments() != null ? tc.arguments() : "");
+                        }
+                    }
                     String token = assistantMessage.getText();
                     if (token != null && !token.isEmpty()) {
                         streamedAssistantText.append(token);
@@ -1158,22 +1189,34 @@ public class AgentService {
                         return;
                     }
 
-                    AssistantMessage assistantMessage = finalAssistantMessage[0];
-                    if (assistantMessage != null && assistantMessage.hasToolCalls()) {
-                        emitRemainingAssistantText(assistantMessage, streamedAssistantText, onNext);
+                    boolean hasToolCalls = !accumulatedToolCallNames.isEmpty();
+                    if (hasToolCalls) {
+                        List<AssistantMessage.ToolCall> mergedCalls = accumulatedToolCallNames.keySet().stream()
+                                .map(id -> new AssistantMessage.ToolCall(
+                                        id,
+                                        accumulatedToolCallTypes.getOrDefault(id, "function"),
+                                        accumulatedToolCallNames.get(id),
+                                        accumulatedToolCallArgs.getOrDefault(id, new StringBuilder()).toString()))
+                                .toList();
+                        AssistantMessage finalAssistantMessage = AssistantMessage.builder()
+                                .text(streamedAssistantText.toString())
+                                .toolCalls(mergedCalls)
+                                .build();
+
+                        emitRemainingAssistantText(finalAssistantMessage, streamedAssistantText, onNext);
                         logAssistantTurnDiagnostics(
                                 conversationId,
-                                buildAssistantTurnDiagnostics(turnPhase, assistantMessage, streamedAssistantText.toString())
+                                buildAssistantTurnDiagnostics(turnPhase, finalAssistantMessage, streamedAssistantText.toString())
                         );
                         List<Message> continuedMessages = new java.util.ArrayList<>(messages);
-                        continuedMessages.add(assistantMessage);
+                        continuedMessages.add(finalAssistantMessage);
                         continueWithToolRequests(
                                 conversationId,
                                 userMessage,
                                 history,
                                 continuedMessages,
                                 availableTools,
-                                assistantMessage.getToolCalls(),
+                                finalAssistantMessage.getToolCalls(),
                                 frontendToolManifest,
                                 blockedToolNames,
                                 0,
@@ -1188,10 +1231,13 @@ public class AgentService {
                         return;
                     }
 
-                    if (assistantMessage != null) {
+                    if (!streamedAssistantText.isEmpty()) {
                         logAssistantTurnDiagnostics(
                                 conversationId,
-                                buildAssistantTurnDiagnostics(turnPhase, assistantMessage, streamedAssistantText.toString())
+                                buildAssistantTurnDiagnostics(
+                                        turnPhase,
+                                        AssistantMessage.builder().text(streamedAssistantText.toString()).build(),
+                                        streamedAssistantText.toString())
                         );
                     }
 

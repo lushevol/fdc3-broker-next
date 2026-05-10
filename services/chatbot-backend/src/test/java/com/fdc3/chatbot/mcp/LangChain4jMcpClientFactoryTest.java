@@ -46,6 +46,23 @@ class LangChain4jMcpClientFactoryTest {
     }
 
     @Test
+    void defaultsMissingInputSchemaToObjectShape() {
+        McpSchema.Tool tool = new McpSchema.Tool(
+                "ping",
+                null,
+                "Health check",
+                null,
+                null,
+                null,
+                null
+        );
+
+        McpToolDescriptor descriptor = LangChain4jMcpClientFactory.toToolDescriptor(tool);
+
+        assertEquals(Map.of("type", "object"), descriptor.inputSchema());
+    }
+
+    @Test
     void normalizeToolResultPrefersStructuredContentWhenPresent() {
         ObjectMapper objectMapper = new ObjectMapper();
         McpSchema.CallToolResult result = new McpSchema.CallToolResult(
