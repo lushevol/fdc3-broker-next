@@ -444,6 +444,63 @@ class ProtocolChatServiceTest {
     }
 
     @Test
+    void streamRunNormalizesShorthandFrontendToolParametersIntoJsonSchema() throws Exception {
+        ProtocolRunRequest request = objectMapper.readValue("""
+                {
+                  "conversationId": "conv-tool-schema",
+                  "context": {
+                    "tools": [
+                      {
+                        "name": "propose_fdc3_action",
+                        "source": "human",
+                        "description": "Request approval before raising an FDC3 intent",
+                        "parameters": {
+                          "actionId": {
+                            "type": "string",
+                            "description": "Action id to raise",
+                            "required": true
+                          },
+                          "question": {
+                            "type": "string",
+                            "description": "Optional original user request",
+                            "required": false
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "messages": [
+                    {
+                      "id": "msg-user-1",
+                      "role": "user",
+                      "parts": [{ "type": "text", "text": "open trade tile" }]
+                    }
+                  ]
+                }
+                """, ProtocolRunRequest.class);
+
+        protocolChatService.streamRun(
+                request,
+                UserCapabilityContext.anonymous(),
+                frame -> {
+                },
+                error -> {
+                    throw new AssertionError(error);
+                },
+                () -> {
+                }
+        );
+
+        assertNotNull(agentService.lastInvocation.frontendTools());
+        assertTrue(agentService.lastInvocation.frontendTools().contains("\"name\":\"propose_fdc3_action\""));
+        assertTrue(agentService.lastInvocation.frontendTools().contains("\"type\":\"object\""));
+        assertTrue(agentService.lastInvocation.frontendTools().contains("\"properties\""));
+        assertTrue(agentService.lastInvocation.frontendTools().contains("\"required\":[\"actionId\"]"));
+        assertTrue(agentService.lastInvocation.frontendTools()
+                .contains("\"question\":{\"type\":\"string\",\"description\":\"Optional original user request\"}"));
+    }
+
+    @Test
     void streamRunEmitsAssistantUiStyleFrames() throws Exception {
         agentService.behavior = invocation -> {
             invocation.onExecutionPlan().accept(ExecutionPlanEvent.builder()

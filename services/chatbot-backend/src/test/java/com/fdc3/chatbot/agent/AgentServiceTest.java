@@ -6,22 +6,20 @@ import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.model.UserCapabilityContext;
 import com.fdc3.chatbot.tool.ToolRegistry;
-import dev.langchain4j.agent.tool.ToolExecutionRequest;
-import dev.langchain4j.agent.tool.ToolSpecification;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.ChatMessageType;
-import dev.langchain4j.model.chat.StreamingChatModel;
-import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
-import dev.langchain4j.model.output.FinishReason;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.ToolResponseMessage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.model.StreamingChatModel;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.test.util.ReflectionTestUtils;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -95,11 +93,33 @@ class AgentServiceTest {
         when(toolRegistry.getTool("get_weather")).thenReturn(weatherTool);
     }
 
-    private static ChatResponse chatResponse(AiMessage aiMessage, FinishReason finishReason) {
+    private static ChatResponse chatResponse(String text) {
         return ChatResponse.builder()
-                .aiMessage(aiMessage)
-                .finishReason(finishReason)
+                .generations(List.of(new Generation(new AssistantMessage(text))))
                 .build();
+    }
+
+    private static ChatResponse chatResponse(String text, List<AssistantMessage.ToolCall> toolCalls) {
+        return ChatResponse.builder()
+                .generations(List.of(new Generation(AssistantMessage.builder()
+                        .content(text)
+                        .toolCalls(toolCalls)
+                        .build())))
+                .build();
+    }
+
+    private static List<String> toolNames(Prompt prompt) {
+        if (!(prompt.getOptions() instanceof ToolCallingChatOptions toolOptions)
+                || toolOptions.getToolCallbacks() == null) {
+            return List.of();
+        }
+        return toolOptions.getToolCallbacks().stream()
+                .map(toolCallback -> toolCallback.getToolDefinition().name())
+                .toList();
+    }
+
+    private static boolean hasToolResponseMessage(Prompt prompt) {
+        return prompt.getInstructions().stream().anyMatch(ToolResponseMessage.class::isInstance);
     }
 
     @Test
@@ -215,30 +235,25 @@ class AgentServiceTest {
         ));
 
         AtomicInteger invocationCount = new AtomicInteger();
-        List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
+        List<String> capturedToolNames = new CopyOnWriteArrayList<>();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
-                capturedToolSpecs.addAll(request.toolSpecifications());
+            public Flux<ChatResponse> stream(Prompt prompt) {
+                capturedToolNames.addAll(toolNames(prompt));
                 if (invocationCount.getAndIncrement() == 0) {
-                    ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
-                            .id("tool-1")
-                            .name("get_current_time")
-                            .arguments("{\"timezone\":\"America/New_York\"}")
-                            .build();
-                    handler.onCompleteResponse(chatResponse(
-                            AiMessage.from(List.of(toolExecutionRequest)),
-                            FinishReason.TOOL_EXECUTION
+                    return Flux.just(chatResponse(
+                            "",
+                            List.of(new AssistantMessage.ToolCall(
+                                    "tool-1",
+                                    "function",
+                                    "get_current_time",
+                                    "{\"timezone\":\"America/New_York\"}"
+                            ))
                     ));
-                    return;
                 }
 
-                assertTrue(request.messages().stream().anyMatch(message -> message.type() == ChatMessageType.TOOL_EXECUTION_RESULT));
-                handler.onPartialResponse("The current time in America/New_York is 2026-03-18 09:31.");
-                handler.onCompleteResponse(chatResponse(
-                        AiMessage.from("The current time in America/New_York is 2026-03-18 09:31."),
-                        FinishReason.STOP
-                ));
+                assertTrue(hasToolResponseMessage(prompt));
+                return Flux.just(chatResponse("The current time in America/New_York is 2026-03-18 09:31."));
             }
         };
         ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
@@ -262,8 +277,7 @@ class AgentServiceTest {
         );
 
         assertTrue(completed.await(1, TimeUnit.SECONDS));
-        assertTrue(capturedToolSpecs.stream().anyMatch(toolSpecification ->
-                "get_current_time".equals(toolSpecification.name())));
+        assertTrue(capturedToolNames.contains("get_current_time"));
         assertEquals(1, toolCalls.size());
         assertEquals("tool-1", toolCalls.get(0).getId());
         assertEquals(ToolCall.ToolStatus.RUNNING, toolCalls.get(0).getStatus());
@@ -279,19 +293,19 @@ class AgentServiceTest {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
         when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of());
 
-        List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
+        List<String> capturedToolNames = new CopyOnWriteArrayList<>();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
-                capturedToolSpecs.addAll(request.toolSpecifications());
-                ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
-                        .id("frontend-tool-1")
-                        .name("custom_client_tool")
-                        .arguments("{\"query\":\"workspace\"}")
-                        .build();
-                handler.onCompleteResponse(chatResponse(
-                        AiMessage.from(List.of(toolExecutionRequest)),
-                        FinishReason.TOOL_EXECUTION
+            public Flux<ChatResponse> stream(Prompt prompt) {
+                capturedToolNames.addAll(toolNames(prompt));
+                return Flux.just(chatResponse(
+                        "",
+                        List.of(new AssistantMessage.ToolCall(
+                                "frontend-tool-1",
+                                "function",
+                                "custom_client_tool",
+                                "{\"query\":\"workspace\"}"
+                        ))
                 ));
             }
         };
@@ -318,8 +332,7 @@ class AgentServiceTest {
         );
 
         assertTrue(completed.await(1, TimeUnit.SECONDS));
-        assertTrue(capturedToolSpecs.stream().anyMatch(toolSpecification ->
-                "custom_client_tool".equals(toolSpecification.name())));
+        assertTrue(capturedToolNames.contains("custom_client_tool"));
         assertEquals(1, toolCalls.size());
         assertEquals("frontend-tool-1", toolCalls.get(0).getId());
         assertEquals(ToolCall.ExecutionTarget.FRONTEND, toolCalls.get(0).getExecutionTarget());
@@ -336,16 +349,12 @@ class AgentServiceTest {
                 new TestToolDefinition("calculator", "Perform calculations", Map.of("type", "object"))
         ));
 
-        List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
+        List<String> capturedToolNames = new CopyOnWriteArrayList<>();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
-                capturedToolSpecs.addAll(request.toolSpecifications());
-                handler.onPartialResponse("Hello");
-                handler.onCompleteResponse(chatResponse(
-                        AiMessage.from("Hello"),
-                        FinishReason.STOP
-                ));
+            public Flux<ChatResponse> stream(Prompt prompt) {
+                capturedToolNames.addAll(toolNames(prompt));
+                return Flux.just(chatResponse("Hello"));
             }
         };
         ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
@@ -374,12 +383,11 @@ class AgentServiceTest {
         );
 
         assertTrue(completed.await(1, TimeUnit.SECONDS));
-        assertEquals(2, capturedToolSpecs.size());
-        assertEquals(1, capturedToolSpecs.stream()
-                .filter(toolSpecification -> "calculator".equals(toolSpecification.name()))
+        assertEquals(2, capturedToolNames.size());
+        assertEquals(1, capturedToolNames.stream()
+                .filter("calculator"::equals)
                 .count());
-        assertTrue(capturedToolSpecs.stream().anyMatch(toolSpecification ->
-                "custom_client_tool".equals(toolSpecification.name())));
+        assertTrue(capturedToolNames.contains("custom_client_tool"));
     }
 
     @Test
@@ -401,13 +409,9 @@ class AgentServiceTest {
         AtomicInteger invocationCount = new AtomicInteger();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+            public Flux<ChatResponse> stream(Prompt prompt) {
                 invocationCount.incrementAndGet();
-                handler.onPartialResponse("I'll check the current weather in Shanghai for you.");
-                handler.onCompleteResponse(chatResponse(
-                        AiMessage.from("I'll check the current weather in Shanghai for you."),
-                        FinishReason.STOP
-                ));
+                return Flux.just(chatResponse("I'll check the current weather in Shanghai for you."));
             }
         };
         ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
@@ -468,39 +472,26 @@ class AgentServiceTest {
         List<List<String>> toolNamesPerInvocation = new CopyOnWriteArrayList<>();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
-                toolNamesPerInvocation.add(request.toolSpecifications().stream()
-                        .map(ToolSpecification::name)
-                        .toList());
+            public Flux<ChatResponse> stream(Prompt prompt) {
+                toolNamesPerInvocation.add(toolNames(prompt));
 
                 if (invocationCount.getAndIncrement() == 0) {
-                    if (request.toolSpecifications().isEmpty()) {
-                        handler.onCompleteResponse(chatResponse(
-                                AiMessage.from("I can describe the analytics request, but I do not have a tool available."),
-                                FinishReason.STOP
-                        ));
-                        return;
+                    if (toolNames(prompt).isEmpty()) {
+                        return Flux.just(chatResponse("I can describe the analytics request, but I do not have a tool available."));
                     }
 
-                    ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
-                            .id("tool-analytics-1")
-                            .name("statistic_count_by_app")
-                            .arguments("""
-                                    {"appName":"cashflow_blotter","startTime":"2026-04-16T00:00:00Z","endTime":"2026-04-17T00:00:00Z"}
-                                    """)
-                            .build();
-                    handler.onCompleteResponse(chatResponse(
-                            AiMessage.from("Let me retrieve the usage statistics for cashflow_blotter.", List.of(toolExecutionRequest)),
-                            FinishReason.TOOL_EXECUTION
+                    return Flux.just(chatResponse(
+                            "Let me retrieve the usage statistics for cashflow_blotter.",
+                            List.of(new AssistantMessage.ToolCall(
+                                    "tool-analytics-1",
+                                    "function",
+                                    "statistic_count_by_app",
+                                    "{\"appName\":\"cashflow_blotter\",\"startTime\":\"2026-04-16T00:00:00Z\",\"endTime\":\"2026-04-17T00:00:00Z\"}"
+                            ))
                     ));
-                    return;
                 }
 
-                handler.onPartialResponse("cashflow_blotter usage yesterday: PV 95, UV 18.");
-                handler.onCompleteResponse(chatResponse(
-                        AiMessage.from("cashflow_blotter usage yesterday: PV 95, UV 18."),
-                        FinishReason.STOP
-                ));
+                return Flux.just(chatResponse("cashflow_blotter usage yesterday: PV 95, UV 18."));
             }
         };
         ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
@@ -547,25 +538,20 @@ class AgentServiceTest {
         AtomicInteger invocationCount = new AtomicInteger();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+            public Flux<ChatResponse> stream(Prompt prompt) {
                 if (invocationCount.getAndIncrement() == 0) {
-                    ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
-                            .id("tool-visible-preamble")
-                            .name("get_current_time")
-                            .arguments("{\"timezone\":\"Asia/Shanghai\"}")
-                            .build();
-                    handler.onCompleteResponse(chatResponse(
-                            AiMessage.from("I’ll check the current Shanghai time first.", List.of(toolExecutionRequest)),
-                            FinishReason.TOOL_EXECUTION
+                    return Flux.just(chatResponse(
+                            "I’ll check the current Shanghai time first.",
+                            List.of(new AssistantMessage.ToolCall(
+                                    "tool-visible-preamble",
+                                    "function",
+                                    "get_current_time",
+                                    "{\"timezone\":\"Asia/Shanghai\"}"
+                            ))
                     ));
-                    return;
                 }
 
-                handler.onPartialResponse("It is currently 2026-03-25 12:30 in Shanghai.");
-                handler.onCompleteResponse(chatResponse(
-                        AiMessage.from("It is currently 2026-03-25 12:30 in Shanghai."),
-                        FinishReason.STOP
-                ));
+                return Flux.just(chatResponse("It is currently 2026-03-25 12:30 in Shanghai."));
             }
         };
         ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
@@ -601,28 +587,21 @@ class AgentServiceTest {
                 new TestToolDefinition("calculator", "Perform calculations", Map.of("type", "object"), true, arguments -> CompletableFuture.completedFuture(Map.of("result", 4)))
         ));
 
-        List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
+        List<String> capturedToolNames = new CopyOnWriteArrayList<>();
         AtomicInteger invocationCount = new AtomicInteger();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
-                capturedToolSpecs.clear();
-                capturedToolSpecs.addAll(request.toolSpecifications());
+            public Flux<ChatResponse> stream(Prompt prompt) {
+                capturedToolNames.clear();
+                capturedToolNames.addAll(toolNames(prompt));
                 invocationCount.incrementAndGet();
 
-                assertTrue(request.messages().stream().anyMatch(message -> message.type() == ChatMessageType.TOOL_EXECUTION_RESULT));
-                assertTrue(request.toolSpecifications().stream().anyMatch(toolSpecification ->
-                        "calculator".equals(toolSpecification.name())));
-                assertTrue(request.toolSpecifications().stream().anyMatch(toolSpecification ->
-                        "other_client_tool".equals(toolSpecification.name())));
-                assertFalse(request.toolSpecifications().stream().anyMatch(toolSpecification ->
-                        "custom_client_tool".equals(toolSpecification.name())));
+                assertTrue(hasToolResponseMessage(prompt));
+                assertTrue(capturedToolNames.contains("calculator"));
+                assertTrue(capturedToolNames.contains("other_client_tool"));
+                assertFalse(capturedToolNames.contains("custom_client_tool"));
 
-                handler.onPartialResponse("I used the completed client-side tool result to answer the request.");
-                handler.onCompleteResponse(chatResponse(
-                        AiMessage.from("I used the completed client-side tool result to answer the request."),
-                        FinishReason.STOP
-                ));
+                return Flux.just(chatResponse("I used the completed client-side tool result to answer the request."));
             }
         };
         ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
@@ -697,17 +676,13 @@ class AgentServiceTest {
         ));
 
         AtomicInteger requestCount = new AtomicInteger();
-        List<ToolSpecification> capturedToolSpecs = new CopyOnWriteArrayList<>();
+        List<String> capturedToolNames = new CopyOnWriteArrayList<>();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+            public Flux<ChatResponse> stream(Prompt prompt) {
                 requestCount.incrementAndGet();
-                capturedToolSpecs.addAll(request.toolSpecifications());
-                handler.onPartialResponse("Hello!");
-                handler.onCompleteResponse(chatResponse(
-                        AiMessage.from("Hello!"),
-                        FinishReason.STOP
-                ));
+                capturedToolNames.addAll(toolNames(prompt));
+                return Flux.just(chatResponse("Hello!"));
             }
         };
         ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
@@ -728,8 +703,8 @@ class AgentServiceTest {
 
         assertTrue(completed.await(1, TimeUnit.SECONDS));
         assertEquals(1, requestCount.get());
-        assertEquals(1, capturedToolSpecs.size());
-        assertEquals("calculator", capturedToolSpecs.get(0).name());
+        assertEquals(1, capturedToolNames.size());
+        assertEquals("calculator", capturedToolNames.get(0));
     }
 
     @Test
@@ -775,17 +750,18 @@ class AgentServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     void buildAssistantTurnDiagnosticsFlagsSilentToolCalls() {
-        ToolExecutionRequest toolExecutionRequest = ToolExecutionRequest.builder()
-                .id("tool-silent-1")
-                .name("generate_status_card")
-                .arguments("{}")
-                .build();
-
         Map<String, Object> diagnostics = ReflectionTestUtils.invokeMethod(
                 agentService,
                 "buildAssistantTurnDiagnostics",
                 "initial",
-                AiMessage.from(List.of(toolExecutionRequest)),
+                AssistantMessage.builder()
+                        .toolCalls(List.of(new AssistantMessage.ToolCall(
+                                "tool-silent-1",
+                                "function",
+                                "generate_status_card",
+                                "{}"
+                        )))
+                        .build(),
                 ""
         );
 
@@ -805,7 +781,7 @@ class AgentServiceTest {
                 agentService,
                 "buildAssistantTurnDiagnostics",
                 "frontend-continuation",
-                AiMessage.from(""),
+                new AssistantMessage(""),
                 ""
         );
 
@@ -839,12 +815,9 @@ class AgentServiceTest {
         AtomicInteger invocationCount = new AtomicInteger();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+            public Flux<ChatResponse> stream(Prompt prompt) {
                 invocationCount.incrementAndGet();
-                handler.onCompleteResponse(chatResponse(
-                        AiMessage.from("I need to clarify the date before I can send that email."),
-                        FinishReason.STOP
-                ));
+                return Flux.just(chatResponse("I need to clarify the date before I can send that email."));
             }
         };
         ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
@@ -942,15 +915,10 @@ class AgentServiceTest {
         List<List<String>> toolNamesPerInvocation = new CopyOnWriteArrayList<>();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+            public Flux<ChatResponse> stream(Prompt prompt) {
                 invocationCount.incrementAndGet();
-                toolNamesPerInvocation.add(request.toolSpecifications().stream()
-                        .map(ToolSpecification::name)
-                        .toList());
-                handler.onCompleteResponse(chatResponse(
-                        AiMessage.from("I should clarify the date first."),
-                        FinishReason.STOP
-                ));
+                toolNamesPerInvocation.add(toolNames(prompt));
+                return Flux.just(chatResponse("I should clarify the date first."));
             }
         };
         ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
@@ -1015,15 +983,10 @@ class AgentServiceTest {
         List<List<String>> toolNamesPerInvocation = new CopyOnWriteArrayList<>();
         StreamingChatModel streamingChatLanguageModel = new StreamingChatModel() {
             @Override
-            public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
+            public Flux<ChatResponse> stream(Prompt prompt) {
                 invocationCount.incrementAndGet();
-                toolNamesPerInvocation.add(request.toolSpecifications().stream()
-                        .map(ToolSpecification::name)
-                        .toList());
-                handler.onCompleteResponse(chatResponse(
-                        AiMessage.from("I can answer that once I know the exact date."),
-                        FinishReason.STOP
-                ));
+                toolNamesPerInvocation.add(toolNames(prompt));
+                return Flux.just(chatResponse("I can answer that once I know the exact date."));
             }
         };
         ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);

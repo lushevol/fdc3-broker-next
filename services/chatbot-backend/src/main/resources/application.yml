@@ -22,8 +22,12 @@ chatbot:
     max-tokens: 4096
     conversation-timeout: 1800000 # 30 minutes
   security:
+    enabled: ${CHATBOT_SECURITY_ENABLED:true}
+    allowed-origins: ${CHATBOT_SECURITY_ALLOWED_ORIGINS:http://localhost:8001,http://127.0.0.1:8001}
     fallback-profiles: ${CHATBOT_SECURITY_FALLBACK_PROFILES:default}
     additional-profiles: ${CHATBOT_SECURITY_ADDITIONAL_PROFILES:}
+  protocol:
+    sse-timeout-millis: ${CHATBOT_PROTOCOL_SSE_TIMEOUT_MILLIS:300000}
   tools:
     enabled: true
   mcp:
@@ -45,4 +49,4 @@ chatbot:
 logging:
   level:
     com.fdc3.chatbot: DEBUG
-    dev.langchain4j: INFO
+    org.springframework.ai: INFO

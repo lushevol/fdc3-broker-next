@@ -4,7 +4,7 @@
 
 ## LLM Integration
 
-- Always use LangChain4j abstractions (`OpenAiChatModel`, `OpenAiStreamingChatModel`)
+- Always use Spring AI abstractions (`ChatModel`, `Prompt`, Spring-managed provider model beans)
 - Never call OpenAI/Anthropic APIs directly — route through `AgentService`
 - Configure model via `spring.ai.openai.*` properties or `CHATBOT_*` env vars
 
@@ -24,7 +24,7 @@
 ## Agentic Loop
 
 - When `CapabilityResolver` is available and no `toolContext` is provided, the agentic control loop is used
-- Otherwise, direct LangChain4j streaming is used
+- Otherwise, the direct model streaming path is used
 - Do not bypass `PlanValidationService` — all plans must be validated before execution
 - `PolicyEvaluator` decisions (DENY, REVIEW_REQUIRED) must be respected
 

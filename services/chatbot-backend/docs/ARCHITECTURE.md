@@ -6,9 +6,9 @@
 
 | Component     | Technology                            |
 | ------------- | ------------------------------------- |
-| Framework     | Spring Boot 3.2.0                     |
+| Framework     | Spring Boot 3.5.14                    |
 | Language      | Java 17                               |
-| AI            | LangChain4j 1.12.2 (OpenAI/Anthropic) |
+| AI            | Spring AI 1.1.6 (OpenAI-compatible/Anthropic) |
 | Reactive      | Spring WebFlux                        |
 | Security      | Spring Security (disabled by default) |
 | Rate Limiting | Bucket4j 8.7                          |
@@ -60,8 +60,8 @@ src/main/java/com/fdc3/chatbot/
 ├── mcp/
 │   ├── McpBootstrapRegistrar.java        # Auto-register from application.yml
 │   ├── McpBootstrapProperties.java
-│   ├── McpClientFactory.java             # Creates LangChain4j MCP client sessions
-│   ├── LangChain4jMcpClientFactory.java  # LangChain4j-specific client factory
+│   ├── McpClientFactory.java             # Creates MCP client sessions
+│   ├── LangChain4jMcpClientFactory.java  # MCP client factory backed by the Spring AI MCP SDK stack
 │   ├── McpProviderRegistrationRequest.java
 │   ├── McpProviderRegistryService.java    # Register/list/unregister MCP providers
 │   ├── McpToolDescriptor.java
@@ -96,7 +96,7 @@ src/main/java/com/fdc3/chatbot/
 ```
 AgentService.processMessageStreaming()
   │
-  ├─ toolContext present or legacy flow? ──→ Direct LangChain4j streaming
+  ├─ toolContext present or legacy flow? ──→ Direct model streaming path
   │
   └─ Agentic control loop active? ──→ AgentDecisionService.decide()
        │
@@ -129,7 +129,7 @@ Dynamic MCP provider registration via:
 1. **REST API**: `POST /api/chat/mcp/providers` with `McpProviderRegistrationRequest`
 2. **Bootstrap config**: `chatbot.mcp.providers` in `application.yml`
 
-Supports `STREAMABLE_HTTP` and `HTTP_SSE` transport types. `McpClientFactory` creates LangChain4j-compatible client sessions.
+Supports `STREAMABLE_HTTP` and `HTTP_SSE` transport types. `McpClientFactory` creates MCP client sessions for registered providers.
 
 ## API Endpoints
 

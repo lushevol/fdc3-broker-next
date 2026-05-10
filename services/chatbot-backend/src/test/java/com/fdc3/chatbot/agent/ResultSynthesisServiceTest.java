@@ -13,15 +13,16 @@ import com.fdc3.chatbot.controlplane.policy.PolicyDecision;
 import com.fdc3.chatbot.controlplane.policy.PolicyDecisionType;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.StreamingChatModel;
-import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.model.StreamingChatModel;
+import org.springframework.ai.chat.prompt.Prompt;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Map;
@@ -51,16 +52,16 @@ class ResultSynthesisServiceTest {
         );
 
         assertThat(result).isEqualTo("LLM summary: cashflow blotter visited users were 30.");
-        ChatRequest request = chatModel.capturedRequest();
-        assertThat(request.messages()).hasSize(2);
-        assertThat(request.messages().get(0)).isInstanceOf(SystemMessage.class);
-        assertThat(((SystemMessage) request.messages().get(0)).text())
+        Prompt request = chatModel.capturedRequest();
+        assertThat(request.getInstructions()).hasSize(2);
+        assertThat(request.getInstructions().get(0)).isInstanceOf(SystemMessage.class);
+        assertThat(((SystemMessage) request.getInstructions().get(0)).getText())
                 .contains("Get visited users for cashflow blotter from 2026-04-01 to 2026-04-08")
                 .contains("application-visited-user-count")
                 .contains("visited_user_count_by_application")
                 .contains("\"uv\":30");
-        assertThat(request.messages().get(1)).isInstanceOf(UserMessage.class);
-        assertThat(((UserMessage) request.messages().get(1)).singleText()).isEqualTo(
+        assertThat(request.getInstructions().get(1)).isInstanceOf(UserMessage.class);
+        assertThat(((UserMessage) request.getInstructions().get(1)).getText()).isEqualTo(
                 "Write the final assistant response using only the executed results."
         );
     }
@@ -84,8 +85,8 @@ class ResultSynthesisServiceTest {
         assertThat(result).isEqualTo(
                 "LLM summary: I couldn't complete the analytics request because the provider timed out."
         );
-        ChatRequest request = chatModel.capturedRequest();
-        assertThat(((SystemMessage) request.messages().get(0)).text())
+        Prompt request = chatModel.capturedRequest();
+        assertThat(((SystemMessage) request.getInstructions().get(0)).getText())
                 .contains("provider timed out")
                 .contains("\"error\":\"provider timed out\"");
     }
@@ -116,10 +117,10 @@ class ResultSynthesisServiceTest {
 
         assertThat(completed.await(1, TimeUnit.SECONDS)).isTrue();
         assertThat(streamedTokens).containsExactly("cashflow blotter visited users ", "were 30.");
-        ChatRequest request = streamingChatModel.capturedRequest();
-        assertThat(request.messages()).hasSize(2);
-        assertThat(request.messages().get(0)).isInstanceOf(SystemMessage.class);
-        assertThat(((SystemMessage) request.messages().get(0)).text())
+        Prompt request = streamingChatModel.capturedRequest();
+        assertThat(request.getInstructions()).hasSize(2);
+        assertThat(request.getInstructions().get(0)).isInstanceOf(SystemMessage.class);
+        assertThat(((SystemMessage) request.getInstructions().get(0)).getText())
                 .contains("Get visited users for cashflow blotter from 2026-04-01 to 2026-04-08")
                 .contains("\"uv\":30");
     }
@@ -289,49 +290,45 @@ class ResultSynthesisServiceTest {
     private static final class CapturingChatModel implements ChatModel {
 
         private final String responseText;
-        private ChatRequest capturedRequest;
+        private Prompt capturedRequest;
 
         private CapturingChatModel(String responseText) {
             this.responseText = responseText;
         }
 
         @Override
-        public ChatResponse doChat(ChatRequest chatRequest) {
-            this.capturedRequest = chatRequest;
+        public ChatResponse call(Prompt prompt) {
+            this.capturedRequest = prompt;
             return ChatResponse.builder()
-                    .aiMessage(AiMessage.from(responseText))
+                    .generations(List.of(new Generation(new AssistantMessage(responseText))))
                     .build();
         }
 
-        private ChatRequest capturedRequest() {
-            return Objects.requireNonNull(capturedRequest, "Chat request was not captured");
+        private Prompt capturedRequest() {
+            return Objects.requireNonNull(capturedRequest, "Prompt was not captured");
         }
     }
 
     private static final class CapturingStreamingChatModel implements StreamingChatModel {
 
         private final List<String> partialTokens;
-        private ChatRequest capturedRequest;
+        private Prompt capturedRequest;
 
         private CapturingStreamingChatModel(List<String> partialTokens) {
             this.partialTokens = partialTokens;
         }
 
         @Override
-        public void chat(ChatRequest chatRequest, StreamingChatResponseHandler handler) {
-            this.capturedRequest = chatRequest;
-            StringBuilder fullText = new StringBuilder();
-            for (String token : partialTokens) {
-                fullText.append(token);
-                handler.onPartialResponse(token);
-            }
-            handler.onCompleteResponse(ChatResponse.builder()
-                    .aiMessage(AiMessage.from(fullText.toString()))
-                    .build());
+        public Flux<ChatResponse> stream(Prompt prompt) {
+            this.capturedRequest = prompt;
+            return Flux.fromIterable(partialTokens)
+                    .map(token -> ChatResponse.builder()
+                            .generations(List.of(new Generation(new AssistantMessage(token))))
+                            .build());
         }
 
-        private ChatRequest capturedRequest() {
-            return Objects.requireNonNull(capturedRequest, "Chat request was not captured");
+        private Prompt capturedRequest() {
+            return Objects.requireNonNull(capturedRequest, "Prompt was not captured");
         }
     }
 }

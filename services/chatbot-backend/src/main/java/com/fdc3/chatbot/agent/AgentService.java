@@ -23,35 +23,28 @@ import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.model.UserCapabilityContext;
 import com.fdc3.chatbot.tool.ToolDefinition;
 import com.fdc3.chatbot.tool.ToolRegistry;
-import dev.langchain4j.agent.tool.ToolExecutionRequest;
-import dev.langchain4j.agent.tool.ToolSpecification;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.ToolExecutionResultMessage;
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.StreamingChatModel;
-import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.request.json.JsonArraySchema;
-import dev.langchain4j.model.chat.request.json.JsonBooleanSchema;
-import dev.langchain4j.model.chat.request.json.JsonEnumSchema;
-import dev.langchain4j.model.chat.request.json.JsonIntegerSchema;
-import dev.langchain4j.model.chat.request.json.JsonNumberSchema;
-import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
-import dev.langchain4j.model.chat.request.json.JsonRawSchema;
-import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
-import dev.langchain4j.model.chat.request.json.JsonStringSchema;
-import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
-import dev.langchain4j.model.openai.OpenAiChatModel;
-import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.ToolResponseMessage;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.StreamingChatModel;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.function.FunctionToolCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import reactor.core.Disposable;
 
 import jakarta.annotation.PostConstruct;
-import java.time.Duration;
+import jakarta.annotation.PreDestroy;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -66,9 +59,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.springframework.core.ParameterizedTypeReference;
 
 /**
- * AI Agent service using LangChain4j for conversation handling.
+ * AI Agent service using Spring AI for conversation handling.
  */
 @Slf4j
 @Service
@@ -158,29 +152,25 @@ public class AgentService {
         if (mockEnabled) {
             log.info("Mock mode enabled - using simulated responses");
         } else if (openaiApiKey != null && !openaiApiKey.isEmpty()) {
-            var chatModelBuilder = OpenAiChatModel.builder()
-                    .apiKey(openaiApiKey)
-                    .modelName(model)
-                    .temperature(temperature)
-                    .maxTokens(maxTokens)
-                    .timeout(Duration.ofSeconds(60));
-
-            var streamingModelBuilder = OpenAiStreamingChatModel.builder()
-                    .apiKey(openaiApiKey)
-                    .modelName(model)
-                    .temperature(temperature)
-                    .maxTokens(maxTokens)
-                    .timeout(Duration.ofSeconds(60));
-
-            // Add base URL if configured (for OpenAI-compatible APIs like Azure, etc.)
+            OpenAiApi.Builder apiBuilder = OpenAiApi.builder().apiKey(openaiApiKey);
             if (openaiBaseUrl != null && !openaiBaseUrl.isEmpty()) {
-                chatModelBuilder.baseUrl(openaiBaseUrl);
-                streamingModelBuilder.baseUrl(openaiBaseUrl);
+                apiBuilder.baseUrl(openaiBaseUrl);
                 log.info("Using custom OpenAI base URL: {}", openaiBaseUrl);
             }
 
-            this.chatModel = chatModelBuilder.build();
-            this.streamingChatModel = streamingModelBuilder.build();
+            OpenAiChatOptions options = OpenAiChatOptions.builder()
+                    .model(model)
+                    .temperature(temperature)
+                    .maxTokens(maxTokens)
+                    .build();
+
+            OpenAiChatModel openAiChatModel = OpenAiChatModel.builder()
+                    .openAiApi(apiBuilder.build())
+                    .defaultOptions(options)
+                    .build();
+
+            this.chatModel = openAiChatModel;
+            this.streamingChatModel = openAiChatModel;
 
             log.info("Initialized OpenAI chat model with model: {}", model);
         } else {
@@ -198,6 +188,11 @@ public class AgentService {
                     ? new ResultSynthesisService()
                     : new ResultSynthesisService(chatModel, streamingChatModel, new ResultSynthesisPromptFactory());
         }
+    }
+
+    @PreDestroy
+    void shutdownExecutors() {
+        mockExecutor.shutdownNow();
     }
 
     /**
@@ -423,7 +418,7 @@ public class AgentService {
     }
 
     /**
-     * Process a chat message through the LangChain4j tool-calling path without the top-level agentic planner shortcut.
+     * Process a chat message through the Spring AI tool-calling path without the top-level agentic planner shortcut.
      * This is used by the standalone protocol endpoint so tool execution and frontend resume are always observable
      * through the protocol frame stream.
      */
@@ -532,8 +527,7 @@ public class AgentService {
         }
 
         try {
-            // Build message list for LangChain4j
-            List<dev.langchain4j.data.message.ChatMessage> messages = new java.util.ArrayList<>();
+            List<Message> messages = new java.util.ArrayList<>();
             FrontendToolContinuation frontendToolContinuation = parseFrontendToolContinuation(toolContext);
             List<FrontendToolManifestEntry> frontendToolManifest =
                     resolveFrontendToolManifest(conversationId, frontendTools);
@@ -548,7 +542,6 @@ public class AgentService {
                 log.debug("Received {} frontend tool manifest entries", frontendToolManifest.size());
             }
 
-            // Add system message
             messages.add(new SystemMessage(buildSystemPrompt(useTools ? availableTools : Map.of())));
             log.debug("Processing message for conversation: {}", conversationId);
 
@@ -556,32 +549,35 @@ public class AgentService {
                 messages.add(new SystemMessage(buildFrontendToolContinuationPrompt(frontendToolContinuation)));
             }
 
-            // Add history
             if (history != null) {
                 for (ChatMessage msg : history) {
                     switch (msg.getRole()) {
                         case USER -> messages.add(new UserMessage(msg.getContent()));
-                        case ASSISTANT -> messages.add(new AiMessage(msg.getContent()));
-                        default -> {}
+                        case ASSISTANT -> messages.add(new AssistantMessage(msg.getContent()));
+                        case TOOL -> messages.add(restoreHistoricalToolMessage(msg));
+                        default -> {
+                        }
                     }
                 }
             }
 
             if (frontendToolContinuation != null) {
                 messages.add(new UserMessage(frontendToolContinuation.getOriginalUserMessage()));
-                messages.add(AiMessage.from(ToolExecutionRequest.builder()
-                        .id(frontendToolContinuation.getToolCallId())
-                        .name(frontendToolContinuation.getToolName())
-                        .arguments(writeJson(frontendToolContinuation.getArgs()))
-                        .build()));
-                messages.add(ToolExecutionResultMessage.from(
+                messages.add(AssistantMessage.builder()
+                        .toolCalls(List.of(new AssistantMessage.ToolCall(
+                                frontendToolContinuation.getToolCallId(),
+                                "function",
+                                frontendToolContinuation.getToolName(),
+                                writeJson(frontendToolContinuation.getArgs())
+                        )))
+                        .build());
+                messages.add(toolResponseMessage(
                         frontendToolContinuation.getToolCallId(),
                         frontendToolContinuation.getToolName(),
                         writeJson(frontendToolContinuation.getResult())
                 ));
                 messages.add(new UserMessage(buildFrontendToolContinuationResumePrompt(frontendToolContinuation)));
             } else {
-                // Add current user message
                 messages.add(new UserMessage(userMessage));
             }
 
@@ -589,16 +585,17 @@ public class AgentService {
 
             log.debug("streamConversation - useTools={}, toolSpecs size={}, frontendToolManifest size={}, blockedFrontendTools={}",
             useTools,
-            useTools ? buildToolSpecifications(availableTools, frontendToolManifest, blockedFrontendTools).size() : 0,
+            useTools ? buildToolCallbacks(availableTools, frontendToolManifest, blockedFrontendTools).size() : 0,
             frontendToolManifest.size(),
             blockedFrontendTools);
-        streamConversation(
+
+            streamConversation(
                     conversationId,
                     userMessage,
                     history,
                     messages,
                     availableTools,
-                    useTools ? buildToolSpecifications(availableTools, frontendToolManifest, blockedFrontendTools) : List.of(),
+                    useTools ? buildToolCallbacks(availableTools, frontendToolManifest, blockedFrontendTools) : List.of(),
                     frontendToolManifest,
                     blockedFrontendTools,
                     frontendToolContinuation != null ? "frontend-continuation" : "initial",
@@ -992,36 +989,31 @@ public class AgentService {
 
         StringBuilder streamedText = new StringBuilder();
         try {
-            streamingChatModel.chat(ChatRequest.builder()
-                    .messages(List.of(
-                            SystemMessage.from(STREAMED_ASSISTANT_TEXT_REQUEST),
-                            UserMessage.from("Draft reply:\n" + draftedReply)
-                    ))
-                    .build(), new StreamingChatResponseHandler() {
-                        @Override
-                        public void onPartialResponse(String token) {
-                            if (cancelled.get()) {
-                                return;
-                            }
-                            streamedText.append(token);
-                            onNext.accept(token);
+            streamingChatModel.stream(new Prompt(
+                    List.of(
+                            new SystemMessage(STREAMED_ASSISTANT_TEXT_REQUEST),
+                            new UserMessage("Draft reply:\n" + draftedReply)
+                    ),
+                    createBaseChatOptions()
+            )).subscribe(
+                    response -> {
+                        if (cancelled.get()) {
+                            return;
                         }
-
-                        @Override
-                        public void onCompleteResponse(ChatResponse response) {
-                            if (cancelled.get()) {
-                                return;
-                            }
-                            String fullText = response.aiMessage() == null ? null : response.aiMessage().text();
-                            emitRemainingAssistantText(fullText, streamedText.toString(), onNext);
+                        String token = assistantText(response);
+                        if (token == null || token.isEmpty()) {
+                            return;
+                        }
+                        streamedText.append(token);
+                        onNext.accept(token);
+                    },
+                    onError,
+                    () -> {
+                        if (!cancelled.get()) {
                             onComplete.run();
                         }
-
-                        @Override
-                        public void onError(Throwable error) {
-                            onError.accept(error);
-                        }
-                    });
+                    }
+            );
         } catch (Exception exception) {
             onError.accept(exception);
         }
@@ -1107,9 +1099,9 @@ public class AgentService {
             String conversationId,
             String userMessage,
             List<ChatMessage> history,
-            List<dev.langchain4j.data.message.ChatMessage> messages,
+            List<Message> messages,
             Map<String, ToolDefinition> availableTools,
-            List<ToolSpecification> toolSpecifications,
+            List<ToolCallback> toolCallbacks,
             List<FrontendToolManifestEntry> frontendToolManifest,
             Set<String> blockedToolNames,
             String turnPhase,
@@ -1121,83 +1113,86 @@ public class AgentService {
             AtomicBoolean cancelled
     ) {
         StringBuilder streamedAssistantText = new StringBuilder();
+        final AssistantMessage[] finalAssistantMessage = new AssistantMessage[1];
 
-        StreamingChatResponseHandler handler = new StreamingChatResponseHandler() {
-            @Override
-            public void onPartialResponse(String token) {
-                if (cancelled.get()) {
-                    return;
+        Prompt prompt = buildPrompt(messages, toolCallbacks);
+        Disposable ignored = streamingChatModel.stream(prompt).subscribe(
+                response -> {
+                    if (cancelled.get()) {
+                        return;
+                    }
+                    AssistantMessage assistantMessage = assistantMessage(response);
+                    if (assistantMessage == null) {
+                        return;
+                    }
+                    finalAssistantMessage[0] = assistantMessage;
+                    String token = assistantMessage.getText();
+                    if (token != null && !token.isEmpty()) {
+                        streamedAssistantText.append(token);
+                        onNext.accept(token);
+                    }
+                },
+                error -> {
+                    if (cancelled.get()) {
+                        return;
+                    }
+                    log.error("Error in streaming response", error);
+                    onError.accept(error);
+                },
+                () -> {
+                    if (cancelled.get()) {
+                        return;
+                    }
+
+                    AssistantMessage assistantMessage = finalAssistantMessage[0];
+                    if (assistantMessage != null && assistantMessage.hasToolCalls()) {
+                        emitRemainingAssistantText(assistantMessage, streamedAssistantText, onNext);
+                        logAssistantTurnDiagnostics(
+                                conversationId,
+                                buildAssistantTurnDiagnostics(turnPhase, assistantMessage, streamedAssistantText.toString())
+                        );
+                        List<Message> continuedMessages = new java.util.ArrayList<>(messages);
+                        continuedMessages.add(assistantMessage);
+                        continueWithToolRequests(
+                                conversationId,
+                                userMessage,
+                                history,
+                                continuedMessages,
+                                availableTools,
+                                assistantMessage.getToolCalls(),
+                                frontendToolManifest,
+                                blockedToolNames,
+                                0,
+                                true,
+                                onNext,
+                                onError,
+                                onComplete,
+                                onToolCall,
+                                onToolResult,
+                                cancelled
+                        );
+                        return;
+                    }
+
+                    if (assistantMessage != null) {
+                        logAssistantTurnDiagnostics(
+                                conversationId,
+                                buildAssistantTurnDiagnostics(turnPhase, assistantMessage, streamedAssistantText.toString())
+                        );
+                    }
+
+                    log.debug("Completed streaming response for conversation: {}", conversationId);
+                    onComplete.run();
                 }
-                streamedAssistantText.append(token);
-                onNext.accept(token);
-            }
-
-            @Override
-            public void onCompleteResponse(ChatResponse response) {
-                if (cancelled.get()) {
-                    return;
-                }
-
-                AiMessage aiMessage = response.aiMessage();
-                if (aiMessage != null && aiMessage.hasToolExecutionRequests()) {
-                    emitRemainingAssistantText(aiMessage, streamedAssistantText, onNext);
-                    logAssistantTurnDiagnostics(
-                            conversationId,
-                            buildAssistantTurnDiagnostics(turnPhase, aiMessage, streamedAssistantText.toString())
-                    );
-                    List<dev.langchain4j.data.message.ChatMessage> continuedMessages =
-                            new java.util.ArrayList<>(messages);
-                    continuedMessages.add(aiMessage);
-                    continueWithToolRequests(
-                            conversationId,
-                            userMessage,
-                            history,
-                            continuedMessages,
-                            availableTools,
-                            aiMessage.toolExecutionRequests(),
-                            frontendToolManifest,
-                            blockedToolNames,
-                            0,
-                            true,
-                            onNext,
-                            onError,
-                            onComplete,
-                            onToolCall,
-                            onToolResult,
-                            cancelled
-                    );
-                    return;
-                }
-
-                if (aiMessage != null) {
-                    logAssistantTurnDiagnostics(
-                            conversationId,
-                            buildAssistantTurnDiagnostics(turnPhase, aiMessage, streamedAssistantText.toString())
-                    );
-                }
-
-                log.debug("Completed streaming response for conversation: {}", conversationId);
-                onComplete.run();
-            }
-
-            @Override
-            public void onError(Throwable error) {
-                if (cancelled.get()) {
-                    return;
-                }
-                log.error("Error in streaming response", error);
-                onError.accept(error);
-            }
-        };
-        streamingChatModel.chat(buildChatRequest(messages, toolSpecifications), handler);
+        );
     }
 
     private void emitRemainingAssistantText(
-            AiMessage aiMessage,
+            AssistantMessage assistantMessage,
             StringBuilder streamedAssistantText,
             java.util.function.Consumer<String> onNext
     ) {
-        String assistantText = aiMessage.text();
+        String assistantText = assistantMessage.getText();
         if (assistantText == null || assistantText.isBlank()) {
             return;
         }
@@ -1222,9 +1217,9 @@ public class AgentService {
             String conversationId,
             String userMessage,
             List<ChatMessage> history,
-            List<dev.langchain4j.data.message.ChatMessage> messages,
+            List<Message> messages,
             Map<String, ToolDefinition> availableTools,
-            List<ToolExecutionRequest> toolExecutionRequests,
+            List<AssistantMessage.ToolCall> toolExecutionRequests,
             List<FrontendToolManifestEntry> frontendToolManifest,
             Set<String> blockedToolNames,
             int index,
@@ -1252,7 +1247,7 @@ public class AgentService {
                     history,
                     messages,
                     availableTools,
-                    buildToolSpecifications(availableTools, frontendToolManifest, blockedToolNames),
+                    buildToolCallbacks(availableTools, frontendToolManifest, blockedToolNames),
                     frontendToolManifest,
                     blockedToolNames,
                     "tool-loop",
@@ -1266,7 +1261,7 @@ public class AgentService {
             return;
         }
 
-        ToolExecutionRequest toolExecutionRequest = toolExecutionRequests.get(index);
+        AssistantMessage.ToolCall toolExecutionRequest = toolExecutionRequests.get(index);
         Map<String, Object> arguments = parseToolArguments(toolExecutionRequest.arguments());
         FrontendToolManifestEntry frontendTool = findFrontendTool(frontendToolManifest, toolExecutionRequest.name());
 
@@ -1302,10 +1297,98 @@ public class AgentService {
         onToolCall.accept(toolCall);
 
         if (requiresConfirmation) {
-            onError.accept(new UnsupportedOperationException(
-                    "Tool confirmation is not supported for the live streaming model path yet: "
-                            + toolExecutionRequest.name()
-            ));
+            pendingToolExecutions.put(
+                    pendingKey(conversationId, toolExecutionRequest.id()),
+                    pendingToolExecution(
+                            () -> onToolCall.accept(ToolCall.builder()
+                                    .id(toolExecutionRequest.id())
+                                    .name(toolExecutionRequest.name())
+                                    .arguments(arguments)
+                                    .status(ToolCall.ToolStatus.RUNNING)
+                                    .executionTarget(ToolCall.ExecutionTarget.BACKEND)
+                                    .requiresConfirmation(true)
+                                    .build()),
+                            () -> executeConfirmedToolRequest(
+                                    conversationId,
+                                    userMessage,
+                                    history,
+                                    messages,
+                                    availableTools,
+                                    toolExecutionRequests,
+                                    frontendToolManifest,
+                                    blockedToolNames,
+                                    index,
+                                    continueAfterToolLoop,
+                                    toolExecutionRequest,
+                                    arguments,
+                                    onNext,
+                                    onError,
+                                    onComplete,
+                                    onToolCall,
+                                    onToolResult,
+                                    cancelled
+                            ),
+                            () -> {
+                                onToolResult.accept(ToolResult.builder()
+                                        .toolCallId(toolExecutionRequest.id())
+                                        .error("Tool execution cancelled by user.")
+                                        .build());
+                                onComplete.run();
+                            }
+                    )
+            );
+            return;
+        }
+
+        executeConfirmedToolRequest(
+                conversationId,
+                userMessage,
+                history,
+                messages,
+                availableTools,
+                toolExecutionRequests,
+                frontendToolManifest,
+                blockedToolNames,
+                index,
+                continueAfterToolLoop,
+                toolExecutionRequest,
+                arguments,
+                onNext,
+                onError,
+                onComplete,
+                onToolCall,
+                onToolResult,
+                cancelled
+        );
+    }
+
+    private void executeConfirmedToolRequest(
+            String conversationId,
+            String userMessage,
+            List<ChatMessage> history,
+            List<Message> messages,
+            Map<String, ToolDefinition> availableTools,
+            List<AssistantMessage.ToolCall> toolExecutionRequests,
+            List<FrontendToolManifestEntry> frontendToolManifest,
+            Set<String> blockedToolNames,
+            int index,
+            boolean continueAfterToolLoop,
+            AssistantMessage.ToolCall toolExecutionRequest,
+            Map<String, Object> arguments,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            AtomicBoolean cancelled
+    ) {
+        ToolDefinition toolDefinition = availableTools.get(toolExecutionRequest.name());
+        if (toolDefinition == null) {
+            onToolResult.accept(ToolResult.builder()
+                    .toolCallId(toolExecutionRequest.id())
+                    .error("Tool is no longer available for execution.")
+                    .build());
+            onComplete.run();
             return;
         }
 
@@ -1322,10 +1405,10 @@ public class AgentService {
                             .build();
                     onToolResult.accept(toolResult);
 
-                    List<dev.langchain4j.data.message.ChatMessage> continuedMessages =
-                            new java.util.ArrayList<>(messages);
-                    continuedMessages.add(ToolExecutionResultMessage.from(
-                            toolExecutionRequest,
+                    List<Message> continuedMessages = new java.util.ArrayList<>(messages);
+                    continuedMessages.add(toolResponseMessage(
+                            toolExecutionRequest.id(),
+                            toolExecutionRequest.name(),
                             serializeToolResult(result, error)
                     ));
                     Set<String> nextBlockedToolNames = new java.util.LinkedHashSet<>(blockedToolNames);
@@ -1352,39 +1435,60 @@ public class AgentService {
                 });
     }
 
-    private List<ToolSpecification> buildToolSpecifications(
+    private List<ToolCallback> buildToolCallbacks(
             Map<String, ToolDefinition> tools,
             List<FrontendToolManifestEntry> frontendTools,
             Set<String> blockedToolNames
     ) {
-        Map<String, ToolSpecification> uniqueSpecs = new java.util.LinkedHashMap<>();
+        Map<String, ToolCallback> uniqueCallbacks = new java.util.LinkedHashMap<>();
 
         tools.values().stream()
                 .filter(toolDefinition -> !blockedToolNames.contains(toolDefinition.getName()))
-                .map(this::toToolSpecification)
-                .forEach(toolSpecification -> uniqueSpecs.put(toolSpecification.name(), toolSpecification));
+                .map(this::toToolCallback)
+                .forEach(toolCallback -> uniqueCallbacks.put(toolCallback.getToolDefinition().name(), toolCallback));
 
         frontendTools.stream()
                 .filter(frontendTool -> !blockedToolNames.contains(frontendTool.getName()))
-                .map(this::toToolSpecification)
-                .forEach(toolSpecification -> uniqueSpecs.putIfAbsent(toolSpecification.name(), toolSpecification));
+                .map(this::toToolCallback)
+                .forEach(toolCallback -> uniqueCallbacks.putIfAbsent(
+                        toolCallback.getToolDefinition().name(),
+                        toolCallback
+                ));
 
-        return List.copyOf(uniqueSpecs.values());
+        return List.copyOf(uniqueCallbacks.values());
     }
 
-    private ToolSpecification toToolSpecification(ToolDefinition toolDefinition) {
-        return ToolSpecification.builder()
-                .name(toolDefinition.getName())
+    private ToolCallback toToolCallback(ToolDefinition toolDefinition) {
+        return FunctionToolCallback.<Map<String, Object>, Object>builder(
+                        toolDefinition.getName(),
+                        arguments -> {
+                            throw new UnsupportedOperationException(
+                                    "Internal tool execution is disabled for manual protocol control"
+                            );
+                        }
+                )
                 .description(toolDefinition.getDescription())
-                .parameters(toToolParameters(toolDefinition.getParameters()))
+                .inputSchema(writeJson(toolDefinition.getParameters()))
+                .inputType(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
                 .build();
     }
 
-    private ToolSpecification toToolSpecification(FrontendToolManifestEntry frontendTool) {
-        return ToolSpecification.builder()
-                .name(frontendTool.getName())
+    private ToolCallback toToolCallback(FrontendToolManifestEntry frontendTool) {
+        return FunctionToolCallback.<Map<String, Object>, Object>builder(
+                        frontendTool.getName(),
+                        arguments -> {
+                            throw new UnsupportedOperationException(
+                                    "Frontend tools are surfaced to the model but executed by the client"
+                            );
+                        }
+                )
                 .description(frontendTool.getDescription())
-                .parameters(toToolParameters(frontendTool.getInputSchema() == null ? Map.of("type", "object") : frontendTool.getInputSchema()))
+                .inputSchema(writeJson(
+                        frontendTool.getInputSchema() == null ? Map.of("type", "object") : frontendTool.getInputSchema()
+                ))
+                .inputType(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
                 .build();
     }
 
@@ -1398,150 +1502,24 @@ public class AgentService {
                 .orElse(null);
     }
 
-@SuppressWarnings("unchecked")
-    private JsonObjectSchema toToolParameters(Map<String, Object> parameters) {
-        if (log.isDebugEnabled()) {
-            log.debug("[DEBUG] toToolParameters input: {}", parameters);
+    private Prompt buildPrompt(List<Message> messages, List<ToolCallback> toolCallbacks) {
+        OpenAiChatOptions.Builder optionsBuilder = OpenAiChatOptions.builder()
+                .model(model)
+                .temperature(temperature)
+                .maxTokens(maxTokens);
+        if (!toolCallbacks.isEmpty()) {
+            optionsBuilder.toolCallbacks(toolCallbacks);
+            optionsBuilder.internalToolExecutionEnabled(false);
         }
-        JsonObjectSchema.Builder builder = JsonObjectSchema.builder();
-        Object description = parameters.get("description");
-        if (description != null) {
-            builder.description(String.valueOf(description));
-        }
-
-        Object properties = parameters.get("properties");
-        if (log.isDebugEnabled()) {
-            log.debug("[DEBUG] toToolParameters - properties: {}", properties);
-        }
-        if (properties instanceof Map<?, ?> map) {
-            map.forEach((key, value) -> {
-                if (key != null && value instanceof Map<?, ?> propertySchema) {
-                    Map<String, Object> cleanedSchema = cleanSchemaMap(propertySchema);
-                    builder.addProperty(String.valueOf(key), toJsonSchemaElement(cleanedSchema));
-                } else if (key != null && (value instanceof String || value instanceof Number || value instanceof Boolean)) {
-                    JsonSchemaElement element = buildSimpleSchema(value);
-                    builder.addProperty(String.valueOf(key), element);
-                } else if (key != null) {
-                    log.warn("[DEBUG] toToolParameters - property {} has non-Map value: {} type={}", key, value, value != null ? value.getClass().getSimpleName() : "null");
-                }
-            });
-        }
-
-        Object required = parameters.get("required");
-        if (required instanceof List<?> list) {
-            builder.required(list.stream().map(String::valueOf).toList());
-        }
-
-        Object additionalProperties = parameters.get("additionalProperties");
-        if (additionalProperties instanceof Boolean bool) {
-            builder.additionalProperties(bool);
-        }
-
-        return builder.build();
+        return new Prompt(messages, optionsBuilder.build());
     }
 
-    private ChatRequest buildChatRequest(
-            List<dev.langchain4j.data.message.ChatMessage> messages,
-            List<ToolSpecification> toolSpecifications
-    ) {
-        ChatRequest.Builder builder = ChatRequest.builder().messages(messages);
-        if (!toolSpecifications.isEmpty()) {
-            builder.toolSpecifications(toolSpecifications);
-        }
-        return builder.build();
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> castSchemaMap(Map<?, ?> schema) {
-        return (Map<String, Object>) schema;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> cleanSchemaMap(Map<?, ?> schema) {
-        Map<String, Object> result = new java.util.LinkedHashMap<>();
-        for (Map.Entry<?, ?> entry : schema.entrySet()) {
-            if (!"required".equals(entry.getKey())) {
-                result.put(String.valueOf(entry.getKey()), entry.getValue());
-            }
-        }
-        return result;
-    }
-
-    private JsonSchemaElement toJsonSchemaElement(Map<String, Object> schema) {
-        String description = schema.get("description") == null ? null : String.valueOf(schema.get("description"));
-        Object enumValues = schema.get("enum");
-        if (enumValues instanceof List<?> values && !values.isEmpty()) {
-            JsonEnumSchema.Builder builder = JsonEnumSchema.builder()
-                    .enumValues(values.stream().map(String::valueOf).toList());
-            if (description != null) {
-                builder.description(description);
-            }
-            return builder.build();
-        }
-
-        String type = schema.get("type") == null ? "string" : String.valueOf(schema.get("type"));
-        return switch (type) {
-            case "object" -> toToolParameters(schema);
-            case "array" -> {
-                JsonArraySchema.Builder builder = JsonArraySchema.builder();
-                if (description != null) {
-                    builder.description(description);
-                }
-                Object items = schema.get("items");
-                if (items instanceof Map<?, ?> itemSchema) {
-                    builder.items(toJsonSchemaElement(castSchemaMap(itemSchema)));
-                } else {
-                    builder.items(JsonRawSchema.from(items == null ? "{\"type\":\"string\"}" : writeJson(items)));
-                }
-                yield builder.build();
-            }
-            case "integer" -> buildIntegerSchema(description);
-            case "number" -> buildNumberSchema(description);
-            case "boolean" -> buildBooleanSchema(description);
-            case "string" -> buildStringSchema(description);
-            default -> JsonRawSchema.from(writeJson(schema));
-        };
-    }
-
-    private JsonSchemaElement buildSimpleSchema(Object value) {
-        if (value instanceof Boolean) {
-            return buildBooleanSchema(null);
-        } else if (value instanceof Number) {
-            return buildStringSchema(null);
-        }
-        return buildStringSchema(null);
-    }
-
-    private JsonStringSchema buildStringSchema(String description) {
-        JsonStringSchema.Builder builder = JsonStringSchema.builder();
-        if (description != null) {
-            builder.description(description);
-        }
-        return builder.build();
-    }
-
-    private JsonIntegerSchema buildIntegerSchema(String description) {
-        JsonIntegerSchema.Builder builder = JsonIntegerSchema.builder();
-        if (description != null) {
-            builder.description(description);
-        }
-        return builder.build();
-    }
-
-    private JsonNumberSchema buildNumberSchema(String description) {
-        JsonNumberSchema.Builder builder = JsonNumberSchema.builder();
-        if (description != null) {
-            builder.description(description);
-        }
-        return builder.build();
-    }
-
-    private JsonBooleanSchema buildBooleanSchema(String description) {
-        JsonBooleanSchema.Builder builder = JsonBooleanSchema.builder();
-        if (description != null) {
-            builder.description(description);
-        }
-        return builder.build();
+    private OpenAiChatOptions createBaseChatOptions() {
+        return OpenAiChatOptions.builder()
+                .model(model)
+                .temperature(temperature)
+                .maxTokens(maxTokens)
+                .build();
     }
 
     private Map<String, Object> parseToolArguments(String arguments) {
@@ -1558,19 +1536,19 @@ public class AgentService {
 
     private Map<String, Object> buildAssistantTurnDiagnostics(
             String turnPhase,
-            AiMessage aiMessage,
+            AssistantMessage assistantMessage,
             String visibleAssistantText
     ) {
-        List<String> toolNames = aiMessage.toolExecutionRequests() == null
+        List<String> toolNames = assistantMessage.getToolCalls() == null
                 ? List.of()
-                : aiMessage.toolExecutionRequests().stream()
-                .map(ToolExecutionRequest::name)
+                : assistantMessage.getToolCalls().stream()
+                .map(AssistantMessage.ToolCall::name)
                 .filter(Objects::nonNull)
                 .toList();
 
         boolean hasToolRequests = !toolNames.isEmpty();
         boolean hasVisibleText = (visibleAssistantText != null && !visibleAssistantText.isBlank())
-                || (aiMessage.text() != null && !aiMessage.text().isBlank());
+                || (assistantMessage.getText() != null && !assistantMessage.getText().isBlank());
         boolean silentToolCall = hasToolRequests && !hasVisibleText;
         boolean emptyAssistantAnswer = !hasToolRequests && !hasVisibleText;
 
@@ -1621,6 +1599,32 @@ public class AgentService {
         }
     }
 
+    private AssistantMessage assistantMessage(ChatResponse response) {
+        if (response == null || response.getResult() == null) {
+            return null;
+        }
+        return response.getResult().getOutput();
+    }
+
+    private String assistantText(ChatResponse response) {
+        AssistantMessage assistantMessage = assistantMessage(response);
+        return assistantMessage == null ? null : assistantMessage.getText();
+    }
+
+    private ToolResponseMessage toolResponseMessage(String toolCallId, String toolName, String responseData) {
+        return ToolResponseMessage.builder()
+                .responses(List.of(new ToolResponseMessage.ToolResponse(toolCallId, toolName, responseData)))
+                .build();
+    }
+
+    private Message restoreHistoricalToolMessage(ChatMessage message) {
+        Map<String, Object> payload = parseToolArguments(message.getContent());
+        String toolCallId = String.valueOf(payload.getOrDefault("toolCallId", UUID.randomUUID().toString()));
+        String toolName = String.valueOf(payload.getOrDefault("toolName", "historical_tool"));
+        Object result = payload.containsKey("result") ? payload.get("result") : payload;
+        return toolResponseMessage(toolCallId, toolName, writeJson(result));
+    }
+
     /**
      * Simulate a streaming response for mock mode.
      */
@@ -1653,17 +1657,53 @@ public class AgentService {
             onToolCall.accept(toolCall);
 
             if (requiresConfirmation) {
+                PendingToolExecution pendingExecution = pendingToolExecution(
+                        () -> onToolCall.accept(ToolCall.builder()
+                                .id(toolCallId)
+                                .name(toolInvocation.name())
+                                .arguments(toolInvocation.arguments())
+                                .status(ToolCall.ToolStatus.RUNNING)
+                                .requiresConfirmation(true)
+                                .build()),
+                        () -> {
+                            ToolDefinition latestToolDefinition = toolRegistry.getTool(toolInvocation.name());
+                            if (latestToolDefinition == null) {
+                                onToolResult.accept(ToolResult.builder()
+                                        .toolCallId(toolCallId)
+                                        .error("Tool is no longer available for execution.")
+                                        .build());
+                                onComplete.run();
+                                return;
+                            }
+                            executeMockTool(
+                                    ToolCall.builder()
+                                            .id(toolCallId)
+                                            .name(toolInvocation.name())
+                                            .arguments(toolInvocation.arguments())
+                                            .status(ToolCall.ToolStatus.RUNNING)
+                                            .requiresConfirmation(true)
+                                            .build(),
+                                    latestToolDefinition,
+                                    toolInvocation,
+                                    userMessage,
+                                    onNext,
+                                    onComplete,
+                                    onToolResult,
+                                    streamHandle
+                            );
+                        },
+                        () -> {
+                            streamHandle.cancel();
+                            onToolResult.accept(ToolResult.builder()
+                                    .toolCallId(toolCallId)
+                                    .error("Tool execution cancelled by user.")
+                                    .build());
+                            onComplete.run();
+                        }
+                );
                 pendingToolExecutions.put(
                         pendingKey(conversationId, toolCallId),
-                        new PendingToolExecution(
-                                toolInvocation,
-                                userMessage,
-                                onNext,
-                                onComplete,
-                                onToolCall,
-                                onToolResult,
-                                streamHandle
-                        )
+                        pendingExecution
                 );
                 return () -> {
                     streamHandle.cancel();
@@ -1847,56 +1887,21 @@ public class AgentService {
         pendingToolExecutions.keySet().removeIf(key -> key.startsWith(conversationId + ":"));
     }
 
-    private void confirmPendingToolExecution(String toolCallId, PendingToolExecution pendingExecution) {
-        ToolDefinition toolDefinition = toolRegistry.getTool(pendingExecution.toolInvocation().name());
-        if (toolDefinition == null) {
-            pendingExecution.onToolResult().accept(ToolResult.builder()
-                    .toolCallId(toolCallId)
-                    .error("Tool is no longer available for execution.")
-                    .build());
-            pendingExecution.onComplete().run();
-            return;
-        }
-        ToolCall resumedToolCall = ToolCall.builder()
-                .id(toolCallId)
-                .name(pendingExecution.toolInvocation().name())
-                .arguments(pendingExecution.toolInvocation().arguments())
-                .status(ToolCall.ToolStatus.RUNNING)
-                .requiresConfirmation(true)
-                .build();
-        pendingExecution.onToolCall().accept(resumedToolCall);
-        executeMockTool(
-                resumedToolCall,
-                toolDefinition,
-                pendingExecution.toolInvocation(),
-                pendingExecution.userMessage(),
-                pendingExecution.onNext(),
-                pendingExecution.onComplete(),
-                pendingExecution.onToolResult(),
-                pendingExecution.streamHandle()
-        );
-    }
-
-    private void cancelPendingToolExecution(String toolCallId, PendingToolExecution pendingExecution) {
-        pendingExecution.streamHandle().cancel();
-        pendingExecution.onToolResult().accept(ToolResult.builder()
-                .toolCallId(toolCallId)
-                .error("Tool execution cancelled by user.")
-                .build());
-        pendingExecution.onComplete().run();
+    private PendingToolExecution pendingToolExecution(
+            Runnable announceRunningAction,
+            Runnable confirmAction,
+            Runnable cancelAction
+    ) {
+        return new PendingToolExecution(announceRunningAction, confirmAction, cancelAction);
     }
 
     private record MockToolInvocation(String name, Map<String, Object> arguments) {
     }
 
     private record PendingToolExecution(
-            MockToolInvocation toolInvocation,
-            String userMessage,
-            java.util.function.Consumer<String> onNext,
-            java.lang.Runnable onComplete,
-            java.util.function.Consumer<ToolCall> onToolCall,
-            java.util.function.Consumer<ToolResult> onToolResult,
-            MockStreamHandle streamHandle
+            Runnable announceRunningAction,
+            Runnable confirmAction,
+            Runnable cancelAction
     ) {
     }
 
@@ -1934,33 +1939,30 @@ public class AgentService {
         }
 
         try {
-            // Build message list for LangChain4j
-            List<dev.langchain4j.data.message.ChatMessage> messages = new java.util.ArrayList<>();
+            List<Message> messages = new java.util.ArrayList<>();
             Map<String, ToolDefinition> availableTools = toolRegistry.resolveTools(UserCapabilityContext.anonymous());
             boolean useTools = !availableTools.isEmpty();
 
-            // Add system message
             messages.add(new SystemMessage(buildSystemPrompt(useTools ? availableTools : Map.of())));
 
-            // Add history
             if (history != null) {
                 for (ChatMessage msg : history) {
                     switch (msg.getRole()) {
                         case USER -> messages.add(new UserMessage(msg.getContent()));
-                        case ASSISTANT -> messages.add(new AiMessage(msg.getContent()));
-                        default -> {}
+                        case ASSISTANT -> messages.add(new AssistantMessage(msg.getContent()));
+                        case TOOL -> messages.add(restoreHistoricalToolMessage(msg));
+                        default -> {
+                        }
                     }
                 }
             }
 
-            // Add current user message
             messages.add(new UserMessage(userMessage));
 
             log.debug("Processing message for conversation: {}", conversationId);
 
-            // Generate response
-            ChatResponse response = chatModel.chat(buildChatRequest(messages, List.of()));
-            return response.aiMessage().text();
+            ChatResponse response = chatModel.call(buildPrompt(messages, List.of()));
+            return assistantText(response);
 
         } catch (Exception e) {
             log.error("Error processing message", e);
@@ -2080,11 +2082,6 @@ public class AgentService {
         return mockEnabled || chatModel != null;
     }
 
-    /**
-     * Confirm or cancel a tool call.
-     * This is a placeholder implementation - in production, this would manage
-     * pending tool executions and resume the conversation flow.
-     */
     public void confirmToolCall(String conversationId, String toolCallId, boolean confirmed) {
         log.info("Tool call {} for conversation {}: {}",
                 toolCallId, conversationId, confirmed ? "confirmed" : "cancelled");
@@ -2092,9 +2089,10 @@ public class AgentService {
         PendingToolExecution pendingExecution = pendingToolExecutions.remove(pendingKey(conversationId, toolCallId));
         if (pendingExecution != null) {
             if (confirmed) {
-                confirmPendingToolExecution(toolCallId, pendingExecution);
+                pendingExecution.announceRunningAction().run();
+                pendingExecution.confirmAction().run();
             } else {
-                cancelPendingToolExecution(toolCallId, pendingExecution);
+                pendingExecution.cancelAction().run();
             }
             return;
         }
