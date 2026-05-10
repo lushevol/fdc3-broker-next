@@ -1,6 +1,5 @@
 package com.fdc3.chatbot.mcp;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.time.Duration;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -21,9 +19,6 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @Component
 public class LangChain4jMcpClientFactory implements McpClientFactory {
-
-    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
-    };
 
     @Override
     public McpClientSession create(McpProviderRegistrationRequest request) {
@@ -82,7 +77,7 @@ public class LangChain4jMcpClientFactory implements McpClientFactory {
         @Override
         public List<McpToolDescriptor> listTools() {
             return client.listTools().tools().stream()
-                    .map(tool -> toToolDescriptor(tool, objectMapper))
+                    .map(tool -> toToolDescriptor(tool))
                     .toList();
         }
 
@@ -141,40 +136,11 @@ public class LangChain4jMcpClientFactory implements McpClientFactory {
         return objectMapper.convertValue(content, Object.class);
     }
 
-    static McpToolDescriptor toToolDescriptor(McpSchema.Tool tool, ObjectMapper objectMapper) {
+    static McpToolDescriptor toToolDescriptor(McpSchema.Tool tool) {
         return new McpToolDescriptor(
                 tool.name(),
                 tool.description(),
-                toInputSchema(tool.inputSchema(), objectMapper)
+                tool.inputSchema()
         );
-    }
-
-    private static Map<String, Object> toInputSchema(McpSchema.JsonSchema schema, ObjectMapper objectMapper) {
-        if (schema == null) {
-            return Map.of("type", "object");
-        }
-
-        Map<String, Object> result = new LinkedHashMap<>();
-        if (schema.type() != null) {
-            result.put("type", schema.type());
-        }
-        if (schema.properties() != null && !schema.properties().isEmpty()) {
-            result.put("properties", objectMapper.convertValue(schema.properties(), Object.class));
-        }
-        if (schema.required() != null && !schema.required().isEmpty()) {
-            result.put("required", schema.required());
-        }
-        if (schema.additionalProperties() != null) {
-            result.put("additionalProperties", schema.additionalProperties());
-        }
-        if (schema.definitions() != null && !schema.definitions().isEmpty()) {
-            result.put("definitions", objectMapper.convertValue(schema.definitions(), Object.class));
-        } else if (schema.defs() != null && !schema.defs().isEmpty()) {
-            result.put("definitions", objectMapper.convertValue(schema.defs(), Object.class));
-        }
-        if (result.isEmpty()) {
-            return Map.of("type", "object");
-        }
-        return objectMapper.convertValue(result, MAP_TYPE);
     }
 }

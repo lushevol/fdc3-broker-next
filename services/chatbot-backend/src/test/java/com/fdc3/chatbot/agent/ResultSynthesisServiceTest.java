@@ -304,6 +304,14 @@ class ResultSynthesisServiceTest {
                     .build();
         }
 
+        @Override
+        public Flux<ChatResponse> stream(Prompt prompt) {
+            this.capturedRequest = prompt;
+            return Flux.just(ChatResponse.builder()
+                    .generations(List.of(new Generation(new AssistantMessage(responseText))))
+                    .build());
+        }
+
         private Prompt capturedRequest() {
             return Objects.requireNonNull(capturedRequest, "Prompt was not captured");
         }

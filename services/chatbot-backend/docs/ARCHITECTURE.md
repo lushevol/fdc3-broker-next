@@ -8,7 +8,7 @@
 | ------------- | ------------------------------------- |
 | Framework     | Spring Boot 3.5.14                    |
 | Language      | Java 17                               |
-| AI            | Spring AI 1.1.6 (OpenAI-compatible/Anthropic) |
+| AI            | Spring AI 2.0.0-M6 (OpenAI-compatible/Anthropic) |
 | Reactive      | Spring WebFlux                        |
 | Security      | Spring Security (disabled by default) |
 | Rate Limiting | Bucket4j 8.7                          |

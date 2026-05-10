@@ -16,6 +16,8 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
 
+import reactor.core.publisher.Flux;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -403,6 +405,14 @@ class AgentDecisionServiceTest {
             return ChatResponse.builder()
                     .generations(List.of(new Generation(new AssistantMessage(responseText))))
                     .build();
+        }
+
+        @Override
+        public Flux<ChatResponse> stream(Prompt prompt) {
+            this.capturedRequest = prompt;
+            return Flux.just(ChatResponse.builder()
+                    .generations(List.of(new Generation(new AssistantMessage(responseText))))
+                    .build());
         }
 
         private Prompt capturedRequest() {

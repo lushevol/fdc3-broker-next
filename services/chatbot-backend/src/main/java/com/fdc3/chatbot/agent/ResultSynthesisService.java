@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.model.StreamingChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 
@@ -61,9 +62,10 @@ public class ResultSynthesisService {
                         )
                 ));
 
-                String modelText = response.getResult() == null || response.getResult().getOutput() == null
+                Generation generation = response.getResults().isEmpty() ? null : response.getResults().get(0);
+                String modelText = generation == null || generation.getOutput() == null
                         ? null
-                        : response.getResult().getOutput().getText();
+                        : generation.getOutput().getText();
                 if (modelText != null && !modelText.isBlank()) {
                     return modelText.trim();
                 }
@@ -127,9 +129,10 @@ public class ResultSynthesisService {
                     )
             )).subscribe(
                     response -> {
-                        String deltaText = response.getResult() == null || response.getResult().getOutput() == null
+                        Generation generation = response.getResults().isEmpty() ? null : response.getResults().get(0);
+                        String deltaText = generation == null || generation.getOutput() == null
                                 ? null
-                                : response.getResult().getOutput().getText();
+                                : generation.getOutput().getText();
                         if (deltaText != null && !deltaText.isEmpty()) {
                             streamedText.append(deltaText);
                             onNext.accept(deltaText);

@@ -1,6 +1,10 @@
 spring:
   application:
     name: chatbot-backend
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.retry.autoconfigure.SpringAiRetryAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiChatAutoConfiguration
   ai:
     openai:
       api-key: ${CHATBOT_OPENAI_API_KEY:}

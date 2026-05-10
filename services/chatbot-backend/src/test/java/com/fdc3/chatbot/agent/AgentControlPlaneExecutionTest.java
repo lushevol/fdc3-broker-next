@@ -633,6 +633,11 @@ class AgentControlPlaneExecutionTest {
         public ChatResponse call(Prompt prompt) {
             return chatResponse("{}");
         }
+
+        @Override
+        public Flux<ChatResponse> stream(Prompt prompt) {
+            return Flux.just(chatResponse("{}"));
+        }
     }
 
     private static final class FixedResponseChatModel extends NoOpChatModel {

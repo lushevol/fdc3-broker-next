@@ -35,13 +35,18 @@ import org.springframework.ai.chat.model.StreamingChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
+
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.function.FunctionToolCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.Disposable;
+
+import com.openai.client.OpenAIClient;
+import com.openai.client.OpenAIClientAsync;
+import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.client.okhttp.OpenAIOkHttpClientAsync;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -152,21 +157,30 @@ public class AgentService {
         if (mockEnabled) {
             log.info("Mock mode enabled - using simulated responses");
         } else if (openaiApiKey != null && !openaiApiKey.isEmpty()) {
-            OpenAiApi.Builder apiBuilder = OpenAiApi.builder().apiKey(openaiApiKey);
-            if (openaiBaseUrl != null && !openaiBaseUrl.isEmpty()) {
-                apiBuilder.baseUrl(openaiBaseUrl);
-                log.info("Using custom OpenAI base URL: {}", openaiBaseUrl);
-            }
-
             OpenAiChatOptions options = OpenAiChatOptions.builder()
                     .model(model)
                     .temperature(temperature)
                     .maxTokens(maxTokens)
                     .build();
 
+            OpenAIOkHttpClient.Builder clientBuilder =
+                    OpenAIOkHttpClient.builder()
+                            .apiKey(openaiApiKey);
+            OpenAIOkHttpClientAsync.Builder asyncClientBuilder =
+                    OpenAIOkHttpClientAsync.builder()
+                            .apiKey(openaiApiKey);
+            if (openaiBaseUrl != null && !openaiBaseUrl.isEmpty()) {
+                clientBuilder.baseUrl(openaiBaseUrl);
+                asyncClientBuilder.baseUrl(openaiBaseUrl);
+                log.info("Using custom OpenAI base URL: {}", openaiBaseUrl);
+            }
+            OpenAIClient openAiClient = clientBuilder.build();
+            OpenAIClientAsync openAiAsyncClient = asyncClientBuilder.build();
+
             OpenAiChatModel openAiChatModel = OpenAiChatModel.builder()
-                    .openAiApi(apiBuilder.build())
-                    .defaultOptions(options)
+                    .openAiClient(openAiClient)
+                    .openAiClientAsync(openAiAsyncClient)
+                    .options(options)
                     .build();
 
             this.chatModel = openAiChatModel;
@@ -1600,10 +1614,10 @@ public class AgentService {
     }
 
     private AssistantMessage assistantMessage(ChatResponse response) {
-        if (response == null || response.getResult() == null) {
+        if (response == null || response.getResults() == null || response.getResults().isEmpty()) {
             return null;
         }
-        return response.getResult().getOutput();
+        return response.getResults().get(0).getOutput();
     }
 
     private String assistantText(ChatResponse response) {

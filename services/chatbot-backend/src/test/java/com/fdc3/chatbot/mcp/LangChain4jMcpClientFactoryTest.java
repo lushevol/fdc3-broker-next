@@ -29,7 +29,7 @@ class LangChain4jMcpClientFactoryTest {
                 ))
                 .build();
 
-        McpToolDescriptor descriptor = LangChain4jMcpClientFactory.toToolDescriptor(tool, new ObjectMapper());
+        McpToolDescriptor descriptor = LangChain4jMcpClientFactory.toToolDescriptor(tool);
 
         assertEquals("portfolio_lookup", descriptor.name());
         assertEquals("Lookup user portfolios", descriptor.description());

@@ -19,6 +19,7 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
 
 import java.util.ArrayList;
@@ -53,7 +54,8 @@ public class AgentDecisionService {
         );
 
         ChatResponse response = chatModel.call(new Prompt(toChatRequestMessages(prompt, history, userMessage)));
-        String responseText = response.getResult().getOutput().getText();
+        String responseText = response.getResults().isEmpty() ? null
+                : response.getResults().get(0).getOutput().getText();
         log.debug("Raw agent decision response: {}", responseText);
 
         return parseDecision(responseText);
