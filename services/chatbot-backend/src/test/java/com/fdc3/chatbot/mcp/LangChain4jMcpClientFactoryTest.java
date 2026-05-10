@@ -1,9 +1,7 @@
 package com.fdc3.chatbot.mcp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.langchain4j.mcp.protocol.McpCallToolResult;
-import dev.langchain4j.agent.tool.ToolSpecification;
-import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
+import io.modelcontextprotocol.spec.McpSchema;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -16,16 +14,22 @@ class LangChain4jMcpClientFactoryTest {
 
     @Test
     void preservesDiscoveredInputSchemaWhenMappingToolSpecification() {
-        ToolSpecification toolSpecification = ToolSpecification.builder()
+        McpSchema.Tool tool = McpSchema.Tool.builder()
                 .name("portfolio_lookup")
                 .description("Lookup user portfolios")
-                .parameters(JsonObjectSchema.builder()
-                        .addStringProperty("accountId", "Account identifier")
-                        .required("accountId")
-                        .build())
+                .inputSchema(new McpSchema.JsonSchema(
+                        "object",
+                        Map.of(
+                                "accountId", Map.of("type", "string", "description", "Account identifier")
+                        ),
+                        List.of("accountId"),
+                        null,
+                        null,
+                        null
+                ))
                 .build();
 
-        McpToolDescriptor descriptor = LangChain4jMcpClientFactory.toToolDescriptor(toolSpecification, new ObjectMapper());
+        McpToolDescriptor descriptor = LangChain4jMcpClientFactory.toToolDescriptor(tool);
 
         assertEquals("portfolio_lookup", descriptor.name());
         assertEquals("Lookup user portfolios", descriptor.description());
@@ -42,10 +46,28 @@ class LangChain4jMcpClientFactoryTest {
     }
 
     @Test
-    void normalizeToolResultPrefersStructuredContentWhenResultTextIsBlank() {
+    void defaultsMissingInputSchemaToObjectShape() {
+        McpSchema.Tool tool = new McpSchema.Tool(
+                "ping",
+                null,
+                "Health check",
+                null,
+                null,
+                null,
+                null
+        );
+
+        McpToolDescriptor descriptor = LangChain4jMcpClientFactory.toToolDescriptor(tool);
+
+        assertEquals(Map.of("type", "object"), descriptor.inputSchema());
+    }
+
+    @Test
+    void normalizeToolResultPrefersStructuredContentWhenPresent() {
         ObjectMapper objectMapper = new ObjectMapper();
-        McpCallToolResult.Result fallbackResult = new McpCallToolResult.Result(
+        McpSchema.CallToolResult result = new McpSchema.CallToolResult(
                 List.of(),
+                false,
                 Map.of(
                         "appFilterValue", "cashflow_blotter",
                         "bucket", "HOUR",
@@ -54,10 +76,10 @@ class LangChain4jMcpClientFactoryTest {
                                 Map.of("timestamp", "2026-04-15T01:00:00Z", "pv", 21, "uv", 6)
                         )
                 ),
-                false
+                Map.of()
         );
 
-        Object normalized = LangChain4jMcpClientFactory.normalizeToolResult(objectMapper, "", fallbackResult);
+        Object normalized = LangChain4jMcpClientFactory.normalizeToolResult(objectMapper, result);
 
         Map<?, ?> normalizedMap = assertInstanceOf(Map.class, normalized);
         assertEquals("cashflow_blotter", normalizedMap.get("appFilterValue"));

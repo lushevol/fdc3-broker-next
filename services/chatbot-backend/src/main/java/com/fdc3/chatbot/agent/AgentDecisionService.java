@@ -12,13 +12,15 @@ import com.fdc3.chatbot.agent.prompt.AgentDecisionPromptFactory;
 import com.fdc3.chatbot.controlplane.model.ResolvedCapability;
 import com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot;
 import com.fdc3.chatbot.model.ChatMessage;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.response.ChatResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.prompt.Prompt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,12 +53,12 @@ public class AgentDecisionService {
                 capabilities
         );
 
-        ChatResponse response = chatModel.chat(ChatRequest.builder()
-                .messages(toChatRequestMessages(prompt, history, userMessage))
-                .build());
-        log.debug("Raw agent decision response: {}", response.aiMessage().text());
+        ChatResponse response = chatModel.call(new Prompt(toChatRequestMessages(prompt, history, userMessage)));
+        String responseText = response.getResults().isEmpty() ? null
+                : response.getResults().get(0).getOutput().getText();
+        log.debug("Raw agent decision response: {}", responseText);
 
-        return parseDecision(response.aiMessage().text());
+        return parseDecision(responseText);
     }
 
     public static AgentDecision parseDecision(String json) {
@@ -260,33 +262,33 @@ public class AgentDecisionService {
         }
     }
 
-    private List<dev.langchain4j.data.message.ChatMessage> toChatRequestMessages(
+    private List<Message> toChatRequestMessages(
             String prompt,
             List<ChatMessage> history,
             String userMessage
     ) {
         List<ChatMessage> normalizedHistory = history == null ? List.of() : history;
-        List<dev.langchain4j.data.message.ChatMessage> messages = new ArrayList<>();
-        messages.add(SystemMessage.from(prompt));
+        List<Message> messages = new ArrayList<>();
+        messages.add(new SystemMessage(prompt));
 
         for (ChatMessage message : normalizedHistory) {
-            dev.langchain4j.data.message.ChatMessage translated = toLangChainMessage(message);
+            Message translated = toSpringAiMessage(message);
             if (translated != null) {
                 messages.add(translated);
             }
         }
 
-        messages.add(UserMessage.from(userMessage));
+        messages.add(new UserMessage(userMessage));
         return List.copyOf(messages);
     }
 
-    private dev.langchain4j.data.message.ChatMessage toLangChainMessage(ChatMessage message) {
+    private Message toSpringAiMessage(ChatMessage message) {
         String content = message.getContent() == null ? "" : message.getContent();
         ChatMessage.Role role = Objects.requireNonNull(message.getRole(), "history message role");
         return switch (role) {
-            case SYSTEM -> SystemMessage.from(content);
-            case USER -> UserMessage.from(content);
-            case ASSISTANT -> AiMessage.from(content);
+            case SYSTEM -> new SystemMessage(content);
+            case USER -> new UserMessage(content);
+            case ASSISTANT -> new AssistantMessage(content);
             case TOOL -> null;
         };
     }

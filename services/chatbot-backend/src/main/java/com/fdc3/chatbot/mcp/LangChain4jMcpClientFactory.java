@@ -1,28 +1,17 @@
 package com.fdc3.chatbot.mcp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.langchain4j.agent.tool.ToolSpecification;
-import dev.langchain4j.mcp.client.DefaultMcpClient;
-import dev.langchain4j.mcp.client.McpClient;
-import dev.langchain4j.mcp.client.transport.McpTransport;
-import dev.langchain4j.mcp.client.transport.http.HttpMcpTransport;
-import dev.langchain4j.mcp.client.transport.http.StreamableHttpMcpTransport;
-import dev.langchain4j.model.chat.request.json.JsonAnyOfSchema;
-import dev.langchain4j.model.chat.request.json.JsonArraySchema;
-import dev.langchain4j.model.chat.request.json.JsonBooleanSchema;
-import dev.langchain4j.model.chat.request.json.JsonEnumSchema;
-import dev.langchain4j.model.chat.request.json.JsonIntegerSchema;
-import dev.langchain4j.model.chat.request.json.JsonNumberSchema;
-import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
-import dev.langchain4j.model.chat.request.json.JsonRawSchema;
-import dev.langchain4j.model.chat.request.json.JsonReferenceSchema;
-import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
-import dev.langchain4j.model.chat.request.json.JsonStringSchema;
-import dev.langchain4j.mcp.protocol.McpCallToolResult;
+import io.modelcontextprotocol.client.McpClient;
+import io.modelcontextprotocol.client.McpSyncClient;
+import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
+import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport;
+import io.modelcontextprotocol.spec.McpClientTransport;
+import io.modelcontextprotocol.spec.McpSchema;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashMap;
+import java.net.URI;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -33,119 +22,108 @@ public class LangChain4jMcpClientFactory implements McpClientFactory {
 
     @Override
     public McpClientSession create(McpProviderRegistrationRequest request) {
-        McpTransport transport = switch (request.getTransportType()) {
-            case STREAMABLE_HTTP -> StreamableHttpMcpTransport.builder()
-                    .url(request.getUrl())
-                    .build();
-            case HTTP_SSE -> HttpMcpTransport.builder()
-                    .sseUrl(request.getUrl())
-                    .build();
+        McpClientTransport transport = switch (request.getTransportType()) {
+            case STREAMABLE_HTTP -> {
+                ParsedEndpoint endpoint = parseEndpoint(request.getUrl());
+                yield HttpClientStreamableHttpTransport.builder(endpoint.baseUrl())
+                        .endpoint(endpoint.path())
+                        .connectTimeout(Duration.ofSeconds(20))
+                        .build();
+            }
+            case HTTP_SSE -> {
+                ParsedEndpoint endpoint = parseEndpoint(request.getUrl());
+                yield HttpClientSseClientTransport.builder(endpoint.baseUrl())
+                        .sseEndpoint(endpoint.path())
+                        .connectTimeout(Duration.ofSeconds(20))
+                        .build();
+            }
         };
 
-        McpClient client = new DefaultMcpClient.Builder()
-                .key(request.getProviderId())
-                .transport(transport)
+        McpSyncClient client = McpClient.sync(transport)
+                .clientInfo(new McpSchema.Implementation("chatbot-backend", "1.0.0"))
+                .requestTimeout(Duration.ofSeconds(20))
                 .build();
+        client.initialize();
 
         return new LangChain4jMcpClientSession(client);
+    }
+
+    private static ParsedEndpoint parseEndpoint(String rawUrl) {
+        URI uri = URI.create(rawUrl);
+        String path = uri.getRawPath();
+        if (path == null || path.isBlank()) {
+            path = "/";
+        }
+        String query = uri.getRawQuery();
+        if (query != null && !query.isBlank()) {
+            path = path + "?" + query;
+        }
+        String baseUrl = uri.getScheme() + "://" + uri.getAuthority();
+        return new ParsedEndpoint(baseUrl, path);
+    }
+
+    private record ParsedEndpoint(String baseUrl, String path) {
     }
 
     private static final class LangChain4jMcpClientSession implements McpClientSession {
 
         private final ObjectMapper objectMapper = new ObjectMapper();
-        private final McpClient client;
+        private final McpSyncClient client;
 
-        private LangChain4jMcpClientSession(McpClient client) {
+        private LangChain4jMcpClientSession(McpSyncClient client) {
             this.client = client;
         }
 
         @Override
         public List<McpToolDescriptor> listTools() {
-            return client.listTools().stream()
-                    .map(tool -> toToolDescriptor(tool, objectMapper))
+            return client.listTools().tools().stream()
+                    .map(tool -> toToolDescriptor(tool))
                     .toList();
         }
 
         @Override
         public CompletableFuture<Object> execute(String toolName, Map<String, Object> arguments) {
-            return CompletableFuture.supplyAsync(() -> client.executeTool(
-                            dev.langchain4j.agent.tool.ToolExecutionRequest.builder()
-                                    .id(java.util.UUID.randomUUID().toString())
-                                    .name(toolName)
-                                    .arguments(writeJson(arguments))
-                                    .build()
-                    ))
-                    .thenApply(result -> {
-                        String resultText = result.resultText();
-                        if (result.isError()) {
-                            return Map.of("error", resultText);
-                        }
-                        return normalizeToolResult(objectMapper, resultText, result.result());
-                    });
+            return CompletableFuture.supplyAsync(() -> client.callTool(new McpSchema.CallToolRequest(toolName, arguments)))
+                    .thenApply(result -> normalizeToolResult(objectMapper, result));
         }
 
         @Override
         public void close() {
             try {
-                client.close();
+                client.closeGracefully();
             } catch (Exception exception) {
                 throw new IllegalStateException("Failed to close MCP client", exception);
             }
         }
-
-        private String writeJson(Map<String, Object> arguments) {
-            try {
-                return objectMapper.writeValueAsString(arguments);
-            } catch (Exception exception) {
-                throw new IllegalStateException("Failed to serialize MCP tool arguments", exception);
-            }
-        }
-
     }
 
-    static Object normalizeToolResult(ObjectMapper objectMapper, String resultText, Object fallbackResult) {
-        if (resultText != null && !resultText.isBlank()) {
-            try {
-                return objectMapper.readValue(resultText, Object.class);
-            } catch (Exception exception) {
-                log.debug("Failed to parse MCP result text as JSON, returning raw text", exception);
-                return resultText;
-            }
-        }
-
-        if (fallbackResult instanceof McpCallToolResult.Result result) {
-            Object structuredContent = result.getStructuredContent();
-            if (structuredContent != null) {
-                return objectMapper.convertValue(structuredContent, Object.class);
-            }
-            Object parsedContent = extractContentPayload(objectMapper, result.getContent());
-            if (parsedContent != null) {
-                return parsedContent;
-            }
-        }
-
-        if (fallbackResult == null) {
+    static Object normalizeToolResult(ObjectMapper objectMapper, McpSchema.CallToolResult result) {
+        if (result == null) {
             return null;
         }
 
-        try {
-            return objectMapper.convertValue(fallbackResult, Object.class);
-        } catch (IllegalArgumentException exception) {
-            log.debug("Failed to normalize MCP fallback result, returning raw object", exception);
-            return fallbackResult;
+        Object normalized = normalizeSuccessfulToolResult(objectMapper, result);
+        if (Boolean.TRUE.equals(result.isError())) {
+            if (normalized instanceof Map<?, ?> normalizedMap && normalizedMap.containsKey("error")) {
+                return normalizedMap;
+            }
+            return Map.of("error", normalized == null ? "Tool execution failed." : normalized);
         }
+        return normalized;
     }
 
-    private static Object extractContentPayload(
-            ObjectMapper objectMapper,
-            List<McpCallToolResult.Content> content
-    ) {
+    private static Object normalizeSuccessfulToolResult(ObjectMapper objectMapper, McpSchema.CallToolResult result) {
+        if (result.structuredContent() != null) {
+            return objectMapper.convertValue(result.structuredContent(), Object.class);
+        }
+
+        List<McpSchema.Content> content = result.content();
         if (content == null || content.isEmpty()) {
             return null;
         }
 
-        if (content.size() == 1 && "text".equalsIgnoreCase(content.get(0).getType())) {
-            String text = content.get(0).getText();
+        if (content.size() == 1 && content.get(0) instanceof McpSchema.TextContent textContent) {
+            String text = textContent.text();
             if (text != null && !text.isBlank()) {
                 try {
                     return objectMapper.readValue(text, Object.class);
@@ -158,105 +136,11 @@ public class LangChain4jMcpClientFactory implements McpClientFactory {
         return objectMapper.convertValue(content, Object.class);
     }
 
-    static McpToolDescriptor toToolDescriptor(ToolSpecification toolSpecification, ObjectMapper objectMapper) {
+    static McpToolDescriptor toToolDescriptor(McpSchema.Tool tool) {
         return new McpToolDescriptor(
-                toolSpecification.name(),
-                toolSpecification.description(),
-                toInputSchema(toolSpecification.parameters(), objectMapper)
+                tool.name(),
+                tool.description(),
+                tool.inputSchema() == null ? Map.of("type", "object") : tool.inputSchema()
         );
-    }
-
-    private static Map<String, Object> toInputSchema(JsonObjectSchema schema, ObjectMapper objectMapper) {
-        if (schema == null) {
-            return Map.of("type", "object");
-        }
-        return toSchemaMap(schema, objectMapper);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> toSchemaMap(JsonSchemaElement schemaElement, ObjectMapper objectMapper) {
-        if (schemaElement instanceof JsonObjectSchema objectSchema) {
-            Map<String, Object> schema = new LinkedHashMap<>();
-            schema.put("type", "object");
-            if (objectSchema.description() != null) {
-                schema.put("description", objectSchema.description());
-            }
-            if (!objectSchema.properties().isEmpty()) {
-                Map<String, Object> properties = new LinkedHashMap<>();
-                objectSchema.properties().forEach((name, propertySchema) ->
-                        properties.put(name, toSchemaMap(propertySchema, objectMapper)));
-                schema.put("properties", properties);
-            }
-            if (objectSchema.required() != null && !objectSchema.required().isEmpty()) {
-                schema.put("required", objectSchema.required());
-            }
-            if (objectSchema.additionalProperties() != null) {
-                schema.put("additionalProperties", objectSchema.additionalProperties());
-            }
-            if (objectSchema.definitions() != null && !objectSchema.definitions().isEmpty()) {
-                Map<String, Object> definitions = new LinkedHashMap<>();
-                objectSchema.definitions().forEach((name, definitionSchema) ->
-                        definitions.put(name, toSchemaMap(definitionSchema, objectMapper)));
-                schema.put("definitions", definitions);
-            }
-            return schema;
-        }
-        if (schemaElement instanceof JsonStringSchema stringSchema) {
-            return primitiveSchema("string", stringSchema.description());
-        }
-        if (schemaElement instanceof JsonIntegerSchema integerSchema) {
-            return primitiveSchema("integer", integerSchema.description());
-        }
-        if (schemaElement instanceof JsonNumberSchema numberSchema) {
-            return primitiveSchema("number", numberSchema.description());
-        }
-        if (schemaElement instanceof JsonBooleanSchema booleanSchema) {
-            return primitiveSchema("boolean", booleanSchema.description());
-        }
-        if (schemaElement instanceof JsonEnumSchema enumSchema) {
-            Map<String, Object> schema = primitiveSchema("string", enumSchema.description());
-            schema.put("enum", enumSchema.enumValues());
-            return schema;
-        }
-        if (schemaElement instanceof JsonArraySchema arraySchema) {
-            Map<String, Object> schema = primitiveSchema("array", arraySchema.description());
-            schema.put("items", toSchemaMap(arraySchema.items(), objectMapper));
-            return schema;
-        }
-        if (schemaElement instanceof JsonReferenceSchema referenceSchema) {
-            Map<String, Object> schema = new LinkedHashMap<>();
-            schema.put("$ref", referenceSchema.reference());
-            if (referenceSchema.description() != null) {
-                schema.put("description", referenceSchema.description());
-            }
-            return schema;
-        }
-        if (schemaElement instanceof JsonAnyOfSchema anyOfSchema) {
-            Map<String, Object> schema = new LinkedHashMap<>();
-            if (anyOfSchema.description() != null) {
-                schema.put("description", anyOfSchema.description());
-            }
-            schema.put("anyOf", anyOfSchema.anyOf().stream()
-                    .map(item -> toSchemaMap(item, objectMapper))
-                    .toList());
-            return schema;
-        }
-        if (schemaElement instanceof JsonRawSchema rawSchema) {
-            try {
-                return objectMapper.readValue(rawSchema.schema(), Map.class);
-            } catch (Exception exception) {
-                throw new IllegalStateException("Failed to deserialize MCP raw schema", exception);
-            }
-        }
-        throw new IllegalArgumentException("Unsupported MCP schema element: " + schemaElement.getClass().getName());
-    }
-
-    private static Map<String, Object> primitiveSchema(String type, String description) {
-        Map<String, Object> schema = new LinkedHashMap<>();
-        schema.put("type", type);
-        if (description != null) {
-            schema.put("description", description);
-        }
-        return schema;
     }
 }

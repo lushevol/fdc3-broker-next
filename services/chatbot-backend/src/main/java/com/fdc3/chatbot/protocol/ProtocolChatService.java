@@ -37,6 +37,7 @@ import java.util.function.Consumer;
 @Service
 @RequiredArgsConstructor
 public class ProtocolChatService {
+    private static final Set<String> TEXTUAL_PART_TYPES = Set.of("text", "reasoning-summary");
 
     private final AgentService agentService;
     private final ObjectMapper objectMapper;
@@ -447,6 +448,7 @@ public class ProtocolChatService {
                 ChatMessage.Role role = switch (String.valueOf(message.getRole())) {
                     case "assistant" -> ChatMessage.Role.ASSISTANT;
                     case "user" -> ChatMessage.Role.USER;
+                    case "tool" -> ChatMessage.Role.TOOL;
                     default -> null;
                 };
                 if (role == null) {
@@ -479,7 +481,7 @@ public class ProtocolChatService {
                         continue;
                     }
                     if (!manifest.stream().anyMatch(m -> m.getName().equals(tool.getName()))) {
-                        manifest.add(toolDescriptorToManifestEntry(tool));
+                        manifest.add(toolDescriptorToManifestEntry(tool, objectMapper));
                     }
                 }
             }
@@ -506,11 +508,11 @@ public class ProtocolChatService {
                     .build();
         }
 
-        private static FrontendToolManifestEntry toolDescriptorToManifestEntry(ProtocolToolDescriptor tool) {
-            Map<String, Object> inputSchema = new java.util.LinkedHashMap<>();
-            if (tool.getParameters() != null) {
-                inputSchema.put("properties", tool.getParameters());
-            }
+        private static FrontendToolManifestEntry toolDescriptorToManifestEntry(
+                ProtocolToolDescriptor tool,
+                ObjectMapper objectMapper
+        ) {
+            Map<String, Object> inputSchema = normalizeToolParameters(tool.getParameters(), objectMapper);
             boolean humanInTheLoop = "human".equalsIgnoreCase(String.valueOf(tool.getSource()));
             String toolName = tool.getName();
             String llmCompatibleName = toolName != null ? toolName.replace('.', '_').replace('-', '_') : toolName;
@@ -521,6 +523,58 @@ public class ProtocolChatService {
                     .humanInTheLoop(humanInTheLoop)
                     .hasRender(true)
                     .build();
+        }
+
+        private static Map<String, Object> normalizeToolParameters(
+                JsonNode parametersNode,
+                ObjectMapper objectMapper
+        ) {
+            if (parametersNode == null || parametersNode.isNull() || parametersNode.isMissingNode()) {
+                return Map.of("type", "object");
+            }
+
+            Map<String, Object> parameters = objectMapper.convertValue(parametersNode, Map.class);
+            Object type = parameters.get("type");
+            Object properties = parameters.get("properties");
+            Object required = parameters.get("required");
+            if ("object".equals(type) && properties instanceof Map<?, ?>) {
+                Map<String, Object> normalized = new LinkedHashMap<>();
+                normalized.put("type", "object");
+                normalized.put("properties", properties);
+                if (required instanceof List<?> requiredList && !requiredList.isEmpty()) {
+                    normalized.put("required", requiredList);
+                }
+                return normalized;
+            }
+
+            Map<String, Object> normalizedProperties = new LinkedHashMap<>();
+            List<String> requiredProperties = new ArrayList<>();
+            for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+                if (!(entry.getValue() instanceof Map<?, ?> rawField)) {
+                    continue;
+                }
+                Map<String, Object> fieldSchema = new LinkedHashMap<>();
+                Object fieldType = rawField.get("type");
+                fieldSchema.put("type", fieldType instanceof String && !((String) fieldType).isBlank()
+                        ? fieldType
+                        : "string");
+                Object description = rawField.get("description");
+                if (description instanceof String descriptionText && !descriptionText.isBlank()) {
+                    fieldSchema.put("description", descriptionText);
+                }
+                normalizedProperties.put(entry.getKey(), fieldSchema);
+                if (Boolean.TRUE.equals(rawField.get("required"))) {
+                    requiredProperties.add(entry.getKey());
+                }
+            }
+
+            Map<String, Object> normalized = new LinkedHashMap<>();
+            normalized.put("type", "object");
+            normalized.put("properties", normalizedProperties);
+            if (!requiredProperties.isEmpty()) {
+                normalized.put("required", requiredProperties);
+            }
+            return normalized;
         }
 
         private static boolean isFrontendToolDescriptor(ProtocolToolDescriptor tool) {
@@ -621,7 +675,7 @@ public class ProtocolChatService {
                 if (part == null || part.getType() == null) {
                     continue;
                 }
-                if (Set.of("text", "reasoning-summary").contains(part.getType()) && part.getText() != null) {
+                if (TEXTUAL_PART_TYPES.contains(part.getType()) && part.getText() != null) {
                     appendSegment(builder, part.getText());
                     continue;
                 }

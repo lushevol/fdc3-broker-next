@@ -4,18 +4,19 @@ import com.fdc3.chatbot.agent.model.AgentDecision;
 import com.fdc3.chatbot.agent.model.ExecutionTranscript;
 import com.fdc3.chatbot.agent.prompt.ResultSynthesisPromptFactory;
 import com.fdc3.chatbot.model.ToolResult;
-import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.StreamingChatModel;
-import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.model.StreamingChatModel;
+import org.springframework.ai.chat.prompt.Prompt;
 
 import java.util.Map;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class ResultSynthesisService {
     private static final String SYNTHESIS_REQUEST =
@@ -54,19 +55,22 @@ public class ResultSynthesisService {
         if (chatModel != null) {
             try {
                 String prompt = promptFactory.build(userMessage, decision, transcript);
-                ChatResponse response = chatModel.chat(ChatRequest.builder()
-                        .messages(java.util.List.of(
-                                SystemMessage.from(prompt),
-                                UserMessage.from(SYNTHESIS_REQUEST)
-                        ))
-                        .build());
+                org.springframework.ai.chat.model.ChatResponse response = chatModel.call(new Prompt(
+                        java.util.List.of(
+                                new SystemMessage(prompt),
+                                new UserMessage(SYNTHESIS_REQUEST)
+                        )
+                ));
 
-                String modelText = response.aiMessage() == null ? null : response.aiMessage().text();
+                Generation generation = response.getResults().isEmpty() ? null : response.getResults().get(0);
+                String modelText = generation == null || generation.getOutput() == null
+                        ? null
+                        : generation.getOutput().getText();
                 if (modelText != null && !modelText.isBlank()) {
                     return modelText.trim();
                 }
-            } catch (Exception ignored) {
-                // Deterministic fallback is resilience only when synthesis model output is unavailable.
+            } catch (Exception exception) {
+                log.debug("Result synthesis model call failed, using deterministic fallback", exception);
             }
         }
 
@@ -118,32 +122,28 @@ public class ResultSynthesisService {
         try {
             String prompt = promptFactory.build(userMessage, decision, transcript);
             StringBuilder streamedText = new StringBuilder();
-            streamingChatModel.chat(ChatRequest.builder()
-                    .messages(java.util.List.of(
-                            SystemMessage.from(prompt),
-                            UserMessage.from(SYNTHESIS_REQUEST)
-                    ))
-                    .build(), new StreamingChatResponseHandler() {
-                        @Override
-                        public void onPartialResponse(String partialResponse) {
-                            streamedText.append(partialResponse);
-                            onNext.accept(partialResponse);
+            streamingChatModel.stream(new Prompt(
+                    java.util.List.of(
+                            new SystemMessage(prompt),
+                            new UserMessage(SYNTHESIS_REQUEST)
+                    )
+            )).subscribe(
+                    response -> {
+                        Generation generation = response.getResults().isEmpty() ? null : response.getResults().get(0);
+                        String deltaText = generation == null || generation.getOutput() == null
+                                ? null
+                                : generation.getOutput().getText();
+                        if (deltaText != null && !deltaText.isEmpty()) {
+                            streamedText.append(deltaText);
+                            onNext.accept(deltaText);
                         }
-
-                        @Override
-                        public void onCompleteResponse(ChatResponse completeResponse) {
-                            String completeText = completeResponse.aiMessage() == null
-                                    ? null
-                                    : completeResponse.aiMessage().text();
-                            emitRemainingAssistantText(streamedText, completeText, onNext);
-                            onComplete.run();
-                        }
-
-                        @Override
-                        public void onError(Throwable error) {
-                            onError.accept(error);
-                        }
-                    });
+                    },
+                    onError,
+                    () -> {
+                        emitRemainingAssistantText(streamedText, streamedText.toString(), onNext);
+                        onComplete.run();
+                    }
+            );
         } catch (Exception exception) {
             onError.accept(exception);
         }

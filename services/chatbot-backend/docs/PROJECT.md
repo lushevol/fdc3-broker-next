@@ -4,11 +4,11 @@
 
 ## Type
 
-Spring Boot 3.2.0 Backend Service (Java 17), Port 8080
+Spring Boot 3.5.14 Backend Service (Java 17), Port 8080
 
 ## Purpose
 
-AI-powered conversational chat service providing OpenAI/Anthropic LLM integration via LangChain4j, with SSE streaming, agentic decision-making (respond/clarify/plan), tool execution, MCP provider registration, generative UI directives, and rate limiting.
+AI-powered conversational chat service providing OpenAI-compatible and Anthropic LLM integration via Spring AI, with SSE streaming, agentic decision-making (respond/clarify/plan), tool execution, MCP provider registration, generative UI directives, and rate limiting.
 
 ## Status
 
@@ -16,7 +16,7 @@ Active Development
 
 ## Key Features
 
-- **LangChain4j integration**: OpenAI/Anthropic models via `OpenAiChatModel` and `OpenAiStreamingChatModel`
+- **Spring AI integration**: OpenAI-compatible and Anthropic chat model support via Spring-managed model beans
 - **SSE streaming responses**: Real-time token delivery via `SseEmitter`
 - **Agentic control loop**: `AgentService` → `AgentDecisionService` (RESPOND/CLARIFY/PLAN) → `PlanValidationService` → `ExecutionOrchestrator` → `ResultSynthesisService`
 - **MCP provider registration**: Dynamic MCP provider registration via REST API or bootstrap config (STREAMABLE_HTTP and HTTP_SSE transports)

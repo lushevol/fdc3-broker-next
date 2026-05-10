@@ -1,11 +1,11 @@
 # Chatbot Backend Service
 
-A Spring Boot-based AI chatbot backend service that provides conversational AI capabilities via OpenAI's GPT models using LangChain4j.
+A Spring Boot-based AI chatbot backend service that provides conversational AI capabilities via Spring AI chat model integrations.
 
 ## Features
 
 - **Streaming Responses**: Real-time SSE (Server-Sent Events) streaming for chat responses
-- **Multi-Provider Support**: OpenAI and Anthropic Claude support via LangChain4j
+- **Multi-Provider Support**: OpenAI-compatible and Anthropic provider support via Spring AI
 - **Tool System**: Extensible tool execution framework for AI-assisted workflows
 - **Rate Limiting**: Built-in rate limiting to prevent API abuse
 - **Conversation Management**: In-memory conversation storage with history
@@ -166,13 +166,13 @@ For full API documentation, see [API.md](docs/API.md).
 
 - **ChatController**: REST API endpoints and canonical SSE event emission
 - **ChatService**: Conversation management, assistant turn persistence, and stream orchestration
-- **AgentService**: AI model integration via LangChain4j and tool lifecycle coordination
+- **AgentService**: AI model integration and tool lifecycle coordination
 - **ToolRegistry**: Tool definitions and execution
 
 ### Technologies
 
-- **Spring Boot 3.2.0**: Web framework
-- **LangChain4j 1.12.2**: AI model abstraction
+- **Spring Boot 3.5.14**: Web framework
+- **Spring AI 1.1.6**: AI model abstraction
 - **Project Reactor**: Reactive programming for streaming
 - **Bucket4j**: Rate limiting
 - **Lombok**: Boilerplate reduction
@@ -235,7 +235,7 @@ See [API.md](docs/API.md) for the canonical SSE event contract (`conversation_id
 
 - Check if mock mode is enabled when it shouldn't be
 - Verify the model name is valid
-- Check LangChain4j logs for API errors
+- Check Spring AI and provider logs for API errors
 
 ## License
 

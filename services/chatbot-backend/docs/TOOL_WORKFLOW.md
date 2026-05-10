@@ -9,7 +9,7 @@ ProtocolChatController (HTTP)
 ProtocolChatService (协议帧转换)
     │
     ▼
-AgentService (AI编排 + LangChain4j)
+AgentService (AI编排 + Model Integration)
     │
     ▼
 ToolRegistry (工具注册表)
@@ -70,7 +70,7 @@ ExecutionOrchestrator.execute()
 - `CLARIFY`: 需要澄清问题
 - `PLAN`: 需要执行tool计划
 
-#### 路径B: LangChain4j Tool-Calling (标准模式)
+#### 路径B: Model Tool-Calling (标准模式)
 
 ```
 流程:
@@ -333,7 +333,7 @@ ProtocolToolDescriptor {
 │  │  decide() → validate() → execute()         │       │
 │  └─────────────────────────────────────────────┘       │
 │  ┌─────────────────────────────────────────────┐       │
-│  │ LangChain4j Tool-Calling (路径B)           │       │
+│  │ Model Tool-Calling (路径B)                 │       │
 │  │  chat() → LLM → execute()                 │       │
 │  └─────────────────────────────────────────────┘       │
 └─────────────────────┬───────────────────────────────┘

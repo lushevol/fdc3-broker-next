@@ -19,14 +19,15 @@ import com.fdc3.chatbot.model.UserCapabilityContext;
 import com.fdc3.chatbot.tool.ToolDefinition;
 import com.fdc3.chatbot.tool.ToolRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.StreamingChatModel;
-import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.model.StreamingChatModel;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.test.util.ReflectionTestUtils;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AgentControlPlaneExecutionTest {
     private static final String FRONTEND_TOOL_MANIFEST = "[{\"name\":\"report_workspace_status\"}]";
+
+    private static ChatResponse chatResponse(String text) {
+        return ChatResponse.builder()
+                .generations(List.of(new Generation(new AssistantMessage(text == null ? "" : text))))
+                .build();
+    }
 
 
     @Test
@@ -623,10 +630,13 @@ class AgentControlPlaneExecutionTest {
     private static class NoOpChatModel implements ChatModel {
 
         @Override
-        public ChatResponse doChat(ChatRequest chatRequest) {
-            return ChatResponse.builder()
-                    .aiMessage(AiMessage.from("{}"))
-                    .build();
+        public ChatResponse call(Prompt prompt) {
+            return chatResponse("{}");
+        }
+
+        @Override
+        public Flux<ChatResponse> stream(Prompt prompt) {
+            return Flux.just(chatResponse("{}"));
         }
     }
 
@@ -639,10 +649,8 @@ class AgentControlPlaneExecutionTest {
         }
 
         @Override
-        public ChatResponse doChat(ChatRequest chatRequest) {
-            return ChatResponse.builder()
-                    .aiMessage(AiMessage.from(responseText))
-                    .build();
+        public ChatResponse call(Prompt prompt) {
+            return chatResponse(responseText);
         }
     }
 
@@ -655,15 +663,8 @@ class AgentControlPlaneExecutionTest {
         }
 
         @Override
-        public void chat(ChatRequest request, StreamingChatResponseHandler handler) {
-            StringBuilder fullText = new StringBuilder();
-            for (String token : partialTokens) {
-                fullText.append(token);
-                handler.onPartialResponse(token);
-            }
-            handler.onCompleteResponse(ChatResponse.builder()
-                    .aiMessage(AiMessage.from(fullText.toString()))
-                    .build());
+        public Flux<ChatResponse> stream(Prompt prompt) {
+            return Flux.fromIterable(partialTokens).map(AgentControlPlaneExecutionTest::chatResponse);
         }
     }
 

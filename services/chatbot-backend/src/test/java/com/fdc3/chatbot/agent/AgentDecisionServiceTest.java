@@ -6,14 +6,17 @@ import com.fdc3.chatbot.agent.prompt.AgentDecisionPromptFactory;
 import com.fdc3.chatbot.controlplane.model.ResolvedCapability;
 import com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot;
 import com.fdc3.chatbot.model.ChatMessage;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.ChatMessageType;
-import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.response.ChatResponse;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.MessageType;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.prompt.Prompt;
+
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Objects;
@@ -299,16 +302,16 @@ class AgentDecisionServiceTest {
                         .build()
         );
 
-        ChatRequest request = chatModel.capturedRequest();
-        assertThat(request.messages()).hasSize(2);
-        assertThat(request.messages().get(0)).isInstanceOf(dev.langchain4j.data.message.SystemMessage.class);
-        String prompt = ((dev.langchain4j.data.message.SystemMessage) request.messages().get(0)).text();
+        Prompt request = chatModel.capturedRequest();
+        assertThat(request.getInstructions()).hasSize(2);
+        assertThat(request.getInstructions().get(0)).isInstanceOf(SystemMessage.class);
+        String prompt = ((SystemMessage) request.getInstructions().get(0)).getText();
         assertThat(prompt).contains("toolName: visited_user_count_by_application");
         assertThat(prompt).doesNotContain("internal-only-capability");
         assertThat(prompt).contains("\"workspaceId\":\"workspace-1\"");
         assertThat(prompt).contains("\"activeAppId\":\"cashflow\"");
-        assertThat(request.messages().get(1).type()).isEqualTo(ChatMessageType.USER);
-        assertThat(((UserMessage) request.messages().get(1)).singleText()).isEqualTo("hello");
+        assertThat(request.getInstructions().get(1).getMessageType()).isEqualTo(MessageType.USER);
+        assertThat(((UserMessage) request.getInstructions().get(1)).getText()).isEqualTo("hello");
     }
 
     @Test
@@ -328,18 +331,18 @@ class AgentDecisionServiceTest {
                 null
         );
 
-        ChatRequest request = chatModel.capturedRequest();
-        assertThat(request.messages()).hasSize(5);
-        assertThat(request.messages().get(0)).isInstanceOf(SystemMessage.class);
-        assertThat(((SystemMessage) request.messages().get(0)).text()).contains("Allowed decisionType values");
-        assertThat(request.messages().get(1)).isInstanceOf(SystemMessage.class);
-        assertThat(((SystemMessage) request.messages().get(1)).text()).isEqualTo("system history");
-        assertThat(request.messages().get(2)).isInstanceOf(UserMessage.class);
-        assertThat(((UserMessage) request.messages().get(2)).singleText()).isEqualTo("previous user");
-        assertThat(request.messages().get(3)).isInstanceOf(AiMessage.class);
-        assertThat(((AiMessage) request.messages().get(3)).text()).isEqualTo("previous assistant");
-        assertThat(request.messages().get(4)).isInstanceOf(UserMessage.class);
-        assertThat(((UserMessage) request.messages().get(4)).singleText()).isEqualTo("current question");
+        Prompt request = chatModel.capturedRequest();
+        assertThat(request.getInstructions()).hasSize(5);
+        assertThat(request.getInstructions().get(0)).isInstanceOf(SystemMessage.class);
+        assertThat(((SystemMessage) request.getInstructions().get(0)).getText()).contains("Allowed decisionType values");
+        assertThat(request.getInstructions().get(1)).isInstanceOf(SystemMessage.class);
+        assertThat(((SystemMessage) request.getInstructions().get(1)).getText()).isEqualTo("system history");
+        assertThat(request.getInstructions().get(2)).isInstanceOf(UserMessage.class);
+        assertThat(((UserMessage) request.getInstructions().get(2)).getText()).isEqualTo("previous user");
+        assertThat(request.getInstructions().get(3)).isInstanceOf(AssistantMessage.class);
+        assertThat(((AssistantMessage) request.getInstructions().get(3)).getText()).isEqualTo("previous assistant");
+        assertThat(request.getInstructions().get(4)).isInstanceOf(UserMessage.class);
+        assertThat(((UserMessage) request.getInstructions().get(4)).getText()).isEqualTo("current question");
     }
 
     @Test
@@ -351,11 +354,11 @@ class AgentDecisionServiceTest {
         AgentDecision decision = service.decide("hello", null, List.of(), null);
 
         assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.RESPOND);
-        ChatRequest request = chatModel.capturedRequest();
-        assertThat(request.messages()).hasSize(2);
-        assertThat(request.messages().get(0)).isInstanceOf(SystemMessage.class);
-        assertThat(request.messages().get(1)).isInstanceOf(UserMessage.class);
-        assertThat(((UserMessage) request.messages().get(1)).singleText()).isEqualTo("hello");
+        Prompt request = chatModel.capturedRequest();
+        assertThat(request.getInstructions()).hasSize(2);
+        assertThat(request.getInstructions().get(0)).isInstanceOf(SystemMessage.class);
+        assertThat(request.getInstructions().get(1)).isInstanceOf(UserMessage.class);
+        assertThat(((UserMessage) request.getInstructions().get(1)).getText()).isEqualTo("hello");
     }
 
     @Test
@@ -376,36 +379,44 @@ class AgentDecisionServiceTest {
         );
 
         assertThat(decision.decisionType()).isEqualTo(AgentDecisionType.RESPOND);
-        ChatRequest request = chatModel.capturedRequest();
-        assertThat(request.messages()).hasSize(4);
-        assertThat(request.messages().get(0)).isInstanceOf(SystemMessage.class);
-        assertThat(request.messages().get(1)).isInstanceOf(UserMessage.class);
-        assertThat(((UserMessage) request.messages().get(1)).singleText()).isEqualTo("previous user");
-        assertThat(request.messages().get(2)).isInstanceOf(AiMessage.class);
-        assertThat(((AiMessage) request.messages().get(2)).text()).isEqualTo("previous assistant");
-        assertThat(request.messages().get(3)).isInstanceOf(UserMessage.class);
-        assertThat(((UserMessage) request.messages().get(3)).singleText()).isEqualTo("current question");
+        Prompt request = chatModel.capturedRequest();
+        assertThat(request.getInstructions()).hasSize(4);
+        assertThat(request.getInstructions().get(0)).isInstanceOf(SystemMessage.class);
+        assertThat(request.getInstructions().get(1)).isInstanceOf(UserMessage.class);
+        assertThat(((UserMessage) request.getInstructions().get(1)).getText()).isEqualTo("previous user");
+        assertThat(request.getInstructions().get(2)).isInstanceOf(AssistantMessage.class);
+        assertThat(((AssistantMessage) request.getInstructions().get(2)).getText()).isEqualTo("previous assistant");
+        assertThat(request.getInstructions().get(3)).isInstanceOf(UserMessage.class);
+        assertThat(((UserMessage) request.getInstructions().get(3)).getText()).isEqualTo("current question");
     }
 
     private static final class CapturingChatModel implements ChatModel {
 
         private final String responseText;
-        private ChatRequest capturedRequest;
+        private Prompt capturedRequest;
 
         private CapturingChatModel(String responseText) {
             this.responseText = responseText;
         }
 
         @Override
-        public ChatResponse doChat(ChatRequest chatRequest) {
-            this.capturedRequest = chatRequest;
+        public ChatResponse call(Prompt prompt) {
+            this.capturedRequest = prompt;
             return ChatResponse.builder()
-                    .aiMessage(AiMessage.from(responseText))
+                    .generations(List.of(new Generation(new AssistantMessage(responseText))))
                     .build();
         }
 
-        private ChatRequest capturedRequest() {
-            return Objects.requireNonNull(capturedRequest, "Chat request was not captured");
+        @Override
+        public Flux<ChatResponse> stream(Prompt prompt) {
+            this.capturedRequest = prompt;
+            return Flux.just(ChatResponse.builder()
+                    .generations(List.of(new Generation(new AssistantMessage(responseText))))
+                    .build());
+        }
+
+        private Prompt capturedRequest() {
+            return Objects.requireNonNull(capturedRequest, "Prompt was not captured");
         }
     }
 }
