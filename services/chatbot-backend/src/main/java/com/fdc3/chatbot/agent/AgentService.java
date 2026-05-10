@@ -87,7 +87,7 @@ public class AgentService {
     @Value("${spring.ai.openai.base-url:}")
     private String openaiBaseUrl;
 
-    @Value("${spring.ai.openai.model:gpt-4}")
+    @Value("${spring.ai.openai.chat.model:gpt-4}")
     private String model;
 
     @Value("${spring.ai.openai.temperature:0.7}")
@@ -1199,7 +1199,7 @@ public class AgentService {
                                         accumulatedToolCallArgs.getOrDefault(id, new StringBuilder()).toString()))
                                 .toList();
                         AssistantMessage finalAssistantMessage = AssistantMessage.builder()
-                                .text(streamedAssistantText.toString())
+                                .content(streamedAssistantText.toString())
                                 .toolCalls(mergedCalls)
                                 .build();
 
@@ -1236,7 +1236,7 @@ public class AgentService {
                                 conversationId,
                                 buildAssistantTurnDiagnostics(
                                         turnPhase,
-                                        AssistantMessage.builder().text(streamedAssistantText.toString()).build(),
+                                        AssistantMessage.builder().content(streamedAssistantText.toString()).build(),
                                         streamedAssistantText.toString())
                         );
                     }
