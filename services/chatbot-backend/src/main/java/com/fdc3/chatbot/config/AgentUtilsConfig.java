@@ -1,11 +1,14 @@
 package com.fdc3.chatbot.config;
 
+import java.util.List;
 import java.util.Map;
 
 import com.fdc3.chatbot.config.AgentUtilsProperties.Skills;
+import com.fdc3.chatbot.config.AgentUtilsProperties.Tasks;
 import com.fdc3.chatbot.config.AgentUtilsProperties.WebFetch;
 import com.fdc3.chatbot.tool.agentutils.PendingQuestionRegistry;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.method.MethodToolCallbackProvider;
@@ -14,13 +17,17 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springaicommunity.agent.common.task.subagent.SubagentReference;
+import org.springaicommunity.agent.common.task.subagent.SubagentType;
 import org.springaicommunity.agent.tools.AskUserQuestionTool;
 import org.springaicommunity.agent.tools.AskUserQuestionTool.QuestionHandler;
 import org.springaicommunity.agent.tools.SkillsTool;
 import org.springaicommunity.agent.tools.SmartWebFetchTool;
 import org.springaicommunity.agent.tools.TodoWriteTool;
 import org.springaicommunity.agent.tools.TodoWriteTool.TodoEventHandler;
-import org.springframework.ai.chat.client.ChatClient;
+import org.springaicommunity.agent.tools.task.TaskTool;
+import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentReferences;
+import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentType;
 
 /**
  * Wires spring-ai-agent-utils tools into Spring context.
@@ -121,5 +128,33 @@ public class AgentUtilsConfig {
             return callbacks[0];
         }
         throw new IllegalStateException("No @Tool-annotated methods found on TodoWriteTool");
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "chatbot.agent-utils.tasks.enabled", havingValue = "true", matchIfMissing = true)
+    public ToolCallback taskToolCallback(
+            ChatModel chatModel,
+            AgentUtilsProperties properties
+    ) {
+        Tasks config = properties.getTasks();
+        log.info("Creating TaskTool with defaultModel={}", config.getSubAgentConfig().getDefaultModel());
+
+        ChatClient.Builder defaultBuilder = ChatClient.builder(chatModel);
+
+        SubagentType subagentType = ClaudeSubagentType.builder()
+                .chatClientBuilder("default", defaultBuilder)
+                .skillsDirectories(List.of("skills"))
+                .build();
+
+        List<SubagentReference> refs = ClaudeSubagentReferences.fromResources(
+                new ClassPathResource("agents"));
+
+        ToolCallback callback = TaskTool.builder()
+                .subagentReferences(refs)
+                .subagentTypes(subagentType)
+                .build();
+
+        log.info("Created TaskTool with {} sub-agent definitions", refs.size());
+        return callback;
     }
 }
