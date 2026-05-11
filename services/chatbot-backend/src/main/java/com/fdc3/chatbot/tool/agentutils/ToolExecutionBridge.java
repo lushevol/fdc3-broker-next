@@ -1,5 +1,7 @@
 package com.fdc3.chatbot.tool.agentutils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 
 import java.util.List;
@@ -13,13 +15,20 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ToolExecutionBridge {
 
+    private static final Logger log = LoggerFactory.getLogger(ToolExecutionBridge.class);
+
     private final Map<String, ToolCallback> executableCallbacks = new ConcurrentHashMap<>();
 
     public ToolExecutionBridge(List<ToolCallback> toolCallbacks) {
         if (toolCallbacks != null) {
             for (ToolCallback callback : toolCallbacks) {
+                if (callback == null) {
+                    continue;
+                }
                 String name = callback.getToolDefinition().name();
-                executableCallbacks.put(name, callback);
+                if (executableCallbacks.putIfAbsent(name, callback) != null) {
+                    log.warn("Duplicate ToolCallback name '{}' — keeping first registration", name);
+                }
             }
         }
     }

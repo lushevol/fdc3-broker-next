@@ -1541,6 +1541,15 @@ public class AgentService {
             return;
         }
 
+        onToolCall.accept(ToolCall.builder()
+                .id(toolExecutionRequest.id())
+                .name(toolExecutionRequest.name())
+                .arguments(arguments)
+                .status(ToolCall.ToolStatus.RUNNING)
+                .executionTarget(ToolCall.ExecutionTarget.BACKEND)
+                .requiresConfirmation(false)
+                .build());
+
         try {
             log.debug("Executing agent-utils tool: {}", toolExecutionRequest.name());
             String result = callback.call(writeJson(arguments));
@@ -1561,7 +1570,7 @@ public class AgentService {
             nextBlockedToolNames.add(toolExecutionRequest.name());
 
             continueWithToolRequests(
-                    conversationId, null, null, continuedMessages,
+                    conversationId, "", List.of(), continuedMessages,
                     availableTools, toolExecutionRequests, frontendToolManifest,
                     Set.copyOf(nextBlockedToolNames), index + 1, continueAfterToolLoop,
                     onNext, onError, onComplete, onToolCall, onToolResult, cancelled
