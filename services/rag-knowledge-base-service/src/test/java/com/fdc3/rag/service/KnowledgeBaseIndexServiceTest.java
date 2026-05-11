@@ -56,6 +56,38 @@ class KnowledgeBaseIndexServiceTest {
     }
 
     @Test
+    void emptyChunksReplaceRepositoryWithoutCallingEmbeddingProvider() {
+        KnowledgeDocumentLoader loader = List::of;
+        KnowledgeChunker chunker = document -> List.of();
+        EmbeddingClient embeddingClient = new EmbeddingClient() {
+            @Override
+            public Mono<List<Double>> embed(String input) {
+                return Mono.error(new AssertionError("Embedding provider should not be called"));
+            }
+
+            @Override
+            public Mono<List<List<Double>>> embedAll(List<String> inputs) {
+                return Mono.error(new AssertionError("Embedding provider should not be called"));
+            }
+        };
+        InMemoryKnowledgeChunkRepository repository = new InMemoryKnowledgeChunkRepository();
+        repository.replaceAll(List.of(new KnowledgeChunk(
+                "existing#1",
+                "existing",
+                "Existing",
+                "advisor",
+                "stale content",
+                Map.of(),
+                List.of(1.0, 0.0)
+        )));
+        KnowledgeBaseIndexService service = new KnowledgeBaseIndexService(loader, chunker, embeddingClient, repository);
+
+        service.rebuildIndex();
+
+        assertThat(repository.size()).isZero();
+    }
+
+    @Test
     void applicationReadyDoesNotFailStartupWhenIndexingFails() {
         KnowledgeDocumentLoader loader = () -> List.of(new KnowledgeDocument(
                 "doc",

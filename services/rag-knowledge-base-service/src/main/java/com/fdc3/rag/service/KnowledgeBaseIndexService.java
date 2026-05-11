@@ -76,6 +76,12 @@ public class KnowledgeBaseIndexService {
         List<KnowledgeChunk> chunks = loader.load().stream()
                 .flatMap(document -> chunker.chunk(document).stream())
                 .toList();
+        if (chunks.isEmpty()) {
+            repository.replaceAll(List.of());
+            log.info("Indexed 0 knowledge chunks.");
+            return;
+        }
+
         List<List<Double>> embeddings = embeddingClient.embedAll(chunks.stream().map(KnowledgeChunk::text).toList())
                 .block();
         if (embeddings == null || embeddings.size() != chunks.size()) {
