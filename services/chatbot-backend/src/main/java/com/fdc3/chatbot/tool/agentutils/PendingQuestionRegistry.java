@@ -1,15 +1,22 @@
 package com.fdc3.chatbot.tool.agentutils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Registry for pending user questions. Each question is keyed by conversationId:questionId.
- * Thread-safe and timeout-enabled.
+ * Thread-safe and timeout-enabled. Entries are automatically cleaned up on
+ * completion, cancellation, or timeout.
  */
 public class PendingQuestionRegistry {
+
+    private static final Logger log = LoggerFactory.getLogger(PendingQuestionRegistry.class);
 
     private final Map<String, CompletableFuture<Map<String, String>>> pending = new ConcurrentHashMap<>();
     private final long timeoutMillis;
@@ -24,11 +31,13 @@ public class PendingQuestionRegistry {
 
     /**
      * Register a pending question and return a future that completes when the user answers.
+     * The map entry is automatically removed when the future completes, times out, or is cancelled.
      */
     public CompletableFuture<Map<String, String>> register(String conversationId, String questionId) {
         String key = key(conversationId, questionId);
         CompletableFuture<Map<String, String>> future = new CompletableFuture<>();
         future.orTimeout(timeoutMillis, TimeUnit.MILLISECONDS);
+        future.whenComplete((result, ex) -> pending.remove(key));
         pending.put(key, future);
         return future;
     }
@@ -53,11 +62,14 @@ public class PendingQuestionRegistry {
         String key = key(conversationId, questionId);
         CompletableFuture<Map<String, String>> future = pending.remove(key);
         if (future != null) {
+            log.debug("Cancelling pending question {}/{}", conversationId, questionId);
             future.cancel(false);
         }
     }
 
     private static String key(String conversationId, String questionId) {
+        Objects.requireNonNull(conversationId, "conversationId must not be null");
+        Objects.requireNonNull(questionId, "questionId must not be null");
         return conversationId + ":" + questionId;
     }
 }
