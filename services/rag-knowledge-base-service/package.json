@@ -1,0 +1,10 @@
+{
+  "name": "rag-knowledge-base-service",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "mvn -DskipTests clean package",
+    "test": "mvn test",
+    "dev": "mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8091'",
+    "dev:stub": "cross-env RAG_EMBEDDING_PROVIDER=deterministic mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8091'"
+  }
+}

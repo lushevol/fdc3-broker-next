@@ -41,6 +41,35 @@ class McpBootstrapRegistrarTest {
     }
 
     @Test
+    void registersRagProviderFromConfiguration() {
+        McpBootstrapProperties properties = new McpBootstrapProperties();
+        McpBootstrapProperties.Provider ragProvider = new McpBootstrapProperties.Provider();
+        ragProvider.setEnabled(true);
+        ragProvider.setProviderId("rag-knowledge-base");
+        ragProvider.setServiceName("RAG Knowledge Base MCP");
+        ragProvider.setTransportType(McpTransportType.STREAMABLE_HTTP);
+        ragProvider.setUrl("http://localhost:8091/api/mcp");
+        ragProvider.setEnabledProfiles(List.of("advisor"));
+        ragProvider.setDescription("Read-only RAG retrieval provider.");
+        properties.setProviders(List.of(ragProvider));
+        properties.setRegistrationMaxAttempts(1);
+        properties.setRegistrationRetryDelayMillis(0L);
+
+        RecordingMcpProviderRegistryService registryService = new RecordingMcpProviderRegistryService();
+        McpBootstrapRegistrar registrar = new McpBootstrapRegistrar(properties, registryService);
+
+        registrar.registerConfiguredProviders();
+
+        assertEquals(1, registryService.requests.size());
+        McpProviderRegistrationRequest request = registryService.requests.get(0);
+        assertEquals("rag-knowledge-base", request.getProviderId());
+        assertEquals("RAG Knowledge Base MCP", request.getServiceName());
+        assertEquals(McpTransportType.STREAMABLE_HTTP, request.getTransportType());
+        assertEquals("http://localhost:8091/api/mcp", request.getUrl());
+        assertEquals(List.of("advisor"), request.getEnabledProfiles());
+    }
+
+    @Test
     void rejectsEnabledProviderWithoutUrl() {
         McpBootstrapProperties properties = new McpBootstrapProperties();
         McpBootstrapProperties.Provider provider = new McpBootstrapProperties.Provider();

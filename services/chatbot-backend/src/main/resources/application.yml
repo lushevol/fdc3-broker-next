@@ -47,6 +47,14 @@ chatbot:
         enabled-profiles:
           - advisor
         description: Read-only analytics MCP provider used for app usage statistics.
+      - enabled: ${CHATBOT_MCP_RAG_ENABLED:false}
+        provider-id: rag-knowledge-base
+        service-name: RAG Knowledge Base MCP
+        transport-type: STREAMABLE_HTTP
+        url: ${CHATBOT_MCP_RAG_URL:}
+        enabled-profiles:
+          - advisor
+        description: Read-only RAG retrieval MCP provider used for knowledge base search.
   rate-limit:
     requests-per-minute: 60
     tokens-per-minute: 100000
