@@ -7,6 +7,7 @@ import com.fdc3.chatbot.config.AgentUtilsProperties.Skills;
 import com.fdc3.chatbot.config.AgentUtilsProperties.Tasks;
 import com.fdc3.chatbot.config.AgentUtilsProperties.WebFetch;
 import com.fdc3.chatbot.tool.agentutils.PendingQuestionRegistry;
+import com.fdc3.chatbot.tool.agentutils.ToolExecutionBridge;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
@@ -16,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ClassPathResource;
 import org.springaicommunity.agent.common.task.subagent.SubagentReference;
 import org.springaicommunity.agent.common.task.subagent.SubagentType;
@@ -32,6 +34,13 @@ import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentType;
 /**
  * Wires spring-ai-agent-utils tools into Spring context.
  * Each tool is conditional on its enabled flag in chatbot.agent-utils.*.
+ *
+ * NOTE: agent-utils 0.7.0 has a dependency on Spring Framework 7.x class
+ * {@code org.springframework.core.Nullness}. All agent-utils tool beans are
+ * disabled by default ({@code matchIfMissing = false}) to avoid context
+ * loading failures on Spring Boot 3.5.x / Spring Framework 6.x. Enable them
+ * explicitly via {@code chatbot.agent-utils.<feature>.enabled=true} when
+ * running on a compatible Spring version.
  */
 @Slf4j
 @Configuration
@@ -44,8 +53,16 @@ public class AgentUtilsConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "chatbot.agent-utils.web-fetch.enabled", havingValue = "true", matchIfMissing = true)
-    public ToolCallback webFetchToolCallback(ChatModel chatModel, AgentUtilsProperties properties) {
+    @Lazy
+    public ToolExecutionBridge toolExecutionBridge(
+            List<ToolCallback> agentUtilsCallbacks
+    ) {
+        return new ToolExecutionBridge(agentUtilsCallbacks);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "chatbot.agent-utils.web-fetch.enabled", havingValue = "true", matchIfMissing = false)
+    public ToolCallback webFetchToolCallback(@Lazy ChatModel chatModel, AgentUtilsProperties properties) {
         WebFetch config = properties.getWebFetch();
         ChatClient chatClient = ChatClient.builder(chatModel).build();
         SmartWebFetchTool tool = SmartWebFetchTool.builder(chatClient)
@@ -65,7 +82,7 @@ public class AgentUtilsConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "chatbot.agent-utils.skills.enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(name = "chatbot.agent-utils.skills.enabled", havingValue = "true", matchIfMissing = false)
     public ToolCallback skillsToolCallback(AgentUtilsProperties properties) {
         Skills config = properties.getSkills();
         ToolCallback callback = SkillsTool.builder()
@@ -77,7 +94,7 @@ public class AgentUtilsConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "chatbot.agent-utils.ask-user.enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(name = "chatbot.agent-utils.ask-user.enabled", havingValue = "true", matchIfMissing = false)
     public ToolCallback askUserQuestionToolCallback(
             PendingQuestionRegistry pendingQuestionRegistry,
             AgentUtilsProperties properties
@@ -111,7 +128,7 @@ public class AgentUtilsConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "chatbot.agent-utils.todo.enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(name = "chatbot.agent-utils.todo.enabled", havingValue = "true", matchIfMissing = false)
     public ToolCallback todoWriteToolCallback() {
         TodoEventHandler handler = todos -> {
             log.info("TodoWrite: {} items received", todos.todos().size());
@@ -131,9 +148,9 @@ public class AgentUtilsConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "chatbot.agent-utils.tasks.enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(name = "chatbot.agent-utils.tasks.enabled", havingValue = "true", matchIfMissing = false)
     public ToolCallback taskToolCallback(
-            ChatModel chatModel,
+            @Lazy ChatModel chatModel,
             AgentUtilsProperties properties
     ) {
         Tasks config = properties.getTasks();
