@@ -38,7 +38,11 @@ public class PendingQuestionRegistry {
         CompletableFuture<Map<String, String>> future = new CompletableFuture<>();
         future.orTimeout(timeoutMillis, TimeUnit.MILLISECONDS);
         future.whenComplete((result, ex) -> pending.remove(key));
-        pending.put(key, future);
+        CompletableFuture<Map<String, String>> existing = pending.putIfAbsent(key, future);
+        if (existing != null) {
+            log.warn("Question already registered for key '{}' — returning existing future", key);
+            return existing;
+        }
         return future;
     }
 

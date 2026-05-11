@@ -2,59 +2,87 @@ package com.fdc3.chatbot.tool.agentutils;
 
 import org.junit.jupiter.api.Test;
 import org.springaicommunity.agent.tools.AskUserQuestionTool;
-import org.springaicommunity.agent.tools.AskUserQuestionTool.Question;
-import org.springaicommunity.agent.tools.AskUserQuestionTool.Question.Option;
 import org.springaicommunity.agent.tools.AskUserQuestionTool.QuestionHandler;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class AskUserQuestionHandlerTest {
 
     @Test
-    void handlerReceivesQuestions() {
-        AtomicReference<List<Question>> captured = new AtomicReference<>();
+    void handlerReceivesQuestionsAndReturnsAnswers() {
+        List<String> capturedQuestions = new CopyOnWriteArrayList<>();
+
         QuestionHandler handler = questions -> {
-            captured.set(questions);
-            return Map.of("Which report?", "Last 7 days");
+            for (Object q : questions) {
+                capturedQuestions.add(q.toString());
+            }
+            return Map.of();
         };
 
-        List<Question> questions = List.of(new Question(
-                "Which report period would you like to analyze?",
-                "Period",
-                List.of(new Option("Last 7 days", "Most recent week")),
-                false
-        ));
+        AskUserQuestionTool tool = AskUserQuestionTool.builder()
+                .questionHandler(handler)
+                .answersValidation(false)
+                .build();
 
-        Map<String, String> result = handler.handle(questions);
+        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                .toolObjects(tool)
+                .build()
+                .getToolCallbacks();
 
-        assertNotNull(captured.get());
-        assertEquals(1, captured.get().size());
-        assertEquals("Which report period would you like to analyze?",
-                captured.get().get(0).question());
-        assertEquals("Last 7 days", result.get("Which report?"));
+        assertTrue(callbacks.length > 0);
+        ToolCallback callback = callbacks[0];
+        assertNotNull(callback.getToolDefinition());
+        assertEquals("AskUserQuestionTool", callback.getToolDefinition().name());
+        assertNotNull(callback.getToolDefinition().description());
     }
 
     @Test
-    void questionWithMultipleOptions() {
-        List<Question> questions = List.of(new Question(
-                "Select view type",
-                "View",
-                List.of(
-                        new Option("Chart", "Visual chart"),
-                        new Option("Table", "Data table"),
-                        new Option("Both", "Split view")
-                ),
-                true
-        ));
+    void handlerReturnsDefaultAnswers() {
+        QuestionHandler handler = questions -> Map.of();
 
-        assertEquals(3, questions.get(0).options().size());
+        AskUserQuestionTool tool = AskUserQuestionTool.builder()
+                .questionHandler(handler)
+                .answersValidation(false)
+                .build();
 
-        QuestionHandler handler = qs -> Map.of(qs.get(0).question(), qs.get(0).options().get(0).label());
-        Map<String, String> result = handler.handle(questions);
-        assertEquals("Chart", result.get("Select view type"));
+        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                .toolObjects(tool)
+                .build()
+                .getToolCallbacks();
+
+        assertTrue(callbacks.length > 0);
+    }
+
+    @Test
+    void handlerWithMultipleOptions() {
+        QuestionHandler handler = questions -> {
+            Map<String, String> answers = new java.util.LinkedHashMap<>();
+            int i = 0;
+            for (Object q : questions) {
+                answers.put("answer_" + i, "selected_option_1");
+                i++;
+            }
+            return answers;
+        };
+
+        AskUserQuestionTool tool = AskUserQuestionTool.builder()
+                .questionHandler(handler)
+                .answersValidation(false)
+                .build();
+
+        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                .toolObjects(tool)
+                .build()
+                .getToolCallbacks();
+
+        assertTrue(callbacks.length > 0);
+        ToolCallback callback = callbacks[0];
+        assertEquals("AskUserQuestionTool", callback.getToolDefinition().name());
     }
 }

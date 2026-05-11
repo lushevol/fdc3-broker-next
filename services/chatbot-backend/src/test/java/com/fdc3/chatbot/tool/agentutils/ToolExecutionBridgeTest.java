@@ -1,62 +1,93 @@
 package com.fdc3.chatbot.tool.agentutils;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
-
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.Test;
 
 class ToolExecutionBridgeTest {
 
-    @Test
-    void storesAndRetrievesCallbacks() {
-        ToolCallback callback = mock(ToolCallback.class);
-        ToolDefinition def = mock(ToolDefinition.class);
-        when(callback.getToolDefinition()).thenReturn(def);
-        when(def.name()).thenReturn("WebFetch");
+    private ToolCallback mockCallback;
+    private ToolDefinition mockDefinition;
 
-        ToolExecutionBridge bridge = new ToolExecutionBridge(List.of(callback));
-
-        assertTrue(bridge.hasCallback("WebFetch"));
-        assertSame(callback, bridge.getCallback("WebFetch"));
+    @BeforeEach
+    void setUp() {
+        mockCallback = mock(ToolCallback.class);
+        mockDefinition = mock(ToolDefinition.class);
+        when(mockCallback.getToolDefinition()).thenReturn(mockDefinition);
+        when(mockDefinition.name()).thenReturn("TestTool");
     }
 
     @Test
-    void returnsNullForUnknownTool() {
+    void constructorAcceptsNullList() {
+        ToolExecutionBridge bridge = new ToolExecutionBridge(null);
+        assertNotNull(bridge);
+        assertFalse(bridge.hasCallback("anything"));
+    }
+
+    @Test
+    void constructorAcceptsEmptyList() {
         ToolExecutionBridge bridge = new ToolExecutionBridge(List.of());
-        assertNull(bridge.getCallback("UnknownTool"));
+        assertNotNull(bridge);
+        assertFalse(bridge.hasCallback("anything"));
+    }
+
+    @Test
+    void hasCallbackReturnsTrueForRegisteredTool() {
+        ToolExecutionBridge bridge = new ToolExecutionBridge(List.of(mockCallback));
+        assertTrue(bridge.hasCallback("TestTool"));
+    }
+
+    @Test
+    void hasCallbackReturnsFalseForUnknownTool() {
+        ToolExecutionBridge bridge = new ToolExecutionBridge(List.of(mockCallback));
         assertFalse(bridge.hasCallback("UnknownTool"));
     }
 
     @Test
-    void handlesNullCallbackList() {
-        ToolExecutionBridge bridge = new ToolExecutionBridge(null);
-        assertTrue(bridge.getCallbackMap().isEmpty());
+    void getCallbackReturnsRegisteredCallback() {
+        ToolExecutionBridge bridge = new ToolExecutionBridge(List.of(mockCallback));
+        ToolCallback result = bridge.getCallback("TestTool");
+        assertSame(mockCallback, result);
     }
 
     @Test
-    void handlesDuplicateNamesGracefully() {
-        ToolCallback cb1 = mock(ToolCallback.class);
-        ToolDefinition def1 = mock(ToolDefinition.class);
-        when(cb1.getToolDefinition()).thenReturn(def1);
-        when(def1.name()).thenReturn("DuplicatedTool");
-
-        ToolCallback cb2 = mock(ToolCallback.class);
-        ToolDefinition def2 = mock(ToolDefinition.class);
-        when(cb2.getToolDefinition()).thenReturn(def2);
-        when(def2.name()).thenReturn("DuplicatedTool");
-
-        ToolExecutionBridge bridge = new ToolExecutionBridge(List.of(cb1, cb2));
-        assertSame(cb1, bridge.getCallback("DuplicatedTool"));
+    void getCallbackReturnsNullForUnknownTool() {
+        ToolExecutionBridge bridge = new ToolExecutionBridge(List.of(mockCallback));
+        assertNull(bridge.getCallback("UnknownTool"));
     }
 
     @Test
-    void getCallbackMapReturnsSnapshot() {
-        ToolExecutionBridge bridge = new ToolExecutionBridge(List.of());
-        assertThrows(UnsupportedOperationException.class,
-                () -> bridge.getCallbackMap().put("x", null));
+    void getCallbackMapReturnsAllRegisteredCallbacks() {
+        ToolExecutionBridge bridge = new ToolExecutionBridge(List.of(mockCallback));
+        Map<String, ToolCallback> map = bridge.getCallbackMap();
+        assertEquals(1, map.size());
+        assertSame(mockCallback, map.get("TestTool"));
+    }
+
+    @Test
+    void constructorSkipsNullCallbacks() {
+        ToolExecutionBridge bridge = new ToolExecutionBridge(Arrays.asList(null, mockCallback, null));
+        assertTrue(bridge.hasCallback("TestTool"));
+        assertEquals(1, bridge.getCallbackMap().size());
+    }
+
+    @Test
+    void constructorHandlesDuplicateNames() {
+        ToolCallback second = mock(ToolCallback.class);
+        ToolDefinition secondDef = mock(ToolDefinition.class);
+        when(second.getToolDefinition()).thenReturn(secondDef);
+        when(secondDef.name()).thenReturn("TestTool");
+
+        ToolExecutionBridge bridge = new ToolExecutionBridge(List.of(mockCallback, second));
+        assertTrue(bridge.hasCallback("TestTool"));
+        // First registration wins
+        assertSame(mockCallback, bridge.getCallback("TestTool"));
     }
 }

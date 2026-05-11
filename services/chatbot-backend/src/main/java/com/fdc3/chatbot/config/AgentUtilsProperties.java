@@ -1,13 +1,17 @@
 package com.fdc3.chatbot.config;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 @ConfigurationProperties("chatbot.agent-utils")
 public class AgentUtilsProperties {
 
     private WebFetch webFetch = new WebFetch();
     private Skills skills = new Skills();
-    private AskUser askUser = new AskUser();
     private Todo todo = new Todo();
     private Tasks tasks = new Tasks();
 
@@ -15,8 +19,6 @@ public class AgentUtilsProperties {
     public void setWebFetch(WebFetch webFetch) { this.webFetch = webFetch; }
     public Skills getSkills() { return skills; }
     public void setSkills(Skills skills) { this.skills = skills; }
-    public AskUser getAskUser() { return askUser; }
-    public void setAskUser(AskUser askUser) { this.askUser = askUser; }
     public Todo getTodo() { return todo; }
     public void setTodo(Todo todo) { this.todo = todo; }
     public Tasks getTasks() { return tasks; }
@@ -24,9 +26,12 @@ public class AgentUtilsProperties {
 
     public static class WebFetch {
         private boolean enabled = true;
+        @NotBlank
         private String userAgent = "FDC3-Chatbot/1.0";
+        @Min(1024)
+        @Max(1_000_000)
         private int maxContentLength = 50000;
-        private boolean domainSafetyCheck = false;
+        private boolean domainSafetyCheck = true;
 
         public boolean isEnabled() { return enabled; }
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
@@ -46,13 +51,6 @@ public class AgentUtilsProperties {
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
         public String getLocation() { return location; }
         public void setLocation(String location) { this.location = location; }
-    }
-
-    public static class AskUser {
-        private boolean enabled = true;
-
-        public boolean isEnabled() { return enabled; }
-        public void setEnabled(boolean enabled) { this.enabled = enabled; }
     }
 
     public static class Todo {

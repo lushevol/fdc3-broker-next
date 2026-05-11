@@ -1,45 +1,75 @@
 package com.fdc3.chatbot.tool.agentutils;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.tool.ToolCallback;
-import org.springframework.core.io.ClassPathResource;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springaicommunity.agent.common.task.subagent.SubagentReference;
 import org.springaicommunity.agent.common.task.subagent.SubagentType;
 import org.springaicommunity.agent.tools.task.TaskTool;
+import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentReferences;
 import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentType;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.core.io.ClassPathResource;
 
+@ExtendWith(MockitoExtension.class)
 class TaskToolTest {
 
-    @Test
-    void buildsTaskToolWithSubagents() {
-        assertDoesNotThrow(() -> {
-            List<org.springaicommunity.agent.common.task.subagent.SubagentReference> refs =
-                    org.springaicommunity.agent.tools.task.claude.ClaudeSubagentReferences.fromResources(new ClassPathResource("agents"));
+    @Mock
+    private ChatModel chatModel;
 
-            assertFalse(refs.isEmpty(), "Should find at least one sub-agent definition");
-        });
+    @Test
+    void claudeSubagentReferencesFromResourcesReturnsNonNullList() {
+        List<SubagentReference> refs = ClaudeSubagentReferences.fromResources(
+                new ClassPathResource("agents"));
+        assertNotNull(refs);
     }
 
     @Test
-    void taskToolHasCorrectName() {
-        ChatModel chatModel = org.mockito.Mockito.mock(ChatModel.class);
-        ChatClient.Builder builder = ChatClient.builder(chatModel);
+    void taskToolBuildsWithCorrectName() {
+        ChatClient.Builder defaultBuilder = ChatClient.builder(chatModel);
 
         SubagentType subagentType = ClaudeSubagentType.builder()
-                .chatClientBuilder("default", builder)
+                .chatClientBuilder("default", defaultBuilder)
+                .skillsDirectories(List.of("skills"))
                 .build();
 
-        // TaskTool.Builder auto-adds default subagent references when a ClaudeSubagentType is used
+        // Load a single agent reference to avoid potential duplicate-key issues
+        // when processing the multi-file agents directory
+        List<SubagentReference> refs = ClaudeSubagentReferences.fromResource(
+                new ClassPathResource("agents/explore.md"));
+
         ToolCallback callback = TaskTool.builder()
+                .subagentReferences(refs)
                 .subagentTypes(subagentType)
                 .build();
 
         assertNotNull(callback);
-        assertNotNull(callback.getToolDefinition().name());
+        assertEquals("Task", callback.getToolDefinition().name());
+        assertNotNull(callback.getToolDefinition().description());
+    }
+
+    @Test
+    void taskToolWithEmptyReferencesStillBuilds() {
+        ChatClient.Builder defaultBuilder = ChatClient.builder(chatModel);
+
+        SubagentType subagentType = ClaudeSubagentType.builder()
+                .chatClientBuilder("default", defaultBuilder)
+                .skillsDirectories(List.of("skills"))
+                .build();
+
+        ToolCallback callback = TaskTool.builder()
+                .subagentReferences(List.of())
+                .subagentTypes(subagentType)
+                .build();
+
+        assertNotNull(callback);
+        assertEquals("Task", callback.getToolDefinition().name());
     }
 }

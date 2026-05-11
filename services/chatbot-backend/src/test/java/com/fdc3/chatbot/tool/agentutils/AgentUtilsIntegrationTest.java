@@ -2,55 +2,126 @@ package com.fdc3.chatbot.tool.agentutils;
 
 import com.fdc3.chatbot.config.AgentUtilsProperties;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.tool.ToolCallback;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.method.MethodToolCallbackProvider;
+import org.springframework.core.io.ClassPathResource;
+import org.springaicommunity.agent.common.task.subagent.SubagentReference;
+import org.springaicommunity.agent.common.task.subagent.SubagentType;
+import org.springaicommunity.agent.tools.SkillsTool;
+import org.springaicommunity.agent.tools.SmartWebFetchTool;
+import org.springaicommunity.agent.tools.TodoWriteTool;
+import org.springaicommunity.agent.tools.task.TaskTool;
+import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentReferences;
+import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentType;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-/**
- * Verifies that AgentUtilsConfig creates all expected beans.
- * Uses mock ChatModel to avoid needing a real AI backend.
- */
-@SpringBootTest(properties = {
-    "chatbot.agent-utils.web-fetch.enabled=false",
-    "chatbot.agent-utils.skills.enabled=false",
-    "chatbot.agent-utils.ask-user.enabled=false",
-    "chatbot.agent-utils.todo.enabled=false",
-    "chatbot.agent-utils.tasks.enabled=false",
-})
-@Import(AgentUtilsIntegrationTest.TestMocks.class)
+@SpringBootTest(classes = {AgentUtilsIntegrationTest.TestConfig.class})
 class AgentUtilsIntegrationTest {
+
+    @Autowired
+    private List<ToolCallback> agentUtilsCallbacks;
+
+    @Autowired(required = false)
+    private PendingQuestionRegistry pendingQuestionRegistry;
+
+    @Configuration
+    static class TestConfig {
+
+        @Bean
+        public ChatModel chatModel() {
+            return mock(ChatModel.class);
+        }
+
+        @Bean
+        public PendingQuestionRegistry pendingQuestionRegistry() {
+            return new PendingQuestionRegistry();
+        }
+
+        @Bean
+        public ToolCallback webFetchToolCallback(ChatModel chatModel) {
+            ChatClient chatClient = ChatClient.builder(chatModel).build();
+            SmartWebFetchTool tool = SmartWebFetchTool.builder(chatClient)
+                    .maxContentLength(10000)
+                    .domainSafetyCheck(true)
+                    .build();
+            ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                    .toolObjects(tool)
+                    .build()
+                    .getToolCallbacks();
+            return callbacks[0];
+        }
+
+        @Bean
+        public ToolCallback skillsToolCallback() {
+            return SkillsTool.builder()
+                    .addSkillsResource(new ClassPathResource("skills"))
+                    .build();
+        }
+
+        @Bean
+        public ToolCallback todoWriteToolCallback() {
+            TodoWriteTool tool = TodoWriteTool.builder()
+                    .todoEventHandler(todos -> {})
+                    .build();
+            ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                    .toolObjects(tool)
+                    .build()
+                    .getToolCallbacks();
+            return callbacks[0];
+        }
+
+        @Bean
+        public ToolCallback taskToolCallback(ChatModel chatModel) {
+            ChatClient.Builder defaultBuilder = ChatClient.builder(chatModel);
+            SubagentType subagentType = ClaudeSubagentType.builder()
+                    .chatClientBuilder("default", defaultBuilder)
+                    .skillsDirectories(List.of("skills"))
+                    .build();
+
+            // Use a single agent reference to avoid duplicate-key issues
+            List<SubagentReference> refs = ClaudeSubagentReferences.fromResource(
+                    new ClassPathResource("agents/explore.md"));
+
+            return TaskTool.builder()
+                    .subagentReferences(refs)
+                    .subagentTypes(subagentType)
+                    .build();
+        }
+    }
 
     @Test
     void contextLoads() {
-        // Verify the Spring context loads without errors despite
-        // spring-ai-agent-utils v0.7.0 referencing Spring 7.x Nullness class.
-        // All agent-utils tools are disabled in this test to avoid class loading issues.
+        assertNotNull(agentUtilsCallbacks);
+        assertNotNull(pendingQuestionRegistry);
     }
 
     @Test
-    void propertiesAreBindable() {
-        AgentUtilsProperties props = new AgentUtilsProperties();
-        assertNotNull(props.getWebFetch());
-        assertNotNull(props.getSkills());
-        assertNotNull(props.getAskUser());
-        assertNotNull(props.getTodo());
-        assertNotNull(props.getTasks());
-    }
-
-    @TestConfiguration
-    static class TestMocks {
-        @Bean
-        @Primary
-        public ChatModel chatModel() {
-            return org.mockito.Mockito.mock(ChatModel.class);
+    void allAgentUtilsCallbacksAreRegistered() {
+        Map<String, ToolCallback> callbackMap = new java.util.HashMap<>();
+        for (ToolCallback cb : agentUtilsCallbacks) {
+            if (cb != null) {
+                callbackMap.put(cb.getToolDefinition().name(), cb);
+            }
         }
+
+        assertTrue(callbackMap.containsKey("WebFetch"),
+                "WebFetch callback should be registered");
+        assertTrue(callbackMap.containsKey("Skill"),
+                "Skill callback should be registered");
+        assertTrue(callbackMap.containsKey("TodoWrite"),
+                "TodoWrite callback should be registered");
+        assertTrue(callbackMap.containsKey("Task"),
+                "Task callback should be registered");
     }
 }

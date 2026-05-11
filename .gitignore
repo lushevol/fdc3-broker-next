@@ -10,6 +10,7 @@ build
 .turbo
 .mf
 out
+*.class
 
 # TypeScript
 *.tsbuildinfo
@@ -20,6 +21,7 @@ apps/base/tsconfig.tsbuildinfo
 coverage
 .nyc_output
 *.log
+test-results
 
 # IDE
 .vscode

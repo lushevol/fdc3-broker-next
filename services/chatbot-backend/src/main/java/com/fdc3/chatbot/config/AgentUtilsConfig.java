@@ -7,6 +7,7 @@ import com.fdc3.chatbot.config.AgentUtilsProperties.Tasks;
 import com.fdc3.chatbot.config.AgentUtilsProperties.WebFetch;
 import com.fdc3.chatbot.tool.agentutils.PendingQuestionRegistry;
 import com.fdc3.chatbot.tool.agentutils.ToolExecutionBridge;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
@@ -20,8 +21,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ClassPathResource;
 import org.springaicommunity.agent.common.task.subagent.SubagentReference;
 import org.springaicommunity.agent.common.task.subagent.SubagentType;
-import org.springaicommunity.agent.tools.AskUserQuestionTool;
-import org.springaicommunity.agent.tools.AskUserQuestionTool.QuestionHandler;
 import org.springaicommunity.agent.tools.SkillsTool;
 import org.springaicommunity.agent.tools.SmartWebFetchTool;
 import org.springaicommunity.agent.tools.TodoWriteTool;
@@ -45,6 +44,17 @@ import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentType;
 @Configuration
 @EnableConfigurationProperties(AgentUtilsProperties.class)
 public class AgentUtilsConfig {
+
+    @PostConstruct
+    void checkCompatibility() {
+        try {
+            Class.forName("org.springframework.core.Nullness");
+        } catch (ClassNotFoundException e) {
+            log.error("spring-ai-agent-utils 0.7.0 requires Spring Framework 7.x class "
+                    + "org.springframework.core.Nullness which is not on the classpath. "
+                    + "Agent-utils tools will fail at runtime when invoked.");
+        }
+    }
 
     @Bean
     public PendingQuestionRegistry pendingQuestionRegistry() {
@@ -70,66 +80,19 @@ public class AgentUtilsConfig {
                 .build();
         log.info("Created WebFetch tool: maxContentLength={}, userAgent={}",
                 config.getMaxContentLength(), config.getUserAgent());
-        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                .toolObjects(tool)
-                .build()
-                .getToolCallbacks();
-        if (callbacks.length > 0) {
-            return callbacks[0];
-        }
-        throw new IllegalStateException("No @Tool-annotated methods found on SmartWebFetchTool");
+        return toToolCallback(tool);
     }
 
     @Bean
     @ConditionalOnProperty(name = "chatbot.agent-utils.skills.enabled", havingValue = "true", matchIfMissing = false)
     public ToolCallback skillsToolCallback(AgentUtilsProperties properties) {
         Skills config = properties.getSkills();
-        String location = config.getLocation();
-        ClassPathResource skillsResource;
-        if (location.startsWith("classpath:")) {
-            skillsResource = new ClassPathResource(location.substring("classpath:".length()));
-        } else {
-            throw new IllegalArgumentException(
-                    "Unsupported skills location scheme: '" + location +
-                    "'. Only 'classpath:' is supported.");
-        }
         ToolCallback callback = SkillsTool.builder()
-                .addSkillsResource(skillsResource)
+                .addSkillsResource(new ClassPathResource(
+                        config.getLocation().replace("classpath:", "")))
                 .build();
         log.info("Created SkillsTool from location: {}", config.getLocation());
         return callback;
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = "chatbot.agent-utils.ask-user.enabled", havingValue = "true", matchIfMissing = false)
-    public ToolCallback askUserQuestionToolCallback(
-            PendingQuestionRegistry pendingQuestionRegistry,
-            AgentUtilsProperties properties
-    ) {
-        // QuestionHandler receives questions from the tool and returns answers.
-        // When questions arrive, the handler stores them in the registry and
-        // blocks until the user responds via the QuestionController endpoint.
-        // NOTE: Full SSE emission + future blocking not yet implemented.
-        QuestionHandler handler = questions -> {
-            log.info("AskUserQuestion: {} questions pending", questions.size());
-            throw new UnsupportedOperationException(
-                    "AskUserQuestion handler is not yet fully implemented. " +
-                    "The handler must emit SSE events and block on user answers " +
-                    "via PendingQuestionRegistry. See AgentUtilsConfig.java");
-        };
-        AskUserQuestionTool tool = AskUserQuestionTool.builder()
-                .questionHandler(handler)
-                .answersValidation(false)
-                .build();
-        log.info("Created AskUserQuestionTool");
-        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                .toolObjects(tool)
-                .build()
-                .getToolCallbacks();
-        if (callbacks.length > 0) {
-            return callbacks[0];
-        }
-        throw new IllegalStateException("No @Tool-annotated methods found on AskUserQuestionTool");
     }
 
     @Bean
@@ -142,14 +105,7 @@ public class AgentUtilsConfig {
                 .todoEventHandler(handler)
                 .build();
         log.info("Created TodoWriteTool");
-        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                .toolObjects(tool)
-                .build()
-                .getToolCallbacks();
-        if (callbacks.length > 0) {
-            return callbacks[0];
-        }
-        throw new IllegalStateException("No @Tool-annotated methods found on TodoWriteTool");
+        return toToolCallback(tool);
     }
 
     @Bean
@@ -178,5 +134,16 @@ public class AgentUtilsConfig {
 
         log.info("Created TaskTool with {} sub-agent definitions", refs.size());
         return callback;
+    }
+
+    private static ToolCallback toToolCallback(Object tool) {
+        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                .toolObjects(tool)
+                .build()
+                .getToolCallbacks();
+        if (callbacks.length > 0) {
+            return callbacks[0];
+        }
+        throw new IllegalStateException("No @Tool-annotated methods found on " + tool.getClass().getSimpleName());
     }
 }
