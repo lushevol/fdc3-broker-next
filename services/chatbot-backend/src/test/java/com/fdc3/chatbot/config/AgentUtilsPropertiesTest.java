@@ -11,10 +11,12 @@ class AgentUtilsPropertiesTest {
         AgentUtilsProperties properties = new AgentUtilsProperties();
         properties.getWebFetch().setEnabled(true);
         properties.getWebFetch().setUserAgent("TestAgent/1.0");
+        properties.getWebFetch().setDomainSafetyCheck(true);
 
         assertTrue(properties.getWebFetch().isEnabled());
         assertEquals("TestAgent/1.0", properties.getWebFetch().getUserAgent());
         assertEquals(50000, properties.getWebFetch().getMaxContentLength());
+        assertTrue(properties.getWebFetch().isDomainSafetyCheck());
     }
 
     @Test
