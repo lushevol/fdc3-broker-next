@@ -19,6 +19,7 @@
     "dev:services": "turbo run dev --filter=\"./services/backend\" --filter=\"./services/chatbot-backend\"",
     "dev:stack": "concurrently \"npm --workspace services/backend run dev\" \"npm --workspace services/elasticsearch-mcp-service run dev:live\" \"npm --workspace services/chatbot-backend run dev:with-elasticsearch-mcp\"",
     "dev:stack:stub": "concurrently \"npm --workspace services/backend run dev\" \"npm --workspace services/elasticsearch-mcp-service run dev:stub\" \"npm --workspace services/chatbot-backend run dev:with-elasticsearch-mcp\"",
+    "dev:rag": "cross-env RAG_EMBEDDING_PROVIDER=deterministic CHATBOT_MCP_RAG_ENABLED=true CHATBOT_MCP_RAG_URL=http://localhost:8091/api/mcp CHATBOT_SECURITY_ADDITIONAL_PROFILES=advisor turbo run dev --filter=\"./services/rag-knowledge-base-service\" --filter=\"./services/chatbot-backend\"",
     "stop": "node scripts/stop-ports.js",
     "changeset": "changeset",
     "version": "changeset version",
