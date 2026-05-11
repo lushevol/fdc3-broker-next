@@ -1552,7 +1552,10 @@ public class AgentService {
 
         try {
             log.debug("Executing agent-utils tool: {}", toolExecutionRequest.name());
-            String result = callback.call(writeJson(arguments));
+            String result = java.util.concurrent.CompletableFuture
+                    .supplyAsync(() -> callback.call(writeJson(arguments)))
+                    .orTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
+                    .join();
 
             ToolResult toolResult = ToolResult.builder()
                     .toolCallId(toolExecutionRequest.id())

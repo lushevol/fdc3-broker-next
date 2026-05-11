@@ -1,7 +1,6 @@
 package com.fdc3.chatbot.config;
 
 import java.util.List;
-import java.util.Map;
 
 import com.fdc3.chatbot.config.AgentUtilsProperties.Skills;
 import com.fdc3.chatbot.config.AgentUtilsProperties.Tasks;
@@ -67,7 +66,7 @@ public class AgentUtilsConfig {
         ChatClient chatClient = ChatClient.builder(chatModel).build();
         SmartWebFetchTool tool = SmartWebFetchTool.builder(chatClient)
                 .maxContentLength(config.getMaxContentLength())
-                .domainSafetyCheck(false)
+                .domainSafetyCheck(config.isDomainSafetyCheck())
                 .build();
         log.info("Created WebFetch tool: maxContentLength={}, userAgent={}",
                 config.getMaxContentLength(), config.getUserAgent());
@@ -85,9 +84,17 @@ public class AgentUtilsConfig {
     @ConditionalOnProperty(name = "chatbot.agent-utils.skills.enabled", havingValue = "true", matchIfMissing = false)
     public ToolCallback skillsToolCallback(AgentUtilsProperties properties) {
         Skills config = properties.getSkills();
+        String location = config.getLocation();
+        ClassPathResource skillsResource;
+        if (location.startsWith("classpath:")) {
+            skillsResource = new ClassPathResource(location.substring("classpath:".length()));
+        } else {
+            throw new IllegalArgumentException(
+                    "Unsupported skills location scheme: '" + location +
+                    "'. Only 'classpath:' is supported.");
+        }
         ToolCallback callback = SkillsTool.builder()
-                .addSkillsResource(new ClassPathResource(
-                        config.getLocation().replace("classpath:", "")))
+                .addSkillsResource(skillsResource)
                 .build();
         log.info("Created SkillsTool from location: {}", config.getLocation());
         return callback;
@@ -102,15 +109,13 @@ public class AgentUtilsConfig {
         // QuestionHandler receives questions from the tool and returns answers.
         // When questions arrive, the handler stores them in the registry and
         // blocks until the user responds via the QuestionController endpoint.
+        // NOTE: Full SSE emission + future blocking not yet implemented.
         QuestionHandler handler = questions -> {
             log.info("AskUserQuestion: {} questions pending", questions.size());
-            // In production, this would:
-            // 1. Generate a questionId
-            // 2. Emit an SSE user_question event
-            // 3. Register the CompletableFuture in pendingQuestionRegistry
-            // 4. Block on future.get() until the user responds
-            // For now, return a default answer to unblock the tool
-            return Map.of();
+            throw new UnsupportedOperationException(
+                    "AskUserQuestion handler is not yet fully implemented. " +
+                    "The handler must emit SSE events and block on user answers " +
+                    "via PendingQuestionRegistry. See AgentUtilsConfig.java");
         };
         AskUserQuestionTool tool = AskUserQuestionTool.builder()
                 .questionHandler(handler)

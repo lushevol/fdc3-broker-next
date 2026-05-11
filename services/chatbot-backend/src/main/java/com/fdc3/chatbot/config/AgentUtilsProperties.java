@@ -26,6 +26,7 @@ public class AgentUtilsProperties {
         private boolean enabled = true;
         private String userAgent = "FDC3-Chatbot/1.0";
         private int maxContentLength = 50000;
+        private boolean domainSafetyCheck = false;
 
         public boolean isEnabled() { return enabled; }
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
@@ -33,6 +34,8 @@ public class AgentUtilsProperties {
         public void setUserAgent(String userAgent) { this.userAgent = userAgent; }
         public int getMaxContentLength() { return maxContentLength; }
         public void setMaxContentLength(int maxContentLength) { this.maxContentLength = maxContentLength; }
+        public boolean isDomainSafetyCheck() { return domainSafetyCheck; }
+        public void setDomainSafetyCheck(boolean domainSafetyCheck) { this.domainSafetyCheck = domainSafetyCheck; }
     }
 
     public static class Skills {
