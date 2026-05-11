@@ -42,6 +42,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.springaicommunity</groupId>
+                <artifactId>spring-ai-agent-utils-bom</artifactId>
+                <version>0.7.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -76,6 +83,12 @@
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-mcp-client</artifactId>
+        </dependency>
+
+        <!-- Spring AI Agent Utils -->
+        <dependency>
+            <groupId>org.springaicommunity</groupId>
+            <artifactId>spring-ai-agent-utils</artifactId>
         </dependency>
 
         <!-- JSON processing -->
