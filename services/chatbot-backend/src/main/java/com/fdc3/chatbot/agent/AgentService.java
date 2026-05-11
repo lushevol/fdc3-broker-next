@@ -23,6 +23,7 @@ import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.model.UserCapabilityContext;
 import com.fdc3.chatbot.tool.ToolDefinition;
 import com.fdc3.chatbot.tool.ToolRegistry;
+import com.fdc3.chatbot.tool.agentutils.ToolExecutionBridge;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -40,6 +41,7 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.function.FunctionToolCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import reactor.core.Disposable;
 
@@ -127,6 +129,8 @@ public class AgentService {
     private final Map<String, List<FrontendToolManifestEntry>> frontendToolManifestsByConversation =
             new ConcurrentHashMap<>();
 
+    private ToolExecutionBridge toolExecutionBridge;
+
     public AgentService(ToolRegistry toolRegistry) {
         this(toolRegistry, null, null, null, null, null, null);
     }
@@ -156,6 +160,11 @@ public class AgentService {
         this.planValidationService = planValidationService;
         this.executionOrchestrator = executionOrchestrator;
         this.resultSynthesisService = resultSynthesisService;
+    }
+
+    @Autowired(required = false)
+    void setToolExecutionBridge(@Lazy ToolExecutionBridge bridge) {
+        this.toolExecutionBridge = bridge;
     }
 
     @PostConstruct
@@ -1341,6 +1350,20 @@ public class AgentService {
 
         ToolDefinition toolDefinition = availableTools.get(toolExecutionRequest.name());
         if (toolDefinition == null) {
+            // Fallback: check executable callbacks (agent-utils tools)
+            if (toolExecutionBridge != null) {
+                ToolCallback callback = toolExecutionBridge.getCallback(toolExecutionRequest.name());
+                if (callback != null) {
+                    executeAgentUtilsCallback(
+                            conversationId, messages, callback,
+                            toolExecutionRequest, arguments, index,
+                            toolExecutionRequests, frontendToolManifest, blockedToolNames,
+                            continueAfterToolLoop, availableTools, onNext, onError, onComplete,
+                            onToolCall, onToolResult, cancelled
+                    );
+                    return;
+                }
+            }
             onError.accept(new IllegalArgumentException("Tool not available for current user: " + toolExecutionRequest.name()));
             return;
         }
@@ -1495,6 +1518,76 @@ public class AgentService {
                 });
     }
 
+    private void executeAgentUtilsCallback(
+            String conversationId,
+            List<Message> messages,
+            ToolCallback callback,
+            AssistantMessage.ToolCall toolExecutionRequest,
+            Map<String, Object> arguments,
+            int index,
+            List<AssistantMessage.ToolCall> toolExecutionRequests,
+            List<FrontendToolManifestEntry> frontendToolManifest,
+            Set<String> blockedToolNames,
+            boolean continueAfterToolLoop,
+            Map<String, ToolDefinition> availableTools,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            AtomicBoolean cancelled
+    ) {
+        if (cancelled.get()) {
+            return;
+        }
+
+        onToolCall.accept(ToolCall.builder()
+                .id(toolExecutionRequest.id())
+                .name(toolExecutionRequest.name())
+                .arguments(arguments)
+                .status(ToolCall.ToolStatus.RUNNING)
+                .executionTarget(ToolCall.ExecutionTarget.BACKEND)
+                .requiresConfirmation(false)
+                .build());
+
+        try {
+            log.debug("Executing agent-utils tool: {}", toolExecutionRequest.name());
+            String result = java.util.concurrent.CompletableFuture
+                    .supplyAsync(() -> callback.call(writeJson(arguments)))
+                    .orTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
+                    .join();
+
+            ToolResult toolResult = ToolResult.builder()
+                    .toolCallId(toolExecutionRequest.id())
+                    .result(result)
+                    .build();
+            onToolResult.accept(toolResult);
+
+            List<Message> continuedMessages = new java.util.ArrayList<>(messages);
+            continuedMessages.add(toolResponseMessage(
+                    toolExecutionRequest.id(),
+                    toolExecutionRequest.name(),
+                    result != null ? result : ""
+            ));
+            Set<String> nextBlockedToolNames = new java.util.LinkedHashSet<>(blockedToolNames);
+            nextBlockedToolNames.add(toolExecutionRequest.name());
+
+            continueWithToolRequests(
+                    conversationId, "", List.of(), continuedMessages,
+                    availableTools, toolExecutionRequests, frontendToolManifest,
+                    Set.copyOf(nextBlockedToolNames), index + 1, continueAfterToolLoop,
+                    onNext, onError, onComplete, onToolCall, onToolResult, cancelled
+            );
+        } catch (Exception e) {
+            log.error("Agent-utils tool '{}' execution failed", toolExecutionRequest.name(), e);
+            onToolResult.accept(ToolResult.builder()
+                    .toolCallId(toolExecutionRequest.id())
+                    .error(e.getMessage())
+                    .build());
+            onComplete.run();
+        }
+    }
+
     private List<ToolCallback> buildToolCallbacks(
             Map<String, ToolDefinition> tools,
             List<FrontendToolManifestEntry> frontendTools,
@@ -1514,6 +1607,13 @@ public class AgentService {
                         toolCallback.getToolDefinition().name(),
                         toolCallback
                 ));
+
+        // Merge agent-utils callbacks for prompt registration
+        if (toolExecutionBridge != null) {
+            toolExecutionBridge.getCallbackMap().entrySet().stream()
+                    .filter(entry -> !blockedToolNames.contains(entry.getKey()))
+                    .forEach(entry -> uniqueCallbacks.putIfAbsent(entry.getKey(), entry.getValue()));
+        }
 
         return List.copyOf(uniqueCallbacks.values());
     }
