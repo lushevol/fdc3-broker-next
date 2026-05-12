@@ -47,7 +47,8 @@ class KnowledgeBaseMcpToolsTest {
                         new RagProperties.Chunking(1200, 160),
                         new RagProperties.Embedding(
                                 "deterministic",
-                                new RagProperties.OpenRouter("", "http://localhost", "model", 3000)
+                                new RagProperties.OpenRouter("", "http://localhost", "model", 3000),
+                                new RagProperties.CopilotApi("http://localhost:4141", "", "text-embedding-3-small", 3000)
                         ),
                         new RagProperties.Search(5, 10, 3000),
                         new RagProperties.Elasticsearch(false, "http://localhost:9200", "", "", "rag-knowledge-chunks", 1536),

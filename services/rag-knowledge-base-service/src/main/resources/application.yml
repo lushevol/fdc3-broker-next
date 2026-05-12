@@ -38,6 +38,11 @@ rag:
       base-url: ${OPENROUTER_BASE_URL:https://openrouter.ai/api/v1}
       model: ${OPENROUTER_EMBEDDING_MODEL:openai/text-embedding-3-small}
       timeout-millis: ${OPENROUTER_EMBEDDING_TIMEOUT_MILLIS:30000}
+    copilot-api:
+      base-url: ${RAG_EMBEDDING_COPILOT_API_BASE_URL:http://localhost:4141}
+      api-key: ${RAG_EMBEDDING_COPILOT_API_KEY:}
+      model: ${RAG_EMBEDDING_COPILOT_API_EMBEDDING_MODEL:text-embedding-3-small}
+      timeout-millis: ${RAG_EMBEDDING_COPILOT_API_TIMEOUT_MILLIS:30000}
   elasticsearch:
     enabled: ${RAG_ELASTICSEARCH_ENABLED:false}
     uris: ${RAG_ES_URIS:http://localhost:9200}

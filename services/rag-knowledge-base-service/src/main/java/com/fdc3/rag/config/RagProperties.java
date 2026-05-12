@@ -17,10 +17,13 @@ public record RagProperties(
     public record Chunking(int maxChars, int overlapChars) {
     }
 
-    public record Embedding(String provider, OpenRouter openrouter) {
+    public record Embedding(String provider, OpenRouter openrouter, CopilotApi copilotApi) {
     }
 
     public record OpenRouter(String apiKey, String baseUrl, String model, int timeoutMillis) {
+    }
+
+    public record CopilotApi(String baseUrl, String apiKey, String model, int timeoutMillis) {
     }
 
     public record Search(int defaultTopK, int maxTopK, long embeddingTimeoutMillis) {

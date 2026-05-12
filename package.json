@@ -20,6 +20,7 @@
     "dev:services:stub": "concurrently \"npm --workspace services/backend run dev\" \"npm --workspace services/elasticsearch-mcp-service run dev:stub\" \"npm --workspace services/chatbot-backend run dev:with-elasticsearch-mcp\"",
     "dev:rag": "concurrently \"npm --workspace services/rag-knowledge-base-service run dev\" \"npm --workspace services/chatbot-backend run dev:with-rag-mcp\"",
     "dev:rag:stub": "concurrently \"npm --workspace services/rag-knowledge-base-service run dev:stub\" \"npm --workspace services/chatbot-backend run dev:with-rag-mcp\"",
+    "dev:rag:copilot": "concurrently \"npm --workspace services/rag-knowledge-base-service run dev:copilot\" \"npm --workspace services/chatbot-backend run dev:with-rag-mcp\"",
     "stop": "node scripts/stop-ports.js",
     "changeset": "changeset",
     "version": "changeset version",
