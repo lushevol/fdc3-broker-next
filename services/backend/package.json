@@ -2,6 +2,6 @@
   "name": "backend",
   "version": "1.0.0",
   "scripts": {
-    "dev": "cross-env PGSL_RDB_URL='jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL' PGSL_RDB_USERNAME_HASHICORP=sa PGSL_RDB_JANUS_HASHICORP= PGSL_RDB_DRIVER=org.h2.Driver OUD_URL=ldap://localhost:389 RATAN_CIPHER_KEY=key ELASTIC_HOST=http://localhost:9200 ELASTIC_API_KEY=key ELASTIC_API_VALUE=value FMAA_HOST=http://localhost:8080 EMS2_HTTPS_HOST=http://localhost:8080 MFA_CERT=cert MFA_REDIRECT_URI=http://localhost:8081 API_GATEWAY_URL=http://localhost:8080 API_GATEWAY_TOKEN=token mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8088 -Dspring.profiles.active=local'"
+    "dev": "env-cmd -f ../../.env.profile.${ACTIVE_ENV:-dev} mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8088 -Dspring.profiles.active=local'"
   }
 }

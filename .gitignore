@@ -42,8 +42,20 @@ prisma/migrations/*/migration.sql
 .temp
 .tmp
 
+# Profile overrides
+.env.active
+.env.profile.local
+
 *storybook.log
 storybook-static
 .playwright-cli/*
 output/playwright/*
 .worktrees
+services/elasticsearch-mcp-service/.settings/org.eclipse.core.resources.prefs
+services/elasticsearch-mcp-service/.settings/org.eclipse.jdt.apt.core.prefs
+services/elasticsearch-mcp-service/.settings/org.eclipse.jdt.core.prefs
+services/elasticsearch-mcp-service/.settings/org.eclipse.m2e.core.prefs
+services/chatbot-backend/.settings/org.eclipse.core.resources.prefs
+services/chatbot-backend/.settings/org.eclipse.jdt.apt.core.prefs
+services/chatbot-backend/.settings/org.eclipse.jdt.core.prefs
+services/chatbot-backend/.settings/org.eclipse.m2e.core.prefs

@@ -24,15 +24,23 @@ public class McpBootstrapRegistrar {
                 continue;
             }
             if (provider.getProviderId() == null || provider.getProviderId().isBlank()) {
-                throw new IllegalStateException("Enabled MCP bootstrap provider is missing providerId");
+                log.warn("Skipping enabled MCP bootstrap provider: missing providerId");
+                continue;
             }
             if (provider.getUrl() == null || provider.getUrl().isBlank()) {
-                throw new IllegalStateException(
-                        "Enabled MCP bootstrap provider '" + provider.getProviderId() + "' is missing url"
-                );
+                log.warn("Skipping enabled MCP bootstrap provider '{}': missing url",
+                        provider.getProviderId());
+                continue;
             }
 
-            registerWithRetry(provider);
+            try {
+                registerWithRetry(provider);
+            } catch (RuntimeException exception) {
+                log.error("Failed to bootstrap MCP provider '{}' after all retries. " +
+                        "The service will continue without this provider. " +
+                        "It can be added later via POST /api/chat/mcp/providers.",
+                        provider.getProviderId(), exception);
+            }
         }
     }
 

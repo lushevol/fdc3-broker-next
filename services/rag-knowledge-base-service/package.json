@@ -4,8 +4,6 @@
   "scripts": {
     "build": "mvn -DskipTests clean package",
     "test": "mvn test",
-    "dev": "cross-env RAG_ELASTICSEARCH_ENABLED=true mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8091'",
-    "dev:stub": "cross-env RAG_EMBEDDING_PROVIDER=deterministic mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8091'",
-    "dev:copilot": "cross-env RAG_EMBEDDING_PROVIDER=copilot-api RAG_ELASTICSEARCH_ENABLED=true mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8091'"
+    "dev": "env-cmd -f ../../.env.profile.${ACTIVE_ENV:-dev} mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8091'"
   }
 }

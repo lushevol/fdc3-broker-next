@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class McpBootstrapRegistrarTest {
 
@@ -70,7 +69,7 @@ class McpBootstrapRegistrarTest {
     }
 
     @Test
-    void rejectsEnabledProviderWithoutUrl() {
+    void skipsEnabledProviderWithoutUrl() {
         McpBootstrapProperties properties = new McpBootstrapProperties();
         McpBootstrapProperties.Provider provider = new McpBootstrapProperties.Provider();
         provider.setEnabled(true);
@@ -81,20 +80,12 @@ class McpBootstrapRegistrarTest {
         properties.setRegistrationMaxAttempts(1);
         properties.setRegistrationRetryDelayMillis(0L);
 
-        McpBootstrapRegistrar registrar = new McpBootstrapRegistrar(
-                properties,
-                new RecordingMcpProviderRegistryService()
-        );
+        RecordingMcpProviderRegistryService registryService = new RecordingMcpProviderRegistryService();
+        McpBootstrapRegistrar registrar = new McpBootstrapRegistrar(properties, registryService);
 
-        IllegalStateException exception = assertThrows(
-                IllegalStateException.class,
-                registrar::registerConfiguredProviders
-        );
+        registrar.registerConfiguredProviders();
 
-        assertEquals(
-                "Enabled MCP bootstrap provider 'elasticsearch-analytics' is missing url",
-                exception.getMessage()
-        );
+        assertEquals(0, registryService.requests.size());
     }
 
     @Test
@@ -124,7 +115,7 @@ class McpBootstrapRegistrarTest {
     }
 
     @Test
-    void throwsAfterExhaustingRetryBudget() {
+    void gracefullyHandlesRetryBudgetExhaustion() {
         McpBootstrapProperties properties = new McpBootstrapProperties();
         McpBootstrapProperties.Provider provider = new McpBootstrapProperties.Provider();
         provider.setEnabled(true);
@@ -143,10 +134,10 @@ class McpBootstrapRegistrarTest {
             }
         };
 
-        RuntimeException exception = assertThrows(RuntimeException.class, registrar::registerConfiguredProviders);
+        registrar.registerConfiguredProviders();
 
-        assertEquals("boom-2", exception.getMessage());
         assertEquals(2, registryService.attempts.get());
+        assertEquals(0, registryService.requests.size());
     }
 
     private static class RecordingMcpProviderRegistryService extends McpProviderRegistryService {
