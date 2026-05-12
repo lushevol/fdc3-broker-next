@@ -44,7 +44,7 @@ class CopilotApiEmbeddingClientTest {
             assertThat(request.getHeaders().get("x-api-key")).isEqualTo("test-api-key");
             assertThat(request.getBody().readUtf8())
                     .contains("\"model\":\"text-embedding-3-small\"")
-                    .contains("\"input\":\"Your text string goes here\"")
+                    .contains("\"input\":[\"Your text string goes here\"]")
                     .contains("\"encoding_format\":\"float\"");
         }
     }

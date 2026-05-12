@@ -32,7 +32,7 @@ public class CopilotApiEmbeddingClient implements EmbeddingClient {
 
     @Override
     public Mono<List<Double>> embed(String input) {
-        return embedRequest(input).map(response -> response.data().get(0).embedding());
+        return embedRequest(List.of(input)).map(response -> response.data().get(0).embedding());
     }
 
     @Override
