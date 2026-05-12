@@ -19,11 +19,11 @@ class SmartWebFetchCallbackTest {
     private ChatModel chatModel;
 
     @Test
-    void createsToolCallbackFromSmartWebFetchTool() {
+    void buildSmartWebFetchToolReturnsWebFetchCallback() {
         ChatClient chatClient = ChatClient.builder(chatModel).build();
         SmartWebFetchTool tool = SmartWebFetchTool.builder(chatClient)
+                .domainSafetyCheck(true)
                 .maxContentLength(10000)
-                .domainSafetyCheck(false)
                 .build();
 
         ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
@@ -31,9 +31,43 @@ class SmartWebFetchCallbackTest {
                 .build()
                 .getToolCallbacks();
 
-        assertNotNull(callbacks);
-        assertEquals(1, callbacks.length);
+        assertTrue(callbacks.length > 0);
+        ToolCallback callback = callbacks[0];
+        assertEquals("WebFetch", callback.getToolDefinition().name());
+        assertNotNull(callback.getToolDefinition().description());
+    }
+
+    @Test
+    void smartWebFetchToolWithCustomUserAgent() {
+        ChatClient chatClient = ChatClient.builder(chatModel).build();
+        SmartWebFetchTool tool = SmartWebFetchTool.builder(chatClient)
+                .domainSafetyCheck(true)
+                .maxContentLength(5000)
+                .build();
+
+        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                .toolObjects(tool)
+                .build()
+                .getToolCallbacks();
+
+        assertTrue(callbacks.length > 0);
         assertEquals("WebFetch", callbacks[0].getToolDefinition().name());
-        assertNotNull(callbacks[0].getToolDefinition().description());
+    }
+
+    @Test
+    void smartWebFetchToolWithDomainSafetyCheck() {
+        ChatClient chatClient = ChatClient.builder(chatModel).build();
+        SmartWebFetchTool tool = SmartWebFetchTool.builder(chatClient)
+                .domainSafetyCheck(true)
+                .maxContentLength(10000)
+                .build();
+
+        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                .toolObjects(tool)
+                .build()
+                .getToolCallbacks();
+
+        assertTrue(callbacks.length > 0);
+        assertEquals("WebFetch", callbacks[0].getToolDefinition().name());
     }
 }

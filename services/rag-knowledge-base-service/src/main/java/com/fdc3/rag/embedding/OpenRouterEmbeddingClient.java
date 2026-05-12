@@ -1,6 +1,7 @@
 package com.fdc3.rag.embedding;
 
 import com.fdc3.rag.config.RagProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,6 +20,7 @@ public class OpenRouterEmbeddingClient implements EmbeddingClient {
     private final WebClient webClient;
     private final RagProperties.OpenRouter properties;
 
+    @Autowired
     public OpenRouterEmbeddingClient(WebClient.Builder webClientBuilder, RagProperties properties) {
         this(webClientBuilder, properties.embedding().openrouter());
     }

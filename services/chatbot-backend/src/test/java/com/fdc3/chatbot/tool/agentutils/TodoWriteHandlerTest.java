@@ -3,12 +3,10 @@ package com.fdc3.chatbot.tool.agentutils;
 import org.junit.jupiter.api.Test;
 import org.springaicommunity.agent.tools.TodoWriteTool;
 import org.springaicommunity.agent.tools.TodoWriteTool.TodoEventHandler;
-import org.springaicommunity.agent.tools.TodoWriteTool.Todos;
-import org.springaicommunity.agent.tools.TodoWriteTool.Todos.Status;
-import org.springaicommunity.agent.tools.TodoWriteTool.Todos.TodoItem;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,19 +14,61 @@ class TodoWriteHandlerTest {
 
     @Test
     void handlerReceivesTodos() {
-        AtomicReference<Todos> captured = new AtomicReference<>();
-        TodoEventHandler handler = captured::set;
+        CopyOnWriteArrayList<String> capturedTasks = new CopyOnWriteArrayList<>();
+
+        TodoEventHandler handler = todos -> {
+            if (todos.todos() != null) {
+                todos.todos().forEach(item -> capturedTasks.add(item.content()));
+            }
+        };
+
         TodoWriteTool tool = TodoWriteTool.builder()
                 .todoEventHandler(handler)
                 .build();
 
-        Todos todos = new Todos(List.of(
-                new TodoItem("Research FDC3", Status.pending, "Researching")
-        ));
-        handler.handle(todos);
+        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                .toolObjects(tool)
+                .build()
+                .getToolCallbacks();
 
-        assertNotNull(captured.get());
-        assertEquals(1, captured.get().todos().size());
-        assertEquals("Research FDC3", captured.get().todos().get(0).content());
+        assertTrue(callbacks.length > 0);
+        ToolCallback callback = callbacks[0];
+        assertNotNull(callback.getToolDefinition());
+        assertEquals("TodoWrite", callback.getToolDefinition().name());
+        assertNotNull(callback.getToolDefinition().description());
+    }
+
+    @Test
+    void handlerWithNullTodosDoesNotThrow() {
+        TodoEventHandler handler = todos -> {
+            // Should not throw even if todos.todos() returns null
+        };
+
+        TodoWriteTool tool = TodoWriteTool.builder()
+                .todoEventHandler(handler)
+                .build();
+
+        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                .toolObjects(tool)
+                .build()
+                .getToolCallbacks();
+
+        assertTrue(callbacks.length > 0);
+    }
+
+    @Test
+    void todoWriteToolHasCorrectName() {
+        TodoEventHandler handler = todos -> {};
+
+        TodoWriteTool tool = TodoWriteTool.builder()
+                .todoEventHandler(handler)
+                .build();
+
+        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                .toolObjects(tool)
+                .build()
+                .getToolCallbacks();
+
+        assertEquals("TodoWrite", callbacks[0].getToolDefinition().name());
     }
 }

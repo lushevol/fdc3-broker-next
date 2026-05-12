@@ -1,6 +1,7 @@
 package com.fdc3.rag.repository;
 
 import com.fdc3.rag.ingest.KnowledgeChunk;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.util.Comparator;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Repository
+@ConditionalOnProperty(name = "rag.elasticsearch.enabled", havingValue = "false", matchIfMissing = true)
 public class InMemoryKnowledgeChunkRepository implements KnowledgeChunkRepository {
 
     private final AtomicReference<List<KnowledgeChunk>> chunks = new AtomicReference<>(List.of());
