@@ -50,7 +50,7 @@ class AgentUtilsConfigTest {
         properties.getSkills().setEnabled(true);
         properties.getSkills().setLocation("classpath:skills");
 
-        ToolCallback callback = config.skillsToolCallback(properties);
+        ToolCallback callback = config.skillsToolCallback();
         assertNotNull(callback);
         assertEquals("Skill", callback.getToolDefinition().name());
         assertNotNull(callback.getToolDefinition().description());
