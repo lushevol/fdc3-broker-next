@@ -8,6 +8,7 @@ public record RagProperties(
         Chunking chunking,
         Embedding embedding,
         Search search,
+        Elasticsearch elasticsearch,
         Executor executor
 ) {
     public record Ingestion(boolean enabled, String resourcePattern) {
@@ -23,6 +24,9 @@ public record RagProperties(
     }
 
     public record Search(int defaultTopK, int maxTopK, long embeddingTimeoutMillis) {
+    }
+
+    public record Elasticsearch(boolean enabled, String uris, String username, String password, String indexName, int embeddingDimension) {
     }
 
     public record Executor(int corePoolSize, int maxPoolSize, int queueCapacity) {

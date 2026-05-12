@@ -50,6 +50,7 @@ class KnowledgeBaseMcpToolsTest {
                                 new RagProperties.OpenRouter("", "http://localhost", "model", 3000)
                         ),
                         new RagProperties.Search(5, 10, 3000),
+                        new RagProperties.Elasticsearch(false, "http://localhost:9200", "", "", "rag-knowledge-chunks", 1536),
                         new RagProperties.Executor(1, 1, 1)
                 ),
                 Runnable::run

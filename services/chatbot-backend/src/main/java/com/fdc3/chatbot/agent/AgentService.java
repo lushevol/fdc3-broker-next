@@ -1690,7 +1690,7 @@ public class AgentService {
                         }
                 )
                 .description(td.description())
-                .inputSchema(writeJson(td.inputSchema()))
+                .inputSchema(td.inputSchema())
                 .inputType(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
                 .build();

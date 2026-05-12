@@ -1,8 +1,10 @@
 package com.fdc3.chatbot.config;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import com.fdc3.chatbot.config.AgentUtilsProperties.Skills;
 import com.fdc3.chatbot.config.AgentUtilsProperties.Tasks;
 import com.fdc3.chatbot.config.AgentUtilsProperties.WebFetch;
 import com.fdc3.chatbot.tool.agentutils.PendingQuestionRegistry;
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.function.FunctionToolCallback;
 import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -22,6 +25,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springaicommunity.agent.common.task.subagent.SubagentReference;
 import org.springaicommunity.agent.common.task.subagent.SubagentType;
 import org.springaicommunity.agent.tools.SkillsTool;
+import org.springaicommunity.agent.utils.Skills;
 import org.springaicommunity.agent.tools.SmartWebFetchTool;
 import org.springaicommunity.agent.tools.TodoWriteTool;
 import org.springaicommunity.agent.tools.TodoWriteTool.TodoEventHandler;
@@ -56,6 +60,30 @@ public class AgentUtilsConfig {
         }
     }
 
+    private static final String SKILL_TOOL_DESCRIPTION_TEMPLATE = """
+            Execute a skill within the main conversation
+
+            <skills_instructions>
+            When users ask you to perform tasks, check if any of the available skills below can help complete the task more effectively. Skills provide specialized capabilities and domain knowledge.
+
+            How to use skills:
+            - Invoke skills using this tool with the skill name only (no arguments)
+            - When you invoke a skill, you will see <command-message>The "{name}" skill is loading</command-message>
+            - The skill's prompt will expand and provide detailed instructions on how to complete the task
+
+            NOTE: Response always starts with the base directory of the skill execution environment. You can use this to retrieve additional files or call shell commands.
+            Skill description follows after the base directory line.
+
+            Important:
+            - Only use skills listed in <available_skills> below
+            - Do not invoke a skill that is already running
+            </skills_instructions>
+
+            <available_skills>
+            %s
+            </available_skills>
+            """;
+
     @Bean
     public PendingQuestionRegistry pendingQuestionRegistry() {
         return new PendingQuestionRegistry();
@@ -85,14 +113,33 @@ public class AgentUtilsConfig {
 
     @Bean
     @ConditionalOnProperty(name = "chatbot.agent-utils.skills.enabled", havingValue = "true", matchIfMissing = false)
-    public ToolCallback skillsToolCallback(AgentUtilsProperties properties) {
-        Skills config = properties.getSkills();
-        ToolCallback callback = SkillsTool.builder()
-                .addSkillsResource(new ClassPathResource(
-                        config.getLocation().replace("classpath:", "")))
+    public ToolCallback skillsToolCallback() {
+        List<SkillsTool.Skill> skills = Skills.loadResource(new ClassPathResource("skills"));
+
+        String skillsXml = skills.stream()
+                .map(SkillsTool.Skill::toXml)
+                .collect(Collectors.joining("\n"));
+
+        String description = SKILL_TOOL_DESCRIPTION_TEMPLATE.formatted(skillsXml);
+
+        Function<Map<String, Object>, String> lookup = args -> {
+            String command = (String) args.get("command");
+            return skills.stream()
+                    .filter(s -> s.name().equals(command))
+                    .findFirst()
+                    .map(s -> "Base directory for this skill: %s%n%n%s".formatted(s.basePath(), s.content()))
+                    .orElse("Unknown skill: " + command);
+        };
+
+        log.info("Created SkillsTool from classpath:skills/ ({} skills loaded)", skills.size());
+        return FunctionToolCallback.builder("Skill", lookup)
+                .description(description)
+                .inputType((java.lang.reflect.Type) Map.class)
+                .inputSchema(
+                  "{\"type\":\"object\",\"properties\":{\"command\":{\"type\":\"string\"," +
+                  "\"description\":\"The name of the skill to invoke\"}}," +
+                  "\"required\":[\"command\"]}")
                 .build();
-        log.info("Created SkillsTool from location: {}", config.getLocation());
-        return callback;
     }
 
     @Bean

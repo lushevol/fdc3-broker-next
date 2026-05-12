@@ -55,6 +55,9 @@ chatbot:
         enabled-profiles:
           - advisor
         description: Read-only RAG retrieval MCP provider used for knowledge base search.
+  agent-utils:
+    skills:
+      enabled: true
   rate-limit:
     requests-per-minute: 60
     tokens-per-minute: 100000
@@ -62,4 +65,4 @@ chatbot:
 logging:
   level:
     com.fdc3.chatbot: DEBUG
-    org.springframework.ai: INFO
+    org.springframework.ai.openai: DEBUG
