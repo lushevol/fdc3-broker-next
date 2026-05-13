@@ -77,7 +77,8 @@ public class ProtocolChatService {
         Set<String> startedSteps = new java.util.HashSet<>();
         String[] pendingFinishReason = new String[]{"stop"};
 
-        Runnable cancel = agentService.processProtocolMessageStreaming(
+        String modelName = invocation.modelName();
+        Runnable cancel = agentService.processProtocolMessageStreamingWithModel(
                 invocation.conversationId(),
                 invocation.userMessage(),
                 capabilityContext,
@@ -85,6 +86,7 @@ public class ProtocolChatService {
                 invocation.frontendToolsJson(),
                 invocation.workspaceContext(),
                 invocation.history(),
+                modelName,
                 token -> {
                     if (textStarted.compareAndSet(false, true)) {
                         onFrame.accept(Map.of(
@@ -415,7 +417,8 @@ public class ProtocolChatService {
             List<ChatMessage> history,
             String toolContext,
             String frontendToolsJson,
-            WorkspaceContextSnapshot workspaceContext
+            WorkspaceContextSnapshot workspaceContext,
+            String modelName
     ) {
         static ProtocolInvocation from(
                 ProtocolRunRequest request,
@@ -460,6 +463,8 @@ public class ProtocolChatService {
                     : request.getRunId();
             String assistantMessageId = "msg_asst_" + UUID.randomUUID();
 
+            String modelName = request.getConfig() != null ? request.getConfig().getModelName() : null;
+
             return new ProtocolInvocation(
                     conversationId,
                     runId,
@@ -468,7 +473,8 @@ public class ProtocolChatService {
                     history,
                     resumableToolContext == null ? null : resumableToolContext.toolContextJson(),
                     serializeFrontendTools(request, objectMapper),
-                    toWorkspaceContext(request)
+                    toWorkspaceContext(request),
+                    modelName
             );
         }
 

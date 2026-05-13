@@ -30,10 +30,10 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.StreamingChatModel;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 
@@ -123,6 +123,10 @@ public class AgentService {
     private ExecutionOrchestrator executionOrchestrator;
     private ResultSynthesisService resultSynthesisService;
     private final ScheduledExecutorService mockExecutor = Executors.newScheduledThreadPool(1);
+
+    // Per-request model name override set by processProtocolMessageStreamingWithModel.
+    // Used by streamConversation to pass the selected model to buildPrompt.
+    private static final ThreadLocal<String> MODEL_NAME_OVERRIDE = new ThreadLocal<>();
 
     // In-memory conversation storage (use Redis/Database in production)
     private final Map<String, List<ChatMessage>> conversations = new ConcurrentHashMap<>();
@@ -483,7 +487,7 @@ public class AgentService {
             java.util.function.Consumer<ToolCall> onToolCall,
             java.util.function.Consumer<ToolResult> onToolResult
     ) {
-        return processMessageStreaming(
+        return processProtocolMessageStreamingWithModel(
                 conversationId,
                 userMessage,
                 capabilityContext,
@@ -491,15 +495,58 @@ public class AgentService {
                 frontendTools,
                 workspaceContext,
                 history,
+                null,
                 onNext,
                 onError,
                 onComplete,
                 onExecutionPlan,
                 onExecutionStep,
                 onToolCall,
-                onToolResult,
-                false
+                onToolResult
         );
+    }
+
+    public Runnable processProtocolMessageStreamingWithModel(
+            String conversationId,
+            String userMessage,
+            UserCapabilityContext capabilityContext,
+            String toolContext,
+            String frontendTools,
+            WorkspaceContextSnapshot workspaceContext,
+            List<ChatMessage> history,
+            String modelName,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ExecutionPlanEvent> onExecutionPlan,
+            java.util.function.Consumer<ExecutionStepEvent> onExecutionStep,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
+    ) {
+        if (modelName != null && !modelName.isBlank()) {
+            MODEL_NAME_OVERRIDE.set(modelName);
+        }
+        try {
+            return processMessageStreaming(
+                    conversationId,
+                    userMessage,
+                    capabilityContext,
+                    toolContext,
+                    frontendTools,
+                    workspaceContext,
+                    history,
+                    onNext,
+                    onError,
+                    onComplete,
+                    onExecutionPlan,
+                    onExecutionStep,
+                    onToolCall,
+                    onToolResult,
+                    false
+            );
+        } finally {
+            MODEL_NAME_OVERRIDE.remove();
+        }
     }
 
     private Runnable processMessageStreaming(
@@ -588,7 +635,8 @@ public class AgentService {
             }
 
             messages.add(new SystemMessage(buildSystemPrompt(useTools ? availableTools : Map.of())));
-            log.debug("Processing message for conversation: {}", conversationId);
+            log.debug("Processing message for conversation: {} with model={}", conversationId,
+                    resolveConfiguredModel());
 
             if (frontendToolContinuation != null) {
                 messages.add(new SystemMessage(buildFrontendToolContinuationPrompt(frontendToolContinuation)));
@@ -1741,9 +1789,12 @@ public class AgentService {
     }
 
     private Prompt buildPrompt(List<Message> messages, List<ToolCallback> toolCallbacks) {
+        String modelName = MODEL_NAME_OVERRIDE.get();
+        String effectiveModel = modelName != null && !modelName.isBlank() ? modelName : resolveConfiguredModel();
+        Double effectiveTemperature = resolveConfiguredTemperature();
         OpenAiChatOptions.Builder optionsBuilder = OpenAiChatOptions.builder()
-                .model(model)
-                .temperature(temperature)
+                .model(effectiveModel)
+                .temperature(effectiveTemperature)
                 .maxTokens(maxTokens);
         if (!toolCallbacks.isEmpty()) {
             optionsBuilder.toolCallbacks(toolCallbacks);

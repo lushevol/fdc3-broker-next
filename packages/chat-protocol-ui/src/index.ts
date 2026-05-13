@@ -14,6 +14,7 @@ export { Badge } from './components/assistant-ui/badge';
 export { ThreadFollowupSuggestions } from './components/assistant-ui/follow-up-suggestions';
 export { HeatGraph } from './components/assistant-ui/heat-graph';
 export { MarkdownText } from './components/assistant-ui/markdown-text';
+export { ModelSelector, ModelSelectorRoot, ModelSelectorTrigger, ModelSelectorContent, ModelSelectorItem } from './components/assistant-ui/model-selector';
 export { MermaidDiagram } from './components/assistant-ui/mermaid-diagram';
 export { MessageTiming } from './components/assistant-ui/message-timing';
 export { Reasoning } from './components/assistant-ui/reasoning';
@@ -23,6 +24,7 @@ export { ToolFallback } from './components/assistant-ui/tool-fallback';
 export { TooltipIconButton } from './components/assistant-ui/tooltip-icon-button';
 
 export { SyntaxHighlighter } from './components/assistant-ui/syntax-highlighter';
+export { useModelList } from './hooks/use-model-list';
 export { SyntaxHighlighter as ShikiHighlighter } from './components/assistant-ui/shiki-highlighter';
 
 export * from './components/ui/accordion';

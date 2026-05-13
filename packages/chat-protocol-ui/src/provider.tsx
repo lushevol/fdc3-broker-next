@@ -29,9 +29,15 @@ import type { ToolkitBridge } from 'chat-protocol-runtime';
 
 const PortalContainerContext = createContext<React.RefObject<HTMLElement | null> | null>(null);
 
+const ModelApiContext = createContext<string>('');
+
 export function usePortalContainer(): HTMLElement | null {
   const ref = useContext(PortalContainerContext);
   return ref?.current ?? null;
+}
+
+export function useModelApiUrl(): string {
+  return useContext(ModelApiContext);
 }
 
 function useHtmlDarkMode(): boolean {
@@ -153,14 +159,22 @@ export function ChatProtocolProvider({
           const conversationId = createConversationId(runOptions.unstable_threadId);
           latestConversationIdRef.current = conversationId;
           const protocolMessages = await toProtocolMessages(runOptions.messages);
+          const runCustom = runOptions.runConfig.custom as Record<string, unknown> | undefined;
+          const modelName =
+            runOptions.config?.config?.modelName ??
+            (typeof runCustom?.config === 'object' && runCustom.config !== null
+              ? (runCustom.config as Record<string, unknown>).modelName
+              : undefined);
+
           const request = buildChatProtocolRequest({
             conversationId,
             messages: protocolMessages,
             tools,
             context,
+            ...(modelName ? { config: { modelName: modelName as string } } : {}),
             metadata: {
               ...(metadata ?? {}),
-              ...((runOptions.runConfig.custom as Record<string, unknown> | undefined) ?? {}),
+              ...(runCustom ?? {}),
             },
           });
 
@@ -306,12 +320,14 @@ export function ChatProtocolProvider({
   const isDark = dark ?? htmlDark;
 
   return (
-    <PortalContainerContext.Provider value={portalContainerRef}>
-      <div ref={portalContainerRef} className={cn('cp-root', isDark && 'dark')}>
-        <AssistantRuntimeProvider runtime={runtime} aui={aui}>
-          {children}
-        </AssistantRuntimeProvider>
-      </div>
-    </PortalContainerContext.Provider>
+    <ModelApiContext.Provider value={apiUrl}>
+      <PortalContainerContext.Provider value={portalContainerRef}>
+        <div ref={portalContainerRef} className={cn('cp-root', isDark && 'dark')}>
+          <AssistantRuntimeProvider runtime={runtime} aui={aui}>
+            {children}
+          </AssistantRuntimeProvider>
+        </div>
+      </PortalContainerContext.Provider>
+    </ModelApiContext.Provider>
   );
 }

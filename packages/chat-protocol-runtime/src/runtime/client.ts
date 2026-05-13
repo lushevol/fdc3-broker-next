@@ -3,6 +3,7 @@ import type {
   ChatFilePart,
   ChatFinishReason,
   ChatMessage,
+  ChatRunConfig,
   ChatRunRequest,
   ChatStreamFrame,
   ChatToolCallPart,
@@ -36,6 +37,7 @@ export type BuildChatProtocolRequestOptions = {
   conversationId: string;
   messages: ChatMessage[];
   tools?: ChatToolDescriptor[];
+  config?: ChatRunConfig;
   metadata?: ChatRunRequest['metadata'];
   runId?: string | null;
   trigger?: ChatRunRequest['trigger'];
@@ -400,6 +402,7 @@ export function buildChatProtocolRequest({
   conversationId,
   messages,
   tools,
+  config,
   metadata,
   runId,
   trigger = 'submit-message',
@@ -410,6 +413,7 @@ export function buildChatProtocolRequest({
     ...(runId !== undefined ? { runId } : {}),
     trigger,
     ...(tools || context ? { context: { ...context, ...(tools ? { tools } : {}) } } : {}),
+    ...(config ? { config } : {}),
     messages,
     ...(metadata ? { metadata } : {}),
   };
