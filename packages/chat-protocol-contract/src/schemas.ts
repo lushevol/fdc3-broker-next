@@ -127,12 +127,31 @@ const chatErrorPartSchema = z
 const chatFilePartSchema = z
   .object({
     type: z.literal('file'),
-    url: z.string().url(),
+    url: z.string().url().optional(),
+    fileId: z.string().min(1).optional(),
     name: z.string().min(1).optional(),
     mimeType: z.string().min(1).optional(),
     sizeBytes: z.number().int().nonnegative().optional(),
+    data: z.string().min(1).optional(),
+    encoding: z.literal('base64').optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (!value.url && !value.fileId && !value.data) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'file part requires one of url, fileId, or data',
+      });
+    }
+
+    if (value.data && value.encoding !== 'base64') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['encoding'],
+        message: 'encoding must be base64 when data is provided',
+      });
+    }
+  });
 
 const chatImagePartSchema = z
   .object({
@@ -143,7 +162,7 @@ const chatImagePartSchema = z
   })
   .strict();
 
-export const chatUserPartSchema = z.discriminatedUnion('type', [
+export const chatUserPartSchema = z.union([
   chatTextPartSchema,
   chatFilePartSchema,
   chatImagePartSchema,
