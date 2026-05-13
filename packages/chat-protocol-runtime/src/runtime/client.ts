@@ -1,5 +1,6 @@
 import type {
   ChatAssistantMessage,
+  ChatFilePart,
   ChatFinishReason,
   ChatMessage,
   ChatRunRequest,
@@ -7,6 +8,7 @@ import type {
   ChatToolCallPart,
   ChatToolDescriptor,
   ChatToolMessage,
+  ChatUserPart,
 } from 'chat-protocol-contract';
 import type { ThreadMessage } from '@assistant-ui/react';
 import { createProtocolStreamAdapter } from './createProtocolStreamAdapter';
@@ -82,13 +84,85 @@ export type BuildHumanToolResumeRequestOptions = {
   context?: ChatRunRequest['context'];
 };
 
-function getTextParts(message: ThreadMessage): string[] {
-  return message.content
-    .filter(
-      (part): part is Extract<ThreadMessage['content'][number], { type: 'text'; text: string }> =>
-        part.type === 'text',
-    )
-    .map((part) => part.text);
+type ThreadFilePartLike = {
+  type: 'file' | 'document';
+  file?: File;
+  filename?: string;
+  name?: string;
+  mimeType?: string;
+  data?: string;
+  encoding?: 'base64';
+  fileId?: string;
+  url?: string;
+  sizeBytes?: number;
+};
+
+function isThreadFilePartLike(part: unknown): part is ThreadFilePartLike {
+  if (!part || typeof part !== 'object') {
+    return false;
+  }
+
+  const type = (part as { type?: unknown }).type;
+  return type === 'file' || type === 'document';
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary);
+}
+
+async function toProtocolFilePart(part: ThreadFilePartLike): Promise<ChatFilePart | null> {
+  if (part.file) {
+    return {
+      type: 'file',
+      name: part.filename ?? part.name ?? part.file.name,
+      mimeType: (part.mimeType ?? part.file.type) || undefined,
+      sizeBytes: part.sizeBytes ?? part.file.size,
+      data: arrayBufferToBase64(await part.file.arrayBuffer()),
+      encoding: 'base64',
+    };
+  }
+
+  if (part.data || part.fileId || part.url) {
+    return {
+      type: 'file',
+      ...(part.url ? { url: part.url } : {}),
+      ...(part.fileId ? { fileId: part.fileId } : {}),
+      ...(part.filename ?? part.name ? { name: part.filename ?? part.name } : {}),
+      ...(part.mimeType ? { mimeType: part.mimeType } : {}),
+      ...(part.sizeBytes !== undefined ? { sizeBytes: part.sizeBytes } : {}),
+      ...(part.data ? { data: part.data, encoding: part.encoding ?? 'base64' } : {}),
+    };
+  }
+
+  return null;
+}
+
+async function getUserParts(message: ThreadMessage): Promise<ChatUserPart[]> {
+  const parts: ChatUserPart[] = [];
+
+  for (const part of message.content) {
+    if (part.type === 'text') {
+      parts.push({
+        type: 'text',
+        text: part.text,
+      });
+      continue;
+    }
+
+    if (isThreadFilePartLike(part)) {
+      const filePart = await toProtocolFilePart(part);
+      if (filePart) {
+        parts.push(filePart);
+      }
+    }
+  }
+
+  return parts;
 }
 
 function isToolThreadMessageLike(
@@ -129,28 +203,34 @@ function getToolResultOutput(part: ToolResultContentPartLike): Record<string, un
   return toRecord(part.output) ?? toRecord(part.result);
 }
 
-export function toProtocolMessages(
+export async function toProtocolMessages(
   messages: readonly ProtocolCompatibleThreadMessage[],
-): ChatMessage[] {
+): Promise<ChatMessage[]> {
   const protocolMessages: ChatMessage[] = [];
 
   for (const message of messages) {
     if (message.role === 'user' || message.role === 'system') {
-      const parts = getTextParts(message).map((text) => ({
-        type: 'text' as const,
-        text,
-      }));
+      const parts = await getUserParts(message);
 
       if (parts.length === 0) {
         continue;
       }
 
-      protocolMessages.push({
-        id: message.id,
-        role: message.role,
-        parts,
-        metadata: message.metadata.custom,
-      });
+      if (message.role === 'system') {
+        protocolMessages.push({
+          id: message.id,
+          role: 'system',
+          parts: parts.filter((part) => part.type === 'text'),
+          metadata: message.metadata.custom,
+        });
+      } else {
+        protocolMessages.push({
+          id: message.id,
+          role: 'user',
+          parts,
+          metadata: message.metadata.custom,
+        });
+      }
       continue;
     }
 

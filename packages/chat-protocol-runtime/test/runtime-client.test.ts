@@ -25,7 +25,7 @@ function createSseResponse(frames: readonly ChatStreamFrame[]): Response {
 }
 
 describe('runtime client', () => {
-  it('converts assistant-ui thread messages into protocol messages including tool results', () => {
+  it('converts assistant-ui thread messages into protocol messages including tool results', async () => {
     const messages: ThreadMessage[] = [
       {
         id: 'msg_user_1',
@@ -86,7 +86,7 @@ describe('runtime client', () => {
       } as unknown as ThreadMessage,
     ];
 
-    expect(toProtocolMessages(messages)).toEqual([
+    await expect(toProtocolMessages(messages)).resolves.toEqual([
       {
         id: 'msg_user_1',
         role: 'user',
@@ -124,6 +124,44 @@ describe('runtime client', () => {
         metadata: {},
       },
     ]);
+  });
+
+  it('converts user text and PDF attachments into protocol parts', async () => {
+    const pdf = new File(['%PDF-1.4'], 'report.pdf', { type: 'application/pdf' });
+    const messages = [
+      {
+        id: 'msg_user_1',
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Summarize this' },
+          {
+            type: 'file',
+            file: pdf,
+            filename: 'report.pdf',
+            mimeType: 'application/pdf',
+          },
+        ],
+        metadata: { custom: {} },
+      },
+    ];
+
+    const result = await toProtocolMessages(messages as never);
+
+    expect(result[0]).toMatchObject({
+      id: 'msg_user_1',
+      role: 'user',
+      parts: [
+        { type: 'text', text: 'Summarize this' },
+        {
+          type: 'file',
+          name: 'report.pdf',
+          mimeType: 'application/pdf',
+          sizeBytes: 8,
+          encoding: 'base64',
+        },
+      ],
+    });
+    expect(result[0]?.parts[1]).toHaveProperty('data');
   });
 
   it('builds a submit-message run request with tools and metadata', () => {

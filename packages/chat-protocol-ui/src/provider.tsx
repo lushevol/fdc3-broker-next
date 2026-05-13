@@ -148,12 +148,13 @@ export function ChatProtocolProvider({
   const modelAdapter = useMemo(
     () =>
       createProtocolLocalRuntime({
-        stream: (runOptions) => {
+        stream: async function* (runOptions) {
           const conversationId = createConversationId(runOptions.unstable_threadId);
           latestConversationIdRef.current = conversationId;
+          const protocolMessages = await toProtocolMessages(runOptions.messages);
           const request = buildChatProtocolRequest({
             conversationId,
-            messages: toProtocolMessages(runOptions.messages),
+            messages: protocolMessages,
             tools,
             context,
             metadata: {
@@ -162,7 +163,7 @@ export function ChatProtocolProvider({
             },
           });
 
-          return streamProtocolRun({
+          yield* streamProtocolRun({
             request,
             url: apiUrl,
             fetch,
@@ -205,11 +206,13 @@ export function ChatProtocolProvider({
 
                 props.addResult(result);
 
-                const request = buildHumanToolResumeRequest({
+                void (async () => {
+                  const protocolMessages = await toProtocolMessages(runtime.thread.getState().messages);
+                  const request = buildHumanToolResumeRequest({
                   conversationId:
                     latestConversationIdRef.current ?? createConversationId(undefined),
                   runId: latestRunIdRef.current,
-                  messages: toProtocolMessages(runtime.thread.getState().messages),
+                  messages: protocolMessages,
                   toolCallId: props.toolCallId,
                   toolName: props.toolName,
                   result,
@@ -218,21 +221,22 @@ export function ChatProtocolProvider({
                   metadata,
                 });
 
-                runtime.thread.resumeRun({
-                  parentId: runtime.thread.getState().messages.at(-1)?.id ?? null,
-                  runConfig: {},
-                  stream: () =>
-                    createProtocolResultStream(
-                      streamProtocolRun({
-                        request,
-                        url: apiUrl,
-                        fetch,
-                        onFrame: handleFrame,
-                        resolveFrontendTool,
-                        toolkitBridge,
-                      }),
-                    ),
-                });
+                  runtime.thread.resumeRun({
+                    parentId: runtime.thread.getState().messages.at(-1)?.id ?? null,
+                    runConfig: {},
+                    stream: () =>
+                      createProtocolResultStream(
+                        streamProtocolRun({
+                          request,
+                          url: apiUrl,
+                          fetch,
+                          onFrame: handleFrame,
+                          resolveFrontendTool,
+                          toolkitBridge,
+                        }),
+                      ),
+                  });
+                })();
               };
 
               return <Render {...props} resume={resume} />;
