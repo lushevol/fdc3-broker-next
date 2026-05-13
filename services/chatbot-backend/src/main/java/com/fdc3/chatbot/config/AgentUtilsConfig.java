@@ -35,6 +35,10 @@ import org.springaicommunity.agent.tools.task.TaskTool;
 import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentType;
 import org.springaicommunity.agent.utils.Skills;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 /**
  * Wires spring-ai-agent-utils tools into Spring context.
  * Each tool is conditional on its enabled flag in chatbot.agent-utils.*.
@@ -112,7 +116,11 @@ public class AgentUtilsConfig {
             return skills.stream()
                     .filter(s -> s.name().equals(command))
                     .findFirst()
-                    .map(s -> "Base directory for this skill: %s%n%n%s".formatted(s.basePath(), s.content()))
+                    .map(s -> "Base directory for this skill: %s%n%n%s%n%n%s".formatted(
+                            resolveSkillBaseDirectory(s.basePath()),
+                            s.content(),
+                            describeSkillFiles(s.basePath())
+                    ))
                     .orElse("Unknown skill: " + command);
         };
 
@@ -125,6 +133,46 @@ public class AgentUtilsConfig {
                   "\"description\":\"The name of the skill to invoke\"}}," +
                   "\"required\":[\"command\"]}")
                 .build();
+    }
+
+    private static String describeSkillFiles(String basePath) {
+        Path root = resolveSkillBaseDirectory(basePath);
+        if (root == null || !Files.isDirectory(root)) {
+            return "Available skill files: unavailable";
+        }
+
+        try (var stream = Files.walk(root, 2)) {
+            String files = stream
+                    .filter(path -> !path.equals(root))
+                    .map(root::relativize)
+                    .map(Path::toString)
+                    .map(path -> Files.isDirectory(root.resolve(path)) ? path + "/" : path)
+                    .sorted()
+                    .collect(Collectors.joining("\n"));
+            if (files.isBlank()) {
+                return "Available skill files: none";
+            }
+            return "Available skill files:\n" + files;
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Failed to list skill files under " + basePath, exception);
+        }
+    }
+
+    private static Path resolveSkillBaseDirectory(String basePath) {
+        if (basePath == null || basePath.isBlank()) {
+            return null;
+        }
+
+        Path root = Path.of(basePath);
+        if (Files.isDirectory(root)) {
+            return root;
+        }
+
+        try {
+            return new ClassPathResource(basePath).getFile().toPath();
+        } catch (IOException exception) {
+            return null;
+        }
     }
 
     @Bean

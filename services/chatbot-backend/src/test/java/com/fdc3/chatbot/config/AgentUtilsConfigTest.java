@@ -1,5 +1,7 @@
 package com.fdc3.chatbot.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fdc3.chatbot.tool.agentutils.PendingQuestionRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.ai.chat.client.ChatClient;
@@ -11,6 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @ExtendWith(MockitoExtension.class)
 class AgentUtilsConfigTest {
@@ -74,5 +79,23 @@ class AgentUtilsConfigTest {
         assertNotNull(callback);
         assertEquals("Skill", callback.getToolDefinition().name());
         assertNotNull(callback.getToolDefinition().description());
+    }
+
+    @Test
+    void skillsToolLoadsPdfSkillWithFilesystemBaseDirectory() throws JsonProcessingException {
+        ToolCallback callback = config.skillsToolCallback();
+
+        String result = new ObjectMapper().readValue(callback.call("{\"command\":\"pdf\"}"), String.class);
+
+        assertTrue(result.contains("Base directory for this skill:"));
+        assertTrue(result.contains("PDF Processing Guide"));
+        assertTrue(result.contains("scripts/"));
+        assertTrue(result.contains("reference.md"));
+
+        String firstLine = result.lines().findFirst().orElseThrow();
+        Path baseDirectory = Path.of(firstLine.replace("Base directory for this skill:", "").trim());
+        assertTrue(Files.isDirectory(baseDirectory), () -> "Expected directory: " + baseDirectory + "\n" + result);
+        assertTrue(Files.exists(baseDirectory.resolve("scripts")));
+        assertTrue(Files.exists(baseDirectory.resolve("reference.md")));
     }
 }
