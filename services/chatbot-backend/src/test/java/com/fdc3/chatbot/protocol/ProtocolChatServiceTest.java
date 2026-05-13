@@ -3,6 +3,8 @@ package com.fdc3.chatbot.protocol;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fdc3.chatbot.agent.AgentService;
 import com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot;
+import com.fdc3.chatbot.files.UploadedFileContextBuilder;
+import com.fdc3.chatbot.files.UploadedFileRegistry;
 import com.fdc3.chatbot.model.ChatMessage;
 import com.fdc3.chatbot.model.ExecutionPlanEvent;
 import com.fdc3.chatbot.model.ExecutionStepEvent;
@@ -13,7 +15,9 @@ import com.fdc3.chatbot.protocol.model.ProtocolRunRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,7 +37,11 @@ class ProtocolChatServiceTest {
     void setUp() {
         agentService = new RecordingAgentService();
         objectMapper = new ObjectMapper();
-        protocolChatService = new ProtocolChatService(agentService, objectMapper);
+        protocolChatService = new ProtocolChatService(
+                agentService,
+                objectMapper,
+                new UploadedFileContextBuilder(new UploadedFileRegistry())
+        );
     }
 
     @Test
@@ -101,6 +109,51 @@ class ProtocolChatServiceTest {
         assertEquals("app-1", agentService.lastInvocation.workspaceContext().getActiveAppId());
         assertEquals("start", frames.get(0).get("type"));
         assertEquals("message-start", frames.get(1).get("type"));
+    }
+
+    @Test
+    void streamRunAppendsUploadedFileContextToActiveUserMessage() throws Exception {
+        String pdfData = Base64.getEncoder().encodeToString("%PDF-1.4".getBytes(StandardCharsets.UTF_8));
+        ProtocolRunRequest request = objectMapper.readValue("""
+                {
+                  "conversationId": "conv-file-1",
+                  "messages": [
+                    {
+                      "id": "msg-user-1",
+                      "role": "user",
+                      "parts": [
+                        { "type": "text", "text": "Summarize this PDF" },
+                        {
+                          "type": "file",
+                          "name": "report.pdf",
+                          "mimeType": "application/pdf",
+                          "sizeBytes": 8,
+                          "data": "%s",
+                          "encoding": "base64"
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """.formatted(pdfData), ProtocolRunRequest.class);
+
+        protocolChatService.streamRun(
+                request,
+                UserCapabilityContext.anonymous(),
+                frame -> {
+                },
+                error -> {
+                    throw new AssertionError(error);
+                },
+                () -> {
+                }
+        );
+
+        assertTrue(agentService.lastInvocation.userMessage().contains("Summarize this PDF"));
+        assertTrue(agentService.lastInvocation.userMessage().contains("Uploaded files available for this conversation"));
+        assertTrue(agentService.lastInvocation.userMessage().contains("report.pdf"));
+        assertTrue(agentService.lastInvocation.userMessage().contains("localPath:"));
+        assertTrue(agentService.lastInvocation.userMessage().contains("invoke the pdf skill"));
     }
 
     @Test
@@ -569,6 +622,59 @@ class ProtocolChatServiceTest {
         assertTrue(frames.stream().anyMatch(frame -> "tool-output-available".equals(frame.get("type"))));
         assertTrue(frames.stream().anyMatch(frame -> "text-delta".equals(frame.get("type"))));
         assertTrue(frames.stream().anyMatch(frame -> "finish".equals(frame.get("type")) && "stop".equals(frame.get("finishReason"))));
+    }
+
+    @Test
+    void streamRunEmitsUserQuestionFrameWithBatchId() throws Exception {
+        agentService.behavior = invocation -> {
+            invocation.onToolCall().accept(ToolCall.builder()
+                    .id("ask-user-1")
+                    .name("AskUserQuestionTool")
+                    .arguments(Map.of("questions", List.of(Map.of(
+                            "question", "Approve this action?",
+                            "header", "Approval"
+                    ))))
+                    .status(ToolCall.ToolStatus.RUNNING)
+                    .executionTarget(ToolCall.ExecutionTarget.BACKEND)
+                    .build());
+            invocation.onComplete().run();
+            return () -> {
+            };
+        };
+
+        ProtocolRunRequest request = objectMapper.readValue("""
+                {
+                  "conversationId": "conv-question-1",
+                  "messages": [
+                    {
+                      "id": "msg-user-1",
+                      "role": "user",
+                      "parts": [{ "type": "text", "text": "Ask me before acting." }]
+                    }
+                  ]
+                }
+                """, ProtocolRunRequest.class);
+
+        List<Map<String, Object>> frames = new ArrayList<>();
+
+        protocolChatService.streamRun(
+                request,
+                UserCapabilityContext.anonymous(),
+                frames::add,
+                error -> {
+                    throw new AssertionError(error);
+                },
+                () -> {
+                }
+        );
+
+        Map<String, Object> questionFrame = frames.stream()
+                .filter(frame -> "user_question".equals(frame.get("type")))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals("ask-user-1", questionFrame.get("toolCallId"));
+        assertEquals("ask-user-1", questionFrame.get("batchId"));
     }
 
     private static final class RecordingAgentService extends AgentService {

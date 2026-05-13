@@ -16,10 +16,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ToolExecutionBridge {
 
     private static final Logger log = LoggerFactory.getLogger(ToolExecutionBridge.class);
+    private static final String ASK_USER_QUESTION_TOOL = "AskUserQuestionTool";
 
     private final Map<String, ToolCallback> executableCallbacks = new ConcurrentHashMap<>();
+    private final PendingQuestionRegistry pendingQuestionRegistry;
 
     public ToolExecutionBridge(List<ToolCallback> toolCallbacks) {
+        this(toolCallbacks, null);
+    }
+
+    public ToolExecutionBridge(List<ToolCallback> toolCallbacks, PendingQuestionRegistry pendingQuestionRegistry) {
+        this.pendingQuestionRegistry = pendingQuestionRegistry;
         if (toolCallbacks != null) {
             for (ToolCallback callback : toolCallbacks) {
                 if (callback == null) {
@@ -43,5 +50,21 @@ public class ToolExecutionBridge {
 
     public boolean hasCallback(String toolName) {
         return executableCallbacks.containsKey(toolName);
+    }
+
+    public boolean waitsForUserAnswer(String toolName) {
+        return ASK_USER_QUESTION_TOOL.equals(toolName);
+    }
+
+    public void beforeCallbackExecution(String toolName, String toolCallId) {
+        if (pendingQuestionRegistry != null && waitsForUserAnswer(toolName)) {
+            pendingQuestionRegistry.bindCurrentBatchId(toolCallId);
+        }
+    }
+
+    public void afterCallbackExecution(String toolName) {
+        if (pendingQuestionRegistry != null && waitsForUserAnswer(toolName)) {
+            pendingQuestionRegistry.clearCurrentBatchId();
+        }
     }
 }

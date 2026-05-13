@@ -11,18 +11,27 @@ import org.springframework.validation.annotation.Validated;
 public class AgentUtilsProperties {
 
     private WebFetch webFetch = new WebFetch();
+    private WebSearch webSearch = new WebSearch();
     private Skills skills = new Skills();
     private Todo todo = new Todo();
     private Tasks tasks = new Tasks();
+    private AskUser askUser = new AskUser();
+    private Bash bash = new Bash();
 
     public WebFetch getWebFetch() { return webFetch; }
     public void setWebFetch(WebFetch webFetch) { this.webFetch = webFetch; }
+    public WebSearch getWebSearch() { return webSearch; }
+    public void setWebSearch(WebSearch webSearch) { this.webSearch = webSearch; }
     public Skills getSkills() { return skills; }
     public void setSkills(Skills skills) { this.skills = skills; }
     public Todo getTodo() { return todo; }
     public void setTodo(Todo todo) { this.todo = todo; }
     public Tasks getTasks() { return tasks; }
     public void setTasks(Tasks tasks) { this.tasks = tasks; }
+    public AskUser getAskUser() { return askUser; }
+    public void setAskUser(AskUser askUser) { this.askUser = askUser; }
+    public Bash getBash() { return bash; }
+    public void setBash(Bash bash) { this.bash = bash; }
 
     public static class WebFetch {
         private boolean enabled = true;
@@ -53,6 +62,24 @@ public class AgentUtilsProperties {
         public void setLocation(String location) { this.location = location; }
     }
 
+    public static class WebSearch {
+        private boolean enabled = true;
+        private int resultCount = 5;
+
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean enabled) { this.enabled = enabled; }
+        @Min(1) @Max(20)
+        public int getResultCount() { return resultCount; }
+        public void setResultCount(int resultCount) { this.resultCount = resultCount; }
+    }
+
+    public static class AskUser {
+        private boolean enabled = true;
+
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    }
+
     public static class Todo {
         private boolean enabled = true;
 
@@ -75,5 +102,18 @@ public class AgentUtilsProperties {
             public String getDefaultModel() { return defaultModel; }
             public void setDefaultModel(String defaultModel) { this.defaultModel = defaultModel; }
         }
+    }
+
+    public static class Bash {
+        private boolean enabled = true;
+        private int timeoutSeconds = 60;
+        private int maxOutputChars = 50_000;
+
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean enabled) { this.enabled = enabled; }
+        public int getTimeoutSeconds() { return timeoutSeconds; }
+        public void setTimeoutSeconds(int timeoutSeconds) { this.timeoutSeconds = timeoutSeconds; }
+        public int getMaxOutputChars() { return maxOutputChars; }
+        public void setMaxOutputChars(int maxOutputChars) { this.maxOutputChars = maxOutputChars; }
     }
 }

@@ -209,6 +209,82 @@ describe('chat protocol contract validation', () => {
     }
   });
 
+  it('accepts a base64 PDF file part in a user message', () => {
+    const result = validateRunRequest({
+      conversationId: 'conv_123',
+      messages: [
+        {
+          id: 'msg_user_1',
+          role: 'user',
+          parts: [
+            {
+              type: 'text',
+              text: 'Summarize this PDF',
+            },
+            {
+              type: 'file',
+              name: 'report.pdf',
+              mimeType: 'application/pdf',
+              sizeBytes: 12,
+              data: 'JVBERi0xLjQ=',
+              encoding: 'base64',
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a file part without data, fileId, or url', () => {
+    const result = validateRunRequest({
+      conversationId: 'conv_123',
+      messages: [
+        {
+          id: 'msg_user_1',
+          role: 'user',
+          parts: [
+            {
+              type: 'file',
+              name: 'report.pdf',
+              mimeType: 'application/pdf',
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.errors.join('\n')).toContain('file part requires one of url, fileId, or data');
+    }
+  });
+
+  it('rejects base64 file data without base64 encoding', () => {
+    const result = validateRunRequest({
+      conversationId: 'conv_123',
+      messages: [
+        {
+          id: 'msg_user_1',
+          role: 'user',
+          parts: [
+            {
+              type: 'file',
+              name: 'report.pdf',
+              data: 'JVBERi0xLjQ=',
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.errors.join('\n')).toContain('encoding must be base64 when data is provided');
+    }
+  });
+
   it('validates a tool pause finish frame fixture', () => {
     const frame = createToolPauseFrameFixture();
 

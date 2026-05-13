@@ -13,6 +13,8 @@ import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springframework.core.io.ClassPathResource;
 import org.springaicommunity.agent.common.task.subagent.SubagentReference;
 import org.springaicommunity.agent.common.task.subagent.SubagentType;
+import org.springaicommunity.agent.tools.AskUserQuestionTool;
+import org.springaicommunity.agent.tools.BraveWebSearchTool;
 import org.springaicommunity.agent.tools.SkillsTool;
 import org.springaicommunity.agent.tools.SmartWebFetchTool;
 import org.springaicommunity.agent.tools.TodoWriteTool;
@@ -54,6 +56,31 @@ class AgentUtilsIntegrationTest {
             SmartWebFetchTool tool = SmartWebFetchTool.builder(chatClient)
                     .maxContentLength(10000)
                     .domainSafetyCheck(true)
+                    .build();
+            ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                    .toolObjects(tool)
+                    .build()
+                    .getToolCallbacks();
+            return callbacks[0];
+        }
+
+        @Bean
+        public ToolCallback webSearchToolCallback() {
+            BraveWebSearchTool tool = BraveWebSearchTool.builder("test-brave-key")
+                    .resultCount(5)
+                    .build();
+            ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                    .toolObjects(tool)
+                    .build()
+                    .getToolCallbacks();
+            return callbacks[0];
+        }
+
+        @Bean
+        public ToolCallback askUserQuestionToolCallback(PendingQuestionRegistry registry) {
+            AskUserQuestionTool tool = AskUserQuestionTool.builder()
+                    .questionHandler(registry)
+                    .answersValidation(true)
                     .build();
             ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
                     .toolObjects(tool)
@@ -117,11 +144,15 @@ class AgentUtilsIntegrationTest {
 
         assertTrue(callbackMap.containsKey("WebFetch"),
                 "WebFetch callback should be registered");
+        assertTrue(callbackMap.containsKey("WebSearch"),
+                "WebSearch callback should be registered");
         assertTrue(callbackMap.containsKey("Skill"),
                 "Skill callback should be registered");
         assertTrue(callbackMap.containsKey("TodoWrite"),
                 "TodoWrite callback should be registered");
         assertTrue(callbackMap.containsKey("Task"),
                 "Task callback should be registered");
+        assertTrue(callbackMap.containsKey("AskUserQuestionTool"),
+                "AskUserQuestionTool callback should be registered");
     }
 }

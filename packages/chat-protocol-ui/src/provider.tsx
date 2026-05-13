@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AssistantRuntimeProvider,
+  type AttachmentAdapter,
   type SuggestionConfig,
   Suggestions,
   Tools,
@@ -148,12 +149,13 @@ export function ChatProtocolProvider({
   const modelAdapter = useMemo(
     () =>
       createProtocolLocalRuntime({
-        stream: (runOptions) => {
+        stream: async function* (runOptions) {
           const conversationId = createConversationId(runOptions.unstable_threadId);
           latestConversationIdRef.current = conversationId;
+          const protocolMessages = await toProtocolMessages(runOptions.messages);
           const request = buildChatProtocolRequest({
             conversationId,
-            messages: toProtocolMessages(runOptions.messages),
+            messages: protocolMessages,
             tools,
             context,
             metadata: {
@@ -162,7 +164,7 @@ export function ChatProtocolProvider({
             },
           });
 
-          return streamProtocolRun({
+          yield* streamProtocolRun({
             request,
             url: apiUrl,
             fetch,
@@ -185,7 +187,34 @@ export function ChatProtocolProvider({
     ],
   );
 
-  const runtime = useLocalRuntime(modelAdapter);
+  const attachmentAdapter = useMemo<AttachmentAdapter>(() => ({
+    accept: '.pdf,application/pdf',
+    async add({ file }) {
+      return {
+        id: file.name,
+        type: file.type.startsWith('image/') ? 'image' : 'document',
+        name: file.name,
+        contentType: file.type,
+        file,
+        status: { type: 'requires-action', reason: 'composer-send' },
+      };
+    },
+    async send(attachment) {
+      return {
+        ...attachment,
+        status: { type: 'complete' },
+        content: [],
+      };
+    },
+    async remove() {
+    },
+  }), []);
+
+  const runtime = useLocalRuntime(modelAdapter, {
+    adapters: {
+      attachments: attachmentAdapter,
+    },
+  });
   const wrappedToolkit = useMemo<Toolkit>(() => {
     return Object.fromEntries(
       Object.entries(toolkit).map(([toolName, tool]) => {
@@ -205,11 +234,13 @@ export function ChatProtocolProvider({
 
                 props.addResult(result);
 
-                const request = buildHumanToolResumeRequest({
+                void (async () => {
+                  const protocolMessages = await toProtocolMessages(runtime.thread.getState().messages);
+                  const request = buildHumanToolResumeRequest({
                   conversationId:
                     latestConversationIdRef.current ?? createConversationId(undefined),
                   runId: latestRunIdRef.current,
-                  messages: toProtocolMessages(runtime.thread.getState().messages),
+                  messages: protocolMessages,
                   toolCallId: props.toolCallId,
                   toolName: props.toolName,
                   result,
@@ -218,21 +249,22 @@ export function ChatProtocolProvider({
                   metadata,
                 });
 
-                runtime.thread.resumeRun({
-                  parentId: runtime.thread.getState().messages.at(-1)?.id ?? null,
-                  runConfig: {},
-                  stream: () =>
-                    createProtocolResultStream(
-                      streamProtocolRun({
-                        request,
-                        url: apiUrl,
-                        fetch,
-                        onFrame: handleFrame,
-                        resolveFrontendTool,
-                        toolkitBridge,
-                      }),
-                    ),
-                });
+                  runtime.thread.resumeRun({
+                    parentId: runtime.thread.getState().messages.at(-1)?.id ?? null,
+                    runConfig: {},
+                    stream: () =>
+                      createProtocolResultStream(
+                        streamProtocolRun({
+                          request,
+                          url: apiUrl,
+                          fetch,
+                          onFrame: handleFrame,
+                          resolveFrontendTool,
+                          toolkitBridge,
+                        }),
+                      ),
+                  });
+                })();
               };
 
               return <Render {...props} resume={resume} />;

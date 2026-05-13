@@ -15,11 +15,15 @@ import static org.junit.jupiter.api.Assertions.*;
         "chatbot.agent-utils.web-fetch.user-agent=TestAgent/1.0",
         "chatbot.agent-utils.web-fetch.max-content-length=10000",
         "chatbot.agent-utils.web-fetch.domain-safety-check=true",
+        "chatbot.agent-utils.web-search.enabled=true",
+        "chatbot.agent-utils.web-search.api-key=test-brave-key",
+        "chatbot.agent-utils.web-search.result-count=10",
         "chatbot.agent-utils.skills.enabled=true",
         "chatbot.agent-utils.skills.location=classpath:test-skills/",
         "chatbot.agent-utils.todo.enabled=true",
         "chatbot.agent-utils.tasks.enabled=true",
-        "chatbot.agent-utils.tasks.sub-agent-config.default-model=test-model"
+        "chatbot.agent-utils.tasks.sub-agent-config.default-model=test-model",
+        "chatbot.agent-utils.ask-user.enabled=true"
 })
 class AgentUtilsPropertiesTest {
 
@@ -57,6 +61,21 @@ class AgentUtilsPropertiesTest {
     }
 
     @Test
+    void webSearchPropertiesAreBound() {
+        AgentUtilsProperties.WebSearch webSearch = properties.getWebSearch();
+        assertNotNull(webSearch);
+        assertTrue(webSearch.isEnabled());
+        assertEquals(10, webSearch.getResultCount());
+    }
+
+    @Test
+    void askUserPropertiesAreBound() {
+        AgentUtilsProperties.AskUser askUser = properties.getAskUser();
+        assertNotNull(askUser);
+        assertTrue(askUser.isEnabled());
+    }
+
+    @Test
     void tasksPropertiesAreBound() {
         AgentUtilsProperties.Tasks tasks = properties.getTasks();
         assertNotNull(tasks);
@@ -71,10 +90,13 @@ class AgentUtilsPropertiesTest {
         assertEquals("FDC3-Chatbot/1.0", defaults.getWebFetch().getUserAgent());
         assertEquals(50000, defaults.getWebFetch().getMaxContentLength());
         assertTrue(defaults.getWebFetch().isDomainSafetyCheck());
+        assertTrue(defaults.getWebSearch().isEnabled());
+        assertEquals(5, defaults.getWebSearch().getResultCount());
         assertTrue(defaults.getSkills().isEnabled());
         assertEquals("classpath:skills/", defaults.getSkills().getLocation());
         assertTrue(defaults.getTodo().isEnabled());
         assertTrue(defaults.getTasks().isEnabled());
         assertEquals("qwen3.5-plus", defaults.getTasks().getSubAgentConfig().getDefaultModel());
+        assertTrue(defaults.getAskUser().isEnabled());
     }
 }

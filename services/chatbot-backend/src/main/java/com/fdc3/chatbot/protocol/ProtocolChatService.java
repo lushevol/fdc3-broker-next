@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fdc3.chatbot.agent.AgentService;
 import com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot;
+import com.fdc3.chatbot.files.UploadedFileContextBuilder;
 import com.fdc3.chatbot.model.ChatMessage;
 import com.fdc3.chatbot.model.ExecutionPlanEvent;
 import com.fdc3.chatbot.model.ExecutionStepEvent;
@@ -41,6 +42,7 @@ public class ProtocolChatService {
 
     private final AgentService agentService;
     private final ObjectMapper objectMapper;
+    private final UploadedFileContextBuilder uploadedFileContextBuilder;
 
     public Runnable streamRun(
             ProtocolRunRequest request,
@@ -49,7 +51,7 @@ public class ProtocolChatService {
             Consumer<Throwable> onError,
             Runnable onComplete
     ) {
-        ProtocolInvocation invocation = ProtocolInvocation.from(request, objectMapper);
+        ProtocolInvocation invocation = ProtocolInvocation.from(request, objectMapper, uploadedFileContextBuilder);
 
         List<ProtocolToolDescriptor> allTools = mergeTools(request);
         Map<String, ProtocolToolDescriptor> toolLookup = new java.util.HashMap<>();
@@ -134,6 +136,7 @@ public class ProtocolChatService {
                     enrichToolCallFromDescriptor(toolCall, toolLookup);
                     toolCalls.add(toolCall);
                     emitToolCallFrames(onFrame, toolCall);
+                    emitUserQuestionFrame(onFrame, toolCall);
                     if (toolCall.getSource() == ChatToolSource.HUMAN || (toolCall.getSource() == null && toolCall.isRequiresConfirmation())) {
                         pendingFinishReason[0] = "action-required";
                         onFrame.accept(Map.of(
@@ -283,6 +286,29 @@ public class ProtocolChatService {
         onFrame.accept(outputFrame);
     }
 
+    private void emitUserQuestionFrame(
+            Consumer<Map<String, Object>> onFrame,
+            ToolCall toolCall
+    ) {
+        if (!"AskUserQuestionTool".equals(toolCall.getName())) {
+            return;
+        }
+        Map<String, Object> args = toolCall.getArguments();
+        if (args == null || args.isEmpty()) {
+            return;
+        }
+        Object rawQuestions = args.get("questions");
+        if (!(rawQuestions instanceof List<?> questionList) || questionList.isEmpty()) {
+            return;
+        }
+        LinkedHashMap<String, Object> frame = new LinkedHashMap<>();
+        frame.put("type", "user_question");
+        frame.put("toolCallId", toolCall.getId());
+        frame.put("batchId", toolCall.getId());
+        frame.put("questions", questionList);
+        onFrame.accept(frame);
+    }
+
     private Map<String, Object> frameError(Throwable error) {
         LinkedHashMap<String, Object> frame = new LinkedHashMap<>();
         frame.put("type", "error");
@@ -391,7 +417,11 @@ public class ProtocolChatService {
             String frontendToolsJson,
             WorkspaceContextSnapshot workspaceContext
     ) {
-        static ProtocolInvocation from(ProtocolRunRequest request, ObjectMapper objectMapper) {
+        static ProtocolInvocation from(
+                ProtocolRunRequest request,
+                ObjectMapper objectMapper,
+                UploadedFileContextBuilder uploadedFileContextBuilder
+        ) {
             List<ProtocolMessage> messages = request.getMessages() == null ? List.of() : request.getMessages();
             if (messages.isEmpty()) {
                 throw new IllegalArgumentException("messages must not be empty");
@@ -412,15 +442,19 @@ public class ProtocolChatService {
             }
 
             ProtocolMessage currentUserMessage = messages.get(currentUserIndex);
-            String userMessage = collectText(currentUserMessage);
-            if (userMessage.isBlank()) {
+            String userText = collectText(currentUserMessage);
+            if (userText.isBlank()) {
                 throw new IllegalArgumentException("active user message must contain text");
             }
 
-            List<ChatMessage> history = toHistory(messages.subList(0, currentUserIndex));
             String conversationId = request.getConversationId() == null || request.getConversationId().isBlank()
                     ? UUID.randomUUID().toString()
                     : request.getConversationId();
+            String fileContext = uploadedFileContextBuilder == null
+                    ? ""
+                    : uploadedFileContextBuilder.build(conversationId, currentUserMessage.getParts());
+            String userMessage = fileContext.isBlank() ? userText : userText + "\n\n" + fileContext;
+            List<ChatMessage> history = toHistory(messages.subList(0, currentUserIndex));
             String runId = request.getRunId() == null || request.getRunId().isBlank()
                     ? UUID.randomUUID().toString()
                     : request.getRunId();

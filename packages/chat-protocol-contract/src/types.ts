@@ -96,10 +96,13 @@ export type ChatErrorPart = {
 
 export type ChatFilePart = {
   type: 'file';
-  url: string;
+  url?: string;
+  fileId?: string;
   name?: string;
   mimeType?: string;
   sizeBytes?: number;
+  data?: string;
+  encoding?: 'base64';
 };
 
 export type ChatImagePart = {

@@ -1,5 +1,7 @@
 package com.fdc3.chatbot.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fdc3.chatbot.tool.agentutils.PendingQuestionRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.ai.chat.client.ChatClient;
@@ -11,6 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @ExtendWith(MockitoExtension.class)
 class AgentUtilsConfigTest {
@@ -35,8 +40,6 @@ class AgentUtilsConfigTest {
 
     @Test
     void webFetchToolCallbackReturnsToolCallbackWithCorrectName() {
-        // Enable web-fetch
-        properties.getWebFetch().setEnabled(true);
         properties.getWebFetch().setMaxContentLength(10000);
 
         ToolCallback callback = config.webFetchToolCallback(chatModel, properties);
@@ -46,13 +49,53 @@ class AgentUtilsConfigTest {
     }
 
     @Test
+    void webSearchToolCallbackReturnsToolCallbackWithCorrectName() {
+        ToolCallback callback = config.webSearchToolCallback(properties, "test-brave-key");
+        assertNotNull(callback);
+        assertEquals("WebSearch", callback.getToolDefinition().name());
+        assertNotNull(callback.getToolDefinition().description());
+    }
+
+    @Test
+    void webSearchToolCallbackThrowsWhenApiKeyMissing() {
+        assertThrows(IllegalArgumentException.class,
+                () -> config.webSearchToolCallback(properties, ""));
+    }
+
+    @Test
+    void askUserQuestionToolCallbackReturnsToolCallbackWithCorrectName() {
+        PendingQuestionRegistry registry = config.pendingQuestionRegistry();
+        ToolCallback callback = config.askUserQuestionToolCallback(registry);
+        assertNotNull(callback);
+        assertEquals("AskUserQuestionTool", callback.getToolDefinition().name());
+        assertNotNull(callback.getToolDefinition().description());
+    }
+
+    @Test
     void skillsToolCallbackReturnsToolCallbackWithCorrectName() {
-        properties.getSkills().setEnabled(true);
         properties.getSkills().setLocation("classpath:skills");
 
         ToolCallback callback = config.skillsToolCallback();
         assertNotNull(callback);
         assertEquals("Skill", callback.getToolDefinition().name());
         assertNotNull(callback.getToolDefinition().description());
+    }
+
+    @Test
+    void skillsToolLoadsPdfSkillWithFilesystemBaseDirectory() throws JsonProcessingException {
+        ToolCallback callback = config.skillsToolCallback();
+
+        String result = new ObjectMapper().readValue(callback.call("{\"command\":\"pdf\"}"), String.class);
+
+        assertTrue(result.contains("Base directory for this skill:"));
+        assertTrue(result.contains("PDF Processing Guide"));
+        assertTrue(result.contains("scripts/"));
+        assertTrue(result.contains("reference.md"));
+
+        String firstLine = result.lines().findFirst().orElseThrow();
+        Path baseDirectory = Path.of(firstLine.replace("Base directory for this skill:", "").trim());
+        assertTrue(Files.isDirectory(baseDirectory), () -> "Expected directory: " + baseDirectory + "\n" + result);
+        assertTrue(Files.exists(baseDirectory.resolve("scripts")));
+        assertTrue(Files.exists(baseDirectory.resolve("reference.md")));
     }
 }

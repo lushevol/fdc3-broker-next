@@ -1158,6 +1158,12 @@ public class AgentService {
             AtomicBoolean cancelled
     ) {
         StringBuilder streamedAssistantText = new StringBuilder();
+        // Buffer text during initial phase to detect AskUserQuestionTool calls.
+        // When AskUserQuestionTool is called, the model generates unreliable
+        // placeholder text (e.g. "tool not available") alongside its tool call.
+        // We suppress that initial text and let the tool-loop phase generate
+        // the real answer.
+        StringBuilder initialTextBuffer = new StringBuilder();
         // Accumulate tool calls across streaming chunks — the model may send
         // tool-call deltas (id/name in one chunk, arguments in later chunks).
         Map<String, String> accumulatedToolCallNames = new LinkedHashMap<>();
@@ -1188,8 +1194,14 @@ public class AgentService {
                     }
                     String token = assistantMessage.getText();
                     if (token != null && !token.isEmpty()) {
-                        streamedAssistantText.append(token);
-                        onNext.accept(token);
+                        if ("initial".equals(turnPhase)) {
+                            // Buffer initial phase text — may be suppressed if
+                            // AskUserQuestionTool is detected at completion.
+                            initialTextBuffer.append(token);
+                        } else {
+                            streamedAssistantText.append(token);
+                            onNext.accept(token);
+                        }
                     }
                 },
                 error -> {
@@ -1205,6 +1217,21 @@ public class AgentService {
                     }
 
                     boolean hasToolCalls = !accumulatedToolCallNames.isEmpty();
+
+                    // Flush or suppress buffered initial-phase text
+                    if ("initial".equals(turnPhase) && initialTextBuffer.length() > 0) {
+                        boolean askUserTool = hasToolCalls && accumulatedToolCallNames.values().stream()
+                                .anyMatch(name -> name.contains("AskUserQuestion"));
+                        if (askUserTool) {
+                            log.debug("Suppressed {} chars of initial text for AskUserQuestionTool",
+                                    initialTextBuffer.length());
+                        } else {
+                            String buffered = initialTextBuffer.toString();
+                            onNext.accept(buffered);
+                            streamedAssistantText.append(buffered);
+                        }
+                    }
+
                     if (hasToolCalls) {
                         List<AssistantMessage.ToolCall> mergedCalls = accumulatedToolCallNames.keySet().stream()
                                 .map(id -> new AssistantMessage.ToolCall(
@@ -1565,17 +1592,24 @@ public class AgentService {
         CompletableFuture<String> future = CompletableFuture
                 .supplyAsync(() -> {
                     try {
+                        toolExecutionBridge.beforeCallbackExecution(
+                                toolExecutionRequest.name(),
+                                toolExecutionRequest.id()
+                        );
                         String jsonArgs = objectMapper.writeValueAsString(arguments);
                         return callback.call(jsonArgs);
                     } catch (Exception e) {
                         throw new CompletionException(e);
+                    } finally {
+                        toolExecutionBridge.afterCallbackExecution(toolExecutionRequest.name());
                     }
                 });
 
-        CompletableFuture<String> timeoutFuture = future
-                .orTimeout(30, java.util.concurrent.TimeUnit.SECONDS);
+        CompletableFuture<String> executionFuture = toolExecutionBridge.waitsForUserAnswer(toolExecutionRequest.name())
+                ? future
+                : future.orTimeout(30, java.util.concurrent.TimeUnit.SECONDS);
 
-        timeoutFuture.whenComplete((result, error) -> {
+        executionFuture.whenComplete((result, error) -> {
             if (cancelled.get()) {
                 return;
             }
