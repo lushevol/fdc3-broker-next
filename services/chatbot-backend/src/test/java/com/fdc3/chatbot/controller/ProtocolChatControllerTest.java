@@ -1,6 +1,8 @@
 package com.fdc3.chatbot.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fdc3.chatbot.files.UploadedFileContextBuilder;
+import com.fdc3.chatbot.files.UploadedFileRegistry;
 import com.fdc3.chatbot.model.UserCapabilityContext;
 import com.fdc3.chatbot.protocol.ProtocolChatService;
 import com.fdc3.chatbot.protocol.model.ProtocolRunRequest;
@@ -166,7 +168,7 @@ class ProtocolChatControllerTest {
         private ProtocolRunRequest lastRequest;
 
         private RecordingProtocolChatService() {
-            super(null, new ObjectMapper());
+            super(null, new ObjectMapper(), new UploadedFileContextBuilder(new UploadedFileRegistry()));
         }
 
         @Override
