@@ -39,4 +39,11 @@ public class ProtocolPart {
     private String description;
     private String code;
     private List<ProtocolActionOption> options;
+    private String url;
+    private String fileId;
+    private String name;
+    private String mimeType;
+    private Long sizeBytes;
+    private String data;
+    private String encoding;
 }
