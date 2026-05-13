@@ -56,6 +56,9 @@ chatbot:
           - advisor
         description: Read-only RAG retrieval MCP provider used for knowledge base search.
   agent-utils:
+    web-search:
+      api-key: ${CHATBOT_BRAVE_SEARCH_API_KEY:}
+      result-count: 5
     skills:
       enabled: true
   rate-limit:

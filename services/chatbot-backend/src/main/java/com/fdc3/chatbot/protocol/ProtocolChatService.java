@@ -134,6 +134,7 @@ public class ProtocolChatService {
                     enrichToolCallFromDescriptor(toolCall, toolLookup);
                     toolCalls.add(toolCall);
                     emitToolCallFrames(onFrame, toolCall);
+                    emitUserQuestionFrame(onFrame, toolCall);
                     if (toolCall.getSource() == ChatToolSource.HUMAN || (toolCall.getSource() == null && toolCall.isRequiresConfirmation())) {
                         pendingFinishReason[0] = "action-required";
                         onFrame.accept(Map.of(
@@ -281,6 +282,28 @@ public class ProtocolChatService {
             outputFrame.put("providerId", toolCall.getProviderId());
         }
         onFrame.accept(outputFrame);
+    }
+
+    private void emitUserQuestionFrame(
+            Consumer<Map<String, Object>> onFrame,
+            ToolCall toolCall
+    ) {
+        if (!"AskUserQuestionTool".equals(toolCall.getName())) {
+            return;
+        }
+        Map<String, Object> args = toolCall.getArguments();
+        if (args == null || args.isEmpty()) {
+            return;
+        }
+        Object rawQuestions = args.get("questions");
+        if (!(rawQuestions instanceof List<?> questionList) || questionList.isEmpty()) {
+            return;
+        }
+        LinkedHashMap<String, Object> frame = new LinkedHashMap<>();
+        frame.put("type", "user_question");
+        frame.put("toolCallId", toolCall.getId());
+        frame.put("questions", questionList);
+        onFrame.accept(frame);
     }
 
     private Map<String, Object> frameError(Throwable error) {

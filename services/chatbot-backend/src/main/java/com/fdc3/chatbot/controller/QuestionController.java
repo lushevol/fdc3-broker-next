@@ -10,13 +10,17 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/chat/{conversationId}/question")
 @RequiredArgsConstructor
 public class QuestionController {
 
     private final PendingQuestionRegistry pendingQuestionRegistry;
 
-    @PostMapping("/{questionId}/answer")
+    /**
+     * Legacy endpoint: answer a question by conversation/ question IDs.
+     * Keyed by the old {@code conversationId:questionId} composite key scheme
+     * used by {@link PendingQuestionRegistry#register(String, String)}.
+     */
+    @PostMapping("/api/chat/{conversationId}/question/{questionId}/answer")
     public ResponseEntity<Void> submitAnswer(
             @PathVariable String conversationId,
             @PathVariable String questionId,
@@ -34,6 +38,27 @@ public class QuestionController {
         }
 
         log.info("User answered question {}/{}", conversationId, questionId);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Answer the first pending question batch. Works with the new
+     * {@link PendingQuestionRegistry#handle(java.util.List)} code path
+     * used by AskUserQuestionTool (which keys by random UUID).
+     */
+    @PostMapping("/api/chat/question/answer")
+    public ResponseEntity<Void> submitAnswer(@RequestBody Map<String, String> answers) {
+        if (answers == null || answers.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        boolean completed = pendingQuestionRegistry.complete(answers);
+        if (!completed) {
+            log.warn("No pending question batch to complete");
+            return ResponseEntity.notFound().build();
+        }
+
+        log.info("User answered a pending question batch");
         return ResponseEntity.ok().build();
     }
 }

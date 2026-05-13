@@ -35,8 +35,6 @@ class AgentUtilsConfigTest {
 
     @Test
     void webFetchToolCallbackReturnsToolCallbackWithCorrectName() {
-        // Enable web-fetch
-        properties.getWebFetch().setEnabled(true);
         properties.getWebFetch().setMaxContentLength(10000);
 
         ToolCallback callback = config.webFetchToolCallback(chatModel, properties);
@@ -46,8 +44,30 @@ class AgentUtilsConfigTest {
     }
 
     @Test
+    void webSearchToolCallbackReturnsToolCallbackWithCorrectName() {
+        ToolCallback callback = config.webSearchToolCallback(properties, "test-brave-key");
+        assertNotNull(callback);
+        assertEquals("WebSearch", callback.getToolDefinition().name());
+        assertNotNull(callback.getToolDefinition().description());
+    }
+
+    @Test
+    void webSearchToolCallbackThrowsWhenApiKeyMissing() {
+        assertThrows(IllegalArgumentException.class,
+                () -> config.webSearchToolCallback(properties, ""));
+    }
+
+    @Test
+    void askUserQuestionToolCallbackReturnsToolCallbackWithCorrectName() {
+        PendingQuestionRegistry registry = config.pendingQuestionRegistry();
+        ToolCallback callback = config.askUserQuestionToolCallback(registry);
+        assertNotNull(callback);
+        assertEquals("AskUserQuestionTool", callback.getToolDefinition().name());
+        assertNotNull(callback.getToolDefinition().description());
+    }
+
+    @Test
     void skillsToolCallbackReturnsToolCallbackWithCorrectName() {
-        properties.getSkills().setEnabled(true);
         properties.getSkills().setLocation("classpath:skills");
 
         ToolCallback callback = config.skillsToolCallback();

@@ -7,58 +7,43 @@ import java.util.stream.Collectors;
 
 import com.fdc3.chatbot.config.AgentUtilsProperties.Tasks;
 import com.fdc3.chatbot.config.AgentUtilsProperties.WebFetch;
+import com.fdc3.chatbot.config.AgentUtilsProperties.WebSearch;
 import com.fdc3.chatbot.tool.agentutils.PendingQuestionRegistry;
 import com.fdc3.chatbot.tool.agentutils.ToolExecutionBridge;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.function.FunctionToolCallback;
 import org.springframework.ai.tool.method.MethodToolCallbackProvider;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ClassPathResource;
-import org.springaicommunity.agent.common.task.subagent.SubagentReference;
 import org.springaicommunity.agent.common.task.subagent.SubagentType;
+import org.springaicommunity.agent.tools.AskUserQuestionTool;
+import org.springaicommunity.agent.tools.BraveWebSearchTool;
 import org.springaicommunity.agent.tools.SkillsTool;
-import org.springaicommunity.agent.utils.Skills;
 import org.springaicommunity.agent.tools.SmartWebFetchTool;
 import org.springaicommunity.agent.tools.TodoWriteTool;
 import org.springaicommunity.agent.tools.TodoWriteTool.TodoEventHandler;
 import org.springaicommunity.agent.tools.task.TaskTool;
-import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentReferences;
 import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentType;
+import org.springaicommunity.agent.utils.Skills;
 
 /**
  * Wires spring-ai-agent-utils tools into Spring context.
  * Each tool is conditional on its enabled flag in chatbot.agent-utils.*.
- *
- * NOTE: agent-utils 0.7.0 has a dependency on Spring Framework 7.x class
- * {@code org.springframework.core.Nullness}. All agent-utils tool beans are
- * disabled by default ({@code matchIfMissing = false}) to avoid context
- * loading failures on Spring Boot 3.5.x / Spring Framework 6.x. Enable them
- * explicitly via {@code chatbot.agent-utils.<feature>.enabled=true} when
- * running on a compatible Spring version.
+ * Enabled by default unless explicitly disabled in configuration.
  */
 @Slf4j
 @Configuration
 @EnableConfigurationProperties(AgentUtilsProperties.class)
 public class AgentUtilsConfig {
-
-    @PostConstruct
-    void checkCompatibility() {
-        try {
-            Class.forName("org.springframework.core.Nullness");
-        } catch (ClassNotFoundException e) {
-            log.error("spring-ai-agent-utils 0.7.0 requires Spring Framework 7.x class "
-                    + "org.springframework.core.Nullness which is not on the classpath. "
-                    + "Agent-utils tools will fail at runtime when invoked.");
-        }
-    }
 
     private static final String SKILL_TOOL_DESCRIPTION_TEMPLATE = """
             Execute a skill within the main conversation
@@ -98,7 +83,7 @@ public class AgentUtilsConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "chatbot.agent-utils.web-fetch.enabled", havingValue = "true", matchIfMissing = false)
+    @ConditionalOnProperty(name = "chatbot.agent-utils.web-fetch.enabled", havingValue = "true", matchIfMissing = true)
     public ToolCallback webFetchToolCallback(@Lazy ChatModel chatModel, AgentUtilsProperties properties) {
         WebFetch config = properties.getWebFetch();
         ChatClient chatClient = ChatClient.builder(chatModel).build();
@@ -143,7 +128,36 @@ public class AgentUtilsConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "chatbot.agent-utils.todo.enabled", havingValue = "true", matchIfMissing = false)
+    @ConditionalOnProperty(name = "chatbot.agent-utils.web-search.enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnExpression("'${CHATBOT_BRAVE_SEARCH_API_KEY:}' != ''")
+    public ToolCallback webSearchToolCallback(
+            AgentUtilsProperties properties,
+            @Value("${CHATBOT_BRAVE_SEARCH_API_KEY:}") String braveApiKey
+    ) {
+        if (braveApiKey.isEmpty()) {
+            log.warn("CHATBOT_BRAVE_SEARCH_API_KEY not set — WebSearchTool will fail at runtime");
+        }
+        WebSearch config = properties.getWebSearch();
+        BraveWebSearchTool tool = BraveWebSearchTool.builder(braveApiKey)
+                .resultCount(config.getResultCount())
+                .build();
+        log.info("Created WebSearchTool: resultCount={}", config.getResultCount());
+        return toToolCallback(tool);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "chatbot.agent-utils.ask-user.enabled", havingValue = "true", matchIfMissing = true)
+    public ToolCallback askUserQuestionToolCallback(PendingQuestionRegistry pendingQuestionRegistry) {
+        AskUserQuestionTool tool = AskUserQuestionTool.builder()
+                .questionHandler(pendingQuestionRegistry)
+                .answersValidation(true)
+                .build();
+        log.info("Created AskUserQuestionTool");
+        return toToolCallback(tool);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "chatbot.agent-utils.todo.enabled", havingValue = "true", matchIfMissing = true)
     public ToolCallback todoWriteToolCallback() {
         TodoEventHandler handler = todos -> {
             log.info("TodoWrite: {} items received", todos.todos().size());
@@ -156,7 +170,7 @@ public class AgentUtilsConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "chatbot.agent-utils.tasks.enabled", havingValue = "true", matchIfMissing = false)
+    @ConditionalOnProperty(name = "chatbot.agent-utils.tasks.enabled", havingValue = "true", matchIfMissing = true)
     public ToolCallback taskToolCallback(
             @Lazy ChatModel chatModel,
             AgentUtilsProperties properties
@@ -171,15 +185,11 @@ public class AgentUtilsConfig {
                 .skillsDirectories(List.of("skills"))
                 .build();
 
-        List<SubagentReference> refs = ClaudeSubagentReferences.fromResources(
-                new ClassPathResource("agents"));
-
         ToolCallback callback = TaskTool.builder()
-                .subagentReferences(refs)
                 .subagentTypes(subagentType)
                 .build();
 
-        log.info("Created TaskTool with {} sub-agent definitions", refs.size());
+        log.info("Created TaskTool");
         return callback;
     }
 
