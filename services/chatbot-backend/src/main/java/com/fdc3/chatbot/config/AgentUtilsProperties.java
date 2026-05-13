@@ -16,6 +16,7 @@ public class AgentUtilsProperties {
     private Todo todo = new Todo();
     private Tasks tasks = new Tasks();
     private AskUser askUser = new AskUser();
+    private Bash bash = new Bash();
 
     public WebFetch getWebFetch() { return webFetch; }
     public void setWebFetch(WebFetch webFetch) { this.webFetch = webFetch; }
@@ -29,6 +30,8 @@ public class AgentUtilsProperties {
     public void setTasks(Tasks tasks) { this.tasks = tasks; }
     public AskUser getAskUser() { return askUser; }
     public void setAskUser(AskUser askUser) { this.askUser = askUser; }
+    public Bash getBash() { return bash; }
+    public void setBash(Bash bash) { this.bash = bash; }
 
     public static class WebFetch {
         private boolean enabled = true;
@@ -99,5 +102,18 @@ public class AgentUtilsProperties {
             public String getDefaultModel() { return defaultModel; }
             public void setDefaultModel(String defaultModel) { this.defaultModel = defaultModel; }
         }
+    }
+
+    public static class Bash {
+        private boolean enabled = true;
+        private int timeoutSeconds = 60;
+        private int maxOutputChars = 50_000;
+
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean enabled) { this.enabled = enabled; }
+        public int getTimeoutSeconds() { return timeoutSeconds; }
+        public void setTimeoutSeconds(int timeoutSeconds) { this.timeoutSeconds = timeoutSeconds; }
+        public int getMaxOutputChars() { return maxOutputChars; }
+        public void setMaxOutputChars(int maxOutputChars) { this.maxOutputChars = maxOutputChars; }
     }
 }

@@ -5,9 +5,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fdc3.chatbot.config.AgentUtilsProperties.Bash;
 import com.fdc3.chatbot.config.AgentUtilsProperties.Tasks;
 import com.fdc3.chatbot.config.AgentUtilsProperties.WebFetch;
 import com.fdc3.chatbot.config.AgentUtilsProperties.WebSearch;
+import com.fdc3.chatbot.tool.agentutils.BashTool;
 import com.fdc3.chatbot.tool.agentutils.PendingQuestionRegistry;
 import com.fdc3.chatbot.tool.agentutils.ToolExecutionBridge;
 import lombok.extern.slf4j.Slf4j;
@@ -239,6 +241,32 @@ public class AgentUtilsConfig {
 
         log.info("Created TaskTool");
         return callback;
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "chatbot.agent-utils.bash.enabled", havingValue = "true", matchIfMissing = true)
+    public ToolCallback bashToolCallback(AgentUtilsProperties properties) {
+        Bash config = properties.getBash();
+        BashTool bashTool = new BashTool(config.getTimeoutSeconds(), config.getMaxOutputChars());
+
+        java.util.function.Function<java.util.Map<String, Object>, String> executeFunction = args -> {
+            String command = (String) args.get("command");
+            String workdir = (String) args.get("workdir");
+            return bashTool.execute(command, workdir);
+        };
+
+        log.info("Created BashTool: timeoutSeconds={}, maxOutputChars={}",
+                config.getTimeoutSeconds(), config.getMaxOutputChars());
+        return org.springframework.ai.tool.function.FunctionToolCallback.builder("Bash", executeFunction)
+                .description("Execute a shell command and return its output. Use this to run Python scripts (e.g. pypdf, pdfplumber, reportlab), shell commands, or any CLI tool.")
+                .inputType(java.util.Map.class)
+                .inputSchema("""
+                        {"type":"object","properties":{
+                          "command":{"type":"string","description":"The shell command to execute, e.g. 'python3 script.py'"},
+                          "workdir":{"type":"string","description":"Working directory for execution (optional)"}
+                        },"required":["command"]}
+                        """)
+                .build();
     }
 
     private static ToolCallback toToolCallback(Object tool) {
