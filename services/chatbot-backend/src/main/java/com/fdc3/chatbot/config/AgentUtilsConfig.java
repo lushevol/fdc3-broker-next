@@ -83,9 +83,10 @@ public class AgentUtilsConfig {
     @Bean
     @Lazy
     public ToolExecutionBridge toolExecutionBridge(
-            List<ToolCallback> agentUtilsCallbacks
+            List<ToolCallback> agentUtilsCallbacks,
+            PendingQuestionRegistry pendingQuestionRegistry
     ) {
-        return new ToolExecutionBridge(agentUtilsCallbacks);
+        return new ToolExecutionBridge(agentUtilsCallbacks, pendingQuestionRegistry);
     }
 
     @Bean

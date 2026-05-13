@@ -28,6 +28,7 @@ public class PendingQuestionRegistry implements QuestionHandler {
     private static final Logger log = LoggerFactory.getLogger(PendingQuestionRegistry.class);
 
     private final Map<String, PendingEntry> pending = new ConcurrentHashMap<>();
+    private final ThreadLocal<String> currentBatchId = new ThreadLocal<>();
     private final long timeoutMillis;
 
     public PendingQuestionRegistry(long timeoutMillis) {
@@ -44,7 +45,7 @@ public class PendingQuestionRegistry implements QuestionHandler {
      */
     @Override
     public Map<String, String> handle(List<Question> questions) {
-        String batchId = UUID.randomUUID().toString();
+        String batchId = currentBatchId();
         CompletableFuture<Map<String, String>> future = new CompletableFuture<>();
         future.orTimeout(timeoutMillis, TimeUnit.MILLISECONDS);
         future.whenComplete((result, ex) -> pending.remove(batchId));
@@ -63,21 +64,27 @@ public class PendingQuestionRegistry implements QuestionHandler {
     }
 
     /**
-     * Complete the most recently registered batch whose blocking {@link #handle( List )}
-     * call has not yet returned. This is a best-effort lookup — if multiple batches
-     * are pending, completes the one with the first non-cancelled future.
-     *
-     * @return true if a batch was found and completed
+     * Bind the next {@link #handle(List)} call on this thread to a stable external
+     * identifier, typically the agent tool call id emitted to the frontend.
      */
-    public boolean complete(Map<String, String> answers) {
-        for (var entry : pending.entrySet()) {
-            CompletableFuture<Map<String, String>> future = entry.getValue().future();
-            if (!future.isDone()) {
-                pending.remove(entry.getKey());
-                return future.complete(answers);
-            }
+    public void bindCurrentBatchId(String batchId) {
+        if (batchId == null || batchId.isBlank()) {
+            currentBatchId.remove();
+            return;
         }
-        return false;
+        currentBatchId.set(batchId);
+    }
+
+    public void clearCurrentBatchId() {
+        currentBatchId.remove();
+    }
+
+    private String currentBatchId() {
+        String batchId = currentBatchId.get();
+        if (batchId == null || batchId.isBlank()) {
+            return UUID.randomUUID().toString();
+        }
+        return batchId;
     }
 
     /**

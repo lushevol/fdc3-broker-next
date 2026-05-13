@@ -188,7 +188,7 @@ export function ChatProtocolProvider({
   );
 
   const attachmentAdapter = useMemo<AttachmentAdapter>(() => ({
-    accept: 'image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.json,.xml,.md',
+    accept: '.pdf,application/pdf',
     async add({ file }) {
       return {
         id: file.name,

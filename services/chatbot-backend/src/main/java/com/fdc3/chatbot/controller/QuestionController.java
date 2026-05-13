@@ -42,23 +42,34 @@ public class QuestionController {
     }
 
     /**
-     * Answer the first pending question batch. Works with the new
-     * {@link PendingQuestionRegistry#handle(java.util.List)} code path
-     * used by AskUserQuestionTool (which keys by random UUID).
+     * Answer a pending AskUserQuestionTool batch by the stable batch ID emitted
+     * to the frontend in the user_question frame.
      */
     @PostMapping("/api/chat/question/answer")
-    public ResponseEntity<Void> submitAnswer(@RequestBody Map<String, String> answers) {
-        if (answers == null || answers.isEmpty()) {
+    public ResponseEntity<Void> submitAnswer(@RequestBody BatchAnswerRequest request) {
+        if (request == null || request.batchId() == null || request.batchId().isBlank()
+                || request.answers() == null || request.answers().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
-        boolean completed = pendingQuestionRegistry.complete(answers);
+        boolean completed = pendingQuestionRegistry.complete(request.batchId(), request.answers());
         if (!completed) {
-            log.warn("No pending question batch to complete");
+            log.warn("No pending question batch found for {}", request.batchId());
             return ResponseEntity.notFound().build();
         }
 
-        log.info("User answered a pending question batch");
+        log.info("User answered question batch {}", request.batchId());
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/api/chat/question/{batchId}/answer")
+    public ResponseEntity<Void> submitBatchAnswer(
+            @PathVariable String batchId,
+            @RequestBody Map<String, Map<String, String>> body
+    ) {
+        Map<String, String> answers = body == null ? null : body.get("answers");
+        return submitAnswer(new BatchAnswerRequest(batchId, answers));
+    }
+
+    public record BatchAnswerRequest(String batchId, Map<String, String> answers) {}
 }

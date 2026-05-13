@@ -304,6 +304,7 @@ public class ProtocolChatService {
         LinkedHashMap<String, Object> frame = new LinkedHashMap<>();
         frame.put("type", "user_question");
         frame.put("toolCallId", toolCall.getId());
+        frame.put("batchId", toolCall.getId());
         frame.put("questions", questionList);
         onFrame.accept(frame);
     }

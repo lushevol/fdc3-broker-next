@@ -624,6 +624,59 @@ class ProtocolChatServiceTest {
         assertTrue(frames.stream().anyMatch(frame -> "finish".equals(frame.get("type")) && "stop".equals(frame.get("finishReason"))));
     }
 
+    @Test
+    void streamRunEmitsUserQuestionFrameWithBatchId() throws Exception {
+        agentService.behavior = invocation -> {
+            invocation.onToolCall().accept(ToolCall.builder()
+                    .id("ask-user-1")
+                    .name("AskUserQuestionTool")
+                    .arguments(Map.of("questions", List.of(Map.of(
+                            "question", "Approve this action?",
+                            "header", "Approval"
+                    ))))
+                    .status(ToolCall.ToolStatus.RUNNING)
+                    .executionTarget(ToolCall.ExecutionTarget.BACKEND)
+                    .build());
+            invocation.onComplete().run();
+            return () -> {
+            };
+        };
+
+        ProtocolRunRequest request = objectMapper.readValue("""
+                {
+                  "conversationId": "conv-question-1",
+                  "messages": [
+                    {
+                      "id": "msg-user-1",
+                      "role": "user",
+                      "parts": [{ "type": "text", "text": "Ask me before acting." }]
+                    }
+                  ]
+                }
+                """, ProtocolRunRequest.class);
+
+        List<Map<String, Object>> frames = new ArrayList<>();
+
+        protocolChatService.streamRun(
+                request,
+                UserCapabilityContext.anonymous(),
+                frames::add,
+                error -> {
+                    throw new AssertionError(error);
+                },
+                () -> {
+                }
+        );
+
+        Map<String, Object> questionFrame = frames.stream()
+                .filter(frame -> "user_question".equals(frame.get("type")))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals("ask-user-1", questionFrame.get("toolCallId"));
+        assertEquals("ask-user-1", questionFrame.get("batchId"));
+    }
+
     private static final class RecordingAgentService extends AgentService {
         private AgentInvocation lastInvocation;
         private AgentBehavior behavior = invocation -> {

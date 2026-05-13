@@ -1592,17 +1592,24 @@ public class AgentService {
         CompletableFuture<String> future = CompletableFuture
                 .supplyAsync(() -> {
                     try {
+                        toolExecutionBridge.beforeCallbackExecution(
+                                toolExecutionRequest.name(),
+                                toolExecutionRequest.id()
+                        );
                         String jsonArgs = objectMapper.writeValueAsString(arguments);
                         return callback.call(jsonArgs);
                     } catch (Exception e) {
                         throw new CompletionException(e);
+                    } finally {
+                        toolExecutionBridge.afterCallbackExecution(toolExecutionRequest.name());
                     }
                 });
 
-        CompletableFuture<String> timeoutFuture = future
-                .orTimeout(30, java.util.concurrent.TimeUnit.SECONDS);
+        CompletableFuture<String> executionFuture = toolExecutionBridge.waitsForUserAnswer(toolExecutionRequest.name())
+                ? future
+                : future.orTimeout(30, java.util.concurrent.TimeUnit.SECONDS);
 
-        timeoutFuture.whenComplete((result, error) -> {
+        executionFuture.whenComplete((result, error) -> {
             if (cancelled.get()) {
                 return;
             }
