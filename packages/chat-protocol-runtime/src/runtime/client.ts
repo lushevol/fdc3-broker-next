@@ -162,6 +162,23 @@ async function getUserParts(message: ThreadMessage): Promise<ChatUserPart[]> {
     }
   }
 
+  if (message.attachments) {
+    for (const attachment of message.attachments) {
+      if (attachment.file) {
+        const filePart = await toProtocolFilePart({
+          type: attachment.type === 'image' ? 'file' : 'document',
+          file: attachment.file,
+          filename: attachment.name,
+          mimeType: attachment.contentType,
+          sizeBytes: attachment.file.size,
+        });
+        if (filePart) {
+          parts.push(filePart);
+        }
+      }
+    }
+  }
+
   return parts;
 }
 

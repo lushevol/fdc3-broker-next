@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AssistantRuntimeProvider,
+  type AttachmentAdapter,
   type SuggestionConfig,
   Suggestions,
   Tools,
@@ -186,7 +187,34 @@ export function ChatProtocolProvider({
     ],
   );
 
-  const runtime = useLocalRuntime(modelAdapter);
+  const attachmentAdapter = useMemo<AttachmentAdapter>(() => ({
+    accept: 'image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.json,.xml,.md',
+    async add({ file }) {
+      return {
+        id: file.name,
+        type: file.type.startsWith('image/') ? 'image' : 'document',
+        name: file.name,
+        contentType: file.type,
+        file,
+        status: { type: 'requires-action', reason: 'composer-send' },
+      };
+    },
+    async send(attachment) {
+      return {
+        ...attachment,
+        status: { type: 'complete' },
+        content: [],
+      };
+    },
+    async remove() {
+    },
+  }), []);
+
+  const runtime = useLocalRuntime(modelAdapter, {
+    adapters: {
+      attachments: attachmentAdapter,
+    },
+  });
   const wrappedToolkit = useMemo<Toolkit>(() => {
     return Object.fromEntries(
       Object.entries(toolkit).map(([toolName, tool]) => {
