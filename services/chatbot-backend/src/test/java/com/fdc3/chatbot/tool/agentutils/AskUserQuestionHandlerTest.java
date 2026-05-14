@@ -1,10 +1,9 @@
 package com.fdc3.chatbot.tool.agentutils;
 
+import com.fdc3.chatbot.config.AgentUtilsConfig;
 import org.junit.jupiter.api.Test;
 import org.springaicommunity.agent.tools.AskUserQuestionTool;
-import org.springaicommunity.agent.tools.AskUserQuestionTool.QuestionHandler;
 import org.springframework.ai.tool.ToolCallback;
-import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 
 import java.util.List;
 import java.util.Map;
@@ -18,25 +17,32 @@ class AskUserQuestionHandlerTest {
     void handlerReceivesQuestionsAndReturnsAnswers() {
         List<String> capturedQuestions = new CopyOnWriteArrayList<>();
 
-        QuestionHandler handler = questions -> {
-            for (Object q : questions) {
-                capturedQuestions.add(q.toString());
+        PendingQuestionRegistry registry = new PendingQuestionRegistry() {
+            @Override
+            public Map<String, String> handle(List<AskUserQuestionTool.Question> questions) {
+                questions.forEach(question -> capturedQuestions.add(question.question()));
+                return Map.of(questions.get(0).question(), "Fast");
             }
-            return Map.of();
         };
 
-        AskUserQuestionTool tool = AskUserQuestionTool.builder()
-                .questionHandler(handler)
-                .answersValidation(false)
-                .build();
+        ToolCallback callback = new AgentUtilsConfig().askUserQuestionToolCallback(registry);
+        callback.call("""
+                {
+                  "questions": [{
+                    "question": "Which mode?",
+                    "header": "Mode",
+                    "options": [
+                      {"label": "Fast", "description": "Run quickly"},
+                      {"label": "Careful", "description": "Run carefully"}
+                    ]
+                  }],
+                  "answers": {
+                    "Which mode?": "Fast"
+                  }
+                }
+                """);
 
-        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                .toolObjects(tool)
-                .build()
-                .getToolCallbacks();
-
-        assertTrue(callbacks.length > 0);
-        ToolCallback callback = callbacks[0];
+        assertEquals(List.of("Which mode?"), capturedQuestions);
         assertNotNull(callback.getToolDefinition());
         assertEquals("AskUserQuestionTool", callback.getToolDefinition().name());
         assertNotNull(callback.getToolDefinition().description());
@@ -44,45 +50,17 @@ class AskUserQuestionHandlerTest {
 
     @Test
     void handlerReturnsDefaultAnswers() {
-        QuestionHandler handler = questions -> Map.of();
+        ToolCallback callback = new AgentUtilsConfig().askUserQuestionToolCallback(new PendingQuestionRegistry());
 
-        AskUserQuestionTool tool = AskUserQuestionTool.builder()
-                .questionHandler(handler)
-                .answersValidation(false)
-                .build();
-
-        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                .toolObjects(tool)
-                .build()
-                .getToolCallbacks();
-
-        assertTrue(callbacks.length > 0);
+        assertNotNull(callback);
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"questions\""));
     }
 
     @Test
     void handlerWithMultipleOptions() {
-        QuestionHandler handler = questions -> {
-            Map<String, String> answers = new java.util.LinkedHashMap<>();
-            int i = 0;
-            for (Object q : questions) {
-                answers.put("answer_" + i, "selected_option_1");
-                i++;
-            }
-            return answers;
-        };
+        ToolCallback callback = new AgentUtilsConfig().askUserQuestionToolCallback(new PendingQuestionRegistry());
 
-        AskUserQuestionTool tool = AskUserQuestionTool.builder()
-                .questionHandler(handler)
-                .answersValidation(false)
-                .build();
-
-        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                .toolObjects(tool)
-                .build()
-                .getToolCallbacks();
-
-        assertTrue(callbacks.length > 0);
-        ToolCallback callback = callbacks[0];
         assertEquals("AskUserQuestionTool", callback.getToolDefinition().name());
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"options\""));
     }
 }

@@ -1,14 +1,13 @@
 package com.fdc3.chatbot.tool.agentutils;
 
+import com.fdc3.chatbot.config.AgentUtilsConfig;
+import com.fdc3.chatbot.config.AgentUtilsProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
-import org.springframework.ai.tool.method.MethodToolCallbackProvider;
-import org.springaicommunity.agent.tools.SmartWebFetchTool;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,54 +19,32 @@ class SmartWebFetchCallbackTest {
 
     @Test
     void buildSmartWebFetchToolReturnsWebFetchCallback() {
-        ChatClient chatClient = ChatClient.builder(chatModel).build();
-        SmartWebFetchTool tool = SmartWebFetchTool.builder(chatClient)
-                .domainSafetyCheck(true)
-                .maxContentLength(10000)
-                .build();
+        AgentUtilsProperties properties = new AgentUtilsProperties();
+        properties.getWebFetch().setMaxContentLength(10000);
 
-        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                .toolObjects(tool)
-                .build()
-                .getToolCallbacks();
+        ToolCallback callback = new AgentUtilsConfig().webFetchToolCallback(chatModel, properties);
 
-        assertTrue(callbacks.length > 0);
-        ToolCallback callback = callbacks[0];
         assertEquals("WebFetch", callback.getToolDefinition().name());
         assertNotNull(callback.getToolDefinition().description());
     }
 
     @Test
     void smartWebFetchToolWithCustomUserAgent() {
-        ChatClient chatClient = ChatClient.builder(chatModel).build();
-        SmartWebFetchTool tool = SmartWebFetchTool.builder(chatClient)
-                .domainSafetyCheck(true)
-                .maxContentLength(5000)
-                .build();
+        AgentUtilsProperties properties = new AgentUtilsProperties();
+        properties.getWebFetch().setMaxContentLength(5000);
 
-        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                .toolObjects(tool)
-                .build()
-                .getToolCallbacks();
+        ToolCallback callback = new AgentUtilsConfig().webFetchToolCallback(chatModel, properties);
 
-        assertTrue(callbacks.length > 0);
-        assertEquals("WebFetch", callbacks[0].getToolDefinition().name());
+        assertEquals("WebFetch", callback.getToolDefinition().name());
     }
 
     @Test
     void smartWebFetchToolWithDomainSafetyCheck() {
-        ChatClient chatClient = ChatClient.builder(chatModel).build();
-        SmartWebFetchTool tool = SmartWebFetchTool.builder(chatClient)
-                .domainSafetyCheck(true)
-                .maxContentLength(10000)
-                .build();
+        AgentUtilsProperties properties = new AgentUtilsProperties();
+        properties.getWebFetch().setDomainSafetyCheck(true);
 
-        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                .toolObjects(tool)
-                .build()
-                .getToolCallbacks();
+        ToolCallback callback = new AgentUtilsConfig().webFetchToolCallback(chatModel, properties);
 
-        assertTrue(callbacks.length > 0);
-        assertEquals("WebFetch", callbacks[0].getToolDefinition().name());
+        assertEquals("WebFetch", callback.getToolDefinition().name());
     }
 }

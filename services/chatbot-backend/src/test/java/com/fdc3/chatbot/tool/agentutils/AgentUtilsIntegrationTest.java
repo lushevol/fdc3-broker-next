@@ -1,26 +1,13 @@
 package com.fdc3.chatbot.tool.agentutils;
 
-import com.fdc3.chatbot.config.AgentUtilsProperties;
+import com.fdc3.chatbot.config.AgentUtilsConfig;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.ai.tool.ToolCallback;
-import org.springframework.ai.tool.method.MethodToolCallbackProvider;
-import org.springframework.core.io.ClassPathResource;
-import org.springaicommunity.agent.common.task.subagent.SubagentReference;
-import org.springaicommunity.agent.common.task.subagent.SubagentType;
-import org.springaicommunity.agent.tools.AskUserQuestionTool;
-import org.springaicommunity.agent.tools.BraveWebSearchTool;
-import org.springaicommunity.agent.tools.SkillsTool;
-import org.springaicommunity.agent.tools.SmartWebFetchTool;
-import org.springaicommunity.agent.tools.TodoWriteTool;
-import org.springaicommunity.agent.tools.task.TaskTool;
-import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentReferences;
-import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentType;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +15,13 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {AgentUtilsIntegrationTest.TestConfig.class})
+@SpringBootTest(
+        classes = {AgentUtilsConfig.class, AgentUtilsIntegrationTest.TestConfig.class},
+        properties = {
+                "CHATBOT_BRAVE_SEARCH_API_KEY=test-brave-key",
+                "chatbot.agent-utils.skills.enabled=true"
+        }
+)
 class AgentUtilsIntegrationTest {
 
     @Autowired
@@ -43,87 +36,6 @@ class AgentUtilsIntegrationTest {
         @Bean
         public ChatModel chatModel() {
             return mock(ChatModel.class);
-        }
-
-        @Bean
-        public PendingQuestionRegistry pendingQuestionRegistry() {
-            return new PendingQuestionRegistry();
-        }
-
-        @Bean
-        public ToolCallback webFetchToolCallback(ChatModel chatModel) {
-            ChatClient chatClient = ChatClient.builder(chatModel).build();
-            SmartWebFetchTool tool = SmartWebFetchTool.builder(chatClient)
-                    .maxContentLength(10000)
-                    .domainSafetyCheck(true)
-                    .build();
-            ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                    .toolObjects(tool)
-                    .build()
-                    .getToolCallbacks();
-            return callbacks[0];
-        }
-
-        @Bean
-        public ToolCallback webSearchToolCallback() {
-            BraveWebSearchTool tool = BraveWebSearchTool.builder("test-brave-key")
-                    .resultCount(5)
-                    .build();
-            ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                    .toolObjects(tool)
-                    .build()
-                    .getToolCallbacks();
-            return callbacks[0];
-        }
-
-        @Bean
-        public ToolCallback askUserQuestionToolCallback(PendingQuestionRegistry registry) {
-            AskUserQuestionTool tool = AskUserQuestionTool.builder()
-                    .questionHandler(registry)
-                    .answersValidation(true)
-                    .build();
-            ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                    .toolObjects(tool)
-                    .build()
-                    .getToolCallbacks();
-            return callbacks[0];
-        }
-
-        @Bean
-        public ToolCallback skillsToolCallback() {
-            return SkillsTool.builder()
-                    .addSkillsResource(new ClassPathResource("skills"))
-                    .build();
-        }
-
-        @Bean
-        public ToolCallback todoWriteToolCallback() {
-            TodoWriteTool tool = TodoWriteTool.builder()
-                    .todoEventHandler(todos -> {})
-                    .build();
-            ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                    .toolObjects(tool)
-                    .build()
-                    .getToolCallbacks();
-            return callbacks[0];
-        }
-
-        @Bean
-        public ToolCallback taskToolCallback(ChatModel chatModel) {
-            ChatClient.Builder defaultBuilder = ChatClient.builder(chatModel);
-            SubagentType subagentType = ClaudeSubagentType.builder()
-                    .chatClientBuilder("default", defaultBuilder)
-                    .skillsDirectories(List.of("skills"))
-                    .build();
-
-            // Use a single agent reference to avoid duplicate-key issues
-            List<SubagentReference> refs = ClaudeSubagentReferences.fromResource(
-                    new ClassPathResource("agents/explore.md"));
-
-            return TaskTool.builder()
-                    .subagentReferences(refs)
-                    .subagentTypes(subagentType)
-                    .build();
         }
     }
 
