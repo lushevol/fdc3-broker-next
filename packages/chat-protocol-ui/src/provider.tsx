@@ -154,6 +154,14 @@ export function ChatProtocolProvider({
     [onFrame],
   );
 
+  const protocolTools = useMemo(() => {
+    if (!tools) return undefined;
+    return tools.filter((toolDesc) => {
+      const toolkitEntry = toolkit[toolDesc.name];
+      return !(toolkitEntry && (toolkitEntry as Record<string, unknown>).disabled === true);
+    });
+  }, [tools, toolkit]);
+
   const modelAdapter = useMemo(
     () =>
       createProtocolLocalRuntime({
@@ -171,7 +179,7 @@ export function ChatProtocolProvider({
           const request = buildChatProtocolRequest({
             conversationId,
             messages: protocolMessages,
-            tools,
+            tools: protocolTools,
             context,
             ...(modelName ? { config: { modelName: modelName as string } } : {}),
             metadata: {
@@ -198,9 +206,9 @@ export function ChatProtocolProvider({
       fetch,
       handleFrame,
       metadata,
+      protocolTools,
       resolveFrontendTool,
       toolkitBridge,
-      tools,
       userId,
     ],
   );

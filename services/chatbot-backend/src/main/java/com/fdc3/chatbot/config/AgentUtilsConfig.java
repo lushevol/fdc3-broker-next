@@ -1,5 +1,7 @@
 package com.fdc3.chatbot.config;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -28,6 +30,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ClassPathResource;
 import org.springaicommunity.agent.common.task.subagent.SubagentType;
 import org.springaicommunity.agent.tools.AskUserQuestionTool;
+import org.springaicommunity.agent.tools.AskUserQuestionTool.Question;
 import org.springaicommunity.agent.tools.BraveWebSearchTool;
 import org.springaicommunity.agent.tools.SkillsTool;
 import org.springaicommunity.agent.tools.SmartWebFetchTool;
@@ -51,6 +54,12 @@ import java.nio.file.Path;
 @EnableConfigurationProperties(AgentUtilsProperties.class)
 public class AgentUtilsConfig {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final TypeReference<List<Question>> ASK_USER_QUESTIONS_TYPE = new TypeReference<>() {
+    };
+    private static final TypeReference<Map<String, String>> ASK_USER_ANSWERS_TYPE = new TypeReference<>() {
+    };
+
     private static final String SKILL_TOOL_DESCRIPTION_TEMPLATE = """
             Execute a skill within the main conversation
 
@@ -73,6 +82,77 @@ public class AgentUtilsConfig {
             <available_skills>
             %s
             </available_skills>
+            """;
+    private static final String ASK_USER_QUESTION_TOOL_DESCRIPTION = """
+            Use this tool when you need to ask the user questions during execution. This allows you to:
+            1. Gather user preferences or requirements
+            2. Clarify ambiguous instructions
+            3. Get decisions on implementation choices as you work
+            4. Offer choices to the user about what direction to take.
+
+            Usage notes:
+            - Users will always be able to select "Other" to provide custom text input
+            - Use multiSelect: true to allow multiple answers to be selected for a question
+            - If you recommend a specific option, make that the first option in the list and add "(Recommended)" at the end of the label
+            """;
+    private static final String ASK_USER_QUESTION_INPUT_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "questions": {
+                  "type": "array",
+                  "description": "Questions to ask the user (1-4 questions)",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "question": {
+                        "type": "string",
+                        "description": "The complete question to ask the user. Should be clear, specific, and end with a question mark."
+                      },
+                      "header": {
+                        "type": "string",
+                        "description": "Very short label displayed as a chip/tag, max 12 characters."
+                      },
+                      "options": {
+                        "type": "array",
+                        "description": "The available choices for this question. Must have 2-4 options.",
+                        "minItems": 2,
+                        "maxItems": 4,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "label": {
+                              "type": "string",
+                              "description": "The display text for this option that the user will see and select."
+                            },
+                            "description": {
+                              "type": "string",
+                              "description": "Explanation of what this option means or what will happen if chosen."
+                            }
+                          },
+                          "required": ["label", "description"]
+                        }
+                      },
+                      "multiSelect": {
+                        "type": "boolean",
+                        "description": "Set to true to allow the user to select multiple options instead of just one."
+                      }
+                    },
+                    "required": ["question", "header", "options"]
+                  }
+                },
+                "answers": {
+                  "type": "object",
+                  "description": "User answers collected by the permission component",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": ["questions"]
+            }
             """;
 
     @Bean
@@ -203,8 +283,19 @@ public class AgentUtilsConfig {
                 .questionHandler(pendingQuestionRegistry)
                 .answersValidation(true)
                 .build();
+        Function<Map<String, Object>, String> askUserQuestion = args -> {
+            List<Question> questions = OBJECT_MAPPER.convertValue(args.get("questions"), ASK_USER_QUESTIONS_TYPE);
+            Map<String, String> answers = args.containsKey("answers") && args.get("answers") != null
+                    ? OBJECT_MAPPER.convertValue(args.get("answers"), ASK_USER_ANSWERS_TYPE)
+                    : Map.of();
+            return tool.askUserQuestion(questions, answers);
+        };
         log.info("Created AskUserQuestionTool");
-        return toToolCallback(tool);
+        return FunctionToolCallback.builder("AskUserQuestionTool", askUserQuestion)
+                .description(ASK_USER_QUESTION_TOOL_DESCRIPTION)
+                .inputType((java.lang.reflect.Type) Map.class)
+                .inputSchema(ASK_USER_QUESTION_INPUT_SCHEMA)
+                .build();
     }
 
     @Bean
