@@ -3,6 +3,7 @@ package com.fdc3.chatbot.config;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
+import io.micrometer.core.instrument.Counter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,12 @@ public class RateLimitConfig implements WebMvcConfigurer {
     private int requestsPerMinute;
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
+
+    private final Counter rateLimitExceededCounter;
+
+    public RateLimitConfig(Counter rateLimitExceededCounter) {
+        this.rateLimitExceededCounter = rateLimitExceededCounter;
+    }
 
     @Bean
     public HandlerInterceptor rateLimitInterceptor() {
