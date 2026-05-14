@@ -4,7 +4,7 @@
   "scripts": {
     "build": "mvn -DskipTests clean package",
     "bundle:centos": "sh ./scripts/bundle-centos.sh",
-    "dev": "env-cmd -f ../../.env.profile.${ACTIVE_ENV:-dev} mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8080 -Dspring.profiles.active=local -javaagent:target/opentelemetry-javaagent.jar -Dotel.traces.exporter=logging -Dotel.metrics.exporter=none -Dotel.logs.exporter=none'",
+    "dev": "mkdir -p logs && env-cmd -f ../../.env.profile.${ACTIVE_ENV:-dev} mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8080 -Dspring.profiles.active=local -javaagent:target/opentelemetry-javaagent.jar -Dotel.traces.exporter=logging -Dotel.metrics.exporter=none -Dotel.logs.exporter=none'",
     "verify:protocol:real": "bash ./scripts/verify-protocol-real.sh",
     "run:bundle": "sh ./scripts/run-centos.sh"
   }
