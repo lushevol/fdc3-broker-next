@@ -52,11 +52,30 @@ class AgentUtilsConfigTest {
     }
 
     @Test
+    void webFetchToolCallbackUsesExplicitFunctionSchema() {
+        ToolCallback callback = config.webFetchToolCallback(chatModel, properties);
+
+        assertTrue(callback.getClass().getName().contains("FunctionToolCallback"));
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"url\""));
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"prompt\""));
+    }
+
+    @Test
     void webSearchToolCallbackReturnsToolCallbackWithCorrectName() {
         ToolCallback callback = config.webSearchToolCallback(properties, "test-brave-key");
         assertNotNull(callback);
         assertEquals("WebSearch", callback.getToolDefinition().name());
         assertNotNull(callback.getToolDefinition().description());
+    }
+
+    @Test
+    void webSearchToolCallbackUsesExplicitFunctionSchema() {
+        ToolCallback callback = config.webSearchToolCallback(properties, "test-brave-key");
+
+        assertTrue(callback.getClass().getName().contains("FunctionToolCallback"));
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"query\""));
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"allowedDomains\""));
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"blockedDomains\""));
     }
 
     @Test
@@ -111,6 +130,33 @@ class AgentUtilsConfigTest {
                 """);
 
         assertTrue(result.contains("Fast"));
+    }
+
+    @Test
+    void todoWriteToolCallbackUsesExplicitFunctionSchema() {
+        ToolCallback callback = config.todoWriteToolCallback();
+
+        assertTrue(callback.getClass().getName().contains("FunctionToolCallback"));
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"todos\""));
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"activeForm\""));
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"status\""));
+    }
+
+    @Test
+    void todoWriteToolCallbackInvokesTodoWriteTool() {
+        ToolCallback callback = config.todoWriteToolCallback();
+
+        String result = callback.call("""
+                {
+                  "todos": [{
+                    "content": "Fix Nullness callback startup",
+                    "status": "in_progress",
+                    "activeForm": "Fixing Nullness callback startup"
+                  }]
+                }
+                """);
+
+        assertTrue(result.contains("Todos have been modified successfully"));
     }
 
     @Test

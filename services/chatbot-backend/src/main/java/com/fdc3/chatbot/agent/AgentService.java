@@ -39,7 +39,6 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.function.FunctionToolCallback;
-import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springaicommunity.agent.tools.AutoMemoryTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,6 +69,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -82,6 +82,43 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 public class AgentService {
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
+    private static final String MEMORY_VIEW_SCHEMA = """
+            {"type":"object","properties":{
+              "path":{"type":"string","description":"Path to the file or directory to view, relative to the memories root. Use empty string or '/' for the root."},
+              "viewRange":{"type":"string","description":"Optional line range as 'start,end' when viewing a file."}
+            },"required":["path"]}
+            """;
+    private static final String MEMORY_CREATE_SCHEMA = """
+            {"type":"object","properties":{
+              "path":{"type":"string","description":"Path for the new file, relative to the memories root."},
+              "fileText":{"type":"string","description":"Full file content including YAML frontmatter followed by the memory body."}
+            },"required":["path","fileText"]}
+            """;
+    private static final String MEMORY_STR_REPLACE_SCHEMA = """
+            {"type":"object","properties":{
+              "path":{"type":"string","description":"Path to the file to edit, relative to the memories root."},
+              "oldStr":{"type":"string","description":"Exact text to find and replace. Must appear exactly once."},
+              "newStr":{"type":"string","description":"Replacement text. Use empty string to delete matched text."}
+            },"required":["path","oldStr","newStr"]}
+            """;
+    private static final String MEMORY_INSERT_SCHEMA = """
+            {"type":"object","properties":{
+              "path":{"type":"string","description":"Path to the file to modify, relative to the memories root."},
+              "insertLine":{"type":"integer","description":"Line number after which to insert the text. Use 0 to insert before the first line."},
+              "insertText":{"type":"string","description":"Text to insert."}
+            },"required":["path","insertLine","insertText"]}
+            """;
+    private static final String MEMORY_DELETE_SCHEMA = """
+            {"type":"object","properties":{
+              "path":{"type":"string","description":"Path to the file or directory to delete, relative to the memories root."}
+            },"required":["path"]}
+            """;
+    private static final String MEMORY_RENAME_SCHEMA = """
+            {"type":"object","properties":{
+              "oldPath":{"type":"string","description":"Current path of the file or directory, relative to the memories root."},
+              "newPath":{"type":"string","description":"New path for the file or directory, relative to the memories root."}
+            },"required":["oldPath","newPath"]}
+            """;
     private static final String STREAMED_ASSISTANT_TEXT_REQUEST = """
             You are writing the user-visible assistant reply for a chat turn.
             Respond with plain assistant text only.
@@ -1873,22 +1910,102 @@ public class AgentService {
         });
     }
 
-    /**
-     * Look up a memory tool by name from the per-user AutoMemoryTools instance.
-     * Uses MethodToolCallbackProvider to extract all @Tool-annotated methods and
-     * finds the one matching the requested name.
-     */
     private ToolCallback resolveMemoryToolCallback(AutoMemoryTools userMemoryTools, String toolName) {
-        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                .toolObjects(userMemoryTools)
-                .build()
-                .getToolCallbacks();
-        for (ToolCallback cb : callbacks) {
+        for (ToolCallback cb : buildMemoryToolCallbacks(userMemoryTools)) {
             if (cb.getToolDefinition().name().equals(toolName)) {
                 return cb;
             }
         }
         return null;
+    }
+
+    List<ToolCallback> buildMemoryToolCallbacks(AutoMemoryTools userMemoryTools) {
+        return List.of(
+                memoryToolCallback(
+                        "MemoryView",
+                        "View a memory file with line numbers or list a memory directory.",
+                        MEMORY_VIEW_SCHEMA,
+                        args -> userMemoryTools.memoryView(
+                                argumentString(args, "path"),
+                                argumentString(args, "viewRange")
+                        )
+                ),
+                memoryToolCallback(
+                        "MemoryCreate",
+                        "Create a new file in the persistent memory store.",
+                        MEMORY_CREATE_SCHEMA,
+                        args -> userMemoryTools.memoryCreate(
+                                argumentString(args, "path"),
+                                argumentString(args, "fileText")
+                        )
+                ),
+                memoryToolCallback(
+                        "MemoryStrReplace",
+                        "Replace an exact string in an existing memory file.",
+                        MEMORY_STR_REPLACE_SCHEMA,
+                        args -> userMemoryTools.memoryStrReplace(
+                                argumentString(args, "path"),
+                                argumentString(args, "oldStr"),
+                                argumentString(args, "newStr")
+                        )
+                ),
+                memoryToolCallback(
+                        "MemoryInsert",
+                        "Insert text at a specific line number in an existing memory file.",
+                        MEMORY_INSERT_SCHEMA,
+                        args -> userMemoryTools.memoryInsert(
+                                argumentString(args, "path"),
+                                argumentInteger(args, "insertLine"),
+                                argumentString(args, "insertText")
+                        )
+                ),
+                memoryToolCallback(
+                        "MemoryDelete",
+                        "Delete a file or directory from the persistent memory store.",
+                        MEMORY_DELETE_SCHEMA,
+                        args -> userMemoryTools.memoryDelete(argumentString(args, "path"))
+                ),
+                memoryToolCallback(
+                        "MemoryRename",
+                        "Rename or move a file or directory within the persistent memory store.",
+                        MEMORY_RENAME_SCHEMA,
+                        args -> userMemoryTools.memoryRename(
+                                argumentString(args, "oldPath"),
+                                argumentString(args, "newPath")
+                        )
+                )
+        );
+    }
+
+    private ToolCallback memoryToolCallback(
+            String name,
+            String description,
+            String inputSchema,
+            Function<Map<String, Object>, String> callback
+    ) {
+        return FunctionToolCallback.<Map<String, Object>, String>builder(name, callback)
+                .description(description)
+                .inputSchema(inputSchema)
+                .inputType(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .build();
+    }
+
+    private static String argumentString(Map<String, Object> args, String name) {
+        Object value = args.get(name);
+        return value == null ? null : value.toString();
+    }
+
+    private static Integer argumentInteger(Map<String, Object> args, String name) {
+        Object value = args.get(name);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+        String stringValue = value.toString();
+        return stringValue.isBlank() ? null : Integer.valueOf(stringValue);
     }
 
     private List<ToolCallback> buildToolCallbacks(
@@ -1926,11 +2043,7 @@ public class AgentService {
             String userId = conversationUsers.get(conversationId);
             if (userId != null) {
                 AutoMemoryTools userMemoryTools = memoryToolsFactory.forUser(userId);
-                ToolCallback[] memoryCallbacks = MethodToolCallbackProvider.builder()
-                        .toolObjects(userMemoryTools)
-                        .build()
-                        .getToolCallbacks();
-                for (ToolCallback cb : memoryCallbacks) {
+                for (ToolCallback cb : buildMemoryToolCallbacks(userMemoryTools)) {
                     String name = cb.getToolDefinition().name();
                     if (!blockedToolNames.contains(name)) {
                         uniqueCallbacks.putIfAbsent(name, cb);

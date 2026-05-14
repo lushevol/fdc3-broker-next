@@ -19,7 +19,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.function.FunctionToolCallback;
-import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -35,6 +34,7 @@ import org.springaicommunity.agent.tools.BraveWebSearchTool;
 import org.springaicommunity.agent.tools.SkillsTool;
 import org.springaicommunity.agent.tools.SmartWebFetchTool;
 import org.springaicommunity.agent.tools.TodoWriteTool;
+import org.springaicommunity.agent.tools.TodoWriteTool.Todos;
 import org.springaicommunity.agent.tools.TodoWriteTool.TodoEventHandler;
 import org.springaicommunity.agent.tools.task.TaskTool;
 import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentType;
@@ -59,6 +59,86 @@ public class AgentUtilsConfig {
     };
     private static final TypeReference<Map<String, String>> ASK_USER_ANSWERS_TYPE = new TypeReference<>() {
     };
+    private static final TypeReference<List<String>> STRING_LIST_TYPE = new TypeReference<>() {
+    };
+    private static final String WEB_FETCH_TOOL_DESCRIPTION = """
+            Fetch content from a URL and run a prompt over the fetched content.
+            """;
+    private static final String WEB_FETCH_INPUT_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "The URL to fetch content from."
+                },
+                "prompt": {
+                  "type": "string",
+                  "description": "The prompt to run on the fetched content."
+                }
+              },
+              "required": ["url", "prompt"]
+            }
+            """;
+    private static final String WEB_SEARCH_TOOL_DESCRIPTION = """
+            Search the web for current information using Brave Search.
+            """;
+    private static final String WEB_SEARCH_INPUT_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "description": "The search query to use."
+                },
+                "allowedDomains": {
+                  "type": "array",
+                  "description": "Only include search results from these domains.",
+                  "items": {"type": "string"}
+                },
+                "blockedDomains": {
+                  "type": "array",
+                  "description": "Never include search results from these domains.",
+                  "items": {"type": "string"}
+                }
+              },
+              "required": ["query"]
+            }
+            """;
+    private static final String TODO_WRITE_TOOL_DESCRIPTION = """
+            Create and update a structured todo list for the current task. Use it to track pending, in-progress, and completed work.
+            """;
+    private static final String TODO_WRITE_INPUT_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "todos": {
+                  "type": "array",
+                  "description": "The full current todo list.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "content": {
+                        "type": "string",
+                        "description": "Todo item content."
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "Todo item status.",
+                        "enum": ["pending", "in_progress", "completed"]
+                      },
+                      "activeForm": {
+                        "type": "string",
+                        "description": "Present-tense form of the todo item while it is in progress."
+                      }
+                    },
+                    "required": ["content", "status", "activeForm"]
+                  }
+                }
+              },
+              "required": ["todos"]
+            }
+            """;
 
     private static final String SKILL_TOOL_DESCRIPTION_TEMPLATE = """
             Execute a skill within the main conversation
@@ -180,7 +260,15 @@ public class AgentUtilsConfig {
                 .build();
         log.info("Created WebFetch tool: maxContentLength={}, userAgent={}",
                 config.getMaxContentLength(), config.getUserAgent());
-        return toToolCallback(tool);
+        Function<Map<String, Object>, String> webFetch = args -> tool.webFetch(
+                (String) args.get("url"),
+                (String) args.get("prompt")
+        );
+        return FunctionToolCallback.builder("WebFetch", webFetch)
+                .description(WEB_FETCH_TOOL_DESCRIPTION)
+                .inputType((java.lang.reflect.Type) Map.class)
+                .inputSchema(WEB_FETCH_INPUT_SCHEMA)
+                .build();
     }
 
     @Bean
@@ -273,7 +361,16 @@ public class AgentUtilsConfig {
                 .resultCount(config.getResultCount())
                 .build();
         log.info("Created WebSearchTool: resultCount={}", config.getResultCount());
-        return toToolCallback(tool);
+        Function<Map<String, Object>, String> webSearch = args -> tool.webSearch(
+                (String) args.get("query"),
+                stringList(args.get("allowedDomains")),
+                stringList(args.get("blockedDomains"))
+        );
+        return FunctionToolCallback.builder("WebSearch", webSearch)
+                .description(WEB_SEARCH_TOOL_DESCRIPTION)
+                .inputType((java.lang.reflect.Type) Map.class)
+                .inputSchema(WEB_SEARCH_INPUT_SCHEMA)
+                .build();
     }
 
     @Bean
@@ -307,8 +404,15 @@ public class AgentUtilsConfig {
         TodoWriteTool tool = TodoWriteTool.builder()
                 .todoEventHandler(handler)
                 .build();
+        Function<Map<String, Object>, String> todoWrite = args -> tool.todoWrite(
+                OBJECT_MAPPER.convertValue(args, Todos.class)
+        );
         log.info("Created TodoWriteTool");
-        return toToolCallback(tool);
+        return FunctionToolCallback.builder("TodoWrite", todoWrite)
+                .description(TODO_WRITE_TOOL_DESCRIPTION)
+                .inputType((java.lang.reflect.Type) Map.class)
+                .inputSchema(TODO_WRITE_INPUT_SCHEMA)
+                .build();
     }
 
     @Bean
@@ -361,14 +465,10 @@ public class AgentUtilsConfig {
                 .build();
     }
 
-    private static ToolCallback toToolCallback(Object tool) {
-        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
-                .toolObjects(tool)
-                .build()
-                .getToolCallbacks();
-        if (callbacks.length > 0) {
-            return callbacks[0];
+    private static List<String> stringList(Object value) {
+        if (value == null) {
+            return List.of();
         }
-        throw new IllegalStateException("No @Tool-annotated methods found on " + tool.getClass().getSimpleName());
+        return OBJECT_MAPPER.convertValue(value, STRING_LIST_TYPE);
     }
 }
