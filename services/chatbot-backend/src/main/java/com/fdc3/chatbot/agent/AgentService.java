@@ -38,7 +38,6 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 
 import org.springframework.ai.tool.ToolCallback;
-import org.springframework.ai.tool.function.FunctionToolCallback;
 import org.springaicommunity.agent.tools.AutoMemoryTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,7 +69,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -1983,12 +1981,7 @@ public class AgentService {
             String inputSchema,
             Function<Map<String, Object>, String> callback
     ) {
-        return FunctionToolCallback.<Map<String, Object>, String>builder(name, callback)
-                .description(description)
-                .inputSchema(inputSchema)
-                .inputType(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
-                .build();
+        return mapToolCallback(name, description, inputSchema, callback);
     }
 
     private static String argumentString(Map<String, Object> args, String name) {
@@ -2056,54 +2049,75 @@ public class AgentService {
     }
 
     private ToolCallback toToolCallback(ToolDefinition toolDefinition) {
-        return FunctionToolCallback.<Map<String, Object>, Object>builder(
-                        toolDefinition.getName(),
-                        arguments -> {
-                            throw new UnsupportedOperationException(
-                                    "Internal tool execution is disabled for manual protocol control"
-                            );
-                        }
-                )
-                .description(toolDefinition.getDescription())
-                .inputSchema(writeJson(toolDefinition.getParameters()))
-                .inputType(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
-                .build();
+        return mapToolCallback(
+                toolDefinition.getName(),
+                toolDefinition.getDescription(),
+                writeJson(toolDefinition.getParameters()),
+                arguments -> {
+                    throw new UnsupportedOperationException(
+                            "Internal tool execution is disabled for manual protocol control"
+                    );
+                }
+        );
     }
 
     private ToolCallback toToolCallback(FrontendToolManifestEntry frontendTool) {
-        return FunctionToolCallback.<Map<String, Object>, Object>builder(
-                        frontendTool.getName(),
-                        arguments -> {
-                            throw new UnsupportedOperationException(
-                                    "Frontend tools are surfaced to the model but executed by the client"
-                            );
-                        }
-                )
-                .description(frontendTool.getDescription())
-                .inputSchema(writeJson(
+        return mapToolCallback(
+                frontendTool.getName(),
+                frontendTool.getDescription(),
+                writeJson(
                         frontendTool.getInputSchema() == null ? Map.of("type", "object") : frontendTool.getInputSchema()
-                ))
-                .inputType(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
-                .build();
+                ),
+                arguments -> {
+                    throw new UnsupportedOperationException(
+                            "Frontend tools are surfaced to the model but executed by the client"
+                    );
+                }
+        );
     }
 
     private ToolCallback toSchemaOnlyCallback(org.springframework.ai.tool.ToolCallback bridgeCallback) {
         var td = bridgeCallback.getToolDefinition();
-        return FunctionToolCallback.<Map<String, Object>, Object>builder(
-                        td.name(),
-                        args -> {
-                            throw new UnsupportedOperationException(
-                                    "Agent-utils tools are executed via the bridge, not directly"
-                            );
-                        }
-                )
-                .description(td.description())
-                .inputSchema(td.inputSchema())
-                .inputType(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
-                .build();
+        return mapToolCallback(
+                td.name(),
+                td.description(),
+                td.inputSchema(),
+                args -> {
+                    throw new UnsupportedOperationException(
+                            "Agent-utils tools are executed via the bridge, not directly"
+                    );
+                }
+        );
+    }
+
+    private ToolCallback mapToolCallback(
+            String name,
+            String description,
+            String inputSchema,
+            Function<Map<String, Object>, ?> callback
+    ) {
+        org.springframework.ai.tool.definition.ToolDefinition toolDefinition =
+                org.springframework.ai.tool.definition.ToolDefinition.builder()
+                        .name(name)
+                        .description(description)
+                        .inputSchema(inputSchema)
+                        .build();
+        return new ToolCallback() {
+            @Override
+            public org.springframework.ai.tool.definition.ToolDefinition getToolDefinition() {
+                return toolDefinition;
+            }
+
+            @Override
+            public String call(String toolInput) {
+                try {
+                    Object result = callback.apply(objectMapper.readValue(toolInput, MAP_TYPE));
+                    return result == null ? "ok" : result.toString();
+                } catch (Exception exception) {
+                    throw new IllegalArgumentException("Invalid " + name + " tool input", exception);
+                }
+            }
+        };
     }
 
     private FrontendToolManifestEntry findFrontendTool(
