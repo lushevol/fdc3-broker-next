@@ -41,7 +41,8 @@ import org.springaicommunity.agent.tools.TodoWriteTool;
 import org.springaicommunity.agent.tools.TodoWriteTool.Todos;
 import org.springaicommunity.agent.tools.TodoWriteTool.TodoEventHandler;
 import org.springaicommunity.agent.tools.task.TaskTool;
-import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentType;
+import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentExecutor;
+import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentResolver;
 import org.springaicommunity.agent.tools.task.repository.DefaultTaskRepository;
 import org.springaicommunity.agent.utils.Skills;
 
@@ -465,10 +466,14 @@ public class AgentUtilsConfig {
 
         ChatClient.Builder defaultBuilder = ChatClient.builder(chatModel);
 
-        SubagentType subagentType = ClaudeSubagentType.builder()
-                .chatClientBuilder("default", defaultBuilder)
-                .skillsDirectories(List.of("skills"))
-                .build();
+        SubagentType subagentType = new SubagentType(
+                new ClaudeSubagentResolver(),
+                new ClaudeSubagentExecutor(
+                        Map.of("default", defaultBuilder),
+                        List.of(),
+                        List.of("skills")
+                )
+        );
 
         List<SubagentType> subagentTypes = List.of(subagentType);
         List<SubagentDefinition> subagents = defaultClaudeSubagentReferences().stream()
