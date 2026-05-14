@@ -723,6 +723,42 @@ class ProtocolChatServiceTest {
             );
             return behavior.apply(lastInvocation);
         }
+
+        @Override
+        public Runnable processProtocolMessageStreamingWithModel(
+                String conversationId,
+                String userMessage,
+                UserCapabilityContext capabilityContext,
+                String toolContext,
+                String frontendTools,
+                WorkspaceContextSnapshot workspaceContext,
+                List<ChatMessage> history,
+                String modelName,
+                Consumer<String> onNext,
+                Consumer<Throwable> onError,
+                Runnable onComplete,
+                Consumer<ExecutionPlanEvent> onExecutionPlan,
+                Consumer<ExecutionStepEvent> onExecutionStep,
+                Consumer<ToolCall> onToolCall,
+                Consumer<ToolResult> onToolResult
+        ) {
+            return processProtocolMessageStreaming(
+                    conversationId,
+                    userMessage,
+                    capabilityContext,
+                    toolContext,
+                    frontendTools,
+                    workspaceContext,
+                    history,
+                    onNext,
+                    onError,
+                    onComplete,
+                    onExecutionPlan,
+                    onExecutionStep,
+                    onToolCall,
+                    onToolResult
+            );
+        }
     }
 
     @FunctionalInterface

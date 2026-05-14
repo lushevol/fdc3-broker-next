@@ -1,8 +1,5 @@
 package com.fdc3.elasticsearchmcp.repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fdc3.elasticsearchmcp.config.ElasticsearchAnalyticsProperties;
 import com.fdc3.elasticsearchmcp.service.model.AggregateMetrics;
 import com.fdc3.elasticsearchmcp.service.model.ApplicationVisitTarget;
@@ -25,6 +22,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Repository
 @ConditionalOnProperty(prefix = "analytics.stub", name = "enabled", havingValue = "false", matchIfMissing = true)
@@ -195,7 +195,7 @@ public class ElasticsearchAppAnalyticsRepository implements AppAnalyticsReposito
     private String writeJson(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalStateException("Failed to serialize Kibana search request", exception);
         }
     }
@@ -203,7 +203,7 @@ public class ElasticsearchAppAnalyticsRepository implements AppAnalyticsReposito
     JsonNode parseJson(String value) {
         try {
             return objectMapper.readTree(value);
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalStateException("Failed to parse request JSON for testing", exception);
         }
     }
