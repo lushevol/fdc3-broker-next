@@ -1,7 +1,6 @@
 package com.fdc3.chatbot.protocol.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,11 +28,11 @@ public class ProtocolPart {
     private String source;
     private String providerId;
     private String state;
-    private JsonNode input;
-    private JsonNode output;
+    private Object input;
+    private Object output;
     private String error;
     private String cardType;
-    private JsonNode props;
+    private Object props;
     private String actionId;
     private String actionType;
     private String description;

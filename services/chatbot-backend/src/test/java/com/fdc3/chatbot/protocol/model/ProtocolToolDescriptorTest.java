@@ -134,4 +134,40 @@ class ProtocolToolDescriptorTest {
         assertEquals(1, context.getTools().size());
         assertEquals(ChatToolSource.MCP, context.getTools().get(0).getSource());
     }
+
+    @Test
+    void shouldDeserializeToolParametersWithSpringBootJackson3Mapper() throws Exception {
+        String json = """
+            {
+              "conversationId": "conv-1",
+              "messages": [
+                {"role": "user", "parts": [{"type": "text", "text": "hi"}]}
+              ],
+              "context": {
+                "tools": [
+                  {
+                    "name": "location.resolve",
+                    "source": "frontend",
+                    "description": "Resolve a location",
+                    "parameters": {
+                      "type": "object",
+                      "properties": {"query": {"type": "string"}},
+                      "required": ["query"]
+                    }
+                  }
+                ]
+              }
+            }
+            """;
+
+        tools.jackson.databind.ObjectMapper jackson3Mapper = new tools.jackson.databind.ObjectMapper();
+
+        ProtocolRunRequest request = jackson3Mapper.readValue(json, ProtocolRunRequest.class);
+
+        assertEquals("conv-1", request.getConversationId());
+        assertNotNull(request.getContext());
+        assertNotNull(request.getContext().getTools());
+        assertEquals("location.resolve", request.getContext().getTools().get(0).getName());
+        assertNotNull(request.getContext().getTools().get(0).getParameters());
+    }
 }

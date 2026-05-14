@@ -566,10 +566,11 @@ public class ProtocolChatService {
         }
 
         private static Map<String, Object> normalizeToolParameters(
-                JsonNode parametersNode,
+                Object parametersNode,
                 ObjectMapper objectMapper
         ) {
-            if (parametersNode == null || parametersNode.isNull() || parametersNode.isMissingNode()) {
+            if (parametersNode == null
+                    || (parametersNode instanceof JsonNode jsonNode && (jsonNode.isNull() || jsonNode.isMissingNode()))) {
                 return Map.of("type", "object");
             }
 
@@ -667,8 +668,8 @@ public class ProtocolChatService {
                             .originalUserMessage(originalUserMessage)
                             .toolCallId(part.getToolCallId())
                             .toolName(part.getToolName())
-                            .args(jsonNodeToMap(objectMapper, part.getInput()))
-                            .result(jsonNodeToObject(objectMapper, part.getOutput()))
+                            .args(jsonValueToMap(objectMapper, part.getInput()))
+                            .result(jsonValueToObject(objectMapper, part.getOutput()))
                             .isError("output-error".equalsIgnoreCase(part.getState()))
                             .error(part.getError())
                             .build();
@@ -740,18 +741,18 @@ public class ProtocolChatService {
             builder.append(value.trim());
         }
 
-        private static Map<String, Object> jsonNodeToMap(ObjectMapper objectMapper, JsonNode node) {
-            if (node == null || node.isNull()) {
+        private static Map<String, Object> jsonValueToMap(ObjectMapper objectMapper, Object value) {
+            if (value == null || (value instanceof JsonNode jsonNode && jsonNode.isNull())) {
                 return Map.of();
             }
-            return objectMapper.convertValue(node, objectMapper.getTypeFactory().constructMapType(LinkedHashMap.class, String.class, Object.class));
+            return objectMapper.convertValue(value, objectMapper.getTypeFactory().constructMapType(LinkedHashMap.class, String.class, Object.class));
         }
 
-        private static Object jsonNodeToObject(ObjectMapper objectMapper, JsonNode node) {
-            if (node == null || node.isNull()) {
+        private static Object jsonValueToObject(ObjectMapper objectMapper, Object value) {
+            if (value == null || (value instanceof JsonNode jsonNode && jsonNode.isNull())) {
                 return Map.of();
             }
-            return objectMapper.convertValue(node, Object.class);
+            return objectMapper.convertValue(value, Object.class);
         }
     }
 
