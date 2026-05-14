@@ -1,7 +1,7 @@
 package com.fdc3.elasticsearchmcp.resource;
 
 import com.fdc3.elasticsearchmcp.catalog.Text2SqlCatalogService;
-import org.springaicommunity.mcp.annotation.McpResource;
+import org.springframework.ai.mcp.annotation.McpResource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 

@@ -24,5 +24,5 @@ public class ChatRequest {
     private List<ProtocolMessage> messages;
     private List<ChatMessage> history;
     @Default
-    private boolean stream = true;
+    private Boolean stream = true;
 }

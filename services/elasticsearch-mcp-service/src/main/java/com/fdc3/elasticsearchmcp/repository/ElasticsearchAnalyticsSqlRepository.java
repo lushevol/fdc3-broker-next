@@ -1,8 +1,5 @@
 package com.fdc3.elasticsearchmcp.repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fdc3.elasticsearchmcp.config.ElasticsearchAnalyticsProperties;
 import com.fdc3.elasticsearchmcp.tool.model.SqlColumn;
 import com.fdc3.elasticsearchmcp.tool.model.SqlQueryResponse;
@@ -22,6 +19,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Repository
 @ConditionalOnProperty(prefix = "analytics.stub", name = "enabled", havingValue = "false", matchIfMissing = true)
@@ -77,7 +77,7 @@ public class ElasticsearchAnalyticsSqlRepository implements AnalyticsSqlReposito
             List<SqlColumn> columns = parseColumns(root.path("columns"));
             List<Map<String, Object>> rows = parseRows(columns, root.path("rows"));
             return new SqlQueryResponse(sql, limit, columns, rows, rows.size());
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalStateException("Failed to parse analytics SQL response", exception);
         }
     }
@@ -115,7 +115,7 @@ public class ElasticsearchAnalyticsSqlRepository implements AnalyticsSqlReposito
     private String writeJson(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException exception) {
+        } catch (JacksonException exception) {
             throw new IllegalStateException("Failed to serialize analytics SQL request", exception);
         }
     }

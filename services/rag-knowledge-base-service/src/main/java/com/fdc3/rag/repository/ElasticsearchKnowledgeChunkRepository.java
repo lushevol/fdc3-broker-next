@@ -1,6 +1,5 @@
 package com.fdc3.rag.repository;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fdc3.rag.config.RagProperties;
 import com.fdc3.rag.ingest.KnowledgeChunk;
 import jakarta.annotation.PreDestroy;
@@ -13,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
