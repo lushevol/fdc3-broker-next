@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.function.FunctionToolCallback;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -63,6 +64,8 @@ public class AgentUtilsConfig {
     private static final TypeReference<List<Question>> ASK_USER_QUESTIONS_TYPE = new TypeReference<>() {
     };
     private static final TypeReference<Map<String, String>> ASK_USER_ANSWERS_TYPE = new TypeReference<>() {
+    };
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
     };
     private static final TypeReference<List<String>> STRING_LIST_TYPE = new TypeReference<>() {
     };
@@ -494,15 +497,28 @@ public class AgentUtilsConfig {
                 subagentExecutors,
                 new DefaultTaskRepository()
         );
-        Function<Map<String, Object>, String> task = args -> taskFunction.apply(
-                OBJECT_MAPPER.convertValue(args, TaskCall.class)
-        );
-
-        ToolCallback callback = FunctionToolCallback.builder("Task", task)
-                .description(TASK_TOOL_DESCRIPTION_TEMPLATE.formatted(subagentRegistrations))
-                .inputType((java.lang.reflect.Type) Map.class)
+        String description = TASK_TOOL_DESCRIPTION_TEMPLATE.formatted(subagentRegistrations);
+        ToolDefinition toolDefinition = ToolDefinition.builder()
+                .name("Task")
+                .description(description)
                 .inputSchema(TASK_TOOL_INPUT_SCHEMA)
                 .build();
+        ToolCallback callback = new ToolCallback() {
+            @Override
+            public ToolDefinition getToolDefinition() {
+                return toolDefinition;
+            }
+
+            @Override
+            public String call(String toolInput) {
+                try {
+                    Map<String, Object> args = OBJECT_MAPPER.readValue(toolInput, MAP_TYPE);
+                    return taskFunction.apply(toTaskCall(args));
+                } catch (IOException exception) {
+                    throw new IllegalArgumentException("Invalid Task tool input", exception);
+                }
+            }
+        };
 
         log.info("Created TaskTool");
         return callback;
@@ -527,6 +543,31 @@ public class AgentUtilsConfig {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No subagent resolver for " + reference))
                 .resolve(reference);
+    }
+
+    private static TaskCall toTaskCall(Map<String, Object> args) {
+        return new TaskCall(
+                stringValue(args.get("description")),
+                stringValue(args.get("prompt")),
+                stringValue(args.get("subagent_type")),
+                stringValue(args.get("model")),
+                stringValue(args.get("resume")),
+                booleanValue(args.get("run_in_background"))
+        );
+    }
+
+    private static String stringValue(Object value) {
+        return value == null ? null : value.toString();
+    }
+
+    private static Boolean booleanValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Boolean booleanValue) {
+            return booleanValue;
+        }
+        return Boolean.valueOf(value.toString());
     }
 
     @Bean
