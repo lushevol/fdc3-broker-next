@@ -27,7 +27,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ClassPathResource;
+import org.springaicommunity.agent.common.task.subagent.SubagentDefinition;
+import org.springaicommunity.agent.common.task.subagent.SubagentExecutor;
+import org.springaicommunity.agent.common.task.subagent.SubagentReference;
 import org.springaicommunity.agent.common.task.subagent.SubagentType;
+import org.springaicommunity.agent.common.task.subagent.TaskCall;
 import org.springaicommunity.agent.tools.AskUserQuestionTool;
 import org.springaicommunity.agent.tools.AskUserQuestionTool.Question;
 import org.springaicommunity.agent.tools.BraveWebSearchTool;
@@ -38,6 +42,7 @@ import org.springaicommunity.agent.tools.TodoWriteTool.Todos;
 import org.springaicommunity.agent.tools.TodoWriteTool.TodoEventHandler;
 import org.springaicommunity.agent.tools.task.TaskTool;
 import org.springaicommunity.agent.tools.task.claude.ClaudeSubagentType;
+import org.springaicommunity.agent.tools.task.repository.DefaultTaskRepository;
 import org.springaicommunity.agent.utils.Skills;
 
 import java.io.IOException;
@@ -137,6 +142,49 @@ public class AgentUtilsConfig {
                 }
               },
               "required": ["todos"]
+            }
+            """;
+    private static final String TASK_TOOL_DESCRIPTION_TEMPLATE = """
+            Launch a new agent to handle complex, multi-step tasks autonomously.
+
+            Available agent types and the tools they have access to:
+            %s
+
+            Usage notes:
+            - Always include a short description summarizing what the agent will do
+            - Provide a detailed prompt with the context and exact expected output
+            - Set run_in_background to true only when you can continue without waiting for the result
+            """;
+    private static final String TASK_TOOL_INPUT_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "description": "Short 3-5 word description of what the agent will do."
+                },
+                "prompt": {
+                  "type": "string",
+                  "description": "Detailed task prompt for the subagent."
+                },
+                "subagent_type": {
+                  "type": "string",
+                  "description": "The subagent type to run."
+                },
+                "model": {
+                  "type": "string",
+                  "description": "Optional model override for the subagent."
+                },
+                "resume": {
+                  "type": "string",
+                  "description": "Optional previous agent id to resume."
+                },
+                "run_in_background": {
+                  "type": "boolean",
+                  "description": "Whether to start the task in the background and return a task id."
+                }
+              },
+              "required": ["description", "prompt", "subagent_type"]
             }
             """;
 
@@ -431,12 +479,54 @@ public class AgentUtilsConfig {
                 .skillsDirectories(List.of("skills"))
                 .build();
 
-        ToolCallback callback = TaskTool.builder()
-                .subagentTypes(subagentType)
+        List<SubagentType> subagentTypes = List.of(subagentType);
+        List<SubagentDefinition> subagents = defaultClaudeSubagentReferences().stream()
+                .map(reference -> resolveSubagent(reference, subagentTypes))
+                .toList();
+        List<SubagentExecutor> subagentExecutors = subagentTypes.stream()
+                .map(SubagentType::executor)
+                .toList();
+        String subagentRegistrations = subagents.stream()
+                .map(SubagentDefinition::toSubagentRegistrations)
+                .collect(Collectors.joining("\n"));
+        TaskTool.TaskFunction taskFunction = new TaskTool.TaskFunction(
+                subagents,
+                subagentExecutors,
+                new DefaultTaskRepository()
+        );
+        Function<Map<String, Object>, String> task = args -> taskFunction.apply(
+                OBJECT_MAPPER.convertValue(args, TaskCall.class)
+        );
+
+        ToolCallback callback = FunctionToolCallback.builder("Task", task)
+                .description(TASK_TOOL_DESCRIPTION_TEMPLATE.formatted(subagentRegistrations))
+                .inputType((java.lang.reflect.Type) Map.class)
+                .inputSchema(TASK_TOOL_INPUT_SCHEMA)
                 .build();
 
         log.info("Created TaskTool");
         return callback;
+    }
+
+    private static List<SubagentReference> defaultClaudeSubagentReferences() {
+        return List.of(
+                new SubagentReference("classpath:/agent/GENERAL_PURPOSE_SUBAGENT.md", "CLAUDE"),
+                new SubagentReference("classpath:/agent/EXPLORE_SUBAGENT.md", "CLAUDE"),
+                new SubagentReference("classpath:/agent/PLAN_SUBAGENT.md", "CLAUDE"),
+                new SubagentReference("classpath:/agent/BASH_SUBAGENT.md", "CLAUDE")
+        );
+    }
+
+    private static SubagentDefinition resolveSubagent(
+            SubagentReference reference,
+            List<SubagentType> subagentTypes
+    ) {
+        return subagentTypes.stream()
+                .map(SubagentType::resolver)
+                .filter(resolver -> resolver.canResolve(reference))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No subagent resolver for " + reference))
+                .resolve(reference);
     }
 
     @Bean

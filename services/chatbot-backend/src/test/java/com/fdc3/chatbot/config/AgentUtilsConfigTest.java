@@ -160,6 +160,15 @@ class AgentUtilsConfigTest {
     }
 
     @Test
+    void taskToolCallbackUsesExplicitFunctionSchema() {
+        ToolCallback callback = config.taskToolCallback(chatModel, properties);
+
+        assertTrue(callback.getClass().getName().contains("FunctionToolCallback"));
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"subagent_type\""));
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"run_in_background\""));
+    }
+
+    @Test
     void skillsToolCallbackReturnsToolCallbackWithCorrectName() {
         properties.getSkills().setLocation("classpath:skills");
 
