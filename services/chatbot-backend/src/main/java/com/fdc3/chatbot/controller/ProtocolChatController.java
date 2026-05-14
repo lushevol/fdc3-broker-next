@@ -64,6 +64,19 @@ public class ProtocolChatController {
 
     private SseEmitter streamRunInternal(ProtocolRunRequest request, Authentication authentication) {
         UserCapabilityContext capabilityContext = capabilityContextResolver.resolve(authentication);
+
+        // If the frontend explicitly passes a userId (from MFE base auth context),
+        // override the JWT-derived userId for per-user memory isolation.
+        if (request.getUserId() != null && !request.getUserId().isBlank()) {
+            capabilityContext.setUserId(request.getUserId());
+            // Also update the fingerprint so tool resolution uses the correct user
+            capabilityContext.setProfileFingerprint(
+                    capabilityContext.getUserId() + "|" +
+                    String.join(",", capabilityContext.getProfiles()) + "|" +
+                    capabilityContext.getProfileVersion()
+            );
+        }
+
         SseEmitter emitter = new SseEmitter(sseTimeoutMillis);
         AtomicReference<Runnable> cancelRef = new AtomicReference<>(() -> {
         });

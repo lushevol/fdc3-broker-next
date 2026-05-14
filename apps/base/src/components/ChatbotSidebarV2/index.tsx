@@ -3,6 +3,7 @@ import { ChatProtocolProvider, AssistantModal, type Toolkit } from 'chat-protoco
 import { createToolkitBridge } from './lib/toolkitBridge';
 import { createRuntimeToolkit, getProtocolToolDescriptors } from './toolkit/tools';
 import { useFdc3ActionExecutor } from './toolkit/use-fdc3-action-executor';
+import { getHooksBase } from '../../hooks/HooksBase';
 import 'chat-protocol-ui/styles.css';
 
 const API_URL = process.env.CHAT_API_URL || 'http://127.0.0.1:8080/api/chat/runs';
@@ -49,6 +50,11 @@ export const ChatbotSidebarV2: React.FC<ChatbotSidebarV2Props> = ({ toolRegistry
     };
   }, [toolRegistryConfig]);
 
+  const currentUserId = useMemo(() => {
+    const store = getHooksBase().store;
+    return store?.user?.userId || store?.user?.sub;
+  }, []);
+
   return (
     <ChatProtocolProvider
       apiUrl={API_URL}
@@ -56,6 +62,7 @@ export const ChatbotSidebarV2: React.FC<ChatbotSidebarV2Props> = ({ toolRegistry
       tools={tools}
       context={context}
       toolkitBridge={toolkitBridge}
+      userId={currentUserId}
     >
       <AssistantModal />
     </ChatProtocolProvider>

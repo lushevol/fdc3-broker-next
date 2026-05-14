@@ -39,7 +39,20 @@
 - Use `CHATBOT_SECURITY_ADDITIONAL_PROFILES` env var to enable tool access profiles (e.g., `advisor` for analytics)
 - Never hard-code security profiles in source code
 
-## Conversation Storage
+## Memory / Conversation Storage
+
+### Long-Term Memory (AutoMemoryTools)
+
+- Uses `AutoMemoryTools` from `spring-ai-agent-utils` for persistent file-based memory
+- Six memory tools available: `MemoryView`, `MemoryCreate`, `MemoryStrReplace`, `MemoryInsert`, `MemoryDelete`, `MemoryRename`
+- Memories are stored as Markdown files with YAML frontmatter in `chatbot.memory.directory` (default: `./data/memories`)
+- A `MEMORY.md` index file tracks all entries — the agent always reads this first
+- Memory types: `user` (preferences/role), `feedback` (behavioral guidance), `project` (context), `reference` (external docs)
+- Memories persist across sessions — facts are never lost on service restart
+- Configured via `chatbot.memory.enabled` and `chatbot.memory.directory` env vars
+- The companion system prompt (`AUTO_MEMORY_TOOLS_SYSTEM_PROMPT.md`) is loaded from the `spring-ai-agent-utils` classpath resource
+
+### Short-Term Conversation History
 
 - Currently in-memory (`ConcurrentHashMap`) — not production-safe
 - Must migrate to Redis or database for production deployments

@@ -3,6 +3,7 @@ package com.fdc3.chatbot.config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fdc3.chatbot.tool.agentutils.PendingQuestionRegistry;
+import org.springaicommunity.agent.tools.AskUserQuestionTool.Question;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
@@ -16,6 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
 class AgentUtilsConfigTest {
@@ -69,6 +72,45 @@ class AgentUtilsConfigTest {
         assertNotNull(callback);
         assertEquals("AskUserQuestionTool", callback.getToolDefinition().name());
         assertNotNull(callback.getToolDefinition().description());
+    }
+
+    @Test
+    void askUserQuestionToolCallbackUsesExplicitFunctionSchema() {
+        PendingQuestionRegistry registry = config.pendingQuestionRegistry();
+        ToolCallback callback = config.askUserQuestionToolCallback(registry);
+
+        assertTrue(callback.getClass().getName().contains("FunctionToolCallback"));
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"questions\""));
+        assertTrue(callback.getToolDefinition().inputSchema().contains("\"answers\""));
+    }
+
+    @Test
+    void askUserQuestionToolCallbackInvokesQuestionHandler() {
+        PendingQuestionRegistry registry = new PendingQuestionRegistry() {
+            @Override
+            public Map<String, String> handle(List<Question> questions) {
+                assertEquals(1, questions.size());
+                assertEquals("Which mode?", questions.get(0).question());
+                return Map.of("Which mode?", "Fast");
+            }
+        };
+        ToolCallback callback = config.askUserQuestionToolCallback(registry);
+
+        String result = callback.call("""
+                {
+                  "questions": [{
+                    "question": "Which mode?",
+                    "header": "Mode",
+                    "options": [
+                      {"label": "Fast", "description": "Run quickly"},
+                      {"label": "Careful", "description": "Run more checks"}
+                    ]
+                  }],
+                  "answers": {}
+                }
+                """);
+
+        assertTrue(result.contains("Fast"));
     }
 
     @Test

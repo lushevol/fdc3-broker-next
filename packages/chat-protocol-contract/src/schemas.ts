@@ -277,6 +277,8 @@ export const chatRunRequestSchema = z
     context: chatRunContextSchema.optional(),
     messages: z.array(chatMessageSchema).min(1),
     metadata: z.record(z.unknown()).default({}),
+    /** Explicit user ID from MFE base auth context, used for memory isolation. */
+    userId: z.string().min(1).optional(),
   })
   .strict();
 

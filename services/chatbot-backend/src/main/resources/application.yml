@@ -65,6 +65,9 @@ chatbot:
       enabled: true
       timeout-seconds: 60
       max-output-chars: 50000
+  memory:
+    enabled: ${CHATBOT_MEMORY_ENABLED:true}
+    directory: ${CHATBOT_MEMORY_DIRECTORY:./data/memories}
   rate-limit:
     requests-per-minute: 60
     tokens-per-minute: 100000

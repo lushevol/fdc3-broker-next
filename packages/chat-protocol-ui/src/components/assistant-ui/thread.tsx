@@ -4,6 +4,8 @@ import {
   UserMessageAttachments,
 } from '@/components/assistant-ui/attachment';
 import { MarkdownText } from '@/components/assistant-ui/markdown-text';
+import { ModelSelector } from '@/components/assistant-ui/model-selector';
+import { useModelList } from '@/hooks/use-model-list';
 import { ToolFallback } from '@/components/assistant-ui/tool-fallback';
 import { TooltipIconButton } from '@/components/assistant-ui/tooltip-icon-button';
 import { Reasoning, ReasoningGroup } from '@/components/assistant-ui/reasoning';
@@ -35,6 +37,7 @@ import {
   SquareIcon,
 } from 'lucide-react';
 import type { FC } from 'react';
+import { useModelApiUrl } from '@/provider';
 
 export const Thread: FC = () => {
   return (
@@ -159,9 +162,22 @@ const Composer: FC = () => {
 };
 
 const ComposerAction: FC = () => {
+  const apiUrl = useModelApiUrl();
+  const { models, loading } = useModelList(apiUrl);
+
   return (
     <div className="aui-composer-action-wrapper relative flex items-center justify-between">
-      <ComposerAddAttachment />
+      <div className="flex items-center gap-1">
+        <ComposerAddAttachment />
+        {!loading && models.length > 0 && (
+          <ModelSelector
+            models={models.map((m) => ({ id: m.id, name: m.name, description: m.description ?? m.providerName }))}
+            defaultValue={undefined}
+            variant="ghost"
+            size="sm"
+          />
+        )}
+      </div>
       <AuiIf condition={(s) => !s.thread.isRunning}>
         <ComposerPrimitive.Send asChild>
           <TooltipIconButton

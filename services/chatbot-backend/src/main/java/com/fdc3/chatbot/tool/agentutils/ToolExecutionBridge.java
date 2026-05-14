@@ -52,6 +52,16 @@ public class ToolExecutionBridge {
         return executableCallbacks.containsKey(toolName);
     }
 
+    /**
+     * Register an additional tool callback at runtime.
+     * Used by AutoMemoryTools and other late-binding tool registrations.
+     */
+    public void registerCallback(String name, ToolCallback callback) {
+        if (executableCallbacks.putIfAbsent(name, callback) != null) {
+            log.warn("Duplicate ToolCallback name '{}' — keeping first registration", name);
+        }
+    }
+
     public boolean waitsForUserAnswer(String toolName) {
         return ASK_USER_QUESTION_TOOL.equals(toolName);
     }

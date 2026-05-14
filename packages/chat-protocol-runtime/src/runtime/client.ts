@@ -3,6 +3,7 @@ import type {
   ChatFilePart,
   ChatFinishReason,
   ChatMessage,
+  ChatRunConfig,
   ChatRunRequest,
   ChatStreamFrame,
   ChatToolCallPart,
@@ -36,10 +37,13 @@ export type BuildChatProtocolRequestOptions = {
   conversationId: string;
   messages: ChatMessage[];
   tools?: ChatToolDescriptor[];
+  config?: ChatRunConfig;
   metadata?: ChatRunRequest['metadata'];
   runId?: string | null;
   trigger?: ChatRunRequest['trigger'];
   context?: ChatRunRequest['context'];
+  /** Explicit user ID from MFE base auth. Passed to backend for per-user memory isolation. */
+  userId?: string;
 };
 
 export type StreamProtocolRunOptions = {
@@ -400,18 +404,22 @@ export function buildChatProtocolRequest({
   conversationId,
   messages,
   tools,
+  config,
   metadata,
   runId,
   trigger = 'submit-message',
   context,
+  userId,
 }: BuildChatProtocolRequestOptions): ChatRunRequest {
   return {
     conversationId,
     ...(runId !== undefined ? { runId } : {}),
     trigger,
     ...(tools || context ? { context: { ...context, ...(tools ? { tools } : {}) } } : {}),
+    ...(config ? { config } : {}),
     messages,
     ...(metadata ? { metadata } : {}),
+    ...(userId ? { userId } : {}),
   };
 }
 
@@ -521,6 +529,16 @@ export function buildHumanToolResumeRequest({
     ],
     ...(metadata ? { metadata } : {}),
   };
+}
+
+export function buildHumanToolResumeRequestWithUserId(
+  options: BuildHumanToolResumeRequestOptions & { userId?: string },
+): ChatRunRequest {
+  const req = buildHumanToolResumeRequest(options);
+  if (options.userId) {
+    req.userId = options.userId;
+  }
+  return req;
 }
 
 async function postRunRequest(

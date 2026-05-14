@@ -39,6 +39,7 @@ function createBaseToolkit(): Record<string, ToolkitDefinition> {
   return {
     profile_lookup: {
       type: 'frontend',
+      disabled: true,
       description: 'Lookup user profile information',
       parameters: z.object({
         userId: z.string().describe('The ID of the user to look up'),
