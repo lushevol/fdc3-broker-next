@@ -12,6 +12,8 @@ import com.fdc3.chatbot.agent.prompt.AgentDecisionPromptFactory;
 import com.fdc3.chatbot.controlplane.model.ResolvedCapability;
 import com.fdc3.chatbot.controlplane.model.WorkspaceContextSnapshot;
 import com.fdc3.chatbot.model.ChatMessage;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.opentelemetry.api.trace.Span;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -41,6 +43,7 @@ public class AgentDecisionService {
         this.promptFactory = Objects.requireNonNull(promptFactory, "promptFactory");
     }
 
+    @WithSpan("agent.decision")
     public AgentDecision decide(
             String userMessage,
             List<ChatMessage> history,
@@ -53,12 +56,19 @@ public class AgentDecisionService {
                 capabilities
         );
 
+        Span span = Span.current();
+        span.setAttribute("decision.type", "pending");
+
         ChatResponse response = chatModel.call(new Prompt(toChatRequestMessages(prompt, history, userMessage)));
         String responseText = response.getResults().isEmpty() ? null
                 : response.getResults().get(0).getOutput().getText();
         log.debug("Raw agent decision response: {}", responseText);
 
-        return parseDecision(responseText);
+        AgentDecision parsed = parseDecision(responseText);
+        if (parsed != null && parsed.decisionType() != null) {
+            span.setAttribute("decision.type", parsed.decisionType().name());
+        }
+        return parsed;
     }
 
     public static AgentDecision parseDecision(String json) {

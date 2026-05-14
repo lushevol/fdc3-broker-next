@@ -7,6 +7,8 @@ import com.fdc3.chatbot.controlplane.model.ResolvedCapability;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.opentelemetry.api.trace.Span;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
@@ -28,11 +30,14 @@ public class ExecutionOrchestrator {
         this.executionDependency = Objects.requireNonNull(executionDependency, "executionDependency");
     }
 
+    @WithSpan("agent.tool.execute")
     public ExecutionTranscript execute(
             ValidatedExecutionPlan validatedPlan,
             Consumer<ToolCall> onToolCall,
             Consumer<ToolResult> onToolResult
     ) {
+        Span span = Span.current();
+        span.setAttribute("plan.steps.count", validatedPlan.steps().size());
         Objects.requireNonNull(validatedPlan, "validatedPlan");
 
         Consumer<ToolCall> toolCallConsumer = onToolCall == null ? toolCall -> {

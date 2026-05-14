@@ -7,6 +7,7 @@ import com.fdc3.chatbot.agent.model.ValidatedExecutionPlan;
 import com.fdc3.chatbot.agent.model.ValidatedExecutionStep;
 import com.fdc3.chatbot.controlplane.model.ResolvedCapability;
 import com.fdc3.chatbot.controlplane.policy.PolicyDecision;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import com.fdc3.chatbot.controlplane.policy.PolicyDecisionType;
 import com.fdc3.chatbot.controlplane.policy.PolicyEvaluator;
 import com.fdc3.chatbot.model.UserCapabilityContext;
@@ -40,6 +41,7 @@ public class PlanValidationService {
         this.policyEvaluator = policyEvaluator;
     }
 
+    @WithSpan("agent.plan.validate")
     public PlanValidationResult validate(AgentPlan proposedPlan, List<ResolvedCapability> allowedCapabilities) {
         return validate(
                 new AgentDecision(null, null, null, proposedPlan),
