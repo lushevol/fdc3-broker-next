@@ -42,6 +42,8 @@ export type BuildChatProtocolRequestOptions = {
   runId?: string | null;
   trigger?: ChatRunRequest['trigger'];
   context?: ChatRunRequest['context'];
+  /** Explicit user ID from MFE base auth. Passed to backend for per-user memory isolation. */
+  userId?: string;
 };
 
 export type StreamProtocolRunOptions = {
@@ -407,6 +409,7 @@ export function buildChatProtocolRequest({
   runId,
   trigger = 'submit-message',
   context,
+  userId,
 }: BuildChatProtocolRequestOptions): ChatRunRequest {
   return {
     conversationId,
@@ -416,6 +419,7 @@ export function buildChatProtocolRequest({
     ...(config ? { config } : {}),
     messages,
     ...(metadata ? { metadata } : {}),
+    ...(userId ? { userId } : {}),
   };
 }
 
@@ -525,6 +529,16 @@ export function buildHumanToolResumeRequest({
     ],
     ...(metadata ? { metadata } : {}),
   };
+}
+
+export function buildHumanToolResumeRequestWithUserId(
+  options: BuildHumanToolResumeRequestOptions & { userId?: string },
+): ChatRunRequest {
+  const req = buildHumanToolResumeRequest(options);
+  if (options.userId) {
+    req.userId = options.userId;
+  }
+  return req;
 }
 
 async function postRunRequest(

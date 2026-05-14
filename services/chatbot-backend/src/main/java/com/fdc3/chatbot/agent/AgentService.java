@@ -39,6 +39,8 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.function.FunctionToolCallback;
+import org.springframework.ai.tool.method.MethodToolCallbackProvider;
+import org.springaicommunity.agent.tools.AutoMemoryTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -52,6 +54,7 @@ import com.openai.client.okhttp.OpenAIOkHttpClientAsync;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -68,6 +71,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 /**
  * AI Agent service using Spring AI for conversation handling.
@@ -111,10 +116,30 @@ public class AgentService {
     @Value("${chatbot.mock.enabled:false}")
     private boolean mockEnabled;
 
+    @Value("${chatbot.memory.enabled:true}")
+    private boolean memoryEnabled;
+
+    @Value("${chatbot.memory.directory:./data/memories}")
+    private String memoryDirectory;
+
+    private String memorySystemPrompt;
+
     private final ToolRegistry toolRegistry;
     private final CapabilityResolver capabilityResolver;
     private final PolicyEvaluator policyEvaluator;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private MemoryToolsFactory memoryToolsFactory; // null when memory is disabled
+
+    /** Tracks userId per active conversation for per-user memory isolation. */
+    private final Map<String, String> conversationUsers = new ConcurrentHashMap<>();
+
+    /**
+     * Per-request tool callbacks indexed by conversationId.
+     * Memory tool callbacks (AutoMemoryTools) are created per-user and stored
+     * here so the execution path in {@link #continueWithToolRequests} can
+     * find them — they are not registered in the global bridge.
+     */
+    private final Map<String, Map<String, ToolCallback>> conversationCallbacks = new ConcurrentHashMap<>();
 
     private ChatModel chatModel;
     private StreamingChatModel streamingChatModel;
@@ -177,6 +202,14 @@ public class AgentService {
         }
     }
 
+    @Autowired(required = false)
+    public void setMemoryToolsFactory(MemoryToolsFactory memoryToolsFactory) {
+        this.memoryToolsFactory = memoryToolsFactory;
+        if (memoryToolsFactory != null) {
+            log.info("MemoryToolsFactory wired – per-user memory isolation enabled");
+        }
+    }
+
     @PostConstruct
     public void init() {
         if (mockEnabled) {
@@ -228,6 +261,36 @@ public class AgentService {
             resultSynthesisService = chatModel == null
                     ? new ResultSynthesisService()
                     : new ResultSynthesisService(chatModel, streamingChatModel, new ResultSynthesisPromptFactory());
+        }
+
+        if (memoryEnabled) {
+            loadMemorySystemPrompt();
+        }
+    }
+
+    private void loadMemorySystemPrompt() {
+        try {
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            Resource resource = resolver.getResource("classpath:prompt/AUTO_MEMORY_TOOLS_SYSTEM_PROMPT.md");
+            if (resource != null && resource.exists()) {
+                String template = new String(resource.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                String memoriesRootDir = Path.of(memoryDirectory).toAbsolutePath().toString();
+                String basePrompt = template.replace("{MEMORIES_ROOT_DIERCTORY}", memoriesRootDir);
+                this.memorySystemPrompt = basePrompt + """
+
+                Important: Memory is per-user and auto-isolated. You are
+                currently operating in a user-specific sandbox. All memory
+                operations affect only this user's memory — other users
+                cannot see this user's memories and this user cannot see
+                theirs.""";
+                log.info("Loaded AutoMemoryTools system prompt ({} chars)", memorySystemPrompt.length());
+            } else {
+                log.warn("AUTO_MEMORY_TOOLS_SYSTEM_PROMPT.md not found on classpath — memory prompt will be empty");
+                this.memorySystemPrompt = "";
+            }
+        } catch (Exception e) {
+            log.warn("Failed to load AutoMemoryTools system prompt from classpath: {}", e.getMessage());
+            this.memorySystemPrompt = "";
         }
     }
 
@@ -568,6 +631,12 @@ public class AgentService {
     ) {
         AtomicBoolean cancelled = new AtomicBoolean(false);
         Map<String, ToolDefinition> availableTools = toolRegistry.resolveTools(capabilityContext);
+
+        // Register per-user memory context for this conversation
+        if (memoryToolsFactory != null && capabilityContext != null) {
+            conversationUsers.put(conversationId, capabilityContext.getUserId());
+        }
+
         if (allowAgenticControlLoop && shouldUseAgenticControlLoop(toolContext, frontendTools)) {
             executeAgenticControlLoop(
                     userMessage,
@@ -628,7 +697,8 @@ public class AgentService {
                     : Set.of();
             boolean useTools = frontendToolContinuation != null
                     || !availableTools.isEmpty()
-                    || !frontendToolManifest.isEmpty();
+                    || !frontendToolManifest.isEmpty()
+                    || (memoryEnabled && memoryToolsFactory != null);
 
             if (!frontendToolManifest.isEmpty()) {
                 log.debug("Received {} frontend tool manifest entries", frontendToolManifest.size());
@@ -676,9 +746,19 @@ public class AgentService {
 
             log.debug("Processing message for conversation: {}", conversationId);
 
+            List<ToolCallback> requestCallbacks = useTools
+                    ? buildToolCallbacks(availableTools, frontendToolManifest, blockedFrontendTools, conversationId)
+                    : List.of();
+            conversationCallbacks.put(conversationId, requestCallbacks.stream()
+                    .collect(java.util.stream.Collectors.toMap(
+                            cb -> cb.getToolDefinition().name(),
+                            cb -> cb,
+                            (a, b) -> a
+                    )));
+
             log.debug("streamConversation - useTools={}, toolSpecs size={}, frontendToolManifest size={}, blockedFrontendTools={}",
             useTools,
-            useTools ? buildToolCallbacks(availableTools, frontendToolManifest, blockedFrontendTools).size() : 0,
+            requestCallbacks.size(),
             frontendToolManifest.size(),
             blockedFrontendTools);
 
@@ -688,7 +768,7 @@ public class AgentService {
                     history,
                     messages,
                     availableTools,
-                    useTools ? buildToolCallbacks(availableTools, frontendToolManifest, blockedFrontendTools) : List.of(),
+                    requestCallbacks,
                     frontendToolManifest,
                     blockedFrontendTools,
                     frontendToolContinuation != null ? "frontend-continuation" : "initial",
@@ -1391,13 +1471,21 @@ public class AgentService {
                 return;
             }
 
+            List<ToolCallback> loopCallbacks = buildToolCallbacks(
+                    availableTools, frontendToolManifest, blockedToolNames, conversationId);
+            conversationCallbacks.put(conversationId, loopCallbacks.stream()
+                    .collect(java.util.stream.Collectors.toMap(
+                            cb -> cb.getToolDefinition().name(),
+                            cb -> cb,
+                            (a, b) -> a
+                    )));
             streamConversation(
                     conversationId,
                     userMessage,
                     history,
                     messages,
                     availableTools,
-                    buildToolCallbacks(availableTools, frontendToolManifest, blockedToolNames),
+                    loopCallbacks,
                     frontendToolManifest,
                     blockedToolNames,
                     "tool-loop",
@@ -1439,6 +1527,25 @@ public class AgentService {
                         onNext, onError, onComplete, onToolCall, onToolResult, cancelled
                 );
                 return;
+            }
+            // Fallback: check per-user AutoMemoryTools tools
+            if (memoryToolsFactory != null) {
+                String userId = conversationUsers.get(conversationId);
+                if (userId != null) {
+                    AutoMemoryTools userMemoryTools = memoryToolsFactory.forUser(userId);
+                    ToolCallback memoryCallback = resolveMemoryToolCallback(
+                            userMemoryTools, toolExecutionRequest.name());
+                    if (memoryCallback != null) {
+                        executeMemoryToolCallback(
+                                toolExecutionRequest, arguments, memoryCallback,
+                                conversationId, userMessage, history, messages, availableTools,
+                                toolExecutionRequests, frontendToolManifest, blockedToolNames,
+                                index, continueAfterToolLoop,
+                                onNext, onError, onComplete, onToolCall, onToolResult, cancelled
+                        );
+                        return;
+                    }
+                }
             }
             onError.accept(new IllegalArgumentException("Tool not available for current user: " + toolExecutionRequest.name()));
             return;
@@ -1695,10 +1802,100 @@ public class AgentService {
         });
     }
 
+    /**
+     * Execute a per-request tool callback (e.g. AutoMemoryTools) directly.
+     * Unlike agent-utils callbacks, these do not go through the ToolExecutionBridge
+     * — they are dynamically created per-user and stored in conversationCallbacks.
+     */
+    private void executeMemoryToolCallback(
+            AssistantMessage.ToolCall toolExecutionRequest,
+            Map<String, Object> arguments,
+            ToolCallback callback,
+            String conversationId,
+            String userMessage,
+            List<ChatMessage> history,
+            List<Message> messages,
+            Map<String, ToolDefinition> availableTools,
+            List<AssistantMessage.ToolCall> toolExecutionRequests,
+            List<FrontendToolManifestEntry> frontendToolManifest,
+            Set<String> blockedToolNames,
+            int index,
+            boolean continueAfterToolLoop,
+            java.util.function.Consumer<String> onNext,
+            java.util.function.Consumer<Throwable> onError,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult,
+            AtomicBoolean cancelled
+    ) {
+        onToolCall.accept(ToolCall.builder()
+                .id(toolExecutionRequest.id())
+                .name(toolExecutionRequest.name())
+                .arguments(arguments)
+                .status(ToolCall.ToolStatus.RUNNING)
+                .executionTarget(ToolCall.ExecutionTarget.BACKEND)
+                .build());
+
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                return callback.call(objectMapper.writeValueAsString(arguments));
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        }).thenAccept(result -> {
+            if (cancelled.get()) return;
+            String resultStr = result != null ? result.toString() : "ok";
+            onToolResult.accept(ToolResult.builder()
+                    .toolCallId(toolExecutionRequest.id())
+                    .result(resultStr)
+                    .build());
+            List<Message> continuedMessages = new java.util.ArrayList<>(messages);
+            continuedMessages.add(toolResponseMessage(
+                    toolExecutionRequest.id(),
+                    toolExecutionRequest.name(),
+                    resultStr
+            ));
+            Set<String> nextBlocked = new java.util.LinkedHashSet<>(blockedToolNames);
+            nextBlocked.add(toolExecutionRequest.name());
+            continueWithToolRequests(
+                    conversationId, userMessage, history, continuedMessages,
+                    availableTools, toolExecutionRequests, frontendToolManifest,
+                    Set.copyOf(nextBlocked), index + 1, continueAfterToolLoop,
+                    onNext, onError, onComplete, onToolCall, onToolResult, cancelled
+            );
+        }).exceptionally(error -> {
+            onToolResult.accept(ToolResult.builder()
+                    .toolCallId(toolExecutionRequest.id())
+                    .error(error.getCause() != null ? error.getCause().getMessage() : error.getMessage())
+                    .build());
+            onComplete.run();
+            return null;
+        });
+    }
+
+    /**
+     * Look up a memory tool by name from the per-user AutoMemoryTools instance.
+     * Uses MethodToolCallbackProvider to extract all @Tool-annotated methods and
+     * finds the one matching the requested name.
+     */
+    private ToolCallback resolveMemoryToolCallback(AutoMemoryTools userMemoryTools, String toolName) {
+        ToolCallback[] callbacks = MethodToolCallbackProvider.builder()
+                .toolObjects(userMemoryTools)
+                .build()
+                .getToolCallbacks();
+        for (ToolCallback cb : callbacks) {
+            if (cb.getToolDefinition().name().equals(toolName)) {
+                return cb;
+            }
+        }
+        return null;
+    }
+
     private List<ToolCallback> buildToolCallbacks(
             Map<String, ToolDefinition> tools,
             List<FrontendToolManifestEntry> frontendTools,
-            Set<String> blockedToolNames
+            Set<String> blockedToolNames,
+            String conversationId
     ) {
         Map<String, ToolCallback> uniqueCallbacks = new java.util.LinkedHashMap<>();
 
@@ -1720,6 +1917,24 @@ public class AgentService {
                 String name = entry.getKey();
                 if (!blockedToolNames.contains(name)) {
                     uniqueCallbacks.putIfAbsent(name, toSchemaOnlyCallback(entry.getValue()));
+                }
+            }
+        }
+
+        // Add per-user memory tool callbacks (AutoMemoryTools)
+        if (memoryToolsFactory != null) {
+            String userId = conversationUsers.get(conversationId);
+            if (userId != null) {
+                AutoMemoryTools userMemoryTools = memoryToolsFactory.forUser(userId);
+                ToolCallback[] memoryCallbacks = MethodToolCallbackProvider.builder()
+                        .toolObjects(userMemoryTools)
+                        .build()
+                        .getToolCallbacks();
+                for (ToolCallback cb : memoryCallbacks) {
+                    String name = cb.getToolDefinition().name();
+                    if (!blockedToolNames.contains(name)) {
+                        uniqueCallbacks.putIfAbsent(name, cb);
+                    }
                 }
             }
         }
@@ -2282,6 +2497,10 @@ public class AgentService {
                                 .orElse("No tools currently available")
                 );
 
+        String memorySection = (memoryEnabled && memorySystemPrompt != null && !memorySystemPrompt.isBlank())
+                ? "\n" + memorySystemPrompt + "\n"
+                : "";
+
         return String.format("""
                 You are %s, a helpful AI assistant integrated into an FDC3-enabled financial desktop platform.
 
@@ -2291,12 +2510,14 @@ public class AgentService {
                 - Navigating the platform and finding information
                 - Automating repetitive tasks
                 %s
+                %s
                 Be concise but helpful. If you need clarification, ask follow-up questions.
 
                 Always be professional and accurate in your responses.
                 """,
                 agentName,
-                toolSection
+                toolSection,
+                memorySection
         );
     }
 

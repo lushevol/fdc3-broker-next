@@ -22,4 +22,10 @@ public class ProtocolRunRequest {
     private ProtocolRunContext context;
     private List<ProtocolMessage> messages;
     private Map<String, Object> metadata;
+    /**
+     * Explicit user ID from the MFE base / frontend auth context.
+     * Used for per-user memory isolation. When present, this takes
+     * precedence over the JWT-derived userId.
+     */
+    private String userId;
 }

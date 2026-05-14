@@ -24,6 +24,7 @@ Active Development
 - **Frontend tool continuation**: Client-side tool execution with results fed back via `toolContext` parameter
 - **Rate limiting**: 60 req/min per client via Bucket4j (health endpoint excluded)
 - **In-memory conversation management**: `ConcurrentHashMap`-based conversation store
+- **Persistent long-term memory**: AutoMemoryTools file-based memory (6 tools: view, create, edit, insert, delete, rename) with YAML-frontmatter Markdown storage
 
 ## Quick Start
 

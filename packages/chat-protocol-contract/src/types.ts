@@ -197,6 +197,11 @@ export type ChatRunRequest = {
   context?: ChatRunContext;
   messages: ChatMessage[];
   metadata?: ChatMessageMetadata;
+  /**
+   * Explicit user ID from the MFE base / frontend auth context.
+   * Used for per-user memory isolation on the backend.
+   */
+  userId?: string;
 };
 
 export type ChatFrameMetadata = Record<string, unknown>;

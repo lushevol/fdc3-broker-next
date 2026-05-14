@@ -69,6 +69,7 @@ export type ChatProtocolProviderProps = {
   tools?: ChatToolDescriptor[];
   context?: ChatRunRequest['context'];
   metadata?: ChatRunRequest['metadata'];
+  userId?: string;
   fetch?: typeof globalThis.fetch;
   onFrame?: (frame: import('chat-protocol-contract').ChatStreamFrame) => void;
   suggestions?: SuggestionConfig[];
@@ -123,6 +124,7 @@ export function ChatProtocolProvider({
   tools,
   context,
   metadata,
+  userId,
   fetch,
   onFrame,
   suggestions,
@@ -176,6 +178,7 @@ export function ChatProtocolProvider({
               ...(metadata ?? {}),
               ...(runCustom ?? {}),
             },
+            userId,
           });
 
           yield* streamProtocolRun({
@@ -198,6 +201,7 @@ export function ChatProtocolProvider({
       resolveFrontendTool,
       toolkitBridge,
       tools,
+      userId,
     ],
   );
 
