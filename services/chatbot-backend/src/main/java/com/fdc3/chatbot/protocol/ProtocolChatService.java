@@ -20,6 +20,8 @@ import com.fdc3.chatbot.protocol.model.ProtocolMessage;
 import com.fdc3.chatbot.protocol.model.ProtocolPart;
 import com.fdc3.chatbot.protocol.model.ProtocolRunRequest;
 import com.fdc3.chatbot.protocol.model.ProtocolToolDescriptor;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.opentelemetry.api.trace.Span;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,7 @@ public class ProtocolChatService {
     private final ObjectMapper objectMapper;
     private final UploadedFileContextBuilder uploadedFileContextBuilder;
 
+    @WithSpan("protocol.service.run")
     public Runnable streamRun(
             ProtocolRunRequest request,
             UserCapabilityContext capabilityContext,
@@ -52,6 +55,10 @@ public class ProtocolChatService {
             Runnable onComplete
     ) {
         ProtocolInvocation invocation = ProtocolInvocation.from(request, objectMapper, uploadedFileContextBuilder);
+
+        Span span = Span.current();
+        span.setAttribute("protocol.run_id", invocation.runId());
+        span.setAttribute("protocol.conversation_count", invocation.history() != null ? invocation.history().size() : 0);
 
         List<ProtocolToolDescriptor> allTools = mergeTools(request);
         Map<String, ProtocolToolDescriptor> toolLookup = new java.util.HashMap<>();

@@ -15,6 +15,8 @@ import com.fdc3.chatbot.protocol.model.ProtocolRunContext;
 import com.fdc3.chatbot.protocol.model.ProtocolRunRequest;
 import com.fdc3.chatbot.protocol.model.ProtocolWorkspaceContext;
 import com.fdc3.chatbot.security.UserCapabilityContextResolver;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.opentelemetry.api.trace.Span;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -52,7 +54,12 @@ public class ProtocolChatController {
     private long sseTimeoutMillis = 300000L;
 
     @PostMapping(value = "/runs", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @WithSpan("protocol.run")
     public SseEmitter streamRun(@RequestBody ProtocolRunRequest request, Authentication authentication) {
+        Span span = Span.current();
+        span.setAttribute("protocol.run_id", request.getRunId() != null ? request.getRunId() : "");
+        span.setAttribute("protocol.model", request.getConfig() != null && request.getConfig().getModelName() != null ? request.getConfig().getModelName() : "");
+        span.setAttribute("protocol.parts_count", request.getMessages() != null ? request.getMessages().size() : 0);
         return streamRunInternal(request, authentication);
     }
 
