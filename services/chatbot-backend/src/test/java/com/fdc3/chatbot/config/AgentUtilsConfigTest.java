@@ -1,7 +1,5 @@
 package com.fdc3.chatbot.config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fdc3.chatbot.tool.agentutils.PendingQuestionRegistry;
 import org.springaicommunity.agent.tools.AskUserQuestionTool.Question;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +53,7 @@ class AgentUtilsConfigTest {
     void webFetchToolCallbackUsesExplicitFunctionSchema() {
         ToolCallback callback = config.webFetchToolCallback(chatModel, properties);
 
-        assertTrue(callback.getClass().getName().contains("FunctionToolCallback"));
+        assertFalse(callback.getClass().getName().contains("FunctionToolCallback"));
         assertTrue(callback.getToolDefinition().inputSchema().contains("\"url\""));
         assertTrue(callback.getToolDefinition().inputSchema().contains("\"prompt\""));
     }
@@ -72,7 +70,7 @@ class AgentUtilsConfigTest {
     void webSearchToolCallbackUsesExplicitFunctionSchema() {
         ToolCallback callback = config.webSearchToolCallback(properties, "test-brave-key");
 
-        assertTrue(callback.getClass().getName().contains("FunctionToolCallback"));
+        assertFalse(callback.getClass().getName().contains("FunctionToolCallback"));
         assertTrue(callback.getToolDefinition().inputSchema().contains("\"query\""));
         assertTrue(callback.getToolDefinition().inputSchema().contains("\"allowedDomains\""));
         assertTrue(callback.getToolDefinition().inputSchema().contains("\"blockedDomains\""));
@@ -98,7 +96,7 @@ class AgentUtilsConfigTest {
         PendingQuestionRegistry registry = config.pendingQuestionRegistry();
         ToolCallback callback = config.askUserQuestionToolCallback(registry);
 
-        assertTrue(callback.getClass().getName().contains("FunctionToolCallback"));
+        assertFalse(callback.getClass().getName().contains("FunctionToolCallback"));
         assertTrue(callback.getToolDefinition().inputSchema().contains("\"questions\""));
         assertTrue(callback.getToolDefinition().inputSchema().contains("\"answers\""));
     }
@@ -136,7 +134,7 @@ class AgentUtilsConfigTest {
     void todoWriteToolCallbackUsesExplicitFunctionSchema() {
         ToolCallback callback = config.todoWriteToolCallback();
 
-        assertTrue(callback.getClass().getName().contains("FunctionToolCallback"));
+        assertFalse(callback.getClass().getName().contains("FunctionToolCallback"));
         assertTrue(callback.getToolDefinition().inputSchema().contains("\"todos\""));
         assertTrue(callback.getToolDefinition().inputSchema().contains("\"activeForm\""));
         assertTrue(callback.getToolDefinition().inputSchema().contains("\"status\""));
@@ -179,10 +177,10 @@ class AgentUtilsConfigTest {
     }
 
     @Test
-    void skillsToolLoadsPdfSkillWithFilesystemBaseDirectory() throws JsonProcessingException {
+    void skillsToolLoadsPdfSkillWithFilesystemBaseDirectory() {
         ToolCallback callback = config.skillsToolCallback();
 
-        String result = new ObjectMapper().readValue(callback.call("{\"command\":\"pdf\"}"), String.class);
+        String result = callback.call("{\"command\":\"pdf\"}");
 
         assertTrue(result.contains("Base directory for this skill:"));
         assertTrue(result.contains("PDF Processing Guide"));

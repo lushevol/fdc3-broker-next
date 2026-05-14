@@ -19,7 +19,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
-import org.springframework.ai.tool.function.FunctionToolCallback;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -315,11 +314,7 @@ public class AgentUtilsConfig {
                 (String) args.get("url"),
                 (String) args.get("prompt")
         );
-        return FunctionToolCallback.builder("WebFetch", webFetch)
-                .description(WEB_FETCH_TOOL_DESCRIPTION)
-                .inputType((java.lang.reflect.Type) Map.class)
-                .inputSchema(WEB_FETCH_INPUT_SCHEMA)
-                .build();
+        return mapToolCallback("WebFetch", WEB_FETCH_TOOL_DESCRIPTION, WEB_FETCH_INPUT_SCHEMA, webFetch);
     }
 
     @Bean
@@ -347,14 +342,14 @@ public class AgentUtilsConfig {
         };
 
         log.info("Created SkillsTool from classpath:skills/ ({} skills loaded)", skills.size());
-        return FunctionToolCallback.builder("Skill", lookup)
-                .description(description)
-                .inputType((java.lang.reflect.Type) Map.class)
-                .inputSchema(
-                  "{\"type\":\"object\",\"properties\":{\"command\":{\"type\":\"string\"," +
-                  "\"description\":\"The name of the skill to invoke\"}}," +
-                  "\"required\":[\"command\"]}")
-                .build();
+        return mapToolCallback(
+                "Skill",
+                description,
+                "{\"type\":\"object\",\"properties\":{\"command\":{\"type\":\"string\","
+                        + "\"description\":\"The name of the skill to invoke\"}},"
+                        + "\"required\":[\"command\"]}",
+                lookup
+        );
     }
 
     private static String describeSkillFiles(String basePath) {
@@ -417,11 +412,7 @@ public class AgentUtilsConfig {
                 stringList(args.get("allowedDomains")),
                 stringList(args.get("blockedDomains"))
         );
-        return FunctionToolCallback.builder("WebSearch", webSearch)
-                .description(WEB_SEARCH_TOOL_DESCRIPTION)
-                .inputType((java.lang.reflect.Type) Map.class)
-                .inputSchema(WEB_SEARCH_INPUT_SCHEMA)
-                .build();
+        return mapToolCallback("WebSearch", WEB_SEARCH_TOOL_DESCRIPTION, WEB_SEARCH_INPUT_SCHEMA, webSearch);
     }
 
     @Bean
@@ -439,11 +430,12 @@ public class AgentUtilsConfig {
             return tool.askUserQuestion(questions, answers);
         };
         log.info("Created AskUserQuestionTool");
-        return FunctionToolCallback.builder("AskUserQuestionTool", askUserQuestion)
-                .description(ASK_USER_QUESTION_TOOL_DESCRIPTION)
-                .inputType((java.lang.reflect.Type) Map.class)
-                .inputSchema(ASK_USER_QUESTION_INPUT_SCHEMA)
-                .build();
+        return mapToolCallback(
+                "AskUserQuestionTool",
+                ASK_USER_QUESTION_TOOL_DESCRIPTION,
+                ASK_USER_QUESTION_INPUT_SCHEMA,
+                askUserQuestion
+        );
     }
 
     @Bean
@@ -459,11 +451,7 @@ public class AgentUtilsConfig {
                 OBJECT_MAPPER.convertValue(args, Todos.class)
         );
         log.info("Created TodoWriteTool");
-        return FunctionToolCallback.builder("TodoWrite", todoWrite)
-                .description(TODO_WRITE_TOOL_DESCRIPTION)
-                .inputType((java.lang.reflect.Type) Map.class)
-                .inputSchema(TODO_WRITE_INPUT_SCHEMA)
-                .build();
+        return mapToolCallback("TodoWrite", TODO_WRITE_TOOL_DESCRIPTION, TODO_WRITE_INPUT_SCHEMA, todoWrite);
     }
 
     @Bean
@@ -584,16 +572,45 @@ public class AgentUtilsConfig {
 
         log.info("Created BashTool: timeoutSeconds={}, maxOutputChars={}",
                 config.getTimeoutSeconds(), config.getMaxOutputChars());
-        return org.springframework.ai.tool.function.FunctionToolCallback.builder("Bash", executeFunction)
-                .description("Execute a shell command and return its output. Use this to run Python scripts (e.g. pypdf, pdfplumber, reportlab), shell commands, or any CLI tool.")
-                .inputType(java.util.Map.class)
-                .inputSchema("""
+        return mapToolCallback(
+                "Bash",
+                "Execute a shell command and return its output. Use this to run Python scripts (e.g. pypdf, pdfplumber, reportlab), shell commands, or any CLI tool.",
+                """
                         {"type":"object","properties":{
                           "command":{"type":"string","description":"The shell command to execute, e.g. 'python3 script.py'"},
                           "workdir":{"type":"string","description":"Working directory for execution (optional)"}
                         },"required":["command"]}
-                        """)
+                        """,
+                executeFunction
+        );
+    }
+
+    private static ToolCallback mapToolCallback(
+            String name,
+            String description,
+            String inputSchema,
+            Function<Map<String, Object>, String> callback
+    ) {
+        ToolDefinition toolDefinition = ToolDefinition.builder()
+                .name(name)
+                .description(description)
+                .inputSchema(inputSchema)
                 .build();
+        return new ToolCallback() {
+            @Override
+            public ToolDefinition getToolDefinition() {
+                return toolDefinition;
+            }
+
+            @Override
+            public String call(String toolInput) {
+                try {
+                    return callback.apply(OBJECT_MAPPER.readValue(toolInput, MAP_TYPE));
+                } catch (IOException exception) {
+                    throw new IllegalArgumentException("Invalid " + name + " tool input", exception);
+                }
+            }
+        };
     }
 
     private static List<String> stringList(Object value) {

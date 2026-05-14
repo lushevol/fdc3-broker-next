@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AgentServiceMemoryToolCallbackTest {
@@ -33,7 +34,7 @@ class AgentServiceMemoryToolCallbackTest {
                 callbacks.stream().map(callback -> callback.getToolDefinition().name()).toList()
         );
         ToolCallback memoryView = callbacks.get(0);
-        assertTrue(memoryView.getClass().getName().contains("FunctionToolCallback"));
+        assertFalse(memoryView.getClass().getName().contains("FunctionToolCallback"));
         assertTrue(memoryView.getToolDefinition().inputSchema().contains("\"viewRange\""));
 
         String result = memoryView.call("{\"path\":\"MEMORY.md\",\"viewRange\":\"1,1\"}");
