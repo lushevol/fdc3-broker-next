@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { ChatProtocolProvider, AssistantModal, type Toolkit } from 'chat-protocol-ui';
-import { createToolkitBridge } from './lib/toolkitBridge';
-import { createRuntimeToolkit, getProtocolToolDescriptors } from './toolkit/tools';
-import { useFdc3ActionExecutor, useFdc3WorkflowExecutor } from './toolkit/use-fdc3-action-executor';
+import { createToolkitBridge } from './toolkit/bridge';
+import { createRuntimeToolkit, getProtocolToolDescriptors } from './toolkit';
+import { useFdc3ActionExecutor, useFdc3WorkflowExecutor } from './toolkit/fdc3/shared/hooks';
 import { getHooksBase } from '../../hooks/HooksBase';
 import 'chat-protocol-ui/styles.css';
 
