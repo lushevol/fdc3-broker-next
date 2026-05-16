@@ -357,6 +357,33 @@ export interface AppDefinition {
         contexts?: string[];
       }>;
     };
+
+    /**
+     * Platform workflow declarations.
+     *
+     * Workflows compose multiple FDC3 intents into a governed, reusable linear
+     * capability that callers can invoke by workflow id.
+     */
+    workflows?: Array<{
+      workflowId: string;
+      title: string;
+      description?: string;
+      inputSchema: Record<string, unknown>;
+      steps: Array<{
+        id: string;
+        intent: string;
+        contextTemplate: Record<string, unknown>;
+        targetAppId?: string;
+        timeoutMs?: number;
+        continueOnError?: boolean;
+        inputBindings?: Array<{
+          fromStepId: string;
+          resultPath: string;
+          contextPath: string;
+          required: boolean;
+        }>;
+      }>;
+    }>;
   };
 
   /**

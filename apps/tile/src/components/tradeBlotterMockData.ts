@@ -4,6 +4,7 @@ import { PENDING_VALIDATION_STATUS } from './tradeBlotterTypes';
 export const TRADE_ROWS: TradeRow[] = [
   {
     tradeId: 'TR-001',
+    instrument: 'AAPL',
     book: 'Rates',
     desk: 'LDN',
     status: PENDING_VALIDATION_STATUS,
@@ -12,6 +13,7 @@ export const TRADE_ROWS: TradeRow[] = [
   },
   {
     tradeId: 'TR-002',
+    instrument: 'EURUSD',
     book: 'FX',
     desk: 'SG',
     status: PENDING_VALIDATION_STATUS,
@@ -20,6 +22,7 @@ export const TRADE_ROWS: TradeRow[] = [
   },
   {
     tradeId: 'TR-003',
+    instrument: 'MSFT',
     book: 'Equities',
     desk: 'NY',
     status: PENDING_VALIDATION_STATUS,
@@ -28,6 +31,7 @@ export const TRADE_ROWS: TradeRow[] = [
   },
   {
     tradeId: 'TR-004',
+    instrument: 'CL',
     book: 'Commodities',
     desk: 'HKG',
     status: PENDING_VALIDATION_STATUS,
@@ -36,6 +40,7 @@ export const TRADE_ROWS: TradeRow[] = [
   },
   {
     tradeId: 'TR-005',
+    instrument: 'US10Y',
     book: 'Rates',
     desk: 'NY',
     status: PENDING_VALIDATION_STATUS,
@@ -44,6 +49,7 @@ export const TRADE_ROWS: TradeRow[] = [
   },
   {
     tradeId: 'TR-006',
+    instrument: 'GBPUSD',
     book: 'FX',
     desk: 'LDN',
     status: PENDING_VALIDATION_STATUS,
@@ -52,6 +58,7 @@ export const TRADE_ROWS: TradeRow[] = [
   },
   {
     tradeId: 'TR-007',
+    instrument: 'LQD',
     book: 'Credit',
     desk: 'SG',
     status: PENDING_VALIDATION_STATUS,
@@ -60,6 +67,7 @@ export const TRADE_ROWS: TradeRow[] = [
   },
   {
     tradeId: 'TR-008',
+    instrument: 'SPY',
     book: 'Macro',
     desk: 'TKY',
     status: PENDING_VALIDATION_STATUS,
@@ -68,6 +76,7 @@ export const TRADE_ROWS: TradeRow[] = [
   },
   {
     tradeId: 'TR-009',
+    instrument: 'SOFR',
     book: 'Rates',
     desk: 'SG',
     status: PENDING_VALIDATION_STATUS,
@@ -76,6 +85,7 @@ export const TRADE_ROWS: TradeRow[] = [
   },
   {
     tradeId: 'TR-010',
+    instrument: 'USDJPY',
     book: 'FX',
     desk: 'NY',
     status: PENDING_VALIDATION_STATUS,
@@ -84,6 +94,7 @@ export const TRADE_ROWS: TradeRow[] = [
   },
   {
     tradeId: 'TR-011',
+    instrument: 'HYG',
     book: 'Credit',
     desk: 'LDN',
     status: PENDING_VALIDATION_STATUS,
@@ -92,6 +103,7 @@ export const TRADE_ROWS: TradeRow[] = [
   },
   {
     tradeId: 'TR-012',
+    instrument: 'NVDA',
     book: 'Equities',
     desk: 'SG',
     status: PENDING_VALIDATION_STATUS,
@@ -100,6 +112,7 @@ export const TRADE_ROWS: TradeRow[] = [
   },
   {
     tradeId: 'TR-013',
+    instrument: 'CDX',
     book: 'Credit',
     desk: 'NY',
     status: 'VALIDATED',

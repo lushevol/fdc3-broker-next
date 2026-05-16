@@ -6,6 +6,8 @@ import {
   ApprovalConfirmTool,
   Fdc3ApprovalTool,
   Fdc3ExecutionResultTool,
+  Fdc3WorkflowApprovalTool,
+  Fdc3WorkflowTranscriptTool,
   FunctionUsageRankingTool,
   HighestOperationUsersTool,
   ProfileLookupTool,
@@ -14,9 +16,12 @@ import {
 } from './tool-renderers';
 import { getFdc3ChatActionDefinitions } from './fdc3-action-definitions';
 import type { Fdc3ActionExecutor } from './fdc3-action-executor';
+import type { Fdc3WorkflowExecutor } from './fdc3-workflow-executor';
+import { getFdc3WorkflowCatalogDescription } from './fdc3-workflow-tool-description';
 
 type RuntimeToolkitDeps = {
   fdc3Executor?: Fdc3ActionExecutor;
+  workflowExecutor?: Fdc3WorkflowExecutor;
 };
 
 type ToolkitDefinition = Toolkit[string] & {
@@ -116,9 +121,10 @@ function createBaseToolkit(): Record<string, ToolkitDefinition> {
   };
 }
 
-export function createRuntimeToolkit({ fdc3Executor }: RuntimeToolkitDeps = {}): Toolkit {
+export function createRuntimeToolkit({ fdc3Executor, workflowExecutor }: RuntimeToolkitDeps = {}): Toolkit {
   const toolkit = createBaseToolkit();
   const actionCatalogDescription = getFdc3ActionCatalogDescription();
+  const workflowCatalogDescription = getFdc3WorkflowCatalogDescription();
 
   const runtimeToolkit: Record<string, ToolkitDefinition> = {
     ...toolkit,
@@ -135,15 +141,24 @@ export function createRuntimeToolkit({ fdc3Executor }: RuntimeToolkitDeps = {}):
       }),
       render: Fdc3ApprovalTool,
     },
+    propose_fdc3_workflow: {
+      type: 'human',
+      description: `Ask the user to approve a declared FDC3 workflow capability. The model must select a workflowId from this catalog and provide only input fields, never workflow steps. ${workflowCatalogDescription}`,
+      parameters: z.object({
+        workflowId: z.string().describe('Declared FDC3 workflow id from the workflow catalog.'),
+        input: z.record(z.string(), z.unknown()).optional().describe('Workflow input values only. Do not include steps.'),
+        originalRequest: z.string().optional().describe('Original user request for approval display.'),
+      }),
+      render: Fdc3WorkflowApprovalTool,
+    },
   };
 
-  if (!fdc3Executor) {
-    return runtimeToolkit as unknown as Toolkit;
-  }
-
-  return {
+  const executableToolkit: Record<string, ToolkitDefinition> = {
     ...runtimeToolkit,
-    execute_fdc3_action: {
+  };
+
+  if (fdc3Executor) {
+    executableToolkit.execute_fdc3_action = {
       type: 'frontend',
       description:
         'After approval, raise the selected declaration-backed FDC3 intent through the platform broker and return the handler result to the chat.',
@@ -154,8 +169,33 @@ export function createRuntimeToolkit({ fdc3Executor }: RuntimeToolkitDeps = {}):
       }),
       execute: async (input) => fdc3Executor.execute(input as { actionId: string }, { continuationPayload: true }),
       render: Fdc3ExecutionResultTool,
-    },
-  } as unknown as Toolkit;
+    };
+  }
+
+  if (workflowExecutor) {
+    executableToolkit.execute_fdc3_workflow = {
+      type: 'frontend',
+      description:
+        'Execute an approved declared FDC3 workflow capability through the platform broker and return the workflow transcript.',
+      parameters: z.object({
+        workflowId: z.string().describe('Declared FDC3 workflow id from propose_fdc3_workflow.'),
+        input: z.record(z.string(), z.unknown()).optional().describe('Workflow input values only.'),
+      }),
+      execute: async (input) => {
+        const record = input as Record<string, unknown>;
+        return workflowExecutor.execute({
+          workflowId: String(record.workflowId),
+          input:
+            record.input && typeof record.input === 'object' && !Array.isArray(record.input)
+              ? (record.input as Record<string, unknown>)
+              : {},
+        });
+      },
+      render: Fdc3WorkflowTranscriptTool,
+    };
+  }
+
+  return executableToolkit as unknown as Toolkit;
 }
 
 export const runtimeToolkit: Toolkit = createRuntimeToolkit();

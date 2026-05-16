@@ -36,7 +36,7 @@ import type { Broker } from 'ratan-fdc3-broker';
 import React, { useContext, useEffect, useState } from 'react';
 import { getAgentApi } from './agent';
 import { ScopedDesktopAgent } from './scoped-agent';
-import type { AppIdentifier, Channel, Context, DesktopAgent, Listener } from './types';
+import type { AppIdentifier, Channel, Context, Listener, RatanDesktopAgent } from './types';
 
 /**
  * Internal React context that holds the FDC3 DesktopAgent instance.
@@ -47,7 +47,7 @@ import type { AppIdentifier, Channel, Context, DesktopAgent, Listener } from './
  * @internal
  */
 const AgentContext = React.createContext<{
-  agent: DesktopAgent | null;
+  agent: RatanDesktopAgent | null;
   app?: AppIdentifier;
 }>({
   agent: null,
@@ -119,7 +119,7 @@ export const AgentProvider: React.FC<{
   /** Optional identifier for the current tile. If provided, FDC3 operations will be scoped to this ID. */
   appIdentifier?: AppIdentifier;
 }> = ({ children, appIdentifier }) => {
-  const [agent, setAgent] = React.useState<DesktopAgent | null>(null);
+  const [agent, setAgent] = React.useState<RatanDesktopAgent | null>(null);
   const [error, setError] = React.useState<Error | null>(null);
 
   React.useEffect(() => {
@@ -133,7 +133,7 @@ export const AgentProvider: React.FC<{
           if (appIdentifier) {
             // If app identifier is provided, create a scoped agent
             // This ensures that all FDC3 calls from this provider are attributed to this app
-            setAgent(new ScopedDesktopAgent(brokerInstance as Broker, appIdentifier));
+            setAgent(new ScopedDesktopAgent(brokerInstance as unknown as Broker, appIdentifier));
           }
           setError(null);
         }
@@ -265,7 +265,7 @@ export const AgentProvider: React.FC<{
  * @see {@link useContextListener} For listening to context changes with automatic cleanup
  * @see [FDC3 DesktopAgent Specification](https://fdc3.finos.org/docs/api/next/DesktopAgent/)
  */
-export function useFDC3(): DesktopAgent {
+export function useFDC3(): RatanDesktopAgent {
   const { agent } = useContext(AgentContext);
   if (!agent) {
     // Fallback to getAgentApi() if context not available

@@ -57,8 +57,8 @@ describe('TradeBlotterFDC3Tile', () => {
   it('renders the tile shell, registers the tile, and unregisters on unmount', () => {
     const { unmount } = render(<TradeBlotterFDC3Tile {...baseProps} />);
 
-    expect(screen.getByText('Trade Blotter')).toBeInTheDocument();
-    expect(screen.getByText('Awaiting SearchTrades intent')).toBeInTheDocument();
+    expect(screen.getByText('Trade Blotter')).toBeTruthy();
+    expect(screen.getByText('Awaiting SearchTrades intent')).toBeTruthy();
     expect(mockRegisterTile).toHaveBeenCalledWith('ws-trade-1', 'template_tile_trade_blotter');
 
     unmount();
@@ -102,10 +102,10 @@ describe('TradeBlotterFDC3Tile', () => {
       });
     });
 
-    expect(screen.getByText('TR-002')).toBeInTheDocument();
-    expect(screen.getByText('TR-006')).toBeInTheDocument();
-    expect(screen.getByText('TR-010')).toBeInTheDocument();
-    expect(screen.queryByText('TR-001')).not.toBeInTheDocument();
+    expect(screen.getByText('TR-002')).toBeTruthy();
+    expect(screen.getByText('TR-006')).toBeTruthy();
+    expect(screen.getByText('TR-010')).toBeTruthy();
+    expect(screen.queryByText('TR-001')).toBeNull();
     expect(result).toEqual({
       status: 'ok',
       intent: 'SearchTrades',
@@ -114,9 +114,21 @@ describe('TradeBlotterFDC3Tile', () => {
       returnedCount: 3,
       summary: '3 trades found. Returning top 3 rows.',
       trades: [
-        expect.objectContaining({ tradeId: 'TR-002', status: 'PENDING_VALIDATION' }),
-        expect.objectContaining({ tradeId: 'TR-006', status: 'PENDING_VALIDATION' }),
-        expect.objectContaining({ tradeId: 'TR-010', status: 'PENDING_VALIDATION' }),
+        expect.objectContaining({
+          tradeId: 'TR-002',
+          status: 'PENDING_VALIDATION',
+          instrument: 'EURUSD',
+        }),
+        expect.objectContaining({
+          tradeId: 'TR-006',
+          status: 'PENDING_VALIDATION',
+          instrument: 'GBPUSD',
+        }),
+        expect.objectContaining({
+          tradeId: 'TR-010',
+          status: 'PENDING_VALIDATION',
+          instrument: 'USDJPY',
+        }),
       ],
       tile: {
         appId: 'template_tile_trade_blotter',
@@ -144,8 +156,8 @@ describe('TradeBlotterFDC3Tile', () => {
       });
     });
 
-    expect(screen.getByText('TR-001')).toBeInTheDocument();
-    expect(screen.queryByText('TR-002')).not.toBeInTheDocument();
+    expect(screen.getByText('TR-001')).toBeTruthy();
+    expect(screen.queryByText('TR-002')).toBeNull();
     expect(result).toEqual(
       expect.objectContaining({
         totalCount: 1,
@@ -156,7 +168,7 @@ describe('TradeBlotterFDC3Tile', () => {
           book: 'Rates',
           desk: 'LDN',
         },
-        trades: [expect.objectContaining({ tradeId: 'TR-001' })],
+        trades: [expect.objectContaining({ tradeId: 'TR-001', instrument: 'AAPL' })],
       }),
     );
   });
@@ -188,7 +200,7 @@ describe('TradeBlotterFDC3Tile', () => {
       }),
     );
     expect((result as { trades: Array<unknown> }).trades).toHaveLength(MAX_RETURNED_TRADES);
-    expect(screen.getByText('TR-012')).toBeInTheDocument();
+    expect(screen.getByText('TR-012')).toBeTruthy();
   });
 
   it('rejects malformed SearchTrades contexts with a predictable error', async () => {
@@ -236,7 +248,7 @@ describe('TradeBlotterFDC3Tile', () => {
 
     const { unmount } = render(<TradeBlotterFDC3Tile {...baseProps} />);
 
-    expect(screen.getByText('Trade Blotter')).toBeInTheDocument();
+    expect(screen.getByText('Trade Blotter')).toBeTruthy();
 
     unmount();
 

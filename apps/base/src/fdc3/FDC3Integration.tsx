@@ -23,6 +23,7 @@ import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFDC3WorkspaceHelper } from './useFDC3WorkspaceHelper';
 import fdc3Definitions from './declarations/fdc3-definitions.json';
+import workflows from './declarations/workflows.json';
 
 // ============================================================================
 // Mock App Directory for Development
@@ -179,6 +180,8 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
 
       // Custom channel IDs for user channels
       userChannelIds: ['red', 'green', 'blue', 'orange', 'purple'],
+
+      workflows,
 
       // Enable debug logging (set to false in production)
       enableDebug: process.env.NODE_ENV === 'development',

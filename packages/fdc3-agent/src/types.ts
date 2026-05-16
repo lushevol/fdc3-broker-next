@@ -8,6 +8,12 @@
  */
 
 import type { DesktopAgent } from '@finos/fdc3';
+import type {
+  WorkflowDefinition,
+  WorkflowJsonObject,
+  WorkflowOptions,
+  WorkflowResolution,
+} from 'ratan-fdc3-broker';
 
 // Re-export all FDC3 types from @finos/fdc3
 export type {
@@ -31,6 +37,27 @@ export type {
   PrivateChannel,
 } from '@finos/fdc3';
 
+export type {
+  WorkflowDefinition,
+  WorkflowJsonObject,
+  WorkflowOptions,
+  WorkflowResolution,
+  WorkflowTranscript,
+  WorkflowStepResult,
+} from 'ratan-fdc3-broker';
+
+export interface WorkflowApi {
+  raiseWorkflow(
+    workflowId: string,
+    input?: WorkflowJsonObject,
+    options?: WorkflowOptions,
+  ): Promise<WorkflowResolution>;
+  findWorkflow(workflowId: string): Promise<WorkflowDefinition | null>;
+  findWorkflowsByInput(input?: WorkflowJsonObject): Promise<WorkflowDefinition[]>;
+}
+
+export type RatanDesktopAgent = DesktopAgent & WorkflowApi;
+
 /**
  * Global namespace for FDC3 state sharing across MFEs.
  *
@@ -43,7 +70,7 @@ export type {
 declare global {
   interface Window {
     __RATAN_FDC3__?: {
-      brokerInstance?: DesktopAgent | null;
+      brokerInstance?: RatanDesktopAgent | null;
     };
   }
 }

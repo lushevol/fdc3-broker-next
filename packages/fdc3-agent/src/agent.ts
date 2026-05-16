@@ -30,7 +30,7 @@
  * @packageDocumentation
  */
 
-import type { DesktopAgent } from './types';
+import type { DesktopAgent, RatanDesktopAgent } from './types';
 
 /**
  * Gets or creates the global FDC3 namespace on window.
@@ -62,12 +62,12 @@ function getGlobalNamespace(): Window['__RATAN_FDC3__'] {
  *
  * @internal
  */
-function getBrokerInstance(): DesktopAgent | null {
+function getBrokerInstance(): RatanDesktopAgent | null {
   const namespace = getGlobalNamespace();
   return namespace?.brokerInstance ?? null;
 }
 
-function setBrokerInstance(broker: DesktopAgent | null): void {
+function setBrokerInstance(broker: RatanDesktopAgent | null): void {
   const namespace = getGlobalNamespace();
   if (namespace) {
     namespace.brokerInstance = broker;
@@ -115,7 +115,7 @@ function setBrokerInstance(broker: DesktopAgent | null): void {
  * @see {@link clearBroker} For clearing the broker instance
  */
 export function setBroker(broker: DesktopAgent): void {
-  setBrokerInstance(broker);
+  setBrokerInstance(broker as RatanDesktopAgent);
 }
 
 /**
@@ -182,7 +182,7 @@ export function setBroker(broker: DesktopAgent): void {
  * @see {@link useFDC3} For React hook alternative
  * @see [FDC3 DesktopAgent Specification](https://fdc3.finos.org/docs/api/next/DesktopAgent/)
  */
-export function getAgentApi(): DesktopAgent {
+export function getAgentApi(): RatanDesktopAgent {
   const brokerInstance = getBrokerInstance();
 
   if (!brokerInstance) {

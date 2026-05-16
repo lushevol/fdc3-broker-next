@@ -16,7 +16,10 @@ describe('ScopedDesktopAgent', () => {
       findInstances: vi.fn(),
       broadcast: vi.fn(),
       raiseIntent: vi.fn(),
+      raiseWorkflow: vi.fn(),
       raiseIntentForContext: vi.fn(),
+      findWorkflow: vi.fn(),
+      findWorkflowsByInput: vi.fn(),
       addContextListener: vi.fn(),
       addIntentListener: vi.fn(),
       findIntent: vi.fn(),
@@ -47,6 +50,23 @@ describe('ScopedDesktopAgent', () => {
 
     await scopedAgent.raiseIntent(intent, context, target);
     expect(mockBroker.raiseIntent).toHaveBeenCalledWith(intent, context, target, mockSource);
+  });
+
+  it('should forward workflow APIs to the broker', async () => {
+    const input = { status: 'PENDING_VALIDATION' };
+    const options = { timeoutMs: 5000 };
+
+    await scopedAgent.raiseWorkflow('trade.pendingValidation.openChart', input, options);
+    await scopedAgent.findWorkflow('trade.pendingValidation.openChart');
+    await scopedAgent.findWorkflowsByInput(input);
+
+    expect(mockBroker.raiseWorkflow).toHaveBeenCalledWith(
+      'trade.pendingValidation.openChart',
+      input,
+      options,
+    );
+    expect(mockBroker.findWorkflow).toHaveBeenCalledWith('trade.pendingValidation.openChart');
+    expect(mockBroker.findWorkflowsByInput).toHaveBeenCalledWith(input);
   });
 
   it('should inject source into raiseIntentForContext', async () => {
