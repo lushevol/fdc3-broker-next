@@ -1,5 +1,7 @@
 # FDC3 Intent Workflow Engine Implementation Plan
 
+> Superseded by `docs/superpowers/plans/2026-05-16-fdc3-workflow-capability.md`. Use the newer FDC3 workflow capability plan for implementation.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add a browser-side FDC3 workflow engine that lets the chatbot propose, approve, and execute linear multi-intent FDC3 workflows, including passing prior intent results into later intent contexts.
@@ -1067,4 +1069,3 @@ git status --short
 git add <changed-files>
 git commit -m "test: verify fdc3 workflow execution"
 ```
-

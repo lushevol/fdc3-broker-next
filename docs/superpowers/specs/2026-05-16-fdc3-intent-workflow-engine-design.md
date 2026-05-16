@@ -1,5 +1,7 @@
 # FDC3 Intent Workflow Engine Design
 
+> Superseded by `docs/superpowers/specs/2026-05-16-fdc3-workflow-capability-design.md`. The newer design moves workflow assembly into FDC3 so chatbot callers raise a declared workflow id instead of supplying raw workflow steps.
+
 ## Goal
 
 Add a declaration-backed workflow engine for FDC3 intents so a user can describe a multi-step workflow in natural language, approve it once, and have the base shell execute multiple FDC3 actions in a strict linear order. Later intent steps can consume data returned by earlier intent handlers.
@@ -258,4 +260,3 @@ Manual verification after implementation:
 - Step result shapes may vary by tile. Mitigation: action metadata should document binding-safe result paths, and required bindings fail loudly.
 - The resolver UI may interrupt execution when multiple targets exist. This is acceptable for v1; resolver selection remains the existing platform behavior.
 - Workflow approval may become noisy for many steps. V1 is linear and should keep plans short; renderer should show dense ordered rows rather than large cards.
-
