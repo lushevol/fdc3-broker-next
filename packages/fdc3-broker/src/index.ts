@@ -37,3 +37,4 @@ export {
 export { TileRegistryImpl } from './tile-registry';
 // Export all types
 export * from './types';
+export * from './workflow-types';
