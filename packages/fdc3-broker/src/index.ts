@@ -37,4 +37,5 @@ export {
 export { TileRegistryImpl } from './tile-registry';
 // Export all types
 export * from './types';
+export { WorkflowExecutor, type RaiseWorkflowIntent } from './workflow-executor';
 export * from './workflow-types';

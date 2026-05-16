@@ -28,6 +28,7 @@ import type {
 } from '@finos/fdc3';
 import type { AppDirectoryClient } from 'ratan-fdc3-app-directory';
 import type { LogLevel } from './logger';
+import type { WorkflowDefinition } from './workflow-types';
 
 export type {
   AppIdentifier,
@@ -78,6 +79,9 @@ export interface BrokerConfig {
 
   /** Intent queue timeout in milliseconds */
   intentQueueTimeout?: number;
+
+  /** Platform workflow declarations available through raiseWorkflow */
+  workflows?: WorkflowDefinition[];
 
   /** Enable OpenFin bridge (if available) */
   enableOpenFinBridge?: boolean;

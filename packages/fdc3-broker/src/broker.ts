@@ -30,6 +30,13 @@ import type {
   ResolverTarget,
   TileOpenFailureDetails,
 } from './types';
+import { WorkflowExecutor } from './workflow-executor';
+import type {
+  WorkflowDefinition,
+  WorkflowJsonObject,
+  WorkflowOptions,
+  WorkflowResolution,
+} from './workflow-types';
 
 // Lazy load OpenFin bridge only when needed
 type OpenFinBridgeType = typeof import('./openfin-bridge').OpenFinBridge;
@@ -88,6 +95,7 @@ export class Broker implements DesktopAgent {
   private openFinBridge: InstanceType<OpenFinBridgeType> | null;
   private postMessageBridge: InstanceType<PostMessageBridgeType> | null;
   private entitlementValidator: EntitlementValidator;
+  private workflowExecutor: WorkflowExecutor;
 
   // Track listeners
   private intentListeners = new Map<string, Listener[]>();
@@ -150,6 +158,11 @@ export class Broker implements DesktopAgent {
 
     // Initialize entitlement validator
     this.entitlementValidator = new EntitlementValidator(config);
+    this.workflowExecutor = new WorkflowExecutor(config.workflows ?? [], (intent, context, target) =>
+      target
+        ? this.raiseIntent(intent, context as Context, target as AppIdentifier)
+        : this.raiseIntent(intent, context as Context),
+    );
 
     // Initialize intent resolver
     this.intentResolver = new IntentResolver(
@@ -1022,6 +1035,25 @@ export class Broker implements DesktopAgent {
     // (Could enhance to show intent picker)
     const intent = intents[0].intent;
     return this.raiseIntent(intent.name, context, targetApp);
+  }
+
+  async raiseWorkflow(
+    workflowId: string,
+    input: WorkflowJsonObject = {},
+    _options?: WorkflowOptions,
+  ): Promise<WorkflowResolution> {
+    return {
+      workflowId,
+      getResult: () => this.workflowExecutor.execute(workflowId, input),
+    };
+  }
+
+  async findWorkflow(workflowId: string): Promise<WorkflowDefinition | null> {
+    return this.workflowExecutor.findWorkflow(workflowId);
+  }
+
+  async findWorkflowsByInput(input?: WorkflowJsonObject): Promise<WorkflowDefinition[]> {
+    return this.workflowExecutor.findWorkflowsByInput(input);
   }
 
   /**
