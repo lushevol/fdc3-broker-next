@@ -5,10 +5,12 @@ type IntentResolution = {
   getResult(): Promise<unknown>;
 };
 
+type Fdc3ContextObject = Record<string, unknown> & { type: string };
+
 type AgentApiLike = {
   raiseIntent(
     intent: string,
-    context: Record<string, unknown>,
+    context: Fdc3ContextObject,
     app?: unknown,
   ): Promise<IntentResolution>;
 };
@@ -21,7 +23,7 @@ type Fdc3ExecutionTile = {
 export type Fdc3ActionContinuationSuccess = {
   status: 'ok';
   intent: string;
-  context: Record<string, unknown>;
+  context: Fdc3ContextObject;
   totalCount: number;
   summary: string;
   trades: unknown[];
@@ -64,7 +66,7 @@ function normalizeTile(value: unknown): Fdc3ExecutionTile | undefined {
 
 function normalizeSuccessPayload(input: {
   intent: string;
-  context: Record<string, unknown>;
+  context: Fdc3ContextObject;
   result: unknown;
 }): Fdc3ActionContinuationSuccess {
   const result = isRecord(input.result) ? input.result : {};
@@ -107,12 +109,13 @@ export function createFdc3ActionExecutor(deps: {
       }
 
       try {
-        const resolution = await getFdc3Api().raiseIntent(action.intent, action.defaultContext);
+        const context = action.defaultContext as Fdc3ContextObject;
+        const resolution = await getFdc3Api().raiseIntent(action.intent, context);
         const result = await resolution.getResult();
 
         return normalizeSuccessPayload({
           intent: action.intent,
-          context: action.defaultContext,
+          context,
           result,
         });
       } catch (error) {

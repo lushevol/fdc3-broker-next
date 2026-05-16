@@ -1,0 +1,53 @@
+[
+  {
+    "workflowId": "trade.pendingValidation.openChart",
+    "title": "Open chart for pending validation trade",
+    "description": "Search pending validation trades and open a chart for the first returned instrument.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PENDING_VALIDATION"]
+        },
+        "select": {
+          "type": "string",
+          "enum": ["first"]
+        },
+        "originalRequest": {
+          "type": "string"
+        }
+      },
+      "required": ["status"]
+    },
+    "steps": [
+      {
+        "id": "search-trades",
+        "intent": "SearchTrades",
+        "contextTemplate": {
+          "type": "fdc3.trade.query",
+          "filters": {
+            "status": "{{input.status}}"
+          },
+          "question": "{{input.originalRequest}}"
+        }
+      },
+      {
+        "id": "view-chart",
+        "intent": "ViewChart",
+        "contextTemplate": {
+          "type": "fdc3.instrument",
+          "id": {}
+        },
+        "inputBindings": [
+          {
+            "fromStepId": "search-trades",
+            "resultPath": "$.trades[0].instrument",
+            "contextPath": "$.id.ticker",
+            "required": true
+          }
+        ]
+      }
+    ]
+  }
+]

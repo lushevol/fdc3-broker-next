@@ -8,6 +8,9 @@ const mockProviderProps: Array<Record<string, unknown>> = [];
 const mockFdc3Executor = {
   execute: jest.fn(),
 };
+const mockWorkflowExecutor = {
+  execute: jest.fn(),
+};
 
 jest.mock('chat-protocol-ui', () => ({
   AssistantModal: () => <div>Assistant Modal</div>,
@@ -39,12 +42,14 @@ jest.mock('recharts', () => ({
 
 jest.mock('./use-fdc3-action-executor', () => ({
   useFdc3ActionExecutor: () => mockFdc3Executor,
+  useFdc3WorkflowExecutor: () => mockWorkflowExecutor,
 }));
 
 describe('runtimeToolkit FDC3 tools', () => {
   beforeEach(() => {
     mockProviderProps.length = 0;
     mockFdc3Executor.execute.mockReset();
+    mockWorkflowExecutor.execute.mockReset();
   });
 
   it('keeps the static toolkit limited to non-executor FDC3 tools', () => {
@@ -62,18 +67,44 @@ describe('runtimeToolkit FDC3 tools', () => {
   });
 
   it('adds the execution tool only for the injected runtime path', () => {
-    const toolkit = createRuntimeToolkit({ fdc3Executor: mockFdc3Executor });
+    const toolkit = createRuntimeToolkit({
+      fdc3Executor: mockFdc3Executor,
+      workflowExecutor: mockWorkflowExecutor,
+    });
     const descriptors = getProtocolToolDescriptors(toolkit);
 
     expect(descriptors).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: 'propose_fdc3_action', source: 'human' }),
         expect.objectContaining({ name: 'execute_fdc3_action', source: 'frontend' }),
+        expect.objectContaining({ name: 'propose_fdc3_workflow', source: 'human' }),
+        expect.objectContaining({ name: 'execute_fdc3_workflow', source: 'frontend' }),
       ]),
     );
 
     expect(toolkit.propose_fdc3_action.type).toBe('human');
     expect(toolkit.execute_fdc3_action.type).toBe('frontend');
+    expect(toolkit.propose_fdc3_workflow.type).toBe('human');
+    expect(toolkit.execute_fdc3_workflow.type).toBe('frontend');
+  });
+
+  it('executes declared FDC3 workflows by id and input only', async () => {
+    mockWorkflowExecutor.execute.mockResolvedValue({
+      status: 'ok',
+      workflowId: 'trade.pendingValidation.openChart',
+    });
+    const toolkit = createRuntimeToolkit({ workflowExecutor: mockWorkflowExecutor });
+
+    await toolkit.execute_fdc3_workflow.execute?.({
+      workflowId: 'trade.pendingValidation.openChart',
+      input: { status: 'PENDING_VALIDATION' },
+      steps: [{ id: 'should-not-be-forwarded' }],
+    });
+
+    expect(mockWorkflowExecutor.execute).toHaveBeenCalledWith({
+      workflowId: 'trade.pendingValidation.openChart',
+      input: { status: 'PENDING_VALIDATION' },
+    });
   });
 
   it('renders meaningful FDC3 approval details and resumes on approve or cancel', () => {

@@ -133,7 +133,7 @@ export const AgentProvider: React.FC<{
           if (appIdentifier) {
             // If app identifier is provided, create a scoped agent
             // This ensures that all FDC3 calls from this provider are attributed to this app
-            setAgent(new ScopedDesktopAgent(brokerInstance as Broker, appIdentifier));
+            setAgent(new ScopedDesktopAgent(brokerInstance as unknown as Broker, appIdentifier));
           }
           setError(null);
         }

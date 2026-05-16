@@ -2,22 +2,26 @@ import React, { useMemo } from 'react';
 import { ChatProtocolProvider, AssistantModal, type Toolkit } from 'chat-protocol-ui';
 import { createToolkitBridge } from './lib/toolkitBridge';
 import { createRuntimeToolkit, getProtocolToolDescriptors } from './toolkit/tools';
-import { useFdc3ActionExecutor } from './toolkit/use-fdc3-action-executor';
+import { useFdc3ActionExecutor, useFdc3WorkflowExecutor } from './toolkit/use-fdc3-action-executor';
 import { getHooksBase } from '../../hooks/HooksBase';
 import 'chat-protocol-ui/styles.css';
 
 const API_URL = process.env.CHAT_API_URL || 'http://127.0.0.1:8080/api/chat/runs';
 
 type ChatbotWorkspaceSnapshot = {
-  activeWorkspaceId?: string;
-  activeWorkspaceLabel?: string;
-  activeTileTitle?: string;
-  activeTileId?: string;
-  activeAppId?: string;
+  activeWorkspaceId?: string | null;
+  activeWorkspaceLabel?: string | null;
+  activeTileTitle?: string | null;
+  activeTileId?: string | null;
+  activeAppId?: string | null;
   totalWorkspaces?: number;
   totalTiles?: number;
   workspaces?: Array<Record<string, unknown>>;
 };
+
+function optionalString(value: string | null | undefined): string | undefined {
+  return value ?? undefined;
+}
 
 type ToolRegistryConfig = {
   getWorkspaceSnapshot?: () => ChatbotWorkspaceSnapshot;
@@ -29,12 +33,14 @@ type ChatbotSidebarV2Props = {
 
 export const ChatbotSidebarV2: React.FC<ChatbotSidebarV2Props> = ({ toolRegistryConfig }) => {
   const fdc3Executor = useFdc3ActionExecutor();
+  const workflowExecutor = useFdc3WorkflowExecutor();
   const toolkit = useMemo<Toolkit>(
     () =>
       createRuntimeToolkit({
         fdc3Executor,
+        workflowExecutor,
       }),
-    [fdc3Executor],
+    [fdc3Executor, workflowExecutor],
   );
   const toolkitBridge = useMemo(() => createToolkitBridge(toolkit), [toolkit]);
   const tools = useMemo(() => getProtocolToolDescriptors(toolkit), [toolkit]);
@@ -46,7 +52,14 @@ export const ChatbotSidebarV2: React.FC<ChatbotSidebarV2Props> = ({ toolRegistry
     }
 
     return {
-      workspace: workspaceSnapshot,
+      workspace: {
+        ...workspaceSnapshot,
+        activeWorkspaceId: optionalString(workspaceSnapshot.activeWorkspaceId),
+        activeWorkspaceLabel: optionalString(workspaceSnapshot.activeWorkspaceLabel),
+        activeTileTitle: optionalString(workspaceSnapshot.activeTileTitle),
+        activeTileId: optionalString(workspaceSnapshot.activeTileId),
+        activeAppId: optionalString(workspaceSnapshot.activeAppId),
+      },
     };
   }, [toolRegistryConfig]);
 

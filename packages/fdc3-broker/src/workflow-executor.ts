@@ -48,7 +48,7 @@ export class WorkflowExecutor {
     return this.workflowsById.get(workflowId) ?? null;
   }
 
-  findWorkflowsByInput(): WorkflowDefinition[] {
+  findWorkflowsByInput(_input?: WorkflowJsonObject): WorkflowDefinition[] {
     return Array.from(this.workflowsById.values());
   }
 
