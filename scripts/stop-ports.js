@@ -3,7 +3,7 @@
 const { execSync } = require('child_process');
 const os = require('os');
 
-const PORTS = [8001, 8002, 8006, 8007, 3000, 3001, 8088, 8080, 8090, 8091, 4173];
+const PORTS = [8001, 8002, 8006, 8007, 3000, 3001, 8088, 8080, 8084, 8090, 8091, 4173];
 
 function killPort(port) {
   const platform = os.platform();

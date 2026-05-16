@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: ${MEMORY_DATASOURCE_URL:jdbc:postgresql://localhost:5432/memory_service}
+    username: ${MEMORY_DATASOURCE_USERNAME:memory_service}
+    password: ${MEMORY_DATASOURCE_PASSWORD:memory_service}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration

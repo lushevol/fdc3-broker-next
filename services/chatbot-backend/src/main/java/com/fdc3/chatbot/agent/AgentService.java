@@ -21,6 +21,7 @@ import com.fdc3.chatbot.model.FrontendToolContinuation;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.model.UserCapabilityContext;
+import com.fdc3.chatbot.memory.MemoryContextBuilder;
 import com.fdc3.chatbot.tool.ToolDefinition;
 import com.fdc3.chatbot.tool.ToolRegistry;
 import com.fdc3.chatbot.tool.agentutils.ToolExecutionBridge;
@@ -162,12 +163,14 @@ public class AgentService {
     private String memoryDirectory;
 
     private String memorySystemPrompt;
+    private static final ThreadLocal<String> OPERATOR_MEMORY_CONTEXT = new ThreadLocal<>();
 
     private final ToolRegistry toolRegistry;
     private final CapabilityResolver capabilityResolver;
     private final PolicyEvaluator policyEvaluator;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private MemoryToolsFactory memoryToolsFactory; // null when memory is disabled
+    private MemoryContextBuilder memoryContextBuilder;
 
     /** Tracks userId per active conversation for per-user memory isolation. */
     private final Map<String, String> conversationUsers = new ConcurrentHashMap<>();
@@ -253,6 +256,14 @@ public class AgentService {
         this.memoryToolsFactory = memoryToolsFactory;
         if (memoryToolsFactory != null) {
             log.info("MemoryToolsFactory wired – per-user memory isolation enabled");
+        }
+    }
+
+    @Autowired(required = false)
+    public void setMemoryContextBuilder(MemoryContextBuilder memoryContextBuilder) {
+        this.memoryContextBuilder = memoryContextBuilder;
+        if (memoryContextBuilder != null) {
+            log.info("SQL-backed memory context builder wired");
         }
     }
 
@@ -769,7 +780,13 @@ public class AgentService {
                 log.debug("Received {} frontend tool manifest entries", frontendToolManifest.size());
             }
 
-            messages.add(new SystemMessage(buildSystemPrompt(useTools ? availableTools : Map.of())));
+            String operatorMemoryContext = buildOperatorMemoryContext(capabilityContext);
+            OPERATOR_MEMORY_CONTEXT.set(operatorMemoryContext);
+            try {
+                messages.add(new SystemMessage(buildSystemPrompt(useTools ? availableTools : Map.of())));
+            } finally {
+                OPERATOR_MEMORY_CONTEXT.remove();
+            }
             log.debug("Processing message for conversation: {} with model={}", conversationId,
                     resolveConfiguredModel());
 
@@ -2625,7 +2642,13 @@ public class AgentService {
             Map<String, ToolDefinition> availableTools = toolRegistry.resolveTools(UserCapabilityContext.anonymous());
             boolean useTools = !availableTools.isEmpty();
 
-            messages.add(new SystemMessage(buildSystemPrompt(useTools ? availableTools : Map.of())));
+            String operatorMemoryContext = buildOperatorMemoryContext(UserCapabilityContext.anonymous());
+            OPERATOR_MEMORY_CONTEXT.set(operatorMemoryContext);
+            try {
+                messages.add(new SystemMessage(buildSystemPrompt(useTools ? availableTools : Map.of())));
+            } finally {
+                OPERATOR_MEMORY_CONTEXT.remove();
+            }
 
             if (history != null) {
                 for (ChatMessage msg : history) {
@@ -2658,6 +2681,13 @@ public class AgentService {
         }
     }
 
+    private String buildOperatorMemoryContext(UserCapabilityContext capabilityContext) {
+        if (!memoryEnabled || memoryContextBuilder == null) {
+            return "";
+        }
+        return memoryContextBuilder.build(capabilityContext == null ? UserCapabilityContext.anonymous() : capabilityContext);
+    }
+
     private String buildSystemPrompt(Map<String, ToolDefinition> availableTools) {
         String toolSection = availableTools.isEmpty()
                 ? ""
@@ -2681,9 +2711,15 @@ public class AgentService {
                                 .orElse("No tools currently available")
                 );
 
-        String memorySection = (memoryEnabled && memorySystemPrompt != null && !memorySystemPrompt.isBlank())
-                ? "\n" + memorySystemPrompt + "\n"
-                : "";
+        String operatorMemoryContext = OPERATOR_MEMORY_CONTEXT.get();
+        String memorySection = "";
+        if (memoryEnabled) {
+            if (operatorMemoryContext != null && !operatorMemoryContext.isBlank()) {
+                memorySection = "\n" + operatorMemoryContext + "\n";
+            } else if (memorySystemPrompt != null && !memorySystemPrompt.isBlank()) {
+                memorySection = "\n" + memorySystemPrompt + "\n";
+            }
+        }
 
         return String.format("""
                 You are %s, a helpful AI assistant integrated into an FDC3-enabled financial desktop platform.
