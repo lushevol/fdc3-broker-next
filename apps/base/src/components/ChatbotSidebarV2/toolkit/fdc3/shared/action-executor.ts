@@ -104,7 +104,11 @@ export function createFdc3ActionExecutor(deps: {
     async execute(input, options) {
       const action = await provider.resolveAction(input.actionId);
       if (!action) {
-        throw new Error(`Unknown FDC3 action: ${input.actionId}`);
+        const error = new Error(`Unknown FDC3 action: ${input.actionId}`);
+        if (options?.continuationPayload) {
+          return normalizeErrorPayload('unknown', error);
+        }
+        throw error;
       }
 
       try {
