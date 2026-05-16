@@ -1,0 +1,9 @@
+{
+  "name": "memory-service",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "mvn -Dmaven.repo.local=../../.m2/repository -DskipTests clean package",
+    "test": "mvn -Dmaven.repo.local=../../.m2/repository test",
+    "dev": "mkdir -p data logs && mvn -Dmaven.repo.local=../../.m2/repository spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8084 -Dspring.profiles.active=local'"
+  }
+}

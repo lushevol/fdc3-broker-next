@@ -59,3 +59,6 @@ services/chatbot-backend/.settings/org.eclipse.core.resources.prefs
 services/chatbot-backend/.settings/org.eclipse.jdt.apt.core.prefs
 services/chatbot-backend/.settings/org.eclipse.jdt.core.prefs
 services/chatbot-backend/.settings/org.eclipse.m2e.core.prefs
+.m2/
+services/memory-service/target/
+services/memory-service/data/
