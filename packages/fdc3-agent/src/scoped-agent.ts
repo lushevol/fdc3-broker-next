@@ -5,11 +5,15 @@ import type {
   AppMetadata,
   Channel,
   Context,
-  DesktopAgent,
   ImplementationMetadata,
   IntentResolution,
   Listener,
   PrivateChannel,
+  RatanDesktopAgent,
+  WorkflowDefinition,
+  WorkflowJsonObject,
+  WorkflowOptions,
+  WorkflowResolution,
 } from './types';
 
 /**
@@ -18,7 +22,7 @@ import type {
  * Wraps the stateless Broker and injects the source AppIdentifier into every call.
  * This ensures that the Broker knows which tile is performing the action.
  */
-export class ScopedDesktopAgent implements DesktopAgent {
+export class ScopedDesktopAgent implements RatanDesktopAgent {
   private broker: Broker;
   private source: AppIdentifier;
 
@@ -71,6 +75,22 @@ export class ScopedDesktopAgent implements DesktopAgent {
     target?: AppIdentifier | string,
   ): Promise<IntentResolution> {
     return this.broker.raiseIntentForContext(context, target, this.source);
+  }
+
+  async raiseWorkflow(
+    workflowId: string,
+    input?: WorkflowJsonObject,
+    options?: WorkflowOptions,
+  ): Promise<WorkflowResolution> {
+    return this.broker.raiseWorkflow(workflowId, input, options);
+  }
+
+  async findWorkflow(workflowId: string): Promise<WorkflowDefinition | null> {
+    return this.broker.findWorkflow(workflowId);
+  }
+
+  async findWorkflowsByInput(input?: WorkflowJsonObject): Promise<WorkflowDefinition[]> {
+    return this.broker.findWorkflowsByInput(input);
   }
 
   async addIntentListener(

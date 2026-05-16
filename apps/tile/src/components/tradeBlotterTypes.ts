@@ -5,7 +5,7 @@ export const INVALID_SEARCH_TRADES_CONTEXT_ERROR = 'Invalid SearchTrades context
 export const MAX_RETURNED_TRADES = 10;
 
 export type TradeQueryFilters = {
-  status: string;
+  status?: string;
   book?: string;
   desk?: string;
 };
@@ -17,6 +17,7 @@ export type TradeQueryContext = {
 
 export type TradeRow = {
   tradeId: string;
+  instrument: string;
   book: string;
   desk: string;
   status: string;

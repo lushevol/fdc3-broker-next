@@ -210,7 +210,11 @@ function IntentListenerSection() {
         <div style={styles.status}>No intents received yet</div>
       ) : (
         receivedIntents.map((context, index) => (
-          <div key={context.name} style={styles.receivedContext}>
+          <div
+            data-testid="fdc3-view-chart-received"
+            key={`${context.type}-${index}`}
+            style={styles.receivedContext}
+          >
             Received ViewChart with: {JSON.stringify(context, null, 2)}
           </div>
         ))

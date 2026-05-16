@@ -49,7 +49,7 @@ const styles = {
   },
   row: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(6, minmax(0, 1fr))',
     gap: '8px',
     padding: '12px',
     borderRadius: '8px',
@@ -211,6 +211,7 @@ function TradeBlotterContent({ appId, instanceId }: TradeBlotterContentProps): R
           {rows.map((row) => (
             <div key={row.tradeId} style={styles.row}>
               <span style={styles.tradeId}>{row.tradeId}</span>
+              <span>{row.instrument}</span>
               <span>{row.book}</span>
               <span>{row.desk}</span>
               <span>{row.counterparty}</span>

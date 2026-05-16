@@ -112,6 +112,20 @@
           "id": 60,
           "title": "Trade Blotter",
           "entity": ["X_RATANONE"]
+        },
+        {
+          "container": "@fm/template_container",
+          "imageDarkTheme": "darkIcons/trade.dark.svg",
+          "subject": "template_subject",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "/template_container1",
+          "subtitle": "",
+          "imageLightTheme": "lightIcons/trade.light.svg",
+          "tile": "/template_tile_workflow_launcher",
+          "id": 61,
+          "title": "FDC3 Workflow Launcher",
+          "entity": ["X_RATANONE"]
         }
       ],
       "id": 15,
