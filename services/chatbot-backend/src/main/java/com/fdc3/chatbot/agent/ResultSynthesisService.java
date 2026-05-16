@@ -4,6 +4,7 @@ import com.fdc3.chatbot.agent.model.AgentDecision;
 import com.fdc3.chatbot.agent.model.ExecutionTranscript;
 import com.fdc3.chatbot.agent.prompt.ResultSynthesisPromptFactory;
 import com.fdc3.chatbot.model.ToolResult;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.ai.chat.messages.SystemMessage;
@@ -47,6 +48,7 @@ public class ResultSynthesisService {
         this.promptFactory = Objects.requireNonNull(promptFactory, "promptFactory");
     }
 
+    @WithSpan("agent.synthesize")
     public String synthesize(
             String userMessage,
             AgentDecision decision,

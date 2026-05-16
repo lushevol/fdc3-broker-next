@@ -24,6 +24,9 @@ import com.fdc3.chatbot.model.UserCapabilityContext;
 import com.fdc3.chatbot.tool.ToolDefinition;
 import com.fdc3.chatbot.tool.ToolRegistry;
 import com.fdc3.chatbot.tool.agentutils.ToolExecutionBridge;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -55,6 +58,7 @@ import jakarta.annotation.PreDestroy;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.LinkedHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -236,6 +240,13 @@ public class AgentService {
                     toolExecutionBridge.getCallbackMap().size());
         }
     }
+
+    @Autowired(required = false)
+    public void setActiveRequests(java.util.concurrent.atomic.AtomicInteger activeRequests) {
+        this.activeRequests = activeRequests;
+    }
+
+    private java.util.concurrent.atomic.AtomicInteger activeRequests;
 
     @Autowired(required = false)
     public void setMemoryToolsFactory(MemoryToolsFactory memoryToolsFactory) {
@@ -664,6 +675,19 @@ public class AgentService {
             java.util.function.Consumer<ToolResult> onToolResult,
             boolean allowAgenticControlLoop
     ) {
+        // Programmatic span — @WithSpan won't work on private methods
+        Span span = Span.current();
+        span.setAttribute("conversation.id", conversationId != null ? conversationId : "");
+        span.setAttribute("agent.model", resolveConfiguredModel());
+        span.setAttribute("agent.mode",
+            allowAgenticControlLoop && shouldUseAgenticControlLoop(toolContext, frontendTools)
+                ? "agentic-control-loop"
+                : "direct-streaming");
+        if (activeRequests != null) {
+            activeRequests.incrementAndGet();
+        }
+
+        Context parentContext = Context.current();
         AtomicBoolean cancelled = new AtomicBoolean(false);
         Map<String, ToolDefinition> availableTools = toolRegistry.resolveTools(capabilityContext);
 
@@ -688,7 +712,13 @@ public class AgentService {
                     onToolResult,
                     cancelled
             );
-            return () -> cancelled.set(true);
+            // Wrap cancellation with OTel context for thread-safety
+            Context agenticContext = Context.current();
+            return () -> {
+                try (Scope ignored = agenticContext.makeCurrent()) {
+                    cancelled.set(true);
+                }
+            };
         }
 
         // Mock mode - simulate streaming response
@@ -820,7 +850,16 @@ public class AgentService {
             onError.accept(e);
         }
 
-        return () -> cancelled.set(true);
+        // Wrap cancellation with OTel context for thread-safety
+        Context normalContext = Context.current();
+        return () -> {
+            try (Scope ignored = normalContext.makeCurrent()) {
+                cancelled.set(true);
+            }
+            if (activeRequests != null) {
+                activeRequests.decrementAndGet();
+            }
+        };
     }
 
     public Runnable processMessageStreaming(
@@ -1196,6 +1235,11 @@ public class AgentService {
         }
 
         StringBuilder streamedText = new StringBuilder();
+        Span llmSpan = Span.current();
+        llmSpan.setAttribute("llm.model", resolveConfiguredModel());
+        llmSpan.setAttribute("llm.temperature", resolveConfiguredTemperature());
+        llmSpan.setAttribute("llm.max_tokens", maxTokens != null ? maxTokens : 0);
+        llmSpan.setAttribute("llm.operation", "stream-assistant-reply");
         try {
             streamingChatModel.stream(new Prompt(
                     List.of(
@@ -1332,6 +1376,13 @@ public class AgentService {
         Map<String, String> accumulatedToolCallNames = new LinkedHashMap<>();
         Map<String, String> accumulatedToolCallTypes = new LinkedHashMap<>();
         Map<String, StringBuilder> accumulatedToolCallArgs = new LinkedHashMap<>();
+
+        Span llmSpan = Span.current();
+        llmSpan.setAttribute("llm.model", resolveConfiguredModel());
+        llmSpan.setAttribute("llm.temperature", resolveConfiguredTemperature());
+        llmSpan.setAttribute("llm.max_tokens", maxTokens != null ? maxTokens : 0);
+        llmSpan.setAttribute("llm.operation", "stream-chat");
+        llmSpan.setAttribute("llm.prompt.messages_count", messages.size());
 
         Prompt prompt = buildPrompt(messages, toolCallbacks);
         Disposable ignored = streamingChatModel.stream(prompt).subscribe(
@@ -2591,6 +2642,12 @@ public class AgentService {
             messages.add(new UserMessage(userMessage));
 
             log.debug("Processing message for conversation: {}", conversationId);
+
+            Span llmSpan = Span.current();
+            llmSpan.setAttribute("llm.model", resolveConfiguredModel());
+            llmSpan.setAttribute("llm.temperature", resolveConfiguredTemperature());
+            llmSpan.setAttribute("llm.max_tokens", maxTokens != null ? maxTokens : 0);
+            llmSpan.setAttribute("llm.operation", "blocking-call");
 
             ChatResponse response = chatModel.call(buildPrompt(messages, List.of()));
             return assistantText(response);

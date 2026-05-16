@@ -2,6 +2,8 @@ package com.fdc3.chatbot.mcp;
 
 import com.fdc3.chatbot.tool.ToolDefinition;
 import com.fdc3.chatbot.tool.ToolRegistry;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.opentelemetry.api.trace.Span;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,10 +20,15 @@ public class McpProviderRegistryService {
     private final ToolRegistry toolRegistry;
     private final McpClientFactory clientFactory;
 
+    @WithSpan("mcp.provider.register")
     public RegisteredMcpProvider register(McpProviderRegistrationRequest request) {
+        Span span = Span.current();
+        span.setAttribute("mcp.provider.id", request.getProviderId() != null ? request.getProviderId() : "");
+        span.setAttribute("mcp.tool.count", 0);
         McpClientFactory.McpClientSession session = clientFactory.create(request);
         try {
             List<McpToolDescriptor> tools = session.listTools();
+            span.setAttribute("mcp.tool.count", tools.size());
             RegisteredMcpProvider provider = RegisteredMcpProvider.builder()
                     .providerId(request.getProviderId())
                     .serviceName(request.getServiceName())

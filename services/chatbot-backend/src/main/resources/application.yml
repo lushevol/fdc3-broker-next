@@ -75,4 +75,20 @@ chatbot:
 logging:
   level:
     com.fdc3.chatbot: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      otlp:
+        enabled: true
+        step: 30s
     org.springframework.ai.openai: DEBUG
