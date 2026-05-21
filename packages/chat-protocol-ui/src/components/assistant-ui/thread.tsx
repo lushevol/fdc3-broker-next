@@ -1,17 +1,4 @@
 import {
-  ComposerAddAttachment,
-  ComposerAttachments,
-  UserMessageAttachments,
-} from '@/components/assistant-ui/attachment';
-import { MarkdownText } from '@/components/assistant-ui/markdown-text';
-import { ModelSelector } from '@/components/assistant-ui/model-selector';
-import { useModelList } from '@/hooks/use-model-list';
-import { ToolFallback } from '@/components/assistant-ui/tool-fallback';
-import { TooltipIconButton } from '@/components/assistant-ui/tooltip-icon-button';
-import { Reasoning, ReasoningGroup } from '@/components/assistant-ui/reasoning';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import {
   ActionBarMorePrimitive,
   ActionBarPrimitive,
   AuiIf,
@@ -37,6 +24,20 @@ import {
   SquareIcon,
 } from 'lucide-react';
 import type { FC } from 'react';
+import {
+  ComposerAddAttachment,
+  ComposerAttachments,
+  UserMessageAttachments,
+} from '@/components/assistant-ui/attachment';
+import { MarkdownText } from '@/components/assistant-ui/markdown-text';
+import { McpStatusBar } from '@/components/assistant-ui/mcp-status-bar';
+import { ModelSelector } from '@/components/assistant-ui/model-selector';
+import { Reasoning, ReasoningGroup } from '@/components/assistant-ui/reasoning';
+import { ToolFallback } from '@/components/assistant-ui/tool-fallback';
+import { TooltipIconButton } from '@/components/assistant-ui/tooltip-icon-button';
+import { Button } from '@/components/ui/button';
+import { useModelList } from '@/hooks/use-model-list';
+import { cn } from '@/lib/utils';
 import { useModelApiUrl } from '@/provider';
 
 export const Thread: FC = () => {
@@ -171,12 +172,17 @@ const ComposerAction: FC = () => {
         <ComposerAddAttachment />
         {!loading && models.length > 0 && (
           <ModelSelector
-            models={models.map((m) => ({ id: m.id, name: m.name, description: m.description ?? m.providerName }))}
+            models={models.map((m) => ({
+              id: m.id,
+              name: m.name,
+              description: m.description ?? m.providerName,
+            }))}
             defaultValue={undefined}
             variant="ghost"
             size="sm"
           />
         )}
+        <McpStatusBar />
       </div>
       <AuiIf condition={(s) => !s.thread.isRunning}>
         <ComposerPrimitive.Send asChild>
