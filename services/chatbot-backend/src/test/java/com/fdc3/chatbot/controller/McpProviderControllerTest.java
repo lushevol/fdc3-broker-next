@@ -81,6 +81,57 @@ class McpProviderControllerTest {
     }
 
     @Test
+    void statusReturnsProviderSummary() throws Exception {
+        when(registryService.listProviders()).thenReturn(List.of(
+                com.fdc3.chatbot.mcp.RegisteredMcpProvider.builder()
+                        .providerId("portfolio-service")
+                        .serviceName("Portfolio Service")
+                        .transportType(McpTransportType.STREAMABLE_HTTP)
+                        .url("http://portfolio-service.internal/mcp")
+                        .enabledProfiles(List.of("advisor"))
+                        .toolNames(List.of("portfolio_lookup", "market_data"))
+                        .build(),
+                com.fdc3.chatbot.mcp.RegisteredMcpProvider.builder()
+                        .providerId("research-service")
+                        .serviceName("Research Service")
+                        .transportType(McpTransportType.HTTP_SSE)
+                        .url("http://research-service.internal/mcp")
+                        .enabledProfiles(List.of("analyst"))
+                        .toolNames(List.of("sentiment_analysis"))
+                        .build()
+        ));
+
+        mockMvc.perform(get("/api/chat/mcp/providers/status"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalProviders").value(2))
+                .andExpect(jsonPath("$.totalTools").value(3))
+                .andExpect(jsonPath("$.providers[0].providerId").value("portfolio-service"))
+                .andExpect(jsonPath("$.providers[0].status").value("CONNECTED"))
+                .andExpect(jsonPath("$.providers[0].toolCount").value(2))
+                .andExpect(jsonPath("$.providers[0].toolStatuses[0].name").value("portfolio_lookup"))
+                .andExpect(jsonPath("$.providers[0].toolStatuses[0].status").value("ENABLED"))
+                .andExpect(jsonPath("$.providers[0].toolStatuses[1].name").value("market_data"))
+                .andExpect(jsonPath("$.providers[0].toolStatuses[1].status").value("ENABLED"))
+                .andExpect(jsonPath("$.providers[1].providerId").value("research-service"))
+                .andExpect(jsonPath("$.providers[1].toolCount").value(1))
+                .andExpect(jsonPath("$.providers[1].toolStatuses[0].name").value("sentiment_analysis"))
+                .andExpect(jsonPath("$.providers[1].toolStatuses[0].status").value("ENABLED"));
+
+        verify(registryService).listProviders();
+    }
+
+    @Test
+    void statusReturnsEmptyWhenNoProviders() throws Exception {
+        when(registryService.listProviders()).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/chat/mcp/providers/status"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalProviders").value(0))
+                .andExpect(jsonPath("$.totalTools").value(0))
+                .andExpect(jsonPath("$.providers").isEmpty());
+    }
+
+    @Test
     void unregisterProviderReturnsSuccessPayload() throws Exception {
         mockMvc.perform(delete("/api/chat/mcp/providers/portfolio-service"))
                 .andExpect(status().isOk())
