@@ -81,9 +81,9 @@ export const McpStatusBar: FC = () => {
 		[refetchDebounced],
 	);
 
-	const icon = loading ? (
+	const icon = loading && !status ? (
 		<Loader2Icon className="size-3.5 animate-spin" />
-	) : error ? (
+	) : error && !status ? (
 		<WifiOffIcon className="size-3.5" />
 	) : (
 		<BlocksIcon className="size-3.5" />
