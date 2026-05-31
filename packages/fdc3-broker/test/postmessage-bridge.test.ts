@@ -12,7 +12,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   PostMessageBridge,
   type PostMessageBridgeOptions,
-  type PostMessageEvent,
   type PostMessageRequest,
   type PostMessageResponse,
 } from '../src/postmessage-bridge';
@@ -345,43 +344,213 @@ describe('PostMessageBridge', () => {
     });
   });
 
-  describe('channel placeholders', () => {
-    it('joinUserChannel should be a no-op', async () => {
+  describe('channel operations', () => {
+    it('joinUserChannel should send a channel join request', async () => {
       const bridge = new PostMessageBridge({
         allowedOrigins: ['http://example.com'],
       });
 
-      // Should not throw
-      await bridge.joinUserChannel('red');
+      const promise = bridge.joinUserChannel('red', 'http://example.com');
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'fdc3-pm-request',
+          method: 'joinUserChannel',
+          payload: { channelId: 'red' },
+        }),
+        'http://example.com',
+      );
+
+      const response: PostMessageResponse = {
+        type: 'fdc3-pm-response',
+        correlationId: sentMessage.correlationId,
+        method: 'joinUserChannel',
+        success: true,
+        payload: undefined,
+        meta: {
+          timestamp: new Date().toISOString(),
+          origin: 'http://example.com',
+        },
+      };
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: response,
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).resolves.toBeUndefined();
     });
 
-    it('broadcast should be a no-op', async () => {
+    it('joinUserChannel should send channel object IDs', async () => {
       const bridge = new PostMessageBridge({
         allowedOrigins: ['http://example.com'],
       });
 
-      // Should not throw
-      await bridge.broadcast({ type: 'test' });
+      const channel = {
+        id: 'green',
+        type: 'user',
+        displayMetadata: { name: 'Green Channel', color: '#00FF00' },
+      };
+
+      const promise = bridge.joinUserChannel(channel, 'http://example.com');
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+
+      expect(sentMessage).toEqual(
+        expect.objectContaining({
+          method: 'joinUserChannel',
+          payload: { channelId: 'green' },
+        }),
+      );
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-response',
+            correlationId: sentMessage.correlationId,
+            method: 'joinUserChannel',
+            success: true,
+            payload: undefined,
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).resolves.toBeUndefined();
     });
 
-    it('getCurrentChannel should return null', async () => {
+    it('broadcast should send context and channel ID', async () => {
       const bridge = new PostMessageBridge({
         allowedOrigins: ['http://example.com'],
       });
 
-      const result = await bridge.getCurrentChannel();
+      const context = { type: 'fdc3.instrument', id: { ticker: 'AAPL' } };
+      const promise = bridge.broadcast(context, 'red', 'http://example.com');
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
 
-      expect(result).toBeNull();
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'fdc3-pm-request',
+          method: 'broadcast',
+          payload: {
+            context,
+            channelId: 'red',
+          },
+        }),
+        'http://example.com',
+      );
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-response',
+            correlationId: sentMessage.correlationId,
+            method: 'broadcast',
+            success: true,
+            payload: undefined,
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).resolves.toBeUndefined();
     });
 
-    it('getUserChannels should return empty array', async () => {
+    it('getCurrentChannel should return the remote current channel', async () => {
       const bridge = new PostMessageBridge({
         allowedOrigins: ['http://example.com'],
       });
 
-      const result = await bridge.getUserChannels();
+      const channel = {
+        id: 'red',
+        type: 'user',
+        displayMetadata: { name: 'Red Channel', color: '#FF0000' },
+      };
+      const promise = bridge.getCurrentChannel('http://example.com');
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
 
-      expect(result).toEqual([]);
+      expect(sentMessage).toEqual(
+        expect.objectContaining({
+          method: 'getCurrentChannel',
+          payload: {},
+        }),
+      );
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-response',
+            correlationId: sentMessage.correlationId,
+            method: 'getCurrentChannel',
+            success: true,
+            payload: channel,
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).resolves.toEqual(channel);
+    });
+
+    it('getUserChannels should return remote user channels', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      const channels = [
+        {
+          id: 'red',
+          type: 'user',
+          displayMetadata: { name: 'Red Channel', color: '#FF0000' },
+        },
+        {
+          id: 'green',
+          type: 'user',
+          displayMetadata: { name: 'Green Channel', color: '#00FF00' },
+        },
+      ];
+      const promise = bridge.getUserChannels('http://example.com');
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+
+      expect(sentMessage).toEqual(
+        expect.objectContaining({
+          method: 'getUserChannels',
+          payload: {},
+        }),
+      );
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-response',
+            correlationId: sentMessage.correlationId,
+            method: 'getUserChannels',
+            success: true,
+            payload: channels,
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).resolves.toEqual(channels);
     });
   });
 
@@ -455,7 +624,7 @@ describe('PostMessageBridge', () => {
     });
 
     it('should handle response for unknown correlation ID', () => {
-      const bridge = new PostMessageBridge({
+      new PostMessageBridge({
         allowedOrigins: ['http://example.com'],
       });
 

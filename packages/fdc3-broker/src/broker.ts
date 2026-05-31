@@ -679,6 +679,12 @@ export class Broker implements DesktopAgent {
       if (bridge?.isEnabled()) {
         await bridge.broadcast(context, channel.id);
       }
+
+      // Sync with PostMessage if available
+      const postMessageBridge = await this.getPostMessageBridge();
+      if (postMessageBridge?.isEnabled()) {
+        await postMessageBridge.broadcast(context, channel.id);
+      }
     });
   }
 
@@ -1289,6 +1295,8 @@ export class Broker implements DesktopAgent {
     return this.perf.measure('getUserChannels', async () => {
       // Get internal user channels
       const internalChannels = this.channelManager.getUserChannels();
+      const mergedChannels = [...internalChannels];
+      const mergedChannelIds = new Set(internalChannels.map((channel) => channel.id));
 
       // Merge with OpenFin channels if available
       const bridge = await this.getOpenFinBridge();
@@ -1296,19 +1304,28 @@ export class Broker implements DesktopAgent {
         const openFinChannels = await bridge.getUserChannels();
 
         // Merge OpenFin channels that don't exist internally
-        const mergedChannels = [...internalChannels];
-        const internalChannelIds = new Set(internalChannels.map((c) => c.id));
-
         for (const openFinChannel of openFinChannels) {
-          if (!internalChannelIds.has(openFinChannel.id)) {
+          if (!mergedChannelIds.has(openFinChannel.id)) {
             mergedChannels.push(openFinChannel);
+            mergedChannelIds.add(openFinChannel.id);
           }
         }
-
-        return mergedChannels;
       }
 
-      return internalChannels;
+      // Merge with PostMessage channels if available
+      const postMessageBridge = await this.getPostMessageBridge();
+      if (postMessageBridge?.isEnabled()) {
+        const postMessageChannels = await postMessageBridge.getUserChannels();
+
+        for (const postMessageChannel of postMessageChannels) {
+          if (!mergedChannelIds.has(postMessageChannel.id)) {
+            mergedChannels.push(postMessageChannel);
+            mergedChannelIds.add(postMessageChannel.id);
+          }
+        }
+      }
+
+      return mergedChannels;
     });
   }
 
@@ -1389,6 +1406,12 @@ export class Broker implements DesktopAgent {
       const bridge = await this.getOpenFinBridge();
       if (bridge?.isEnabled()) {
         await bridge.joinUserChannel(channel);
+      }
+
+      // Sync with PostMessage if available
+      const postMessageBridge = await this.getPostMessageBridge();
+      if (postMessageBridge?.isEnabled()) {
+        await postMessageBridge.joinUserChannel(channel);
       }
     });
   }

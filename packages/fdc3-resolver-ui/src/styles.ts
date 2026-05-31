@@ -140,7 +140,7 @@ export const Card = {
     border: `1px solid ${Colors.border}`,
     borderRadius: '8px',
     cursor: 'pointer',
-    transition: 'border-color 0.2s, box-shadow 0.2s',
+    transition: 'all 0.2s',
   },
   selected: {
     borderColor: Colors.primary,
