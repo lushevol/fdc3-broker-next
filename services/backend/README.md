@@ -1,9 +1,9 @@
-# Single-UI-Bff
+# Single UI BFF
 
-## Description
+Spring Boot backend-for-frontend service for the MFE platform.
 
-## Global Design
+- Current service docs: [docs/PROJECT.md](docs/PROJECT.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/RULES.md](docs/RULES.md)
+- Local run: `npm run dev`
+- Port: `8088`
 
-## Event Design
-
-## Table Design
+The local profile uses H2 in PostgreSQL mode with mocked external dependencies.

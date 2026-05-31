@@ -1,242 +1,110 @@
 # Chatbot Backend Service
 
-A Spring Boot-based AI chatbot backend service that provides conversational AI capabilities via Spring AI chat model integrations.
+Spring Boot AI chatbot backend for the MFE platform. The service exposes the canonical chat protocol over SSE, integrates with Spring AI model providers, executes local and MCP tools, supports frontend/human tool continuations, and reads operator memory from `memory-service`.
+
+- Current service docs: [docs/PROJECT.md](docs/PROJECT.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/RULES.md](docs/RULES.md)
+- API contract: [docs/API.md](docs/API.md)
+- Tool workflow: [docs/TOOL_WORKFLOW.md](docs/TOOL_WORKFLOW.md)
+- MFE integration: [docs/MFE_INTEGRATION.md](docs/MFE_INTEGRATION.md)
+- Observability: [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md)
 
 ## Features
 
-- **Streaming Responses**: Real-time SSE (Server-Sent Events) streaming for chat responses
-- **Multi-Provider Support**: OpenAI-compatible and Anthropic provider support via Spring AI
-- **Tool System**: Extensible tool execution framework for AI-assisted workflows
-- **Rate Limiting**: Built-in rate limiting to prevent API abuse
-- **Conversation Management**: In-memory conversation storage with history
-- **Generative UI**: Support for dynamic UI components rendered by AI
+- **Canonical chat protocol** via `POST /api/chat/runs` and SSE frames.
+- **Compatibility stream endpoint** via `POST /api/chat/stream`.
+- **Spring AI model integration** for OpenAI-compatible and Anthropic providers.
+- **Model list endpoint** for OpenAI-compatible `/models`.
+- **Agentic control loop** for respond/clarify/plan decisions, policy validation, tool execution, and synthesis.
+- **Tool registry** for local Java tools, agent-utils callbacks, frontend tools, human approval tools, and MCP tools.
+- **MCP provider registry** for Elasticsearch analytics and RAG knowledge-base services.
+- **Memory context** from `memory-service` plus per-user AutoMemoryTools file memory compatibility.
+- **Rate limiting and security profile gating**.
+- **OpenTelemetry/Micrometer observability** and rolling file logs.
 
 ## Prerequisites
 
-- Java 17 or higher
-- Maven 3.8+
-- OpenAI API Key (or Anthropic API Key)
+- Java 21
+- Maven 3.9+
+- OpenAI-compatible or Anthropic API key for real model calls
 
 ## Configuration
 
-### Environment Variables
+See `.env.example` and root `.env.profile.*` files.
 
-The service uses the following environment variables for configuration:
+| Variable                               | Purpose                                        |
+| -------------------------------------- | ---------------------------------------------- |
+| `CHATBOT_OPENAI_API_KEY`               | OpenAI-compatible API key                      |
+| `CHATBOT_OPENAI_BASE_URL`              | OpenAI-compatible base URL                     |
+| `CHATBOT_OPENAI_MODEL`                 | Default model                                  |
+| `CHATBOT_OPENAI_TEMPERATURE`           | Default model temperature                      |
+| `CHATBOT_ANTHROPIC_API_KEY`            | Anthropic API key                              |
+| `CHATBOT_ANTHROPIC_MODEL`              | Anthropic model                                |
+| `CHATBOT_SECURITY_ENABLED`             | Enables bearer-token enforcement when true     |
+| `CHATBOT_SECURITY_ADDITIONAL_PROFILES` | Extra profiles such as `advisor` for MCP tools |
+| `CHATBOT_MCP_ELASTICSEARCH_ENABLED`    | Bootstrap Elasticsearch MCP provider           |
+| `CHATBOT_MCP_ELASTICSEARCH_URL`        | Elasticsearch MCP URL                          |
+| `CHATBOT_MCP_RAG_ENABLED`              | Bootstrap RAG MCP provider                     |
+| `CHATBOT_MCP_RAG_URL`                  | RAG MCP URL                                    |
+| `CHATBOT_MEMORY_BASE_URL`              | Memory service URL                             |
+| `CHATBOT_MEMORY_TENANT_ID`             | Memory tenant sent to memory-service           |
+| `CHATBOT_MEMORY_REQUEST_TIMEOUT`       | Best-effort memory lookup timeout              |
+| `CHATBOT_MEMORY_CONTEXT_LIMIT`         | Maximum memories injected into prompt          |
+| `CHATBOT_BRAVE_SEARCH_API_KEY`         | Brave search key for agent-utils web search    |
+| `LOG_FILE`                             | Rolling log file path                          |
 
-| Variable                     | Required | Default                    | Description                         |
-| ---------------------------- | -------- | -------------------------- | ----------------------------------- |
-| `CHATBOT_OPENAI_API_KEY`     | Yes\*    | -                          | Your OpenAI API key                 |
-| `CHATBOT_OPENAI_BASE_URL`    | No       | `https://api.openai.com`   | OpenAI API base URL                 |
-| `CHATBOT_OPENAI_MODEL`       | No       | `gpt-4`                    | OpenAI model to use                 |
-| `CHATBOT_OPENAI_TEMPERATURE` | No       | `0.7`                      | Temperature for response generation |
-| `CHATBOT_ANTHROPIC_API_KEY`  | No       | -                          | Anthropic API key (optional)        |
-| `CHATBOT_ANTHROPIC_MODEL`    | No       | `claude-3-sonnet-20240229` | Anthropic model to use              |
-
-\* Required when `chatbot.mock.enabled=false`
-
-### Mock Mode
-
-For development and testing without API keys, you can enable mock mode:
-
-```yaml
-chatbot:
-  mock:
-    enabled: true
-```
-
-In mock mode, the service simulates AI responses without calling external APIs.
-
-## Running the Service
-
-### Local Development
-
-1. **Set environment variables:**
-
-   ```bash
-   export CHATBOT_OPENAI_API_KEY="your-api-key-here"
-   export CHATBOT_OPENAI_BASE_URL="https://api.openai.com"
-   ```
-
-2. **Build and run with Maven:**
-
-   ```bash
-   cd services/chatbot-backend
-   mvn spring-boot:run
-   ```
-
-3. **Or build the JAR and run:**
-   ```bash
-   cd services/chatbot-backend
-   mvn clean package
-   java -jar target/chatbot-backend.jar
-   ```
-
-### Build a CentOS Deploy Bundle
-
-To compile the service on macOS, upload it manually to a CentOS server, and run it there:
-
-1. **Build the deploy archive locally:**
-
-   ```bash
-   cd services/chatbot-backend
-   npm run bundle:centos
-   ```
-
-2. **Upload the archive to the target CentOS server:**
-
-   ```bash
-   scp dist/chatbot-backend-centos.tar.gz your-user@your-server:/path/to/deploy/
-   ```
-
-3. **Extract it on the server:**
-
-   ```bash
-   cd /path/to/deploy
-   tar -xzf chatbot-backend-centos.tar.gz
-   cd chatbot-backend-centos
-   ```
-
-4. **Create the runtime environment file:**
-
-   ```bash
-   cp .env.example .env
-   ```
-
-5. **Start the service:**
-
-   ```bash
-   chmod +x run.sh
-   ./run.sh
-   ```
-
-`run.sh` stops early with explicit errors if Java 17+, `.env`, or `chatbot-backend.jar` is missing.
-
-### Using Environment File
-
-Create a `.env` file in the project root:
+## Running Locally
 
 ```bash
-CHATBOT_OPENAI_API_KEY=your-api-key-here
-CHATBOT_OPENAI_BASE_URL=https://api.openai.com
-CHATBOT_OPENAI_MODEL=gpt-4
-CHATBOT_OPENAI_TEMPERATURE=0.7
+cd services/chatbot-backend
+npm run dev
 ```
 
-Then source it before running:
+The dev script creates `logs/`, loads `.env.profile.${ACTIVE_ENV:-dev}`, and starts Maven on port 8080 with the `local` Spring profile and the OpenTelemetry Java agent.
+
+Profile examples:
 
 ```bash
-source .env
-./mvnw spring-boot:run
+ACTIVE_ENV=stub npm run dev
+ACTIVE_ENV=copilot npm run dev
 ```
 
-### Docker (Future)
+Root service stacks:
 
-```dockerfile
-# Dockerfile to be added
-FROM eclipse-temurin:17-jdk-alpine
-COPY target/chatbot-backend.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+```bash
+npm run dev:services
+npm run dev:services:stub
+npm run dev:rag:stub
+npm run dev:rag:copilot
 ```
 
 ## API Endpoints
 
-The service exposes the following REST endpoints:
+- `POST /api/chat/runs` - canonical SSE chat protocol.
+- `POST /api/chat/stream` - compatibility JSON-body stream endpoint converted into protocol requests.
+- `GET /api/chat/health` - service health.
+- `GET /api/chat/models` - model list from the configured OpenAI-compatible provider.
+- `POST /api/chat/mcp/providers` - register an MCP provider.
+- `GET /api/chat/mcp/providers` - list MCP providers.
+- `GET /api/chat/mcp/providers/status` - provider/tool status summary.
+- `DELETE /api/chat/mcp/providers/{providerId}` - unregister an MCP provider.
+- `POST /api/chat/question/answer` - answer a pending user-question batch.
+- `POST /api/chat/question/{batchId}/answer` - answer a pending batch by path id.
+- `POST /api/chat/{conversationId}/question/{questionId}/answer` - legacy question answer endpoint.
 
-### Health Check
-
-- **GET** `/api/chat/health` - Service health check
-
-### Chat Endpoints
-
-- **POST** `/api/chat` - Send a message and get a complete response
-- **GET** `/api/chat/stream` - Send a message and receive streaming SSE response
-- **GET** `/api/chat/{conversationId}/history` - Get conversation history
-- **DELETE** `/api/chat/{conversationId}` - Clear a conversation
-
-### Tool Management
-
-- **POST** `/api/chat/{conversationId}/tools/{toolCallId}/confirm` - Confirm/cancel tool execution
-
-For full API documentation, see [API.md](docs/API.md).
-
-## Architecture
-
-### Key Components
-
-- **ChatController**: REST API endpoints and canonical SSE event emission
-- **ChatService**: Conversation management, assistant turn persistence, and stream orchestration
-- **AgentService**: AI model integration and tool lifecycle coordination
-- **ToolRegistry**: Tool definitions and execution
-
-### Technologies
-
-- **Spring Boot 3.5.14**: Web framework
-- **Spring AI 1.1.6**: AI model abstraction
-- **Project Reactor**: Reactive programming for streaming
-- **Bucket4j**: Rate limiting
-- **Lombok**: Boilerplate reduction
-
-## Development
-
-### Adding Custom Tools
-
-Tools can be added to extend the AI's capabilities:
-
-```java
-@Component
-public class MyCustomTool {
-    @Tool(name = "my_tool", description = "Does something useful")
-    public String execute(String input) {
-        return "Result: " + input;
-    }
-}
-```
-
-See [TOOL_CREATION_GUIDE.md](docs/TOOL_CREATION_GUIDE.md) for details.
-
-### Testing
+## Build and Test
 
 ```bash
-./mvnw test
+cd services/chatbot-backend
+npm run build
+mvn test
+npm run verify:protocol:real
 ```
 
-## Integration with Frontend
+## CentOS Bundle
 
-The chatbot backend integrates with the `@fm/base` MFE's assistant-ui modal surface. The frontend mounts `AssistantUIRuntimeProvider` once near the app root and renders `ChatbotSidebar` as the floating assistant modal trigger.
-
-Configure the frontend to connect to this service:
-
-```tsx
-<AssistantUIRuntimeProvider apiUrl="http://localhost:8080/api/chat">
-  <AppShell />
-  <ChatbotSidebar />
-</AssistantUIRuntimeProvider>
+```bash
+cd services/chatbot-backend
+npm run bundle:centos
 ```
 
-See [MFE_INTEGRATION.md](docs/MFE_INTEGRATION.md) for full integration details.
-See [API.md](docs/API.md) for the canonical SSE event contract (`conversation_id`, `message`, `tool_call`, `tool_result`, `generative_ui`, `error`, `done`).
-
-## Troubleshooting
-
-### Service won't start
-
-- Verify Java 17+ is installed: `java -version`
-- Check that the required environment variables are set
-- Review application logs for configuration errors
-
-### API calls failing
-
-- Verify the OpenAI API key is valid
-- Check network connectivity to OpenAI's API
-- Review rate limiting status
-
-### No AI responses
-
-- Check if mock mode is enabled when it shouldn't be
-- Verify the model name is valid
-- Check Spring AI and provider logs for API errors
-
-## License
-
-Proprietary - FDC3 Project
+The generated archive contains the service JAR, `.env.example`, and a run script. The run script fails fast if Java 21+, `.env`, or the JAR is missing.

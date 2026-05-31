@@ -4,35 +4,26 @@ Spring Boot authentication server (port 8082). See [root AGENTS.md](../../AGENTS
 
 ## Purpose
 
-Authentication and authorization service supporting LDAP/OUD, JWT, FMAA OAuth2, and Kong Gateway auth. Manages sessions via Redis.
+Authentication and authorization service supporting OUD/LDAP login, Redis-backed sessions, EMS2 entitlement lookups, FMAA OAuth2 token flows, and Kong Gateway authentication.
 
 ## Key Details
 
-- **Framework:** Spring Boot 3.3.7 (Java 17)
+- **Framework:** Spring Boot 4.0.6 (Java 21)
 - **Port:** 8082
 - **Build tool:** Maven (`pom.xml`)
-- **No package.json** – not part of the npm workspace; managed separately
+- **Artifact:** `ratanone-auth-server`
+- **Docs:** [docs/PROJECT.md](docs/PROJECT.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/RULES.md](docs/RULES.md)
 
-## Architecture
+## Commands
 
-See `ARCHITECTURE.md` in this directory for full details.
-
-**Auth methods supported:**
-
-1. OUD/LDAP (username/password)
-2. JWT (`Single-UI-Authorization` header)
-3. FMAA OAuth2 (`FMAA-Token` header)
-4. Kong Gateway (`X-Token` / `/v3/kong/token`)
-5. Session Token (Redis lookup)
-
-**External dependencies:** Redis cluster, LDAP/OUD, EMS2 (entitlements), FMAA, Kong Gateway, HashiCorp Vault
+```bash
+cd services/auth-server
+mvn test
+mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8082'
+```
 
 ## Important
 
-- This service requires many external services (Redis, LDAP, etc.) that are not available in local dev
-- No npm scripts – run directly with Maven:
-  ```bash
-  cd services/auth-server
-  mvn spring-boot:run -Dserver.port=8082
-  ```
-- Local dev may require mock configurations or VPN access to corporate services
+- Requires corporate Redis, OUD, EMS2, FMAA, Kong, and Vault-style secrets for realistic runs.
+- Do not commit real service credentials or captured token values.
+- Local development may require VPN access or explicit mock configuration.

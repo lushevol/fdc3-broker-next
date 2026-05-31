@@ -1,35 +1,35 @@
 # RAG Knowledge Base Service
 
-Standalone MCP server that exposes read-only knowledge retrieval to chatbot-backend.
+Standalone MCP server that exposes read-only knowledge retrieval to `chatbot-backend`.
 
-## Documentation
-
-- [Architecture](docs/ARCHITECTURE.md)
-- [Document management manual](docs/DOCUMENT_MANAGEMENT.md)
+- Current service docs: [docs/PROJECT.md](docs/PROJECT.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/RULES.md](docs/RULES.md)
+- Document operations: [docs/DOCUMENT_MANAGEMENT.md](docs/DOCUMENT_MANAGEMENT.md)
+- MCP endpoint: `http://localhost:8091/api/mcp`
 
 ## Local Run
 
 ```bash
 cd services/rag-knowledge-base-service
-npm run dev:stub
+ACTIVE_ENV=stub npm run dev
 ```
 
 For OpenRouter embeddings:
 
 ```bash
 export OPENROUTER_API_KEY=...
-npm run dev
+ACTIVE_ENV=dev npm run dev
 ```
 
-MCP endpoint:
+For the root stack:
 
-```text
-http://localhost:8091/api/mcp
+```bash
+npm run dev:rag:stub
+npm run dev:rag:copilot
 ```
 
 ## Chatbot Integration
 
-Set:
+Set these variables for `chatbot-backend`:
 
 ```bash
 CHATBOT_MCP_RAG_ENABLED=true
@@ -37,40 +37,38 @@ CHATBOT_MCP_RAG_URL=http://localhost:8091/api/mcp
 CHATBOT_SECURITY_ADDITIONAL_PROFILES=advisor
 ```
 
+The `dev` profile in `.env.profile.dev` enables RAG registration for the full stack.
+
 ## Manual Verification
 
 Start RAG with deterministic embeddings:
 
 ```bash
 cd services/rag-knowledge-base-service
-npm run dev:stub
+ACTIVE_ENV=stub npm run dev
 ```
 
-Start chatbot with the RAG MCP provider:
+Start chatbot with the matching profile:
 
 ```bash
 cd services/chatbot-backend
-npm run dev:with-rag-mcp
+ACTIVE_ENV=stub npm run dev
 ```
 
 Verify provider registration:
 
 ```bash
 curl http://localhost:8080/api/chat/mcp/providers
+curl http://localhost:8080/api/chat/mcp/providers/status
 ```
 
-Expected provider:
+Expected provider id: `rag-knowledge-base`.
 
-```json
-{
-  "providerId": "rag-knowledge-base",
-  "toolNames": ["search_knowledge_base"]
-}
-```
+## Document Operations
 
-## Quick Document Operations
+The default knowledge source is Markdown files under `src/main/resources/knowledge/`. Restart the service after adding, editing, or deleting source documents so startup indexing rebuilds the repository.
 
-The POC knowledge base is file-backed. Add, delete, or modify Markdown files under `src/main/resources/knowledge/`, then restart the service or call the future reindex endpoint when it exists. Each file should include front matter:
+Each file should include front matter:
 
 ```markdown
 ---
@@ -79,4 +77,4 @@ namespace: advisor
 ---
 ```
 
-See [Document management manual](docs/DOCUMENT_MANAGEMENT.md) for exact steps and validation commands.
+See [docs/DOCUMENT_MANAGEMENT.md](docs/DOCUMENT_MANAGEMENT.md) for validation steps.
