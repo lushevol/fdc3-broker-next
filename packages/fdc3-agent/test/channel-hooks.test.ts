@@ -8,12 +8,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '@testing-library/jest-dom';
 import { clearBroker, setBroker, getAgentApi } from '../src/agent';
 import { useContextListener, useCurrentChannel, useUserChannels } from '../src/hooks';
-import type { Channel, Context, DesktopAgent } from '../src/types';
+import type { Channel, Context, DesktopAgent, Listener } from '../src/types';
+
+type ContextListenerRecord = {
+  contextType: string | null | ((context: Context) => void);
+  handler?: (context: Context) => void;
+  listener: Listener;
+};
 
 // Mock DesktopAgent
 const createMockBroker = () => {
   let currentChannel: Channel | null = null;
-  const contextListeners = new Map<string, any>();
+  const contextListeners = new Map<string, ContextListenerRecord>();
 
   const mockBroker: DesktopAgent = {
     open: vi.fn().mockResolvedValue({ appId: 'test-app' }),
@@ -55,7 +61,7 @@ const createMockBroker = () => {
           type: 'app',
           broadcast: vi.fn(),
           getCurrentContext: vi.fn().mockResolvedValue(null),
-          addContextListener: vi.fn().mockImplementation(async (contextType, handler) => {
+          addContextListener: vi.fn().mockImplementation(async (_contextType, _handler) => {
             const listenerId = `listener-${Date.now()}`;
             return {
               id: listenerId,
@@ -158,7 +164,7 @@ describe('Channel Hooks', () => {
     it('should call handler when context is received', async () => {
       const handler = vi.fn();
 
-      const { result } = renderHook(() => useContextListener('fdc3.chart', handler));
+      renderHook(() => useContextListener('fdc3.chart', handler));
 
       await waitFor(() => {
         const broker = getAgentApi();
@@ -172,17 +178,12 @@ describe('Channel Hooks', () => {
       };
 
       await act(async () => {
-        // Get the registered listener and call it
-        const addContextListenerCalls = vi.mocked(
-          (getAgentApi() as DesktopAgent).addContextListener,
-        ).mock.calls as any;
-
-        if (addContextListenerCalls.length > 0) {
-          const registeredHandler = addContextListenerCalls[0][1];
-          // In real scenario, handler would be called by channel broadcast
-          // For this test, we verify the registration happened
-        }
+        const registeredHandler = vi.mocked((getAgentApi() as DesktopAgent).addContextListener).mock
+          .calls[0][1] as (context: Context) => void;
+        registeredHandler(context);
       });
+
+      expect(handler).toHaveBeenCalledWith(context);
     });
 
     it('should filter by context type', async () => {

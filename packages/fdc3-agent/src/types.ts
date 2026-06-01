@@ -27,11 +27,14 @@ export type {
   DesktopAgent,
   // Channel types
   DisplayMetadata,
+  EventHandler,
   // Event types
   FDC3Event,
+  FDC3EventTypes,
   // Implementation metadata
   ImplementationMetadata,
   Intent,
+  IntentHandler,
   IntentResolution,
   Listener,
   PrivateChannel,

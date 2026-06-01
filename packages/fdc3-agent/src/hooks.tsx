@@ -36,7 +36,14 @@ import type { Broker } from 'ratan-fdc3-broker';
 import React, { useContext, useEffect, useState } from 'react';
 import { getAgentApi } from './agent';
 import { ScopedDesktopAgent } from './scoped-agent';
-import type { AppIdentifier, Channel, Context, Listener, RatanDesktopAgent } from './types';
+import type {
+  AppIdentifier,
+  Channel,
+  Context,
+  IntentHandler,
+  Listener,
+  RatanDesktopAgent,
+} from './types';
 
 /**
  * Internal React context that holds the FDC3 DesktopAgent instance.
@@ -130,11 +137,13 @@ export const AgentProvider: React.FC<{
       try {
         const brokerInstance = getAgentApi();
         if (mounted) {
-          if (appIdentifier) {
-            // If app identifier is provided, create a scoped agent
-            // This ensures that all FDC3 calls from this provider are attributed to this app
-            setAgent(new ScopedDesktopAgent(brokerInstance as unknown as Broker, appIdentifier));
-          }
+          // If app identifier is provided, create a scoped agent so FDC3 calls
+          // from this provider are attributed to the tile.
+          setAgent(
+            appIdentifier
+              ? new ScopedDesktopAgent(brokerInstance as unknown as Broker, appIdentifier)
+              : brokerInstance,
+          );
           setError(null);
         }
       } catch (err) {
@@ -154,7 +163,7 @@ export const AgentProvider: React.FC<{
     };
   }, [appIdentifier]);
 
-  const value = React.useMemo(() => ({ agent, appIdentifier }), [agent, appIdentifier]);
+  const value = React.useMemo(() => ({ agent, app: appIdentifier }), [agent, appIdentifier]);
 
   // Show error if broker is not available after multiple retries
   if (error && !agent) {
@@ -369,10 +378,7 @@ export function useAppIdentifier(): AppIdentifier | undefined {
  * @see {@link useFDC3} For direct access to addIntentListener method
  * @see [FDC3 Intents Specification](https://fdc3.finos.org/docs/api/next/DesktopAgent/#addintentlistener)
  */
-export function useIntentListener(
-  intent: string,
-  handler: (context: Context) => any | Promise<any>,
-): void {
+export function useIntentListener(intent: string, handler: IntentHandler): void {
   const fdc3 = useFDC3();
 
   useEffect(() => {

@@ -228,6 +228,46 @@ describe('PostMessageBridge', () => {
       vi.useRealTimers();
     });
 
+    it('should also broadcast wildcard requests to an opener window when present', async () => {
+      vi.useFakeTimers();
+      const openerPostMessage = vi.fn();
+      window.opener = { postMessage: openerPostMessage };
+
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['*'],
+      });
+
+      const promise = bridge.raiseIntentExternal('ViewChart', { type: 'fdc3.instrument' });
+
+      expect(openerPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'fdc3-pm-request',
+          method: 'raiseIntent',
+        }),
+        '*',
+      );
+
+      vi.advanceTimersByTime(5001);
+      await expect(promise).rejects.toThrow('Request timed out');
+      vi.useRealTimers();
+    });
+
+    it('should reject when target origin is not allowlisted', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      await expect(
+        bridge.raiseIntentExternal(
+          'ViewChart',
+          { type: 'fdc3.instrument' },
+          undefined,
+          'http://evil.com',
+        ),
+      ).rejects.toThrow('Origin not allowed: http://evil.com');
+      expect(mockPostMessage).not.toHaveBeenCalled();
+    });
+
     it('should resolve on success response', async () => {
       vi.useFakeTimers();
 
@@ -275,6 +315,39 @@ describe('PostMessageBridge', () => {
 
       vi.useRealTimers();
     });
+
+    it('should reject on failed remote responses', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      const promise = bridge.raiseIntentExternal(
+        'ViewChart',
+        { type: 'test' },
+        undefined,
+        'http://example.com',
+      );
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-response',
+            correlationId: sentMessage.correlationId,
+            method: 'raiseIntent',
+            success: false,
+            error: 'remote intent failed',
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).rejects.toThrow('remote intent failed');
+    });
   });
 
   describe('open', () => {
@@ -315,6 +388,41 @@ describe('PostMessageBridge', () => {
 
       vi.useRealTimers();
     });
+
+    it('should resolve open requests with the returned app identifier', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      const promise = bridge.open(
+        { appId: 'my-app', instanceId: 'requested-instance' },
+        { type: 'fdc3.instrument' },
+        'http://example.com',
+      );
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-response',
+            correlationId: sentMessage.correlationId,
+            method: 'open',
+            success: true,
+            payload: { appId: 'my-app', instanceId: 'opened-instance' },
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).resolves.toEqual({
+        appId: 'my-app',
+        instanceId: 'opened-instance',
+      });
+    });
   });
 
   describe('findIntent', () => {
@@ -326,6 +434,80 @@ describe('PostMessageBridge', () => {
       const result = await bridge.findIntent('ViewChart');
 
       expect(result).toEqual({
+        intent: { name: 'ViewChart', displayName: 'ViewChart' },
+        apps: [],
+      });
+    });
+
+    it('should send findIntent requests and return successful remote results', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      const promise = bridge.findIntent(
+        'ViewChart',
+        { type: 'fdc3.instrument' },
+        'http://example.com',
+      );
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+      const response = {
+        intent: { name: 'ViewChart', displayName: 'View Chart' },
+        apps: [{ appId: 'chart-app', name: 'Chart App' }],
+      };
+
+      expect(sentMessage).toEqual(
+        expect.objectContaining({
+          method: 'findIntent',
+          payload: { intent: 'ViewChart', context: { type: 'fdc3.instrument' } },
+        }),
+      );
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-response',
+            correlationId: sentMessage.correlationId,
+            method: 'findIntent',
+            success: true,
+            payload: response,
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).resolves.toEqual(response);
+    });
+
+    it('should return an empty result when remote findIntent fails', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      const promise = bridge.findIntent('ViewChart', undefined, 'http://example.com');
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-response',
+            correlationId: sentMessage.correlationId,
+            method: 'findIntent',
+            success: false,
+            error: 'directory unavailable',
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).resolves.toEqual({
         intent: { name: 'ViewChart', displayName: 'ViewChart' },
         apps: [],
       });
@@ -342,9 +524,87 @@ describe('PostMessageBridge', () => {
 
       expect(result).toEqual([]);
     });
+
+    it('should send findIntentsByContext requests and return successful remote results', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      const context = { type: 'fdc3.instrument' };
+      const promise = bridge.findIntentsByContext(context, 'http://example.com');
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+      const response = [{ intent: { name: 'ViewChart', displayName: 'View Chart' }, apps: [] }];
+
+      expect(sentMessage).toEqual(
+        expect.objectContaining({
+          method: 'findIntentsByContext',
+          payload: { context },
+        }),
+      );
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-response',
+            correlationId: sentMessage.correlationId,
+            method: 'findIntentsByContext',
+            success: true,
+            payload: response,
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).resolves.toEqual(response);
+    });
+
+    it('should return an empty list when remote findIntentsByContext fails', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      const promise = bridge.findIntentsByContext(
+        { type: 'fdc3.instrument' },
+        'http://example.com',
+      );
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-response',
+            correlationId: sentMessage.correlationId,
+            method: 'findIntentsByContext',
+            success: false,
+            error: 'directory unavailable',
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).resolves.toEqual([]);
+    });
   });
 
   describe('channel operations', () => {
+    it('joinUserChannel should reject when the bridge is disabled', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: [],
+      });
+
+      await expect(bridge.joinUserChannel('red')).rejects.toThrow(
+        'PostMessage bridge is not enabled',
+      );
+    });
+
     it('joinUserChannel should send a channel join request', async () => {
       const bridge = new PostMessageBridge({
         allowedOrigins: ['http://example.com'],
@@ -423,6 +683,52 @@ describe('PostMessageBridge', () => {
       );
 
       await expect(promise).resolves.toBeUndefined();
+    });
+
+    it('joinUserChannel should use the first allowlisted origin by default', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      const promise = bridge.joinUserChannel('blue');
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'joinUserChannel',
+          payload: { channelId: 'blue' },
+        }),
+        'http://example.com',
+      );
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-response',
+            correlationId: sentMessage.correlationId,
+            method: 'joinUserChannel',
+            success: true,
+            payload: undefined,
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).resolves.toBeUndefined();
+    });
+
+    it('broadcast should reject when the bridge is disabled', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: [],
+      });
+
+      await expect(bridge.broadcast({ type: 'fdc3.instrument' })).rejects.toThrow(
+        'PostMessage bridge is not enabled',
+      );
     });
 
     it('broadcast should send context and channel ID', async () => {
@@ -506,6 +812,42 @@ describe('PostMessageBridge', () => {
       await expect(promise).resolves.toEqual(channel);
     });
 
+    it('getCurrentChannel should return null when the remote request fails', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      const promise = bridge.getCurrentChannel('http://example.com');
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-response',
+            correlationId: sentMessage.correlationId,
+            method: 'getCurrentChannel',
+            success: false,
+            error: 'no current channel',
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).resolves.toBeNull();
+    });
+
+    it('getCurrentChannel should return null when disabled', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: [],
+      });
+
+      await expect(bridge.getCurrentChannel()).resolves.toBeNull();
+    });
+
     it('getUserChannels should return remote user channels', async () => {
       const bridge = new PostMessageBridge({
         allowedOrigins: ['http://example.com'],
@@ -551,6 +893,42 @@ describe('PostMessageBridge', () => {
       );
 
       await expect(promise).resolves.toEqual(channels);
+    });
+
+    it('getUserChannels should return an empty list when the remote request fails', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      const promise = bridge.getUserChannels('http://example.com');
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-response',
+            correlationId: sentMessage.correlationId,
+            method: 'getUserChannels',
+            success: false,
+            error: 'channels unavailable',
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
+
+      await expect(promise).resolves.toEqual([]);
+    });
+
+    it('getUserChannels should return an empty list when disabled', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: [],
+      });
+
+      await expect(bridge.getUserChannels()).resolves.toEqual([]);
     });
   });
 
@@ -619,6 +997,51 @@ describe('PostMessageBridge', () => {
       });
 
       messageHandler?.(event);
+
+      expect(mockHandler).not.toHaveBeenCalled();
+    });
+
+    it('should ignore non-object message data', () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      const mockHandler = vi.fn();
+      bridge.subscribeToIntents(mockHandler, ['ViewChart']);
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: null,
+          origin: 'http://example.com',
+        }),
+      );
+
+      expect(mockHandler).not.toHaveBeenCalled();
+    });
+
+    it('should ignore incoming request envelopes', () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      const mockHandler = vi.fn();
+      bridge.subscribeToIntents(mockHandler, ['ViewChart']);
+
+      messageHandler?.(
+        new MessageEvent('message', {
+          data: {
+            type: 'fdc3-pm-request',
+            correlationId: 'incoming-request',
+            method: 'raiseIntent',
+            payload: { intent: 'ViewChart', context: { type: 'fdc3.instrument' } },
+            meta: {
+              timestamp: new Date().toISOString(),
+              origin: 'http://example.com',
+            },
+          },
+          origin: 'http://example.com',
+        }),
+      );
 
       expect(mockHandler).not.toHaveBeenCalled();
     });

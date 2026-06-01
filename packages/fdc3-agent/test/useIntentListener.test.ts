@@ -40,7 +40,7 @@ const createMockBroker = () => {
     }),
     addIntentListener: vi
       .fn()
-      .mockImplementation((intent: string, handler: (context: Context) => any) => {
+      .mockImplementation((intent: string, _handler: (context: Context) => unknown) => {
         const listener: Listener = {
           unsubscribe: vi.fn(),
         };
@@ -162,16 +162,15 @@ describe('useIntentListener hook', () => {
         expect(mockBroker.addIntentListener).toHaveBeenCalled();
       });
 
-      const listener = await mockBroker.addIntentListener('ViewChart', handler);
-      const unsubscribeSpy = vi.spyOn(listener, 'unsubscribe');
+      const listener = listeners.get('ViewChart');
+      expect(listener).toBeDefined();
+      const unsubscribeSpy = vi.mocked(listener!.unsubscribe);
 
       act(() => {
         unmount();
       });
 
-      // Note: In actual implementation, the listener reference is stored in closure
-      // This test verifies the cleanup structure is correct
-      expect(mockBroker.addIntentListener).toHaveBeenCalled();
+      expect(unsubscribeSpy).toHaveBeenCalled();
     });
 
     it('should handle multiple mount/unmount cycles', async () => {

@@ -213,7 +213,7 @@ describe('ResolverDialog', () => {
     it('should not close dialog when content area is clicked', async () => {
       const onCancel = vi.fn();
 
-      const { container } = render(<ResolverDialog {...defaultProps} onCancel={onCancel} />);
+      render(<ResolverDialog {...defaultProps} onCancel={onCancel} />);
 
       // Click the inner content (white box)
       const content = screen.getByTestId('resolver-content');
@@ -232,7 +232,7 @@ describe('ResolverDialog', () => {
     });
 
     it('should update focus when useResolverKeyboard changes focused index', () => {
-      const { rerender } = render(<ResolverDialog {...defaultProps} />);
+      render(<ResolverDialog {...defaultProps} />);
 
       // This test would require mocking useResolverKeyboard to return different indices
       // For now, we just verify the component is rendered
@@ -250,6 +250,19 @@ describe('ResolverDialog', () => {
       render(<ResolverDialog {...emptyProps} />);
 
       expect(screen.getByText(/0\s*application/i)).toBeInTheDocument();
+    });
+
+    it('should ignore selection keys when there are no targets', () => {
+      const onSelect = vi.fn();
+
+      render(<ResolverDialog {...defaultProps} targets={[]} onSelect={onSelect} />);
+
+      fireEvent.keyDown(document, {
+        key: 'Enter',
+        code: 'Enter',
+      });
+
+      expect(onSelect).not.toHaveBeenCalled();
     });
 
     it('should handle target without instanceId', () => {
@@ -363,14 +376,14 @@ describe('ResolverDialog', () => {
     });
 
     it('should render content box with white background', () => {
-      const { container } = render(<ResolverDialog {...defaultProps} />);
+      render(<ResolverDialog {...defaultProps} />);
 
       const content = screen.getByTestId('resolver-content');
       expect(content).toBeInTheDocument();
     });
 
     it('should render targets in column layout', () => {
-      const { container } = render(<ResolverDialog {...defaultProps} />);
+      render(<ResolverDialog {...defaultProps} />);
 
       const listbox = screen.getByRole('listbox');
       expect(listbox).toHaveStyle({ flexDirection: 'column' });
@@ -397,16 +410,3 @@ describe('ResolverDialog', () => {
     });
   });
 });
-
-// Helper function for text search with regex
-function screenByText(text: string | RegExp) {
-  return {
-    toBeInTheDocument: () => {
-      const elements = screen.queryAllByText(text);
-      if (elements.length > 0) {
-        return;
-      }
-      throw new Error(`Element with text ${text} not found`);
-    },
-  };
-}

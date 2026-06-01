@@ -4,7 +4,11 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { isOpenFinAvailable } from '../src/environment';
+import {
+  getRuntimeEnvironment,
+  isOpenFinAvailable,
+  isPostMessageAvailable,
+} from '../src/environment';
 
 describe('Environment Detection', () => {
   const originalGlobalThis = globalThis;
@@ -146,6 +150,43 @@ describe('Environment Detection', () => {
 
         expect(() => isOpenFinAvailable()).not.toThrow();
         expect(isOpenFinAvailable()).toBe(expected);
+      });
+    });
+  });
+
+  describe('getRuntimeEnvironment()', () => {
+    it('should resolve openfin when fin.desktop is available', async () => {
+      (globalThis as any).fin = {
+        desktop: {},
+      };
+
+      await expect(getRuntimeEnvironment()).resolves.toBe('openfin');
+    });
+
+    it('should resolve browser when OpenFin is not available', async () => {
+      delete (globalThis as any).fin;
+
+      await expect(getRuntimeEnvironment()).resolves.toBe('browser');
+    });
+  });
+
+  describe('isPostMessageAvailable()', () => {
+    it('should return true when window.postMessage is available', () => {
+      expect(isPostMessageAvailable()).toBe(true);
+    });
+
+    it('should return false when postMessage is not a function', () => {
+      const originalPostMessage = window.postMessage;
+      Object.defineProperty(window, 'postMessage', {
+        configurable: true,
+        value: undefined,
+      });
+
+      expect(isPostMessageAvailable()).toBe(false);
+
+      Object.defineProperty(window, 'postMessage', {
+        configurable: true,
+        value: originalPostMessage,
       });
     });
   });

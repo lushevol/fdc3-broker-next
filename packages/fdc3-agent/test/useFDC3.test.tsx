@@ -7,8 +7,8 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '@testing-library/jest-dom';
 import { clearBroker, getAgentApi, setBroker } from '../src/agent';
-import { AgentProvider, useFDC3 } from '../src/hooks';
-import type { Context, DesktopAgent } from '../src/types';
+import { AgentProvider, useAppIdentifier, useFDC3 } from '../src/hooks';
+import type { AppIdentifier, Channel, Context, DesktopAgent } from '../src/types';
 
 // Mock DesktopAgent
 const mockDesktopAgent: DesktopAgent = {
@@ -119,6 +119,66 @@ describe('useFDC3 hook', () => {
       });
 
       expect(mockDesktopAgent.raiseIntent).toHaveBeenCalledWith('ViewChart', context);
+    });
+
+    it('should keep the broker instance in provider context even if the global broker is cleared', async () => {
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <AgentProvider>{children}</AgentProvider>
+      );
+
+      const { result, rerender } = renderHook(() => useFDC3(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current).toBe(mockDesktopAgent);
+      });
+
+      clearBroker();
+
+      expect(() => rerender()).not.toThrow();
+      expect(result.current).toBe(mockDesktopAgent);
+    });
+
+    it('should expose the provider app identifier through useAppIdentifier', async () => {
+      const appIdentifier: AppIdentifier = {
+        appId: 'chart-tile',
+        instanceId: 'chart-tile-1',
+      };
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <AgentProvider appIdentifier={appIdentifier}>{children}</AgentProvider>
+      );
+
+      const { result } = renderHook(() => useAppIdentifier(), { wrapper });
+
+      await waitFor(() => {
+        expect(result.current).toEqual(appIdentifier);
+      });
+    });
+
+    it('should scope FDC3 calls to the provider app identifier', async () => {
+      const appIdentifier: AppIdentifier = {
+        appId: 'chart-tile',
+        instanceId: 'chart-tile-1',
+      };
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <AgentProvider appIdentifier={appIdentifier}>{children}</AgentProvider>
+      );
+
+      const { result } = renderHook(() => useFDC3(), { wrapper });
+
+      const context: Context = {
+        type: 'fdc3.instrument',
+        id: { ticker: 'AAPL' },
+      };
+
+      await waitFor(() => {
+        expect(result.current).toBeDefined();
+      });
+
+      await act(async () => {
+        await result.current.broadcast(context);
+      });
+
+      expect(mockDesktopAgent.broadcast).toHaveBeenCalledWith(context, appIdentifier);
     });
   });
 
@@ -330,13 +390,13 @@ describe('useFDC3 hook', () => {
     it('should provide access to joinUserChannel() method', async () => {
       const { result } = renderHook(() => useFDC3());
 
-      const mockChannel = {
+      const mockChannel: Channel = {
         id: 'red',
         type: 'user',
       };
 
       await act(async () => {
-        await result.current.joinUserChannel(mockChannel as any);
+        await result.current.joinUserChannel(mockChannel);
       });
 
       expect(mockDesktopAgent.joinUserChannel).toHaveBeenCalledWith(mockChannel);
@@ -389,7 +449,7 @@ describe('useFDC3 hook', () => {
     it('should reflect changes when broker is updated', () => {
       const { result } = renderHook(() => useFDC3());
 
-      const originalBroker = result.current;
+      expect(result.current).toBe(mockDesktopAgent);
 
       // Update broker
       const newBroker = { ...mockDesktopAgent };

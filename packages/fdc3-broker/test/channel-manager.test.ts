@@ -306,7 +306,7 @@ describe('ChannelManager', () => {
     });
 
     it('should return false when tile is not on channel', () => {
-      const channel = channelManager.createChannel('test-channel');
+      channelManager.createChannel('test-channel');
 
       expect(channelManager.isTileOnChannel('tile-1', 'test-channel')).toBe(false);
     });
@@ -397,6 +397,10 @@ describe('ChannelManager', () => {
       expect(channels.length).toBe(2);
       channels.forEach((c) => expect(c.type).toBe('private'));
     });
+
+    it('should return an empty list for unknown channel types', () => {
+      expect(channelManager.getChannelsByType('workspace' as never)).toEqual([]);
+    });
   });
 
   describe('getChannelByType()', () => {
@@ -407,6 +411,15 @@ describe('ChannelManager', () => {
 
       expect(channel).toBeDefined();
       expect(channel?.id).toBe('app-channel');
+    });
+
+    it('should return private channels by type and id', () => {
+      channelManager.createPrivateChannel('private-channel');
+
+      const channel = channelManager.getChannelByType('private', 'private-channel');
+
+      expect(channel?.id).toBe('private-channel');
+      expect(channel?.type).toBe('private');
     });
 
     it('should return null for wrong type', () => {
@@ -422,11 +435,49 @@ describe('ChannelManager', () => {
 
       expect(channel).toBeNull();
     });
+
+    it('should return null for unknown channel types', () => {
+      const channel = channelManager.getChannelByType('workspace' as never, 'red');
+
+      expect(channel).toBeNull();
+    });
+  });
+
+  describe('addUserChannel()', () => {
+    it('should add a custom user channel', () => {
+      channelManager.addUserChannel('purple', {
+        name: 'Purple',
+        color: '#800080',
+      });
+
+      const channel = channelManager.getChannelByType('user', 'purple');
+
+      expect(channel?.id).toBe('purple');
+      expect(channel?.type).toBe('user');
+      expect(channel?.displayMetadata).toEqual({
+        name: 'Purple',
+        color: '#800080',
+      });
+    });
+
+    it('should keep the existing user channel when adding a duplicate id', () => {
+      const original = channelManager.getChannelByType('user', 'red');
+
+      channelManager.addUserChannel('red', {
+        name: 'Replacement Red',
+        color: '#ff1111',
+      });
+
+      expect(channelManager.getChannelByType('user', 'red')).toBe(original);
+      expect(channelManager.getChannelByType('user', 'red')?.displayMetadata).toEqual(
+        original?.displayMetadata,
+      );
+    });
   });
 
   describe('removePrivateChannel()', () => {
     it('should remove private channel', () => {
-      const channel = channelManager.createPrivateChannel('my-private');
+      channelManager.createPrivateChannel('my-private');
 
       expect(channelManager.hasChannel('my-private')).toBe(true);
 
