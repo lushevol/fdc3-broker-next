@@ -12,12 +12,12 @@
  * @see quickstart.md#L563-L705
  */
 
-import type { AppIdentifier, Channel, Context, Listener } from 'ratan-fdc3-agent';
+import type { Channel, Context, Listener } from 'ratan-fdc3-agent';
 import { useEffect, useState } from 'react';
-import type { TileProps } from '../Root/routing/common/interface';
 import { FDC3Agent } from '../Root/import';
+import type { TileProps } from '../Root/routing/common/interface';
 
-const { AgentProvider, useAppIdentifier, useFDC3, useIntentListener, useUserChannels } = FDC3Agent;
+const { useAppIdentifier, useFDC3, useIntentListener, useUserChannels } = FDC3Agent;
 /**
  * Example instrument data for FDC3 operations
  */
@@ -112,26 +112,6 @@ const styles = {
     color: '#666',
     marginTop: '4px',
   },
-};
-
-const useFDC3TileRegister = (appIdentifier: AppIdentifier) => {
-  const fdc3 = useFDC3();
-
-  useEffect(() => {
-    try {
-      fdc3.registerTile(appIdentifier.instanceId, appIdentifier.appId);
-    } catch (error) {
-      console.error('Failed to register tile:', error);
-    }
-
-    return () => {
-      try {
-        fdc3.unregisterTile(appIdentifier.instanceId, appIdentifier.appId);
-      } catch (error) {
-        console.error('Failed to unregister tile:', error);
-      }
-    };
-  }, [fdc3, appIdentifier.instanceId, appIdentifier.appId]);
 };
 
 /**
@@ -370,7 +350,7 @@ function ChannelSection() {
         {receivedContexts.length === 0 ? (
           <div style={styles.status}>No contexts received</div>
         ) : (
-          receivedContexts.map((context, index) => (
+          receivedContexts.map((context) => (
             <div key={context.name} style={styles.receivedContext}>
               {JSON.stringify(context, null, 2)}
             </div>
@@ -421,7 +401,7 @@ function CurrentContextSection() {
 /**
  * Example FDC3 Tile Component
  *
- * Wraps the tile content with AgentProvider and demonstrates all FDC3 operations.
+ * Demonstrates FDC3 operations. The base container provides the scoped FDC3 agent.
  *
  * @example
  * ```tsx
@@ -432,22 +412,15 @@ function CurrentContextSection() {
  * }
  * ```
  */
-export function ExampleFDC3Tile(props: TileProps) {
-  const appIdentifier = {
-    appId: props.tile.replace(/\//g, ''),
-    instanceId: props.id,
-  };
-  useFDC3TileRegister(appIdentifier);
+export function ExampleFDC3Tile(_props: TileProps) {
   return (
-    <AgentProvider appIdentifier={appIdentifier}>
-      <div style={styles.container}>
-        <div style={styles.header}>FDC3 Example Tile</div>
-        <FDC3Operations />
-        <IntentListenerSection />
-        <ChannelSection />
-        <CurrentContextSection />
-      </div>
-    </AgentProvider>
+    <div style={styles.container}>
+      <div style={styles.header}>FDC3 Example Tile</div>
+      <FDC3Operations />
+      <IntentListenerSection />
+      <ChannelSection />
+      <CurrentContextSection />
+    </div>
   );
 }
 

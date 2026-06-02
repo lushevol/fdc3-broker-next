@@ -86,14 +86,14 @@ interface TileProps extends Container {
 
 ## FDC3 Demo (`components/ExampleFDC3Tile.tsx`)
 
-The template includes a comprehensive FDC3 example (453 lines) demonstrating:
+The template includes a comprehensive FDC3 example demonstrating:
 
 - **Intent raising** — `fdc3.raiseIntent('ViewChart', context)` to send intents to other apps
 - **Intent listening** — `useIntentListener('ViewChart', handler)` with automatic cleanup
 - **Context broadcasting** — `fdc3.broadcast(context)` to share data on channels
 - **Channel management** — `fdc3.getUserChannels()`, `joinUserChannel()`, `leaveCurrentChannel()`, `getCurrentChannel()`
 - **Context listening** — `fdc3.addContextListener()` with self-message filtering
-- **Tile registration** — `useFDC3TileRegister` hook registers/unregisters tiles via `fdc3.registerTile()`/`fdc3.unregisterTile()`
+- **Base-owned lifecycle** — `@fm/base` wraps each remote tile with a scoped FDC3 agent and registers/unregisters tile instances in `pages/Home/common/Container.tsx`
 
 Components:
 
@@ -101,7 +101,7 @@ Components:
 - `IntentListenerSection` — Displays received intents
 - `ChannelSection` — Channel picker with color-coded badges and context display
 - `CurrentContextSection` — Shows current channel context
-- `ExampleFDC3Tile` — Top-level component wrapped in `<AgentProvider>`
+- `ExampleFDC3Tile` — Demo component that consumes the base-provided FDC3 agent hooks
 
 ## Shared Shell Pattern (`Root/import/index.ts`)
 

@@ -46,8 +46,8 @@ import { ErrorBoundry } from '@fm/base';
   - `useIntentListener(intent, handler)` — listen for intents with automatic cleanup
   - `useAppIdentifier()` — get the current app identity for filtering
   - `useUserChannels()` — list available user channels
-- Wrap FDC3-using components in `<AgentProvider appIdentifier={...}>`
-- Register tiles with `useFDC3TileRegister(appIdentifier)` for proper lifecycle management
+- Do not wrap tile components in `<AgentProvider>` inside the tile app; `@fm/base` wraps remote tiles in `pages/Home/common/Container.tsx`
+- Do not manually call `registerTile()`/`unregisterTile()` in tile components; base owns tile lifecycle registration
 - See `components/ExampleFDC3Tile.tsx` for a full demo
 
 ## TileProps Interface

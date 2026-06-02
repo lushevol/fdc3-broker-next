@@ -18,12 +18,6 @@ const mockRaiseWorkflow = jest.fn() as unknown as MockRaiseWorkflow;
 
 jest.mock('../Root/import', () => ({
   FDC3Agent: {
-    AgentProvider: ({
-      children,
-    }: {
-      appIdentifier: { appId: string; instanceId: string };
-      children: React.ReactNode;
-    }) => <>{children}</>,
     useFDC3: () => ({
       raiseWorkflow: mockRaiseWorkflow,
     }),
