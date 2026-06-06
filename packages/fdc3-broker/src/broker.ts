@@ -475,6 +475,11 @@ export class Broker implements DesktopAgent {
       return this.postMessageBridge;
     }
 
+    // Check if the bridge is explicitly enabled
+    if (!this.config.enablePostMessageBridge) {
+      return null;
+    }
+
     // Check if options are configured
     if (!this.config.postMessageBridgeOptions) {
       return null;

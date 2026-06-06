@@ -188,10 +188,14 @@ export class PostMessageBridge {
   }
 
   /**
-   * Pick a target origin for callers that do not need to address a specific remote.
+   * Get all target origins for fan-out requests.
+   * When `*` is in the allowlist, returns `['*']`. Otherwise returns all configured origins.
    */
-  private getDefaultTargetOrigin(): string {
-    return this.options.allowedOrigins.includes('*') ? '*' : this.options.allowedOrigins[0];
+  private getAllTargetOrigins(): string[] {
+    if (this.options.allowedOrigins.includes('*')) {
+      return ['*'];
+    }
+    return [...this.options.allowedOrigins];
   }
 
   /**
@@ -491,14 +495,14 @@ export class PostMessageBridge {
     }
 
     const channelId = typeof channel === 'string' ? channel : channel.id;
-    const origin = targetOrigin ?? this.getDefaultTargetOrigin();
+    const origins = targetOrigin ? [targetOrigin] : this.getAllTargetOrigins();
 
     this.logger.debug('Joining channel via PostMessage', {
       channelId,
-      targetOrigin: origin,
+      targetOrigins: origins,
     });
 
-    await this.sendRequest<void>(origin, 'joinUserChannel', { channelId });
+    await Promise.all(origins.map((origin) => this.sendRequest<void>(origin, 'joinUserChannel', { channelId })));
 
     this.logger.info('Joined channel via PostMessage', { channelId });
   }
@@ -515,15 +519,15 @@ export class PostMessageBridge {
       throw new Error('PostMessage bridge is not enabled');
     }
 
-    const origin = targetOrigin ?? this.getDefaultTargetOrigin();
+    const origins = targetOrigin ? [targetOrigin] : this.getAllTargetOrigins();
 
     this.logger.debug('Broadcasting context via PostMessage', {
       context,
       channelId,
-      targetOrigin: origin,
+      targetOrigins: origins,
     });
 
-    await this.sendRequest<void>(origin, 'broadcast', { context, channelId });
+    await Promise.all(origins.map((origin) => this.sendRequest<void>(origin, 'broadcast', { context, channelId })));
 
     this.logger.info('Broadcast via PostMessage successful', {
       context,
@@ -541,14 +545,18 @@ export class PostMessageBridge {
       return null;
     }
 
-    const origin = targetOrigin ?? this.getDefaultTargetOrigin();
+    const origins = targetOrigin ? [targetOrigin] : this.getAllTargetOrigins();
 
-    try {
-      return await this.sendRequest<Channel | null>(origin, 'getCurrentChannel', {});
-    } catch (error) {
-      this.logger.debug('getCurrentChannel via PostMessage failed', { error });
-      return null;
+    const results = await Promise.allSettled(
+      origins.map((origin) => this.sendRequest<Channel | null>(origin, 'getCurrentChannel', {})),
+    );
+
+    for (const result of results) {
+      if (result.status === 'fulfilled' && result.value !== null) {
+        return result.value;
+      }
     }
+    return null;
   }
 
   /**
@@ -561,14 +569,25 @@ export class PostMessageBridge {
       return [];
     }
 
-    const origin = targetOrigin ?? this.getDefaultTargetOrigin();
+    const origins = targetOrigin ? [targetOrigin] : this.getAllTargetOrigins();
 
-    try {
-      return await this.sendRequest<Channel[]>(origin, 'getUserChannels', {});
-    } catch (error) {
-      this.logger.debug('getUserChannels via PostMessage failed', { error });
-      return [];
+    const results = await Promise.allSettled(
+      origins.map((origin) => this.sendRequest<Channel[]>(origin, 'getUserChannels', {})),
+    );
+
+    const channels: Channel[] = [];
+    const seenIds = new Set<string>();
+    for (const result of results) {
+      if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+        for (const channel of result.value) {
+          if (!seenIds.has(channel.id)) {
+            seenIds.add(channel.id);
+            channels.push(channel);
+          }
+        }
+      }
     }
+    return channels;
   }
 
   /**
