@@ -29,9 +29,11 @@ root-config (port 8001)        ← Single-SPA orchestrator, loads import map
 **Services** (backends):
 
 - `backend` – Spring Boot (Java), port 8088, in-memory H2 for local dev
-- `chatbot-backend` – Spring Boot (Java), port 8080, OpenAI/Anthropic chat
+- `chatbot-backend` – Spring Boot (Java), port 8080, protocol chat, OpenAI-compatible/Anthropic chat, tools, MCP, memory
 - `auth-server` – Spring Boot (Java), port 8082, LDAP/Redis/JWT auth
 - `elasticsearch-mcp-service` – Spring Boot (Java), port 8090
+- `memory-service` – Spring Boot (Java), port 8084, SQL-backed chatbot memory
+- `rag-knowledge-base-service` – Spring Boot (Java), port 8091, MCP RAG retrieval
 
 **Proxy** (WebSocket gateways):
 
@@ -44,10 +46,13 @@ root-config (port 8001)        ← Single-SPA orchestrator, loads import map
 npm run dev              # Start UI apps + full backend stack (live ES MCP)
 npm run dev:stub         # Start UI apps + full backend stack (stub ES MCP)
 npm run dev:ui           # Start only UI apps (root-config, base, container, tile)
-npm run dev:services     # Start only backend + chatbot-backend (no ES MCP)
-npm run dev:stack        # Start backend + ES MCP (live) + chatbot-backend
-npm run dev:stack:stub   # Start backend + ES MCP (stub) + chatbot-backend
-npm run stop             # Kill all processes on ports 8001,8002,8006,8007,3000,3001,8088,8080
+npm run dev:services     # Start backend + ES MCP + memory-service + chatbot-backend
+npm run dev:services:stub # Start service stack with stub profile
+npm run dev:memory       # Start only memory-service
+npm run dev:rag          # Start RAG service + chatbot-backend
+npm run dev:rag:stub     # Start RAG service + chatbot-backend with stub profile
+npm run dev:rag:copilot  # Start RAG service + chatbot-backend with Copilot embedding profile
+npm run stop             # Kill configured local dev ports
 npm run build            # Turbo build all workspaces (continues on error)
 npm run build:packages   # Build only packages/*
 npm run test             # Turbo test all workspaces
@@ -131,6 +136,8 @@ Requires these env vars (see `services/chatbot-backend/.env.example`):
 
 - `CHATBOT_OPENAI_API_KEY`, `CHATBOT_OPENAI_BASE_URL`, `CHATBOT_OPENAI_MODEL`, `CHATBOT_OPENAI_TEMPERATURE`
 - `CHATBOT_ANTHROPIC_API_KEY`, `CHATBOT_ANTHROPIC_MODEL`
+- `CHATBOT_MEMORY_BASE_URL`, `CHATBOT_MEMORY_TENANT_ID`, `CHATBOT_MEMORY_REQUEST_TIMEOUT`, `CHATBOT_MEMORY_CONTEXT_LIMIT`
+- `CHATBOT_MCP_RAG_ENABLED`, `CHATBOT_MCP_RAG_URL`
 
 These are also declared in `turbo.json` `globalEnv`.
 
@@ -170,30 +177,33 @@ cd packages/chat-protocol-contract && npm run lint
 
 Each workspace has unified context docs under its `docs/` directory:
 
-| Workspace                            | PROJECT.md                                                    | ARCHITECTURE.md                                                 | RULES.md                                                  |
-| ------------------------------------ | ------------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------- |
-| **Apps**                             |                                                               |                                                                 |                                                           |
-| `apps/root-config`                   | [PROJECT](apps/root-config/docs/PROJECT.md)                   | [ARCH](apps/root-config/docs/ARCHITECTURE.md)                   | [RULES](apps/root-config/docs/RULES.md)                   |
-| `apps/base`                          | [PROJECT](apps/base/docs/PROJECT.md)                          | [ARCH](apps/base/docs/ARCHITECTURE.md)                          | [RULES](apps/base/docs/RULES.md)                          |
-| `apps/container`                     | [PROJECT](apps/container/docs/PROJECT.md)                     | [ARCH](apps/container/docs/ARCHITECTURE.md)                     | [RULES](apps/container/docs/RULES.md)                     |
-| `apps/tile`                          | [PROJECT](apps/tile/docs/PROJECT.md)                          | [ARCH](apps/tile/docs/ARCHITECTURE.md)                          | [RULES](apps/tile/docs/RULES.md)                          |
-| `apps/mf_container`                  | [PROJECT](apps/mf_container/docs/PROJECT.md)                  | [ARCH](apps/mf_container/docs/ARCHITECTURE.md)                  | [RULES](apps/mf_container/docs/RULES.md)                  |
-| `apps/mf_tile`                       | [PROJECT](apps/mf_tile/docs/PROJECT.md)                       | [ARCH](apps/mf_tile/docs/ARCHITECTURE.md)                       | [RULES](apps/mf_tile/docs/RULES.md)                       |
-| **Packages**                         |                                                               |                                                                 |                                                           |
-| `packages/mf_lib`                    | [PROJECT](packages/mf_lib/docs/PROJECT.md)                    | [ARCH](packages/mf_lib/docs/ARCHITECTURE.md)                    | [RULES](packages/mf_lib/docs/RULES.md)                    |
-| `packages/ratan-design`              | [PROJECT](packages/ratan-design/docs/PROJECT.md)              | [ARCH](packages/ratan-design/docs/ARCHITECTURE.md)              | [RULES](packages/ratan-design/docs/RULES.md)              |
-| `packages/chat-protocol-contract`    | [README](packages/chat-protocol-contract/README.md)           | (types + Zod schemas)                                           | (vitest)                                                  |
-| `packages/fdc3-agent`                | [PROJECT](packages/fdc3-agent/docs/PROJECT.md)                | [ARCH](packages/fdc3-agent/docs/ARCHITECTURE.md)                | [RULES](packages/fdc3-agent/docs/RULES.md)                |
-| `packages/fdc3-app-directory`        | [PROJECT](packages/fdc3-app-directory/docs/PROJECT.md)        | [ARCH](packages/fdc3-app-directory/docs/ARCHITECTURE.md)        | [RULES](packages/fdc3-app-directory/docs/RULES.md)        |
-| `packages/fdc3-broker`               | [PROJECT](packages/fdc3-broker/docs/PROJECT.md)               | [ARCH](packages/fdc3-broker/docs/ARCHITECTURE.md)               | [RULES](packages/fdc3-broker/docs/RULES.md)               |
-| `packages/fdc3-resolver-ui`          | [PROJECT](packages/fdc3-resolver-ui/docs/PROJECT.md)          | [ARCH](packages/fdc3-resolver-ui/docs/ARCHITECTURE.md)          | [RULES](packages/fdc3-resolver-ui/docs/RULES.md)          |
-| **Services**                         |                                                               |                                                                 |                                                           |
-| `services/backend`                   | [PROJECT](services/backend/docs/PROJECT.md)                   | [ARCH](services/backend/docs/ARCHITECTURE.md)                   | [RULES](services/backend/docs/RULES.md)                   |
-| `services/chatbot-backend`           | [PROJECT](services/chatbot-backend/docs/PROJECT.md)           | [ARCH](services/chatbot-backend/docs/ARCHITECTURE.md)           | [RULES](services/chatbot-backend/docs/RULES.md)           |
-| `services/elasticsearch-mcp-service` | [PROJECT](services/elasticsearch-mcp-service/docs/PROJECT.md) | [ARCH](services/elasticsearch-mcp-service/docs/ARCHITECTURE.md) | [RULES](services/elasticsearch-mcp-service/docs/RULES.md) |
-| **Proxy**                            |                                                               |                                                                 |                                                           |
-| `proxy/ws-gateway-server`            | [PROJECT](proxy/ws-gateway-server/docs/PROJECT.md)            | [ARCH](proxy/ws-gateway-server/docs/ARCHITECTURE.md)            | [RULES](proxy/ws-gateway-server/docs/RULES.md)            |
-| `proxy/local-llm-ws-client`          | [PROJECT](proxy/local-llm-ws-client/docs/PROJECT.md)          | [ARCH](proxy/local-llm-ws-client/docs/ARCHITECTURE.md)          | [RULES](proxy/local-llm-ws-client/docs/RULES.md)          |
+| Workspace                             | PROJECT.md                                                     | ARCHITECTURE.md                                                  | RULES.md                                                   |
+| ------------------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------- |
+| **Apps**                              |                                                                |                                                                  |                                                            |
+| `apps/root-config`                    | [PROJECT](apps/root-config/docs/PROJECT.md)                    | [ARCH](apps/root-config/docs/ARCHITECTURE.md)                    | [RULES](apps/root-config/docs/RULES.md)                    |
+| `apps/base`                           | [PROJECT](apps/base/docs/PROJECT.md)                           | [ARCH](apps/base/docs/ARCHITECTURE.md)                           | [RULES](apps/base/docs/RULES.md)                           |
+| `apps/container`                      | [PROJECT](apps/container/docs/PROJECT.md)                      | [ARCH](apps/container/docs/ARCHITECTURE.md)                      | [RULES](apps/container/docs/RULES.md)                      |
+| `apps/tile`                           | [PROJECT](apps/tile/docs/PROJECT.md)                           | [ARCH](apps/tile/docs/ARCHITECTURE.md)                           | [RULES](apps/tile/docs/RULES.md)                           |
+| `apps/mf_container`                   | [PROJECT](apps/mf_container/docs/PROJECT.md)                   | [ARCH](apps/mf_container/docs/ARCHITECTURE.md)                   | [RULES](apps/mf_container/docs/RULES.md)                   |
+| `apps/mf_tile`                        | [PROJECT](apps/mf_tile/docs/PROJECT.md)                        | [ARCH](apps/mf_tile/docs/ARCHITECTURE.md)                        | [RULES](apps/mf_tile/docs/RULES.md)                        |
+| **Packages**                          |                                                                |                                                                  |                                                            |
+| `packages/mf_lib`                     | [PROJECT](packages/mf_lib/docs/PROJECT.md)                     | [ARCH](packages/mf_lib/docs/ARCHITECTURE.md)                     | [RULES](packages/mf_lib/docs/RULES.md)                     |
+| `packages/ratan-design`               | [PROJECT](packages/ratan-design/docs/PROJECT.md)               | [ARCH](packages/ratan-design/docs/ARCHITECTURE.md)               | [RULES](packages/ratan-design/docs/RULES.md)               |
+| `packages/chat-protocol-contract`     | [README](packages/chat-protocol-contract/README.md)            | (types + Zod schemas)                                            | (vitest)                                                   |
+| `packages/fdc3-agent`                 | [PROJECT](packages/fdc3-agent/docs/PROJECT.md)                 | [ARCH](packages/fdc3-agent/docs/ARCHITECTURE.md)                 | [RULES](packages/fdc3-agent/docs/RULES.md)                 |
+| `packages/fdc3-app-directory`         | [PROJECT](packages/fdc3-app-directory/docs/PROJECT.md)         | [ARCH](packages/fdc3-app-directory/docs/ARCHITECTURE.md)         | [RULES](packages/fdc3-app-directory/docs/RULES.md)         |
+| `packages/fdc3-broker`                | [PROJECT](packages/fdc3-broker/docs/PROJECT.md)                | [ARCH](packages/fdc3-broker/docs/ARCHITECTURE.md)                | [RULES](packages/fdc3-broker/docs/RULES.md)                |
+| `packages/fdc3-resolver-ui`           | [PROJECT](packages/fdc3-resolver-ui/docs/PROJECT.md)           | [ARCH](packages/fdc3-resolver-ui/docs/ARCHITECTURE.md)           | [RULES](packages/fdc3-resolver-ui/docs/RULES.md)           |
+| **Services**                          |                                                                |                                                                  |                                                            |
+| `services/auth-server`                | [PROJECT](services/auth-server/docs/PROJECT.md)                | [ARCH](services/auth-server/docs/ARCHITECTURE.md)                | [RULES](services/auth-server/docs/RULES.md)                |
+| `services/backend`                    | [PROJECT](services/backend/docs/PROJECT.md)                    | [ARCH](services/backend/docs/ARCHITECTURE.md)                    | [RULES](services/backend/docs/RULES.md)                    |
+| `services/chatbot-backend`            | [PROJECT](services/chatbot-backend/docs/PROJECT.md)            | [ARCH](services/chatbot-backend/docs/ARCHITECTURE.md)            | [RULES](services/chatbot-backend/docs/RULES.md)            |
+| `services/elasticsearch-mcp-service`  | [PROJECT](services/elasticsearch-mcp-service/docs/PROJECT.md)  | [ARCH](services/elasticsearch-mcp-service/docs/ARCHITECTURE.md)  | [RULES](services/elasticsearch-mcp-service/docs/RULES.md)  |
+| `services/memory-service`             | [PROJECT](services/memory-service/docs/PROJECT.md)             | [ARCH](services/memory-service/docs/ARCHITECTURE.md)             | [RULES](services/memory-service/docs/RULES.md)             |
+| `services/rag-knowledge-base-service` | [PROJECT](services/rag-knowledge-base-service/docs/PROJECT.md) | [ARCH](services/rag-knowledge-base-service/docs/ARCHITECTURE.md) | [RULES](services/rag-knowledge-base-service/docs/RULES.md) |
+| **Proxy**                             |                                                                |                                                                  |                                                            |
+| `proxy/ws-gateway-server`             | [PROJECT](proxy/ws-gateway-server/docs/PROJECT.md)             | [ARCH](proxy/ws-gateway-server/docs/ARCHITECTURE.md)             | [RULES](proxy/ws-gateway-server/docs/RULES.md)             |
+| `proxy/local-llm-ws-client`           | [PROJECT](proxy/local-llm-ws-client/docs/PROJECT.md)           | [ARCH](proxy/local-llm-ws-client/docs/ARCHITECTURE.md)           | [RULES](proxy/local-llm-ws-client/docs/RULES.md)           |
 
 Each `docs/` directory follows the same structure:
 

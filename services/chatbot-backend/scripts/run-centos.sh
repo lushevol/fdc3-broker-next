@@ -17,7 +17,7 @@ if [ ! -f "$JAR_PATH" ] && [ -f "$DEPLOY_DIR/target/chatbot-backend.jar" ]; then
 fi
 
 if ! command -v java >/dev/null 2>&1; then
-  echo "Error: Java 17+ is required. Install a JDK and verify 'java -version' works before running this service." >&2
+  echo "Error: Java 21+ is required. Install a JDK and verify 'java -version' works before running this service." >&2
   exit 1
 fi
 

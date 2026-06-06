@@ -106,6 +106,22 @@ describe('AppDirectoryClientImpl', () => {
 
       expect(app).toBeNull();
     });
+
+    it('should URL encode app IDs with reserved characters', async () => {
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockChartApp,
+      } as Response);
+
+      await client.getApp('chart app/primary');
+
+      expect(fetch).toHaveBeenCalledWith(
+        'https://app-directory.example.com/api/v2/apps/chart%20app%2Fprimary',
+        expect.objectContaining({
+          method: 'GET',
+        }),
+      );
+    });
   });
 
   describe('findByIntent', () => {
@@ -196,7 +212,7 @@ describe('AppDirectoryClientImpl', () => {
             }, 200);
 
             if (options && typeof options === 'object' && 'signal' in options) {
-              const signal = (options as any).signal;
+              const signal = options.signal as AbortSignal | undefined;
               if (signal) {
                 signal.addEventListener('abort', () => {
                   clearTimeout(timer);
@@ -210,6 +226,74 @@ describe('AppDirectoryClientImpl', () => {
       );
 
       await expect(shortTimeoutClient.getAllApps()).rejects.toThrow('timeout');
+    });
+
+    it('should use status text when an error body is not valid JSON', async () => {
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+        statusText: 'Forbidden',
+        json: async () => {
+          throw new Error('invalid json');
+        },
+      } as unknown as Response);
+
+      await expect(client.getAllApps()).rejects.toThrow('App Directory error: Forbidden');
+    });
+
+    it('should preserve default error messages for non-special HTTP statuses', async () => {
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: false,
+        status: 429,
+        statusText: 'Too Many Requests',
+        json: async () => ({ message: 'Rate limited' }),
+      } as Response);
+
+      await expect(client.getAllApps()).rejects.toThrow('Rate limited');
+    });
+  });
+
+  describe('authentication headers', () => {
+    it('should support asynchronous auth token lookup before each request', async () => {
+      const getAuthToken = vi.fn().mockResolvedValue('async-token');
+      const tokenClient = new AppDirectoryClientImpl({
+        baseUrl: 'https://app-directory.example.com/api',
+        getAuthToken,
+      });
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      } as Response);
+
+      await tokenClient.getAllApps();
+
+      expect(getAuthToken).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledWith(
+        'https://app-directory.example.com/api/v2/apps',
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer async-token',
+          }),
+        }),
+      );
+    });
+
+    it('should omit Authorization when getAuthToken returns null', async () => {
+      const tokenClient = new AppDirectoryClientImpl({
+        baseUrl: 'https://app-directory.example.com/api',
+        getAuthToken: () => null,
+      });
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      } as Response);
+
+      await tokenClient.getAllApps();
+
+      const init = vi.mocked(fetch).mock.calls[0][1] as RequestInit;
+      expect(init.headers).not.toHaveProperty('Authorization');
     });
   });
 });

@@ -191,6 +191,14 @@ export class PrivateChannelImpl implements PrivateChannel {
   type = 'private' as const;
   private channel: ChannelImpl;
   private allowedTiles: Set<string> = new Set();
+  private contextListenerRecords: Map<
+    string,
+    {
+      contextType: string | null;
+      listener: Listener;
+      active: boolean;
+    }
+  > = new Map();
 
   /**
    * Creates a new private channel
@@ -211,6 +219,10 @@ export class PrivateChannelImpl implements PrivateChannel {
    * @param context - Context data to broadcast
    */
   async broadcast(context: Context): Promise<void> {
+    if (this.disconnected) {
+      return;
+    }
+
     // Only broadcast if at least one tile has been granted access
     if (this.allowedTiles.size === 0) {
       return;
@@ -254,12 +266,30 @@ export class PrivateChannelImpl implements PrivateChannel {
     contextTypeOrHandler: string | ((context: Context) => void),
     handler?: (context: Context) => void,
   ): Promise<Listener> {
+    const contextType = typeof contextTypeOrHandler === 'function' ? null : contextTypeOrHandler;
+
     // If first arg is a function, it's the handler for all contexts
-    if (typeof contextTypeOrHandler === 'function') {
-      return this.channel.addContextListener(contextTypeOrHandler);
-    }
-    // Otherwise it's (contextType, handler)
-    return this.channel.addContextListener(contextTypeOrHandler, handler!);
+    const innerListener =
+      typeof contextTypeOrHandler === 'function'
+        ? await this.channel.addContextListener(contextTypeOrHandler)
+        : await this.channel.addContextListener(contextTypeOrHandler, handler!);
+    const listenerId = `private_context_listener_${Date.now()}_${Math.random()}`;
+
+    const record = {
+      contextType,
+      listener: innerListener,
+      active: true,
+    };
+
+    this.contextListenerRecords.set(listenerId, record);
+    this.emitEvent('addContextListener', { contextType });
+
+    return {
+      id: listenerId,
+      unsubscribe: async () => {
+        await this.unsubscribeContextListener(listenerId);
+      },
+    } as Listener;
   }
 
   /**
@@ -313,6 +343,44 @@ export class PrivateChannelImpl implements PrivateChannel {
   private eventHandlers: Map<string, Set<EventHandler>> = new Map();
   private disconnected = false;
 
+  private emitEvent(type: PrivateChannelEventTypes, details: unknown): void {
+    const handlers = this.eventHandlers.get(type);
+    if (!handlers) {
+      return;
+    }
+
+    for (const handler of Array.from(handlers)) {
+      try {
+        handler({ type, details });
+      } catch (error) {
+        console.error(`[PrivateChannel] Error in ${type} handler:`, error);
+      }
+    }
+  }
+
+  private replayAddContextListenerEvents(handler: EventHandler): void {
+    for (const record of this.contextListenerRecords.values()) {
+      if (record.active) {
+        handler({
+          type: 'addContextListener',
+          details: { contextType: record.contextType },
+        });
+      }
+    }
+  }
+
+  private async unsubscribeContextListener(listenerId: string): Promise<void> {
+    const record = this.contextListenerRecords.get(listenerId);
+    if (!record || !record.active) {
+      return;
+    }
+
+    record.active = false;
+    this.contextListenerRecords.delete(listenerId);
+    await record.listener.unsubscribe();
+    this.emitEvent('unsubscribe', { contextType: record.contextType });
+  }
+
   /**
    * Register a handler for events from the PrivateChannel.
    *
@@ -337,6 +405,10 @@ export class PrivateChannelImpl implements PrivateChannel {
       this.eventHandlers.get(eventType)!.add(handler);
     }
 
+    if (type === null || type === 'addContextListener') {
+      this.replayAddContextListenerEvents(handler);
+    }
+
     return {
       id: listenerId,
       unsubscribe: async () => {
@@ -359,17 +431,11 @@ export class PrivateChannelImpl implements PrivateChannel {
     }
     this.disconnected = true;
 
-    // Notify all disconnect handlers
-    const handlers = this.eventHandlers.get('disconnect');
-    if (handlers) {
-      for (const handler of handlers) {
-        try {
-          handler({ type: 'disconnect', details: null });
-        } catch (error) {
-          console.error('[PrivateChannel] Error in disconnect handler:', error);
-        }
-      }
+    for (const listenerId of Array.from(this.contextListenerRecords.keys())) {
+      await this.unsubscribeContextListener(listenerId);
     }
+
+    this.emitEvent('disconnect', null);
   }
 
   /**
@@ -394,6 +460,7 @@ export class PrivateChannelImpl implements PrivateChannel {
       this.eventHandlers.set('addContextListener', new Set());
     }
     this.eventHandlers.get('addContextListener')!.add(wrappedHandler);
+    this.replayAddContextListenerEvents(wrappedHandler);
 
     return {
       id: listenerId,

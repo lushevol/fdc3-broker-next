@@ -77,6 +77,35 @@ describe('AppDirectoryClientImpl - Modes', () => {
       vi.mocked(fetch).mockRejectedValueOnce(new Error('Network'));
       await expect(client.getAllApps()).rejects.toThrow('Network');
     });
+
+    it('should throw remote query errors for intent, context, and category lookups', async () => {
+      client = new AppDirectoryClientImpl({
+        baseUrl: 'https://api.example.com',
+        localApps: [localApp],
+        mode: 'remote-only',
+      });
+
+      vi.mocked(fetch)
+        .mockRejectedValueOnce(new Error('Intent network'))
+        .mockRejectedValueOnce(new Error('Context network'))
+        .mockRejectedValueOnce(new Error('Category network'));
+
+      await expect(client.findByIntent('ViewChart')).rejects.toThrow('Intent network');
+      await expect(client.findByContextType('fdc3.instrument')).rejects.toThrow('Context network');
+      await expect(client.findByCategory('Local')).rejects.toThrow('Category network');
+    });
+
+    it('should rethrow non-Error getApp failures', async () => {
+      client = new AppDirectoryClientImpl({
+        baseUrl: 'https://api.example.com',
+        localApps: [localApp],
+        mode: 'remote-only',
+      });
+
+      vi.mocked(fetch).mockRejectedValueOnce('network-string');
+
+      await expect(client.getApp('local-app')).rejects.toBe('network-string');
+    });
   });
 
   describe('Mode: local-only', () => {
@@ -104,6 +133,27 @@ describe('AppDirectoryClientImpl - Modes', () => {
     it('should return null for missing app', async () => {
       const app = await client.getApp('remote-app');
       expect(app).toBeNull();
+    });
+
+    it('should filter local apps by intent without a network call', async () => {
+      const apps = await client.findByIntent('ViewChart');
+
+      expect(fetch).not.toHaveBeenCalled();
+      expect(apps).toEqual([localApp]);
+    });
+
+    it('should filter local apps by context type without a network call', async () => {
+      const apps = await client.findByContextType('fdc3.instrument');
+
+      expect(fetch).not.toHaveBeenCalled();
+      expect(apps).toEqual([localApp]);
+    });
+
+    it('should filter local apps by category without a network call', async () => {
+      const apps = await client.findByCategory('Local');
+
+      expect(fetch).not.toHaveBeenCalled();
+      expect(apps).toEqual([localApp]);
     });
   });
 
@@ -139,6 +189,71 @@ describe('AppDirectoryClientImpl - Modes', () => {
 
       const apps = await client.getAllApps();
       expect(apps).toContainEqual(localApp);
+    });
+
+    it('should return local app on remote not found', async () => {
+      client = new AppDirectoryClientImpl({
+        baseUrl: 'https://api.example.com',
+        localApps: [localApp],
+        mode: 'local-first',
+      });
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+        json: async () => ({ message: 'APP_NOT_FOUND' }),
+      } as Response);
+
+      await expect(client.getApp('local-app')).resolves.toEqual(localApp);
+    });
+
+    it('should fallback to a local app on non-404 remote getApp errors', async () => {
+      client = new AppDirectoryClientImpl({
+        baseUrl: 'https://api.example.com',
+        localApps: [localApp],
+        mode: 'local-first',
+      });
+
+      vi.mocked(fetch).mockRejectedValueOnce(new Error('Network'));
+
+      await expect(client.getApp('local-app')).resolves.toEqual(localApp);
+    });
+
+    it('should merge matching local and remote intent results with remote precedence', async () => {
+      client = new AppDirectoryClientImpl({
+        baseUrl: 'https://api.example.com',
+        localApps: [localApp, commonAppLocal],
+        mode: 'local-first',
+      });
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => [commonAppRemote],
+      } as Response);
+
+      const apps = await client.findByIntent('ViewChart');
+
+      expect(apps).toContainEqual(localApp);
+      expect(apps).toContainEqual(commonAppRemote);
+      expect(apps).not.toContainEqual(commonAppLocal);
+    });
+
+    it('should fallback to local intent, context, and category queries when remote fails', async () => {
+      client = new AppDirectoryClientImpl({
+        baseUrl: 'https://api.example.com',
+        localApps: [localApp],
+        mode: 'local-first',
+      });
+
+      vi.mocked(fetch)
+        .mockRejectedValueOnce(new Error('Network'))
+        .mockRejectedValueOnce(new Error('Network'))
+        .mockRejectedValueOnce(new Error('Network'));
+
+      await expect(client.findByIntent('ViewChart')).resolves.toEqual([localApp]);
+      await expect(client.findByContextType('fdc3.instrument')).resolves.toEqual([localApp]);
+      await expect(client.findByCategory('Local')).resolves.toEqual([localApp]);
     });
   });
 });

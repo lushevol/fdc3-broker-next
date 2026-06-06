@@ -231,14 +231,16 @@ describe('Broker + Resolver UI Integration', () => {
     });
 
     it('should open tile directly without resolver UI', async () => {
-      let directBroker: Broker;
+      const directBrokerRef: { current?: Broker } = {};
 
       const onTileOpen = vi.fn().mockImplementation(async (target) => {
         // Simulate app startup and listener registration to avoid timeout
         const instanceId = `${target.appId || 'app'}-1`;
         if (target.appId) {
-          await directBroker.registerTile(instanceId, target.appId, { appId: target.appId });
-          await directBroker.addIntentListener('ViewChart', async () => {}, {
+          await directBrokerRef.current!.registerTile(instanceId, target.appId, {
+            appId: target.appId,
+          });
+          await directBrokerRef.current!.addIntentListener('ViewChart', async () => {}, {
             appId: target.appId,
             instanceId,
           });
@@ -254,7 +256,8 @@ describe('Broker + Resolver UI Integration', () => {
         },
       };
 
-      directBroker = new Broker(config);
+      const directBroker = new Broker(config);
+      directBrokerRef.current = directBroker;
 
       await directBroker.raiseIntent('ViewChart', mockContext, {
         appId: 'chart-app',
@@ -339,12 +342,14 @@ describe('Broker + Resolver UI Integration', () => {
   describe('resolver UI callback integration', () => {
     it('should use custom resolver UI callback when provided', async () => {
       // Create separate broker to avoid interference
-      let customBroker: Broker;
+      const customBrokerRef: { current?: Broker } = {};
 
       const onTileOpen = vi.fn().mockImplementation(async (target) => {
         const instanceId = `${target.appId || 'app'}-1`;
-        await customBroker.registerTile(instanceId, target.appId, { appId: target.appId });
-        await customBroker.addIntentListener('ViewChart', async () => {}, {
+        await customBrokerRef.current!.registerTile(instanceId, target.appId, {
+          appId: target.appId,
+        });
+        await customBrokerRef.current!.addIntentListener('ViewChart', async () => {}, {
           appId: target.appId,
           instanceId,
         });
@@ -364,7 +369,8 @@ describe('Broker + Resolver UI Integration', () => {
         },
       };
 
-      customBroker = new Broker(config);
+      const customBroker = new Broker(config);
+      customBrokerRef.current = customBroker;
 
       await customBroker.raiseIntent('ViewChart', mockContext);
 
@@ -373,12 +379,14 @@ describe('Broker + Resolver UI Integration', () => {
     });
 
     it('should default to first target when no resolver UI callback', async () => {
-      let brokerWithoutResolver: Broker;
+      const brokerWithoutResolverRef: { current?: Broker } = {};
 
       const onTileOpen = vi.fn().mockImplementation(async (target) => {
         const instanceId = `${target.appId || 'app'}-1`;
-        await brokerWithoutResolver.registerTile(instanceId, target.appId, { appId: target.appId });
-        await brokerWithoutResolver.addIntentListener('ViewChart', async () => {}, {
+        await brokerWithoutResolverRef.current!.registerTile(instanceId, target.appId, {
+          appId: target.appId,
+        });
+        await brokerWithoutResolverRef.current!.addIntentListener('ViewChart', async () => {}, {
           appId: target.appId,
           instanceId,
         });
@@ -393,7 +401,8 @@ describe('Broker + Resolver UI Integration', () => {
         },
       };
 
-      brokerWithoutResolver = new Broker(configWithoutResolver);
+      const brokerWithoutResolver = new Broker(configWithoutResolver);
+      brokerWithoutResolverRef.current = brokerWithoutResolver;
 
       const resolution = await brokerWithoutResolver.raiseIntent('ViewChart', mockContext);
 

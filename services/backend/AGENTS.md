@@ -4,28 +4,32 @@ Spring Boot backend service (port 8088). See [root AGENTS.md](../../AGENTS.md) f
 
 ## Purpose
 
-Main backend API for the MFE platform. Provides REST endpoints for data grids, workflows, and business logic.
+Single UI BFF for authentication, JWT lifecycle, EMS2 entitlement filtering, MFE admin config, config upload, and analytics forwarding.
 
 ## Key Details
 
-- **Framework:** Spring Boot (Java)
+- **Framework:** Spring Boot 4.0.6 (Java 21)
 - **Port:** 8088
-- **Database:** In-memory H2 for local dev (`MODE=PostgreSQL`)
+- **Database:** H2 in PostgreSQL mode for local dev, PostgreSQL for deployed profiles
 - **Build tool:** Maven (`pom.xml`)
 - **Local profile:** `spring.profiles.active=local`
+- **Docs:** [docs/PROJECT.md](docs/PROJECT.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/RULES.md](docs/RULES.md)
 
 ## Commands
 
 ```bash
-npm run dev    # Start with embedded H2, port 8088, local profile
-# Equivalent to: mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8088 -Dspring.profiles.active=local'
+npm run dev    # Start with .env.profile.${ACTIVE_ENV:-dev}, embedded H2, port 8088
+```
+
+Maven verification:
+
+```bash
+cd services/backend
+mvn test
 ```
 
 ## Important
 
-- The `dev` script passes a long inline environment string for H2 configuration, LDAP URL, etc. Edit directly in `package.json` if you need to change any of these.
-- No test/lint npm scripts – use Maven directly for Java tasks:
-  ```bash
-  cd services/backend && mvn test
-  ```
-- Source code in `src/main/java/`
+- Environment values come from root `.env.profile.*` files through `env-cmd`.
+- Local profile mocks external dependencies through `LocalConfig`.
+- Source code lives in `src/main/java/`.

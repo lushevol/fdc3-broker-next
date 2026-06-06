@@ -8,8 +8,6 @@ import type { TileProps } from '../Root/routing/common/interface';
 import { TradeBlotterFDC3Tile } from './TradeBlotterFDC3Tile';
 import { MAX_RETURNED_TRADES, SEARCH_TRADES_INTENT } from './tradeBlotterTypes';
 
-const mockRegisterTile = jest.fn();
-const mockUnregisterTile = jest.fn();
 const mockUseIntentListener = jest.fn();
 const mockIntentListenerCalls: Array<{
   intent: string;
@@ -18,16 +16,6 @@ const mockIntentListenerCalls: Array<{
 
 jest.mock('../Root/import', () => ({
   FDC3Agent: {
-    AgentProvider: ({
-      children,
-    }: {
-      appIdentifier: { appId: string; instanceId: string };
-      children: React.ReactNode;
-    }) => <>{children}</>,
-    useFDC3: () => ({
-      registerTile: mockRegisterTile,
-      unregisterTile: mockUnregisterTile,
-    }),
     useIntentListener: (intent: string, handler: (context: unknown) => Promise<unknown>) => {
       mockUseIntentListener(intent, handler);
       mockIntentListenerCalls.push({ intent, handler });
@@ -48,22 +36,15 @@ const baseProps: TileProps = {
 
 describe('TradeBlotterFDC3Tile', () => {
   beforeEach(() => {
-    mockRegisterTile.mockReset();
-    mockUnregisterTile.mockReset();
     mockUseIntentListener.mockReset();
     mockIntentListenerCalls.length = 0;
   });
 
-  it('renders the tile shell, registers the tile, and unregisters on unmount', () => {
-    const { unmount } = render(<TradeBlotterFDC3Tile {...baseProps} />);
+  it('renders the tile shell and relies on the base container for FDC3 lifecycle wiring', () => {
+    render(<TradeBlotterFDC3Tile {...baseProps} />);
 
     expect(screen.getByText('Trade Blotter')).toBeTruthy();
     expect(screen.getByText('Awaiting SearchTrades intent')).toBeTruthy();
-    expect(mockRegisterTile).toHaveBeenCalledWith('ws-trade-1', 'template_tile_trade_blotter');
-
-    unmount();
-
-    expect(mockUnregisterTile).toHaveBeenCalledWith('ws-trade-1', 'template_tile_trade_blotter');
   });
 
   it('keeps the SearchTrades listener identity stable across state-driven rerenders', async () => {
@@ -237,22 +218,4 @@ describe('TradeBlotterFDC3Tile', () => {
     );
   });
 
-  it('swallows register and unregister failures from the agent lifecycle', () => {
-    const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
-    mockRegisterTile.mockImplementation(() => {
-      throw new Error('register failed');
-    });
-    mockUnregisterTile.mockImplementation(() => {
-      throw new Error('unregister failed');
-    });
-
-    const { unmount } = render(<TradeBlotterFDC3Tile {...baseProps} />);
-
-    expect(screen.getByText('Trade Blotter')).toBeTruthy();
-
-    unmount();
-
-    expect(mockConsoleError).toHaveBeenCalledTimes(2);
-    mockConsoleError.mockRestore();
-  });
 });

@@ -139,6 +139,36 @@ describe('IntentQueueImpl', () => {
       const stored = localStorage.getItem('fdc3-intent-queue');
       expect(stored).toBeTruthy();
     });
+
+    it('should warn when queue persistence fails during save', () => {
+      const originalSetItem = localStorage.setItem;
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      Object.defineProperty(localStorage, 'setItem', {
+        configurable: true,
+        value: () => {
+          throw new Error('storage unavailable');
+        },
+      });
+
+      queue.queueIntent('tile-2', {
+        id: 'intent-1',
+        intent: 'ViewChart',
+        context: mockContext1,
+        source: mockSource,
+        timestamp: Date.now(),
+      });
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[IntentQueue] Failed to save to localStorage:',
+        expect.any(Error),
+      );
+
+      Object.defineProperty(localStorage, 'setItem', {
+        configurable: true,
+        value: originalSetItem,
+      });
+      warnSpy.mockRestore();
+    });
   });
 
   describe('deliverQueued()', () => {
@@ -283,7 +313,13 @@ describe('IntentQueueImpl', () => {
       queue.queueIntent('tile-2', intent);
 
       const intents = queue.getQueuedIntents('tile-2');
-      intents.push({} as any); // Try to modify returned array
+      intents.push({
+        id: 'external-mutation',
+        intent: 'ViewChart',
+        context: mockContext1,
+        source: mockSource,
+        timestamp: Date.now(),
+      }); // Try to modify returned array
 
       // Original queue should not be modified
       expect(queue.getQueuedIntents('tile-2').length).toBe(1);

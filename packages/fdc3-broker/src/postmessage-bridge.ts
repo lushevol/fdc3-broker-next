@@ -184,7 +184,18 @@ export class PostMessageBridge {
    * Validate origin against allowlist
    */
   private isOriginAllowed(origin: string): boolean {
-    return this.options.allowedOrigins.includes(origin);
+    return this.options.allowedOrigins.includes('*') || this.options.allowedOrigins.includes(origin);
+  }
+
+  /**
+   * Get all target origins for fan-out requests.
+   * When `*` is in the allowlist, returns `['*']`. Otherwise returns all configured origins.
+   */
+  private getAllTargetOrigins(): string[] {
+    if (this.options.allowedOrigins.includes('*')) {
+      return ['*'];
+    }
+    return [...this.options.allowedOrigins];
   }
 
   /**
@@ -472,46 +483,111 @@ export class PostMessageBridge {
     }
   }
 
-  // ==========================================================================
-  // Channel Placeholders (not implemented in this iteration)
-  // ==========================================================================
-
   /**
-   * Joins a user channel (placeholder)
+   * Joins a user channel in an external domain
+   *
+   * @param channel - Channel object or channel ID
+   * @param targetOrigin - Target origin to send to
    */
-  async joinUserChannel(_channel: Channel | string): Promise<void> {
-    this.logger.warn(
-      'PostMessage bridge: joinUserChannel not yet implemented - channels are not supported',
-    );
+  async joinUserChannel(channel: Channel | string, targetOrigin?: string): Promise<void> {
+    if (!this.enabled) {
+      throw new Error('PostMessage bridge is not enabled');
+    }
+
+    const channelId = typeof channel === 'string' ? channel : channel.id;
+    const origins = targetOrigin ? [targetOrigin] : this.getAllTargetOrigins();
+
+    this.logger.debug('Joining channel via PostMessage', {
+      channelId,
+      targetOrigins: origins,
+    });
+
+    await Promise.all(origins.map((origin) => this.sendRequest<void>(origin, 'joinUserChannel', { channelId })));
+
+    this.logger.info('Joined channel via PostMessage', { channelId });
   }
 
   /**
-   * Broadcasts context (placeholder)
+   * Broadcasts context to an external channel
+   *
+   * @param context - Context data to broadcast
+   * @param channelId - Optional channel ID, remote may use current channel when omitted
+   * @param targetOrigin - Target origin to send to
    */
-  async broadcast(_context: Context, _channelId?: string): Promise<void> {
-    this.logger.warn(
-      'PostMessage bridge: broadcast not yet implemented - channels are not supported',
-    );
+  async broadcast(context: Context, channelId?: string, targetOrigin?: string): Promise<void> {
+    if (!this.enabled) {
+      throw new Error('PostMessage bridge is not enabled');
+    }
+
+    const origins = targetOrigin ? [targetOrigin] : this.getAllTargetOrigins();
+
+    this.logger.debug('Broadcasting context via PostMessage', {
+      context,
+      channelId,
+      targetOrigins: origins,
+    });
+
+    await Promise.all(origins.map((origin) => this.sendRequest<void>(origin, 'broadcast', { context, channelId })));
+
+    this.logger.info('Broadcast via PostMessage successful', {
+      context,
+      channelId,
+    });
   }
 
   /**
-   * Gets current channel (placeholder)
+   * Gets the current external channel
+   *
+   * @param targetOrigin - Target origin to query
    */
-  async getCurrentChannel(): Promise<Channel | null> {
-    this.logger.warn(
-      'PostMessage bridge: getCurrentChannel not yet implemented - channels are not supported',
+  async getCurrentChannel(targetOrigin?: string): Promise<Channel | null> {
+    if (!this.enabled) {
+      return null;
+    }
+
+    const origins = targetOrigin ? [targetOrigin] : this.getAllTargetOrigins();
+
+    const results = await Promise.allSettled(
+      origins.map((origin) => this.sendRequest<Channel | null>(origin, 'getCurrentChannel', {})),
     );
+
+    for (const result of results) {
+      if (result.status === 'fulfilled' && result.value !== null) {
+        return result.value;
+      }
+    }
     return null;
   }
 
   /**
-   * Gets user channels (placeholder)
+   * Gets user channels from an external domain
+   *
+   * @param targetOrigin - Target origin to query
    */
-  async getUserChannels(): Promise<Channel[]> {
-    this.logger.warn(
-      'PostMessage bridge: getUserChannels not yet implemented - channels are not supported',
+  async getUserChannels(targetOrigin?: string): Promise<Channel[]> {
+    if (!this.enabled) {
+      return [];
+    }
+
+    const origins = targetOrigin ? [targetOrigin] : this.getAllTargetOrigins();
+
+    const results = await Promise.allSettled(
+      origins.map((origin) => this.sendRequest<Channel[]>(origin, 'getUserChannels', {})),
     );
-    return [];
+
+    const channels: Channel[] = [];
+    const seenIds = new Set<string>();
+    for (const result of results) {
+      if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+        for (const channel of result.value) {
+          if (!seenIds.has(channel.id)) {
+            seenIds.add(channel.id);
+            channels.push(channel);
+          }
+        }
+      }
+    }
+    return channels;
   }
 
   /**

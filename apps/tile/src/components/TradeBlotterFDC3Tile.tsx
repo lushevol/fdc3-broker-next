@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { FDC3Agent } from '../Root/import';
 import type { TileProps } from '../Root/routing/common/interface';
 import { TRADE_ROWS } from './tradeBlotterMockData';
@@ -11,7 +11,7 @@ import {
   TRADE_QUERY_CONTEXT_TYPE,
 } from './tradeBlotterTypes';
 
-const { AgentProvider, useFDC3, useIntentListener } = FDC3Agent;
+const { useIntentListener } = FDC3Agent;
 
 const styles = {
   container: {
@@ -133,26 +133,6 @@ function parseTradeQueryContext(value: unknown): TradeQueryContext {
   };
 }
 
-function useFdc3TileRegistration(appId: string, instanceId: string): void {
-  const fdc3 = useFDC3();
-
-  useEffect(() => {
-    try {
-      fdc3.registerTile(instanceId, appId);
-    } catch (error) {
-      console.error('Failed to register tile:', error);
-    }
-
-    return () => {
-      try {
-        fdc3.unregisterTile(instanceId, appId);
-      } catch (error) {
-        console.error('Failed to unregister tile:', error);
-      }
-    };
-  }, [appId, fdc3, instanceId]);
-}
-
 type TradeBlotterContentProps = {
   appId: string;
   instanceId: string;
@@ -161,8 +141,6 @@ type TradeBlotterContentProps = {
 function TradeBlotterContent({ appId, instanceId }: TradeBlotterContentProps): React.ReactElement {
   const [rows, setRows] = useState<TradeRow[]>([]);
   const [summary, setSummary] = useState<string>('Awaiting SearchTrades intent');
-
-  useFdc3TileRegistration(appId, instanceId);
 
   const handleSearchTrades = useCallback(
     async (rawContext: unknown): Promise<TradeSearchResult> => {
@@ -226,14 +204,6 @@ function TradeBlotterContent({ appId, instanceId }: TradeBlotterContentProps): R
 
 export function TradeBlotterFDC3Tile(props: TileProps): React.ReactElement {
   const appId = props.tile.replace(/\//g, '');
-  const appIdentifier = {
-    appId,
-    instanceId: props.id,
-  };
 
-  return (
-    <AgentProvider appIdentifier={appIdentifier}>
-      <TradeBlotterContent appId={appId} instanceId={props.id} />
-    </AgentProvider>
-  );
+  return <TradeBlotterContent appId={appId} instanceId={props.id} />;
 }

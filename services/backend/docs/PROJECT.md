@@ -1,57 +1,68 @@
-# backend (Single UI BFF) — Project Overview
+# backend (Single UI BFF) - Project Overview
 
-← [Monorepo AGENTS.md](../../AGENTS.md)
+<- [Monorepo AGENTS.md](../../../AGENTS.md)
 
 ## Type
 
-Spring Boot 3.3.4 Backend Service (Java 17), Port 8088
+Spring Boot 4.0.6 backend service (Java 21), port 8088.
 
 ## Purpose
 
-Backend for Frontend (BFF) providing authentication (LDAP/SSO), authorization (EMS2), JWT token management, admin CRUD (tiles, categories, import maps), and analytics. Uses in-memory H2 for local dev.
+Backend for Frontend for the Single-SPA platform. It owns SSO login flows, JWT token lifecycle, EMS2 entitlement filtering, MFE admin configuration for tiles/categories/import maps, CSV config upload, and analytics forwarding.
 
 ## Status
 
-Production
+Active service.
 
 ## Key Features
 
-- **Dual authentication**: LDAP password login and MFA/SSO OAuth2 code exchange
-- **JWT RSA512 token lifecycle**: main token (15 min), refresh token (225 min), entitlement token (12 h)
-- **Maker-checker approval workflow**: tile/category/import map create/update sets `isActive=false` until checker approves
-- **Entitlement-scoped data**: all tile, category, and import map data filtered by EMS2 roles
-- **Elasticsearch analytics**: page-view and unique-visitor data pushed to Elasticsearch
-- **Local development with mock services**: `LocalConfig` provides mock beans for LDAP, EMS2, MFA, and Elasticsearch
+- **Dual login path**: OUD/LDAP password login or MFA/SSO authorization-code exchange.
+- **JWT lifecycle**: main token, refresh token, and entitlement token signed with RSA512.
+- **EMS2 authorization**: drawer, tile, category, and import-map access is filtered by entitlement data.
+- **Maker-checker admin flow**: create/update operations remain inactive until approved.
+- **CSV config upload**: import maps, categories, and tiles can be bulk-loaded.
+- **Analytics forwarding**: UI events are written through the analytics service.
+- **Local profile**: H2 in PostgreSQL mode plus mock beans for LDAP, EMS2, MFA, FMAA, and Elasticsearch.
 
 ## Quick Start
 
 ```bash
 # From monorepo root
-npm run dev:services
+npm --workspace services/backend run dev
 
-# Or standalone
-cd services/backend && npm run dev
-# Equivalent to: mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8088 -Dspring.profiles.active=local'
+# Or as part of the service stack
+npm run dev:services
 ```
 
-Local profile starts H2 in-memory database with `create-drop` — no PostgreSQL or LDAP needed.
+The workspace `dev` script loads `.env.profile.${ACTIVE_ENV:-dev}` and starts Maven with:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8088 -Dspring.profiles.active=local'
+```
 
 ## Package
 
 `com.scb.sso.singleuibff`
 
-## Environment
+## Runtime Configuration
 
-Production requires 20+ environment variables:
+Local `.env.profile.*` files provide H2 and mock dependency values:
 
-| Group         | Variables                                                                               |
-| ------------- | --------------------------------------------------------------------------------------- |
-| Database      | `PGSL_RDB_HOST`, `PGSL_RDB_PORT`, `PGSL_RDB_NAME`, `PGSL_RDB_USER`, `PGSL_RDB_PASSWORD` |
-| LDAP          | `OUD_URL`, `OUD_USER_SEARCH_BASE`, `OUD_USER_SEARCH_FILTER`                             |
-| Elasticsearch | `ELASTIC_HOST`, `ELASTIC_PORT`, `ELASTIC_PROTOCOL`, `ELASTIC_INDEX`                     |
-| MFA/SSO       | `MFA_CLIENT_ID`, `MFA_CLIENT_SECRET`, `MFA_TOKEN_URL`, `MFA_REDIRECT_URI`               |
-| EMS2          | `EMS2_URL`, `EMS2_CLIENT_ID`, `EMS2_CLIENT_SECRET`                                      |
-| JWT           | `JWT_ISSUER`, `JWT_REFRESH_ISSUER`, `JWT_SECRET` (RSA512 keys)                          |
-| FMAA          | `FMAA_URL`, `FMAA_CLIENT_ID`, `FMAA_CLIENT_SECRET`                                      |
+| Group          | Current variables                                                                            |
+| -------------- | -------------------------------------------------------------------------------------------- |
+| Database       | `PGSL_RDB_URL`, `PGSL_RDB_USERNAME_HASHICORP`, `PGSL_RDB_JANUS_HASHICORP`, `PGSL_RDB_DRIVER` |
+| Directory/Auth | `OUD_URL`, `RATAN_CIPHER_KEY`, `FMAA_HOST`, `MFA_CERT`, `MFA_REDIRECT_URI`                   |
+| Analytics      | `ELASTIC_HOST`, `ELASTIC_API_KEY`, `ELASTIC_API_VALUE`                                       |
+| Entitlements   | `EMS2_HTTPS_HOST`                                                                            |
+| Gateway        | `API_GATEWAY_URL`, `API_GATEWAY_TOKEN`                                                       |
 
-Local profile (`local`) uses in-memory H2 and `LocalConfig` mock beans — none of these are required.
+Production configuration is read from `application.yml`, HashiCorp-backed values, and deployment environment variables.
+
+## Verification
+
+```bash
+cd services/backend
+mvn test
+```
+
+Current focused tests cover local auth flow and JWT utilities.

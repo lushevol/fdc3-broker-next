@@ -205,11 +205,15 @@ export const useResolverKeyboard = (options: UseResolverKeyboardOptions) => {
       switch (event.key) {
         case 'ArrowDown':
           event.preventDefault();
-          setFocusedIndex((prev) => (prev + 1) % itemCount);
+          if (itemCount > 0) {
+            setFocusedIndex((prev) => (prev + 1) % itemCount);
+          }
           break;
         case 'ArrowUp':
           event.preventDefault();
-          setFocusedIndex((prev) => (prev - 1 + itemCount) % itemCount);
+          if (itemCount > 0) {
+            setFocusedIndex((prev) => (prev - 1 + itemCount) % itemCount);
+          }
           break;
         case 'Home':
           event.preventDefault();
@@ -217,12 +221,14 @@ export const useResolverKeyboard = (options: UseResolverKeyboardOptions) => {
           break;
         case 'End':
           event.preventDefault();
-          setFocusedIndex(itemCount - 1);
+          setFocusedIndex(Math.max(0, itemCount - 1));
           break;
         case 'Enter':
         case ' ':
           event.preventDefault();
-          onSelect(focusedIndex);
+          if (itemCount > 0 && focusedIndex >= 0 && focusedIndex < itemCount) {
+            onSelect(focusedIndex);
+          }
           break;
         case 'Escape':
           event.preventDefault();

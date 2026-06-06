@@ -39,7 +39,7 @@ Chatbot Backend CentOS Deploy Bundle
 3. Run: chmod +x run.sh
 4. Start the service with: ./run.sh
 
-The launcher will stop with a clear error if Java 17+, the JAR, or .env is missing.
+The launcher will stop with a clear error if Java 21+, the JAR, or .env is missing.
 EOF
 
 chmod +x "$BUILD_DIR/run.sh"

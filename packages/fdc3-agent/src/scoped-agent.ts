@@ -5,7 +5,10 @@ import type {
   AppMetadata,
   Channel,
   Context,
+  EventHandler,
+  FDC3EventTypes,
   ImplementationMetadata,
+  IntentHandler,
   IntentResolution,
   Listener,
   PrivateChannel,
@@ -93,10 +96,7 @@ export class ScopedDesktopAgent implements RatanDesktopAgent {
     return this.broker.findWorkflowsByInput(input);
   }
 
-  async addIntentListener(
-    intent: string,
-    handler: (context: Context) => any | Promise<any>,
-  ): Promise<Listener> {
+  async addIntentListener(intent: string, handler: IntentHandler): Promise<Listener> {
     return this.broker.addIntentListener(intent, handler, this.source);
   }
 
@@ -128,7 +128,10 @@ export class ScopedDesktopAgent implements RatanDesktopAgent {
     return this.broker.getInfo();
   }
 
-  async addEventListener(eventType: any, handler: (event: any) => void): Promise<Listener> {
+  async addEventListener(
+    eventType: FDC3EventTypes | null,
+    handler: EventHandler,
+  ): Promise<Listener> {
     return this.broker.addEventListener(eventType, handler);
   }
 

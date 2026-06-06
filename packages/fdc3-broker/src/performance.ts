@@ -47,7 +47,7 @@ export class PerformanceTracker {
    */
   end(operation: string): number {
     const start = this.marks.get(operation);
-    if (!start) {
+    if (start === undefined) {
       console.warn(`[FDC3:Perf] No start mark found for operation: ${operation}`);
       return 0;
     }

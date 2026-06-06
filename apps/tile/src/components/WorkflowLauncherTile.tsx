@@ -3,7 +3,7 @@ import type { TileProps } from '../Root/routing/common/interface';
 import { FDC3Agent } from '../Root/import';
 import { PENDING_VALIDATION_STATUS } from './tradeBlotterTypes';
 
-const { AgentProvider, useFDC3 } = FDC3Agent;
+const { useFDC3 } = FDC3Agent;
 
 const WORKFLOW_ID = 'trade.pendingValidation.openChart';
 const WORKFLOW_INPUT = {
@@ -135,15 +135,6 @@ function WorkflowLauncherContent(): React.ReactElement {
   );
 }
 
-export function WorkflowLauncherTile(props: TileProps): React.ReactElement {
-  const appIdentifier = {
-    appId: props.tile.replace(/\//g, ''),
-    instanceId: props.id,
-  };
-
-  return (
-    <AgentProvider appIdentifier={appIdentifier}>
-      <WorkflowLauncherContent />
-    </AgentProvider>
-  );
+export function WorkflowLauncherTile(_props: TileProps): React.ReactElement {
+  return <WorkflowLauncherContent />;
 }

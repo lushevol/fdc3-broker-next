@@ -1,53 +1,52 @@
-# chatbot-backend — Project Overview
+# chatbot-backend - Project Overview
 
-← [Monorepo AGENTS.md](../../AGENTS.md)
+<- [Monorepo AGENTS.md](../../../AGENTS.md)
 
 ## Type
 
-Spring Boot 3.5.14 Backend Service (Java 17), Port 8080
+Spring Boot 4.0.6 backend service (Java 21), port 8080.
 
 ## Purpose
 
-AI-powered conversational chat service providing OpenAI-compatible and Anthropic LLM integration via Spring AI, with SSE streaming, agentic decision-making (respond/clarify/plan), tool execution, MCP provider registration, generative UI directives, and rate limiting.
+AI chat backend for the MFE platform. It accepts chat protocol requests, streams protocol frames over SSE, orchestrates Spring AI model calls, exposes local/frontend/MCP tools, handles user-question and tool continuation flows, and injects memory context.
 
 ## Status
 
-Active Development
+Active service.
 
 ## Key Features
 
-- **Spring AI integration**: OpenAI-compatible and Anthropic chat model support via Spring-managed model beans
-- **SSE streaming responses**: Real-time token delivery via `SseEmitter`
-- **Agentic control loop**: `AgentService` → `AgentDecisionService` (RESPOND/CLARIFY/PLAN) → `PlanValidationService` → `ExecutionOrchestrator` → `ResultSynthesisService`
-- **MCP provider registration**: Dynamic MCP provider registration via REST API or bootstrap config (STREAMABLE_HTTP and HTTP_SSE transports)
-- **Generative UI directives**: Frontend receives `generative_ui` SSE events with UI rendering instructions
-- **Frontend tool continuation**: Client-side tool execution with results fed back via `toolContext` parameter
-- **Rate limiting**: 60 req/min per client via Bucket4j (health endpoint excluded)
-- **In-memory conversation management**: `ConcurrentHashMap`-based conversation store
-- **Persistent long-term memory**: AutoMemoryTools file-based memory (6 tools: view, create, edit, insert, delete, rename) with YAML-frontmatter Markdown storage
+- **Canonical protocol endpoint**: `POST /api/chat/runs`.
+- **Compatibility endpoint**: `POST /api/chat/stream` converts legacy `ChatRequest` into `ProtocolRunRequest`.
+- **Spring AI integration**: OpenAI-compatible and Anthropic model support.
+- **Model selection**: `config.modelName` can override the default model for a run.
+- **Agentic control loop**: decision, plan validation, execution orchestration, result synthesis.
+- **Tools**: local Java tools, agent-utils callbacks, frontend tools, human approval, and MCP tools.
+- **MCP bootstrap and runtime registry**: Elasticsearch analytics and RAG providers can be configured or registered at runtime.
+- **Memory**: SQL-backed `memory-service` context plus per-user AutoMemoryTools compatibility.
+- **Observability**: OpenTelemetry annotations/agent, Micrometer metrics, actuator, rolling logs.
+- **Rate limiting**: Bucket4j request limiting.
 
 ## Quick Start
 
 ```bash
-# From monorepo root (requires env vars — see .env.example)
-npm run dev:services
-
-# Or standalone
-cd services/chatbot-backend && npm run dev
-
-# With Elasticsearch MCP service (starts the stub MCP service automatically)
-npm run dev:with-elasticsearch-mcp
-
-# Build / test
-npm run build
-npm run test
+cd services/chatbot-backend
+npm run dev
 ```
 
-Default LLM: Alibaba DashScope (`qwen3.5-plus`) via OpenAI-compatible API.
+Root stacks:
 
-## Required Environment Variables
+```bash
+npm run dev:services
+npm run dev:services:stub
+npm run dev:rag:stub
+```
 
-See `.env.example`:
+## Required Configuration
+
+See `.env.example` and root `.env.profile.*`.
+
+Core provider values:
 
 - `CHATBOT_OPENAI_API_KEY`
 - `CHATBOT_OPENAI_BASE_URL`
@@ -56,4 +55,21 @@ See `.env.example`:
 - `CHATBOT_ANTHROPIC_API_KEY`
 - `CHATBOT_ANTHROPIC_MODEL`
 
-These are also declared in root `turbo.json` under `globalEnv`.
+Integration values:
+
+- `CHATBOT_MCP_ELASTICSEARCH_ENABLED`
+- `CHATBOT_MCP_ELASTICSEARCH_URL`
+- `CHATBOT_MCP_RAG_ENABLED`
+- `CHATBOT_MCP_RAG_URL`
+- `CHATBOT_MEMORY_BASE_URL`
+- `CHATBOT_MEMORY_TENANT_ID`
+- `CHATBOT_MEMORY_REQUEST_TIMEOUT`
+- `CHATBOT_MEMORY_CONTEXT_LIMIT`
+
+## Verification
+
+```bash
+cd services/chatbot-backend
+mvn test
+npm run verify:protocol:real
+```

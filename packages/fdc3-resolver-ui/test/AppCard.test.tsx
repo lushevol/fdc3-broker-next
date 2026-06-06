@@ -207,9 +207,7 @@ describe('AppCard', () => {
 
       fireEvent(card!, event);
 
-      // Note: fireEvent doesn't actually use the real event object for preventDefault
-      // This is more of a structural test
-      expect(card).toBeTruthy();
+      expect(preventDefaultSpy).toHaveBeenCalled();
     });
   });
 

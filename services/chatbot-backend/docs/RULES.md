@@ -1,65 +1,52 @@
-# chatbot-backend — Rules
+# chatbot-backend - Rules
 
-← [PROJECT.md](./PROJECT.md) · [Monorepo rules](../../docs/rules.md)
+<- [PROJECT.md](./PROJECT.md) - [Monorepo rules](../../../docs/rules.md)
 
-## LLM Integration
+## Protocol
 
-- Always use Spring AI abstractions (`ChatModel`, `Prompt`, Spring-managed provider model beans)
-- Never call OpenAI/Anthropic APIs directly — route through `AgentService`
-- Configure model via `spring.ai.openai.*` properties or `CHATBOT_*` env vars
+- New clients use `POST /api/chat/runs`.
+- Request messages must use `parts`, not `content`.
+- Keep frame names aligned with `packages/chat-protocol-contract`.
+- Always emit `finish` exactly once for a run unless the connection is cancelled.
+- Preserve `/api/chat/stream` as compatibility unless all callers are migrated.
 
-## SSE Streaming
+## Model Integration
 
-- Use `SseEmitter` for all streaming responses — never return blocking responses from streaming endpoints
-- Emit event types in order: `conversation_id` → `message`/`tool_call`/`tool_result`/`generative_ui`/`execution_plan`/`execution_step` → `done`
-- Always emit `done` as the final event to signal stream completion
-- Always emit `conversation_id` as the first event
+- Use Spring AI abstractions and configured provider beans.
+- Do not call OpenAI, Anthropic, or provider-specific chat completions directly from controllers.
+- Per-run model override goes through `ProtocolRunRequest.config.modelName`.
 
-## MCP Providers
+## Tools
 
-- Register via `POST /api/chat/mcp/providers` or bootstrap config in `application.yml`
-- Use `STREAMABLE_HTTP` transport type for new providers (preferred over `HTTP_SSE`)
-- Never call MCP tool endpoints directly — route through `ToolRegistry`
+- Implement local Java tools through `ToolDefinition`.
+- Register local tools through Spring beans; `ToolRegistry` discovers them.
+- MCP tools must be registered through `McpProviderRegistryService`.
+- Frontend tools come from protocol `context.tools` or compatibility `context.frontendTools`.
+- Human/approval tools must finish with `action-required` until a valid continuation is submitted.
 
-## Agentic Loop
+## Memory
 
-- When `CapabilityResolver` is available and no `toolContext` is provided, the agentic control loop is used
-- Otherwise, the direct model streaming path is used
-- Do not bypass `PlanValidationService` — all plans must be validated before execution
-- `PolicyEvaluator` decisions (DENY, REVIEW_REQUIRED) must be respected
+- `memory-service` lookup is best-effort and scoped by user id.
+- Never share AutoMemoryTools directories across users.
+- Do not log memory bodies or full operator context.
 
-## Tool Implementation
+## Security
 
-- Implement `ToolDefinition` interface: `getName()`, `getDescription()`, `getParameters()`, `execute()`
-- Register tools via `ToolRegistry`
-- Built-in tools (`CalculatorTool`, `TimeTool`, `WeatherTool`) are always available
+- Profile-gated tools must remain profile-gated.
+- Do not hard-code user profiles in source; use JWT claims or `CHATBOT_SECURITY_ADDITIONAL_PROFILES`.
+- Keep rate limiting enabled for production.
 
-## Security Profiles
+## Observability
 
-- Use `CHATBOT_SECURITY_ADDITIONAL_PROFILES` env var to enable tool access profiles (e.g., `advisor` for analytics)
-- Never hard-code security profiles in source code
+- Keep spans around protocol entry points, model calls, tool execution, and MCP provider calls.
+- Keep `chatbot.request.active` registered.
+- Do not log secrets, provider API keys, raw prompts containing private data, or full tool outputs.
 
-## Memory / Conversation Storage
+## Tests
 
-### Long-Term Memory (AutoMemoryTools)
+```bash
+cd services/chatbot-backend
+mvn test
+```
 
-- Uses `AutoMemoryTools` from `spring-ai-agent-utils` for persistent file-based memory
-- Six memory tools available: `MemoryView`, `MemoryCreate`, `MemoryStrReplace`, `MemoryInsert`, `MemoryDelete`, `MemoryRename`
-- Memories are stored as Markdown files with YAML frontmatter in `chatbot.memory.directory` (default: `./data/memories`)
-- A `MEMORY.md` index file tracks all entries — the agent always reads this first
-- Memory types: `user` (preferences/role), `feedback` (behavioral guidance), `project` (context), `reference` (external docs)
-- Memories persist across sessions — facts are never lost on service restart
-- Configured via `chatbot.memory.enabled` and `chatbot.memory.directory` env vars
-- The companion system prompt (`AUTO_MEMORY_TOOLS_SYSTEM_PROMPT.md`) is loaded from the `spring-ai-agent-utils` classpath resource
-
-### Short-Term Conversation History
-
-- Currently in-memory (`ConcurrentHashMap`) — not production-safe
-- Must migrate to Redis or database for production deployments
-- Conversation data is lost on service restart
-
-## Rate Limiting
-
-- 60 req/min per client — do not remove or loosen for production
-- Health endpoint (`/api/chat/health`) is excluded from rate limiting
-- Configurable via `chatbot.rate-limit.requests-per-minute`
+Add or update tests for protocol frames, MCP registration, tool execution, memory context, and controller behavior before changing those paths.

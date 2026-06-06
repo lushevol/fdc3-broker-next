@@ -1,91 +1,71 @@
 # RAG Knowledge Base Service Architecture
 
-## Purpose
+<- [PROJECT.md](./PROJECT.md)
 
-`rag-knowledge-base-service` is a standalone MCP provider for read-only retrieval augmented generation. It keeps document ingestion, chunking, embeddings, and vector search outside `chatbot-backend`, so chatbot integration stays plugin-based through the existing MCP provider registry.
+## Tech Stack
+
+| Component               | Technology                            |
+| ----------------------- | ------------------------------------- |
+| Framework               | Spring Boot 4.0.6                     |
+| Language                | Java 21                               |
+| MCP                     | Spring AI 2.0.0-M6 MCP server         |
+| HTTP client             | Spring WebFlux `WebClient`            |
+| Local vector storage    | In-memory cosine repository           |
+| Optional vector storage | Elasticsearch dense vector repository |
+| Build                   | Maven                                 |
 
 ## Runtime Shape
 
 ```text
 chatbot-backend
-  └─ MCP client registration
-      └─ rag-knowledge-base-service /api/mcp
-          └─ search_knowledge_base(query, topK, namespace)
-              ├─ KnowledgeSearchService
-              ├─ EmbeddingClient
-              │   ├─ OpenRouterEmbeddingClient
-              │   └─ DeterministicEmbeddingClient
-              └─ KnowledgeChunkRepository
-                  └─ InMemoryKnowledgeChunkRepository
+  -> MCP client registration
+     -> rag-knowledge-base-service /api/mcp
+        -> search_knowledge_base(query, topK, namespace)
+           -> KnowledgeSearchService
+              -> EmbeddingClient
+              -> KnowledgeChunkRepository
 ```
 
 ## Key Components
 
-- `KnowledgeBaseMcpTools`: exposes MCP tool `search_knowledge_base`.
-- `KnowledgeSearchService`: embeds the query on a bounded executor and searches the repository.
-- `KnowledgeBaseIndexService`: indexes source documents after `ApplicationReadyEvent`; startup does not fail if indexing fails.
-- `MarkdownKnowledgeDocumentLoader`: loads `*.md` files from `rag.ingestion.resource-pattern`.
-- `SimpleMarkdownChunker`: splits documents into overlapping text chunks.
-- `EmbeddingClient`: stable interface for query and document embeddings.
-- `KnowledgeChunkRepository`: stable storage/search boundary for migration to Elasticsearch.
-
-## Request Flow
-
-1. `chatbot-backend` registers the RAG service from `chatbot.mcp.providers`.
-2. The agent sees `search_knowledge_base` as an MCP read capability.
-3. When the model calls the tool, the RAG service embeds the query.
-4. The repository returns top-K chunks filtered by optional namespace.
-5. The tool response includes chunk text, score, document id, namespace, title, and metadata for citation.
+- `KnowledgeBaseMcpTools`: exposes `search_knowledge_base`.
+- `KnowledgeSearchService`: embeds the query and searches the selected repository.
+- `KnowledgeBaseIndexService`: indexes source documents after `ApplicationReadyEvent`.
+- `MarkdownKnowledgeDocumentLoader`: loads Markdown resources and front matter.
+- `SimpleMarkdownChunker`: splits source documents into overlapping chunks.
+- `EmbeddingClient`: interface implemented by deterministic, OpenRouter, and Copilot clients.
+- `KnowledgeChunkRepository`: storage/search boundary for in-memory and Elasticsearch repositories.
 
 ## Indexing Flow
 
 1. Spring starts the MCP server.
 2. `KnowledgeBaseIndexService` listens for `ApplicationReadyEvent`.
-3. Indexing runs on `ragEmbeddingExecutor`.
-4. Markdown files are loaded, chunked, embedded, and atomically published into the repository with `replaceAll`.
-5. If OpenRouter is unavailable, the service logs the indexing failure and keeps the MCP endpoint available.
+3. If ingestion is enabled, Markdown resources are loaded and chunked.
+4. Chunks are embedded on `ragEmbeddingExecutor`.
+5. `KnowledgeChunkRepository.replaceAll(...)` publishes the rebuilt index.
+6. Indexing failures are logged; the MCP endpoint remains available.
+
+## Search Flow
+
+1. The model calls `search_knowledge_base`.
+2. The service caps `topK` using `rag.search.max-top-k`.
+3. The query is embedded using the configured provider.
+4. The repository returns scored chunks, optionally filtered by namespace.
+5. The response includes chunk id, document id, title, namespace, text, score, and metadata.
 
 ## Embedding Providers
 
-`openrouter` is the production provider:
+| Provider        | Use                                    |
+| --------------- | -------------------------------------- |
+| `deterministic` | Local and tests; no network/API key    |
+| `openrouter`    | OpenRouter embedding API               |
+| `copilot-api`   | Local Copilot-compatible embedding API |
 
-```bash
-OPENROUTER_API_KEY=...
-OPENROUTER_EMBEDDING_MODEL=openai/text-embedding-3-small
-```
+Do not mix embedding providers between indexed chunks and query embeddings.
 
-`deterministic` is for local development and tests:
+## Repository Selection
 
-```bash
-RAG_EMBEDDING_PROVIDER=deterministic
-```
+- `rag.elasticsearch.enabled=false`: use `InMemoryKnowledgeChunkRepository`.
+- `rag.elasticsearch.enabled=true`: use `ElasticsearchKnowledgeChunkRepository`.
 
-Do not mix providers for indexed chunks and query embeddings. Similarity scores are only meaningful when both vectors come from the same embedding space.
-
-## Elasticsearch Migration Boundary
-
-The migration target is a new implementation of `KnowledgeChunkRepository`, selected by a future property such as `rag.store.provider=elasticsearch`.
-
-The repository contract should remain stable:
-
-- `replaceAll(List<KnowledgeChunk> chunks)`
-- `search(List<Double> queryEmbedding, String namespace, int topK)`
-- `size()`
-
-Recommended Elasticsearch document shape:
-
-```json
-{
-  "chunkId": "mfe-chatbot#1",
-  "documentId": "mfe-chatbot",
-  "title": "MFE Chatbot And MCP",
-  "namespace": "advisor",
-  "text": "Remote MCP providers are registered...",
-  "embedding": [0.1, 0.2],
-  "metadata": {
-    "source": "seed"
-  }
-}
-```
-
-This keeps `chatbot-backend` unchanged when storage moves from memory to Elasticsearch.
+Elasticsearch uses `rag.elasticsearch.uris`, `index-name`, and `embedding-dimension`. The repository creates the index when missing and stores one document per chunk.

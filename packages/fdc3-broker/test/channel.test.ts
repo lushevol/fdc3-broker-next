@@ -414,6 +414,213 @@ describe('PrivateChannelImpl', () => {
     });
   });
 
+  describe('private channel event contract', () => {
+    it('should emit addContextListener events for new listeners', async () => {
+      const eventHandler = vi.fn();
+
+      await privateChannel.addEventListener('addContextListener', eventHandler);
+      await privateChannel.addContextListener('fdc3.chart', vi.fn());
+      await privateChannel.addContextListener(vi.fn());
+
+      expect(eventHandler).toHaveBeenCalledWith({
+        type: 'addContextListener',
+        details: { contextType: 'fdc3.chart' },
+      });
+      expect(eventHandler).toHaveBeenCalledWith({
+        type: 'addContextListener',
+        details: { contextType: null },
+      });
+    });
+
+    it('should replay existing addContextListener events to late subscribers', async () => {
+      await privateChannel.addContextListener('fdc3.chart', vi.fn());
+      await privateChannel.addContextListener(vi.fn());
+
+      const eventHandler = vi.fn();
+      await privateChannel.addEventListener('addContextListener', eventHandler);
+
+      expect(eventHandler).toHaveBeenNthCalledWith(1, {
+        type: 'addContextListener',
+        details: { contextType: 'fdc3.chart' },
+      });
+      expect(eventHandler).toHaveBeenNthCalledWith(2, {
+        type: 'addContextListener',
+        details: { contextType: null },
+      });
+    });
+
+    it('should emit unsubscribe events when context listeners unsubscribe', async () => {
+      const eventHandler = vi.fn();
+      await privateChannel.addEventListener('unsubscribe', eventHandler);
+
+      const chartListener = await privateChannel.addContextListener('fdc3.chart', vi.fn());
+      const allListener = await privateChannel.addContextListener(vi.fn());
+
+      await chartListener.unsubscribe();
+      await allListener.unsubscribe();
+
+      expect(eventHandler).toHaveBeenCalledWith({
+        type: 'unsubscribe',
+        details: { contextType: 'fdc3.chart' },
+      });
+      expect(eventHandler).toHaveBeenCalledWith({
+        type: 'unsubscribe',
+        details: { contextType: null },
+      });
+    });
+
+    it('should notify all-event subscribers for private channel events', async () => {
+      const eventHandler = vi.fn();
+      await privateChannel.addEventListener(null, eventHandler);
+
+      const listener = await privateChannel.addContextListener('fdc3.chart', vi.fn());
+      await listener.unsubscribe();
+      await privateChannel.disconnect();
+
+      expect(eventHandler).toHaveBeenCalledWith({
+        type: 'addContextListener',
+        details: { contextType: 'fdc3.chart' },
+      });
+      expect(eventHandler).toHaveBeenCalledWith({
+        type: 'unsubscribe',
+        details: { contextType: 'fdc3.chart' },
+      });
+      expect(eventHandler).toHaveBeenCalledWith({ type: 'disconnect', details: null });
+    });
+
+    it('should remove private event handlers when their listener unsubscribes', async () => {
+      const eventHandler = vi.fn();
+      const listener = await privateChannel.addEventListener('addContextListener', eventHandler);
+
+      await listener.unsubscribe();
+      await privateChannel.addContextListener('fdc3.chart', vi.fn());
+
+      expect(eventHandler).not.toHaveBeenCalled();
+    });
+
+    it('should support deprecated add-context and unsubscribe event helpers', async () => {
+      const addContextHandler = vi.fn();
+      const unsubscribeHandler = vi.fn();
+
+      privateChannel.onAddContextListener(addContextHandler);
+      privateChannel.onUnsubscribe(unsubscribeHandler);
+
+      const chartListener = await privateChannel.addContextListener('fdc3.chart', vi.fn());
+      const allListener = await privateChannel.addContextListener(vi.fn());
+
+      await chartListener.unsubscribe();
+      await allListener.unsubscribe();
+
+      expect(addContextHandler).toHaveBeenCalledWith('fdc3.chart');
+      expect(addContextHandler).toHaveBeenCalledWith(undefined);
+      expect(unsubscribeHandler).toHaveBeenCalledWith('fdc3.chart');
+      expect(unsubscribeHandler).toHaveBeenCalledWith(undefined);
+    });
+
+    it('should unsubscribe active context listeners before firing disconnect', async () => {
+      const eventOrder: string[] = [];
+      const eventHandler = vi.fn((event) => {
+        eventOrder.push(event.type);
+      });
+
+      await privateChannel.addEventListener(null, eventHandler);
+      await privateChannel.addContextListener('fdc3.chart', vi.fn());
+      await privateChannel.addContextListener('fdc3.quote', vi.fn());
+
+      await privateChannel.disconnect();
+
+      expect(eventOrder).toEqual([
+        'addContextListener',
+        'addContextListener',
+        'unsubscribe',
+        'unsubscribe',
+        'disconnect',
+      ]);
+      expect(privateChannel.isDisconnected()).toBe(true);
+    });
+
+    it('should prevent broadcasts after disconnect', async () => {
+      const handler = vi.fn();
+
+      privateChannel.grantAccess('tile-1');
+      await privateChannel.addContextListener('fdc3.chart', handler);
+
+      await privateChannel.disconnect();
+      await privateChannel.broadcast(mockContext);
+
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('should call deprecated disconnect helpers only once', async () => {
+      const disconnectHandler = vi.fn();
+      privateChannel.onDisconnect(disconnectHandler);
+
+      await privateChannel.disconnect();
+      await privateChannel.disconnect();
+
+      expect(disconnectHandler).toHaveBeenCalledTimes(1);
+    });
+
+    it('should continue emitting when a private event handler throws', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const failingHandler = vi.fn(() => {
+        throw new Error('event handler failed');
+      });
+      const succeedingHandler = vi.fn();
+
+      await privateChannel.addEventListener('addContextListener', failingHandler);
+      await privateChannel.addEventListener('addContextListener', succeedingHandler);
+
+      await privateChannel.addContextListener('fdc3.chart', vi.fn());
+
+      expect(failingHandler).toHaveBeenCalledTimes(1);
+      expect(succeedingHandler).toHaveBeenCalledWith({
+        type: 'addContextListener',
+        details: { contextType: 'fdc3.chart' },
+      });
+      expect(consoleError).toHaveBeenCalledWith(
+        '[PrivateChannel] Error in addContextListener handler:',
+        expect.any(Error),
+      );
+
+      consoleError.mockRestore();
+    });
+
+    it('should make context listener unsubscribe idempotent', async () => {
+      const eventHandler = vi.fn();
+      await privateChannel.addEventListener('unsubscribe', eventHandler);
+
+      const listener = await privateChannel.addContextListener('fdc3.chart', vi.fn());
+
+      await listener.unsubscribe();
+      await listener.unsubscribe();
+
+      expect(eventHandler).toHaveBeenCalledTimes(1);
+    });
+
+    it('should unsubscribe deprecated private event helpers', async () => {
+      const addContextHandler = vi.fn();
+      const unsubscribeHandler = vi.fn();
+      const disconnectHandler = vi.fn();
+
+      const addContextListener = privateChannel.onAddContextListener(addContextHandler);
+      const unsubscribeListener = privateChannel.onUnsubscribe(unsubscribeHandler);
+      const disconnectListener = privateChannel.onDisconnect(disconnectHandler);
+
+      await addContextListener.unsubscribe();
+      await unsubscribeListener.unsubscribe();
+      await disconnectListener.unsubscribe();
+
+      const listener = await privateChannel.addContextListener('fdc3.chart', vi.fn());
+      await listener.unsubscribe();
+      await privateChannel.disconnect();
+
+      expect(addContextHandler).not.toHaveBeenCalled();
+      expect(unsubscribeHandler).not.toHaveBeenCalled();
+      expect(disconnectHandler).not.toHaveBeenCalled();
+    });
+  });
+
   describe('tile management', () => {
     it('should remove tile from channel', () => {
       privateChannel.grantAccess('tile-1');

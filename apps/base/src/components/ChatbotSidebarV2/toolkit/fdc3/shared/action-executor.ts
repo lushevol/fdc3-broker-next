@@ -114,6 +114,7 @@ export function createFdc3ActionExecutor(deps: {
       try {
         const api = getFdc3Api();
 
+        // @ts-expect-error
         const resolution = await api.raiseIntent(action.intent, action.defaultContext);
         const result = await resolution.getResult();
 
@@ -127,6 +128,7 @@ export function createFdc3ActionExecutor(deps: {
 
           return normalizeSuccessPayload({
             intent: action.intent,
+            // @ts-expect-error
             context: action.defaultContext,
             result,
           });

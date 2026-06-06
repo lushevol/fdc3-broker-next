@@ -1,50 +1,35 @@
-# backend — Rules
+# backend - Rules
 
-← [PROJECT.md](./PROJECT.md) · [Monorepo rules](../../docs/rules.md)
+<- [PROJECT.md](./PROJECT.md) - [Monorepo rules](../../../docs/rules.md)
 
-## Profiles
+## Runtime
 
-- Always use `-Dspring.profiles.active=local` for local development
-- Never run without a profile in production — production requires PostgreSQL and all external service URLs
+- Use `npm --workspace services/backend run dev` for local work.
+- Keep local runs on `spring.profiles.active=local`; production-like runs need PostgreSQL and external service configuration.
+- Do not add new local-only behavior outside `LocalConfig` or `application-local.yml`.
 
 ## Database
 
-- Local profile uses H2 with `create-drop` — schema is rebuilt on every restart
-- All entity classes define the JPA schema — Flyway migrations only run on PostgreSQL
-- Never rely on data persisted in local H2 across restarts
+- Local H2 is transient. Never rely on local data surviving restart.
+- PostgreSQL schema changes must use Flyway migrations under `src/main/resources/migration/`.
+- Do not edit an applied migration. Add a new migration instead.
 
-## Authentication
+## Auth and Entitlements
 
-- `LocalConfig` mocks all auth — accepts any username/password
-- Never use `LocalConfig` beans in production (they are `@Profile("local")`)
-- Never commit real LDAP, EMS2, or MFA credentials
-
-## JWT Keys
-
-- Same RSA512 keys exist in local and production configs for compatibility
-- Rotate keys in production following your organization's key rotation policy
-- Never expose JWT secret keys in logs or error responses
-
-## Admin Operations
-
-- Tile, category, and import map create/update operations follow maker-checker pattern
-- New/modified records set `isActive=false` until a checker approves
-- Do not bypass the maker-checker approval workflow
-
-## Entitlements
-
-- All tile, category, and import map data is scoped by `ems2Role`
-- Never bypass role filtering — always use `AuthorizationService.getEntitlements()`
-- EMS2 calls are cached — clear the cache if role data changes
+- Never bypass `AuthorizationService.getEntitlements()` for drawer, tile, category, or import-map visibility.
+- Keep maker-checker semantics for admin create/update operations: changed records start inactive until approved.
+- Do not log JWT keys, passwords, entitlement payloads, or decrypted config values.
 
 ## Security Headers
 
-- `RequestFilter` sets `Cache-Control`, `X-XSS-Protection`, `X-Content-Type-Options`, `X-Frame-Options`, `HSTS`, `Referrer-Policy`
-- Never remove these headers or the filter registration
+- `RequestFilter` owns response security headers. Keep new endpoints behind the same filter chain.
+- Do not remove `Cache-Control`, `X-Content-Type-Options`, `X-Frame-Options`, HSTS, or `Referrer-Policy` headers without an explicit security review.
 
 ## Tests
 
-- Run via `mvn test` from `services/backend`
-- Only 2 test files exist: `LocalAuthFlowIntegrationTest`, `JwtTokenUtilTest`
-- Add tests for new endpoints before marking work complete
-- Local tests rely on `LocalConfig` — no external services needed
+```bash
+cd services/backend
+mvn test
+```
+
+Add or update tests before changing controller behavior, token handling, CSV parsing, or entitlement filtering.
