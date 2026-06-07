@@ -1,0 +1,11 @@
+query SettlementGroupMessageCount(
+  $filter: GroupMsgReq!
+  $pageNo: Int!
+  $pageSize: Int!
+) {
+  groupMessages(filter: $filter, page: $pageNo, size: $pageSize) {
+    pageInfo {
+      totalHits
+    }
+  }
+}

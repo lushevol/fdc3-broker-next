@@ -1,0 +1,6 @@
+---
+spring:
+  application:
+    name: ratan-flowzero-orchestration-service
+server:
+  port: 11210

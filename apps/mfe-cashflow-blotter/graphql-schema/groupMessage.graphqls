@@ -1,0 +1,85 @@
+type GroupMessages {
+    pageInfo:ResultPageInfo!
+    results:[GroupInfo]!
+}
+
+type GroupInfo {
+
+    Id: String
+
+    Group_Id: String
+
+    Group_Status: String
+
+    Group_Event: String
+
+    Trade_Id: String
+
+    Major_Version: Int
+
+    Cashflow_Id: String
+
+    Cashflow_Count: Int
+
+    Cashflow_Sequence: Int
+
+    Bussiness_Event: String
+
+    Amendment_Type: String
+
+    Booking_System_Event: String
+
+    Cashflow_Event_Reason: String
+
+    Status: String
+
+    Cashflow_Status: String
+
+    Create_At: String
+
+    Update_At: String
+
+    Is_Group_Locked: Boolean
+
+    Updated_By: String
+
+    Mxg_Trade_Id: String
+
+    Is_Trade_Validated: Boolean
+
+    ratanException: [RatanException]
+
+	Booking_Entity_Id: String
+
+	Counterparty_Fm_Id: String
+
+	Value_Date: String
+
+    Pending_Reason: String
+
+    Payment_Currency: String
+
+    Payment_Amount: String
+
+    Original_Payment_Id: String
+
+    Commodity_Flag: String
+
+    ISDA_Taxonomy: String
+
+    Pay_Direction: String
+
+}
+
+input GroupMsgReq{
+    Cashflow_Id: String
+    Trade_Id: String
+    Major_Version: Int
+    Status: [String]
+    Cashflow_Status: String
+    Group_Status: [String]
+    Booking_Entity_Id: [String]
+    Value_Date: String
+    Counterparty_Fm_Id: [String]
+    Counterparty_Fm_Code: [String]
+}

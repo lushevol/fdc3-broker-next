@@ -1,0 +1,56 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@layer base {
+  h1 {
+    @apply text-2xl;
+  }
+  h2 {
+    @apply text-xl;
+  }
+  h3 {
+    @apply text-lg;
+  }
+  a {
+    @apply text-blue-600 underline;
+  }
+}
+/* fix css overrides other application in mfe */
+@layer components {
+  .container {
+    max-width: 100%;
+  }
+  @screen sm {
+    .container {
+      max-width: 100%;
+    }
+  }
+  @screen md {
+    .container {
+      max-width: 100%;
+    }
+  }
+  @screen lg {
+    .container {
+      max-width: 100%;
+    }
+  }
+  @screen xl {
+    .container {
+      max-width: 100%;
+    }
+  }
+  @screen 2xl {
+    .container {
+      max-width: 100%;
+    }
+  }
+}
+
+body {
+  @apply bg-light-bg text-light-text;
+}
+.dark body {
+  @apply bg-dark-bg text-dark-text;
+}

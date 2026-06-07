@@ -1,0 +1,17 @@
+# ============================================================
+# Profile: staging
+# Activate: -Dspring.profiles.active=staging
+# ============================================================
+
+minio:
+  endpoint: https://fmminio-sit.uk.standardchartered.com:29000/
+  access-key: Z6TRPWT3530YRJZSF2KQ
+  secret-key: k0038fJMvRRiv+PIfczWkXR4V83xfqX0i0BtY1kg
+  bucket: 51358-ratan-flowzero-bucket
+  part-size: 10485760   # 10 MB
+
+nas:
+  # Windows local path for developer workstation
+  root-path: /apps/ratannas/flowzero
+  base-url: /markets_workflow/nas-files
+

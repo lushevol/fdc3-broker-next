@@ -1,0 +1,61 @@
+trigger: none
+
+parameters:
+  - name: releaseId
+    type: string
+    displayName: Release Item Id
+    default: 0
+
+  - name: rollbackAppVersion
+    type: string
+    displayName: Rollback App Version
+    default: 0
+
+  - name: rollbackBuildNumber
+    type: string
+    displayName: Rollback Build Number
+    default: 0
+
+  - name: deployEnv
+    type: string
+    displayName: Deploy to VM or AWS (only for develop branch)
+    default: vm
+    values:
+      - vm
+      - eks
+      - sit
+      - demo
+
+  - name: runDevStage
+    type: boolean
+    displayName: Auto deploy DEV
+    default: false
+    values:
+      - false
+      - true
+
+variables:
+  - name: APP_NAME
+    value: ${{ replace(variables['Build.Repository.Name'], '51358-', '') }}
+
+resources:
+  repositories:
+    - repository: templates
+      ref: feature/flowzero
+      name: FMQPR/51358-ratanone-ado-templates
+      type: git
+
+extends:
+  template: java-maven.yml@templates
+  parameters:
+    releaseId: ${{ parameters.releaseId }}
+    jdkVersion: 17
+    packageVersion: 1.0.2
+    deployStack: ansible
+    rollbackAppVersion: ${{ parameters.rollbackAppVersion }}
+    rollbackBuildNumber: ${{ parameters.rollbackBuildNumber }}
+    deployEnv: ${{ parameters.deployEnv }}
+    featureRelease: true
+    runDevStage: ${{ parameters.runDevStage }}
+    sonarCoverageExclusions: '**/workflow/config/**, **/common/**, **/springframework/**, **/controller/**,**/workflow/entity/**,**/controller/**,**/listener/**,**/feign/**,**/utils/**,**/RatanFlowzeroOrchestrationApplication*'
+

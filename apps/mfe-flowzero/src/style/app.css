@@ -1,0 +1,19 @@
+.tabmain {
+  padding: 0 !important;
+  border-radius: 0 !important;
+  overflow-y: hidden !important;
+}
+
+.tabmain .section {
+  border-radius: 0 !important;
+}
+
+body *::-webkit-scrollbar,
+body *::-webkit-scrollbar-thumb {
+  border-radius: 0 !important;
+}
+
+/* Ensure notifications render above the sidebar (z-index: 1580) */
+.ant-notification {
+  z-index: 1600 !important;
+}

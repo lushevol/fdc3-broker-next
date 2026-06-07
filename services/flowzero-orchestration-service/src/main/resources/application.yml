@@ -1,0 +1,586 @@
+PGSL_RDB_SCHEMA: ratan_flowzero_orchestration_service
+
+info:
+  build:
+    artifactId: "@project.artifactId@"
+    name: "@project.name@"
+    description: "@project.description@"
+    version: "@project.version@"
+  applicationName: ${spring.application.name}
+
+camunda.bpm:
+  database:
+    schema-name: ${PGSL_RDB_SCHEMA}
+    table-prefix: ${PGSL_RDB_SCHEMA}.
+    schema-update: true
+  filter:
+    create: All tasks
+  auto-deployment-enabled: false
+  generic-properties:
+    properties:
+      historyTimeToLive: null
+      enforceHistoryTimeToLive: false
+      generalResourceWhitelistPattern: ".+"
+  webapp:
+    index-redirect-enabled: true  # set false in prod
+
+spring:
+  application:
+    name: ratan-flowzero-orchestration-service
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 110MB
+  ssl:
+    bundle:
+      pem:
+        kong:
+          # curl: --cert 51358-ratan-nonprd.crt  --key 51358-ratan-nonprd.key
+          # Spring resolves env vars KONG_CERT_FILE / KONG_KEY_FILE at startup
+          keystore:
+#            certificate: "file:${KONG_CERT_FILE:C:/Users/8224853/jks/51358-ratan-nonprd.crt}"
+#            private-key: "file:${KONG_KEY_FILE:C:/Users/8224853/jks/51358-ratan-nonprd.key}"
+            certificate: "file:${KONG_CERT_FILE:/apps/ratanrt/ssl/pk12/51358-ratan-nonprd.crt}"
+            private-key: "file:${KONG_KEY_FILE:/apps/ratanrt/ssl/pk12/51358-ratan-nonprd.key}"
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        primary-dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  datasource:
+    url: ${PGSL_RDB_URL}
+    username: ${PGSL_RDB_USERNAME_HASHICORP}
+    password: ${PGSL_RDB_JANUS_HASHICORP}
+    driver-class-name: ${PGSL_RDB_DRIVER}
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    placeholder-replacement: false
+    table: ratanone_workflow_schema_history
+
+jasypt:
+  encryptor:
+    password: ${RATAN_CIPHER_KEY}
+
+ratanone:
+  logging:
+    level: info
+    folder: ${LOG_DIR:./logs}
+    logstash:
+      destinations: ${LOGSTASH_URL:10.198.199.160:5000}
+  static-data:
+    icdms:
+      create-endpoint: http://uklvadrtn006a.pi.dev.net:9000/icdms/icdms-api/kong/genericAutoCase/create
+      metadata-endpoint: https://gateway-stg.51242.app.standardchartered.com/icdms/icdms-api/kong/getDocumentMetaData
+      retry:
+        scheduler:
+          enabled: true
+          # Cron: every 5 minutes; override per-env via CONFIG_SERVER
+          cron: "0 */5 * * * *"
+          batch-size: 20
+    file-net:
+      jwt-endpoint: https://fnappstest.uk.standardchartered.com:445/ECMServices/core/ecm/v4/token
+      multipart-endpoint: https://fnappstest.uk.standardchartered.com:445/ECMServices/core/ecm/cdms/v4/documents/multipart
+      metadata-endpoint: https://fnappstest.uk.standardchartered.com:445/ECMServices/core/ecm/cdms/v4/documents/metadata
+      delete-endpoint: https://fnappstest.uk.standardchartered.com:445/ECMServices/core/ecm/cdms/v4/documents/{documentId}
+      retrieve-endpoint: https://fnappstest.uk.standardchartered.com:445/ECMServices/core/ecm/cdms/v4/documents/stream/{documentId}
+      client-id: 51358_FlowZero
+      client-secret: 8kyFNVAnwzyk
+      object-store: CDMS
+      document-class: Document
+  cert:
+    rest:
+      enabled: false  # kongCertRestTemplate (KongCertRestTemplateConfig) is used instead; JKS keystore not required
+  authentication:
+    cert:
+      keystore-file: ${JKS_KEYSTORE_FILE}
+      keystore-pwd: ${JKS_KEYSTORE_PWD}
+      truststore-file: ${JKS_TRUSTSTORE_FILE}
+      truststore-pwd: ${JKS_TRUSTSTORE_PWD}
+    kong:
+      account: svc.flowzero.001.dev
+      sec: SCBpassword00000000000000$
+      token-endpoint: https://gateway-stg.51242.app.standardchartered.com/oauth2/token
+      client-endpoint: https://gateway-stg.51242.app.standardchartered.com/api/identity/oauth2/dcr/v1.0/register?client_name=svc.flowzero.001.dev
+      # cert-file / key-file moved to spring.ssl.bundle.pem.kong
+
+
+
+
+# ── Resilience4j: iCDMS 三重防护 (RateLimiter → CircuitBreaker → TimeLimiter) ──────
+resilience4j:
+
+  # ① 限流：令牌桶算法，每秒最多 10 次请求
+  ratelimiter:
+    instances:
+      icdmsClient:
+        limitForPeriod: 10          # 刷新周期内最大许可数
+        limitRefreshPeriod: 1s      # 许可刷新周期
+        timeoutDuration: 0ms        # 获取许可等待时间；0=立即失败（快速失败）
+
+  # ② 断路器：COUNT_BASED 滑动窗口
+  circuitbreaker:
+    instances:
+      icdmsClient:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 20               # 统计最近 20 次请求
+        failureRateThreshold: 50            # 失败率 ≥50% → OPEN
+        slowCallRateThreshold: 80           # 慢调用率 ≥80% → OPEN
+        slowCallDurationThreshold: 5s       # 超过 5s 算慢调用（与 TimeLimiter 8s 协同）
+        permittedNumberOfCallsInHalfOpenState: 5
+        waitDurationInOpenState: 60s        # OPEN 后冷却 60s 再试探
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        recordExceptions:
+          - org.springframework.web.client.ResourceAccessException
+          - com.scb.ratan.flowzero.workflow.common.exception.IcdmsSyncException
+          - java.util.concurrent.TimeoutException
+        ignoreExceptions:
+          - com.scb.ratan.flowzero.workflow.common.exception.IcdmsClientException  # 4xx 不计入失败率
+
+  # ③ 超时限制：防止线程长时间阻塞
+  timelimiter:
+    instances:
+      icdmsClient:
+        timeoutDuration: 8s         # 单次 HTTP 调用最长 8s
+        cancelRunningFuture: true   # 超时后中断底层线程
+
+  open-apis:
+    auto-startup: true
+    api-gateway-url: ${API_GATEWAY_URL}
+    api-gateway-token: ${API_GATEWAY_TOKEN}
+    apis:
+      - name: flowzero@deployDefiniton
+        entrypoint:
+          method: POST
+          path: /api/v1/process-definitions/deploy
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/process-definitions/deploy
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroDeploy
+
+      - name: flowzero@startInstance
+        entrypoint:
+          method: POST
+          path: /api/v1/workflow-request/start
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/workflow-request/start
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_RAISE REQUEST:RAISE_NEW_REQUEST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroDeployStartInstance
+      - name: flowzero@saveWorkflowRequest
+        entrypoint:
+          method: POST
+          path: /api/v1/workflow-request/save
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/workflow-request/save
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_RAISE REQUEST:RAISE_NEW_REQUEST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroDeploySaveWorkflowRequest
+      - name: flowzero@workflowRequestDraft
+        entrypoint:
+          method: GET
+          path: /api/v1/workflow-request/draft
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/workflow-request/draft
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_RAISE REQUEST:SAVE_DRAFT_REQUEST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroDeployWorkflowRequestDraft
+      - name: flowzero@myRequest
+        entrypoint:
+          method: GET
+          path: /api/v1/workflow-request/my-request
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/workflow-request/my-request
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_REQUEST CENTRE:VIEW_MYREQUEST_LIST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroMyRequest
+
+      - name: flowzero@myApproval
+        entrypoint:
+          method: GET
+          path: /api/v1/workflow-request/my-approval
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/workflow-request/my-approval
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_REQUEST CENTRE:VIEW_MYAPPROVAL_LIST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroMyApproval
+            
+      - name: flowzero@todoList
+        entrypoint:
+          method: GET
+          path: /api/v1/tasks/todo-list
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/tasks/todo-list
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGHANDLETASK_LIST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroTodoList
+
+      - name: flowzero@taskDetail
+        entrypoint:
+          method: GET
+          path: /api/v1/tasks/detail/{taskId}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/tasks/detail/{taskId}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:VIEW_TASK_DETAIL
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZerotaskDetail
+
+      - name: flowzero@taskApprove
+        entrypoint:
+          method: POST
+          path: /api/v1/tasks/approve
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/tasks/approve
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:ACT_ON_TASK_DETAIL
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroTaskApprove
+
+      - name: flowzero@taskReject
+        entrypoint:
+          method: POST
+          path: /api/v1/tasks/reject
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/tasks/reject
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:ACT_ON_TASK_DETAIL
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroTaskReject
+
+      - name: flowzero@taskTerminate
+        entrypoint:
+          method: POST
+          path: /api/v1/tasks/terminate
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/tasks/terminate
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:ACT_ON_TASK_DETAIL
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroTaskTerminate
+
+      - name: flowzero@tasksProperties
+        entrypoint:
+          method: GET
+          path: /api/v1/tasks/extension-properties/{taskId}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/tasks/extension-properties/{taskId}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:VIEW_TASK_DETAIL
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroTasksProperties
+
+      - name: flowzero@teamTaskList
+        entrypoint:
+          method: GET
+          path: /api/v1/tasks/team-task-list
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/tasks/team-task-list
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:VIEW_MYTEAMTASK_LIST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroTeamTaskList
+
+      - name: flowzero@pendingClaimList
+        entrypoint:
+          method: GET
+          path: /api/v1/tasks/pending-claim-list
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/tasks/pending-claim-list
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGCLAIMTASK_LIST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroPendingClaimList
+
+      - name: flowzero@taskCounts
+        entrypoint:
+          method: GET
+          path: /api/v1/tasks/counts
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/tasks/counts
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGHANDLETASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYTEAMTASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGCLAIMTASK_LIST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroTaskCounts
+
+      - name: flowzero@batchClaim
+        entrypoint:
+          method: POST
+          path: /api/v1/tasks/batch/claim
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/tasks/batch/claim
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:CLAIM_TASK
+            - FLOW_ZERO_TODO:CLAIM_TEAMTASK
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroTaskBatchClaim
+
+      - name: flowzero@batchAssign
+        entrypoint:
+          method: POST
+          path: /api/v1/tasks/batch/assign
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/tasks/batch/assign
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:ASSIGN_TEAMTASK_TO_TEAMMEMBER
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroTaskBatchAssign
+
+      - name: flowzero@requestCount
+        entrypoint:
+          method: GET
+          path: /api/v1/statistics/request-count
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/statistics/request-count
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGHANDLETASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYTEAMTASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGCLAIMTASK_LIST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroRequestCount
+
+      - name: flowzero@pendingDistribution
+        entrypoint:
+          method: GET
+          path: /api/v1/statistics/pending-distribution
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/statistics/pending-distribution
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGHANDLETASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYTEAMTASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGCLAIMTASK_LIST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroPendingDistribution
+
+      - name: flowzero@requestTrend
+        entrypoint:
+          method: GET
+          path: /api/v1/statistics/request-trend
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/statistics/request-trend
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGHANDLETASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYTEAMTASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGCLAIMTASK_LIST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroRequestTrend
+
+      - name: flowzero@tasksInbox
+        entrypoint:
+          method: GET
+          path: /api/v1/tasks/inbox
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/tasks/inbox
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGHANDLETASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYTEAMTASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGCLAIMTASK_LIST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroTasksInbox
+
+      - name: flowzero@assignableUsers
+        entrypoint:
+          method: GET
+          path: /api/v1/tasks/assignable-users
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/tasks/assignable-users
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGHANDLETASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYTEAMTASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGCLAIMTASK_LIST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroAssignableUsers
+
+      # ── Workflow Attachment APIs ──────────────────────────────────────────────
+      - name: flowzero@uploadAttachment
+        entrypoint:
+          method: POST
+          path: /api/v1/file-manage/{businessId}/attachments
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/file-manage/{businessId}/attachments
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_ATTACHMENT:UPLOAD_ATTACHMENT
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroUploadAttachment
+
+      - name: flowzero@deleteAttachment
+        entrypoint:
+          method: DELETE
+          path: /api/v1/file-manage/{businessId}/attachments/{attachmentId}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/file-manage/{businessId}/attachments/{attachmentId}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_ATTACHMENT:DELETE_ATTACHMENT
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroDeleteAttachment
+
+      - name: flowzero@listAttachments
+        entrypoint:
+          method: GET
+          path: /api/v1/file-manage/{businessId}/attachments
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/file-manage/{businessId}/attachments
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_ATTACHMENT:VIEW_ATTACHMENT_LIST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroListAttachments
+
+      - name: flowzero@getAttachmentContent
+        entrypoint:
+          method: GET
+          path: /api/v1/file-manage/{businessId}/attachments/{attachmentId}/content
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/file-manage/{businessId}/attachments/{attachmentId}/content
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_ATTACHMENT:VIEW_ATTACHMENT_LIST
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroGetAttachmentContent
+
+      # ── iCDMS APIs ────────────────────────────────────────────────────────────
+      - name: flowzero@icdmsQueryDocuments
+        entrypoint:
+          method: POST
+          path: /api/v1/icdms/documents/query
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/icdms/documents/query
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_ICDMS:QUERY_DOCUMENT_METADATA
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroIcdmsQueryDocuments
+
+      - name: flowzero@icdmsGetToken
+        entrypoint:
+          method: GET
+          path: /api/v1/icdms/token
+        endpoint:
+          service: lb://RATAN-FLOWZERO-ORCHESTRATION-SERVICE
+          path: /api/v1/icdms/token
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_ICDMS:QUERY_DOCUMENT_METADATA
+        audit:
+          type: flowzeroOrchestrationService
+          action: FlowZeroIcdmsGetToken

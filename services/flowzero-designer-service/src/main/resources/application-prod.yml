@@ -1,0 +1,19 @@
+# ============================================================
+# Profile: prod
+# Activate: -Dspring.profiles.active=prod
+#
+# All sensitive values MUST be supplied via environment variables
+# or Jasypt-encrypted ENC() expressions — never hardcoded.
+# ============================================================
+
+minio:
+  endpoint: ${MINIO_ENDPOINT}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket: ${MINIO_BUCKET:51358-ratan-flowzero-bucket-prod}
+  part-size: ${MINIO_PART_SIZE:10485760}   # 10 MB default
+
+nas:
+  root-path: ${NAS_ROOT_PATH:/apps/ratannas/flowzero/prod}
+  base-url: ${NAS_BASE_URL}
+

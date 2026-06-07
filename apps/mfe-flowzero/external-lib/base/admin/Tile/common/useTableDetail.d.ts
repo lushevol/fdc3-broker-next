@@ -1,0 +1,24 @@
+import React from "react";
+declare const useTableDetail: (
+  categories: any,
+  importMap: any
+) => {
+  onClose: () => void;
+  onOpen: (row: any, mode: any) => () => void;
+  openDetail: boolean;
+  data: any[];
+  setData: React.Dispatch<React.SetStateAction<any[]>>;
+  record: any;
+  setRecord: React.Dispatch<any>;
+  onChange: (value: any, field: string) => void;
+  onReset: () => void;
+  onSave: () => Promise<void>;
+  onSaveData: (result: any) => Promise<void>;
+  resetId: number;
+  onVerify: () => Promise<void>;
+  onUpdate: () => Promise<void>;
+  onUpdateData: (result: any) => Promise<void>;
+  isLoading: boolean;
+  onDeactivate: () => Promise<void>;
+};
+export default useTableDetail;

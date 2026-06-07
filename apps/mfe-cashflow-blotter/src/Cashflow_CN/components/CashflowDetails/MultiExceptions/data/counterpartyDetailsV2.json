@@ -1,0 +1,164 @@
+{
+  "fmEntity": {
+    "fmSysContact": [
+      {
+        "fmSysContSysGenId": "731905",
+        "mediumCode": "SWIFT",
+        "mediumUsage": "MXR",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "710756",
+        "mediumCode": "FSA",
+        "mediumUsage": "BIC",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "812959",
+        "mediumCode": "EXCHANGE",
+        "mediumUsage": "MKTWIRPB1",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "20923",
+        "mediumCode": "SWIFT",
+        "mediumUsage": "CONF",
+        "addrLine": "SCBLMOMXXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "16667",
+        "mediumCode": "SWIFT",
+        "mediumUsage": "CONF",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "19445",
+        "mediumCode": "SWIFT",
+        "mediumUsage": "CONF",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "16780",
+        "mediumCode": "SWIFT",
+        "mediumUsage": "CONF",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "7522",
+        "mediumCode": "SWIFT",
+        "mediumUsage": "MAIN",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      }
+    ],
+    "fmAddress": [
+      {
+        "fmAddrSysGenId": "574613",
+        "addrType": "ACBS",
+        "addrLine1": "ADDR1 574613",
+        "addrLine2": "ADDR2 574613",
+        "state": "",
+        "city": "KOW",
+        "country": "HK",
+        "postCode": "KWUN TONG",
+        "email": "",
+        "phone": "PHONE 574613"
+      },
+      {
+        "fmAddrSysGenId": "489258",
+        "addrType": "CONF",
+        "addrLine1": "ADDR1 489258",
+        "addrLine2": "ADDR2 489258",
+        "state": "",
+        "city": "HKG",
+        "country": "HK",
+        "postCode": "",
+        "email": "",
+        "phone": ""
+      },
+      {
+        "fmAddrSysGenId": "456950",
+        "addrType": "MAIN",
+        "addrLine1": "ADDR1 456950",
+        "addrLine2": "ADDR2 456950",
+        "state": "",
+        "city": "CENTRAL",
+        "country": "HK",
+        "postCode": "",
+        "email": "",
+        "phone": ""
+      },
+      {
+        "fmAddrSysGenId": "486175",
+        "addrType": "MXG",
+        "addrLine1": "ADDR1 486175",
+        "addrLine2": "ADDR2 486175",
+        "state": "",
+        "city": "HKG",
+        "country": "HK",
+        "postCode": "",
+        "email": "",
+        "phone": ""
+      },
+      {
+        "fmAddrSysGenId": "1448145",
+        "addrType": "CCS",
+        "addrLine1": "ADDR1 1448145",
+        "addrLine2": "ADDR2 1448145",
+        "state": "",
+        "city": "HKG",
+        "country": "HK",
+        "postCode": "400018",
+        "email": "",
+        "phone": ""
+      }
+    ],
+    "fmAccount": {
+      "leId": "11153358",
+      "subProfileId": "1",
+      "fmId": "2",
+      "rmfFlag": "",
+      "fmCode": "SCB HONGKON*HKG",
+      "fmProfileShortName": "SNAME 2",
+      "fmProfileStatus": "ACTIVE",
+      "fmLongName": "LNAME 453988",
+      "fmLongName1": "LNAME1 453988",
+      "ultParentFmId": "400035981",
+      "fmLimitType": "GLBLMT",
+      "ccilMemberId": "",
+      "ccilAbbreviatedName": "",
+      "dvpCustInd": "0               ",
+      "equivalentCCILCounterpartyAtlasID": null,
+      "omgAlertId": "",
+      "markitWireId": "",
+      "omgOgdId": "",
+      "iceLinkId": "",
+      "omgCtmId": "",
+      "omgCtmAccount": "",
+      "btsId": "HKSCBLHK",
+      "scbClassCode": "32",
+      "fmType": "INTECOM",
+      "opicsClassCode": "238",
+      "fmClassCode": "IC",
+      "finInstType": "BANK",
+      "InstSector": "320",
+      "clsEigibility": "Y",
+      "clsCustType": "SETTLEM",
+      "clsStartDate": "2017-11-06 00:00:00.0",
+      "brokerId": "",
+      "pbFlag": "N",
+      "rpOverride": "",
+      "valuationStatement": "",
+      "setupToClear": "Y",
+      "nameMaskingRequired": "N",
+      "fundCode": ""
+    }
+  }
+}

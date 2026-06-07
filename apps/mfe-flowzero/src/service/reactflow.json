@@ -1,0 +1,76 @@
+{
+  "nodes": [
+    {
+      "id": "start-event-1",
+      "type": "StartEventNode",
+      "position": {
+        "x": 176,
+        "y": 80
+      },
+      "data": {
+        "label": "Initiate Request",
+        "id": "start-event-1",
+        "assignee": ""
+      },
+      "measured": {
+        "width": 130,
+        "height": 111
+      }
+    },
+    {
+      "id": "user-task-1769062669797",
+      "type": "WorkFlowStepNode",
+      "position": {
+        "x": 448,
+        "y": 80
+      },
+      "data": {
+        "label": "Workflow Step",
+        "id": "user-task-1769062669797",
+        "assignee": "8229727"
+      },
+      "measured": {
+        "width": 130,
+        "height": 111
+      }
+    },
+    {
+      "id": "end-1769062673772",
+      "type": "EndNode",
+      "position": {
+        "x": 688,
+        "y": 80
+      },
+      "data": {
+        "label": "End",
+        "id": "end-1769062673772",
+        "assignee": ""
+      },
+      "measured": {
+        "width": 130,
+        "height": 111
+      }
+    }
+  ],
+
+  "edges": [
+    {
+      "id": "xy-edge__start-event-1-user-task-1769062669797_di_di",
+      "source": "start-event-1",
+      "target": "user-task-1769062669797",
+      "type": "default",
+      "data": {
+        "label": ""
+      }
+    },
+    {
+      "id": "xy-edge__user-task-1769062669797-end-1769062673772_di_di",
+      "source": "user-task-1769062669797",
+      "target": "end-1769062673772",
+      "type": "default",
+      "data": {
+        "label": ""
+      }
+    }
+  ]
+}

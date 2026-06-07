@@ -1,0 +1,84 @@
+# v1.43.3
+feat(cashflow-blotter): Support settlement method update.  #12781813
+feat(cashflow-blotter): Add new fields into accounting details. #12478879
+
+# v1.42.6
+enhancement(cashflow-blotter):RFI - SSI Exception.#12105734
+
+# v1.42.5
+enhancement(cashflow-blotter):Quick Search & Filter Query Validation.#13128309
+fix nexus: Move express to devdependency.
+enhancement(cashflow-dashboard):Add "COMPLETED" into group status list.
+
+# v1.35.0
+
+feat(cashflow-blotter): Filter in Search Bar. #8136068
+feat(cashflow-blotter): Entity setup in blotter. #8368145
+
+# v1.30.0
+
+feat(cashflow-blotter): ISO-Display MX message in Swift Tab. #8159148
+
+# v1.22.0
+
+fix: fix bic netting table break line style issue. #7769863
+fix: fix group blotter display count issue while apply filter. #8162374
+feat: add textnumber setting for payment amount, to enhace amount notification issue. #7988564 #8236663
+
+# v1.21.0
+
+feat(cashflow-blotter && Dashboard && Group Blotter): Static enrichment for tranch1 entities. #7449166
+feat(cashflow-blotter): Update Vostro SI Settlement Means values (Tranche 1). #7147811
+feat(cashflow-blotter): Update Cashflow Blotter amount field to show as per actual payment value. #7529240
+feat(cashflow-blotter): Disable republish button in accounting details. #7859155
+
+# v1.20.0
+
+feat(group-blotter): Add column. #7828900
+
+# v1.19.0
+
+feat(cashflow-blotter && group-blotter && dashboard): Add Hefei entity. #7884363
+
+# v1.18.0
+
+feat(cashflow-blotter): implement advanced search. #7529554
+feat(dashboard): use count graphql api query status. #7787853
+feat(cashflow-blotter): Add Prime PM product to Quick search screen #7529524
+
+# v1.17.0
+
+feat(cashflow-blotter): Enhance Accounting Detail, Audit History ag-grid table height. #7711891
+
+# v1.16.0
+
+feat(cashflow-blotter): allow netting users act as exception checker. #6473089
+fix(cashflow-blotter): fix netting preview dialog maxium can't click net button issue. #1851282
+feat(Dashboard)： In Dashboard blotter, Setting Button to be shown as Create Or Modify #7591543
+fix(dashboard): change page size to 1000 in case performance risk. #7177412
+
+# v1.15.0
+
+feat(cashflow-blotter): add candidate page size for query cashflow. #7176831
+feat(dashboard): remove useless dashboard filters. #7177412
+feat(dashboard): disable search and clear while dashboard fetching. #7177412
+feat(dashboard): change dashboard query and refresh to queued. #7177412
+fix(cashflow-blotter): after customer filter, "currency" + "amount Range" should be cleared. #6586355
+
+# v1.14.0
+
+fix(dashboard): fix dashboard search issue. #6989826
+feat(dashboard): add back auto refresh interval. #7177412
+
+# v1.13.0
+
+feat(cashflow-blotter): increased timeout for below apis, #6857938
+
+- bilateral/ccil/beneficiaryBic Netting API
+- ⁠bilateral/ccil/beneficiaryBic Netting Preview API
+- Exception maker/checker API
+- Bulk Exception maker/checker API
+
+# v1.11.2
+
+feat(dashboard): fix dashboard performance issue. remove dashboard details, only keep status indicators.
