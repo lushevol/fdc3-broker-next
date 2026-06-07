@@ -1,0 +1,1049 @@
+{
+  "quickSearchItems": [
+    {
+      "component": "QuickSearchManyInOne",
+      "manyInOne": [
+        {
+          "label": "Trade ID",
+          "field": "Trade_Id",
+          "component": "QuickSearchInput",
+          "placeholder": "Multiple searches separated by commas",
+          "suffix": "Multiple searches separated by commas",
+          "commas": true
+        },
+        {
+          "label": "Package ID",
+          "field": "Package_Id",
+          "component": "QuickSearchInput"
+        },
+        {
+          "label": "Source System ID",
+          "field": "Source_System_Trade_Internal_Id",
+          "component": "QuickSearchInput"
+        },
+        {
+          "label": "Murex Trade ID",
+          "field": "Murex_Trade_Id",
+          "component": "QuickSearchInput",
+          "placeholder": "Multiple searches separated by commas",
+          "suffix": "Multiple searches separated by commas",
+          "commas": true
+        }
+      ]
+    },
+    {
+      "component": "QuickSearchManyInOne",
+      "manyInOne": [
+        {
+          "label": "Trader",
+          "field": "Entity.Person.Trader_PSID",
+          "component": "QuickSearchInput"
+        },
+        {
+          "label": "Source System",
+          "field": "Data_Flow.Data_Source_System",
+          "component": "QuickSearchSelect",
+          "selectMode": "multiple",
+          "valueList": [
+            {
+              "label": "Blade",
+              "value": "Blade"
+            },
+            {
+              "label": "S2BX",
+              "value": "S2BX"
+            },
+            {
+              "label": "CFETS",
+              "value": "CFETS"
+            },
+            {
+              "label": "Murex",
+              "value": "Murex"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Portfolio",
+      "field": "Portfolio.Booking_Entity_Trade_Portfolio_Name",
+      "component": "QuickSearchDynamickSelect",
+      "searchFun": "getDynamicListForPortfolio"
+    },
+    {
+      "component": "QuickSearchManyInOne",
+      "manyInOne": [
+        {
+          "label": "Counterparty Legal Name",
+          "field": "Entity.Counterparty_Long_Name",
+          "component": "QuickSearchDynamickSelect",
+          "selectMode": "multiple",
+          "searchFun": "debounceGetDynamicList",
+          "searchField": "lmp_long_name"
+        },
+        {
+          "label": "Counterparty Short Name",
+          "field": "Entity.Counterparty_Name",
+          "component": "QuickSearchInput",
+          "placeholder": "Multiple searches separated by commas",
+          "suffix": "Multiple searches separated by commas",
+          "commas": true
+        },
+        {
+          "label": "Counterparty FMID",
+          "field": "Entity.Counterparty_SCI_FMID",
+          "component": "QuickSearchDynamickSelect",
+          "selectMode": "multiple",
+          "searchFun": "debounceGetDynamicList",
+          "searchField": "fm_profile_sys_gen_id"
+        }
+      ]
+    },
+    {
+      "label": "Product Taxonomy",
+      "field": "PRODUCT_TYPE",
+      "component": "QuickSearchSelect",
+      "selectMode": "multiple",
+      "valueList": [
+        {
+          "label": "ForeignExchange:Forward",
+          "value": "fxSource-Instrument_Common.ISDA_Taxonomy-ForeignExchange:Forward"
+        },
+
+        {
+          "label": "ForeignExchange:Spot",
+          "value": "fxSource-Instrument_Common.ISDA_Taxonomy-ForeignExchange:Spot"
+        },
+        {
+          "label": "ForeignExchange:Swap",
+          "value": "fxSource-Instrument_Common.ISDA_Taxonomy-ForeignExchange:Swap"
+        },
+        {
+          "label": "ForeignExchange:VanillaOption",
+          "value": "fxSource-Instrument_Common.ISDA_Taxonomy-ForeignExchange:VanillaOption"
+        },
+        {
+          "label": "ForeignExchange:SimpleExotic:Digital",
+          "value": "fxSource-Instrument_Common.ISDA_Taxonomy-ForeignExchange:SimpleExotic:Digital"
+        },
+        {
+          "label": "ForeignExchange:NDF",
+          "value": "fxSource-Instrument_Common.ISDA_Taxonomy-ForeignExchange:NDF"
+        },
+        {
+          "label": "Accumulator Swap",
+          "value": "otherSource-Instrument_Common.Source_System_Instrument_Sub_Type-Accumulator Swap"
+        },
+        {
+          "label": "Equity Swap",
+          "value": "otherSource-Instrument_Common.Source_System_Instrument_Sub_Type-Equity Swap"
+        },
+        {
+          "label": "OTC Option",
+          "value": "otherSource-Instrument_Common.Source_System_Instrument_Sub_Type-OTC Option"
+        },
+        {
+          "label": "Simple Cashflow (SCF)",
+          "value": "scfSource-Instrument_Common.Primary_Asset_Class"
+        },
+        {
+          "label": "InterestRate:IRSwap",
+          "value": "irsSource-Instrument_Common.ISDA_Taxonomy"
+        },
+        {
+          "label": "InterestRate:CrossCurrency",
+          "value": "ccsSource-Instrument_Common.ISDA_Taxonomy"
+        },
+        {
+          "label": "InterestRate:LoanDeposit",
+          "value": "loanSource-Instrument_Common.ISDA_Taxonomy-InterestRate:LoanDeposit"
+        }
+      ]
+    },
+    {
+      "component": "QuickSearchManyInOne",
+      "manyInOne": [
+        {
+          "label": "Trade Date",
+          "field": "Trade_Date",
+          "component": "QuickSearchPicker"
+        },
+        {
+          "label": "System Entry Date",
+          "field": "TP_System_Capture_Timestamp",
+          "component": "QuickSearchPicker"
+        }
+      ]
+    },
+
+    {
+      "label": "Currency Pair",
+      "field": "Instrument_Common.Currency_Pair",
+      "component": "QuickSearchInput"
+    },
+    {
+      "label": "Value Date Range",
+      "field": "SETTLEMENT_DATE",
+      "component": "QuickSearchPicker"
+    },
+    {
+      "label": "SCB Booking Entity",
+      "field": "Entity.Booking_Entity_SCI_FMID",
+      "component": "QuickSearchSelect",
+      "valueList": [
+        {
+          "label": "SCB LONDON*LDN",
+          "value": "10075222"
+        },
+        {
+          "label": "SCB HONGKON*HKG",
+          "value": "2"
+        },
+        {
+          "label": "SCB SG LTD*SIN",
+          "value": "400451508"
+        },
+        {
+          "label": "SCB SG LTDACU*SIN",
+          "value": "400452428"
+        },
+        {
+          "label": "SC PVT BK JE BR*STH",
+          "value": "400910415"
+        },
+        {
+          "label": "SCB SAUDI*RYD",
+          "value": "400991880"
+        },
+        {
+          "label": "SCB SHANGH*SHA",
+          "value": "10036642"
+        },
+        {
+          "label": "SCB SEOUL*SEL",
+          "value": "10036645"
+        },
+        {
+          "label": "SCB SING*SIN",
+          "value": "3"
+        },
+        {
+          "label": "NEPAL GRINDLAYS*KTM",
+          "value": "400007847"
+        },
+        {
+          "label": "SCB CHINA HO*SHA",
+          "value": "400521212"
+        },
+        {
+          "label": "SCB EGYPT*CAI",
+          "value": "401036553"
+        },
+        {
+          "label": "SCB CN KMG*KMG",
+          "value": "400667486"
+        },
+        {
+          "label": "SCB SHA FTU*FT2",
+          "value": "400677737"
+        },
+        {
+          "label": "SCB CHINA*ZHU",
+          "value": "10078716"
+        },
+        {
+          "label": "SCB CHINA*BJG",
+          "value": "400001378"
+        },
+        {
+          "label": "SCB CHINA DALIAN*DLN",
+          "value": "400095464"
+        },
+        {
+          "label": "SCB CHINA*XMN",
+          "value": "10062461"
+        },
+        {
+          "label": "SCB CHINA*NCG",
+          "value": "400090093"
+        },
+        {
+          "label": "SCB CHINA*SZN",
+          "value": "10032025"
+        },
+        {
+          "label": "SCB CHINA*TIA",
+          "value": "235003861"
+        },
+        {
+          "label": "SCB SUZHOU*SUZ",
+          "value": "400054737"
+        },
+        {
+          "label": "SCB GUANGZHOU*GZU",
+          "value": "400054708"
+        },
+        {
+          "label": "SCB CN HRB*HRB",
+          "value": "400683682"
+        },
+        {
+          "label": "SCB CHINA*NJG",
+          "value": "10020899"
+        },
+        {
+          "label": "SCB SHANGH*SHA",
+          "value": "10036642"
+        },
+        {
+          "label": "SCB QINGDAO*QDO",
+          "value": "400057714"
+        },
+        {
+          "label": "SCB CN HANGZHOU*HNZ",
+          "value": "400085753"
+        },
+        {
+          "label": "SCB CHENGDU*CGD",
+          "value": "400054741"
+        },
+        {
+          "label": "SCB CN CHONGQING*CQG",
+          "value": "400075752"
+        },
+        {
+          "label": "SCBLXIAN*XIN",
+          "value": "400193370"
+        },
+        {
+          "label": "SCB CN ZHENGZHOU*ZZU",
+          "value": "400516442"
+        },
+        {
+          "label": "SCB CN FOSHAN*FOS",
+          "value": "400209000"
+        },
+        {
+          "label": "SCB CHINA HOHHOT*HHH",
+          "value": "400130178"
+        },
+        {
+          "label": "SCB CN SYG*SYG",
+          "value": "400798477"
+        },
+        {
+          "label": "SCB CHINA NINGBO*NGB",
+          "value": "400130180"
+        },
+        {
+          "label": "SCB CN CHO*CHO",
+          "value": "400899993"
+        },
+        {
+          "label": "SCB CN CHANGSHA*CGS",
+          "value": "400220273"
+        },
+        {
+          "label": "SCB CN FUZHOU*FZH",
+          "value": "400229749"
+        },
+        {
+          "label": "SCB CN JINAN BR*JNA",
+          "value": "400218197"
+        },
+        {
+          "label": "SCB CN WUHAN*WUH",
+          "value": "400185419"
+        },
+        {
+          "label": "SCB CN TAIYUAN*TYA",
+          "value": "400516443"
+        }
+      ]
+    }
+  ],
+  "tradesCustomFields": {
+    "Trade_Id": {
+      "index": 1,
+      "colDefs": {
+        "hide": false,
+        "cellStyle": { "user-select": "text" }
+      }
+    },
+    "Package_Id": {
+      "colDefs": {
+        "hide": false
+      }
+    },
+    "Trade_Version": {
+      "colDefs": {
+        "hide": false
+      }
+    },
+    "Trade_State": {
+      "colDefs": {
+        "hide": false
+      }
+    },
+    "Direction": {
+      "colDefs": {
+        "hide": false,
+        "valueGetter": "formatBuySell",
+        "cellRenderer": "handleDirection"
+      }
+    },
+    "Tracking_Version": {
+      "colDefs": {
+        "hide": false
+      }
+    },
+    "Trade_Event.Business_Event_Type": {
+      "colDefs": {
+        "hide": false,
+        "pinned": "right",
+        "lockPinned": true
+      }
+    },
+    "Trade_Date": {
+      "colDefs": {
+        "hide": false,
+        "cellStyle": "handleTradeDate",
+        "cellRenderer": "Time"
+      }
+    },
+    "TP_System_Last_Updated_Date_Time": {
+      "colDefs": {
+        "hide": false,
+        "cellRenderer": "Time"
+      }
+    },
+    "Instrument_Common.ISDA_Taxonomy": {
+      "colDefs": {
+        "hide": false
+      }
+    },
+    "Instrument_Common.Instrument_Full_Name": {
+      "colDefs": {
+        "hide": false
+      }
+    },
+    "Entity.Counterparty_SCI_FMID": {
+      "colDefs": {
+        "hide": false
+      }
+    },
+    "Entity.Counterparty_Long_Name": {
+      "colDefs": {
+        "hide": false
+      }
+    },
+    "Entity.Counterparty_Name": {
+      "colDefs": {
+        "hide": false
+      }
+    },
+    "Entity.Counterparty_Country_ISO_Code": {
+      "colDefs": {
+        "hide": false
+      }
+    },
+    "Entity.Booking_Entity_Name": {
+      "colDefs": {
+        "hide": false
+      }
+    },
+    "Entity.Person.Trader_PSID": {
+      "colDefs": {
+        "valueGetter": "getTrader"
+      }
+    },
+    "Entity.Person.Execution_Marketer_PSID": {
+      "colDefs": {
+        "valueGetter": "getExecutionMarketer"
+      }
+    },
+    "Entity.Person.Booking_Marketer_PSID": {
+      "colDefs": {
+        "valueGetter": "getBookingMarketer"
+      }
+    },
+    "Entity.Person.Coverage_Marketer_PSID": {
+      "colDefs": {
+        "valueGetter": "getCoverageMarketer"
+      }
+    },
+    "Physical_Status": {
+      "colDefs": {
+        "hide": false,
+        "pinned": "right",
+        "lockPinned": true,
+        "cellStyle": "handlePhysicalStatus"
+      }
+    },
+    "Marketer_Commission_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Novation_Trade_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Extra_Marketer_Commission_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Novation_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Action_Type": {
+      "colDefs": {
+        "hide": false,
+        "pinned": "right",
+        "lockPinned": true
+      }
+    },
+    "Execution_Date_Time": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "TP_System_Capture_Timestamp": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Floating_Marketer_Commission_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Fixed_Marketer_Commission_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Trade_Event.Effective_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Trade_Event.Fixing_Information.Fixing_Time": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Trade_Event.Trigger_Touch_Information.Trigger_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Trade_Event.Observation_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Trade_Event.Expiry_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Trade_Event.Expiry_Time": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Trade_Event.Exercise_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Trade_Event.Cash_Settlement_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Trade_Event.Exercise_Time": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Cash_Financial_Instrument.Effective_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Cash_Financial_Instrument.Adjusted_Effective_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Cash_Financial_Instrument.Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Cash_Financial_Instrument.Exchanged_Currency1_Payment_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Cash_Financial_Instrument.Exchanged_Currency2_Payment_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Cash_Financial_Instrument.Settlement_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.Effective_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.Adjusted_Effective_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.Forward_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Forward_Future_Instrument.Exchanged_Currency1_Payment_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Forward_Future_Instrument.Exchanged_Currency2_Payment_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Forward_Future_Instrument.Settlement_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.FX_Leg.Near_Leg.Fixing_Information.Cash_Settlement_Fixing_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.FX_Leg.Near_Leg.Settlement_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.FX_Leg.Near_Leg.Exchanged_Currency2_Payment_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Forward_Future_Instrument.FX_Leg.Near_Leg.Exchanged_Currency1_Payment_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Forward_Future_Instrument.FX_Leg.Far_Leg.Fixing_Information.Cash_Settlement_Fixing_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.FX_Leg.Far_Leg.Settlement_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.FX_Leg.Far_Leg.Exchanged_Currency2_Payment_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Forward_Future_Instrument.FX_Leg.Far_Leg.Exchanged_Currency1_Payment_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Option_Instrument.Accrual_Information.Accrual_Region_Lower_Bound_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Option_Instrument.Accrual_Information.Accrual_Region_Upper_Bound_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Option_Instrument.Effective_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.Fixing_Information.Fixing_Time": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.Last_Reset_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.Notional_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Option_Instrument.Payoff_Information.Payoff_Region_Lower_Bound_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Option_Instrument.Payoff_Information.Payoff_Region_Strike_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Option_Instrument.Payoff_Information.Payoff_Region_Upper_Bound_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Option_Instrument.Periodic_Date.Periodic_Settlement_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.Premium_Payment_Date_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+
+    "Forward_Future_Instrument.Periodic_Date.Reset_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.Settlement_Period.Settlement_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.Settlement_Period.Settlement_Period_Notional_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Forward_Future_Instrument.Schedule_Generation_Rule.Settlement_Schedule_End_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.Schedule_Generation_Rule.Settlement_Schedule_Start_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.Target_Information.Maximum_Rebate_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Comments_1": {
+      "colDefs": {
+        "cellRenderer": "CommentCell"
+      }
+    },
+    "Comments_2": {
+      "colDefs": {
+        "cellRenderer": "CommentCell"
+      }
+    },
+    "Comments_3": {
+      "colDefs": {
+        "cellRenderer": "CommentCell"
+      }
+    },
+    "Trade_Event.Cash_Settlement_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Forward_Future_Instrument.Target_Information.Target_Accumulated_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Option_Instrument.Payoff_Information.Constant_Payoff_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Trade_Event.Size_Change.Exercised_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Trade_Event.Size_Change.Outstanding_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Swap_Instrument.Return_Leg.Notional_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Cashflows_Instrument.Periodic_Cash_Flow.Payment_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Swap_Instrument.IR_Leg.Notional_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Swap_Instrument.Additional_Payment.Additional_Party_Payment_Amount": {
+      "colDefs": {
+        "valueFormatter": "priceCellFormatterWithComma",
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Swap_Instrument.Return_Leg.Initial_Net_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Option_Instrument.Spot_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Option_Instrument.Strike_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Forward_Future_Instrument.Barrier_Information.Barrier_Trigger_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Forward_Future_Instrument.Spot_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Swap_Instrument.Return_Leg.Cash_Financial_Instrument.Basket_Underliers_Net_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Gross_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Gross_Spot_Price": {
+      "colDefs": {
+        "valueFormatter": {
+          "handleFunction": "priceCellFormatterWithComma",
+          "params": 4
+        },
+        "cellRenderer": "TooltipCell"
+      }
+    },
+    "Trade_Event.Agreement_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Forward_Future_Instrument.Expiry_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Settlement_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Swap_Instrument.IR_Leg.Termination_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Cashflows_Instrument.Periodic_Cash_Flow.Payment_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Swap_Instrument.Return_Leg.Last_Payment_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Swap_Instrument.Return_Leg.Termination_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Option_Instrument.Expiry_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Option_Instrument.Adjusted_Expiry_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Option_Instrument.Premium_Payment_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Data_Flow.Data_Publication_Date_Time": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "Swap_Instrument.IR_Leg.Effective_Date": {
+      "colDefs": {
+        "cellRenderer": "Time"
+      }
+    },
+    "MTM": {
+      "colDefs": {
+        "cellClass": "handleMTM"
+      },
+      "disabledView": false,
+      "disabledFilter": false
+    },
+    "Validation_Status": {
+      "colDefs": {
+        "valueFormatter": "handleReviewStatus"
+      }
+    },
+    "Validation_Comments": {
+      "colDefs": {
+        "cellRenderer": "TextCommentCell"
+      }
+    },
+    "Pending_Trade_Review": {
+      "colDefs": {
+        "valueGetter": "handlePendingReview",
+        "disabledFilter": false,
+        "comparator": "handleStringDateSort"
+      }
+    }
+  },
+  "customFilterDefault": [
+    {
+      "field": ["Entity", "Person", "Coverage_Marketer_PSID"],
+      "operator": "EQ",
+      "values": "",
+      "name": "TextInput"
+    },
+    {
+      "field": ["Instrument_Common", "Contract_Code"],
+      "operator": "EQ",
+      "values": "",
+      "name": "TextInput"
+    }
+  ]
+}

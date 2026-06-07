@@ -1,0 +1,631 @@
+{
+  "quickSearchLabelWidth": 175,
+  "quickSearchFormWidth": 240,
+  "quickSearchItems": [
+    {
+      "label": "Cashflow ID",
+      "field": "Cashflow.Cashflow_Id",
+      "component": "QuickSearchInput",
+      "placeholder": "Multiple searches separated by commas"
+    },
+    {
+      "label": "Trade ID",
+      "field": "Trade_Id",
+      "component": "QuickSearchInput"
+    },
+    {
+      "label": "Portfolio",
+      "field": "Portfolio.Booking_Entity_Trade_Portfolio_Name",
+      "component": "QuickSearchDynamickSelect",
+      "searchFun": "getDynamicListForPortfolio"
+    },
+    {
+      "component": "QuickSearchManyInOne",
+      "manyInOne": [
+        {
+          "label": "Counterparty Legal Name",
+          "field": "trade.Entity.Counterparty_Long_Name",
+          "component": "QuickSearchDynamickSelect",
+          "searchFun": "debounceGetDynamicList",
+          "searchField": "lmp_long_name"
+        },
+        {
+          "label": "Counterparty FMID",
+          "field": "Entity.Counterparty_SCI_FMID",
+          "component": "QuickSearchDynamickSelect",
+          "selectMode": "multiple",
+          "searchFun": "debounceGetDynamicList",
+          "searchField": "fm_profile_sys_gen_id"
+        }
+      ]
+    },
+    {
+      "label": "Product Taxonomy",
+      "field": "PRODUCT_TAXONOMY",
+      "component": "QuickSearchSelect",
+      "valueList": [
+        {
+          "label": "ForeignExchange:Forward",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/ForeignExchange:Forward"
+        },
+
+        {
+          "label": "ForeignExchange:Spot",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/ForeignExchange:Spot"
+        },
+        {
+          "label": "ForeignExchange:Swap",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/ForeignExchange:Swap"
+        },
+        {
+          "label": "Accumulator Swap",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/Accumulator Swap"
+        },
+        {
+          "label": "Equity Swap",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/Equity Swap"
+        },
+        {
+          "label": "OTC Option",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/OTC Option"
+        },
+        {
+          "label": "FX Balance",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/FX Balance"
+        },
+        {
+          "label": "FX Cash",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/FX Cash"
+        },
+        {
+          "label": "FX Opt Forward",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/FX Opt Forward"
+        },
+        {
+          "label": "Forward",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/Forward"
+        },
+        {
+          "label": "Issued Structured Deposit",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/Issued Structured Deposit"
+        },
+        {
+          "label": "REPO-BC",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/REPO-BC"
+        },
+        {
+          "label": "REPO-CR",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/REPO-CR"
+        },
+        {
+          "label": "REPO-CX",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/REPO-CX"
+        },
+        {
+          "label": "REPO-LC",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/REPO-LC"
+        },
+        {
+          "label": "REPO-PS",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/REPO-PS"
+        },
+        {
+          "label": "REPO-RB",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/REPO-RB"
+        },
+        {
+          "label": "REPO-RS",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/REPO-RS"
+        },
+        {
+          "label": "REPO-SP",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/REPO-SP"
+        },
+        {
+          "label": "REPO-TL",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/REPO-TL"
+        },
+        {
+          "label": "REPO-TP",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/REPO-TP"
+        },
+        {
+          "label": "REPO-TR",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/REPO-TR"
+        },
+        {
+          "label": "REPO-TS",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/REPO-TS"
+        },
+        {
+          "label": "SECLEN-SB",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/SECLEN-SB"
+        },
+        {
+          "label": "SECLEN-SL",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/SECLEN-SL"
+        },
+        {
+          "label": "Shares",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/Shares"
+        },
+        {
+          "label": "Spot",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/Spot"
+        },
+        {
+          "label": "Structured Note",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/Structured Note"
+        },
+        {
+          "label": "Structured Option DOS",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/Structured Option DOS"
+        },
+        {
+          "label": "Swap Far Leg",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/Swap Far Leg"
+        },
+        {
+          "label": "Swap Near Leg",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/Swap Near Leg"
+        },
+        {
+          "label": "Time Option",
+          "value": "Instrument_Common.Source_System_Instrument_Sub_Type/_/Time Option"
+        }
+      ]
+    },
+    {
+      "label": "Currency",
+      "field": "Cashflow.Payment_Currency",
+      "component": "QuickSearchSelect",
+      "valueList": ["AUD", "EUR", "GBP", "HKD", "JPY", "SGD", "USD"]
+    },
+    {
+      "label": "Value Date Range",
+      "field": "Cashflow.Payment_Date",
+      "component": "QuickSearchPicker"
+    },
+    {
+      "label": "SCB Booking Entity",
+      "field": "Entity.Booking_Entity_SCI_FMID",
+      "component": "QuickSearchSelect",
+      "valueList": [
+        {
+          "label": "SCB LONDON*LDN",
+          "value": "10075222"
+        },
+        {
+          "label": "SCB HONGKON*HKG",
+          "value": "2"
+        },
+        {
+          "label": "SCB SG LTD*SIN",
+          "value": "400451508"
+        },
+        {
+          "label": "SCB SG LTDACU*SIN",
+          "value": "400452428"
+        },
+        {
+          "label": "SC PVT BK JE BR*STH",
+          "value": "400910415"
+        },
+        {
+          "label": "SCB SAUDI*RYD",
+          "value": "400991880"
+        },
+        {
+          "label": "SCB SHANGH*SHA",
+          "value": "10036642"
+        },
+        {
+          "label": "SCB SEOUL*SEL",
+          "value": "10036645"
+        },
+        {
+          "label": "SCB SING*SIN",
+          "value": "3"
+        },
+        {
+          "label": "NEPAL GRINDLAYS*KTM",
+          "value": "400007847"
+        },
+        {
+          "label": "SCB CHINA HO*SHA",
+          "value": "400521212"
+        },
+        {
+          "label": "SCB EGYPT*CAI",
+          "value": "401036553"
+        }
+      ]
+    }
+  ],
+  "quickSearchItemsCN": [
+    {
+      "label": "Cashflow ID",
+      "field": "Cashflow.Cashflow_Id",
+      "component": "QuickSearchInput",
+      "placeholder": "Multiple searches separated by commas"
+    },
+    {
+      "component": "QuickSearchManyInOne",
+      "manyInOne": [
+        {
+          "label": "Trade ID",
+          "field": "Trade_Id",
+          "component": "QuickSearchInput"
+        },
+        {
+          "label": "Original Trade ID",
+          "field": "BCS_Parent_Trade_Id",
+          "component": "QuickSearchInput"
+        }
+      ]
+    },
+    {
+      "label": "Value Date Range",
+      "field": "Cashflow.Payment_Date",
+      "component": "QuickSearchPicker"
+    },
+    {
+      "label": "Currency",
+      "field": "Cashflow.Payment_Currency",
+      "component": "QuickSearchSelect",
+      "valueList": [
+        "HKD",
+        "INO",
+        "CNY",
+        "AUD",
+        "INR",
+        "ALL",
+        "CHF",
+        "CNH",
+        "CAD",
+        "KRW",
+        "EUR",
+        "SAR",
+        "NPR",
+        "TOP",
+        "XAF",
+        "BHD",
+        "MYO",
+        "SGD",
+        "QAR",
+        "JPY",
+        "GBP",
+        "CNO",
+        "FJD",
+        "EGO",
+        "AED",
+        "EGP",
+        "USD",
+        "PHP"
+      ]
+    },
+    {
+      "label": "Product Taxonomy",
+      "field": "PRODUCT_TAXONOMY",
+      "component": "QuickSearchSelect",
+      "selectMode": "multiple",
+      "valueList": [
+        {
+          "label": "ForeignExchange:Forward",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/ForeignExchange:Forward"
+        },
+
+        {
+          "label": "ForeignExchange:Spot",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/ForeignExchange:Spot"
+        },
+        {
+          "label": "ForeignExchange:Swap",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/ForeignExchange:Swap"
+        },
+        {
+          "label": "ForeignExchange:VanillaOption",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/ForeignExchange:VanillaOption"
+        },
+        {
+          "label": "ForeignExchange:SimpleExotic:Digital",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/ForeignExchange:SimpleExotic:Digital"
+        },
+        {
+          "label": "ForeignExchange:NDF",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/ForeignExchange:NDF"
+        },
+        {
+          "label": "IRD|IRS|Structured Swap|FX_QUANTO_RA_DI",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/IRD|IRS|Structured Swap|FX_QUANTO_RA_DI"
+        },
+        {
+          "label": "IRD|IRS|Vanilla IR Swap",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/IRD|IRS|Vanilla IR Swap"
+        },
+        {
+          "label": "IRD|IRS",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/IRD|IRS"
+        },
+        {
+          "label": "CURR|FXD|FXD",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/CURR|FXD|FXD"
+        },
+        {
+          "label": "IRD|LN_BR",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/IRD|LN_BR"
+        },
+        {
+          "label": "IRD|CS",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/IRD|CS"
+        },
+        {
+          "label": "CURR|FXD|XSW",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/CURR|FXD|XSW"
+        },
+        {
+          "label": "CRD|RTRS",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/CRD|RTRS"
+        },
+        {
+          "label": "COM|SWAP",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/COM|SWAP"
+        },
+        {
+          "label": "IRD|BOND",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/IRD|BOND"
+        },
+        {
+          "label": "SCF|SCF|SCF",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/SCF|SCF|SCF"
+        },
+        {
+          "label": "CURR|OPT|SMP",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/CURR|OPT|SMP"
+        },
+        {
+          "label": "CURR|OPT|ASN",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/CURR|OPT|ASN"
+        },
+        {
+          "label": "Simple Cashflow (SCF)",
+          "value": "Instrument_Common.Primary_Asset_Class/_/Cash"
+        },
+        {
+          "label": "InterestRate:IRSwap",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/InterestRate:IRSwap:FixedFloat/_/InterestRate:IRSwap:FloatFloat/_/InterestRate:IRSwap:OIS"
+        },
+        {
+          "label": "InterestRate:CrossCurrency",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/InterestRate:CrossCurrency:Basis/_/InterestRate:CrossCurrency:FixedFloat/_/InterestRate:CrossCurrency:FixedFixed/_/InterestRate:LoanDeposit"
+        },
+        {
+          "label": "InterestRate:LoanDeposit",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/InterestRate:LoanDeposit"
+        },
+        {
+          "label": "Credit:Loans:TermLoan",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/Credit:Loans:TermLoan"
+        },
+        {
+          "label": "Credit:Loans:RevolvingTermLoan",
+          "value": "Instrument_Common.ISDA_Taxonomy/_/Credit:Loans:RevolvingTermLoan"
+        }
+      ]
+    },
+    {
+      "component": "QuickSearchManyInOne",
+      "manyInOne": [
+        {
+          "label": "Counterparty FMCODE",
+          "field": "Entity.Counterparty_SCI_FMCODE",
+          "component": "QuickSearchInput",
+          "commas": true,
+          "placeholder": "Multiple searches separated by commas"
+        },
+        {
+          "label": "Counterparty FMID",
+          "field": "Entity.Counterparty_SCI_FMID",
+          "component": "QuickSearchInput",
+          "commas": true,
+          "placeholder": "Multiple searches separated by commas"
+        }
+      ]
+    },
+    {
+      "component": "QuickSearchManyInOne",
+      "manyInOne": [
+        {
+          "label": "SCB Booking Entity",
+          "field": "Entity.Booking_Entity_SCI_FMID",
+          "component": "QuickSearchSelect",
+          "valueList": [
+            {
+              "label": "SCB SHANGH*SHA",
+              "value": "10036642"
+            },
+            {
+              "label": "SCB CN CHO*CHO",
+              "value": "400899993"
+            },
+            {
+              "label": "SCB CHINA*BJG",
+              "value": "400001378"
+            },
+            {
+              "label": "SCB CHINA*NJG",
+              "value": "10020899"
+            },
+            {
+              "label": "SCB CHINA*TIA",
+              "value": "235003861"
+            },
+            {
+              "label": "SCB CHINA*ZHU",
+              "value": "10078716"
+            },
+            {
+              "label": "SCB CHINA*XMN",
+              "value": "10062461"
+            },
+            {
+              "label": "SCB CHINA*SZN",
+              "value": "10032025"
+            },
+            {
+              "label": "SCB GUANGZHOU*GZU",
+              "value": "400054708"
+            },
+            {
+              "label": "SCB SUZHOU*SUZ",
+              "value": "400054737"
+            },
+            {
+              "label": "SCB CHENGDU*CGD",
+              "value": "400054741"
+            },
+            {
+              "label": "SCB QINGDAO*QDO",
+              "value": "400057714"
+            },
+            {
+              "label": "SCB CN CHONGQING*CQG",
+              "value": "400075752"
+            },
+            {
+              "label": "SCB CN HANGZHOU*HNZ",
+              "value": "400085753"
+            },
+            {
+              "label": "SCB CHINA*NCG",
+              "value": "400090093"
+            },
+            {
+              "label": "SCB CHINA DALIAN*DLN",
+              "value": "400095464"
+            },
+            {
+              "label": "SCB CHINA NINGBO*NGB",
+              "value": "400130180"
+            },
+            {
+              "label": "SCB CHINA HOHHOT*HHH",
+              "value": "400130178"
+            },
+            {
+              "label": "SCB CN WUHAN*WUH",
+              "value": "400185419"
+            },
+            {
+              "label": "SCBLXIAN*XIN",
+              "value": "400193370"
+            },
+            {
+              "label": "SCB CN FOSHAN*FOS",
+              "value": "400209000"
+            },
+            {
+              "label": "SCB CN JINAN BR*JNA",
+              "value": "400218197"
+            },
+            {
+              "label": "SCB CN CHANGSHA*CGS",
+              "value": "400220273"
+            },
+            {
+              "label": "SCB CN FUZHOU*FZH",
+              "value": "400229749"
+            },
+            {
+              "label": "SCB CN TAIYUAN*TYA",
+              "value": "400516443"
+            },
+            {
+              "label": "SCB CN ZHENGZHOU*ZZU",
+              "value": "400516442"
+            },
+            {
+              "label": "SCB CN KMG*KMG",
+              "value": "400667486"
+            },
+            {
+              "label": "SCB SHA FTU*FT2",
+              "value": "400677737"
+            },
+            {
+              "label": "SCB CN HRB*HRB",
+              "value": "400683682"
+            },
+            {
+              "label": "SCB CN SYG*SYG",
+              "value": "400798477"
+            },
+            {
+              "label": "SCB LONDON*LDN",
+              "value": "10075222"
+            },
+            {
+              "label": "SCB HONGKON*HKG",
+              "value": "2"
+            },
+            {
+              "label": "SCB SG LTD*SIN",
+              "value": "400451508"
+            },
+            {
+              "label": "SCB SG LTDACU*SIN",
+              "value": "400452428"
+            },
+            {
+              "label": "SC PVT BK JE BR*STH",
+              "value": "400910415"
+            },
+            {
+              "label": "SCB SAUDI*RYD",
+              "value": "400991880"
+            },
+            {
+              "label": "SCB SEOUL*SEL",
+              "value": "10036645"
+            },
+            {
+              "label": "SCB SING*SIN",
+              "value": "3"
+            },
+            {
+              "label": "NEPAL GRINDLAYS*KTM",
+              "value": "400007847"
+            },
+            {
+              "label": "SCB CHINA HO*SHA",
+              "value": "400521212"
+            },
+            {
+              "label": "SCB EGYPT*CAI",
+              "value": "401036553"
+            }
+          ]
+        },
+        {
+          "label": "SCB Booking Entity FMID",
+          "field": "Entity.Booking_Entity_SCI_FMID",
+          "component": "QuickSearchInput"
+        }
+      ]
+    },
+    {
+      "label": "Beneficiary Name",
+      "field": "Settlement_Instruction.Account.Beneficiary_Account_Name",
+      "component": "QuickSearchInput"
+    },
+    {
+      "label": "Beneficiary Account BIC Code",
+      "field": "Settlement_Instruction.Account.Beneficiary_BIC_code",
+      "component": "QuickSearchInput"
+    }
+  ],
+  "quickSearchAmountItem": {
+    "label": "Amount Range",
+    "field": "Cashflow.Payment_Amount"
+  }
+}
