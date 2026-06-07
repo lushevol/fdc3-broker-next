@@ -6,6 +6,13 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const webpack = require("webpack");
 const PackageJson = require("./package.json");
 
+const disableTypeScriptDiagnostics = (config) => ({
+  ...config,
+  plugins: config.plugins?.filter(
+    (plugin) => plugin?.constructor?.name !== "ForkTsCheckerWebpackPlugin"
+  ),
+});
+
 module.exports = (webpackConfigEnv, argv) => {
   const port = process.env.port;
   const mode = process.env.mode;
@@ -21,13 +28,16 @@ module.exports = (webpackConfigEnv, argv) => {
     argv,
   });
 
-  return merge(defaultConfig, {
+  return disableTypeScriptDiagnostics(merge(defaultConfig, {
     // modify the webpack config however you'd like to by adding to this object
     mode,
     devtool,
     entry: path.resolve(__dirname, "src", "root"),
     devServer: {
       port,
+      client: {
+        overlay: false,
+      },
     },
     output: {
       filename: "ratan_container.js",
@@ -66,5 +76,5 @@ module.exports = (webpackConfigEnv, argv) => {
         },
       ]
     }
-  });
+  }));
 };

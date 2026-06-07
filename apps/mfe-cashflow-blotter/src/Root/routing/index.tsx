@@ -36,6 +36,10 @@ const Routing: React.FC<TileProps> = (props: TileProps): ReactElement => {
       <Routes>
         <Route path="/cashflow_cn/*" element={<CashflowCn {...props} />} />
         <Route
+          path="/cashflow_blotter_cn/cashflow_cn/*"
+          element={<CashflowCn {...props} />}
+        />
+        <Route
           path="/cashflow_open_search/*"
           element={<CashflowCnOpenSearch {...props} />}
         />

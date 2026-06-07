@@ -126,6 +126,34 @@
           "id": 61,
           "title": "FDC3 Workflow Launcher",
           "entity": ["X_RATANONE"]
+        },
+        {
+          "container": "@fm/ratan_container",
+          "imageDarkTheme": "darkIcons/cashflow.dark.svg",
+          "subject": "template_subject",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "cashflow_blotter_cn",
+          "subtitle": "",
+          "imageLightTheme": "lightIcons/cashflow.light.svg",
+          "tile": "cashflow_cn",
+          "id": 62,
+          "title": "Cashflow Blotter",
+          "entity": ["X_RATANONE"]
+        },
+        {
+          "container": "@fm/flowzero",
+          "imageDarkTheme": "darkIcons/icon01.svg",
+          "subject": "template_subject",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "/flowzero",
+          "subtitle": "",
+          "imageLightTheme": "lightIcons/icon01.svg",
+          "tile": "/home",
+          "id": 63,
+          "title": "Flowzero",
+          "entity": ["X_RATANONE"]
         }
       ],
       "id": 15,

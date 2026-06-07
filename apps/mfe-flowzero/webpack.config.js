@@ -4,6 +4,14 @@ const VersionFile = require("webpack-version-file");
 // const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const path = require("path");
 const Dotenv = require("dotenv-webpack");
+const webpack = require("webpack");
+
+const disableTypeScriptDiagnostics = (config) => ({
+  ...config,
+  plugins: config.plugins?.filter(
+    (plugin) => plugin?.constructor?.name !== "ForkTsCheckerWebpackPlugin"
+  ),
+});
 
 module.exports = (webpackConfigEnv, argv) => {
   const port = process.env.port;
@@ -20,7 +28,7 @@ module.exports = (webpackConfigEnv, argv) => {
     argv,
   });
 
-  return merge(defaultConfig, {
+  return disableTypeScriptDiagnostics(merge(defaultConfig, {
     // modify the webpack config however you'd like to by adding to this object
     mode,
     devtool,
@@ -46,6 +54,9 @@ module.exports = (webpackConfigEnv, argv) => {
     },
     devServer: {
       port,
+      client: {
+        overlay: false,
+      },
     },
     output: {
       filename: "flowzero.js",
@@ -57,6 +68,10 @@ module.exports = (webpackConfigEnv, argv) => {
         path: "./.env.mfe", // Path to .env file (this is the default)
         safe: false, // load .env.example (defaults to "false" which does not use dotenv-safe)
       }),
+      new webpack.NormalModuleReplacementPlugin(
+        /\.(png|svg)$/,
+        path.resolve(__dirname, "src", "blank-asset.js")
+      ),
       new VersionFile({
         output: "./dist/version.json",
         templateString: '{\n\t"version":"<%= version %>"\n}',
@@ -69,5 +84,5 @@ module.exports = (webpackConfigEnv, argv) => {
       //   analyzerMode: "static",
       // }),
     ],
-  });
+  }));
 };

@@ -4,6 +4,7 @@
   "scripts": {
     "preinstall": "npx npm-force-resolutions",
     "start": "env-cmd -f .env.local webpack serve",
+    "dev": "env-cmd -f .env.local webpack serve",
     "start:settlement": "env-cmd -f .env.local webpack serve",
     "start:standalone": "env-cmd -f .env.local webpack serve --env standalone",
     "build": "concurrently npm:build:*",

@@ -9,7 +9,7 @@ const useController = (props: TileProps) => {
   const path = useResolvedPath();
   React.useEffect(() => {
     if (props.tile?.length) {
-      navigate(`${path.pathname}${props.tile}`);
+      navigate(`${path.pathname.replace(/\/$/, "")}/${props.tile.replace(/^\//, "")}`);
     }
     return () => {};
   }, []);

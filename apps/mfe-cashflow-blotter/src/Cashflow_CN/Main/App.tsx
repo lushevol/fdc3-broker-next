@@ -153,6 +153,7 @@ const App: FC<TileProps> = ({ parameters }) => {
         })
         .catch(() => {
           abortTracking();
+          setIsGetFieldsDone(true);
         });
     }
   }, [isInitComplete]);

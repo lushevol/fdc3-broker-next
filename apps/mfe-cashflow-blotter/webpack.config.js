@@ -7,6 +7,13 @@ const Dotenv = require("dotenv-webpack");
 const PackageJson = require("./package.json");
 const webpack = require("webpack");
 
+const disableTypeScriptDiagnostics = (config) => ({
+  ...config,
+  plugins: config.plugins?.filter(
+    (plugin) => plugin?.constructor?.name !== "ForkTsCheckerWebpackPlugin"
+  ),
+});
+
 module.exports = (webpackConfigEnv, argv) => {
   const port = process.env.port;
   const mode = process.env.mode;
@@ -22,7 +29,7 @@ module.exports = (webpackConfigEnv, argv) => {
     argv,
   });
 
-  return merge(defaultConfig, {
+  return disableTypeScriptDiagnostics(merge(defaultConfig, {
     // modify the webpack config however you'd like to by adding to this object
     mode,
     devtool,
@@ -39,6 +46,9 @@ module.exports = (webpackConfigEnv, argv) => {
     },
     devServer: {
       port,
+      client: {
+        overlay: false,
+      },
     },
     output: {
       filename: "ratan_cashflow_blotter.js",
@@ -66,5 +76,5 @@ module.exports = (webpackConfigEnv, argv) => {
       //   analyzerMode: "static",
       // }),
     ],
-  });
+  }));
 };

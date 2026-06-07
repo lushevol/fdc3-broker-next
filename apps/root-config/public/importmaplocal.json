@@ -11,6 +11,7 @@
     "mf_container": "//localhost:3000/mf_container.js",
     "mf_tile": "//localhost:3001/mf_tile.js",
     "@fm/ratan_container": "//localhost:8009/ratan_container.js",
+    "@fm/flowzero": "//localhost:8016/flowzero.js",
     "@fm/ratan_cashflow": "//localhost:8008/ratan_cashflow.js",
     "@fm/ratan_trades": "//localhost:8010/ratan_trades.js",
     "@fm/ratan_exception": "//localhost:8011/ratan_exception.js",

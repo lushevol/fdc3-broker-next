@@ -10,6 +10,7 @@
     "@fm/sstm_container": "/sstm-container/sstm_container.js",
     "@fm/sstm_tiles": "/sstm-tiles/sstm_tiles.js",
     "@fm/ratan_container": "/ratan_container/ratan_container.js",
+    "@fm/flowzero": "/flowzero/flowzero.js",
     "@fm/ratan_cashflow": "/ratan_cashflow/ratan_cashflow.js",
     "@fm/ratan_trades": "/ratan_trade/ratan_trades.js",
     "@fm/ratan_exception": "/ratan_exception/ratan_exception.js",
