@@ -17,6 +17,21 @@ spring:
         primary-dialect: org.hibernate.dialect.PostgreSQLDialect
   application:
     name: ratan-flowzero-designer-service
+  ai:
+    mcp:
+      server:
+        enabled: true
+        name: ratan-flowzero-designer-service
+        version: 1.0.2
+        type: SYNC
+        transport: WEBMVC
+        instructions: "Provides deterministic FlowZero workflow draft generation tools"
+        sse-message-endpoint: /api/mcp/messages
+        capabilities:
+          tool: true
+          resource: false
+          prompt: false
+          completion: false
   datasource:
     url: ${PGSL_RDB_URL}
     username: ${PGSL_RDB_USERNAME_HASHICORP}

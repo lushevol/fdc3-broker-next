@@ -25,6 +25,7 @@
         <ansible.version>20241112.2</ansible.version>
         <failsafe.version>3.2.3</failsafe.version>
         <minio.version>8.6.0</minio.version>
+        <spring-ai.version>1.0.3</spring-ai.version>
     </properties>
 
     <dependencyManagement>
@@ -36,10 +37,21 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.retry</groupId>
             <artifactId>spring-retry</artifactId>
