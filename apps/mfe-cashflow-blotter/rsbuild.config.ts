@@ -125,6 +125,7 @@ export default defineConfig({
       optimization: {
         runtimeChunk: false,
         splitChunks: false,
+        concatenateModules: false, // Prevent Rspack from merging CJS sub-module imports (lodash, etc.) into namespace references
       },
       output: {
         uniqueName: "@fm/ratan_cashflow_blotter",
@@ -132,6 +133,7 @@ export default defineConfig({
           type: "system",
         },
         chunkFilename: "[chunkhash].[name].ratan_cashflow_blotter.js",
+        publicPath: `http://localhost:${port}/`,
       },
       plugins: [
         new rspack.BannerPlugin({

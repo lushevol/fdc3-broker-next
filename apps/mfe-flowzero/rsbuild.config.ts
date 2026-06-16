@@ -126,6 +126,7 @@ export default defineConfig({
       optimization: {
         runtimeChunk: false,
         splitChunks: false,
+        concatenateModules: false, // Prevent Rspack from merging CJS sub-module imports into namespace references
       },
       output: {
         uniqueName: "@fm/flowzero",
@@ -133,6 +134,7 @@ export default defineConfig({
           type: "system",
         },
         chunkFilename: "[chunkhash].[name].flowzero.js",
+        publicPath: `http://localhost:${port}/`,
       },
       plugins: [
         new rspack.NormalModuleReplacementPlugin(

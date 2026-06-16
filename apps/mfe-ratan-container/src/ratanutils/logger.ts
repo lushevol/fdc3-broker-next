@@ -1,8 +1,40 @@
 import { Service, CommonUtil } from "../Root/import";
 const { service } = Service;
-import log from "loglevel";
 import { getEnable } from "./componentEnabling";
 const logApi = "/api/ratan/v1/esLogging";
+
+// Create a minimal console-based logger as default
+const makeLogger = (name?: string) => {
+  const noop = (..._args: any[]) => {};
+  const methods: Record<string, any> = {};
+  for (const m of ["trace", "debug", "info", "warn", "error"]) {
+    methods[m] = name ? console[m]?.bind(console, `[${name}]`) ?? noop : console[m]?.bind(console) ?? noop;
+  }
+  methods.methodFactory = null;
+  methods.enableAll = noop;
+  methods.disableAll = noop;
+  methods.setLevel = noop;
+  methods.setDefaultLevel = noop;
+  methods.getLevel = () => 2;
+  methods.getLogger = (n: string) => makeLogger(n);
+  return methods;
+};
+
+// Try to get real loglevel, fall back to console if not available
+let _log: any;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const raw = require("loglevel");
+  // In System.register output, CJS module.exports may be wrapped
+  _log = raw && typeof raw.enableAll === "function" ? raw : null;
+  if (!_log && raw && raw.default && typeof raw.default.enableAll === "function") {
+    _log = raw.default;
+  }
+} catch {
+  _log = null;
+}
+const log = _log || makeLogger();
+
 export const getErrorInfo = (stack: string) => {
   const lines = stack.split("\n");
   const message = lines.splice(0, 1)[0];
@@ -49,7 +81,9 @@ export const newMethodFactory = (methodName, logLevel, loggerName) => {
   const rawMethod = originalFactory(methodName, logLevel, loggerName);
   return handleMsg(methodName, loggerName, rawMethod);
 };
-log.methodFactory = newMethodFactory;
+if (originalFactory) {
+  log.methodFactory = newMethodFactory;
+}
 log.enableAll();
 export const logInit = () => {
   if (getEnable("Logger")) {

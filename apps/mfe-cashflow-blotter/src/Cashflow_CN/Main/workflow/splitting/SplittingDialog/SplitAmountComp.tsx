@@ -6,7 +6,7 @@ import PendingOutlineIcon from "@mui/icons-material/Pending";
 import { Button, IconButton } from "@mui/material";
 import { InputNumber, message, Tooltip } from "antd";
 import { isEmpty } from "Import/ratanutils";
-import { cloneDeep } from "lodash";
+import cloneDeep from "lodash/cloneDeep";
 import isNumber from "lodash/isNumber";
 import { FC, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";

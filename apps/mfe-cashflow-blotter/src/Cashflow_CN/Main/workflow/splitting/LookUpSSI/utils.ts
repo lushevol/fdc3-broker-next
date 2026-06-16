@@ -1,6 +1,7 @@
 import { MessageInstance } from "antd/es/message/interface";
 import { isEmpty } from "Import/ratanutils";
-import { cloneDeep, isNil } from "lodash";
+import cloneDeep from "lodash/cloneDeep";
+import isNil from "lodash/isNil";
 
 import { RefStructType } from "../../../../components/CashflowDetails/MultiExceptions/common/interface";
 import { NostroFormDetails } from "../../../../components/CashflowDetails/MultiExceptions/components/Nostro/interface";

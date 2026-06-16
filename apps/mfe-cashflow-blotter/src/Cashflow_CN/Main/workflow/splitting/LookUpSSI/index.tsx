@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { message } from "antd";
 import { Button } from "Import/index";
-import { cloneDeep } from "lodash";
+import cloneDeep from "lodash/cloneDeep";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NostroSection from "src/Cashflow_CN/components/CashflowDetails/MultiExceptions/components/Nostro";

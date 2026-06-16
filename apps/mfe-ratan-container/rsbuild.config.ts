@@ -105,6 +105,7 @@ export default defineConfig({
       optimization: {
         runtimeChunk: false,
         splitChunks: false,
+        concatenateModules: false, // Prevent Rspack from merging CJS sub-module imports into namespace references
       },
       output: {
         uniqueName: "@fm/ratan_container",
@@ -112,6 +113,7 @@ export default defineConfig({
           type: "system",
         },
         chunkFilename: "[chunkhash].[name].ratan_container.js",
+        publicPath: `http://localhost:${port}/`,
       },
       plugins: [
         new rspack.BannerPlugin({
