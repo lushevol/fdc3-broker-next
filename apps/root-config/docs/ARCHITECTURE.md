@@ -30,6 +30,9 @@ root-config/
 │   ├── jwt.js                       # Local RS512 JWT generator for dev auth mock
 │   ├── jwt.test.js                  # JWT generation unit test
 │   └── copy.js                      # Post-build: copies public/ to dist/
+├── mock/
+│   └── captured-api-fixtures.mock.json # Sanitized captured MFE API responses
+├── captured-api-mocks.ts            # Captured API replay matcher and middleware
 ├── dev-server.ts                    # Dev proxy + mock middleware (350 lines)
 ├── rsbuild.config.ts                # Build config (SystemJS output, externals)
 ├── rsbuild.config.test.ts           # Tests for dev server middleware
@@ -67,6 +70,8 @@ Browser loads index.ejs
 | `/api/sse/`       | `http://localhost:8088` | Server-Sent Events          |
 
 When `useBackendAuth=false`, mock auth endpoints replace `/api/auth/v2/sso/*` routes. FDC3 mock endpoints are always active.
+
+Captured app API mocks are registered in `dev-server.ts` so root-config owns overall local devserver behavior. Individual MFE `server/` folders are for containerization/server packaging and should not receive cross-MFE local mock response logic.
 
 ## Build Output
 

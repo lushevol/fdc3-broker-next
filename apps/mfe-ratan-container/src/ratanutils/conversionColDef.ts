@@ -1,4 +1,4 @@
-import { omit } from "lodash";
+import omit from "lodash/omit";
 export const filterArray = (arr: string[], valueIsArray: string[]) => {
   const newArr: string[] = [];
   let isArray = false;

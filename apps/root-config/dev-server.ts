@@ -1,6 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { ProxyOptions, RequestHandler, SetupMiddlewaresFn } from '@rsbuild/core';
 
+import { createCapturedApiMockMiddleware, type CapturedApiFixture } from './captured-api-mocks';
+
 type JsonRecord = Record<string, unknown>;
 
 type MockMiddleware = RequestHandler & {
@@ -34,6 +36,10 @@ const mockLoginResp = require('./login-resp.mock.json') as JsonRecord;
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { generateJWT } = require('./scripts/jwt') as {
   generateJWT: (payload: JsonRecord) => string;
+};
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const capturedApiMocks = require('./mock/captured-api-fixtures.mock.json') as {
+  fixtures?: CapturedApiFixture[];
 };
 
 function createMiddleware(path: string, handler: RequestHandler): MockMiddleware {
@@ -76,6 +82,11 @@ function sendJson(res: ServerResponse, data: unknown): void {
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify({ code: 200, message: 'success', data }));
+}
+
+function sendNoContent(res: ServerResponse): void {
+  res.statusCode = 204;
+  res.end();
 }
 
 function createAuthToken(): string {
@@ -196,6 +207,7 @@ export const rootConfigDevSetup: SetupMiddlewaresFn = (middlewares) => {
   const useBackendAuth = process.env.useBackendAuth?.toLowerCase() === 'true';
   const token = createAuthToken();
   const fdc3Store = createFdc3Store();
+  const capturedApiFixtures = capturedApiMocks.fixtures ?? [];
 
   if (!useBackendAuth) {
     middlewares.unshift(
@@ -218,6 +230,13 @@ export const rootConfigDevSetup: SetupMiddlewaresFn = (middlewares) => {
   }
 
   middlewares.unshift(
+    createCapturedApiMockMiddleware(capturedApiFixtures),
+    createMiddleware('/api/analytics/v1/fmo/print', (_req, res) => {
+      sendNoContent(res);
+    }),
+    createMiddleware('/v1/fmo/print', (_req, res) => {
+      sendNoContent(res);
+    }),
     createMiddleware('/api/auth/v1/fmo/admin/fdc3/intent/data', (_req, res) => {
       sendJson(res, fdc3Store.intents);
     }),

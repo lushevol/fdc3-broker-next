@@ -24,6 +24,8 @@
 
 - `dev-server.ts` contains all proxy and mock middleware
 - When modifying mock data, update files in the workspace root (`login-resp.mock.json`, `fdc3-declaration.mock.json`, `category.mock.json`)
+- When adding captured app API mocks, update root-config mock payloads under `mock/` and register middleware from `dev-server.ts`
+- Do not put cross-MFE local devserver mock behavior in individual MFE `server/` folders; those folders are for containerization/server packaging of that MFE
 - The mock JWT signer uses a hardcoded RSA key for local dev only — **never use in production**
 
 ## HTML Template
