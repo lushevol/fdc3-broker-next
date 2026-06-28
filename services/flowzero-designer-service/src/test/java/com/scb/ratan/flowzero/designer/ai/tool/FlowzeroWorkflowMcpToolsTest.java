@@ -6,6 +6,10 @@ import com.scb.ratan.flowzero.designer.ai.model.FlowzeroWorkflowDraftResponse.Po
 import com.scb.ratan.flowzero.designer.ai.model.FlowzeroWorkflowDraftResponse.WorkflowEdge;
 import com.scb.ratan.flowzero.designer.ai.model.FlowzeroWorkflowDraftResponse.WorkflowNode;
 import com.scb.ratan.flowzero.designer.ai.service.FlowzeroWorkflowDraftGenerator;
+import com.scb.ratan.flowzero.designer.entity.dbo.Workflow;
+import com.scb.ratan.flowzero.designer.entity.dto.CreateWorkflowDto;
+import com.scb.ratan.flowzero.designer.entity.dto.SaveWorkflowDto;
+import com.scb.ratan.flowzero.designer.service.IWorkflowService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -20,9 +24,11 @@ import static org.mockito.Mockito.when;
 class FlowzeroWorkflowMcpToolsTest {
 
     @Test
-    void generateFlowzeroWorkflowDelegatesToDraftGenerator() {
+    void generateFlowzeroWorkflowPersistsDraftThroughWorkflowService() {
         FlowzeroWorkflowDraftGenerator generator = mock(FlowzeroWorkflowDraftGenerator.class);
+        IWorkflowService workflowService = mock(IWorkflowService.class);
         FlowzeroWorkflowDraftResponse draft = new FlowzeroWorkflowDraftResponse(
+            null,
             "Expense Approval",
             "Approval flow",
             "Finance",
@@ -35,8 +41,12 @@ class FlowzeroWorkflowMcpToolsTest {
             List.of()
         );
         when(generator.generate(org.mockito.ArgumentMatchers.any())).thenReturn(draft);
+        Workflow createdWorkflow = new Workflow();
+        createdWorkflow.setId("workflow-123");
+        createdWorkflow.setUniqueProcessId("process-abc");
+        when(workflowService.create(org.mockito.ArgumentMatchers.any())).thenReturn(createdWorkflow);
 
-        FlowzeroWorkflowMcpTools tools = new FlowzeroWorkflowMcpTools(generator);
+        FlowzeroWorkflowMcpTools tools = new FlowzeroWorkflowMcpTools(generator, workflowService);
         FlowzeroWorkflowDraftResponse response = tools.generateFlowzeroWorkflow(
             "start, manager approval, end",
             "Expense Approval",
@@ -52,6 +62,18 @@ class FlowzeroWorkflowMcpToolsTest {
         assertThat(requestCaptor.getValue().prompt()).isEqualTo("start, manager approval, end");
         assertThat(requestCaptor.getValue().workflowName()).isEqualTo("Expense Approval");
         assertThat(requestCaptor.getValue().countryCodes()).containsExactly("CN");
+        ArgumentCaptor<CreateWorkflowDto> createCaptor = ArgumentCaptor.forClass(CreateWorkflowDto.class);
+        verify(workflowService).create(createCaptor.capture());
+        assertThat(createCaptor.getValue().getName()).isEqualTo("Expense Approval");
+        assertThat(createCaptor.getValue().getCountryCodes()).isEqualTo("CN");
+        assertThat(createCaptor.getValue().getBusinessArea()).isEqualTo("Finance");
+        ArgumentCaptor<SaveWorkflowDto> saveCaptor = ArgumentCaptor.forClass(SaveWorkflowDto.class);
+        verify(workflowService).save(saveCaptor.capture());
+        assertThat(saveCaptor.getValue().getId()).isEqualTo("workflow-123");
+        assertThat(saveCaptor.getValue().getName()).isEqualTo("Expense Approval");
+        assertThat(saveCaptor.getValue().getOwnerIds()).isEqualTo("alice");
+        assertThat(saveCaptor.getValue().getContent()).contains("bpmn:definitions");
+        assertThat(response.workflowId()).isEqualTo("workflow-123");
         assertThat(response.nodes()).hasSize(1);
         assertThat(response.edges()).hasSize(1);
         assertThat(response.bpmnXml()).contains("bpmn");

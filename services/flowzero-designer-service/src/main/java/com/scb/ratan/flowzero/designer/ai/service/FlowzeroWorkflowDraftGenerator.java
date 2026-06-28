@@ -44,6 +44,7 @@ public class FlowzeroWorkflowDraftGenerator {
         String summary = nodes.stream().map(WorkflowNode::label).collect(Collectors.joining(" -> "));
 
         return new FlowzeroWorkflowDraftResponse(
+            null,
             workflowName,
             request.description(),
             request.businessArea(),

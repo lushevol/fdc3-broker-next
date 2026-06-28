@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 public record FlowzeroWorkflowDraftResponse(
+    String workflowId,
     String workflowName,
     String description,
     String businessArea,

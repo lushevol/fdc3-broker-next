@@ -45,6 +45,7 @@ class AgentServiceTest {
     private TestToolDefinition calculatorTool;
     private TestToolDefinition timeTool;
     private TestToolDefinition weatherTool;
+    private TestToolDefinition flowzeroWorkflowTool;
 
     @BeforeEach
     void setUp() {
@@ -83,15 +84,28 @@ class AgentServiceTest {
                         "conditions", "Partly Cloudy"
                 ))
         );
+        flowzeroWorkflowTool = new TestToolDefinition(
+                "generate_flowzero_workflow",
+                "Generate and persist a Flowzero workflow",
+                Map.of("type", "object"),
+                false,
+                arguments -> CompletableFuture.completedFuture(Map.of(
+                        "workflowId", "wf-mock-1",
+                        "workflowName", arguments.get("workflowName"),
+                        "summary", "Start -> Manager Approval -> Finance Approval -> End"
+                ))
+        );
 
         when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
                 "calculator", calculatorTool,
                 "get_current_time", timeTool,
-                "get_weather", weatherTool
+                "get_weather", weatherTool,
+                "generate_flowzero_workflow", flowzeroWorkflowTool
         ));
         when(toolRegistry.getTool("calculator")).thenReturn(calculatorTool);
         when(toolRegistry.getTool("get_current_time")).thenReturn(timeTool);
         when(toolRegistry.getTool("get_weather")).thenReturn(weatherTool);
+        when(toolRegistry.getTool("generate_flowzero_workflow")).thenReturn(flowzeroWorkflowTool);
     }
 
     private static ChatResponse chatResponse(String text) {
@@ -213,6 +227,36 @@ class AgentServiceTest {
 
         assertEquals("", streamedText.toString());
         assertEquals(1L, completed.getCount());
+    }
+
+    @Test
+    void processMessageStreamingRoutesFlowzeroGenerationToWorkflowTool() throws Exception {
+        List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
+        List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
+        StringBuilder streamedText = new StringBuilder();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-flowzero",
+                "Generate a Flowzero workflow named Expense Approval: start, manager approval, finance approval, end",
+                List.<ChatMessage>of(),
+                streamedText::append,
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown,
+                toolCalls::add,
+                toolResults::add
+        );
+
+        assertTrue(completed.await(2, TimeUnit.SECONDS));
+        assertEquals(1, toolCalls.size());
+        assertEquals("generate_flowzero_workflow", toolCalls.get(0).getName());
+        assertEquals("Expense Approval", toolCalls.get(0).getArguments().get("workflowName"));
+        assertEquals("start, manager approval, finance approval, end", toolCalls.get(0).getArguments().get("prompt"));
+        assertEquals(1, toolResults.size());
+        assertEquals("wf-mock-1", ((Map<?, ?>) toolResults.get(0).getResult()).get("workflowId"));
+        assertTrue(streamedText.toString().contains("Created Flowzero workflow Expense Approval"));
     }
 
     @Test
