@@ -4,6 +4,7 @@ import com.fdc3.flowzeromcp.model.StoredWorkflow;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -26,6 +27,10 @@ public class InMemoryWorkflowRepository {
 
     public long count() {
         return workflows.size();
+    }
+
+    public Optional<StoredWorkflow> findById(String workflowId) {
+        return Optional.ofNullable(workflows.get(workflowId));
     }
 
     public List<StoredWorkflow> findPage(int page, int size) {

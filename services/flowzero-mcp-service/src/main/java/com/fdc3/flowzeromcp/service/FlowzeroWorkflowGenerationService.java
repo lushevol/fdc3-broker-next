@@ -13,7 +13,9 @@ import com.fdc3.flowzeromcp.repository.InMemoryWorkflowRepository;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class FlowzeroWorkflowGenerationService {
@@ -94,6 +96,10 @@ public class FlowzeroWorkflowGenerationService {
         );
     }
 
+    public GeneratedWorkflowResult generate(GenerateWorkflowRequest request) {
+        return generateWorkflow(request);
+    }
+
     public WorkflowPageResult getWorkflowPage(int page, int size) {
         List<WorkflowSummary> records = repository.findPage(page, size).stream()
             .map(workflow -> new WorkflowSummary(
@@ -109,6 +115,23 @@ public class FlowzeroWorkflowGenerationService {
             .toList();
 
         return new WorkflowPageResult(records, repository.count(), page, size);
+    }
+
+    public WorkflowDetail getWorkflowDetail(String workflowId) {
+        StoredWorkflow workflow = repository.findById(workflowId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Workflow not found: " + workflowId
+            ));
+
+        return new WorkflowDetail(
+            workflow.id(),
+            workflow.name(),
+            workflow.status(),
+            workflow.displayVersion(),
+            workflow.description(),
+            workflow.content()
+        );
     }
 
     private List<String> normalizedSteps(GenerateWorkflowRequest request) {
