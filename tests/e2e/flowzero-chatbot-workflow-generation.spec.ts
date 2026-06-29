@@ -66,7 +66,18 @@ const useCases: FlowzeroUseCase[] = [
   },
 ];
 
-async function closeExpiredSessionModal(page: Page): Promise<void> {
+async function closeExpiredSessionModal(page: Page, timeout = 500): Promise<void> {
+  const extendButton = page.getByRole('button', { name: 'Extend' });
+  if (
+    await extendButton
+      .waitFor({ state: 'visible', timeout })
+      .then(() => true)
+      .catch(() => false)
+  ) {
+    await extendButton.click();
+    return;
+  }
+
   const closeButton = page.getByRole('button', { name: 'Close' });
   if (await closeButton.isVisible().catch(() => false)) {
     await closeButton.click();
@@ -82,8 +93,8 @@ async function loginToWorkspace(page: Page): Promise<void> {
   await page.goto('http://127.0.0.1:8001/?show_normal_login=Y');
   await closeExpiredSessionModal(page);
   await page.getByRole('button', { name: 'Sign In', exact: true }).click();
-  await closeExpiredSessionModal(page);
-  await expect(page.getByRole('button', { name: 'Find tile' })).toBeVisible();
+  await closeExpiredSessionModal(page, 5_000);
+  await expect(page.getByText('Find tile')).toBeVisible();
 }
 
 async function openAssistant(page: Page): Promise<void> {
@@ -97,10 +108,13 @@ async function sendAssistantMessage(page: Page, message: string): Promise<void> 
 }
 
 async function assertGeneratedWorkflow(page: Page, useCase: FlowzeroUseCase): Promise<void> {
-  await expect(page.getByText('Used tool: generate_flowzero_workflow')).toBeVisible({
+  const toolTrigger = page.getByRole('button', {
+    name: 'Used tool: generate_flowzero_workflow',
+  });
+  await expect(toolTrigger).toBeVisible({
     timeout: 30_000,
   });
-  await page.getByText('Used tool: generate_flowzero_workflow').click();
+  await toolTrigger.click();
 
   const toolResult = page.locator('.aui-tool-fallback-result-content').last();
   await expect(toolResult).toContainText('"workflowId": "flowzero-wf-');

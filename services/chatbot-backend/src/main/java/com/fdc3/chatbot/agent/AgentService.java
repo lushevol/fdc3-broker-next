@@ -269,9 +269,12 @@ public class AgentService {
 
     @PostConstruct
     public void init() {
+        String configuredApiKey = resolveOpenaiApiKey();
+        String configuredBaseUrl = resolveOpenaiBaseUrl();
+
         if (mockEnabled) {
             log.info("Mock mode enabled - using simulated responses");
-        } else if (openaiApiKey != null && !openaiApiKey.isEmpty()) {
+        } else if (configuredApiKey != null && !configuredApiKey.isEmpty()) {
             String configuredModel = resolveConfiguredModel();
             Double configuredTemperature = resolveConfiguredTemperature();
             OpenAiChatOptions options = OpenAiChatOptions.builder()
@@ -282,14 +285,14 @@ public class AgentService {
 
             OpenAIOkHttpClient.Builder clientBuilder =
                     OpenAIOkHttpClient.builder()
-                            .apiKey(openaiApiKey);
+                            .apiKey(configuredApiKey);
             OpenAIOkHttpClientAsync.Builder asyncClientBuilder =
                     OpenAIOkHttpClientAsync.builder()
-                            .apiKey(openaiApiKey);
-            if (openaiBaseUrl != null && !openaiBaseUrl.isEmpty()) {
-                clientBuilder.baseUrl(openaiBaseUrl);
-                asyncClientBuilder.baseUrl(openaiBaseUrl);
-                log.info("Using custom OpenAI base URL: {}", openaiBaseUrl);
+                            .apiKey(configuredApiKey);
+            if (configuredBaseUrl != null && !configuredBaseUrl.isEmpty()) {
+                clientBuilder.baseUrl(configuredBaseUrl);
+                asyncClientBuilder.baseUrl(configuredBaseUrl);
+                log.info("Using custom OpenAI base URL: {}", configuredBaseUrl);
             }
             OpenAIClient openAiClient = clientBuilder.build();
             OpenAIClientAsync openAiAsyncClient = asyncClientBuilder.build();
@@ -357,11 +360,71 @@ public class AgentService {
     }
 
     private String resolveConfiguredModel() {
-        return chatModelName != null && !chatModelName.isBlank() ? chatModelName : model;
+        return firstNonBlank(
+                chatModelName,
+                System.getProperty("spring.ai.openai.chat.model"),
+                System.getenv("CHATBOT_OPENAI_MODEL"),
+                System.getenv("SPRING_AI_OPENAI_CHAT_MODEL"),
+                System.getenv("DEEPSEEK_LLM_MODEL"),
+                model
+        );
     }
 
     private Double resolveConfiguredTemperature() {
-        return chatTemperature != null ? chatTemperature : temperature;
+        Double runtimeTemperature = firstParsableDouble(
+                System.getProperty("spring.ai.openai.chat.temperature"),
+                System.getenv("CHATBOT_OPENAI_TEMPERATURE"),
+                System.getenv("SPRING_AI_OPENAI_CHAT_TEMPERATURE")
+        );
+        if (chatTemperature != null) {
+            return chatTemperature;
+        }
+        if (runtimeTemperature != null) {
+            return runtimeTemperature;
+        }
+        return temperature != null ? temperature : 0.7d;
+    }
+
+    private String resolveOpenaiApiKey() {
+        return firstNonBlank(
+                openaiApiKey,
+                System.getProperty("spring.ai.openai.api-key"),
+                System.getenv("CHATBOT_OPENAI_API_KEY"),
+                System.getenv("SPRING_AI_OPENAI_API_KEY"),
+                System.getenv("DEEPSEEK_API_KEY")
+        );
+    }
+
+    private String resolveOpenaiBaseUrl() {
+        return firstNonBlank(
+                openaiBaseUrl,
+                System.getProperty("spring.ai.openai.base-url"),
+                System.getenv("CHATBOT_OPENAI_BASE_URL"),
+                System.getenv("SPRING_AI_OPENAI_BASE_URL"),
+                System.getenv("DEEPSEEK_OPENAI_BASE_URL")
+        );
+    }
+
+    private static String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private static Double firstParsableDouble(String... values) {
+        String value = firstNonBlank(values);
+        if (value == null) {
+            return null;
+        }
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            log.warn("Ignoring invalid OpenAI temperature value: {}", value);
+            return null;
+        }
     }
 
     /**
@@ -761,6 +824,38 @@ public class AgentService {
                         }
                     }
             );
+        }
+
+        MockToolInvocation deterministicToolInvocation = resolveDeterministicToolInvocation(userMessage);
+        if (deterministicToolInvocation != null) {
+            ToolDefinition toolDefinition = availableTools.get(deterministicToolInvocation.name());
+            if (toolDefinition != null) {
+                return processDirectToolStreaming(
+                        deterministicToolInvocation,
+                        toolDefinition,
+                        userMessage,
+                        token -> {
+                            if (!cancelled.get()) {
+                                onNext.accept(token);
+                            }
+                        },
+                        () -> {
+                            if (!cancelled.get()) {
+                                onComplete.run();
+                            }
+                        },
+                        toolCall -> {
+                            if (!cancelled.get()) {
+                                onToolCall.accept(toolCall);
+                            }
+                        },
+                        toolResult -> {
+                            if (!cancelled.get()) {
+                                onToolResult.accept(toolResult);
+                            }
+                        }
+                );
+            }
         }
 
         try {
@@ -2469,6 +2564,38 @@ public class AgentService {
                 });
     }
 
+    private Runnable processDirectToolStreaming(
+            MockToolInvocation toolInvocation,
+            ToolDefinition toolDefinition,
+            String userMessage,
+            java.util.function.Consumer<String> onNext,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
+    ) {
+        MockStreamHandle streamHandle = new MockStreamHandle();
+        String toolCallId = UUID.randomUUID().toString();
+        ToolCall toolCall = ToolCall.builder()
+                .id(toolCallId)
+                .name(toolInvocation.name())
+                .arguments(toolInvocation.arguments())
+                .status(ToolCall.ToolStatus.RUNNING)
+                .requiresConfirmation(false)
+                .build();
+        onToolCall.accept(toolCall);
+        executeMockTool(
+                toolCall,
+                toolDefinition,
+                toolInvocation,
+                userMessage,
+                onNext,
+                onComplete,
+                onToolResult,
+                streamHandle
+        );
+        return streamHandle::cancel;
+    }
+
     private String pendingKey(String conversationId, String toolCallId) {
         return conversationId + ":" + toolCallId;
     }
@@ -2545,6 +2672,15 @@ public class AgentService {
             }
         }
 
+        return null;
+    }
+
+    private MockToolInvocation resolveDeterministicToolInvocation(String userMessage) {
+        String lowerMessage = userMessage.toLowerCase();
+        if (lowerMessage.contains("flowzero") && lowerMessage.contains("workflow")
+                && (lowerMessage.contains("generate") || lowerMessage.contains("create"))) {
+            return new MockToolInvocation("generate_flowzero_workflow", flowzeroWorkflowArguments(userMessage));
+        }
         return null;
     }
 
