@@ -24,6 +24,7 @@ import com.fdc3.chatbot.model.UserCapabilityContext;
 import com.fdc3.chatbot.memory.MemoryContextBuilder;
 import com.fdc3.chatbot.tool.ToolDefinition;
 import com.fdc3.chatbot.tool.ToolRegistry;
+import com.fdc3.chatbot.tool.ToolRegistry.ResolvedToolMetadata;
 import com.fdc3.chatbot.tool.agentutils.ToolExecutionBridge;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
@@ -76,6 +77,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import com.fdc3.chatbot.protocol.model.ChatToolSource;
 
 /**
  * AI Agent service using Spring AI for conversation handling.
@@ -764,6 +766,7 @@ public class AgentService {
         Context parentContext = Context.current();
         AtomicBoolean cancelled = new AtomicBoolean(false);
         Map<String, ToolDefinition> availableTools = toolRegistry.resolveTools(capabilityContext);
+        Map<String, ResolvedToolMetadata> availableToolMetadata = toolRegistry.resolveToolMetadata(capabilityContext);
 
         // Register per-user memory context for this conversation
         if (memoryToolsFactory != null && capabilityContext != null) {
@@ -803,6 +806,7 @@ public class AgentService {
                     conversationId,
                     userMessage,
                     availableTools,
+                    availableToolMetadata,
                     token -> {
                         if (!cancelled.get()) {
                             onNext.accept(token);
@@ -833,6 +837,7 @@ public class AgentService {
                 return processDirectToolStreaming(
                         deterministicToolInvocation,
                         toolDefinition,
+                        availableToolMetadata.get(deterministicToolInvocation.name()),
                         userMessage,
                         token -> {
                             if (!cancelled.get()) {
@@ -2426,6 +2431,7 @@ public class AgentService {
             String conversationId,
             String userMessage,
             Map<String, ToolDefinition> availableTools,
+            Map<String, ResolvedToolMetadata> availableToolMetadata,
             java.util.function.Consumer<String> onNext,
             java.lang.Runnable onComplete,
             java.util.function.Consumer<ToolCall> onToolCall,
@@ -2441,24 +2447,22 @@ public class AgentService {
             }
             String toolCallId = UUID.randomUUID().toString();
             boolean requiresConfirmation = toolDefinition.requiresConfirmation();
-            ToolCall toolCall = ToolCall.builder()
+            ToolCall toolCall = buildToolCallWithMetadata(ToolCall.builder()
                     .id(toolCallId)
                     .name(toolInvocation.name())
                     .arguments(toolInvocation.arguments())
                     .status(requiresConfirmation ? ToolCall.ToolStatus.PENDING : ToolCall.ToolStatus.RUNNING)
-                    .requiresConfirmation(requiresConfirmation)
-                    .build();
+                    .requiresConfirmation(requiresConfirmation), availableToolMetadata.get(toolInvocation.name()));
             onToolCall.accept(toolCall);
 
             if (requiresConfirmation) {
                 PendingToolExecution pendingExecution = pendingToolExecution(
-                        () -> onToolCall.accept(ToolCall.builder()
+                        () -> onToolCall.accept(buildToolCallWithMetadata(ToolCall.builder()
                                 .id(toolCallId)
                                 .name(toolInvocation.name())
                                 .arguments(toolInvocation.arguments())
                                 .status(ToolCall.ToolStatus.RUNNING)
-                                .requiresConfirmation(true)
-                                .build()),
+                                .requiresConfirmation(true), availableToolMetadata.get(toolInvocation.name()))),
                         () -> {
                             ToolDefinition latestToolDefinition = toolRegistry.getTool(toolInvocation.name());
                             if (latestToolDefinition == null) {
@@ -2470,13 +2474,12 @@ public class AgentService {
                                 return;
                             }
                             executeMockTool(
-                                    ToolCall.builder()
+                                    buildToolCallWithMetadata(ToolCall.builder()
                                             .id(toolCallId)
                                             .name(toolInvocation.name())
                                             .arguments(toolInvocation.arguments())
                                             .status(ToolCall.ToolStatus.RUNNING)
-                                            .requiresConfirmation(true)
-                                            .build(),
+                                            .requiresConfirmation(true), availableToolMetadata.get(toolInvocation.name())),
                                     latestToolDefinition,
                                     toolInvocation,
                                     userMessage,
@@ -2567,6 +2570,7 @@ public class AgentService {
     private Runnable processDirectToolStreaming(
             MockToolInvocation toolInvocation,
             ToolDefinition toolDefinition,
+            ResolvedToolMetadata toolMetadata,
             String userMessage,
             java.util.function.Consumer<String> onNext,
             java.lang.Runnable onComplete,
@@ -2575,13 +2579,12 @@ public class AgentService {
     ) {
         MockStreamHandle streamHandle = new MockStreamHandle();
         String toolCallId = UUID.randomUUID().toString();
-        ToolCall toolCall = ToolCall.builder()
+        ToolCall toolCall = buildToolCallWithMetadata(ToolCall.builder()
                 .id(toolCallId)
                 .name(toolInvocation.name())
                 .arguments(toolInvocation.arguments())
                 .status(ToolCall.ToolStatus.RUNNING)
-                .requiresConfirmation(false)
-                .build();
+                .requiresConfirmation(false), toolMetadata);
         onToolCall.accept(toolCall);
         executeMockTool(
                 toolCall,
@@ -2763,6 +2766,14 @@ public class AgentService {
             Runnable cancelAction
     ) {
         return new PendingToolExecution(announceRunningAction, confirmAction, cancelAction);
+    }
+
+    private ToolCall buildToolCallWithMetadata(ToolCall.ToolCallBuilder builder, ResolvedToolMetadata toolMetadata) {
+        if (toolMetadata != null && "mcp".equalsIgnoreCase(toolMetadata.executionType())) {
+            builder.source(ChatToolSource.MCP);
+            builder.providerId(toolMetadata.providerId());
+        }
+        return builder.build();
     }
 
     private record MockToolInvocation(String name, Map<String, Object> arguments) {

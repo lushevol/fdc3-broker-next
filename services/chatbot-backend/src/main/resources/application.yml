@@ -55,6 +55,15 @@ chatbot:
         enabled-profiles:
           - advisor
         description: Read-only RAG retrieval MCP provider used for knowledge base search.
+      - enabled: ${CHATBOT_MCP_FLOWZERO_ENABLED:false}
+        provider-id: flowzero-mcp
+        service-name: Flowzero MCP
+        transport-type: STREAMABLE_HTTP
+        url: ${CHATBOT_MCP_FLOWZERO_URL:http://127.0.0.1:8092/api/mcp}
+        enabled-profiles:
+          - default
+          - advisor
+        description: Creates and retrieves Flowzero workflow drafts through MCP.
   agent-utils:
     web-search:
       api-key: ${CHATBOT_BRAVE_SEARCH_API_KEY:}

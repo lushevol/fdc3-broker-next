@@ -5,7 +5,9 @@ import com.fdc3.chatbot.model.FrontendToolContinuation;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.model.UserCapabilityContext;
+import com.fdc3.chatbot.protocol.model.ChatToolSource;
 import com.fdc3.chatbot.tool.ToolRegistry;
+import com.fdc3.chatbot.tool.ToolRegistry.ResolvedToolMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -101,6 +103,19 @@ class AgentServiceTest {
                 "get_current_time", timeTool,
                 "get_weather", weatherTool,
                 "generate_flowzero_workflow", flowzeroWorkflowTool
+        ));
+        when(toolRegistry.resolveToolMetadata(UserCapabilityContext.anonymous())).thenReturn(Map.of(
+                "calculator", new ResolvedToolMetadata("calculator", calculatorTool, "local", "local", "write", "global"),
+                "get_current_time", new ResolvedToolMetadata("get_current_time", timeTool, "local", "local", "read", "global"),
+                "get_weather", new ResolvedToolMetadata("get_weather", weatherTool, "local", "local", "read", "global"),
+                "generate_flowzero_workflow", new ResolvedToolMetadata(
+                        "generate_flowzero_workflow",
+                        flowzeroWorkflowTool,
+                        "flowzero-mcp",
+                        "mcp",
+                        "read",
+                        "global"
+                )
         ));
         when(toolRegistry.getTool("calculator")).thenReturn(calculatorTool);
         when(toolRegistry.getTool("get_current_time")).thenReturn(timeTool);
@@ -254,6 +269,8 @@ class AgentServiceTest {
         assertEquals("generate_flowzero_workflow", toolCalls.get(0).getName());
         assertEquals("Expense Approval", toolCalls.get(0).getArguments().get("workflowName"));
         assertEquals("start, manager approval, finance approval, end", toolCalls.get(0).getArguments().get("prompt"));
+        assertEquals(ChatToolSource.MCP, toolCalls.get(0).getSource());
+        assertEquals("flowzero-mcp", toolCalls.get(0).getProviderId());
         assertEquals(1, toolResults.size());
         assertEquals("wf-mock-1", ((Map<?, ?>) toolResults.get(0).getResult()).get("workflowId"));
         assertTrue(streamedText.toString().contains("Created Flowzero workflow Expense Approval"));
@@ -367,6 +384,8 @@ class AgentServiceTest {
         assertEquals(1, toolCalls.size());
         assertEquals("generate_flowzero_workflow", toolCalls.get(0).getName());
         assertEquals("Vendor Onboarding", toolCalls.get(0).getArguments().get("workflowName"));
+        assertEquals(ChatToolSource.MCP, toolCalls.get(0).getSource());
+        assertEquals("flowzero-mcp", toolCalls.get(0).getProviderId());
         assertEquals(1, toolResults.size());
         assertEquals("wf-mock-1", ((Map<?, ?>) toolResults.get(0).getResult()).get("workflowId"));
         assertTrue(streamedText.toString().contains("Created Flowzero workflow Vendor Onboarding"));
