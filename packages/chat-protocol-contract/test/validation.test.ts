@@ -5,6 +5,8 @@ import {
   createMixedToolRunRequestFixture,
   createToolPauseFrameFixture,
   createWeatherRunRequestFixture,
+  flowzeroGeneratedWorkflowResultSchema,
+  flowzeroMcpToolFrameFixture,
   validateRunRequest,
   validateStreamFrame,
 } from '../src';
@@ -343,6 +345,58 @@ describe('chat protocol contract validation', () => {
     if (!result.success) {
       expect(result.errors.join('\n')).toContain('output');
     }
+  });
+
+  it('accepts a Flowzero generated workflow result with navigation route', () => {
+    const result = flowzeroGeneratedWorkflowResultSchema.safeParse({
+      workflowId: 'wf_123',
+      workflowName: 'Client onboarding',
+      summary: 'Creates a new client onboarding workflow',
+      steps: ['Capture request', 'Review compliance'],
+      workflowDetail: {
+        category: 'operations',
+      },
+      open: {
+        label: 'Open workflow',
+        route: '/flowzero/workflows/wf_123',
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a Flowzero generated workflow result without open.route', () => {
+    const result = flowzeroGeneratedWorkflowResultSchema.safeParse({
+      workflowId: 'wf_123',
+      workflowName: 'Client onboarding',
+      summary: 'Creates a new client onboarding workflow',
+      steps: ['Capture request', 'Review compliance'],
+      workflowDetail: {
+        category: 'operations',
+      },
+      open: {
+        label: 'Open workflow',
+      },
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.map((issue) => issue.path.join('.')).join('\n')).toContain('open.route');
+    }
+  });
+
+  it('provides a Flowzero MCP tool-output frame fixture with MCP provider metadata', () => {
+    const frame = flowzeroMcpToolFrameFixture;
+
+    expect(frame).toMatchObject({
+      type: 'tool-output-available',
+      source: 'mcp',
+      providerId: 'flowzero-mcp',
+    });
+
+    const result = validateStreamFrame(frame);
+
+    expect(result.success).toBe(true);
   });
 
   it('reports root-level validation errors for non-object frames', () => {

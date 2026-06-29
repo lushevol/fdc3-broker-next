@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { FLOWZERO_GENERATE_WORKFLOW_TOOL, FLOWZERO_MCP_PROVIDER_ID } from './types';
+
 export const chatRoleSchema = z.enum(['system', 'user', 'assistant', 'tool']);
 export const chatFinishReasonSchema = z.enum(['stop', 'tool-calls', 'action-required', 'error']);
 export const chatToolCallStateSchema = z.enum([
@@ -15,6 +17,30 @@ export const chatActionStatusSchema = z.enum(['pending', 'resolved']);
 export const chatFrameMetadataSchema = z.record(z.unknown());
 const chatStructuredPayloadSchema = z.record(z.unknown());
 export const chatToolSourceSchema = z.enum(['frontend', 'backend', 'human', 'mcp']);
+export const flowzeroMcpProviderIdSchema = z.literal(FLOWZERO_MCP_PROVIDER_ID);
+export const flowzeroGenerateWorkflowToolSchema = z.literal(FLOWZERO_GENERATE_WORKFLOW_TOOL);
+export const flowzeroGeneratedWorkflowResultSchema = z
+  .object({
+    workflowId: z.string().min(1),
+    workflowName: z.string().min(1),
+    status: z.string().min(1).optional(),
+    version: z.number().optional(),
+    displayVersion: z.number().optional(),
+    businessArea: z.string().min(1).optional(),
+    countryCodes: z.array(z.string().min(1)).optional(),
+    ownerIds: z.array(z.string().min(1)).optional(),
+    description: z.string().min(1).optional(),
+    summary: z.string().min(1),
+    steps: z.array(z.string().min(1)).min(2),
+    workflowDetail: z.record(z.unknown()),
+    open: z
+      .object({
+        label: z.string().min(1),
+        route: z.string().min(1),
+      })
+      .strict(),
+  })
+  .strict();
 
 const chatTextPartSchema = z
   .object({
