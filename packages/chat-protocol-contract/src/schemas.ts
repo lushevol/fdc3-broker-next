@@ -48,6 +48,48 @@ const flowzeroMcpToolOutputSchema = z
   })
   .strict();
 
+function refineFlowzeroToolOutputFrame(
+  value: {
+    output: Record<string, unknown>;
+    source?: string;
+    providerId?: string;
+  },
+  ctx: z.RefinementCtx,
+): void {
+  if (value.output.toolName !== FLOWZERO_GENERATE_WORKFLOW_TOOL) {
+    return;
+  }
+
+  const sourceResult = z.literal('mcp').safeParse(value.source);
+  if (!sourceResult.success) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['source'],
+      message: 'source must be "mcp" for generate_flowzero_workflow tool outputs',
+    });
+  }
+
+  const providerResult = flowzeroMcpProviderIdSchema.safeParse(value.providerId);
+  if (!providerResult.success) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['providerId'],
+      message: 'providerId must be "flowzero-mcp" for generate_flowzero_workflow tool outputs',
+    });
+  }
+
+  const outputResult = flowzeroMcpToolOutputSchema.safeParse(value.output);
+  if (!outputResult.success) {
+    for (const issue of outputResult.error.issues) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['output', ...issue.path],
+        message: issue.message,
+      });
+    }
+  }
+}
+
 const chatTextPartSchema = z
   .object({
     type: z.literal('text'),
@@ -434,7 +476,7 @@ export const chatToolInputAvailableFrameSchema = z
   })
   .strict();
 
-export const chatToolOutputAvailableFrameSchema = z
+const chatToolOutputAvailableFrameBaseSchema = z
   .object({
     type: z.literal('tool-output-available'),
     toolCallId: z.string().min(1),
@@ -443,6 +485,10 @@ export const chatToolOutputAvailableFrameSchema = z
     providerId: z.string().min(1).optional(),
   })
   .strict();
+
+export const chatToolOutputAvailableFrameSchema = chatToolOutputAvailableFrameBaseSchema.superRefine(
+  refineFlowzeroToolOutputFrame,
+);
 
 export const chatToolOutputErrorFrameSchema = z
   .object({
@@ -515,7 +561,7 @@ export const chatStreamFrameSchema = z.discriminatedUnion('type', [
   chatToolInputStartFrameSchema,
   chatToolInputDeltaFrameSchema,
   chatToolInputAvailableFrameSchema,
-  chatToolOutputAvailableFrameSchema,
+  chatToolOutputAvailableFrameBaseSchema,
   chatToolOutputErrorFrameSchema,
   chatUiPartAvailableFrameSchema,
   chatActionRequiredFrameSchema,
@@ -523,36 +569,9 @@ export const chatStreamFrameSchema = z.discriminatedUnion('type', [
   chatFinishFrameSchema,
   chatErrorFrameSchema,
 ]).superRefine((value, ctx) => {
-  if (value.type !== 'tool-output-available' || value.output.toolName !== FLOWZERO_GENERATE_WORKFLOW_TOOL) {
+  if (value.type !== 'tool-output-available') {
     return;
   }
 
-  const sourceResult = z.literal('mcp').safeParse(value.source);
-  if (!sourceResult.success) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['source'],
-      message: 'source must be "mcp" for generate_flowzero_workflow tool outputs',
-    });
-  }
-
-  const providerResult = flowzeroMcpProviderIdSchema.safeParse(value.providerId);
-  if (!providerResult.success) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['providerId'],
-      message: 'providerId must be "flowzero-mcp" for generate_flowzero_workflow tool outputs',
-    });
-  }
-
-  const outputResult = flowzeroMcpToolOutputSchema.safeParse(value.output);
-  if (!outputResult.success) {
-    for (const issue of outputResult.error.issues) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['output', ...issue.path],
-        message: issue.message,
-      });
-    }
-  }
+  refineFlowzeroToolOutputFrame(value, ctx);
 });

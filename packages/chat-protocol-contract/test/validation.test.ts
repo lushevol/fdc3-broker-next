@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { ZodError } from 'zod';
 
 import {
+  chatToolOutputAvailableFrameSchema,
   createWeatherContinuationRunRequestFixture,
   createMixedToolRunRequestFixture,
   createToolPauseFrameFixture,
@@ -411,6 +413,15 @@ describe('chat protocol contract validation', () => {
     }
   });
 
+  it('chatToolOutputAvailableFrameSchema rejects a Flowzero frame without the Flowzero provider id', () => {
+    expect(() =>
+      chatToolOutputAvailableFrameSchema.parse({
+        ...flowzeroMcpToolFrameFixture,
+        providerId: 'other-mcp',
+      }),
+    ).toThrow(/providerId/);
+  });
+
   it('rejects a Flowzero MCP tool-output frame without MCP source metadata', () => {
     const result = validateStreamFrame({
       ...flowzeroMcpToolFrameFixture,
@@ -421,6 +432,15 @@ describe('chat protocol contract validation', () => {
     if (!result.success) {
       expect(result.errors.join('\n')).toContain('source');
     }
+  });
+
+  it('chatToolOutputAvailableFrameSchema rejects a Flowzero frame without MCP source metadata', () => {
+    expect(() =>
+      chatToolOutputAvailableFrameSchema.parse({
+        ...flowzeroMcpToolFrameFixture,
+        source: 'backend',
+      }),
+    ).toThrow(/source/);
   });
 
   it('rejects a Flowzero MCP tool-output frame with malformed workflow output', () => {
@@ -443,6 +463,32 @@ describe('chat protocol contract validation', () => {
     }
   });
 
+  it('chatToolOutputAvailableFrameSchema rejects a Flowzero frame with malformed workflow output', () => {
+    let thrownError: unknown;
+
+    try {
+      chatToolOutputAvailableFrameSchema.parse({
+        ...flowzeroMcpToolFrameFixture,
+        output: {
+          toolName: 'generate_flowzero_workflow',
+          result: {
+            ...flowzeroMcpToolFrameFixture.output.result,
+            open: {
+              label: 'Open workflow',
+            },
+          },
+        },
+      });
+    } catch (error) {
+      thrownError = error;
+    }
+
+    expect(thrownError).toBeInstanceOf(ZodError);
+    if (thrownError instanceof ZodError) {
+      expect(thrownError.issues.map((issue) => issue.path.join('.')).join('\n')).toContain('output.result.open.route');
+    }
+  });
+
   it('preserves generic validation for non-Flowzero tool-output frames', () => {
     const result = validateStreamFrame({
       type: 'tool-output-available',
@@ -457,6 +503,22 @@ describe('chat protocol contract validation', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it('chatToolOutputAvailableFrameSchema preserves generic validation for non-Flowzero tool-output frames', () => {
+    expect(() =>
+      chatToolOutputAvailableFrameSchema.parse({
+        type: 'tool-output-available',
+        toolCallId: 'tc_generic_1',
+        source: 'backend',
+        output: {
+          toolName: 'weather_search',
+          result: {
+            summary: 'Sunny',
+          },
+        },
+      }),
+    ).not.toThrow();
   });
 
   it('reports root-level validation errors for non-object frames', () => {
