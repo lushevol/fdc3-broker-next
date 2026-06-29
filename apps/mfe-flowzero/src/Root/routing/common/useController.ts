@@ -13,6 +13,17 @@ const useController = (props: TileProps) => {
     }
     return () => {};
   }, []);
+  React.useEffect(() => {
+    const handler = (event: Event) => {
+      const route = (event as CustomEvent<{ route?: string }>).detail?.route;
+      if (route?.startsWith("/flowzero/")) {
+        navigate(route);
+      }
+    };
+
+    window.addEventListener("flowzero:navigate", handler);
+    return () => window.removeEventListener("flowzero:navigate", handler);
+  }, [navigate]);
   return {};
 };
 

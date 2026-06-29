@@ -166,6 +166,12 @@ export const rootConfigProxy: ProxyOptions[] = [
     changeOrigin: true,
   },
   {
+    context: ['/api/flowzero/v1'],
+    target: 'http://127.0.0.1:8092',
+    secure: false,
+    changeOrigin: true,
+  },
+  {
     context: ['/api/bff/'],
     pathRewrite: { '^/api/bff': '' },
     target: 'http://localhost:8088',
