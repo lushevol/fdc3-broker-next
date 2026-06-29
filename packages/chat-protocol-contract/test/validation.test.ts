@@ -399,6 +399,66 @@ describe('chat protocol contract validation', () => {
     expect(result.success).toBe(true);
   });
 
+  it('rejects a Flowzero MCP tool-output frame without the Flowzero provider id', () => {
+    const result = validateStreamFrame({
+      ...flowzeroMcpToolFrameFixture,
+      providerId: 'other-mcp',
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.errors.join('\n')).toContain('providerId');
+    }
+  });
+
+  it('rejects a Flowzero MCP tool-output frame without MCP source metadata', () => {
+    const result = validateStreamFrame({
+      ...flowzeroMcpToolFrameFixture,
+      source: 'backend',
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.errors.join('\n')).toContain('source');
+    }
+  });
+
+  it('rejects a Flowzero MCP tool-output frame with malformed workflow output', () => {
+    const result = validateStreamFrame({
+      ...flowzeroMcpToolFrameFixture,
+      output: {
+        toolName: 'generate_flowzero_workflow',
+        result: {
+          ...flowzeroMcpToolFrameFixture.output.result,
+          open: {
+            label: 'Open workflow',
+          },
+        },
+      },
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.errors.join('\n')).toContain('output.result.open.route');
+    }
+  });
+
+  it('preserves generic validation for non-Flowzero tool-output frames', () => {
+    const result = validateStreamFrame({
+      type: 'tool-output-available',
+      toolCallId: 'tc_generic_1',
+      source: 'backend',
+      output: {
+        toolName: 'weather_search',
+        result: {
+          summary: 'Sunny',
+        },
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   it('reports root-level validation errors for non-object frames', () => {
     const result = validateStreamFrame(null);
 
