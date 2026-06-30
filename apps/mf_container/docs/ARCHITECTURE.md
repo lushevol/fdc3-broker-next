@@ -8,7 +8,7 @@
 | ------------ | ------------------------------------------ |
 | UI Framework | React 18.3                                 |
 | Build Tool   | Rsbuild (Rspack-based)                     |
-| Federation   | `@module-federation/rsbuild-plugin` ^2.0.1 |
+| Federation   | `@module-federation/rsbuild-plugin` ^2.6.0 |
 | Language     | TypeScript 5.9 (strict mode)               |
 
 ## Directory Structure

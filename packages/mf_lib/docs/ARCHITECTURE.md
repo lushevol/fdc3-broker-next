@@ -42,7 +42,7 @@ Three library output formats:
 
 All formats share `dts: { bundle: false }` — individual `.d.ts` files are emitted, not bundled.
 
-Plugins: `pluginReact()`, `pluginModuleFederation(moduleFederationConfig)`
+Plugins: `pluginReact()`, `pluginModuleFederation(moduleFederationConfig)` using the current `@module-federation/*` release line
 
 ## Module Federation Configuration (`module-federation.config.ts`)
 

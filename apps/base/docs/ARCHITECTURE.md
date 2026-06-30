@@ -17,7 +17,7 @@
 | Routing        | `react-router-dom` v6                                                                          |
 | State          | React Context + `useReducer` (AppContext)                                                      |
 | Testing        | Jest 29, `babel-jest`, `jest-environment-jsdom`, `@testing-library/react`                      |
-| Module Format  | SystemJS (`library.type: 'system'`)                                                            |
+| Module Format  | SystemJS today; federation packages are aligned to the current `@module-federation/*` release line while the orchestrator migration is completed |
 
 ## Directory Structure
 
