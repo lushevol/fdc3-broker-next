@@ -23,9 +23,9 @@ public class FlowzeroWorkflowMcpTools {
     )
     public GeneratedWorkflowResult generateWorkflow(
         @McpToolParam(description = "Natural-language workflow requirements", required = true) String prompt,
-        @McpToolParam(description = "Optional workflow name") String workflowName,
-        @McpToolParam(description = "Optional ordered workflow steps") List<String> steps,
-        @McpToolParam(description = "Optional requesting user id") String requestedBy
+        @McpToolParam(description = "Optional workflow name", required = false) String workflowName,
+        @McpToolParam(description = "Optional ordered workflow steps", required = false) List<String> steps,
+        @McpToolParam(description = "Optional requesting user id", required = false) String requestedBy
     ) {
         return service.generate(new GenerateWorkflowRequest(
             prompt,

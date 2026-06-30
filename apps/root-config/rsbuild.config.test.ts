@@ -142,6 +142,51 @@ describe('root-config rsbuild integration', () => {
     expect(middlewarePaths).toEqual(expect.arrayContaining(['__capturedApiMocks']));
   });
 
+  it('lets Flowzero workflow service routes reach the live service proxy', async () => {
+    process.env.useBackendAuth = 'false';
+
+    const { rootConfigDevSetup } = await import('./rsbuild.config');
+
+    const registeredMiddlewares: Array<{
+      path?: string;
+      (
+        req: { method?: string; url?: string },
+        res: { setHeader: jest.Mock; end: jest.Mock },
+        next: jest.Mock,
+      ): Promise<void> | void;
+    }> = [];
+
+    rootConfigDevSetup(
+      {
+        unshift: (...handlers) => {
+          registeredMiddlewares.unshift(...handlers);
+        },
+        push: (...handlers) => {
+          registeredMiddlewares.push(...handlers);
+        },
+      },
+      {} as never,
+    );
+
+    const capturedMiddleware = registeredMiddlewares.find(
+      (middleware) => middleware.path === '__capturedApiMocks',
+    );
+    const res = {
+      setHeader: jest.fn(),
+      end: jest.fn(),
+    };
+    const next = jest.fn();
+
+    await capturedMiddleware?.(
+      { method: 'GET', url: '/api/flowzero/v1/workflow/page?page=0&size=10' },
+      res,
+      next,
+    );
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.end).not.toHaveBeenCalled();
+  });
+
   it('registers a silent analytics print endpoint for UI-only dev', async () => {
     process.env.useBackendAuth = 'false';
 

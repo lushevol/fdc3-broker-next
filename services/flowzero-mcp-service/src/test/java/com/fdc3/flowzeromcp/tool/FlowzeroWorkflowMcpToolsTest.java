@@ -1,6 +1,7 @@
 package com.fdc3.flowzeromcp.tool;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fdc3.flowzeromcp.model.GeneratedWorkflowResult;
@@ -11,6 +12,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.mcp.annotation.McpTool;
+import org.springframework.ai.mcp.annotation.McpToolParam;
 
 class FlowzeroWorkflowMcpToolsTest {
 
@@ -43,5 +45,16 @@ class FlowzeroWorkflowMcpToolsTest {
 
         McpTool toolAnnotation = method.getAnnotation(McpTool.class);
         assertEquals("generate_flowzero_workflow", toolAnnotation.name());
+
+        McpToolParam[] params = new McpToolParam[method.getParameters().length];
+        for (int index = 0; index < method.getParameters().length; index++) {
+            params[index] = method.getParameters()[index].getAnnotation(McpToolParam.class);
+        }
+        org.junit.jupiter.api.Assertions.assertAll(
+            () -> assertTrue(params[0].required()),
+            () -> assertFalse(params[1].required()),
+            () -> assertFalse(params[2].required()),
+            () -> assertFalse(params[3].required())
+        );
     }
 }

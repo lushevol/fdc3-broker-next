@@ -13,6 +13,7 @@ import com.fdc3.flowzeromcp.repository.InMemoryWorkflowRepository;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,6 +31,7 @@ public class FlowzeroWorkflowGenerationService {
     private final FlowzeroBpmnBuilder bpmnBuilder;
     private final ObjectMapper objectMapper;
 
+    @Autowired
     public FlowzeroWorkflowGenerationService(
         InMemoryWorkflowRepository repository,
         FlowzeroBpmnBuilder bpmnBuilder

@@ -1,5 +1,6 @@
 import React from 'react';
 import { z } from 'zod';
+import type { ToolRenderProps } from '../../compositor';
 import type { ToolkitDefinition } from '../../utils/param-info';
 import { FlowzeroWorkflowGenerationTool } from './ui';
 
@@ -19,11 +20,10 @@ export function createFlowzeroWorkflowGenerationTool(
       steps: z.array(z.string()).optional().describe('Optional ordered workflow steps'),
       requestedBy: z.string().optional().describe('Optional requesting user id'),
     }),
-    render: (props: Record<string, unknown>) => (
+    render: (props: ToolRenderProps) =>
       React.createElement(FlowzeroWorkflowGenerationTool, {
         ...props,
         openFlowzeroWorkflow,
-      })
-    ),
+      }),
   };
 }

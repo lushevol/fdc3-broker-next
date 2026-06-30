@@ -144,6 +144,17 @@ function loadCategoryResponse(): unknown {
   return require('./category.mock.json');
 }
 
+function isFlowzeroWorkflowServiceFixture(fixture: CapturedApiFixture): boolean {
+  return (
+    [
+      '/api/flowzero/v1/workflow/page',
+      '/api/flowzero/v1/workflow/create',
+      '/api/flowzero/v1/workflow/check-name',
+    ].includes(fixture.request.pathname) ||
+    fixture.request.pathname.startsWith('/api/flowzero/v1/workflow/detail/')
+  );
+}
+
 function createFdc3Store(): Fdc3Store {
   return {
     intents: [
@@ -213,7 +224,9 @@ export const rootConfigDevSetup: SetupMiddlewaresFn = (middlewares) => {
   const useBackendAuth = process.env.useBackendAuth?.toLowerCase() === 'true';
   const token = createAuthToken();
   const fdc3Store = createFdc3Store();
-  const capturedApiFixtures = capturedApiMocks.fixtures ?? [];
+  const capturedApiFixtures = (capturedApiMocks.fixtures ?? []).filter(
+    (fixture) => !isFlowzeroWorkflowServiceFixture(fixture),
+  );
 
   if (!useBackendAuth) {
     middlewares.unshift(
