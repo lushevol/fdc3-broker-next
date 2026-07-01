@@ -3,7 +3,7 @@
 const { execSync } = require('child_process');
 const os = require('os');
 
-const PORTS = [8001, 8002, 8006, 8007, 3000, 3001, 8088, 8080, 8084, 8090, 8091, 4173];
+const PORTS = [8001, 8002, 8006, 8007, 3000, 3001, 8088, 8080, 8084, 8090, 8091, 8092, 4173];
 
 function killPort(port) {
   const platform = os.platform();
@@ -13,7 +13,7 @@ function killPort(port) {
     if (platform === 'win32') {
       execSync(`netstat -ano | findstr :${port}`, { stdio: 'pipe' });
       const output = execSync(`netstat -ano`, { encoding: 'utf8' });
-      const lines = output.split('\n').filter(line => line.includes(`:${port}`));
+      const lines = output.split('\n').filter((line) => line.includes(`:${port}`));
       pids = new Set();
       for (const line of lines) {
         const match = line.trim().match(/\s+(\d+)\s*$/);
@@ -38,8 +38,7 @@ function killPort(port) {
         execSync(`kill -9 ${pid}`, { stdio: 'ignore' });
       }
       console.log(`Killed process ${pid} on port ${port}`);
-    } catch {
-    }
+    } catch {}
   }
 }
 
