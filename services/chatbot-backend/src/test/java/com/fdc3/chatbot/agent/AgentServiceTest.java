@@ -28,6 +28,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -274,6 +275,30 @@ class AgentServiceTest {
         assertEquals(1, toolResults.size());
         assertEquals("wf-mock-1", ((Map<?, ?>) toolResults.get(0).getResult()).get("workflowId"));
         assertTrue(streamedText.toString().contains("Created Flowzero workflow Expense Approval"));
+    }
+
+    @Test
+    void processMessageStreamingDoesNotUseMockResponseWhenNonMockModelIsMissing() throws Exception {
+        ReflectionTestUtils.setField(agentService, "mockEnabled", false);
+        ReflectionTestUtils.setField(agentService, "streamingChatModel", null);
+
+        StringBuilder streamedText = new StringBuilder();
+        AtomicReference<Throwable> capturedError = new AtomicReference<>();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-no-model",
+                "hello",
+                List.<ChatMessage>of(),
+                streamedText::append,
+                capturedError::set,
+                completed::countDown
+        );
+
+        assertTrue(completed.await(1, TimeUnit.SECONDS));
+        assertEquals("", streamedText.toString());
+        assertNotNull(capturedError.get());
+        assertTrue(capturedError.get().getMessage().contains("No real chat model is configured"));
     }
 
     @Test
