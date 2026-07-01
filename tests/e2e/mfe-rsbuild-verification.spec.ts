@@ -23,7 +23,7 @@ async function loginToWorkspace(page: Page): Promise<void> {
 }
 
 test.describe('Rsbuild-migrated MFE verification', () => {
-  test('all three migrated MFE JS bundles are valid SystemJS modules', async ({
+  test('Ratan remotes expose Module Federation manifests and Flowzero remains SystemJS', async ({
     page,
   }) => {
     // First navigate to the page so SystemJS is loaded
@@ -36,20 +36,32 @@ test.describe('Rsbuild-migrated MFE verification', () => {
     });
     expect(systemAvailable).toBe(true);
 
-    // Verify each MFE JS file is a valid System.register module
-    for (const { name, url } of [
-      { name: '@fm/ratan_cashflow_blotter', url: 'http://localhost:8015/ratan_cashflow_blotter.js' },
-      { name: '@fm/ratan_container', url: 'http://localhost:8009/ratan_container.js' },
-      { name: '@fm/flowzero', url: 'http://localhost:8016/flowzero.js' },
+    for (const { name, url, remoteEntry } of [
+      {
+        name: 'ratan_cashflow_blotter',
+        url: 'http://localhost:8015/mf-manifest.json',
+        remoteEntry: 'ratan_cashflow_blotter.js',
+      },
+      {
+        name: 'ratan_container',
+        url: 'http://localhost:8009/mf-manifest.json',
+        remoteEntry: 'ratan_container.js',
+      },
     ]) {
       const response = await page.request.get(url);
       expect(response.status()).toBe(200);
-      const content = await response.text();
-      // Verify it's a System.register() module
-      expect(content).toContain('System.register');
-      // Log file size for verification
-      console.log(`${name}: ${(content.length / 1024).toFixed(1)} KB`);
+      const manifest = await response.json();
+      expect(manifest.name).toBe(name);
+      expect(manifest.metaData.remoteEntry.name).toBe(remoteEntry);
+      expect(manifest.exposes.some((expose: { name: string }) => expose.name === '.')).toBe(true);
+      console.log(`${name}: Module Federation manifest available`);
     }
+
+    const flowzeroResponse = await page.request.get('http://localhost:8016/flowzero.js');
+    expect(flowzeroResponse.status()).toBe(200);
+    const flowzeroContent = await flowzeroResponse.text();
+    expect(flowzeroContent).toContain('System.register');
+    console.log(`@fm/flowzero: ${(flowzeroContent.length / 1024).toFixed(1)} KB`);
   });
 
   test('root-config serves base app shell', async ({ page }) => {
@@ -70,8 +82,14 @@ test.describe('Rsbuild-migrated MFE verification', () => {
     await loginToWorkspace(page);
 
     // Verify the workspace/tile system is functional
-    const hasNewTile = await page.getByText('New Tile').isVisible().catch(() => false);
-    const hasFindTile = await page.getByText('Find tile').isVisible().catch(() => false);
+    const hasNewTile = await page
+      .getByText('New Tile')
+      .isVisible()
+      .catch(() => false);
+    const hasFindTile = await page
+      .getByText('Find tile')
+      .isVisible()
+      .catch(() => false);
 
     console.log('Visible tile buttons - New Tile:', hasNewTile, 'Find tile:', hasFindTile);
     expect(hasNewTile || hasFindTile).toBe(true);
@@ -85,7 +103,10 @@ test.describe('Rsbuild-migrated MFE verification', () => {
 
     await page.waitForTimeout(1000);
     // Check if the drawer opens and shows "Tile Options"
-    const drawerVisible = await page.getByText('Tile Options').isVisible().catch(() => false);
+    const drawerVisible = await page
+      .getByText('Tile Options')
+      .isVisible()
+      .catch(() => false);
     console.log('Tile Options drawer visible:', drawerVisible);
   });
 

@@ -1,9 +1,9 @@
-// import { loadRemote } from '@module-federation/enhanced/runtime';
 import { AgentProvider, useFDC3 } from 'ratan-fdc3-agent';
 import React, { type ReactElement, Suspense } from 'react';
 import ErrorBoundry from '../../../components/ErrorBoundry';
 import Splash from '../../../components/Splash';
 import type { Container as ContainerProps } from '../../../hooks/model/workspaces';
+import { loadWorkspaceRemote } from './remoteLoader';
 
 const AdminModule = React.lazy(() => import('../../../admin'));
 
@@ -66,18 +66,7 @@ const FDC3TileProvider: React.FC<{
 };
 
 const Container: React.FC<ContainerProps> = (props: ContainerProps): ReactElement => {
-  const Comp = React.useMemo(
-    () =>
-      React.lazy(async () => {
-        // if (props.container?.startsWith('mf_')) {
-        //   return loadRemote(props.container) as Promise<{
-        //     default: React.ComponentType<any>;
-        //   }>;
-        // }
-        return System.import(props.container);
-      }),
-    [],
-  );
+  const Comp = React.useMemo(() => React.lazy(() => loadWorkspaceRemote(props.container)), []);
   return (
     <ErrorBoundry emailSupport={props.emailSupport}>
       <Suspense fallback={<Splash />}>
