@@ -1,14 +1,34 @@
 package com.fdc3.chatbot.mcp;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class McpBootstrapRegistrarTest {
+
+    @Test
+    void applicationConfigurationIncludesFlowzeroMcpProviderDefaults() throws Exception {
+        String applicationYaml = new String(
+                new ClassPathResource("application.yml").getInputStream().readAllBytes(),
+                StandardCharsets.UTF_8
+        );
+
+        assertTrue(applicationYaml.contains("provider-id: flowzero-mcp"));
+        assertTrue(applicationYaml.contains("enabled: ${CHATBOT_MCP_FLOWZERO_ENABLED:false}"));
+        assertTrue(applicationYaml.contains("service-name: Flowzero MCP"));
+        assertTrue(applicationYaml.contains("transport-type: STREAMABLE_HTTP"));
+        assertTrue(applicationYaml.contains("url: ${CHATBOT_MCP_FLOWZERO_URL:http://127.0.0.1:8092/api/mcp}"));
+        assertTrue(applicationYaml.contains("- default"));
+        assertTrue(applicationYaml.contains("- advisor"));
+        assertTrue(applicationYaml.contains("description: Creates and retrieves Flowzero workflow drafts through MCP."));
+    }
 
     @Test
     void registersEnabledProvidersFromConfiguration() {

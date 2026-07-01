@@ -62,13 +62,12 @@ public class ToolRegistry {
     }
 
     public Map<String, ResolvedToolMetadata> resolveToolMetadata(UserCapabilityContext context) {
-        String cacheKey = context.getUserId() + "|" + context.getProfileFingerprint() + "|" + registryVersion.get();
         Map<String, ToolDefinition> resolvedTools = resolveTools(context);
         Map<String, ResolvedToolMetadata> metadata = new LinkedHashMap<>();
 
         resolvedTools.forEach((name, definition) -> {
             RegisteredTool localTool = localTools.get(name);
-            if (localTool != null) {
+            if (localTool != null && localTool.definition() == definition) {
                 metadata.put(name, new ResolvedToolMetadata(
                         name,
                         definition,
@@ -81,7 +80,7 @@ public class ToolRegistry {
             }
 
             mcpProviders.forEach((providerId, providerState) -> {
-                if (!metadata.containsKey(name) && providerState.tools().containsKey(name)) {
+                if (!metadata.containsKey(name) && providerState.tools().get(name) == definition) {
                     metadata.put(name, new ResolvedToolMetadata(
                             name,
                             definition,
@@ -106,9 +105,15 @@ public class ToolRegistry {
                     resolved.put(name, tool.definition());
                 }
             });
-            mcpProviders.values().forEach(provider -> {
+            mcpProviders.forEach((providerId, provider) -> {
                 if (matchesProfiles(provider.enabledProfiles(), context.getProfiles())) {
-                    provider.tools().forEach(resolved::putIfAbsent);
+                    provider.tools().forEach((toolName, toolDefinition) -> {
+                        if (shouldOverrideLocalTool(providerId, toolName)) {
+                            resolved.put(toolName, toolDefinition);
+                        } else {
+                            resolved.putIfAbsent(toolName, toolDefinition);
+                        }
+                    });
                 }
             });
             return Map.copyOf(resolved);
@@ -240,6 +245,10 @@ public class ToolRegistry {
 
     private String defaultAccessType(ToolDefinition toolDefinition) {
         return toolDefinition.requiresConfirmation() ? "write" : "read";
+    }
+
+    private boolean shouldOverrideLocalTool(String providerId, String toolName) {
+        return "flowzero-mcp".equals(providerId) && "generate_flowzero_workflow".equals(toolName);
     }
 
     private record RegisteredTool(ToolDefinition definition, Set<String> enabledProfiles) {

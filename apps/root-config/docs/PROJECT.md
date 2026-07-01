@@ -17,6 +17,7 @@ Production — core infrastructure app. Must be running for any MFE to load.
 - **Layout-driven routing** — Parses `microfrontend-layout.html` to determine which MFEs activate on which routes
 - **Dev proxy server** — Proxies API calls to backend services (auth, BFF, chat, analytics, SSE) during local development
 - **Mock middleware** — Provides mock auth and FDC3 endpoints when `useBackendAuth=false`
+- **Captured app API mocks** — Replays sanitized captured API responses for local MFE journeys from root-config dev middleware
 - **JWT token generation** — Local RS512 JWT signing for dev auth mock
 
 ## Quick Start

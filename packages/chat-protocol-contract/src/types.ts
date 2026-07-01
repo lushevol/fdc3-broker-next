@@ -17,6 +17,25 @@ export type ChatActionStatus = 'pending' | 'resolved';
 
 export type ChatToolSource = 'frontend' | 'backend' | 'human' | 'mcp';
 
+export const FLOWZERO_MCP_PROVIDER_ID = 'flowzero-mcp' as const;
+export const FLOWZERO_GENERATE_WORKFLOW_TOOL = 'generate_flowzero_workflow' as const;
+
+export type FlowzeroGeneratedWorkflowResult = {
+  workflowId: string;
+  workflowName: string;
+  status?: string;
+  version?: number;
+  displayVersion?: number;
+  businessArea?: string;
+  countryCodes?: string[];
+  ownerIds?: string[];
+  description?: string;
+  summary: string;
+  steps: string[];
+  workflowDetail: Record<string, unknown>;
+  open: { label: string; route: string };
+};
+
 export type ChatTextPart = {
   type: 'text';
   text: string;

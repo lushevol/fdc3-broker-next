@@ -1,0 +1,197 @@
+@font-face {
+  font-family: "FlowzeroIconfont";
+  src: url("IconFont.woff2?t=1779076390256") format("woff2"),
+    url("IconFont.woff?t=1779076390256") format("woff"),
+    url("IconFont.ttf?t=1779076390256") format("truetype");
+}
+
+.flowzero-iconfont {
+  font-family: "FlowzeroIconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-settings-gear-cog:before {
+  content: "\e900";
+}
+.icon-building-bank:before {
+  content: "\e901";
+}
+.icon-briefcase:before {
+  content: "\e902";
+}
+.icon-list-task:before {
+  content: "\e903";
+}
+.icon-flag:before {
+  content: "\e904";
+}
+.icon-sparkle-ai:before {
+  content: "\e905";
+}
+.icon-building-office:before {
+  content: "\e906";
+}
+.icon-mail-envelope-closed:before {
+  content: "\e907";
+}
+.icon-arrow-chevron-nav-left-backward:before {
+  content: "\e908";
+}
+.icon-search:before {
+  content: "\e909";
+}
+.icon-plus-add:before {
+  content: "\e90a";
+}
+.icon-arrow-chevron-nav-right-forward:before {
+  content: "\e90b";
+}
+.icon-user-profile-person-detach-circle:before {
+  content: "\e90c";
+}
+.icon-check-tick-circle:before {
+  content: "\e90d";
+}
+.icon-check-tick:before {
+  content: "\e90e";
+}
+.icon-network-system-flow-diagram-right:before {
+  content: "\e90f";
+}
+.icon-code-dev-laptop:before {
+  content: "\e910";
+}
+.icon-format-italic:before {
+  content: "\e911";
+}
+.icon-social-hashtag:before {
+  content: "\e912";
+}
+.icon-calendar:before {
+  content: "\e913";
+}
+.icon-text:before {
+  content: "\e914";
+}
+.icon-dots-more-vertical:before {
+  content: "\e915";
+}
+.icon-arrow-sort:before {
+  content: "\e916";
+}
+.icon-arrow-reset:before {
+  content: "\e917";
+}
+.icon-zoom-out-minus-magnify:before {
+  content: "\e918";
+}
+.icon-arrow-zoom-expand-outwards:before {
+  content: "\e919";
+}
+.icon-zoom-in-plus-magnify:before {
+  content: "\e91a";
+}
+.icon-cube-3D:before {
+  content: "\e91b";
+}
+.icon-cube-transparent:before {
+  content: "\e91c";
+}
+.icon-list-dot:before {
+  content: "\e91d";
+}
+.icon-user-profile-person-filled:before {
+  content: "\e91e";
+}
+.icon-alert-triangle-exclamation:before {
+  content: "\e91f";
+}
+.icon-history-start:before {
+  content: "\e920";
+}
+.icon-arrow-chevron-nav-downward:before {
+  content: "\e921";
+}
+.icon-adjust:before {
+  content: "\e922";
+}
+.icon-filter-funnel:before {
+  content: "\e923";
+}
+.icon-document-upload-page:before {
+  content: "\e924";
+}
+.icon-timer-clock:before {
+  content: "\e925";
+}
+.icon-eye-show:before {
+  content: "\e926";
+}
+.icon-chat-comment-lines:before {
+  content: "\e927";
+}
+.icon-edit:before {
+  content: "\e928";
+}
+.icon-trash-bin-delete:before {
+  content: "\e929";
+}
+.icon-pencil-edit:before {
+  content: "\e92a";
+}
+.icon-clock-pending:before {
+  content: "\e92b";
+}
+.icon-field-check-tick-box:before {
+  content: "\e92c";
+}
+.icon-field-document-page:before {
+  content: "\e92d";
+}
+.icon-field-trash:before {
+  content: "\e92e";
+}
+.icon-field-dropdown:before {
+  content: "\e92f";
+}
+.icon-field-radio:before {
+  content: "\e930";
+}
+.icon-field-image-picture:before {
+  content: "\e931";
+}
+.icon-Icon-database:before {
+  content: "\e932";
+}
+.icon-Icon-document-page-file:before {
+  content: "\e933";
+}
+.icon-Icon-mail-envelope-open:before {
+  content: "\e934";
+}
+.icon-Icon-switch-on:before {
+  content: "\e935";
+}
+.icon-Icon-cross-close-x-circle-filled:before {
+  content: "\e936";
+}
+.icon-form-designer:before {
+  content: "\e937";
+}
+.icon-user-person-profile:before {
+  content: "\e938";
+}
+.icon-arrow-upload:before {
+  content: "\e939";
+}
+.icon-table-columns:before {
+  content: "\e93a";
+}
+
+/**
+ * Make by Icon Font Exporter
+ * https://www.figma.com/community/plugin/1129455674275940478/Icon-Font-Exporter
+ */

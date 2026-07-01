@@ -24,6 +24,7 @@ import com.fdc3.chatbot.model.UserCapabilityContext;
 import com.fdc3.chatbot.memory.MemoryContextBuilder;
 import com.fdc3.chatbot.tool.ToolDefinition;
 import com.fdc3.chatbot.tool.ToolRegistry;
+import com.fdc3.chatbot.tool.ToolRegistry.ResolvedToolMetadata;
 import com.fdc3.chatbot.tool.agentutils.ToolExecutionBridge;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
@@ -76,6 +77,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import com.fdc3.chatbot.protocol.model.ChatToolSource;
 
 /**
  * AI Agent service using Spring AI for conversation handling.
@@ -269,9 +271,12 @@ public class AgentService {
 
     @PostConstruct
     public void init() {
+        String configuredApiKey = resolveOpenaiApiKey();
+        String configuredBaseUrl = resolveOpenaiBaseUrl();
+
         if (mockEnabled) {
             log.info("Mock mode enabled - using simulated responses");
-        } else if (openaiApiKey != null && !openaiApiKey.isEmpty()) {
+        } else if (configuredApiKey != null && !configuredApiKey.isEmpty()) {
             String configuredModel = resolveConfiguredModel();
             Double configuredTemperature = resolveConfiguredTemperature();
             OpenAiChatOptions options = OpenAiChatOptions.builder()
@@ -282,14 +287,14 @@ public class AgentService {
 
             OpenAIOkHttpClient.Builder clientBuilder =
                     OpenAIOkHttpClient.builder()
-                            .apiKey(openaiApiKey);
+                            .apiKey(configuredApiKey);
             OpenAIOkHttpClientAsync.Builder asyncClientBuilder =
                     OpenAIOkHttpClientAsync.builder()
-                            .apiKey(openaiApiKey);
-            if (openaiBaseUrl != null && !openaiBaseUrl.isEmpty()) {
-                clientBuilder.baseUrl(openaiBaseUrl);
-                asyncClientBuilder.baseUrl(openaiBaseUrl);
-                log.info("Using custom OpenAI base URL: {}", openaiBaseUrl);
+                            .apiKey(configuredApiKey);
+            if (configuredBaseUrl != null && !configuredBaseUrl.isEmpty()) {
+                clientBuilder.baseUrl(configuredBaseUrl);
+                asyncClientBuilder.baseUrl(configuredBaseUrl);
+                log.info("Using custom OpenAI base URL: {}", configuredBaseUrl);
             }
             OpenAIClient openAiClient = clientBuilder.build();
             OpenAIClientAsync openAiAsyncClient = asyncClientBuilder.build();
@@ -357,11 +362,71 @@ public class AgentService {
     }
 
     private String resolveConfiguredModel() {
-        return chatModelName != null && !chatModelName.isBlank() ? chatModelName : model;
+        return firstNonBlank(
+                chatModelName,
+                System.getProperty("spring.ai.openai.chat.model"),
+                System.getenv("CHATBOT_OPENAI_MODEL"),
+                System.getenv("SPRING_AI_OPENAI_CHAT_MODEL"),
+                System.getenv("DEEPSEEK_LLM_MODEL"),
+                model
+        );
     }
 
     private Double resolveConfiguredTemperature() {
-        return chatTemperature != null ? chatTemperature : temperature;
+        Double runtimeTemperature = firstParsableDouble(
+                System.getProperty("spring.ai.openai.chat.temperature"),
+                System.getenv("CHATBOT_OPENAI_TEMPERATURE"),
+                System.getenv("SPRING_AI_OPENAI_CHAT_TEMPERATURE")
+        );
+        if (chatTemperature != null) {
+            return chatTemperature;
+        }
+        if (runtimeTemperature != null) {
+            return runtimeTemperature;
+        }
+        return temperature != null ? temperature : 0.7d;
+    }
+
+    private String resolveOpenaiApiKey() {
+        return firstNonBlank(
+                openaiApiKey,
+                System.getProperty("spring.ai.openai.api-key"),
+                System.getenv("CHATBOT_OPENAI_API_KEY"),
+                System.getenv("SPRING_AI_OPENAI_API_KEY"),
+                System.getenv("DEEPSEEK_API_KEY")
+        );
+    }
+
+    private String resolveOpenaiBaseUrl() {
+        return firstNonBlank(
+                openaiBaseUrl,
+                System.getProperty("spring.ai.openai.base-url"),
+                System.getenv("CHATBOT_OPENAI_BASE_URL"),
+                System.getenv("SPRING_AI_OPENAI_BASE_URL"),
+                System.getenv("DEEPSEEK_OPENAI_BASE_URL")
+        );
+    }
+
+    private static String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private static Double firstParsableDouble(String... values) {
+        String value = firstNonBlank(values);
+        if (value == null) {
+            return null;
+        }
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            log.warn("Ignoring invalid OpenAI temperature value: {}", value);
+            return null;
+        }
     }
 
     /**
@@ -701,6 +766,7 @@ public class AgentService {
         Context parentContext = Context.current();
         AtomicBoolean cancelled = new AtomicBoolean(false);
         Map<String, ToolDefinition> availableTools = toolRegistry.resolveTools(capabilityContext);
+        Map<String, ResolvedToolMetadata> availableToolMetadata = toolRegistry.resolveToolMetadata(capabilityContext);
 
         // Register per-user memory context for this conversation
         if (memoryToolsFactory != null && capabilityContext != null) {
@@ -740,6 +806,7 @@ public class AgentService {
                     conversationId,
                     userMessage,
                     availableTools,
+                    availableToolMetadata,
                     token -> {
                         if (!cancelled.get()) {
                             onNext.accept(token);
@@ -761,6 +828,39 @@ public class AgentService {
                         }
                     }
             );
+        }
+
+        MockToolInvocation deterministicToolInvocation = resolveDeterministicToolInvocation(userMessage);
+        if (deterministicToolInvocation != null) {
+            ToolDefinition toolDefinition = availableTools.get(deterministicToolInvocation.name());
+            if (toolDefinition != null) {
+                return processDirectToolStreaming(
+                        deterministicToolInvocation,
+                        toolDefinition,
+                        availableToolMetadata.get(deterministicToolInvocation.name()),
+                        userMessage,
+                        token -> {
+                            if (!cancelled.get()) {
+                                onNext.accept(token);
+                            }
+                        },
+                        () -> {
+                            if (!cancelled.get()) {
+                                onComplete.run();
+                            }
+                        },
+                        toolCall -> {
+                            if (!cancelled.get()) {
+                                onToolCall.accept(toolCall);
+                            }
+                        },
+                        toolResult -> {
+                            if (!cancelled.get()) {
+                                onToolResult.accept(toolResult);
+                            }
+                        }
+                );
+            }
         }
 
         try {
@@ -2331,6 +2431,7 @@ public class AgentService {
             String conversationId,
             String userMessage,
             Map<String, ToolDefinition> availableTools,
+            Map<String, ResolvedToolMetadata> availableToolMetadata,
             java.util.function.Consumer<String> onNext,
             java.lang.Runnable onComplete,
             java.util.function.Consumer<ToolCall> onToolCall,
@@ -2346,24 +2447,22 @@ public class AgentService {
             }
             String toolCallId = UUID.randomUUID().toString();
             boolean requiresConfirmation = toolDefinition.requiresConfirmation();
-            ToolCall toolCall = ToolCall.builder()
+            ToolCall toolCall = buildToolCallWithMetadata(ToolCall.builder()
                     .id(toolCallId)
                     .name(toolInvocation.name())
                     .arguments(toolInvocation.arguments())
                     .status(requiresConfirmation ? ToolCall.ToolStatus.PENDING : ToolCall.ToolStatus.RUNNING)
-                    .requiresConfirmation(requiresConfirmation)
-                    .build();
+                    .requiresConfirmation(requiresConfirmation), availableToolMetadata.get(toolInvocation.name()));
             onToolCall.accept(toolCall);
 
             if (requiresConfirmation) {
                 PendingToolExecution pendingExecution = pendingToolExecution(
-                        () -> onToolCall.accept(ToolCall.builder()
+                        () -> onToolCall.accept(buildToolCallWithMetadata(ToolCall.builder()
                                 .id(toolCallId)
                                 .name(toolInvocation.name())
                                 .arguments(toolInvocation.arguments())
                                 .status(ToolCall.ToolStatus.RUNNING)
-                                .requiresConfirmation(true)
-                                .build()),
+                                .requiresConfirmation(true), availableToolMetadata.get(toolInvocation.name()))),
                         () -> {
                             ToolDefinition latestToolDefinition = toolRegistry.getTool(toolInvocation.name());
                             if (latestToolDefinition == null) {
@@ -2375,13 +2474,12 @@ public class AgentService {
                                 return;
                             }
                             executeMockTool(
-                                    ToolCall.builder()
+                                    buildToolCallWithMetadata(ToolCall.builder()
                                             .id(toolCallId)
                                             .name(toolInvocation.name())
                                             .arguments(toolInvocation.arguments())
                                             .status(ToolCall.ToolStatus.RUNNING)
-                                            .requiresConfirmation(true)
-                                            .build(),
+                                            .requiresConfirmation(true), availableToolMetadata.get(toolInvocation.name())),
                                     latestToolDefinition,
                                     toolInvocation,
                                     userMessage,
@@ -2469,6 +2567,38 @@ public class AgentService {
                 });
     }
 
+    private Runnable processDirectToolStreaming(
+            MockToolInvocation toolInvocation,
+            ToolDefinition toolDefinition,
+            ResolvedToolMetadata toolMetadata,
+            String userMessage,
+            java.util.function.Consumer<String> onNext,
+            java.lang.Runnable onComplete,
+            java.util.function.Consumer<ToolCall> onToolCall,
+            java.util.function.Consumer<ToolResult> onToolResult
+    ) {
+        MockStreamHandle streamHandle = new MockStreamHandle();
+        String toolCallId = UUID.randomUUID().toString();
+        ToolCall toolCall = buildToolCallWithMetadata(ToolCall.builder()
+                .id(toolCallId)
+                .name(toolInvocation.name())
+                .arguments(toolInvocation.arguments())
+                .status(ToolCall.ToolStatus.RUNNING)
+                .requiresConfirmation(false), toolMetadata);
+        onToolCall.accept(toolCall);
+        executeMockTool(
+                toolCall,
+                toolDefinition,
+                toolInvocation,
+                userMessage,
+                onNext,
+                onComplete,
+                onToolResult,
+                streamHandle
+        );
+        return streamHandle::cancel;
+    }
+
     private String pendingKey(String conversationId, String toolCallId) {
         return conversationId + ":" + toolCallId;
     }
@@ -2530,6 +2660,11 @@ public class AgentService {
             return new MockToolInvocation("get_current_time", Map.of("timezone", timezone));
         }
 
+        if (lowerMessage.contains("flowzero") && lowerMessage.contains("workflow")
+                && (lowerMessage.contains("generate") || lowerMessage.contains("create"))) {
+            return new MockToolInvocation("generate_flowzero_workflow", flowzeroWorkflowArguments(userMessage));
+        }
+
         if (lowerMessage.contains("calculate") || userMessage.matches(".*\\d+[\\d\\s+\\-*/().]*.*")) {
             String expression = userMessage.replaceFirst("(?i).*calculate", "").trim();
             if (expression.isEmpty()) {
@@ -2541,6 +2676,40 @@ public class AgentService {
         }
 
         return null;
+    }
+
+    private MockToolInvocation resolveDeterministicToolInvocation(String userMessage) {
+        String lowerMessage = userMessage.toLowerCase();
+        if (lowerMessage.contains("flowzero") && lowerMessage.contains("workflow")
+                && (lowerMessage.contains("generate") || lowerMessage.contains("create"))) {
+            return new MockToolInvocation("generate_flowzero_workflow", flowzeroWorkflowArguments(userMessage));
+        }
+        return null;
+    }
+
+    private Map<String, Object> flowzeroWorkflowArguments(String userMessage) {
+        String workflowName = extractFlowzeroWorkflowName(userMessage);
+        String prompt = userMessage.contains(":")
+                ? userMessage.substring(userMessage.lastIndexOf(':') + 1).trim()
+                : userMessage;
+        Map<String, Object> arguments = new LinkedHashMap<>();
+        arguments.put("prompt", prompt);
+        arguments.put("workflowName", workflowName);
+        arguments.put("description", workflowName + " generated by chatbot");
+        arguments.put("businessArea", "General");
+        arguments.put("countryCodes", List.of("GLOBAL"));
+        arguments.put("ownerIds", List.of("system"));
+        return arguments;
+    }
+
+    private String extractFlowzeroWorkflowName(String userMessage) {
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("(?i)\\b(?:named|called)\\s+([^:,.]+)")
+                .matcher(userMessage);
+        if (matcher.find()) {
+            return matcher.group(1).trim();
+        }
+        return "Generated FlowZero Workflow";
     }
 
     private String generateToolResponse(
@@ -2570,6 +2739,11 @@ public class AgentService {
                     + " at " + resultMap.get("temperature") + " degrees " + resultMap.get("temperatureUnit") + ".";
         }
 
+        if ("generate_flowzero_workflow".equals(toolName) && result instanceof Map<?, ?> resultMap) {
+            return "Created Flowzero workflow " + resultMap.get("workflowName")
+                    + " (" + resultMap.get("workflowId") + "). " + resultMap.get("summary");
+        }
+
         return "I used " + toolName + " to help answer: " + userMessage;
     }
 
@@ -2592,6 +2766,14 @@ public class AgentService {
             Runnable cancelAction
     ) {
         return new PendingToolExecution(announceRunningAction, confirmAction, cancelAction);
+    }
+
+    private ToolCall buildToolCallWithMetadata(ToolCall.ToolCallBuilder builder, ResolvedToolMetadata toolMetadata) {
+        if (toolMetadata != null && "mcp".equalsIgnoreCase(toolMetadata.executionType())) {
+            builder.source(ChatToolSource.MCP);
+            builder.providerId(toolMetadata.providerId());
+        }
+        return builder.build();
     }
 
     private record MockToolInvocation(String name, Map<String, Object> arguments) {

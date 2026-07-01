@@ -1,4 +1,5 @@
-import type { ChatRunRequest, ChatStreamFrame } from './types';
+import type { ChatRunRequest, ChatStreamFrame, FlowzeroGeneratedWorkflowResult } from './types';
+import { FLOWZERO_GENERATE_WORKFLOW_TOOL, FLOWZERO_MCP_PROVIDER_ID } from './types';
 
 export function createWeatherRunRequestFixture(): ChatRunRequest {
   return {
@@ -265,3 +266,36 @@ export function createToolPauseFrameFixture(): ChatStreamFrame {
     messageId: 'msg_asst_1',
   };
 }
+
+export const flowzeroGeneratedWorkflowFixture: FlowzeroGeneratedWorkflowResult = {
+  workflowId: 'wf_client_onboarding',
+  workflowName: 'Client onboarding',
+  status: 'draft',
+  version: 3,
+  displayVersion: 3,
+  businessArea: 'Operations',
+  countryCodes: ['US', 'GB'],
+  ownerIds: ['owner_123'],
+  description: 'Workflow for onboarding a new institutional client.',
+  summary: 'Creates a draft onboarding workflow with compliance and handoff steps.',
+  steps: ['Capture request', 'Review compliance', 'Publish workflow'],
+  workflowDetail: {
+    trigger: 'manual',
+    tags: ['onboarding', 'compliance'],
+  },
+  open: {
+    label: 'Open workflow',
+    route: '/flowzero/workflows/wf_client_onboarding',
+  },
+};
+
+export const flowzeroMcpToolFrameFixture: ChatStreamFrame = {
+  type: 'tool-output-available',
+  toolCallId: 'call_flowzero_1',
+  source: 'mcp',
+  providerId: FLOWZERO_MCP_PROVIDER_ID,
+  output: {
+    toolName: FLOWZERO_GENERATE_WORKFLOW_TOOL,
+    result: flowzeroGeneratedWorkflowFixture,
+  },
+};

@@ -1,0 +1,35 @@
+{
+  "disabledFeature": [
+    "Cashflow_Fuzzy_Search",
+    "Cashflow_Sub_Status_Subscription",
+    "Product_Details_Drilldown",
+    "Fuzzy_Search",
+    "Trade_Subscription",
+    "Filter_Builder_POC",
+    "Filter_Builder_Next",
+    "View_Builder_POC"
+  ],
+  "enableFeatureForUser": {
+    "Trade_Subscription": ["1613070", "2000115", "1603686"]
+  },
+  "enableFeatureForPage": {
+    "Filter_Builder_POC": [
+      "TRADE_FILTER_BUILDER",
+      "MO_EXCEPTION_FILTER",
+      "RATAN_CA_EXCEPTION",
+      "RATAN_FM_COO_EXCEPTION"
+    ],
+    "Filter_Builder_Next": [
+      "TRADE_FILTER_BUILDER",
+      "MO_EXCEPTION_FILTER",
+      "RATAN_CA_EXCEPTION",
+      "RATAN_FM_COO_EXCEPTION"
+    ],
+    "View_Builder_POC": [
+      "MIDDLE_OFFICE_PROCESS",
+      "TRADE_VIEW_BUILDER",
+      "RATAN_CA_EXCEPTION",
+      "RATAN_FM_COO_EXCEPTION"
+    ]
+  }
+}

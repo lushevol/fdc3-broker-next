@@ -32,7 +32,10 @@ export const successHandler = (response: AxiosResponse): AxiosResponse | Promise
     type: ActionType.SET_IS_LOADING,
     data: { isLoading: false },
   });
-  if (response?.config?.url?.includes('/api/ratan/')) {
+  if (
+    response?.config?.url?.includes('/api/ratan/') ||
+    response?.config?.headers?.['standard-response'] === 'true'
+  ) {
     return handleStandardResponse(response);
   }
   return response;

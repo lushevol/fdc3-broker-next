@@ -1,0 +1,1076 @@
+PGSL_RDB_SCHEMA: ratan_flowzero_designer_service
+
+info:
+  build:
+    artifactId: "@project.artifactId@"
+    name: "@project.name@"
+    description: "@project.description@"
+    version: "@project.version@"
+  applicationName: ${spring.application.name}
+
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        primary-dialect: org.hibernate.dialect.PostgreSQLDialect
+  application:
+    name: ratan-flowzero-designer-service
+  ai:
+    mcp:
+      server:
+        enabled: true
+        name: ratan-flowzero-designer-service
+        version: 1.0.2
+        type: SYNC
+        transport: WEBMVC
+        instructions: "Provides deterministic FlowZero workflow draft generation tools"
+        sse-message-endpoint: /api/mcp/messages
+        capabilities:
+          tool: true
+          resource: false
+          prompt: false
+          completion: false
+  datasource:
+    url: ${PGSL_RDB_URL}
+    username: ${PGSL_RDB_USERNAME_HASHICORP}
+    password: ${PGSL_RDB_JANUS_HASHICORP}
+    driver-class-name: ${PGSL_RDB_DRIVER}
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    placeholder-replacement: false
+    table: ratanone_flowzero_schema_history
+  retry:
+    enabled: true
+
+retry:
+  max-attempts: 3
+  backoff:
+    delay: 2000
+    multiplier: 2.0
+    max-delay: 5000
+
+  upload:
+    max-attempts: 3
+    backoff:
+      delay: 5000
+      multiplier: 2.0
+      max-delay: 8000
+
+  download:
+    max-attempts: 3
+    backoff:
+      delay: 5000
+      multiplier: 2.0
+      max-delay: 5000
+
+jasypt:
+  encryptor:
+    password: ${RATAN_CIPHER_KEY}
+
+# -----------------------------------------------------------------------
+# minio / nas — defined per environment profile
+#   application-dev.yml      (local development)
+#   application-uat1.yml     (UAT1)
+#   application-staging.yml  (Staging)
+#   application-prod.yml     (Production)
+#
+# Activate via: -Dspring.profiles.active=uat1
+# -----------------------------------------------------------------------
+
+
+ratanone:
+  logging:
+    level: info
+    folder: ${LOG_DIR:./logs}
+    logstash:
+      destinations: ${LOGSTASH_URL:10.198.199.160:5000}
+  open-apis:
+    auto-startup: true
+    api-gateway-url: ${API_GATEWAY_URL}
+    api-gateway-token: ${API_GATEWAY_TOKEN}
+    apis:
+      - name: create_workflow@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/workflow/create
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/workflow/create
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: create_workflow
+
+      - name: save_workflow@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/workflow/save
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/workflow/save
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: save_workflow
+
+      - name: workflow_detail@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/workflow/detail/{workflowId}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/workflow/detail/{workflowId}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:VIEW_WORKFLOW_DETAIL
+        audit:
+          type: flowzeroDesignerService
+          action: workflow_detail
+
+      - name: workflow_page@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/workflow/page
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/workflow/page
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:VIEW_WORKFLOW_LIST
+        audit:
+          type: flowzeroDesignerService
+          action: workflow_page
+
+      - name: published_workflow_page@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/workflow/published-workflow-page
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/workflow/published-workflow-page
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_RAISE REQUEST:VIEW_PUBLISHEDWORKFLOW_LIST
+        audit:
+          type: flowzeroDesignerService
+          action: published_workflow_page
+
+      - name: publish_workflow@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/workflow/publish
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/workflow/publish
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: publish_workflow
+
+      - name: before_publish_check@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/workflow/before-publish-check/{workflowId}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/workflow/before-publish-check/{workflowId}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: before_publish_check
+      - name: check_name@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/workflow/check-name
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/workflow/check-name
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: check-name
+      - name: turn_suspend_workflow_to_terminated@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/workflow/turn-suspend-workflow-to-terminated
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/workflow/turn-suspend-workflow-to-terminated
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: turn_suspend_workflow_to_terminated
+
+      - name: get_variable_names@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/workflow/variable-names/{workflowId}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/workflow/variable-names/{workflowId}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:VIEW_WORKFLOW_DETAIL
+        audit:
+          type: flowzeroDesignerService
+          action: get_variable_names
+
+      - name: create_form@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/form/create
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/form/create
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FORM MANAGEMENT:OPERATE_FORM
+        audit:
+          type: flowzeroDesignerService
+          action: create_form
+
+      - name: save_form@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/form/save
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/form/save
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FORM MANAGEMENT:OPERATE_FORM
+        audit:
+          type: flowzeroDesignerService
+          action: save_form
+
+      - name: form_detail@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/form/detail/{formId}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/form/detail/{formId}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FORM MANAGEMENT:VIEW_FORM_DETAIL
+        audit:
+          type: flowzeroDesignerService
+          action: form_detail
+
+      - name: form_page@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/form/page
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/form/page
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FORM MANAGEMENT:VIEW_FORM_LIST
+        audit:
+          type: flowzeroDesignerService
+          action: form_page
+
+      - name: publish_form@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/form/publish/{formId}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/form/publish/{formId}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FORM MANAGEMENT:OPERATE_FORM
+        audit:
+          type: flowzeroDesignerService
+          action: publish_form
+
+      - name: check_form_name@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/form/check-name
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/form/check-name
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FORM MANAGEMENT:OPERATE_FORM
+        audit:
+          type: flowzeroDesignerService
+          action: check_form_name
+
+      - name: delete_form@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/form/delete/{formId}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/form/delete/{formId}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FORM MANAGEMENT:DELETE_FORM
+        audit:
+          type: flowzeroDesignerService
+          action: delete_form
+
+      - name: copy_form@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/form/copy/{formId}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/form/copy/{formId}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FORM MANAGEMENT:DUPLICATE_FORM
+        audit:
+          type: flowzeroDesignerService
+          action: copy_form
+
+      - name: published_forms@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/form/published-forms
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/form/published-forms
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FORM MANAGEMENT:VIEW_FORM_LIST
+        audit:
+          type: flowzeroDesignerService
+          action: published_forms
+
+      - name: create_fields@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/fields/create
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/fields/create
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FIELD CONFIGURATION:OPERATE_FIELD
+        audit:
+          type: flowzeroDesignerService
+          action: create_fields
+
+      - name: query_fields@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/fields/find-by-condition
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/fields/find-by-condition
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FIELD CONFIGURATION:VIEW_FIELD_LIST
+        audit:
+          type: flowzeroDesignerService
+          action: query_fields
+
+      - name: query_field@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/fields/{fieldId}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/fields/{fieldId}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FIELD CONFIGURATION:VIEW_FIELD_DETAIL
+        audit:
+          type: flowzeroDesignerService
+          action: query_field
+
+      - name: update_field@flowZeroDesignerService
+        entrypoint:
+          method: PUT
+          path: /api/v1/fields/{fieldId}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/fields/{fieldId}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FIELD CONFIGURATION:VIEW_FIELD_DETAIL
+        audit:
+          type: flowzeroDesignerService
+          action: update_field
+
+      - name: update_field_status@flowZeroDesignerService
+        entrypoint:
+          method: PATCH
+          path: /api/v1/fields/status
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/fields/status
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FIELD CONFIGURATION:VIEW_FIELD_LIST
+        audit:
+          type: flowzeroDesignerService
+          action: update_field_status
+
+      - name: delete_field@flowZeroDesignerService
+        entrypoint:
+          method: DELETE
+          path: /api/v1/fields
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/fields
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FIELD CONFIGURATION:OPERATE_FIELD
+        audit:
+          type: flowzeroDesignerService
+          action: delete_field
+
+      - name: query_keywords@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/fields/keywords
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/fields/keywords
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FIELD CONFIGURATION:OPERATE_FIELD
+        audit:
+          type: flowzeroDesignerService
+          action: query_keywords
+
+      - name: check_fieldlabel@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/fields/check-label
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/fields/check-label
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_FIELD CONFIGURATION:OPERATE_FIELD
+        audit:
+          type: flowzeroDesignerService
+          action: query_keywords
+
+
+      - name: create_user@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/user/create
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/create
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: create_user
+
+      - name: update_user@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/user/update
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/update
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: update_user
+
+      - name: delete_user@flowZeroDesignerService
+        entrypoint:
+          method: DELETE
+          path: /api/v1/user/delete/{id}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/delete/{id}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: delete_user
+
+      - name: user_detail@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/user/detail/{id}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/detail/{id}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: user_detail
+
+      - name: user_by_bankId@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/user/bankId/{bankId}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/bankId/{bankId}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: user_by_bankId
+
+      - name: user_by_email@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/user/email/{email}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/email/{email}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: user_by_email
+
+      - name: user_by_countryCode@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/user/country/{countryCode}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/country/{countryCode}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: user_by_countryCode
+
+      - name: user_by_userName@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/user/userName/{userName}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/userName/{userName}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: user_by_userName
+
+      - name: user_all@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/user/all
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/all
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: user_all
+
+      - name: user_page@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/user/page
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/page
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+            - FLOW_ZERO_TODO:OPERATE_WORKFLOW:ASSIGN_TEAMTASK_TO_TEAMMEMBER
+        audit:
+          type: flowzeroDesignerService
+          action: user_page
+
+      - name: user_search@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/user/search
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/search
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+            - FLOW_ZERO_TODO:OPERATE_WORKFLOW:ASSIGN_TEAMTASK_TO_TEAMMEMBER
+        audit:
+          type: flowzeroDesignerService
+          action: user_search
+
+      - name: create_country@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/country/create
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/country/create
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: create_country
+
+      - name: update_country@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/country/update
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/country/update
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: update_country
+
+      - name: delete_country@flowZeroDesignerService
+        entrypoint:
+          method: DELETE
+          path: /api/v1/country/delete/{id}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/country/delete/{id}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: delete_country
+
+      - name: country_detail@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/country/detail/{id}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/country/detail/{id}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: country_detail
+
+      - name: country_by_alpha2Code@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/country/alpha2/{alpha2Code}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/country/alpha2/{alpha2Code}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: country_by_alpha2Code
+
+      - name: country_by_alpha3Code@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/country/alpha3/{alpha3Code}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/country/alpha3/{alpha3Code}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: country_by_alpha3Code
+
+      - name: country_all@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/country/all
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/country/all
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: country_all
+
+      - name: country_page@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/country/page
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/country/page
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: country_page
+
+      - name: create_dictionary@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/dictionary/create
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/dictionary/create
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: create_dictionary
+
+      - name: update_dictionary@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/dictionary/update
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/dictionary/update
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: update_dictionary
+
+      - name: delete_dictionary@flowZeroDesignerService
+        entrypoint:
+          method: DELETE
+          path: /api/v1/dictionary/delete/{id}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/dictionary/delete/{id}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: delete_dictionary
+
+      - name: dictionary_detail@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/dictionary/detail/{id}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/dictionary/detail/{id}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: dictionary_detail
+
+      - name: dictionary_by_name@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/dictionary/name/{name}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/dictionary/name/{name}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: dictionary_by_name
+
+      - name: dictionary_by_names@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/dictionary/findByNames
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/dictionary/findByNames
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: dictionary_by_names
+
+      - name: dictionary_all@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/dictionary/all
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/dictionary/all
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: dictionary_all
+
+      - name: dictionary_page@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/dictionary/page
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/dictionary/page
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: dictionary_page
+
+      - name: upload_file@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/file/upload
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/file/upload
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: upload_file
+
+      - name: get_download_url@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/file/download-url
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/file/download-url
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: get_download_url
+
+      - name: candidate_group_detail@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/candidate-group/detail/{id}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/candidate-group/detail/{id}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: candidate_group_detail
+
+      - name: candidate_group_page@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/candidate-group/page
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/candidate-group/page
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: candidate_group_page
+
+      - name: candidate_group_search@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/candidate-group/search
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/candidate-group/search
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: candidate_group_search
+
+      - name: workflow_navigation@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/workflow/navigation
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/workflow/navigation
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+            - FLOW_ZERO_TODO:CLAIM_TASK
+            - FLOW_ZERO_TODO:CLAIM_TEAMTASK
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGHANDLETASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYTEAMTASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGCLAIMTASK_LIST
+        audit:
+          type: flowzeroDesignerService
+          action: workflow_navigation
+
+      - name: get_user_settings@flowZeroDesignerService
+        entrypoint:
+          method: GET
+          path: /api/v1/user/settings/{type}/{name}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/settings/{type}/{name}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+            - FLOW_ZERO_TODO:CLAIM_TASK
+            - FLOW_ZERO_TODO:CLAIM_TEAMTASK
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGHANDLETASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYTEAMTASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGCLAIMTASK_LIST
+        audit:
+          type: flowzeroDesignerService
+          action: get_user_settings
+
+      - name: put_user_settings@flowZeroDesignerService
+        entrypoint:
+          method: PUT
+          path: /api/v1/user/settings/{type}/{name}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/settings/{type}/{name}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+            - FLOW_ZERO_TODO:CLAIM_TASK
+            - FLOW_ZERO_TODO:CLAIM_TEAMTASK
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGHANDLETASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYTEAMTASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGCLAIMTASK_LIST
+        audit:
+          type: flowzeroDesignerService
+          action: put_user_settings
+
+      - name: delete_user_settings@flowZeroDesignerService
+        entrypoint:
+          method: DELETE
+          path: /api/v1/user/settings/{type}/{name}
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/user/settings/{type}/{name}
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+            - FLOW_ZERO_TODO:CLAIM_TASK
+            - FLOW_ZERO_TODO:CLAIM_TEAMTASK
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGHANDLETASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYTEAMTASK_LIST
+            - FLOW_ZERO_TODO:VIEW_MYPENDINGCLAIMTASK_LIST
+        audit:
+          type: flowzeroDesignerService
+          action: delete_user_settings
+
+      - name: init_navigation@flowZeroDesignerService
+        entrypoint:
+          method: POST
+          path: /api/v1/workflow/navigation/init
+        endpoint:
+          service: lb://RATAN-FLOWZERO-DESIGNER-SERVICE
+          path: /api/v1/workflow/navigation/init
+        auth:
+          required: true
+          actions:
+            - FLOW_ZERO_WORKFLOW MANAGEMENT:OPERATE_WORKFLOW
+        audit:
+          type: flowzeroDesignerService
+          action: init_navigation

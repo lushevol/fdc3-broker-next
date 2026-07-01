@@ -97,6 +97,12 @@ React, ReactDOM, and single-spa are **externals** resolved at runtime via the im
 - `root-config/public/importmap.json` – production mapping
 - Adding a new tile/container requires updating both import maps
 
+### Dev API mocks
+
+- Cross-MFE local API mocks and captured-response replay belong in `apps/root-config/dev-server.ts`
+- Store root-config mock payloads beside root-config, for example under `apps/root-config/mock/`
+- Do **not** add local dev API mock behavior to individual MFE `server/` folders; those folders are for containerization/server packaging of that MFE, not the overall local devserver
+
 ### Turbo pipeline
 
 - `build` has `dependsOn: ["^build"]` – packages must build before apps

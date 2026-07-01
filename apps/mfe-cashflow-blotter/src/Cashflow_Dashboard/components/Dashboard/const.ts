@@ -1,0 +1,1 @@
+export const DASHBOARD_REFRESH_INTERVAL = 120 * 1000;

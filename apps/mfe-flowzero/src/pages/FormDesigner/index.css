@@ -1,0 +1,31 @@
+/* Custom scrollbar */
+.flowzero-custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.flowzero-custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #999999;
+  border-radius: 6px !important;
+}
+.flowzero-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #999999;
+}
+.dark .flowzero-custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #666666;
+}
+.dark .flowzero-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #666666;
+}
+
+/* Force grabbing cursor on all elements while dragging */
+body.is-dragging,
+body.is-dragging * {
+  cursor: grabbing !important;
+}
+
+body {
+  overscroll-behavior: none;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}

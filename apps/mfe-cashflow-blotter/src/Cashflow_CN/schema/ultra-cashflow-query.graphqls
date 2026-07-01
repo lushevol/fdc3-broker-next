@@ -1,0 +1,13 @@
+query SettlementCashflowDataUltraQuery($payload: RatanUltraQuery!) {
+  cashflowUltraQuery(payload: $payload) {
+    totalResult
+    pageIndex
+    itemsPerPage
+    lastPage
+    results {
+      Cashflow {
+        Cashflow_Id
+      }
+    }
+  }
+}

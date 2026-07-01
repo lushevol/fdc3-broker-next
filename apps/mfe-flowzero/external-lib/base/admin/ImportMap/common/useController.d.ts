@@ -1,0 +1,34 @@
+import { GridColDef } from "@mui/x-data-grid";
+import React from "react";
+
+import { ImportMapProps } from "./interface";
+declare const useController: (props: ImportMapProps) => {
+  store: import("../../../hooks/model/root").RootModel;
+  onCreateNew: () => void;
+  columns: GridColDef<any, any, any>[];
+  rows: any;
+  onClose: () => void;
+  onOpen: (row: any, mode: any) => () => void;
+  onChange: (value: any, field: string) => void;
+  openDetail: boolean;
+  record: any;
+  onReset: () => void;
+  onSave: () => Promise<void>;
+  onSaveData: (result: any) => Promise<void>;
+  resetId: number;
+  onVerify: () => Promise<void>;
+  onUpdate: () => Promise<void>;
+  onUpdateData: (result: any) => Promise<void>;
+  isLoading: boolean;
+  onDeactivate: () => Promise<void>;
+  auditColumns: GridColDef<any, any, any>[];
+  auditRows: any;
+  openAudit: boolean;
+  onCloseAudit: () => void;
+  importMap: undefined;
+  setImportMap: React.Dispatch<React.SetStateAction<undefined>>;
+  getAuditData: (_importMap: any) => void;
+  refreshTab: () => void;
+  onOpenAudit: (row: any) => () => void;
+};
+export default useController;

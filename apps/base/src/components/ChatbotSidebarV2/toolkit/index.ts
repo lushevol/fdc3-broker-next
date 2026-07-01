@@ -18,13 +18,20 @@ import { proposeFdc3WorkflowTool } from './fdc3/propose-workflow';
 import { createExecuteFdc3WorkflowTool } from './fdc3/execute-workflow';
 import type { Fdc3ActionExecutor } from './fdc3/shared/action-executor';
 import type { Fdc3WorkflowExecutor } from './fdc3/shared/workflow-executor';
+import {
+  createFlowzeroWorkflowGenerationTool,
+  type FlowzeroWorkflowOpenHandler,
+} from './flowzero/workflow-generation';
 
 export type RuntimeToolkitDeps = {
   fdc3Executor?: Fdc3ActionExecutor;
   workflowExecutor?: Fdc3WorkflowExecutor;
+  openFlowzeroWorkflow?: FlowzeroWorkflowOpenHandler;
 };
 
-function createBaseToolkit(): Record<string, ToolkitDefinition> {
+function createBaseToolkit({
+  openFlowzeroWorkflow,
+}: Pick<RuntimeToolkitDeps, 'openFlowzeroWorkflow'> = {}): Record<string, ToolkitDefinition> {
   return {
     profile_lookup: profileLookupTool,
     timezone_current: timezoneCurrentTool,
@@ -36,14 +43,16 @@ function createBaseToolkit(): Record<string, ToolkitDefinition> {
     most_used_functions_by_application: mostUsedFunctionsTool,
     propose_fdc3_action: proposeFdc3ActionTool,
     propose_fdc3_workflow: proposeFdc3WorkflowTool,
+    generate_flowzero_workflow: createFlowzeroWorkflowGenerationTool(openFlowzeroWorkflow),
   };
 }
 
 export function createRuntimeToolkit({
   fdc3Executor,
   workflowExecutor,
+  openFlowzeroWorkflow,
 }: RuntimeToolkitDeps = {}): Toolkit {
-  const toolkit = createBaseToolkit();
+  const toolkit = createBaseToolkit({ openFlowzeroWorkflow });
 
   const runtimeToolkit: Record<string, ToolkitDefinition> = {
     ...toolkit,

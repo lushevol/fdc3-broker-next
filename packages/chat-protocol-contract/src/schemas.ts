@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { FLOWZERO_GENERATE_WORKFLOW_TOOL, FLOWZERO_MCP_PROVIDER_ID } from './types';
+
 export const chatRoleSchema = z.enum(['system', 'user', 'assistant', 'tool']);
 export const chatFinishReasonSchema = z.enum(['stop', 'tool-calls', 'action-required', 'error']);
 export const chatToolCallStateSchema = z.enum([
@@ -15,6 +17,78 @@ export const chatActionStatusSchema = z.enum(['pending', 'resolved']);
 export const chatFrameMetadataSchema = z.record(z.unknown());
 const chatStructuredPayloadSchema = z.record(z.unknown());
 export const chatToolSourceSchema = z.enum(['frontend', 'backend', 'human', 'mcp']);
+export const flowzeroMcpProviderIdSchema = z.literal(FLOWZERO_MCP_PROVIDER_ID);
+export const flowzeroGenerateWorkflowToolSchema = z.literal(FLOWZERO_GENERATE_WORKFLOW_TOOL);
+export const flowzeroGeneratedWorkflowResultSchema = z
+  .object({
+    workflowId: z.string().min(1),
+    workflowName: z.string().min(1),
+    status: z.string().min(1).optional(),
+    version: z.number().optional(),
+    displayVersion: z.number().optional(),
+    businessArea: z.string().min(1).optional(),
+    countryCodes: z.array(z.string().min(1)).optional(),
+    ownerIds: z.array(z.string().min(1)).optional(),
+    description: z.string().min(1).optional(),
+    summary: z.string().min(1),
+    steps: z.array(z.string().min(1)).min(2),
+    workflowDetail: z.record(z.unknown()),
+    open: z
+      .object({
+        label: z.string().min(1),
+        route: z.string().min(1),
+      })
+      .strict(),
+  })
+  .strict();
+const flowzeroMcpToolOutputSchema = z
+  .object({
+    toolName: flowzeroGenerateWorkflowToolSchema,
+    result: flowzeroGeneratedWorkflowResultSchema,
+  })
+  .strict();
+
+function refineFlowzeroToolOutputFrame(
+  value: {
+    output: Record<string, unknown>;
+    source?: string;
+    providerId?: string;
+  },
+  ctx: z.RefinementCtx,
+): void {
+  if (value.output.toolName !== FLOWZERO_GENERATE_WORKFLOW_TOOL) {
+    return;
+  }
+
+  const sourceResult = z.literal('mcp').safeParse(value.source);
+  if (!sourceResult.success) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['source'],
+      message: 'source must be "mcp" for generate_flowzero_workflow tool outputs',
+    });
+  }
+
+  const providerResult = flowzeroMcpProviderIdSchema.safeParse(value.providerId);
+  if (!providerResult.success) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['providerId'],
+      message: 'providerId must be "flowzero-mcp" for generate_flowzero_workflow tool outputs',
+    });
+  }
+
+  const outputResult = flowzeroMcpToolOutputSchema.safeParse(value.output);
+  if (!outputResult.success) {
+    for (const issue of outputResult.error.issues) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['output', ...issue.path],
+        message: issue.message,
+      });
+    }
+  }
+}
 
 const chatTextPartSchema = z
   .object({
@@ -402,7 +476,7 @@ export const chatToolInputAvailableFrameSchema = z
   })
   .strict();
 
-export const chatToolOutputAvailableFrameSchema = z
+const chatToolOutputAvailableFrameBaseSchema = z
   .object({
     type: z.literal('tool-output-available'),
     toolCallId: z.string().min(1),
@@ -411,6 +485,10 @@ export const chatToolOutputAvailableFrameSchema = z
     providerId: z.string().min(1).optional(),
   })
   .strict();
+
+export const chatToolOutputAvailableFrameSchema = chatToolOutputAvailableFrameBaseSchema.superRefine(
+  refineFlowzeroToolOutputFrame,
+);
 
 export const chatToolOutputErrorFrameSchema = z
   .object({
@@ -483,11 +561,17 @@ export const chatStreamFrameSchema = z.discriminatedUnion('type', [
   chatToolInputStartFrameSchema,
   chatToolInputDeltaFrameSchema,
   chatToolInputAvailableFrameSchema,
-  chatToolOutputAvailableFrameSchema,
+  chatToolOutputAvailableFrameBaseSchema,
   chatToolOutputErrorFrameSchema,
   chatUiPartAvailableFrameSchema,
   chatActionRequiredFrameSchema,
   chatActionResolvedFrameSchema,
   chatFinishFrameSchema,
   chatErrorFrameSchema,
-]);
+]).superRefine((value, ctx) => {
+  if (value.type !== 'tool-output-available') {
+    return;
+  }
+
+  refineFlowzeroToolOutputFrame(value, ctx);
+});

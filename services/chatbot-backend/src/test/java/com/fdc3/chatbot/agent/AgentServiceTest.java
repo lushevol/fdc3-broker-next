@@ -5,7 +5,9 @@ import com.fdc3.chatbot.model.FrontendToolContinuation;
 import com.fdc3.chatbot.model.ToolCall;
 import com.fdc3.chatbot.model.ToolResult;
 import com.fdc3.chatbot.model.UserCapabilityContext;
+import com.fdc3.chatbot.protocol.model.ChatToolSource;
 import com.fdc3.chatbot.tool.ToolRegistry;
+import com.fdc3.chatbot.tool.ToolRegistry.ResolvedToolMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -45,6 +47,7 @@ class AgentServiceTest {
     private TestToolDefinition calculatorTool;
     private TestToolDefinition timeTool;
     private TestToolDefinition weatherTool;
+    private TestToolDefinition flowzeroWorkflowTool;
 
     @BeforeEach
     void setUp() {
@@ -83,15 +86,41 @@ class AgentServiceTest {
                         "conditions", "Partly Cloudy"
                 ))
         );
+        flowzeroWorkflowTool = new TestToolDefinition(
+                "generate_flowzero_workflow",
+                "Generate and persist a Flowzero workflow",
+                Map.of("type", "object"),
+                false,
+                arguments -> CompletableFuture.completedFuture(Map.of(
+                        "workflowId", "wf-mock-1",
+                        "workflowName", arguments.get("workflowName"),
+                        "summary", "Start -> Manager Approval -> Finance Approval -> End"
+                ))
+        );
 
         when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
                 "calculator", calculatorTool,
                 "get_current_time", timeTool,
-                "get_weather", weatherTool
+                "get_weather", weatherTool,
+                "generate_flowzero_workflow", flowzeroWorkflowTool
+        ));
+        when(toolRegistry.resolveToolMetadata(UserCapabilityContext.anonymous())).thenReturn(Map.of(
+                "calculator", new ResolvedToolMetadata("calculator", calculatorTool, "local", "local", "write", "global"),
+                "get_current_time", new ResolvedToolMetadata("get_current_time", timeTool, "local", "local", "read", "global"),
+                "get_weather", new ResolvedToolMetadata("get_weather", weatherTool, "local", "local", "read", "global"),
+                "generate_flowzero_workflow", new ResolvedToolMetadata(
+                        "generate_flowzero_workflow",
+                        flowzeroWorkflowTool,
+                        "flowzero-mcp",
+                        "mcp",
+                        "read",
+                        "global"
+                )
         ));
         when(toolRegistry.getTool("calculator")).thenReturn(calculatorTool);
         when(toolRegistry.getTool("get_current_time")).thenReturn(timeTool);
         when(toolRegistry.getTool("get_weather")).thenReturn(weatherTool);
+        when(toolRegistry.getTool("generate_flowzero_workflow")).thenReturn(flowzeroWorkflowTool);
     }
 
     private static ChatResponse chatResponse(String text) {
@@ -216,6 +245,38 @@ class AgentServiceTest {
     }
 
     @Test
+    void processMessageStreamingRoutesFlowzeroGenerationToWorkflowTool() throws Exception {
+        List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
+        List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
+        StringBuilder streamedText = new StringBuilder();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-flowzero",
+                "Generate a Flowzero workflow named Expense Approval: start, manager approval, finance approval, end",
+                List.<ChatMessage>of(),
+                streamedText::append,
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown,
+                toolCalls::add,
+                toolResults::add
+        );
+
+        assertTrue(completed.await(2, TimeUnit.SECONDS));
+        assertEquals(1, toolCalls.size());
+        assertEquals("generate_flowzero_workflow", toolCalls.get(0).getName());
+        assertEquals("Expense Approval", toolCalls.get(0).getArguments().get("workflowName"));
+        assertEquals("start, manager approval, finance approval, end", toolCalls.get(0).getArguments().get("prompt"));
+        assertEquals(ChatToolSource.MCP, toolCalls.get(0).getSource());
+        assertEquals("flowzero-mcp", toolCalls.get(0).getProviderId());
+        assertEquals(1, toolResults.size());
+        assertEquals("wf-mock-1", ((Map<?, ?>) toolResults.get(0).getResult()).get("workflowId"));
+        assertTrue(streamedText.toString().contains("Created Flowzero workflow Expense Approval"));
+    }
+
+    @Test
     void processMessageStreamingExecutesToolRequestsFromStreamingModel() throws Exception {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
         when(toolRegistry.resolveTools(UserCapabilityContext.anonymous())).thenReturn(Map.of(
@@ -290,6 +351,47 @@ class AgentServiceTest {
     }
 
     @Test
+    void processMessageStreamingRoutesFlowzeroGenerationToWorkflowToolInNonMockMode() throws Exception {
+        ReflectionTestUtils.setField(agentService, "mockEnabled", false);
+
+        AtomicInteger modelInvocations = new AtomicInteger();
+        StreamingChatModel streamingChatLanguageModel = prompt -> {
+            modelInvocations.incrementAndGet();
+            return Flux.just(chatResponse("I can help create that workflow."));
+        };
+        ReflectionTestUtils.setField(agentService, "streamingChatModel", streamingChatLanguageModel);
+
+        List<ToolCall> toolCalls = new CopyOnWriteArrayList<>();
+        List<ToolResult> toolResults = new CopyOnWriteArrayList<>();
+        StringBuilder streamedText = new StringBuilder();
+        CountDownLatch completed = new CountDownLatch(1);
+
+        agentService.processMessageStreaming(
+                "conversation-flowzero-live",
+                "Generate a Flowzero workflow named Vendor Onboarding: start, collect documents, approval, end",
+                List.of(),
+                streamedText::append,
+                error -> {
+                    throw new AssertionError(error);
+                },
+                completed::countDown,
+                toolCalls::add,
+                toolResults::add
+        );
+
+        assertTrue(completed.await(2, TimeUnit.SECONDS));
+        assertEquals(0, modelInvocations.get());
+        assertEquals(1, toolCalls.size());
+        assertEquals("generate_flowzero_workflow", toolCalls.get(0).getName());
+        assertEquals("Vendor Onboarding", toolCalls.get(0).getArguments().get("workflowName"));
+        assertEquals(ChatToolSource.MCP, toolCalls.get(0).getSource());
+        assertEquals("flowzero-mcp", toolCalls.get(0).getProviderId());
+        assertEquals(1, toolResults.size());
+        assertEquals("wf-mock-1", ((Map<?, ?>) toolResults.get(0).getResult()).get("workflowId"));
+        assertTrue(streamedText.toString().contains("Created Flowzero workflow Vendor Onboarding"));
+    }
+
+    @Test
     void initPrefersSpringAi2ChatPropertiesOverLegacyOpenAiKeys() {
         ReflectionTestUtils.setField(agentService, "mockEnabled", false);
         ReflectionTestUtils.setField(agentService, "openaiApiKey", "test-key");
@@ -329,6 +431,49 @@ class AgentServiceTest {
         assertNotNull(streamingChatModel);
         assertEquals("legacy-model", chatModel.getOptions().getModel());
         assertEquals(0.7d, chatModel.getOptions().getTemperature());
+    }
+
+    @Test
+    void initFallsBackToRuntimeOpenAiSystemPropertiesWhenInjectedValuesAreBlank() {
+        String previousApiKey = System.getProperty("spring.ai.openai.api-key");
+        String previousBaseUrl = System.getProperty("spring.ai.openai.base-url");
+        String previousModel = System.getProperty("spring.ai.openai.chat.model");
+        try {
+            System.setProperty("spring.ai.openai.api-key", "runtime-key");
+            System.setProperty("spring.ai.openai.base-url", "https://runtime.example/v1");
+            System.setProperty("spring.ai.openai.chat.model", "runtime-model");
+
+            ReflectionTestUtils.setField(agentService, "mockEnabled", false);
+            ReflectionTestUtils.setField(agentService, "openaiApiKey", "");
+            ReflectionTestUtils.setField(agentService, "openaiBaseUrl", "");
+            ReflectionTestUtils.setField(agentService, "model", "legacy-model");
+            ReflectionTestUtils.setField(agentService, "temperature", 0.7d);
+            ReflectionTestUtils.setField(agentService, "chatModelName", "");
+            ReflectionTestUtils.setField(agentService, "chatTemperature", null);
+
+            agentService.init();
+
+            OpenAiChatModel chatModel = (OpenAiChatModel) ReflectionTestUtils.getField(agentService, "chatModel");
+            OpenAiChatModel streamingChatModel =
+                    (OpenAiChatModel) ReflectionTestUtils.getField(agentService, "streamingChatModel");
+
+            assertNotNull(chatModel);
+            assertNotNull(streamingChatModel);
+            assertEquals("runtime-model", chatModel.getOptions().getModel());
+            assertEquals(0.7d, chatModel.getOptions().getTemperature());
+        } finally {
+            restoreSystemProperty("spring.ai.openai.api-key", previousApiKey);
+            restoreSystemProperty("spring.ai.openai.base-url", previousBaseUrl);
+            restoreSystemProperty("spring.ai.openai.chat.model", previousModel);
+        }
+    }
+
+    private static void restoreSystemProperty(String key, String value) {
+        if (value == null) {
+            System.clearProperty(key);
+        } else {
+            System.setProperty(key, value);
+        }
     }
 
     @Test

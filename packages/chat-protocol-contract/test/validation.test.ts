@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
+import { ZodError } from 'zod';
 
 import {
+  chatToolOutputAvailableFrameSchema,
   createWeatherContinuationRunRequestFixture,
   createMixedToolRunRequestFixture,
   createToolPauseFrameFixture,
   createWeatherRunRequestFixture,
+  flowzeroGeneratedWorkflowResultSchema,
+  flowzeroMcpToolFrameFixture,
   validateRunRequest,
   validateStreamFrame,
 } from '../src';
@@ -343,6 +347,178 @@ describe('chat protocol contract validation', () => {
     if (!result.success) {
       expect(result.errors.join('\n')).toContain('output');
     }
+  });
+
+  it('accepts a Flowzero generated workflow result with navigation route', () => {
+    const result = flowzeroGeneratedWorkflowResultSchema.safeParse({
+      workflowId: 'wf_123',
+      workflowName: 'Client onboarding',
+      summary: 'Creates a new client onboarding workflow',
+      steps: ['Capture request', 'Review compliance'],
+      workflowDetail: {
+        category: 'operations',
+      },
+      open: {
+        label: 'Open workflow',
+        route: '/flowzero/workflows/wf_123',
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a Flowzero generated workflow result without open.route', () => {
+    const result = flowzeroGeneratedWorkflowResultSchema.safeParse({
+      workflowId: 'wf_123',
+      workflowName: 'Client onboarding',
+      summary: 'Creates a new client onboarding workflow',
+      steps: ['Capture request', 'Review compliance'],
+      workflowDetail: {
+        category: 'operations',
+      },
+      open: {
+        label: 'Open workflow',
+      },
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.map((issue) => issue.path.join('.')).join('\n')).toContain('open.route');
+    }
+  });
+
+  it('provides a Flowzero MCP tool-output frame fixture with MCP provider metadata', () => {
+    const frame = flowzeroMcpToolFrameFixture;
+
+    expect(frame).toMatchObject({
+      type: 'tool-output-available',
+      source: 'mcp',
+      providerId: 'flowzero-mcp',
+    });
+
+    const result = validateStreamFrame(frame);
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a Flowzero MCP tool-output frame without the Flowzero provider id', () => {
+    const result = validateStreamFrame({
+      ...flowzeroMcpToolFrameFixture,
+      providerId: 'other-mcp',
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.errors.join('\n')).toContain('providerId');
+    }
+  });
+
+  it('chatToolOutputAvailableFrameSchema rejects a Flowzero frame without the Flowzero provider id', () => {
+    expect(() =>
+      chatToolOutputAvailableFrameSchema.parse({
+        ...flowzeroMcpToolFrameFixture,
+        providerId: 'other-mcp',
+      }),
+    ).toThrow(/providerId/);
+  });
+
+  it('rejects a Flowzero MCP tool-output frame without MCP source metadata', () => {
+    const result = validateStreamFrame({
+      ...flowzeroMcpToolFrameFixture,
+      source: 'backend',
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.errors.join('\n')).toContain('source');
+    }
+  });
+
+  it('chatToolOutputAvailableFrameSchema rejects a Flowzero frame without MCP source metadata', () => {
+    expect(() =>
+      chatToolOutputAvailableFrameSchema.parse({
+        ...flowzeroMcpToolFrameFixture,
+        source: 'backend',
+      }),
+    ).toThrow(/source/);
+  });
+
+  it('rejects a Flowzero MCP tool-output frame with malformed workflow output', () => {
+    const result = validateStreamFrame({
+      ...flowzeroMcpToolFrameFixture,
+      output: {
+        toolName: 'generate_flowzero_workflow',
+        result: {
+          ...flowzeroMcpToolFrameFixture.output.result,
+          open: {
+            label: 'Open workflow',
+          },
+        },
+      },
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.errors.join('\n')).toContain('output.result.open.route');
+    }
+  });
+
+  it('chatToolOutputAvailableFrameSchema rejects a Flowzero frame with malformed workflow output', () => {
+    let thrownError: unknown;
+
+    try {
+      chatToolOutputAvailableFrameSchema.parse({
+        ...flowzeroMcpToolFrameFixture,
+        output: {
+          toolName: 'generate_flowzero_workflow',
+          result: {
+            ...flowzeroMcpToolFrameFixture.output.result,
+            open: {
+              label: 'Open workflow',
+            },
+          },
+        },
+      });
+    } catch (error) {
+      thrownError = error;
+    }
+
+    expect(thrownError).toBeInstanceOf(ZodError);
+    if (thrownError instanceof ZodError) {
+      expect(thrownError.issues.map((issue) => issue.path.join('.')).join('\n')).toContain('output.result.open.route');
+    }
+  });
+
+  it('preserves generic validation for non-Flowzero tool-output frames', () => {
+    const result = validateStreamFrame({
+      type: 'tool-output-available',
+      toolCallId: 'tc_generic_1',
+      source: 'backend',
+      output: {
+        toolName: 'weather_search',
+        result: {
+          summary: 'Sunny',
+        },
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('chatToolOutputAvailableFrameSchema preserves generic validation for non-Flowzero tool-output frames', () => {
+    expect(() =>
+      chatToolOutputAvailableFrameSchema.parse({
+        type: 'tool-output-available',
+        toolCallId: 'tc_generic_1',
+        source: 'backend',
+        output: {
+          toolName: 'weather_search',
+          result: {
+            summary: 'Sunny',
+          },
+        },
+      }),
+    ).not.toThrow();
   });
 
   it('reports root-level validation errors for non-object frames', () => {

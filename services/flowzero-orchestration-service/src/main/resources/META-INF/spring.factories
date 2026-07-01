@@ -1,0 +1,3 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.scb.ratan.flowzero.workflow.processor.DataSourceEnvironmentPostProcessor
+

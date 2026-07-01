@@ -1,0 +1,13 @@
+---
+spring:
+  application:
+    name: ratan-flowzero-designer-service
+server:
+  port: 11611
+
+ratanone:
+  logging:
+    level: info
+    folder: ${LOG_DIR:./logs}
+    logstash:
+      destinations: ${LOGSTASH_URL:10.198.199.160:5000}

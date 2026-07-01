@@ -36,5 +36,6 @@ npm run lint      # ESLint
 ## Important
 
 - When adding a new MFE, update **both** `importmaplocal.json` and `importmap.json` with the app name and URL
-- The `dev-server.ts` file contains proxy setup – modifying this changes how dev traffic routes
+- The `dev-server.ts` file contains proxy setup and cross-MFE local API mock behavior – modifying this changes how dev traffic routes
+- Add captured-response/mock API behavior here in root-config, with payloads under `mock/`; do **not** put overall local devserver mocks in individual MFE `server/` folders
 - `isLocal` and `importmap` env vars control whether dev or prod import map is used

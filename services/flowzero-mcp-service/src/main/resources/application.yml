@@ -1,0 +1,18 @@
+server:
+  port: 8092
+
+spring:
+  application:
+    name: flowzero-mcp-service
+  ai:
+    mcp:
+      server:
+        name: flowzero-mcp-service
+        version: 0.0.1
+        type: SYNC
+        protocol: STREAMABLE
+        instructions: 'Creates and retrieves Flowzero workflow drafts'
+        capabilities:
+          tool: true
+        streamable-http:
+          mcp-endpoint: /api/mcp

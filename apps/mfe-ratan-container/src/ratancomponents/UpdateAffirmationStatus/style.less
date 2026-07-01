@@ -1,0 +1,49 @@
+.update-affirmation-status {
+  .dialog-header {
+    padding: 5px 10px;
+    font-size: 13px;
+    text-align: left;
+    background-color: var(--theme-color-modal-header);
+    border-bottom: 1px solid var(--theme-color-modal-header-border);
+  }
+  .dialog-content {
+    position: relative;
+    min-width: 430px;
+    min-height: 100px;
+    padding: 20px 20px 20px 20px;
+    .item {
+      margin-bottom: 15px;
+    }
+    .ant-form-item {
+      margin-bottom: 15px;
+      .ant-form-item-label {
+        width: 130px;
+      }
+      .operation-btn {
+        text-align: right;
+        .submit {
+          margin-right: 60px;
+          border: 1px solid var(--theme-color-btn-submit-border);
+        }
+        .cancel {
+          margin-right: 10px;
+        }
+      }
+    }
+  }
+}
+.update-affirmation-info {
+  display: flex;
+  padding-bottom: 10px;
+  color: var(--theme-color-btn-disabled-font);
+  .label {
+    padding-right: 3px;
+    width: 130px;
+    // font-size: 11px;
+    text-align: right;
+  }
+  .value {
+    width: 200px;
+    word-wrap: break-word;
+  }
+}

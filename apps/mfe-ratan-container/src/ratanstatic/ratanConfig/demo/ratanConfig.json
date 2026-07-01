@@ -1,0 +1,9 @@
+{
+  "REACT_APP_SERVER_ENV": "demo",
+  "REACT_APP_API_URL_MOCK": "http://uklvadapp1340.uk.dev.net:8456",
+  "REACT_APP_SOCKET_URL_TRADES": "ws://ratan-aws-demo-ns5-ratan-trade.ir.standardchartered.com",
+  "REACT_APP_SOCKET_URL_EXCEPTIONS": "ws://ratan-aws-demo-ns5-ratan-exceptions.ir.standardchartered.com",
+  "REACT_APP_SOCKET_URL_CASHFLOW": "ws://ratan-aws-demo-ns5-ratan-cashflow.ir.standardchartered.com",
+  "REACT_APP_SOCKET_URL_SUB_STATUS": "ws://ratan-aws-demo-ns5-ratan-cashflow.ir.standardchartered.com",
+  "disabledFeature": ["Cashflow_Fuzzy_Search", "Product_Details_Drilldown"]
+}
