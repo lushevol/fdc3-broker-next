@@ -798,10 +798,7 @@ public class AgentService {
             };
         }
 
-        // Mock mode - simulate streaming response
-        log.info("[DEBUG] Profile lookup - mockEnabled={}, streamingChatModel={}",
-                mockEnabled, streamingChatModel != null ? streamingChatModel.getClass().getSimpleName() : "null");
-        if (mockEnabled || streamingChatModel == null) {
+        if (mockEnabled) {
             return processMockStreaming(
                     conversationId,
                     userMessage,
@@ -828,6 +825,15 @@ public class AgentService {
                         }
                     }
             );
+        }
+
+        if (streamingChatModel == null) {
+            onError.accept(new IllegalStateException(
+                    "No real chat model is configured. Set CHATBOT_OPENAI_API_KEY, CHATBOT_OPENAI_BASE_URL, and " +
+                            "CHATBOT_OPENAI_MODEL or enable chatbot.mock.enabled explicitly."
+            ));
+            onComplete.run();
+            return () -> cancelled.set(true);
         }
 
         MockToolInvocation deterministicToolInvocation = resolveDeterministicToolInvocation(userMessage);

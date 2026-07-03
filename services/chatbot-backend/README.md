@@ -45,6 +45,8 @@ See `.env.example` and root `.env.profile.*` files.
 | `CHATBOT_MCP_ELASTICSEARCH_URL`        | Elasticsearch MCP URL                          |
 | `CHATBOT_MCP_RAG_ENABLED`              | Bootstrap RAG MCP provider                     |
 | `CHATBOT_MCP_RAG_URL`                  | RAG MCP URL                                    |
+| `CHATBOT_MCP_FLOWZERO_ENABLED`         | Bootstrap Flowzero MCP workflow provider       |
+| `CHATBOT_MCP_FLOWZERO_URL`             | Flowzero MCP URL                               |
 | `CHATBOT_MEMORY_BASE_URL`              | Memory service URL                             |
 | `CHATBOT_MEMORY_TENANT_ID`             | Memory tenant sent to memory-service           |
 | `CHATBOT_MEMORY_REQUEST_TIMEOUT`       | Best-effort memory lookup timeout              |
@@ -61,6 +63,13 @@ npm run dev
 
 The dev script creates `logs/`, loads `.env.profile.${ACTIVE_ENV:-dev}`, and starts Maven on port 8080 with the `local` Spring profile and the OpenTelemetry Java agent.
 
+For local flows that do not need the OpenTelemetry Java agent artifact, use:
+
+```bash
+cd services/chatbot-backend
+npm run dev:local
+```
+
 Profile examples:
 
 ```bash
@@ -75,7 +84,10 @@ npm run dev:services
 npm run dev:services:stub
 npm run dev:rag:stub
 npm run dev:rag:copilot
+npm run dev:flowzero-chatbot
 ```
+
+`npm run dev:flowzero-chatbot` starts the UI, `chatbot-backend`, and `flowzero-mcp-service` with `.env.profile.flowzero-chatbot`, which enables `flowzero-mcp` and disables Elasticsearch/RAG MCP providers. It requires real OpenAI-compatible model settings (`CHATBOT_OPENAI_API_KEY`, `CHATBOT_OPENAI_BASE_URL`, `CHATBOT_OPENAI_MODEL`) and refuses to start without them so local verification cannot accidentally use mock chatbot responses. It uses `chatbot-backend`'s `dev:local` mode so the focused workflow-generation environment does not require `target/opentelemetry-javaagent.jar`.
 
 ## API Endpoints
 

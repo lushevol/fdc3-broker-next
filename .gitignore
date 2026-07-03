@@ -21,6 +21,7 @@ apps/base/tsconfig.tsbuildinfo
 coverage
 .nyc_output
 *.log
+services/*/logs/
 test-results
 
 # IDE
