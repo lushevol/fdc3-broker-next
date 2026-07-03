@@ -1,7 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class", // Enable dark mode via class strategy
+  important: ":is(.flowzero-app, .flowzero-portal)",
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  corePlugins: {
+    container: false,
+    preflight: false,
+  },
   theme: {
     extend: {
       colors: {

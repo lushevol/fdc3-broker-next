@@ -1,15 +1,15 @@
-.tabmain {
+.flowzero-app .tabmain {
   padding: 0 !important;
   border-radius: 0 !important;
   overflow-y: hidden !important;
 }
 
-.tabmain .section {
+.flowzero-app .tabmain .section {
   border-radius: 0 !important;
 }
 
-body *::-webkit-scrollbar,
-body *::-webkit-scrollbar-thumb {
+.flowzero-app *::-webkit-scrollbar,
+.flowzero-app *::-webkit-scrollbar-thumb {
   border-radius: 0 !important;
 }
 
