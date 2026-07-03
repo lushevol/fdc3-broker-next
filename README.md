@@ -37,7 +37,13 @@ Use this focused launcher when verifying natural-language workflow creation thro
 npm run dev:flowzero-chatbot
 ```
 
-It starts the UI shell, Flowzero MFE, `chatbot-backend`, and `flowzero-mcp-service` with `.env.profile.flowzero-chatbot`. The profile enables only the Flowzero MCP provider for the chatbot, so workflow generation runs through the service-owned MCP boundary without requiring Elasticsearch or RAG services. The launcher requires `CHATBOT_OPENAI_API_KEY`, `CHATBOT_OPENAI_BASE_URL`, and `CHATBOT_OPENAI_MODEL` so the chatbot cannot fall back to mock responses. Open `http://localhost:8001`, log in, ask the chatbot to create a Flowzero workflow, then use the generated card's **Open in Flowzero** action or go to Flowzero → Design → Workflow Management.
+It starts the UI shell, Flowzero MFE, `chatbot-backend`, and `flowzero-mcp-service` with `.env.profile.flowzero-chatbot`. The profile enables only the Flowzero MCP provider for the chatbot, so workflow generation runs through the service-owned MCP boundary without requiring Elasticsearch or RAG services. The launcher requires `CHATBOT_OPENAI_API_KEY`, `CHATBOT_OPENAI_BASE_URL`, and `CHATBOT_OPENAI_MODEL` so the chatbot cannot fall back to mock responses. Put secrets in exported shell variables or an ignored `.env.profile.flowzero-chatbot.local` file. Open `http://localhost:8001`, log in, ask the chatbot to create a Flowzero workflow, then use the generated card's **Open in Flowzero** action or go to Flowzero → Design → Workflow Management.
+
+To verify the model configuration before launch:
+
+```bash
+npm run env:check:flowzero-chatbot
+```
 
 ### Monorepo Management
 
