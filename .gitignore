@@ -46,6 +46,7 @@ prisma/migrations/*/migration.sql
 # Profile overrides
 .env.active
 .env.profile.local
+.env.profile.*.local
 
 *storybook.log
 storybook-static
