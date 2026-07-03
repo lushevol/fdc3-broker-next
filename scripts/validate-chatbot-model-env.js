@@ -5,6 +5,7 @@ const path = require('path');
 
 const activeEnv = process.env.ACTIVE_ENV || process.argv[2] || 'dev';
 const profilePath = path.resolve(process.cwd(), `.env.profile.${activeEnv}`);
+const localProfilePath = path.resolve(process.cwd(), `.env.profile.${activeEnv}.local`);
 
 function parseEnvProfile(filePath) {
   if (!fs.existsSync(filePath)) {
@@ -36,7 +37,8 @@ function parseEnvProfile(filePath) {
 }
 
 const profileEnv = parseEnvProfile(profilePath);
-const env = { ...process.env, ...profileEnv };
+const localProfileEnv = parseEnvProfile(localProfilePath);
+const env = { ...profileEnv, ...localProfileEnv, ...process.env };
 
 function isMissing(value) {
   return !value || value === 'your-api-key-here' || value === 'changeme';
