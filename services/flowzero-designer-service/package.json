@@ -1,0 +1,10 @@
+{
+  "name": "flowzero-designer-service",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "mvn -DskipTests clean package",
+    "dev": "env-cmd -f ../../.env.profile.${ACTIVE_ENV:-dev} mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=11611 -Dspring.profiles.active=dev'",
+    "test": "mvn test"
+  }
+}

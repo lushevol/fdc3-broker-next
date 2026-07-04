@@ -4,6 +4,17 @@ import { FC, PropsWithChildren } from "react";
 
 import { getCustomThemeStyle } from "./MfeCustomThemeStyle";
 
+const FLOWZERO_APP_SCOPE_CLASS = "flowzero-app";
+const FLOWZERO_PORTAL_SCOPE_CLASS = "flowzero-portal";
+
+function getFlowzeroPopupContainer(triggerNode?: HTMLElement) {
+  return (
+    triggerNode?.closest(`.${FLOWZERO_APP_SCOPE_CLASS}`) ??
+    document.querySelector<HTMLElement>(`.${FLOWZERO_APP_SCOPE_CLASS}`) ??
+    document.body
+  );
+}
+
 const MfeThemeProvider: FC<PropsWithChildren> = ({ children }) => {
   const [ContainerStore] = ContainerProvider.useContext();
 
@@ -16,7 +27,10 @@ const MfeThemeProvider: FC<PropsWithChildren> = ({ children }) => {
   }
 
   return (
-    <ConfigProvider>
+    <ConfigProvider
+      getPopupContainer={getFlowzeroPopupContainer}
+      modal={{ className: FLOWZERO_PORTAL_SCOPE_CLASS }}
+    >
       <style>{getCustomThemeStyle(ContainerStore.theme ?? "light")}</style>
       {children}
     </ConfigProvider>

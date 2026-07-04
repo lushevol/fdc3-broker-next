@@ -1,56 +1,115 @@
-@import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-@layer base {
-  h1 {
-    @apply text-2xl;
-  }
-  h2 {
-    @apply text-xl;
-  }
-  h3 {
-    @apply text-lg;
-  }
-  a {
-    @apply text-blue-600 underline;
-  }
+.flowzero-app,
+.flowzero-app *,
+.flowzero-app ::before,
+.flowzero-app ::after,
+.flowzero-portal,
+.flowzero-portal *,
+.flowzero-portal ::before,
+.flowzero-portal ::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x: ;
+  --tw-pan-y: ;
+  --tw-pinch-zoom: ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position: ;
+  --tw-gradient-via-position: ;
+  --tw-gradient-to-position: ;
+  --tw-ordinal: ;
+  --tw-slashed-zero: ;
+  --tw-numeric-figure: ;
+  --tw-numeric-spacing: ;
+  --tw-numeric-fraction: ;
+  --tw-ring-inset: ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur: ;
+  --tw-brightness: ;
+  --tw-contrast: ;
+  --tw-grayscale: ;
+  --tw-hue-rotate: ;
+  --tw-invert: ;
+  --tw-saturate: ;
+  --tw-sepia: ;
+  --tw-drop-shadow: ;
+  --tw-backdrop-blur: ;
+  --tw-backdrop-brightness: ;
+  --tw-backdrop-contrast: ;
+  --tw-backdrop-grayscale: ;
+  --tw-backdrop-hue-rotate: ;
+  --tw-backdrop-invert: ;
+  --tw-backdrop-opacity: ;
+  --tw-backdrop-saturate: ;
+  --tw-backdrop-sepia: ;
+  --tw-contain-size: ;
+  --tw-contain-layout: ;
+  --tw-contain-paint: ;
+  --tw-contain-style: ;
 }
+
+.flowzero-app h1 {
+  @apply text-2xl;
+}
+.flowzero-app h2 {
+  @apply text-xl;
+}
+.flowzero-app h3 {
+  @apply text-lg;
+}
+.flowzero-app a {
+  @apply text-blue-600 underline;
+}
+
 /* fix css overrides other application in mfe */
 @layer components {
-  .container {
+  .flowzero-app .container {
     max-width: 100%;
   }
   @screen sm {
-    .container {
+    .flowzero-app .container {
       max-width: 100%;
     }
   }
   @screen md {
-    .container {
+    .flowzero-app .container {
       max-width: 100%;
     }
   }
   @screen lg {
-    .container {
+    .flowzero-app .container {
       max-width: 100%;
     }
   }
   @screen xl {
-    .container {
+    .flowzero-app .container {
       max-width: 100%;
     }
   }
   @screen 2xl {
-    .container {
+    .flowzero-app .container {
       max-width: 100%;
     }
   }
 }
 
-body {
+.flowzero-app {
   @apply bg-light-bg text-light-text;
 }
-.dark body {
+.dark .flowzero-app {
   @apply bg-dark-bg text-dark-text;
 }

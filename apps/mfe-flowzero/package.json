@@ -2,7 +2,7 @@
   "name": "@fm/flowzero",
   "version": "PACKAGE_VERSION",
   "scripts": {
-    "preinstall": "npx npm-force-resolutions",
+    "-preinstall": "npx npm-force-resolutions",
     "start": "npm run dev:webpack",
     "dev": "npm run dev:webpack",
     "dev:rsbuild": "env-cmd -f .env.local rsbuild dev",
@@ -22,7 +22,7 @@
     "mock": "node server/mock-server.mjs",
     "test": "cross-env BABEL_ENV=test jest --coverage --ci -u --maxWorkers=4 --passWithNoTests",
     "watch-tests": "cross-env BABEL_ENV=test jest --watch",
-    "prepare": "husky install",
+    "-prepare": "husky install",
     "coverage": "cross-env BABEL_ENV=test jest --coverage",
     "pre-commit": "concurrently npm:lint npm:format",
     "pre-push": "concurrently npm:test npm:lint",
