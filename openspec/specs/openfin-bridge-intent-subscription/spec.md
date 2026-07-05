@@ -1,5 +1,40 @@
 ## ADDED Requirements
 
+### Requirement: Platform Provider-delivered intents are supported
+
+The OpenFin bridge SHALL support production OpenFin/Here Core Platform manifests that use `platform.providerUrl` and a Platform Provider HTML page to override `InteropBroker.handleFiredIntent`.
+
+#### Scenario: Platform Provider selects and targets the MFE window
+
+- **WHEN** an external OpenFin view fires an intent
+- **AND** the Platform Provider override receives the intent in `handleFiredIntent`
+- **AND** the Provider resolves a target from `intent.name` and `intent.context.type`
+- **THEN** the Provider creates or selects the MFE window/view
+- **AND** calls `setIntentTarget(intent, targetIdentity)`
+- **AND** the OpenFin Interop Broker delivers the intent after the MFE target registers its handler
+
+#### Scenario: MFE broker routes provider-delivered intent internally
+
+- **WHEN** OpenFin delivers a Provider-targeted intent into the MFE base window
+- **THEN** the MFE broker treats the intent as externally originated
+- **AND** routes configured Provider-level launch/update intents by context type
+- **AND** opens the matching internal tile when needed
+- **AND** delivers the intent after the tile registers its listener
+
+#### Scenario: Context-selected app target is preserved
+
+- **WHEN** a Provider-level intent such as `scb.ViewLaunch` or `scb.ViewUpdate` is routed by context type
+- **AND** context lookup resolves exactly one internal app
+- **THEN** the broker preserves that app as the target when raising the actual internal intent
+- **AND** does not widen the route back into an ambiguous intent-only resolver path
+
+#### Scenario: Provider-originated unresolved intent does not bounce back
+
+- **WHEN** an intent originated from external OpenFin
+- **AND** the MFE broker cannot find an internal target
+- **THEN** the broker does not raise the same intent back to OpenFin
+- **AND** no loop is created between the MFE broker and Platform Provider
+
 ### Requirement: Bridge subscribes to predefined global intents
 
 The `OpenFinBridge` SHALL subscribe to a predefined set of global intents that are always listened for, regardless of installed applications.

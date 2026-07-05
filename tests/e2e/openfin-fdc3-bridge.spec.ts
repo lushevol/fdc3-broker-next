@@ -3,9 +3,13 @@ import { chromium, expect, test, type Browser, type Page } from '@playwright/tes
 const openFinE2EEnabled = process.env.OPENFIN_E2E === '1';
 const cdpUrl = process.env.OPENFIN_CDP_URL ?? 'http://127.0.0.1:9223';
 const appUrl = process.env.OPENFIN_E2E_APP_URL ?? 'http://127.0.0.1:8001/?show_normal_login=Y';
+const manifestPort = process.env.OPENFIN_E2E_MANIFEST_PORT ?? '9499';
+const platformUuid = process.env.OPENFIN_E2E_PLATFORM_UUID ?? 'fdc3-broker-next-e2e-platform';
+const mfeTargetName = process.env.OPENFIN_E2E_MFE_TARGET_NAME ?? 'fdc3-broker-next-e2e';
 
 function getNavigationUrl(): string {
   const url = new URL(appUrl);
+  url.searchParams.set('openfin_platform_provider_e2e', '1');
   url.searchParams.set('openfin_e2e_ts', `${Date.now()}`);
   return url.toString();
 }
@@ -19,6 +23,10 @@ type OpenFinE2EWindow = Window & {
     };
     me?: {
       isOpenFin?: boolean;
+      identity?: {
+        uuid?: string;
+        name?: string;
+      };
       interop?: {
         fireIntent?: unknown;
         registerIntentHandler?: unknown;
@@ -60,6 +68,13 @@ type OpenFinE2EWindow = Window & {
       email?: string;
     };
   } | null;
+  __OPENFIN_E2E_RAISE_INTENT__?: (intent: string, context: unknown) => Promise<unknown>;
+  __OPENFIN_E2E_DISPATCH_INTENT__?: (intent: string, context: unknown) => Promise<void>;
+  __OPENFIN_E2E_PROVIDER_EVENTS__?: Array<{
+    type: string;
+    detail: unknown;
+    timestamp: number;
+  }>;
 };
 
 type OpenFinInteropBrokerConstructor = new (...args: unknown[]) => {
@@ -67,21 +82,31 @@ type OpenFinInteropBrokerConstructor = new (...args: unknown[]) => {
 };
 
 test.skip(!openFinE2EEnabled, 'Set OPENFIN_E2E=1 and launch OpenFin before running this spec.');
-test.describe.configure({ mode: 'serial' });
+test.describe.configure({ mode: 'serial', timeout: 150_000 });
 test.setTimeout(150_000);
 
 let browser: Browser;
 let page: Page;
+let homePage: Page;
+let providerPage: Page;
 
-async function findOpenFinPage(browserInstance: Browser): Promise<Page> {
+async function findPage(
+  browserInstance: Browser,
+  predicate: (candidate: Page) => boolean | Promise<boolean>,
+  description: string,
+): Promise<Page> {
   const deadline = Date.now() + 60_000;
 
   while (Date.now() < deadline) {
     const pages = browserInstance.contexts().flatMap((context) => context.pages());
-    const appPage = pages.find((candidate) => {
-      const url = candidate.url();
-      return url.includes('127.0.0.1:8001') || url.includes('localhost:8001');
-    });
+    let appPage: Page | undefined;
+
+    for (const candidate of pages) {
+      if (await predicate(candidate)) {
+        appPage = candidate;
+        break;
+      }
+    }
 
     if (appPage) {
       return appPage;
@@ -90,9 +115,52 @@ async function findOpenFinPage(browserInstance: Browser): Promise<Page> {
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
-  throw new Error(
-    `Could not find the base MFE page in OpenFin via ${cdpUrl}. ` +
-      'Run `npm run openfin:e2e:launch` while the dev UI is available.',
+  throw new Error(`Could not find ${description} in OpenFin via ${cdpUrl}.`);
+}
+
+async function findOpenFinPage(browserInstance: Browser): Promise<Page> {
+  return findPage(
+    browserInstance,
+    async (candidate) => {
+      const url = candidate.url();
+      if (!url.includes('127.0.0.1:8001') && !url.includes('localhost:8001')) {
+        return false;
+      }
+
+      if (url.includes('openfin_platform_provider_e2e=1')) {
+        return true;
+      }
+
+      return candidate
+        .evaluate(
+          ({ expectedUuid, expectedName }) => {
+            const openFinWindow = window as OpenFinE2EWindow;
+            return (
+              openFinWindow.fin?.me?.identity?.uuid === expectedUuid &&
+              openFinWindow.fin.me.identity.name === expectedName
+            );
+          },
+          { expectedUuid: platformUuid, expectedName: mfeTargetName },
+        )
+        .catch(() => false);
+    },
+    'the base MFE page. Run `npm run openfin:e2e:launch` while the dev UI is available',
+  );
+}
+
+async function findOpenFinHomePage(browserInstance: Browser): Promise<Page> {
+  return findPage(
+    browserInstance,
+    (candidate) => candidate.url().includes(`127.0.0.1:${manifestPort}/openfin-home.html`),
+    'the OpenFin e2e home page',
+  );
+}
+
+async function findOpenFinProviderPage(browserInstance: Browser): Promise<Page> {
+  return findPage(
+    browserInstance,
+    (candidate) => candidate.url().includes(`127.0.0.1:${manifestPort}/platform-provider.html`),
+    'the OpenFin e2e platform provider page',
   );
 }
 
@@ -104,7 +172,7 @@ async function closeExpiredSessionModal(target: Page): Promise<void> {
 }
 
 async function installOpenFinInteropBootstrap(target: Page): Promise<void> {
-  await target.addInitScript(() => {
+  await target.addInitScript(({ fallbackName, fallbackUuid }) => {
     const bootstrapInterop = async (): Promise<void> => {
       const openFinWindow = window as OpenFinE2EWindow;
       const interopModule = openFinWindow.fin?.Interop;
@@ -138,8 +206,8 @@ async function installOpenFinInteropBootstrap(target: Page): Promise<void> {
               clientIdentity: { name?: string; uuid?: string },
             ): Promise<unknown> {
               const target = {
-                name: clientIdentity.name ?? 'fdc3-broker-next-e2e',
-                uuid: clientIdentity.uuid ?? 'fdc3-broker-next-e2e',
+                name: clientIdentity.name ?? fallbackName,
+                uuid: clientIdentity.uuid ?? fallbackUuid,
               };
 
               await this.setIntentTarget(intent, target);
@@ -181,7 +249,7 @@ async function installOpenFinInteropBootstrap(target: Page): Promise<void> {
     tryBootstrap();
     window.addEventListener('DOMContentLoaded', tryBootstrap);
     window.addEventListener('fdc3Ready', tryBootstrap);
-  });
+  }, { fallbackName: mfeTargetName, fallbackUuid: platformUuid });
 }
 
 async function waitForOpenFinIntentSubscription(target: Page, intent: string): Promise<void> {
@@ -199,7 +267,7 @@ async function waitForOpenFinIntentSubscription(target: Page, intent: string): P
 }
 
 async function ensureOpenFinInterop(target: Page): Promise<void> {
-  await target.evaluate(async () => {
+  await target.evaluate(async ({ fallbackName, fallbackUuid }) => {
     const openFinWindow = window as OpenFinE2EWindow;
     const interopModule = openFinWindow.fin?.Interop;
     if (!interopModule) {
@@ -217,8 +285,8 @@ async function ensureOpenFinInterop(target: Page): Promise<void> {
             clientIdentity: { name?: string; uuid?: string },
           ): Promise<unknown> {
             const target = {
-              name: clientIdentity.name ?? 'fdc3-broker-next-e2e',
-              uuid: clientIdentity.uuid ?? 'fdc3-broker-next-e2e',
+              name: clientIdentity.name ?? fallbackName,
+              uuid: clientIdentity.uuid ?? fallbackUuid,
             };
 
             await this.setIntentTarget(intent, target);
@@ -251,7 +319,7 @@ async function ensureOpenFinInterop(target: Page): Promise<void> {
           : never;
       }
     }
-  });
+  }, { fallbackName: mfeTargetName, fallbackUuid: platformUuid });
 }
 
 async function loginToWorkspace(target: Page): Promise<void> {
@@ -298,21 +366,63 @@ async function expectRatanBrokerAvailable(target: Page): Promise<void> {
 async function raiseOpenFinIntent(target: Page, intent: string, context: unknown): Promise<void> {
   await ensureOpenFinInterop(target);
   await waitForOpenFinIntentSubscription(target, intent);
-  await target.evaluate(
+  await homePage.evaluate(
     async ({ intentName, payload }) => {
       const openFinWindow = window as OpenFinE2EWindow;
-      if (!openFinWindow.fdc3) {
-        throw new Error('OpenFin FDC3 API is not available');
+      if (typeof openFinWindow.__OPENFIN_E2E_DISPATCH_INTENT__ === 'function') {
+        await openFinWindow.__OPENFIN_E2E_DISPATCH_INTENT__(intentName, payload);
+        return;
       }
-      openFinWindow.__OPENFIN_E2E_INJECTING_INTENT__ = true;
-      try {
-        await openFinWindow.fdc3.raiseIntent(intentName, payload);
-      } finally {
-        openFinWindow.__OPENFIN_E2E_INJECTING_INTENT__ = false;
+      if (typeof openFinWindow.__OPENFIN_E2E_RAISE_INTENT__ === 'function') {
+        await openFinWindow.__OPENFIN_E2E_RAISE_INTENT__(intentName, payload);
+        return;
       }
+      throw new Error('OpenFin E2E home intent helper is not available');
     },
     { intentName: intent, payload: context },
   );
+}
+
+async function getProviderEvents(): Promise<
+  NonNullable<OpenFinE2EWindow['__OPENFIN_E2E_PROVIDER_EVENTS__']>
+> {
+  return providerPage.evaluate(() => {
+    const openFinWindow = window as OpenFinE2EWindow;
+    return openFinWindow.__OPENFIN_E2E_PROVIDER_EVENTS__ ?? [];
+  });
+}
+
+async function ensureMfePage(): Promise<Page> {
+  await homePage.evaluate(async () => {
+    const openFinWindow = window as OpenFinE2EWindow;
+    if (typeof openFinWindow.__OPENFIN_E2E_DISPATCH_INTENT__ === 'function') {
+      await openFinWindow.__OPENFIN_E2E_DISPATCH_INTENT__('scb.ViewLaunch', {
+        type: 'scb.fmptp.cashflow',
+        id: {
+          cashflowId: 'CF-OPENFIN-PROVIDER-BOOTSTRAP',
+        },
+      });
+      return;
+    }
+    if (typeof openFinWindow.__OPENFIN_E2E_RAISE_INTENT__ !== 'function') {
+      throw new Error('OpenFin E2E home intent helper is not available');
+    }
+    void openFinWindow.__OPENFIN_E2E_RAISE_INTENT__('scb.ViewLaunch', {
+      type: 'scb.fmptp.cashflow',
+      id: {
+        cashflowId: 'CF-OPENFIN-PROVIDER-BOOTSTRAP',
+      },
+    });
+  });
+
+  await browser.close().catch(() => undefined);
+  browser = await chromium.connectOverCDP(cdpUrl);
+  homePage = await findOpenFinHomePage(browser);
+  providerPage = await findOpenFinProviderPage(browser);
+
+  const createdPage = await findOpenFinPage(browser);
+  await installOpenFinInteropBootstrap(createdPage);
+  return createdPage;
 }
 
 async function captureOpenFinRaiseIntent(target: Page): Promise<void> {
@@ -367,10 +477,38 @@ async function expectPreloginQueueCreated(target: Page): Promise<void> {
     .toContain('__prelogin__');
 }
 
-test.beforeAll(async () => {
+// Playwright requires hook fixtures to use object destructuring even when this
+// suite connects to the already-running OpenFin runtime over CDP.
+// eslint-disable-next-line no-empty-pattern
+test.beforeAll(async ({}, testInfo) => {
+  testInfo.setTimeout(150_000);
   browser = await chromium.connectOverCDP(cdpUrl);
-  page = await findOpenFinPage(browser);
+  homePage = await findOpenFinHomePage(browser);
+  providerPage = await findOpenFinProviderPage(browser);
+  page = await ensureMfePage();
   await installOpenFinInteropBootstrap(page);
+});
+
+test('platform provider handles fired intent and targets the MFE window', async () => {
+  await loginToWorkspace(page);
+  await expectOpenFinRuntime(page);
+
+  const beforeCount = (await getProviderEvents()).length;
+
+  await raiseOpenFinIntent(page, 'scb.ViewLaunch', {
+    type: 'scb.fmptp.cashflow',
+    id: {
+      cashflowId: 'CF-OPENFIN-PROVIDER-001',
+    },
+  });
+
+  await expect(page.getByRole('tab', { name: 'FDC3 Tile 1' }).first()).toBeVisible();
+
+  await expect
+    .poll(async () => (await getProviderEvents()).slice(beforeCount).map((event) => event.type))
+    .toEqual(
+      expect.arrayContaining(['handle-fired-intent', 'target-lookup', 'set-intent-target']),
+    );
 });
 
 test('base MFE is running inside OpenFin with FDC3 available', async () => {
