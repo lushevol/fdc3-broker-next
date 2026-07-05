@@ -1071,13 +1071,21 @@ export class Broker implements DesktopAgent {
     if (intents.length === 1) {
       // Only one intent, use it
       const intent = intents[0].intent;
-      return this.raiseIntent(intent.name, context, targetApp, source);
+      const contextTarget =
+        !targetApp && intents[0].apps.length === 1
+          ? { appId: intents[0].apps[0].appId }
+          : targetApp;
+      return this.raiseIntent(intent.name, context, contextTarget, source);
     }
 
     // Multiple intents available - default to first one
     // (Could enhance to show intent picker)
     const intent = intents[0].intent;
-    return this.raiseIntent(intent.name, context, targetApp, source);
+    const contextTarget =
+      !targetApp && intents[0].apps.length === 1
+        ? { appId: intents[0].apps[0].appId }
+        : targetApp;
+    return this.raiseIntent(intent.name, context, contextTarget, source);
   }
 
   async raiseWorkflow(

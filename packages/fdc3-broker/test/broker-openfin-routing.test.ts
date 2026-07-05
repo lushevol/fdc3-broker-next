@@ -41,6 +41,11 @@ const mockFin = {
   },
 };
 
+type OpenFinTestGlobal = typeof globalThis & {
+  fin: typeof mockFin;
+  fdc3: typeof mockFDC3;
+};
+
 describe('Broker Bidirectional Routing', () => {
   let broker: Broker;
   let mockConfig: BrokerConfig;
@@ -50,8 +55,8 @@ describe('Broker Bidirectional Routing', () => {
     vi.clearAllMocks();
 
     // Setup OpenFin environment
-    (globalThis as any).fin = mockFin;
-    (globalThis as any).fdc3 = mockFDC3;
+    (globalThis as OpenFinTestGlobal).fin = mockFin;
+    (globalThis as OpenFinTestGlobal).fdc3 = mockFDC3;
 
     mockAppDirectory = new MockAppDirectoryService();
 
@@ -227,6 +232,86 @@ describe('Broker Bidirectional Routing', () => {
 
       expect(handler).toHaveBeenCalledWith(context);
       expect(mockFDC3.raiseIntent).not.toHaveBeenCalled();
+    });
+
+    it('should carry context-selected app target into intent resolution', async () => {
+      const context: Context = {
+        type: 'scb.fmptp.cashflow',
+        id: { tradeId: 'TR-CONTEXT-TARGET' },
+      };
+      const handler = vi.fn();
+      const onShowResolverUI = vi.fn(async () => null);
+      const brokerHolder: { current?: Broker } = {};
+      const onTileOpen = vi.fn(async ({ appId }: AppIdentifier) => {
+        const instanceId = `${appId}-instance`;
+        brokerHolder.current?.registerTile(instanceId, appId);
+        await brokerHolder.current?.addIntentListener('OpenDetails', handler, {
+          appId,
+          instanceId,
+        });
+        return {
+          appId,
+          instanceId,
+        };
+      });
+
+      mockAppDirectory.registerApp({
+        appId: 'cashflow-context-tile',
+        name: 'Cashflow Context Tile',
+        version: '1.0.0',
+        interop: {
+          intents: {
+            listensFor: [
+              {
+                intent: 'OpenDetails',
+                contexts: ['scb.fmptp.cashflow'],
+              },
+            ],
+          },
+        },
+      });
+      mockAppDirectory.registerApp({
+        appId: 'trade-context-tile',
+        name: 'Trade Context Tile',
+        version: '1.0.0',
+        interop: {
+          intents: {
+            listensFor: [
+              {
+                intent: 'OpenDetails',
+                contexts: ['fdc3.trade'],
+              },
+            ],
+          },
+        },
+      });
+
+      const contextRoutingBroker = new Broker({
+        ...mockConfig,
+        callbacks: {
+          ...mockConfig.callbacks,
+          onTileOpen,
+          onShowResolverUI,
+        },
+        openFinBridgeOptions: {
+          contextRoutingIntents: ['scb.ViewLaunch'],
+        },
+      });
+      brokerHolder.current = contextRoutingBroker;
+
+      await (contextRoutingBroker as unknown as BrokerOpenFinTestAccess).handleOpenFinIntent(
+        'scb.ViewLaunch',
+        context,
+        {
+          appId: 'external-openfin-app',
+        },
+      );
+
+      expect(onShowResolverUI).not.toHaveBeenCalled();
+      expect(onTileOpen).toHaveBeenCalledWith(
+        expect.objectContaining({ appId: 'cashflow-context-tile' }),
+      );
+      expect(handler).toHaveBeenCalledWith(context);
     });
 
     it('should not bounce an unresolved OpenFin-originated intent back to OpenFin', async () => {

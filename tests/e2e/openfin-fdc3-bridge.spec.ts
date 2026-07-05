@@ -34,12 +34,23 @@ type OpenFinE2EWindow = Window & {
   };
   __OPENFIN_E2E_ADD_INTENT_LISTENER_WRAPPED__?: boolean;
   __OPENFIN_E2E_REGISTERED_INTENTS__?: string[];
+  __OPENFIN_E2E_INJECTING_INTENT__?: boolean;
+  __OPENFIN_E2E_RAISED_INTENTS__?: Array<{
+    intent: string;
+    context: unknown;
+    app?: unknown;
+  }>;
   __RATAN_FDC3__?: {
     brokerInstance: {
       raiseIntent: (
         intent: string,
         context: unknown,
         target?: unknown,
+        source?: unknown,
+      ) => Promise<unknown>;
+      handleOpenFinIntent?: (
+        intent: string,
+        context: unknown,
         source?: unknown,
       ) => Promise<unknown>;
     };
@@ -57,6 +68,7 @@ type OpenFinInteropBrokerConstructor = new (...args: unknown[]) => {
 
 test.skip(!openFinE2EEnabled, 'Set OPENFIN_E2E=1 and launch OpenFin before running this spec.');
 test.describe.configure({ mode: 'serial' });
+test.setTimeout(150_000);
 
 let browser: Browser;
 let page: Page;
@@ -272,6 +284,17 @@ async function expectOpenFinRuntime(target: Page): Promise<void> {
     .toBe(true);
 }
 
+async function expectRatanBrokerAvailable(target: Page): Promise<void> {
+  await expect
+    .poll(() =>
+      target.evaluate(() => {
+        const openFinWindow = window as OpenFinE2EWindow;
+        return Boolean(openFinWindow.__RATAN_FDC3__?.brokerInstance);
+      }),
+    )
+    .toBe(true);
+}
+
 async function raiseOpenFinIntent(target: Page, intent: string, context: unknown): Promise<void> {
   await ensureOpenFinInterop(target);
   await waitForOpenFinIntentSubscription(target, intent);
@@ -281,10 +304,67 @@ async function raiseOpenFinIntent(target: Page, intent: string, context: unknown
       if (!openFinWindow.fdc3) {
         throw new Error('OpenFin FDC3 API is not available');
       }
-      await openFinWindow.fdc3.raiseIntent(intentName, payload);
+      openFinWindow.__OPENFIN_E2E_INJECTING_INTENT__ = true;
+      try {
+        await openFinWindow.fdc3.raiseIntent(intentName, payload);
+      } finally {
+        openFinWindow.__OPENFIN_E2E_INJECTING_INTENT__ = false;
+      }
     },
     { intentName: intent, payload: context },
   );
+}
+
+async function captureOpenFinRaiseIntent(target: Page): Promise<void> {
+  await target.evaluate(async () => {
+    const openFinWindow = window as OpenFinE2EWindow;
+    if (!openFinWindow.fdc3) {
+      throw new Error('OpenFin FDC3 API is not available');
+    }
+
+    openFinWindow.__OPENFIN_E2E_RAISED_INTENTS__ = [];
+    const originalRaiseIntent = openFinWindow.fdc3.raiseIntent.bind(openFinWindow.fdc3);
+    openFinWindow.fdc3.raiseIntent = async (intent: string, context: unknown, app?: unknown) => {
+      if (!openFinWindow.__OPENFIN_E2E_INJECTING_INTENT__) {
+        openFinWindow.__OPENFIN_E2E_RAISED_INTENTS__?.push({ intent, context, app });
+        return {
+          intent,
+          source: {
+            appId: 'openfin-e2e-provider',
+            instanceId: 'openfin-e2e-provider',
+          },
+          getResult: async () => undefined,
+        };
+      }
+
+      return originalRaiseIntent(intent, context);
+    };
+  });
+}
+
+async function getCapturedOpenFinRaiseIntents(
+  target: Page,
+): Promise<NonNullable<OpenFinE2EWindow['__OPENFIN_E2E_RAISED_INTENTS__']>> {
+  return target.evaluate(() => {
+    const openFinWindow = window as OpenFinE2EWindow;
+    return openFinWindow.__OPENFIN_E2E_RAISED_INTENTS__ ?? [];
+  });
+}
+
+async function expectPreloginQueueDrained(target: Page): Promise<void> {
+  await expect
+    .poll(() => target.evaluate(() => window.localStorage.getItem('fdc3-intent-queue')), {
+      timeout: 60_000,
+    })
+    .not.toContain('__prelogin__');
+}
+
+async function expectPreloginQueueCreated(target: Page): Promise<void> {
+  await expect
+    .poll(() => target.evaluate(() => window.localStorage.getItem('fdc3-intent-queue')), {
+      timeout: 60_000,
+    })
+    .toContain('__prelogin__');
 }
 
 test.beforeAll(async () => {
@@ -313,6 +393,34 @@ test('routes OpenFin ViewLaunch intent by context to the matching tile', async (
   await expect(page.getByRole('tab', { name: 'FDC3 Tile 1' }).first()).toBeVisible();
 });
 
+test('routes OpenFin ViewUpdate intent by context to the matching tile', async () => {
+  await loginToWorkspace(page);
+  await expectOpenFinRuntime(page);
+
+  await raiseOpenFinIntent(page, 'scb.ViewUpdate', {
+    type: 'scb.fmptp.cashflow',
+    id: {
+      cashflowId: 'CF-OPENFIN-UPDATE-001',
+    },
+  });
+
+  await expect(page.getByRole('tab', { name: 'FDC3 Tile 1' }).first()).toBeVisible();
+});
+
+test('routes direct OpenFin ViewCashflow intent to the matching tile', async () => {
+  await loginToWorkspace(page);
+  await expectOpenFinRuntime(page);
+
+  await raiseOpenFinIntent(page, 'ViewCashflow', {
+    type: 'scb.fmptp.cashflow',
+    id: {
+      cashflowId: 'CF-OPENFIN-DIRECT-001',
+    },
+  });
+
+  await expect(page.getByRole('tab', { name: 'FDC3 Tile 1' }).first()).toBeVisible();
+});
+
 test('persists pre-login OpenFin intents and replays them after login', async () => {
   await page.goto(getNavigationUrl());
   await ensureOpenFinInterop(page);
@@ -323,6 +431,8 @@ test('persists pre-login OpenFin intents and replays them after login', async ()
   await page.goto(getNavigationUrl());
   await ensureOpenFinInterop(page);
   await expectOpenFinRuntime(page);
+  await expect(page.getByRole('button', { name: 'Sign In', exact: true })).toBeVisible();
+  await expectRatanBrokerAvailable(page);
 
   await raiseOpenFinIntent(page, 'scb.ViewLaunch', {
     type: 'scb.fmptp.cashflow',
@@ -331,9 +441,7 @@ test('persists pre-login OpenFin intents and replays them after login', async ()
     },
   });
 
-  await expect
-    .poll(() => page.evaluate(() => window.localStorage.getItem('fdc3-intent-queue')))
-    .toContain('__prelogin__');
+  await expectPreloginQueueCreated(page);
 
   await page.reload();
   await closeExpiredSessionModal(page);
@@ -342,38 +450,77 @@ test('persists pre-login OpenFin intents and replays them after login', async ()
 
   await expect(page.getByText('New Tile')).toBeVisible();
   await expect(page.getByRole('tab', { name: 'FDC3 Tile 1' }).first()).toBeVisible();
+  await expectPreloginQueueDrained(page);
 });
 
-test('dispatches an internal broker intent to an external OpenFin listener', async () => {
+test('keeps pre-login OpenFin intent queued across an SSO-style reload before replay', async () => {
+  await page.goto(getNavigationUrl());
+  await ensureOpenFinInterop(page);
+  await page.evaluate(() => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+  });
+  await page.goto(getNavigationUrl());
+  await ensureOpenFinInterop(page);
+  await expectOpenFinRuntime(page);
+  await expect(page.getByRole('button', { name: 'Sign In', exact: true })).toBeVisible();
+  await expectRatanBrokerAvailable(page);
+
+  await raiseOpenFinIntent(page, 'scb.ViewLaunch', {
+    type: 'scb.fmptp.cashflow',
+    id: {
+      cashflowId: 'CF-PRELOGIN-RELOAD-001',
+    },
+  });
+
+  await expectPreloginQueueCreated(page);
+
+  await page.reload();
+  await ensureOpenFinInterop(page);
+  await expectPreloginQueueCreated(page);
+
+  await closeExpiredSessionModal(page);
+  await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+  await closeExpiredSessionModal(page);
+
+  await expect(page.getByText('New Tile')).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'FDC3 Tile 1' }).first()).toBeVisible();
+  await expectPreloginQueueDrained(page);
+});
+
+test('does not bounce an unresolved external OpenFin intent back to the provider', async () => {
   await loginToWorkspace(page);
   await expectOpenFinRuntime(page);
-  await ensureOpenFinInterop(page);
+  await captureOpenFinRaiseIntent(page);
 
   await page.evaluate(async () => {
     const openFinWindow = window as OpenFinE2EWindow;
-    if (!openFinWindow.fdc3) {
-      throw new Error('OpenFin FDC3 API is not available');
+    if (!openFinWindow.__RATAN_FDC3__?.brokerInstance.handleOpenFinIntent) {
+      throw new Error('Ratan FDC3 OpenFin handler is not available');
     }
-    openFinWindow.__OPENFIN_E2E_EXTERNAL_INTENT__ = null;
-
-    const originalRaiseIntent = openFinWindow.fdc3.raiseIntent.bind(openFinWindow.fdc3);
-    openFinWindow.fdc3.raiseIntent = async (intent: string, context: unknown) => {
-      if (intent === 'StartCall') {
-        openFinWindow.__OPENFIN_E2E_EXTERNAL_INTENT__ =
-          context as OpenFinE2EWindow['__OPENFIN_E2E_EXTERNAL_INTENT__'];
-        return {
-          intent,
-          source: {
-            appId: 'openfin-e2e-external-listener',
-            instanceId: 'openfin-e2e-external-listener',
-          },
-          getResult: async () => undefined,
-        };
-      }
-
-      return originalRaiseIntent(intent, context);
-    };
+    await openFinWindow.__RATAN_FDC3__.brokerInstance.handleOpenFinIntent(
+      'StartCall',
+      {
+        type: 'fdc3.contact',
+        id: {
+          email: 'unhandled-external@example.com',
+        },
+      },
+      {
+        appId: 'external',
+      },
+    );
   });
+
+  await expect
+    .poll(() => getCapturedOpenFinRaiseIntents(page))
+    .toEqual([]);
+});
+
+test('routes an internal no-target intent to the external OpenFin provider', async () => {
+  await loginToWorkspace(page);
+  await expectOpenFinRuntime(page);
+  await captureOpenFinRaiseIntent(page);
 
   await page.evaluate(async () => {
     const openFinWindow = window as OpenFinE2EWindow;
@@ -397,11 +544,94 @@ test('dispatches an internal broker intent to an external OpenFin listener', asy
   });
 
   await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const openFinWindow = window as OpenFinE2EWindow;
-        return openFinWindow.__OPENFIN_E2E_EXTERNAL_INTENT__?.id?.email ?? null;
-      }),
-    )
-    .toBe('openfin-e2e@example.com');
+    .poll(() => getCapturedOpenFinRaiseIntents(page))
+    .toEqual([
+      {
+        intent: 'StartCall',
+        context: {
+          type: 'fdc3.contact',
+          id: {
+            email: 'openfin-e2e@example.com',
+          },
+        },
+      },
+    ]);
+});
+
+test('routes an internal no-target intent to a specified external OpenFin target', async () => {
+  await loginToWorkspace(page);
+  await expectOpenFinRuntime(page);
+  await captureOpenFinRaiseIntent(page);
+
+  await page.evaluate(async () => {
+    const openFinWindow = window as OpenFinE2EWindow;
+    if (!openFinWindow.__RATAN_FDC3__?.brokerInstance) {
+      throw new Error('Ratan FDC3 broker is not available');
+    }
+    await openFinWindow.__RATAN_FDC3__.brokerInstance.raiseIntent(
+      'StartCall',
+      {
+        type: 'fdc3.contact',
+        id: {
+          email: 'targeted-openfin-e2e@example.com',
+        },
+      },
+      {
+        appId: 'openfin-contact-app',
+        instanceId: 'openfin-contact-app-1',
+      },
+      {
+        appId: 'template_tile_fdc3_1',
+        instanceId: 'openfin-e2e-source',
+      },
+    );
+  });
+
+  await expect
+    .poll(() => getCapturedOpenFinRaiseIntents(page))
+    .toEqual([
+      {
+        intent: 'StartCall',
+        context: {
+          type: 'fdc3.contact',
+          id: {
+            email: 'targeted-openfin-e2e@example.com',
+          },
+        },
+        app: {
+          appId: 'openfin-contact-app',
+          instanceId: 'openfin-contact-app-1',
+        },
+      },
+    ]);
+});
+
+test('does not call the external OpenFin provider when an internal tile handles the intent', async () => {
+  await loginToWorkspace(page);
+  await expectOpenFinRuntime(page);
+  await captureOpenFinRaiseIntent(page);
+
+  await page.evaluate(async () => {
+    const openFinWindow = window as OpenFinE2EWindow;
+    if (!openFinWindow.__RATAN_FDC3__?.brokerInstance) {
+      throw new Error('Ratan FDC3 broker is not available');
+    }
+    await openFinWindow.__RATAN_FDC3__.brokerInstance.raiseIntent(
+      'ViewCashflow',
+      {
+        type: 'scb.fmptp.cashflow',
+        id: {
+          cashflowId: 'CF-INTERNAL-HANDLED-001',
+        },
+      },
+      undefined,
+      {
+        appId: 'template_tile_fdc3_2',
+        instanceId: 'openfin-e2e-source',
+      },
+    );
+  });
+
+  await expect(page.getByRole('tab', { name: 'FDC3 Tile 1' }).first()).toBeVisible();
+  expect(await getCapturedOpenFinRaiseIntents(page)).toEqual([]);
 });
