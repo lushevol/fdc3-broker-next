@@ -9,6 +9,20 @@ import { Broker } from '../src/broker';
 import type { AppIdentifier, BrokerConfig, Context } from '../src/types';
 import { OpenFinBridge } from '../src/openfin-bridge';
 
+type BrokerOpenFinTestAccess = Broker & {
+  handleOpenFinIntent: (
+    intent: string,
+    context: Context,
+    source?: AppIdentifier,
+  ) => Promise<void>;
+};
+
+type BrokerTileRegistryTestAccess = Broker & {
+  tileRegistry: {
+    getTile: (instanceId: string) => { appId: string } | null;
+  };
+};
+
 // Mock OpenFin global
 const mockFDC3 = {
   addIntentListener: vi.fn(),
@@ -166,6 +180,145 @@ describe('Broker Bidirectional Routing', () => {
   });
 
   describe('incoming intent forwarding from OpenFin', () => {
+    it('should route configured OpenFin launch/update intents by context type', async () => {
+      const intent = 'scb.ViewLaunch';
+      const context: Context = {
+        type: 'scb.fmptp.cashflow',
+        id: { tradeId: 'TR-1' },
+      };
+
+      mockAppDirectory.registerApp({
+        appId: 'cashflow-tile',
+        name: 'Cashflow Tile',
+        version: '1.0.0',
+        interop: {
+          intents: {
+            listensFor: [
+              {
+                intent: 'scb.fmptp.ViewCashflows',
+                contexts: ['scb.fmptp.cashflow'],
+              },
+            ],
+          },
+        },
+      });
+
+      const contextRoutingBroker = new Broker({
+        ...mockConfig,
+        openFinBridgeOptions: {
+          contextRoutingIntents: ['scb.ViewLaunch', 'scb.ViewUpdate'],
+        },
+      });
+
+      contextRoutingBroker.registerTile('cashflow-1', 'cashflow-tile');
+      const handler = vi.fn();
+      await contextRoutingBroker.addIntentListener('scb.fmptp.ViewCashflows', handler, {
+        appId: 'cashflow-tile',
+        instanceId: 'cashflow-1',
+      });
+
+      await (contextRoutingBroker as unknown as BrokerOpenFinTestAccess).handleOpenFinIntent(
+        intent,
+        context,
+        {
+          appId: 'external-openfin-app',
+        },
+      );
+
+      expect(handler).toHaveBeenCalledWith(context);
+      expect(mockFDC3.raiseIntent).not.toHaveBeenCalled();
+    });
+
+    it('should not bounce an unresolved OpenFin-originated intent back to OpenFin', async () => {
+      const context: Context = {
+        type: 'fdc3.contact',
+        id: { email: 'test@example.com' },
+      };
+
+      await (broker as unknown as BrokerOpenFinTestAccess).handleOpenFinIntent(
+        'UnknownExternalIntent',
+        context,
+        {
+          appId: 'external-openfin-app',
+        },
+      );
+
+      expect(mockFDC3.raiseIntent).not.toHaveBeenCalled();
+    });
+
+    it('should persist pre-login OpenFin intents and replay them after reload/login', async () => {
+      const context: Context = {
+        type: 'scb.fmptp.cashflow',
+        id: { tradeId: 'TR-2' },
+      };
+      const handler = vi.fn();
+      let loggedIn = false;
+      let loginCallback: (() => Promise<unknown>) | undefined;
+
+      mockAppDirectory.registerApp({
+        appId: 'cashflow-tile',
+        name: 'Cashflow Tile',
+        version: '1.0.0',
+        interop: {
+          intents: {
+            listensFor: [
+              {
+                intent: 'scb.fmptp.ViewCashflows',
+                contexts: ['scb.fmptp.cashflow'],
+              },
+            ],
+          },
+        },
+      });
+
+      const queueingBroker = new Broker({
+        ...mockConfig,
+        callbacks: {
+          ...mockConfig.callbacks,
+          onLoginStatusCheck: async () => loggedIn,
+        },
+        openFinBridgeOptions: {
+          contextRoutingIntents: ['scb.ViewLaunch', 'scb.ViewUpdate'],
+        },
+      });
+
+      await (queueingBroker as unknown as BrokerOpenFinTestAccess).handleOpenFinIntent(
+        'scb.ViewLaunch',
+        context,
+        {
+          appId: 'external-openfin-app',
+        },
+      );
+
+      expect(localStorage.getItem('fdc3-intent-queue')).toContain('__prelogin__');
+
+      loggedIn = true;
+      const replayBroker = new Broker({
+        ...mockConfig,
+        callbacks: {
+          ...mockConfig.callbacks,
+          onLoginStatusCheck: async () => loggedIn,
+        },
+        onLogin: async (callback) => {
+          loginCallback = callback;
+        },
+        openFinBridgeOptions: {
+          contextRoutingIntents: ['scb.ViewLaunch', 'scb.ViewUpdate'],
+        },
+      });
+
+      replayBroker.registerTile('cashflow-1', 'cashflow-tile');
+      await replayBroker.addIntentListener('scb.fmptp.ViewCashflows', handler, {
+        appId: 'cashflow-tile',
+        instanceId: 'cashflow-1',
+      });
+
+      await loginCallback?.();
+
+      expect(handler).toHaveBeenCalledWith(context);
+      expect(localStorage.getItem('fdc3-intent-queue')).toBe(JSON.stringify([]));
+    });
+
     it('should forward incoming intents to internal tiles', async () => {
       const intent = 'ViewChart';
       const context: Context = {
@@ -208,7 +361,7 @@ describe('Broker Bidirectional Routing', () => {
 
       // The handler should be called via raiseIntent -> internal routing
       // The internal routing finds the registered tile via tileRegistry
-      expect(handler).toHaveBeenCalledWith(context);
+      await vi.waitFor(() => expect(handler).toHaveBeenCalledWith(context));
     });
 
     it('should forward to multiple listeners', async () => {
@@ -266,7 +419,7 @@ describe('Broker Bidirectional Routing', () => {
       await registeredHandler(context);
 
       // Both handlers should be called via raiseIntent (one will be selected based on instanceId)
-      expect(handler1).toHaveBeenCalledWith(context);
+      await vi.waitFor(() => expect(handler1).toHaveBeenCalledWith(context));
     });
 
     it('should handle errors in intent forwarding gracefully', async () => {
@@ -303,7 +456,8 @@ describe('Broker Bidirectional Routing', () => {
       expect(registeredHandler).toBeDefined();
 
       // Should not throw - errors are caught internally
-      await expect(registeredHandler(context)).resolves.toBeUndefined();
+      expect(() => registeredHandler(context)).not.toThrow();
+      await vi.waitFor(() => expect(failingHandler).toHaveBeenCalledWith(context));
     });
 
     it('should not register with OpenFin if no internal listeners for that intent', async () => {
@@ -356,11 +510,6 @@ describe('Broker Bidirectional Routing', () => {
   describe('integration with broker tile registry', () => {
     it('should update tile registry when OpenFin intent is received', async () => {
       const intent = 'ViewChart';
-      const context: Context = {
-        type: 'fdc3.chart',
-        id: { ticker: 'AAPL' },
-      };
-
       broker.registerTile('tile-1', 'test-app');
       const source = { appId: 'test-app', instanceId: 'tile-1' };
 
@@ -368,7 +517,9 @@ describe('Broker Bidirectional Routing', () => {
       await broker.addIntentListener(intent, handler, source);
 
       // Verify tile is registered
-      const tile = (broker as any).tileRegistry.getTile('tile-1');
+      const tile = (broker as unknown as BrokerTileRegistryTestAccess).tileRegistry.getTile(
+        'tile-1',
+      );
       expect(tile).toBeDefined();
       expect(tile.appId).toBe('test-app');
     });

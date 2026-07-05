@@ -9,6 +9,8 @@
     "test:packages": "turbo run test --filter=\"./packages/*\"",
     "test:e2e": "playwright test tests/e2e --project=chromium",
     "test:e2e:headed": "playwright test tests/e2e --project=chromium --headed",
+    "openfin:e2e:launch": "node scripts/openfin-e2e-launch.js",
+    "test:e2e:openfin": "cross-env OPENFIN_E2E=1 playwright test tests/e2e/openfin-fdc3-bridge.spec.ts --project=chromium",
     "test:e2e:chat-protocol": "cross-env PLAYWRIGHT_CHAT_PROTOCOL_DEMO=1 playwright test tests/e2e/chat-protocol-demo*.spec.ts --project=chat-protocol-demo",
     "lint": "turbo run lint --continue",
     "clean": "turbo run clean",

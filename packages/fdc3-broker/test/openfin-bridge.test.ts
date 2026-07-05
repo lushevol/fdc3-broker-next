@@ -208,32 +208,31 @@ describe('OpenFinBridge', () => {
   });
 
   describe('isIntentFromExternalOpenFinSource()', () => {
-    it('should return true when source is undefined', () => {
+    it('should return false when source is undefined', () => {
       const result = bridge.isIntentFromExternalOpenFinSource(undefined);
 
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
 
     it('should return true when source.appId is "external"', () => {
       const source: AppIdentifier = { appId: 'external' };
       const result = bridge.isIntentFromExternalOpenFinSource(source);
 
-      expect(result).toBe(false);
+      expect(result).toBe(true);
     });
 
-    it('should return true when source has a real appId', () => {
+    it('should return false when source has a real appId', () => {
       const source: AppIdentifier = { appId: 'real-app-id' };
       const result = bridge.isIntentFromExternalOpenFinSource(source);
 
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
 
     it('should handle source with name but no appId', () => {
       const source: AppIdentifier = { name: 'Some App' };
       const result = bridge.isIntentFromExternalOpenFinSource(source);
 
-      // name exists but no appId, so it won't match 'external'
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
   });
 

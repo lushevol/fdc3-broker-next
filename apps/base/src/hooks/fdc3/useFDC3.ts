@@ -2,13 +2,12 @@ import type { DesktopAgent } from '@finos/fdc3';
 import { useEffect } from 'react';
 import baseFDC3Broker from './base-broker';
 import { FDC3ClientConstructor } from './fdc3-client-constructor';
-import { getExternalFDC3, setExternalFDC3, useExternalFDC3 } from './useExternalFDC3';
+import { getExternalFDC3, setExternalFDC3 } from './useExternalFDC3';
 import { useFDC3WorkspaceHelper } from './useFDC3WorkspaceHelper';
 
 const useFDC3 = () => {
   const { workspaceOpenTile } = useFDC3WorkspaceHelper();
   baseFDC3Broker.setOpenTile(workspaceOpenTile);
-  useExternalFDC3();
 
   useEffect(() => {
     setExternalFDC3(window.fdc3);

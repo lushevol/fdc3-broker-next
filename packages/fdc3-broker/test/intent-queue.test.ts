@@ -365,7 +365,7 @@ describe('IntentQueueImpl', () => {
       expect(intents[0].id).toBe('intent-1');
     });
 
-    it('should clear localStorage after loading', () => {
+    it('should keep localStorage after loading until explicitly cleared', () => {
       const intent: QueuedIntent = {
         id: 'intent-1',
         intent: 'ViewChart',
@@ -377,7 +377,7 @@ describe('IntentQueueImpl', () => {
       queue.queueIntent('tile-2', intent);
       queue.loadFromPersistence();
 
-      expect(localStorage.getItem('fdc3-intent-queue')).toBeNull();
+      expect(localStorage.getItem('fdc3-intent-queue')).toContain('intent-1');
     });
 
     it('should handle loading when localStorage is empty', () => {

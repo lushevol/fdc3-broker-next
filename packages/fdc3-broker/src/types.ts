@@ -105,6 +105,12 @@ export interface BrokerConfig {
 export interface OpenFinBridgeOptions {
   /** Global intents to subscribe to (defaults to standard FDC3 intents) */
   globalIntents?: string[];
+
+  /**
+   * Incoming OpenFin intents that should be resolved by their context type instead
+   * of being delivered as the original external intent name.
+   */
+  contextRoutingIntents?: string[];
 }
 
 /**

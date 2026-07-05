@@ -33,7 +33,7 @@ export const DEFAULT_GLOBAL_INTENTS: string[] = [];
 export class OpenFinBridge {
   private logger: Logger;
   private enabled: boolean;
-  private fdc3: DesktopAgent | null = null; // OpenFin's fin.desktop.fdc3
+  private fdc3: DesktopAgent | null = null; // OpenFin's window.fdc3
   private appDirectoryClient: AppDirectoryClient | null = null;
   private subscribedIntents = new Set<string>();
 
@@ -49,7 +49,7 @@ export class OpenFinBridge {
 
     if (this.enabled) {
       try {
-        this.fdc3 = (globalThis as any).fdc3;
+        this.fdc3 = this.getFDC3DesktopAgent();
         this.logger.info('OpenFin bridge initialized');
       } catch (error) {
         this.logger.error('Failed to initialize OpenFin bridge:', error as Error);
@@ -65,6 +65,44 @@ export class OpenFinBridge {
    */
   isEnabled(): boolean {
     return this.enabled;
+  }
+
+  private getFDC3DesktopAgent(): DesktopAgent | null {
+    const globalFdc3 = (globalThis as any).fdc3 as DesktopAgent | undefined;
+    if (globalFdc3) {
+      return globalFdc3;
+    }
+
+    return ((globalThis as any).fin?.desktop?.fdc3 as DesktopAgent | undefined) ?? null;
+  }
+
+  private async waitForFDC3DesktopAgent(timeoutMs = 5000): Promise<DesktopAgent | null> {
+    const existing = this.getFDC3DesktopAgent();
+    if (existing) {
+      this.fdc3 = existing;
+      return existing;
+    }
+
+    if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') {
+      return null;
+    }
+
+    return new Promise((resolve) => {
+      const timeout = window.setTimeout(() => {
+        window.removeEventListener('fdc3Ready', onReady);
+        this.fdc3 = null;
+        resolve(null);
+      }, timeoutMs);
+
+      const onReady = () => {
+        window.clearTimeout(timeout);
+        const fdc3 = this.getFDC3DesktopAgent();
+        this.fdc3 = fdc3;
+        resolve(fdc3);
+      };
+
+      window.addEventListener('fdc3Ready', onReady, { once: true });
+    });
   }
 
   /**
@@ -115,13 +153,11 @@ export class OpenFinBridge {
    * @returns
    */
   isIntentFromExternalOpenFinSource(source?: AppIdentifier): boolean {
-    // all intents internally should have a source, but if not, assume it's from OpenFin to allow routing (e.g. pre-login intents)
     if (!source) {
-      return true;
+      return false;
     }
 
-    // Heuristic: if source has an appId that is not 'external', consider it from OpenFin
-    return source.appId !== 'external';
+    return source.appId === 'external';
   }
 
   /**
@@ -131,7 +167,8 @@ export class OpenFinBridge {
    * @returns Promise resolving when subscriptions are complete
    */
   async initializeIntents(globalIntents?: string[]): Promise<void> {
-    if (!this.enabled || !this.fdc3) {
+    const fdc3 = await this.waitForFDC3DesktopAgent();
+    if (!this.enabled || !fdc3) {
       this.logger.warn('OpenFin not available, skipping intent initialization');
       return;
     }
@@ -145,7 +182,7 @@ export class OpenFinBridge {
       }
 
       try {
-        await this.fdc3.addIntentListener(
+        await fdc3.addIntentListener(
           intent,
           (context: Context, metadata?: ContextMetadata) => {
             this.logger.debug('Received intent from OpenFin', {
@@ -155,7 +192,11 @@ export class OpenFinBridge {
             });
             // Handler is set via setIntentHandler
             if (this._intentHandler) {
-              return this._intentHandler(intent, context, metadata?.source);
+              void Promise.resolve(this._intentHandler(intent, context, metadata?.source)).catch(
+                (error) => {
+                  this.logger.error(`Failed to handle OpenFin intent ${intent}:`, error as Error);
+                },
+              );
             } else {
               this.logger.warn('No intent handler set for OpenFin intents');
             }
@@ -180,12 +221,12 @@ export class OpenFinBridge {
    * @param intentHandler - Handler for incoming intents from OpenFin
    */
   setIntentHandler(
-    intentHandler: (intent: string, context: Context, source?: AppIdentifier) => void,
+    intentHandler: (intent: string, context: Context, source?: AppIdentifier) => void | Promise<void>,
   ): void {
     this._intentHandler = intentHandler;
   }
   private _intentHandler:
-    | ((intent: string, context: Context, source?: AppIdentifier) => void)
+    | ((intent: string, context: Context, source?: AppIdentifier) => void | Promise<void>)
     | null = null;
 
   /**
@@ -251,7 +292,8 @@ export class OpenFinBridge {
     context: Context,
     target?: AppIdentifier,
   ): Promise<IntentResolution> {
-    if (!this.enabled || !this.fdc3) {
+    const fdc3 = await this.waitForFDC3DesktopAgent();
+    if (!this.enabled || !fdc3) {
       this.logger.warn('OpenFin not available, cannot raise external intent');
       throw new Error('OpenFin not available');
     }
@@ -261,9 +303,9 @@ export class OpenFinBridge {
     try {
       let resolution;
       if (target) {
-        resolution = await this.fdc3.raiseIntent(intent, context, target);
+        resolution = await fdc3.raiseIntent(intent, context, target);
       } else {
-        resolution = await this.fdc3.raiseIntent(intent, context);
+        resolution = await fdc3.raiseIntent(intent, context);
       }
 
       this.logger.info('Intent raised to OpenFin successfully', {

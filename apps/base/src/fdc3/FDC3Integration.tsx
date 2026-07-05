@@ -23,7 +23,9 @@ import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFDC3WorkspaceHelper } from './useFDC3WorkspaceHelper';
 import fdc3Definitions from './declarations/fdc3-definitions.json';
+import { getOpenFinBrokerOptions } from './openfin';
 import workflows from './declarations/workflows.json';
+import { useContext as useAppContext } from '../hooks/provider';
 
 // ============================================================================
 // Mock App Directory for Development
@@ -107,6 +109,7 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
     null,
   );
   const [resolverReject, setResolverReject] = useState<((error: Error) => void) | null>(null);
+  const [store] = useAppContext();
 
   // ========================================================================
   // FDC3 Workspace Helper
@@ -124,12 +127,85 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
    * without requiring the broker to be re-initialized.
    */
   const workspaceOpenTileRef = useRef(workspaceOpenTile);
+  const loginCallbacksRef = useRef(new Set<() => Promise<unknown>>());
+  const brokerRef = useRef<Broker | null>(null);
+
+  useEffect(() => {
+    const replayQueuedIntents = () => {
+      loginCallbacksRef.current.forEach((callback) => {
+        void callback();
+      });
+      void brokerRef.current?.processQueuedIntents?.();
+    };
+
+    const handleStorageUpdated = (event: Event) => {
+      const { detail } = event as CustomEvent<{ key?: string }>;
+      if (detail?.key !== 'SET_TOKEN') {
+        return;
+      }
+
+      [500, 1500, 3000].forEach((delay) => {
+        timeouts.push(window.setTimeout(replayQueuedIntents, delay));
+      });
+    };
+
+    const timeouts: number[] = [];
+
+    window.addEventListener('ratan-storage-updated', handleStorageUpdated);
+    return () => {
+      window.removeEventListener('ratan-storage-updated', handleStorageUpdated);
+      timeouts.forEach((id) => window.clearTimeout(id));
+    };
+  }, []);
 
   useEffect(() => {
     workspaceOpenTileRef.current = workspaceOpenTile;
   }, [workspaceOpenTile]);
 
+  useEffect(() => {
+    if (!store.token) {
+      return;
+    }
+
+    const replay = () => {
+      loginCallbacksRef.current.forEach((callback) => {
+        void callback();
+      });
+      void brokerRef.current?.processQueuedIntents?.();
+    };
+
+    // Immediate replay attempt
+    replay();
+
+    // Self-terminating poll: stops once the persisted queue is empty
+    const intervalId = window.setInterval(() => {
+      const queue = localStorage.getItem('fdc3-intent-queue');
+      if (!queue || queue === JSON.stringify([])) {
+        window.clearInterval(intervalId);
+        return;
+      }
+      replay();
+    }, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [store.token, allAccessibleTiles.length]);
+
   const localApps = useMemo<AppDefinition[]>(() => {
+    if (allAccessibleTiles.length === 0) {
+      return fdc3Definitions.map((app) => ({
+        appId: app.appId,
+        name: app.appId,
+        version: '',
+        description: '',
+        icon: '',
+        type: '',
+        url: '',
+        interop: app.interop ?? {},
+      }));
+    }
+
     return allAccessibleTiles.map((tile) => {
       const appId = tile.tile?.replace('/', '');
       return {
@@ -189,17 +265,19 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
       // Log level
       logLevel: LogLevel.DEBUG,
 
+      ...getOpenFinBrokerOptions(),
+
       // Login/logout handler registration
       onLogin: async (callback: () => Promise<any>) => {
         // Register login callback - called when user logs in
         console.log('[FDC3] Login handler registered');
-        await callback();
+        loginCallbacksRef.current.add(callback);
       },
 
       onLogout: async (callback: () => Promise<any>) => {
         // Register logout callback - called when user logs out
         console.log('[FDC3] Logout handler registered');
-        await callback();
+        loginCallbacksRef.current.add(callback);
       },
 
       // Callbacks for broker operations
@@ -383,17 +461,13 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
       return;
     }
 
-    // Skip if app directory has no tiles yet (still loading)
-    if (allAccessibleTiles.length === 0) {
-      return;
-    }
-
     const initializeBroker = async () => {
       try {
         console.log('[FDC3] Initializing broker...');
 
         // Create the broker instance
         const broker = new Broker(brokerConfig);
+        brokerRef.current = broker;
 
         // Make broker available to all tiles
         setBroker(broker);
@@ -401,7 +475,7 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
         // Mark as initialized to prevent re-initialization
         brokerInitializedRef.current = true;
         setBrokerInitialized(true);
-        setBrokerInitializedWithTiles(true);
+        setBrokerInitializedWithTiles(allAccessibleTiles.length > 0);
 
         console.log('[FDC3] Broker initialized successfully');
       } catch (error) {

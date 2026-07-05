@@ -44,6 +44,7 @@ let openFinBridgeClass: OpenFinBridgeType | null = null;
 
 // Pre-login tile ID for intent queue
 const PRELOGIN_TILE_ID = '__prelogin__';
+const EXTERNAL_OPENFIN_SOURCE_APP_ID = 'external';
 
 // Lazy load PostMessage bridge only when needed
 type PostMessageBridgeType = typeof import('./postmessage-bridge').PostMessageBridge;
@@ -206,7 +207,7 @@ export class Broker implements DesktopAgent {
    */
   private async setupOpenFinIntentForwarding(): Promise<void> {
     // Check if OpenFin is available in the environment
-    const isOpenFinDetected = !!(globalThis as any).fin?.desktop?.fdc3;
+    const isOpenFinDetected = !!(globalThis as any).fin?.desktop;
 
     if (!isOpenFinDetected) {
       this.logger.debug('OpenFin not detected, skipping bridge initialization');
@@ -272,7 +273,7 @@ export class Broker implements DesktopAgent {
     const isLoggedIn = await this.checkLoginStatus();
     if (!isLoggedIn) {
       // Queue intent for after login
-      const sourceId: AppIdentifier = source || { appId: 'external' };
+      const sourceId: AppIdentifier = this.createExternalOpenFinSource(source);
       this.intentQueue.enqueue(PRELOGIN_TILE_ID, intent, context, sourceId);
       this.logger.debug('User not logged in, queued intent for post-login', { intent });
       return;
@@ -281,10 +282,39 @@ export class Broker implements DesktopAgent {
     // No internal listeners - raise intent internally (will find apps, resolve, open, deliver)
     // Pass skipExternalRouting=true to prevent infinite loop back to OpenFin
     try {
-      await this.raiseIntent(intent, context, undefined, source);
+      await this.routeOpenFinIntent(intent, context, source);
     } catch (error) {
       this.logger.error(`Error raising intent ${intent} from OpenFin:`, error as Error);
     }
+  }
+
+  private createExternalOpenFinSource(source?: AppIdentifier): AppIdentifier {
+    return {
+      ...source,
+      appId: EXTERNAL_OPENFIN_SOURCE_APP_ID,
+    };
+  }
+
+  private shouldRouteOpenFinIntentByContext(intent: string): boolean {
+    return this.config.openFinBridgeOptions?.contextRoutingIntents?.includes(intent) ?? false;
+  }
+
+  private async routeOpenFinIntent(
+    intent: string,
+    context: Context,
+    source?: AppIdentifier,
+  ): Promise<IntentResolution> {
+    const openFinSource = this.createExternalOpenFinSource(source);
+
+    if (this.shouldRouteOpenFinIntentByContext(intent)) {
+      return this.raiseIntentForContext(context, undefined, openFinSource);
+    }
+
+    return this.raiseIntent(intent, context, undefined, openFinSource);
+  }
+
+  private shouldRouteMissingTargetExternally(source?: AppIdentifier): boolean {
+    return source?.appId !== EXTERNAL_OPENFIN_SOURCE_APP_ID;
   }
 
   /**
@@ -325,10 +355,9 @@ export class Broker implements DesktopAgent {
     // Raise filtered intents
     for (const queuedIntent of validIntents) {
       try {
-        await this.raiseIntent(
+        await this.routeOpenFinIntent(
           queuedIntent.intent,
           queuedIntent.context,
-          undefined,
           queuedIntent.source,
         );
       } catch (error) {
@@ -336,9 +365,13 @@ export class Broker implements DesktopAgent {
       }
     }
 
-    // Clear queue
+    // Clear queue after replay so a persisted SSO handoff is handled once.
     this.intentQueue.clearQueue(PRELOGIN_TILE_ID);
     this.logger.info('Cleared pre-login intent queue');
+  }
+
+  async processQueuedIntents(): Promise<void> {
+    await this.processQueuedIntentsAfterLogin();
   }
 
   /**
@@ -955,8 +988,7 @@ export class Broker implements DesktopAgent {
       const result = await this.intentResolver.resolve(intent, context, targetApp);
 
       if (result.type === 'not-found') {
-        // Skip external routing if flag is set (prevents infinite loop from OpenFin)
-        if (!this.openFinBridge?.isIntentFromExternalOpenFinSource(source)) {
+        if (this.shouldRouteMissingTargetExternally(source)) {
           // Try routing to OpenFin if available
           const openFinBridge = await this.getOpenFinBridge();
           if (openFinBridge?.isEnabled()) {
@@ -1045,7 +1077,7 @@ export class Broker implements DesktopAgent {
     // Multiple intents available - default to first one
     // (Could enhance to show intent picker)
     const intent = intents[0].intent;
-    return this.raiseIntent(intent.name, context, targetApp);
+    return this.raiseIntent(intent.name, context, targetApp, source);
   }
 
   async raiseWorkflow(

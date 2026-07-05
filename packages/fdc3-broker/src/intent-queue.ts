@@ -92,7 +92,6 @@ export class IntentQueueImpl implements IntentQueueInterface {
       const data = localStorage.getItem('fdc3-intent-queue');
       if (data) {
         this.queue = new Map(JSON.parse(data));
-        localStorage.removeItem('fdc3-intent-queue');
       }
     } catch (error) {
       console.warn('[IntentQueue] Failed to load from localStorage:', error);

@@ -88,6 +88,8 @@ export const getJWTPayload = (token: string): any => {
 export const storeData = (key: string, data: string): void => {
   getLocalStorage().setItem(key, data);
   getSessionStorage().setItem(key, data);
+
+  window.dispatchEvent(new CustomEvent('ratan-storage-updated', { detail: { key, data } }));
 };
 
 /**
@@ -101,10 +103,14 @@ export const clearLocalStorage = (dispacth?, actionTypes?: ActionType[]): void =
     // Clear specific keys only
     actionTypes.forEach((actionType) => {
       getLocalStorage().removeItem(actionType);
+      window.dispatchEvent(
+        new CustomEvent('ratan-storage-updated', { detail: { key: actionType } }),
+      );
     });
   } else {
     // Clear all localStorage
     getLocalStorage().clear();
+    window.dispatchEvent(new CustomEvent('ratan-storage-updated', { detail: { key: '*' } }));
   }
   // Always clear sessionStorage completely
   getSessionStorage().clear();
