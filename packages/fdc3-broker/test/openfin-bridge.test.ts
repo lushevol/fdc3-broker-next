@@ -358,6 +358,57 @@ describe('OpenFinBridge', () => {
       expect(intentHandler).toHaveBeenCalledWith('ViewChart', context, source);
     });
 
+    it('should wait for async intent routing before resolving provider-delivered intents', async () => {
+      const mockApps: AppDefinition[] = [
+        {
+          appId: 'app1',
+          name: 'App 1',
+          title: 'App 1',
+          interop: {
+            intents: {
+              listensFor: [{ intent: 'ViewChart', contexts: ['fdc3.chart'] }],
+            },
+          },
+        },
+      ];
+
+      const mockClient = createMockAppDirectoryClient(mockApps);
+      const bridgeWithClient = new OpenFinBridge(mockClient as any);
+      let resolveRouting: (() => void) | undefined;
+      const intentHandler = vi.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveRouting = resolve;
+          }),
+      );
+
+      bridgeWithClient.setIntentHandler(intentHandler);
+      await bridgeWithClient.initializeIntents(['ViewChart']);
+
+      const registeredHandler = mockFDC3.addIntentListener.mock.calls.find(
+        (call) => call[0] === 'ViewChart',
+      )?.[1];
+      const context: Context = {
+        type: 'fdc3.chart',
+        id: { ticker: 'AAPL' },
+      };
+
+      const routed = registeredHandler(context);
+      let completed = false;
+      void routed.then(() => {
+        completed = true;
+      });
+
+      await Promise.resolve();
+      expect(completed).toBe(false);
+
+      resolveRouting?.();
+      await routed;
+
+      expect(completed).toBe(true);
+      expect(intentHandler).toHaveBeenCalledWith('ViewChart', context, undefined);
+    });
+
     it('should log warning when no handler is set', async () => {
       const mockApps: AppDefinition[] = [
         {

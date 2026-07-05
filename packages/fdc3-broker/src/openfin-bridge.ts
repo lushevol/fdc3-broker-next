@@ -192,7 +192,7 @@ export class OpenFinBridge {
             });
             // Handler is set via setIntentHandler
             if (this._intentHandler) {
-              void Promise.resolve(this._intentHandler(intent, context, metadata?.source)).catch(
+              return Promise.resolve(this._intentHandler(intent, context, metadata?.source)).catch(
                 (error) => {
                   this.logger.error(`Failed to handle OpenFin intent ${intent}:`, error as Error);
                 },
