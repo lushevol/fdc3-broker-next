@@ -131,6 +131,8 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
   const brokerRef = useRef<Broker | null>(null);
 
   useEffect(() => {
+    const timeouts: number[] = [];
+
     const replayQueuedIntents = () => {
       loginCallbacksRef.current.forEach((callback) => {
         void callback();
@@ -148,8 +150,6 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
         timeouts.push(window.setTimeout(replayQueuedIntents, delay));
       });
     };
-
-    const timeouts: number[] = [];
 
     window.addEventListener('ratan-storage-updated', handleStorageUpdated);
     return () => {
