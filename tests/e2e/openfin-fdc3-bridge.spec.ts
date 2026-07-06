@@ -559,6 +559,53 @@ test('routes direct OpenFin ViewCashflow intent to the matching tile', async () 
   await expect(page.getByRole('tab', { name: 'FDC3 Tile 1' }).first()).toBeVisible();
 });
 
+test('routes external OpenFin SearchCashflows intent to the cashflow blotter', async () => {
+  await loginToWorkspace(page);
+  await expectOpenFinRuntime(page);
+
+  // Raise SearchCashflows through the broker from within the OpenFin context.
+  // The source is tagged with appId='external' (EXTERNAL_OPENFIN_SOURCE_APP_ID),
+  // matching what createExternalOpenFinSource() in broker.ts produces when
+  // the OpenFin Bridge forwards an intent via handleOpenFinIntent →
+  // routeOpenFinIntent → raiseIntent.
+  //
+  // NOTE: This fires the intent directly through the broker (not via
+  // window.fdc3.raiseIntent on the OpenFin home page) because SearchCashflows
+  // has 2 declared listeners (cashflow_cn + cashflow_group_management), which
+  // triggers the resolver UI when no specific target is given. The resolver
+  // dialog requires user interaction, making it unsuitable for CI tests.
+  //
+  // The test still runs inside the actual OpenFin runtime (requires
+  // OPENFIN_E2E=1 and CDP connection to an OpenFin instance) and verifies
+  // that the broker correctly routes external intents to the cashflow blotter.
+  const searchContext = {
+    type: 'scb.fmptp.cashflow.query' as const,
+    target: 'cashflow_cn' as const,
+    filters: [
+      { field: 'Cashflow.Cashflow_State', operator: 'IN', values: ['WAITING'] },
+    ],
+  };
+
+  await page.evaluate(async (context) => {
+    const broker = (window as any).__RATAN_FDC3__?.brokerInstance;
+    if (!broker) throw new Error('FDC3 broker not available');
+
+    const resolution = await broker.raiseIntent(
+      'SearchCashflows',
+      context,
+      'cashflow_cn',
+      { appId: 'external' },
+    );
+
+    return {
+      sourceAppId: resolution.source?.appId,
+    };
+  }, searchContext);
+
+  // The broker should open the cashflow blotter tile to handle the intent
+  await expect(page.getByRole('tab', { name: 'Cashflow Blotter' }).first()).toBeVisible({ timeout: 30_000 });
+});
+
 test('persists pre-login OpenFin intents and replays them after login', async () => {
   await page.goto(getNavigationUrl());
   await ensureOpenFinInterop(page);
