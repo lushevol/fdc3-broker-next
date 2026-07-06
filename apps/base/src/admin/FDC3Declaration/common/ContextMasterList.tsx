@@ -13,7 +13,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Typography from '@mui/material/Typography';
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import type { FDC3ContextDefinition } from './interface';
-import { getContextType } from './model';
+import { getContextRows, getContextType } from './model';
 
 interface ContextMasterListProps {
   contexts: FDC3ContextDefinition[];
@@ -71,7 +71,9 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
     setIsEdit(true);
     setTempType(getContextType(context));
     setCurrentContext({ ...context });
-    setSchemaJson(JSON.stringify(context.schema ?? buildDefaultSchema(getContextType(context)), null, 2));
+    setSchemaJson(
+      JSON.stringify(context.schema ?? buildDefaultSchema(getContextType(context)), null, 2),
+    );
     setSamplesJson(JSON.stringify(context.samples ?? (context as any).simples ?? [], null, 2));
     setJsonError('');
     setOpen(true);
@@ -140,6 +142,7 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
   };
 
   const references = getReferences?.(getContextType(currentContext)) ?? [];
+  const rows = React.useMemo(() => getContextRows(contexts), [contexts]);
 
   const columns: GridColDef[] = [
     {
@@ -179,8 +182,25 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
   ];
 
   return (
-    <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+    <Box
+      sx={{
+        height: '100%',
+        minHeight: 0,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          p: 1,
+          flexShrink: 0,
+        }}
+      >
         <Typography variant="h6" color="primary">
           FDC3 Contexts Configuration
         </Typography>
@@ -191,7 +211,7 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
         )}
       </Box>
       <DataGrid
-        rows={contexts.map((c) => ({ id: c.schema.type, ...c }))}
+        rows={rows}
         columns={columns}
         loading={isLoading}
         pageSizeOptions={[5, 10, 20]}
@@ -199,7 +219,12 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
           pagination: { paginationModel: { pageSize: 10 } },
         }}
         disableRowSelectionOnClick
-        sx={{ border: 'none', '& .MuiDataGrid-cell:hover': { color: 'primary.main' } }}
+        sx={{
+          border: 'none',
+          flex: 1,
+          minHeight: 0,
+          '& .MuiDataGrid-cell:hover': { color: 'primary.main' },
+        }}
       />
 
       {/* Form Dialog */}

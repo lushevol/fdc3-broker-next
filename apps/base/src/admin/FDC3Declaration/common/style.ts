@@ -12,8 +12,11 @@ export const classes = {
 
 const Root = styled(Stack)(({ theme }) => ({
   [`&.${classes.root}`]: {
-    height: '100%',
+    flex: 1,
+    height: '100% !important',
+    minHeight: 0,
     width: '100%',
+    overflow: 'hidden',
     backgroundColor: theme.palette.background.default,
   },
   [`& .${classes.editorContainer}`]: {

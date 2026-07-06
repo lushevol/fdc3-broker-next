@@ -52,10 +52,19 @@ const FDC3Declaration: React.FC<FDC3DeclarationProps> = (
     setTab(newValue);
   };
 
+  const tabPanelSx = (isActive: boolean) => ({
+    p: 2,
+    flex: 1,
+    minHeight: 0,
+    overflow: 'hidden',
+    display: isActive ? 'flex' : 'none',
+    flexDirection: 'column',
+  });
+
   return (
     <ErrorBoundry>
       <Root className={classes.root} data-testid={`${PREFIX}`} spacing={0} direction="column">
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2, flexShrink: 0 }}>
           <Tabs value={tab} onChange={handleTabChange} aria-label="fdc3 declaration tabs">
             <Tab label="Declarations" />
             <Tab label="Intents Master List" />
@@ -63,13 +72,14 @@ const FDC3Declaration: React.FC<FDC3DeclarationProps> = (
           </Tabs>
         </Box>
 
-        <Box sx={{ p: 2, height: '100%', display: tab === 0 ? 'block' : 'none' }}>
+        <Box sx={tabPanelSx(tab === 0)}>
           <Box
             sx={{
               display: 'grid',
               gridTemplateColumns: 'repeat(4, minmax(120px, 1fr))',
               gap: 1,
               mb: 2,
+              flexShrink: 0,
             }}
           >
             <Box sx={{ p: 1, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}>
@@ -103,7 +113,7 @@ const FDC3Declaration: React.FC<FDC3DeclarationProps> = (
             onChange={(event) => setSearch(event.target.value)}
             size="small"
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, flexShrink: 0 }}
           />
           {/* Removed Category Selection Header */}
           <Main
@@ -130,7 +140,7 @@ const FDC3Declaration: React.FC<FDC3DeclarationProps> = (
           />
         </Box>
 
-        <Box sx={{ p: 2, height: '100%', display: tab === 1 ? 'block' : 'none' }}>
+        <Box sx={tabPanelSx(tab === 1)}>
           <IntentMasterList
             intents={intents}
             onCreate={createIntent}
@@ -142,7 +152,7 @@ const FDC3Declaration: React.FC<FDC3DeclarationProps> = (
           />
         </Box>
 
-        <Box sx={{ p: 2, height: '100%', display: tab === 2 ? 'block' : 'none' }}>
+        <Box sx={tabPanelSx(tab === 2)}>
           <ContextMasterList
             contexts={contexts}
             onCreate={createContext}

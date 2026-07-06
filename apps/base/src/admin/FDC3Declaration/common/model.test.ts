@@ -3,6 +3,7 @@ import {
   filterDeclarations,
   getContextType,
   getDeclarationSummary,
+  getContextRows,
   getReferencedContextTypes,
   getReferencedIntentNames,
   normalizeInterop,
@@ -35,21 +36,23 @@ describe('FDC3Declaration model helpers', () => {
   });
 
   test('normalizes missing raises and keyed listensFor to arrays', () => {
-    expect(normalizeInterop({ intents: { listensFor: { ViewChart: { contexts: [] } } } }).intents)
-      .toEqual({
-        listensFor: [{ intent: 'ViewChart', contexts: [] }],
-        raises: [],
-      });
+    expect(
+      normalizeInterop({ intents: { listensFor: { ViewChart: { contexts: [] } } } }).intents,
+    ).toEqual({
+      listensFor: [{ intent: 'ViewChart', contexts: [] }],
+      raises: [],
+    });
   });
 
   test('summarizes declarations and empty declarations', () => {
-    expect(getDeclarationSummary(declarations, [{ name: 'SearchTrades', description: '' }], []))
-      .toEqual({
-        declarations: 2,
-        intents: 1,
-        contexts: 0,
-        emptyDeclarations: 1,
-      });
+    expect(
+      getDeclarationSummary(declarations, [{ name: 'SearchTrades', description: '' }], []),
+    ).toEqual({
+      declarations: 2,
+      intents: 1,
+      contexts: 0,
+      emptyDeclarations: 1,
+    });
   });
 
   test('filters declarations by app id, tile title, intent, and context type', () => {
@@ -63,5 +66,20 @@ describe('FDC3Declaration model helpers', () => {
   test('detects declaration references for intent and context deletion warnings', () => {
     expect(getReferencedIntentNames(declarations, 'SearchTrades')).toEqual(['trade-blotter']);
     expect(getReferencedContextTypes(declarations, 'fdc3.instrument')).toEqual(['trade-blotter']);
+  });
+
+  test('builds unique context grid rows from declared context type', () => {
+    expect(
+      getContextRows([
+        {
+          schema: { type: 'object', properties: { type: { const: 'fdc3.instrument' } } },
+          description: 'Instrument',
+        },
+        {
+          schema: { type: 'object', properties: { type: { const: 'fdc3.trade.query' } } },
+          description: 'Trade query',
+        },
+      ]).map((row) => row.id),
+    ).toEqual(['fdc3.instrument', 'fdc3.trade.query']);
   });
 });

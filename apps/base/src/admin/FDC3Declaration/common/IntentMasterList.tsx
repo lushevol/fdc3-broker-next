@@ -113,8 +113,25 @@ const IntentMasterList: React.FC<IntentMasterListProps> = ({
   ];
 
   return (
-    <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+    <Box
+      sx={{
+        height: '100%',
+        minHeight: 0,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          p: 1,
+          flexShrink: 0,
+        }}
+      >
         <Typography variant="h6" color="primary">
           FDC3 Intents Configuration
         </Typography>
@@ -133,7 +150,12 @@ const IntentMasterList: React.FC<IntentMasterListProps> = ({
           pagination: { paginationModel: { pageSize: 10 } },
         }}
         disableRowSelectionOnClick
-        sx={{ border: 'none', '& .MuiDataGrid-cell:hover': { color: 'primary.main' } }}
+        sx={{
+          border: 'none',
+          flex: 1,
+          minHeight: 0,
+          '& .MuiDataGrid-cell:hover': { color: 'primary.main' },
+        }}
       />
 
       {/* Access / Form Dialog */}
