@@ -1,7 +1,6 @@
-import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import Tooltip from '@mui/material/Tooltip';
-import type { GridActionsCellItem, GridColDef } from '@mui/x-data-grid';
+import type { GridColDef } from '@mui/x-data-grid';
 import { GridActionsCellItem as GridAction } from '@mui/x-data-grid';
 import React from 'react';
 import { useContext } from '../../../hooks/provider';
@@ -19,7 +18,6 @@ import useTableDetail from './useTableDetail';
 
 const useController = (_props: FDC3DeclarationProps) => {
   const [store] = useContext();
-  const [inputValue, setInputValue] = React.useState('');
 
   const [intents, setIntents] = React.useState<any[]>([]);
   const [contexts, setContexts] = React.useState<any[]>([]);
@@ -103,7 +101,6 @@ const useController = (_props: FDC3DeclarationProps) => {
     // If creating, we are creating.
     // The API distinguishes by endpoint.
 
-    const existing = data.find((d) => d.appId === formData.appId);
     // NOTE: Logic here: if we allow editing appId, it's a new record.
     // But usually appId is providing identity.
     // If we are in "Edit" mode (record is set), we update.

@@ -11,8 +11,6 @@ import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import type { FDC3IntentDefinition } from './interface';
 
@@ -23,6 +21,7 @@ interface IntentMasterListProps {
   onDelete?: (intent: FDC3IntentDefinition) => Promise<void>;
   isLoading: boolean;
   readOnly?: boolean;
+  getReferences?: (intentName: string) => string[];
 }
 
 const IntentMasterList: React.FC<IntentMasterListProps> = ({
@@ -32,6 +31,7 @@ const IntentMasterList: React.FC<IntentMasterListProps> = ({
   onDelete,
   isLoading,
   readOnly,
+  getReferences,
 }) => {
   const [open, setOpen] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
@@ -77,6 +77,8 @@ const IntentMasterList: React.FC<IntentMasterListProps> = ({
       setCurrentIntent({ name: '', description: '' });
     }
   };
+
+  const references = getReferences?.(currentIntent.name) ?? [];
 
   const columns: GridColDef[] = [
     { field: 'name', headerName: 'Intent Name', width: 250 },
@@ -183,6 +185,11 @@ const IntentMasterList: React.FC<IntentMasterListProps> = ({
             <strong>{currentIntent.name}</strong>? This action cannot be undone and may affect
             applications using this intent.
           </DialogContentText>
+          {references.length > 0 && (
+            <DialogContentText color="warning.main" sx={{ mt: 2 }}>
+              Used by: {references.join(', ')}
+            </DialogContentText>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>

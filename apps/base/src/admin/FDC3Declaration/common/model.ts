@@ -23,6 +23,13 @@ export interface FDC3IntentContextEntry {
   contexts: string[];
 }
 
+export interface NormalizedFDC3Interop extends Omit<FDC3Interop, 'intents'> {
+  intents: {
+    listensFor: FDC3IntentContextEntry[];
+    raises: FDC3IntentContextEntry[];
+  };
+}
+
 type LegacyInteropMap = Record<string, { contexts?: string[] } | undefined>;
 
 const toEntries = (
@@ -58,7 +65,7 @@ export const getContextType = (context: FDC3ContextDefinition): string => {
   return schema.properties?.type?.const ?? schema.type ?? '';
 };
 
-export const normalizeInterop = (interop?: Partial<FDC3Interop>): FDC3Interop => ({
+export const normalizeInterop = (interop?: Partial<FDC3Interop>): NormalizedFDC3Interop => ({
   ...interop,
   intents: {
     listensFor: toEntries(interop?.intents?.listensFor),

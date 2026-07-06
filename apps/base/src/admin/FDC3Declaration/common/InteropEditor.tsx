@@ -2,19 +2,18 @@ import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Chip from '@mui/material/Chip';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import { classes } from './style';
 import type { FDC3Interop, FDC3IntentDefinition, FDC3ContextDefinition } from './interface';
+import { getContextType, normalizeInterop } from './model';
 
 interface InteropEditorProps {
   value: FDC3Interop;
@@ -22,6 +21,7 @@ interface InteropEditorProps {
   intents: FDC3IntentDefinition[];
   contexts: FDC3ContextDefinition[];
   readOnly?: boolean;
+  onValidityChange?: (isValid: boolean) => void;
 }
 
 const InteropEditor: React.FC<InteropEditorProps> = ({
@@ -30,10 +30,16 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
   intents,
   contexts,
   readOnly,
+  onValidityChange,
 }) => {
   const [jsonMode, setJsonMode] = useState(false);
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [jsonString, setJsonString] = useState('');
+  const normalizedValue = React.useMemo(() => normalizeInterop(value), [value]);
+  const contextOptions = React.useMemo(
+    () => contexts.map((context) => getContextType(context)).filter(Boolean),
+    [contexts],
+  );
 
   // Sync internal JSON string when value changes externally (and not in JSON mode to avoid cursor jumps) or mode switch
   useEffect(() => {
@@ -47,10 +53,13 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
     setJsonString(newVal);
     try {
       const parsed = JSON.parse(newVal);
-      onChange(parsed);
+      onChange(normalizeInterop(parsed));
       setJsonError(null);
-    } catch (e: any) {
-      setJsonError(e.message);
+      onValidityChange?.(true);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Invalid JSON';
+      setJsonError(message);
+      onValidityChange?.(false);
     }
   };
 
@@ -163,7 +172,16 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h6">FDC3 Interop Configuration</Typography>
         <FormControlLabel
-          control={<Switch checked={jsonMode} onChange={(e) => setJsonMode(e.target.checked)} />}
+          control={
+            <Switch
+              checked={jsonMode}
+              onChange={(e) => {
+                setJsonMode(e.target.checked);
+                setJsonError(null);
+                onValidityChange?.(true);
+              }}
+            />
+          }
           label="JSON Mode"
         />
       </Box>
@@ -216,7 +234,7 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
               )}
             </Box>
             <Stack spacing={2}>
-              {getListensForEntries(value?.intents?.listensFor).map(
+              {getListensForEntries(normalizedValue?.intents?.listensFor).map(
                 ({ name, contexts: currentContexts }) => (
                   <Box
                     key={name}
@@ -238,7 +256,7 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                     <Autocomplete
                       multiple
                       freeSolo
-                      options={contexts.map((c) => c.schema.type as string)}
+                      options={contextOptions}
                       value={currentContexts}
                       onChange={(_, val) => handleContextChange('listensFor', name, val)}
                       renderTags={(val, getTagProps) =>
@@ -302,7 +320,7 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
               )}
             </Box>
             <Stack spacing={2}>
-              {getRaisesEntries(value?.intents?.raises).map(
+              {getRaisesEntries(normalizedValue?.intents?.raises).map(
                 ({ name, contexts: currentContexts }) => (
                   <Box
                     key={name}
@@ -322,7 +340,7 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                     <Autocomplete
                       multiple
                       freeSolo
-                      options={contexts.map((c) => c.schema.type as string)}
+                      options={contextOptions}
                       value={currentContexts}
                       onChange={(_, val) => handleContextChange('raises', name, val)}
                       renderTags={(val, getTagProps) =>

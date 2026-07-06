@@ -152,18 +152,6 @@ function sendAuthResponse(
   res.end(JSON.stringify(responseBody));
 }
 
-function loadInitialDeclarations(): Fdc3Declaration[] {
-  try {
-    const declarationPath = require.resolve('./fdc3-declaration.mock.json');
-    delete require.cache[declarationPath];
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const initialData = require('./fdc3-declaration.mock.json') as { data?: Fdc3Declaration[] };
-    return initialData.data ?? [];
-  } catch {
-    return [];
-  }
-}
-
 function readJsonFile<T>(filePath: string, fallback: T): T {
   try {
     return JSON.parse(fs.readFileSync(filePath, 'utf8')) as T;

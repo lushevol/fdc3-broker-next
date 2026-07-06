@@ -12,11 +12,9 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Divider from '@mui/material/Divider';
 import InteropEditor from './InteropEditor';
-import { FDC3IntentDefinition, FDC3ContextDefinition } from './interface';
+import type { FDC3DeclarationData, FDC3IntentDefinition, FDC3ContextDefinition } from './interface';
+import { normalizeInterop } from './model';
 
 interface DeclarationDialogProps {
   open: boolean;
@@ -28,6 +26,7 @@ interface DeclarationDialogProps {
   contexts: FDC3ContextDefinition[];
   isEdit?: boolean;
   readOnly?: boolean;
+  onDelete?: (data: FDC3DeclarationData) => Promise<void>;
 }
 
 const DeclarationDialog: React.FC<DeclarationDialogProps> = ({
@@ -41,32 +40,44 @@ const DeclarationDialog: React.FC<DeclarationDialogProps> = ({
 
   isEdit,
   readOnly,
+  onDelete,
 }) => {
   const [fullScreen, setFullScreen] = useState(false);
+  const [isInteropValid, setIsInteropValid] = useState(true);
   const [formData, setFormData] = useState<any>({
     appId: '',
-    interop: { intents: { listensFor: {}, raises: {} } },
+    interop: { intents: { listensFor: [], raises: [] } },
   });
 
   // Reset form when opening
   useEffect(() => {
     if (open) {
       if (initialData) {
-        setFormData(JSON.parse(JSON.stringify(initialData)));
+        const nextData = JSON.parse(JSON.stringify(initialData));
+        setFormData({ ...nextData, interop: normalizeInterop(nextData.interop) });
       } else {
         setFormData({
           appId: '',
-          interop: { intents: { listensFor: {}, raises: {} } },
+          interop: { intents: { listensFor: [], raises: [] } },
         });
       }
+      setIsInteropValid(true);
     }
   }, [open, initialData]);
 
   const handleSave = async () => {
-    if (!formData.appId) return;
+    if (!formData.appId || !isInteropValid) return;
     await onSave(formData);
     onClose();
   };
+
+  const tileOptions = tiles.map((tile) => ({
+    label: [tile.title, tile.tileId ?? tile.appId ?? tile.tile ?? tile.id].filter(Boolean).join(' - '),
+    value: tile.tileId ?? tile.appId ?? tile.tile ?? String(tile.id ?? ''),
+  }));
+  const selectedTileOption =
+    tileOptions.find((option) => option.value === formData.appId) ??
+    (formData.appId ? { label: formData.appId, value: formData.appId } : null);
 
   return (
     <Dialog
@@ -115,9 +126,16 @@ const DeclarationDialog: React.FC<DeclarationDialogProps> = ({
             App ID:
           </Typography>
           <Autocomplete
-            options={tiles.map((t) => t.tileId)}
-            value={formData.appId}
-            onChange={(_, newValue) => setFormData({ ...formData, appId: newValue })}
+            options={tileOptions}
+            getOptionLabel={(option) => option.label}
+            isOptionEqualToValue={(option, value) => option.value === value.value}
+            value={selectedTileOption}
+            onChange={(_, newValue) =>
+              setFormData({
+                ...formData,
+                appId: newValue?.value ?? '',
+              })
+            }
             renderInput={(params) => (
               <TextField {...params} variant="outlined" size="small" placeholder="Select Tile ID" />
             )}
@@ -141,6 +159,7 @@ const DeclarationDialog: React.FC<DeclarationDialogProps> = ({
             intents={intents}
             contexts={contexts}
             readOnly={readOnly}
+            onValidityChange={setIsInteropValid}
           />
         </Box>
       </DialogContent>
@@ -152,10 +171,15 @@ const DeclarationDialog: React.FC<DeclarationDialogProps> = ({
         <Button onClick={onClose} color="inherit" sx={{ mr: 'auto', color: 'error.main' }}>
           Close
         </Button>
+        {isEdit && onDelete && !readOnly && (
+          <Button onClick={() => onDelete(formData)} color="error" variant="outlined">
+            Delete
+          </Button>
+        )}
         <Button
           onClick={() =>
             setFormData(
-              initialData || { appId: '', interop: { intents: { listensFor: {}, raises: {} } } },
+              initialData || { appId: '', interop: { intents: { listensFor: [], raises: [] } } },
             )
           }
           color="inherit"
@@ -167,7 +191,7 @@ const DeclarationDialog: React.FC<DeclarationDialogProps> = ({
           <Button
             onClick={handleSave}
             variant="contained"
-            disabled={!formData.appId}
+            disabled={!formData.appId || !isInteropValid}
             sx={{ px: 4 }}
           >
             {isEdit ? 'Update' : 'Create'}

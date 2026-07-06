@@ -32,8 +32,9 @@ const useServices = () => {
           { signal: getCategoryRef?.current.signal },
         );
         return resposnse?.data?.data ?? [];
-      } catch (_e) {}
-      return [];
+      } catch {
+        return [];
+      }
     },
     [dispacthErrorMessage],
   );
@@ -42,7 +43,7 @@ const useServices = () => {
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/tile/data', { entitlementsToken });
       return resposnse?.data?.data ?? [];
-    } catch (_e) {
+    } catch {
       return [];
     }
   }, []);
@@ -61,8 +62,9 @@ const useServices = () => {
           { signal: getDeclarationRef?.current.signal },
         );
         return resposnse?.data?.data ?? [];
-      } catch (_e) {}
-      return [];
+      } catch {
+        return [];
+      }
     },
     [dispacthErrorMessage],
   );
@@ -81,8 +83,9 @@ const useServices = () => {
           { signal: updateDeclarationRef?.current.signal },
         );
         return resposnse?.data?.data ?? {};
-      } catch (_e) {}
-      return {};
+      } catch {
+        return {};
+      }
     },
     [dispacthErrorMessage],
   );
@@ -101,8 +104,9 @@ const useServices = () => {
           { signal: createDeclarationRef?.current.signal },
         );
         return resposnse?.data?.data ?? {};
-      } catch (_e) {}
-      return {};
+      } catch {
+        return {};
+      }
     },
     [dispacthErrorMessage],
   );
@@ -121,8 +125,9 @@ const useServices = () => {
           { signal: deleteDeclarationRef?.current.signal },
         );
         return resposnse?.data?.data ?? {};
-      } catch (_e) {}
-      return {};
+      } catch {
+        return {};
+      }
     },
     [dispacthErrorMessage],
   );
@@ -133,7 +138,7 @@ const useServices = () => {
         entitlementsToken,
       });
       return resposnse?.data?.data ?? [];
-    } catch (_e) {
+    } catch {
       return [];
     }
   }, []);
@@ -145,7 +150,7 @@ const useServices = () => {
         ...data,
       });
       return resposnse?.data?.data ?? {};
-    } catch (_e) {
+    } catch {
       return {};
     }
   }, []);
@@ -157,7 +162,7 @@ const useServices = () => {
         ...data,
       });
       return resposnse?.data?.data ?? {};
-    } catch (_e) {
+    } catch {
       return {};
     }
   }, []);
@@ -169,7 +174,7 @@ const useServices = () => {
         ...data,
       });
       return resposnse?.data?.data ?? {};
-    } catch (_e) {
+    } catch {
       return {};
     }
   }, []);
@@ -185,7 +190,7 @@ const useServices = () => {
           samples: ctx.samples ?? ctx.simples ?? [],
         })) ?? []
       );
-    } catch (_e) {
+    } catch {
       return [];
     }
   }, []);
@@ -197,7 +202,7 @@ const useServices = () => {
         ...data,
       });
       return resposnse?.data?.data ?? {};
-    } catch (_e) {
+    } catch {
       return {};
     }
   }, []);
@@ -209,7 +214,7 @@ const useServices = () => {
         ...data,
       });
       return resposnse?.data?.data ?? {};
-    } catch (_e) {
+    } catch {
       return {};
     }
   }, []);
@@ -221,7 +226,7 @@ const useServices = () => {
         ...data,
       });
       return resposnse?.data?.data ?? {};
-    } catch (_e) {
+    } catch {
       return {};
     }
   }, []);
