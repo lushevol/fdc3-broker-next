@@ -170,6 +170,20 @@
           "entity": ["X_RATANONE"]
         },
         {
+          "container": "@fm/template_container",
+          "imageDarkTheme": "darkIcons/trade.dark.svg",
+          "subject": "template_subject",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "/template_container1",
+          "subtitle": "",
+          "imageLightTheme": "lightIcons/trade.light.svg",
+          "tile": "/template_tile_fdc3_console",
+          "id": 66,
+          "title": "FDC3 Console",
+          "entity": ["X_RATANONE"]
+        },
+        {
           "container": "@fm/flowzero",
           "imageDarkTheme": "darkIcons/icon01.svg",
           "subject": "template_subject",
