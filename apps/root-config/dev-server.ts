@@ -273,6 +273,12 @@ function loadCategoryResponse(): unknown {
   return require('./category.mock.json');
 }
 
+function loadTileResponse(): unknown[] {
+  const drawers = Array.isArray(mockLoginResp.drawers) ? mockLoginResp.drawers : [];
+
+  return drawers.flatMap((drawer) => (Array.isArray(drawer.tiles) ? drawer.tiles : []));
+}
+
 function isFlowzeroWorkflowServiceFixture(fixture: CapturedApiFixture): boolean {
   return (
     [
@@ -414,6 +420,9 @@ export const rootConfigDevSetup: SetupMiddlewaresFn = (middlewares) => {
     }),
     createMiddleware('/api/auth/v1/fmo/admin/fdc3/delete', async (req, res) => {
       sendJson(res, fdc3Store.deleteDeclaration(await parseJsonBody(req)));
+    }),
+    createMiddleware('/api/auth/v1/fmo/admin/tile/data', (_req, res) => {
+      sendJson(res, loadTileResponse());
     }),
     createMiddleware('/api/auth/v1/fmo/admin/category/data', (_req, res) => {
       res.statusCode = 200;

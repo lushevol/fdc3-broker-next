@@ -214,6 +214,34 @@ describe('root-config rsbuild integration', () => {
       expect.arrayContaining(['/api/analytics/v1/fmo/print', '/v1/fmo/print']),
     );
   });
+
+  it('registers admin tile data for UI-only dev', async () => {
+    process.env.useBackendAuth = 'false';
+
+    const { rootConfigDevSetup } = await import('./rsbuild.config');
+
+    const registeredMiddlewares: Array<{ path?: string }> = [];
+
+    rootConfigDevSetup(
+      {
+        unshift: (...handlers) => {
+          registeredMiddlewares.unshift(...handlers);
+        },
+        push: (...handlers) => {
+          registeredMiddlewares.push(...handlers);
+        },
+      },
+      {} as never,
+    );
+
+    const middlewarePaths = registeredMiddlewares
+      .map((middleware) => middleware.path)
+      .filter(Boolean);
+
+    expect(middlewarePaths).toEqual(
+      expect.arrayContaining(['/api/auth/v1/fmo/admin/tile/data']),
+    );
+  });
 });
 
 describe('captured app api mock matching', () => {
