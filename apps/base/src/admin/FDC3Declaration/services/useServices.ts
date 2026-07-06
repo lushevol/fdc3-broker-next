@@ -2,9 +2,6 @@ import React from 'react';
 import { getHooksBase } from '../../../hooks/HooksBase';
 import { ActionType } from '../../../hooks/reducer/util/ActionType';
 import { postService } from '../../../hooks/service';
-import intentsData from '../../../fdc3/declarations/intents.json';
-import contextsData from '../../../fdc3/declarations/contexts.json';
-import appDeclarationsData from '../../../fdc3/declarations/fdc3-definitions.json';
 
 const useServices = () => {
   const { baseDispatch } = getHooksBase();
@@ -52,8 +49,6 @@ const useServices = () => {
 
   const getDeclaration = React.useCallback(
     async (entitlementsToken, data) => {
-      // Day 2: API Integration
-      /*
       try {
         dispacthErrorMessage(undefined);
         if (getDeclarationRef?.current) {
@@ -68,16 +63,12 @@ const useServices = () => {
         return resposnse?.data?.data ?? [];
       } catch (_e) {}
       return [];
-      */
-      return (appDeclarationsData as any) || [];
     },
     [dispacthErrorMessage],
   );
 
   const updateDeclaration = React.useCallback(
     async (entitlementsToken, data) => {
-      // Day 2: API Integration
-      /*
       try {
         dispacthErrorMessage(undefined);
         if (updateDeclarationRef?.current) {
@@ -92,16 +83,12 @@ const useServices = () => {
         return resposnse?.data?.data ?? {};
       } catch (_e) {}
       return {};
-      */
-      return {};
     },
     [dispacthErrorMessage],
   );
 
   const createDeclaration = React.useCallback(
     async (entitlementsToken, data) => {
-      // Day 2: API Integration
-      /*
       try {
         dispacthErrorMessage(undefined);
         if (createDeclarationRef?.current) {
@@ -116,16 +103,12 @@ const useServices = () => {
         return resposnse?.data?.data ?? {};
       } catch (_e) {}
       return {};
-      */
-      return {};
     },
     [dispacthErrorMessage],
   );
 
   const deleteDeclaration = React.useCallback(
     async (entitlementsToken, data) => {
-      // Day 2: API Integration
-      /*
       try {
         dispacthErrorMessage(undefined);
         if (deleteDeclarationRef?.current) {
@@ -140,17 +123,12 @@ const useServices = () => {
         return resposnse?.data?.data ?? {};
       } catch (_e) {}
       return {};
-      */
-      return {};
     },
     [dispacthErrorMessage],
   );
 
   const getIntentList = React.useCallback(async (entitlementsToken) => {
-    // Day 2: API Integration
-    /*
     try {
-      // Mocking or using potential endpoint
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/intent/data', {
         entitlementsToken,
       });
@@ -158,13 +136,9 @@ const useServices = () => {
     } catch (_e) {
       return [];
     }
-    */
-    return (intentsData as any) || [];
   }, []);
 
   const createIntent = React.useCallback(async (entitlementsToken, data) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/intent/create', {
         entitlementsToken,
@@ -174,13 +148,9 @@ const useServices = () => {
     } catch (_e) {
       return {};
     }
-    */
-    return {};
   }, []);
 
   const updateIntent = React.useCallback(async (entitlementsToken, data) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/intent/update', {
         entitlementsToken,
@@ -190,13 +160,9 @@ const useServices = () => {
     } catch (_e) {
       return {};
     }
-    */
-    return {};
   }, []);
 
   const deleteIntent = React.useCallback(async (entitlementsToken, data) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/intent/delete', {
         entitlementsToken,
@@ -206,34 +172,25 @@ const useServices = () => {
     } catch (_e) {
       return {};
     }
-    */
-    return {};
   }, []);
 
   const getContextList = React.useCallback(async (entitlementsToken) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/context/data', {
         entitlementsToken,
       });
-      return resposnse?.data?.data ?? [];
+      return (
+        resposnse?.data?.data?.map((ctx) => ({
+          ...ctx,
+          samples: ctx.samples ?? ctx.simples ?? [],
+        })) ?? []
+      );
     } catch (_e) {
       return [];
     }
-    */
-    // Map 'simples' from JSON to 'samples' expected by interface
-    return (
-      (contextsData as any)?.map((ctx: any) => ({
-        ...ctx,
-        samples: ctx.simples,
-      })) || []
-    );
   }, []);
 
   const createContext = React.useCallback(async (entitlementsToken, data) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/context/create', {
         entitlementsToken,
@@ -243,13 +200,9 @@ const useServices = () => {
     } catch (_e) {
       return {};
     }
-    */
-    return {};
   }, []);
 
   const updateContext = React.useCallback(async (entitlementsToken, data) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/context/update', {
         entitlementsToken,
@@ -259,13 +212,9 @@ const useServices = () => {
     } catch (_e) {
       return {};
     }
-    */
-    return {};
   }, []);
 
   const deleteContext = React.useCallback(async (entitlementsToken, data) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/context/delete', {
         entitlementsToken,
@@ -275,8 +224,6 @@ const useServices = () => {
     } catch (_e) {
       return {};
     }
-    */
-    return {};
   }, []);
 
   return {
