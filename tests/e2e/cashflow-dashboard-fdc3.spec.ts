@@ -266,4 +266,112 @@ test.describe('Cashflow FDC3 migration', () => {
     expect(brokerHealth.hasAddIntentListener).toBeTruthy();
     expect(brokerHealth.registeredIntentCount).toBeGreaterThanOrEqual(1);
   });
+
+  test('external-originated SearchCashflows intent triggers cashflow blotter via broker', async ({ page }) => {
+    await loginToWorkspace(page);
+
+    // ---- Phase 1: Open Cashflow Blotter so it registers a SearchCashflows listener ----
+    await openTileFromDrawer(page, 'Cashflow Blotter');
+
+    await expect
+      .poll(async () => registeredSearchCashflowListenerCount(page), { timeout: 30_000 })
+      .toBeGreaterThanOrEqual(1);
+
+    // ---- Phase 2: Simulate an external (OpenFin) intent arriving at the broker ----
+    // This mirrors the exact flow: OpenFin bridge receives intent from external
+    // source, calls handleOpenFinIntent → routeOpenFinIntent → raiseIntent
+    // with source.appId = 'external' (EXTERNAL_OPENFIN_SOURCE_APP_ID).
+    const searchContext = {
+      type: 'scb.fmptp.cashflow.query' as const,
+      target: 'cashflow_cn' as const,
+      filters: [
+        { field: 'Cashflow.Cashflow_State', operator: 'IN', values: ['WAITING'] },
+      ],
+    };
+
+    const resolutionResult = await page.evaluate(async (context) => {
+      const broker = (window as any).__RATAN_FDC3__?.brokerInstance;
+      if (!broker) throw new Error('FDC3 broker not available');
+
+      // External source with appId='external' — same as what createExternalOpenFinSource()
+      // produces in broker.ts (line 291-295). This tag prevents the broker from routing
+      // an unresolved intent back to OpenFin (infinite loop protection).
+      const resolution = await broker.raiseIntent(
+        'SearchCashflows',
+        context,
+        'cashflow_cn',
+        { appId: 'external' },
+      );
+
+      let result: unknown = undefined;
+      try {
+        result = await resolution.getResult();
+      } catch {
+        // getResult may reject if the handler didn't return a value
+      }
+
+      return {
+        sourceAppId: resolution.source?.appId,
+        sourceInstanceId: resolution.source?.instanceId,
+        result,
+      };
+    }, searchContext);
+
+    expect(resolutionResult.sourceAppId).toBe('cashflow_cn');
+
+    // The cashflow blotter's handler returns { handled: true, filters: [...] }
+    // when filters match the SearchCashflows context schema
+    if (resolutionResult.result) {
+      expect((resolutionResult.result as any).handled).toBe(true);
+    }
+
+    // ---- Phase 3: Verify the existing tab is still rendered ----
+    await expect(page.getByRole('tab', { name: 'Cashflow Blotter' }).first()).toBeVisible();
+  });
+
+  test('external-originated SearchCashflows intent opens cashflow blotter if not already running', async ({ page }) => {
+    await loginToWorkspace(page);
+
+    // ---- Verify no cashflow blotter tab is open yet ----
+    const cashflowTabVisible = await page.getByRole('tab', { name: 'Cashflow Blotter' }).isVisible().catch(() => false);
+    if (!cashflowTabVisible) {
+      // Confirm it's not there
+      await expect(page.getByRole('tab', { name: 'Cashflow Blotter' })).toHaveCount(0);
+    }
+
+    // ---- Raise SearchCashflows as an external intent without opening the tile manually ----
+    const searchContext = {
+      type: 'scb.fmptp.cashflow.query' as const,
+      target: 'cashflow_cn' as const,
+      filters: [
+        { field: 'Cashflow.Cashflow_State', operator: 'IN', values: ['WAITING'] },
+      ],
+    };
+
+    await page.evaluate(async (context) => {
+      const broker = (window as any).__RATAN_FDC3__?.brokerInstance;
+      if (!broker) throw new Error('FDC3 broker not available');
+
+      // External source intent — triggers the broker to open the cashflow_cn
+      // app via deliverIntent → open() → waitForIntentListener → deliver
+      const resolution = await broker.raiseIntent(
+        'SearchCashflows',
+        context,
+        'cashflow_cn',
+        { appId: 'external' },
+      );
+
+      return {
+        sourceAppId: resolution.source?.appId,
+      };
+    }, searchContext);
+
+    // ---- Verify the broker opened the cashflow blotter tile ----
+    await expect(page.getByRole('tab', { name: 'Cashflow Blotter' }).first()).toBeVisible({ timeout: 30_000 });
+
+    // Verify the SearchCashflows listener is now registered
+    await expect
+      .poll(async () => registeredSearchCashflowListenerCount(page), { timeout: 15_000 })
+      .toBeGreaterThanOrEqual(1);
+  });
 });
