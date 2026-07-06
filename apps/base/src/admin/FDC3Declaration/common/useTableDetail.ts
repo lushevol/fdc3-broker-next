@@ -51,7 +51,9 @@ const useTableDetail = (categories) => {
 
   const onOpen = React.useCallback(
     (row, mode) => () => {
-      const temp = JSON.parse(JSON.stringify(row));
+      const temp = row
+        ? JSON.parse(JSON.stringify(row))
+        : { appId: '', interop: { intents: { listensFor: [], raises: [] } } };
       temp.mode = mode;
       setRecord(temp);
       setOpenDetail(true);

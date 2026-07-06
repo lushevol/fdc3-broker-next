@@ -13,6 +13,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Typography from '@mui/material/Typography';
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import type { FDC3ContextDefinition } from './interface';
+import { getContextRows, getContextType } from './model';
 
 interface ContextMasterListProps {
   contexts: FDC3ContextDefinition[];
@@ -21,6 +22,7 @@ interface ContextMasterListProps {
   onDelete?: (context: FDC3ContextDefinition) => Promise<void>;
   isLoading: boolean;
   readOnly?: boolean;
+  getReferences?: (contextType: string) => string[];
 }
 
 const ContextMasterList: React.FC<ContextMasterListProps> = ({
@@ -30,6 +32,7 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
   onDelete,
   isLoading,
   readOnly,
+  getReferences,
 }) => {
   const [open, setOpen] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
@@ -40,18 +43,39 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
     schema: { type: '' as any },
     description: '',
   });
+  const [schemaJson, setSchemaJson] = React.useState('{}');
+  const [samplesJson, setSamplesJson] = React.useState('[]');
+  const [jsonError, setJsonError] = React.useState('');
+
+  const buildDefaultSchema = (type: string) => ({
+    type: 'object',
+    properties: {
+      type: {
+        const: type,
+      },
+    },
+    required: ['type'],
+  });
 
   const handleOpenCreate = () => {
     setIsEdit(false);
     setTempType('');
-    setCurrentContext({ schema: {}, description: '' });
+    setCurrentContext({ schema: buildDefaultSchema('') as any, description: '', samples: [] });
+    setSchemaJson(JSON.stringify(buildDefaultSchema(''), null, 2));
+    setSamplesJson('[]');
+    setJsonError('');
     setOpen(true);
   };
 
   const handleOpenEdit = (context: FDC3ContextDefinition) => {
     setIsEdit(true);
-    setTempType(context.schema.type as string);
+    setTempType(getContextType(context));
     setCurrentContext({ ...context });
+    setSchemaJson(
+      JSON.stringify(context.schema ?? buildDefaultSchema(getContextType(context)), null, 2),
+    );
+    setSamplesJson(JSON.stringify(context.samples ?? (context as any).simples ?? [], null, 2));
+    setJsonError('');
     setOpen(true);
   };
 
@@ -62,9 +86,40 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
 
   const handleSave = async () => {
     if (tempType) {
+      let parsedSchema: unknown;
+      let parsedSamples: unknown;
+
+      try {
+        parsedSchema = JSON.parse(schemaJson);
+        parsedSamples = JSON.parse(samplesJson);
+      } catch (error) {
+        setJsonError(error instanceof Error ? error.message : 'Invalid JSON');
+        return;
+      }
+
+      if (!parsedSchema || typeof parsedSchema !== 'object' || Array.isArray(parsedSchema)) {
+        setJsonError('Schema JSON must be an object');
+        return;
+      }
+
+      if (!Array.isArray(parsedSamples)) {
+        setJsonError('Sample JSON must be an array');
+        return;
+      }
+
       const contextToSave = {
         ...currentContext,
-        schema: { ...currentContext.schema, type: tempType as any },
+        schema: {
+          ...(parsedSchema as object),
+          properties: {
+            ...((parsedSchema as any).properties ?? {}),
+            type: {
+              ...((parsedSchema as any).properties?.type ?? {}),
+              const: tempType,
+            },
+          },
+        } as any,
+        samples: parsedSamples as any,
       };
 
       if (isEdit && onUpdate) {
@@ -79,21 +134,24 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
   };
 
   const handleConfirmDelete = async () => {
-    if (onDelete && currentContext.schema?.type) {
+    if (onDelete && getContextType(currentContext)) {
       await onDelete(currentContext);
       setDeleteDialogOpen(false);
       setCurrentContext({ schema: {}, description: '' });
     }
   };
 
+  const references = getReferences?.(getContextType(currentContext)) ?? [];
+  const rows = React.useMemo(() => getContextRows(contexts), [contexts]);
+
   const columns: GridColDef[] = [
     {
       field: 'type',
       headerName: 'Context Type',
-      width: 250,
-      valueGetter: (params) => params.row.schema.type,
+      flex: 0.8,
+      minWidth: 240,
     },
-    { field: 'description', headerName: 'Description', width: 400 },
+    { field: 'description', headerName: 'Description', flex: 1.2, minWidth: 320 },
     ...(readOnly
       ? []
       : [
@@ -124,8 +182,25 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
   ];
 
   return (
-    <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+    <Box
+      sx={{
+        height: '100%',
+        minHeight: 0,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          p: 1,
+          flexShrink: 0,
+        }}
+      >
         <Typography variant="h6" color="primary">
           FDC3 Contexts Configuration
         </Typography>
@@ -136,7 +211,7 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
         )}
       </Box>
       <DataGrid
-        rows={contexts.map((c) => ({ id: c.schema.type, ...c }))}
+        rows={rows}
         columns={columns}
         loading={isLoading}
         pageSizeOptions={[5, 10, 20]}
@@ -144,7 +219,13 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
           pagination: { paginationModel: { pageSize: 10 } },
         }}
         disableRowSelectionOnClick
-        sx={{ border: 'none', '& .MuiDataGrid-cell:hover': { color: 'primary.main' } }}
+        sx={{
+          border: 'none',
+          flex: 1,
+          height: '100%',
+          minHeight: 0,
+          '& .MuiDataGrid-cell:hover': { color: 'primary.main' },
+        }}
       />
 
       {/* Form Dialog */}
@@ -177,6 +258,27 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
               }
               placeholder="Describe this context type..."
             />
+            <TextField
+              label="Schema JSON"
+              fullWidth
+              multiline
+              minRows={6}
+              variant="outlined"
+              value={schemaJson}
+              onChange={(e) => setSchemaJson(e.target.value)}
+              error={!!jsonError}
+            />
+            <TextField
+              label="Sample JSON Array"
+              fullWidth
+              multiline
+              minRows={4}
+              variant="outlined"
+              value={samplesJson}
+              onChange={(e) => setSamplesJson(e.target.value)}
+              error={!!jsonError}
+              helperText={jsonError}
+            />
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
@@ -195,8 +297,13 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
         <DialogContent>
           <DialogContentText>
             Are you sure you want to permanently delete the context{' '}
-            <strong>{currentContext.schema?.type}</strong>? This action cannot be undone.
+            <strong>{getContextType(currentContext)}</strong>? This action cannot be undone.
           </DialogContentText>
+          {references.length > 0 && (
+            <DialogContentText color="warning.main" sx={{ mt: 2 }}>
+              Used by: {references.join(', ')}
+            </DialogContentText>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>

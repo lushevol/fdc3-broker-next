@@ -1,6 +1,7 @@
-import { Grid, useMediaQuery } from "@mui/material";
-import cn from "classnames";
-import { getBusinessFieldsFromCache, useParentData } from "Import/ratanutils";
+import { Grid, useMediaQuery } from '@mui/material';
+import cn from 'classnames';
+import { getBusinessFieldsFromCache, useParentData } from 'Import/ratanutils';
+import { useFDC3 } from 'ratan-fdc3-agent';
 import {
   createContext,
   Dispatch,
@@ -10,39 +11,38 @@ import {
   useEffect,
   useMemo,
   useState,
-} from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  useDisplayResolution,
-  useE2Elatency,
-  usePageView,
-  useTimeCost,
-} from "src/Root/analysis";
+} from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useDisplayResolution, useE2Elatency, usePageView, useTimeCost } from 'src/Root/analysis';
 import {
   BLOTTER_RENDERING_LATENCY,
   BLOTTER_RENDERING_LATENCY_STAGES,
   READ_FIELDS_FROM_CACHE,
   READ_FIELDS_WITHOUT_CACHE,
-} from "src/Root/analysis/const";
-import { getFieldsVersion } from "src/Root/common/utils";
-import { featureScopedEnabled } from "src/Root/common/utils/featureFlagController";
-import { CommonUtil, ReactRouterDom } from "src/Root/import";
-import { useRatanDispatcher } from "src/Root/import/ratancomponents";
-import { TileProps } from "src/Root/routing/common/interface";
+} from 'src/Root/analysis/const';
+import { getFieldsVersion } from 'src/Root/common/utils';
+import { featureScopedEnabled } from 'src/Root/common/utils/featureFlagController';
+import { CommonUtil, ReactRouterDom } from 'src/Root/import';
+import { useRatanDispatcher } from 'src/Root/import/ratancomponents';
+import {
+  type CashflowSearchAgent,
+  registerCashflowSearchIntent,
+} from 'src/Root/fdc3/cashflowInterop';
+import { TileProps } from 'src/Root/routing/common/interface';
 
-import json from "../../../package.json";
-import CashflowDataGrid from "../components/CashflowDataGrid";
-import CashflowNotification from "../components/CashflowNotification";
-import CustomSearchView from "../components/CustomSearchView";
-import GridFooter from "../components/GridFooter";
-import PresetQueryCount from "../components/PresetQueryCount";
-import QuickFilters from "../components/QuickFilters";
-import QuickSearch from "../components/QuickSearch";
-import ToggleVisibleDivider from "../components/ToggleVisibleDivider";
-import { cashflowCustomFields } from "./config/fieldsConfig";
-import { setInitParams, setOpensearch } from "./store/actions";
-import { RootState } from "./store/interface";
-import StyledRoot, { BreakPoint, classes } from "./style";
+import json from '../../../package.json';
+import CashflowDataGrid from '../components/CashflowDataGrid';
+import CashflowNotification from '../components/CashflowNotification';
+import CustomSearchView from '../components/CustomSearchView';
+import GridFooter from '../components/GridFooter';
+import PresetQueryCount from '../components/PresetQueryCount';
+import QuickFilters from '../components/QuickFilters';
+import QuickSearch from '../components/QuickSearch';
+import ToggleVisibleDivider from '../components/ToggleVisibleDivider';
+import { cashflowCustomFields } from './config/fieldsConfig';
+import { setInitParams, setOpensearch } from './store/actions';
+import { RootState } from './store/interface';
+import StyledRoot, { BreakPoint, classes } from './style';
 
 export const AgGridFilterContext = createContext<{
   aggridTags: AggridFilterTag[];
@@ -59,9 +59,7 @@ export const AgGridFilterContext = createContext<{
 const App: FC<TileProps> = ({ parameters }) => {
   const { isInitComplete } = useParentData();
   const [isGetFieldsDone, setIsGetFieldsDone] = useState(false);
-  const showCashflowSearchBar = useSelector(
-    (state: RootState) => state.showCashflowSearchBar
-  );
+  const showCashflowSearchBar = useSelector((state: RootState) => state.showCashflowSearchBar);
   const dynamicClass = cn(classes.searchSection, {
     hide: !showCashflowSearchBar,
   });
@@ -69,24 +67,23 @@ const App: FC<TileProps> = ({ parameters }) => {
   const [aggridTags, setAggridTags] = useState<AggridFilterTag[]>([]);
   const dispatch = useDispatch<any>();
   const { dispatchVersionState, dispatchApiStatusList } = useRatanDispatcher();
-  const { initTrackingPoints, addTrackingPoint } = useE2Elatency(
-    BLOTTER_RENDERING_LATENCY
-  );
+  const { initTrackingPoints, addTrackingPoint } = useE2Elatency(BLOTTER_RENDERING_LATENCY);
   const { startTracking: startTrackingReadfromcache } = useTimeCost({
-    subType: "event",
+    subType: 'event',
   });
   const isBigScreen = useMediaQuery(`(min-width:${BreakPoint.Middle}px)`);
   usePageView();
   useDisplayResolution();
   const { useLocation } = ReactRouterDom;
   const location = useLocation();
+  const fdc3 = useFDC3() as CashflowSearchAgent;
 
   const removeAggridTag = useCallback(
     (colId: string) => {
       gridEvent.api?.destroyFilter(colId);
       setAggridTags((val) => val.filter((subItem) => subItem.colId !== colId));
     },
-    [gridEvent]
+    [gridEvent],
   );
 
   const clearAggridTags = useCallback(() => {
@@ -99,6 +96,30 @@ const App: FC<TileProps> = ({ parameters }) => {
       dispatch(setInitParams(parameters));
     }
   }, [parameters]);
+
+  useEffect(() => {
+    let isMounted = true;
+    let listener: Awaited<ReturnType<typeof registerCashflowSearchIntent>> | undefined;
+
+    registerCashflowSearchIntent(fdc3, (filters) => {
+      dispatch(setInitParams({ filters }));
+    })
+      .then((nextListener) => {
+        if (isMounted) {
+          listener = nextListener;
+        } else {
+          void nextListener.unsubscribe();
+        }
+      })
+      .catch((error) => {
+        console.warn('[Cashflow FDC3] Failed to register SearchCashflows listener', error);
+      });
+
+    return () => {
+      isMounted = false;
+      void listener?.unsubscribe();
+    };
+  }, [dispatch, fdc3]);
   /**
    * option1
    * OpenSearch flag in url param
@@ -117,7 +138,7 @@ const App: FC<TileProps> = ({ parameters }) => {
    */
   useEffect(() => {
     const pathname = location.pathname;
-    if (pathname.includes("/cashflow_open_search")) {
+    if (pathname.includes('/cashflow_open_search')) {
       dispatch(setOpensearch(true));
     }
   }, []);
@@ -129,20 +150,16 @@ const App: FC<TileProps> = ({ parameters }) => {
 
   useEffect(() => {
     dispatchVersionState({ version: json.version, env: CommonUtil.getEnv() });
-    dispatchApiStatusList(["TDS3_Trade_Query", "DQSL_Counterparty_Query_V2"]);
+    dispatchApiStatusList(['TDS3_Trade_Query', 'DQSL_Counterparty_Query_V2']);
     if (isInitComplete) {
-      const {
-        fields: fieldsVersionBefore,
-        fieldsConfig: fieldsConfigVersionBefore,
-      } = getFieldsVersion() ?? {};
+      const { fields: fieldsVersionBefore, fieldsConfig: fieldsConfigVersionBefore } =
+        getFieldsVersion() ?? {};
       const { completeTracking, abortTracking } = startTrackingReadfromcache();
-      getBusinessFieldsFromCache("cashflowCN", cashflowCustomFields)
+      getBusinessFieldsFromCache('cashflowCN', cashflowCustomFields)
         .then(() => {
           setIsGetFieldsDone(true);
-          const {
-            fields: fieldsVersionAfter,
-            fieldsConfig: fieldsConfigVersionAfter,
-          } = getFieldsVersion() ?? {};
+          const { fields: fieldsVersionAfter, fieldsConfig: fieldsConfigVersionAfter } =
+            getFieldsVersion() ?? {};
           completeTracking({
             name:
               fieldsVersionBefore === fieldsVersionAfter &&
@@ -165,13 +182,11 @@ const App: FC<TileProps> = ({ parameters }) => {
       removeAggridTag,
       clearAggridTags,
     }),
-    [aggridTags, setAggridTags, removeAggridTag, clearAggridTags]
+    [aggridTags, setAggridTags, removeAggridTag, clearAggridTags],
   );
 
   return isInitComplete && isGetFieldsDone ? (
-    <StyledRoot
-      className={`${classes.ratanCashflow} kp--ratan_cashflow_blotter`}
-    >
+    <StyledRoot className={`${classes.ratanCashflow} kp--ratan_cashflow_blotter`}>
       <AgGridFilterContext.Provider value={setAgGridValue}>
         {/* <Version version={json.version} /> */}
         <div className={dynamicClass}>
@@ -182,8 +197,8 @@ const App: FC<TileProps> = ({ parameters }) => {
                 xs={9}
                 className={classes.box}
                 sx={{
-                  minWidth: isBigScreen ? "950px" : "100%",
-                  paddingBottom: "4px !important",
+                  minWidth: isBigScreen ? '950px' : '100%',
+                  paddingBottom: '4px !important',
                 }}
               >
                 <div className={`${classes.border} kp--quick_search`}>
@@ -196,8 +211,8 @@ const App: FC<TileProps> = ({ parameters }) => {
                 xs={3}
                 className={classes.box}
                 sx={{
-                  minWidth: isBigScreen ? "400px" : "500px",
-                  paddingBottom: "4px !important",
+                  minWidth: isBigScreen ? '400px' : '500px',
+                  paddingBottom: '4px !important',
                 }}
               >
                 <PresetQueryCount />
@@ -210,7 +225,7 @@ const App: FC<TileProps> = ({ parameters }) => {
           </div>
         </div>
         <ToggleVisibleDivider />
-        {featureScopedEnabled("Enable_Search_Bar") && <QuickFilters />}
+        {featureScopedEnabled('Enable_Search_Bar') && <QuickFilters />}
         <GridFooter />
         <CashflowDataGrid />
         <CashflowNotification />

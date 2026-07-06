@@ -105,6 +105,9 @@ const Root = styled('section')(({ theme }) => ({
       '&>div:first-of-type': {
         height: 'auto!important',
       },
+      '&>.FDC3Declaration-root:first-of-type': {
+        height: '100%!important',
+      },
     },
   },
   [`& .${classes.addtab}`]: {

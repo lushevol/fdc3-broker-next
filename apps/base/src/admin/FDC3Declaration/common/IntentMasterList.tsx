@@ -11,8 +11,6 @@ import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import type { FDC3IntentDefinition } from './interface';
 
@@ -23,6 +21,7 @@ interface IntentMasterListProps {
   onDelete?: (intent: FDC3IntentDefinition) => Promise<void>;
   isLoading: boolean;
   readOnly?: boolean;
+  getReferences?: (intentName: string) => string[];
 }
 
 const IntentMasterList: React.FC<IntentMasterListProps> = ({
@@ -32,6 +31,7 @@ const IntentMasterList: React.FC<IntentMasterListProps> = ({
   onDelete,
   isLoading,
   readOnly,
+  getReferences,
 }) => {
   const [open, setOpen] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
@@ -78,6 +78,8 @@ const IntentMasterList: React.FC<IntentMasterListProps> = ({
     }
   };
 
+  const references = getReferences?.(currentIntent.name) ?? [];
+
   const columns: GridColDef[] = [
     { field: 'name', headerName: 'Intent Name', width: 250 },
     { field: 'description', headerName: 'Description', width: 400 },
@@ -111,8 +113,25 @@ const IntentMasterList: React.FC<IntentMasterListProps> = ({
   ];
 
   return (
-    <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1 }}>
+    <Box
+      sx={{
+        height: '100%',
+        minHeight: 0,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          p: 1,
+          flexShrink: 0,
+        }}
+      >
         <Typography variant="h6" color="primary">
           FDC3 Intents Configuration
         </Typography>
@@ -131,7 +150,13 @@ const IntentMasterList: React.FC<IntentMasterListProps> = ({
           pagination: { paginationModel: { pageSize: 10 } },
         }}
         disableRowSelectionOnClick
-        sx={{ border: 'none', '& .MuiDataGrid-cell:hover': { color: 'primary.main' } }}
+        sx={{
+          border: 'none',
+          flex: 1,
+          height: '100%',
+          minHeight: 0,
+          '& .MuiDataGrid-cell:hover': { color: 'primary.main' },
+        }}
       />
 
       {/* Access / Form Dialog */}
@@ -183,6 +208,11 @@ const IntentMasterList: React.FC<IntentMasterListProps> = ({
             <strong>{currentIntent.name}</strong>? This action cannot be undone and may affect
             applications using this intent.
           </DialogContentText>
+          {references.length > 0 && (
+            <DialogContentText color="warning.main" sx={{ mt: 2 }}>
+              Used by: {references.join(', ')}
+            </DialogContentText>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>

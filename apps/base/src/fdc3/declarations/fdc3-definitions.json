@@ -43,5 +43,44 @@
         ]
       }
     }
+  },
+  {
+    "appId": "cashflow_cn_dashboard",
+    "interop": {
+      "intents": {
+        "raises": [
+          {
+            "intent": "SearchCashflows",
+            "contexts": ["scb.fmptp.cashflow.query"]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "appId": "cashflow_cn",
+    "interop": {
+      "intents": {
+        "listensFor": [
+          {
+            "intent": "SearchCashflows",
+            "contexts": ["scb.fmptp.cashflow.query"]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "appId": "cashflow_group_management",
+    "interop": {
+      "intents": {
+        "listensFor": [
+          {
+            "intent": "SearchCashflows",
+            "contexts": ["scb.fmptp.cashflow.query"]
+          }
+        ]
+      }
+    }
   }
 ]

@@ -1,4 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
 import type { ProxyOptions, RequestHandler, SetupMiddlewaresFn } from '@rsbuild/core';
 
 import { createCapturedApiMockMiddleware, type CapturedApiFixture } from './captured-api-mocks';
@@ -17,8 +19,15 @@ type Fdc3Intent = {
 type Fdc3Context = {
   schema?: {
     type?: string;
+    properties?: {
+      type?: {
+        const?: string;
+      };
+    };
   };
   description?: string;
+  samples?: unknown[];
+  simples?: unknown[];
 };
 
 type Fdc3Declaration = JsonRecord & {
@@ -29,6 +38,24 @@ type Fdc3Store = {
   intents: Fdc3Intent[];
   contexts: Fdc3Context[];
   declarations: Fdc3Declaration[];
+};
+
+export type Fdc3StorePaths = {
+  declarations: string;
+  intents: string;
+  contexts: string;
+};
+
+export type Fdc3StoreApi = Fdc3Store & {
+  createDeclaration: (body: JsonRecord) => Fdc3Declaration;
+  updateDeclaration: (body: JsonRecord) => Fdc3Declaration;
+  deleteDeclaration: (body: JsonRecord) => Fdc3Declaration;
+  createIntent: (body: JsonRecord) => Fdc3Intent;
+  updateIntent: (body: JsonRecord) => Fdc3Intent;
+  deleteIntent: (body: JsonRecord) => Fdc3Intent;
+  createContext: (body: JsonRecord) => Fdc3Context;
+  updateContext: (body: JsonRecord) => Fdc3Context;
+  deleteContext: (body: JsonRecord) => Fdc3Context;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -125,16 +152,118 @@ function sendAuthResponse(
   res.end(JSON.stringify(responseBody));
 }
 
-function loadInitialDeclarations(): Fdc3Declaration[] {
+function readJsonFile<T>(filePath: string, fallback: T): T {
   try {
-    const declarationPath = require.resolve('./fdc3-declaration.mock.json');
-    delete require.cache[declarationPath];
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const initialData = require('./fdc3-declaration.mock.json') as { data?: Fdc3Declaration[] };
-    return initialData.data ?? [];
+    return JSON.parse(fs.readFileSync(filePath, 'utf8')) as T;
   } catch {
-    return [];
+    return fallback;
   }
+}
+
+function writeJsonFile(filePath: string, value: unknown): void {
+  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function getFdc3ContextType(context: Fdc3Context): string {
+  return context.schema?.properties?.type?.const ?? context.schema?.type ?? '';
+}
+
+export function createFileBackedFdc3Store(paths: Fdc3StorePaths): Fdc3StoreApi {
+  const api: Fdc3StoreApi = {
+    declarations: readJsonFile<Fdc3Declaration[]>(paths.declarations, []),
+    intents: readJsonFile<Fdc3Intent[]>(paths.intents, []),
+    contexts: readJsonFile<Fdc3Context[]>(paths.contexts, []),
+    createDeclaration(body) {
+      const item: Fdc3Declaration = {
+        ...body,
+        appId: typeof body.appId === 'string' && body.appId ? body.appId : `app-${Date.now()}`,
+      };
+      api.declarations = [
+        item,
+        ...api.declarations.filter((declaration) => declaration.appId !== item.appId),
+      ];
+      writeJsonFile(paths.declarations, api.declarations);
+      return item;
+    },
+    updateDeclaration(body) {
+      const appId = typeof body.appId === 'string' ? body.appId : '';
+      const item: Fdc3Declaration = { ...body, appId };
+      api.declarations = api.declarations.map((declaration) =>
+        declaration.appId === appId ? { ...declaration, ...item } : declaration,
+      );
+      writeJsonFile(paths.declarations, api.declarations);
+      return item;
+    },
+    deleteDeclaration(body) {
+      const appId = typeof body.appId === 'string' ? body.appId : '';
+      const item: Fdc3Declaration = { ...body, appId };
+      api.declarations = api.declarations.filter((declaration) => declaration.appId !== appId);
+      writeJsonFile(paths.declarations, api.declarations);
+      return item;
+    },
+    createIntent(body) {
+      const item: Fdc3Intent = {
+        name: typeof body.name === 'string' ? body.name : '',
+        description: typeof body.description === 'string' ? body.description : '',
+      };
+
+      if (item.name && !api.intents.some((intent) => intent.name === item.name)) {
+        api.intents = [...api.intents, item];
+        writeJsonFile(paths.intents, api.intents);
+      }
+
+      return item;
+    },
+    updateIntent(body) {
+      const item: Fdc3Intent = {
+        name: typeof body.name === 'string' ? body.name : '',
+        description: typeof body.description === 'string' ? body.description : '',
+      };
+      api.intents = api.intents.map((intent) => (intent.name === item.name ? item : intent));
+      writeJsonFile(paths.intents, api.intents);
+      return item;
+    },
+    deleteIntent(body) {
+      const item: Fdc3Intent = {
+        name: typeof body.name === 'string' ? body.name : '',
+        description: typeof body.description === 'string' ? body.description : '',
+      };
+      api.intents = api.intents.filter((intent) => intent.name !== item.name);
+      writeJsonFile(paths.intents, api.intents);
+      return item;
+    },
+    createContext(body) {
+      const item = body as Fdc3Context;
+      const contextType = getFdc3ContextType(item);
+
+      if (contextType && !api.contexts.some((context) => getFdc3ContextType(context) === contextType)) {
+        api.contexts = [...api.contexts, item];
+        writeJsonFile(paths.contexts, api.contexts);
+      }
+
+      return item;
+    },
+    updateContext(body) {
+      const item = body as Fdc3Context;
+      const contextType = getFdc3ContextType(item);
+      api.contexts = api.contexts.map((context) =>
+        getFdc3ContextType(context) === contextType ? item : context,
+      );
+      writeJsonFile(paths.contexts, api.contexts);
+      return item;
+    },
+    deleteContext(body) {
+      const item = body as Fdc3Context;
+      const contextType = getFdc3ContextType(item);
+      api.contexts = api.contexts.filter(
+        (context) => getFdc3ContextType(context) !== contextType,
+      );
+      writeJsonFile(paths.contexts, api.contexts);
+      return item;
+    },
+  };
+
+  return api;
 }
 
 function loadCategoryResponse(): unknown {
@@ -142,6 +271,12 @@ function loadCategoryResponse(): unknown {
   delete require.cache[categoryPath];
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   return require('./category.mock.json');
+}
+
+function loadTileResponse(): unknown[] {
+  const drawers = Array.isArray(mockLoginResp.drawers) ? mockLoginResp.drawers : [];
+
+  return drawers.flatMap((drawer) => (Array.isArray(drawer.tiles) ? drawer.tiles : []));
 }
 
 function isFlowzeroWorkflowServiceFixture(fixture: CapturedApiFixture): boolean {
@@ -155,18 +290,12 @@ function isFlowzeroWorkflowServiceFixture(fixture: CapturedApiFixture): boolean 
   );
 }
 
-function createFdc3Store(): Fdc3Store {
-  return {
-    intents: [
-      { name: 'ViewInstrument', description: 'View instrument details' },
-      { name: 'ViewContact', description: 'View contact details' },
-    ],
-    contexts: [
-      { schema: { type: 'fdc3.instrument' }, description: 'Financial Instrument' },
-      { schema: { type: 'fdc3.contact' }, description: 'Contact Info' },
-    ],
-    declarations: loadInitialDeclarations(),
-  };
+function createFdc3Store(): Fdc3StoreApi {
+  return createFileBackedFdc3Store({
+    declarations: path.resolve(__dirname, '../base/src/fdc3/declarations/fdc3-definitions.json'),
+    intents: path.resolve(__dirname, '../base/src/fdc3/declarations/intents.json'),
+    contexts: path.resolve(__dirname, '../base/src/fdc3/declarations/contexts.json'),
+  });
 }
 
 export const rootConfigProxy: ProxyOptions[] = [
@@ -250,6 +379,15 @@ export const rootConfigDevSetup: SetupMiddlewaresFn = (middlewares) => {
 
   middlewares.unshift(
     createCapturedApiMockMiddleware(capturedApiFixtures),
+    // Disable caching for the import map so updates take effect immediately
+    createMiddleware('/importmaplocal.json', (_req, res) => {
+      const filePath = path.resolve(__dirname, 'public/importmaplocal.json');
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(fs.readFileSync(filePath, 'utf-8'));
+    }),
     createMiddleware('/api/analytics/v1/fmo/print', (_req, res) => {
       sendNoContent(res);
     }),
@@ -260,124 +398,40 @@ export const rootConfigDevSetup: SetupMiddlewaresFn = (middlewares) => {
       sendJson(res, fdc3Store.intents);
     }),
     createMiddleware('/api/auth/v1/fmo/admin/fdc3/intent/create', async (req, res) => {
-      const body = await parseJsonBody(req);
-      const name = typeof body.name === 'string' ? body.name : '';
-
-      if (name) {
-        const existing = fdc3Store.intents.find((intent) => intent.name === name);
-        if (!existing) {
-          fdc3Store.intents.push({
-            name,
-            description: typeof body.description === 'string' ? body.description : '',
-          });
-        }
-      }
-
-      sendJson(res, body);
+      sendJson(res, fdc3Store.createIntent(await parseJsonBody(req)));
     }),
     createMiddleware('/api/auth/v1/fmo/admin/fdc3/intent/update', async (req, res) => {
-      const body = await parseJsonBody(req);
-      const name = typeof body.name === 'string' ? body.name : '';
-      const intentIndex = fdc3Store.intents.findIndex((intent) => intent.name === name);
-
-      if (intentIndex !== -1) {
-        fdc3Store.intents[intentIndex] = {
-          ...fdc3Store.intents[intentIndex],
-          name,
-          description:
-            typeof body.description === 'string'
-              ? body.description
-              : fdc3Store.intents[intentIndex].description,
-        };
-      }
-
-      sendJson(res, body);
+      sendJson(res, fdc3Store.updateIntent(await parseJsonBody(req)));
     }),
     createMiddleware('/api/auth/v1/fmo/admin/fdc3/intent/delete', async (req, res) => {
-      const body = await parseJsonBody(req);
-      const name = typeof body.name === 'string' ? body.name : '';
-      fdc3Store.intents = fdc3Store.intents.filter((intent) => intent.name !== name);
-      sendJson(res, body);
+      sendJson(res, fdc3Store.deleteIntent(await parseJsonBody(req)));
     }),
     createMiddleware('/api/auth/v1/fmo/admin/fdc3/context/data', (_req, res) => {
       sendJson(res, fdc3Store.contexts);
     }),
     createMiddleware('/api/auth/v1/fmo/admin/fdc3/context/create', async (req, res) => {
-      const body = await parseJsonBody(req);
-      const schema = body.schema as Fdc3Context['schema'] | undefined;
-      const schemaType = typeof schema?.type === 'string' ? schema.type : '';
-
-      if (schemaType) {
-        const existing = fdc3Store.contexts.find((context) => context.schema?.type === schemaType);
-        if (!existing) {
-          fdc3Store.contexts.push(body as unknown as Fdc3Context);
-        }
-      }
-
-      sendJson(res, body);
+      sendJson(res, fdc3Store.createContext(await parseJsonBody(req)));
     }),
     createMiddleware('/api/auth/v1/fmo/admin/fdc3/context/update', async (req, res) => {
-      const body = await parseJsonBody(req);
-      const schema = body.schema as Fdc3Context['schema'] | undefined;
-      const schemaType = typeof schema?.type === 'string' ? schema.type : '';
-      const contextIndex = fdc3Store.contexts.findIndex(
-        (context) => context.schema?.type === schemaType,
-      );
-
-      if (contextIndex !== -1) {
-        fdc3Store.contexts[contextIndex] = {
-          ...fdc3Store.contexts[contextIndex],
-          ...(body as unknown as Fdc3Context),
-        };
-      }
-
-      sendJson(res, body);
+      sendJson(res, fdc3Store.updateContext(await parseJsonBody(req)));
     }),
     createMiddleware('/api/auth/v1/fmo/admin/fdc3/context/delete', async (req, res) => {
-      const body = await parseJsonBody(req);
-      const schema = body.schema as Fdc3Context['schema'] | undefined;
-      const schemaType = typeof schema?.type === 'string' ? schema.type : '';
-      fdc3Store.contexts = fdc3Store.contexts.filter(
-        (context) => context.schema?.type !== schemaType,
-      );
-      sendJson(res, body);
+      sendJson(res, fdc3Store.deleteContext(await parseJsonBody(req)));
     }),
     createMiddleware('/api/auth/v1/fmo/admin/fdc3/data', (_req, res) => {
       sendJson(res, fdc3Store.declarations);
     }),
     createMiddleware('/api/auth/v1/fmo/admin/fdc3/create', async (req, res) => {
-      const body = await parseJsonBody(req);
-      const newItem: Fdc3Declaration = {
-        ...body,
-        appId: typeof body.appId === 'string' && body.appId ? body.appId : `app-${Date.now()}`,
-      };
-
-      fdc3Store.declarations.unshift(newItem);
-      sendJson(res, newItem);
+      sendJson(res, fdc3Store.createDeclaration(await parseJsonBody(req)));
     }),
     createMiddleware('/api/auth/v1/fmo/admin/fdc3/update', async (req, res) => {
-      const body = await parseJsonBody(req);
-      const appId = typeof body.appId === 'string' ? body.appId : '';
-      const declarationIndex = fdc3Store.declarations.findIndex(
-        (declaration) => declaration.appId === appId,
-      );
-
-      if (declarationIndex !== -1) {
-        fdc3Store.declarations[declarationIndex] = {
-          ...fdc3Store.declarations[declarationIndex],
-          ...body,
-        };
-      }
-
-      sendJson(res, body);
+      sendJson(res, fdc3Store.updateDeclaration(await parseJsonBody(req)));
     }),
     createMiddleware('/api/auth/v1/fmo/admin/fdc3/delete', async (req, res) => {
-      const body = await parseJsonBody(req);
-      const appId = typeof body.appId === 'string' ? body.appId : '';
-      fdc3Store.declarations = fdc3Store.declarations.filter(
-        (declaration) => declaration.appId !== appId,
-      );
-      sendJson(res, body);
+      sendJson(res, fdc3Store.deleteDeclaration(await parseJsonBody(req)));
+    }),
+    createMiddleware('/api/auth/v1/fmo/admin/tile/data', (_req, res) => {
+      sendJson(res, loadTileResponse());
     }),
     createMiddleware('/api/auth/v1/fmo/admin/category/data', (_req, res) => {
       res.statusCode = 200;

@@ -1,13 +1,10 @@
-import RefreshIcon from '@mui/icons-material/Refresh';
-import Autocomplete from '@mui/material/Autocomplete';
-import IconButton from '@mui/material/IconButton';
-import Stack from '@mui/material/Stack';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import React, { type ReactElement } from 'react';
 import ErrorBoundry from '../../components/ErrorBoundry';
-import Input from '../../components/Input';
 import Main from '../common/Main';
 import type { FDC3DeclarationProps } from './common/interface';
 import Root, { classes, PREFIX } from './common/style';
@@ -20,13 +17,11 @@ const FDC3Declaration: React.FC<FDC3DeclarationProps> = (
   props: FDC3DeclarationProps,
 ): ReactElement => {
   const {
-    store,
     // categories, // Removed
     // category, // Removed
     // onCategoryChange, // Removed
     // onInputChange, // Removed
     // inputValue, // Removed
-    refresh,
     disableCreateNew,
     intents,
     contexts,
@@ -36,13 +31,18 @@ const FDC3Declaration: React.FC<FDC3DeclarationProps> = (
     createContext,
     updateContext,
     deleteContext,
+    deleteDeclaration,
     isLoading,
     openDetail, // State tracking if dialog is open
     record, // Record being edited
-    onOpen, // Function to open (edit/new)
     onClose, // Function to close
     handleSaveDeclaration, // Custom save handler
     tiles, // Available tiles
+    search,
+    setSearch,
+    summary,
+    intentReferences,
+    contextReferences,
     ...rest
   } = useController(props);
 
@@ -52,10 +52,19 @@ const FDC3Declaration: React.FC<FDC3DeclarationProps> = (
     setTab(newValue);
   };
 
+  const tabPanelSx = (isActive: boolean) => ({
+    p: 2,
+    flex: 1,
+    minHeight: 0,
+    overflow: 'hidden',
+    display: isActive ? 'flex' : 'none',
+    flexDirection: 'column',
+  });
+
   return (
     <ErrorBoundry>
       <Root className={classes.root} data-testid={`${PREFIX}`} spacing={0} direction="column">
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2, flexShrink: 0 }}>
           <Tabs value={tab} onChange={handleTabChange} aria-label="fdc3 declaration tabs">
             <Tab label="Declarations" />
             <Tab label="Intents Master List" />
@@ -63,52 +72,112 @@ const FDC3Declaration: React.FC<FDC3DeclarationProps> = (
           </Tabs>
         </Box>
 
-        <Box sx={{ p: 2, height: '100%', display: tab === 0 ? 'block' : 'none' }}>
-          {/* Removed Category Selection Header */}
-          <Main
-            titleCreateNew="Create New Declaration"
-            columnVisibilityModel={{}}
-            disabledCreateNew={disableCreateNew}
-            isLoading={isLoading}
-            openDetail={false}
-            openAudit={false}
-            onCloseAudit={() => {}}
-            auditColumns={[]}
-            auditRows={[]}
-            // TableProps requirements
-            record={record || {}}
-            onClose={onClose}
-            onChange={() => {}}
-            onUpdate={() => {}}
-            onVerify={() => {}}
-            onDeactivate={() => {}}
-            onSave={() => {}}
-            onReset={() => {}}
-            resetId={0}
-            {...rest}
-          />
+        <Box sx={tabPanelSx(tab === 0)}>
+          {tab === 0 && (
+            <>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, minmax(120px, 1fr))',
+                  gap: 1,
+                  mb: 2,
+                  flexShrink: 0,
+                }}
+              >
+                <Box
+                  sx={{ p: 1, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}
+                >
+                  <Typography variant="caption" color="text.secondary">
+                    Declarations
+                  </Typography>
+                  <Typography variant="h6">{summary.declarations}</Typography>
+                </Box>
+                <Box
+                  sx={{ p: 1, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}
+                >
+                  <Typography variant="caption" color="text.secondary">
+                    Intents
+                  </Typography>
+                  <Typography variant="h6">{summary.intents}</Typography>
+                </Box>
+                <Box
+                  sx={{ p: 1, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}
+                >
+                  <Typography variant="caption" color="text.secondary">
+                    Contexts
+                  </Typography>
+                  <Typography variant="h6">{summary.contexts}</Typography>
+                </Box>
+                <Box
+                  sx={{ p: 1, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}
+                >
+                  <Typography variant="caption" color="text.secondary">
+                    Empty
+                  </Typography>
+                  <Typography variant="h6">{summary.emptyDeclarations}</Typography>
+                </Box>
+              </Box>
+              <TextField
+                label="Search FDC3"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                size="small"
+                fullWidth
+                sx={{ mb: 2, flexShrink: 0 }}
+              />
+              {/* Removed Category Selection Header */}
+              <Main
+                titleCreateNew="Create New Declaration"
+                columnVisibilityModel={{}}
+                disabledCreateNew={disableCreateNew}
+                isLoading={isLoading}
+                openDetail={false}
+                openAudit={false}
+                onCloseAudit={() => {}}
+                auditColumns={[]}
+                auditRows={[]}
+                // TableProps requirements
+                record={record || {}}
+                onClose={onClose}
+                onChange={() => {}}
+                onUpdate={() => {}}
+                onVerify={() => {}}
+                onDeactivate={() => {}}
+                onSave={() => {}}
+                onReset={() => {}}
+                resetId={0}
+                {...rest}
+              />
+            </>
+          )}
         </Box>
 
-        <Box sx={{ p: 2, height: '100%', display: tab === 1 ? 'block' : 'none' }}>
-          <IntentMasterList
-            intents={intents}
-            onCreate={createIntent}
-            onUpdate={updateIntent}
-            onDelete={deleteIntent}
-            isLoading={isLoading}
-            readOnly={true}
-          />
+        <Box sx={tabPanelSx(tab === 1)}>
+          {tab === 1 && (
+            <IntentMasterList
+              intents={intents}
+              onCreate={createIntent}
+              onUpdate={updateIntent}
+              onDelete={deleteIntent}
+              isLoading={isLoading}
+              readOnly={false}
+              getReferences={intentReferences}
+            />
+          )}
         </Box>
 
-        <Box sx={{ p: 2, height: '100%', display: tab === 2 ? 'block' : 'none' }}>
-          <ContextMasterList
-            contexts={contexts}
-            onCreate={createContext}
-            onUpdate={updateContext}
-            onDelete={deleteContext}
-            isLoading={isLoading}
-            readOnly={true}
-          />
+        <Box sx={tabPanelSx(tab === 2)}>
+          {tab === 2 && (
+            <ContextMasterList
+              contexts={contexts}
+              onCreate={createContext}
+              onUpdate={updateContext}
+              onDelete={deleteContext}
+              isLoading={isLoading}
+              readOnly={false}
+              getReferences={contextReferences}
+            />
+          )}
         </Box>
 
         {/* Custom Declaration Dialog */}
@@ -121,7 +190,8 @@ const FDC3Declaration: React.FC<FDC3DeclarationProps> = (
           intents={intents}
           contexts={contexts}
           isEdit={record?.mode === 'edit'}
-          readOnly={true}
+          readOnly={false}
+          onDelete={deleteDeclaration}
         />
       </Root>
     </ErrorBoundry>

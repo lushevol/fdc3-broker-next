@@ -10,6 +10,12 @@ export const classes = {
 const Root = styled(Box)(() => ({
   [`&.${classes.root}`]: {
     width: '100%',
+    flex: 1,
+    height: '100%',
+    minHeight: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
   },
   [`& .${classes.grid}`]: {
     '& .MuiDataGrid-row': {

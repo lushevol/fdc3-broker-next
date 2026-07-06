@@ -2,9 +2,6 @@ import React from 'react';
 import { getHooksBase } from '../../../hooks/HooksBase';
 import { ActionType } from '../../../hooks/reducer/util/ActionType';
 import { postService } from '../../../hooks/service';
-import intentsData from '../../../fdc3/declarations/intents.json';
-import contextsData from '../../../fdc3/declarations/contexts.json';
-import appDeclarationsData from '../../../fdc3/declarations/fdc3-definitions.json';
 
 const useServices = () => {
   const { baseDispatch } = getHooksBase();
@@ -35,8 +32,9 @@ const useServices = () => {
           { signal: getCategoryRef?.current.signal },
         );
         return resposnse?.data?.data ?? [];
-      } catch (_e) {}
-      return [];
+      } catch {
+        return [];
+      }
     },
     [dispacthErrorMessage],
   );
@@ -45,15 +43,13 @@ const useServices = () => {
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/tile/data', { entitlementsToken });
       return resposnse?.data?.data ?? [];
-    } catch (_e) {
+    } catch {
       return [];
     }
   }, []);
 
   const getDeclaration = React.useCallback(
     async (entitlementsToken, data) => {
-      // Day 2: API Integration
-      /*
       try {
         dispacthErrorMessage(undefined);
         if (getDeclarationRef?.current) {
@@ -66,18 +62,15 @@ const useServices = () => {
           { signal: getDeclarationRef?.current.signal },
         );
         return resposnse?.data?.data ?? [];
-      } catch (_e) {}
-      return [];
-      */
-      return (appDeclarationsData as any) || [];
+      } catch {
+        return [];
+      }
     },
     [dispacthErrorMessage],
   );
 
   const updateDeclaration = React.useCallback(
     async (entitlementsToken, data) => {
-      // Day 2: API Integration
-      /*
       try {
         dispacthErrorMessage(undefined);
         if (updateDeclarationRef?.current) {
@@ -90,18 +83,15 @@ const useServices = () => {
           { signal: updateDeclarationRef?.current.signal },
         );
         return resposnse?.data?.data ?? {};
-      } catch (_e) {}
-      return {};
-      */
-      return {};
+      } catch {
+        return {};
+      }
     },
     [dispacthErrorMessage],
   );
 
   const createDeclaration = React.useCallback(
     async (entitlementsToken, data) => {
-      // Day 2: API Integration
-      /*
       try {
         dispacthErrorMessage(undefined);
         if (createDeclarationRef?.current) {
@@ -114,18 +104,15 @@ const useServices = () => {
           { signal: createDeclarationRef?.current.signal },
         );
         return resposnse?.data?.data ?? {};
-      } catch (_e) {}
-      return {};
-      */
-      return {};
+      } catch {
+        return {};
+      }
     },
     [dispacthErrorMessage],
   );
 
   const deleteDeclaration = React.useCallback(
     async (entitlementsToken, data) => {
-      // Day 2: API Integration
-      /*
       try {
         dispacthErrorMessage(undefined);
         if (deleteDeclarationRef?.current) {
@@ -138,145 +125,110 @@ const useServices = () => {
           { signal: deleteDeclarationRef?.current.signal },
         );
         return resposnse?.data?.data ?? {};
-      } catch (_e) {}
-      return {};
-      */
-      return {};
+      } catch {
+        return {};
+      }
     },
     [dispacthErrorMessage],
   );
 
   const getIntentList = React.useCallback(async (entitlementsToken) => {
-    // Day 2: API Integration
-    /*
     try {
-      // Mocking or using potential endpoint
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/intent/data', {
         entitlementsToken,
       });
       return resposnse?.data?.data ?? [];
-    } catch (_e) {
+    } catch {
       return [];
     }
-    */
-    return (intentsData as any) || [];
   }, []);
 
   const createIntent = React.useCallback(async (entitlementsToken, data) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/intent/create', {
         entitlementsToken,
         ...data,
       });
       return resposnse?.data?.data ?? {};
-    } catch (_e) {
+    } catch {
       return {};
     }
-    */
-    return {};
   }, []);
 
   const updateIntent = React.useCallback(async (entitlementsToken, data) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/intent/update', {
         entitlementsToken,
         ...data,
       });
       return resposnse?.data?.data ?? {};
-    } catch (_e) {
+    } catch {
       return {};
     }
-    */
-    return {};
   }, []);
 
   const deleteIntent = React.useCallback(async (entitlementsToken, data) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/intent/delete', {
         entitlementsToken,
         ...data,
       });
       return resposnse?.data?.data ?? {};
-    } catch (_e) {
+    } catch {
       return {};
     }
-    */
-    return {};
   }, []);
 
   const getContextList = React.useCallback(async (entitlementsToken) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/context/data', {
         entitlementsToken,
       });
-      return resposnse?.data?.data ?? [];
-    } catch (_e) {
+      return (
+        resposnse?.data?.data?.map((ctx) => ({
+          ...ctx,
+          samples: ctx.samples ?? ctx.simples ?? [],
+        })) ?? []
+      );
+    } catch {
       return [];
     }
-    */
-    // Map 'simples' from JSON to 'samples' expected by interface
-    return (
-      (contextsData as any)?.map((ctx: any) => ({
-        ...ctx,
-        samples: ctx.simples,
-      })) || []
-    );
   }, []);
 
   const createContext = React.useCallback(async (entitlementsToken, data) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/context/create', {
         entitlementsToken,
         ...data,
       });
       return resposnse?.data?.data ?? {};
-    } catch (_e) {
+    } catch {
       return {};
     }
-    */
-    return {};
   }, []);
 
   const updateContext = React.useCallback(async (entitlementsToken, data) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/context/update', {
         entitlementsToken,
         ...data,
       });
       return resposnse?.data?.data ?? {};
-    } catch (_e) {
+    } catch {
       return {};
     }
-    */
-    return {};
   }, []);
 
   const deleteContext = React.useCallback(async (entitlementsToken, data) => {
-    // Day 2: API Integration
-    /*
     try {
       const resposnse = await postService('/auth/v1/fmo/admin/fdc3/context/delete', {
         entitlementsToken,
         ...data,
       });
       return resposnse?.data?.data ?? {};
-    } catch (_e) {
+    } catch {
       return {};
     }
-    */
-    return {};
   }, []);
 
   return {

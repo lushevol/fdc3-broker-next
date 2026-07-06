@@ -4,6 +4,7 @@
     "react": "/js/external/react.development.js",
     "react-dom": "/js/external/react-dom.development.js",
     "react-dom/client": "/js/external/react-dom.development.js",
+    "react-redux": "/js/external/react-redux.development.js",
     "@fm/root-config": "/config.js",
     "@fm/base": "//localhost:8002/base.js",
     "@fm/template_container": "//localhost:8007/template_container.js",

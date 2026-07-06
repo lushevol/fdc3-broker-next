@@ -3,7 +3,7 @@ import type { AdminModuleProps } from '../../common/interface';
 import type { JSONSchema7 } from 'json-schema';
 import { AppDefinition } from 'ratan-fdc3-app-directory';
 
-export interface FDC3DeclarationProps extends AdminModuleProps {}
+export type FDC3DeclarationProps = AdminModuleProps;
 
 export interface FDC3IntentDefinition {
   name: string;

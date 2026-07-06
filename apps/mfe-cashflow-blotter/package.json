@@ -112,6 +112,7 @@
     "react-dom": "^18.2.0",
     "react-querybuilder": "^6.5.4",
     "react-redux": "^8.0.5",
+    "ratan-fdc3-agent": "*",
     "redux-logger": "^3.0.6",
     "single-spa": "^5.9.3",
     "single-spa-react": "^4.3.1",

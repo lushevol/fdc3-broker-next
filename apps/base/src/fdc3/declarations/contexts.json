@@ -63,6 +63,51 @@
       "type": "object",
       "properties": {
         "type": {
+          "const": "scb.fmptp.cashflow.query"
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "field": {
+                "type": "string"
+              },
+              "operator": {
+                "type": "string"
+              },
+              "values": {}
+            },
+            "required": ["field", "operator"]
+          }
+        },
+        "target": {
+          "type": "string",
+          "enum": ["cashflow_cn", "cashflow_group_management"]
+        }
+      },
+      "required": ["type", "filters", "target"]
+    },
+    "simples": [
+      {
+        "type": "scb.fmptp.cashflow.query",
+        "filters": [
+          {
+            "field": "Cashflow.Cashflow_State",
+            "operator": "IN",
+            "values": ["WAITING"]
+          }
+        ],
+        "target": "cashflow_cn"
+      }
+    ],
+    "description": "Cashflow blotter search query context"
+  },
+  {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "type": {
           "const": "scb.fmptp.trade"
         },
         "id": {

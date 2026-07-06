@@ -1,21 +1,28 @@
-import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import Tooltip from '@mui/material/Tooltip';
-import type { GridActionsCellItem, GridColDef } from '@mui/x-data-grid';
+import type { GridColDef } from '@mui/x-data-grid';
 import { GridActionsCellItem as GridAction } from '@mui/x-data-grid';
 import React from 'react';
 import { useContext } from '../../../hooks/provider';
 import useServices from '../services/useServices';
 import type { FDC3DeclarationProps } from './interface';
+import {
+  filterDeclarations,
+  findTileLabel,
+  getDeclarationSummary,
+  getReferencedContextTypes,
+  getReferencedIntentNames,
+  normalizeInterop,
+} from './model';
 import useTableDetail from './useTableDetail';
 
 const useController = (_props: FDC3DeclarationProps) => {
   const [store] = useContext();
-  const [inputValue, setInputValue] = React.useState('');
 
   const [intents, setIntents] = React.useState<any[]>([]);
   const [contexts, setContexts] = React.useState<any[]>([]);
   const [tiles, setTiles] = React.useState<any[]>([]);
+  const [search, setSearch] = React.useState('');
 
   // We don't need categories anymore, just passing empty struct to table detail hook if needed?
   // Actually useTableDetail might need category logic? let's see.
@@ -53,10 +60,11 @@ const useController = (_props: FDC3DeclarationProps) => {
     // Fetch all declarations (no category filter)
     getDeclaration(store.entitlementsToken, {}).then((_data) => {
       if (_data) {
-        const mapped = _data.map((item) => {
-          item.id = item.appId;
-          return item;
-        });
+        const mapped = _data.map((item) => ({
+          ...item,
+          id: item.appId,
+          interop: normalizeInterop(item.interop),
+        }));
         setData(mapped);
       }
     });
@@ -64,6 +72,16 @@ const useController = (_props: FDC3DeclarationProps) => {
     getContextList(store.entitlementsToken).then(setContexts);
     getTile(store.entitlementsToken).then(setTiles);
   }, [store.entitlementsToken]);
+
+  const filteredRows = React.useMemo(
+    () => filterDeclarations(data, tiles, search),
+    [data, tiles, search],
+  );
+
+  const summary = React.useMemo(
+    () => getDeclarationSummary(data, intents, contexts),
+    [data, intents, contexts],
+  );
 
   React.useEffect(() => {
     if (store.entitlementsToken) {
@@ -83,7 +101,6 @@ const useController = (_props: FDC3DeclarationProps) => {
     // If creating, we are creating.
     // The API distinguishes by endpoint.
 
-    const existing = data.find((d) => d.appId === formData.appId);
     // NOTE: Logic here: if we allow editing appId, it's a new record.
     // But usually appId is providing identity.
     // If we are in "Edit" mode (record is set), we update.
@@ -95,14 +112,22 @@ const useController = (_props: FDC3DeclarationProps) => {
       result = await updateDeclaration(store.entitlementsToken, formData);
       // Update local data
       if (result?.appId) {
-        setData((prev) => prev.map((p) => (p.appId === result.appId ? result : p)));
+        setData((prev) =>
+          prev.map((p) =>
+            p.appId === result.appId
+              ? { ...result, id: result.appId, interop: normalizeInterop(result.interop) }
+              : p,
+          ),
+        );
       }
     } else {
       result = await createDeclaration(store.entitlementsToken, formData);
       // Add to local data
       if (result?.appId) {
-        result.id = result.appId;
-        setData((prev) => [result, ...prev]);
+        setData((prev) => [
+          { ...result, id: result.appId, interop: normalizeInterop(result.interop) },
+          ...prev,
+        ]);
       }
     }
     setIsLoading(false);
@@ -122,6 +147,17 @@ const useController = (_props: FDC3DeclarationProps) => {
       }
     },
     [store.entitlementsToken, deleteDeclaration],
+  );
+
+  const handleDeleteDeclaration = React.useCallback(
+    async (row) => {
+      setIsLoading(true);
+      await deleteDeclaration(store.entitlementsToken, row);
+      setData((prev) => prev.filter((d) => d.appId !== row.appId));
+      setIsLoading(false);
+      onClose();
+    },
+    [store.entitlementsToken, deleteDeclaration, onClose],
   );
 
   const columns: GridColDef[] = React.useMemo(
@@ -153,6 +189,24 @@ const useController = (_props: FDC3DeclarationProps) => {
           width: 250,
         },
         {
+          field: 'tileTitle',
+          headerName: 'Tile',
+          width: 260,
+          valueGetter: (params) => findTileLabel(tiles, params.row.appId) || params.row.appId,
+        },
+        {
+          field: 'listensForCount',
+          headerName: 'Listens',
+          width: 100,
+          valueGetter: (params) => normalizeInterop(params.row.interop).intents.listensFor.length,
+        },
+        {
+          field: 'raisesCount',
+          headerName: 'Raises',
+          width: 100,
+          valueGetter: (params) => normalizeInterop(params.row.interop).intents.raises?.length ?? 0,
+        },
+        {
           field: 'interop',
           headerName: 'Interop Details',
           width: 600,
@@ -163,7 +217,7 @@ const useController = (_props: FDC3DeclarationProps) => {
           },
         },
       ] as GridColDef[],
-    [onOpen, handleDelete],
+    [onOpen, handleDelete, tiles],
   );
 
   const onCreateNew = React.useCallback(() => {
@@ -173,13 +227,13 @@ const useController = (_props: FDC3DeclarationProps) => {
 
   // We no longer disable create based on category
   // We no longer disable create based on category
-  const disableCreateNew = true;
+  const disableCreateNew = false;
 
   return {
     store,
     refresh: initData,
     columns,
-    rows: data,
+    rows: filteredRows,
     onCreateNew,
     disableCreateNew,
     onClose,
@@ -189,6 +243,12 @@ const useController = (_props: FDC3DeclarationProps) => {
     intents,
     contexts,
     tiles,
+    search,
+    setSearch,
+    summary,
+    deleteDeclaration: handleDeleteDeclaration,
+    intentReferences: (intentName: string) => getReferencedIntentNames(data, intentName),
+    contextReferences: (contextType: string) => getReferencedContextTypes(data, contextType),
     createIntent: async (data) => {
       await createIntent(store.entitlementsToken, data);
       getIntentList(store.entitlementsToken).then(setIntents);

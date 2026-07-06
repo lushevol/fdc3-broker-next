@@ -2,19 +2,18 @@ import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Chip from '@mui/material/Chip';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import { classes } from './style';
 import type { FDC3Interop, FDC3IntentDefinition, FDC3ContextDefinition } from './interface';
+import { getContextType, normalizeInterop } from './model';
 
 interface InteropEditorProps {
   value: FDC3Interop;
@@ -22,6 +21,7 @@ interface InteropEditorProps {
   intents: FDC3IntentDefinition[];
   contexts: FDC3ContextDefinition[];
   readOnly?: boolean;
+  onValidityChange?: (isValid: boolean) => void;
 }
 
 const InteropEditor: React.FC<InteropEditorProps> = ({
@@ -30,10 +30,16 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
   intents,
   contexts,
   readOnly,
+  onValidityChange,
 }) => {
   const [jsonMode, setJsonMode] = useState(false);
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [jsonString, setJsonString] = useState('');
+  const normalizedValue = React.useMemo(() => normalizeInterop(value), [value]);
+  const contextOptions = React.useMemo(
+    () => contexts.map((context) => getContextType(context)).filter(Boolean),
+    [contexts],
+  );
 
   // Sync internal JSON string when value changes externally (and not in JSON mode to avoid cursor jumps) or mode switch
   useEffect(() => {
@@ -47,10 +53,13 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
     setJsonString(newVal);
     try {
       const parsed = JSON.parse(newVal);
-      onChange(parsed);
+      onChange(normalizeInterop(parsed));
       setJsonError(null);
-    } catch (e: any) {
-      setJsonError(e.message);
+      onValidityChange?.(true);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Invalid JSON';
+      setJsonError(message);
+      onValidityChange?.(false);
     }
   };
 
@@ -160,11 +169,33 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
 
   return (
     <Box className={classes.editorContainer}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h6">FDC3 Interop Configuration</Typography>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems={{ xs: 'flex-start', sm: 'center' }}
+        gap={2}
+        mb={2}
+      >
+        <Box>
+          <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+            Intent routing
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Connect intents to the contexts each tile can receive or raise.
+          </Typography>
+        </Box>
         <FormControlLabel
-          control={<Switch checked={jsonMode} onChange={(e) => setJsonMode(e.target.checked)} />}
-          label="JSON Mode"
+          control={
+            <Switch
+              checked={jsonMode}
+              onChange={(e) => {
+                setJsonMode(e.target.checked);
+                setJsonError(null);
+                onValidityChange?.(true);
+              }}
+            />
+          }
+          label="Raw JSON"
         />
       </Box>
 
@@ -181,15 +212,29 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
           disabled={readOnly}
         />
       ) : (
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           {/* Listens For Section */}
           <Grid item xs={12}>
-            <Typography variant="subtitle1" gutterBottom className={classes.section}>
-              Listens For
-            </Typography>
-            <Box mb={2} display="flex" gap={1}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: { xs: 'stretch', sm: 'center' },
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: 1.5,
+                mb: 1.5,
+              }}
+            >
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                  Listens for
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Intents this app handles when another app raises them.
+                </Typography>
+              </Box>
               {!readOnly && (
-                <>
+                <Box display="flex" gap={1} sx={{ minWidth: { xs: '100%', sm: 420 } }}>
                   <Autocomplete
                     options={intents.map((i) => i.name)}
                     value={newListenIntent}
@@ -197,7 +242,7 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                     renderInput={(params) => (
                       <TextField {...params} size="small" label="Select Intent to Add" />
                     )}
-                    sx={{ width: 300 }}
+                    sx={{ flex: 1 }}
                   />
                   <Button
                     variant="contained"
@@ -212,25 +257,32 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                   >
                     Add
                   </Button>
-                </>
+                </Box>
               )}
             </Box>
             <Stack spacing={2}>
-              {getListensForEntries(value?.intents?.listensFor).map(
+              {getListensForEntries(normalizedValue?.intents?.listensFor).map(
                 ({ name, contexts: currentContexts }) => (
                   <Box
                     key={name}
                     display="flex"
                     alignItems="flex-start"
-                    gap={2}
-                    p={1}
-                    bgcolor="action.hover"
+                    gap={1.5}
+                    p={1.5}
+                    bgcolor="#f8fafc"
+                    border={1}
+                    borderColor="divider"
                     borderRadius={1}
                   >
                     <Chip
                       label={name}
                       color="primary"
-                      sx={{ minWidth: 150, justifyContent: 'space-between' }}
+                      sx={{
+                        width: 180,
+                        maxWidth: 180,
+                        justifyContent: 'space-between',
+                        flexShrink: 0,
+                      }}
                       onDelete={
                         !readOnly ? () => handleDeleteIntent('listensFor', name) : undefined
                       }
@@ -238,7 +290,7 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                     <Autocomplete
                       multiple
                       freeSolo
-                      options={contexts.map((c) => c.schema.type as string)}
+                      options={contextOptions}
                       value={currentContexts}
                       onChange={(_, val) => handleContextChange('listensFor', name, val)}
                       renderTags={(val, getTagProps) =>
@@ -252,7 +304,13 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                         ))
                       }
                       renderInput={(params) => (
-                        <TextField {...params} variant="standard" placeholder="" hiddenLabel />
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          size="small"
+                          placeholder="Add contexts"
+                          hiddenLabel
+                        />
                       )}
                       sx={{ flexGrow: 1 }}
                       disabled={readOnly}
@@ -270,12 +328,26 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
 
           {/* Raises Section */}
           <Grid item xs={12}>
-            <Typography variant="subtitle1" gutterBottom className={classes.section}>
-              Raises
-            </Typography>
-            <Box mb={2} display="flex" gap={1}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: { xs: 'stretch', sm: 'center' },
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: 1.5,
+                mb: 1.5,
+              }}
+            >
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                  Raises
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Intents this app can initiate with its outgoing contexts.
+                </Typography>
+              </Box>
               {!readOnly && (
-                <>
+                <Box display="flex" gap={1} sx={{ minWidth: { xs: '100%', sm: 420 } }}>
                   <Autocomplete
                     options={intents.map((i) => i.name)}
                     value={newRaiseIntent}
@@ -283,7 +355,7 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                     renderInput={(params) => (
                       <TextField {...params} size="small" label="Select Intent to Add" />
                     )}
-                    sx={{ width: 300 }}
+                    sx={{ flex: 1 }}
                   />
                   <Button
                     variant="contained"
@@ -298,31 +370,38 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                   >
                     Add
                   </Button>
-                </>
+                </Box>
               )}
             </Box>
             <Stack spacing={2}>
-              {getRaisesEntries(value?.intents?.raises).map(
+              {getRaisesEntries(normalizedValue?.intents?.raises).map(
                 ({ name, contexts: currentContexts }) => (
                   <Box
                     key={name}
                     display="flex"
                     alignItems="flex-start"
-                    gap={2}
-                    p={1}
-                    bgcolor="action.hover"
+                    gap={1.5}
+                    p={1.5}
+                    bgcolor="#f8fafc"
+                    border={1}
+                    borderColor="divider"
                     borderRadius={1}
                   >
                     <Chip
                       label={name}
                       color="secondary"
-                      sx={{ minWidth: 150, justifyContent: 'space-between' }}
+                      sx={{
+                        width: 180,
+                        maxWidth: 180,
+                        justifyContent: 'space-between',
+                        flexShrink: 0,
+                      }}
                       onDelete={!readOnly ? () => handleDeleteIntent('raises', name) : undefined}
                     />
                     <Autocomplete
                       multiple
                       freeSolo
-                      options={contexts.map((c) => c.schema.type as string)}
+                      options={contextOptions}
                       value={currentContexts}
                       onChange={(_, val) => handleContextChange('raises', name, val)}
                       renderTags={(val, getTagProps) =>
@@ -338,8 +417,9 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          variant="standard"
-                          placeholder="Contexts"
+                          variant="outlined"
+                          size="small"
+                          placeholder="Add contexts"
                           hiddenLabel
                         />
                       )}
