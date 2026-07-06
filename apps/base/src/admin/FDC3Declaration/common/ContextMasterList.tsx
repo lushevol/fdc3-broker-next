@@ -148,10 +148,10 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
     {
       field: 'type',
       headerName: 'Context Type',
-      width: 250,
-      valueGetter: (params) => getContextType(params.row as FDC3ContextDefinition),
+      flex: 0.8,
+      minWidth: 240,
     },
-    { field: 'description', headerName: 'Description', width: 400 },
+    { field: 'description', headerName: 'Description', flex: 1.2, minWidth: 320 },
     ...(readOnly
       ? []
       : [
@@ -222,6 +222,7 @@ const ContextMasterList: React.FC<ContextMasterListProps> = ({
         sx={{
           border: 'none',
           flex: 1,
+          height: '100%',
           minHeight: 0,
           '& .MuiDataGrid-cell:hover': { color: 'primary.main' },
         }}

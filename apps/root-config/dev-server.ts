@@ -379,6 +379,15 @@ export const rootConfigDevSetup: SetupMiddlewaresFn = (middlewares) => {
 
   middlewares.unshift(
     createCapturedApiMockMiddleware(capturedApiFixtures),
+    // Disable caching for the import map so updates take effect immediately
+    createMiddleware('/importmaplocal.json', (_req, res) => {
+      const filePath = path.resolve(__dirname, 'public/importmaplocal.json');
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(fs.readFileSync(filePath, 'utf-8'));
+    }),
     createMiddleware('/api/analytics/v1/fmo/print', (_req, res) => {
       sendNoContent(res);
     }),

@@ -73,95 +73,111 @@ const FDC3Declaration: React.FC<FDC3DeclarationProps> = (
         </Box>
 
         <Box sx={tabPanelSx(tab === 0)}>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, minmax(120px, 1fr))',
-              gap: 1,
-              mb: 2,
-              flexShrink: 0,
-            }}
-          >
-            <Box sx={{ p: 1, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}>
-              <Typography variant="caption" color="text.secondary">
-                Declarations
-              </Typography>
-              <Typography variant="h6">{summary.declarations}</Typography>
-            </Box>
-            <Box sx={{ p: 1, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}>
-              <Typography variant="caption" color="text.secondary">
-                Intents
-              </Typography>
-              <Typography variant="h6">{summary.intents}</Typography>
-            </Box>
-            <Box sx={{ p: 1, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}>
-              <Typography variant="caption" color="text.secondary">
-                Contexts
-              </Typography>
-              <Typography variant="h6">{summary.contexts}</Typography>
-            </Box>
-            <Box sx={{ p: 1, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}>
-              <Typography variant="caption" color="text.secondary">
-                Empty
-              </Typography>
-              <Typography variant="h6">{summary.emptyDeclarations}</Typography>
-            </Box>
-          </Box>
-          <TextField
-            label="Search FDC3"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            size="small"
-            fullWidth
-            sx={{ mb: 2, flexShrink: 0 }}
-          />
-          {/* Removed Category Selection Header */}
-          <Main
-            titleCreateNew="Create New Declaration"
-            columnVisibilityModel={{}}
-            disabledCreateNew={disableCreateNew}
-            isLoading={isLoading}
-            openDetail={false}
-            openAudit={false}
-            onCloseAudit={() => {}}
-            auditColumns={[]}
-            auditRows={[]}
-            // TableProps requirements
-            record={record || {}}
-            onClose={onClose}
-            onChange={() => {}}
-            onUpdate={() => {}}
-            onVerify={() => {}}
-            onDeactivate={() => {}}
-            onSave={() => {}}
-            onReset={() => {}}
-            resetId={0}
-            {...rest}
-          />
+          {tab === 0 && (
+            <>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, minmax(120px, 1fr))',
+                  gap: 1,
+                  mb: 2,
+                  flexShrink: 0,
+                }}
+              >
+                <Box
+                  sx={{ p: 1, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}
+                >
+                  <Typography variant="caption" color="text.secondary">
+                    Declarations
+                  </Typography>
+                  <Typography variant="h6">{summary.declarations}</Typography>
+                </Box>
+                <Box
+                  sx={{ p: 1, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}
+                >
+                  <Typography variant="caption" color="text.secondary">
+                    Intents
+                  </Typography>
+                  <Typography variant="h6">{summary.intents}</Typography>
+                </Box>
+                <Box
+                  sx={{ p: 1, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}
+                >
+                  <Typography variant="caption" color="text.secondary">
+                    Contexts
+                  </Typography>
+                  <Typography variant="h6">{summary.contexts}</Typography>
+                </Box>
+                <Box
+                  sx={{ p: 1, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}
+                >
+                  <Typography variant="caption" color="text.secondary">
+                    Empty
+                  </Typography>
+                  <Typography variant="h6">{summary.emptyDeclarations}</Typography>
+                </Box>
+              </Box>
+              <TextField
+                label="Search FDC3"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                size="small"
+                fullWidth
+                sx={{ mb: 2, flexShrink: 0 }}
+              />
+              {/* Removed Category Selection Header */}
+              <Main
+                titleCreateNew="Create New Declaration"
+                columnVisibilityModel={{}}
+                disabledCreateNew={disableCreateNew}
+                isLoading={isLoading}
+                openDetail={false}
+                openAudit={false}
+                onCloseAudit={() => {}}
+                auditColumns={[]}
+                auditRows={[]}
+                // TableProps requirements
+                record={record || {}}
+                onClose={onClose}
+                onChange={() => {}}
+                onUpdate={() => {}}
+                onVerify={() => {}}
+                onDeactivate={() => {}}
+                onSave={() => {}}
+                onReset={() => {}}
+                resetId={0}
+                {...rest}
+              />
+            </>
+          )}
         </Box>
 
         <Box sx={tabPanelSx(tab === 1)}>
-          <IntentMasterList
-            intents={intents}
-            onCreate={createIntent}
-            onUpdate={updateIntent}
-            onDelete={deleteIntent}
-            isLoading={isLoading}
-            readOnly={false}
-            getReferences={intentReferences}
-          />
+          {tab === 1 && (
+            <IntentMasterList
+              intents={intents}
+              onCreate={createIntent}
+              onUpdate={updateIntent}
+              onDelete={deleteIntent}
+              isLoading={isLoading}
+              readOnly={false}
+              getReferences={intentReferences}
+            />
+          )}
         </Box>
 
         <Box sx={tabPanelSx(tab === 2)}>
-          <ContextMasterList
-            contexts={contexts}
-            onCreate={createContext}
-            onUpdate={updateContext}
-            onDelete={deleteContext}
-            isLoading={isLoading}
-            readOnly={false}
-            getReferences={contextReferences}
-          />
+          {tab === 2 && (
+            <ContextMasterList
+              contexts={contexts}
+              onCreate={createContext}
+              onUpdate={updateContext}
+              onDelete={deleteContext}
+              isLoading={isLoading}
+              readOnly={false}
+              getReferences={contextReferences}
+            />
+          )}
         </Box>
 
         {/* Custom Declaration Dialog */}

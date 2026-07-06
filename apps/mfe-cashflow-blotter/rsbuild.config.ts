@@ -114,6 +114,7 @@ export default defineConfig({
         react: "react",
         "react-dom": "react-dom",
         "react-dom/client": "react-dom/client",
+        "react-redux": "react-redux",
         "@fm/base": "@fm/base",
         "@fm/ratan_container": "@fm/ratan_container",
       },

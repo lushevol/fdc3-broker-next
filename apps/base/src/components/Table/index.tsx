@@ -40,6 +40,7 @@ const Table: React.FC<TableProps> = (props: TableProps): ReactElement => {
           className={classes.grid}
           rows={rows}
           columns={columns}
+          loading={isLoading}
           initialState={{
             pagination: {
               paginationModel: {
@@ -52,6 +53,9 @@ const Table: React.FC<TableProps> = (props: TableProps): ReactElement => {
           disableRowSelectionOnClick
           density="compact"
           sx={{
+            flex: 1,
+            height: '100%',
+            minHeight: 0,
             '& .MuiDataGrid-virtualScroller': {
               width: 'calc(100% - 0px)!important',
             },

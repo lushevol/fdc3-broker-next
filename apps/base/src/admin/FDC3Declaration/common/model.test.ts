@@ -69,17 +69,18 @@ describe('FDC3Declaration model helpers', () => {
   });
 
   test('builds unique context grid rows from declared context type', () => {
-    expect(
-      getContextRows([
-        {
-          schema: { type: 'object', properties: { type: { const: 'fdc3.instrument' } } },
-          description: 'Instrument',
-        },
-        {
-          schema: { type: 'object', properties: { type: { const: 'fdc3.trade.query' } } },
-          description: 'Trade query',
-        },
-      ]).map((row) => row.id),
-    ).toEqual(['fdc3.instrument', 'fdc3.trade.query']);
+    const rows = getContextRows([
+      {
+        schema: { type: 'object', properties: { type: { const: 'fdc3.instrument' } } },
+        description: 'Instrument',
+      },
+      {
+        schema: { type: 'object', properties: { type: { const: 'fdc3.trade.query' } } },
+        description: 'Trade query',
+      },
+    ]);
+
+    expect(rows.map((row) => row.id)).toEqual(['fdc3.instrument', 'fdc3.trade.query']);
+    expect(rows.map((row) => row.type)).toEqual(['fdc3.instrument', 'fdc3.trade.query']);
   });
 });

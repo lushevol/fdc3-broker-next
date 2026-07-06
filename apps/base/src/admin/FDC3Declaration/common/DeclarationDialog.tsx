@@ -6,13 +6,13 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import InteropEditor from './InteropEditor';
@@ -124,6 +124,7 @@ const DeclarationDialog: React.FC<DeclarationDialogProps> = ({
           borderRadius: fullScreen ? 0 : 1,
           bgcolor: 'background.paper',
           backgroundImage: 'none',
+          boxShadow: fullScreen ? 'none' : '0 24px 80px rgba(15, 23, 42, 0.26)',
         },
       }}
     >
@@ -132,18 +133,19 @@ const DeclarationDialog: React.FC<DeclarationDialogProps> = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          bgcolor: 'background.default',
+          bgcolor: '#f8fafc',
           borderBottom: 1,
           borderColor: 'divider',
-          p: 2,
+          px: 3,
+          py: 2,
           flexShrink: 0,
         }}
       >
         <Box sx={{ minWidth: 0 }}>
-          <Typography variant="overline" color="text.secondary">
-            FDC3 declaration
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+            FDC3 declaration editor
           </Typography>
-          <Typography variant="h6" component="div" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+          <Typography variant="h6" component="div" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
             {isEdit ? formData.appId || 'Edit declaration' : 'Create declaration'}
           </Typography>
         </Box>
@@ -157,15 +159,13 @@ const DeclarationDialog: React.FC<DeclarationDialogProps> = ({
         </Box>
       </DialogTitle>
 
-      <DialogContent
-        sx={{ p: 0, flex: 1, minHeight: 0, overflow: 'hidden', bgcolor: 'background.paper' }}
-      >
+      <DialogContent sx={{ p: 0, flex: 1, minHeight: 0, overflow: 'hidden', bgcolor: '#ffffff' }}>
         <Box
           sx={{
             height: '100%',
             minHeight: 0,
             display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: '320px minmax(0, 1fr)' },
+            gridTemplateColumns: { xs: '1fr', md: '340px minmax(0, 1fr)' },
           }}
         >
           <Stack
@@ -174,50 +174,66 @@ const DeclarationDialog: React.FC<DeclarationDialogProps> = ({
               p: 3,
               minHeight: 0,
               overflow: 'auto',
-              bgcolor: 'background.default',
+              bgcolor: '#f8fafc',
               borderRight: { xs: 0, md: 1 },
               borderBottom: { xs: 1, md: 0 },
               borderColor: 'divider',
             }}
           >
-            <Box>
-              <Typography variant="caption" color="text.secondary">
+            <Box
+              sx={{
+                p: 2,
+                border: 1,
+                borderColor: 'divider',
+                borderRadius: 1,
+                bgcolor: 'background.paper',
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
                 Application
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, mb: 2 }}>
                 Choose the tile that owns this declaration.
               </Typography>
+              <Autocomplete
+                options={tileOptions}
+                getOptionLabel={(option) => option.label}
+                isOptionEqualToValue={(option, value) => option.value === value.value}
+                value={selectedTileOption}
+                onChange={(_, newValue) =>
+                  setFormData({
+                    ...formData,
+                    appId: newValue?.value ?? '',
+                  })
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="App ID"
+                    variant="outlined"
+                    size="small"
+                    placeholder="Select tile"
+                    required
+                  />
+                )}
+                disabled={isEdit}
+                fullWidth
+              />
             </Box>
-            <Autocomplete
-              options={tileOptions}
-              getOptionLabel={(option) => option.label}
-              isOptionEqualToValue={(option, value) => option.value === value.value}
-              value={selectedTileOption}
-              onChange={(_, newValue) =>
-                setFormData({
-                  ...formData,
-                  appId: newValue?.value ?? '',
-                })
-              }
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="App ID"
-                  variant="outlined"
-                  size="small"
-                  placeholder="Select tile"
-                  required
-                />
-              )}
-              disabled={isEdit}
-              fullWidth
-            />
-            <Divider />
-            <Box>
-              <Typography variant="caption" color="text.secondary">
+
+            <Box
+              sx={{
+                p: 2,
+                border: 1,
+                borderColor: 'divider',
+                borderRadius: 1,
+                bgcolor: 'background.paper',
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
                 Capabilities
               </Typography>
-              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
+              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1.5 }}>
                 <Chip
                   label={`${listensForCount} listens`}
                   size="small"
@@ -233,24 +249,32 @@ const DeclarationDialog: React.FC<DeclarationDialogProps> = ({
                 <Chip label={`${contextCount} contexts`} size="small" variant="outlined" />
               </Stack>
             </Box>
-            <Divider />
-            <Box>
-              <Typography variant="caption" color="text.secondary">
-                Save status
-              </Typography>
-              <Box sx={{ mt: 1 }}>
-                <Chip
-                  label={
-                    !formData.appId
-                      ? 'Select an app'
-                      : isInteropValid
-                        ? 'Ready to save'
-                        : 'Fix interop JSON'
-                  }
+
+            <Box
+              sx={{
+                p: 2,
+                border: 1,
+                borderColor: formData.appId && isInteropValid ? 'success.light' : 'warning.light',
+                borderRadius: 1,
+                bgcolor: formData.appId && isInteropValid ? '#f0fdf4' : '#fffbeb',
+              }}
+            >
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <CheckCircleOutlineIcon
                   color={formData.appId && isInteropValid ? 'success' : 'warning'}
-                  size="small"
+                  fontSize="small"
                 />
-              </Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                  Save status
+                </Typography>
+              </Stack>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                {!formData.appId
+                  ? 'Select an app before saving this declaration.'
+                  : isInteropValid
+                    ? 'The declaration is valid and ready to save.'
+                    : 'Fix the interop JSON before saving.'}
+              </Typography>
             </Box>
           </Stack>
 

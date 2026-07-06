@@ -169,8 +169,21 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
 
   return (
     <Box className={classes.editorContainer}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h6">FDC3 Interop Configuration</Typography>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems={{ xs: 'flex-start', sm: 'center' }}
+        gap={2}
+        mb={2}
+      >
+        <Box>
+          <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+            Intent routing
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Connect intents to the contexts each tile can receive or raise.
+          </Typography>
+        </Box>
         <FormControlLabel
           control={
             <Switch
@@ -182,7 +195,7 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
               }}
             />
           }
-          label="JSON Mode"
+          label="Raw JSON"
         />
       </Box>
 
@@ -199,15 +212,29 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
           disabled={readOnly}
         />
       ) : (
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           {/* Listens For Section */}
           <Grid item xs={12}>
-            <Typography variant="subtitle1" gutterBottom className={classes.section}>
-              Listens For
-            </Typography>
-            <Box mb={2} display="flex" gap={1}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: { xs: 'stretch', sm: 'center' },
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: 1.5,
+                mb: 1.5,
+              }}
+            >
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                  Listens for
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Intents this app handles when another app raises them.
+                </Typography>
+              </Box>
               {!readOnly && (
-                <>
+                <Box display="flex" gap={1} sx={{ minWidth: { xs: '100%', sm: 420 } }}>
                   <Autocomplete
                     options={intents.map((i) => i.name)}
                     value={newListenIntent}
@@ -215,7 +242,7 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                     renderInput={(params) => (
                       <TextField {...params} size="small" label="Select Intent to Add" />
                     )}
-                    sx={{ width: 300 }}
+                    sx={{ flex: 1 }}
                   />
                   <Button
                     variant="contained"
@@ -230,7 +257,7 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                   >
                     Add
                   </Button>
-                </>
+                </Box>
               )}
             </Box>
             <Stack spacing={2}>
@@ -240,15 +267,22 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                     key={name}
                     display="flex"
                     alignItems="flex-start"
-                    gap={2}
-                    p={1}
-                    bgcolor="action.hover"
+                    gap={1.5}
+                    p={1.5}
+                    bgcolor="#f8fafc"
+                    border={1}
+                    borderColor="divider"
                     borderRadius={1}
                   >
                     <Chip
                       label={name}
                       color="primary"
-                      sx={{ minWidth: 150, justifyContent: 'space-between' }}
+                      sx={{
+                        width: 180,
+                        maxWidth: 180,
+                        justifyContent: 'space-between',
+                        flexShrink: 0,
+                      }}
                       onDelete={
                         !readOnly ? () => handleDeleteIntent('listensFor', name) : undefined
                       }
@@ -270,7 +304,13 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                         ))
                       }
                       renderInput={(params) => (
-                        <TextField {...params} variant="standard" placeholder="" hiddenLabel />
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          size="small"
+                          placeholder="Add contexts"
+                          hiddenLabel
+                        />
                       )}
                       sx={{ flexGrow: 1 }}
                       disabled={readOnly}
@@ -288,12 +328,26 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
 
           {/* Raises Section */}
           <Grid item xs={12}>
-            <Typography variant="subtitle1" gutterBottom className={classes.section}>
-              Raises
-            </Typography>
-            <Box mb={2} display="flex" gap={1}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: { xs: 'stretch', sm: 'center' },
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: 1.5,
+                mb: 1.5,
+              }}
+            >
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                  Raises
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Intents this app can initiate with its outgoing contexts.
+                </Typography>
+              </Box>
               {!readOnly && (
-                <>
+                <Box display="flex" gap={1} sx={{ minWidth: { xs: '100%', sm: 420 } }}>
                   <Autocomplete
                     options={intents.map((i) => i.name)}
                     value={newRaiseIntent}
@@ -301,7 +355,7 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                     renderInput={(params) => (
                       <TextField {...params} size="small" label="Select Intent to Add" />
                     )}
-                    sx={{ width: 300 }}
+                    sx={{ flex: 1 }}
                   />
                   <Button
                     variant="contained"
@@ -316,7 +370,7 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                   >
                     Add
                   </Button>
-                </>
+                </Box>
               )}
             </Box>
             <Stack spacing={2}>
@@ -326,15 +380,22 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                     key={name}
                     display="flex"
                     alignItems="flex-start"
-                    gap={2}
-                    p={1}
-                    bgcolor="action.hover"
+                    gap={1.5}
+                    p={1.5}
+                    bgcolor="#f8fafc"
+                    border={1}
+                    borderColor="divider"
                     borderRadius={1}
                   >
                     <Chip
                       label={name}
                       color="secondary"
-                      sx={{ minWidth: 150, justifyContent: 'space-between' }}
+                      sx={{
+                        width: 180,
+                        maxWidth: 180,
+                        justifyContent: 'space-between',
+                        flexShrink: 0,
+                      }}
                       onDelete={!readOnly ? () => handleDeleteIntent('raises', name) : undefined}
                     />
                     <Autocomplete
@@ -356,8 +417,9 @@ const InteropEditor: React.FC<InteropEditorProps> = ({
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          variant="standard"
-                          placeholder="Contexts"
+                          variant="outlined"
+                          size="small"
+                          placeholder="Add contexts"
                           hiddenLabel
                         />
                       )}

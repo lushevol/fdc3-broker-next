@@ -25,6 +25,7 @@ export interface FDC3IntentContextEntry {
 
 export interface FDC3ContextGridRow extends FDC3ContextDefinition {
   id: string;
+  type: string;
 }
 
 export interface NormalizedFDC3Interop extends Omit<FDC3Interop, 'intents'> {
@@ -70,10 +71,15 @@ export const getContextType = (context: FDC3ContextDefinition): string => {
 };
 
 export const getContextRows = (contexts: FDC3ContextDefinition[]): FDC3ContextGridRow[] =>
-  contexts.map((context, index) => ({
-    ...context,
-    id: getContextType(context) || `context-${index}`,
-  }));
+  contexts.map((context, index) => {
+    const type = getContextType(context);
+
+    return {
+      ...context,
+      id: type || `context-${index}`,
+      type,
+    };
+  });
 
 export const normalizeInterop = (interop?: Partial<FDC3Interop>): NormalizedFDC3Interop => ({
   ...interop,

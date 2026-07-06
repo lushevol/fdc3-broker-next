@@ -153,6 +153,7 @@ const IntentMasterList: React.FC<IntentMasterListProps> = ({
         sx={{
           border: 'none',
           flex: 1,
+          height: '100%',
           minHeight: 0,
           '& .MuiDataGrid-cell:hover': { color: 'primary.main' },
         }}

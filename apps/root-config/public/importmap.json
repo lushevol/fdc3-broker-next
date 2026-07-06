@@ -3,6 +3,7 @@
     "single-spa": "/js/external/single-spa.min.js",
     "react": "/js/external/react.production.min.js",
     "react-dom": "/js/external/react-dom.production.min.js",
+    "react-redux": "/js/external/react-redux.production.min.js",
     "@fm/root-config": "/config.js",
     "@fm/base": "/base/base.js",
     "@fm/template_container": "/template_container/template_container.js",
