@@ -6,7 +6,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '@testing-library/jest-dom';
-import { clearBroker, getAgentApi, setBroker } from '../src/agent';
+import { clearBroker, getAgentApi, setBroker, setCurrentTile } from '../src/agent';
 import { AgentProvider, useAppIdentifier, useFDC3 } from '../src/hooks';
 import type { AppIdentifier, Channel, Context, DesktopAgent } from '../src/types';
 
@@ -73,8 +73,9 @@ describe('useFDC3 hook', () => {
   });
 
   afterEach(() => {
-    // Clean up broker after each test
+    // Clean up broker and tile identity after each test
     clearBroker();
+    setCurrentTile(null);
   });
 
   describe('with AgentProvider', () => {

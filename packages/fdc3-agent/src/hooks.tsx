@@ -34,7 +34,7 @@
 
 import type { Broker } from 'ratan-fdc3-broker';
 import React, { useContext, useEffect, useState } from 'react';
-import { getAgentApi } from './agent';
+import { getAgentApi, getCurrentTile, setCurrentTile } from './agent';
 import { ScopedDesktopAgent } from './scoped-agent';
 import type {
   AppIdentifier,
@@ -126,47 +126,76 @@ export const AgentProvider: React.FC<{
   /** Optional identifier for the current tile. If provided, FDC3 operations will be scoped to this ID. */
   appIdentifier?: AppIdentifier;
 }> = ({ children, appIdentifier }) => {
-  const [agent, setAgent] = React.useState<RatanDesktopAgent | null>(null);
+  // Create the (possibly scoped) agent synchronously during render so that
+  // children receive the correct agent on the very first render.  Previously
+  // this was done inside a useEffect, which meant the first render always saw
+  // agent=null and fell back to getAgentApi() (the raw broker), causing intent
+  // listeners to be registered without source scoping — and the waitForListener
+  // in deliverIntent never matched them.
+  //
+  // The broker is always set by the base MFE before tiles mount, so the
+  // synchronous creation always succeeds in practice.  The async fallback in
+  // the effect below handles the vanishingly rare broker-not-ready edge case.
+  const agent = React.useMemo<RatanDesktopAgent | null>(() => {
+    if (!appIdentifier) {
+      // No scoping required — use the raw broker directly.
+      try { return getAgentApi(); } catch { return null; }
+    }
+    return tryCreateScopedAgent(appIdentifier);
+  }, [appIdentifier]);
+
+  // Bridge MFE boundaries: store the tile identity in the shared
+  // window.__RATAN_FDC3__ namespace so that useFDC3() in child MFEs
+  // (which cannot share React context) can build a properly scoped
+  // ScopedDesktopAgent as a fallback.
+  setCurrentTile(appIdentifier ?? null);
+
+  // Async fallback when the broker wasn't ready during render (edge case).
+  // Resets the agent if it was null and the broker appears later.
+  const [asyncAgent, setAsyncAgent] = React.useState<RatanDesktopAgent | null>(null);
   const [error, setError] = React.useState<Error | null>(null);
 
   React.useEffect(() => {
+    // Synchronous creation already succeeded — nothing to do.
+    if (agent) return;
+
     let mounted = true;
 
-    // Try to get the broker instance
-    const tryGetAgent = () => {
-      try {
-        const brokerInstance = getAgentApi();
-        if (mounted) {
-          // If app identifier is provided, create a scoped agent so FDC3 calls
-          // from this provider are attributed to the tile.
-          setAgent(
-            appIdentifier
-              ? new ScopedDesktopAgent(brokerInstance as unknown as Broker, appIdentifier)
-              : brokerInstance,
-          );
-          setError(null);
-        }
-      } catch (err) {
-        // Broker not initialized yet, retry after a delay
-        if (mounted) {
-          setError(err as Error);
-          // Retry every 100ms
-          setTimeout(tryGetAgent, 100);
-        }
+    const retry = () => {
+      const scoped = tryCreateScopedAgent(appIdentifier);
+      if (!mounted) return;
+      if (scoped) {
+        setAsyncAgent(scoped);
+        setError(null);
+      } else if (appIdentifier) {
+        setTimeout(retry, 100);
       }
     };
 
-    tryGetAgent();
+    // Show initial error state (useful for debugging the edge case)
+    if (appIdentifier) {
+      try {
+        getAgentApi();
+      } catch (err) {
+        if (mounted) setError(err as Error);
+      }
+    }
+
+    setTimeout(retry, 100);
 
     return () => {
       mounted = false;
     };
-  }, [appIdentifier]);
+  }, [agent, appIdentifier]);
 
-  const value = React.useMemo(() => ({ agent, app: appIdentifier }), [agent, appIdentifier]);
+  const effectiveAgent = agent ?? asyncAgent;
+  const value = React.useMemo(
+    () => ({ agent: effectiveAgent, app: appIdentifier }),
+    [effectiveAgent, appIdentifier],
+  );
 
   // Show error if broker is not available after multiple retries
-  if (error && !agent) {
+  if (error && !effectiveAgent) {
     return (
       <div
         style={{
@@ -184,6 +213,17 @@ export const AgentProvider: React.FC<{
 
   return <AgentContext.Provider value={value}>{children}</AgentContext.Provider>;
 };
+
+/** Helper: create a ScopedDesktopAgent when the broker is available, or return null. */
+function tryCreateScopedAgent(appIdentifier: AppIdentifier | undefined): RatanDesktopAgent | null {
+  if (!appIdentifier) return null;
+  try {
+    const brokerInstance = getAgentApi();
+    return new ScopedDesktopAgent(brokerInstance as unknown as Broker, appIdentifier);
+  } catch {
+    return null;
+  }
+}
 
 /**
  * React hook that provides access to the FDC3 DesktopAgent API.
@@ -276,11 +316,23 @@ export const AgentProvider: React.FC<{
  */
 export function useFDC3(): RatanDesktopAgent {
   const { agent } = useContext(AgentContext);
-  if (!agent) {
-    // Fallback to getAgentApi() if context not available
-    return getAgentApi();
+  if (agent) {
+    return agent;
   }
-  return agent;
+
+  // The React context from AgentProvider is NOT shared across MFE boundaries
+  // (each MFE bundles its own copy of ratan-fdc3-agent).  As a fallback, check
+  // the global tile source set by FDC3TileProvider during render.
+  const tileSource = getCurrentTile();
+  if (tileSource) {
+    try {
+      return new ScopedDesktopAgent(getAgentApi() as unknown as Broker, tileSource);
+    } catch {
+      // fall through to getAgentApi()
+    }
+  }
+
+  return getAgentApi();
 }
 
 /**

@@ -295,7 +295,7 @@ export type {
  *
  * @see {@link ./agent.ts} For detailed documentation
  */
-export { clearBroker, getAgentApi, setBroker } from './agent';
+export { clearBroker, getAgentApi, setBroker, setCurrentTile, getCurrentTile } from './agent';
 
 // ============================================================================
 // React Hooks
