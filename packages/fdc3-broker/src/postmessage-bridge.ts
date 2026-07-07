@@ -112,6 +112,8 @@ export class PostMessageBridge {
     if (!this.options.allowedOrigins || this.options.allowedOrigins.length === 0) {
       this.logger.warn(
         'PostMessage bridge initialized with empty allowedOrigins - no cross-origin messages will be accepted',
+        undefined,
+        'bridge',
       );
       this.enabled = false;
     } else {
@@ -122,7 +124,7 @@ export class PostMessageBridge {
       this.setupMessageListener();
       this.logger.info('PostMessage bridge initialized', {
         allowedOrigins: this.options.allowedOrigins,
-      });
+      }, 'bridge');
     }
   }
 
@@ -343,14 +345,14 @@ export class PostMessageBridge {
     supportedIntents: string[],
   ): void {
     if (!this.enabled) {
-      this.logger.warn('PostMessage bridge not enabled, skipping intent subscription');
+      this.logger.warn('PostMessage bridge not enabled, skipping intent subscription', undefined, 'bridge');
       return;
     }
 
     this.intentHandler = intentHandler;
     this.logger.info('Subscribed to external intents via PostMessage', {
       intents: supportedIntents,
-    });
+    }, 'bridge');
   }
 
   /**
@@ -389,7 +391,7 @@ export class PostMessageBridge {
     this.logger.info('Intent raised via PostMessage successfully', {
       intent,
       source: response.source,
-    });
+    }, 'bridge');
 
     return response;
   }
@@ -424,7 +426,7 @@ export class PostMessageBridge {
 
     this.logger.info('App open request successful via PostMessage', {
       appId: response.appId,
-    });
+    }, 'bridge');
 
     return response;
   }
@@ -504,7 +506,7 @@ export class PostMessageBridge {
 
     await Promise.all(origins.map((origin) => this.sendRequest<void>(origin, 'joinUserChannel', { channelId })));
 
-    this.logger.info('Joined channel via PostMessage', { channelId });
+    this.logger.info('Joined channel via PostMessage', { channelId }, 'bridge');
   }
 
   /**
@@ -532,7 +534,7 @@ export class PostMessageBridge {
     this.logger.info('Broadcast via PostMessage successful', {
       context,
       channelId,
-    });
+    }, 'bridge');
   }
 
   /**

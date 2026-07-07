@@ -50,7 +50,7 @@ export class OpenFinBridge {
     if (this.enabled) {
       try {
         this.fdc3 = this.getFDC3DesktopAgent();
-        this.logger.info('OpenFin bridge initialized');
+        this.logger.info('OpenFin bridge initialized', undefined, 'bridge');
       } catch (error) {
         this.logger.error('Failed to initialize OpenFin bridge:', error as Error);
         this.enabled = false;
@@ -212,7 +212,7 @@ export class OpenFinBridge {
     this.logger.info('OpenFin bridge initialized with intents', {
       intentCount: this.subscribedIntents.size,
       intents: Array.from(this.subscribedIntents),
-    });
+    }, 'bridge');
   }
 
   /**

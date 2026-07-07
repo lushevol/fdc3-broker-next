@@ -100,23 +100,23 @@ export class IntentResolver {
       intent,
       contextType: context?.type,
       target,
-    });
+    }, 'intent');
 
     // If target specified, resolve directly
     if (target) {
       this.logger.debug('Resolving to specific target', {
         appId: target.appId,
         instanceId: target.instanceId,
-      });
+      }, 'intent');
       return await this.resolveSpecificTarget(intent, context, target);
     }
 
     // Find all apps that can handle this intent
     const apps = await this.appDirectory.findByIntent(intent);
-    this.logger.debug('Found apps for intent', { intent, count: apps.length });
+    this.logger.debug('Found apps for intent', { intent, count: apps.length }, 'intent');
 
     if (apps.length === 0) {
-      this.logger.debug('No apps found for intent', { intent });
+      this.logger.debug('No apps found for intent', { intent }, 'intent');
       return { type: 'not-found' };
     }
 
@@ -125,22 +125,22 @@ export class IntentResolver {
     this.logger.debug('Filtered by entitlements', {
       total: apps.length,
       entitled: entitledApps.length,
-    });
+    }, 'intent');
 
     if (entitledApps.length === 0) {
-      this.logger.debug('No entitled apps found for intent', { intent });
+      this.logger.debug('No entitled apps found for intent', { intent }, 'intent');
       return { type: 'not-found' };
     }
 
     // Find instances of entitled apps
     const targets = await this.findTargets(entitledApps, intent);
-    this.logger.debug('Found targets', { count: targets.length, intent });
+    this.logger.debug('Found targets', { count: targets.length, intent }, 'intent');
 
     if (targets.length === 0) {
       // No instances running, but apps exist - return first app for launching
       this.logger.debug('No running instances, returning app for launch', {
         appId: entitledApps[0]?.appId,
-      });
+      }, 'intent');
       return { type: 'success', target: targets[0] };
     }
 
@@ -148,7 +148,7 @@ export class IntentResolver {
       this.logger.debug('Single target found', {
         appId: targets[0].appId,
         instanceId: targets[0].instanceId,
-      });
+      }, 'intent');
       return { type: 'success', target: targets[0] };
     }
 
@@ -156,7 +156,7 @@ export class IntentResolver {
     this.logger.debug('Multiple targets found, showing resolver UI', {
       count: targets.length,
       appIds: targets.map((t) => t.appId),
-    });
+    }, 'intent');
     return { type: 'ambiguous', targets };
   }
 

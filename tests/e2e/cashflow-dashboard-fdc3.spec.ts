@@ -26,9 +26,16 @@ declare global {
 }
 
 async function closeExpiredSessionModal(page: Page): Promise<void> {
+  // Try "Close" (old session dialog variant)
   const closeButton = page.getByRole('button', { name: 'Close' });
   if (await closeButton.isVisible().catch(() => false)) {
     await closeButton.click();
+    return;
+  }
+  // Try "Extend" (newer session dialog variant with Extend/Logout)
+  const extendButton = page.getByRole('button', { name: 'Extend' });
+  if (await extendButton.isVisible().catch(() => false)) {
+    await extendButton.click();
   }
 }
 
@@ -41,7 +48,14 @@ async function loginToWorkspace(page: Page): Promise<void> {
   await page.goto('http://127.0.0.1:8001/?show_normal_login=Y');
   await closeExpiredSessionModal(page);
   await page.getByRole('button', { name: 'Sign In', exact: true }).click();
-  await closeExpiredSessionModal(page);
+  // Dismiss any session-expired dialog that appears after login.
+  // The dialog can show asynchronously and covers the "Find tile" button.
+  for (let i = 0; i < 8; i++) {
+    await page.waitForTimeout(1000);
+    await closeExpiredSessionModal(page);
+    const findTile = page.getByRole('button', { name: 'Find tile' });
+    if (await findTile.isVisible().catch(() => false)) break;
+  }
   await expect(page.getByRole('button', { name: 'Find tile' })).toBeVisible();
 }
 

@@ -165,9 +165,16 @@ async function findOpenFinProviderPage(browserInstance: Browser): Promise<Page> 
 }
 
 async function closeExpiredSessionModal(target: Page): Promise<void> {
+  // Try "Close" (old session dialog variant)
   const closeButton = target.getByRole('button', { name: 'Close' });
   if (await closeButton.isVisible().catch(() => false)) {
     await closeButton.click();
+    return;
+  }
+  // Try "Extend" (newer session dialog variant with Extend/Logout)
+  const extendButton = target.getByRole('button', { name: 'Extend' });
+  if (await extendButton.isVisible().catch(() => false)) {
+    await extendButton.click();
   }
 }
 
@@ -333,7 +340,12 @@ async function loginToWorkspace(target: Page): Promise<void> {
   await ensureOpenFinInterop(target);
   await closeExpiredSessionModal(target);
   await target.getByRole('button', { name: 'Sign In', exact: true }).click();
-  await closeExpiredSessionModal(target);
+  // Dismiss any session-expired dialog that appears after login
+  for (let i = 0; i < 8; i++) {
+    await target.waitForTimeout(1000);
+    await closeExpiredSessionModal(target);
+    if (await target.getByText('New Tile').isVisible().catch(() => false)) break;
+  }
   await expect(target.getByText('New Tile')).toBeVisible();
 }
 

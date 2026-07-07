@@ -3,6 +3,7 @@
  *
  * Provides consistent logging with configurable log levels and debug mode.
  * Security events are always logged regardless of log level for audit trail.
+ * Supports event-based subscriptions for real-time log streaming.
  *
  * @see research.md#L790-L833
  */
@@ -24,11 +25,34 @@ export enum LogLevel {
 }
 
 /**
- * Structured logger class
+ * A structured log event emitted by the Logger.
+ * Used for streaming logs to external consumers (e.g., FDC3 Console widget).
+ */
+export interface LogEvent {
+  /** Log severity level */
+  level: LogLevel;
+  /** Human-readable event description */
+  message: string;
+  /** Optional structured data associated with the event */
+  data?: unknown;
+  /** Unix timestamp (ms) when the event was emitted */
+  timestamp: number;
+  /** Category name for grouping related events */
+  category?: string;
+}
+
+/**
+ * Callback type for log event subscriptions
+ */
+export type LogEventCallback = (event: LogEvent) => void;
+
+/**
+ * Structured logger class with event subscription support
  */
 export class Logger {
   private level: LogLevel;
   private enabled: boolean;
+  private subscribers = new Set<LogEventCallback>();
 
   /**
    * Creates a new Logger instance
@@ -42,6 +66,48 @@ export class Logger {
   }
 
   /**
+   * Subscribes to all log events emitted by this logger.
+   * Returns an unsubscribe function.
+   *
+   * @param callback - Function called for each log event
+   * @returns Unsubscribe function to remove the listener
+   *
+   * @example
+   * ```typescript
+   * const unsub = logger.subscribe((event) => {
+   *   console.log(`[${event.level}] ${event.message}`, event.data);
+   * });
+   * // Later: unsub();
+   * ```
+   */
+  subscribe(callback: LogEventCallback): () => void {
+    this.subscribers.add(callback);
+    return () => {
+      this.subscribers.delete(callback);
+    };
+  }
+
+  /**
+   * Internal: emit a log event to all subscribers
+   */
+  private emit(level: LogLevel, message: string, data?: unknown, category?: string): void {
+    const event: LogEvent = {
+      level,
+      message,
+      data,
+      timestamp: Date.now(),
+      category,
+    };
+    this.subscribers.forEach((cb) => {
+      try {
+        cb(event);
+      } catch {
+        // Silently ignore subscriber errors — never let a logger crash the app
+      }
+    });
+  }
+
+  /**
    * Logs a debug message
    *
    * @param event - Description of the event
@@ -52,9 +118,10 @@ export class Logger {
    * logger.debug('Intent received', { intent: 'ViewChart', context });
    * ```
    */
-  debug(event: string, data?: unknown): void {
+  debug(event: string, data?: unknown, category?: string): void {
     if (this.enabled && this.level <= LogLevel.DEBUG) {
       console.debug(`[FDC3:DEBUG] ${event}`, data ?? '');
+      this.emit(LogLevel.DEBUG, event, data, category);
     }
   }
 
@@ -64,9 +131,10 @@ export class Logger {
    * @param event - Description of the event
    * @param data - Optional data to log
    */
-  info(event: string, data?: unknown): void {
+  info(event: string, data?: unknown, category?: string): void {
     if (this.enabled && this.level <= LogLevel.INFO) {
       console.info(`[FDC3:INFO] ${event}`, data ?? '');
+      this.emit(LogLevel.INFO, event, data, category);
     }
   }
 
@@ -76,9 +144,10 @@ export class Logger {
    * @param event - Description of the warning
    * @param data - Optional data to log
    */
-  warn(event: string, data?: unknown): void {
+  warn(event: string, data?: unknown, category?: string): void {
     if (this.enabled && this.level <= LogLevel.WARN) {
       console.warn(`[FDC3:WARN] ${event}`, data ?? '');
+      this.emit(LogLevel.WARN, event, data, category);
     }
   }
 
@@ -89,9 +158,10 @@ export class Logger {
    * @param error - Optional Error object
    * @param data - Optional additional data
    */
-  error(event: string, error?: Error, data?: unknown): void {
+  error(event: string, error?: Error, data?: unknown, category?: string): void {
     if (this.enabled && this.level <= LogLevel.ERROR) {
       console.error(`[FDC3:ERROR] ${event}`, error ?? '', data ?? '');
+      this.emit(LogLevel.ERROR, event, { error: error?.message, data }, category);
     }
   }
 
@@ -103,9 +173,10 @@ export class Logger {
    * @param event - Description of the security event
    * @param data - Optional data to log
    */
-  security(event: string, data?: unknown): void {
+  security(event: string, data?: unknown, category?: string): void {
     // Security events are always logged for audit trail
     console.warn(`[FDC3:SECURITY] ${event}`, data ?? '');
+    this.emit(LogLevel.SECURITY, event, data, category);
   }
 
   /**
@@ -124,5 +195,12 @@ export class Logger {
    */
   setEnabled(enabled: boolean): void {
     this.enabled = enabled;
+  }
+
+  /**
+   * Returns the number of active subscribers
+   */
+  getSubscriberCount(): number {
+    return this.subscribers.size;
   }
 }

@@ -74,10 +74,10 @@ export class EntitlementValidator {
     tileId: string,
     checkConfig: EntitlementCheckConfig,
   ): Promise<EntitlementCheckResult> {
-    this.logger.debug(`Checking ${checkConfig.action} entitlement`, checkConfig.logContext);
+    this.logger.debug(`Checking ${checkConfig.action} entitlement`, checkConfig.logContext, 'entitlement');
 
     if (!this.config.callbacks.onValidateEntitlements) {
-      this.logger.warn('No entitlement validation configured, allowing by default');
+      this.logger.warn('No entitlement validation configured, allowing by default', undefined, 'entitlement');
       return { allowed: true };
     }
 
@@ -88,7 +88,7 @@ export class EntitlementValidator {
       );
 
       if (!entitled) {
-        this.logger.security(checkConfig.securityLogMessage, checkConfig.logContext);
+        this.logger.security(checkConfig.securityLogMessage, checkConfig.logContext, 'entitlement');
         return {
           allowed: false,
           reason: checkConfig.deniedReason,
@@ -98,7 +98,7 @@ export class EntitlementValidator {
 
       return { allowed: true };
     } catch (error) {
-      this.logger.error(`Error checking ${checkConfig.action} entitlements`, error as Error);
+      this.logger.error(`Error checking ${checkConfig.action} entitlements`, error as Error, undefined, 'entitlement');
       return {
         allowed: false,
         reason: 'Error validating entitlements',

@@ -18,7 +18,7 @@ import {
   LogLevel,
   type ResolverTarget,
 } from 'ratan-fdc3-broker';
-import { ResolverDialog } from 'ratan-fdc3-resolver-ui';
+import { FDC3ConsoleWidget, initFDC3LogService, destroyFDC3LogService, ResolverDialog } from 'ratan-fdc3-resolver-ui';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFDC3WorkspaceHelper } from './useFDC3WorkspaceHelper';
@@ -488,6 +488,15 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
     initializeBroker();
   }, [brokerConfig, allAccessibleTiles.length]);
 
+  // Separate effect for FDC3 log service — not coupled to broker config changes
+  useEffect(() => {
+    initFDC3LogService();
+
+    return () => {
+      destroyFDC3LogService();
+    };
+  }, []);
+
   // ========================================================================
   // Resolver Dialog Handlers
   // ========================================================================
@@ -533,6 +542,9 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
         onSelect={handleResolverSelect}
         onCancel={handleResolverCancel}
       />
+
+      {/* Floating FDC3 Console Widget — always available */}
+      <FDC3ConsoleWidget />
 
       {/* Broker Status Indicator (for development) */}
       {/* {process.env.NODE_ENV === 'development' && (

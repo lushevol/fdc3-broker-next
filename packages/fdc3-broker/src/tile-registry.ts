@@ -8,6 +8,7 @@
  * @see data-model.md#L518-L583
  */
 
+import { Logger } from './logger';
 import type { Channel, ContextListener, TileInstance, TileRegistry } from './types';
 
 /**
@@ -19,6 +20,11 @@ import type { Channel, ContextListener, TileInstance, TileRegistry } from './typ
  */
 export class TileRegistryImpl implements TileRegistry {
   private tiles = new Map<string, TileInstance>();
+  private logger: Logger;
+
+  constructor() {
+    this.logger = new Logger(false);
+  }
 
   /**
    * Register a tile
@@ -26,6 +32,7 @@ export class TileRegistryImpl implements TileRegistry {
    */
   registerTile(tile: TileInstance): void {
     this.tiles.set(tile.instanceId, tile);
+    this.logger.debug('Tile registered', { instanceId: tile.instanceId, appId: tile.appId, state: tile.state }, 'lifecycle');
   }
 
   /**
@@ -34,6 +41,7 @@ export class TileRegistryImpl implements TileRegistry {
    */
   unregisterTile(instanceId: string): void {
     this.tiles.delete(instanceId);
+    this.logger.debug('Tile unregistered', { instanceId }, 'lifecycle');
   }
 
   /**

@@ -7,14 +7,32 @@
  * @see research.md#L838-L863
  */
 
+import { LogLevel } from './logger';
+
 /**
  * Performance tracker class
  *
  * Tracks execution time of operations and logs warnings for slow operations (>100ms).
  * Supports both manual start/end tracking and automatic async function measurement.
+ * Emits performance events that can be subscribed to via the broker logger.
  */
 export class PerformanceTracker {
   private marks = new Map<string, number>();
+  private perfLogs: Array<{ operation: string; duration: number; timestamp: number }> = [];
+  private subscribers = new Set<(operation: string, duration: number) => void>();
+
+  /**
+   * Subscribes to performance completions
+   *
+   * @param callback - Called with (operation, durationMs) when an operation completes
+   * @returns Unsubscribe function
+   */
+  subscribe(callback: (operation: string, duration: number) => void): () => void {
+    this.subscribers.add(callback);
+    return () => {
+      this.subscribers.delete(callback);
+    };
+  }
 
   /**
    * Starts tracking an operation
@@ -55,10 +73,27 @@ export class PerformanceTracker {
     const duration = performance.now() - start;
     this.marks.delete(operation);
 
+    // Store perf log
+    this.perfLogs.push({ operation, duration, timestamp: Date.now() });
+    if (this.perfLogs.length > 100) {
+      this.perfLogs.shift();
+    }
+
     // Log if operation took too long (>100ms)
     if (duration > 100) {
       console.warn(`[FDC3:Perf] ${operation} took ${duration.toFixed(2)}ms`);
+    } else if (duration > 50) {
+      console.info(`[FDC3:Perf] ${operation} took ${duration.toFixed(2)}ms`);
     }
+
+    // Notify subscribers
+    this.subscribers.forEach((cb) => {
+      try {
+        cb(operation, duration);
+      } catch {
+        // Silently ignore subscriber errors
+      }
+    });
 
     return duration;
   }
@@ -90,11 +125,19 @@ export class PerformanceTracker {
   }
 
   /**
-   * Clears all operation marks
+   * Gets recent performance logs
    *
-   * Removes all tracked operations from the tracker.
+   * @returns Array of recent performance entries
+   */
+  getPerfLogs(): Array<{ operation: string; duration: number; timestamp: number }> {
+    return [...this.perfLogs];
+  }
+
+  /**
+   * Clears all operation marks and performance logs
    */
   clear(): void {
     this.marks.clear();
+    this.perfLogs = [];
   }
 }

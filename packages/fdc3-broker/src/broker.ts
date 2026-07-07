@@ -200,6 +200,30 @@ export class Broker implements DesktopAgent {
   }
 
   /**
+   * Subscribes to log events from the broker's logger.
+   * Returns an unsubscribe function.
+   *
+   * Use this to stream FDC3 broker logs in real time to a console widget
+   * or other monitoring tool.
+   *
+   * @param callback - Called with each log event emitted by the broker
+   * @returns Function to unsubscribe
+   *
+   * @example
+   * ```typescript
+   * const unsub = broker.subscribeToLogs((event) => {
+   *   console.log(`[${event.level}] ${event.message}`);
+   * });
+   * // Later: unsub();
+   * ```
+   */
+  subscribeToLogs(
+    callback: (event: import('./logger').LogEvent) => void,
+  ): () => void {
+    return this.logger.subscribe(callback);
+  }
+
+  /**
    * Set up OpenFin intent forwarding
    * Subscribes to intents from OpenFin and forwards them to internal tiles
    *
@@ -699,18 +723,29 @@ export class Broker implements DesktopAgent {
     this.logger.debug('broadcast', {
       context,
       currentTile: source,
-    });
+    }, 'context');
 
     return this.perf.measure('broadcast', async () => {
       const currentTile = this.tileRegistry.getTile(source?.instanceId || '');
       if (!currentTile || !currentTile.currentChannel) {
-        throw new Error('No channel joined');
+        const errMsg = 'No channel joined';
+        this.logger.warn('broadcast failed: no channel', { source }, 'context');
+        throw new Error(errMsg);
       }
 
       const channel = currentTile.currentChannel;
+      this.logger.info('Broadcasting context', {
+        contextType: context?.type,
+        channelId: channel.id,
+        tileId: source?.instanceId,
+      }, 'context');
 
       // Broadcast to internal channel
       await channel.broadcast(context);
+      this.logger.debug('Context broadcast to internal channel', {
+        contextType: context?.type,
+        channelId: channel.id,
+      }, 'context');
 
       // Sync with OpenFin if available
       const bridge = await this.getOpenFinBridge();
@@ -781,11 +816,11 @@ export class Broker implements DesktopAgent {
     const actualSource =
       typeof handlerOrSource === 'object' && 'appId' in handlerOrSource ? handlerOrSource : source;
 
-    this.logger.debug('addContextListener', {
+    this.logger.info('addContextListener', {
       contextType,
       appId: actualSource?.appId,
       instanceId: actualSource?.instanceId,
-    });
+    }, 'context');
 
     // Get current tile's channel
     const currentChannel = await this.getCurrentChannel(actualSource);
@@ -966,10 +1001,11 @@ export class Broker implements DesktopAgent {
 
     this.logger.debug('raiseIntent', {
       intent,
+      contextType: context?.type,
       context,
       target: targetApp,
       sourceTile: source,
-    });
+    }, 'intent');
 
     return this.perf.measure('raiseIntent', async () => {
       // Validate sender entitlements using EntitlementValidator
@@ -1139,11 +1175,11 @@ export class Broker implements DesktopAgent {
     handler: (context: Context) => any | Promise<any>,
     source?: AppIdentifier,
   ): Promise<Listener> {
-    this.logger.debug('addIntentListener', {
+    this.logger.info('addIntentListener', {
       intent,
       appId: source?.appId,
       instanceId: source?.instanceId,
-    });
+    }, 'intent');
 
     // Validate receiver entitlements using EntitlementValidator
     const entitlementCheck = await this.entitlementValidator.canReceiveIntent(
@@ -1413,11 +1449,11 @@ export class Broker implements DesktopAgent {
    * @see broadcast
    */
   async joinUserChannel(channelId: string, source?: AppIdentifier): Promise<void> {
-    this.logger.debug('joinUserChannel', {
+    this.logger.info('joinUserChannel', {
       channelId,
       appId: source?.appId,
       instanceId: source?.instanceId,
-    });
+    }, 'channel');
 
     return this.perf.measure('joinUserChannel', async () => {
       if (!source?.appId || !source.instanceId) {
@@ -1515,7 +1551,7 @@ export class Broker implements DesktopAgent {
     this.logger.debug('leaveCurrentChannel', {
       appId: source?.appId,
       instanceId: source?.instanceId,
-    });
+    }, 'channel');
 
     if (!source?.instanceId) {
       return;
@@ -1666,7 +1702,7 @@ export class Broker implements DesktopAgent {
    * @see setCurrentTile
    */
   async registerTile(instanceId: string, appId: string, metadata?: AppMetadata): Promise<void> {
-    this.logger.debug('registerTile', { instanceId, appId });
+    this.logger.info('registerTile', { instanceId, appId }, 'lifecycle');
 
     this.tileRegistry.registerTile({
       appId,
@@ -1683,7 +1719,9 @@ export class Broker implements DesktopAgent {
     // Deliver any queued intents
     const queued = this.intentQueue.getQueuedIntents(instanceId);
     if (queued.length > 0) {
-      this.logger.info(`Delivering ${queued.length} queued intents to tile ${instanceId}`);
+      this.logger.info(`Delivering ${queued.length} queued intents to tile ${instanceId}`, {
+        intents: queued.map((q) => q.intent),
+      }, 'lifecycle');
 
       // Deliver intents
       for (const queuedIntent of queued) {
@@ -1736,7 +1774,7 @@ export class Broker implements DesktopAgent {
    * @see registerTile
    */
   unregisterTile(instanceId: string): void {
-    this.logger.debug('unregisterTile', { instanceId });
+    this.logger.info('unregisterTile', { instanceId }, 'lifecycle');
 
     // Clean up intent listeners for this tile
     const tile = this.tileRegistry.getTile(instanceId);
@@ -1778,7 +1816,12 @@ export class Broker implements DesktopAgent {
     target: ResolverTarget,
     source?: AppIdentifier,
   ): Promise<IntentResolution> {
-    this.logger.debug('deliverIntent', { intent, context, target });
+    this.logger.debug('deliverIntent', {
+      intent,
+      contextType: context?.type,
+      target,
+      source,
+    }, 'intent');
 
     // Check if target instance is mounted
     if (target.instanceId) {
@@ -1804,16 +1847,28 @@ export class Broker implements DesktopAgent {
             if (handler) {
               try {
                 const result = await handler(context);
+                this.logger.info('Intent handler executed successfully', {
+                  intent,
+                  targetInstanceId: target.instanceId,
+                  source,
+                }, 'intent');
                 results.push(result);
               } catch (error) {
-                // Handle handler errors gracefully - log and continue
-                this.logger.error(`Error in intent handler for ${intent}:`, error as Error);
-                // Continue processing other handlers; result won't be added
+                this.logger.error(`Error in intent handler for ${intent}:`, error as Error, {
+                  target,
+                  source,
+                }, 'intent');
               }
             }
           }
 
           // Return first result
+          this.logger.info('Intent delivered', {
+            intent,
+            contextType: context?.type,
+            target,
+            source,
+          }, 'intent');
           return this.intentResolver.createIntentResolution(target, intent, results[0]);
         }
       } else {

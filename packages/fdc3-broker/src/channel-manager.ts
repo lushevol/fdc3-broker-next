@@ -35,6 +35,7 @@ export class ChannelManager {
     const channels = userChannelIds || (USER_CHANNEL_IDS as unknown as string[]);
     this.initializeUserChannels(channels);
     this.logger = new Logger(enableDebug);
+    this.logger.info('ChannelManager initialized', { channelCount: channels.length, channels }, 'channel');
   }
 
   /**
@@ -73,11 +74,13 @@ export class ChannelManager {
    */
   createChannel(channelId: string): Channel {
     if (this.appChannels.has(channelId)) {
+      this.logger.debug('Channel already exists', { channelId }, 'channel');
       return this.appChannels.get(channelId)!;
     }
 
     const channel = new ChannelImpl(channelId, 'app');
     this.appChannels.set(channelId, channel);
+    this.logger.info('App channel created', { channelId }, 'channel');
     return channel;
   }
 
@@ -111,6 +114,7 @@ export class ChannelManager {
     const id = channelId || `private_${Date.now()}_${Math.random()}`;
     const privateChannel = new PrivateChannelImpl(id);
     this.privateChannels.set(id, privateChannel);
+    this.logger.info('Private channel created', { channelId: id }, 'channel');
     return privateChannel;
   }
 
@@ -148,11 +152,11 @@ export class ChannelManager {
     // Track tile's channel
     this.tileChannels.set(instanceId, channel);
 
-    this.logger.debug('Tile joined channel', {
+    this.logger.info('Tile joined channel', {
       instanceId,
       channelId: channel.id,
       previousChannelId,
-    });
+    }, 'channel');
   }
 
   /**
@@ -170,7 +174,7 @@ export class ChannelManager {
 
     this.tileChannels.delete(instanceId);
 
-    this.logger.debug('Tile left channel', { instanceId, channelId });
+    this.logger.info('Tile left channel', { instanceId, channelId }, 'channel');
   }
 
   /**

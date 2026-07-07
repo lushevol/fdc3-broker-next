@@ -160,3 +160,22 @@ export type { ErrorBoundaryProps, ErrorBoundaryTheme } from './ResolverErrorBoun
 export * from './types';
 // Export hooks
 export { useResolverKeyboard } from './useResolverKeyboard';
+
+// Export FDC3 Log Service and Console Widget
+export type {
+  FDC3LogEntry,
+  FDC3ConsoleWidgetProps,
+  LogEntryCallback,
+  TileIdentity,
+} from './fdc3-log';
+export {
+  FDC3ConsoleWidget,
+  LOG_CATEGORY_ICONS,
+  LOG_LEVEL_COLORS,
+  clearFDC3Logs,
+  destroyFDC3LogService,
+  getFDC3LogEntries,
+  initFDC3LogService,
+  pushFDC3Log,
+  subscribeToFDC3Logs,
+} from './fdc3-log';
