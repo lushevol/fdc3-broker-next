@@ -543,8 +543,10 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
         onCancel={handleResolverCancel}
       />
 
-      {/* Floating FDC3 Console Widget — always available */}
-      <FDC3ConsoleWidget />
+      {/* Floating FDC3 Console — only in dev mode when logged in */}
+      {process.env.NODE_ENV === 'development' && store.token && (
+        <FDC3ConsoleWidget />
+      )}
 
       {/* Broker Status Indicator (for development) */}
       {/* {process.env.NODE_ENV === 'development' && (

@@ -46,6 +46,13 @@ let openFinBridgeClass: OpenFinBridgeType | null = null;
 const PRELOGIN_TILE_ID = '__prelogin__';
 const EXTERNAL_OPENFIN_SOURCE_APP_ID = 'external';
 
+type PendingIntentListener = {
+  intent: string;
+  resolve: () => void;
+  reject: (error: Error) => void;
+  timeoutId?: ReturnType<typeof setTimeout>;
+};
+
 // Lazy load PostMessage bridge only when needed
 type PostMessageBridgeType = typeof import('./postmessage-bridge').PostMessageBridge;
 let postMessageBridgeClass: PostMessageBridgeType | null = null;
@@ -109,10 +116,7 @@ export class Broker implements DesktopAgent {
   private privateChannels = new Map<string, PrivateChannel>();
 
   // Track pending intent listeners (waits for app launch)
-  private pendingIntentListeners = new Map<
-    string,
-    Array<{ intent: string; resolve: () => void }>
-  >();
+  private pendingIntentListeners = new Map<string, PendingIntentListener[]>();
 
   /**
    * Creates a new FDC3 Broker instance
@@ -1002,6 +1006,12 @@ export class Broker implements DesktopAgent {
     const ctxType = context?.type ?? 'unknown';
     const appLabel = source?.appId ?? 'unknown-source';
 
+    this.logger.debug('raiseIntent', {
+      intent,
+      context,
+      target: targetApp,
+      sourceTile: source,
+    });
     this.logger.info(`Intent flow: raiseIntent("${intent}", "${ctxType}") from ${appLabel}`, {
       intent, contextType: ctxType, context, target: targetApp, source,
     }, 'intent');
@@ -1193,10 +1203,6 @@ export class Broker implements DesktopAgent {
     const appLabel = source?.appId ?? '?';
     const instanceLabel = source?.instanceId ?? '(unscoped)';
 
-    this.logger.info(`Intent listener: "${intent}" registered by ${appLabel}[${instanceLabel}]`, {
-      intent, appId: source?.appId, instanceId: source?.instanceId,
-    }, 'intent');
-
     // Validate receiver entitlements using EntitlementValidator
     this.logger.info(`  subscription: checking receive entitlement for ${appLabel} on "${intent}"`, {
       source: source?.appId, intent,
@@ -1232,8 +1238,10 @@ export class Broker implements DesktopAgent {
         if (listeners) {
           const index = listeners.findIndex((l) => this.listenerIds.get(l) === listenerId);
           if (index >= 0) {
-            listeners.splice(index, 1);
-            this.listenerIds.delete(listeners[index]!);
+            const [removed] = listeners.splice(index, 1);
+            if (removed) {
+              this.listenerIds.delete(removed);
+            }
           }
         }
       },
@@ -1246,6 +1254,7 @@ export class Broker implements DesktopAgent {
     // Prioritize instanceId, fallback to appId
     const instanceId = source?.instanceId;
     if (instanceId) {
+      this.removeDuplicateIntentListeners(intent, source, listenerId);
       this.tileRegistry.addIntentListener(instanceId, intent);
     }
 
@@ -1257,6 +1266,10 @@ export class Broker implements DesktopAgent {
 
     // Store handler with listener
     (listener as any).handler = handler;
+
+    this.logger.info(`Intent listener: "${intent}" registered by ${appLabel}[${instanceLabel}]`, {
+      intent, appId: source?.appId, instanceId: source?.instanceId,
+    }, 'intent');
 
     // // Sync with OpenFin if this is a new intent type
     // const isNewIntentType = this.intentListeners.get(intent)!.length === 1;
@@ -1275,18 +1288,7 @@ export class Broker implements DesktopAgent {
             intent, appId: source.appId, pendingCount: matchingWaits.length,
           }, 'intent');
         }
-        // Resolve all matching waits
-        matchingWaits.forEach((wait) => {
-          wait.resolve();
-        });
-
-        // Remove resolved waits
-        const remaining = pendingForApp.filter((p) => p.intent !== intent);
-        if (remaining.length > 0) {
-          this.pendingIntentListeners.set(source.appId, remaining);
-        } else {
-          this.pendingIntentListeners.delete(source.appId);
-        }
+        matchingWaits.forEach((wait) => this.resolvePendingIntentListener(source.appId, wait));
       }
     }
 
@@ -1294,6 +1296,62 @@ export class Broker implements DesktopAgent {
       intent, appId: source?.appId, instanceId: source?.instanceId,
     }, 'intent');
     return listener;
+  }
+
+  private removeDuplicateIntentListeners(
+    intent: string,
+    source: AppIdentifier,
+    currentListenerId: string,
+  ): void {
+    const listeners = this.intentListeners.get(intent);
+    if (!listeners || !source.instanceId) {
+      return;
+    }
+
+    for (let index = listeners.length - 1; index >= 0; index--) {
+      const existing = listeners[index];
+      const existingSource = (existing as any).source as AppIdentifier | undefined;
+      const existingListenerId = this.listenerIds.get(existing);
+      if (
+        existingListenerId !== currentListenerId &&
+        existingSource?.instanceId === source.instanceId &&
+        existingSource?.appId === source.appId
+      ) {
+        listeners.splice(index, 1);
+        this.listenerIds.delete(existing);
+      }
+    }
+  }
+
+  private resolvePendingIntentListener(appId: string, wait: PendingIntentListener): void {
+    this.removePendingIntentListener(appId, wait);
+    if (wait.timeoutId) {
+      clearTimeout(wait.timeoutId);
+    }
+    wait.resolve();
+  }
+
+  private rejectPendingIntentListener(
+    appId: string,
+    wait: PendingIntentListener,
+    error: Error,
+  ): void {
+    this.removePendingIntentListener(appId, wait);
+    wait.reject(error);
+  }
+
+  private removePendingIntentListener(appId: string, wait: PendingIntentListener): void {
+    const pending = this.pendingIntentListeners.get(appId);
+    if (!pending) {
+      return;
+    }
+
+    const nextPending = pending.filter((pendingWait) => pendingWait !== wait);
+    if (nextPending.length > 0) {
+      this.pendingIntentListeners.set(appId, nextPending);
+    } else {
+      this.pendingIntentListeners.delete(appId);
+    }
   }
 
   /**
@@ -1992,34 +2050,24 @@ export class Broker implements DesktopAgent {
       if (!this.pendingIntentListeners.has(appId)) {
         this.pendingIntentListeners.set(appId, []);
       }
-      this.pendingIntentListeners.get(appId)!.push({ intent, resolve });
+      const wait: PendingIntentListener = { intent, resolve, reject };
+      this.pendingIntentListeners.get(appId)!.push(wait);
 
       this.logger.debug(`  waitForListener: registered pending wait for "${intent}" on ${appId}`, {
         appId, intent,
       }, 'intent');
 
       // Set timeout
-      const timeoutId = setTimeout(() => {
-        // Cleanup
-        const pending = this.pendingIntentListeners.get(appId);
-        if (pending) {
-          const idx = pending.findIndex((p) => p.intent === intent && p.resolve === resolve);
-          if (idx >= 0) {
-            pending.splice(idx, 1);
-            if (pending.length === 0) {
-              this.pendingIntentListeners.delete(appId);
-            }
-          }
-        }
+      wait.timeoutId = setTimeout(() => {
         this.logger.warn(`  waitForListener ✗: timeout (${timeoutMs}ms) waiting for "${intent}" listener on ${appId}`, {
           appId, intent, timeoutMs,
         }, 'intent');
-        reject(new Error(`Timeout waiting for intent listener: ${intent}`));
+        this.rejectPendingIntentListener(
+          appId,
+          wait,
+          new Error(`Timeout waiting for intent listener: ${intent}`),
+        );
       }, timeoutMs);
-
-      // Allow the timeout to be cleared if resolved externally
-      // Store handle for cleanup if needed
-      (resolve as any).__timeoutId = timeoutId;
     });
   }
 }

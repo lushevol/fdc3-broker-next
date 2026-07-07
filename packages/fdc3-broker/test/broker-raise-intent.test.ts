@@ -4,7 +4,7 @@
  */
 
 import type { AppDirectoryClient } from '@fm/fdc3-app-directory';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Broker } from '../src/broker';
 import type { AppIdentifier, BrokerConfig, Context, IntentResolution } from '../src/types';
 
@@ -82,6 +82,10 @@ describe('Broker.raiseIntent()', () => {
     };
 
     broker = new Broker(mockConfig);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   describe('entitlement validation', () => {
@@ -328,6 +332,27 @@ describe('Broker.raiseIntent()', () => {
       expect(result.source.appId).toBe('app1');
     });
 
+    it('should replace duplicate listener registrations from the same tile instance', async () => {
+      const handler1 = vi.fn().mockResolvedValue('stale');
+      const handler2 = vi.fn().mockResolvedValue('fresh');
+      const target = { appId: 'app1', instanceId: 'tile-1' };
+
+      broker['registerTile']('tile-1', 'app1', {
+        appId: 'app1',
+        name: 'App 1',
+      });
+
+      await broker.addIntentListener('ViewChart', handler1, target);
+      await broker.addIntentListener('ViewChart', handler2, target);
+
+      const result = await broker.raiseIntent('ViewChart', mockContext, target, mockSource);
+
+      expect(handler1).not.toHaveBeenCalled();
+      expect(handler2).toHaveBeenCalledTimes(1);
+      expect(handler2).toHaveBeenCalledWith(mockContext);
+      await expect(result.getResult?.()).resolves.toBe('fresh');
+    });
+
     it('should handle handler errors gracefully', async () => {
       const handler = vi.fn().mockRejectedValue(new Error('Handler error'));
 
@@ -481,6 +506,33 @@ describe('Broker.raiseIntent()', () => {
         const intentResult = await result.getResult();
         expect(intentResult).toEqual({ processed: true, context: mockContext });
       }
+    });
+
+    it('should clear pending listener waits after registration resolves', async () => {
+      vi.useFakeTimers();
+      const warnSpy = vi.spyOn(broker['logger'], 'warn');
+
+      const waitForListener = broker['waitForIntentListener']('app1', 'ViewChart', 30_000);
+
+      await broker.registerTile('tile-new', 'app1', {
+        appId: 'app1',
+        name: 'App 1',
+      });
+      await broker.addIntentListener('ViewChart', vi.fn(), {
+        appId: 'app1',
+        instanceId: 'tile-new',
+      });
+      await expect(waitForListener).resolves.toBeUndefined();
+
+      expect(broker['pendingIntentListeners'].get('app1')).toBeUndefined();
+
+      vi.advanceTimersByTime(30_000);
+
+      expect(warnSpy).not.toHaveBeenCalledWith(
+        expect.stringContaining('waitForListener ✗: timeout'),
+        expect.anything(),
+        'intent',
+      );
     });
   });
 
