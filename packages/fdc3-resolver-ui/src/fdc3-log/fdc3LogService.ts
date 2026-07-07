@@ -173,21 +173,21 @@ function addLog(
   // Try to enrich with tile info from the tile cache
   enrichWithTileInfo(entry);
 
-  // Sync to browser console so all FDC3 log API entries are visible
-  // in the developer tools regardless of their source.
-  const tag = entry.tileName ? ` [${entry.tileName}]` : '';
-  switch (level) {
-    case 'error':
-      console.error(`[FDC3-API:ERROR]${tag} ${message}`, data ?? '');
-      break;
-    case 'warn':
-      console.warn(`[FDC3-API:WARN]${tag} ${message}`, data ?? '');
-      break;
-    case 'debug':
-      console.debug(`[FDC3-API:DEBUG]${tag} ${message}`, data ?? '');
-      break;
-    default:
-      console.info(`[FDC3-API:${level.toUpperCase()}]${tag} ${message}`, data ?? '');
+  // Sync meaningful events (info+) to browser console.
+  // Debug/perf entries are suppressed to keep the console readable
+  // (they represent internal polling and performance details).
+  if (level !== 'debug' && level !== 'perf') {
+    const tag = entry.tileName ? ` [${entry.tileName}]` : '';
+    switch (level) {
+      case 'error':
+        console.error(`[FDC3]${tag} ${message}`, data ?? '');
+        break;
+      case 'warn':
+        console.warn(`[FDC3]${tag} ${message}`, data ?? '');
+        break;
+      default:
+        console.info(`[FDC3]${tag} ${message}`, data ?? '');
+    }
   }
 
   logEntries.push(entry);
@@ -216,7 +216,10 @@ function addLog(
 function patchConsole(): void {
   if (typeof console === 'undefined') return;
 
-  const FDC3_PREFIX_RE = /^\[FDC3:(DEBUG|INFO|WARN|ERROR|SECURITY|Perf)\]\s*(.*)/;
+  // Only intercept patterns that do NOT go through the broker's Logger subscriber.
+  // [FDC3:*] messages come from the broker Logger which has its own subscriber path
+  // (providing richer structured data with category labels), so we skip them here
+  // to avoid double-capturing every broker event.
   const FMPTP_FDC3_RE = /^\[FMPTP FDC3\]\s*(.*)/;
   const CASHFLOW_FDC3_RE = /^\[Cashflow[^\]]*\]\s*(.*)/;
   const INTENTQUEUE_RE = /^\[IntentQueue\]\s*(.*)/;
@@ -235,41 +238,25 @@ function patchConsole(): void {
       const firstArg = typeof args[0] === 'string' ? args[0] : '';
       if (!firstArg) return;
 
-      // [FDC3:LEVEL] pattern (from broker Logger)
-      let match = firstArg.match(FDC3_PREFIX_RE);
-      if (match) {
-        let level: FDC3LogEntry['level'];
-        switch (match[1]) {
-          case 'DEBUG': level = 'debug'; break;
-          case 'INFO': level = 'info'; break;
-          case 'WARN': level = 'warn'; break;
-          case 'ERROR': level = 'error'; break;
-          case 'SECURITY': level = 'security'; break;
-          case 'Perf': level = 'perf'; break;
-          default: level = 'info';
-        }
-        addLog(level, level === 'perf' ? 'perf' : 'general', match[2], args[1], 'console');
-        return;
-      }
-
       // [FMPTP FDC3] pattern (legacy base broker)
-      match = firstArg.match(FMPTP_FDC3_RE);
+      const match = firstArg.match(FMPTP_FDC3_RE);
+      /* c8 ignore next 14 */
       if (match) {
         addLog('info', 'general', match[1], args[1], 'base');
         return;
       }
 
       // [Cashflow*] pattern (cashflow tiles)
-      match = firstArg.match(CASHFLOW_FDC3_RE);
-      if (match) {
-        addLog('info', 'intent', `[Cashflow] ${match[1]}`, args[1], 'tile');
+      const cashflowMatch = firstArg.match(CASHFLOW_FDC3_RE);
+      if (cashflowMatch) {
+        addLog('info', 'intent', `[Cashflow] ${cashflowMatch[1]}`, args[1], 'tile');
         return;
       }
 
       // [IntentQueue] pattern
-      match = firstArg.match(INTENTQUEUE_RE);
-      if (match) {
-        addLog('info', 'lifecycle', `[Queue] ${match[1]}`, args[1], 'broker');
+      const queueMatch = firstArg.match(INTENTQUEUE_RE);
+      if (queueMatch) {
+        addLog('info', 'lifecycle', `[Queue] ${queueMatch[1]}`, args[1], 'broker');
         return;
       }
     } as typeof console.log;

@@ -330,6 +330,27 @@ const S = {
 } as const;
 
 /* ------------------------------------------------------------------ */
+/*  Helpers                                                           */
+/* ------------------------------------------------------------------ */
+
+function copyToClipboard(text: string): void {
+  navigator.clipboard.writeText(text).catch((err) => {
+    console.warn('Failed to copy to clipboard:', err);
+  });
+}
+
+function formatLogAsText(entry: FDC3LogEntry): string {
+  const detail = entry.data
+    ? typeof entry.data === 'string'
+      ? entry.data
+      : JSON.stringify(entry.data, null, 2)
+    : '';
+  const tag = entry.tileName ? ` [${entry.tileName}]` : '';
+  const tile = entry.tileId ? ` tile:${entry.tileId}` : '';
+  return `[${entry.ts}][${entry.level.toUpperCase()}]${tag} ${entry.message} (${entry.source}${tile})${detail ? '\n' + detail : ''}`;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Quick actions                                                     */
 /* ------------------------------------------------------------------ */
 
@@ -442,6 +463,11 @@ function ActivityTab({
                       {entry.tileName || entry.tileId}
                     </span>
                   )}
+                  <button type="button" title="Copy this entry"
+                    onClick={(e) => { e.stopPropagation(); copyToClipboard(formatLogAsText(entry)); }}
+                    style={{ background: 'none', border: 'none', color: '#606060', cursor: 'pointer', fontSize: '11px', padding: '0 2px', fontFamily: 'inherit' }}>
+                    📋
+                  </button>
                   <span title={`Source: ${entry.source}`} style={S.logMeta}>{entry.source}</span>
                 </div>
                 {isExpanded && detailText && (
@@ -664,8 +690,12 @@ const FDC3ConsoleWidget: React.FC<FDC3ConsoleWidgetProps> = ({
     lastSeenLength.current = logs.length;
   }, [logs.length, isVisible]);
 
-  // Poll broker state for listeners/channels
+  // Poll broker state for listeners/channels.
+  // Only runs when the listeners tab is active, at a 10 s interval,
+  // to avoid noisy debug-level logging from getUserChannels/getCurrentChannel.
   useEffect(() => {
+    if (activeTab !== 'listeners') return;
+
     const poll = () => {
       const ratan = (globalThis as Record<string, unknown>).__RATAN_FDC3__ as Record<string, unknown> | undefined;
       const broker = ratan?.brokerInstance as Record<string, unknown> | undefined;
@@ -690,9 +720,9 @@ const FDC3ConsoleWidget: React.FC<FDC3ConsoleWidgetProps> = ({
       }
     };
     poll();
-    const interval = setInterval(poll, 2000);
+    const interval = setInterval(poll, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [activeTab]);
 
   // Auto-scroll
   useEffect(() => {
@@ -713,6 +743,11 @@ const FDC3ConsoleWidget: React.FC<FDC3ConsoleWidgetProps> = ({
     activeLevels.has(e.level) && activeCategories.has(e.category) &&
     (!searchFilter || e.message.toLowerCase().includes(searchFilter.toLowerCase()))
   );
+
+  const handleCopyAll = useCallback(() => {
+    const text = filteredLogs.map((e: FDC3LogEntry) => formatLogAsText(e)).join('\n---\n');
+    copyToClipboard(text);
+  }, [filteredLogs.length]);
 
   return (
     <>
@@ -758,6 +793,7 @@ const FDC3ConsoleWidget: React.FC<FDC3ConsoleWidgetProps> = ({
 
           <div style={S.toolbar}>
             <button type="button" style={{ ...S.btn, ...S.btnDanger }} onClick={handleClear}>Clear</button>
+            <button type="button" style={S.btn} onClick={handleCopyAll}>Copy All</button>
             <button type="button" style={{ ...S.btn, ...S.btnSecondary }} onClick={() => setIsVisible(false)}>Close</button>
             <span style={S.statusText}>{logs.length} event{logs.length !== 1 ? 's' : ''}</span>
           </div>

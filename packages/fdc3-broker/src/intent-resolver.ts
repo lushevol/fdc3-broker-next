@@ -96,64 +96,71 @@ export class IntentResolver {
     context: Context,
     target?: AppIdentifier,
   ): Promise<IntentResolutionResult> {
-    this.logger.debug('Resolving intent', {
-      intent,
-      contextType: context?.type,
-      target,
+    const ctxType = context?.type ?? 'unknown';
+
+    this.logger.info(`  resolve: "${intent}" with context "${ctxType}"`, {
+      intent, contextType: ctxType, target,
     }, 'intent');
 
     // If target specified, resolve directly
     if (target) {
-      this.logger.debug('Resolving to specific target', {
-        appId: target.appId,
-        instanceId: target.instanceId,
+      this.logger.info(`  resolve: target pre-specified as "${target.appId}" (instance: ${target.instanceId ?? 'new'})`, {
+        appId: target.appId, instanceId: target.instanceId,
       }, 'intent');
       return await this.resolveSpecificTarget(intent, context, target);
     }
 
     // Find all apps that can handle this intent
     const apps = await this.appDirectory.findByIntent(intent);
-    this.logger.debug('Found apps for intent', { intent, count: apps.length }, 'intent');
+    this.logger.info(`  resolve: found ${apps.length} app(s) that can handle "${intent}"`, {
+      intent, appCount: apps.length,
+      appIds: apps.map((a) => a.appId),
+    }, 'intent');
 
     if (apps.length === 0) {
-      this.logger.debug('No apps found for intent', { intent }, 'intent');
+      this.logger.info(`  resolve: NO apps found for intent "${intent}"`, { intent }, 'intent');
       return { type: 'not-found' };
     }
 
     // Filter apps to only those entitled
     const entitledApps = await this.filterEntitledApps(apps);
-    this.logger.debug('Filtered by entitlements', {
-      total: apps.length,
-      entitled: entitledApps.length,
+    this.logger.info(`  resolve: filtered ${apps.length} app(s) by entitlements → ${entitledApps.length} entitled`, {
+      total: apps.length, entitled: entitledApps.length,
+      entitledIds: entitledApps.map((a) => a.appId),
     }, 'intent');
 
     if (entitledApps.length === 0) {
-      this.logger.debug('No entitled apps found for intent', { intent }, 'intent');
+      this.logger.info(`  resolve: NO entitled apps for intent "${intent}"`, { intent }, 'intent');
       return { type: 'not-found' };
     }
 
     // Find instances of entitled apps
     const targets = await this.findTargets(entitledApps, intent);
-    this.logger.debug('Found targets', { count: targets.length, intent }, 'intent');
+    this.logger.info(`  resolve: found ${targets.length} running instance(s) across ${entitledApps.length} entitled app(s)`, {
+      targetCount: targets.length,
+      entitledAppCount: entitledApps.length,
+      targets: targets.map((t) => ({ appId: t.appId, instanceId: t.instanceId })),
+    }, 'intent');
 
     if (targets.length === 0) {
-      // No instances running, but apps exist - return first app for launching
-      this.logger.debug('No running instances, returning app for launch', {
-        appId: entitledApps[0]?.appId,
+      // No instances running, but apps exist — return first app for launching
+      const firstApp = entitledApps[0];
+      this.logger.info(`  resolve: no running instances — will launch "${firstApp?.appId}"`, {
+        appId: firstApp?.appId,
       }, 'intent');
       return { type: 'success', target: targets[0] };
     }
 
     if (targets.length === 1) {
-      this.logger.debug('Single target found', {
+      this.logger.info(`  resolve: single target "${targets[0].appId}"[${targets[0].instanceId}]`, {
         appId: targets[0].appId,
         instanceId: targets[0].instanceId,
       }, 'intent');
       return { type: 'success', target: targets[0] };
     }
 
-    // Multiple targets available - ambiguous
-    this.logger.debug('Multiple targets found, showing resolver UI', {
+    // Multiple targets available — ambiguous
+    this.logger.info(`  resolve: ${targets.length} targets — showing resolver UI`, {
       count: targets.length,
       appIds: targets.map((t) => t.appId),
     }, 'intent');
