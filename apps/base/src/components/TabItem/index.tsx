@@ -1,6 +1,9 @@
 import DeleteIcon from '@mui/icons-material/Delete';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import React, { type ReactElement } from 'react';
@@ -8,7 +11,20 @@ import type { TabProps } from './common/interface';
 import Root, { classes, PREFIX } from './common/style';
 
 const TabItem: React.FC<TabProps> = (props: TabProps): ReactElement => {
-  const { item, edit, remove, refreshTab, showRemove, showRefresh } = props;
+  const { item, edit, remove, refreshTab, showRemove, showRefresh, closeOthers, closeAll } =
+    props;
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Tooltip title={item.label} placement="top-start">
       <Root data-testid={`${PREFIX}`}>
@@ -39,6 +55,16 @@ const TabItem: React.FC<TabProps> = (props: TabProps): ReactElement => {
             <RefreshIcon fontSize="small" />
           </IconButton>
         )}
+        <IconButton
+          id={`menuWorkspace-${item.id}`}
+          data-testid={`menuWorkspace-${item.id}`}
+          aria-label="workspace menu"
+          size="medium"
+          className={classes.button}
+          onClick={handleMenuClick}
+        >
+          <MoreVertIcon fontSize="small" />
+        </IconButton>
         {showRemove && (
           <IconButton
             id={`deleteWorkspace-${item.id}`}
@@ -51,6 +77,46 @@ const TabItem: React.FC<TabProps> = (props: TabProps): ReactElement => {
             <DeleteIcon fontSize="small" />
           </IconButton>
         )}
+        <Menu
+          anchorEl={anchorEl}
+          open={menuOpen}
+          onClose={handleMenuClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          <MenuItem
+            onClick={(e) => {
+              handleMenuClose();
+              remove(item)(e);
+            }}
+            disabled={!showRemove}
+          >
+            Close
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              handleMenuClose();
+              closeOthers(item);
+            }}
+            disabled={!showRemove}
+          >
+            Close Others
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              handleMenuClose();
+              closeAll();
+            }}
+          >
+            Close All
+          </MenuItem>
+        </Menu>
       </Root>
     </Tooltip>
   );

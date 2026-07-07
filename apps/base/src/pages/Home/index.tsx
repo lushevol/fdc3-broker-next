@@ -1,14 +1,15 @@
 import AddIcon from '@mui/icons-material/Add';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import React, { type ReactElement } from 'react';
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import AppBar from '../../components/AppBar';
 import Empty from '../../components/Empty';
 import Snackbar from '../../components/Snackbar';
+import SortableTab from '../../components/SortableTab';
 import TabItem from '../../components/TabItem';
-import TabPanel, { a11yProps } from '../../components/TabPanel';
+import TabPanel from '../../components/TabPanel';
 import Timeout from '../../components/Timeout';
 import type { Workspace } from '../../hooks/model/workspaces';
 import Container from './common/Container';
@@ -50,11 +51,28 @@ const Home: React.FC = (): ReactElement => {
     mouseMove,
     validateWorkspaceReady,
     closeAllTiles,
+    closeOthers,
+    closeAll,
+    handleReorder,
+    handleDragStart,
+    handleDragCancel,
+    activeDragId,
   } = useController();
   const { openTile } = useParameters();
   const { channelMessage, clearMessage } = useOpenfin(openTile);
   const { workspaceOpenTile } = useFDC3WorkspaceHelper();
   const length = store?.workspaces?.length ?? 0;
+  const workspaceIds = store?.workspaces?.map((w) => w.id) ?? [];
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+  );
+  const draggedItem = activeDragId
+    ? store?.workspaces?.find((w) => w.id === activeDragId)
+    : undefined;
   const toolRegistryConfig = React.useMemo(() => {
     const activeContainer = store?.currentWorkspace?.containers?.[0];
 
@@ -127,54 +145,86 @@ const Home: React.FC = (): ReactElement => {
           <AppBar />
         </header>
         <main className={classes.main}>
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            data-testid={`${PREFIX}_workspaces`}
-            aria-label="workspaces"
-            className={classes.tabs}
-            variant="scrollable"
-            scrollButtons
-            onDoubleClick={focus(value)}
+          <DndContext
+            onDragStart={handleDragStart}
+            onDragEnd={handleReorder}
+            onDragCancel={handleDragCancel}
+            sensors={sensors}
           >
-            <div className={classes.firsttab}></div>
-            {store?.workspaces?.map((item: Workspace) => {
-              const showRefresh: boolean = !!(
-                item.id === store?.currentWorkspace?.id &&
-                store?.refreshTab &&
-                store?.refreshTab[item.id]
-              );
-              return (
-                <Tab
-                  key={item.id}
-                  label={
-                    <TabItem
-                      item={item}
-                      edit={edit}
-                      remove={remove}
-                      refreshTab={refreshTab}
-                      showRemove={length > 1}
-                      showRefresh={showRefresh}
-                    />
-                  }
-                  className={classes.tab}
-                  {...a11yProps(item.id)}
-                />
-              );
-            })}
-            <div className={classes.lasttab}>
-              <Button
-                variant="contained"
-                className={classes.addtab}
-                onClick={add}
-                data-testid={`${PREFIX}_add_btn`}
-                aria-label="Add Workspace"
-                title="Add Workspace"
+            <div
+              className={classes.tabBar}
+              role="tablist"
+              data-testid={`${PREFIX}_workspaces`}
+            >
+              <div className={classes.firsttab}></div>
+              <SortableContext
+                items={workspaceIds}
+                strategy={horizontalListSortingStrategy}
               >
-                <AddIcon />
-              </Button>
+                {store?.workspaces?.map((item: Workspace) => {
+                  const showRefresh: boolean = !!(
+                    item.id === store?.currentWorkspace?.id &&
+                    store?.refreshTab &&
+                    store?.refreshTab[item.id]
+                  );
+                  return (
+                    <SortableTab
+                      key={item.id}
+                      id={item.id}
+                      active={item.id === store?.currentWorkspace?.id}
+                      onClick={() => handleChange(item)}
+                      onDoubleClick={focus(item)}
+                    >
+                      <TabItem
+                        item={item}
+                        edit={edit}
+                        remove={remove}
+                        refreshTab={refreshTab}
+                        showRemove={length > 1}
+                        showRefresh={showRefresh}
+                        closeOthers={closeOthers}
+                        closeAll={closeAll}
+                      />
+                    </SortableTab>
+                  );
+                })}
+              </SortableContext>
+              <div className={classes.lasttab}>
+                <Button
+                  variant="contained"
+                  className={classes.addtab}
+                  onClick={add}
+                  data-testid={`${PREFIX}_add_btn`}
+                  aria-label="Add Workspace"
+                  title="Add Workspace"
+                >
+                  <AddIcon />
+                </Button>
+              </div>
             </div>
-          </Tabs>
+            <DragOverlay>
+              {draggedItem ? (
+                <div className={classes.dragOverlay}>
+                  <TabItem
+                    item={draggedItem}
+                    edit={edit}
+                    remove={remove}
+                    refreshTab={refreshTab}
+                    showRemove={length > 1}
+                    showRefresh={
+                      !!(
+                        draggedItem.id === store?.currentWorkspace?.id &&
+                        store?.refreshTab &&
+                        store?.refreshTab[draggedItem.id]
+                      )
+                    }
+                    closeOthers={closeOthers}
+                    closeAll={closeAll}
+                  />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
           <Box className={classes.box}>
             {store?.workspaces?.map((item: Workspace, i) => {
               const validation: boolean = !!item?.containers?.length;

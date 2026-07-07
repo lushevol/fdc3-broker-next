@@ -3,8 +3,7 @@ export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_home`;
 export const classes = {
   root: `${PREFIX}-root`,
   main: `${PREFIX}-main`,
-  tabs: `${PREFIX}-tabs`,
-  tab: `${PREFIX}-tab`,
+  tabBar: `${PREFIX}-tabBar`,
   firsttab: `${PREFIX}-firsttab`,
   lasttab: `${PREFIX}-lasttab`,
   div: `${PREFIX}-div`,
@@ -12,79 +11,44 @@ export const classes = {
   tabpanel: `${PREFIX}-tabpanel`,
   addtab: `${PREFIX}-addtab`,
   containerTile: `${PREFIX}-containerTile`,
+  dragOverlay: `${PREFIX}-dragOverlay`,
 };
 
 const Root = styled('section')(({ theme }) => ({
   marginTop: '1rem',
   overflow: 'hidden',
   [`& .${classes.main}`]: {},
-  [`& .${classes.tabs}`]: {
-    '& .MuiTab-root': {
-      fontSize: '0.75rem',
-      fontWeight: 300,
+  [`& .${classes.tabBar}`]: {
+    display: 'flex',
+    alignItems: 'center',
+    overflow: 'auto',
+    minHeight: 48,
+    flexShrink: 0,
+    scrollbarWidth: 'thin',
+    '&::-webkit-scrollbar': {
+      height: 4,
     },
-    '& .MuiTabs-flexContainer': {},
-    '& .MuiTabs-indicator': {
-      top: '3px',
-      height: 'auto',
-      borderTopLeftRadius: '3px',
-      borderTopRightRadius: '3px',
-      zIndex: 0,
-      ...theme.theme['HomePage']['MuiTabs-indicator'],
-    },
-    '& .Mui-selected': {
-      fontWeight: 400,
-    },
-    '& .MuiTabs-scrollButtons': {
-      '&.Mui-disabled': {
-        display: 'none',
-      },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: 'rgba(0,0,0,0.2)',
+      borderRadius: 4,
     },
     [`& .${classes.firsttab}`]: {
       width: '16px',
-    },
-    [`& .${classes.tab}`]: {
-      userSelect: 'none',
-      width: 176,
-      zIndex: 1,
-      opacity: '0.6',
-      '&.Mui-selected': {
-        opacity: '1',
-      },
-      '&:hover': {
-        opacity: '1',
-      },
-      '& .MuiTouchRipple-root': {
-        display: 'none',
-      },
-      '& .MuiInput-root:before': {
-        border: '0!important',
-      },
-      '& .MuiInput-root:after': {
-        border: '0!important',
-      },
-      '& .MuiInput-root:hover': {
-        border: '0!important',
-      },
-      '& .MuiInput-root': {
-        transition: 'none',
-        width: 'auto',
-        userSelect: 'none',
-        '& input': {
-          padding: 0,
-          margin: 0,
-          cursor: 'pointer',
-          userSelect: 'none',
-          fontSize: '0.75rem',
-          fontWeight: 400,
-        },
-      },
+      flexShrink: 0,
     },
     [`& .${classes.lasttab}`]: {
       alignSelf: 'center',
       paddingLeft: '1rem',
       paddingRight: '1rem',
+      flexShrink: 0,
     },
+  },
+  [`& .${classes.dragOverlay}`]: {
+    opacity: 0.85,
+    cursor: 'grabbing',
+    width: 176,
+    borderRadius: 4,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
   },
   [`& .${classes.box}`]: {
     ...theme.theme['HomePage']['Box'],

@@ -1,0 +1,40 @@
+{
+  "devtools_port": 9223,
+  "runtime": {
+    "version": "stable",
+    "arguments": "--v=1 --remote-debugging-port=9223"
+  },
+  "platform": {
+    "uuid": "fdc3-broker-next-e2e-platform",
+    "name": "fdc3-broker-next-e2e-platform",
+    "autoShow": false,
+    "providerUrl": "http://127.0.0.1:9499/platform-provider.html",
+    "permissions": {
+      "webAPIs": [
+        "openExternal"
+      ]
+    },
+    "defaultWindowOptions": {
+      "saveWindowState": false,
+      "fdc3Api": true,
+      "fdc3InteropApi": "2.0",
+      "defaultWidth": 1440,
+      "defaultHeight": 950
+    }
+  },
+  "snapshot": {
+    "windows": [
+      {
+        "name": "fdc3-broker-next-e2e-home",
+        "uuid": "fdc3-broker-next-e2e-platform",
+        "url": "http://127.0.0.1:9499/openfin-home.html",
+        "autoShow": true,
+        "saveWindowState": false,
+        "fdc3Api": true,
+        "fdc3InteropApi": "2.0",
+        "defaultWidth": 1000,
+        "defaultHeight": 700
+      }
+    ]
+  }
+}

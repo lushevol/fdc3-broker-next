@@ -29,23 +29,62 @@ const useController = () => {
   const [value, setValue] = React.useState(1);
   const [ready, setReady] = React.useState(false);
   const [validateWorkspaceReady, setValidateWorkspaceReady] = React.useState(false);
-  const handleChange = (event, newValue: number) => {
-    if (!event.target?.parentElement?.parentElement?.id?.includes('deleteWorkspace-')) {
-      const workspaces = [...(store?.workspaces as Workspace[])];
-      const workspace = workspaces[newValue - 1];
-      const container = 'base';
-      const tile = 'home';
-      const title = workspace.label;
-      setDetail(workspace, title, container, tile);
-      TabEvent('click', {
-        name: 'select workspace',
-        value: title,
-        container,
-        tile,
-      });
-      dispacthCurrentWorkspace(workspace);
-      dispacthErrorMessage(undefined);
+  const [activeDragId, setActiveDragId] = React.useState<string | null>(null);
+
+  const handleChange = (item: Workspace) => {
+    const workspaces = store?.workspaces as Workspace[];
+    const workspace = workspaces.find((w) => w.id === item.id);
+    if (!workspace) return;
+    const container = 'base';
+    const tile = 'home';
+    const title = workspace.label;
+    setDetail(workspace, title, container, tile);
+    TabEvent('click', {
+      name: 'select workspace',
+      value: title,
+      container,
+      tile,
+    });
+    dispacthCurrentWorkspace(workspace);
+    const index = workspaces.findIndex((w) => w.id === item.id);
+    setValue(index + 1);
+    dispacthErrorMessage(undefined);
+  };
+
+  const handleDragStart = (event) => {
+    setActiveDragId(event.active.id as string);
+  };
+
+  const handleDragCancel = () => {
+    setActiveDragId(null);
+  };
+
+  const handleReorder = (event) => {
+    setActiveDragId(null);
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const workspaces = [...(store?.workspaces as Workspace[])];
+    const oldIndex = workspaces.findIndex((w) => w.id === active.id);
+    const newIndex = workspaces.findIndex((w) => w.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const [moved] = workspaces.splice(oldIndex, 1);
+    workspaces.splice(newIndex, 0, moved);
+
+    dispacthWorkspaces(workspaces);
+
+    if (store?.currentWorkspace) {
+      const currentIndex = workspaces.findIndex((w) => w.id === store.currentWorkspace?.id);
+      setValue(currentIndex + 1);
     }
+    ButtonEvent('click', {
+      name: 'reorder workspace',
+      value: moved.label,
+      container: 'base',
+      tile: 'home',
+    });
+    dispacthErrorMessage(undefined);
   };
   const runExtend = () => {
     extend(store?.expiredIn, store.isOnLogout, store.token);
@@ -146,6 +185,37 @@ const useController = () => {
     return false;
   };
 
+  const closeOthers = (item: Workspace) => {
+    const workspaceLabel = item.label;
+    const container = 'base';
+    const tile = 'home';
+    setDetail(item, workspaceLabel, container, tile);
+    ButtonEvent('click', {
+      name: 'close others workspaces',
+      value: workspaceLabel,
+      container,
+      tile,
+    });
+    dispacthWorkspaces([item]);
+    dispacthCurrentWorkspace(item);
+    setValue(1);
+    dispacthErrorMessage(undefined);
+  };
+
+  const closeAll = () => {
+    const label = store?.currentWorkspace?.label ?? 'Workspace';
+    ButtonEvent('click', {
+      name: 'close all workspaces',
+      value: label,
+      container: 'base',
+      tile: 'home',
+    });
+    dispacthWorkspaces([]);
+    addWorkspace();
+    setValue(1);
+    dispacthErrorMessage(undefined);
+  };
+
   const refreshTab = (item: Workspace) => (event: React.MouseEvent) => {
     event.stopPropagation();
     refreshTabUtil(store?.refreshTab, store?.workspaces, item.id, setDetail, ButtonEvent);
@@ -175,20 +245,18 @@ const useController = () => {
     store?.workspaces,
   ]);
 
-  const focus = (id) => () => {
-    const workspaces = [...(store?.workspaces as Workspace[])];
-    const workspace = workspaces[id - 1];
+  const focus = (item: Workspace) => () => {
     const container = 'base';
     const tile = 'home';
-    const title = workspace.label;
-    setDetail(workspace, title, container, tile);
+    const title = item.label;
+    setDetail(item, title, container, tile);
     ButtonEvent('click', {
       name: 'edit workspace',
       value: title,
       container,
       tile,
     });
-    document.getElementById(`edit-${workspace.id}`)?.focus();
+    document.getElementById(`edit-${item.id}`)?.focus();
   };
 
   React.useEffect(() => {
@@ -218,6 +286,12 @@ const useController = () => {
     updateValue,
     refreshTab,
     closeAllTiles,
+    closeOthers,
+    closeAll,
+    handleReorder,
+    handleDragStart,
+    handleDragCancel,
+    activeDragId,
   };
 };
 

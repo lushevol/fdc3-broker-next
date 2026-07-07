@@ -7,4 +7,6 @@ export interface TabProps {
   refreshTab: (item: Workspace) => (event) => void;
   showRemove: boolean;
   showRefresh: boolean;
+  closeOthers: (item: Workspace) => void;
+  closeAll: () => void;
 }
