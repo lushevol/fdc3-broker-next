@@ -1,9 +1,9 @@
 import { useContainerDispatcher } from 'Import/index';
-import { useFDC3 } from 'ratan-fdc3-agent';
+import { FDC3Agent } from 'src/Root/import';
 import {
-  type CashflowSearchAgent,
+  CASHFLOW_SEARCH_INTENT,
   type CashflowSearchTarget,
-  raiseCashflowSearchIntent,
+  buildCashflowSearchContext,
 } from 'src/Root/fdc3/cashflowInterop';
 
 import { AdvancedSearchCriteria, SearchCriteria } from '../store/interface';
@@ -31,7 +31,7 @@ const combineFilters = (
 
 const useController = () => {
   const { dispacthOpenCashflow } = useContainerDispatcher();
-  const fdc3 = useFDC3() as CashflowSearchAgent;
+  const fdc3 = FDC3Agent.useFDC3();
   const { quickSearch, advancedSearch } = useAppSelector((state) => state.dashboardSearch);
   return {
     openCashflowBlotterByFilter: async (filters: Filter[], tileMenu: string) => {
@@ -42,7 +42,11 @@ const useController = () => {
           : 'cashflow_cn';
 
       try {
-        await raiseCashflowSearchIntent(fdc3, combinedFilters, target);
+        await fdc3.raiseIntent(
+          CASHFLOW_SEARCH_INTENT,
+          buildCashflowSearchContext(combinedFilters, target),
+          target,
+        );
       } catch (error) {
         console.warn(
           '[Cashflow FDC3] Falling back to direct cashflow open after SearchCashflows failed',

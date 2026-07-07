@@ -1,13 +1,9 @@
 import { useParentData } from 'Import/ratanutils';
 import { createContext, Dispatch, FC, SetStateAction, useEffect } from 'react';
-import { useFDC3 } from 'ratan-fdc3-agent';
 import { useDispatch } from 'react-redux';
 import { usePageView } from 'src/Root/analysis';
-import {
-  type CashflowSearchAgent,
-  registerCashflowSearchIntent,
-} from 'src/Root/fdc3/cashflowInterop';
-import { CommonUtil } from 'src/Root/import';
+import { CASHFLOW_SEARCH_INTENT, handleCashflowSearchIntent } from 'src/Root/fdc3/cashflowInterop';
+import { CommonUtil, FDC3Agent } from 'src/Root/import';
 import { useRatanDispatcher } from 'src/Root/import/ratancomponents';
 import { TileProps } from 'src/Root/routing/common/interface';
 
@@ -33,7 +29,6 @@ const App: FC<TileProps> = ({ parameters }) => {
   const { isInitComplete } = useParentData();
   const { dispatchVersionState, dispatchApiStatusList } = useRatanDispatcher();
   const dispatch = useDispatch();
-  const fdc3 = useFDC3() as CashflowSearchAgent;
   usePageView();
   useEffect(() => {
     dispatchVersionState({ version: json.version, env: CommonUtil.getEnv() });
@@ -45,30 +40,12 @@ const App: FC<TileProps> = ({ parameters }) => {
       dispatch(setQuickSearchCriteria(filter));
     }
   }, [parameters]);
-  useEffect(() => {
-    let isMounted = true;
-    let listener: Awaited<ReturnType<typeof registerCashflowSearchIntent>> | undefined;
-
-    registerCashflowSearchIntent(fdc3, (filters) => {
+  FDC3Agent.useIntentListener(CASHFLOW_SEARCH_INTENT, (context) =>
+    handleCashflowSearchIntent(context, (filters) => {
       const filter = convertFilter2GroupSearchCriteria(filters, true);
       dispatch(setQuickSearchCriteria(filter));
-    })
-      .then((nextListener) => {
-        if (isMounted) {
-          listener = nextListener;
-        } else {
-          void nextListener.unsubscribe();
-        }
-      })
-      .catch((error) => {
-        console.warn('[Cashflow FDC3] Failed to register SearchCashflows listener', error);
-      });
-
-    return () => {
-      isMounted = false;
-      void listener?.unsubscribe();
-    };
-  }, [dispatch, fdc3]);
+    }),
+  );
   return isInitComplete ? (
     <StyledRoot className={classes.ratanCashflow}>
       <div className={classes.searchSection}>

@@ -3,8 +3,7 @@ import {
   CASHFLOW_SEARCH_QUERY_CONTEXT,
   buildCashflowSearchContext,
   getCashflowFiltersFromContext,
-  raiseCashflowSearchIntent,
-  registerCashflowSearchIntent,
+  handleCashflowSearchIntent,
 } from './cashflowInterop';
 
 describe('cashflow FDC3 interop helpers', () => {
@@ -39,35 +38,27 @@ describe('cashflow FDC3 interop helpers', () => {
     ).toEqual([]);
   });
 
-  test('raises SearchCashflows to the selected cashflow target', async () => {
-    const raiseIntent = jest.fn().mockResolvedValue({ intent: CASHFLOW_SEARCH_INTENT });
-
-    await raiseCashflowSearchIntent({ raiseIntent }, filters, 'cashflow_group_management');
-
-    expect(raiseIntent).toHaveBeenCalledWith(
-      CASHFLOW_SEARCH_INTENT,
-      buildCashflowSearchContext(filters, 'cashflow_group_management'),
-      'cashflow_group_management',
-    );
-  });
-
-  test('registers a SearchCashflows listener that applies filters from the context', async () => {
-    const unsubscribe = jest.fn();
-    let handler: (context: unknown) => unknown;
-    const addIntentListener = jest.fn().mockImplementation((_intent, nextHandler) => {
-      handler = nextHandler;
-      return Promise.resolve({ unsubscribe });
-    });
+  test('handles SearchCashflows contexts from useIntentListener', () => {
     const applyFilters = jest.fn();
 
-    const listener = await registerCashflowSearchIntent({ addIntentListener }, applyFilters);
-    const result = handler!(buildCashflowSearchContext(filters, 'cashflow_group_management'));
+    const result = handleCashflowSearchIntent(
+      buildCashflowSearchContext(filters, 'cashflow_group_management'),
+      applyFilters,
+    );
 
-    expect(addIntentListener).toHaveBeenCalledWith(CASHFLOW_SEARCH_INTENT, expect.any(Function));
     expect(applyFilters).toHaveBeenCalledWith(filters);
     expect(result).toEqual({ handled: true, filters });
+  });
 
-    await listener.unsubscribe();
-    expect(unsubscribe).toHaveBeenCalled();
+  test('ignores non-cashflow contexts in useIntentListener', () => {
+    const applyFilters = jest.fn();
+
+    const result = handleCashflowSearchIntent(
+      { type: 'fdc3.instrument', id: { ticker: 'AAPL' } },
+      applyFilters,
+    );
+
+    expect(applyFilters).not.toHaveBeenCalled();
+    expect(result).toEqual({ handled: false, filters: [] });
   });
 });

@@ -9,18 +9,6 @@ export interface CashflowSearchContext {
   target: CashflowSearchTarget;
 }
 
-export interface CashflowSearchAgent {
-  raiseIntent?: (
-    intent: string,
-    context: CashflowSearchContext,
-    target: CashflowSearchTarget,
-  ) => Promise<unknown>;
-  addIntentListener?: (
-    intent: string,
-    handler: (context: unknown) => unknown,
-  ) => Promise<{ unsubscribe: () => void | Promise<void> }>;
-}
-
 export const buildCashflowSearchContext = (
   filters: Filter[],
   target: CashflowSearchTarget,
@@ -43,37 +31,15 @@ export const getCashflowFiltersFromContext = (context: unknown): Filter[] => {
   return queryContext.filters;
 };
 
-export const raiseCashflowSearchIntent = (
-  agent: CashflowSearchAgent,
-  filters: Filter[],
-  target: CashflowSearchTarget,
-): Promise<unknown> => {
-  if (!agent.raiseIntent) {
-    return Promise.reject(new Error('FDC3 raiseIntent is not available'));
-  }
-
-  return agent.raiseIntent(
-    CASHFLOW_SEARCH_INTENT,
-    buildCashflowSearchContext(filters, target),
-    target,
-  );
-};
-
-export const registerCashflowSearchIntent = (
-  agent: CashflowSearchAgent,
+export const handleCashflowSearchIntent = (
+  context: unknown,
   applyFilters: (filters: Filter[]) => void,
-): Promise<{ unsubscribe: () => void | Promise<void> }> => {
-  if (!agent.addIntentListener) {
-    return Promise.reject(new Error('FDC3 addIntentListener is not available'));
+): { handled: boolean; filters: Filter[] } => {
+  const filters = getCashflowFiltersFromContext(context);
+
+  if (filters.length > 0) {
+    applyFilters(filters);
   }
 
-  return agent.addIntentListener(CASHFLOW_SEARCH_INTENT, (context: unknown) => {
-    const filters = getCashflowFiltersFromContext(context);
-
-    if (filters.length > 0) {
-      applyFilters(filters);
-    }
-
-    return { handled: filters.length > 0, filters };
-  });
+  return { handled: filters.length > 0, filters };
 };

@@ -1,7 +1,6 @@
 import { Grid, useMediaQuery } from '@mui/material';
 import cn from 'classnames';
 import { getBusinessFieldsFromCache, useParentData } from 'Import/ratanutils';
-import { useFDC3 } from 'ratan-fdc3-agent';
 import {
   createContext,
   Dispatch,
@@ -22,12 +21,9 @@ import {
 } from 'src/Root/analysis/const';
 import { getFieldsVersion } from 'src/Root/common/utils';
 import { featureScopedEnabled } from 'src/Root/common/utils/featureFlagController';
-import { CommonUtil, ReactRouterDom } from 'src/Root/import';
+import { CommonUtil, FDC3Agent, ReactRouterDom } from 'src/Root/import';
 import { useRatanDispatcher } from 'src/Root/import/ratancomponents';
-import {
-  type CashflowSearchAgent,
-  registerCashflowSearchIntent,
-} from 'src/Root/fdc3/cashflowInterop';
+import { CASHFLOW_SEARCH_INTENT, handleCashflowSearchIntent } from 'src/Root/fdc3/cashflowInterop';
 import { TileProps } from 'src/Root/routing/common/interface';
 
 import json from '../../../package.json';
@@ -76,7 +72,6 @@ const App: FC<TileProps> = ({ parameters }) => {
   useDisplayResolution();
   const { useLocation } = ReactRouterDom;
   const location = useLocation();
-  const fdc3 = useFDC3() as CashflowSearchAgent;
 
   const removeAggridTag = useCallback(
     (colId: string) => {
@@ -97,29 +92,11 @@ const App: FC<TileProps> = ({ parameters }) => {
     }
   }, [parameters]);
 
-  useEffect(() => {
-    let isMounted = true;
-    let listener: Awaited<ReturnType<typeof registerCashflowSearchIntent>> | undefined;
-
-    registerCashflowSearchIntent(fdc3, (filters) => {
+  FDC3Agent.useIntentListener(CASHFLOW_SEARCH_INTENT, (context) =>
+    handleCashflowSearchIntent(context, (filters) => {
       dispatch(setInitParams({ filters }));
-    })
-      .then((nextListener) => {
-        if (isMounted) {
-          listener = nextListener;
-        } else {
-          void nextListener.unsubscribe();
-        }
-      })
-      .catch((error) => {
-        console.warn('[Cashflow FDC3] Failed to register SearchCashflows listener', error);
-      });
-
-    return () => {
-      isMounted = false;
-      void listener?.unsubscribe();
-    };
-  }, [dispatch, fdc3]);
+    }),
+  );
   /**
    * option1
    * OpenSearch flag in url param
