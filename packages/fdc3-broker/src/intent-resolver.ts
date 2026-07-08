@@ -255,6 +255,17 @@ export class IntentResolver {
     const targets: ResolverTarget[] = [];
 
     for (const app of apps) {
+      const appTarget: ResolverTarget = {
+        appId: app.appId,
+        metadata: {
+          appId: app.appId,
+          name: app.name,
+          title: app.title,
+          description: app.description,
+          version: app.version,
+        },
+      };
+
       // Find running instances of this app
       const tiles = this.tileRegistry.getTilesByAppId(app.appId);
       const mountedTiles = tiles.filter((t) => t.state === 'mounted');
@@ -272,20 +283,11 @@ export class IntentResolver {
           };
           targets.push(resolverTarget);
         }
-      } else {
-        // No instances running, but app is available
-        const resolverTarget: ResolverTarget = {
-          appId: app.appId,
-          metadata: {
-            appId: app.appId,
-            name: app.name,
-            title: app.title,
-            description: app.description,
-            version: app.version,
-          },
-        };
-        targets.push(resolverTarget);
       }
+
+      // Always include the app itself so users can launch a fresh instance even
+      // when one or more instances are already running.
+      targets.push(appTarget);
     }
 
     return targets;
@@ -329,10 +331,14 @@ export class IntentResolver {
    * }
    * ```
    */
-  async showResolverUI(targets: ResolverTarget[]): Promise<ResolverTarget | null> {
+  async showResolverUI(
+    targets: ResolverTarget[],
+    context?: Context,
+    intent?: string,
+  ): Promise<ResolverTarget | null> {
     if (this.callbacks.onShowResolverUI) {
       try {
-        return await this.callbacks.onShowResolverUI(targets);
+        return await this.callbacks.onShowResolverUI(targets, context, intent);
       } catch (error) {
         console.error('[IntentResolver] Resolver UI failed:', error);
         return null;

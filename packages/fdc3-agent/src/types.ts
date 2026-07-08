@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import type { AppIdentifier, DesktopAgent } from '@finos/fdc3';
+import type { AppIdentifier, AppMetadata, DesktopAgent } from '@finos/fdc3';
 import type {
   WorkflowDefinition,
   WorkflowJsonObject,
@@ -59,7 +59,12 @@ export interface WorkflowApi {
   findWorkflowsByInput(input?: WorkflowJsonObject): Promise<WorkflowDefinition[]>;
 }
 
-export type RatanDesktopAgent = DesktopAgent & WorkflowApi;
+export interface TileLifecycleApi {
+  registerTile(instanceId: string, appId: string, metadata?: AppMetadata): Promise<void> | void;
+  unregisterTile(instanceId: string): Promise<void> | void;
+}
+
+export type RatanDesktopAgent = DesktopAgent & WorkflowApi & TileLifecycleApi;
 
 /**
  * Global namespace for FDC3 state sharing across MFEs.

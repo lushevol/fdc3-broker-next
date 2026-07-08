@@ -1066,7 +1066,7 @@ export class Broker implements DesktopAgent {
         this.logger.info(`→ step 2: ${result.targets.length} targets available — showing resolver UI`, {
           intent, count: result.targets.length, targets: result.targets.map((t: any) => t.appId),
         }, 'intent');
-        const selected = await this.intentResolver.showResolverUI(result.targets);
+        const selected = await this.intentResolver.showResolverUI(result.targets, context, intent);
         if (!selected) {
           this.logger.warn(`→ step 2: resolver UI cancelled by user for "${intent}"`, { intent }, 'intent');
           throw new Error('User cancelled intent resolution');

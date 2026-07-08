@@ -8,10 +8,11 @@
  * @packageDocumentation
  */
 
-import { type AppIdentifier, setBroker } from 'ratan-fdc3-agent';
+import { AgentProvider, setBroker, useFDC3 } from 'ratan-fdc3-agent';
 import { AppDirectoryClientImpl } from 'ratan-fdc3-app-directory';
 import {
   type AppDefinition,
+  type AppIdentifier,
   Broker,
   type BrokerConfig,
   type Context,
@@ -28,21 +29,70 @@ import workflows from './declarations/workflows.json';
 import { useContext as useAppContext } from '../hooks/provider';
 
 // ============================================================================
-// Mock App Directory for Development
+// FDC3 Tile Provider for Base Workspace Containers
 // ============================================================================
 
 /**
- * Mock app directory for development and testing.
- *
- * In production, replace this with your actual App Directory implementation:
- * ```typescript
- * import { AppDirectoryClient } from '@fm/fdc3-app-directory';
- * const appDirectory = new AppDirectoryClient({
- *   baseUrl: 'https://your-app-directory.com',
- *   authToken: userAuthToken
- * });
- * ```
+ * Wraps remote workspace tiles with the FDC3 agent context and registers their
+ * tile lifecycle with the broker. Keeping this in base centralizes FDC3 tile
+ * wiring while `Container` remains focused on loading/rendering remote MFEs.
  */
+type FDC3TileAppIdentifier = {
+  appId: string;
+  instanceId: string;
+};
+
+const getFdc3AppId = (tile: string): string => tile.replace(/\//g, '');
+
+const FDC3TileLifecycle: React.FC<{
+  appIdentifier: FDC3TileAppIdentifier;
+  children: React.ReactNode;
+}> = ({ appIdentifier, children }) => {
+  const fdc3 = useFDC3();
+  const { appId, instanceId } = appIdentifier;
+
+  useEffect(() => {
+    try {
+      void Promise.resolve(fdc3.registerTile(instanceId, appId)).catch((error) => {
+        console.error('Failed to register tile:', error);
+      });
+    } catch (error) {
+      console.error('Failed to register tile:', error);
+    }
+
+    return () => {
+      try {
+        void Promise.resolve(fdc3.unregisterTile(instanceId)).catch((error) => {
+          console.error('Failed to unregister tile:', error);
+        });
+      } catch (error) {
+        console.error('Failed to unregister tile:', error);
+      }
+    };
+  }, [appId, fdc3, instanceId]);
+
+  return <>{children}</>;
+};
+
+export const FDC3TileProvider: React.FC<{
+  children: React.ReactNode;
+  instanceId: string;
+  tile: string;
+}> = ({ children, instanceId, tile }) => {
+  const appIdentifier = useMemo(
+    () => ({
+      appId: getFdc3AppId(tile),
+      instanceId,
+    }),
+    [instanceId, tile],
+  );
+
+  return (
+    <AgentProvider appIdentifier={appIdentifier}>
+      <FDC3TileLifecycle appIdentifier={appIdentifier}>{children}</FDC3TileLifecycle>
+    </AgentProvider>
+  );
+};
 
 // ============================================================================
 // FDC3 Integration Component
@@ -98,9 +148,9 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
   // State Management
   // ========================================================================
 
-  const [brokerInitialized, setBrokerInitialized] = useState(false);
-  const [brokerInitializedWithTiles, setBrokerInitializedWithTiles] = useState(false);
-  const [brokerError, setBrokerError] = useState<string | null>(null);
+  const [, setBrokerInitialized] = useState(false);
+  const [, setBrokerInitializedWithTiles] = useState(false);
+  const [, setBrokerError] = useState<string | null>(null);
   const [resolverOpen, setResolverOpen] = useState(false);
   const [resolverIntent, setResolverIntent] = useState('');
   const [resolverContext, setResolverContext] = useState<Context | null>(null);
@@ -192,6 +242,18 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
     };
   }, [store.token, allAccessibleTiles.length]);
 
+  /**
+   * Local app directory definitions for development and local-only discovery.
+   *
+   * In production, replace this with your actual App Directory implementation:
+   * ```typescript
+   * import { AppDirectoryClient } from '@fm/fdc3-app-directory';
+   * const appDirectory = new AppDirectoryClient({
+   *   baseUrl: 'https://your-app-directory.com',
+   *   authToken: userAuthToken
+   * });
+   * ```
+   */
   const localApps = useMemo<AppDefinition[]>(() => {
     if (allAccessibleTiles.length === 0) {
       return fdc3Definitions.map((app) => ({
@@ -207,7 +269,7 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
     }
 
     return allAccessibleTiles.map((tile) => {
-      const appId = tile.tile?.replace('/', '');
+      const appId = tile.tile?.replace(/\//g, '') ?? '';
       return {
         appId,
         name: tile.title,
@@ -268,13 +330,13 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
       ...getOpenFinBrokerOptions(),
 
       // Login/logout handler registration
-      onLogin: async (callback: () => Promise<any>) => {
+      onLogin: async (callback: () => Promise<unknown>) => {
         // Register login callback - called when user logs in
         console.log('[FDC3] Login handler registered');
         loginCallbacksRef.current.add(callback);
       },
 
-      onLogout: async (callback: () => Promise<any>) => {
+      onLogout: async (callback: () => Promise<unknown>) => {
         // Register logout callback - called when user logs out
         console.log('[FDC3] Logout handler registered');
         loginCallbacksRef.current.add(callback);
@@ -310,14 +372,14 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
           try {
             console.log(`Opening tile: ${app.appId}`, app);
 
-            // Use ref to access the latest workspaceOpenTile function
-            // This prevents stale closures when the hook's dependencies change
+            // Use ref to access the latest workspaceOpenTile function.
+            // This prevents stale closures when the hook's dependencies change.
             const openStatus = await workspaceOpenTileRef.current(
               {
                 tile: app.appId,
               },
               {
-                workspaceId: app?.instanceId,
+                workspaceId: app.instanceId,
               },
             );
 
@@ -329,7 +391,7 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
 
             return {
               ...app,
-              instanceId: openStatus?.workspaceId,
+              instanceId: openStatus.workspaceId,
             };
           } catch (error) {
             console.error('Failed to open tile:', error);
@@ -418,10 +480,16 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
          *
          * IMPORTANT: This integrates with the ResolverDialog component.
          */
-        onShowResolverUI: async (targets: ResolverTarget[]): Promise<ResolverTarget | null> => {
-          return new Promise((resolve, reject) => {
+        onShowResolverUI: async (
+          targets: ResolverTarget[],
+          context?: Context,
+          intent?: string,
+        ): Promise<ResolverTarget | null> =>
+          new Promise((resolve, reject) => {
             // Update resolver state to show dialog
             setResolverTargets(targets);
+            setResolverContext(context ?? null);
+            setResolverIntent(intent ?? '');
             setResolverResolve(() => (target: ResolverTarget) => {
               setResolverOpen(false);
               resolve(target);
@@ -431,8 +499,7 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
               reject(error);
             });
             setResolverOpen(true);
-          });
-        },
+          }),
       },
     }),
     [appDirectory],
@@ -553,81 +620,6 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
         <BrokerStatusBadge initialized={brokerInitialized} error={brokerError} />
       )} */}
     </>
-  );
-};
-
-// ============================================================================
-// Broker Status Badge Component (Development Only)
-// ============================================================================
-
-interface BrokerStatusBadgeProps {
-  initialized: boolean;
-  error: string | null;
-}
-
-const BrokerStatusBadge: React.FC<BrokerStatusBadgeProps> = ({ initialized, error }) => {
-  if (error) {
-    return (
-      <div
-        style={{
-          position: 'fixed',
-          bottom: '10px',
-          right: '10px',
-          padding: '10px 15px',
-          backgroundColor: '#f44336',
-          color: '#fff',
-          borderRadius: '4px',
-          fontSize: '12px',
-          fontWeight: 500,
-          zIndex: 10000,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-        }}
-      >
-        FDC3 Error: {error}
-      </div>
-    );
-  }
-
-  if (!initialized) {
-    return (
-      <div
-        style={{
-          position: 'fixed',
-          bottom: '10px',
-          right: '10px',
-          padding: '10px 15px',
-          backgroundColor: '#ff9800',
-          color: '#fff',
-          borderRadius: '4px',
-          fontSize: '12px',
-          fontWeight: 500,
-          zIndex: 10000,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-        }}
-      >
-        FDC3 Initializing...
-      </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        bottom: '10px',
-        right: '10px',
-        padding: '10px 15px',
-        backgroundColor: '#4caf50',
-        color: '#fff',
-        borderRadius: '4px',
-        fontSize: '12px',
-        fontWeight: 500,
-        zIndex: 10000,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-      }}
-    >
-      FDC3 Ready
-    </div>
   );
 };
 

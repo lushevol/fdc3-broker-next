@@ -3,24 +3,20 @@ import { render, screen, waitFor } from '@testing-library/react';
 import Container from './Container';
 import type { Container as ContainerProps } from '../../../hooks/model/workspaces';
 
-const mockRegisterTile = jest.fn();
-const mockUnregisterTile = jest.fn();
-const mockUseFDC3 = jest.fn(() => ({
-  registerTile: mockRegisterTile,
-  unregisterTile: mockUnregisterTile,
-}));
-const mockAgentProvider = jest.fn(
+const mockFDC3TileProvider = jest.fn(
   ({
     children,
-    appIdentifier,
+    instanceId,
+    tile,
   }: {
     children: React.ReactNode;
-    appIdentifier: { appId: string; instanceId: string };
+    instanceId: string;
+    tile: string;
   }) => (
     <div
-      data-testid="fdc3-agent-provider"
-      data-app-id={appIdentifier.appId}
-      data-instance-id={appIdentifier.instanceId}
+      data-testid="fdc3-tile-provider"
+      data-instance-id={instanceId}
+      data-tile={tile}
     >
       {children}
     </div>
@@ -28,15 +24,14 @@ const mockAgentProvider = jest.fn(
 );
 
 jest.mock(
-  'ratan-fdc3-agent',
+  '../../../fdc3/FDC3Integration',
   () => ({
-    AgentProvider: (props: {
+    FDC3TileProvider: (props: {
       children: React.ReactNode;
-      appIdentifier: { appId: string; instanceId: string };
-    }) => mockAgentProvider(props),
-    useFDC3: () => mockUseFDC3(),
+      instanceId: string;
+      tile: string;
+    }) => mockFDC3TileProvider(props),
   }),
-  { virtual: true },
 );
 
 jest.mock('../../../components/ErrorBoundry', () => ({
@@ -67,28 +62,19 @@ const remoteTileProps: ContainerProps = {
 
 describe('Container FDC3 integration', () => {
   beforeEach(() => {
-    mockAgentProvider.mockClear();
-    mockRegisterTile.mockClear();
-    mockUnregisterTile.mockClear();
-    mockUseFDC3.mockClear();
+    mockFDC3TileProvider.mockClear();
     (System.import as jest.Mock).mockClear();
   });
 
-  it('wraps remote tiles with a scoped FDC3 agent and registers the tile lifecycle in base', async () => {
-    const { unmount } = render(<Container {...remoteTileProps} />);
+  it('wraps remote tiles with the centralized FDC3 tile provider', async () => {
+    render(<Container {...remoteTileProps} />);
 
-    const provider = await screen.findByTestId('fdc3-agent-provider');
+    const provider = await screen.findByTestId('fdc3-tile-provider');
 
-    expect(provider).toHaveAttribute('data-app-id', 'template_tile_fdc3_2');
+    expect(provider).toHaveAttribute('data-tile', '/template_tile_fdc3_2');
     expect(provider).toHaveAttribute('data-instance-id', 'tile-instance-1');
     await waitFor(() => {
-      expect(mockRegisterTile).toHaveBeenCalledWith('tile-instance-1', 'template_tile_fdc3_2');
-    });
-
-    unmount();
-
-    await waitFor(() => {
-      expect(mockUnregisterTile).toHaveBeenCalledWith('tile-instance-1');
+      expect(System.import).toHaveBeenCalledWith('@fm/template');
     });
   });
 });

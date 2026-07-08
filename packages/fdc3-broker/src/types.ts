@@ -172,7 +172,11 @@ export interface BrokerCallbacks {
    * @param targets Available targets
    * @returns Selected target or null if cancelled
    */
-  onShowResolverUI?(targets: ResolverTarget[]): Promise<ResolverTarget | null>;
+  onShowResolverUI?(
+    targets: ResolverTarget[],
+    context?: Context,
+    intent?: string,
+  ): Promise<ResolverTarget | null>;
 
   /**
    * Called when a tile fails to open

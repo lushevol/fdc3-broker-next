@@ -81,6 +81,17 @@ describe('AppCard', () => {
       expect(screen.queryByText(/Instance:/)).not.toBeInTheDocument();
     });
 
+    it('should display new instance label when instance ID is not provided', () => {
+      const propsWithoutInstance = {
+        ...defaultProps,
+        instanceId: undefined,
+      };
+
+      render(<AppCard {...propsWithoutInstance} />);
+
+      expect(screen.getByText('New instance')).toBeInTheDocument();
+    });
+
     it('should display app icon when available', () => {
       const { container } = render(<AppCard {...defaultProps} />);
 

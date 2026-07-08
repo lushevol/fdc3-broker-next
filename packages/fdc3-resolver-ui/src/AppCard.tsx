@@ -203,9 +203,9 @@ export const AppCard: React.FC<AppCardProps> = ({
       <div style={AppCardStyles.name}>{app.title || app.name}</div>
 
       {/* App Instance */}
-      {instanceId && (
-        <div style={{ ...Typography.caption, marginBottom: '8px' }}>Instance: {instanceId}</div>
-      )}
+      <div style={{ ...Typography.caption, marginBottom: '8px' }}>
+        {instanceId ? `Instance: ${instanceId}` : 'New instance'}
+      </div>
 
       {/* Current Context */}
       {currentContext && (

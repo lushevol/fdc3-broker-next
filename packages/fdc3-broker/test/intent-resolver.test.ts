@@ -103,7 +103,7 @@ describe('IntentResolver', () => {
       expect(mockAppDirectory.findByIntent).toHaveBeenCalledWith('ViewChart');
     });
 
-    it('should return single mounted tile when one instance running', async () => {
+    it('should return ambiguous result with mounted tile and new instance when one instance is running', async () => {
       const mockContext = { type: 'fdc3.chart', id: { ticker: 'AAPL' } };
 
       vi.mocked(mockAppDirectory.findByIntent).mockResolvedValue([mockApp1]);
@@ -111,10 +111,12 @@ describe('IntentResolver', () => {
 
       const result = await resolver.resolve('ViewChart', mockContext);
 
-      expect(result.type).toBe('success');
-      expect(result.target).toBeDefined();
-      expect(result.target?.appId).toBe('app1');
-      expect(result.target?.instanceId).toBe('tile-1');
+      expect(result.type).toBe('ambiguous');
+      expect(result.targets).toEqual([
+        expect.objectContaining({ appId: 'app1', instanceId: 'tile-1' }),
+        expect.objectContaining({ appId: 'app1' }),
+      ]);
+      expect(result.targets?.[1].instanceId).toBeUndefined();
     });
 
     it('should filter out unmounted tiles', async () => {
@@ -130,10 +132,11 @@ describe('IntentResolver', () => {
 
       const result = await resolver.resolve('ViewChart', mockContext);
 
-      expect(result.type).toBe('success');
+      expect(result.type).toBe('ambiguous');
       // Only mounted tiles should be returned
       const tiles = vi.mocked(mockTileRegistry.getTilesByAppId).mock.results[0].value;
       expect(tiles.filter((t: TileInstance) => t.state === 'mounted').length).toBe(1);
+      expect(result.targets?.filter((target) => target.instanceId).length).toBe(1);
     });
   });
 
@@ -150,9 +153,13 @@ describe('IntentResolver', () => {
 
       expect(result.type).toBe('ambiguous');
       expect(result.targets).toBeDefined();
-      expect(result.targets?.length).toBe(2);
+      expect(result.targets?.length).toBe(4);
       expect(result.targets?.[0].appId).toBe('app1');
-      expect(result.targets?.[1].appId).toBe('app2');
+      expect(result.targets?.[1].appId).toBe('app1');
+      expect(result.targets?.[1].instanceId).toBeUndefined();
+      expect(result.targets?.[2].appId).toBe('app2');
+      expect(result.targets?.[3].appId).toBe('app2');
+      expect(result.targets?.[3].instanceId).toBeUndefined();
     });
 
     it('should return ambiguous result when multiple instances of same app', async () => {
@@ -170,9 +177,30 @@ describe('IntentResolver', () => {
       const result = await resolver.resolve('ViewChart', mockContext);
 
       expect(result.type).toBe('ambiguous');
-      expect(result.targets?.length).toBe(2);
+      expect(result.targets?.length).toBe(3);
       expect(result.targets?.[0].instanceId).toBe('tile-1');
       expect(result.targets?.[1].instanceId).toBe('tile-2a');
+      expect(result.targets?.[2].instanceId).toBeUndefined();
+    });
+
+    it('should include a new instance target for apps that already have mounted instances', async () => {
+      const mockContext = { type: 'fdc3.chart', id: { ticker: 'AAPL' } };
+
+      vi.mocked(mockAppDirectory.findByIntent).mockResolvedValue([mockApp1]);
+      vi.mocked(mockTileRegistry.getTilesByAppId).mockReturnValue([mockTile1]);
+
+      const result = await resolver.resolve('ViewChart', mockContext);
+
+      expect(result.type).toBe('ambiguous');
+      expect(result.targets).toContainEqual(
+        expect.objectContaining({
+          appId: 'app1',
+          metadata: expect.objectContaining({ appId: 'app1', name: 'App 1' }),
+        }),
+      );
+      expect(result.targets?.some((target) => target.appId === 'app1' && !target.instanceId)).toBe(
+        true,
+      );
     });
   });
 
@@ -319,10 +347,12 @@ describe('IntentResolver', () => {
       const selectedTarget = targets[1];
       vi.mocked(mockCallbacks.onShowResolverUI).mockResolvedValue(selectedTarget);
 
-      const result = await resolver.showResolverUI(targets);
+      const context = { type: 'fdc3.chart', id: { ticker: 'AAPL' } };
+
+      const result = await resolver.showResolverUI(targets, context, 'ViewChart');
 
       expect(result).toEqual(selectedTarget);
-      expect(mockCallbacks.onShowResolverUI).toHaveBeenCalledWith(targets);
+      expect(mockCallbacks.onShowResolverUI).toHaveBeenCalledWith(targets, context, 'ViewChart');
     });
 
     it('should return null when resolver UI is cancelled', async () => {

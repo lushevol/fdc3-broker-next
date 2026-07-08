@@ -271,6 +271,7 @@ export type {
   Listener,
   PrivateChannel,
 } from '@finos/fdc3';
+export type { RatanDesktopAgent, TileLifecycleApi } from './types';
 
 // ============================================================================
 // Agent API

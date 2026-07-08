@@ -121,6 +121,7 @@ describe('Broker.raiseIntent()', () => {
       });
 
       vi.mocked(mockAppDirectory.findByIntent).mockResolvedValue([mockApp1]);
+      vi.mocked(mockCallbacks.onShowResolverUI).mockImplementation(async (targets) => targets[0] ?? null);
 
       // Add intent listener
       await broker.addIntentListener('ViewChart', vi.fn(), mockSource);
