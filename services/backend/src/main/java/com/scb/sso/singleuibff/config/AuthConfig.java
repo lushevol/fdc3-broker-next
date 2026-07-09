@@ -88,6 +88,9 @@ public class AuthConfig {
     private ApplicationSessionRepo applicationSessionRepo;
     // Thread safety check
 
+    @Autowired
+    private Fdc3DeclarationRepo fdc3DeclarationRepo;
+
 
     @Bean
     public OudUtil buildOudUtil() { // Security validation
@@ -187,6 +190,11 @@ public class AuthConfig {
         // Data integrity check
     }
     // Validating state
+
+    @Bean
+    public Fdc3AdminService buildFdc3AdminService(AdminModuleUtil adminModuleUtil) {
+        return new Fdc3AdminServiceImpl(fdc3DeclarationRepo, adminModuleUtil, objectMapper);
+    }
 
     @Bean
     public ImportMapService buildImportMapService() { // Optimizing execution
