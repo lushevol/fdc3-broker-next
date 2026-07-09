@@ -1,6 +1,7 @@
 package com.scb.sso.singleuibff.controller.v1;
 
 import com.scb.sso.singleuibff.dto.request.RequestOfFdc3Declaration;
+import com.scb.sso.singleuibff.dto.request.RequestOfFdc3Intent;
 import com.scb.sso.singleuibff.dto.response.ResponseOfAdminModule;
 import com.scb.sso.singleuibff.exceptions.JwtException;
 import com.scb.sso.singleuibff.exceptions.RecordNotCreatedException;
@@ -70,6 +71,58 @@ public class FDC3AdminController {
                     .data(fdc3AdminService.deleteDeclaration(request, httpServletRequest))
                     .build());
         } catch (RecordNotFoundException | RecordNotUpdatedException | RecordNotCreatedException | JwtException exception) {
+            return badRequest(exception.getMessage());
+        }
+    }
+
+    @PostMapping(value = "v1/fmo/admin/fdc3/intent/data")
+    public ResponseEntity<?> getIntents(@NotNull @RequestBody RequestOfFdc3Intent request,
+            HttpServletRequest httpServletRequest) {
+        try {
+            return ResponseEntity.ok().body(ResponseOfAdminModule.builder()
+                    .result(true)
+                    .data(fdc3AdminService.listIntents(request.getEntitlementsToken(), httpServletRequest))
+                    .build());
+        } catch (JwtException exception) {
+            return badRequest(exception.getMessage());
+        }
+    }
+
+    @PostMapping(value = "v1/fmo/admin/fdc3/intent/create")
+    public ResponseEntity<?> createIntent(@NotNull @RequestBody RequestOfFdc3Intent request,
+            HttpServletRequest httpServletRequest) {
+        try {
+            return ResponseEntity.ok().body(ResponseOfAdminModule.builder()
+                    .result(true)
+                    .data(fdc3AdminService.createIntent(request, httpServletRequest))
+                    .build());
+        } catch (RecordNotCreatedException | JwtException exception) {
+            return badRequest(exception.getMessage());
+        }
+    }
+
+    @PostMapping(value = "v1/fmo/admin/fdc3/intent/update")
+    public ResponseEntity<?> updateIntent(@NotNull @RequestBody RequestOfFdc3Intent request,
+            HttpServletRequest httpServletRequest) {
+        try {
+            return ResponseEntity.ok().body(ResponseOfAdminModule.builder()
+                    .result(true)
+                    .data(fdc3AdminService.updateIntent(request, httpServletRequest))
+                    .build());
+        } catch (RecordNotCreatedException | RecordNotFoundException | RecordNotUpdatedException | JwtException exception) {
+            return badRequest(exception.getMessage());
+        }
+    }
+
+    @PostMapping(value = "v1/fmo/admin/fdc3/intent/delete")
+    public ResponseEntity<?> deleteIntent(@NotNull @RequestBody RequestOfFdc3Intent request,
+            HttpServletRequest httpServletRequest) {
+        try {
+            return ResponseEntity.ok().body(ResponseOfAdminModule.builder()
+                    .result(true)
+                    .data(fdc3AdminService.deleteIntent(request, httpServletRequest))
+                    .build());
+        } catch (RecordNotCreatedException | RecordNotFoundException | RecordNotUpdatedException | JwtException exception) {
             return badRequest(exception.getMessage());
         }
     }

@@ -1,6 +1,7 @@
 package com.scb.sso.singleuibff.service.v1;
 
 import com.scb.sso.singleuibff.dto.request.RequestOfFdc3Declaration;
+import com.scb.sso.singleuibff.dto.request.RequestOfFdc3Intent;
 import com.scb.sso.singleuibff.exceptions.RecordNotCreatedException;
 import com.scb.sso.singleuibff.exceptions.RecordNotFoundException;
 import com.scb.sso.singleuibff.exceptions.RecordNotUpdatedException;
@@ -20,5 +21,16 @@ public interface Fdc3AdminService {
             throws RecordNotCreatedException, RecordNotFoundException, RecordNotUpdatedException;
 
     Map<String, Object> deleteDeclaration(RequestOfFdc3Declaration declaration, HttpServletRequest request)
+            throws RecordNotCreatedException, RecordNotFoundException, RecordNotUpdatedException;
+
+    List<Map<String, Object>> listIntents(String entitlementsToken, HttpServletRequest request);
+
+    Map<String, Object> createIntent(RequestOfFdc3Intent intent, HttpServletRequest request)
+            throws RecordNotCreatedException;
+
+    Map<String, Object> updateIntent(RequestOfFdc3Intent intent, HttpServletRequest request)
+            throws RecordNotCreatedException, RecordNotFoundException, RecordNotUpdatedException;
+
+    Map<String, Object> deleteIntent(RequestOfFdc3Intent intent, HttpServletRequest request)
             throws RecordNotCreatedException, RecordNotFoundException, RecordNotUpdatedException;
 }

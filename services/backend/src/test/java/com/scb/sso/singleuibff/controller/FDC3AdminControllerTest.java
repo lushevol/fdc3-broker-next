@@ -3,6 +3,7 @@ package com.scb.sso.singleuibff.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scb.sso.singleuibff.repository.Fdc3DeclarationRepo;
+import com.scb.sso.singleuibff.repository.Fdc3IntentRepo;
 import com.scb.sso.singleuibff.util.AdminModuleUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,12 +42,16 @@ class FDC3AdminControllerTest {
     @Autowired
     private Fdc3DeclarationRepo fdc3DeclarationRepo;
 
+    @Autowired
+    private Fdc3IntentRepo fdc3IntentRepo;
+
     @MockitoBean
     private AdminModuleUtil adminModuleUtil;
 
     @BeforeEach
     void setUpAdminValidation() {
         fdc3DeclarationRepo.deleteAll();
+        fdc3IntentRepo.deleteAll();
         when(adminModuleUtil.validate(any(HttpServletRequest.class), eq("test-entitlements-token")))
                 .thenReturn(Map.of("sub", "tester", "ems2Role", "SUPER_USER"));
     }
@@ -166,6 +171,91 @@ class FDC3AdminControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.result").value(false))
                 .andExpect(jsonPath("$.errorMessage").value("FDC3 declaration not found."));
+    }
+
+    @Test
+    void intentEndpointsCreateListUpdateAndSoftDelete() throws Exception {
+        LoginTokens tokens = new LoginTokens("Bearer test-access-token", "test-entitlements-token");
+
+        mockMvc.perform(post("/v1/fmo/admin/fdc3/intent/create")
+                .header(HEADER_JWT_TOKEN, tokens.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of(
+                        "entitlementsToken", tokens.entitlementsToken(),
+                        "name", "ViewChart",
+                        "description", "View a chart"
+                ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(true))
+                .andExpect(jsonPath("$.data.name").value("ViewChart"))
+                .andExpect(jsonPath("$.data.description").value("View a chart"));
+
+        mockMvc.perform(post("/v1/fmo/admin/fdc3/intent/data")
+                .header(HEADER_JWT_TOKEN, tokens.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of("entitlementsToken", tokens.entitlementsToken()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(true))
+                .andExpect(jsonPath("$.data[0].name").value("ViewChart"));
+
+        mockMvc.perform(post("/v1/fmo/admin/fdc3/intent/update")
+                .header(HEADER_JWT_TOKEN, tokens.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of(
+                        "entitlementsToken", tokens.entitlementsToken(),
+                        "name", "ViewChart",
+                        "description", "Open the chart view"
+                ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(true))
+                .andExpect(jsonPath("$.data.description").value("Open the chart view"));
+
+        mockMvc.perform(post("/v1/fmo/admin/fdc3/intent/delete")
+                .header(HEADER_JWT_TOKEN, tokens.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of(
+                        "entitlementsToken", tokens.entitlementsToken(),
+                        "name", "ViewChart"
+                ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(true))
+                .andExpect(jsonPath("$.data.name").value("ViewChart"));
+
+        MvcResult listAfterDelete = mockMvc.perform(post("/v1/fmo/admin/fdc3/intent/data")
+                .header(HEADER_JWT_TOKEN, tokens.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of("entitlementsToken", tokens.entitlementsToken()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(true))
+                .andReturn();
+
+        JsonNode data = objectMapper.readTree(listAfterDelete.getResponse().getContentAsString()).path("data");
+        assertThat(data).isEmpty();
+    }
+
+    @Test
+    void intentCreateRejectsDuplicateActiveName() throws Exception {
+        LoginTokens tokens = new LoginTokens("Bearer test-access-token", "test-entitlements-token");
+        String payload = objectMapper.writeValueAsString(Map.of(
+                "entitlementsToken", tokens.entitlementsToken(),
+                "name", "ViewInstrument",
+                "description", "View an instrument"
+        ));
+
+        mockMvc.perform(post("/v1/fmo/admin/fdc3/intent/create")
+                .header(HEADER_JWT_TOKEN, tokens.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(true));
+
+        mockMvc.perform(post("/v1/fmo/admin/fdc3/intent/create")
+                .header(HEADER_JWT_TOKEN, tokens.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.result").value(false))
+                .andExpect(jsonPath("$.errorMessage").value("FDC3 intent already exists."));
     }
 
     private record LoginTokens(String accessToken, String entitlementsToken) {
