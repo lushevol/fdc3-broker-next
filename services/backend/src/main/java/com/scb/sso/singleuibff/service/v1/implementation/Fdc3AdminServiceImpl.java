@@ -2,13 +2,16 @@ package com.scb.sso.singleuibff.service.v1.implementation;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scb.sso.singleuibff.dto.request.RequestOfFdc3Context;
 import com.scb.sso.singleuibff.dto.request.RequestOfFdc3Declaration;
 import com.scb.sso.singleuibff.dto.request.RequestOfFdc3Intent;
+import com.scb.sso.singleuibff.entity.Fdc3Context;
 import com.scb.sso.singleuibff.entity.Fdc3Declaration;
 import com.scb.sso.singleuibff.entity.Fdc3Intent;
 import com.scb.sso.singleuibff.exceptions.RecordNotCreatedException;
 import com.scb.sso.singleuibff.exceptions.RecordNotFoundException;
 import com.scb.sso.singleuibff.exceptions.RecordNotUpdatedException;
+import com.scb.sso.singleuibff.repository.Fdc3ContextRepo;
 import com.scb.sso.singleuibff.repository.Fdc3DeclarationRepo;
 import com.scb.sso.singleuibff.repository.Fdc3IntentRepo;
 import com.scb.sso.singleuibff.service.v1.Fdc3AdminService;
@@ -27,6 +30,7 @@ public class Fdc3AdminServiceImpl implements Fdc3AdminService {
 
     private final Fdc3DeclarationRepo declarationRepo;
     private final Fdc3IntentRepo intentRepo;
+    private final Fdc3ContextRepo contextRepo;
     private final AdminModuleUtil adminModuleUtil;
     private final ObjectMapper objectMapper;
 
@@ -170,6 +174,78 @@ public class Fdc3AdminServiceImpl implements Fdc3AdminService {
         }
     }
 
+    @Override
+    public List<Map<String, Object>> listContexts(String entitlementsToken, HttpServletRequest request) {
+        Map<String, String> payload = adminModuleUtil.validate(request, entitlementsToken);
+        return contextRepo.findByEms2RoleAndIsActiveOrderByUpdatedAtDesc(payload.get("ems2Role"), true)
+                .stream()
+                .map(this::toContextResponse)
+                .toList();
+    }
+
+    @Override
+    public Map<String, Object> createContext(RequestOfFdc3Context context, HttpServletRequest request)
+            throws RecordNotCreatedException {
+        Map<String, String> payload = adminModuleUtil.validate(request, context.getEntitlementsToken());
+        String contextType = requireContextType(context.getSchema());
+        String ems2Role = payload.get("ems2Role");
+
+        if (contextRepo.existsByContextTypeAndEms2RoleAndIsActive(contextType, ems2Role, true)) {
+            throw RecordNotCreatedException.builder().message("FDC3 context already exists.").build();
+        }
+
+        Date now = new Date();
+        Fdc3Context saved = contextRepo.save(Fdc3Context.builder()
+                .contextType(contextType)
+                .schemaJson(writeJson(context.getSchema()))
+                .samplesJson(writeJson(defaultSamples(context.getSamples())))
+                .description(StringUtils.defaultString(context.getDescription()))
+                .ems2Role(ems2Role)
+                .isActive(true)
+                .createdAt(now)
+                .updatedAt(now)
+                .createdBy(payload.get("sub"))
+                .updatedBy(payload.get("sub"))
+                .build());
+        return toContextResponse(saved);
+    }
+
+    @Override
+    public Map<String, Object> updateContext(RequestOfFdc3Context context, HttpServletRequest request)
+            throws RecordNotCreatedException, RecordNotFoundException, RecordNotUpdatedException {
+        Map<String, String> payload = adminModuleUtil.validate(request, context.getEntitlementsToken());
+        Fdc3Context existing = findActiveContext(requireContextType(context.getSchema()), payload.get("ems2Role"));
+
+        existing.setSchemaJson(writeJson(context.getSchema()));
+        existing.setSamplesJson(writeJson(defaultSamples(context.getSamples())));
+        existing.setDescription(StringUtils.defaultString(context.getDescription()));
+        existing.setUpdatedAt(new Date());
+        existing.setUpdatedBy(payload.get("sub"));
+
+        try {
+            return toContextResponse(contextRepo.save(existing));
+        } catch (RuntimeException exception) {
+            throw RecordNotUpdatedException.builder().message("FDC3 context not updated.").build();
+        }
+    }
+
+    @Override
+    public Map<String, Object> deleteContext(RequestOfFdc3Context context, HttpServletRequest request)
+            throws RecordNotCreatedException, RecordNotFoundException, RecordNotUpdatedException {
+        Map<String, String> payload = adminModuleUtil.validate(request, context.getEntitlementsToken());
+        Fdc3Context existing = findActiveContext(requireContextType(context.getSchema()), payload.get("ems2Role"));
+
+        existing.setActive(false);
+        existing.setUpdatedAt(new Date());
+        existing.setUpdatedBy(payload.get("sub"));
+
+        try {
+            return toContextResponse(contextRepo.save(existing));
+        } catch (RuntimeException exception) {
+            throw RecordNotUpdatedException.builder().message("FDC3 context not deleted.").build();
+        }
+    }
+
     private Fdc3Declaration findActiveDeclaration(String appId, String ems2Role) throws RecordNotFoundException {
         return declarationRepo.findByAppIdAndEms2RoleAndIsActive(appId, ems2Role, true)
                 .orElseThrow(() -> RecordNotFoundException.builder().message("FDC3 declaration not found.").build());
@@ -178,6 +254,11 @@ public class Fdc3AdminServiceImpl implements Fdc3AdminService {
     private Fdc3Intent findActiveIntent(String name, String ems2Role) throws RecordNotFoundException {
         return intentRepo.findByNameAndEms2RoleAndIsActive(name, ems2Role, true)
                 .orElseThrow(() -> RecordNotFoundException.builder().message("FDC3 intent not found.").build());
+    }
+
+    private Fdc3Context findActiveContext(String contextType, String ems2Role) throws RecordNotFoundException {
+        return contextRepo.findByContextTypeAndEms2RoleAndIsActive(contextType, ems2Role, true)
+                .orElseThrow(() -> RecordNotFoundException.builder().message("FDC3 context not found.").build());
     }
 
     private Map<String, Object> toDeclarationResponse(Fdc3Declaration declaration) {
@@ -191,6 +272,14 @@ public class Fdc3AdminServiceImpl implements Fdc3AdminService {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("name", intent.getName());
         response.put("description", intent.getDescription());
+        return response;
+    }
+
+    private Map<String, Object> toContextResponse(Fdc3Context context) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("schema", readJsonObject(context.getSchemaJson()));
+        response.put("description", context.getDescription());
+        response.put("samples", readJsonList(context.getSamplesJson()));
         return response;
     }
 
@@ -208,11 +297,38 @@ public class Fdc3AdminServiceImpl implements Fdc3AdminService {
         return name.trim();
     }
 
+    private String requireContextType(Map<String, Object> schema) throws RecordNotCreatedException {
+        if (schema == null) {
+            throw RecordNotCreatedException.builder().message("FDC3 context schema is required.").build();
+        }
+
+        Object properties = schema.get("properties");
+        if (properties instanceof Map<?, ?> propertiesMap) {
+            Object type = propertiesMap.get("type");
+            if (type instanceof Map<?, ?> typeMap && typeMap.get("const") instanceof String constValue
+                    && StringUtils.isNotBlank(constValue)) {
+                return constValue.trim();
+            }
+        }
+
+        Object schemaType = schema.get("type");
+        if (schemaType instanceof String typeValue && StringUtils.isNotBlank(typeValue)
+                && !"object".equalsIgnoreCase(typeValue)) {
+            return typeValue.trim();
+        }
+
+        throw RecordNotCreatedException.builder().message("FDC3 context type is required.").build();
+    }
+
     private Map<String, Object> defaultInterop(Map<String, Object> interop) {
         if (interop == null) {
             return Map.of("intents", Map.of("listensFor", List.of(), "raises", List.of()));
         }
         return interop;
+    }
+
+    private List<Object> defaultSamples(List<Object> samples) {
+        return samples == null ? List.of() : samples;
     }
 
     private String writeJson(Object value) throws RecordNotCreatedException {
@@ -229,6 +345,15 @@ public class Fdc3AdminServiceImpl implements Fdc3AdminService {
             });
         } catch (Exception exception) {
             return Map.of("intents", Map.of("listensFor", List.of(), "raises", List.of()));
+        }
+    }
+
+    private List<Object> readJsonList(String value) {
+        try {
+            return objectMapper.readValue(value, new TypeReference<>() {
+            });
+        } catch (Exception exception) {
+            return List.of();
         }
     }
 }

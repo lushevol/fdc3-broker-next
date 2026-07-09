@@ -94,6 +94,9 @@ public class AuthConfig {
     @Autowired
     private Fdc3IntentRepo fdc3IntentRepo;
 
+    @Autowired
+    private Fdc3ContextRepo fdc3ContextRepo;
+
 
     @Bean
     public OudUtil buildOudUtil() { // Security validation
@@ -196,7 +199,8 @@ public class AuthConfig {
 
     @Bean
     public Fdc3AdminService buildFdc3AdminService(AdminModuleUtil adminModuleUtil) {
-        return new Fdc3AdminServiceImpl(fdc3DeclarationRepo, fdc3IntentRepo, adminModuleUtil, objectMapper);
+        return new Fdc3AdminServiceImpl(fdc3DeclarationRepo, fdc3IntentRepo, fdc3ContextRepo, adminModuleUtil,
+                objectMapper);
     }
 
     @Bean

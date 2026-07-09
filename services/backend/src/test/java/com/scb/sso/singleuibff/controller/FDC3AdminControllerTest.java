@@ -2,6 +2,7 @@ package com.scb.sso.singleuibff.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scb.sso.singleuibff.repository.Fdc3ContextRepo;
 import com.scb.sso.singleuibff.repository.Fdc3DeclarationRepo;
 import com.scb.sso.singleuibff.repository.Fdc3IntentRepo;
 import com.scb.sso.singleuibff.util.AdminModuleUtil;
@@ -45,6 +46,9 @@ class FDC3AdminControllerTest {
     @Autowired
     private Fdc3IntentRepo fdc3IntentRepo;
 
+    @Autowired
+    private Fdc3ContextRepo fdc3ContextRepo;
+
     @MockitoBean
     private AdminModuleUtil adminModuleUtil;
 
@@ -52,6 +56,7 @@ class FDC3AdminControllerTest {
     void setUpAdminValidation() {
         fdc3DeclarationRepo.deleteAll();
         fdc3IntentRepo.deleteAll();
+        fdc3ContextRepo.deleteAll();
         when(adminModuleUtil.validate(any(HttpServletRequest.class), eq("test-entitlements-token")))
                 .thenReturn(Map.of("sub", "tester", "ems2Role", "SUPER_USER"));
     }
@@ -256,6 +261,95 @@ class FDC3AdminControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.result").value(false))
                 .andExpect(jsonPath("$.errorMessage").value("FDC3 intent already exists."));
+    }
+
+    @Test
+    void contextEndpointsCreateListUpdateAndSoftDelete() throws Exception {
+        LoginTokens tokens = new LoginTokens("Bearer test-access-token", "test-entitlements-token");
+
+        mockMvc.perform(post("/v1/fmo/admin/fdc3/context/create")
+                .header(HEADER_JWT_TOKEN, tokens.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of(
+                        "entitlementsToken", tokens.entitlementsToken(),
+                        "schema", contextSchema("fdc3.instrument"),
+                        "description", "Instrument context",
+                        "samples", new Object[] { Map.of("type", "fdc3.instrument", "id", Map.of("ticker", "AAPL")) }
+                ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(true))
+                .andExpect(jsonPath("$.data.schema.properties.type.const").value("fdc3.instrument"))
+                .andExpect(jsonPath("$.data.samples[0].type").value("fdc3.instrument"));
+
+        mockMvc.perform(post("/v1/fmo/admin/fdc3/context/data")
+                .header(HEADER_JWT_TOKEN, tokens.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of("entitlementsToken", tokens.entitlementsToken()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(true))
+                .andExpect(jsonPath("$.data[0].schema.properties.type.const").value("fdc3.instrument"));
+
+        mockMvc.perform(post("/v1/fmo/admin/fdc3/context/update")
+                .header(HEADER_JWT_TOKEN, tokens.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of(
+                        "entitlementsToken", tokens.entitlementsToken(),
+                        "schema", contextSchema("fdc3.instrument"),
+                        "description", "Updated instrument context",
+                        "samples", new Object[] { Map.of("type", "fdc3.instrument", "name", "Apple") }
+                ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(true))
+                .andExpect(jsonPath("$.data.description").value("Updated instrument context"))
+                .andExpect(jsonPath("$.data.samples[0].name").value("Apple"));
+
+        mockMvc.perform(post("/v1/fmo/admin/fdc3/context/delete")
+                .header(HEADER_JWT_TOKEN, tokens.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of(
+                        "entitlementsToken", tokens.entitlementsToken(),
+                        "schema", contextSchema("fdc3.instrument")
+                ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(true))
+                .andExpect(jsonPath("$.data.schema.properties.type.const").value("fdc3.instrument"));
+
+        MvcResult listAfterDelete = mockMvc.perform(post("/v1/fmo/admin/fdc3/context/data")
+                .header(HEADER_JWT_TOKEN, tokens.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of("entitlementsToken", tokens.entitlementsToken()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(true))
+                .andReturn();
+
+        JsonNode data = objectMapper.readTree(listAfterDelete.getResponse().getContentAsString()).path("data");
+        assertThat(data).isEmpty();
+    }
+
+    @Test
+    void contextDeleteRejectsMissingContextType() throws Exception {
+        LoginTokens tokens = new LoginTokens("Bearer test-access-token", "test-entitlements-token");
+
+        mockMvc.perform(post("/v1/fmo/admin/fdc3/context/delete")
+                .header(HEADER_JWT_TOKEN, tokens.accessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of(
+                        "entitlementsToken", tokens.entitlementsToken(),
+                        "schema", contextSchema("fdc3.missing")
+                ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.result").value(false))
+                .andExpect(jsonPath("$.errorMessage").value("FDC3 context not found."));
+    }
+
+    private Map<String, Object> contextSchema(String type) {
+        return Map.of(
+                "type", "object",
+                "properties", Map.of(
+                        "type", Map.of("const", type)
+                ),
+                "required", new String[] { "type" }
+        );
     }
 
     private record LoginTokens(String accessToken, String entitlementsToken) {

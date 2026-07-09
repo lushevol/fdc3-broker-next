@@ -1,5 +1,6 @@
 package com.scb.sso.singleuibff.controller.v1;
 
+import com.scb.sso.singleuibff.dto.request.RequestOfFdc3Context;
 import com.scb.sso.singleuibff.dto.request.RequestOfFdc3Declaration;
 import com.scb.sso.singleuibff.dto.request.RequestOfFdc3Intent;
 import com.scb.sso.singleuibff.dto.response.ResponseOfAdminModule;
@@ -121,6 +122,58 @@ public class FDC3AdminController {
             return ResponseEntity.ok().body(ResponseOfAdminModule.builder()
                     .result(true)
                     .data(fdc3AdminService.deleteIntent(request, httpServletRequest))
+                    .build());
+        } catch (RecordNotCreatedException | RecordNotFoundException | RecordNotUpdatedException | JwtException exception) {
+            return badRequest(exception.getMessage());
+        }
+    }
+
+    @PostMapping(value = "v1/fmo/admin/fdc3/context/data")
+    public ResponseEntity<?> getContexts(@NotNull @RequestBody RequestOfFdc3Context request,
+            HttpServletRequest httpServletRequest) {
+        try {
+            return ResponseEntity.ok().body(ResponseOfAdminModule.builder()
+                    .result(true)
+                    .data(fdc3AdminService.listContexts(request.getEntitlementsToken(), httpServletRequest))
+                    .build());
+        } catch (JwtException exception) {
+            return badRequest(exception.getMessage());
+        }
+    }
+
+    @PostMapping(value = "v1/fmo/admin/fdc3/context/create")
+    public ResponseEntity<?> createContext(@NotNull @RequestBody RequestOfFdc3Context request,
+            HttpServletRequest httpServletRequest) {
+        try {
+            return ResponseEntity.ok().body(ResponseOfAdminModule.builder()
+                    .result(true)
+                    .data(fdc3AdminService.createContext(request, httpServletRequest))
+                    .build());
+        } catch (RecordNotCreatedException | JwtException exception) {
+            return badRequest(exception.getMessage());
+        }
+    }
+
+    @PostMapping(value = "v1/fmo/admin/fdc3/context/update")
+    public ResponseEntity<?> updateContext(@NotNull @RequestBody RequestOfFdc3Context request,
+            HttpServletRequest httpServletRequest) {
+        try {
+            return ResponseEntity.ok().body(ResponseOfAdminModule.builder()
+                    .result(true)
+                    .data(fdc3AdminService.updateContext(request, httpServletRequest))
+                    .build());
+        } catch (RecordNotCreatedException | RecordNotFoundException | RecordNotUpdatedException | JwtException exception) {
+            return badRequest(exception.getMessage());
+        }
+    }
+
+    @PostMapping(value = "v1/fmo/admin/fdc3/context/delete")
+    public ResponseEntity<?> deleteContext(@NotNull @RequestBody RequestOfFdc3Context request,
+            HttpServletRequest httpServletRequest) {
+        try {
+            return ResponseEntity.ok().body(ResponseOfAdminModule.builder()
+                    .result(true)
+                    .data(fdc3AdminService.deleteContext(request, httpServletRequest))
                     .build());
         } catch (RecordNotCreatedException | RecordNotFoundException | RecordNotUpdatedException | JwtException exception) {
             return badRequest(exception.getMessage());
