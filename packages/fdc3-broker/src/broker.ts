@@ -44,7 +44,7 @@ let openFinBridgeClass: OpenFinBridgeType | null = null;
 
 // Pre-login tile ID for intent queue
 const PRELOGIN_TILE_ID = '__prelogin__';
-const EXTERNAL_OPENFIN_SOURCE_APP_ID = 'external';
+const EXTERNAL_SOURCE_APP_ID = 'external';
 
 type PendingIntentListener = {
   intent: string;
@@ -301,7 +301,7 @@ export class Broker implements DesktopAgent {
     const isLoggedIn = await this.checkLoginStatus();
     if (!isLoggedIn) {
       // Queue intent for after login
-      const sourceId: AppIdentifier = this.createExternalOpenFinSource(source);
+      const sourceId: AppIdentifier = this.createExternalIntentSource(source);
       this.intentQueue.enqueue(PRELOGIN_TILE_ID, intent, context, sourceId);
       this.logger.debug('User not logged in, queued intent for post-login', { intent });
       return;
@@ -310,16 +310,16 @@ export class Broker implements DesktopAgent {
     // No internal listeners - raise intent internally (will find apps, resolve, open, deliver)
     // Pass skipExternalRouting=true to prevent infinite loop back to OpenFin
     try {
-      await this.routeOpenFinIntent(intent, context, source);
+      await this.routeExternalIntent(intent, context, source);
     } catch (error) {
       this.logger.error(`Error raising intent ${intent} from OpenFin:`, error as Error);
     }
   }
 
-  private createExternalOpenFinSource(source?: AppIdentifier): AppIdentifier {
+  private createExternalIntentSource(source?: AppIdentifier): AppIdentifier {
     return {
       ...source,
-      appId: EXTERNAL_OPENFIN_SOURCE_APP_ID,
+      appId: EXTERNAL_SOURCE_APP_ID,
     };
   }
 
@@ -327,22 +327,59 @@ export class Broker implements DesktopAgent {
     return this.config.openFinBridgeOptions?.contextRoutingIntents?.includes(intent) ?? false;
   }
 
-  private async routeOpenFinIntent(
+  private shouldRoutePostMessageIntentByContext(intent: string): boolean {
+    return this.config.postMessageBridgeOptions?.contextRoutingIntents?.includes(intent) ?? false;
+  }
+
+  private shouldRouteExternalIntentByContext(intent: string): boolean {
+    return (
+      this.shouldRouteOpenFinIntentByContext(intent) ||
+      this.shouldRoutePostMessageIntentByContext(intent)
+    );
+  }
+
+  private async routeExternalIntent(
     intent: string,
     context: Context,
     source?: AppIdentifier,
   ): Promise<IntentResolution> {
-    const openFinSource = this.createExternalOpenFinSource(source);
+    const externalSource = this.createExternalIntentSource(source);
 
-    if (this.shouldRouteOpenFinIntentByContext(intent)) {
-      return this.raiseIntentForContext(context, undefined, openFinSource);
+    if (this.shouldRouteExternalIntentByContext(intent)) {
+      return this.raiseIntentForContext(context, undefined, externalSource);
     }
 
-    return this.raiseIntent(intent, context, undefined, openFinSource);
+    return this.raiseIntent(intent, context, undefined, externalSource);
+  }
+
+  private async handlePostMessageIntent(
+    intent: string,
+    context: Context,
+    source?: AppIdentifier,
+  ): Promise<void> {
+    this.logger.debug('Received intent from PostMessage', {
+      intent,
+      context,
+      source,
+    });
+
+    const isLoggedIn = await this.checkLoginStatus();
+    if (!isLoggedIn) {
+      const sourceId: AppIdentifier = this.createExternalIntentSource(source);
+      this.intentQueue.enqueue(PRELOGIN_TILE_ID, intent, context, sourceId);
+      this.logger.debug('User not logged in, queued PostMessage intent for post-login', { intent });
+      return;
+    }
+
+    try {
+      await this.routeExternalIntent(intent, context, source);
+    } catch (error) {
+      this.logger.error(`Error raising intent ${intent} from PostMessage:`, error as Error);
+    }
   }
 
   private shouldRouteMissingTargetExternally(source?: AppIdentifier): boolean {
-    return source?.appId !== EXTERNAL_OPENFIN_SOURCE_APP_ID;
+    return source?.appId !== EXTERNAL_SOURCE_APP_ID;
   }
 
   /**
@@ -383,7 +420,7 @@ export class Broker implements DesktopAgent {
     // Raise filtered intents
     for (const queuedIntent of validIntents) {
       try {
-        await this.routeOpenFinIntent(
+        await this.routeExternalIntent(
           queuedIntent.intent,
           queuedIntent.context,
           queuedIntent.source,
@@ -481,32 +518,7 @@ export class Broker implements DesktopAgent {
         // Subscribe to intents from external domains
         this.postMessageBridge.subscribeToIntents(
           async (intent: string, context: Context, source?: AppIdentifier) => {
-            this.logger.debug('Received intent from PostMessage', {
-              intent,
-              context,
-              source,
-            });
-
-            // Find internal tiles that can handle this intent
-            const listeners = this.intentListeners.get(intent);
-            if (listeners && listeners.length > 0) {
-              // Forward to internal listeners
-              for (const listener of listeners) {
-                const handler = (listener as unknown as Record<string, unknown>).handler as
-                  | ((context: Context) => Promise<void>)
-                  | undefined;
-                if (handler) {
-                  try {
-                    await handler(context);
-                  } catch (error) {
-                    this.logger.error(
-                      `Error forwarding PostMessage intent ${intent}:`,
-                      error as Error,
-                    );
-                  }
-                }
-              }
-            }
+            await this.handlePostMessageIntent(intent, context, source);
           },
           Array.from(this.intentListeners.keys()),
         );

@@ -61,10 +61,62 @@ body {
   font-size: 1rem;
 }
 
+.portal-panel {
+  border: 1px solid #dfe3ff;
+}
+
+.portal-controls {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(180px, 260px) auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.portal-controls label {
+  display: grid;
+  gap: 6px;
+  color: #444;
+  font-weight: 600;
+}
+
+.portal-controls input,
+.portal-controls select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #ccd2e0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #222;
+  background: white;
+  font: inherit;
+}
+
+.portal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.portal-actions button {
+  min-height: 42px;
+  padding: 0 16px;
+  background: #2f6f5f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.portal-actions button:hover {
+  background: #285f52;
+}
+
 .context-buttons {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .context-buttons button {
@@ -187,6 +239,14 @@ body {
 
   .action-grid {
     grid-template-columns: 1fr;
+  }
+
+  .portal-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-actions {
+    flex-direction: column;
   }
 
   .context-buttons {

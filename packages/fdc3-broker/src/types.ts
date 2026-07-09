@@ -121,6 +121,11 @@ export interface PostMessageBridgeOptions {
   allowedOrigins: string[];
   /** Request timeout in ms (default: 5000) */
   timeout?: number;
+  /**
+   * Incoming PostMessage intents that should be resolved by their context type
+   * instead of being delivered as the original external intent name.
+   */
+  contextRoutingIntents?: string[];
 }
 
 /**

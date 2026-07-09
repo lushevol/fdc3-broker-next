@@ -1,6 +1,7 @@
-# FDC3 Demo Application
+# FDC3 PostMessage Console
 
-A standalone demo web application showcasing the FDC3 (Financial Desktop Connectivity and Collaboration Consortium) packages usage.
+A standalone demo web application showcasing FDC3 package usage and browser-to-portal
+PostMessage intent handoff.
 
 ## Overview
 
@@ -9,6 +10,28 @@ This demo application demonstrates the capabilities of the FDC3 packages:
 - **@fm/fdc3-agent**: Client-side FDC3 agent for tiles
 - **@fm/fdc3-broker**: Core FDC3 2.2 DesktopAgent implementation
 - **@fm/fdc3-app-directory**: FDC3 app directory client
+
+It also acts as a standalone source console for opening the FMO portal and sending an
+FDC3 intent/context envelope via `window.postMessage`.
+
+## Portal PostMessage Flow
+
+1. Start the portal UI stack (`root-config`, `base`, and the target container/tile).
+2. Start this console on `http://localhost:8011`.
+3. In the console, keep the default portal URL `http://localhost:8001`.
+4. Click **Open Portal**, sign in to the portal, then click **Send to Portal**.
+5. The console posts an `fdc3-pm-event` envelope with `method: "intentEvent"` and
+   a payload containing `intent` and `context`.
+
+For local development, `apps/base/.env.mfe` includes:
+
+```bash
+FDC3_POSTMESSAGE_ALLOWED_ORIGINS='http://localhost:8011,http://localhost:8010'
+```
+
+For production, set `FDC3_POSTMESSAGE_ALLOWED_ORIGINS` to the exact deployed
+origin(s) of the approved source page. Avoid `*` in production; the portal broker
+uses this allowlist to decide which browser origins may trigger FDC3 intents.
 
 ## Features
 

@@ -14,9 +14,9 @@
     "react-dom": "^18.3.1",
     "single-spa-react": "^4.3.0",
     "single-spa": "^6.0.0",
-    "@fm/fdc3-agent": "file:../../packages/fdc3-agent",
-    "@fm/fdc3-broker": "file:../../packages/fdc3-broker",
-    "@fm/fdc3-app-directory": "file:../../packages/fdc3-app-directory",
+    "ratan-fdc3-agent": "*",
+    "ratan-fdc3-broker": "*",
+    "ratan-fdc3-app-directory": "*",
     "@finos/fdc3": "^2.2.0"
   },
   "devDependencies": {

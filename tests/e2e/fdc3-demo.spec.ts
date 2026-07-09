@@ -6,7 +6,10 @@ test.describe('FDC3 Demo', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
     
-    await expect(page.locator('h1')).toContainText('FDC3 Demo Application');
+    await expect(page.locator('h1')).toContainText('FDC3 PostMessage Console');
+    await expect(page.getByLabel('Portal URL')).toHaveValue('http://localhost:8001');
+    await expect(page.getByRole('button', { name: 'Open Portal' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Send to Portal' })).toBeVisible();
     await expect(page.locator('text=Context Selection')).toBeVisible();
     await expect(page.locator('text=Actions')).toBeVisible();
     await expect(page.locator('text=Activity Log')).toBeVisible();

@@ -24,7 +24,8 @@ import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFDC3WorkspaceHelper } from './useFDC3WorkspaceHelper';
 import fdc3Definitions from './declarations/fdc3-definitions.json';
-import { getOpenFinBrokerOptions } from './openfin';
+import { getBrowserInteropBrokerOptions } from './postmessage';
+import { getOpenFinBrokerOptions } from "./openfin";
 import workflows from './declarations/workflows.json';
 import { useContext as useAppContext } from '../hooks/provider';
 
@@ -326,6 +327,8 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
 
       // Log level
       logLevel: LogLevel.DEBUG,
+
+      ...getBrowserInteropBrokerOptions(),
 
       ...getOpenFinBrokerOptions(),
 
