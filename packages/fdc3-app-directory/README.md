@@ -1,10 +1,10 @@
-# @fm/fdc3-app-directory
+# ratan-fdc3-app-directory
 
 **App Directory client for discovering FDC3 applications with entitlement filtering**
 
 ## Overview
 
-`@fm/fdc3-app-directory` provides a client for querying the App Directory service to discover available FDC3 applications. It filters results based on user entitlements and supports both production HTTP client and in-memory mock service for development.
+`ratan-fdc3-app-directory` provides a client for querying the App Directory service to discover available FDC3 applications. It filters results based on user entitlements and supports both production HTTP client and in-memory mock service for development.
 
 ### Key Features
 
@@ -22,14 +22,14 @@
 │           Base MFE (@fm/base)                  │
 │                                                │
 │  ┌──────────────────────────────────────────┐  │
-│  │      @fm/fdc3-broker                    │  │
+│  │      ratan-fdc3-broker                    │  │
 │  │  - Uses AppDirectoryClient              │  │
 │  │  - Queries available apps               │  │
 │  │  - Resolves intents                     │  │
 │  └──────────────┬───────────────────────────┘  │
 │                 ↓                               │
 │  ┌──────────────────────────────────────────┐  │
-│  │  @fm/fdc3-app-directory                │  │
+│  │  ratan-fdc3-app-directory                │  │
 │  │  ┌────────────────────────────────────┐ │  │
 │  │  │ AppDirectoryClientImpl             │ │  │
 │  │  │ - HTTP requests to API            │ │  │
@@ -55,7 +55,7 @@
 
 ```bash
 cd apps/base
-yarn add @fm/fdc3-app-directory
+npm install ratan-fdc3-app-directory
 ```
 
 ### Peer Dependencies
@@ -67,7 +67,7 @@ None (zero runtime dependencies)
 ### Using the Real Client (Production)
 
 ```tsx
-import { AppDirectoryClientImpl } from '@fm/fdc3-app-directory';
+import { AppDirectoryClientImpl } from 'ratan-fdc3-app-directory';
 
 const client = new AppDirectoryClientImpl({
   baseUrl: 'https://app-directory.example.com/api',
@@ -94,7 +94,7 @@ const analyticsApps = await client.findByCategory('Analytics');
 ### Using the Mock Service (Development)
 
 ```tsx
-import { MockAppDirectoryService } from '@fm/fdc3-app-directory';
+import { MockAppDirectoryService } from 'ratan-fdc3-app-directory';
 
 const mockService = new MockAppDirectoryService();
 
@@ -352,8 +352,8 @@ interface AppDefinition {
 ### Pattern 1: Integration with Broker
 
 ```tsx
-import { AppDirectoryClientImpl } from '@fm/fdc3-app-directory';
-import { Broker } from '@fm/fdc3-broker';
+import { AppDirectoryClientImpl } from 'ratan-fdc3-app-directory';
+import { Broker } from 'ratan-fdc3-broker';
 
 const appDirectory = new AppDirectoryClientImpl({
   baseUrl: process.env.APP_DIRECTORY_URL || 'https://app-directory.example.com/api',
@@ -378,7 +378,7 @@ const broker = new Broker({
 ### Pattern 2: Development with Mock Service
 
 ```tsx
-import { MockAppDirectoryService } from '@fm/fdc3-app-directory';
+import { MockAppDirectoryService } from 'ratan-fdc3-app-directory';
 
 // Create mock service
 const mockAppDirectory = new MockAppDirectoryService();
@@ -418,7 +418,7 @@ const broker = new Broker({
 ### Pattern 3: Environment-Based Selection
 
 ```tsx
-import { AppDirectoryClientImpl, MockAppDirectoryService } from '@fm/fdc3-app-directory';
+import { AppDirectoryClientImpl, MockAppDirectoryService } from 'ratan-fdc3-app-directory';
 
 const appDirectory =
   process.env.NODE_ENV === 'development'
@@ -446,7 +446,7 @@ if (appDirectory instanceof MockAppDirectoryService) {
 ### Pattern 4: Querying by Multiple Criteria
 
 ```tsx
-import { AppDirectoryClientImpl } from '@fm/fdc3-app-directory';
+import { AppDirectoryClientImpl } from 'ratan-fdc3-app-directory';
 
 const client = new AppDirectoryClientImpl({
   baseUrl: 'https://app-directory.example.com/api',
@@ -471,7 +471,7 @@ const allRelevantApps = [...chartApps, ...instrumentApps, ...analyticsApps].filt
 ### Pattern 5: Error Handling
 
 ```tsx
-import { AppDirectoryClientImpl } from '@fm/fdc3-app-directory';
+import { AppDirectoryClientImpl } from 'ratan-fdc3-app-directory';
 
 const client = new AppDirectoryClientImpl({
   baseUrl: 'https://app-directory.example.com/api',
@@ -524,7 +524,7 @@ import { vi } from 'vitest';
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { MockAppDirectoryService } from '@fm/fdc3-app-directory';
+import { MockAppDirectoryService } from 'ratan-fdc3-app-directory';
 
 describe('MockAppDirectoryService', () => {
   let mockService: MockAppDirectoryService;
@@ -697,7 +697,7 @@ MIT
 
 ## Related Packages
 
-- [`@fm/fdc3-broker`](../fdc3-broker) - FDC3 broker (uses this package)
-- [`@fm/fdc3-agent`](../fdc3-agent) - FDC3 agent for tiles
-- [`@fm/fdc3-resolver-ui`](../fdc3-resolver-ui) - Resolver UI component
+- [`ratan-fdc3-broker`](../fdc3-broker) - FDC3 broker (uses this package)
+- [`ratan-fdc3-agent`](../fdc3-agent) - FDC3 agent for tiles
+- [`ratan-fdc3-resolver-ui`](../fdc3-resolver-ui) - Resolver UI component
 - [`@finos/fdc3`](https://www.npmjs.com/package/@finos/fdc3) - Official FDC3 standard

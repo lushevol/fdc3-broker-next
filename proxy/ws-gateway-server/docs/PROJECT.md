@@ -1,6 +1,6 @@
 # @ai-gateway/ws-gateway-server — Project Overview
 
-← [Monorepo AGENTS.md](../../AGENTS.md)
+← [Monorepo AGENTS.md](../../../AGENTS.md)
 
 ## Type
 

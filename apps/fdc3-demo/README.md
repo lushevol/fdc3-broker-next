@@ -7,9 +7,9 @@ PostMessage intent handoff.
 
 This demo application demonstrates the capabilities of the FDC3 packages:
 
-- **@fm/fdc3-agent**: Client-side FDC3 agent for tiles
-- **@fm/fdc3-broker**: Core FDC3 2.2 DesktopAgent implementation
-- **@fm/fdc3-app-directory**: FDC3 app directory client
+- **ratan-fdc3-agent**: Client-side FDC3 agent for tiles
+- **ratan-fdc3-broker**: Core FDC3 2.2 DesktopAgent implementation
+- **ratan-fdc3-app-directory**: FDC3 app directory client
 
 It also acts as a standalone source console for opening the FMO portal and sending an
 FDC3 intent/context envelope via `window.postMessage`.
@@ -78,7 +78,7 @@ npm run build
 npm run preview
 ```
 
-The application will be available at `http://localhost:8010`.
+The application will be available at `http://localhost:8011`.
 
 ## Architecture
 
@@ -95,7 +95,7 @@ src/
 
 ### FDC3 Integration
 
-The app uses the `AgentProvider` from `@fm/fdc3-agent` to wrap the application,
+The app uses the `AgentProvider` from `ratan-fdc3-agent` to wrap the application,
 providing FDC3 capabilities to all child components:
 
 ```tsx

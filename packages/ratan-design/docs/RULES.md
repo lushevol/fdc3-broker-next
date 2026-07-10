@@ -1,6 +1,6 @@
 # ratan-design — Rules & Conventions
 
-> Parent rules: [Monorepo AGENTS.md](../../AGENTS.md) · [Monorepo rules](../../docs/rules.md)
+> Parent rules: [Monorepo AGENTS.md](../../../AGENTS.md) · [Monorepo rules](../../../docs/rules.md)
 
 ## Design Tokens
 

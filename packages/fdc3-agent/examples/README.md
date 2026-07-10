@@ -34,7 +34,7 @@ import {
   useContextListener,
   useCurrentChannel,
   useUserChannels,
-} from '@fm/fdc3-agent';
+} from 'ratan-fdc3-agent';
 
 function ChartTile() {
   const fdc3 = useFDC3();
@@ -74,8 +74,8 @@ function ChartTile() {
 **Usage**:
 
 ```tsx
-import { AgentProvider } from '@fm/fdc3-agent';
-import { ChartTile } from '@fm/fdc3-agent/examples/ChartTile';
+import { AgentProvider } from 'ratan-fdc3-agent';
+import { ChartTile } from 'ratan-fdc3-agent/examples/ChartTile';
 
 function App() {
   return (
@@ -99,7 +99,7 @@ function App() {
 
 ### 2. FDC3 Integration Example (`FDC3Integration.tsx`)
 
-**Location**: `apps/base/src/examples/FDC3Integration.tsx`
+**Location**: `apps/base/src/fdc3/FDC3Integration.tsx`
 
 **Purpose**: Demonstrates complete FDC3 broker setup for the base MFE.
 
@@ -117,14 +117,14 @@ function App() {
 #### Step 1: Installation
 
 ```bash
-yarn add @fm/fdc3-broker @fm/fdc3-resolver-ui @fm/fdc3-app-directory
+npm install ratan-fdc3-broker ratan-fdc3-resolver-ui ratan-fdc3-app-directory
 ```
 
 #### Step 2: Wrap Your App
 
 ```tsx
 import { FDC3Integration } from './examples/FDC3Integration';
-import { AppDirectoryClient } from '@fm/fdc3-app-directory';
+import { AppDirectoryClient } from 'ratan-fdc3-app-directory';
 
 const appDirectoryClient = new AppDirectoryClient({
   baseUrl: 'https://your-app-directory.com',
@@ -232,15 +232,15 @@ const brokerConfig: BrokerConfig = {
 1. Ensure all dependencies are installed:
 
    ```bash
-   yarn install
+   npm install
    ```
 
 2. Build the FDC3 packages:
    ```bash
-   yarn workspace @fm/fdc3-agent build
-   yarn workspace @fm/fdc3-broker build
-   yarn workspace @fm/fdc3-resolver-ui build
-   yarn workspace @fm/fdc3-app-directory build
+   npm --workspace packages/fdc3-agent run build
+   npm --workspace packages/fdc3-broker run build
+   npm --workspace packages/fdc3-resolver-ui run build
+   npm --workspace packages/fdc3-app-directory run build
    ```
 
 ### Run ChartTile Example
@@ -248,8 +248,8 @@ const brokerConfig: BrokerConfig = {
 1. In your tile MFE, create a component that uses ChartTile:
 
    ```tsx
-   import { AgentProvider } from '@fm/fdc3-agent';
-   import { ChartTile } from '@fm/fdc3-agent/examples/ChartTile';
+   import { AgentProvider } from 'ratan-fdc3-agent';
+   import { ChartTile } from 'ratan-fdc3-agent/examples/ChartTile';
 
    export function App() {
      return (
@@ -263,7 +263,7 @@ const brokerConfig: BrokerConfig = {
 2. Start your tile MFE:
    ```bash
    cd apps/your-tile-mfe
-   yarn dev
+   npm run dev
    ```
 
 ### Run FDC3Integration Example
@@ -285,7 +285,7 @@ const brokerConfig: BrokerConfig = {
 2. Start your base MFE:
    ```bash
    cd apps/base
-   yarn dev
+   npm run dev
    ```
 
 ---
@@ -377,10 +377,10 @@ function WorkspaceManager() {
 
 ```tsx
 import { render, screen, fireEvent } from '@testing-library/react';
-import { AgentProvider } from '@fm/fdc3-agent';
-import { ChartTile } from '@fm/fdc3-agent/examples/ChartTile';
-import { setBroker } from '@fm/fdc3-agent';
-import { Broker } from '@fm/fdc3-broker';
+import { AgentProvider } from 'ratan-fdc3-agent';
+import { ChartTile } from 'ratan-fdc3-agent/examples/ChartTile';
+import { setBroker } from 'ratan-fdc3-agent';
+import { Broker } from 'ratan-fdc3-broker';
 
 // Mock broker
 const mockBroker = new Broker({
@@ -496,7 +496,7 @@ await fdc3.joinChannel('red');
 - [FDC3 Specification](https://fdc3.finos.org/docs/api/next/)
 - [FDC3 Intents](https://fdc3.finos.org/docs/intents/overview/)
 - [ChartTile.tsx](./ChartTile.tsx) - Full source code
-- [FDC3Integration.tsx](../../../apps/base/src/examples/FDC3Integration.tsx) - Full source code
+- [FDC3Integration.tsx](../../../apps/base/src/fdc3/FDC3Integration.tsx) - Full source code
 
 ---
 

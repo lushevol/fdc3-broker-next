@@ -1,6 +1,6 @@
 # mf_lib — Rules & Conventions
 
-> Parent rules: [Monorepo AGENTS.md](../../AGENTS.md) · [Monorepo rules](../../docs/rules.md)
+> Parent rules: [Monorepo AGENTS.md](../../../AGENTS.md) · [Monorepo rules](../../../docs/rules.md)
 
 ## Module Federation
 

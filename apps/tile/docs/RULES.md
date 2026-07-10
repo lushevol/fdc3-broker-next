@@ -1,6 +1,6 @@
 # @fm/template — Rules & Conventions
 
-> Parent rules: [docs/rules.md](../../docs/rules.md) | Parent config: [AGENTS.md](../../AGENTS.md)
+> Parent rules: [docs/rules.md](../../../docs/rules.md) | Parent config: [AGENTS.md](../../../AGENTS.md)
 
 ## Scaffolding Rules
 

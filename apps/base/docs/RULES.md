@@ -1,6 +1,6 @@
 # @fm/base — Rules & Conventions
 
-> Parent rules: [../../docs/rules.md](../../docs/rules.md) | [Monorepo AGENTS.md](../../AGENTS.md)
+> Parent rules: [../../docs/rules.md](../../../docs/rules.md) | [Monorepo AGENTS.md](../../../AGENTS.md)
 
 ## Module Format
 

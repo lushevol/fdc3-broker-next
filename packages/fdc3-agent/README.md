@@ -1,10 +1,10 @@
-# @fm/fdc3-agent
+# ratan-fdc3-agent
 
 **FDC3 agent API for MFE tiles - Thin wrapper that delegates to the central FDC3 broker**
 
 ## Overview
 
-`@fm/fdc3-agent` provides a lightweight agent API that tiles use to access FDC3 operations. The agent is a thin wrapper that delegates all calls to the central `@fm/fdc3-broker` running in the base MFE layer.
+`ratan-fdc3-agent` provides a lightweight agent API that tiles use to access FDC3 operations. The agent is a thin wrapper that delegates all calls to the central `ratan-fdc3-broker` running in the base MFE layer.
 
 ### Key Features
 
@@ -21,7 +21,7 @@
 │          Tile MFE (Your Application)       │
 │                                            │
 │  ┌──────────────────────────────────────┐  │
-│  │       @fm/fdc3-agent                 │  │
+│  │       ratan-fdc3-agent                 │  │
 │  │  - getAgentApi()                     │  │
 │  │  - React Hooks (useFDC3, etc.)      │  │
 │  │  - Type re-exports                   │  │
@@ -33,7 +33,7 @@
 │          Base MFE (@fm/base)               │
 │                                            │
 │  ┌──────────────────────────────────────┐  │
-│  │       @fm/fdc3-broker                │  │
+│  │       ratan-fdc3-broker                │  │
 │  │  - Intent Resolution                 │  │
 │  │  - Channel Management                │  │
 │  │  - Context Broadcasting              │  │
@@ -45,7 +45,7 @@
 
 ```bash
 cd apps/mf_tile  # or any tile app
-yarn add @fm/fdc3-agent
+npm install ratan-fdc3-agent
 ```
 
 ### Peer Dependencies
@@ -63,7 +63,7 @@ yarn add @fm/fdc3-agent
 The simplest way to access FDC3 functionality:
 
 ```tsx
-import { getAgentApi } from '@fm/fdc3-agent';
+import { getAgentApi } from 'ratan-fdc3-agent';
 
 const MyTile = () => {
   const fdc3 = getAgentApi();
@@ -86,7 +86,7 @@ const MyTile = () => {
 For better React integration, use the provided hooks:
 
 ```tsx
-import { useFDC3, useIntentListener, useContextListener } from '@fm/fdc3-agent';
+import { useFDC3, useIntentListener, useContextListener } from 'ratan-fdc3-agent';
 
 const MyTile = () => {
   const fdc3 = useFDC3();
@@ -239,7 +239,7 @@ channels.forEach((channel) => {
 ### Pattern 1: Send Intent
 
 ```tsx
-import { getAgentApi } from '@fm/fdc3-agent';
+import { getAgentApi } from 'ratan-fdc3-agent';
 
 const InstrumentTile = () => {
   const fdc3 = getAgentApi();
@@ -263,7 +263,7 @@ const InstrumentTile = () => {
 ### Pattern 2: Send Intent to Specific App
 
 ```tsx
-import { getAgentApi } from '@fm/fdc3-agent';
+import { getAgentApi } from 'ratan-fdc3-agent';
 
 const InstrumentTile = () => {
   const fdc3 = getAgentApi();
@@ -288,7 +288,7 @@ const InstrumentTile = () => {
 ### Pattern 3: Listen for Intents
 
 ```tsx
-import { useIntentListener } from '@fm/fdc3-agent';
+import { useIntentListener } from 'ratan-fdc3-agent';
 
 const ChartTile = () => {
   // Register intent listener
@@ -308,7 +308,7 @@ const ChartTile = () => {
 ### Pattern 4: Join Channel and Broadcast
 
 ```tsx
-import { getAgentApi } from '@fm/fdc3-agent';
+import { getAgentApi } from 'ratan-fdc3-agent';
 import { useEffect, useState } from 'react';
 
 const NewsTile = () => {
@@ -348,7 +348,7 @@ const NewsTile = () => {
 ### Pattern 5: Listen for Context Broadcasts
 
 ```tsx
-import { useContextListener, useState } from '@fm/fdc3-agent';
+import { useContextListener, useState } from 'ratan-fdc3-agent';
 
 const InstrumentTile = () => {
   const [instrument, setInstrument] = useState(null);
@@ -366,7 +366,7 @@ const InstrumentTile = () => {
 ### Pattern 6: Private Channel for Secure Communication
 
 ```tsx
-import { getAgentApi } from '@fm/fdc3-agent';
+import { getAgentApi } from 'ratan-fdc3-agent';
 import { useState } from 'react';
 
 const PortfolioTile = () => {
@@ -412,7 +412,7 @@ const PortfolioTile = () => {
 ### Pattern 7: Channel Lifecycle Management
 
 ```tsx
-import { getAgentApi } from '@fm/fdc3-agent';
+import { getAgentApi } from 'ratan-fdc3-agent';
 import { useEffect, useState } from 'react';
 
 const InstrumentTile = () => {
@@ -466,7 +466,7 @@ import type {
   Listener,
   ImplementationMetadata,
   DisplayMetadata,
-} from '@fm/fdc3-agent';
+} from 'ratan-fdc3-agent';
 
 // Use in your components
 const handleContext = (context: Context) => {
@@ -512,7 +512,7 @@ window.fdc3 = {
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { getAgentApi } from '@fm/fdc3-agent';
+import { getAgentApi } from 'ratan-fdc3-agent';
 
 describe('FDC3 Agent', () => {
   beforeEach(() => {
@@ -553,7 +553,7 @@ The `ErrorBoundary` component catches JavaScript errors anywhere in the agent's 
 #### Basic Usage
 
 ```tsx
-import { ErrorBoundary, AgentProvider } from '@fm/fdc3-agent';
+import { ErrorBoundary, AgentProvider } from 'ratan-fdc3-agent';
 
 <ErrorBoundary
   onError={(error, errorInfo) => {
@@ -609,7 +609,7 @@ interface ErrorBoundaryProps {
 The agent propagates errors from the broker. Handle errors appropriately:
 
 ```tsx
-import { getAgentApi } from '@fm/fdc3-agent';
+import { getAgentApi } from 'ratan-fdc3-agent';
 
 const MyTile = () => {
   const fdc3 = getAgentApi();
@@ -722,7 +722,7 @@ MIT
 
 ## Related Packages
 
-- [`@fm/fdc3-broker`](../fdc3-broker) - Central FDC3 broker
-- [`@fm/fdc3-app-directory`](../fdc3-app-directory) - App Directory client
-- [`@fm/fdc3-resolver-ui`](../fdc3-resolver-ui) - Resolver UI component
+- [`ratan-fdc3-broker`](../fdc3-broker) - Central FDC3 broker
+- [`ratan-fdc3-app-directory`](../fdc3-app-directory) - App Directory client
+- [`ratan-fdc3-resolver-ui`](../fdc3-resolver-ui) - Resolver UI component
 - [`@finos/fdc3`](https://www.npmjs.com/package/@finos/fdc3) - Official FDC3 standard

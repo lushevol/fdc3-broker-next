@@ -1,6 +1,6 @@
 # ws-gateway-server — Rules
 
-← [PROJECT.md](./PROJECT.md) · [Monorepo rules](../../docs/rules.md)
+← [PROJECT.md](./PROJECT.md) · [Monorepo rules](../../../docs/rules.md)
 
 ## Protocol
 

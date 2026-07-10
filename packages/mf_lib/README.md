@@ -1,27 +1,17 @@
-# Rslib MF Project
+# mf_lib
 
-This example demonstrates how to use Rslib to build a simple Module Federation React component.
+Shared React component library built with Rslib and exposed as a Module Federation remote.
 
-### Command
+## Commands
 
-Build package
-
-```
-yarn build
-```
-
-Dev package
-
-1.
-
-```
-yarn mf-dev
+```bash
+npm --workspace packages/mf_lib run build
+npm --workspace packages/mf_lib run dev
+npm --workspace packages/mf_lib run mf-dev
 ```
 
-2.
+- `build` creates the library distribution.
+- `dev` runs the Rslib watcher.
+- `mf-dev` serves the Module Federation build for local consumers.
 
-```
-yarn storybook
-```
-
-visit http://localhost:6006
+React and React DOM are peer dependencies and must be supplied by the consuming application.
