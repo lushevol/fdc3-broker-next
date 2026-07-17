@@ -2,12 +2,23 @@ import type { ComponentType } from 'react';
 import { z } from 'zod';
 
 export const APPLICATION_CONTRACT_VERSION = '1.0.0' as const;
+export const APPEARANCE_CONTRACT_VERSION = '1.0.0' as const;
+
+export const appearanceSnapshotSchema = z.object({
+  scheme: z.enum(['light', 'dark']),
+  preference: z.enum(['light', 'dark', 'system']),
+  density: z.enum(['compact', 'comfortable']),
+  locale: z.string().min(1),
+  direction: z.enum(['ltr', 'rtl']),
+  contractVersion: z.literal(APPEARANCE_CONTRACT_VERSION),
+});
 
 export const platformCapabilitySchema = z.enum([
   'navigation',
   'notifications',
   'telemetry',
   'workspace',
+  'appearance',
 ]);
 
 const basePathSchema = z
@@ -25,6 +36,7 @@ export const applicationRegistryEntrySchema = z.object({
   exposedModule: z.string().regex(/^\.\/[A-Za-z0-9/_-]+$/),
   basePath: basePathSchema,
   contractVersion: z.string().min(1),
+  appearanceContractVersion: z.string().min(1),
   capabilities: z.array(platformCapabilitySchema),
 });
 
@@ -46,6 +58,7 @@ export const applicationRegistrySchema = z
   });
 
 export type PlatformCapabilityName = z.infer<typeof platformCapabilitySchema>;
+export type AppearanceSnapshot = z.infer<typeof appearanceSnapshotSchema>;
 export type ApplicationRegistryEntry = z.infer<typeof applicationRegistryEntrySchema>;
 export type ApplicationRegistry = z.infer<typeof applicationRegistrySchema>;
 
@@ -65,11 +78,17 @@ export interface WorkspaceCapability {
   closeCurrent(): void;
 }
 
+export interface AppearanceCapability {
+  getSnapshot(): AppearanceSnapshot;
+  subscribe(listener: (snapshot: AppearanceSnapshot) => void): () => void;
+}
+
 export interface PlatformCapabilities {
   navigation: NavigationCapability;
   notifications: NotificationCapability;
   telemetry: TelemetryCapability;
   workspace: WorkspaceCapability;
+  appearance: AppearanceCapability;
 }
 
 export interface ApplicationProps {
@@ -82,6 +101,7 @@ export interface ApplicationManifest {
   id: string;
   displayName: string;
   contractVersion: string;
+  appearanceContractVersion: string;
 }
 
 export interface FederatedApplicationModule {
@@ -115,6 +135,14 @@ export function assertCompatibleApplicationModule(
   ) {
     throw new Error(
       `Unsupported application contract version: ${module.manifest.contractVersion ?? registryEntry.contractVersion}`,
+    );
+  }
+  if (
+    module.manifest.appearanceContractVersion !== APPEARANCE_CONTRACT_VERSION ||
+    registryEntry.appearanceContractVersion !== APPEARANCE_CONTRACT_VERSION
+  ) {
+    throw new Error(
+      `Unsupported appearance contract version: ${module.manifest.appearanceContractVersion ?? registryEntry.appearanceContractVersion}`,
     );
   }
   return module as FederatedApplicationModule;

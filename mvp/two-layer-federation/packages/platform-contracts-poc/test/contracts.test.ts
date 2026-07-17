@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   APPLICATION_CONTRACT_VERSION,
+  APPEARANCE_CONTRACT_VERSION,
   applicationRegistrySchema,
+  appearanceSnapshotSchema,
   assertCompatibleApplicationModule,
   findApplicationForPath,
   type FederatedApplicationModule,
@@ -15,8 +17,34 @@ const validApplication = {
   exposedModule: './application',
   basePath: '/cashflow',
   contractVersion: APPLICATION_CONTRACT_VERSION,
-  capabilities: ['navigation', 'notifications', 'telemetry', 'workspace'],
+  appearanceContractVersion: APPEARANCE_CONTRACT_VERSION,
+  capabilities: ['navigation', 'notifications', 'telemetry', 'workspace', 'appearance'],
 };
+
+const validAppearance = {
+  scheme: 'dark',
+  preference: 'system',
+  density: 'compact',
+  locale: 'en-US',
+  direction: 'ltr',
+  contractVersion: APPEARANCE_CONTRACT_VERSION,
+};
+
+describe('appearanceSnapshotSchema', () => {
+  it('accepts a complete appearance snapshot', () => {
+    expect(appearanceSnapshotSchema.parse(validAppearance)).toEqual(validAppearance);
+  });
+
+  it.each([
+    ['unknown scheme', { scheme: 'sepia' }],
+    ['unknown preference', { preference: 'automatic' }],
+    ['unknown density', { density: 'tiny' }],
+    ['unknown direction', { direction: 'vertical' }],
+    ['missing version', { contractVersion: undefined }],
+  ])('rejects %s', (_name, change) => {
+    expect(() => appearanceSnapshotSchema.parse({ ...validAppearance, ...change })).toThrow();
+  });
+});
 
 describe('applicationRegistrySchema', () => {
   it('accepts a complete registry', () => {
@@ -53,6 +81,7 @@ describe('assertCompatibleApplicationModule', () => {
       id: 'cashflow',
       displayName: 'Cashflow',
       contractVersion: APPLICATION_CONTRACT_VERSION,
+      appearanceContractVersion: APPEARANCE_CONTRACT_VERSION,
     },
     Application: vi.fn(() => null),
   };
@@ -70,6 +99,25 @@ describe('assertCompatibleApplicationModule', () => {
         validApplication,
       ),
     ).toThrow(/contract version/i);
+  });
+
+  it('rejects unsupported appearance contract versions', () => {
+    expect(() =>
+      assertCompatibleApplicationModule(
+        {
+          ...compatibleModule,
+          manifest: { ...compatibleModule.manifest, appearanceContractVersion: '2.0.0' },
+        },
+        validApplication,
+      ),
+    ).toThrow(/appearance contract version/i);
+
+    expect(() =>
+      assertCompatibleApplicationModule(compatibleModule, {
+        ...validApplication,
+        appearanceContractVersion: '0.9.0',
+      }),
+    ).toThrow(/appearance contract version/i);
   });
 
   it('rejects mismatched application identities', () => {

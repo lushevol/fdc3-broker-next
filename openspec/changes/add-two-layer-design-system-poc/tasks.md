@@ -1,9 +1,9 @@
 ## 1. Appearance contract
 
-- [ ] 1.1 Add failing platform-contract tests for valid and invalid appearance snapshots, manifest compatibility, and appearance capability typing
-- [ ] 1.2 Implement the versioned appearance snapshot schema, manifest metadata, capability interfaces, and compatibility validation
-- [ ] 1.3 Add failing platform-SDK tests for appearance snapshot retrieval and subscription lifecycle
-- [ ] 1.4 Implement the SDK appearance client and local appearance controller used by standalone applications
+- [x] 1.1 Add failing platform-contract tests for valid and invalid appearance snapshots, manifest compatibility, and appearance capability typing
+- [x] 1.2 Implement the versioned appearance snapshot schema, manifest metadata, capability interfaces, and compatibility validation
+- [x] 1.3 Add failing platform-SDK tests for appearance snapshot retrieval and subscription lifecycle
+- [x] 1.4 Implement the SDK appearance client and local appearance controller used by standalone applications
 
 ## 2. Design-system package
 
