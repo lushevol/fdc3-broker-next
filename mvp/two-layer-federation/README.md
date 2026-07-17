@@ -9,7 +9,8 @@ This directory is the ownership boundary for the greenfield `Host -> Application
 - `packages/platform-contracts-poc` — runtime-validated host/application contracts
 - `packages/platform-sdk-poc` — typed application client for host capabilities
 - `packages/ratan-sdk-poc` — shared Ratan domain functions
-- `packages/ratan-ui-poc` — shared Ratan React components
+- `packages/ratan-design-poc` — product-neutral semantic tokens, local MUI provider, and bounded foundational components
+- `packages/ratan-ui-poc` — Ratan domain React components built on the design-system package
 - `tests/e2e` and `playwright.config.ts` — isolated browser verification
 
 ## Commands
@@ -28,3 +29,4 @@ The workspace package names intentionally retain the `-poc` suffix so moving the
 ## Planning
 
 - [DevOps and system migration plan](./docs/DEVOPS_MIGRATION_PLAN.md)
+- [Design-system POC boundaries and production promotion policy](./docs/DESIGN_SYSTEM_POC.md)

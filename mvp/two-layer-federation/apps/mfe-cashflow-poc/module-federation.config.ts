@@ -7,7 +7,7 @@ export default createModuleFederationConfig({
   exposes: { './application': './src/application.tsx' },
   dts: false,
   shared: {
-    react: { singleton: true, requiredVersion: pkg.dependencies.react },
-    'react-dom': { singleton: true, requiredVersion: pkg.dependencies['react-dom'] },
+    react: { singleton: true, eager: true, requiredVersion: pkg.dependencies.react },
+    'react-dom': { singleton: true, eager: true, requiredVersion: pkg.dependencies['react-dom'] },
   },
 });

@@ -26,7 +26,7 @@
 
 ## 5. Integrated verification and documentation
 
-- [ ] 5.1 Add E2E coverage for live scheme and density propagation, keyboard focus, standalone-compatible behavior, deep routing, and application failure isolation
-- [ ] 5.2 Add runtime compatibility and network assertions proving no design-system remote, Ratan container, Single-SPA, SystemJS, or import map is loaded
-- [ ] 5.3 Update the isolated MVP documentation with package boundaries, production promotion rules, commands, and compatibility/version policy
-- [ ] 5.4 Run package tests with coverage, host/application tests, lint, type checks, production builds, and Playwright E2E; resolve every failure
+- [x] 5.1 Add E2E coverage for live scheme and density propagation, keyboard focus, standalone-compatible behavior, deep routing, and application failure isolation
+- [x] 5.2 Add runtime compatibility and network assertions proving no design-system remote, Ratan container, Single-SPA, SystemJS, or import map is loaded
+- [x] 5.3 Update the isolated MVP documentation with package boundaries, production promotion rules, commands, and compatibility/version policy
+- [x] 5.4 Run package tests with coverage, host/application tests, lint, type checks, production builds, and Playwright E2E; resolve every failure
