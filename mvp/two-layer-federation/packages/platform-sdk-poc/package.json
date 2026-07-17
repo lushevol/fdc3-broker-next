@@ -1,0 +1,22 @@
+{
+  "name": "@fm/platform-sdk-poc",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean",
+    "test": "vitest run --coverage",
+    "lint": "eslint .",
+    "clean": "rm -rf dist coverage"
+  },
+  "dependencies": { "@fm/platform-contracts-poc": "*" },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.18",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}

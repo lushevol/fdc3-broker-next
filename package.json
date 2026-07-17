@@ -12,6 +12,11 @@
     "openfin:e2e:launch": "node scripts/openfin-e2e-launch.js",
     "test:e2e:openfin": "cross-env OPENFIN_E2E=1 playwright test tests/e2e/openfin-fdc3-bridge.spec.ts --project=chromium --ui",
     "test:e2e:chat-protocol": "cross-env PLAYWRIGHT_CHAT_PROTOCOL_DEMO=1 playwright test tests/e2e/chat-protocol-demo*.spec.ts --project=chat-protocol-demo",
+    "build:federation-mvp-packages": "npm --workspace @fm/platform-contracts-poc run build && npm --workspace @fm/platform-sdk-poc run build && npm --workspace @fm/ratan-sdk-poc run build && npm --workspace @fm/ratan-ui-poc run build",
+    "build:federation-mvp": "npm run build:federation-mvp-packages && npm --workspace @fm/mfe-cashflow-poc run build && npm --workspace @fm/portal-host-poc run build",
+    "dev:federation-mvp": "npm run build:federation-mvp-packages && concurrently \"npm --workspace @fm/mfe-cashflow-poc run dev\" \"npm --workspace @fm/portal-host-poc run dev\"",
+    "test:federation-mvp": "npm --workspace @fm/platform-contracts-poc test && npm --workspace @fm/platform-sdk-poc test && npm --workspace @fm/ratan-sdk-poc test && npm --workspace @fm/ratan-ui-poc test && npm --workspace @fm/portal-host-poc test -- --runInBand && npm --workspace @fm/mfe-cashflow-poc test -- --runInBand",
+    "test:e2e:federation-mvp": "npm run build:federation-mvp && playwright test --config=mvp/two-layer-federation/playwright.config.ts",
     "lint": "turbo run lint --continue",
     "clean": "turbo run clean",
     "format": "prettier --write \"**/*.{ts,tsx,md,json,yml,yaml}\"",
@@ -49,6 +54,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.0",
+    "serve": "^12.0.1",
     "ts-node": "^10.9.2",
     "turbo": "^2.8.13",
     "typescript-eslint": "^8.53.0"
@@ -57,6 +63,8 @@
   "workspaces": [
     "apps/*",
     "packages/*",
+    "mvp/two-layer-federation/apps/*",
+    "mvp/two-layer-federation/packages/*",
     "services/*",
     "proxy/*"
   ],
