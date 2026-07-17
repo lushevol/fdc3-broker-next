@@ -7,10 +7,10 @@
 
 ## 2. Design-system package
 
-- [ ] 2.1 Scaffold `@fm/ratan-design-poc`, workspace scripts, peer dependencies, build configuration, and test setup
-- [ ] 2.2 Add failing tests for light/dark tokens, density, standalone provider rendering, Button, TextField, StatusBadge, and visible focus contracts
-- [ ] 2.3 Implement semantic tokens, generated CSS-variable styles, MUI theme creation, and `DesignSystemProvider`
-- [ ] 2.4 Implement the bounded Button, TextField, and StatusBadge APIs and export only the intended public surface
+- [x] 2.1 Scaffold `@fm/ratan-design-poc`, workspace scripts, peer dependencies, build configuration, and test setup
+- [x] 2.2 Add failing tests for light/dark tokens, density, standalone provider rendering, Button, TextField, StatusBadge, and visible focus contracts
+- [x] 2.3 Implement semantic tokens, generated CSS-variable styles, MUI theme creation, and `DesignSystemProvider`
+- [x] 2.4 Implement the bounded Button, TextField, and StatusBadge APIs and export only the intended public surface
 
 ## 3. Host appearance ownership
 

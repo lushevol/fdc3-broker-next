@@ -1,0 +1,89 @@
+@layer ratan.tokens, ratan.foundation, ratan.components;
+
+@layer ratan.tokens {
+  .ratan-design-root {
+    --ratan-font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --ratan-font-size-body: 0.8125rem;
+    --ratan-font-size-label: 0.75rem;
+    --ratan-font-weight-strong: 700;
+    --ratan-space-1: 0.25rem;
+    --ratan-space-2: 0.5rem;
+    --ratan-space-3: 0.75rem;
+    --ratan-space-4: 1rem;
+    --ratan-radius-control: 0.5rem;
+    --ratan-radius-pill: 999px;
+    --ratan-focus-width: 2px;
+    --ratan-focus-offset: 2px;
+    min-height: inherit;
+    color: var(--ratan-color-content-primary);
+    background: var(--ratan-color-surface-default);
+    font-family: var(--ratan-font-family);
+  }
+
+  .ratan-design-root[data-ratan-theme="light"] {
+    --ratan-color-surface-default: #f5f7fb;
+    --ratan-color-surface-raised: #ffffff;
+    --ratan-color-surface-interactive: #e8eef6;
+    --ratan-color-content-primary: #172033;
+    --ratan-color-content-secondary: #53647c;
+    --ratan-color-border-subtle: #cbd5e1;
+    --ratan-color-border-strong: #8da0ba;
+    --ratan-color-action-primary: #006b5f;
+    --ratan-color-action-primary-hover: #00564c;
+    --ratan-color-action-on-primary: #ffffff;
+    --ratan-color-action-danger: #b42335;
+    --ratan-color-focus-ring: #007f72;
+    --ratan-color-status-ready-content: #075f54;
+    --ratan-color-status-ready-surface: #d6f5ef;
+    --ratan-color-status-review-content: #815000;
+    --ratan-color-status-review-surface: #fff1c7;
+    --ratan-color-status-blocked-content: #9b1c31;
+    --ratan-color-status-blocked-surface: #ffe1e6;
+    --ratan-color-status-neutral-content: #46566c;
+    --ratan-color-status-neutral-surface: #e8edf4;
+    color-scheme: light;
+  }
+
+  .ratan-design-root[data-ratan-theme="dark"] {
+    --ratan-color-surface-default: #0d1c2f;
+    --ratan-color-surface-raised: #11253c;
+    --ratan-color-surface-interactive: #183451;
+    --ratan-color-content-primary: #edf5ff;
+    --ratan-color-content-secondary: #9bb0c7;
+    --ratan-color-border-subtle: #29435f;
+    --ratan-color-border-strong: #527091;
+    --ratan-color-action-primary: #5eead4;
+    --ratan-color-action-primary-hover: #7cefdc;
+    --ratan-color-action-on-primary: #07121e;
+    --ratan-color-action-danger: #ff9cab;
+    --ratan-color-focus-ring: #7cefdc;
+    --ratan-color-status-ready-content: #7cead5;
+    --ratan-color-status-ready-surface: #123b38;
+    --ratan-color-status-review-content: #ffd48b;
+    --ratan-color-status-review-surface: #45351e;
+    --ratan-color-status-blocked-content: #ff9cab;
+    --ratan-color-status-blocked-surface: #48242e;
+    --ratan-color-status-neutral-content: #b5c3d5;
+    --ratan-color-status-neutral-surface: #26374c;
+    color-scheme: dark;
+  }
+
+  .ratan-design-root[data-ratan-density="compact"] {
+    --ratan-control-height: 2rem;
+    --ratan-control-padding-inline: 0.75rem;
+    --ratan-control-gap: 0.5rem;
+  }
+
+  .ratan-design-root[data-ratan-density="comfortable"] {
+    --ratan-control-height: 2.5rem;
+    --ratan-control-padding-inline: 1rem;
+    --ratan-control-gap: 0.75rem;
+  }
+}
+
+@layer ratan.foundation {
+  .ratan-design-root :where(button, input, textarea, select):focus-visible {
+    outline: var(--ratan-focus-width) solid var(--ratan-color-focus-ring);
+    outline-offset: var(--ratan-focus-offset);
+  }
+}
