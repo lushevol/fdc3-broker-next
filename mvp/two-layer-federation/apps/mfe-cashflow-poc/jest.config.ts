@@ -9,6 +9,7 @@ export default {
     '^@fm/platform-contracts-poc$': '<rootDir>/../../packages/platform-contracts-poc/src/index.ts',
     '^@fm/platform-sdk-poc$': '<rootDir>/../../packages/platform-sdk-poc/src/index.ts',
     '^@fm/ratan-sdk-poc$': '<rootDir>/../../packages/ratan-sdk-poc/src/index.ts',
+    '^@fm/ratan-design-poc$': '<rootDir>/../../packages/ratan-design-poc/src/index.tsx',
     '^@fm/ratan-ui-poc$': '<rootDir>/../../packages/ratan-ui-poc/src/index.tsx'
   },
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/index.tsx', '!src/test-setup.ts'],

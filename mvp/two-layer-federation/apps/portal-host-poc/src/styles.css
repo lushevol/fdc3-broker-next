@@ -16,7 +16,7 @@ button { cursor: pointer; }
   grid-template-columns: 250px 1fr;
   grid-template-rows: 82px 1fr;
   color: var(--ratan-color-content-primary);
-  background: var(--ratan-color-surface-page);
+  background: var(--ratan-color-surface-default);
 }
 
 .portal-header {

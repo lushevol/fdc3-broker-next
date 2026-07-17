@@ -77,6 +77,10 @@ describe('shared components', () => {
       target: { value: 'USD' },
     });
     expect(onChange).toHaveBeenCalledWith('USD');
+    expect(screen.getByRole('textbox', { name: 'Filter cashflows' })).toHaveAttribute(
+      'data-ratan-control',
+      'text-field',
+    );
   });
 
   it.each(['ready', 'review', 'blocked'] as const)('renders readable %s status', (status) => {

@@ -1,6 +1,18 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import type { ApplicationProps, PlatformCapabilities } from '@fm/platform-contracts-poc';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import {
+  APPEARANCE_CONTRACT_VERSION,
+  type AppearanceSnapshot,
+  type ApplicationProps,
+  type PlatformCapabilities,
+} from '@fm/platform-contracts-poc';
+import { createAppearanceController } from '@fm/platform-sdk-poc';
 import { Application, manifest } from './application';
+import { STANDALONE_APPEARANCE, standaloneAppearanceCapability } from './standalone';
+
+const defaultAppearance: AppearanceSnapshot = {
+  scheme: 'dark', preference: 'dark', density: 'compact', locale: 'en-US', direction: 'ltr',
+  contractVersion: APPEARANCE_CONTRACT_VERSION,
+};
 
 function createCapabilities(): PlatformCapabilities {
   return {
@@ -13,6 +25,7 @@ function createCapabilities(): PlatformCapabilities {
     notifications: { show: jest.fn() },
     telemetry: { track: jest.fn() },
     workspace: { closeCurrent: jest.fn() },
+    appearance: createAppearanceController(defaultAppearance).capability,
   };
 }
 
@@ -25,7 +38,38 @@ describe('Cashflow federated application', () => {
   beforeEach(() => window.history.replaceState({}, '', '/cashflow'));
 
   it('publishes a compatible application manifest', () => {
-    expect(manifest).toEqual({ id: 'cashflow', displayName: 'Cashflow', contractVersion: '1.0.0' });
+    expect(manifest).toEqual({
+      id: 'cashflow', displayName: 'Cashflow', contractVersion: '1.0.0',
+      appearanceContractVersion: '1.0.0',
+    });
+  });
+
+  it('defines deterministic standalone appearance defaults', () => {
+    expect(standaloneAppearanceCapability.getSnapshot()).toEqual(STANDALONE_APPEARANCE);
+    expect(STANDALONE_APPEARANCE).toMatchObject({ scheme: 'dark', density: 'compact' });
+  });
+
+  it('subscribes a local provider to live host appearance updates', () => {
+    const controller = createAppearanceController(defaultAppearance);
+    const capabilities = { ...createCapabilities(), appearance: controller.capability };
+    renderApplication(capabilities);
+    const designRoot = document.querySelector('[data-ratan-scope="application"]');
+    expect(designRoot).toHaveAttribute('data-ratan-theme', 'dark');
+    expect(designRoot).toHaveAttribute('data-ratan-density', 'compact');
+
+    act(() => controller.setSnapshot({
+      ...defaultAppearance, scheme: 'light', preference: 'light', density: 'comfortable',
+    }));
+    expect(designRoot).toHaveAttribute('data-ratan-theme', 'light');
+    expect(designRoot).toHaveAttribute('data-ratan-density', 'comfortable');
+  });
+
+  it('uses the shared filter, action, and status primitives', () => {
+    renderApplication();
+    expect(screen.getByRole('searchbox', { name: 'Filter cashflows' })).toHaveAttribute('data-ratan-control', 'text-field');
+    fireEvent.click(screen.getByRole('button', { name: 'Select CF-1001' }));
+    expect(screen.getByRole('button', { name: 'View CF-1001 details' })).toHaveAttribute('data-ratan-variant', 'primary');
+    expect(screen.getAllByText('Ready')[0].closest('[data-status]')).toHaveAttribute('data-status', 'ready');
   });
 
   it('filters records and updates the application-owned summary', () => {

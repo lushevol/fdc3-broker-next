@@ -14,6 +14,8 @@ describe('CashflowTable', () => {
     expect(screen.getByRole('rowheader', { name: 'CF-1001' })).toBeInTheDocument();
     expect(screen.getByText('1,250,000.00')).toBeInTheDocument();
     expect(screen.getByText('-420,000.00')).toBeInTheDocument();
+    expect(screen.getByText('Ready').closest('[data-status]')).toHaveAttribute('data-status', 'ready');
+    expect(screen.getByText('Review').closest('[data-status]')).toHaveAttribute('data-status', 'review');
   });
 
   it('reports row selection and exposes selected state', () => {

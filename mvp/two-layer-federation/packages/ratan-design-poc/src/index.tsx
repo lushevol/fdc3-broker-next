@@ -156,6 +156,7 @@ export function TextField({ onChange, ...props }: TextFieldProps) {
   return (
     <StyledTextField
       {...props}
+      inputProps={{ ...props.inputProps, 'data-ratan-control': 'text-field' }}
       onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
       variant="outlined"
     />

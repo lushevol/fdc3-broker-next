@@ -1,4 +1,5 @@
 import type { CashflowRecord } from '@fm/ratan-sdk-poc';
+import { Button, StatusBadge, type StatusTone } from '@fm/ratan-design-poc';
 
 export interface CashflowTableProps {
   rows: CashflowRecord[];
@@ -39,11 +40,11 @@ export function CashflowTable({ rows, selectedId, onSelect }: CashflowTableProps
                 <td className={record.amount < 0 ? 'amount-negative' : undefined}>
                   {amountFormatter.format(record.amount)}
                 </td>
-                <td><span className={`status status-${record.status.toLowerCase()}`}>{record.status}</span></td>
+                <td><StatusBadge status={record.status.toLowerCase() as StatusTone}>{record.status}</StatusBadge></td>
                 <td>
-                  <button type="button" className="row-action" onClick={() => onSelect(record)}>
+                  <Button variant="ghost" className="row-action" onClick={() => onSelect(record)}>
                     Select <span className="visually-hidden">{record.id}</span>
-                  </button>
+                  </Button>
                 </td>
               </tr>
             ))

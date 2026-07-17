@@ -20,9 +20,9 @@
 
 ## 4. Cashflow adoption
 
-- [ ] 4.1 Add failing Cashflow tests for host-driven updates, standalone defaults, shared filter/action/status components, and preserved workflow behavior
-- [ ] 4.2 Wrap Cashflow in its local design provider, subscribe through the platform SDK, and retain standalone rendering
-- [ ] 4.3 Replace representative Cashflow filter, primary actions, and status badges and remove their superseded literal styles
+- [x] 4.1 Add failing Cashflow tests for host-driven updates, standalone defaults, shared filter/action/status components, and preserved workflow behavior
+- [x] 4.2 Wrap Cashflow in its local design provider, subscribe through the platform SDK, and retain standalone rendering
+- [x] 4.3 Replace representative Cashflow filter, primary actions, and status badges and remove their superseded literal styles
 
 ## 5. Integrated verification and documentation
 
