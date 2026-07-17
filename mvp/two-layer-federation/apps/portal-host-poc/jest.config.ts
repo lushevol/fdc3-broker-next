@@ -6,6 +6,7 @@ export default {
   moduleNameMapper: {
     '\\.(css)$': 'identity-obj-proxy',
     '^@fm/platform-contracts-poc$': '<rootDir>/../../packages/platform-contracts-poc/src/index.ts',
+    '^@fm/ratan-design-poc$': '<rootDir>/../../packages/ratan-design-poc/src/index.tsx',
   },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',

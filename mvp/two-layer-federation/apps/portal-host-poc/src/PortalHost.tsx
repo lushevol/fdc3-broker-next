@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   findApplicationForPath,
+  type AppearanceCapability,
+  type AppearanceSnapshot,
   type ApplicationRegistry,
   type ApplicationRegistryEntry,
   type PlatformCapabilities,
 } from '@fm/platform-contracts-poc';
+import { Button, DesignSystemProvider } from '@fm/ratan-design-poc';
+import { persistAppearance, readStoredAppearance } from './appearance';
 import { RemoteApplication } from './RemoteApplication';
 import { moduleFederationRuntime, type RemoteRuntime } from './remote';
 
@@ -33,6 +37,24 @@ export function PortalHost({ registry, runtime = moduleFederationRuntime }: Prop
   });
   const [activeId, setActiveId] = useState<string | null>(initialEntry?.id ?? null);
   const [notification, setNotification] = useState<string | null>(null);
+  const [appearance, setAppearance] = useState(() => readStoredAppearance(window.localStorage));
+  const appearanceRef = useRef(appearance);
+  const appearanceListeners = useRef(new Set<(snapshot: AppearanceSnapshot) => void>());
+
+  appearanceRef.current = appearance;
+
+  const appearanceCapability = useMemo<AppearanceCapability>(() => ({
+    getSnapshot: () => appearanceRef.current,
+    subscribe: (listener) => {
+      appearanceListeners.current.add(listener);
+      return () => appearanceListeners.current.delete(listener);
+    },
+  }), []);
+
+  useEffect(() => {
+    persistAppearance(window.localStorage, appearance);
+    appearanceListeners.current.forEach((listener) => listener(appearance));
+  }, [appearance]);
 
   const openApplication = useCallback((entry: ApplicationRegistryEntry, navigate = true) => {
     setTabs((current) => {
@@ -71,32 +93,66 @@ export function PortalHost({ registry, runtime = moduleFederationRuntime }: Prop
         track: (event, data) => console.info('platform-event', { application: activeTab.entry.id, event, data }),
       },
       workspace: { closeCurrent: () => closeApplication(activeTab.entry.id) },
+      appearance: appearanceCapability,
     };
-  }, [activeTab, closeApplication]);
+  }, [activeTab, appearanceCapability, closeApplication]);
 
   return (
-    <div className="portal-shell">
+    <DesignSystemProvider
+      appearance={{
+        scheme: appearance.scheme,
+        density: appearance.density,
+        direction: appearance.direction,
+      }}
+      scope="host"
+    >
+      <div className="portal-shell">
       <header className="portal-header">
         <div>
           <span className="eyebrow">FMO NEXT</span>
           <h1>Operations Workspace</h1>
         </div>
-        <div className="architecture-badge" data-testid="architecture-badge">Host → Application</div>
+        <div className="header-actions">
+          <div className="appearance-controls" aria-label="Appearance controls">
+            <Button
+              variant="ghost"
+              aria-label={`Use ${appearance.scheme === 'dark' ? 'light' : 'dark'} theme`}
+              onClick={() => setAppearance((current) => {
+                const scheme = current.scheme === 'dark' ? 'light' : 'dark';
+                return { ...current, scheme, preference: scheme };
+              })}
+            >
+              {appearance.scheme === 'dark' ? 'Light' : 'Dark'} theme
+            </Button>
+            <Button
+              variant="ghost"
+              aria-label={`Use ${appearance.density === 'compact' ? 'comfortable' : 'compact'} density`}
+              onClick={() => setAppearance((current) => ({
+                ...current,
+                density: current.density === 'compact' ? 'comfortable' : 'compact',
+              }))}
+            >
+              {appearance.density === 'compact' ? 'Comfortable' : 'Compact'} density
+            </Button>
+          </div>
+          <div className="architecture-badge" data-testid="architecture-badge">Host → Application</div>
+        </div>
       </header>
 
       <aside className="launcher" aria-label="Application launcher">
         <h2>Applications</h2>
         <p>Runtime registry</p>
         {registry.applications.map((entry) => (
-          <button
+          <Button
             key={entry.id}
-            type="button"
+            variant="secondary"
+            className="launcher-action"
             aria-label={`Open ${entry.displayName}`}
             onClick={() => openApplication(entry)}
           >
             <span className="launcher-icon">{entry.displayName.slice(0, 2).toUpperCase()}</span>
             <span>Open {entry.displayName}</span>
-          </button>
+          </Button>
         ))}
         <dl className="runtime-facts">
           <div><dt>Composition</dt><dd>2 layers</dd></div>
@@ -151,6 +207,7 @@ export function PortalHost({ registry, runtime = moduleFederationRuntime }: Prop
           <button type="button" aria-label="Dismiss notification" onClick={() => setNotification(null)}>×</button>
         </div>
       ) : null}
-    </div>
+      </div>
+    </DesignSystemProvider>
   );
 }

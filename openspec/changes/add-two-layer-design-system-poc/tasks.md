@@ -14,9 +14,9 @@
 
 ## 3. Host appearance ownership
 
-- [ ] 3.1 Add failing host tests for deterministic defaults, persisted scheme/density, stable capability identity, subscription updates, and shared control usage
-- [ ] 3.2 Implement host appearance controller/provider, persistence, theme and density controls, and capability wiring
-- [ ] 3.3 Replace representative host buttons with design-system components and remove superseded literal component styles
+- [x] 3.1 Add failing host tests for deterministic defaults, persisted scheme/density, stable capability identity, subscription updates, and shared control usage
+- [x] 3.2 Implement host appearance controller/provider, persistence, theme and density controls, and capability wiring
+- [x] 3.3 Replace representative host buttons with design-system components and remove superseded literal component styles
 
 ## 4. Cashflow adoption
 

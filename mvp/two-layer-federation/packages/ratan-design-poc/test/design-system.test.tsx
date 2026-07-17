@@ -22,7 +22,7 @@ describe('DesignSystemProvider', () => {
         <div>Content</div>
       </DesignSystemProvider>,
     );
-    const root = screen.getByTestId('ratan-design-root');
+    const root = document.querySelector('[data-ratan-scope="application"]');
     expect(root).toHaveAttribute('data-ratan-theme', 'dark');
     expect(root).toHaveAttribute('data-ratan-density', 'compact');
     expect(root).toHaveAttribute('dir', 'ltr');

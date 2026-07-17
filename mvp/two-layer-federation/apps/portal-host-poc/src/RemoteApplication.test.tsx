@@ -1,15 +1,23 @@
 import { render, screen } from '@testing-library/react';
-import { APPLICATION_CONTRACT_VERSION, type ApplicationRegistryEntry, type PlatformCapabilities } from '@fm/platform-contracts-poc';
+import { APPLICATION_CONTRACT_VERSION, APPEARANCE_CONTRACT_VERSION, type ApplicationRegistryEntry, type PlatformCapabilities } from '@fm/platform-contracts-poc';
 import { RemoteApplication } from './RemoteApplication';
 
 const entry: ApplicationRegistryEntry = {
   id: 'cashflow', displayName: 'Cashflow', remoteName: 'mfe_cashflow_poc',
   manifestUrl: 'http://127.0.0.1:9101/mf-manifest.json', exposedModule: './application',
-  basePath: '/cashflow', contractVersion: APPLICATION_CONTRACT_VERSION, capabilities: [],
+  basePath: '/cashflow', contractVersion: APPLICATION_CONTRACT_VERSION,
+  appearanceContractVersion: APPEARANCE_CONTRACT_VERSION, capabilities: [],
 };
 const capabilities: PlatformCapabilities = {
   navigation: { navigate: jest.fn() }, notifications: { show: jest.fn() },
   telemetry: { track: jest.fn() }, workspace: { closeCurrent: jest.fn() },
+  appearance: {
+    getSnapshot: () => ({
+      scheme: 'dark', preference: 'dark', density: 'compact', locale: 'en-US', direction: 'ltr',
+      contractVersion: APPEARANCE_CONTRACT_VERSION,
+    }),
+    subscribe: () => () => undefined,
+  },
 };
 
 describe('RemoteApplication edge cases', () => {
@@ -28,7 +36,7 @@ describe('RemoteApplication edge cases', () => {
     const view = render(<RemoteApplication entry={entry} instanceId="cashflow-1" capabilities={capabilities} runtime={runtime} />);
     view.unmount();
     resolveRemote({
-      manifest: { id: 'cashflow', displayName: 'Cashflow', contractVersion: APPLICATION_CONTRACT_VERSION },
+      manifest: { id: 'cashflow', displayName: 'Cashflow', contractVersion: APPLICATION_CONTRACT_VERSION, appearanceContractVersion: APPEARANCE_CONTRACT_VERSION },
       Application: () => <p>Too late</p>,
     });
     await Promise.resolve();

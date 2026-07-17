@@ -8,7 +8,8 @@
       "exposedModule": "./application",
       "basePath": "/cashflow",
       "contractVersion": "1.0.0",
-      "capabilities": ["navigation", "notifications", "telemetry", "workspace"]
+      "appearanceContractVersion": "1.0.0",
+      "capabilities": ["navigation", "notifications", "telemetry", "workspace", "appearance"]
     }
   ]
 }

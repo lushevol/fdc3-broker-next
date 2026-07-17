@@ -1,5 +1,5 @@
 import React from 'react';
-import { APPLICATION_CONTRACT_VERSION, type ApplicationRegistryEntry } from '@fm/platform-contracts-poc';
+import { APPLICATION_CONTRACT_VERSION, APPEARANCE_CONTRACT_VERSION, type ApplicationRegistryEntry } from '@fm/platform-contracts-poc';
 import { loadFederatedApplication, remoteRequestFromEntry } from './remote';
 
 jest.mock('@module-federation/enhanced/runtime', () => ({
@@ -15,6 +15,7 @@ const entry: ApplicationRegistryEntry = {
   exposedModule: './application',
   basePath: '/cashflow',
   contractVersion: APPLICATION_CONTRACT_VERSION,
+  appearanceContractVersion: APPEARANCE_CONTRACT_VERSION,
   capabilities: [],
 };
 
@@ -25,7 +26,7 @@ describe('remote application loader', () => {
 
   it('registers and returns a compatible remote module', async () => {
     const module = {
-      manifest: { id: 'cashflow', displayName: 'Cashflow', contractVersion: APPLICATION_CONTRACT_VERSION },
+      manifest: { id: 'cashflow', displayName: 'Cashflow', contractVersion: APPLICATION_CONTRACT_VERSION, appearanceContractVersion: APPEARANCE_CONTRACT_VERSION },
       Application: () => React.createElement('div'),
     };
     const runtime = {
@@ -43,7 +44,7 @@ describe('remote application loader', () => {
     const runtime = {
       registerRemotes: jest.fn(),
       loadRemote: jest.fn().mockResolvedValue({
-        manifest: { id: 'cashflow', displayName: 'Cashflow', contractVersion: APPLICATION_CONTRACT_VERSION },
+        manifest: { id: 'cashflow', displayName: 'Cashflow', contractVersion: APPLICATION_CONTRACT_VERSION, appearanceContractVersion: APPEARANCE_CONTRACT_VERSION },
         Application: () => null,
       }),
     };
@@ -59,7 +60,7 @@ describe('remote application loader', () => {
     runtime.loadRemote.mockResolvedValue(undefined);
     await expect(loadFederatedApplication(entry, runtime)).rejects.toThrow(/did not return/i);
     runtime.loadRemote.mockResolvedValue({
-      manifest: { id: 'other', displayName: 'Other', contractVersion: APPLICATION_CONTRACT_VERSION },
+      manifest: { id: 'other', displayName: 'Other', contractVersion: APPLICATION_CONTRACT_VERSION, appearanceContractVersion: APPEARANCE_CONTRACT_VERSION },
       Application: () => null,
     });
     await expect(loadFederatedApplication(entry, runtime)).rejects.toThrow(/identity/i);

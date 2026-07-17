@@ -62,8 +62,9 @@ export function createRatanTheme(appearance: DesignAppearance) {
 
 export function DesignSystemProvider({
   appearance,
+  scope = 'application',
   children,
-}: PropsWithChildren<{ appearance: DesignAppearance }>) {
+}: PropsWithChildren<{ appearance: DesignAppearance; scope?: 'host' | 'application' | 'standalone' }>) {
   const theme = useMemo(
     () => createRatanTheme(appearance),
     [appearance.density, appearance.direction, appearance.scheme],
@@ -72,7 +73,7 @@ export function DesignSystemProvider({
     <ThemeProvider theme={theme}>
       <div
         className="ratan-design-root"
-        data-testid="ratan-design-root"
+        data-ratan-scope={scope}
         data-ratan-theme={appearance.scheme}
         data-ratan-density={appearance.density}
         dir={appearance.direction}

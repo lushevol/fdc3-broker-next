@@ -1,4 +1,4 @@
-import { APPLICATION_CONTRACT_VERSION } from '@fm/platform-contracts-poc';
+import { APPLICATION_CONTRACT_VERSION, APPEARANCE_CONTRACT_VERSION } from '@fm/platform-contracts-poc';
 import { loadApplicationRegistry } from './registry';
 
 const registry = {
@@ -11,7 +11,8 @@ const registry = {
       exposedModule: './application',
       basePath: '/cashflow',
       contractVersion: APPLICATION_CONTRACT_VERSION,
-      capabilities: ['navigation', 'notifications', 'telemetry', 'workspace'],
+      appearanceContractVersion: APPEARANCE_CONTRACT_VERSION,
+      capabilities: ['navigation', 'notifications', 'telemetry', 'workspace', 'appearance'],
     },
   ],
 };

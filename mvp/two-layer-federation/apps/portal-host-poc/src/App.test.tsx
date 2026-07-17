@@ -1,5 +1,9 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { APPLICATION_CONTRACT_VERSION, type ApplicationRegistry } from '@fm/platform-contracts-poc';
+import {
+  APPLICATION_CONTRACT_VERSION,
+  APPEARANCE_CONTRACT_VERSION,
+  type ApplicationRegistry,
+} from '@fm/platform-contracts-poc';
 import { App } from './App';
 import { loadApplicationRegistry } from './registry';
 
@@ -9,7 +13,9 @@ const registry: ApplicationRegistry = {
   applications: [{
     id: 'cashflow', displayName: 'Cashflow', remoteName: 'mfe_cashflow_poc',
     manifestUrl: 'http://127.0.0.1:9101/mf-manifest.json', exposedModule: './application',
-    basePath: '/cashflow', contractVersion: APPLICATION_CONTRACT_VERSION, capabilities: [],
+    basePath: '/cashflow', contractVersion: APPLICATION_CONTRACT_VERSION,
+    appearanceContractVersion: APPEARANCE_CONTRACT_VERSION,
+    capabilities: ['appearance'],
   }],
 };
 
