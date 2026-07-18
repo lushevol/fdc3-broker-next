@@ -14,6 +14,7 @@ import {
   type StatusTone,
 } from '@fm/ratan-design';
 import './styles.css';
+import { AuthorizationLimits } from './AuthorizationLimits';
 
 export const manifest: ApplicationManifest = {
   id: 'cashflow',
@@ -84,6 +85,9 @@ export function Application({ instanceId, basePath, capabilities }: ApplicationP
     if (detail) client.track('cashflow.details.opened', { id: detail.id });
   }, [client, detail]);
 
+  const isAuthorizationLimits = path === `${basePath}/authorization-limits`
+    || path.startsWith(`${basePath}/authorization-limits/`);
+
   return (
     <DesignSystemProvider
       appearance={{
@@ -93,7 +97,12 @@ export function Application({ instanceId, basePath, capabilities }: ApplicationP
       }}
       scope="application"
     >
-      {detailId ? (
+      {isAuthorizationLimits ? (
+        <article className="cashflow-app" data-instance-id={instanceId}>
+          <Button variant="ghost" onClick={() => client.navigate(basePath)}>Back to Cashflow</Button>
+          <AuthorizationLimits basePath={basePath} path={path} client={client} />
+        </article>
+      ) : detailId ? (
         <article className="cashflow-app cashflow-details" data-instance-id={instanceId}>
           <Button variant="ghost" onClick={() => client.navigate(basePath)}>
             Back to cashflows
@@ -123,7 +132,7 @@ export function Application({ instanceId, basePath, capabilities }: ApplicationP
         <article className="cashflow-app" data-instance-id={instanceId}>
           <header className="cashflow-header">
             <div><span className="section-label">Ratan operations</span><h2>Cashflow blotter</h2></div>
-            <strong>{filtered.length} records</strong>
+            <div className="cashflow-header-actions"><Button variant="secondary" onClick={() => client.navigate(`${basePath}/authorization-limits`)}>Authorization Limits</Button><strong>{filtered.length} records</strong></div>
           </header>
           <TextField
             id={`${instanceId}-filter`}

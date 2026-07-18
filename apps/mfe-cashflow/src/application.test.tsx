@@ -9,6 +9,10 @@ import { createAppearanceController } from '@fm/platform-sdk';
 import { Application, filterRecords, manifest } from './application';
 import { STANDALONE_APPEARANCE, standaloneCapabilities } from './standalone';
 
+jest.mock('@fm/ratan-data-grid', () => ({
+  RatanDataGrid: () => <div data-testid="mock-data-grid" />,
+}));
+
 const appearance: AppearanceSnapshot = {
   scheme: 'dark', preference: 'dark', density: 'compact', locale: 'en-US', direction: 'ltr',
   contractVersion: APPEARANCE_CONTRACT_VERSION,

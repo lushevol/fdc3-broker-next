@@ -8,10 +8,10 @@
 
 ## 2. Authorization Limits domain cohort
 
-- [ ] 2.1 Add typed Authorization Limit records, deterministic asynchronous repository fixtures, currency formatting, and loading/empty/error/ready tests
-- [ ] 2.2 Add list and details routes to the production Cashflow application with explicit read-only/mutation-deferral messaging
-- [ ] 2.3 Add tests for filtering, grid columns, row selection, double-click/keyboard details activation, detail metadata, back navigation, and unknown records
-- [ ] 2.4 Use only production platform/design/grid package APIs and keep list/details composition application-owned
+- [x] 2.1 Add typed Authorization Limit records, deterministic asynchronous repository fixtures, currency formatting, and loading/empty/error/ready tests
+- [x] 2.2 Add list and details routes to the production Cashflow application with explicit read-only/mutation-deferral messaging
+- [x] 2.3 Add tests for filtering, grid columns, row selection, double-click/keyboard details activation, detail metadata, back navigation, and unknown records
+- [x] 2.4 Use only production platform/design/grid package APIs and keep list/details composition application-owned
 
 ## 3. Conformance and release evidence
 
