@@ -7,8 +7,8 @@ it('keeps the host identity path free of legacy, credential, storage, and domain
     .join('\n');
   const hostSource = readFileSync(resolve(process.cwd(), 'src/PortalHost.tsx'), 'utf8');
   const forbiddenEverywhere = [
-    'mfe-ratan-container',
-    'ratan_container',
+    ['mfe-ratan', 'container'].join('-'),
+    ['ratan', 'container'].join('_'),
     'getUser',
     'hasPermission',
     'SET_TOKEN',
