@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   findApplicationForPath,
-  IDENTITY_CONTRACT_VERSION,
   type AppearanceCapability,
   type AppearanceSnapshot,
   type ApplicationRegistry,
@@ -11,15 +10,24 @@ import {
 } from '@fm/platform-contracts';
 import { Button, DesignSystemProvider } from '@fm/ratan-design';
 import { persistAppearance, readStoredAppearance } from './appearance';
+import { ANONYMOUS_IDENTITY_CAPABILITY } from './identity';
 import { RemoteApplication } from './RemoteApplication';
 import { moduleFederationRuntime, type RemoteRuntime } from './remote';
 
-interface Props { registry: ApplicationRegistry; runtime?: RemoteRuntime }
+interface Props {
+  readonly registry: ApplicationRegistry;
+  readonly runtime?: RemoteRuntime;
+  readonly identity?: IdentityCapability;
+}
 interface Tab { entry: ApplicationRegistryEntry; instanceId: string }
 
 function navigate(path: string) { window.history.pushState({}, '', path); window.dispatchEvent(new PopStateEvent('popstate')); }
 
-export function PortalHost({ registry, runtime = moduleFederationRuntime }: Props) {
+export function PortalHost({
+  registry,
+  runtime = moduleFederationRuntime,
+  identity = ANONYMOUS_IDENTITY_CAPABILITY,
+}: Props) {
   const counts = useRef<Record<string, number>>({});
   const initial = findApplicationForPath(registry.applications, window.location.pathname);
   const [tabs, setTabs] = useState<Tab[]>(() => {
@@ -37,16 +45,6 @@ export function PortalHost({ registry, runtime = moduleFederationRuntime }: Prop
     getSnapshot: () => appearanceRef.current,
     subscribe(listener) { listeners.current.add(listener); return () => listeners.current.delete(listener); },
   }), []);
-  const identityCapability = useMemo<IdentityCapability>(() => {
-    const snapshot = Object.freeze({
-      state: 'anonymous' as const,
-      contractVersion: IDENTITY_CONTRACT_VERSION,
-    });
-    return Object.freeze({
-      getSnapshot: () => snapshot,
-      subscribe: () => () => undefined,
-    });
-  }, []);
   useEffect(() => { persistAppearance(window.localStorage, appearance); listeners.current.forEach((listener) => listener(appearance)); }, [appearance]);
 
   const open = useCallback((entry: ApplicationRegistryEntry, updatePath = true) => {
@@ -80,8 +78,8 @@ export function PortalHost({ registry, runtime = moduleFederationRuntime }: Prop
     navigation: { navigate }, notifications: { show: setNotification },
     telemetry: { track: (event, data) => console.info('platform-event', { application: active.entry.id, event, data }) },
     workspace: { closeCurrent: () => close(active.entry.id) }, appearance: appearanceCapability,
-    identity: identityCapability,
-  }) : null, [active, appearanceCapability, close, identityCapability]);
+    identity,
+  }) : null, [active, appearanceCapability, close, identity]);
 
   return (
     <DesignSystemProvider appearance={{ scheme: appearance.scheme, density: appearance.density, direction: appearance.direction }} scope="host">

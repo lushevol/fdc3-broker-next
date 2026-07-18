@@ -2,17 +2,16 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 it('keeps the host identity path free of legacy, credential, storage, and domain concerns', () => {
-  const source = ['identity.ts', 'App.tsx', 'PortalHost.tsx', 'bootstrap.tsx']
+  const identitySource = ['identity.ts', 'App.tsx', 'bootstrap.tsx']
     .map((file) => readFileSync(resolve(process.cwd(), 'src', file), 'utf8'))
     .join('\n');
-  const forbidden = [
+  const hostSource = readFileSync(resolve(process.cwd(), 'src/PortalHost.tsx'), 'utf8');
+  const forbiddenEverywhere = [
     'mfe-ratan-container',
     'ratan_container',
     'getUser',
     'hasPermission',
     'SET_TOKEN',
-    'localStorage',
-    'sessionStorage',
     'Single-UI-Authorization',
     'accessToken',
     'refreshToken',
@@ -20,5 +19,8 @@ it('keeps the host identity path free of legacy, credential, storage, and domain
     'authorization-limits',
     'profileLimitation',
   ];
-  expect(forbidden.filter((reference) => source.includes(reference))).toEqual([]);
+  expect(forbiddenEverywhere.filter((reference) =>
+    `${identitySource}\n${hostSource}`.includes(reference))).toEqual([]);
+  expect(['localStorage', 'sessionStorage'].filter((reference) =>
+    identitySource.includes(reference))).toEqual([]);
 });

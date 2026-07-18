@@ -1,13 +1,13 @@
 ## 1. Anonymous fallback contract
 
 - [x] 1.1 Add failing tests for stable frozen anonymous snapshot/capability and no-op subscription
-- [ ] 1.2 Implement the isolated host anonymous identity module
+- [x] 1.2 Implement the isolated host anonymous identity module
 
 ## 2. Host injection and propagation
 
 - [x] 2.1 Add failing PortalHost tests for exact capability delivery and live authenticated-to-anonymous updates
 - [x] 2.2 Add failing App tests proving the capability is threaded across asynchronous registry loading
-- [ ] 2.3 Implement optional App/PortalHost injection with anonymous default
+- [x] 2.3 Implement optional App/PortalHost injection with anonymous default
 
 ## 3. Legacy separation and documentation
 
