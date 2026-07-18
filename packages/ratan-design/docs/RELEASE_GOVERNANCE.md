@@ -2,11 +2,11 @@
 
 ## Version axes
 
-| Version | Purpose | Compatibility decision |
-| --- | --- | --- |
-| `@fm/ratan-design` | Build-time components and tokens | Package manager semver |
-| Application contract | Host/application mount API | Host manifest validation |
-| Appearance contract | Snapshot and semantic runtime boundary | Host manifest validation and explicit adapters |
+| Version              | Purpose                                | Compatibility decision                         |
+| -------------------- | -------------------------------------- | ---------------------------------------------- |
+| `@fm/ratan-design`   | Build-time components and tokens       | Package manager semver                         |
+| Application contract | Host/application mount API             | Host manifest validation                       |
+| Appearance contract  | Snapshot and semantic runtime boundary | Host manifest validation and explicit adapters |
 
 Different compatible design-package minors may run in host and application bundles. Package equality is not required. Unsupported protocol majors are rejected before rendering.
 
@@ -24,4 +24,4 @@ Every major includes migration guidance. A host may support the immediately prev
 
 ## Next pilot
 
-The next change makes the new production host consume `@fm/platform-contracts`, `@fm/platform-sdk`, and `@fm/ratan-design`, then migrates one independently deployed Cashflow application. Dialogs, AG Grid, Ant application migration, and workflow consolidation remain later cohorts.
+The production host, independent Cashflow pilot, and first read-only AG Grid cohort now consume the production package family. Version 1.1 adds interaction presentation only; typed Cashflow entitlement/service ports and behavior-tested mutations remain a later application cohort.

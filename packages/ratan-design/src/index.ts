@@ -1,6 +1,30 @@
 /** Production Ratan design foundation. */
-export { Button, type ButtonProps, type ButtonVariant } from './components/Button';
-export { StatusBadge, type StatusBadgeProps, type StatusTone } from './components/StatusBadge';
+export {
+  Button,
+  type ButtonProps,
+  type ButtonVariant,
+} from './components/Button';
+export {
+  ConfirmationDialog,
+  type ConfirmationDialogProps,
+  type ConfirmationTone,
+} from './components/ConfirmationDialog';
+export {
+  Dialog,
+  type DialogProps,
+  type DialogWidth,
+} from './components/Dialog';
+export {
+  InlineAlert,
+  type InlineAlertProps,
+  type InlineAlertTone,
+} from './components/InlineAlert';
+export { NumberField, type NumberFieldProps } from './components/NumberField';
+export {
+  StatusBadge,
+  type StatusBadgeProps,
+  type StatusTone,
+} from './components/StatusBadge';
 export { TextField, type TextFieldProps } from './components/TextField';
 export {
   DesignSystemProvider,

@@ -16,7 +16,7 @@
     "@fm/platform-contracts": "1.0.0",
     "@fm/platform-sdk": "1.0.0",
     "@fm/ratan-data-grid": "1.0.0",
-    "@fm/ratan-design": "1.0.0",
+    "@fm/ratan-design": "^1.0.0",
     "@mui/material": "^5.18.0",
     "ag-grid-community": "32.3.0",
     "ag-grid-react": "32.3.0",

@@ -12,7 +12,7 @@ import {
 
 describe('production design tokens', () => {
   it('uses the scoped production package identity', () => {
-    expect(packageJson).toMatchObject({ name: '@fm/ratan-design', version: '1.0.0' });
+    expect(packageJson).toMatchObject({ name: '@fm/ratan-design', version: '1.1.0' });
   });
 
   it('defines complete light and dark semantic color roles', () => {

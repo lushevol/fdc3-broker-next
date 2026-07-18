@@ -13,7 +13,11 @@ src/
 ├── components/
 │   ├── Button.tsx
 │   ├── TextField.tsx
-│   └── StatusBadge.tsx
+│   ├── NumberField.tsx
+│   ├── StatusBadge.tsx
+│   ├── Dialog.tsx
+│   ├── ConfirmationDialog.tsx
+│   └── InlineAlert.tsx
 ├── foundation/
 │   ├── tokens.ts                   authoritative typed semantics
 │   └── generate-token-css.ts       deterministic pure generator
@@ -27,6 +31,10 @@ src/
 ## Provider boundary
 
 `DesignSystemProvider` accepts only resolved scheme, density, and direction. It sets attributes on its own `.ratan-design-root` and does not mutate `documentElement`. Updating appearance rerenders the provider without remounting consumer state.
+
+## Interaction boundary
+
+Interaction components adapt private MUI behavior behind domain-neutral props. Dialog state remains in the consuming application; MUI portals do not create another federation/runtime layer. Inline feedback renders where composed and has no singleton manager. Numeric controls emit raw controlled values and never format domain currency.
 
 ## Build and verification
 

@@ -17,12 +17,12 @@
 
 ## 4. Additive release and documentation
 
-- [ ] 4.1 Advance `@fm/ratan-design` to 1.1.0 and add restricted public component/type exports without breaking the 1.0.0 surface
-- [ ] 4.2 Add dependency/public-export scans for Ant, AG Grid, federation, legacy Ratan/domain, raw MUI, `sx`, slots, form engines, and internal subpaths
-- [ ] 4.3 Update Storybook stories, demo, README, changelog, architecture/rules, and acceptance guidance for interaction ownership boundaries
-- [ ] 4.4 Extend the packed consumer fixture for NumberField, Dialog, ConfirmationDialog, InlineAlert, declarations, CSS, and blocked subpaths
+- [x] 4.1 Advance `@fm/ratan-design` to 1.1.0 and add restricted public component/type exports without breaking the 1.0.0 surface
+- [x] 4.2 Add dependency/public-export scans for Ant, AG Grid, federation, legacy Ratan/domain, raw MUI, `sx`, slots, form engines, and internal subpaths
+- [x] 4.3 Update Storybook stories, demo, README, changelog, architecture/rules, and acceptance guidance for interaction ownership boundaries
+- [x] 4.4 Extend the packed consumer fixture for NumberField, Dialog, ConfirmationDialog, InlineAlert, declarations, CSS, and blocked subpaths
 
 ## 5. Verification evidence
 
-- [ ] 5.1 Run design coverage, lint, declaration/build, Storybook, deterministic CSS, dependency scans, packed consumption, production-pilot tests/builds, and strict OpenSpec validation
-- [ ] 5.2 Record artifact sizes, accessibility evidence, additive compatibility, deliberately deferred controls, and mutation-cohort entry criteria
+- [x] 5.1 Run design coverage, lint, declaration/build, Storybook, deterministic CSS, dependency scans, packed consumption, production-pilot tests/builds, and strict OpenSpec validation
+- [x] 5.2 Record artifact sizes, accessibility evidence, additive compatibility, deliberately deferred controls, and mutation-cohort entry criteria

@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Button } from '../src/components/Button';
@@ -8,7 +14,11 @@ import { InlineAlert } from '../src/components/InlineAlert';
 import { NumberField } from '../src/components/NumberField';
 import { DesignSystemProvider, type DesignAppearance } from '../src/provider';
 
-const appearance: DesignAppearance = { scheme: 'dark', density: 'compact', direction: 'ltr' };
+const appearance: DesignAppearance = {
+  scheme: 'dark',
+  density: 'compact',
+  direction: 'ltr',
+};
 
 afterEach(cleanup);
 
@@ -23,7 +33,9 @@ function renderDesign(children: React.ReactNode) {
 describe('NumberField', () => {
   it('emits controlled numbers and null when cleared', () => {
     const onChange = vi.fn();
-    renderDesign(<NumberField id="limit" label="Limit" value={12} onChange={onChange} />);
+    renderDesign(
+      <NumberField id="limit" label="Limit" value={12} onChange={onChange} />,
+    );
 
     const input = screen.getByRole('spinbutton', { name: 'Limit' });
     expect(input).toHaveValue(12);
@@ -85,15 +97,21 @@ describe('NumberField', () => {
         />
       </DesignSystemProvider>,
     );
-    expect(screen.getByRole('spinbutton', { name: 'Validated limit' })).toHaveAttribute(
-      'aria-invalid',
-      'true',
-    );
+    expect(
+      screen.getByRole('spinbutton', { name: 'Validated limit' }),
+    ).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getByText('A limit is required')).toBeInTheDocument();
   });
 
   it('accepts focus without owning validation or form state', () => {
-    renderDesign(<NumberField id="focus-limit" label="Focus limit" value={4} onChange={vi.fn()} />);
+    renderDesign(
+      <NumberField
+        id="focus-limit"
+        label="Focus limit"
+        value={4}
+        onChange={vi.fn()}
+      />,
+    );
     const input = screen.getByRole('spinbutton', { name: 'Focus limit' });
     input.focus();
     expect(input).toHaveFocus();
@@ -116,7 +134,9 @@ describe('Dialog', () => {
     );
 
     const dialog = screen.getByRole('dialog', { name: 'Edit limit' });
-    expect(dialog).toHaveAccessibleDescription('Update the selected profile limit.');
+    expect(dialog).toHaveAccessibleDescription(
+      'Update the selected profile limit.',
+    );
     expect(dialog).toHaveAttribute('data-ratan-width', 'medium');
     expect(screen.getByText('Dialog content')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
@@ -124,7 +144,9 @@ describe('Dialog', () => {
 
   it('supports the three documented widths', () => {
     const view = renderDesign(
-      <Dialog open title="Width" width="small" onClose={vi.fn()}>Content</Dialog>,
+      <Dialog open title="Width" width="small" onClose={vi.fn()}>
+        Content
+      </Dialog>,
     );
     expect(screen.getByRole('dialog', { name: 'Width' })).toHaveAttribute(
       'data-ratan-width',
@@ -132,7 +154,9 @@ describe('Dialog', () => {
     );
     view.rerender(
       <DesignSystemProvider appearance={appearance} scope="standalone">
-        <Dialog open title="Width" width="large" onClose={vi.fn()}>Content</Dialog>
+        <Dialog open title="Width" width="large" onClose={vi.fn()}>
+          Content
+        </Dialog>
       </DesignSystemProvider>,
     );
     expect(screen.getByRole('dialog', { name: 'Width' })).toHaveAttribute(
@@ -143,11 +167,17 @@ describe('Dialog', () => {
 
   it('closes from its close button, Escape, and backdrop when dismissible', () => {
     const onClose = vi.fn();
-    renderDesign(<Dialog open title="Dismissible" onClose={onClose}>Content</Dialog>);
+    renderDesign(
+      <Dialog open title="Dismissible" onClose={onClose}>
+        Content
+      </Dialog>,
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Close Dismissible' }));
     expect(onClose).toHaveBeenCalledTimes(1);
-    fireEvent.keyDown(screen.getByRole('dialog', { name: 'Dismissible' }), { key: 'Escape' });
+    fireEvent.keyDown(screen.getByRole('dialog', { name: 'Dismissible' }), {
+      key: 'Escape',
+    });
     expect(onClose).toHaveBeenCalledTimes(2);
     const dialogRoot = document.querySelector('.MuiDialog-root');
     const dialogContainer = document.querySelector('.MuiDialog-container');
@@ -162,13 +192,23 @@ describe('Dialog', () => {
   it('blocks close button, Escape, and backdrop dismissal when non-dismissible', () => {
     const onClose = vi.fn();
     renderDesign(
-      <Dialog open title="Pending" onClose={onClose} dismissible={false} actions={<Button>Wait</Button>}>
+      <Dialog
+        open
+        title="Pending"
+        onClose={onClose}
+        dismissible={false}
+        actions={<Button>Wait</Button>}
+      >
         Content
       </Dialog>,
     );
 
-    expect(screen.queryByRole('button', { name: 'Close Pending' })).not.toBeInTheDocument();
-    fireEvent.keyDown(screen.getByRole('dialog', { name: 'Pending' }), { key: 'Escape' });
+    expect(
+      screen.queryByRole('button', { name: 'Close Pending' }),
+    ).not.toBeInTheDocument();
+    fireEvent.keyDown(screen.getByRole('dialog', { name: 'Pending' }), {
+      key: 'Escape',
+    });
     const dialogRoot = document.querySelector('.MuiDialog-root');
     const dialogContainer = document.querySelector('.MuiDialog-container');
     fireEvent.mouseDown(dialogContainer!);
@@ -183,7 +223,9 @@ describe('Dialog', () => {
       return (
         <>
           <Button onClick={() => setOpen(true)}>Open editor</Button>
-          <Dialog open={open} title="Editor" onClose={() => setOpen(false)}>Content</Dialog>
+          <Dialog open={open} title="Editor" onClose={() => setOpen(false)}>
+            Content
+          </Dialog>
         </>
       );
     }
@@ -198,27 +240,33 @@ describe('Dialog', () => {
 });
 
 describe('ConfirmationDialog', () => {
-  it.each(['default', 'danger'] as const)('runs %s confirmation and cancellation callbacks', (tone) => {
-    const onConfirm = vi.fn();
-    const onCancel = vi.fn();
-    renderDesign(
-      <ConfirmationDialog
-        open
-        title="Confirm action"
-        message="This change is application-owned."
-        confirmLabel="Apply"
-        tone={tone}
-        onConfirm={onConfirm}
-        onCancel={onCancel}
-      />,
-    );
-    const confirm = screen.getByRole('button', { name: 'Apply' });
-    expect(confirm).toHaveAttribute('data-ratan-variant', tone === 'danger' ? 'danger' : 'primary');
-    fireEvent.click(confirm);
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-    expect(onConfirm).toHaveBeenCalledTimes(1);
-    expect(onCancel).toHaveBeenCalledTimes(1);
-  });
+  it.each(['default', 'danger'] as const)(
+    'runs %s confirmation and cancellation callbacks',
+    (tone) => {
+      const onConfirm = vi.fn();
+      const onCancel = vi.fn();
+      renderDesign(
+        <ConfirmationDialog
+          open
+          title="Confirm action"
+          message="This change is application-owned."
+          confirmLabel="Apply"
+          tone={tone}
+          onConfirm={onConfirm}
+          onCancel={onCancel}
+        />,
+      );
+      const confirm = screen.getByRole('button', { name: 'Apply' });
+      expect(confirm).toHaveAttribute(
+        'data-ratan-variant',
+        tone === 'danger' ? 'danger' : 'primary',
+      );
+      fireEvent.click(confirm);
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+      expect(onCancel).toHaveBeenCalledTimes(1);
+    },
+  );
 
   it('prevents repeat confirmation and all dismissal while loading', () => {
     const onConfirm = vi.fn();
@@ -238,9 +286,13 @@ describe('ConfirmationDialog', () => {
     expect(progress).toBeDisabled();
     expect(progress).toHaveAttribute('aria-busy', 'true');
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
-    expect(screen.queryByRole('button', { name: 'Close Delete limit' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Close Delete limit' }),
+    ).not.toBeInTheDocument();
     fireEvent.click(progress);
-    fireEvent.keyDown(screen.getByRole('dialog', { name: 'Delete limit' }), { key: 'Escape' });
+    fireEvent.keyDown(screen.getByRole('dialog', { name: 'Delete limit' }), {
+      key: 'Escape',
+    });
     expect(onConfirm).not.toHaveBeenCalled();
     expect(onCancel).not.toHaveBeenCalled();
   });
@@ -271,12 +323,15 @@ describe('InlineAlert', () => {
     ['success', 'status'],
     ['warning', 'status'],
     ['error', 'alert'],
-  ] as const)('renders %s feedback with the appropriate live-region role', (tone, role) => {
-    renderDesign(<InlineAlert tone={tone} message={`${tone} feedback`} />);
-    const alert = screen.getByRole(role);
-    expect(alert).toHaveTextContent(`${tone} feedback`);
-    expect(alert).toHaveAttribute('data-ratan-tone', tone);
-  });
+  ] as const)(
+    'renders %s feedback with the appropriate live-region role',
+    (tone, role) => {
+      renderDesign(<InlineAlert tone={tone} message={`${tone} feedback`} />);
+      const alert = screen.getByRole(role);
+      expect(alert).toHaveTextContent(`${tone} feedback`);
+      expect(alert).toHaveAttribute('data-ratan-tone', tone);
+    },
+  );
 
   it('renders structured content and invokes one labeled action', () => {
     const onAction = vi.fn();
@@ -297,8 +352,12 @@ describe('InlineAlert', () => {
   it('keeps independent application feedback isolated', () => {
     renderDesign(
       <>
-        <section aria-label="Application one"><InlineAlert tone="info" message="First" /></section>
-        <section aria-label="Application two"><InlineAlert tone="success" message="Second" /></section>
+        <section aria-label="Application one">
+          <InlineAlert tone="info" message="First" />
+        </section>
+        <section aria-label="Application two">
+          <InlineAlert tone="success" message="Second" />
+        </section>
       </>,
     );
     expect(screen.getAllByRole('status')).toHaveLength(2);

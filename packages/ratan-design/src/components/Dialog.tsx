@@ -36,12 +36,17 @@ const StyledDialog = styled(MuiDialog)({
     borderRadius: 'var(--ratan-radius-control)',
   },
   '& .MuiDialogTitle-root': {
-    paddingInlineEnd: 'calc(var(--ratan-control-height) + var(--ratan-control-gap))',
+    paddingInlineEnd:
+      'calc(var(--ratan-control-height) + var(--ratan-control-gap))',
     fontSize: 'var(--ratan-font-size-body)',
     fontWeight: 'var(--ratan-font-weight-strong)',
   },
-  '& .MuiDialogContentText-root': { color: 'var(--ratan-color-content-secondary)' },
-  '& .MuiDialogActions-root': { padding: 'var(--ratan-control-padding-inline)' },
+  '& .MuiDialogContentText-root': {
+    color: 'var(--ratan-color-content-secondary)',
+  },
+  '& .MuiDialogActions-root': {
+    padding: 'var(--ratan-control-padding-inline)',
+  },
 });
 
 const CloseButton = styled(IconButton)({
@@ -76,16 +81,26 @@ export function Dialog({
       aria-describedby={description ? descriptionId : undefined}
       maxWidth={maxWidths[width]}
       fullWidth
-      PaperProps={{ 'data-ratan-width': width } as React.HTMLAttributes<HTMLDivElement>}
+      PaperProps={
+        { 'data-ratan-width': width } as React.HTMLAttributes<HTMLDivElement>
+      }
     >
       <DialogTitle id={titleId}>{title}</DialogTitle>
       {dismissible ? (
-        <CloseButton aria-label={`Close ${title}`} onClick={onClose} size="small">
+        <CloseButton
+          aria-label={`Close ${title}`}
+          onClick={onClose}
+          size="small"
+        >
           <span aria-hidden="true">×</span>
         </CloseButton>
       ) : null}
       <DialogContent>
-        {description ? <DialogContentText id={descriptionId}>{description}</DialogContentText> : null}
+        {description ? (
+          <DialogContentText id={descriptionId}>
+            {description}
+          </DialogContentText>
+        ) : null}
         {children}
       </DialogContent>
       {actions ? <DialogActions>{actions}</DialogActions> : null}

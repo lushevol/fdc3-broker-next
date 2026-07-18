@@ -1,6 +1,6 @@
 {
   "name": "@fm/ratan-design",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Production design foundation for independently deployed FM applications",
   "private": true,
   "type": "module",

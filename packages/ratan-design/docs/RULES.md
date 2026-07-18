@@ -6,6 +6,8 @@
 - Never export raw MUI components, MUI theme providers, `sx`, Emotion internals, or internal source paths.
 - Components are domain-neutral and must not import application or Ratan domain models.
 - Every new component requires behavior/accessibility tests and Storybook coverage.
+- Dialogs and feedback must remain application-composed; never add global overlay state, toast queues, or cross-MFE event buses.
+- Authorization, maker/checker policy, repositories, and mutation lifecycle are application/domain responsibilities.
 
 ## Tokens and styling
 

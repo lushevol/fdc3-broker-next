@@ -66,7 +66,10 @@ try {
   writeFileSync(join(temporaryRoot, 'consumer.mjs'), `
 import { APPEARANCE_CONTRACT_VERSION, appearanceSnapshotSchema } from '@fm/platform-contracts';
 import { createAppearanceController } from '@fm/platform-sdk';
-import { Button, DesignSystemProvider, StatusBadge, TextField, semanticTokens } from '@fm/ratan-design';
+import {
+  Button, ConfirmationDialog, Dialog, DesignSystemProvider, InlineAlert, NumberField,
+  StatusBadge, TextField, semanticTokens,
+} from '@fm/ratan-design';
 import { RatanDataGrid, createColumnDefinitions } from '@fm/ratan-data-grid';
 import { existsSync } from 'node:fs';
 
@@ -76,7 +79,7 @@ const appearance = Object.freeze({
 });
 appearanceSnapshotSchema.parse(appearance);
 if (createAppearanceController(appearance).capability.getSnapshot().scheme !== 'dark') throw new Error('SDK export failed');
-if (!Button || !TextField || !StatusBadge || !DesignSystemProvider || !semanticTokens.color.dark) throw new Error('Design export failed');
+if (!Button || !TextField || !NumberField || !StatusBadge || !Dialog || !ConfirmationDialog || !InlineAlert || !DesignSystemProvider || !semanticTokens.color.dark) throw new Error('Design export failed');
 if (!RatanDataGrid || createColumnDefinitions([{ key: 'id', header: 'ID' }]).length !== 1) throw new Error('Grid export failed');
 const cssPath = import.meta.resolve('@fm/ratan-design/styles.css');
 if (!existsSync(new URL(cssPath))) throw new Error('Stylesheet export failed');
@@ -93,7 +96,10 @@ if (!blocked) throw new Error('Grid internal subpath was not blocked');
   writeFileSync(join(temporaryRoot, 'fixture.tsx'), `
 import type { AppearanceSnapshot, PlatformCapabilities } from '@fm/platform-contracts';
 import { createAppearanceController, createPlatformClient } from '@fm/platform-sdk';
-import { Button, DesignSystemProvider, StatusBadge, TextField } from '@fm/ratan-design';
+import {
+  Button, ConfirmationDialog, Dialog, DesignSystemProvider, InlineAlert, NumberField,
+  StatusBadge, TextField,
+} from '@fm/ratan-design';
 import { RatanDataGrid, type RatanDataGridColumn } from '@fm/ratan-data-grid';
 
 declare const appearance: AppearanceSnapshot;
@@ -106,9 +112,24 @@ const columns: RatanDataGridColumn<Row>[] = [{ key: 'id', header: 'ID' }];
 export const Fixture = () => (
   <DesignSystemProvider appearance={controller.capability.getSnapshot()}>
     <TextField id="filter" label="Filter" value="" onChange={() => undefined} />
+    <NumberField id="limit" label="Limit" value={1} min={0} onChange={() => undefined} />
     <StatusBadge status="ready">Ready</StatusBadge>
+    <InlineAlert tone="info" message="Local feedback" />
     <Button>Submit</Button>
+    <Dialog open={false} title="Editor" onClose={() => undefined}>Content</Dialog>
+    <ConfirmationDialog
+      open={false}
+      title="Confirm"
+      message="Proceed?"
+      confirmLabel="Proceed"
+      onConfirm={() => undefined}
+      onCancel={() => undefined}
+    />
     <RatanDataGrid ariaLabel="Rows" rows={rows} columns={columns} getRowId={(row) => row.id} />
+    {/* @ts-expect-error raw styling is intentionally not public */}
+    <NumberField id="styled-limit" label="Styled" value={1} onChange={() => undefined} sx={{ color: 'red' }} />
+    {/* @ts-expect-error raw MUI slots are intentionally not public */}
+    <Dialog open={false} title="Slotted" onClose={() => undefined} slotProps={{}}>Content</Dialog>
   </DesignSystemProvider>
 );
 `);

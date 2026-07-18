@@ -40,7 +40,9 @@ export function ConfirmationDialog({
       dismissible={!loading}
       actions={
         <>
-          <Button variant="ghost" disabled={loading} onClick={onCancel}>{cancelLabel}</Button>
+          <Button variant="ghost" disabled={loading} onClick={onCancel}>
+            {cancelLabel}
+          </Button>
           <Button
             variant={tone === 'danger' ? 'danger' : 'primary'}
             disabled={loading || confirmDisabled}

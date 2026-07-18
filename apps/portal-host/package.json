@@ -14,7 +14,7 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@fm/platform-contracts": "1.0.0",
-    "@fm/ratan-design": "1.0.0",
+    "@fm/ratan-design": "^1.0.0",
     "@module-federation/enhanced": "^2.1.0",
     "@mui/material": "^5.18.0",
     "react": "^18.3.1",

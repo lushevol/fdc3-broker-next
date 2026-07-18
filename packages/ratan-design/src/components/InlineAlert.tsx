@@ -32,9 +32,12 @@ export function InlineAlert({
   onAction,
 }: InlineAlertProps) {
   const titleId = useId();
-  const action = actionLabel && onAction
-    ? <Button variant="ghost" onClick={onAction}>{actionLabel}</Button>
-    : undefined;
+  const action =
+    actionLabel && onAction ? (
+      <Button variant="ghost" onClick={onAction}>
+        {actionLabel}
+      </Button>
+    ) : undefined;
 
   return (
     <StyledAlert

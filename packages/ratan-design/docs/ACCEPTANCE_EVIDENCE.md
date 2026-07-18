@@ -41,3 +41,34 @@ The foundation intentionally does not yet include dialogs/overlays, icons, navig
 ## Pilot entry criteria
 
 The next change can pilot these packages in the new host and one independent Cashflow application because the public exports, protocol contracts, standalone mode, peer boundaries, generated styles, documentation, and consumer installation are now verified without source aliases.
+
+## Interaction foundation 1.1.0
+
+The additive interaction release was accepted after the production host, Cashflow application, and data-grid cohort existed. No application mutation or entitlement behavior was changed in this release.
+
+| Gate | Result |
+| --- | --- |
+| Design tests | 45 passed; 100% lines/functions/statements, 96.87% branches |
+| Interaction behavior | Number/null changes, helper/error association, modal naming, Escape/backdrop gating, focus restoration, loading repeat prevention, and urgency-specific live regions passed |
+| Storybook | Static production build passed for all existing components plus NumberField, Dialog, ConfirmationDialog, and InlineAlert |
+| Build and declarations | ESM, CSS, and declarations built successfully; generated token CSS remained byte-for-byte deterministic |
+| Boundaries | No Ant, AG Grid, federation, legacy Ratan/domain, form engine, raw public MUI/Emotion, or application dependency/import |
+| Packed consumer | Runtime exports, TypeScript JSX, restricted props, CSS resolution, and blocked internal subpaths passed |
+| Existing production consumers | Data grid 6 tests, Cashflow 12 tests, and host 10 tests passed without adopting the new APIs |
+| Runtime architecture | Boundary verifier still reports only host and federated-application layers, with only React and ReactDOM shared singletons |
+| OpenSpec | `add-production-interaction-foundation` passed strict validation |
+
+### 1.1.0 artifact evidence
+
+| Artifact | Size |
+| --- | ---: |
+| JavaScript | 15.74 KB |
+| CSS | 3.38 KB |
+| Declarations | 8.81 KB |
+| Packed tarball | 8,834 bytes |
+
+The unchanged Cashflow production build passed at 1,911.1 KB / 505.0 KB gzip after resolving the additive workspace minor. This release preserves every 1.0.0 export and token; runtime host/application compatibility still depends on platform protocol majors rather than an identical design-package minor.
+
+### Deferred controls and mutation entry
+
+Select/autocomplete, date/time and currency formatting, icons, navigation, toast queues, global overlay managers, form engines, entitlement policy, service clients, and mutation state machines remain deliberately deferred. The first mutation cohort may start only after Cashflow defines typed entitlement and service ports, characterizes status transitions and self-verification rules, maps failures to local feedback, and tests repeat-write prevention.

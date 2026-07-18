@@ -1,5 +1,18 @@
 # @fm/ratan-design
 
+## 1.1.0
+
+### Added
+
+- Added controlled `NumberField`, compositional `Dialog`, bounded `ConfirmationDialog`, and application-local `InlineAlert` APIs.
+- Added keyboard, focus restoration, loading repeat-prevention, validation association, and live-region behavior tests.
+- Added Storybook and standalone-demo coverage plus packed-consumer checks for the interaction surface.
+
+### Compatibility
+
+- This is additive: every 1.0.0 export and semantic token remains available with compatible behavior.
+- Applications still own form state, domain formatting, authorization, request lifecycle, service calls, and cross-MFE communication.
+
 ## 1.0.0
 
 ### Major changes
