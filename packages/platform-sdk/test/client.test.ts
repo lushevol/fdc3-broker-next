@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   APPEARANCE_CONTRACT_VERSION,
+  IDENTITY_CONTRACT_VERSION,
   type AppearanceSnapshot,
+  type IdentitySnapshot,
   type PlatformCapabilities,
 } from '@fm/platform-contracts';
-import { createAppearanceController, createPlatformClient } from '../src';
+import { createAppearanceController, createIdentityController, createPlatformClient } from '../src';
 
 const darkCompact: AppearanceSnapshot = {
   scheme: 'dark',
@@ -77,5 +79,48 @@ describe('production platform SDK', () => {
     const unsubscribe = createPlatformClient(capabilities).subscribeToAppearance(listener);
     expect(typeof unsubscribe).toBe('function');
     unsubscribe();
+  });
+
+  it('returns no identity when the optional capability is unavailable', () => {
+    const client = createPlatformClient(createCapabilities());
+    expect(client.getIdentity()).toBeUndefined();
+    expect(client.subscribeToIdentity(vi.fn())).toBeUndefined();
+  });
+
+  it('publishes validated immutable identity snapshots through the client', () => {
+    const anonymous: IdentitySnapshot = { state: 'anonymous', contractVersion: IDENTITY_CONTRACT_VERSION };
+    const controller = createIdentityController(anonymous);
+    const capabilities = { ...createCapabilities(), identity: controller.capability };
+    const listener = vi.fn();
+    const unsubscribe = createPlatformClient(capabilities).subscribeToIdentity(listener);
+    const mutable = {
+      state: 'authenticated' as const,
+      userId: 'operator-7',
+      permissions: ['authorization-limits:write'],
+      contractVersion: IDENTITY_CONTRACT_VERSION,
+    };
+    controller.setSnapshot(mutable);
+    mutable.userId = 'changed';
+    mutable.permissions.push('changed');
+    expect(listener).toHaveBeenCalledWith({
+      state: 'authenticated', userId: 'operator-7', permissions: ['authorization-limits:write'],
+      contractVersion: IDENTITY_CONTRACT_VERSION,
+    });
+    expect(controller.capability.getSnapshot()).toEqual(listener.mock.calls[0][0]);
+    expect(Object.isFrozen(controller.capability.getSnapshot())).toBe(true);
+    expect(Object.isFrozen((controller.capability.getSnapshot() as { permissions: string[] }).permissions)).toBe(true);
+    unsubscribe?.();
+    controller.setSnapshot(anonymous);
+    expect(listener).toHaveBeenCalledOnce();
+  });
+
+  it('rejects malformed identity without changing the current snapshot', () => {
+    const anonymous: IdentitySnapshot = { state: 'anonymous', contractVersion: IDENTITY_CONTRACT_VERSION };
+    expect(() => createIdentityController({ ...anonymous, userId: 'invalid' } as never)).toThrow();
+    const controller = createIdentityController(anonymous);
+    expect(() => controller.setSnapshot({
+      state: 'authenticated', userId: '', permissions: [], contractVersion: IDENTITY_CONTRACT_VERSION,
+    } as never)).toThrow();
+    expect(controller.capability.getSnapshot()).toEqual(anonymous);
   });
 });

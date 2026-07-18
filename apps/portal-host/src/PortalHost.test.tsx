@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { ApplicationProps } from '@fm/platform-contracts';
+import { IDENTITY_CONTRACT_VERSION, type ApplicationProps } from '@fm/platform-contracts';
 import { PortalHost } from './PortalHost';
 import { entry } from './test-fixtures';
 import type { RemoteRuntime } from './remote';
@@ -12,6 +12,7 @@ function Cashflow({ capabilities, instanceId }: ApplicationProps) {
 function runtime(): RemoteRuntime {
   return { registerRemotes: jest.fn(), loadRemote: jest.fn().mockResolvedValue({ manifest: {
     id: 'cashflow', displayName: 'Cashflow', contractVersion: '1.0.0', appearanceContractVersion: '1.0.0',
+    identityContractVersion: IDENTITY_CONTRACT_VERSION,
   }, Application: Cashflow }) };
 }
 
@@ -50,6 +51,7 @@ describe('production PortalHost', () => {
     const remote = runtime();
     (remote.loadRemote as jest.Mock).mockResolvedValueOnce({ manifest: {
       id: 'cashflow', displayName: 'Cashflow', contractVersion: '1.0.0', appearanceContractVersion: '1.0.0',
+      identityContractVersion: IDENTITY_CONTRACT_VERSION,
     }, Application: ({ capabilities }: ApplicationProps) => { supplied = capabilities.appearance; return <span>Appearance remote</span>; } });
     render(<PortalHost registry={{ applications: [entry] }} runtime={remote} />);
     fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
@@ -64,6 +66,28 @@ describe('production PortalHost', () => {
     expect(identity?.getSnapshot()).toMatchObject({ scheme: 'light', density: 'comfortable' });
     expect(document.querySelector('[data-ratan-scope="host"]')).toHaveAttribute('data-ratan-theme', 'light');
     unsubscribe?.();
+  });
+
+  it('owns a truthful anonymous identity capability', async () => {
+    let supplied: ApplicationProps['capabilities']['identity'];
+    const remote = runtime();
+    (remote.loadRemote as jest.Mock).mockResolvedValueOnce({
+      manifest: {
+        id: 'cashflow', displayName: 'Cashflow', contractVersion: '1.0.0',
+        appearanceContractVersion: '1.0.0', identityContractVersion: IDENTITY_CONTRACT_VERSION,
+      },
+      Application: ({ capabilities }: ApplicationProps) => {
+        supplied = capabilities.identity;
+        return <span>Identity remote</span>;
+      },
+    });
+    render(<PortalHost registry={{ applications: [entry] }} runtime={remote} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+    await screen.findByText('Identity remote');
+    expect(supplied?.getSnapshot()).toEqual({
+      state: 'anonymous', contractVersion: IDENTITY_CONTRACT_VERSION,
+    });
+    expect(Object.isFrozen(supplied?.getSnapshot())).toBe(true);
   });
 
   it('contains remote failures and forces retry registration', async () => {

@@ -2,14 +2,18 @@ import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
   APPLICATION_CONTRACT_VERSION,
   APPEARANCE_CONTRACT_VERSION,
+  IDENTITY_CONTRACT_VERSION,
   FederatedCompatibilityError,
   applicationRegistrySchema,
   appearanceSnapshotSchema,
+  identitySnapshotSchema,
   assertCompatibleApplicationModule,
   findApplicationForPath,
   type AppearanceCapability,
   type AppearanceSnapshot,
   type ApplicationRegistryEntry,
+  type IdentityCapability,
+  type IdentitySnapshot,
 } from '../src';
 
 const appearance: AppearanceSnapshot = {
@@ -48,6 +52,21 @@ describe('production platform contracts', () => {
   it('uses independent stable production versions', () => {
     expect(APPLICATION_CONTRACT_VERSION).toBe('1.0.0');
     expect(APPEARANCE_CONTRACT_VERSION).toBe('1.0.0');
+    expect(IDENTITY_CONTRACT_VERSION).toBe('1.0.0');
+  });
+
+  it('validates explicit anonymous and authenticated identity snapshots', () => {
+    const anonymous = { state: 'anonymous', contractVersion: IDENTITY_CONTRACT_VERSION } as const;
+    const authenticated = {
+      state: 'authenticated', userId: 'operator-7', permissions: ['authorization-limits:write'],
+      contractVersion: IDENTITY_CONTRACT_VERSION,
+    } as const;
+    expect(identitySnapshotSchema.parse(anonymous)).toEqual(anonymous);
+    expect(identitySnapshotSchema.parse(authenticated)).toEqual(authenticated);
+    expect(identitySnapshotSchema.safeParse({ ...authenticated, userId: '' }).success).toBe(false);
+    expect(identitySnapshotSchema.safeParse({ ...authenticated, permissions: ['write', 'write'] }).success).toBe(false);
+    expect(identitySnapshotSchema.safeParse({ ...authenticated, accessToken: 'secret' }).success).toBe(false);
+    expect(identitySnapshotSchema.safeParse({ ...anonymous, userId: 'fabricated' }).success).toBe(false);
   });
 
   it('accepts a complete appearance snapshot and rejects malformed input', () => {
@@ -68,6 +87,32 @@ describe('production platform contracts', () => {
 
   it('returns a compatible typed federated module', () => {
     expect(assertCompatibleApplicationModule(module, entry)).toBe(module);
+  });
+
+  it('negotiates identity only when the registry requests it', () => {
+    expect(assertCompatibleApplicationModule(module, entry)).toBe(module);
+    const identityEntry = {
+      ...entry,
+      capabilities: [...entry.capabilities, 'identity' as const],
+      identityContractVersion: IDENTITY_CONTRACT_VERSION,
+    };
+    const identityModule = {
+      ...module,
+      manifest: { ...module.manifest, identityContractVersion: IDENTITY_CONTRACT_VERSION },
+    };
+    expect(assertCompatibleApplicationModule(identityModule, identityEntry)).toBe(identityModule);
+    for (const [candidate, registryEntry] of [
+      [module, identityEntry],
+      [identityModule, { ...identityEntry, identityContractVersion: '2.0.0' }],
+    ] as const) {
+      try {
+        assertCompatibleApplicationModule(candidate, registryEntry);
+        throw new Error('Expected identity compatibility validation to fail');
+      } catch (error) {
+        expect(error).toBeInstanceOf(FederatedCompatibilityError);
+        expect(error).toMatchObject({ code: 'IDENTITY_CONTRACT_UNSUPPORTED' });
+      }
+    }
   });
 
   it.each([
@@ -101,5 +146,11 @@ describe('production platform contracts', () => {
     expectTypeOf<AppearanceSnapshot>().toMatchTypeOf<Readonly<AppearanceSnapshot>>();
     expectTypeOf<AppearanceCapability['getSnapshot']>().returns.toEqualTypeOf<AppearanceSnapshot>();
     expectTypeOf<AppearanceCapability['subscribe']>().parameter(0).toBeFunction();
+  });
+
+  it('types the immutable identity capability surface', () => {
+    expectTypeOf<IdentitySnapshot>().toMatchTypeOf<Readonly<IdentitySnapshot>>();
+    expectTypeOf<IdentityCapability['getSnapshot']>().returns.toEqualTypeOf<IdentitySnapshot>();
+    expectTypeOf<IdentityCapability['subscribe']>().parameter(0).toBeFunction();
   });
 });

@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import {
   APPEARANCE_CONTRACT_VERSION,
+  IDENTITY_CONTRACT_VERSION,
   type AppearanceSnapshot,
   type ApplicationProps,
   type PlatformCapabilities,
@@ -35,8 +36,24 @@ describe('production Cashflow application', () => {
   beforeEach(() => window.history.replaceState({}, '', '/cashflow'));
 
   it('publishes production identity and deterministic standalone appearance', () => {
-    expect(manifest).toMatchObject({ id: 'cashflow', contractVersion: '1.0.0', appearanceContractVersion: '1.0.0', designSystemVersion: '1.0.0' });
+    expect(manifest).toMatchObject({
+      id: 'cashflow', contractVersion: '1.0.0', appearanceContractVersion: '1.0.0',
+      identityContractVersion: IDENTITY_CONTRACT_VERSION, designSystemVersion: '1.1.0',
+    });
     expect(STANDALONE_APPEARANCE).toMatchObject({ scheme: 'dark', density: 'compact' });
+  });
+
+  it('remains read-only when the host supplies anonymous identity', () => {
+    const platform = {
+      ...capabilities(),
+      identity: {
+        getSnapshot: () => ({ state: 'anonymous' as const, contractVersion: IDENTITY_CONTRACT_VERSION }),
+        subscribe: () => () => undefined,
+      },
+    };
+    mount(platform);
+    expect(screen.queryByRole('button', { name: 'Create authorization limit' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Edit authorization limit/ })).not.toBeInTheDocument();
   });
 
   it('filters application-owned records', () => {
