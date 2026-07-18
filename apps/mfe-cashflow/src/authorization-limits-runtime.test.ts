@@ -55,7 +55,10 @@ describe('Authorization Limits runtime composition', () => {
   });
 
   it('clones and freezes the translated domain principal', () => {
-    const permissions = [AUTHORIZATION_LIMITS_PERMISSIONS.access, AUTHORIZATION_LIMITS_PERMISSIONS.initiate];
+    const permissions: string[] = [
+      AUTHORIZATION_LIMITS_PERMISSIONS.access,
+      AUTHORIZATION_LIMITS_PERMISSIONS.initiate,
+    ];
     const identity = {
       state: 'authenticated' as const,
       userId: 'maker-one',
