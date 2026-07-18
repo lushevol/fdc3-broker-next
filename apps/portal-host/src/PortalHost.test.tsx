@@ -1,5 +1,11 @@
+import { useSyncExternalStore } from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { IDENTITY_CONTRACT_VERSION, type ApplicationProps } from '@fm/platform-contracts';
+import {
+  IDENTITY_CONTRACT_VERSION,
+  type ApplicationProps,
+  type IdentityCapability,
+  type IdentitySnapshot,
+} from '@fm/platform-contracts';
 import { PortalHost } from './PortalHost';
 import { entry } from './test-fixtures';
 import type { RemoteRuntime } from './remote';
@@ -88,6 +94,45 @@ describe('production PortalHost', () => {
       state: 'anonymous', contractVersion: IDENTITY_CONTRACT_VERSION,
     });
     expect(Object.isFrozen(supplied?.getSnapshot())).toBe(true);
+  });
+
+  it('delivers an injected capability by reference and preserves live logout', async () => {
+    let current: IdentitySnapshot = {
+      state: 'authenticated', userId: 'maker-one', permissions: ['limits:write'],
+      contractVersion: IDENTITY_CONTRACT_VERSION,
+    };
+    const listeners = new Set<(snapshot: IdentitySnapshot) => void>();
+    const identity: IdentityCapability = {
+      getSnapshot: () => current,
+      subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); },
+    };
+    let supplied: IdentityCapability | undefined;
+    const remote = runtime();
+    (remote.loadRemote as jest.Mock).mockResolvedValueOnce({
+      manifest: {
+        id: 'cashflow', displayName: 'Cashflow', contractVersion: '1.0.0',
+        appearanceContractVersion: '1.0.0', identityContractVersion: IDENTITY_CONTRACT_VERSION,
+      },
+      Application: ({ capabilities }: ApplicationProps) => {
+        supplied = capabilities.identity;
+        const snapshot = useSyncExternalStore(
+          capabilities.identity!.subscribe,
+          capabilities.identity!.getSnapshot,
+          capabilities.identity!.getSnapshot,
+        );
+        return <span>Live identity {snapshot.state}</span>;
+      },
+    });
+    render(<PortalHost registry={{ applications: [entry] }} runtime={remote} identity={identity} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+    expect(await screen.findByText('Live identity authenticated')).toBeInTheDocument();
+    expect(supplied).toBe(identity);
+    act(() => {
+      current = { state: 'anonymous', contractVersion: IDENTITY_CONTRACT_VERSION };
+      listeners.forEach((listener) => listener(current));
+    });
+    expect(screen.getByText('Live identity anonymous')).toBeInTheDocument();
+    expect(supplied).toBe(identity);
   });
 
   it('contains remote failures and forces retry registration', async () => {
