@@ -81,7 +81,7 @@ Identity remains a minimal observable authorization context, not a credential bu
 
 | Gate | Result |
 | --- | --- |
-| Host tests | 16 tests passed; 95.23% statements, 83.11% branches, 93.44% functions, 96.03% lines |
+| Host tests | 19 tests passed; 95.91% statements, 92.2% branches, 93.44% functions, 96.03% lines |
 | Identity fallback | 100% statements, branches, functions, and lines |
 | Static checks | Host ESLint and strict TypeScript passed |
 | Production build | Platform contracts/SDK, design system, data grid, Cashflow, and host built in dependency order |
