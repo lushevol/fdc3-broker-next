@@ -1,9 +1,9 @@
 ## 1. Production application foundation
 
-- [ ] 1.1 Add the `@fm/mfe-cashflow` workspace, independent development/build entries, and strict React/ReactDOM federation sharing
-- [ ] 1.2 Add failing tests for manifest identity, standalone defaults, live appearance subscription, public design primitives, domain filtering, details navigation, notifications, and fresh reopen state
-- [ ] 1.3 Implement the application-owned Cashflow record workflow using only production contracts, SDK, and design-system public APIs
-- [ ] 1.4 Add scoped application styles and tests that reject document-global reset ownership
+- [x] 1.1 Add the `@fm/mfe-cashflow` workspace, independent development/build entries, and strict React/ReactDOM federation sharing
+- [x] 1.2 Add failing tests for manifest identity, standalone defaults, live appearance subscription, public design primitives, domain filtering, details navigation, notifications, and fresh reopen state
+- [x] 1.3 Implement the application-owned Cashflow record workflow using only production contracts, SDK, and design-system public APIs
+- [x] 1.4 Add scoped application styles and tests that reject document-global reset ownership
 
 ## 2. Production host foundation
 
