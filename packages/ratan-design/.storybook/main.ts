@@ -24,9 +24,6 @@ const config: StorybookConfig = {
   addons: [
     '@storybook/addon-docs',
     '@storybook/addon-onboarding',
-    {
-      name: getAbsolutePath('storybook-addon-rslib'),
-    },
   ],
   framework: {
     name: getAbsolutePath('storybook-react-rsbuild'),

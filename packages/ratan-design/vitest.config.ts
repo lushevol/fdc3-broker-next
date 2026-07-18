@@ -8,8 +8,9 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/**/*.ts'],
+      include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts', 'test/**'],
+      thresholds: { lines: 90, branches: 90, functions: 90, statements: 90 },
     },
     reporters: ['default', 'junit', 'vitest-sonar-reporter'],
     outputFile: {

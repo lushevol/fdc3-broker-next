@@ -1,46 +1,21 @@
-/**
- * Ratan Design System
- *
- * A React component library based on the SC Global Design System (GDS) specifications.
- *
- * @packageDocumentation
- */
-
-// Types
-export type {
-  ButtonProps,
-  ButtonState,
-  ButtonStatus,
-  ButtonStyle,
-  ButtonType,
-} from './Button';
-// Components
-export { Button, default as ButtonComponent } from './Button';
-export type {
-  CardImagePosition,
-  CardPadding,
-  CardProps,
-  CardSelectionType,
-  CardTrailingContent,
-  CardVariant,
-} from './Card';
-export { Card, default as CardComponent } from './Card';
-// Input components
-export type { InputProps, InputStatus, InputSize } from './Input';
-export type { PasswordInputProps } from './Input';
-export type { SearchInputProps } from './Input';
-export { Input, default as InputComponent } from './Input';
-export { PasswordInput } from './Input';
-export { SearchInput } from './Input';
-
-// Design Tokens
-export * from './tokens';
-
-// CSS Cleanup utility
-export { cleanUnusedCss } from './css-cleanup/index.js';
-export type {
-  CleanUnusedCssOptions,
-  CleanUnusedCssResult,
-  CleanupStats,
-  DomSignature,
-} from './css-cleanup/index.js';
+/** Production Ratan design foundation. */
+export { Button, type ButtonProps, type ButtonVariant } from './components/Button';
+export { StatusBadge, type StatusBadgeProps, type StatusTone } from './components/StatusBadge';
+export { TextField, type TextFieldProps } from './components/TextField';
+export {
+  DesignSystemProvider,
+  type DesignAppearance,
+  type DesignScope,
+  type DesignSystemProviderProps,
+} from './provider';
+export {
+  COLOR_TOKEN_NAMES,
+  DENSITY_TOKEN_NAMES,
+  semanticTokens,
+  validateSemanticTokens,
+  type ColorTokenName,
+  type DensityTokenName,
+  type DesignDensity,
+  type DesignScheme,
+  type SemanticTokens,
+} from './foundation/tokens';
