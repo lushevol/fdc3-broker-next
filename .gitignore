@@ -60,3 +60,5 @@ services/*/.project
 .m2/
 services/memory-service/target/
 services/memory-service/data/
+.playwright-mcp/*
+tmp/
