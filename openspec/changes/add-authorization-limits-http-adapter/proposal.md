@@ -14,6 +14,6 @@ All mutation composition is verified against a typed service port, but productio
 
 ## Impact
 
-- Affected code: `apps/mfe-cashflow` service adapter, tests, and migration documentation.
+- Affected code: `mvp/two-layer-federation/apps/mfe-cashflow` service adapter, tests, and migration documentation.
 - No host authentication contract, credential behavior, production endpoint configuration, or runtime activation.
 - No UI/design/federation changes.

@@ -23,6 +23,6 @@ None.
 
 ## Impact
 
-- Affected code: `apps/portal-host` identity fallback, `App`/`PortalHost` props, tests, and architecture documentation.
+- Affected code: `mvp/two-layer-federation/apps/portal-host` identity fallback, `App`/`PortalHost` props, tests, and architecture documentation.
 - No changes to platform contracts/SDK, Cashflow domain APIs, registry schema, authentication endpoints, HTTP credentials, or federation topology.
 - No authenticated production session is fabricated and no Authorization Limits mutation is activated.

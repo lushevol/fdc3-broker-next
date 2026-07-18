@@ -14,7 +14,7 @@ The production Cashflow application has a verified read-only Authorization Limit
 
 ## Impact
 
-- Affected code: `apps/mfe-cashflow/src` and its tests/docs only.
+- Affected code: `mvp/two-layer-federation/apps/mfe-cashflow/src` and its tests/docs only.
 - No design-system API, host contract, federation sharing, or runtime layer changes.
 - No production service calls or mutation controls are enabled by this change.
 - The next cohort can compose `@fm/ratan-design@1.1.0` controls against these ports without importing legacy Ratan code.

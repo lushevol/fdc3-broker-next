@@ -12,14 +12,14 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: 'node_modules/.bin/serve -s apps/mfe-cashflow/dist -l tcp://127.0.0.1:9201 -C -n --no-port-switching',
+      command: 'node_modules/.bin/serve -s mvp/two-layer-federation/apps/mfe-cashflow/dist -l tcp://127.0.0.1:9201 -C -n --no-port-switching',
       cwd: '../..',
       url: 'http://127.0.0.1:9201/mf-manifest.json',
       reuseExistingServer: true,
       timeout: 120_000,
     },
     {
-      command: 'node_modules/.bin/serve -s apps/portal-host/dist -l tcp://127.0.0.1:9200 -C -n --no-port-switching',
+      command: 'node_modules/.bin/serve -s mvp/two-layer-federation/apps/portal-host/dist -l tcp://127.0.0.1:9200 -C -n --no-port-switching',
       cwd: '../..',
       url: 'http://127.0.0.1:9200/registry.json',
       reuseExistingServer: true,

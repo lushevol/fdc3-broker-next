@@ -22,7 +22,7 @@ The isolated MVP proves direct Module Federation under `mvp/two-layer-federation
 
 ### Create production identities beside, not from, the POC
 
-The pilot uses `apps/portal-host` and `apps/mfe-cashflow`. The POC remains isolated evidence and cannot become an import, workspace dependency, source alias, or runtime URL. This makes accidental POC promotion detectable.
+The pilot uses `mvp/two-layer-federation/apps/portal-host` and `mvp/two-layer-federation/apps/mfe-cashflow`. They are production-identity candidates, but remain physically isolated beside the POC until the replacement runtime is approved for rollout. The `*-poc` workspaces remain separate evidence and cannot become an import, workspace dependency, source alias, or runtime URL. This makes both accidental legacy integration and accidental POC promotion detectable.
 
 ### Keep exactly two runtime layers
 
@@ -69,4 +69,3 @@ Rollback is removal of the pilot routes/scripts because no production traffic is
 - Which real Cashflow journey is small enough to migrate first while still exercising AG Grid behavior?
 - Which host capabilities must become production-ready before that cohort can receive real users?
 - What bundle-size threshold would justify controlled MUI/Emotion vendor sharing?
-

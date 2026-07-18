@@ -25,7 +25,7 @@ None.
 
 ## Impact
 
-- Adds new workspaces under `apps/portal-host` and `apps/mfe-cashflow`; it does not modify or route production traffic away from the legacy platform.
+- Adds isolated production-pilot workspaces under `mvp/two-layer-federation/apps/portal-host` and `mvp/two-layer-federation/apps/mfe-cashflow`; it does not add applications to the legacy `apps/` tree, modify the legacy applications, or route production traffic away from the legacy platform.
 - Consumes `@fm/platform-contracts`, `@fm/platform-sdk`, and `@fm/ratan-design` through their published package APIs.
 - Adds root scripts and a dedicated Playwright configuration for the production pilot.
 - Establishes the executable baseline required by the separate `productionize-two-layer-federation-delivery` DevOps/control-plane program.

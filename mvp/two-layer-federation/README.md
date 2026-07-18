@@ -1,11 +1,13 @@
 # Two-layer Module Federation MVP
 
-This directory is the ownership boundary for the greenfield `Host -> Application` proof of concept. It is isolated from the existing Single-SPA/SystemJS production platform.
+This directory is the ownership boundary for the greenfield `Host -> Application` proof of concept and the isolated production pilot derived from it. Both are isolated from the existing Single-SPA/SystemJS production platform.
 
 ## Structure
 
 - `apps/portal-host-poc` — runtime registry, workspace shell, capability provider, and federated application loader
 - `apps/mfe-cashflow-poc` — independently built Cashflow application remote
+- `apps/portal-host` — production-identity host pilot; not part of the legacy `apps/` runtime tree
+- `apps/mfe-cashflow` — production-identity Cashflow pilot loaded directly by `portal-host`
 - `packages/platform-contracts-poc` — runtime-validated host/application contracts
 - `packages/platform-sdk-poc` — typed application client for host capabilities
 - `packages/ratan-sdk-poc` — shared Ratan domain functions
@@ -24,7 +26,7 @@ npm run build:federation-mvp
 npm run test:e2e:federation-mvp
 ```
 
-The workspace package names intentionally retain the `-poc` suffix so moving the code does not change its public package identities.
+The proof-of-concept workspace package names intentionally retain the `-poc` suffix. The production-pilot applications retain their non-POC package identities while remaining physically isolated in this MVP boundary.
 
 ## Planning
 

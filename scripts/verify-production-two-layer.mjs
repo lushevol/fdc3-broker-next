@@ -1,7 +1,10 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
-const roots = ['apps/portal-host', 'apps/mfe-cashflow'];
+const roots = [
+  'mvp/two-layer-federation/apps/portal-host',
+  'mvp/two-layer-federation/apps/mfe-cashflow',
+];
 const forbidden = [
   /-poc\b/i,
   /single-spa/i,
@@ -56,7 +59,10 @@ for (const root of roots) {
   }
 }
 
-const applicationCss = await readFile('apps/mfe-cashflow/src/styles.css', 'utf8');
+const applicationCss = await readFile(
+  'mvp/two-layer-federation/apps/mfe-cashflow/src/styles.css',
+  'utf8',
+);
 if (/(^|[}\s,])(html|body|:root|\*)\s*[{,]/m.test(applicationCss)) {
   throw new Error('Cashflow application CSS owns a document-global selector');
 }
