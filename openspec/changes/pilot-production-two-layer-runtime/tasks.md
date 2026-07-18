@@ -21,7 +21,7 @@
 
 ## 4. Browser acceptance and evidence
 
-- [ ] 4.1 Add dedicated production-pilot Playwright servers and configuration for independently built host and remote artifacts
-- [ ] 4.2 Add browser journeys for registry bootstrap, remote open, Cashflow filtering/details, live theme/density propagation, nested refresh, close/reopen state, and remote failure containment
-- [ ] 4.3 Add dependency-ordered root test, lint, build, conformance, and end-to-end scripts
-- [ ] 4.4 Run all gates, strict OpenSpec validation, and record build sizes and acceptance evidence for the first legacy domain/grid cohort
+- [x] 4.1 Add dedicated production-pilot Playwright servers and configuration for independently built host and remote artifacts
+- [x] 4.2 Add browser journeys for registry bootstrap, remote open, Cashflow filtering/details, live theme/density propagation, nested refresh, close/reopen state, and remote failure containment
+- [x] 4.3 Add dependency-ordered root test, lint, build, conformance, and end-to-end scripts
+- [x] 4.4 Run all gates, strict OpenSpec validation, and record build sizes and acceptance evidence for the first legacy domain/grid cohort
