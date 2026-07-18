@@ -29,5 +29,5 @@
 
 - [x] 5.1 Add an automated packed-consumer fixture that verifies JavaScript, declarations, CSS exports, documented imports, and blocked internal subpaths
 - [x] 5.2 Add root scripts for production foundation test, build, lint, dependency scan, and packed-consumer verification in dependency order
-- [ ] 5.3 Run all production package tests with required coverage, lint, type declarations, deterministic builds, forbidden-dependency scans, packed-consumer verification, and strict OpenSpec validation
-- [ ] 5.4 Record build sizes, compatibility guarantees, known deferred cohorts, and acceptance evidence for the host/application pilot
+- [x] 5.3 Run all production package tests with required coverage, lint, type declarations, deterministic builds, forbidden-dependency scans, packed-consumer verification, and strict OpenSpec validation
+- [x] 5.4 Record build sizes, compatibility guarantees, known deferred cohorts, and acceptance evidence for the host/application pilot
