@@ -30,6 +30,8 @@ function client(): PlatformClient {
     closeCurrentWorkspace: jest.fn(),
     getAppearance: jest.fn() as PlatformClient['getAppearance'],
     subscribeToAppearance: jest.fn(),
+    getIdentity: jest.fn(),
+    subscribeToIdentity: jest.fn(),
   };
 }
 

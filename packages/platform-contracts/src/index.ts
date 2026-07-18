@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 export const APPLICATION_CONTRACT_VERSION = '1.0.0' as const;
 export const APPEARANCE_CONTRACT_VERSION = '1.0.0' as const;
+export const IDENTITY_CONTRACT_VERSION = '1.0.0' as const;
 
 export const appearanceSnapshotSchema = z.object({
   scheme: z.enum(['light', 'dark']),
@@ -13,12 +14,32 @@ export const appearanceSnapshotSchema = z.object({
   contractVersion: z.literal(APPEARANCE_CONTRACT_VERSION),
 }).strict();
 
+const identityPermissionSchema = z.string().trim().min(1);
+
+export const identitySnapshotSchema = z.discriminatedUnion('state', [
+  z.object({
+    state: z.literal('anonymous'),
+    contractVersion: z.literal(IDENTITY_CONTRACT_VERSION),
+  }).strict(),
+  z.object({
+    state: z.literal('authenticated'),
+    userId: z.string().trim().min(1),
+    permissions: z.array(identityPermissionSchema).superRefine((permissions, context) => {
+      if (new Set(permissions).size !== permissions.length) {
+        context.addIssue({ code: z.ZodIssueCode.custom, message: 'Permissions must be unique' });
+      }
+    }),
+    contractVersion: z.literal(IDENTITY_CONTRACT_VERSION),
+  }).strict(),
+]);
+
 export const platformCapabilitySchema = z.enum([
   'navigation',
   'notifications',
   'telemetry',
   'workspace',
   'appearance',
+  'identity',
 ]);
 
 const basePathSchema = z
@@ -37,6 +58,7 @@ export const applicationRegistryEntrySchema = z.object({
   basePath: basePathSchema,
   contractVersion: z.string().min(1),
   appearanceContractVersion: z.string().min(1),
+  identityContractVersion: z.string().min(1).optional(),
   capabilities: z.array(platformCapabilitySchema),
 }).strict();
 
@@ -60,6 +82,13 @@ export const applicationRegistrySchema = z
 
 export type PlatformCapabilityName = z.infer<typeof platformCapabilitySchema>;
 export type AppearanceSnapshot = Readonly<z.infer<typeof appearanceSnapshotSchema>>;
+type ParsedIdentitySnapshot = z.infer<typeof identitySnapshotSchema>;
+export type IdentitySnapshot =
+  | Readonly<Extract<ParsedIdentitySnapshot, { state: 'anonymous' }>>
+  | Readonly<
+      Omit<Extract<ParsedIdentitySnapshot, { state: 'authenticated' }>, 'permissions'>
+      & { readonly permissions: readonly string[] }
+    >;
 export type ApplicationRegistryEntry = z.infer<typeof applicationRegistryEntrySchema>;
 export type ApplicationRegistry = z.infer<typeof applicationRegistrySchema>;
 
@@ -84,12 +113,18 @@ export interface AppearanceCapability {
   subscribe(listener: (snapshot: AppearanceSnapshot) => void): () => void;
 }
 
+export interface IdentityCapability {
+  getSnapshot(): IdentitySnapshot;
+  subscribe(listener: (snapshot: IdentitySnapshot) => void): () => void;
+}
+
 export interface PlatformCapabilities {
   readonly navigation: NavigationCapability;
   readonly notifications: NotificationCapability;
   readonly telemetry: TelemetryCapability;
   readonly workspace: WorkspaceCapability;
   readonly appearance: AppearanceCapability;
+  readonly identity?: IdentityCapability;
 }
 
 export interface ApplicationProps {
@@ -103,6 +138,7 @@ export interface ApplicationManifest {
   readonly displayName: string;
   readonly contractVersion: string;
   readonly appearanceContractVersion: string;
+  readonly identityContractVersion?: string;
   readonly designSystemVersion?: string;
 }
 
@@ -117,7 +153,8 @@ export type FederatedCompatibilityCode =
   | 'MANIFEST_MISSING'
   | 'APPLICATION_ID_MISMATCH'
   | 'APPLICATION_CONTRACT_UNSUPPORTED'
-  | 'APPEARANCE_CONTRACT_UNSUPPORTED';
+  | 'APPEARANCE_CONTRACT_UNSUPPORTED'
+  | 'IDENTITY_CONTRACT_UNSUPPORTED';
 
 export class FederatedCompatibilityError extends Error {
   readonly name = 'FederatedCompatibilityError';
@@ -191,6 +228,23 @@ export function assertCompatibleApplicationModule(
         supported: APPEARANCE_CONTRACT_VERSION,
         manifest: manifest.appearanceContractVersion,
         registry: registryEntry.appearanceContractVersion,
+      },
+    );
+  }
+  if (
+    registryEntry.capabilities.includes('identity')
+    && (
+      manifest.identityContractVersion !== IDENTITY_CONTRACT_VERSION
+      || registryEntry.identityContractVersion !== IDENTITY_CONTRACT_VERSION
+    )
+  ) {
+    return compatibilityError(
+      'IDENTITY_CONTRACT_UNSUPPORTED',
+      `Unsupported identity contract version: ${manifest.identityContractVersion ?? registryEntry.identityContractVersion ?? 'missing'}`,
+      {
+        supported: IDENTITY_CONTRACT_VERSION,
+        manifest: manifest.identityContractVersion,
+        registry: registryEntry.identityContractVersion,
       },
     );
   }

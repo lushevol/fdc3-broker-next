@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   findApplicationForPath,
+  IDENTITY_CONTRACT_VERSION,
   type AppearanceCapability,
   type AppearanceSnapshot,
   type ApplicationRegistry,
   type ApplicationRegistryEntry,
+  type IdentityCapability,
   type PlatformCapabilities,
 } from '@fm/platform-contracts';
 import { Button, DesignSystemProvider } from '@fm/ratan-design';
@@ -35,6 +37,16 @@ export function PortalHost({ registry, runtime = moduleFederationRuntime }: Prop
     getSnapshot: () => appearanceRef.current,
     subscribe(listener) { listeners.current.add(listener); return () => listeners.current.delete(listener); },
   }), []);
+  const identityCapability = useMemo<IdentityCapability>(() => {
+    const snapshot = Object.freeze({
+      state: 'anonymous' as const,
+      contractVersion: IDENTITY_CONTRACT_VERSION,
+    });
+    return Object.freeze({
+      getSnapshot: () => snapshot,
+      subscribe: () => () => undefined,
+    });
+  }, []);
   useEffect(() => { persistAppearance(window.localStorage, appearance); listeners.current.forEach((listener) => listener(appearance)); }, [appearance]);
 
   const open = useCallback((entry: ApplicationRegistryEntry, updatePath = true) => {
@@ -68,7 +80,8 @@ export function PortalHost({ registry, runtime = moduleFederationRuntime }: Prop
     navigation: { navigate }, notifications: { show: setNotification },
     telemetry: { track: (event, data) => console.info('platform-event', { application: active.entry.id, event, data }) },
     workspace: { closeCurrent: () => close(active.entry.id) }, appearance: appearanceCapability,
-  }) : null, [active, appearanceCapability, close]);
+    identity: identityCapability,
+  }) : null, [active, appearanceCapability, close, identityCapability]);
 
   return (
     <DesignSystemProvider appearance={{ scheme: appearance.scheme, density: appearance.density, direction: appearance.direction }} scope="host">

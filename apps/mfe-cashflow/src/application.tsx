@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import {
   APPLICATION_CONTRACT_VERSION,
   APPEARANCE_CONTRACT_VERSION,
+  IDENTITY_CONTRACT_VERSION,
   type ApplicationManifest,
   type ApplicationProps,
 } from '@fm/platform-contracts';
@@ -23,7 +24,8 @@ export const manifest: ApplicationManifest = {
   displayName: 'Cashflow',
   contractVersion: APPLICATION_CONTRACT_VERSION,
   appearanceContractVersion: APPEARANCE_CONTRACT_VERSION,
-  designSystemVersion: '1.0.0',
+  identityContractVersion: IDENTITY_CONTRACT_VERSION,
+  designSystemVersion: '1.1.0',
 };
 
 export interface CashflowRecord {

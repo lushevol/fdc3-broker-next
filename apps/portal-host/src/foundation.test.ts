@@ -1,6 +1,7 @@
 import {
   APPLICATION_CONTRACT_VERSION,
   APPEARANCE_CONTRACT_VERSION,
+  IDENTITY_CONTRACT_VERSION,
 } from '@fm/platform-contracts';
 import { APPEARANCE_STORAGE_KEY, DEFAULT_APPEARANCE, persistAppearance, readStoredAppearance } from './appearance';
 import { loadApplicationRegistry } from './registry';
@@ -30,6 +31,7 @@ describe('production host foundation', () => {
       loadRemote: jest.fn().mockResolvedValue({ manifest: {
         id: 'cashflow', displayName: 'Cashflow', contractVersion: APPLICATION_CONTRACT_VERSION,
         appearanceContractVersion: APPEARANCE_CONTRACT_VERSION,
+        identityContractVersion: IDENTITY_CONTRACT_VERSION,
       }, Application }),
     };
     expect(remoteRequestFromEntry(entry)).toBe('mfe_cashflow/application');

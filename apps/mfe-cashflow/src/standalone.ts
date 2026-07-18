@@ -1,9 +1,10 @@
 import {
   APPEARANCE_CONTRACT_VERSION,
+  IDENTITY_CONTRACT_VERSION,
   type AppearanceSnapshot,
   type PlatformCapabilities,
 } from '@fm/platform-contracts';
-import { createAppearanceController } from '@fm/platform-sdk';
+import { createAppearanceController, createIdentityController } from '@fm/platform-sdk';
 
 export const STANDALONE_APPEARANCE: AppearanceSnapshot = {
   scheme: 'dark',
@@ -15,6 +16,10 @@ export const STANDALONE_APPEARANCE: AppearanceSnapshot = {
 };
 
 const appearanceController = createAppearanceController(STANDALONE_APPEARANCE);
+const identityController = createIdentityController({
+  state: 'anonymous',
+  contractVersion: IDENTITY_CONTRACT_VERSION,
+});
 
 export const standaloneCapabilities: PlatformCapabilities = {
   navigation: {
@@ -27,4 +32,5 @@ export const standaloneCapabilities: PlatformCapabilities = {
   telemetry: { track: (event, data) => console.info('cashflow-event', { event, data }) },
   workspace: { closeCurrent: () => console.info('close cashflow preview') },
   appearance: appearanceController.capability,
+  identity: identityController.capability,
 };

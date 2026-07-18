@@ -19,6 +19,7 @@ function client(): PlatformClient {
   return {
     navigate: jest.fn(), notify: jest.fn(), track: jest.fn(), closeCurrentWorkspace: jest.fn(),
     getAppearance: jest.fn() as PlatformClient['getAppearance'], subscribeToAppearance: jest.fn(),
+    getIdentity: jest.fn(), subscribeToIdentity: jest.fn(),
   };
 }
 

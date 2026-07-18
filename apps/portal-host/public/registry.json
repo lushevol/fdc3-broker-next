@@ -8,6 +8,7 @@
     "basePath": "/cashflow",
     "contractVersion": "1.0.0",
     "appearanceContractVersion": "1.0.0",
-    "capabilities": ["navigation", "notifications", "telemetry", "workspace", "appearance"]
+    "identityContractVersion": "1.0.0",
+    "capabilities": ["navigation", "notifications", "telemetry", "workspace", "appearance", "identity"]
   }]
 }
