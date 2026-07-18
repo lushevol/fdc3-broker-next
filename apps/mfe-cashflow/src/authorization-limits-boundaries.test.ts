@@ -59,4 +59,36 @@ describe('Authorization Limits policy and service boundaries', () => {
       expect(source).toContain(component);
     }
   });
+
+  it('keeps runtime composition application-owned and transport-neutral', () => {
+    const runtime = readFileSync(resolve(process.cwd(), 'src/authorization-limits-runtime.ts'), 'utf8');
+    const application = readFileSync(resolve(process.cwd(), 'src/application.tsx'), 'utf8');
+    const forbiddenRuntimeReferences = [
+      'fetch(',
+      'XMLHttpRequest',
+      'axios',
+      'import.meta.env',
+      'process.env',
+      'localStorage',
+      'authorization-limits-http-service',
+      '@module-federation/',
+    ];
+    expect(forbiddenRuntimeReferences.filter((reference) => runtime.includes(reference))).toEqual([]);
+    expect(application).not.toContain('authorization-limits-http-service');
+    expect(application).toMatch(/export const Application = createCashflowApplication\(\);/);
+  });
+
+  it('keeps Authorization Limits domain types out of the host and platform packages', () => {
+    const sources = [
+      resolve(process.cwd(), '../portal-host/src'),
+      resolve(process.cwd(), '../../packages/platform-contracts/src'),
+      resolve(process.cwd(), '../../packages/platform-sdk/src'),
+    ].flatMap((directory) => [
+      resolve(directory, 'index.ts'),
+      resolve(directory, 'PortalHost.tsx'),
+    ]).filter((file) => {
+      try { readFileSync(file); return true; } catch { return false; }
+    }).map((file) => readFileSync(file, 'utf8')).join('\n');
+    expect(sources).not.toMatch(/AuthorizationLimits|authorization-limits|profileLimitation/);
+  });
 });

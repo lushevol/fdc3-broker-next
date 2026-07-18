@@ -57,12 +57,12 @@ describe('production Cashflow application', () => {
   });
 
   it('remains read-only when the host supplies anonymous identity', () => {
+    const identity = createIdentityController({
+      state: 'anonymous', contractVersion: IDENTITY_CONTRACT_VERSION,
+    });
     const platform = {
       ...capabilities(),
-      identity: {
-        getSnapshot: () => ({ state: 'anonymous' as const, contractVersion: IDENTITY_CONTRACT_VERSION }),
-        subscribe: () => () => undefined,
-      },
+      identity: identity.capability,
     };
     mount(platform);
     expect(screen.queryByRole('button', { name: 'Create authorization limit' })).not.toBeInTheDocument();

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import {
   APPLICATION_CONTRACT_VERSION,
   APPEARANCE_CONTRACT_VERSION,
@@ -18,6 +18,8 @@ import '@fm/ratan-design/styles.css';
 import '@fm/ratan-data-grid/styles.css';
 import './styles.css';
 import { AuthorizationLimits } from './AuthorizationLimits';
+import { composeAuthorizationLimitsRuntime } from './authorization-limits-runtime';
+import type { AuthorizationLimitsService } from './authorization-limits-service';
 
 export const manifest: ApplicationManifest = {
   id: 'cashflow',
@@ -67,32 +69,51 @@ function useBrowserPath() {
   return path;
 }
 
-export function Application({ instanceId, basePath, capabilities }: ApplicationProps) {
-  const client = useMemo(() => createPlatformClient(capabilities), [capabilities]);
-  const appearance = useSyncExternalStore(
-    client.subscribeToAppearance,
-    client.getAppearance,
-    client.getAppearance,
-  );
-  const path = useBrowserPath();
-  const detailPrefix = `${basePath}/details/`;
-  const detailId = path.startsWith(detailPrefix)
-    ? decodeURIComponent(path.slice(detailPrefix.length))
-    : null;
-  const detail = detailId ? records.find((record) => record.id === detailId) : undefined;
-  const [query, setQuery] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const filtered = useMemo(() => filterRecords(query), [query]);
-  const selected = records.find((record) => record.id === selectedId);
+export interface CashflowRuntimeDependencies {
+  readonly authorizationLimitsService?: AuthorizationLimitsService;
+}
 
-  useEffect(() => {
-    if (detail) client.track('cashflow.details.opened', { id: detail.id });
-  }, [client, detail]);
+const unsubscribeIdentity = () => undefined;
 
-  const isAuthorizationLimits = path === `${basePath}/authorization-limits`
-    || path.startsWith(`${basePath}/authorization-limits/`);
+export function createCashflowApplication(dependencies: CashflowRuntimeDependencies = {}) {
+  const runtimeDependencies = Object.freeze({ ...dependencies });
 
-  return (
+  function CashflowApplication({ instanceId, basePath, capabilities }: ApplicationProps) {
+    const client = useMemo(() => createPlatformClient(capabilities), [capabilities]);
+    const appearance = useSyncExternalStore(
+      client.subscribeToAppearance,
+      client.getAppearance,
+      client.getAppearance,
+    );
+    const subscribeToIdentity = useCallback(
+      (listener: () => void) => client.subscribeToIdentity(listener) ?? unsubscribeIdentity,
+      [client],
+    );
+    const getIdentity = useCallback(() => client.getIdentity(), [client]);
+    const identity = useSyncExternalStore(subscribeToIdentity, getIdentity, getIdentity);
+    const authorizationLimitsRuntime = useMemo(
+      () => composeAuthorizationLimitsRuntime(identity, runtimeDependencies.authorizationLimitsService),
+      [identity],
+    );
+    const path = useBrowserPath();
+    const detailPrefix = `${basePath}/details/`;
+    const detailId = path.startsWith(detailPrefix)
+      ? decodeURIComponent(path.slice(detailPrefix.length))
+      : null;
+    const detail = detailId ? records.find((record) => record.id === detailId) : undefined;
+    const [query, setQuery] = useState('');
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const filtered = useMemo(() => filterRecords(query), [query]);
+    const selected = records.find((record) => record.id === selectedId);
+
+    useEffect(() => {
+      if (detail) client.track('cashflow.details.opened', { id: detail.id });
+    }, [client, detail]);
+
+    const isAuthorizationLimits = path === `${basePath}/authorization-limits`
+      || path.startsWith(`${basePath}/authorization-limits/`);
+
+    return (
     <DesignSystemProvider
       appearance={{
         scheme: appearance.scheme,
@@ -104,7 +125,13 @@ export function Application({ instanceId, basePath, capabilities }: ApplicationP
       {isAuthorizationLimits ? (
         <article className="cashflow-app" data-instance-id={instanceId}>
           <Button variant="ghost" onClick={() => client.navigate(basePath)}>Back to Cashflow</Button>
-          <AuthorizationLimits basePath={basePath} path={path} client={client} />
+          <AuthorizationLimits
+            basePath={basePath}
+            path={path}
+            client={client}
+            repository={authorizationLimitsRuntime.repository}
+            mutation={authorizationLimitsRuntime.mutation}
+          />
         </article>
       ) : detailId ? (
         <article className="cashflow-app cashflow-details" data-instance-id={instanceId}>
@@ -177,7 +204,13 @@ export function Application({ instanceId, basePath, capabilities }: ApplicationP
         </article>
       )}
     </DesignSystemProvider>
-  );
+    );
+  }
+
+  CashflowApplication.displayName = 'CashflowApplication';
+  return CashflowApplication;
 }
+
+export const Application = createCashflowApplication();
 
 export default { manifest, Application };

@@ -78,6 +78,11 @@ export function AuthorizationLimits({
   );
 
   useEffect(() => {
+    setEditor(null);
+    setTransition(null);
+  }, [mutation]);
+
+  useEffect(() => {
     let active = true;
     setLoading(true);
     setError(null);
