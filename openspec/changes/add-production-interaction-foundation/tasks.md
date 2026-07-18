@@ -5,15 +5,15 @@
 
 ## 2. Accessible overlay interactions
 
-- [ ] 2.1 Add failing Dialog tests for title/description/actions, width, modal role, close button, Escape/backdrop dismissal, non-dismissible state, and focus restoration
-- [ ] 2.2 Implement the compositional Dialog API with scoped MUI adapter styling and no global overlay state
-- [ ] 2.3 Add failing ConfirmationDialog tests for default/danger tones, confirm/cancel callbacks, disabled/loading behavior, repeat prevention, and accessible progress copy
-- [ ] 2.4 Implement ConfirmationDialog as a bounded Dialog composition with application-owned lifecycle and authorization
+- [x] 2.1 Add failing Dialog tests for title/description/actions, width, modal role, close button, Escape/backdrop dismissal, non-dismissible state, and focus restoration
+- [x] 2.2 Implement the compositional Dialog API with scoped MUI adapter styling and no global overlay state
+- [x] 2.3 Add failing ConfirmationDialog tests for default/danger tones, confirm/cancel callbacks, disabled/loading behavior, repeat prevention, and accessible progress copy
+- [x] 2.4 Implement ConfirmationDialog as a bounded Dialog composition with application-owned lifecycle and authorization
 
 ## 3. Local semantic feedback
 
-- [ ] 3.1 Add failing InlineAlert tests for info/success/warning/error semantics, optional title, message, labeled action, and isolated rendering
-- [ ] 3.2 Implement InlineAlert without global queues, portals, event buses, or request-state ownership
+- [x] 3.1 Add failing InlineAlert tests for info/success/warning/error semantics, optional title, message, labeled action, and isolated rendering
+- [x] 3.2 Implement InlineAlert without global queues, portals, event buses, or request-state ownership
 
 ## 4. Additive release and documentation
 
