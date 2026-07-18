@@ -1,9 +1,9 @@
 ## 1. Production contract packages
 
-- [ ] 1.1 Add failing `@fm/platform-contracts` tests for package identity, snapshot parsing, registry validation, typed compatibility success, and stable incompatibility failures
-- [ ] 1.2 Implement the production application/appearance schemas, capability types, compatibility result/error API, package exports, build, and coverage configuration
-- [ ] 1.3 Add failing `@fm/platform-sdk` tests for capability delegation, standalone controller updates, unsubscription, invalid snapshot rejection, and immutable reads
-- [ ] 1.4 Implement the production platform client and validated standalone appearance controller with package exports and build configuration
+- [x] 1.1 Add failing `@fm/platform-contracts` tests for package identity, snapshot parsing, registry validation, typed compatibility success, and stable incompatibility failures
+- [x] 1.2 Implement the production application/appearance schemas, capability types, compatibility result/error API, package exports, build, and coverage configuration
+- [x] 1.3 Add failing `@fm/platform-sdk` tests for capability delegation, standalone controller updates, unsubscription, invalid snapshot rejection, and immutable reads
+- [x] 1.4 Implement the production platform client and validated standalone appearance controller with package exports and build configuration
 
 ## 2. Production design tokens
 
