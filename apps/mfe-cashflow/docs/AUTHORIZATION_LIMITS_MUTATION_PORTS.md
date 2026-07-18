@@ -56,7 +56,7 @@ Before create/edit/status UI is enabled:
 1. Approve the identity/entitlement capability and concrete service transport.
 2. Verify backend request/response fixtures for every operation and version conflict.
 3. Inject the principal and service at the Cashflow application boundary; do not use module globals.
-4. Compose `@fm/ratan-design@1.1.0` dialogs, NumberField, ConfirmationDialog, and InlineAlert with application-owned request state.
+4. Compose `@fm/ratan-design@1.1.0` interactions with application-owned request state. Create/edit now satisfies this behind an omitted-by-default capability; delete and pending transitions remain outstanding.
 5. Test loading repeat prevention, local error feedback, refresh/reconciliation, self-verification, and every action matrix row.
 6. Retain a cohort flag and legacy route fallback until browser parity and production delivery gates pass.
 
@@ -72,4 +72,4 @@ Before create/edit/status UI is enabled:
 | Production artifacts | Cashflow remains 1,911.1 KB / 505.0 KB gzip; host remains 529.4 KB / 158.3 KB gzip because the new ports are not imported by runtime composition |
 | OpenSpec | `define-authorization-limit-mutation-ports` passed strict validation |
 
-The cohort does not add a principal or service prop to `AuthorizationLimits`, expose an action control, or change fixture behavior. Mutation UI remains blocked on the six entry criteria above.
+The later [create/edit cohort](AUTHORIZATION_LIMITS_CREATE_EDIT_ACCEPTANCE.md) adds one coherent optional capability and behavior-tested composition, but the current production bootstrap still supplies neither principal nor service. Runtime mutation activation remains blocked on the criteria above.

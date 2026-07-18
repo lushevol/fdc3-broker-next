@@ -71,6 +71,7 @@ test.describe('production two-layer pilot', () => {
     await page.getByRole('button', { name: 'Open Cashflow' }).click();
     await page.getByRole('button', { name: 'Authorization Limits' }).click();
     await expect(page).toHaveURL(/\/cashflow\/authorization-limits$/);
+    await expect(page.getByRole('button', { name: 'Create Authorization Limit' })).toHaveCount(0);
     const gridRegion = page.getByRole('region', { name: 'Authorization Limits' });
     await expect(gridRegion.getByRole('treegrid')).toBeVisible();
     await expect(gridRegion.getByRole('row')).toHaveCount(6);
@@ -90,6 +91,7 @@ test.describe('production two-layer pilot', () => {
     await expect(page).toHaveURL(/\/cashflow\/authorization-limits\/details\/LIM-1009$/);
     await expect(page.getByText('$750,000.00')).toBeVisible();
     await expect(page.getByText(/remain in the legacy workflow/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Edit Authorization Limit' })).toHaveCount(0);
 
     await page.getByRole('button', { name: 'Back to Authorization Limits' }).click();
     const keyboardCell = page.getByRole('region', { name: 'Authorization Limits' }).getByRole('gridcell', { name: 'GLOBAL-MAKER' });

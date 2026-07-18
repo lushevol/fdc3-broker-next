@@ -11,6 +11,6 @@
 
 ## 3. Documentation and verification
 
-- [ ] 3.1 Document the opt-in bootstrap contract, rollback-by-omission, accepted behavior, and deferred delete/transition cohorts
-- [ ] 3.2 Run focused/full Cashflow coverage, lint/build, design/package/pilot regression, runtime boundaries, browser read-only regression, and strict OpenSpec validation
-- [ ] 3.3 Record acceptance evidence and concrete adapter/transition entry criteria
+- [x] 3.1 Document the opt-in bootstrap contract, rollback-by-omission, accepted behavior, and deferred delete/transition cohorts
+- [x] 3.2 Run focused/full Cashflow coverage, lint/build, design/package/pilot regression, runtime boundaries, browser read-only regression, and strict OpenSpec validation
+- [x] 3.3 Record acceptance evidence and concrete adapter/transition entry criteria

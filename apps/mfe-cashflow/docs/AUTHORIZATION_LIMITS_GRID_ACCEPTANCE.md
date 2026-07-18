@@ -48,7 +48,7 @@ This size is accepted only for the bounded cohort. Before adding another grid-he
 
 ## Explicitly deferred
 
-- Create, edit, delete, approve add/edit/delete, and reject add/edit/delete.
+- Runtime activation of create/edit, plus delete, approve add/edit/delete, and reject add/edit/delete. Create/edit composition is now behavior-tested behind an omitted-by-default capability; see [create/edit acceptance](AUTHORIZATION_LIMITS_CREATE_EDIT_ACCEPTANCE.md).
 - Ant modal/message/form replacement for those mutation workflows.
 - Production Authorization Limits service integration, authenticated principal delivery, audit submission, and concrete optimistic/concurrent update behavior. Pure entitlement and service ports are now specified and verified in [mutation ports](AUTHORIZATION_LIMITS_MUTATION_PORTS.md), but are not wired to the UI.
 - User column preferences, export, enterprise filters, sidebars, ranges, or other AG Grid Enterprise features.
