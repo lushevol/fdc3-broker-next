@@ -2,7 +2,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 describe('Authorization Limits policy and service boundaries', () => {
-  it.each(['authorization-limits-policy.ts', 'authorization-limits-service.ts'])(
+  it.each([
+    'authorization-limits-policy.ts',
+    'authorization-limits-service.ts',
+    'authorization-limits-http-service.ts',
+  ])(
     'keeps %s free of UI, transport, federation, and legacy globals',
     (file) => {
       const source = readFileSync(resolve(process.cwd(), 'src', file), 'utf8');
