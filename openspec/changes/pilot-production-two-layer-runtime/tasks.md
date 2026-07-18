@@ -7,11 +7,11 @@
 
 ## 2. Production host foundation
 
-- [ ] 2.1 Add the `@fm/portal-host` workspace, public registry fixture, independent build entry, and strict React/ReactDOM federation sharing
-- [ ] 2.2 Add failing tests for validated registry bootstrap, deterministic appearance persistence, launcher/workspace routing, capability delegation, nested refresh, and retryable failures
-- [ ] 2.3 Implement direct remote registration/loading with production compatibility validation before render
-- [ ] 2.4 Implement host-owned appearance, navigation, notification, telemetry, workspace lifecycle, and contained error boundaries
-- [ ] 2.5 Implement host shell composition with its own design provider and host-owned document reset
+- [x] 2.1 Add the `@fm/portal-host` workspace, public registry fixture, independent build entry, and strict React/ReactDOM federation sharing
+- [x] 2.2 Add failing tests for validated registry bootstrap, deterministic appearance persistence, launcher/workspace routing, capability delegation, nested refresh, and retryable failures
+- [x] 2.3 Implement direct remote registration/loading with production compatibility validation before render
+- [x] 2.4 Implement host-owned appearance, navigation, notification, telemetry, workspace lifecycle, and contained error boundaries
+- [x] 2.5 Implement host shell composition with its own design provider and host-owned document reset
 
 ## 3. Architecture conformance
 
