@@ -6,9 +6,12 @@ import {
   type ApplicationProps,
   type PlatformCapabilities,
 } from '@fm/platform-contracts';
-import { createAppearanceController } from '@fm/platform-sdk';
-import { Application, filterRecords, manifest } from './application';
+import { createAppearanceController, createIdentityController } from '@fm/platform-sdk';
+import { Application, createCashflowApplication, filterRecords, manifest } from './application';
 import { STANDALONE_APPEARANCE, standaloneCapabilities } from './standalone';
+import { AUTHORIZATION_LIMITS_PERMISSIONS } from './authorization-limits-policy';
+import { authorizationLimitFixtures } from './authorization-limits-repository';
+import type { AuthorizationLimitsService } from './authorization-limits-service';
 
 jest.mock('@fm/ratan-data-grid', () => ({
   RatanDataGrid: () => <div data-testid="mock-data-grid" />,
@@ -30,6 +33,16 @@ function capabilities(controller = createAppearanceController(appearance)): Plat
 function mount(platform = capabilities()) {
   const props: ApplicationProps = { instanceId: 'cashflow-1', basePath: '/cashflow', capabilities: platform };
   return { ...render(<Application {...props} />), platform };
+}
+
+function domainService(): AuthorizationLimitsService {
+  const record = authorizationLimitFixtures[0];
+  return {
+    list: jest.fn().mockResolvedValue(authorizationLimitFixtures),
+    create: jest.fn().mockResolvedValue(record), edit: jest.fn().mockResolvedValue(record),
+    confirm: jest.fn().mockResolvedValue(record), reject: jest.fn().mockResolvedValue(record),
+    remove: jest.fn().mockResolvedValue(record),
+  };
 }
 
 describe('production Cashflow application', () => {
@@ -54,6 +67,51 @@ describe('production Cashflow application', () => {
     mount(platform);
     expect(screen.queryByRole('button', { name: 'Create authorization limit' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Edit authorization limit/ })).not.toBeInTheDocument();
+  });
+
+  it('keeps the default export read-only for authenticated identity without a service', async () => {
+    window.history.replaceState({}, '', '/cashflow/authorization-limits');
+    const identity = createIdentityController({
+      state: 'authenticated', userId: 'maker-one',
+      permissions: [AUTHORIZATION_LIMITS_PERMISSIONS.access, AUTHORIZATION_LIMITS_PERMISSIONS.initiate],
+      contractVersion: IDENTITY_CONTRACT_VERSION,
+    });
+    mount({ ...capabilities(), identity: identity.capability });
+    await screen.findByTestId('mock-data-grid');
+    expect(screen.queryByRole('button', { name: 'Create Authorization Limit' })).not.toBeInTheDocument();
+  });
+
+  it('keeps an injected service read-only for anonymous identity', async () => {
+    window.history.replaceState({}, '', '/cashflow/authorization-limits');
+    const service = domainService();
+    const FactoryApplication = createCashflowApplication({ authorizationLimitsService: service });
+    const platform = capabilities();
+    render(<FactoryApplication instanceId="cashflow-service" basePath="/cashflow" capabilities={{
+      ...platform,
+      identity: createIdentityController({ state: 'anonymous', contractVersion: IDENTITY_CONTRACT_VERSION }).capability,
+    }} />);
+    await screen.findByTestId('mock-data-grid');
+    expect(service.list).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('button', { name: 'Create Authorization Limit' })).not.toBeInTheDocument();
+  });
+
+  it('composes an authenticated service and removes open mutation UI on logout', async () => {
+    window.history.replaceState({}, '', '/cashflow/authorization-limits');
+    const identity = createIdentityController({
+      state: 'authenticated', userId: 'maker-one',
+      permissions: [AUTHORIZATION_LIMITS_PERMISSIONS.access, AUTHORIZATION_LIMITS_PERMISSIONS.initiate],
+      contractVersion: IDENTITY_CONTRACT_VERSION,
+    });
+    const FactoryApplication = createCashflowApplication({ authorizationLimitsService: domainService() });
+    render(<FactoryApplication instanceId="cashflow-authenticated" basePath="/cashflow" capabilities={{
+      ...capabilities(), identity: identity.capability,
+    }} />);
+    const create = await screen.findByRole('button', { name: 'Create Authorization Limit' });
+    fireEvent.click(create);
+    expect(screen.getByRole('dialog', { name: 'Create Authorization Limit' })).toBeInTheDocument();
+    act(() => identity.setSnapshot({ state: 'anonymous', contractVersion: IDENTITY_CONTRACT_VERSION }));
+    expect(screen.queryByRole('button', { name: 'Create Authorization Limit' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Create Authorization Limit' })).not.toBeInTheDocument();
   });
 
   it('filters application-owned records', () => {
