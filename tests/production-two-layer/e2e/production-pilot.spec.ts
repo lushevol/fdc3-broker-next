@@ -65,4 +65,44 @@ test.describe('production two-layer pilot', () => {
     await page.getByRole('button', { name: 'Retry Cashflow' }).click();
     await expect(page.getByRole('heading', { name: 'Cashflow blotter' })).toBeVisible();
   });
+
+  test('runs the Authorization Limits grid cohort by pointer and keyboard', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Open Cashflow' }).click();
+    await page.getByRole('button', { name: 'Authorization Limits' }).click();
+    await expect(page).toHaveURL(/\/cashflow\/authorization-limits$/);
+    const gridRegion = page.getByRole('region', { name: 'Authorization Limits' });
+    await expect(gridRegion.getByRole('treegrid')).toBeVisible();
+    await expect(gridRegion.getByRole('row')).toHaveCount(6);
+
+    const filter = page.getByRole('searchbox', { name: 'Filter Authorization Limits' });
+    await filter.fill('TREASURY');
+    await expect(gridRegion.getByText('TREASURY-ASIA')).toBeVisible();
+    await expect(gridRegion.getByText('GLOBAL-MAKER')).toHaveCount(0);
+    await filter.clear();
+
+    const limitationHeader = gridRegion.getByRole('columnheader', { name: /Limitation/ });
+    await limitationHeader.click();
+    await expect(limitationHeader).toHaveAttribute('aria-sort', 'ascending');
+
+    const profileCell = gridRegion.getByRole('gridcell', { name: 'CONTROL-L1' });
+    await profileCell.dblclick();
+    await expect(page).toHaveURL(/\/cashflow\/authorization-limits\/details\/LIM-1009$/);
+    await expect(page.getByText('$750,000.00')).toBeVisible();
+    await expect(page.getByText(/remain in the legacy workflow/i)).toBeVisible();
+
+    await page.getByRole('button', { name: 'Back to Authorization Limits' }).click();
+    const keyboardCell = page.getByRole('region', { name: 'Authorization Limits' }).getByRole('gridcell', { name: 'GLOBAL-MAKER' });
+    await keyboardCell.click();
+    await keyboardCell.press('Enter');
+    await expect(page).toHaveURL(/\/cashflow\/authorization-limits\/details\/LIM-1001$/);
+
+    await page.getByRole('button', { name: 'Back to Authorization Limits' }).click();
+    const application = page.locator('[data-ratan-scope="application"]');
+    const grid = page.locator('.ratan-data-grid');
+    await expect(grid).toHaveCSS('--ag-row-height', '36px');
+    await page.getByRole('button', { name: 'Use comfortable density' }).click();
+    await expect(application).toHaveAttribute('data-ratan-density', 'comfortable');
+    await expect(grid).toHaveCSS('--ag-row-height', '44px');
+  });
 });

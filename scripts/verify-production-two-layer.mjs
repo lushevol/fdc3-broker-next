@@ -10,6 +10,11 @@ const forbidden = [
   /@fm\/base/i,
   /mfe-ratan-container/i,
   /ratan[_-]container/i,
+  /\bantd\b/i,
+  /src\/Root/i,
+  /ag-grid-enterprise/i,
+  /ratancomponents/i,
+  /ratanutils/i,
 ];
 
 async function filesBelow(directory) {
@@ -42,7 +47,7 @@ for (const root of roots) {
 
   const federation = await readFile(join(root, 'module-federation.config.ts'), 'utf8');
   const sharedBlock = federation.slice(federation.indexOf('shared:'));
-  for (const forbiddenShare of ['@fm/ratan-design', '@mui/material', '@emotion/react', '@emotion/styled']) {
+  for (const forbiddenShare of ['@fm/ratan-design', '@fm/ratan-data-grid', '@mui/material', '@emotion/react', '@emotion/styled', 'ag-grid-community', 'ag-grid-react']) {
     if (sharedBlock.includes(forbiddenShare)) throw new Error(`${root} runtime-shares ${forbiddenShare}`);
   }
   if (!/react:\s*{[^}]*singleton:\s*true/s.test(sharedBlock)
@@ -60,5 +65,5 @@ console.log(JSON.stringify({
   verified: true,
   runtimeLayers: ['portal-host', 'federated-application'],
   singletonShares: ['react', 'react-dom'],
-  productionPackages: ['@fm/platform-contracts', '@fm/platform-sdk', '@fm/ratan-design'],
+  productionPackages: ['@fm/platform-contracts', '@fm/platform-sdk', '@fm/ratan-design', '@fm/ratan-data-grid'],
 }));

@@ -13,6 +13,8 @@ import {
   TextField,
   type StatusTone,
 } from '@fm/ratan-design';
+import '@fm/ratan-design/styles.css';
+import '@fm/ratan-data-grid/styles.css';
 import './styles.css';
 import { AuthorizationLimits } from './AuthorizationLimits';
 

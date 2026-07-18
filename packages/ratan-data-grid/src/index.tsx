@@ -8,8 +8,6 @@ import {
   type RowDoubleClickedEvent,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-quartz.css';
 import './styles.css';
 
 ModuleRegistry.registerModules([ClientSideRowModelModule]);

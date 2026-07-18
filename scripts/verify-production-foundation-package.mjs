@@ -34,7 +34,7 @@ try {
     type: 'module',
   }, null, 2));
 
-  const packages = ['platform-contracts', 'platform-sdk', 'ratan-design'];
+  const packages = ['platform-contracts', 'platform-sdk', 'ratan-design', 'ratan-data-grid'];
   const tarballs = packages.map((packageName) => {
     const output = run('npm', [
       'pack',
@@ -48,7 +48,7 @@ try {
   });
 
   run('npm', ['install', '--ignore-scripts', '--no-package-lock', '--legacy-peer-deps', tarballs[0]], temporaryRoot);
-  run('npm', ['install', '--ignore-scripts', '--no-package-lock', '--legacy-peer-deps', tarballs[1], tarballs[2]], temporaryRoot);
+  run('npm', ['install', '--ignore-scripts', '--no-package-lock', '--legacy-peer-deps', tarballs[1], tarballs[2], tarballs[3]], temporaryRoot);
 
   for (const dependency of [
     'react',
@@ -57,6 +57,8 @@ try {
     '@emotion/react',
     '@emotion/styled',
     '@mui/material',
+    'ag-grid-community',
+    'ag-grid-react',
     '@types/react',
     '@types/react-dom',
   ]) linkRootDependency(dependency);
@@ -65,6 +67,7 @@ try {
 import { APPEARANCE_CONTRACT_VERSION, appearanceSnapshotSchema } from '@fm/platform-contracts';
 import { createAppearanceController } from '@fm/platform-sdk';
 import { Button, DesignSystemProvider, StatusBadge, TextField, semanticTokens } from '@fm/ratan-design';
+import { RatanDataGrid, createColumnDefinitions } from '@fm/ratan-data-grid';
 import { existsSync } from 'node:fs';
 
 const appearance = Object.freeze({
@@ -74,27 +77,38 @@ const appearance = Object.freeze({
 appearanceSnapshotSchema.parse(appearance);
 if (createAppearanceController(appearance).capability.getSnapshot().scheme !== 'dark') throw new Error('SDK export failed');
 if (!Button || !TextField || !StatusBadge || !DesignSystemProvider || !semanticTokens.color.dark) throw new Error('Design export failed');
+if (!RatanDataGrid || createColumnDefinitions([{ key: 'id', header: 'ID' }]).length !== 1) throw new Error('Grid export failed');
 const cssPath = import.meta.resolve('@fm/ratan-design/styles.css');
 if (!existsSync(new URL(cssPath))) throw new Error('Stylesheet export failed');
+const gridCssPath = import.meta.resolve('@fm/ratan-data-grid/styles.css');
+if (!existsSync(new URL(gridCssPath))) throw new Error('Grid stylesheet export failed');
 let blocked = false;
 try { await import('@fm/ratan-design/src/provider'); } catch (error) { blocked = error?.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED'; }
 if (!blocked) throw new Error('Internal subpath was not blocked');
+blocked = false;
+try { await import('@fm/ratan-data-grid/src/index'); } catch (error) { blocked = error?.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED'; }
+if (!blocked) throw new Error('Grid internal subpath was not blocked');
 `);
 
   writeFileSync(join(temporaryRoot, 'fixture.tsx'), `
 import type { AppearanceSnapshot, PlatformCapabilities } from '@fm/platform-contracts';
 import { createAppearanceController, createPlatformClient } from '@fm/platform-sdk';
 import { Button, DesignSystemProvider, StatusBadge, TextField } from '@fm/ratan-design';
+import { RatanDataGrid, type RatanDataGridColumn } from '@fm/ratan-data-grid';
 
 declare const appearance: AppearanceSnapshot;
 declare const capabilities: PlatformCapabilities;
 const controller = createAppearanceController(appearance);
 createPlatformClient(capabilities).getAppearance();
+type Row = { id: string; amount: number };
+const rows: Row[] = [{ id: 'one', amount: 1 }];
+const columns: RatanDataGridColumn<Row>[] = [{ key: 'id', header: 'ID' }];
 export const Fixture = () => (
   <DesignSystemProvider appearance={controller.capability.getSnapshot()}>
     <TextField id="filter" label="Filter" value="" onChange={() => undefined} />
     <StatusBadge status="ready">Ready</StatusBadge>
     <Button>Submit</Button>
+    <RatanDataGrid ariaLabel="Rows" rows={rows} columns={columns} getRowId={(row) => row.id} />
   </DesignSystemProvider>
 );
 `);

@@ -1,3 +1,6 @@
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-quartz.css';
+
 .ratan-data-grid {
   --ag-font-family: var(--ratan-font-family);
   --ag-font-size: var(--ratan-font-size-body);

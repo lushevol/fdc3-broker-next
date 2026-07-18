@@ -15,8 +15,8 @@
 
 ## 3. Conformance and release evidence
 
-- [ ] 3.1 Extend root dependency-order scripts for grid package test/lint/build and pilot application acceptance
-- [ ] 3.2 Extend boundary scans for Ant, raw legacy Ratan, `src/Root`, AG Grid Enterprise, raw grid API/configuration exports, and legacy runtime dependencies
-- [ ] 3.3 Add browser coverage for list load, filtering, sorting, pagination, pointer/keyboard details, back, appearances, standalone, and federated modes
-- [ ] 3.4 Run packed package consumption, unit/component coverage, lint, builds, browser matrix, and strict OpenSpec validation
-- [ ] 3.5 Record AG Grid version/license, before/after bundle size, deferred mutation workflows, production service blockers, and cohort exit evidence
+- [x] 3.1 Extend root dependency-order scripts for grid package test/lint/build and pilot application acceptance
+- [x] 3.2 Extend boundary scans for Ant, raw legacy Ratan, `src/Root`, AG Grid Enterprise, raw grid API/configuration exports, and legacy runtime dependencies
+- [x] 3.3 Add browser coverage for list load, filtering, sorting, pagination, pointer/keyboard details, back, appearances, standalone, and federated modes
+- [x] 3.4 Run packed package consumption, unit/component coverage, lint, builds, browser matrix, and strict OpenSpec validation
+- [x] 3.5 Record AG Grid version/license, before/after bundle size, deferred mutation workflows, production service blockers, and cohort exit evidence
