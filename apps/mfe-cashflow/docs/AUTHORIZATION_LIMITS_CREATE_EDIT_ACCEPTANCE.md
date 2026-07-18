@@ -57,4 +57,4 @@ The code is bundled even while runtime injection is absent. The delta is accepte
 4. Inject the capability behind a cohort/canary flag with the legacy route as rollback.
 5. Run browser create/edit parity against an approved non-production backend.
 
-Delete and add/edit/delete pending confirm/reject remain separate behavior cohorts after the adapter gate. Legacy Authorization Limits remains authoritative until these blockers and the production-delivery program are complete.
+Delete and add/edit/delete pending confirm/reject are now behavior-tested in the [transition cohort](AUTHORIZATION_LIMITS_TRANSITIONS_ACCEPTANCE.md), still behind the same omitted-by-default capability. Legacy Authorization Limits remains authoritative until the adapter, activation blockers, and production-delivery program are complete.

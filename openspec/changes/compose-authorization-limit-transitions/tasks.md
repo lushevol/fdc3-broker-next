@@ -11,6 +11,6 @@
 
 ## 3. Documentation and verification
 
-- [ ] 3.1 Document operation labels, safer cancellation semantics, refresh strategy, rollback, and adapter activation blockers
-- [ ] 3.2 Run focused/full coverage, lint/build, production package/pilot regression, runtime boundaries, browser rollback, and strict OpenSpec validation
-- [ ] 3.3 Record bundle/test/accessibility evidence and remaining adapter/cutover criteria
+- [x] 3.1 Document operation labels, safer cancellation semantics, refresh strategy, rollback, and adapter activation blockers
+- [x] 3.2 Run focused/full coverage, lint/build, production package/pilot regression, runtime boundaries, browser rollback, and strict OpenSpec validation
+- [x] 3.3 Record bundle/test/accessibility evidence and remaining adapter/cutover criteria

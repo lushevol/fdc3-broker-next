@@ -56,7 +56,7 @@ Before create/edit/status UI is enabled:
 1. Approve the identity/entitlement capability and concrete service transport.
 2. Verify backend request/response fixtures for every operation and version conflict.
 3. Inject the principal and service at the Cashflow application boundary; do not use module globals.
-4. Compose `@fm/ratan-design@1.1.0` interactions with application-owned request state. Create/edit now satisfies this behind an omitted-by-default capability; delete and pending transitions remain outstanding.
+4. Compose `@fm/ratan-design@1.1.0` interactions with application-owned request state. Create/edit and all record transitions now satisfy this behind an omitted-by-default capability.
 5. Test loading repeat prevention, local error feedback, refresh/reconciliation, self-verification, and every action matrix row.
 6. Retain a cohort flag and legacy route fallback until browser parity and production delivery gates pass.
 

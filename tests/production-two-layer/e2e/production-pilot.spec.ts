@@ -92,6 +92,12 @@ test.describe('production two-layer pilot', () => {
     await expect(page.getByText('$750,000.00')).toBeVisible();
     await expect(page.getByText(/remain in the legacy workflow/i)).toBeVisible();
     await expect(page.getByRole('button', { name: 'Edit Authorization Limit' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Delete Authorization Limit' })).toHaveCount(0);
+
+    await page.goto('/cashflow/authorization-limits/details/LIM-1003');
+    await expect(page.getByRole('heading', { name: 'LIM-1003' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Approve Add' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Reject Add' })).toHaveCount(0);
 
     await page.getByRole('button', { name: 'Back to Authorization Limits' }).click();
     const keyboardCell = page.getByRole('region', { name: 'Authorization Limits' }).getByRole('gridcell', { name: 'GLOBAL-MAKER' });

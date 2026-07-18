@@ -190,7 +190,7 @@ export function AuthorizationLimits({
   }
 
   return <section className="authorization-limits">
-    <header className="authorization-limits-header"><div><span className="section-label">Migration cohort 1</span><h2>Authorization Limits</h2><p>{mutation ? 'Opt-in create/edit · remaining mutations stay in legacy' : 'Read-only list and details · mutations remain in legacy'}</p></div><div className="authorization-limits-summary"><strong>{filtered.length} limits</strong>{policy?.create.allowed ? <Button onClick={() => setEditor({ mode: 'create' })}>Create Authorization Limit</Button> : null}</div></header>
+    <header className="authorization-limits-header"><div><span className="section-label">Migration cohort 1</span><h2>Authorization Limits</h2><p>{mutation ? 'Opt-in mutation composition · production activation remains gated' : 'Read-only list and details · mutations remain in legacy'}</p></div><div className="authorization-limits-summary"><strong>{filtered.length} limits</strong>{policy?.create.allowed ? <Button onClick={() => setEditor({ mode: 'create' })}>Create Authorization Limit</Button> : null}</div></header>
     {localFeedback}
     <TextField id="authorization-limits-filter" label="Filter Authorization Limits" type="search" value={query} onChange={setQuery} />
     <RatanDataGrid
