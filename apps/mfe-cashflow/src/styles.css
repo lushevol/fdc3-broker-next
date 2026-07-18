@@ -35,5 +35,7 @@
 .authorization-limits-header p { margin: 0; color: var(--ratan-color-content-secondary); }
 .authorization-limits-summary { display: flex; align-items: center; gap: var(--ratan-control-gap); }
 .authorization-limit-editor-form { display: grid; gap: var(--ratan-control-gap); padding-top: var(--ratan-control-gap); }
+.authorization-limit-actions { display: flex; flex-wrap: wrap; gap: var(--ratan-control-gap); }
+.authorization-limit-transition-message p { color: var(--ratan-color-content-secondary); }
 .authorization-limits .ratan-data-grid { margin-top: 1rem; }
 .migration-note { max-width: 48rem; padding: 1rem; border: 1px solid var(--ratan-color-status-review-content); border-radius: var(--ratan-radius-control); color: var(--ratan-color-status-review-content); background: var(--ratan-color-status-review-surface); }

@@ -4,6 +4,11 @@ import { RatanDataGrid, type RatanDataGridColumn } from '@fm/ratan-data-grid';
 import { Button, InlineAlert, StatusBadge, TextField, type StatusTone } from '@fm/ratan-design';
 import { AuthorizationLimitEditor } from './AuthorizationLimitEditor';
 import {
+  AuthorizationLimitTransitionDialog,
+  authorizationLimitTransitionPresentation,
+  type AuthorizationLimitTransitionAction,
+} from './AuthorizationLimitTransitionDialog';
+import {
   createAuthorizationLimitsPolicy,
   type AuthorizationLimitsPrincipal,
 } from './authorization-limits-policy';
@@ -62,6 +67,10 @@ export function AuthorizationLimits({
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editor, setEditor] = useState<EditorState | null>(null);
+  const [transition, setTransition] = useState<{
+    readonly action: AuthorizationLimitTransitionAction;
+    readonly record: AuthorizationLimitRecord;
+  } | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const policy = useMemo(
     () => mutation ? createAuthorizationLimitsPolicy(mutation.principal) : null,
@@ -113,6 +122,33 @@ export function AuthorizationLimits({
       onClose={() => setEditor(null)}
     />
   ) : null;
+  const executeTransition = async () => {
+    if (!mutation || !transition) throw new Error('Mutation capability is unavailable.');
+    const { action, record } = transition;
+    const key = {
+      profile: record.profile,
+      currency: record.currency,
+      expectedVersion: record.version,
+    } as const;
+    if (action === 'delete') {
+      await mutation.service.remove(key);
+    } else {
+      const command = { ...key, status: record.status as Exclude<typeof record.status, 'CONFIRMED'> };
+      if (action.startsWith('approve-')) await mutation.service.confirm(command);
+      else await mutation.service.reject(command);
+    }
+    setRows(await mutation.service.list());
+    setFeedback(authorizationLimitTransitionPresentation[action].success);
+  };
+  const transitionDialog = transition ? (
+    <AuthorizationLimitTransitionDialog
+      key={`${transition.action}-${transition.record.limitationId}`}
+      action={transition.action}
+      record={transition.record}
+      onExecute={executeTransition}
+      onClose={() => setTransition(null)}
+    />
+  ) : null;
   const localFeedback = feedback
     ? <InlineAlert tone="success" message={feedback} />
     : null;
@@ -120,23 +156,36 @@ export function AuthorizationLimits({
   if (detailId) {
     return <section className="authorization-limits authorization-limit-details">
       <Button variant="ghost" onClick={() => client.navigate(route)}>Back to Authorization Limits</Button>
+      {localFeedback}
       {loading ? <p role="status">Loading Authorization Limit…</p> : detail ? <>
         <header><div><span className="section-label">Authorization Limit</span><h2>{detail.limitationId}</h2></div><StatusBadge status={statusTone(detail.status)}>{detail.status.replace('_', ' ')}</StatusBadge></header>
-        {localFeedback}
         <dl className="details-grid">
           <div><dt>Profile</dt><dd>{detail.profile}</dd></div><div><dt>Currency</dt><dd>{detail.currency}</dd></div>
           <div><dt>Limitation</dt><dd>{formatUsdLimit(detail.limitation)}</dd></div><div><dt>Status</dt><dd>{detail.status}</dd></div>
           <div><dt>Version</dt><dd>{detail.version}</dd></div><div><dt>Updated</dt><dd>{detail.updatedAt}</dd></div>
           <div><dt>Created by</dt><dd>{detail.createdBy}</dd></div><div><dt>Updated by</dt><dd>{detail.updatedBy}</dd></div>
         </dl>
-        {policy?.decide('edit', detail).allowed ? (
-          <Button onClick={() => setEditor({ mode: 'edit', record: detail })}>Edit Authorization Limit</Button>
-        ) : null}
+        <div className="authorization-limit-actions">
+          {policy?.actionsFor(detail).map((action) => action === 'edit' ? (
+            <Button key={action} onClick={() => setEditor({ mode: 'edit', record: detail })}>
+              Edit Authorization Limit
+            </Button>
+          ) : action !== 'create' ? (
+            <Button
+              key={action}
+              variant={authorizationLimitTransitionPresentation[action].tone === 'danger' ? 'danger' : 'secondary'}
+              onClick={() => setTransition({ action, record: detail })}
+            >
+              {authorizationLimitTransitionPresentation[action].trigger}
+            </Button>
+          ) : null)}
+        </div>
         <p className="migration-note">{mutation
-          ? 'Opt-in create/edit cohort. Delete, approve, and reject remain in the legacy workflow.'
+          ? 'Opt-in mutation composition. Runtime activation awaits an approved authenticated service adapter.'
           : 'Read-only migration cohort. Create, edit, delete, approve, and reject remain in the legacy workflow.'}</p>
       </> : <p role="alert">Authorization Limit record was not found.</p>}
       {editorDialog}
+      {transitionDialog}
     </section>;
   }
 
@@ -159,5 +208,6 @@ export function AuthorizationLimits({
       emptyMessage="No Authorization Limits match the current filter."
     />
     {editorDialog}
+    {transitionDialog}
   </section>;
 }

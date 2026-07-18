@@ -27,7 +27,11 @@ describe('Authorization Limits policy and service boundaries', () => {
   );
 
   it('keeps create/edit composition on bounded production design APIs', () => {
-    const source = ['AuthorizationLimits.tsx', 'AuthorizationLimitEditor.tsx']
+    const source = [
+      'AuthorizationLimits.tsx',
+      'AuthorizationLimitEditor.tsx',
+      'AuthorizationLimitTransitionDialog.tsx',
+    ]
       .map((file) => readFileSync(resolve(process.cwd(), 'src', file), 'utf8'))
       .join('\n');
     const forbiddenReferences = [
@@ -40,7 +44,14 @@ describe('Authorization Limits policy and service boundaries', () => {
       'sx=',
     ];
     expect(forbiddenReferences.filter((reference) => source.includes(reference))).toEqual([]);
-    for (const component of ['Dialog', 'TextField', 'NumberField', 'Button', 'InlineAlert']) {
+    for (const component of [
+      'Dialog',
+      'ConfirmationDialog',
+      'TextField',
+      'NumberField',
+      'Button',
+      'InlineAlert',
+    ]) {
       expect(source).toContain(component);
     }
   });

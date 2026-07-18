@@ -182,11 +182,10 @@ describe('Authorization Limits opt-in create/edit cohort', () => {
       }),
     );
     expect(await screen.findByText('$75.00')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /approve|reject/i })).not.toBeInTheDocument();
   });
 
-  it('does not expose edit or pending transitions for a pending detail', async () => {
+  it('does not expose edit or pending transitions for a self-updated pending detail', async () => {
     render(
       <AuthorizationLimits
         basePath="/cashflow"
@@ -195,7 +194,7 @@ describe('Authorization Limits opt-in create/edit cohort', () => {
         repository={repository()}
         mutation={{
           principal: {
-            userId: 'checker-one',
+            userId: 'cashflow-operations',
             permissions: [AUTHORIZATION_LIMITS_PERMISSIONS.verify],
           },
           service: service(),
@@ -266,6 +265,171 @@ describe('Authorization Limits opt-in create/edit cohort', () => {
     fireEvent.click(progress);
     expect(create).toHaveBeenCalledTimes(1);
     resolveCreate(authorizationLimitFixtures[0]);
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+});
+
+describe('Authorization Limits opt-in delete and transition cohort', () => {
+  const checker = {
+    userId: 'checker-one',
+    permissions: [AUTHORIZATION_LIMITS_PERMISSIONS.verify],
+  } as const;
+
+  it.each([
+    {
+      id: 'LIM-1001',
+      trigger: 'Delete Authorization Limit',
+      title: 'Delete Authorization Limit?',
+      confirmLabel: 'Delete',
+      method: 'remove',
+      command: { profile: 'GLOBAL-MAKER', currency: 'USD', expectedVersion: 1 },
+      principal: maker,
+    },
+    {
+      id: 'LIM-1003', trigger: 'Approve Add', title: 'Approve Add?', confirmLabel: 'Create', method: 'confirm',
+      command: { profile: 'TREASURY-ASIA', currency: 'USD', status: 'ADD_PENDING', expectedVersion: 1 },
+      principal: checker,
+    },
+    {
+      id: 'LIM-1003', trigger: 'Reject Add', title: 'Reject Add?', confirmLabel: 'Reject Add', method: 'reject',
+      command: { profile: 'TREASURY-ASIA', currency: 'USD', status: 'ADD_PENDING', expectedVersion: 1 },
+      principal: checker,
+    },
+    {
+      id: 'LIM-1004', trigger: 'Approve Edit', title: 'Approve Edit?', confirmLabel: 'Approve', method: 'confirm',
+      command: { profile: 'TREASURY-EMEA', currency: 'USD', status: 'EDIT_PENDING', expectedVersion: 1 },
+      principal: checker,
+    },
+    {
+      id: 'LIM-1004', trigger: 'Reject Edit', title: 'Reject Edit?', confirmLabel: 'Reject', method: 'reject',
+      command: { profile: 'TREASURY-EMEA', currency: 'USD', status: 'EDIT_PENDING', expectedVersion: 1 },
+      principal: checker,
+    },
+    {
+      id: 'LIM-1006', trigger: 'Approve Delete', title: 'Approve Deletion?', confirmLabel: 'Delete', method: 'confirm',
+      command: { profile: 'OPERATIONS-EU', currency: 'USD', status: 'DELETE_PENDING', expectedVersion: 1 },
+      principal: checker,
+    },
+    {
+      id: 'LIM-1006', trigger: 'Reject Delete', title: 'Reject Deletion?', confirmLabel: 'Reject Deletion', method: 'reject',
+      command: { profile: 'OPERATIONS-EU', currency: 'USD', status: 'DELETE_PENDING', expectedVersion: 1 },
+      principal: checker,
+    },
+  ] as const)(
+    'runs $trigger explicitly and refreshes records',
+    async ({ id, trigger, title, confirmLabel, method, command, principal }) => {
+      const mutationService = service();
+      render(
+        <AuthorizationLimits
+          basePath="/cashflow"
+          path={`/cashflow/authorization-limits/details/${id}`}
+          client={client()}
+          repository={repository()}
+          mutation={{ principal, service: mutationService }}
+        />,
+      );
+      await screen.findByRole('heading', { name: id });
+      fireEvent.click(screen.getByRole('button', { name: trigger }));
+      expect(screen.getByRole('dialog', { name: title })).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: confirmLabel }));
+      await waitFor(() =>
+        expect(mutationService[method]).toHaveBeenCalledWith(command),
+      );
+      expect(mutationService.list).toHaveBeenCalledTimes(1);
+      expect(await screen.findByRole('status')).toHaveTextContent('Authorization Limit');
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    },
+  );
+
+  it('treats Cancel as dismissal instead of an alternative rejection', async () => {
+    const mutationService = service();
+    render(
+      <AuthorizationLimits
+        basePath="/cashflow"
+        path="/cashflow/authorization-limits/details/LIM-1004"
+        client={client()}
+        repository={repository()}
+        mutation={{ principal: checker, service: mutationService }}
+      />,
+    );
+    await screen.findByRole('heading', { name: 'LIM-1004' });
+    fireEvent.click(screen.getByRole('button', { name: 'Reject Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(mutationService.confirm).not.toHaveBeenCalled();
+    expect(mutationService.reject).not.toHaveBeenCalled();
+    expect(mutationService.remove).not.toHaveBeenCalled();
+    expect(mutationService.list).not.toHaveBeenCalled();
+  });
+
+  it('reconciles a removed record to existing not-found recovery', async () => {
+    const mutationService = service({ list: jest.fn().mockResolvedValue([]) });
+    render(
+      <AuthorizationLimits
+        basePath="/cashflow"
+        path="/cashflow/authorization-limits/details/LIM-1001"
+        client={client()}
+        repository={repository()}
+        mutation={{ principal: maker, service: mutationService }}
+      />,
+    );
+    await screen.findByRole('heading', { name: 'LIM-1001' });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Authorization Limit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('record was not found');
+    expect(mutationService.list).toHaveBeenCalledTimes(1);
+  });
+
+  it('retains a failed transition for local retry', async () => {
+    const confirm = jest
+      .fn()
+      .mockRejectedValueOnce(new AuthorizationLimitsMutationError('conflict', 'Record version changed'))
+      .mockResolvedValueOnce(authorizationLimitFixtures[3]);
+    const mutationService = service({ confirm });
+    render(
+      <AuthorizationLimits
+        basePath="/cashflow"
+        path="/cashflow/authorization-limits/details/LIM-1004"
+        client={client()}
+        repository={repository()}
+        mutation={{ principal: checker, service: mutationService }}
+      />,
+    );
+    await screen.findByRole('heading', { name: 'LIM-1004' });
+    fireEvent.click(screen.getByRole('button', { name: 'Approve Edit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Record version changed');
+    expect(screen.getByRole('dialog', { name: 'Approve Edit?' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
+    await waitFor(() => expect(confirm).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('prevents repeat transition and dismissal while loading', async () => {
+    let resolveConfirm!: (value: AuthorizationLimitRecord) => void;
+    const pending = new Promise<AuthorizationLimitRecord>((resolve) => {
+      resolveConfirm = resolve;
+    });
+    const confirm = jest.fn().mockReturnValue(pending);
+    render(
+      <AuthorizationLimits
+        basePath="/cashflow"
+        path="/cashflow/authorization-limits/details/LIM-1003"
+        client={client()}
+        repository={repository()}
+        mutation={{ principal: checker, service: service({ confirm }) }}
+      />,
+    );
+    await screen.findByRole('heading', { name: 'LIM-1003' });
+    fireEvent.click(screen.getByRole('button', { name: 'Approve Add' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+    const progress = await screen.findByRole('button', { name: 'Create in progress' });
+    expect(progress).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Close Approve Add?' })).not.toBeInTheDocument();
+    fireEvent.click(progress);
+    expect(confirm).toHaveBeenCalledTimes(1);
+    resolveConfirm(authorizationLimitFixtures[2]);
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 });
