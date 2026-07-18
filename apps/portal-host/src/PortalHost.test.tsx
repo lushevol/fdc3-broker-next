@@ -71,6 +71,9 @@ describe('production PortalHost', () => {
     expect(supplied).toBe(identity);
     expect(identity?.getSnapshot()).toMatchObject({ scheme: 'light', density: 'comfortable' });
     expect(document.querySelector('[data-ratan-scope="host"]')).toHaveAttribute('data-ratan-theme', 'light');
+    fireEvent.click(screen.getByRole('button', { name: 'Use dark theme' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Use compact density' }));
+    await waitFor(() => expect(identity?.getSnapshot()).toMatchObject({ scheme: 'dark', density: 'compact' }));
     unsubscribe?.();
   });
 
