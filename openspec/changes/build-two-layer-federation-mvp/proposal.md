@@ -27,8 +27,8 @@ None. The MVP is additive and leaves existing production capabilities unchanged.
 
 ## Impact
 
-- New workspaces under `mvp/two-layer-federation/apps/` for the host and pilot application.
-- New workspaces under `mvp/two-layer-federation/packages/` for platform contracts, platform SDK, Ratan SDK, and Ratan UI.
-- The MVP owns its Playwright configuration and E2E suite under `mvp/two-layer-federation/`; root scripts provide convenient entry points.
+- New workspaces under `mvp/two-layer-federation/poc/apps/` for the host and pilot application.
+- New workspaces under `mvp/two-layer-federation/poc/packages/` for platform contracts, platform SDK, Ratan SDK, and Ratan UI.
+- The POC owns its Playwright configuration and E2E suite under `mvp/two-layer-federation/poc/`; root scripts provide convenient entry points.
 - Module Federation, React, Rsbuild, Zod, Vitest, and Playwright are used by the new workspaces.
 - Existing `apps/root-config`, `apps/base`, `apps/mfe-ratan-container`, and `apps/mfe-cashflow-blotter` are not modified as part of the MVP runtime.

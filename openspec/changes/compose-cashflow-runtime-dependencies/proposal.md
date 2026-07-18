@@ -23,6 +23,6 @@ None.
 
 ## Impact
 
-- Affected code: `mvp/two-layer-federation/apps/mfe-cashflow` application export, runtime composition helper, tests, and migration documentation.
+- Affected code: `mvp/two-layer-federation/realworld/apps/mfe-cashflow` application export, runtime composition helper, tests, and migration documentation.
 - The platform contracts, portal host, design system, grid, endpoint adapter, and federation topology remain unchanged.
 - No concrete HTTP client, environment URL, credential policy, authentication adapter, or production mutation activation is introduced.

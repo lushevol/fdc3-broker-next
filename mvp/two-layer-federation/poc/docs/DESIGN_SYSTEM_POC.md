@@ -10,7 +10,7 @@ The implementation is evidence for a production API, not the production API itse
 
 ### 1. MVP-only `*-poc` packages
 
-Everything under `mvp/two-layer-federation` is private and disposable evidence:
+Everything under `mvp/two-layer-federation/poc` is private and disposable evidence:
 
 - `@fm/ratan-design-poc` owns product-neutral tokens, `DesignSystemProvider`, `Button`, `TextField`, and `StatusBadge`.
 - `@fm/ratan-ui-poc` owns Ratan domain composition such as `CashflowTable` and consumes the design package.
@@ -24,7 +24,7 @@ These packages stay private, retain their `-poc` names, and must not be renamed 
 
 The production package will be a product-neutral, versioned package derived from proven behavior rather than copied wholesale. It should expose semantic tokens, provider adapters, bounded components, accessibility contracts, and test utilities. It must not expose raw MUI components as its public API, import Ratan domain models, own routing/workspace behavior, or be registered as a federated remote.
 
-`packages/ratan-design` is not automatically the owner merely because that name already exists. Before promotion, decide whether to replace it behind a new major version or create a portal-neutral package identity. Existing Ant Design behavior must not silently define the new public API.
+The promoted implementation now lives at `mvp/two-layer-federation/realworld/packages/ratan-design`. Its production identity was selected through an explicit major reset; the historical package location did not silently define the new public API.
 
 ### 3. Host-owned global bootstrap responsibilities
 

@@ -25,7 +25,7 @@ None.
 
 ## Impact
 
-- Adds `packages/ratan-data-grid` with AG Grid community/react peer dependencies and package tests.
-- Extends `mvp/two-layer-federation/apps/mfe-cashflow` routes and domain composition; the host and platform contract do not change.
+- Adds `mvp/two-layer-federation/realworld/packages/ratan-data-grid` with AG Grid community/react peer dependencies and package tests.
+- Extends `mvp/two-layer-federation/realworld/apps/mfe-cashflow` routes and domain composition; the host and platform contract do not change.
 - Adds new production-pilot browser coverage and dependency-ordered root commands.
 - Establishes the adapter pattern for later Cashflow grids while keeping the design foundation free of AG Grid.

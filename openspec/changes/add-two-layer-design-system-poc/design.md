@@ -18,7 +18,7 @@ The POC must preserve the proven two-layer runtime. `mfe-ratan-container`, Singl
 **Non-Goals:**
 
 - Building the complete production component library.
-- Migrating legacy production applications or `packages/ratan-design`.
+- Migrating legacy production applications or the realworld `@fm/ratan-design` package.
 - Migrating AG Grid, Ant Design, dialogs, or full Cashflow workflows in this slice.
 - Publishing production package identities or designing the final release pipeline.
 - Sharing MUI, Emotion, or the design package through Module Federation.

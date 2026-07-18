@@ -1,6 +1,6 @@
 ## Context
 
-The POC under `mvp/two-layer-federation` proved the desired runtime and appearance boundary, but its `*-poc` packages are private evidence and intentionally cannot become production identities. The repository already contains `packages/ratan-design`, an unconsumed `0.0.2` Ant/Emotion experiment with component-local literal tokens and no provider or runtime compatibility contract. Repository-wide search finds no imports of that package in the four legacy applications, making a controlled major reset safer than preserving an accidental API.
+The POC now isolated under `mvp/two-layer-federation/poc` proved the desired runtime and appearance boundary, but its `*-poc` packages are private evidence and intentionally cannot become production identities. The repository originally contained `packages/ratan-design`, an unconsumed `0.0.2` Ant/Emotion experiment with component-local literal tokens and no provider or runtime compatibility contract. Repository-wide search found no imports in the four legacy applications, making a controlled major reset and later relocation to `mvp/two-layer-federation/realworld/packages/ratan-design` safer than preserving an accidental API.
 
 The long-term platform has two runtime layers: a new host/base platform directly loads independently deployed applications. `mfe-ratan-container` is not a layer. Shared Ratan logic and UI are packages. The production foundation must therefore work in separate React roots, standalone application development, rolling application releases, and future isolation boundaries without a shared React context or design remote.
 
@@ -74,7 +74,7 @@ In addition to unit coverage, build and pack each production package, install th
 
 1. Add failing tests for package identity, dependency prohibitions, token generation, public exports, components, and focus behavior.
 2. Add production platform contracts and SDK with compatibility/failure-code tests.
-3. Replace the experimental `packages/ratan-design` implementation with the scoped MUI/Emotion foundation and generated tokens.
+3. Replace the experimental implementation with the scoped MUI/Emotion foundation and generated tokens under `mvp/two-layer-federation/realworld/packages/ratan-design`.
 4. Update Storybook/demo/docs/changelog to the new API and remove Ant/icon dependencies.
 5. Run unit coverage, lint, type/build, dependency scans, and packed-consumer verification.
 6. Commit the foundation independently. A later change pilots it in the new production host and one application.

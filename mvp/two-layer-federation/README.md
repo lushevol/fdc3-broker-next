@@ -1,34 +1,14 @@
-# Two-layer Module Federation MVP
+# Two-layer federation workspaces
 
-This directory is the ownership boundary for the greenfield `Host -> Application` proof of concept and the isolated production pilot derived from it. Both are isolated from the existing Single-SPA/SystemJS production platform.
+This directory contains two deliberately isolated tracks. Directory ownership is part of the architecture: code must not cross from one track into the other through source paths, workspace aliases, runtime URLs, or deployment configuration.
 
-## Structure
+## Tracks
 
-- `apps/portal-host-poc` — runtime registry, workspace shell, capability provider, and federated application loader
-- `apps/mfe-cashflow-poc` — independently built Cashflow application remote
-- `apps/portal-host` — production-identity host pilot; not part of the legacy `apps/` runtime tree
-- `apps/mfe-cashflow` — production-identity Cashflow pilot loaded directly by `portal-host`
-- `packages/platform-contracts-poc` — runtime-validated host/application contracts
-- `packages/platform-sdk-poc` — typed application client for host capabilities
-- `packages/ratan-sdk-poc` — shared Ratan domain functions
-- `packages/ratan-design-poc` — product-neutral semantic tokens, local MUI provider, and bounded foundational components
-- `packages/ratan-ui-poc` — Ratan domain React components built on the design-system package
-- `tests/e2e` and `playwright.config.ts` — isolated browser verification
+- [`poc/`](./poc/README.md) — frozen, disposable `*-poc` evidence proving the two-layer Module Federation model.
+- [`realworld/`](./realworld/README.md) — production-identity applications and versioned packages used for migration cohorts and eventual delivery.
 
-## Commands
+Both tracks keep exactly two runtime layers: host and independently deployed applications. Shared contracts, design foundations, grid adapters, and Ratan domain code are packages, never runtime containers.
 
-Run these from the repository root:
+## Ownership rule
 
-```bash
-npm run dev:federation-mvp
-npm run test:federation-mvp
-npm run build:federation-mvp
-npm run test:e2e:federation-mvp
-```
-
-The proof-of-concept workspace package names intentionally retain the `-poc` suffix. The production-pilot applications retain their non-POC package identities while remaining physically isolated in this MVP boundary.
-
-## Planning
-
-- [DevOps and system migration plan](./docs/DEVOPS_MIGRATION_PLAN.md)
-- [Design-system POC boundaries and production promotion policy](./docs/DESIGN_SYSTEM_POC.md)
+The POC may inform realworld APIs, but realworld code must never import, load, alias, or publish a `*-poc` workspace. New product work belongs only in `realworld/`; POC changes are limited to preserving reproducible historical evidence.

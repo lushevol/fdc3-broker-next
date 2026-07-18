@@ -1,10 +1,17 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
-const roots = [
-  'mvp/two-layer-federation/apps/portal-host',
-  'mvp/two-layer-federation/apps/mfe-cashflow',
+const applicationRoots = [
+  'mvp/two-layer-federation/realworld/apps/portal-host',
+  'mvp/two-layer-federation/realworld/apps/mfe-cashflow',
 ];
+const packageRoots = [
+  'mvp/two-layer-federation/realworld/packages/platform-contracts',
+  'mvp/two-layer-federation/realworld/packages/platform-sdk',
+  'mvp/two-layer-federation/realworld/packages/ratan-design',
+  'mvp/two-layer-federation/realworld/packages/ratan-data-grid',
+];
+const roots = [...applicationRoots, ...packageRoots];
 const forbidden = [
   /-poc\b/i,
   /single-spa/i,
@@ -18,6 +25,7 @@ const forbidden = [
   /ag-grid-enterprise/i,
   /ratancomponents/i,
   /ratanutils/i,
+  /two-layer-federation\/poc/i,
 ];
 
 async function filesBelow(directory) {
@@ -31,15 +39,19 @@ async function filesBelow(directory) {
 
 for (const root of roots) {
   const packageJson = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
-  const dependencyNames = Object.keys(packageJson.dependencies ?? {});
+  const dependencyNames = Object.keys({
+    ...packageJson.dependencies,
+    ...packageJson.peerDependencies,
+    ...packageJson.devDependencies,
+  });
   for (const dependency of dependencyNames) {
     if (forbidden.some((pattern) => pattern.test(dependency))) {
       throw new Error(`${root} has forbidden dependency ${dependency}`);
     }
   }
 
-  const paths = (await filesBelow(root)).filter((path) =>
-    /\.(?:ts|tsx|css|json)$/.test(path) && !/(?:dist|coverage|node_modules)\//.test(path),
+  const paths = (await filesBelow(join(root, 'src'))).filter((path) =>
+    /\.(?:ts|tsx|css|json)$/.test(path),
   );
   for (const path of paths) {
     const source = await readFile(path, 'utf8');
@@ -47,7 +59,9 @@ for (const root of roots) {
       if (pattern.test(source)) throw new Error(`${path} contains forbidden runtime reference ${pattern}`);
     }
   }
+}
 
+for (const root of applicationRoots) {
   const federation = await readFile(join(root, 'module-federation.config.ts'), 'utf8');
   const sharedBlock = federation.slice(federation.indexOf('shared:'));
   for (const forbiddenShare of ['@fm/ratan-design', '@fm/ratan-data-grid', '@mui/material', '@emotion/react', '@emotion/styled', 'ag-grid-community', 'ag-grid-react']) {
@@ -60,7 +74,7 @@ for (const root of roots) {
 }
 
 const applicationCss = await readFile(
-  'mvp/two-layer-federation/apps/mfe-cashflow/src/styles.css',
+  'mvp/two-layer-federation/realworld/apps/mfe-cashflow/src/styles.css',
   'utf8',
 );
 if (/(^|[}\s,])(html|body|:root|\*)\s*[{,]/m.test(applicationCss)) {

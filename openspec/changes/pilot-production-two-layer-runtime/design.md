@@ -22,7 +22,7 @@ The isolated MVP proves direct Module Federation under `mvp/two-layer-federation
 
 ### Create production identities beside, not from, the POC
 
-The pilot uses `mvp/two-layer-federation/apps/portal-host` and `mvp/two-layer-federation/apps/mfe-cashflow`. They are production-identity candidates, but remain physically isolated beside the POC until the replacement runtime is approved for rollout. The `*-poc` workspaces remain separate evidence and cannot become an import, workspace dependency, source alias, or runtime URL. This makes both accidental legacy integration and accidental POC promotion detectable.
+The pilot uses `mvp/two-layer-federation/realworld/apps/portal-host` and `mvp/two-layer-federation/realworld/apps/mfe-cashflow`. They are production-identity candidates isolated from both the legacy repository workspaces and the sibling `poc/` track until rollout is approved. The `*-poc` workspaces cannot become an import, workspace dependency, source alias, or runtime URL.
 
 ### Keep exactly two runtime layers
 

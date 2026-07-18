@@ -15,16 +15,16 @@ export default defineConfig({
   webServer: [
     {
       command:
-        'node_modules/.bin/serve -s mvp/two-layer-federation/apps/mfe-cashflow-poc/dist -l tcp://127.0.0.1:9101 -C -n --no-port-switching',
-      cwd: '../..',
+        'node_modules/.bin/serve -s mvp/two-layer-federation/poc/apps/mfe-cashflow-poc/dist -l tcp://127.0.0.1:9101 -C -n --no-port-switching',
+      cwd: '../../..',
       url: 'http://127.0.0.1:9101/mf-manifest.json',
       reuseExistingServer: true,
       timeout: 120_000,
     },
     {
       command:
-        'node_modules/.bin/serve -s mvp/two-layer-federation/apps/portal-host-poc/dist -l tcp://127.0.0.1:9100 -C -n --no-port-switching',
-      cwd: '../..',
+        'node_modules/.bin/serve -s mvp/two-layer-federation/poc/apps/portal-host-poc/dist -l tcp://127.0.0.1:9100 -C -n --no-port-switching',
+      cwd: '../../..',
       url: 'http://127.0.0.1:9100/registry.json',
       reuseExistingServer: true,
       timeout: 120_000,

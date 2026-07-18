@@ -5,7 +5,8 @@
 - **Status:** Proposed next-phase plan
 - **Scope:** Production delivery and phased migration from Single-SPA/SystemJS to the two-layer `Host -> Application` architecture
 - **Implementation:** Out of scope for this document
-- **MVP location:** `mvp/two-layer-federation/`
+- **POC location:** `mvp/two-layer-federation/poc/`
+- **Realworld migration location:** `mvp/two-layer-federation/realworld/`
 
 The central production principle is **build once, publish immutably, and promote by registry update**. The host and each application must have independent release pipelines. Environment promotion must not rebuild the host or application.
 

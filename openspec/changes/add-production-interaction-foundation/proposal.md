@@ -26,7 +26,7 @@ None.
 
 ## Impact
 
-- Updates only `packages/ratan-design` and shared verification/documentation scripts in this change.
+- Updates only `mvp/two-layer-federation/realworld/packages/ratan-design` and realworld verification/documentation scripts in this change.
 - Adds no new runtime dependency: components adapt the existing MUI/Emotion peers.
 - Does not modify the Cashflow application or enable mutation/approval workflows yet.
 - Unblocks a later Authorization Limits mutation cohort once service and entitlement contracts are explicitly approved.

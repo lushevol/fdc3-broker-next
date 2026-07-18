@@ -4,7 +4,7 @@ The two-layer POC proved that a host-owned appearance contract and build-time MU
 
 ## What Changes
 
-- **BREAKING** Promote the currently unconsumed internal `packages/ratan-design` workspace from the experimental Ant-oriented `ratan-design@0.x` API to the production `@fm/ratan-design@1.0.0` foundation API.
+- **BREAKING** Promote the previously unconsumed internal `packages/ratan-design` workspace from the experimental Ant-oriented `ratan-design@0.x` API to the production `@fm/ratan-design@1.0.0` foundation API, now owned under `mvp/two-layer-federation/realworld/packages/ratan-design`.
 - Define one product-neutral semantic token source, generated/scoped CSS variables, light/dark schemes, compact/comfortable density, and visible-focus behavior.
 - Provide a local MUI/Emotion `DesignSystemProvider` and bounded production `Button`, `TextField`, and `StatusBadge` APIs without re-exporting MUI.
 - Add production `@fm/platform-contracts` and `@fm/platform-sdk` packages for versioned application/appearance manifests, stable appearance subscription, compatibility validation, and standalone controllers.
@@ -26,8 +26,8 @@ None. Existing extraction-oriented design-token and component-style specificatio
 
 ## Impact
 
-- Replaces the public API and package identity of `packages/ratan-design`; repository search confirms it currently has no application consumers.
-- Adds `packages/platform-contracts` and `packages/platform-sdk` as production workspaces derived from POC-proven behavior, not runtime remotes.
+- Replaces the public API and package identity now located at `mvp/two-layer-federation/realworld/packages/ratan-design`; repository search confirmed it had no application consumers at promotion time.
+- Adds `mvp/two-layer-federation/realworld/packages/platform-contracts` and `mvp/two-layer-federation/realworld/packages/platform-sdk` as production workspaces derived from POC-proven behavior, not runtime remotes.
 - Changes root lockfile/workspace metadata and adds MUI/Emotion production dependencies.
 - Does not yet migrate `apps/base`, `apps/root-config`, `apps/mfe-ratan-container`, or `apps/mfe-cashflow-blotter`; those changes follow after the production foundation passes its own gates.
 - Does not change the proven two-layer rule: only React and ReactDOM may be federation singletons, and design packages are bundled into consumers.

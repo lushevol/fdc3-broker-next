@@ -26,7 +26,7 @@ None. Existing production capabilities remain unchanged; this change is isolated
 
 ## Impact
 
-- Adds `mvp/two-layer-federation/packages/ratan-design-poc` and registers it as an npm workspace dependency.
+- Adds `mvp/two-layer-federation/poc/packages/ratan-design-poc` and registers it as an npm workspace dependency.
 - Updates the MVP platform contracts and SDK, host, Cashflow application, tests, root MVP scripts, and isolated documentation.
 - Adds MUI and Emotion dependencies to the POC design package and consuming MVP workspaces without adding them to the Module Federation shared scope.
-- Does not modify the legacy Single-SPA/SystemJS runtime, production applications, existing `packages/ratan-design`, or `mfe-ratan-container`.
+- Does not modify the legacy Single-SPA/SystemJS runtime, production applications, the realworld design package, or `mfe-ratan-container`.

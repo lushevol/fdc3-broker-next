@@ -20,7 +20,7 @@ Every major includes migration guidance. A host may support the immediately prev
 
 ## POC separation
 
-`mvp/two-layer-federation/packages/ratan-design-poc` remains private evidence. Production code does not import it, alias it, or publish it. Proven behavior was reimplemented behind production identities and gates.
+`mvp/two-layer-federation/poc/packages/ratan-design-poc` remains private evidence. Production code does not import it, alias it, or publish it. Proven behavior was reimplemented behind production identities and gates.
 
 ## Next pilot
 

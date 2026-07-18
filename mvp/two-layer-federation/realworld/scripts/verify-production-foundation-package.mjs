@@ -4,7 +4,8 @@ import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const realworldRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const repositoryRoot = resolve(realworldRoot, '../../..');
 const temporaryRoot = mkdtempSync(join(tmpdir(), 'fm-production-foundation-'));
 
 function run(command, args, cwd = repositoryRoot) {
@@ -38,7 +39,7 @@ try {
   const tarballs = packages.map((packageName) => {
     const output = run('npm', [
       'pack',
-      resolve(repositoryRoot, 'packages', packageName),
+      resolve(realworldRoot, 'packages', packageName),
       '--json',
       '--pack-destination',
       temporaryRoot,
