@@ -15,9 +15,9 @@
 
 ## 3. Architecture conformance
 
-- [ ] 3.1 Add automated dependency/import/configuration scans for POC, Single-SPA, SystemJS, import-map, `@fm/base`, and `mfe-ratan-container` boundaries
-- [ ] 3.2 Verify only React and ReactDOM are federation singleton shares and the design/MUI/Emotion stack remains deployable-local
-- [ ] 3.3 Verify the host and application build independently without source aliases or POC artifacts
+- [x] 3.1 Add automated dependency/import/configuration scans for POC, Single-SPA, SystemJS, import-map, `@fm/base`, and `mfe-ratan-container` boundaries
+- [x] 3.2 Verify only React and ReactDOM are federation singleton shares and the design/MUI/Emotion stack remains deployable-local
+- [x] 3.3 Verify the host and application build independently without source aliases or POC artifacts
 
 ## 4. Browser acceptance and evidence
 
