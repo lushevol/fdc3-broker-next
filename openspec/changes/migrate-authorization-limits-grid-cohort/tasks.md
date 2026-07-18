@@ -1,10 +1,10 @@
 ## 1. Versioned data-grid adapter
 
-- [ ] 1.1 Add `@fm/ratan-data-grid@1.0.0` package metadata, AG Grid Community/React peer boundaries, ESM/declaration/CSS exports, and build configuration
-- [ ] 1.2 Add failing tests for bounded columns, stable row identity, selection, activation, pagination, loading, empty, error/retry, and restricted exports
-- [ ] 1.3 Implement the generic `RatanDataGrid` adapter without raw grid API/configuration exports
-- [ ] 1.4 Add scoped semantic AG Grid theme mapping for both schemes and densities
-- [ ] 1.5 Add dependency/license scans rejecting Ant, enterprise modules, federation runtimes, legacy Ratan imports, and design-foundation coupling
+- [x] 1.1 Add `@fm/ratan-data-grid@1.0.0` package metadata, AG Grid Community/React peer boundaries, ESM/declaration/CSS exports, and build configuration
+- [x] 1.2 Add failing tests for bounded columns, stable row identity, selection, activation, pagination, loading, empty, error/retry, and restricted exports
+- [x] 1.3 Implement the generic `RatanDataGrid` adapter without raw grid API/configuration exports
+- [x] 1.4 Add scoped semantic AG Grid theme mapping for both schemes and densities
+- [x] 1.5 Add dependency/license scans rejecting Ant, enterprise modules, federation runtimes, legacy Ratan imports, and design-foundation coupling
 
 ## 2. Authorization Limits domain cohort
 

@@ -1,0 +1,47 @@
+{
+  "name": "@fm/ratan-data-grid",
+  "version": "1.0.0",
+  "description": "Bounded AG Grid Community adapter for Ratan applications",
+  "private": true,
+  "type": "module",
+  "sideEffects": ["**/*.css"],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./dist/index.css"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsup src/index.tsx --format esm --dts --clean --external react --external react-dom --external ag-grid-community --external ag-grid-react",
+    "test": "vitest run --coverage",
+    "lint": "eslint src tests vitest.config.ts",
+    "clean": "rm -rf dist coverage"
+  },
+  "peerDependencies": {
+    "ag-grid-community": ">=32.3.0 <33",
+    "ag-grid-react": ">=32.3.0 <33",
+    "react": ">=18 <19",
+    "react-dom": ">=18 <19"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@vitest/coverage-v8": "^4.0.18",
+    "ag-grid-community": "32.3.0",
+    "ag-grid-react": "32.3.0",
+    "happy-dom": "^20.0.11",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "license": "UNLICENSED",
+  "publishConfig": { "access": "restricted" }
+}
