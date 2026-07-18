@@ -19,11 +19,15 @@ This track is private, disposable evidence. Every workspace retains a `-poc` pac
 Run from the repository root:
 
 ```bash
-npm run build:federation-mvp
-npm run test:federation-mvp
-npm run lint:federation-mvp
-npm run verify:federation-mvp-boundaries
-npm run test:e2e:federation-mvp
+npm run poc:dev
+npm run poc:build
+npm run poc:test
+npm run poc:lint
+npm run poc:verify:boundaries
+npm run poc:check
+npm run poc:test:e2e
 ```
+
+`poc:check` is the complete non-browser CI gate. `poc:test:e2e` builds the track, verifies its boundaries, starts the POC-only Playwright servers, and exercises the browser acceptance suite.
 
 Do not add production package identities, production migration cohorts, or deployment configuration to this track.

@@ -19,14 +19,16 @@ This track contains production package identities and the migration implementati
 Run from the repository root:
 
 ```bash
-npm run build:production-foundation
-npm run test:production-foundation
-npm run build:production-pilot
-npm run test:production-pilot
-npm run lint:production-pilot
-npm run verify:production-foundation-package
-npm run verify:production-pilot-boundaries
-npm run test:e2e:production-pilot
+npm run realworld:dev
+npm run realworld:build
+npm run realworld:test
+npm run realworld:lint
+npm run realworld:verify:packages
+npm run realworld:verify:boundaries
+npm run realworld:check
+npm run realworld:test:e2e
 ```
+
+`realworld:check` is the complete non-browser CI gate. Foundation-only and package-only building blocks remain available as `realworld:*:foundation` and `realworld:build:packages` commands for focused package work.
 
 Package identities and versions remain production-oriented even while this track is an isolated migration candidate. No realworld workspace may depend on a `*-poc` package or runtime artifact.

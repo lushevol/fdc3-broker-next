@@ -2,12 +2,16 @@
 
 The realworld track is accepted only when all of the following pass from the repository root:
 
-1. `npm run build:production-pilot`
-2. `npm run test:production-pilot`
-3. `npm run lint:production-pilot`
-4. `npm run verify:production-foundation-package`
-5. `npm run verify:production-pilot-boundaries`
-6. `npm run test:e2e:production-pilot`
+1. `npm run realworld:check`
+2. `npm run realworld:test:e2e`
+
+For focused diagnosis, the aggregate gates decompose into:
+
+- `npm run realworld:build`
+- `npm run realworld:test`
+- `npm run realworld:lint`
+- `npm run realworld:verify:packages`
+- `npm run realworld:verify:boundaries`
 
 The boundary verifier must report two runtime layers and React/ReactDOM as the only singleton shares. Package verification must consume packed public artifacts rather than source aliases. Browser verification must cover direct remote loading, nested routes, appearance propagation, standalone execution, failure recovery, Authorization Limits grid behavior, and anonymous rollback with mutation controls absent.
 

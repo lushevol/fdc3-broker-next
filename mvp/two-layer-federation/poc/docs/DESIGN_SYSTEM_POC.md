@@ -90,9 +90,9 @@ The smallest production follow-up is a separate change that decides the package 
 From the repository root:
 
 ```bash
-npm run test:federation-mvp
-npm run build:federation-mvp
-npm run test:e2e:federation-mvp
+npm run poc:test
+npm run poc:build
+npm run poc:test:e2e
 ```
 
 The E2E command builds packages in dependency order before starting isolated static servers on ports 9100 and 9101.
