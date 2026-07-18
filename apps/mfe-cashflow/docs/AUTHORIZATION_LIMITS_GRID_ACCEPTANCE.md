@@ -50,7 +50,7 @@ This size is accepted only for the bounded cohort. Before adding another grid-he
 
 - Create, edit, delete, approve add/edit/delete, and reject add/edit/delete.
 - Ant modal/message/form replacement for those mutation workflows.
-- Production Authorization Limits service integration, authentication, entitlements, maker/checker role policy, audit submission, and optimistic/concurrent update rules.
+- Production Authorization Limits service integration, authenticated principal delivery, audit submission, and concrete optimistic/concurrent update behavior. Pure entitlement and service ports are now specified and verified in [mutation ports](AUTHORIZATION_LIMITS_MUTATION_PORTS.md), but are not wired to the UI.
 - User column preferences, export, enterprise filters, sidebars, ranges, or other AG Grid Enterprise features.
 
 ## Production cutover blockers

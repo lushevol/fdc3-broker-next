@@ -6,10 +6,23 @@ describe('Authorization Limits policy and service boundaries', () => {
     'keeps %s free of UI, transport, federation, and legacy globals',
     (file) => {
       const source = readFileSync(resolve(process.cwd(), 'src', file), 'utf8');
+      const forbiddenReferences = [
+        "from 'react",
+        '@fm/ratan-design',
+        '@fm/ratan-data-grid',
+        '@mui/',
+        ['an', 'td'].join(''),
+        'axios',
+        '@module-federation/',
+        ['mfe-cashflow', 'blotter'].join('-'),
+        ['src', 'Root'].join('/'),
+        ['ratan', 'utils'].join(''),
+        ['ratan', 'components'].join(''),
+      ];
+      expect(forbiddenReferences.filter((reference) => source.includes(reference))).toEqual([]);
       expect(source).not.toMatch(
-        /from\s+['"](?:react|@fm\/ratan-design|@fm\/ratan-data-grid|@mui\/|antd|axios|@module-federation\/|\.\/\.\.\/mfe-cashflow-blotter|src\/Root\/)/,
+        /\b(?:fetch|XMLHttpRequest|hasPermission|getUser|service\.(?:get|post|put|delete))\b/,
       );
-      expect(source).not.toMatch(/\b(?:fetch|XMLHttpRequest|hasPermission|getUser|service\.(?:get|post|put|delete))\b/);
     },
   );
 });
