@@ -1,13 +1,13 @@
 ## 1. Capability and form behavior
 
-- [ ] 1.1 Add failing tests for absent capability, Visitor denial, entitled create/edit visibility, and pending/deferred action absence
-- [ ] 1.2 Add failing tests for controlled fields, validation, bounded limitation, loading repeat prevention, success reconciliation, error retention, and retry
-- [ ] 1.3 Implement the coherent principal/service mutation capability and application-owned create/edit state
+- [x] 1.1 Add failing tests for absent capability, Visitor denial, entitled create/edit visibility, and pending/deferred action absence
+- [x] 1.2 Add failing tests for controlled fields, validation, bounded limitation, loading repeat prevention, success reconciliation, error retention, and retry
+- [x] 1.3 Implement the coherent principal/service mutation capability and application-owned create/edit state
 
 ## 2. Production design composition
 
-- [ ] 2.1 Compose Dialog, TextField, NumberField, Button, and InlineAlert without raw UI/framework escape hatches
-- [ ] 2.2 Add boundary/style tests proving no Ant, raw MUI form/dialog, legacy Ratan globals, or global mutation infrastructure
+- [x] 2.1 Compose Dialog, TextField, NumberField, Button, and InlineAlert without raw UI/framework escape hatches
+- [x] 2.2 Add boundary/style tests proving no Ant, raw MUI form/dialog, legacy Ratan globals, or global mutation infrastructure
 
 ## 3. Documentation and verification
 

@@ -25,4 +25,23 @@ describe('Authorization Limits policy and service boundaries', () => {
       );
     },
   );
+
+  it('keeps create/edit composition on bounded production design APIs', () => {
+    const source = ['AuthorizationLimits.tsx', 'AuthorizationLimitEditor.tsx']
+      .map((file) => readFileSync(resolve(process.cwd(), 'src', file), 'utf8'))
+      .join('\n');
+    const forbiddenReferences = [
+      '@mui/',
+      ['an', 'td'].join(''),
+      ['src', 'Root'].join('/'),
+      ['ratan', 'utils'].join(''),
+      ['ratan', 'components'].join(''),
+      'slotProps=',
+      'sx=',
+    ];
+    expect(forbiddenReferences.filter((reference) => source.includes(reference))).toEqual([]);
+    for (const component of ['Dialog', 'TextField', 'NumberField', 'Button', 'InlineAlert']) {
+      expect(source).toContain(component);
+    }
+  });
 });
