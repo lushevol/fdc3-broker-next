@@ -13,11 +13,11 @@
 ## 3. Boundaries and documentation
 
 - [x] 3.1 Extend boundary checks for host/domain isolation, no concrete transport, and dormant default bootstrap
-- [ ] 3.2 Document the composition API, activation inputs, live downgrade behavior, and rollback path
-- [ ] 3.3 Confirm platform packages, host, registry, and federation topology remain unchanged
+- [x] 3.2 Document the composition API, activation inputs, live downgrade behavior, and rollback path
+- [x] 3.3 Confirm platform packages, host, registry, and federation topology remain unchanged
 
 ## 4. Verification
 
-- [ ] 4.1 Run focused/full coverage, lint, strict TypeScript, and production builds
-- [ ] 4.2 Run runtime-boundary verification and all current browser rollback journeys
-- [ ] 4.3 Strict-validate OpenSpec and record bundle/test evidence
+- [x] 4.1 Run focused/full coverage, lint, strict TypeScript, and production builds
+- [x] 4.2 Run runtime-boundary verification and all current browser rollback journeys
+- [x] 4.3 Strict-validate OpenSpec and record bundle/test evidence
