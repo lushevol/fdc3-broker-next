@@ -12,11 +12,11 @@
 ## 3. Legacy separation and documentation
 
 - [x] 3.1 Add boundary checks excluding legacy globals, storage, credentials, domain roles, and container imports
-- [ ] 3.2 Document legacy identity/entitlement/header behavior and replacement ownership
-- [ ] 3.3 Confirm platform contracts, SDK, registry, Cashflow, and federation topology remain unchanged
+- [x] 3.2 Document legacy identity/entitlement/header behavior and replacement ownership
+- [x] 3.3 Confirm platform contracts, SDK, registry, Cashflow, and federation topology remain unchanged
 
 ## 4. Verification
 
-- [ ] 4.1 Run host/full pilot coverage, lint, strict TypeScript, and production builds
+- [x] 4.1 Run host/full pilot coverage, lint, strict TypeScript, and production builds
 - [ ] 4.2 Run two-layer boundary verification and browser rollback journeys
-- [ ] 4.3 Strict-validate OpenSpec and record test/bundle evidence
+- [x] 4.3 Strict-validate OpenSpec and record test/bundle evidence
