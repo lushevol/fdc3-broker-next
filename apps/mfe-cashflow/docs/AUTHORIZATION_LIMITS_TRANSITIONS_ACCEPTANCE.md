@@ -52,7 +52,7 @@ The complete opt-in mutation composition is 16.1 KB / 4.4 KB gzip above the acce
 ## Remaining activation and cutover criteria
 
 1. Version and approve authenticated identity/entitlement delivery.
-2. Implement a production service adapter with credentials, CSRF, runtime response validation, timeout, and categorized error mapping.
+2. Validate the dormant [HTTP adapter](AUTHORIZATION_LIMITS_HTTP_ADAPTER_ACCEPTANCE.md) against approved backend fixtures, then supply credentials, CSRF, timeout, and telemetry through an approved transport.
 3. Prove real backend fixtures for all six service operations, including conflict and record-removal semantics.
 4. Add authenticated non-production browser journeys for every operation and self-verification denial.
 5. Activate behind cohort/canary configuration with telemetry, SLOs, legacy-route fallback, and registry rollback.

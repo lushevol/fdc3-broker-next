@@ -12,6 +12,6 @@
 
 ## 3. Documentation and verification
 
-- [ ] 3.1 Document endpoint mapping, payload assumptions, transport responsibilities, dormant bootstrap, and activation blockers
-- [ ] 3.2 Run focused/full coverage, lint/build, production pilot/package regression, runtime boundaries, browser rollback, and strict OpenSpec validation
-- [ ] 3.3 Record test/bundle evidence and remaining authenticated activation/cutover criteria
+- [x] 3.1 Document endpoint mapping, payload assumptions, transport responsibilities, dormant bootstrap, and activation blockers
+- [x] 3.2 Run focused/full coverage, lint/build, production pilot/package regression, runtime boundaries, browser rollback, and strict OpenSpec validation
+- [x] 3.3 Record test/bundle evidence and remaining authenticated activation/cutover criteria
