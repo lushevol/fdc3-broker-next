@@ -1,7 +1,7 @@
 ## 1. Controlled numeric form control
 
-- [ ] 1.1 Add failing NumberField tests for controlled number/null changes, label, required/disabled, min/max/step, helper/error association, invalid state, focus, and restricted props
-- [ ] 1.2 Implement the bounded NumberField API and semantic token styling without domain formatting or form-state ownership
+- [x] 1.1 Add failing NumberField tests for controlled number/null changes, label, required/disabled, min/max/step, helper/error association, invalid state, focus, and restricted props
+- [x] 1.2 Implement the bounded NumberField API and semantic token styling without domain formatting or form-state ownership
 
 ## 2. Accessible overlay interactions
 
