@@ -10,6 +10,7 @@
     "test:e2e": "playwright test tests/e2e --project=chromium",
     "test:e2e:headed": "playwright test tests/e2e --project=chromium --headed",
     "openfin:e2e:launch": "node scripts/openfin-e2e-launch.js",
+    "openfin:single-view:launch": "node scripts/openfin-single-view-launch.js",
     "test:e2e:openfin": "cross-env OPENFIN_E2E=1 playwright test tests/e2e/openfin-fdc3-bridge.spec.ts --project=chromium --ui",
     "test:e2e:chat-protocol": "cross-env PLAYWRIGHT_CHAT_PROTOCOL_DEMO=1 playwright test tests/e2e/chat-protocol-demo*.spec.ts --project=chat-protocol-demo",
     "poc:build:packages": "npm --workspace @fm/platform-contracts-poc run build && npm --workspace @fm/platform-sdk-poc run build && npm --workspace @fm/ratan-sdk-poc run build && npm --workspace @fm/ratan-design-poc run build && npm --workspace @fm/ratan-ui-poc run build",

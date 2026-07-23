@@ -11,8 +11,17 @@ import type { TabProps } from './common/interface';
 import Root, { classes, PREFIX } from './common/style';
 
 const TabItem: React.FC<TabProps> = (props: TabProps): ReactElement => {
-  const { item, edit, remove, refreshTab, showRemove, showRefresh, closeOthers, closeAll } =
-    props;
+  const {
+    item,
+    edit,
+    remove,
+    refreshTab,
+    showRemove,
+    showRefresh,
+    closeOthers,
+    closeAll,
+    openInSingleView,
+  } = props;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
 
@@ -25,9 +34,15 @@ const TabItem: React.FC<TabProps> = (props: TabProps): ReactElement => {
     setAnchorEl(null);
   };
 
+  const handleContextMenu = (event: React.MouseEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+
   return (
     <Tooltip title={item.label} placement="top-start">
-      <Root data-testid={`${PREFIX}`}>
+      <Root data-testid={`${PREFIX}`} onContextMenu={handleContextMenu}>
         <div className={classes.textBoxOutter}>
           <TextField
             id={`edit-${item.id}`}
@@ -90,6 +105,15 @@ const TabItem: React.FC<TabProps> = (props: TabProps): ReactElement => {
             horizontal: 'right',
           }}
         >
+          <MenuItem
+            onClick={() => {
+              handleMenuClose();
+              void openInSingleView(item);
+            }}
+            disabled={!item.containers?.length}
+          >
+            Open in Single View
+          </MenuItem>
           <MenuItem
             onClick={(e) => {
               handleMenuClose();

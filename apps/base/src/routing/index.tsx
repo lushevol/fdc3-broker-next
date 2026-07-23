@@ -17,12 +17,14 @@ import Splash from '../components/Splash';
 import Login from '../pages/Login';
 import Root, { classes, PREFIX } from './common/style';
 import useController from './common/useController';
+import { isSingleViewRequest } from '../pages/Home/common/singleView';
 
 /**
  * Lazy-loaded Home component for authenticated users.
  * Loaded on demand to improve initial bundle size.
  */
 const Home = React.lazy(() => import('../pages/Home'));
+const SingleView = React.lazy(() => import('../pages/SingleView'));
 
 /**
  * Determines which component to render based on authentication state.
@@ -31,7 +33,10 @@ const Home = React.lazy(() => import('../pages/Home'));
  * @param entities - The user's entity permissions
  * @returns Home component if authenticated, Login component otherwise
  */
-export const RoutingComponent = (token, entities) => (token && entities ? <Home /> : <Login />);
+export const RoutingComponent = (token, entities) => {
+  if (!token || !entities) return <Login />;
+  return isSingleViewRequest() ? <SingleView /> : <Home />;
+};
 
 /**
  * Main Routing Component
@@ -54,6 +59,7 @@ const Routing: React.FC = (_props): ReactElement => {
 
   // Get application store and handlers from controller
   const { store, handleCloseErrorMessage, isReady } = useController();
+  const singleViewRequest = isSingleViewRequest();
 
   // Show page loader while app initializes
   if (!isReady) {
@@ -70,10 +76,10 @@ const Routing: React.FC = (_props): ReactElement => {
       <Suspense fallback={<Splash />}>{RoutingComponent(store.token, store.entities)}</Suspense>
 
       {/* Global loading overlay */}
-      {store.isLoading && <PageLoader />}
+      {!singleViewRequest && store.isLoading && <PageLoader />}
 
       {/* Global error message snackbar */}
-      {store.errorMsg && (
+      {!singleViewRequest && store.errorMsg && (
         <Snackbar
           open={!!store.errorMsg}
           onClose={handleCloseErrorMessage}

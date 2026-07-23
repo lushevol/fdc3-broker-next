@@ -28,6 +28,7 @@ import { getBrowserInteropBrokerOptions } from './postmessage';
 import { getOpenFinBrokerOptions } from "./openfin";
 import workflows from './declarations/workflows.json';
 import { useContext as useAppContext } from '../hooks/provider';
+import { isSingleViewRequest } from '../pages/Home/common/singleView';
 
 // ============================================================================
 // FDC3 Tile Provider for Base Workspace Containers
@@ -145,6 +146,7 @@ interface FDC3IntegrationProps {
  * ```
  */
 export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) => {
+  const singleViewRequest = isSingleViewRequest();
   // ========================================================================
   // State Management
   // ========================================================================
@@ -604,17 +606,19 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
       {children}
 
       {/* FDC3 Resolver Dialog */}
-      <ResolverDialog
-        open={resolverOpen}
-        intent={resolverIntent}
-        context={resolverContext as Context}
-        targets={resolverTargets}
-        onSelect={handleResolverSelect}
-        onCancel={handleResolverCancel}
-      />
+      {!singleViewRequest && (
+        <ResolverDialog
+          open={resolverOpen}
+          intent={resolverIntent}
+          context={resolverContext as Context}
+          targets={resolverTargets}
+          onSelect={handleResolverSelect}
+          onCancel={handleResolverCancel}
+        />
+      )}
 
       {/* Floating FDC3 Console — only in dev mode when logged in */}
-      {process.env.NODE_ENV === 'development' && store.token && (
+      {!singleViewRequest && process.env.NODE_ENV === 'development' && store.token && (
         <FDC3ConsoleWidget />
       )}
 

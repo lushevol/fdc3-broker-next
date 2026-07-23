@@ -1,14 +1,17 @@
 import React from 'react';
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import useAnalytics from '../../../analytics';
 import type { AnalyticsData } from '../../../analytics/model';
 import useDispatcher from '../../../hooks/dispathcer';
 import type { Workspace } from '../../../hooks/model/workspaces';
+import { firstWorkspace } from '../../../hooks/model/workspaces';
 import { useContext } from '../../../hooks/provider';
 import { getRefreshToken } from '../../../hooks/service';
 import { extend } from '../../../hooks/service/util/extend';
 import { aOrb, validateWorkspace } from '../../../utils/common';
 import { handleLoginEntities } from '../../../utils/login';
 import { refreshTabUtil, setDetail } from './util';
+import { launchSingleView } from './singleView';
 
 const analyticsData: AnalyticsData = { container: 'Base', tile: 'home' };
 
@@ -22,9 +25,9 @@ const useController = () => {
     addWorkspace,
     dispacthErrorMessage,
   } = useDispatcher();
-  const timerPopup = React.useRef<any>(0);
-  const timerMouseMove = React.useRef<any>(0);
-  const timerRefreshToken = React.useRef<any>(0);
+  const timerPopup = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timerMouseMove = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timerRefreshToken = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showTimeout, setShowTimeout] = React.useState(false);
   const [value, setValue] = React.useState(1);
   const [ready, setReady] = React.useState(false);
@@ -51,7 +54,7 @@ const useController = () => {
     dispacthErrorMessage(undefined);
   };
 
-  const handleDragStart = (event) => {
+  const handleDragStart = (event: DragStartEvent) => {
     setActiveDragId(event.active.id as string);
   };
 
@@ -59,7 +62,59 @@ const useController = () => {
     setActiveDragId(null);
   };
 
-  const handleReorder = (event) => {
+  const removeTransferredWorkspace = React.useCallback(
+    (item: Workspace) => {
+      const workspaces = [...(store?.workspaces as Workspace[])];
+      const index = workspaces.findIndex((workspace) => workspace.id === item.id);
+      if (index === -1) return;
+
+      workspaces.splice(index, 1);
+      const nextWorkspaces = workspaces.length > 0 ? workspaces : [firstWorkspace()];
+      const nextWorkspace = nextWorkspaces[Math.min(index, nextWorkspaces.length - 1)];
+      dispacthWorkspaces(nextWorkspaces);
+      dispacthCurrentWorkspace(nextWorkspace);
+      setValue(Math.min(index + 1, nextWorkspaces.length));
+    },
+    [dispacthCurrentWorkspace, dispacthWorkspaces, store?.workspaces],
+  );
+
+  const openInSingleView = React.useCallback(
+    async (item: Workspace) => {
+      const container = item.containers?.[0];
+      if (!container) {
+        dispacthErrorMessage('Only a workspace containing a tile can open in single view.');
+        return;
+      }
+
+      try {
+        await launchSingleView(container);
+        removeTransferredWorkspace(item);
+        ButtonEvent('click', {
+          name: 'open workspace in single view',
+          value: container.title,
+          ...analyticsData,
+        });
+        dispacthErrorMessage(undefined);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unable to open single view.';
+        dispacthErrorMessage(message);
+      }
+    },
+    [ButtonEvent, dispacthErrorMessage, removeTransferredWorkspace],
+  );
+
+  const isDraggedOutsideViewport = (event: DragEndEvent): boolean => {
+    const rect = event.active.rect.current.translated;
+    if (!rect) return false;
+    return (
+      rect.left < 0 ||
+      rect.top < 0 ||
+      rect.right > window.innerWidth ||
+      rect.bottom > window.innerHeight
+    );
+  };
+
+  const handleReorder = (event: DragEndEvent) => {
     setActiveDragId(null);
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -86,6 +141,18 @@ const useController = () => {
     });
     dispacthErrorMessage(undefined);
   };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    setActiveDragId(null);
+    if (isDraggedOutsideViewport(event)) {
+      const workspace = (store?.workspaces as Workspace[])?.find(
+        (item) => item.id === event.active.id,
+      );
+      if (workspace) await openInSingleView(workspace);
+      return;
+    }
+    handleReorder(event);
+  };
   const runExtend = () => {
     extend(store?.expiredIn, store.isOnLogout, store.token);
   };
@@ -108,7 +175,7 @@ const useController = () => {
   };
 
   React.useEffect(() => {
-    const params: any = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location.search);
     if (params?.get('code')) {
       handleLoginEntities(store.entities, dispatch, store.drawers);
     }
@@ -289,9 +356,11 @@ const useController = () => {
     closeOthers,
     closeAll,
     handleReorder,
+    handleDragEnd,
     handleDragStart,
     handleDragCancel,
     activeDragId,
+    openInSingleView,
   };
 };
 

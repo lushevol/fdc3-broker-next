@@ -53,10 +53,11 @@ const Home: React.FC = (): ReactElement => {
     closeAllTiles,
     closeOthers,
     closeAll,
-    handleReorder,
+    handleDragEnd,
     handleDragStart,
     handleDragCancel,
     activeDragId,
+    openInSingleView,
   } = useController();
   const { openTile } = useParameters();
   const { channelMessage, clearMessage } = useOpenfin(openTile);
@@ -147,7 +148,7 @@ const Home: React.FC = (): ReactElement => {
         <main className={classes.main}>
           <DndContext
             onDragStart={handleDragStart}
-            onDragEnd={handleReorder}
+            onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}
             sensors={sensors}
           >
@@ -184,6 +185,7 @@ const Home: React.FC = (): ReactElement => {
                         showRefresh={showRefresh}
                         closeOthers={closeOthers}
                         closeAll={closeAll}
+                        openInSingleView={openInSingleView}
                       />
                     </SortableTab>
                   );
@@ -220,6 +222,7 @@ const Home: React.FC = (): ReactElement => {
                     }
                     closeOthers={closeOthers}
                     closeAll={closeAll}
+                    openInSingleView={openInSingleView}
                   />
                 </div>
               ) : null}

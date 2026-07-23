@@ -9,4 +9,5 @@ export interface TabProps {
   showRefresh: boolean;
   closeOthers: (item: Workspace) => void;
   closeAll: () => void;
+  openInSingleView: (item: Workspace) => Promise<void>;
 }

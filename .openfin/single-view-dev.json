@@ -1,0 +1,35 @@
+{
+  "devtools_port": 9323,
+  "runtime": {
+    "version": "stable",
+    "arguments": "--v=1 --remote-debugging-port=9323"
+  },
+  "platform": {
+    "uuid": "mfe-base-single-view-dev",
+    "name": "mfe-base-single-view-dev",
+    "autoShow": false,
+    "providerUrl": "http://127.0.0.1:9500/platform-provider.html",
+    "defaultWindowOptions": {
+      "saveWindowState": false,
+      "fdc3Api": true,
+      "fdc3InteropApi": "2.0",
+      "defaultWidth": 1440,
+      "defaultHeight": 950
+    }
+  },
+  "snapshot": {
+    "windows": [
+      {
+        "name": "mfe-base-single-view-dev-home",
+        "uuid": "mfe-base-single-view-dev",
+        "url": "http://127.0.0.1:8001/?show_normal_login=Y",
+        "autoShow": true,
+        "saveWindowState": false,
+        "fdc3Api": true,
+        "fdc3InteropApi": "2.0",
+        "defaultWidth": 1440,
+        "defaultHeight": 950
+      }
+    ]
+  }
+}
