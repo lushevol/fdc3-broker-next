@@ -1,6 +1,6 @@
 # @fm/base — Project Overview
 
-> Parent: [Monorepo AGENTS.md](../../AGENTS.md)
+> Parent: [Monorepo AGENTS.md](../../../AGENTS.md)
 
 | Field       | Value                                                  |
 | ----------- | ------------------------------------------------------ |

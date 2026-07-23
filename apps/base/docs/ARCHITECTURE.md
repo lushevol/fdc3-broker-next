@@ -1,6 +1,6 @@
 # @fm/base — Architecture
 
-> Parent: [PROJECT.md](./PROJECT.md) | [Monorepo AGENTS.md](../../AGENTS.md)
+> Parent: [PROJECT.md](./PROJECT.md) | [Monorepo AGENTS.md](../../../AGENTS.md)
 
 ## Tech Stack
 

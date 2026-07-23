@@ -1,0 +1,16 @@
+## 1. Capability and form behavior
+
+- [x] 1.1 Add failing tests for absent capability, Visitor denial, entitled create/edit visibility, and pending/deferred action absence
+- [x] 1.2 Add failing tests for controlled fields, validation, bounded limitation, loading repeat prevention, success reconciliation, error retention, and retry
+- [x] 1.3 Implement the coherent principal/service mutation capability and application-owned create/edit state
+
+## 2. Production design composition
+
+- [x] 2.1 Compose Dialog, TextField, NumberField, Button, and InlineAlert without raw UI/framework escape hatches
+- [x] 2.2 Add boundary/style tests proving no Ant, raw MUI form/dialog, legacy Ratan globals, or global mutation infrastructure
+
+## 3. Documentation and verification
+
+- [x] 3.1 Document the opt-in bootstrap contract, rollback-by-omission, accepted behavior, and deferred delete/transition cohorts
+- [x] 3.2 Run focused/full Cashflow coverage, lint/build, design/package/pilot regression, runtime boundaries, browser read-only regression, and strict OpenSpec validation
+- [x] 3.3 Record acceptance evidence and concrete adapter/transition entry criteria

@@ -1,10 +1,10 @@
-# @fm/fdc3-resolver-ui
+# ratan-fdc3-resolver-ui
 
 **React resolver UI component for FDC3 intent resolution with full accessibility support**
 
 ## Overview
 
-`@fm/fdc3-resolver-ui` provides React components for displaying the resolver UI when multiple target applications are available for an intent. It features a user-friendly interface with full keyboard navigation and WCAG 2.1 AA compliance.
+`ratan-fdc3-resolver-ui` provides React components for displaying the resolver UI when multiple target applications are available for an intent. It features a user-friendly interface with full keyboard navigation and WCAG 2.1 AA compliance.
 
 ### Key Features
 
@@ -25,14 +25,14 @@
 │           Base MFE (@fm/base)                  │
 │                                                │
 │  ┌──────────────────────────────────────────┐  │
-│  │      @fm/fdc3-broker                    │  │
+│  │      ratan-fdc3-broker                    │  │
 │  │  - Detects ambiguous intent targets    │  │
 │  │  - Calls onShowResolverUI callback     │  │
 │  │  - Waits for user selection            │  │
 │  └──────────────┬───────────────────────────┘  │
 │                 ↓                               │
 │  ┌──────────────────────────────────────────┐  │
-│  │  @fm/fdc3-resolver-ui                  │  │
+│  │  ratan-fdc3-resolver-ui                  │  │
 │  │  ┌────────────────────────────────────┐ │  │
 │  │  │ ResolverDialog                     │ │  │
 │  │  │ - Modal overlay                    │ │  │
@@ -58,7 +58,7 @@
 
 ```bash
 cd apps/base
-yarn add @fm/fdc3-resolver-ui
+npm install ratan-fdc3-resolver-ui
 ```
 
 ### Peer Dependencies
@@ -88,7 +88,7 @@ This package supports code splitting to reduce the initial bundle size. Use lazy
 ### Lazy Loading with Suspense
 
 ```tsx
-import { lazyResolverDialog, ResolverSuspense } from '@fm/fdc3-resolver-ui';
+import { lazyResolverDialog, ResolverSuspense } from 'ratan-fdc3-resolver-ui';
 
 const App: React.FC = () => {
   const [resolverState, setResolverState] = useState({
@@ -123,7 +123,7 @@ const App: React.FC = () => {
 Prefetch the resolver components before they're needed to improve the user experience:
 
 ```tsx
-import { preloadResolver } from '@fm/fdc3-resolver-ui';
+import { preloadResolver } from 'ratan-fdc3-resolver-ui';
 
 // Preload on component mount
 useEffect(() => {
@@ -165,8 +165,8 @@ useEffect(() => {
 // apps/base/src/root.tsx or apps/base/src/hooks/provider/index.tsx
 
 import React, { useState } from 'react';
-import { BrokerProvider } from '@fm/fdc3-broker';
-import { ResolverDialog } from '@fm/fdc3-resolver-ui';
+import { BrokerProvider } from 'ratan-fdc3-broker';
+import { ResolverDialog } from 'ratan-fdc3-resolver-ui';
 
 const AppWithBroker: React.FC = ({ children }) => {
   const [resolverState, setResolverState] = useState({
@@ -239,7 +239,7 @@ export default AppWithBroker;
 
 ```tsx
 import React, { useState } from 'react';
-import { ResolverDialog } from '@fm/fdc3-resolver-ui';
+import { ResolverDialog } from 'ratan-fdc3-resolver-ui';
 
 const App: React.FC = () => {
   const [resolverState, setResolverState] = useState({
@@ -521,7 +521,7 @@ const theme = createTheme({
 You can also create your own dialog using the individual components:
 
 ```tsx
-import { AppCard, ContextPreview } from '@fm/fdc3-resolver-ui';
+import { AppCard, ContextPreview } from 'ratan-fdc3-resolver-ui';
 
 const CustomResolver = ({ open, targets, onSelect, onCancel }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -565,8 +565,8 @@ const CustomResolver = ({ open, targets, onSelect, onCancel }) => {
 ### Pattern 1: Integration with Broker (Recommended)
 
 ```tsx
-import { BrokerProvider } from '@fm/fdc3-broker';
-import { ResolverDialog } from '@fm/fdc3-resolver-ui';
+import { BrokerProvider } from 'ratan-fdc3-broker';
+import { ResolverDialog } from 'ratan-fdc3-resolver-ui';
 
 const App = () => {
   const [resolverState, setResolverState] = useState({
@@ -699,7 +699,7 @@ The `ResolverErrorBoundary` component catches JavaScript errors in the resolver 
 #### Basic Usage
 
 ```tsx
-import { ResolverErrorBoundary, ResolverDialog } from '@fm/fdc3-resolver-ui';
+import { ResolverErrorBoundary, ResolverDialog } from 'ratan-fdc3-resolver-ui';
 
 <ResolverErrorBoundary
   onError={(error, errorInfo) => {
@@ -818,7 +818,7 @@ global.IntersectionObserver = vi.fn(() => ({
 ```typescript
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { ResolverDialog } from "@fm/fdc3-resolver-ui";
+import { ResolverDialog } from "ratan-fdc3-resolver-ui";
 
 describe("ResolverDialog", () => {
   const mockTargets = [
@@ -979,7 +979,7 @@ MIT
 
 ## Related Packages
 
-- [`@fm/fdc3-broker`](../fdc3-broker) - FDC3 broker (uses this package)
-- [`@fm/fdc3-agent`](../fdc3-agent) - FDC3 agent for tiles
-- [`@fm/fdc3-app-directory`](../fdc3-app-directory) - App Directory client
+- [`ratan-fdc3-broker`](../fdc3-broker) - FDC3 broker (uses this package)
+- [`ratan-fdc3-agent`](../fdc3-agent) - FDC3 agent for tiles
+- [`ratan-fdc3-app-directory`](../fdc3-app-directory) - App Directory client
 - [`@finos/fdc3`](https://www.npmjs.com/package/@finos/fdc3) - Official FDC3 standard

@@ -1,6 +1,6 @@
 # @ai-gateway/local-llm-ws-client — Project Overview
 
-← [Monorepo AGENTS.md](../../AGENTS.md)
+← [Monorepo AGENTS.md](../../../AGENTS.md)
 
 ## Type
 

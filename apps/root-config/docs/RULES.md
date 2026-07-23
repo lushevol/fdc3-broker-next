@@ -1,6 +1,6 @@
 # @fm/root-config — Development Rules
 
-> **Parent rules:** [../../docs/rules.md](../../docs/rules.md) | **Monorepo conventions:** [../../../AGENTS.md](../../../AGENTS.md)
+> **Parent rules:** [../../../docs/rules.md](../../../docs/rules.md) | **Monorepo conventions:** [../../../AGENTS.md](../../../AGENTS.md)
 
 ## Module Format
 

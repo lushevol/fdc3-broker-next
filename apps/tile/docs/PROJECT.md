@@ -1,6 +1,6 @@
 # @fm/template — Project Overview
 
-> Parent: [Monorepo AGENTS.md](../../AGENTS.md)
+> Parent: [Monorepo AGENTS.md](../../../AGENTS.md)
 
 ## Type
 

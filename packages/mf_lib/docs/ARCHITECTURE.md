@@ -1,6 +1,6 @@
 # mf_lib — Architecture
 
-> Parent: [Monorepo AGENTS.md](../../AGENTS.md)
+> Parent: [Monorepo AGENTS.md](../../../AGENTS.md)
 
 ## Tech Stack
 

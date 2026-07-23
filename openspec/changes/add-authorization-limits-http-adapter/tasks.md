@@ -1,0 +1,17 @@
+## 1. Endpoint and decoding contract
+
+- [x] 1.1 Add failing tests for all methods, paths, encoded segments, and request bodies
+- [x] 1.2 Add failing tests for complete list/record decoding and malformed status/currency/numeric/audit/list payloads
+- [x] 1.3 Implement the transport-injected adapter and pure runtime record decoder
+
+## 2. Failure and dependency boundaries
+
+- [x] 2.1 Add failing tests for 400/401/403/409/422/5xx/other status mapping, transport throws, retryability, and preserved categorized errors
+- [x] 2.2 Implement deterministic failure mapping without swallowed or fabricated results
+- [x] 2.3 Extend boundary tests for concrete client, browser global, UI, legacy, and federation exclusions
+
+## 3. Documentation and verification
+
+- [x] 3.1 Document endpoint mapping, payload assumptions, transport responsibilities, dormant bootstrap, and activation blockers
+- [x] 3.2 Run focused/full coverage, lint/build, production pilot/package regression, runtime boundaries, browser rollback, and strict OpenSpec validation
+- [x] 3.3 Record test/bundle evidence and remaining authenticated activation/cutover criteria

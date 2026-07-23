@@ -1,0 +1,38 @@
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-quartz.css';
+
+.ratan-data-grid {
+  --ag-font-family: var(--ratan-font-family);
+  --ag-font-size: var(--ratan-font-size-body);
+  --ag-background-color: var(--ratan-color-surface-default);
+  --ag-foreground-color: var(--ratan-color-content-primary);
+  --ag-header-background-color: var(--ratan-color-surface-raised);
+  --ag-header-foreground-color: var(--ratan-color-content-secondary);
+  --ag-border-color: var(--ratan-color-border-subtle);
+  --ag-row-hover-color: var(--ratan-color-surface-interactive);
+  --ag-selected-row-background-color: var(--ratan-color-surface-interactive);
+  --ag-range-selection-border-color: var(--ratan-color-focus-ring);
+  --ag-input-focus-border-color: var(--ratan-color-focus-ring);
+  --ag-checkbox-checked-color: var(--ratan-color-action-primary);
+  width: 100%;
+  color-scheme: inherit;
+}
+
+.ratan-design-root[data-ratan-density="compact"] .ratan-data-grid {
+  --ag-grid-size: 4px;
+  --ag-row-height: 36px;
+  --ag-header-height: 36px;
+}
+
+.ratan-design-root[data-ratan-density="comfortable"] .ratan-data-grid {
+  --ag-grid-size: 6px;
+  --ag-row-height: 44px;
+  --ag-header-height: 44px;
+}
+
+.ratan-data-grid .ag-root-wrapper { border-radius: var(--ratan-radius-control); }
+.ratan-data-grid .ag-row.ratan-row-selected { box-shadow: inset 3px 0 var(--ratan-color-action-primary); }
+.ratan-data-grid :where(.ag-cell, .ag-header-cell):focus-within { outline: var(--ratan-focus-width) solid var(--ratan-color-focus-ring); outline-offset: calc(-1 * var(--ratan-focus-width)); }
+.ratan-data-grid-state { display: grid; min-height: 10rem; place-content: center; padding: 1rem; border: 1px solid var(--ratan-color-border-subtle); border-radius: var(--ratan-radius-control); color: var(--ratan-color-content-secondary); background: var(--ratan-color-surface-default); text-align: center; }
+.ratan-data-grid-error { color: var(--ratan-color-status-blocked-content); background: var(--ratan-color-status-blocked-surface); }
+.ratan-data-grid-error button { min-height: var(--ratan-control-height); padding-inline: var(--ratan-control-padding-inline); border: 1px solid currentColor; border-radius: var(--ratan-radius-control); color: inherit; background: transparent; }

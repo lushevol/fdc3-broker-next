@@ -1,0 +1,15 @@
+{
+  "applications": [
+    {
+      "id": "cashflow",
+      "displayName": "Cashflow",
+      "remoteName": "mfe_cashflow_poc",
+      "manifestUrl": "http://127.0.0.1:9101/mf-manifest.json",
+      "exposedModule": "./application",
+      "basePath": "/cashflow",
+      "contractVersion": "1.0.0",
+      "appearanceContractVersion": "1.0.0",
+      "capabilities": ["navigation", "notifications", "telemetry", "workspace", "appearance"]
+    }
+  ]
+}

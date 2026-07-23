@@ -1,10 +1,10 @@
-# @fm/fdc3-broker
+# ratan-fdc3-broker
 
 **FDC3 2.2-compliant broker implementation for MFE platform**
 
 ## Overview
 
-`@fm/fdc3-broker` is a central FDC3 broker that runs in the base MFE layer and provides full FDC3 2.2 DesktopAgent API functionality. It handles intent resolution, channel management, context broadcasting, and integrates with OpenFin for bidirectional routing.
+`ratan-fdc3-broker` is a central FDC3 broker that runs in the base MFE layer and provides full FDC3 2.2 DesktopAgent API functionality. It handles intent resolution, channel management, context broadcasting, and integrates with OpenFin for bidirectional routing.
 
 ### Key Features
 
@@ -25,7 +25,7 @@
 │                    Base MFE (@fm/base)                       │
 │                                                               │
 │  ┌──────────────────────────────────────────────────────┐   │
-│  │           FDC3 Broker (@fm/fdc3-broker)              │   │
+│  │           FDC3 Broker (ratan-fdc3-broker)              │   │
 │  │  - Intent Resolution (uses @finos/fdc3 types)        │   │
 │  │  - Channel Management                                 │   │
 │  │  - Context Broadcasting                               │   │
@@ -54,7 +54,7 @@
 
 ```bash
 cd apps/base
-yarn add @fm/fdc3-broker @fm/fdc3-app-directory @fm/fdc3-resolver-ui
+npm install ratan-fdc3-broker ratan-fdc3-app-directory ratan-fdc3-resolver-ui
 ```
 
 ### Peer Dependencies
@@ -75,8 +75,8 @@ Create and configure the broker in your base MFE:
 ```tsx
 // apps/base/src/hooks/fdc3/broker.ts
 
-import { Broker } from '@fm/fdc3-broker';
-import { AppDirectoryClientImpl } from '@fm/fdc3-app-directory';
+import { Broker } from 'ratan-fdc3-broker';
+import { AppDirectoryClientImpl } from 'ratan-fdc3-app-directory';
 
 // Create app directory client
 const appDirectory = new AppDirectoryClientImpl({
@@ -157,7 +157,7 @@ Set up the broker so tiles can access it via the agent:
 
 import { useEffect } from 'react';
 import { broker } from './hooks/fdc3/broker';
-import { setBroker } from '@fm/fdc3-agent';
+import { setBroker } from 'ratan-fdc3-agent';
 
 const AppWithBroker: React.FC = ({ children }) => {
   useEffect(() => {
@@ -184,9 +184,9 @@ If you want to use the built-in resolver UI for ambiguous intents:
 // apps/base/src/hooks/fdc3/broker-with-resolver.tsx
 
 import React, { useState } from 'react';
-import { Broker, ResolverTarget } from '@fm/fdc3-broker';
-import { ResolverDialog } from '@fm/fdc3-resolver-ui';
-import type { Context } from '@fm/fdc3-broker';
+import { Broker, ResolverTarget } from 'ratan-fdc3-broker';
+import { ResolverDialog } from 'ratan-fdc3-resolver-ui';
+import type { Context } from 'ratan-fdc3-broker';
 
 export const createBrokerWithResolver = () => {
   const [resolverState, setResolverState] = useState({
@@ -274,7 +274,7 @@ Open browser console and check:
 The main FDC3 broker implementation.
 
 ```tsx
-import { Broker } from '@fm/fdc3-broker';
+import { Broker } from 'ratan-fdc3-broker';
 
 const broker = new Broker(config);
 ```
@@ -617,7 +617,7 @@ The `ErrorBoundary` component catches JavaScript errors anywhere in the broker's
 #### Basic Usage
 
 ```tsx
-import { ErrorBoundary, BrokerProvider } from '@fm/fdc3-broker';
+import { ErrorBoundary, BrokerProvider } from 'ratan-fdc3-broker';
 
 <ErrorBoundary
   onError={(error, errorInfo) => {
@@ -702,7 +702,7 @@ try {
 ### Example 1: Send Intent to Specific Tile
 
 ```tsx
-import { useBroker } from '@fm/fdc3-broker';
+import { useBroker } from 'ratan-fdc3-broker';
 
 const ChartTile = () => {
   const { broker } = useBroker();
@@ -722,7 +722,7 @@ const ChartTile = () => {
 ### Example 2: Listen for Context Broadcasts
 
 ```tsx
-import { useBroker } from '@fm/fdc3-broker';
+import { useBroker } from 'ratan-fdc3-broker';
 import { useEffect, useState } from 'react';
 
 const InstrumentTile = () => {
@@ -754,7 +754,7 @@ const InstrumentTile = () => {
 ### Example 3: Create Private Channel
 
 ```tsx
-import { useBroker } from '@fm/fdc3-broker';
+import { useBroker } from 'ratan-fdc3-broker';
 
 const PortfolioTile = () => {
   const { broker } = useBroker();
@@ -810,8 +810,8 @@ global.fin = undefined;
 
 ```typescript
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Broker } from '@fm/fdc3-broker';
-import { MockAppDirectoryService } from '@fm/fdc3-app-directory/mock';
+import { Broker } from 'ratan-fdc3-broker';
+import { MockAppDirectoryService } from 'ratan-fdc3-app-directory/mock';
 
 describe('Broker', () => {
   let broker: Broker;
@@ -864,7 +864,7 @@ import type {
   IntentResolution,
   Listener,
   ImplementationMetadata,
-} from '@fm/fdc3-broker';
+} from 'ratan-fdc3-broker';
 ```
 
 ## License
@@ -873,7 +873,7 @@ MIT
 
 ## Related Packages
 
-- [`@fm/fdc3-agent`](../fdc3-agent) - FDC3 agent for tiles
-- [`@fm/fdc3-app-directory`](../fdc3-app-directory) - App Directory client
-- [`@fm/fdc3-resolver-ui`](../fdc3-resolver-ui) - Resolver UI component
+- [`ratan-fdc3-agent`](../fdc3-agent) - FDC3 agent for tiles
+- [`ratan-fdc3-app-directory`](../fdc3-app-directory) - App Directory client
+- [`ratan-fdc3-resolver-ui`](../fdc3-resolver-ui) - Resolver UI component
 - [`@finos/fdc3`](https://www.npmjs.com/package/@finos/fdc3) - Official FDC3 standard

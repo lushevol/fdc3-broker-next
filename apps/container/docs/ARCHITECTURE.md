@@ -1,6 +1,6 @@
 # @fm/template_container — Architecture
 
-> Parent: [Monorepo AGENTS.md](../../AGENTS.md)
+> Parent: [Monorepo AGENTS.md](../../../AGENTS.md)
 
 ## Tech Stack
 

@@ -1,6 +1,6 @@
 # local-llm-ws-client — Rules
 
-← [PROJECT.md](./PROJECT.md) · [Monorepo rules](../../docs/rules.md)
+← [PROJECT.md](./PROJECT.md) · [Monorepo rules](../../../docs/rules.md)
 
 ## Reconnection
 
