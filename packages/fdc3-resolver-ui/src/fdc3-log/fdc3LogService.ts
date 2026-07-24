@@ -55,6 +55,10 @@ function formatTimestamp(ts: number): string {
   return new Date(ts).toISOString().slice(11, 23);
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 /**
  * Try to extract tile identity from broker log event data.
  * The broker's Logger often includes { appId, instanceId, ... } in the data payload.
@@ -285,9 +289,10 @@ function patchBrokerInstance(): void {
   // Subscribe to the broker's logger for structured log events
   if (typeof broker.subscribeToLogs === 'function') {
     const unsub = (broker.subscribeToLogs as (cb: (event: unknown) => void) => () => void)(
-      (event: any) => {
+      (event: unknown) => {
+        const brokerEvent = isRecord(event) ? event : {};
         let level: FDC3LogEntry['level'];
-        switch (event.level) {
+        switch (brokerEvent.level) {
           case 0: level = 'debug'; break;
           case 1: level = 'info'; break;
           case 2: level = 'warn'; break;
@@ -297,9 +302,9 @@ function patchBrokerInstance(): void {
         }
         addLog(
           level,
-          (event.category as FDC3LogEntry['category']) || 'general',
-          event.message,
-          event.data,
+          (brokerEvent.category as FDC3LogEntry['category']) || 'general',
+          typeof brokerEvent.message === 'string' ? brokerEvent.message : '',
+          brokerEvent.data,
           'broker',
         );
       },

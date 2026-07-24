@@ -11,6 +11,24 @@ import { ChannelImpl, PrivateChannelImpl, USER_CHANNEL_IDS } from './channel';
 import { Logger } from './logger';
 import type { Channel, Context, DisplayMetadata, PrivateChannel } from './types';
 
+type ManagedChannel = Channel & {
+  addTile(tileId: string): void;
+  removeTile(tileId: string): void;
+  getTiles(): string[];
+  getListenerCount(): number;
+  hasTile(tileId: string): boolean;
+};
+
+function isManagedChannel(channel: Channel): channel is ManagedChannel {
+  return (
+    'addTile' in channel &&
+    'removeTile' in channel &&
+    'getTiles' in channel &&
+    'getListenerCount' in channel &&
+    'hasTile' in channel
+  );
+}
+
 /**
  * Channel Manager Implementation
  *
@@ -73,9 +91,10 @@ export class ChannelManager {
    * @returns Channel object
    */
   createChannel(channelId: string): Channel {
-    if (this.appChannels.has(channelId)) {
+    const existingChannel = this.appChannels.get(channelId);
+    if (existingChannel) {
       this.logger.debug('Channel already exists', { channelId }, 'channel');
-      return this.appChannels.get(channelId)!;
+      return existingChannel;
     }
 
     const channel = new ChannelImpl(channelId, 'app');
@@ -91,17 +110,7 @@ export class ChannelManager {
    * @returns Channel object or null if not found
    */
   getChannel(channelId: string): Channel | null {
-    // Check app channels
-    if (this.appChannels.has(channelId)) {
-      return this.appChannels.get(channelId)!;
-    }
-
-    // Check user channels
-    if (this.userChannels.has(channelId)) {
-      return this.userChannels.get(channelId)!;
-    }
-
-    return null;
+    return this.appChannels.get(channelId) ?? this.userChannels.get(channelId) ?? null;
   }
 
   /**
@@ -138,15 +147,13 @@ export class ChannelManager {
     const previousChannelId = currentChannel?.id;
 
     // Remove from previous channel if on one
-    if (currentChannel) {
-      if ('removeTile' in currentChannel) {
-        (currentChannel as unknown as ChannelImpl).removeTile(instanceId);
-      }
+    if (currentChannel && isManagedChannel(currentChannel)) {
+      currentChannel.removeTile(instanceId);
     }
 
     // Add to new channel
-    if ('addTile' in channel) {
-      (channel as unknown as ChannelImpl).addTile(instanceId);
+    if (isManagedChannel(channel)) {
+      channel.addTile(instanceId);
     }
 
     // Track tile's channel
@@ -168,8 +175,8 @@ export class ChannelManager {
     const channel = this.tileChannels.get(instanceId);
     const channelId = channel?.id;
 
-    if (channel && 'removeTile' in channel) {
-      (channel as unknown as ChannelImpl).removeTile(instanceId);
+    if (channel && isManagedChannel(channel)) {
+      channel.removeTile(instanceId);
     }
 
     this.tileChannels.delete(instanceId);
@@ -243,11 +250,8 @@ export class ChannelManager {
    * @returns Array of tile IDs
    */
   getTilesOnChannel(channelId: string): string[] {
-    const channel = this.getChannel(channelId) as unknown as ChannelImpl;
-    if (channel && channel.getTiles) {
-      return channel.getTiles();
-    }
-    return [];
+    const channel = this.getChannel(channelId);
+    return channel && isManagedChannel(channel) ? channel.getTiles() : [];
   }
 
   /**
@@ -257,11 +261,8 @@ export class ChannelManager {
    * @returns true if tile is on channel
    */
   isTileOnChannel(instanceId: string, channelId: string): boolean {
-    const channel = this.getChannel(channelId) as unknown as ChannelImpl;
-    if (channel && channel.hasTile) {
-      return channel.hasTile(instanceId);
-    }
-    return false;
+    const channel = this.getChannel(channelId);
+    return channel !== null && isManagedChannel(channel) && channel.hasTile(instanceId);
   }
 
   /**
@@ -274,14 +275,16 @@ export class ChannelManager {
     listenerCount: number;
     type: string;
   } | null {
-    const channel = this.getChannel(channelId) as unknown as ChannelImpl;
+    const channel = this.getChannel(channelId);
     if (!channel) {
       return null;
     }
 
+    const managedChannel = isManagedChannel(channel) ? channel : null;
+
     return {
-      tileCount: channel.getTiles ? channel.getTiles().length : 0,
-      listenerCount: channel.getListenerCount ? channel.getListenerCount() : 0,
+      tileCount: managedChannel?.getTiles().length ?? 0,
+      listenerCount: managedChannel?.getListenerCount() ?? 0,
       type: channel.type,
     };
   }
@@ -330,16 +333,8 @@ export class ChannelManager {
    * @returns Array of channels
    */
   getChannelsByType(type: 'app' | 'user' | 'private'): Channel[] {
-    switch (type) {
-      case 'app':
-        return Array.from(this.appChannels.values());
-      case 'user':
-        return Array.from(this.userChannels.values());
-      case 'private':
-        return Array.from(this.privateChannels.values());
-      default:
-        return [];
-    }
+    const channels = this.getChannelStore(type);
+    return channels ? Array.from(channels.values()) : [];
   }
 
   /**
@@ -349,15 +344,21 @@ export class ChannelManager {
    * @returns Channel or null
    */
   getChannelByType(type: 'app' | 'user' | 'private', channelId: string): Channel | null {
+    return this.getChannelStore(type)?.get(channelId) ?? null;
+  }
+
+  private getChannelStore(type: 'app' | 'user' | 'private'):
+    | ReadonlyMap<string, Channel>
+    | undefined {
     switch (type) {
       case 'app':
-        return this.appChannels.get(channelId) || null;
+        return this.appChannels;
       case 'user':
-        return this.userChannels.get(channelId) || null;
+        return this.userChannels;
       case 'private':
-        return this.privateChannels.get(channelId) || null;
+        return this.privateChannels;
       default:
-        return null;
+        return undefined;
     }
   }
 }

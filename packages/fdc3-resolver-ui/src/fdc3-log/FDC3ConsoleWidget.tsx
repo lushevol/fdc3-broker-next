@@ -40,6 +40,56 @@ interface ListenerCount {
   count: number;
 }
 
+interface BrokerInspector {
+  intentListeners?: unknown;
+  getUserChannels?: () => Promise<unknown>;
+  getCurrentChannel?: () => Promise<unknown>;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function getBrokerInspector(): BrokerInspector | null {
+  const globalState = (globalThis as Record<string, unknown>).__RATAN_FDC3__;
+  if (!isRecord(globalState) || !isRecord(globalState.brokerInstance)) {
+    return null;
+  }
+
+  const broker = globalState.brokerInstance;
+  return {
+    intentListeners: broker.intentListeners,
+    getUserChannels:
+      typeof broker.getUserChannels === 'function'
+        ? (broker.getUserChannels as () => Promise<unknown>)
+        : undefined,
+    getCurrentChannel:
+      typeof broker.getCurrentChannel === 'function'
+        ? (broker.getCurrentChannel as () => Promise<unknown>)
+        : undefined,
+  };
+}
+
+function toAppChannelInfo(value: unknown): AppChannelInfo | null {
+  if (!isRecord(value) || typeof value.id !== 'string') {
+    return null;
+  }
+
+  return {
+    id: value.id,
+    displayName: typeof value.displayName === 'string' ? value.displayName : value.id,
+    type: typeof value.type === 'string' ? value.type : 'user',
+  };
+}
+
+function isAppChannelInfo(value: AppChannelInfo | null): value is AppChannelInfo {
+  return value !== null;
+}
+
+function getChannelId(value: unknown): string | null {
+  return isRecord(value) && typeof value.id === 'string' ? value.id : null;
+}
+
 /* ------------------------------------------------------------------ */
 /*  Styles (dark VS Code terminal theme)                              */
 /* ------------------------------------------------------------------ */
@@ -389,7 +439,7 @@ interface ActivityTabProps {
   logs: FDC3LogEntry[];
   expandedId: number | null;
   onToggleExpand: (id: number) => void;
-  logEndRef: React.RefObject<HTMLDivElement | null>;
+  logEndRef: React.Ref<HTMLDivElement>;
   levels: string[];
   activeLevels: Set<string>;
   categories: string[];
@@ -485,7 +535,7 @@ function ActivityTab({
             Showing {filteredCount} of {logs.length} entries
           </div>
         )}
-        <div ref={logEndRef as any} />
+        <div ref={logEndRef} />
       </div>
     </>
   );
@@ -697,8 +747,7 @@ const FDC3ConsoleWidget: React.FC<FDC3ConsoleWidgetProps> = ({
     if (activeTab !== 'listeners') return;
 
     const poll = () => {
-      const ratan = (globalThis as Record<string, unknown>).__RATAN_FDC3__ as Record<string, unknown> | undefined;
-      const broker = ratan?.brokerInstance as Record<string, unknown> | undefined;
+      const broker = getBrokerInspector();
       if (!broker) return;
 
       if (broker.intentListeners instanceof Map) {
@@ -708,14 +757,18 @@ const FDC3ConsoleWidget: React.FC<FDC3ConsoleWidgetProps> = ({
         });
         setListeners(counts);
       }
-      if (typeof broker.getUserChannels === 'function') {
-        (broker.getUserChannels as () => Promise<unknown[]>)().then((chs: any) => {
-          setChannels((chs ?? []).map((ch: any) => ({ id: ch.id, displayName: ch.displayName ?? ch.id, type: ch.type ?? 'user' })));
+      if (broker.getUserChannels) {
+        void broker.getUserChannels().then((channels) => {
+          setChannels(
+            Array.isArray(channels)
+              ? channels.map(toAppChannelInfo).filter(isAppChannelInfo)
+              : [],
+          );
         }).catch(() => {});
       }
-      if (typeof broker.getCurrentChannel === 'function') {
-        (broker.getCurrentChannel as () => Promise<unknown>)().then((ch: any) => {
-          setCurrentChannelId(ch?.id ?? null);
+      if (broker.getCurrentChannel) {
+        void broker.getCurrentChannel().then((channel) => {
+          setCurrentChannelId(getChannelId(channel));
         }).catch(() => {});
       }
     };
@@ -736,8 +789,26 @@ const FDC3ConsoleWidget: React.FC<FDC3ConsoleWidgetProps> = ({
     pushFDC3Log('info', 'lifecycle', 'Activity log cleared', undefined, 'base');
   }, []);
 
-  const toggleLevel = (lvl: string) => setActiveLevels((p) => { const n = new Set(p); n.has(lvl) ? n.delete(lvl) : n.add(lvl); return n; });
-  const toggleCategory = (cat: string) => setActiveCategories((p) => { const n = new Set(p); n.has(cat) ? n.delete(cat) : n.add(cat); return n; });
+  const toggleLevel = (level: string) =>
+    setActiveLevels((current) => {
+      const next = new Set(current);
+      if (next.has(level)) {
+        next.delete(level);
+      } else {
+        next.add(level);
+      }
+      return next;
+    });
+  const toggleCategory = (category: string) =>
+    setActiveCategories((current) => {
+      const next = new Set(current);
+      if (next.has(category)) {
+        next.delete(category);
+      } else {
+        next.add(category);
+      }
+      return next;
+    });
 
   const filteredLogs = logs.filter((e) =>
     activeLevels.has(e.level) && activeCategories.has(e.category) &&

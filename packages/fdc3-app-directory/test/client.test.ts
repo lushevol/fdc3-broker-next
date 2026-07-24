@@ -181,6 +181,33 @@ describe('AppDirectoryClientImpl', () => {
     });
   });
 
+  describe('local-first searches', () => {
+    it('merges a matching local app with remote results without including unrelated local apps', async () => {
+      const localChartApp: AppDefinition = { ...mockChartApp, appId: 'local-chart-app' };
+      const localOrderApp: AppDefinition = {
+        ...mockChartApp,
+        appId: 'local-order-app',
+        categories: ['Trading'],
+        interop: { intents: { listensFor: [{ intent: 'ViewOrder', contexts: ['fdc3.order'] }] } },
+      };
+      const localFirstClient = new AppDirectoryClientImpl({
+        baseUrl: 'https://app-directory.example.com/api',
+        mode: 'local-first',
+        localApps: [localChartApp, localOrderApp],
+      });
+
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => [mockChartApp],
+      } as Response);
+
+      await expect(localFirstClient.findByIntent('ViewChart')).resolves.toEqual([
+        localChartApp,
+        mockChartApp,
+      ]);
+    });
+  });
+
   describe('error handling', () => {
     it('should handle 500 error', async () => {
       vi.mocked(fetch).mockResolvedValueOnce({

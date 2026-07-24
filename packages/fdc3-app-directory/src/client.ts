@@ -415,31 +415,9 @@ export class AppDirectoryClientImpl implements AppDirectoryClientInterface {
    * @see contracts/app-directory-api.yaml#L48-L53
    */
   async findByIntent(intent: string): Promise<AppDefinition[]> {
-    // Mode: Local Only
-    if (this.mode === 'local-only') {
-      return Array.from(this.localApps.values()).filter((app) =>
-        app.interop?.intents?.listensFor?.some((listener) => listener.intent === intent),
-      );
-    }
-
-    let remoteApps: AppDefinition[] = [];
-
-    try {
-      remoteApps = await this.request<AppDefinition[]>('/v2/apps', 'GET', {
-        intent,
-      });
-    } catch (error) {
-      if (this.mode !== 'local-first') {
-        throw error;
-      }
-    }
-
-    // Filter local apps
-    const localMatches = Array.from(this.localApps.values()).filter((app) =>
-      app.interop?.intents?.listensFor?.some((listener) => listener.intent === intent),
+    return this.findApps({ intent }, (app) =>
+      Boolean(app.interop?.intents?.listensFor?.some((listener) => listener.intent === intent)),
     );
-
-    return this.mergeApps(remoteApps, localMatches);
   }
 
   /**
@@ -533,35 +511,13 @@ export class AppDirectoryClientImpl implements AppDirectoryClientInterface {
    * @see contracts/app-directory-api.yaml#L54-L59
    */
   async findByContextType(contextType: string): Promise<AppDefinition[]> {
-    // Mode: Local Only
-    if (this.mode === 'local-only') {
-      return Array.from(this.localApps.values()).filter((app) =>
+    return this.findApps({ contextType }, (app) =>
+      Boolean(
         app.interop?.intents?.listensFor?.some((listener) =>
           listener.contexts?.includes(contextType),
         ),
-      );
-    }
-
-    let remoteApps: AppDefinition[] = [];
-
-    try {
-      remoteApps = await this.request<AppDefinition[]>('/v2/apps', 'GET', {
-        contextType,
-      });
-    } catch (error) {
-      if (this.mode !== 'local-first') {
-        throw error;
-      }
-    }
-
-    // Filter local apps
-    const localMatches = Array.from(this.localApps.values()).filter((app) =>
-      app.interop?.intents?.listensFor?.some((listener) =>
-        listener.contexts?.includes(contextType),
       ),
     );
-
-    return this.mergeApps(remoteApps, localMatches);
   }
 
   /**
@@ -658,31 +614,27 @@ export class AppDirectoryClientImpl implements AppDirectoryClientInterface {
    * @see contracts/app-directory-api.yaml#L42-L47
    */
   async findByCategory(category: string): Promise<AppDefinition[]> {
-    // Mode: Local Only
-    if (this.mode === 'local-only') {
-      return Array.from(this.localApps.values()).filter((app) =>
-        app.categories?.includes(category),
-      );
-    }
+    return this.findApps({ category }, (app) => Boolean(app.categories?.includes(category)));
+  }
 
-    let remoteApps: AppDefinition[] = [];
+  private async findApps(
+    params: Record<string, string>,
+    matches: (app: AppDefinition) => boolean,
+  ): Promise<AppDefinition[]> {
+    const localMatches = Array.from(this.localApps.values()).filter(matches);
+    if (this.mode === 'local-only') {
+      return localMatches;
+    }
 
     try {
-      remoteApps = await this.request<AppDefinition[]>('/v2/apps', 'GET', {
-        category,
-      });
+      const remoteApps = await this.request<AppDefinition[]>('/v2/apps', 'GET', params);
+      return this.mergeApps(remoteApps, localMatches);
     } catch (error) {
-      if (this.mode !== 'local-first') {
-        throw error;
+      if (this.mode === 'local-first') {
+        return this.mergeApps([], localMatches);
       }
+      throw error;
     }
-
-    // Filter local apps
-    const localMatches = Array.from(this.localApps.values()).filter((app) =>
-      app.categories?.includes(category),
-    );
-
-    return this.mergeApps(remoteApps, localMatches);
   }
 
   /**
