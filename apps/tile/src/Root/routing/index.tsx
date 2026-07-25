@@ -12,6 +12,10 @@ const FDC3Tile2 = React.lazy(() => import('../../FDC3Tile2'));
 const TradeBlotterTile = React.lazy(() => import('../../TradeBlotterTile'));
 const WorkflowLauncherTile = React.lazy(() => import('../../WorkflowLauncherTile'));
 const FDC3ConsoleTile = React.lazy(() => import('../../FDC3ConsoleTile'));
+const WorkflowDiscoveryTile = React.lazy(() => import('../../WorkflowDiscoveryTile'));
+const WorkflowPricingTile = React.lazy(() => import('../../WorkflowPricingTile'));
+const WorkflowRiskTile = React.lazy(() => import('../../WorkflowRiskTile'));
+const WorkflowOrchestratorTile = React.lazy(() => import('../../WorkflowOrchestratorTile'));
 
 const Routing: React.FC<TileProps> = (props: TileProps): ReactElement => {
   useController(props);
@@ -54,6 +58,38 @@ const Routing: React.FC<TileProps> = (props: TileProps): ReactElement => {
         element={
           <React.Suspense fallback={<Loader />}>
             <WorkflowLauncherTile {...props} />
+          </React.Suspense>
+        }
+      ></Route>
+      <Route
+        path="/template_tile_workflow_orchestrator/*"
+        element={
+          <React.Suspense fallback={<Loader />}>
+            <WorkflowOrchestratorTile {...props} />
+          </React.Suspense>
+        }
+      ></Route>
+      <Route
+        path="/template_tile_workflow_discovery/*"
+        element={
+          <React.Suspense fallback={<Loader />}>
+            <WorkflowDiscoveryTile {...props} />
+          </React.Suspense>
+        }
+      ></Route>
+      <Route
+        path="/template_tile_workflow_pricing/*"
+        element={
+          <React.Suspense fallback={<Loader />}>
+            <WorkflowPricingTile {...props} />
+          </React.Suspense>
+        }
+      ></Route>
+      <Route
+        path="/template_tile_workflow_risk/*"
+        element={
+          <React.Suspense fallback={<Loader />}>
+            <WorkflowRiskTile {...props} />
           </React.Suspense>
         }
       ></Route>

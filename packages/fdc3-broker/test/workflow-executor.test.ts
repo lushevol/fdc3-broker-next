@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { WorkflowExecutor } from '../src/workflow-executor';
-import type { WorkflowDefinition } from '../src/workflow-types';
+import type { WorkflowDefinition, WorkflowEvent } from '../src/workflow-types';
 
 const workflow: WorkflowDefinition = {
   workflowId: 'trade.pendingValidation.openChart',
@@ -96,6 +96,49 @@ describe('WorkflowExecutor', () => {
     ]);
   });
 
+  it('emits an ordered lifecycle for a successful workflow', async () => {
+    const raiseIntent = vi
+      .fn()
+      .mockResolvedValueOnce({
+        getResult: async () => ({ trades: [{ instrument: 'AAPL' }] }),
+      })
+      .mockResolvedValueOnce({
+        getResult: async () => ({ opened: true }),
+      });
+    const events: WorkflowEvent[] = [];
+    const executor = new WorkflowExecutor([workflow], raiseIntent);
+
+    await executor.execute(
+      workflow.workflowId,
+      { status: 'PENDING_VALIDATION' },
+      { runId: 'run-success', emit: (event) => events.push(event) },
+    );
+
+    expect(events.map((event) => event.type)).toEqual([
+      'workflow.started',
+      'node.started',
+      'node.completed',
+      'node.started',
+      'node.completed',
+      'workflow.completed',
+    ]);
+    expect(events.map((event) => event.sequence)).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(events.every((event) => event.runId === 'run-success')).toBe(true);
+    expect(events[1]).toMatchObject({
+      workflowId: workflow.workflowId,
+      stepId: 'search-trades',
+      intent: 'SearchTrades',
+      context: {
+        type: 'fdc3.trade.query',
+        filters: { status: 'PENDING_VALIDATION' },
+      },
+    });
+    expect(events[2]).toMatchObject({
+      stepId: 'search-trades',
+      result: { trades: [{ instrument: 'AAPL' }] },
+    });
+  });
+
   it('returns a failed transcript when a required binding cannot be resolved', async () => {
     const raiseIntent = vi.fn().mockResolvedValueOnce({
       getResult: async () => ({ trades: [] }),
@@ -156,6 +199,31 @@ describe('WorkflowExecutor', () => {
       error: 'intent unavailable',
     });
     expect(transcript.summary).toContain('Workflow failed at step search-trades');
+  });
+
+  it('emits node and workflow failure events for a non-continuable error', async () => {
+    const events: WorkflowEvent[] = [];
+    const executor = new WorkflowExecutor(
+      [workflow],
+      vi.fn().mockRejectedValueOnce(new Error('intent unavailable')),
+    );
+
+    await executor.execute(
+      workflow.workflowId,
+      {},
+      { runId: 'run-failure', emit: (event) => events.push(event) },
+    );
+
+    expect(events.map((event) => event.type)).toEqual([
+      'workflow.started',
+      'node.started',
+      'node.failed',
+      'workflow.failed',
+    ]);
+    expect(events[2]).toMatchObject({
+      stepId: 'search-trades',
+      error: 'intent unavailable',
+    });
   });
 
   it('uses a generic message for non-Error step failures', async () => {

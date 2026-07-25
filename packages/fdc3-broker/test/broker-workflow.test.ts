@@ -42,4 +42,79 @@ describe('Broker workflows', () => {
       filters: { status: 'PENDING_VALIDATION' },
     });
   });
+
+  it('buffers lifecycle events and executes a resolution only once', async () => {
+    const broker = new Broker({
+      appDirectory: {} as AppDirectoryClient,
+      workflows: [workflow],
+      callbacks: {},
+      onLogin: async () => undefined,
+      onLogout: async () => undefined,
+    });
+    broker.raiseIntent = vi.fn().mockResolvedValue({
+      getResult: async () => ({ totalCount: 1 }),
+    }) as typeof broker.raiseIntent;
+    const resolution = await broker.raiseWorkflow(workflow.workflowId, {
+      status: 'PENDING_VALIDATION',
+    });
+    const eventTypes: string[] = [];
+
+    const subscription = resolution.subscribe((event) => {
+      eventTypes.push(event.type);
+    });
+    const [first, second] = await Promise.all([resolution.getResult(), resolution.getResult()]);
+
+    expect(first).toBe(second);
+    expect(broker.raiseIntent).toHaveBeenCalledTimes(1);
+    expect(eventTypes).toEqual([
+      'workflow.started',
+      'node.started',
+      'node.completed',
+      'workflow.completed',
+    ]);
+
+    subscription.unsubscribe();
+  });
+
+  it('distinguishes unavailable, declared-only, and live workflow handlers', async () => {
+    const findByIntent = vi.fn().mockResolvedValue([]);
+    const broker = new Broker({
+      appDirectory: { findByIntent } as unknown as AppDirectoryClient,
+      workflows: [workflow],
+      callbacks: {},
+      onLogin: async () => undefined,
+      onLogout: async () => undefined,
+    });
+
+    await expect(
+      broker.inspectWorkflowCapability({
+        intent: 'SearchTrades',
+        targetAppId: 'trade-search',
+      }),
+    ).resolves.toEqual({ state: 'unavailable', appId: 'trade-search' });
+
+    findByIntent.mockResolvedValue([{ appId: 'trade-search', name: 'Trade search' }]);
+    await expect(
+      broker.inspectWorkflowCapability({
+        intent: 'SearchTrades',
+        targetAppId: 'trade-search',
+      }),
+    ).resolves.toEqual({ state: 'declared-only', appId: 'trade-search' });
+
+    await broker.registerTile('trade-search-1', 'trade-search');
+    await broker.addIntentListener('SearchTrades', async () => ({ totalCount: 1 }), {
+      appId: 'trade-search',
+      instanceId: 'trade-search-1',
+    });
+    await expect(
+      broker.inspectWorkflowCapability({
+        intent: 'SearchTrades',
+        targetAppId: 'trade-search',
+      }),
+    ).resolves.toEqual({
+      state: 'ready',
+      appId: 'trade-search',
+      instanceId: 'trade-search-1',
+    });
+  });
 });

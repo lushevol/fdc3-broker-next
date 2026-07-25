@@ -2,6 +2,8 @@ import { applyWorkflowBindings } from './workflow-bindings';
 import { renderWorkflowContextTemplate } from './workflow-template';
 import type {
   WorkflowDefinition,
+  WorkflowEvent,
+  WorkflowEventListener,
   WorkflowJsonObject,
   WorkflowStepResult,
   WorkflowTranscript,
@@ -17,6 +19,19 @@ export type RaiseWorkflowIntent = (
   context: WorkflowJsonObject,
   target?: unknown,
 ) => Promise<IntentResolutionLike>;
+
+export type WorkflowExecutionOptions = {
+  runId?: string;
+  emit?: WorkflowEventListener;
+};
+
+let nextWorkflowRunId = 1;
+
+function createRunId(workflowId: string): string {
+  const runId = `${workflowId}-${Date.now()}-${nextWorkflowRunId}`;
+  nextWorkflowRunId += 1;
+  return runId;
+}
 
 function isRecord(value: unknown): value is WorkflowJsonObject {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -52,10 +67,26 @@ export class WorkflowExecutor {
     return Array.from(this.workflowsById.values());
   }
 
-  async execute(workflowId: string, input: WorkflowJsonObject = {}): Promise<WorkflowTranscript> {
+  async execute(
+    workflowId: string,
+    input: WorkflowJsonObject = {},
+    options: WorkflowExecutionOptions = {},
+  ): Promise<WorkflowTranscript> {
+    const runId = options.runId ?? createRunId(workflowId);
+    let sequence = 0;
+    const emit = (event: Omit<WorkflowEvent, 'runId' | 'workflowId' | 'sequence' | 'timestamp'>) => {
+      sequence += 1;
+      options.emit?.({
+        ...event,
+        runId,
+        workflowId,
+        sequence,
+        timestamp: new Date().toISOString(),
+      });
+    };
     const workflow = this.workflowsById.get(workflowId);
     if (!workflow) {
-      return {
+      const transcript: WorkflowTranscript = {
         status: 'error',
         workflowId,
         title: workflowId,
@@ -70,8 +101,11 @@ export class WorkflowExecutor {
         },
         summary: `Unknown workflow: ${workflowId}`,
       };
+      emit({ type: 'workflow.failed', error: transcript.summary, summary: transcript.summary });
+      return transcript;
     }
 
+    emit({ type: 'workflow.started' });
     const priorResults = new Map<string, unknown>();
     const completedSteps: WorkflowStepResult[] = [];
 
@@ -92,9 +126,24 @@ export class WorkflowExecutor {
           context: {},
           error: errorMessage(error),
         };
-        return this.failedTranscript(workflow, input, completedSteps, failedStep);
+        emit({
+          type: 'node.failed',
+          stepId: step.id,
+          intent: step.intent,
+          context: {},
+          error: failedStep.error,
+        });
+        const transcript = this.failedTranscript(workflow, input, completedSteps, failedStep);
+        emit({ type: 'workflow.failed', error: failedStep.error, summary: transcript.summary });
+        return transcript;
       }
 
+      emit({
+        type: 'node.started',
+        stepId: step.id,
+        intent: step.intent,
+        context,
+      });
       try {
         const resolution = step.targetAppId
           ? await this.raiseIntent(step.intent, context, { appId: step.targetAppId })
@@ -109,6 +158,13 @@ export class WorkflowExecutor {
         };
         completedSteps.push(stepResult);
         priorResults.set(step.id, result);
+        emit({
+          type: 'node.completed',
+          stepId: step.id,
+          intent: step.intent,
+          context,
+          result: stepResult.result,
+        });
       } catch (error) {
         const failedStep: WorkflowStepResult = {
           stepId: step.id,
@@ -117,14 +173,23 @@ export class WorkflowExecutor {
           context,
           error: errorMessage(error),
         };
+        emit({
+          type: 'node.failed',
+          stepId: step.id,
+          intent: step.intent,
+          context,
+          error: failedStep.error,
+        });
         if (!step.continueOnError) {
-          return this.failedTranscript(workflow, input, completedSteps, failedStep);
+          const transcript = this.failedTranscript(workflow, input, completedSteps, failedStep);
+          emit({ type: 'workflow.failed', error: failedStep.error, summary: transcript.summary });
+          return transcript;
         }
         completedSteps.push(failedStep);
       }
     }
 
-    return {
+    const transcript: WorkflowTranscript = {
       status: 'ok',
       workflowId: workflow.workflowId,
       title: workflow.title,
@@ -132,6 +197,8 @@ export class WorkflowExecutor {
       completedSteps,
       summary: `Completed ${completedSteps.length} of ${workflow.steps.length} workflow steps.`,
     };
+    emit({ type: 'workflow.completed', summary: transcript.summary });
+    return transcript;
   }
 
   private failedTranscript(

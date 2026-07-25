@@ -271,7 +271,19 @@ export type {
   Listener,
   PrivateChannel,
 } from '@finos/fdc3';
-export type { RatanDesktopAgent, TileLifecycleApi } from './types';
+export type {
+  RatanDesktopAgent,
+  TileLifecycleApi,
+  WorkflowDefinition,
+  WorkflowEvent,
+  WorkflowEventListener,
+  WorkflowEventSubscription,
+  WorkflowJsonObject,
+  WorkflowOptions,
+  WorkflowResolution,
+  WorkflowStepResult,
+  WorkflowTranscript,
+} from './types';
 
 // ============================================================================
 // Agent API

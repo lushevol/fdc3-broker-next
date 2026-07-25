@@ -33,9 +33,14 @@ import type {
 import { WorkflowExecutor } from './workflow-executor';
 import type {
   WorkflowDefinition,
+  WorkflowCapabilityInspection,
+  WorkflowCapabilityInspectionRequest,
+  WorkflowEvent,
+  WorkflowEventListener,
   WorkflowJsonObject,
   WorkflowOptions,
   WorkflowResolution,
+  WorkflowTranscript,
 } from './workflow-types';
 
 // Lazy load OpenFin bridge only when needed
@@ -976,6 +981,50 @@ export class Broker implements DesktopAgent {
   }
 
   /**
+   * Inspects whether a workflow capability is only declared or has a live listener.
+   *
+   * App-directory declarations are metadata and do not guarantee that a mounted
+   * tile registered its handler. Workflow runtimes can inject this method as a
+   * capability inspector to fail fast instead of waiting for an empty result.
+   */
+  async inspectWorkflowCapability(
+    request: WorkflowCapabilityInspectionRequest,
+  ): Promise<WorkflowCapabilityInspection> {
+    const declaredApps = await this.appDirectory.findByIntent(request.intent);
+    const matchingApps = request.targetAppId
+      ? declaredApps.filter((app) => app.appId === request.targetAppId)
+      : declaredApps;
+    if (matchingApps.length === 0) {
+      return {
+        state: 'unavailable',
+        appId: request.targetAppId,
+      };
+    }
+
+    for (const app of matchingApps) {
+      const readyTile = this.tileRegistry
+        .getTilesByAppId(app.appId)
+        .find(
+          (tile) =>
+            tile.state === 'mounted' &&
+            tile.intentListeners.has(request.intent),
+        );
+      if (readyTile) {
+        return {
+          state: 'ready',
+          appId: app.appId,
+          instanceId: readyTile.instanceId,
+        };
+      }
+    }
+
+    return {
+      state: 'declared-only',
+      appId: request.targetAppId ?? matchingApps[0]?.appId,
+    };
+  }
+
+  /**
    * Raises an intent to a target application
    *
    * Sends an intent with context data to a target application. If no target is specified,
@@ -1166,9 +1215,34 @@ export class Broker implements DesktopAgent {
     input: WorkflowJsonObject = {},
     _options?: WorkflowOptions,
   ): Promise<WorkflowResolution> {
+    const bufferedEvents: WorkflowEvent[] = [];
+    const listeners = new Set<WorkflowEventListener>();
+    let resultPromise: Promise<WorkflowTranscript> | undefined;
+    const start = (): Promise<WorkflowTranscript> => {
+      resultPromise ??= Promise.resolve().then(() =>
+        this.workflowExecutor.execute(workflowId, input, {
+          emit: (event) => {
+            bufferedEvents.push(event);
+            listeners.forEach((listener) => listener(event));
+          },
+        }),
+      );
+      return resultPromise;
+    };
+
     return {
       workflowId,
-      getResult: () => this.workflowExecutor.execute(workflowId, input),
+      getResult: start,
+      subscribe: (listener) => {
+        bufferedEvents.forEach((event) => listener(event));
+        listeners.add(listener);
+        void start();
+        return {
+          unsubscribe: () => {
+            listeners.delete(listener);
+          },
+        };
+      },
     };
   }
 

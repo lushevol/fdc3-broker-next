@@ -10,6 +10,9 @@
 import type { AppIdentifier, AppMetadata, DesktopAgent } from '@finos/fdc3';
 import type {
   WorkflowDefinition,
+  WorkflowEvent,
+  WorkflowEventListener,
+  WorkflowEventSubscription,
   WorkflowJsonObject,
   WorkflowOptions,
   WorkflowResolution,
@@ -42,6 +45,9 @@ export type {
 
 export type {
   WorkflowDefinition,
+  WorkflowEvent,
+  WorkflowEventListener,
+  WorkflowEventSubscription,
   WorkflowJsonObject,
   WorkflowOptions,
   WorkflowResolution,

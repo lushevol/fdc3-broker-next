@@ -49,5 +49,74 @@
         ]
       }
     ]
+  },
+  {
+    "workflowId": "trade.workflow.insight",
+    "title": "Discover, price, and assess a pending trade",
+    "description": "Find a pending-validation trade, enrich it with a market price, and classify its exposure.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PENDING_VALIDATION"]
+        }
+      },
+      "required": ["status"]
+    },
+    "steps": [
+      {
+        "id": "discover-trade",
+        "intent": "DiscoverWorkflowTrades",
+        "targetAppId": "template_tile_workflow_discovery",
+        "contextTemplate": {
+          "type": "fdc3.trade.query",
+          "filters": {
+            "status": "{{input.status}}"
+          }
+        }
+      },
+      {
+        "id": "price-trade",
+        "intent": "PriceWorkflowTrade",
+        "targetAppId": "template_tile_workflow_pricing",
+        "contextTemplate": {
+          "type": "fdc3.trade",
+          "trade": {}
+        },
+        "inputBindings": [
+          {
+            "fromStepId": "discover-trade",
+            "resultPath": "$.trade",
+            "contextPath": "$.trade",
+            "required": true
+          }
+        ]
+      },
+      {
+        "id": "assess-risk",
+        "intent": "AssessWorkflowRisk",
+        "targetAppId": "template_tile_workflow_risk",
+        "contextTemplate": {
+          "type": "ratan.workflow.risk",
+          "trade": {},
+          "price": {}
+        },
+        "inputBindings": [
+          {
+            "fromStepId": "discover-trade",
+            "resultPath": "$.trade",
+            "contextPath": "$.trade",
+            "required": true
+          },
+          {
+            "fromStepId": "price-trade",
+            "resultPath": "$.price",
+            "contextPath": "$.price",
+            "required": true
+          }
+        ]
+      }
+    ]
   }
 ]
