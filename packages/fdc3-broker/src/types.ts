@@ -27,6 +27,7 @@ import type {
   PrivateChannelEventTypes,
 } from '@finos/fdc3';
 import type { AppDirectoryClient } from 'ratan-fdc3-app-directory';
+import type { ModuleLoaderApi } from 'ratan-module-composition';
 import type { LogLevel } from './logger';
 import type { WorkflowDefinition } from './workflow-types';
 
@@ -82,6 +83,12 @@ export interface BrokerConfig {
 
   /** Platform workflow declarations available through raiseWorkflow */
   workflows?: WorkflowDefinition[];
+
+  /**
+   * Optional platform module-composition capability. This is deliberately not
+   * part of FDC3; hosts inject the runtime-specific loader implementation.
+   */
+  moduleLoader?: ModuleLoaderApi;
 
   /** Enable OpenFin bridge (if available) */
   enableOpenFinBridge?: boolean;

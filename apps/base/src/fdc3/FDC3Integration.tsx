@@ -19,13 +19,19 @@ import {
   LogLevel,
   type ResolverTarget,
 } from 'ratan-fdc3-broker';
-import { FDC3ConsoleWidget, initFDC3LogService, destroyFDC3LogService, ResolverDialog } from 'ratan-fdc3-resolver-ui';
+import {
+  FDC3ConsoleWidget,
+  initFDC3LogService,
+  destroyFDC3LogService,
+  ResolverDialog,
+} from 'ratan-fdc3-resolver-ui';
+import { ModuleLoader, SystemJsModuleAdapter } from 'ratan-module-composition';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFDC3WorkspaceHelper } from './useFDC3WorkspaceHelper';
 import fdc3Definitions from './declarations/fdc3-definitions.json';
 import { getBrowserInteropBrokerOptions } from './postmessage';
-import { getOpenFinBrokerOptions } from "./openfin";
+import { getOpenFinBrokerOptions } from './openfin';
 import workflows from './declarations/workflows.json';
 import { useContext as useAppContext } from '../hooks/provider';
 import { isSingleViewRequest } from '../pages/Home/common/singleView';
@@ -323,6 +329,12 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
       userChannelIds: ['red', 'green', 'blue', 'orange', 'purple'],
 
       workflows,
+
+      // Platform extension, not an FDC3 API. Module Federation hosts can add a
+      // ModuleFederationModuleAdapter with their runtime's loadRemote function.
+      moduleLoader: new ModuleLoader([
+        new SystemJsModuleAdapter((moduleId) => System.import(moduleId)),
+      ]),
 
       // Enable debug logging (set to false in production)
       enableDebug: process.env.NODE_ENV === 'development',

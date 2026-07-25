@@ -184,6 +184,34 @@
           "entity": ["X_RATANONE"]
         },
         {
+          "container": "@fm/module-loader-producer",
+          "imageDarkTheme": "darkIcons/trade.dark.svg",
+          "subject": "module_loader_sample",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "/module_loader_producer",
+          "subtitle": "Exposes TradeSummaryCard",
+          "imageLightTheme": "lightIcons/trade.light.svg",
+          "tile": "/module_loader_producer",
+          "id": 67,
+          "title": "Module Loader Producer",
+          "entity": ["X_RATANONE"]
+        },
+        {
+          "container": "@fm/template_container",
+          "imageDarkTheme": "darkIcons/trade.dark.svg",
+          "subject": "module_loader_sample",
+          "isTemplate": false,
+          "emailSupport": "FM_BPMS_SUPPORT@sc.com",
+          "module": "/template_container1",
+          "subtitle": "Embeds producer component",
+          "imageLightTheme": "lightIcons/trade.light.svg",
+          "tile": "/module_loader_consumer",
+          "id": 68,
+          "title": "Module Loader Consumer",
+          "entity": ["X_RATANONE"]
+        },
+        {
           "container": "@fm/flowzero",
           "imageDarkTheme": "darkIcons/icon01.svg",
           "subject": "template_subject",

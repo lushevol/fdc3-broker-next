@@ -8,6 +8,8 @@
 
 import type { ContextMetadata } from '@finos/fdc3';
 import type { AppDirectoryClient } from 'ratan-fdc3-app-directory';
+import { UnavailableModuleLoader } from 'ratan-module-composition';
+import type { ModuleLoaderApi } from 'ratan-module-composition';
 import { ChannelManager } from './channel-manager';
 import { EntitlementValidator } from './entitlements';
 import { IntentQueueImpl } from './intent-queue';
@@ -92,6 +94,8 @@ let postMessageBridgeClass: PostMessageBridgeType | null = null;
  * @see DesktopAgent
  */
 export class Broker implements DesktopAgent {
+  /** Platform extension; it does not belong to the FDC3 DesktopAgent API. */
+  readonly modules: ModuleLoaderApi;
   private logger: Logger;
   private perf: PerformanceTracker;
   private intentResolver: IntentResolver;
@@ -148,6 +152,7 @@ export class Broker implements DesktopAgent {
    */
   constructor(config: BrokerConfig) {
     this.config = config;
+    this.modules = config.moduleLoader ?? new UnavailableModuleLoader();
     this.logger = new Logger(config.enableDebug ?? false, config.logLevel ?? LogLevel.INFO);
     this.perf = new PerformanceTracker();
     this.appDirectory = config.appDirectory;
@@ -163,10 +168,12 @@ export class Broker implements DesktopAgent {
 
     // Initialize entitlement validator
     this.entitlementValidator = new EntitlementValidator(config);
-    this.workflowExecutor = new WorkflowExecutor(config.workflows ?? [], (intent, context, target) =>
-      target
-        ? this.raiseIntent(intent, context as Context, target as AppIdentifier)
-        : this.raiseIntent(intent, context as Context),
+    this.workflowExecutor = new WorkflowExecutor(
+      config.workflows ?? [],
+      (intent, context, target) =>
+        target
+          ? this.raiseIntent(intent, context as Context, target as AppIdentifier)
+          : this.raiseIntent(intent, context as Context),
     );
 
     // Initialize intent resolver
@@ -221,9 +228,7 @@ export class Broker implements DesktopAgent {
    * // Later: unsub();
    * ```
    */
-  subscribeToLogs(
-    callback: (event: import('./logger').LogEvent) => void,
-  ): () => void {
+  subscribeToLogs(callback: (event: import('./logger').LogEvent) => void): () => void {
     return this.logger.subscribe(callback);
   }
 
@@ -736,10 +741,14 @@ export class Broker implements DesktopAgent {
    * @see addContextListener
    */
   async broadcast(context: Context, source?: AppIdentifier): Promise<void> {
-    this.logger.debug('broadcast', {
-      context,
-      currentTile: source,
-    }, 'context');
+    this.logger.debug(
+      'broadcast',
+      {
+        context,
+        currentTile: source,
+      },
+      'context',
+    );
 
     return this.perf.measure('broadcast', async () => {
       const currentTile = this.tileRegistry.getTile(source?.instanceId || '');
@@ -750,18 +759,26 @@ export class Broker implements DesktopAgent {
       }
 
       const channel = currentTile.currentChannel;
-      this.logger.info('Broadcasting context', {
-        contextType: context?.type,
-        channelId: channel.id,
-        tileId: source?.instanceId,
-      }, 'context');
+      this.logger.info(
+        'Broadcasting context',
+        {
+          contextType: context?.type,
+          channelId: channel.id,
+          tileId: source?.instanceId,
+        },
+        'context',
+      );
 
       // Broadcast to internal channel
       await channel.broadcast(context);
-      this.logger.debug('Context broadcast to internal channel', {
-        contextType: context?.type,
-        channelId: channel.id,
-      }, 'context');
+      this.logger.debug(
+        'Context broadcast to internal channel',
+        {
+          contextType: context?.type,
+          channelId: channel.id,
+        },
+        'context',
+      );
 
       // Sync with OpenFin if available
       const bridge = await this.getOpenFinBridge();
@@ -832,11 +849,15 @@ export class Broker implements DesktopAgent {
     const actualSource =
       typeof handlerOrSource === 'object' && 'appId' in handlerOrSource ? handlerOrSource : source;
 
-    this.logger.info('addContextListener', {
-      contextType,
-      appId: actualSource?.appId,
-      instanceId: actualSource?.instanceId,
-    }, 'context');
+    this.logger.info(
+      'addContextListener',
+      {
+        contextType,
+        appId: actualSource?.appId,
+        instanceId: actualSource?.instanceId,
+      },
+      'context',
+    );
 
     // Get current tile's channel
     const currentChannel = await this.getCurrentChannel(actualSource);
@@ -1024,15 +1045,28 @@ export class Broker implements DesktopAgent {
       target: targetApp,
       sourceTile: source,
     });
-    this.logger.info(`Intent flow: raiseIntent("${intent}", "${ctxType}") from ${appLabel}`, {
-      intent, contextType: ctxType, context, target: targetApp, source,
-    }, 'intent');
+    this.logger.info(
+      `Intent flow: raiseIntent("${intent}", "${ctxType}") from ${appLabel}`,
+      {
+        intent,
+        contextType: ctxType,
+        context,
+        target: targetApp,
+        source,
+      },
+      'intent',
+    );
 
     return this.perf.measure('raiseIntent', async () => {
       // ── Step 1: Validate sender entitlements ──
-      this.logger.info(`→ step 1: check sender entitlements for ${appLabel} → ${intent}`, {
-        source: source?.appId, intent,
-      }, 'intent');
+      this.logger.info(
+        `→ step 1: check sender entitlements for ${appLabel} → ${intent}`,
+        {
+          source: source?.appId,
+          intent,
+        },
+        'intent',
+      );
       const entitlementCheck = await this.entitlementValidator.canSendIntent(
         source?.appId || '',
         intent,
@@ -1040,55 +1074,100 @@ export class Broker implements DesktopAgent {
       );
 
       if (!entitlementCheck.allowed) {
-        this.logger.warn(`→ step 1 ✗: entitlement DENIED for ${appLabel} → ${intent}: ${entitlementCheck.reason}`, {
-          source: source?.appId, intent, reason: entitlementCheck.reason,
-        }, 'intent');
+        this.logger.warn(
+          `→ step 1 ✗: entitlement DENIED for ${appLabel} → ${intent}: ${entitlementCheck.reason}`,
+          {
+            source: source?.appId,
+            intent,
+            reason: entitlementCheck.reason,
+          },
+          'intent',
+        );
         throw new Error(entitlementCheck.reason || 'Not entitled to send this intent');
       }
       this.logger.info(`→ step 1 ✓: entitlements OK for ${appLabel} → ${intent}`, {}, 'intent');
 
       // ── Step 2: Resolve target ──
-      this.logger.info(`→ step 2: resolving target for intent "${intent}"`, { intent, contextType: ctxType, target: targetApp }, 'intent');
+      this.logger.info(
+        `→ step 2: resolving target for intent "${intent}"`,
+        { intent, contextType: ctxType, target: targetApp },
+        'intent',
+      );
       const result = await this.intentResolver.resolve(intent, context, targetApp);
 
       if (result.type === 'not-found') {
-        this.logger.info(`→ step 2: no internal target found for "${intent}"`, { intent }, 'intent');
+        this.logger.info(
+          `→ step 2: no internal target found for "${intent}"`,
+          { intent },
+          'intent',
+        );
 
         if (this.shouldRouteMissingTargetExternally(source)) {
           // Try routing to OpenFin if available
           const openFinBridge = await this.getOpenFinBridge();
           if (openFinBridge?.isEnabled()) {
-            this.logger.info(`→ step 2: routing "${intent}" to OpenFin bridge`, { intent, context }, 'intent');
+            this.logger.info(
+              `→ step 2: routing "${intent}" to OpenFin bridge`,
+              { intent, context },
+              'intent',
+            );
             return await openFinBridge.raiseIntentExternal(intent, context, targetApp);
           }
 
           // Try routing to PostMessage bridge if available
           const postMessageBridge = await this.getPostMessageBridge();
           if (postMessageBridge?.isEnabled()) {
-            this.logger.info(`→ step 2: routing "${intent}" to PostMessage bridge`, { intent, context }, 'intent');
+            this.logger.info(
+              `→ step 2: routing "${intent}" to PostMessage bridge`,
+              { intent, context },
+              'intent',
+            );
             return await postMessageBridge.raiseIntentExternal(intent, context, targetApp);
           }
         }
 
-        this.logger.warn(`→ step 2 ✗: no target found for intent "${intent}" (not routed externally)`, { intent }, 'intent');
+        this.logger.warn(
+          `→ step 2 ✗: no target found for intent "${intent}" (not routed externally)`,
+          { intent },
+          'intent',
+        );
         throw new Error(`No target found for intent: ${intent}`);
       }
 
       if (result.type === 'ambiguous' && result.targets) {
-        this.logger.info(`→ step 2: ${result.targets.length} targets available — showing resolver UI`, {
-          intent, count: result.targets.length, targets: result.targets.map((t: any) => t.appId),
-        }, 'intent');
+        this.logger.info(
+          `→ step 2: ${result.targets.length} targets available — showing resolver UI`,
+          {
+            intent,
+            count: result.targets.length,
+            targets: result.targets.map((t: any) => t.appId),
+          },
+          'intent',
+        );
         const selected = await this.intentResolver.showResolverUI(result.targets, context, intent);
         if (!selected) {
-          this.logger.warn(`→ step 2: resolver UI cancelled by user for "${intent}"`, { intent }, 'intent');
+          this.logger.warn(
+            `→ step 2: resolver UI cancelled by user for "${intent}"`,
+            { intent },
+            'intent',
+          );
           throw new Error('User cancelled intent resolution');
         }
-        this.logger.info(`→ step 2: user selected target "${selected.appId}"`, { appId: selected.appId, instanceId: selected.instanceId }, 'intent');
+        this.logger.info(
+          `→ step 2: user selected target "${selected.appId}"`,
+          { appId: selected.appId, instanceId: selected.instanceId },
+          'intent',
+        );
         result.target = selected;
       } else {
-        this.logger.info(`→ step 2 ✓: resolved to single target "${result.target?.appId}"`, {
-          appId: result.target?.appId, instanceId: result.target?.instanceId,
-        }, 'intent');
+        this.logger.info(
+          `→ step 2 ✓: resolved to single target "${result.target?.appId}"`,
+          {
+            appId: result.target?.appId,
+            instanceId: result.target?.instanceId,
+          },
+          'intent',
+        );
       }
 
       if (!result.target) {
@@ -1097,9 +1176,14 @@ export class Broker implements DesktopAgent {
       }
 
       // ── Step 3: Deliver intent to target ──
-      this.logger.info(`→ step 3: delivering intent "${intent}" to target "${result.target.appId}" (instance: ${result.target.instanceId ?? 'new'})`, {
-        intent, target: result.target,
-      }, 'intent');
+      this.logger.info(
+        `→ step 3: delivering intent "${intent}" to target "${result.target.appId}" (instance: ${result.target.instanceId ?? 'new'})`,
+        {
+          intent,
+          target: result.target,
+        },
+        'intent',
+      );
       return await this.deliverIntent(intent, context, result.target, source);
     });
   }
@@ -1155,9 +1239,7 @@ export class Broker implements DesktopAgent {
     // (Could enhance to show intent picker)
     const intent = intents[0].intent;
     const contextTarget =
-      !targetApp && intents[0].apps.length === 1
-        ? { appId: intents[0].apps[0].appId }
-        : targetApp;
+      !targetApp && intents[0].apps.length === 1 ? { appId: intents[0].apps[0].appId } : targetApp;
     return this.raiseIntent(intent.name, context, contextTarget, source);
   }
 
@@ -1216,21 +1298,36 @@ export class Broker implements DesktopAgent {
     const instanceLabel = source?.instanceId ?? '(unscoped)';
 
     // Validate receiver entitlements using EntitlementValidator
-    this.logger.info(`  subscription: checking receive entitlement for ${appLabel} on "${intent}"`, {
-      source: source?.appId, intent,
-    }, 'intent');
+    this.logger.info(
+      `  subscription: checking receive entitlement for ${appLabel} on "${intent}"`,
+      {
+        source: source?.appId,
+        intent,
+      },
+      'intent',
+    );
     const entitlementCheck = await this.entitlementValidator.canReceiveIntent(
       source?.appId || '',
       intent,
     );
 
     if (!entitlementCheck.allowed) {
-      this.logger.warn(`  subscription ✗: receive entitlement DENIED for ${appLabel} on "${intent}": ${entitlementCheck.reason}`, {
-        source: source?.appId, intent, reason: entitlementCheck.reason,
-      }, 'intent');
+      this.logger.warn(
+        `  subscription ✗: receive entitlement DENIED for ${appLabel} on "${intent}": ${entitlementCheck.reason}`,
+        {
+          source: source?.appId,
+          intent,
+          reason: entitlementCheck.reason,
+        },
+        'intent',
+      );
       throw new Error(entitlementCheck.reason || 'Not entitled to receive this intent');
     }
-    this.logger.info(`  subscription ✓: receive entitlement OK for ${appLabel} on "${intent}"`, {}, 'intent');
+    this.logger.info(
+      `  subscription ✓: receive entitlement OK for ${appLabel} on "${intent}"`,
+      {},
+      'intent',
+    );
 
     const listenerId = `intent_${this.nextListenerId++}`;
     const listener = {
@@ -1279,9 +1376,15 @@ export class Broker implements DesktopAgent {
     // Store handler with listener
     (listener as any).handler = handler;
 
-    this.logger.info(`Intent listener: "${intent}" registered by ${appLabel}[${instanceLabel}]`, {
-      intent, appId: source?.appId, instanceId: source?.instanceId,
-    }, 'intent');
+    this.logger.info(
+      `Intent listener: "${intent}" registered by ${appLabel}[${instanceLabel}]`,
+      {
+        intent,
+        appId: source?.appId,
+        instanceId: source?.instanceId,
+      },
+      'intent',
+    );
 
     // // Sync with OpenFin if this is a new intent type
     // const isNewIntentType = this.intentListeners.get(intent)!.length === 1;
@@ -1296,17 +1399,29 @@ export class Broker implements DesktopAgent {
       if (pendingForApp) {
         const matchingWaits = pendingForApp.filter((p) => p.intent === intent);
         if (matchingWaits.length > 0) {
-          this.logger.info(`  subscription ✓: resolving ${matchingWaits.length} pending delivery(ies) for "${intent}" on ${appLabel}`, {
-            intent, appId: source.appId, pendingCount: matchingWaits.length,
-          }, 'intent');
+          this.logger.info(
+            `  subscription ✓: resolving ${matchingWaits.length} pending delivery(ies) for "${intent}" on ${appLabel}`,
+            {
+              intent,
+              appId: source.appId,
+              pendingCount: matchingWaits.length,
+            },
+            'intent',
+          );
         }
         matchingWaits.forEach((wait) => this.resolvePendingIntentListener(source.appId, wait));
       }
     }
 
-    this.logger.info(`✓ listener registered: "${intent}" on ${appLabel}[${instanceLabel}]`, {
-      intent, appId: source?.appId, instanceId: source?.instanceId,
-    }, 'intent');
+    this.logger.info(
+      `✓ listener registered: "${intent}" on ${appLabel}[${instanceLabel}]`,
+      {
+        intent,
+        appId: source?.appId,
+        instanceId: source?.instanceId,
+      },
+      'intent',
+    );
     return listener;
   }
 
@@ -1549,11 +1664,15 @@ export class Broker implements DesktopAgent {
    * @see broadcast
    */
   async joinUserChannel(channelId: string, source?: AppIdentifier): Promise<void> {
-    this.logger.info('joinUserChannel', {
-      channelId,
-      appId: source?.appId,
-      instanceId: source?.instanceId,
-    }, 'channel');
+    this.logger.info(
+      'joinUserChannel',
+      {
+        channelId,
+        appId: source?.appId,
+        instanceId: source?.instanceId,
+      },
+      'channel',
+    );
 
     return this.perf.measure('joinUserChannel', async () => {
       if (!source?.appId || !source.instanceId) {
@@ -1648,10 +1767,14 @@ export class Broker implements DesktopAgent {
    * @see getCurrentChannel
    */
   async leaveCurrentChannel(source?: AppIdentifier): Promise<void> {
-    this.logger.debug('leaveCurrentChannel', {
-      appId: source?.appId,
-      instanceId: source?.instanceId,
-    }, 'channel');
+    this.logger.debug(
+      'leaveCurrentChannel',
+      {
+        appId: source?.appId,
+        instanceId: source?.instanceId,
+      },
+      'channel',
+    );
 
     if (!source?.instanceId) {
       return;
@@ -1819,9 +1942,13 @@ export class Broker implements DesktopAgent {
     // Deliver any queued intents
     const queued = this.intentQueue.getQueuedIntents(instanceId);
     if (queued.length > 0) {
-      this.logger.info(`Delivering ${queued.length} queued intents to tile ${instanceId}`, {
-        intents: queued.map((q) => q.intent),
-      }, 'lifecycle');
+      this.logger.info(
+        `Delivering ${queued.length} queued intents to tile ${instanceId}`,
+        {
+          intents: queued.map((q) => q.intent),
+        },
+        'lifecycle',
+      );
 
       // Deliver intents
       for (const queuedIntent of queued) {
@@ -1920,22 +2047,39 @@ export class Broker implements DesktopAgent {
     const instanceLabel = target?.instanceId ?? '(new)';
     const ctxType = context?.type ?? 'unknown';
 
-    this.logger.info(`→ step 3: deliverIntent("${intent}", "${ctxType}") → ${appLabel} [${instanceLabel}]`, {
-      intent, contextType: ctxType, target, source,
-    }, 'intent');
+    this.logger.info(
+      `→ step 3: deliverIntent("${intent}", "${ctxType}") → ${appLabel} [${instanceLabel}]`,
+      {
+        intent,
+        contextType: ctxType,
+        target,
+        source,
+      },
+      'intent',
+    );
 
     // ── Step 3a: Check if target instance is mounted ──
     if (target.instanceId) {
       const tile = this.tileRegistry.getTile(target.instanceId);
       if (tile && tile.state === 'mounted') {
-        this.logger.info(`→ step 3a: target ${appLabel}[${target.instanceId}] is mounted`, { instanceId: target.instanceId }, 'intent');
+        this.logger.info(
+          `→ step 3a: target ${appLabel}[${target.instanceId}] is mounted`,
+          { instanceId: target.instanceId },
+          'intent',
+        );
 
         // Find intent listeners for this intent
         const listeners = this.intentListeners.get(intent);
         if (listeners && listeners.length > 0) {
-          this.logger.info(`→ step 3b: found ${listeners.length} listener(s) for "${intent}" on ${appLabel}[${target.instanceId}]`, {
-            listenerCount: listeners.length, intent, instanceId: target.instanceId,
-          }, 'intent');
+          this.logger.info(
+            `→ step 3b: found ${listeners.length} listener(s) for "${intent}" on ${appLabel}[${target.instanceId}]`,
+            {
+              listenerCount: listeners.length,
+              intent,
+              instanceId: target.instanceId,
+            },
+            'intent',
+          );
 
           // ── Step 3c: Call handler ──
           const results: any[] = [];
@@ -1952,33 +2096,60 @@ export class Broker implements DesktopAgent {
 
             const handler = (listener as any).handler;
             if (handler) {
-              this.logger.info(`→ step 3c: invoking intent handler for "${intent}" on ${appLabel}[${target.instanceId}]`, {
-                intent, instanceId: target.instanceId,
-              }, 'intent');
+              this.logger.info(
+                `→ step 3c: invoking intent handler for "${intent}" on ${appLabel}[${target.instanceId}]`,
+                {
+                  intent,
+                  instanceId: target.instanceId,
+                },
+                'intent',
+              );
               try {
                 const result = await handler(context);
-                this.logger.info(`→ step 3c ✓: intent handler completed for "${intent}" on ${appLabel}[${target.instanceId}]`, {
-                  intent, instanceId: target.instanceId,
-                }, 'intent');
+                this.logger.info(
+                  `→ step 3c ✓: intent handler completed for "${intent}" on ${appLabel}[${target.instanceId}]`,
+                  {
+                    intent,
+                    instanceId: target.instanceId,
+                  },
+                  'intent',
+                );
                 results.push(result);
               } catch (error) {
-                this.logger.error(`→ step 3c ✗: intent handler FAILED for "${intent}" on ${appLabel}[${target.instanceId}]:`, error as Error, {
-                  target, source,
-                }, 'intent');
+                this.logger.error(
+                  `→ step 3c ✗: intent handler FAILED for "${intent}" on ${appLabel}[${target.instanceId}]:`,
+                  error as Error,
+                  {
+                    target,
+                    source,
+                  },
+                  'intent',
+                );
               }
             }
           }
 
           // Return first result
-          this.logger.info(`✓ intent "${intent}" fully delivered to ${appLabel}[${target.instanceId}]`, {
-            intent, target, source,
-          }, 'intent');
+          this.logger.info(
+            `✓ intent "${intent}" fully delivered to ${appLabel}[${target.instanceId}]`,
+            {
+              intent,
+              target,
+              source,
+            },
+            'intent',
+          );
           return this.intentResolver.createIntentResolution(target, intent, results[0]);
         }
 
-        this.logger.warn(`→ step 3b: no listeners for "${intent}" on ${appLabel}[${target.instanceId}] — queuing intent`, {
-          intent, instanceId: target.instanceId,
-        }, 'intent');
+        this.logger.warn(
+          `→ step 3b: no listeners for "${intent}" on ${appLabel}[${target.instanceId}] — queuing intent`,
+          {
+            intent,
+            instanceId: target.instanceId,
+          },
+          'intent',
+        );
         this.intentQueue.enqueue(target.instanceId, intent, context, {
           appId: source?.appId || '',
           instanceId: source?.instanceId,
@@ -1987,9 +2158,14 @@ export class Broker implements DesktopAgent {
       }
 
       // Target specified but not mounted
-      this.logger.info(`→ step 3a: target ${appLabel}[${target.instanceId}] is NOT mounted — queuing intent`, {
-        instanceId: target.instanceId, tileState: tile?.state ?? 'unknown',
-      }, 'intent');
+      this.logger.info(
+        `→ step 3a: target ${appLabel}[${target.instanceId}] is NOT mounted — queuing intent`,
+        {
+          instanceId: target.instanceId,
+          tileState: tile?.state ?? 'unknown',
+        },
+        'intent',
+      );
       this.intentQueue.enqueue(target.instanceId, intent, context, {
         appId: source?.appId || '',
         instanceId: source?.instanceId,
@@ -1998,22 +2174,40 @@ export class Broker implements DesktopAgent {
     }
 
     // ── Step 3a: No instance — open new instance ──
-    this.logger.info(`→ step 3a: target ${appLabel} has no running instance — opening new tile`, {
-      appId: target.appId,
-    }, 'intent');
+    this.logger.info(
+      `→ step 3a: target ${appLabel} has no running instance — opening new tile`,
+      {
+        appId: target.appId,
+      },
+      'intent',
+    );
     await this.open(target);
-    this.logger.info(`→ step 3a: opened new instance of ${appLabel}`, { appId: target.appId }, 'intent');
+    this.logger.info(
+      `→ step 3a: opened new instance of ${appLabel}`,
+      { appId: target.appId },
+      'intent',
+    );
 
     // Wait for the app to register the intent listener
     if (target.appId) {
-      this.logger.info(`→ step 3d: waiting for ${appLabel} to register intent listener for "${intent}" (timeout: 30s)`, {
-        appId: target.appId, intent,
-      }, 'intent');
+      this.logger.info(
+        `→ step 3d: waiting for ${appLabel} to register intent listener for "${intent}" (timeout: 30s)`,
+        {
+          appId: target.appId,
+          intent,
+        },
+        'intent',
+      );
       try {
         await this.waitForIntentListener(target.appId, intent);
-        this.logger.info(`→ step 3d ✓: ${appLabel} registered listener for "${intent}"`, {
-          appId: target.appId, intent,
-        }, 'intent');
+        this.logger.info(
+          `→ step 3d ✓: ${appLabel} registered listener for "${intent}"`,
+          {
+            appId: target.appId,
+            intent,
+          },
+          'intent',
+        );
 
         // Now that listener is registered, we can try delivering again
         const instances = await this.findInstances({ appId: target.appId });
@@ -2022,16 +2216,26 @@ export class Broker implements DesktopAgent {
             ...target,
             instanceId: instances[0].instanceId,
           };
-          this.logger.info(`→ step 3e: re-delivering intent "${intent}" to new instance ${newTarget.instanceId}`, {
-            intent, instanceId: newTarget.instanceId,
-          }, 'intent');
+          this.logger.info(
+            `→ step 3e: re-delivering intent "${intent}" to new instance ${newTarget.instanceId}`,
+            {
+              intent,
+              instanceId: newTarget.instanceId,
+            },
+            'intent',
+          );
           return await this.deliverIntent(intent, context, newTarget, source);
         }
-        this.logger.warn(`→ step 3e: no instances found for ${appLabel} after listener registration`, { appId: target.appId }, 'intent');
+        this.logger.warn(
+          `→ step 3e: no instances found for ${appLabel} after listener registration`,
+          { appId: target.appId },
+          'intent',
+        );
       } catch (error) {
         this.logger.warn(
           `→ step 3d: timeout waiting for ${appLabel} to register listener for "${intent}" — returning resolution without delivery`,
-          undefined, 'intent',
+          undefined,
+          'intent',
         );
       }
     }
@@ -2043,17 +2247,28 @@ export class Broker implements DesktopAgent {
    * Waits for a specific app to register an intent listener
    */
   private waitForIntentListener(appId: string, intent: string, timeoutMs = 30000): Promise<void> {
-    this.logger.info(`  waitForListener: awaiting "${intent}" listener on ${appId} (timeout: ${timeoutMs}ms)`, {
-      appId, intent, timeoutMs,
-    }, 'intent');
+    this.logger.info(
+      `  waitForListener: awaiting "${intent}" listener on ${appId} (timeout: ${timeoutMs}ms)`,
+      {
+        appId,
+        intent,
+        timeoutMs,
+      },
+      'intent',
+    );
     return new Promise<void>((resolve, reject) => {
       // Check if already registered (race condition check)
       const tiles = this.tileRegistry.getTilesByAppId(appId);
       const hasListener = tiles.some((t) => t.intentListeners.has(intent));
       if (hasListener) {
-        this.logger.info(`  waitForListener: "${intent}" listener already registered on ${appId}`, {
-          appId, intent,
-        }, 'intent');
+        this.logger.info(
+          `  waitForListener: "${intent}" listener already registered on ${appId}`,
+          {
+            appId,
+            intent,
+          },
+          'intent',
+        );
         resolve();
         return;
       }
@@ -2065,15 +2280,26 @@ export class Broker implements DesktopAgent {
       const wait: PendingIntentListener = { intent, resolve, reject };
       this.pendingIntentListeners.get(appId)!.push(wait);
 
-      this.logger.debug(`  waitForListener: registered pending wait for "${intent}" on ${appId}`, {
-        appId, intent,
-      }, 'intent');
+      this.logger.debug(
+        `  waitForListener: registered pending wait for "${intent}" on ${appId}`,
+        {
+          appId,
+          intent,
+        },
+        'intent',
+      );
 
       // Set timeout
       wait.timeoutId = setTimeout(() => {
-        this.logger.warn(`  waitForListener ✗: timeout (${timeoutMs}ms) waiting for "${intent}" listener on ${appId}`, {
-          appId, intent, timeoutMs,
-        }, 'intent');
+        this.logger.warn(
+          `  waitForListener ✗: timeout (${timeoutMs}ms) waiting for "${intent}" listener on ${appId}`,
+          {
+            appId,
+            intent,
+            timeoutMs,
+          },
+          'intent',
+        );
         this.rejectPendingIntentListener(
           appId,
           wait,
