@@ -65,7 +65,7 @@ export interface Tile {
   container: string;
   module: string;
   tile: string;
-  parameters?: Object;
+  parameters?: object;
   emailSupport: string;
   entity?: string[];
   subject?: string;

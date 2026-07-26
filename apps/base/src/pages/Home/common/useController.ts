@@ -4,14 +4,13 @@ import useAnalytics from '../../../analytics';
 import type { AnalyticsData } from '../../../analytics/model';
 import useDispatcher from '../../../hooks/dispathcer';
 import type { Workspace } from '../../../hooks/model/workspaces';
-import { firstWorkspace } from '../../../hooks/model/workspaces';
 import { useContext } from '../../../hooks/provider';
 import { getRefreshToken } from '../../../hooks/service';
 import { extend } from '../../../hooks/service/util/extend';
 import { aOrb, validateWorkspace } from '../../../utils/common';
 import { handleLoginEntities } from '../../../utils/login';
 import { refreshTabUtil, setDetail } from './util';
-import { launchSingleView } from './singleView';
+import { launchSingleView, removeSingleViewSourceWorkspace } from './singleView';
 
 const analyticsData: AnalyticsData = { container: 'Base', tile: 'home' };
 
@@ -62,20 +61,49 @@ const useController = () => {
     setActiveDragId(null);
   };
 
-  const removeTransferredWorkspace = React.useCallback(
+  const updateValue = (workspaces, index_, value_) => {
+    const remainingWorkspaces = workspaces.filter((_, index) => index !== index_);
+    if (index_ + 1 < value_) {
+      setValue((v) => v - 1);
+    } else if (index_ + 1 === value_) {
+      const nextWorkspace = remainingWorkspaces[Math.min(index_, remainingWorkspaces.length - 1)];
+      dispacthCurrentWorkspace(nextWorkspace);
+      setValue(nextWorkspace ? Math.min(index_ + 1, remainingWorkspaces.length) : 1);
+    }
+  };
+
+  const removeWorkspace = React.useCallback(
     (item: Workspace) => {
       const workspaces = [...(store?.workspaces as Workspace[])];
       const index = workspaces.findIndex((workspace) => workspace.id === item.id);
-      if (index === -1) return;
+      if (index === -1) return false;
 
-      workspaces.splice(index, 1);
-      const nextWorkspaces = workspaces.length > 0 ? workspaces : [firstWorkspace()];
-      const nextWorkspace = nextWorkspaces[Math.min(index, nextWorkspaces.length - 1)];
-      dispacthWorkspaces(nextWorkspaces);
-      dispacthCurrentWorkspace(nextWorkspace);
-      setValue(Math.min(index + 1, nextWorkspaces.length));
+      const workspace = workspaces[index];
+      const container = 'base';
+      const tile = 'home';
+      const title = workspace.label;
+      setDetail(workspace, title, container, tile);
+      ButtonEvent('click', {
+        name: 'remove workspace',
+        value: title,
+        container,
+        tile,
+      });
+      TileEvent('close', { name: title, container, tile });
+      updateValue(workspaces, index, value);
+      dispacthWorkspaces(removeSingleViewSourceWorkspace(workspaces, item.id));
+      dispacthErrorMessage(undefined);
+      return false;
     },
-    [dispacthCurrentWorkspace, dispacthWorkspaces, store?.workspaces],
+    [
+      ButtonEvent,
+      TileEvent,
+      dispacthCurrentWorkspace,
+      dispacthErrorMessage,
+      dispacthWorkspaces,
+      store?.workspaces,
+      value,
+    ],
   );
 
   const openInSingleView = React.useCallback(
@@ -87,8 +115,8 @@ const useController = () => {
       }
 
       try {
-        await launchSingleView(container);
-        removeTransferredWorkspace(item);
+        await launchSingleView(container.tile.replace(/^\//, ''));
+        removeWorkspace(item);
         ButtonEvent('click', {
           name: 'open workspace in single view',
           value: container.title,
@@ -100,7 +128,7 @@ const useController = () => {
         dispacthErrorMessage(message);
       }
     },
-    [ButtonEvent, dispacthErrorMessage, removeTransferredWorkspace],
+    [ButtonEvent, dispacthErrorMessage, removeWorkspace],
   );
 
   const isDraggedOutsideViewport = (event: DragEndEvent): boolean => {
@@ -222,34 +250,9 @@ const useController = () => {
     dispacthWorkspaces(workspaces);
   };
 
-  const updateValue = (workspaces, index_, value_) => {
-    if (index_ + 1 < value_) {
-      setValue((v) => v - 1);
-    } else if (index_ + 1 === value_) {
-      dispacthCurrentWorkspace(workspaces[index_ - 1]);
-    }
-  };
   const remove = (item: Workspace) => (event: React.MouseEvent) => {
     event.stopPropagation();
-    const workspaces = [...(store?.workspaces as Workspace[])];
-    const index = workspaces.findIndex((w) => w.id === item.id);
-    const workspace = workspaces[index];
-    const container = 'base';
-    const tile = 'home';
-    const title = workspace.label;
-    setDetail(workspace, title, container, tile);
-    ButtonEvent('click', {
-      name: 'remove workspace',
-      value: title,
-      container,
-      tile,
-    });
-    TileEvent('close', { name: title, container, tile });
-    updateValue(workspaces, index, value);
-    workspaces.splice(index, 1);
-    dispacthWorkspaces(workspaces);
-    dispacthErrorMessage(undefined);
-    return false;
+    return removeWorkspace(item);
   };
 
   const closeOthers = (item: Workspace) => {

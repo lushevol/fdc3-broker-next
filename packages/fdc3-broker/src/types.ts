@@ -102,6 +102,13 @@ export interface BrokerConfig {
   /** OpenFin bridge options */
   openFinBridgeOptions?: OpenFinBridgeOptions;
 
+  /**
+   * Tile instance IDs whose raised intents must bypass local resolution and
+   * use an external bridge. Hosts use this for isolated surfaces such as a
+   * single-tile window.
+   */
+  forceExternalIntentSourceInstanceIds?: string[];
+
   onLogin: (callback: () => Promise<any>) => Promise<void>;
   onLogout: (callback: () => Promise<any>) => Promise<void>;
 }

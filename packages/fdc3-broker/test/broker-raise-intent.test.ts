@@ -121,7 +121,9 @@ describe('Broker.raiseIntent()', () => {
       });
 
       vi.mocked(mockAppDirectory.findByIntent).mockResolvedValue([mockApp1]);
-      vi.mocked(mockCallbacks.onShowResolverUI).mockImplementation(async (targets) => targets[0] ?? null);
+      vi.mocked(mockCallbacks.onShowResolverUI).mockImplementation(
+        async (targets) => targets[0] ?? null,
+      );
 
       // Add intent listener
       await broker.addIntentListener('ViewChart', vi.fn(), mockSource);
@@ -172,6 +174,38 @@ describe('Broker.raiseIntent()', () => {
           mockSource,
         ),
       ).resolves.toBeDefined();
+    });
+  });
+
+  describe('forced external routing', () => {
+    it('routes an intent raised by a configured single-view tile externally even when it has an internal target', async () => {
+      const externalResolution = {
+        source: { appId: 'external-app' },
+        intent: 'ViewChart',
+        getResult: vi.fn(),
+      } as IntentResolution;
+      const raiseIntentExternal = vi.fn().mockResolvedValue(externalResolution);
+
+      const singleViewBroker = new Broker({
+        ...mockConfig,
+        forceExternalIntentSourceInstanceIds: ['tile-1'],
+      });
+      singleViewBroker.registerTile('tile-1', 'app1');
+      await singleViewBroker.addIntentListener('ViewChart', vi.fn(), {
+        appId: 'app1',
+        instanceId: 'tile-1',
+      });
+      (
+        singleViewBroker as unknown as { getOpenFinBridge: () => Promise<unknown> }
+      ).getOpenFinBridge = vi
+        .fn()
+        .mockResolvedValue({ isEnabled: () => true, raiseIntentExternal });
+
+      await expect(
+        singleViewBroker.raiseIntent('ViewChart', mockContext, undefined, mockSource),
+      ).resolves.toEqual(externalResolution);
+
+      expect(raiseIntentExternal).toHaveBeenCalledWith('ViewChart', mockContext, undefined);
     });
   });
 

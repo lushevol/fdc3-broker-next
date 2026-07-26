@@ -5,10 +5,7 @@ import { extractParamInfo, resolveToolSource } from './utils/param-info';
 import { profileLookupTool } from './profile-lookup';
 import { timezoneCurrentTool } from './timezone-current';
 import { approvalConfirmTool } from './approval-confirm';
-import {
-  visitedUserCountByApplicationTool,
-  visitedUserHourlyByApplicationTool,
-} from './analytics';
+import { visitedUserCountByApplicationTool, visitedUserHourlyByApplicationTool } from './analytics';
 import { resolveRelativeDateTool } from './resolve-relative-date';
 import { highestOperationUsersTool } from './user-ranking';
 import { mostUsedFunctionsTool } from './function-ranking';
@@ -18,20 +15,14 @@ import { proposeFdc3WorkflowTool } from './fdc3/propose-workflow';
 import { createExecuteFdc3WorkflowTool } from './fdc3/execute-workflow';
 import type { Fdc3ActionExecutor } from './fdc3/shared/action-executor';
 import type { Fdc3WorkflowExecutor } from './fdc3/shared/workflow-executor';
-import {
-  createFlowzeroWorkflowGenerationTool,
-  type FlowzeroWorkflowOpenHandler,
-} from './flowzero/workflow-generation';
+import { createFlowzeroWorkflowGenerationTool } from './flowzero/workflow-generation';
 
 export type RuntimeToolkitDeps = {
   fdc3Executor?: Fdc3ActionExecutor;
   workflowExecutor?: Fdc3WorkflowExecutor;
-  openFlowzeroWorkflow?: FlowzeroWorkflowOpenHandler;
 };
 
-function createBaseToolkit({
-  openFlowzeroWorkflow,
-}: Pick<RuntimeToolkitDeps, 'openFlowzeroWorkflow'> = {}): Record<string, ToolkitDefinition> {
+function createBaseToolkit(): Record<string, ToolkitDefinition> {
   return {
     profile_lookup: profileLookupTool,
     timezone_current: timezoneCurrentTool,
@@ -43,16 +34,15 @@ function createBaseToolkit({
     most_used_functions_by_application: mostUsedFunctionsTool,
     propose_fdc3_action: proposeFdc3ActionTool,
     propose_fdc3_workflow: proposeFdc3WorkflowTool,
-    generate_flowzero_workflow: createFlowzeroWorkflowGenerationTool(openFlowzeroWorkflow),
+    generate_flowzero_workflow: createFlowzeroWorkflowGenerationTool(),
   };
 }
 
 export function createRuntimeToolkit({
   fdc3Executor,
   workflowExecutor,
-  openFlowzeroWorkflow,
 }: RuntimeToolkitDeps = {}): Toolkit {
-  const toolkit = createBaseToolkit({ openFlowzeroWorkflow });
+  const toolkit = createBaseToolkit();
 
   const runtimeToolkit: Record<string, ToolkitDefinition> = {
     ...toolkit,
@@ -67,8 +57,7 @@ export function createRuntimeToolkit({
   }
 
   if (workflowExecutor) {
-    executableToolkit.execute_fdc3_workflow =
-      createExecuteFdc3WorkflowTool(workflowExecutor);
+    executableToolkit.execute_fdc3_workflow = createExecuteFdc3WorkflowTool(workflowExecutor);
   }
 
   return executableToolkit as unknown as Toolkit;

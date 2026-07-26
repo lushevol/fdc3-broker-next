@@ -29,12 +29,18 @@ import { ModuleLoader, SystemJsModuleAdapter } from 'ratan-module-composition';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFDC3WorkspaceHelper } from './useFDC3WorkspaceHelper';
+import { getSingleViewBrokerOptions, isSingleViewTarget } from './singleView';
 import fdc3Definitions from './declarations/fdc3-definitions.json';
 import { getBrowserInteropBrokerOptions } from './postmessage';
 import { getOpenFinBrokerOptions } from './openfin';
 import workflows from './declarations/workflows.json';
 import { useContext as useAppContext } from '../hooks/provider';
-import { isSingleViewRequest } from '../pages/Home/common/singleView';
+import {
+  createSingleViewContainer,
+  findSingleViewTile,
+  isSingleViewRequest,
+  SINGLE_VIEW_QUERY_PARAM,
+} from '../pages/Home/common/singleView';
 
 // ============================================================================
 // FDC3 Tile Provider for Base Workspace Containers
@@ -169,6 +175,15 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
   );
   const [resolverReject, setResolverReject] = useState<((error: Error) => void) | null>(null);
   const [store] = useAppContext();
+  const singleViewTileId = new URLSearchParams(window.location.search).get(SINGLE_VIEW_QUERY_PARAM);
+  const singleViewTile = findSingleViewTile(
+    singleViewTileId,
+    store.drawers?.flatMap((drawer) => drawer.tiles),
+  );
+  const singleViewContainer = singleViewTile
+    ? createSingleViewContainer(singleViewTile)
+    : undefined;
+  const singleViewAppId = singleViewContainer ? getFdc3AppId(singleViewContainer.tile) : undefined;
 
   // ========================================================================
   // FDC3 Workspace Helper
@@ -264,6 +279,29 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
    * ```
    */
   const localApps = useMemo<AppDefinition[]>(() => {
+    if (singleViewRequest) {
+      const selectedTile = allAccessibleTiles.find(
+        (tile) => tile.tile && getFdc3AppId(tile.tile) === singleViewAppId,
+      );
+
+      if (!selectedTile || !singleViewAppId) {
+        return [];
+      }
+
+      return [
+        {
+          appId: singleViewAppId,
+          name: selectedTile.title,
+          version: '',
+          description: '',
+          icon: '',
+          type: '',
+          url: '',
+          interop: fdc3Definitions.find((app) => app.appId === singleViewAppId)?.interop ?? {},
+        },
+      ];
+    }
+
     if (allAccessibleTiles.length === 0) {
       return fdc3Definitions.map((app) => ({
         appId: app.appId,
@@ -290,7 +328,7 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
         interop: fdc3Definitions.find((app) => app.appId === appId)?.interop ?? {},
       };
     });
-  }, [allAccessibleTiles]);
+  }, [allAccessibleTiles, singleViewAppId, singleViewRequest]);
 
   // ========================================================================
   // Broker Configuration
@@ -346,6 +384,8 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
 
       ...getOpenFinBrokerOptions(),
 
+      ...getSingleViewBrokerOptions(singleViewContainer),
+
       // Login/logout handler registration
       onLogin: async (callback: () => Promise<unknown>) => {
         // Register login callback - called when user logs in
@@ -388,6 +428,21 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
         onTileOpen: async (app: AppIdentifier): Promise<AppIdentifier> => {
           try {
             console.log(`Opening tile: ${app.appId}`, app);
+
+            if (singleViewRequest) {
+              if (!isSingleViewTarget(app, singleViewContainer, singleViewAppId)) {
+                throw new Error('Single view cannot open a tile other than its target.');
+              }
+
+              if (!singleViewContainer || !singleViewAppId) {
+                throw new Error('Single-view target is unavailable.');
+              }
+
+              return {
+                appId: singleViewAppId,
+                instanceId: singleViewContainer.id,
+              };
+            }
 
             // Use ref to access the latest workspaceOpenTile function.
             // This prevents stale closures when the hook's dependencies change.
@@ -519,7 +574,7 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
           }),
       },
     }),
-    [appDirectory],
+    [appDirectory, singleViewAppId, singleViewContainer, singleViewRequest],
   );
 
   // ========================================================================

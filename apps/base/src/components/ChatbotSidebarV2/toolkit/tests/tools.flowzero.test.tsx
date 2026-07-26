@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it, jest } from '@jest/globals';
 import { createRuntimeToolkit, getProtocolToolDescriptors } from '../index';
 
@@ -36,9 +36,8 @@ describe('runtimeToolkit Flowzero tools', () => {
     );
   });
 
-  it('renders a generated workflow card with a direct Flowzero open action', () => {
-    const openFlowzeroWorkflow = jest.fn();
-    const toolkit = createRuntimeToolkit({ openFlowzeroWorkflow });
+  it('renders a generated workflow card without opening another workspace tile', () => {
+    const toolkit = createRuntimeToolkit();
     const Render = toolkit.generate_flowzero_workflow?.render as React.ComponentType<{
       args: Record<string, unknown>;
       result: unknown;
@@ -68,10 +67,6 @@ describe('runtimeToolkit Flowzero tools', () => {
     expect(screen.getByText('DRAFT')).toBeInTheDocument();
     expect(screen.getByText('3 steps')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /open in flowzero/i }));
-
-    expect(openFlowzeroWorkflow).toHaveBeenCalledWith(
-      '/flowzero/workflow-management/NewWorkflow/?workflowDetail=%7B%22id%22%3A%22wf-123%22%7D&from=detail',
-    );
+    expect(screen.queryByRole('button', { name: /open in flowzero/i })).not.toBeInTheDocument();
   });
 });
