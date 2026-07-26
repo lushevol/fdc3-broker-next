@@ -509,6 +509,37 @@ describe('Broker.raiseIntent()', () => {
       }
     });
 
+    it('shares one cold tile launch across concurrent intents for the same target app', async () => {
+      vi.mocked(mockAppDirectory.findByIntent).mockResolvedValue([mockApp1]);
+      vi.mocked(mockAppDirectory.getApp).mockResolvedValue(mockApp1);
+
+      const handler = vi.fn(async (context: Context) => ({ context }));
+      vi.mocked(mockCallbacks.onTileOpen).mockImplementation(async (app) => {
+        const appId = typeof app === 'string' ? app : app.appId;
+        const instanceId = `${appId}-shared-instance`;
+
+        await broker.registerTile(instanceId, appId, { appId, name: appId });
+        setTimeout(() => {
+          void broker.addIntentListener('ViewChart', handler, { appId, instanceId });
+        }, 10);
+
+        return { appId, instanceId };
+      });
+
+      await Promise.all([
+        broker.raiseIntent('ViewChart', mockContext, undefined, mockSource),
+        broker.raiseIntent(
+          'ViewChart',
+          { type: 'fdc3.chart', id: { ticker: 'MSFT' } },
+          undefined,
+          mockSource,
+        ),
+      ]);
+
+      expect(mockCallbacks.onTileOpen).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledTimes(2);
+    });
+
     it('should clear pending listener waits after registration resolves', async () => {
       vi.useFakeTimers();
       const warnSpy = vi.spyOn(broker['logger'], 'warn');
@@ -618,7 +649,15 @@ describe('Broker.raiseIntent()', () => {
 
       await broker.raiseIntent('ViewChart', mockContext, undefined, mockSource);
 
-      expect(measureSpy).toHaveBeenCalledWith('raiseIntent', expect.any(Function));
+      expect(measureSpy).toHaveBeenCalledWith(
+        'raiseIntent',
+        expect.any(Function),
+        expect.objectContaining({
+          intent: 'ViewChart',
+          sourceAppId: 'tile-1',
+          sourceInstanceId: 'tile-1',
+        }),
+      );
     });
   });
 
