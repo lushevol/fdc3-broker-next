@@ -1,77 +1,89 @@
-import type { Container } from '../../../hooks/model/workspaces';
+import type { Tile } from '../../../hooks/model/root';
 import {
   buildSingleViewUrl,
-  cleanExpiredSingleViewHandoffs,
-  getSingleViewHandoff,
+  createSingleViewContainer,
+  findSingleViewTile,
+  getSingleViewTileId,
   launchSingleView,
+  removeSingleViewSourceWorkspace,
   SingleViewLaunchError,
 } from './singleView';
 
-const container: Container = {
-  id: 'tile-1',
+const tile: Tile = {
   container: '@fm/tile',
   module: '/module',
   tile: '/tile',
   title: 'Tile',
   emailSupport: 'support@example.com',
   panelId: 'panel-1',
-  tabId: 'tab-1',
 };
 
-describe('single view handoffs', () => {
-  beforeEach(() => window.localStorage.clear());
-
-  it('opens a browser popup and retains a valid handoff for the target page', async () => {
+describe('single view launch', () => {
+  it('opens a browser tab using only the target tile ID', async () => {
     const openWindow = jest.fn(() => ({ focus: jest.fn() })) as unknown as Window['open'];
 
     await expect(
-      launchSingleView(container, { createId: () => 'handoff-1', openWindow }),
-    ).resolves.toBe('handoff-1');
+      launchSingleView('tile', { createWindowId: () => 'window-1', openWindow }),
+    ).resolves.toBe('window-1');
 
-    expect(openWindow).toHaveBeenCalledWith(
-      buildSingleViewUrl('handoff-1'),
-      '_blank',
-      expect.stringContaining('width=1200'),
-    );
-    expect(getSingleViewHandoff('handoff-1')).toMatchObject({ container });
+    expect(openWindow).toHaveBeenCalledWith(buildSingleViewUrl('tile'), '_blank');
+    expect(window.localStorage.length).toBe(0);
   });
 
   it('uses an OpenFin platform window when available', async () => {
     const createWindow = jest.fn().mockResolvedValue({});
 
-    await launchSingleView(container, {
-      createId: () => 'openfin-1',
+    await launchSingleView('tile', {
+      createWindowId: () => 'window-1',
       getPlatform: () => ({ createWindow }),
     });
 
     expect(createWindow).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'mfe-base-single-view-openfin-1',
+        name: 'mfe-base-single-view-window-1',
+        url: buildSingleViewUrl('tile'),
         defaultWidth: 1200,
         defaultHeight: 800,
-        customData: { singleViewHandoff: expect.objectContaining({ container }) },
       }),
     );
   });
 
-  it('removes the pending handoff when popup creation fails', async () => {
+  it('reports a blocked browser tab without writing a handoff record', async () => {
     await expect(
-      launchSingleView(container, { createId: () => 'blocked', openWindow: () => null }),
+      launchSingleView('tile', { createWindowId: () => 'blocked', openWindow: () => null }),
     ).rejects.toBeInstanceOf(SingleViewLaunchError);
 
-    expect(getSingleViewHandoff('blocked')).toBeNull();
+    expect(window.localStorage.length).toBe(0);
   });
 
-  it('removes expired and malformed handoffs', () => {
-    window.localStorage.setItem(
-      'mfe-base:single-view:expired',
-      JSON.stringify({ version: 1, expiresAt: 10, container }),
-    );
-    window.localStorage.setItem('mfe-base:single-view:broken', 'not-json');
+  it('resolves a tile from the accessible tile catalogue, not a workspace instance', () => {
+    expect(getSingleViewTileId(tile)).toBe('tile');
+    expect(findSingleViewTile('tile', [tile])).toEqual(tile);
+    expect(findSingleViewTile('unknown', [tile])).toBeUndefined();
+    expect(createSingleViewContainer(tile)).toMatchObject({
+      id: 'tile',
+      container: '@fm/tile',
+      module: '/module',
+      tile: '/tile',
+    });
+  });
 
-    cleanExpiredSingleViewHandoffs(window.localStorage, 11);
+  it('removes the source workspace after its tile moves to single view', () => {
+    const sourceWorkspace = {
+      id: 'workspace-1',
+      label: 'Workspace 1',
+      isActive: true,
+      containers: [createSingleViewContainer(tile)],
+    };
+    const remainingWorkspace = {
+      id: 'workspace-2',
+      label: 'Workspace 2',
+      isActive: false,
+      containers: [],
+    };
 
-    expect(window.localStorage.getItem('mfe-base:single-view:expired')).toBeNull();
-    expect(window.localStorage.getItem('mfe-base:single-view:broken')).toBeNull();
+    expect(
+      removeSingleViewSourceWorkspace([sourceWorkspace, remainingWorkspace], sourceWorkspace.id),
+    ).toEqual([remainingWorkspace]);
   });
 });

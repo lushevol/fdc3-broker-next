@@ -4,11 +4,7 @@ import type { ToolRenderProps } from '../../compositor';
 import type { ToolkitDefinition } from '../../utils/param-info';
 import { FlowzeroWorkflowGenerationTool } from './ui';
 
-export type FlowzeroWorkflowOpenHandler = (route: string) => void | Promise<void>;
-
-export function createFlowzeroWorkflowGenerationTool(
-  openFlowzeroWorkflow?: FlowzeroWorkflowOpenHandler,
-): ToolkitDefinition {
+export function createFlowzeroWorkflowGenerationTool(): ToolkitDefinition {
   return {
     type: 'backend',
     source: 'mcp',
@@ -20,10 +16,6 @@ export function createFlowzeroWorkflowGenerationTool(
       steps: z.array(z.string()).optional().describe('Optional ordered workflow steps'),
       requestedBy: z.string().optional().describe('Optional requesting user id'),
     }),
-    render: (props: ToolRenderProps) =>
-      React.createElement(FlowzeroWorkflowGenerationTool, {
-        ...props,
-        openFlowzeroWorkflow,
-      }),
+    render: (props: ToolRenderProps) => React.createElement(FlowzeroWorkflowGenerationTool, props),
   };
 }

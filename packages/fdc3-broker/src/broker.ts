@@ -1025,11 +1025,7 @@ export class Broker implements DesktopAgent {
     for (const app of matchingApps) {
       const readyTile = this.tileRegistry
         .getTilesByAppId(app.appId)
-        .find(
-          (tile) =>
-            tile.state === 'mounted' &&
-            tile.intentListeners.has(request.intent),
-        );
+        .find((tile) => tile.state === 'mounted' && tile.intentListeners.has(request.intent));
       if (readyTile) {
         return {
           state: 'ready',
@@ -1136,6 +1132,10 @@ export class Broker implements DesktopAgent {
       }
       this.logger.info(`→ step 1 ✓: entitlements OK for ${appLabel} → ${intent}`, {}, 'intent');
 
+      if (this.config.forceExternalIntentSourceInstanceIds?.includes(source?.instanceId ?? '')) {
+        return this.raiseIntentExternally(intent, context, targetApp);
+      }
+
       // ── Step 2: Resolve target ──
       this.logger.info(
         `→ step 2: resolving target for intent "${intent}"`,
@@ -1235,6 +1235,24 @@ export class Broker implements DesktopAgent {
       );
       return await this.deliverIntent(intent, context, result.target, source);
     });
+  }
+
+  private async raiseIntentExternally(
+    intent: string,
+    context: Context,
+    target?: AppIdentifier,
+  ): Promise<IntentResolution> {
+    const openFinBridge = await this.getOpenFinBridge();
+    if (openFinBridge?.isEnabled()) {
+      return openFinBridge.raiseIntentExternal(intent, context, target);
+    }
+
+    const postMessageBridge = await this.getPostMessageBridge();
+    if (postMessageBridge?.isEnabled()) {
+      return postMessageBridge.raiseIntentExternal(intent, context, target);
+    }
+
+    throw new Error(`No external bridge is available for intent: ${intent}`);
   }
 
   /**
