@@ -24,7 +24,11 @@ export { Logger, LogLevel } from './logger';
 // Export OpenFin bridge
 export { OpenFinBridge } from './openfin-bridge';
 // Export performance tracker
-export { PerformanceTracker } from './performance';
+export {
+  PerformanceTracker,
+  type PerformanceAttributes,
+  type PerformanceMetric,
+} from './performance';
 // Export PostMessage bridge
 export {
   PostMessageBridge,

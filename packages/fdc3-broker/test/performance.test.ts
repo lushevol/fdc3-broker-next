@@ -64,4 +64,42 @@ describe('PerformanceTracker', () => {
     expect(tracker.end('operation')).toBe(0);
     expect(warn).toHaveBeenCalledWith('[FDC3:Perf] No start mark found for operation: operation');
   });
+
+  it('keeps overlapping operations separate and preserves their attributes', async () => {
+    const tracker = new PerformanceTracker();
+    let releaseFirst!: () => void;
+    const firstGate = new Promise<void>((resolve) => {
+      releaseFirst = resolve;
+    });
+
+    const first = tracker.measure(
+      'broadcast',
+      async () => firstGate,
+      { sourceAppId: 'prices', sourceInstanceId: 'prices-1', contextType: 'fdc3.instrument' },
+    );
+    const second = tracker.measure(
+      'broadcast',
+      async () => undefined,
+      { sourceAppId: 'chart', sourceInstanceId: 'chart-1', contextType: 'fdc3.instrument' },
+    );
+
+    await second;
+    releaseFirst();
+    await first;
+
+    const metrics = tracker.getPerfLogs();
+    expect(metrics).toHaveLength(2);
+    expect(metrics.map((metric) => metric.id)).toEqual(['broadcast:2', 'broadcast:1']);
+    expect(metrics.map((metric) => metric.attributes?.sourceAppId).sort()).toEqual(['chart', 'prices']);
+    expect(metrics.every((metric) => metric.duration >= 0)).toBe(true);
+  });
+
+  it('creates Chrome User Timing measures for completed FDC3 operations', async () => {
+    const tracker = new PerformanceTracker();
+
+    await tracker.measure('raiseIntent', async () => 'ok', { intent: 'ViewChart' });
+
+    const entries = performance.getEntriesByType?.('measure') ?? [];
+    expect(entries.some((entry) => entry.name.startsWith('fdc3:raiseIntent:'))).toBe(true);
+  });
 });

@@ -7,8 +7,6 @@
  * @see research.md#L838-L863
  */
 
-import { LogLevel } from './logger';
-
 /**
  * Performance tracker class
  *
@@ -16,18 +14,53 @@ import { LogLevel } from './logger';
  * Supports both manual start/end tracking and automatic async function measurement.
  * Emits performance events that can be subscribed to via the broker logger.
  */
+export interface PerformanceAttributes {
+  /** The tile that initiated the FDC3 operation. */
+  sourceAppId?: string;
+  sourceInstanceId?: string;
+  /** The requested target, if one was supplied by the caller. */
+  targetAppId?: string;
+  targetInstanceId?: string;
+  /** Safe FDC3 metadata. Never attach the full context payload here. */
+  intent?: string;
+  contextType?: string;
+  channelId?: string;
+}
+
+export interface PerformanceMetric {
+  id: string;
+  operation: string;
+  duration: number;
+  timestamp: number;
+  outcome: 'success' | 'error';
+  attributes?: PerformanceAttributes;
+}
+
+type ActiveMark = {
+  operation: string;
+  startedAt: number;
+  attributes?: PerformanceAttributes;
+};
+
+/**
+ * The names below are deliberately stable so Chrome DevTools' Performance panel
+ * can filter an FDC3 transaction without needing the application's log console.
+ */
+const USER_TIMING_PREFIX = 'fdc3';
+
 export class PerformanceTracker {
-  private marks = new Map<string, number>();
-  private perfLogs: Array<{ operation: string; duration: number; timestamp: number }> = [];
-  private subscribers = new Set<(operation: string, duration: number) => void>();
+  private marks = new Map<string, ActiveMark>();
+  private perfLogs: PerformanceMetric[] = [];
+  private subscribers = new Set<(metric: PerformanceMetric) => void>();
+  private nextId = 0;
 
   /**
    * Subscribes to performance completions
    *
-   * @param callback - Called with (operation, durationMs) when an operation completes
+   * @param callback - Called with the completed, attributed metric
    * @returns Unsubscribe function
    */
-  subscribe(callback: (operation: string, duration: number) => void): () => void {
+  subscribe(callback: (metric: PerformanceMetric) => void): () => void {
     this.subscribers.add(callback);
     return () => {
       this.subscribers.delete(callback);
@@ -46,8 +79,14 @@ export class PerformanceTracker {
    * const duration = tracker.end('myOperation');
    * ```
    */
-  start(operation: string): void {
-    this.marks.set(operation, performance.now());
+  start(operation: string, attributes?: PerformanceAttributes): string {
+    const id = `${operation}:${++this.nextId}`;
+    const markName = this.getMarkName(id);
+    const startedAt = performance.now();
+
+    this.marks.set(id, { operation, startedAt, attributes });
+    performance.mark?.(markName);
+    return id;
   }
 
   /**
@@ -63,33 +102,47 @@ export class PerformanceTracker {
    * const duration = tracker.end('myOperation'); // returns e.g., 45.2
    * ```
    */
-  end(operation: string): number {
-    const start = this.marks.get(operation);
-    if (start === undefined) {
-      console.warn(`[FDC3:Perf] No start mark found for operation: ${operation}`);
+  end(operationOrId: string, outcome: PerformanceMetric['outcome'] = 'success'): number {
+    const id = this.marks.has(operationOrId)
+      ? operationOrId
+      : [...this.marks.keys()].find((markId) => this.marks.get(markId)?.operation === operationOrId);
+    const mark = id ? this.marks.get(id) : undefined;
+    if (!id || !mark) {
+      console.warn(`[FDC3:Perf] No start mark found for operation: ${operationOrId}`);
       return 0;
     }
 
-    const duration = performance.now() - start;
-    this.marks.delete(operation);
+    const duration = performance.now() - mark.startedAt;
+    this.marks.delete(id);
+
+    const metric: PerformanceMetric = {
+      id,
+      operation: mark.operation,
+      duration,
+      timestamp: Date.now(),
+      outcome,
+      attributes: mark.attributes,
+    };
+    const measureName = this.getMeasureName(id, outcome);
+    this.recordUserTiming(id, measureName);
 
     // Store perf log
-    this.perfLogs.push({ operation, duration, timestamp: Date.now() });
+    this.perfLogs.push(metric);
     if (this.perfLogs.length > 100) {
       this.perfLogs.shift();
     }
 
     // Log if operation took too long (>100ms)
     if (duration > 100) {
-      console.warn(`[FDC3:Perf] ${operation} took ${duration.toFixed(2)}ms`);
+      console.warn(`[FDC3:Perf] ${mark.operation} took ${duration.toFixed(2)}ms`);
     } else if (duration > 50) {
-      console.info(`[FDC3:Perf] ${operation} took ${duration.toFixed(2)}ms`);
+      console.info(`[FDC3:Perf] ${mark.operation} took ${duration.toFixed(2)}ms`);
     }
 
     // Notify subscribers
     this.subscribers.forEach((cb) => {
       try {
-        cb(operation, duration);
+        cb(metric);
       } catch {
         // Silently ignore subscriber errors
       }
@@ -115,12 +168,20 @@ export class PerformanceTracker {
    * });
    * ```
    */
-  async measure<T>(operation: string, fn: () => Promise<T>): Promise<T> {
-    this.start(operation);
+  async measure<T>(
+    operation: string,
+    fn: () => Promise<T>,
+    attributes?: PerformanceAttributes,
+  ): Promise<T> {
+    const markId = this.start(operation, attributes);
+    let outcome: PerformanceMetric['outcome'] = 'success';
     try {
       return await fn();
+    } catch (error) {
+      outcome = 'error';
+      throw error;
     } finally {
-      this.end(operation);
+      this.end(markId, outcome);
     }
   }
 
@@ -129,7 +190,7 @@ export class PerformanceTracker {
    *
    * @returns Array of recent performance entries
    */
-  getPerfLogs(): Array<{ operation: string; duration: number; timestamp: number }> {
+  getPerfLogs(): PerformanceMetric[] {
     return [...this.perfLogs];
   }
 
@@ -139,5 +200,31 @@ export class PerformanceTracker {
   clear(): void {
     this.marks.clear();
     this.perfLogs = [];
+  }
+
+  private getMarkName(id: string): string {
+    return `${USER_TIMING_PREFIX}:${id}:start`;
+  }
+
+  private getEndMarkName(id: string): string {
+    return `${USER_TIMING_PREFIX}:${id}:end`;
+  }
+
+  private getMeasureName(id: string, outcome: PerformanceMetric['outcome']): string {
+    return `${USER_TIMING_PREFIX}:${id}:${outcome}`;
+  }
+
+  /** User Timing must never interfere with delivery on older or embedded browsers. */
+  private recordUserTiming(id: string, measureName: string): void {
+    if (!performance.mark || !performance.measure) {
+      return;
+    }
+
+    try {
+      performance.mark(this.getEndMarkName(id));
+      performance.measure(measureName, this.getMarkName(id), this.getEndMarkName(id));
+    } catch {
+      // The in-memory metric remains available even if User Timing is unavailable.
+    }
   }
 }

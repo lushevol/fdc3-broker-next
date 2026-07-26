@@ -15,7 +15,7 @@ import { EntitlementValidator } from './entitlements';
 import { IntentQueueImpl } from './intent-queue';
 import { IntentResolver } from './intent-resolver';
 import { Logger, LogLevel } from './logger';
-import { PerformanceTracker } from './performance';
+import { PerformanceTracker, type PerformanceAttributes } from './performance';
 import { TileRegistryImpl } from './tile-registry';
 import type {
   AppIdentifier,
@@ -127,6 +127,9 @@ export class Broker implements DesktopAgent {
   // Track pending intent listeners (waits for app launch)
   private pendingIntentListeners = new Map<string, PendingIntentListener[]>();
 
+  /** One target tile launch is shared by concurrent intent deliveries. */
+  private inFlightTileLaunches = new Map<string, Promise<void>>();
+
   /**
    * Creates a new FDC3 Broker instance
    *
@@ -235,6 +238,39 @@ export class Broker implements DesktopAgent {
    */
   subscribeToLogs(callback: (event: import('./logger').LogEvent) => void): () => void {
     return this.logger.subscribe(callback);
+  }
+
+  /**
+   * Subscribe to completed FDC3 operation metrics. Entries also appear as User
+   * Timing measures in Chrome DevTools under the `fdc3:` prefix.
+   */
+  subscribeToPerformanceMetrics(
+    callback: (metric: import('./performance').PerformanceMetric) => void,
+  ): () => void {
+    return this.perf.subscribe(callback);
+  }
+
+  /** Returns the most recent 100 completed FDC3 operation metrics. */
+  getPerformanceMetrics(): import('./performance').PerformanceMetric[] {
+    return this.perf.getPerfLogs();
+  }
+
+  private performanceAttributes(
+    source?: AppIdentifier,
+    target?: AppIdentifier,
+    context?: Context,
+    channelId?: string,
+    intent?: string,
+  ): PerformanceAttributes {
+    return {
+      sourceAppId: source?.appId,
+      sourceInstanceId: source?.instanceId,
+      targetAppId: target?.appId,
+      targetInstanceId: target?.instanceId,
+      contextType: context?.type,
+      channelId,
+      intent,
+    };
   }
 
   /**
@@ -657,7 +693,7 @@ export class Broker implements DesktopAgent {
       }
 
       return appIdentifier;
-    });
+    }, this.performanceAttributes(source, appIdentifier, context));
   }
 
   /**
@@ -796,7 +832,7 @@ export class Broker implements DesktopAgent {
       if (postMessageBridge?.isEnabled()) {
         await postMessageBridge.broadcast(context, channel.id);
       }
-    });
+    }, this.performanceAttributes(source, undefined, context));
   }
 
   /**
@@ -1234,7 +1270,7 @@ export class Broker implements DesktopAgent {
         'intent',
       );
       return await this.deliverIntent(intent, context, result.target, source);
-    });
+    }, this.performanceAttributes(source, targetApp, context, undefined, intent));
   }
 
   /**
@@ -1649,7 +1685,7 @@ export class Broker implements DesktopAgent {
       }
 
       return privateChannel;
-    });
+    }, this.performanceAttributes(source));
   }
 
   /**
@@ -1799,7 +1835,7 @@ export class Broker implements DesktopAgent {
       if (postMessageBridge?.isEnabled()) {
         await postMessageBridge.joinUserChannel(channel);
       }
-    });
+    }, this.performanceAttributes(source, undefined, undefined, channelId));
   }
 
   /**
@@ -2191,7 +2227,11 @@ export class Broker implements DesktopAgent {
                 'intent',
               );
               try {
-                const result = await handler(context);
+                const result = await this.perf.measure(
+                  'intentHandler',
+                  () => Promise.resolve(handler(context)),
+                  this.performanceAttributes(source, target, context, undefined, intent),
+                );
                 this.logger.info(
                   `→ step 3c ✓: intent handler completed for "${intent}" on ${appLabel}[${target.instanceId}]`,
                   {
@@ -2267,7 +2307,7 @@ export class Broker implements DesktopAgent {
       },
       'intent',
     );
-    await this.open(target);
+    await this.openSharedTile(target);
     this.logger.info(
       `→ step 3a: opened new instance of ${appLabel}`,
       { appId: target.appId },
@@ -2285,7 +2325,11 @@ export class Broker implements DesktopAgent {
         'intent',
       );
       try {
-        await this.waitForIntentListener(target.appId, intent);
+        await this.perf.measure(
+          'waitForIntentListener',
+          () => this.waitForIntentListener(target.appId, intent),
+          this.performanceAttributes(source, target, context, undefined, intent),
+        );
         this.logger.info(
           `→ step 3d ✓: ${appLabel} registered listener for "${intent}"`,
           {
@@ -2327,6 +2371,34 @@ export class Broker implements DesktopAgent {
     }
 
     return this.intentResolver.createIntentResolution(target, intent);
+  }
+
+  /**
+   * Starts a target tile once and lets concurrent callers await the same launch.
+   * Listener readiness remains intent-specific and is handled afterwards.
+   */
+  private openSharedTile(target: ResolverTarget): Promise<void> {
+    const existingLaunch = this.inFlightTileLaunches.get(target.appId);
+    if (existingLaunch) {
+      this.logger.info(
+        `→ step 3a: joining in-flight launch for ${target.appId}`,
+        { appId: target.appId },
+        'intent',
+      );
+      return existingLaunch;
+    }
+
+    const launch = this.open(target).then(
+      () => {
+        this.inFlightTileLaunches.delete(target.appId);
+      },
+      (error: unknown) => {
+        this.inFlightTileLaunches.delete(target.appId);
+        throw error;
+      },
+    );
+    this.inFlightTileLaunches.set(target.appId, launch);
+    return launch;
   }
 
   /**
