@@ -36,6 +36,18 @@ describe('DesignSystemProvider', () => {
     expect(compact.components?.MuiButton?.defaultProps?.size).toBe('small');
     expect(comfortable.components?.MuiButton?.defaultProps?.size).toBe('medium');
   });
+
+  it('targets CSS-in-JS output at the supplied Tile Shadow Root', () => {
+    const host = document.createElement('section');
+    const styleTarget = host.attachShadow({ mode: 'open' });
+    render(
+      <DesignSystemProvider appearance={darkCompact} styleTarget={styleTarget}>
+        <Button>Isolated action</Button>
+      </DesignSystemProvider>,
+    );
+    expect(styleTarget.querySelector('style[data-emotion^="ratan-application"]')).not.toBeNull();
+    expect(document.head.querySelector('style[data-emotion^="ratan-application"]')).toBeNull();
+  });
 });
 
 describe('shared components', () => {

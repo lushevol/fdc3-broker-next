@@ -6,7 +6,7 @@ import {
   type PlatformCapabilities,
 } from '@fm/platform-contracts-poc';
 import { createAppearanceController } from '@fm/platform-sdk-poc';
-import { Application, manifest } from './application';
+import { Application, applicationManifest, manifest, mount, unmount } from './application';
 import { STANDALONE_APPEARANCE, standaloneAppearanceCapability } from './standalone';
 
 const defaultAppearance: AppearanceSnapshot = {
@@ -37,11 +37,12 @@ const renderApplication = (capabilities = createCapabilities()) => {
 describe('Cashflow federated application', () => {
   beforeEach(() => window.history.replaceState({}, '', '/cashflow'));
 
-  it('publishes a compatible application manifest', () => {
-    expect(manifest).toEqual({
+  it('publishes a compatible application manifest and Host Tile contract', () => {
+    expect(applicationManifest).toEqual({
       id: 'cashflow', displayName: 'Cashflow', contractVersion: '1.0.0',
       appearanceContractVersion: '1.0.0',
     });
+    expect(manifest).toEqual({ tileId: 'cashflow', contractVersion: '0.1' });
   });
 
   it('defines deterministic standalone appearance defaults', () => {
@@ -115,5 +116,30 @@ describe('Cashflow federated application', () => {
     first.unmount();
     renderApplication();
     expect(screen.getByRole('searchbox', { name: 'Filter cashflows' })).toHaveValue('');
+  });
+
+  it('mounts and unmounts through the Host Shadow Root contract', () => {
+    const host = document.createElement('section');
+    const root = host.attachShadow({ mode: 'open' });
+    const close = jest.fn();
+    const telemetry = jest.fn();
+    act(() => mount({
+      tileId: 'cashflow', instanceId: 'cashflow-2', root,
+      capabilities: { close, telemetry: { track: telemetry }, fdc3: { raise: jest.fn() } },
+    }));
+    expect(root.textContent).toContain('Cashflow blotter');
+    const select = [...root.querySelectorAll('button')].find((button) => button.textContent === 'Select CF-1001') as HTMLButtonElement;
+    act(() => select.click());
+    const details = root.querySelector('[aria-label="View CF-1001 details"]') as HTMLButtonElement;
+    act(() => details.click());
+    const notify = root.querySelector('[aria-label="Notify host about CF-1001"]') as HTMLButtonElement;
+    act(() => notify.click());
+    expect(window.location.pathname).toBe('/cashflow/details/CF-1001');
+    expect(telemetry).toHaveBeenCalledWith('cashflow.notification.Cashflow CF-1001 selected');
+    expect(telemetry).toHaveBeenCalledWith('cashflow.details.opened');
+    act(() => unmount('cashflow-2'));
+    expect(root.textContent).toBe('');
+    act(() => unmount('cashflow-missing'));
+    expect(close).not.toHaveBeenCalled();
   });
 });

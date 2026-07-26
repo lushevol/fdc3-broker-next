@@ -16,10 +16,9 @@ This track is private, disposable evidence. Every workspace retains a `-poc` pac
 
 ## Portal platform design documents
 
-- [Portal Platform POC Constitution](./docs/PORTAL_PLATFORM_POC_CHARTER.md) — normative long-term rules, the smallest POC boundary, acceptance evidence, and phased sequence.
-- [Portal Platform Design Discussion](./docs/PORTAL_PLATFORM_DISCUSSION.md) — consolidated project decisions, current evidence/gaps, migration mapping, and decisions requiring confirmation.
-- [Portal POC 1 Specification](./docs/PORTAL_POC1_SPEC.md) — proposed normative behavior and contracts for the portal-core POC.
-- [Portal POC 1 Test Plan](./docs/PORTAL_POC1_TEST_PLAN.md) — TDD order, requirement coverage, browser journeys, and exit evidence.
+- [Portal Home POC Plan](./docs/PORTAL_HOME_POC_PLAN.md) — the active, comprehensive implementation and verification plan.
+- [Portal Platform POC Charter](./docs/PORTAL_PLATFORM_POC_CHARTER.md) — durable target architecture rules and subsequent POC sequence.
+- [DevOps Migration Plan](./docs/DEVOPS_MIGRATION_PLAN.md) — distinct post-POC production delivery and migration plan.
 
 These documents do not authorize implementation. The POC constitution takes precedence over older POC planning notes when their scope conflicts.
 

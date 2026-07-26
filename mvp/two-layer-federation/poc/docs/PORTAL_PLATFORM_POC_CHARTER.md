@@ -162,6 +162,9 @@ It does not own tenant business behavior, tenant business data, or tenant-specif
 - Approved Ratan Design primitives **MUST** use the design-system observability functions for their standard interactions and states.
 - A tile **MUST NOT** define a competing global theme, CSS reset, z-index scale, typography system, or motion system.
 - Generated CSS classes or host DOM structure **MUST NOT** be used as a cross-root contract.
+- Iframes **MUST NOT** be used for Tile rendering. Every Tile instance **MUST** render into its assigned `tile-workspace` Shadow Root.
+- Extracted CSS, CSS Modules, CSS-in-JS insertion points, portals, and global resets **MUST** target the assigned Shadow Root and **MUST NOT** remain in the Host document.
+- Because Shadow DOM is not a JavaScript security realm, Tiles **MUST** be trusted modules and **MUST NOT** mutate shared browser globals or access another Tile's root.
 - React and ReactDOM **MAY** be shared runtime singletons; design-system libraries, styling engines, and domain UI **MUST NOT** become federated runtime application layers.
 - A tenant **MAY** own domain components, layouts, forms, charts, and grids when they obey platform tokens, accessibility, loading, empty, error, and interaction rules.
 - Exceptions **MUST** have an owner, reason, bounded scope, risk level, expiry date, and replacement plan.
@@ -208,91 +211,22 @@ It does not own tenant business behavior, tenant business data, or tenant-specif
 - `root-config`, `base`, and `mfe-ratan-container` **MUST NOT** be retired until their remaining consumers are inventoried and migrated or explicitly removed.
 - No new business feature **SHOULD** increase dependence on the legacy container layer.
 
-## 5. Smallest Portal POC
+## 5. Current Portal Home POC
 
-### 5.1 Primary hypothesis
+The active home/workspace POC is defined by [PORTAL_HOME_POC_PLAN.md](./PORTAL_HOME_POC_PLAN.md). It intentionally starts with a local entitlement set rather than a fake login flow, uses the requested React 19/Vite/Zustand/Web Component technology boundary, and includes one minimal FDC3/OpenFin adapter journey.
 
-One platform host can establish a deterministic session, discover an entitled independently built tenant tile at runtime, and run two isolated instances of that same tile without a shared runtime container.
+Its scope is deliberately limited. It does not alter the following durable rules: Host-to-Tile ownership, registry governance, independent Tile delivery, Host-owned FDC3/OpenFin boundary, mandatory Ratan Design infrastructure, and measured legacy migration.
 
-This is the smallest useful Portal POC because it tests the defining product boundary: one governed platform canvas hosting independently owned, repeatable tile instances.
-
-### 5.2 Required acceptance journey
-
-The POC is complete only when the automated acceptance suite demonstrates all of the following through one primary user journey plus focused failure and registry evidence:
-
-1. The user performs one explicit fake login action and the host establishes a deterministic user/session.
-2. The launcher is generated from a runtime registry and hides an unentitled registry entry.
-3. The user opens the entitled Cashflow tile twice.
-4. The workspace displays two distinct instance identities for the same `tileId`.
-5. A state change in one instance does not mutate the other instance.
-6. Host lifecycle telemetry identifies each instance during open, activate, close, and failure events.
-7. Closing one instance leaves the other instance mounted and usable.
-8. An incompatible or failed remote is contained without crashing the host or the healthy instance.
-9. Changing the registry entry can select a compatible tile artifact without rebuilding the host.
-
-### 5.3 Included scope
-
-- One Portal Host.
-- One real tile definition: Cashflow.
-- Two concurrent Cashflow tile instances.
-- One synthetic unentitled registry entry used only to prove filtering.
-- Static, runtime-loaded registry data with schema validation.
-- Module Federation as the POC loader.
-- One explicit fake login action backed by deterministic session and entitlement adapters.
-- Minimal workspace open, activate, close, and instance identity behavior.
-- Existing bounded appearance/design-system proof.
-- One in-memory host lifecycle telemetry sink.
-- Load/contract failure isolation.
-- Unit, contract, boundary, and browser evidence.
-
-### 5.4 Explicitly excluded scope
-
-The first Portal POC **MUST NOT** add:
-
-- a real identity provider, production token handling, or distributed session store;
-- a production Nginx, gateway, route-control service, or tenant deployment;
-- a real tenant Java backend;
-- the scaffold CLI or template generation;
-- a production notification broker or WebSocket service;
-- notification product behavior beyond an existing no-op/local test adapter;
-- FDC3 context, intent, or resolver behavior;
-- an enterprise telemetry backend or dashboards;
-- a general capability gateway, workflow orchestrator, policy engine, chatbot integration, or AI actions;
-- workspace layout persistence, drag/drop, free-form resizing, or cross-device restore;
-- multiple tile types, multiple tenants, or cross-tenant communication;
-- a complete FDC3 implementation or catalog;
-- production signing, SBOM, canary, promotion, or rollback automation;
-- a broad design-system component catalog;
-- changes under `mvp/two-layer-federation/realworld/`;
-- migration of any current production application.
-
-### 5.5 Evidence and exit gates
-
-| Gate | Required evidence |
-| --- | --- |
-| Runtime boundary | Network/build evidence shows `host -> tile`; no Single-SPA, SystemJS, import map, base remote, or Ratan runtime container. |
-| Registry | Invalid and incompatible records are rejected before mount; registry change does not require a host build. |
-| Multi-instance | Two instances share `tileId`, have different `instanceId` values, and retain isolated local state. |
-| Entitlement | An unentitled tile is absent from discovery and cannot be mounted through a direct route. |
-| Observability | Host lifecycle events cross a typed in-memory adapter and include tile and instance attribution. |
-| Failure isolation | One failing instance does not crash the host or another healthy instance. |
-| Design boundary | No cross-root theme context, generated class dependency, or design-system runtime remote. |
-| Quality | Tests precede implementation, affected bounded packages meet the repository coverage rule, lint has zero warnings, and build/boundary checks pass. |
-| Scope | None of the explicit exclusions are introduced. |
-
-Passing this POC authorizes a production architecture proposal. It does not authorize direct promotion of POC code.
-
-## 6. Sequence after the first POC
+## 6. Sequence after the current POC
 
 Only one slice should be active at a time.
 
 | Slice | Question answered | Earliest output |
 | --- | --- | --- |
-| POC 1 — portal core | Can a governed host establish a fake session, filter registered tiles by entitlement, and safely run repeatable independent tile instances? | Evidence described in section 5. |
-| POC 2 — OpenFin/FDC3 boundary | Can an OpenFin-originated caller raise canonical intent `scb.fmptp.SearchCashflows` with `scb.fmptp.cashflow.query` context through the host-owned FDC3 adapter with identity, resolution, and correlation? | Reuse the target when exactly one compatible instance exists, open one when none exists, and show the resolver when multiple exist. Temporarily alias legacy `SearchCashflows` with telemetry and a sunset date. No general capability gateway, workflow, or broad intent catalog. |
-| POC 3 — Nginx tenant boundary | Can static Host and Tile UI artifacts plus one minimal Spring Boot service operate only through approved Nginx routes, with the platform auth SDK verifying the request-header JWT and producing trace correlation? | One UI/API vertical journey; no route control plane automation. |
-| POC 4 — notification boundary | Can one structured tenant event be safely targeted, delivered, displayed, and observed through a platform adapter? | One in-memory end-to-end event; no durable broker. |
-| POC 5 — design observability | Can one Button and one form control emit safe, correlated semantic events through an injected design-observability adapter without changing UI behavior? | Two component journeys; no broad instrumentation catalog or production telemetry backend. |
+| POC 2 — real access | Can the Host establish and refresh a production-like SSO/session and entitlement context without exposing raw tokens to Tiles? | One authenticated Host and Tile journey. |
+| POC 3 — FDC3/OpenFin expansion | Can an OpenFin-originated caller resolve `scb.fmptp.SearchCashflows` across zero, one, or multiple eligible Tile instances? | Resolver and correlation behavior, without a general capability gateway. |
+| POC 4 — Nginx tenant boundary | Can static Host and Tile UI artifacts plus one minimal Spring Boot service operate only through approved Nginx routes with trace correlation? | One UI/API vertical journey; no route control plane automation. |
+| POC 5 — notification boundary | Can one structured tenant event be safely targeted, delivered, displayed, and observed through a platform adapter? | One in-memory end-to-end event; no durable broker. |
 | POC 6 — scaffold | Can the proven UI and Java contracts be generated and pass conformance without manual platform wiring? | One CLI command per template and generated-project verification. |
 | Workspace evolution — roadmap | Do real workflows require simultaneous visibility beyond duplicate tabs? | Prove fixed multi-pane layouts before considering free-form movement, resizing, or drag/drop. |
 | Realworld 1 — platform foundation | Can production host/contracts/design foundations be released independently with explicit compatibility? | Production-owned packages and host skeleton. |

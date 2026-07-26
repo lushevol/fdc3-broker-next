@@ -1,3 +1,5 @@
+html, body, #root { min-height: 100%; margin: 0; background: #0d1c2f; }
+
 .cashflow-app {
   --cash-accent: var(--ratan-color-action-primary);
   --cash-line: var(--ratan-color-border-subtle);
