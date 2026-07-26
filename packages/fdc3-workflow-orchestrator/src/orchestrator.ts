@@ -214,7 +214,42 @@ export class WorkflowOrchestrator {
         summary: failure.message,
       });
     }
-    const preflight = await this.preflight(workflowId, input);
+    const deadline =
+      executionOptions.timeoutMs === undefined
+        ? undefined
+        : Date.now() + executionOptions.timeoutMs;
+    let preflight: WorkflowPreflightReport;
+    try {
+      preflight =
+        deadline === undefined
+          ? await this.preflight(workflowId, input)
+          : await controlledPromise(
+              this.preflight(workflowId, input),
+              Math.max(1, deadline - Date.now()),
+              executionOptions.signal,
+            );
+    } catch (error) {
+      const code = this.controlledCode(error);
+      if (code === 'CANCELLED') {
+        return this.cancelledTranscript(workflow, runId, input, startedAt, [], emit);
+      }
+      const failure = createFailure(
+        code === 'RESULT_TIMEOUT' ? 'RESULT_TIMEOUT' : 'CAPABILITY_INSPECTION_FAILED',
+        workflowId,
+      );
+      emit({ type: 'workflow.failed', failure, summary: failure.message });
+      return this.transcript({
+        runId,
+        workflowId,
+        title: workflow.title,
+        input,
+        startedAt,
+        status: 'failed',
+        completedSteps: [],
+        failures: [failure],
+        summary: failure.message,
+      });
+    }
     const preflightFailure = preflight.checks.find((check) => check.failure)?.failure;
     if (preflightFailure) {
       emit({
@@ -240,11 +275,6 @@ export class WorkflowOrchestrator {
     const results = new Map<string, unknown>();
     const completedSteps: WorkflowStepResult[] = [];
     const failures: WorkflowFailure[] = [];
-    const deadline =
-      executionOptions.timeoutMs === undefined
-        ? undefined
-        : Date.now() + executionOptions.timeoutMs;
-
     for (const step of workflow.steps) {
       if (executionOptions.signal?.aborted) {
         return this.cancelledTranscript(
@@ -485,7 +515,11 @@ export class WorkflowOrchestrator {
     }
     let result: unknown;
     try {
-      result = await controlledPromise(resolution.getResult(), remaining, signal);
+      const resultTimeout =
+        deadline === undefined
+          ? configuredTimeout
+          : Math.min(configuredTimeout, Math.max(1, deadline - Date.now()));
+      result = await controlledPromise(resolution.getResult(), resultTimeout, signal);
     } catch (error) {
       const code = this.controlledCode(error) ?? 'INTENT_EXECUTION_FAILED';
       return { failure: createFailure(code, workflowId, step, attempt) };

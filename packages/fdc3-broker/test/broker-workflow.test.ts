@@ -76,6 +76,33 @@ describe('Broker workflows', () => {
     subscription.unsubscribe();
   });
 
+  it('isolates throwing workflow subscribers from execution and other subscribers', async () => {
+    const broker = new Broker({
+      appDirectory: {} as AppDirectoryClient,
+      workflows: [workflow],
+      callbacks: {},
+      onLogin: async () => undefined,
+      onLogout: async () => undefined,
+    });
+    broker.raiseIntent = vi.fn().mockResolvedValue({
+      getResult: async () => ({ totalCount: 1 }),
+    }) as typeof broker.raiseIntent;
+    const resolution = await broker.raiseWorkflow(workflow.workflowId, {
+      status: 'PENDING_VALIDATION',
+    });
+    const healthySubscriber = vi.fn();
+
+    resolution.subscribe(() => {
+      throw new Error('subscriber failed');
+    });
+    resolution.subscribe(healthySubscriber);
+
+    await expect(resolution.getResult()).resolves.toMatchObject({ status: 'ok' });
+    expect(healthySubscriber).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'workflow.completed' }),
+    );
+  });
+
   it('distinguishes unavailable, declared-only, and live workflow handlers', async () => {
     const findByIntent = vi.fn().mockResolvedValue([]);
     const broker = new Broker({

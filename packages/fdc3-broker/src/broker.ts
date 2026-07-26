@@ -1223,7 +1223,13 @@ export class Broker implements DesktopAgent {
         this.workflowExecutor.execute(workflowId, input, {
           emit: (event) => {
             bufferedEvents.push(event);
-            listeners.forEach((listener) => listener(event));
+            listeners.forEach((listener) => {
+              try {
+                listener(event);
+              } catch {
+                // Workflow observers are isolated from execution.
+              }
+            });
           },
         }),
       );
@@ -1234,7 +1240,13 @@ export class Broker implements DesktopAgent {
       workflowId,
       getResult: start,
       subscribe: (listener) => {
-        bufferedEvents.forEach((event) => listener(event));
+        bufferedEvents.forEach((event) => {
+          try {
+            listener(event);
+          } catch {
+            // Workflow observers are isolated from execution.
+          }
+        });
         listeners.add(listener);
         void start();
         return {

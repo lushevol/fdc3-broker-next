@@ -434,6 +434,20 @@ describe('WorkflowOrchestrator', () => {
     expect(timedOut.failures[0]?.code).toBe('RESULT_TIMEOUT');
   });
 
+  it('enforces the run-level deadline while capability preflight is pending', async () => {
+    const orchestrator = new WorkflowOrchestrator({
+      workflows: [baseWorkflow],
+      client: clientReturning({ tradeId: 'TR-1' }),
+      inspectCapability: () => new Promise(() => undefined),
+      preflightMode: 'required',
+    });
+
+    const transcript = await orchestrator.execute('trade.insight', { desk: 'FX' }, { timeoutMs: 5 });
+
+    expect(transcript.status).toBe('failed');
+    expect(transcript.failures[0]?.code).toBe('RESULT_TIMEOUT');
+  });
+
   it('continues after an explicitly continuable failure and binds prior results', async () => {
     const workflow: WorkflowDefinition = {
       ...baseWorkflow,
