@@ -1,4 +1,5 @@
 import type { Broker } from 'ratan-fdc3-broker';
+import type { ModuleLoaderApi } from 'ratan-module-composition';
 import type {
   AppIdentifier,
   AppIntent,
@@ -28,10 +29,12 @@ import type {
 export class ScopedDesktopAgent implements RatanDesktopAgent {
   private broker: Broker;
   private source: AppIdentifier;
+  readonly modules: ModuleLoaderApi;
 
   constructor(broker: Broker, source: AppIdentifier) {
     this.broker = broker;
     this.source = source;
+    this.modules = broker.modules;
   }
 
   async open(app: AppIdentifier | string, context?: Context): Promise<AppIdentifier> {

@@ -271,7 +271,8 @@ export type {
   Listener,
   PrivateChannel,
 } from '@finos/fdc3';
-export type { RatanDesktopAgent, TileLifecycleApi } from './types';
+export type { ModuleCompositionApi, RatanDesktopAgent, TileLifecycleApi } from './types';
+export type { ExposedModule, ModuleLoaderApi, ModuleReference } from 'ratan-module-composition';
 
 // ============================================================================
 // Agent API

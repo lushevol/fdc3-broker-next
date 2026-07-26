@@ -8,6 +8,7 @@
     "@fm/base": "/base/base.js",
     "@fm/template_container": "/template_container/template_container.js",
     "@fm/template": "/template/template.js",
+    "@fm/module-loader-producer": "/module-loader-producer/module-loader-producer.js",
     "@fm/sstm_container": "/sstm-container/sstm_container.js",
     "@fm/sstm_tiles": "/sstm-tiles/sstm_tiles.js",
     "@fm/ratan_container": "/ratan_container/ratan_container.js",

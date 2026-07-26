@@ -9,6 +9,7 @@
     "@fm/base": "//localhost:8002/base.js",
     "@fm/template_container": "//localhost:8007/template_container.js",
     "@fm/template": "//localhost:8006/template.js",
+    "@fm/module-loader-producer": "//localhost:8024/module-loader-producer.js",
     "mf_container": "//localhost:3000/mf_container.js",
     "mf_tile": "//localhost:3001/mf_tile.js",
     "@fm/ratan_container": "//localhost:8009/ratan_container.js",
