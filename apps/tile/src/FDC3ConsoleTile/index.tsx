@@ -395,7 +395,7 @@ function useBrokerInterceptor(
 
 interface ActivityTabProps {
   logs: LogEntry[];
-  logEndRef: React.RefObject<HTMLDivElement | null>;
+  logEndRef: React.RefObject<HTMLDivElement>;
 }
 
 function ActivityTab({ logs, logEndRef }: ActivityTabProps) {
@@ -687,7 +687,7 @@ const FDC3ConsoleTile: React.FC<TileProps> = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [brokerAvailable, setBrokerAvailable] = useState(false);
   const nextId = useRef(1);
-  const logEndRef = useRef<HTMLDivElement | null>(null);
+  const logEndRef = useRef<HTMLDivElement>(null);
 
   // Add log entry
   const addLog = useCallback((type: LogEntryType, message: string) => {

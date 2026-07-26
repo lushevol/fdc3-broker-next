@@ -191,6 +191,9 @@ test.describe('chatbot FDC3 workflow integration', () => {
     await expect(page.getByText('Approve FDC3 workflow')).toBeVisible();
     await expect(page.getByText('trade.pendingValidation.openChart')).toBeVisible();
     await expect(page.getByText('PENDING_VALIDATION')).toBeVisible();
+    await expect(page.getByText('Planned Steps')).toBeVisible();
+    await expect(page.getByText(/search-trades/i)).toBeVisible();
+    await expect(page.getByText(/view-chart/i)).toBeVisible();
 
     const initialToolNames = requests[0]?.context?.tools?.map((tool) => tool.name) ?? [];
     expect(initialToolNames).toEqual(
@@ -203,6 +206,7 @@ test.describe('chatbot FDC3 workflow integration', () => {
     await expect(page.getByRole('tab', { name: 'FDC3 Tile 2' })).toBeVisible();
     await expect(page.getByTestId('fdc3-view-chart-received').first()).toContainText('AAPL');
     await expect(page.getByText('Workflow completed. I opened the chart for AAPL')).toBeVisible();
+    await expect(page.getByTestId('fdc3-workflow-transcript')).toBeVisible();
     await expect(page.getByText('FDC3 Workflow Result')).toBeVisible();
     await expect(page.getByText('Completed 2 of 2 workflow steps.')).toBeVisible();
 

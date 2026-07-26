@@ -4,6 +4,7 @@ import {
   asString,
   type ToolRenderProps,
 } from '../../compositor';
+import { getFdc3ChatWorkflowDefinition } from '../shared/declarations';
 
 export function Fdc3WorkflowApprovalTool({
   args,
@@ -17,6 +18,8 @@ export function Fdc3WorkflowApprovalTool({
   const approvalResult = asRecord(result);
   const confirmed = approvalResult?.confirmed;
   const input = asRecord(args.input) ?? {};
+  const workflowId = asString(args.workflowId) ?? 'Unknown';
+  const workflow = getFdc3ChatWorkflowDefinition(workflowId);
 
   if (typeof confirmed === 'boolean') {
     return (
@@ -31,7 +34,7 @@ export function Fdc3WorkflowApprovalTool({
           {confirmed ? 'FDC3 workflow approved' : 'FDC3 workflow cancelled'}
         </div>
         <div className="mt-1 text-xs opacity-80">
-          {asString(args.workflowId) ?? 'Unknown workflow'}
+          {workflowId}
         </div>
       </div>
     );
@@ -42,8 +45,7 @@ export function Fdc3WorkflowApprovalTool({
       <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 shadow-sm">
         <div className="text-sm font-semibold text-amber-900">Approve FDC3 workflow</div>
         <div className="mt-2 text-xs text-amber-900">
-          <span className="font-semibold">Workflow:</span>{' '}
-          {asString(args.workflowId) ?? 'Unknown'}
+          <span className="font-semibold">Workflow:</span> {workflow?.title ?? workflowId}
         </div>
         {typeof args.originalRequest === 'string' ? (
           <div className="mt-1 text-xs text-amber-900">
@@ -51,6 +53,20 @@ export function Fdc3WorkflowApprovalTool({
           </div>
         ) : null}
         <div className="mt-3 rounded-xl border border-amber-200 bg-white/70 p-3">
+          {workflow?.steps.length ? (
+            <>
+              <div className="text-xs font-semibold uppercase tracking-[0.08em] text-amber-900">
+                Planned Steps
+              </div>
+              <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs text-slate-700">
+                {workflow.steps.map((step) => (
+                  <li key={step.id}>
+                    <span className="font-medium">{step.id}</span> — {step.intent}
+                  </li>
+                ))}
+              </ol>
+            </>
+          ) : null}
           <div className="text-xs font-semibold uppercase tracking-[0.08em] text-amber-900">
             Workflow Input
           </div>

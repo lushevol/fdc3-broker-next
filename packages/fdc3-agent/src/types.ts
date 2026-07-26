@@ -11,6 +11,9 @@ import type { AppIdentifier, AppMetadata, DesktopAgent } from '@finos/fdc3';
 import type { ModuleLoaderApi } from 'ratan-module-composition';
 import type {
   WorkflowDefinition,
+  WorkflowEvent,
+  WorkflowEventListener,
+  WorkflowEventSubscription,
   WorkflowJsonObject,
   WorkflowOptions,
   WorkflowResolution,
@@ -43,6 +46,9 @@ export type {
 
 export type {
   WorkflowDefinition,
+  WorkflowEvent,
+  WorkflowEventListener,
+  WorkflowEventSubscription,
   WorkflowJsonObject,
   WorkflowOptions,
   WorkflowResolution,

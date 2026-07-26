@@ -5,7 +5,7 @@ import { Fdc3WorkflowApprovalTool } from './ui';
 
 export const proposeFdc3WorkflowTool: ToolkitDefinition = {
   type: 'human',
-  description: `Ask the user to approve a declared FDC3 workflow capability. The model must select a workflowId from this catalog and provide only input fields, never workflow steps. ${getFdc3WorkflowCatalogDescription()}`,
+  description: `Turn a user's workflow goal into the ordered steps of one matching declared FDC3 workflow, then ask for explicit approval before any intent executes. The model must select a workflowId from this catalog, provide only that workflow's input fields, and never invent workflow ids, intents, steps, or bindings. The UI renders the selected workflow's declared steps as the execution plan. ${getFdc3WorkflowCatalogDescription()}`,
   parameters: z.object({
     workflowId: z.string().describe('Declared FDC3 workflow id from the workflow catalog.'),
     input: z

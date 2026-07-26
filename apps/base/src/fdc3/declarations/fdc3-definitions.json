@@ -45,6 +45,45 @@
     }
   },
   {
+    "appId": "template_tile_workflow_discovery",
+    "interop": {
+      "intents": {
+        "listensFor": [
+          {
+            "intent": "DiscoverWorkflowTrades",
+            "contexts": ["fdc3.trade.query"]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "appId": "template_tile_workflow_pricing",
+    "interop": {
+      "intents": {
+        "listensFor": [
+          {
+            "intent": "PriceWorkflowTrade",
+            "contexts": ["fdc3.trade"]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "appId": "template_tile_workflow_risk",
+    "interop": {
+      "intents": {
+        "listensFor": [
+          {
+            "intent": "AssessWorkflowRisk",
+            "contexts": ["ratan.workflow.risk"]
+          }
+        ]
+      }
+    }
+  },
+  {
     "appId": "cashflow_cn_dashboard",
     "interop": {
       "intents": {

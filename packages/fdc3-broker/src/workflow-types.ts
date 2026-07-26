@@ -29,6 +29,45 @@ export type WorkflowOptions = {
   timeoutMs?: number;
 };
 
+export type WorkflowCapabilityInspectionRequest = {
+  intent: string;
+  targetAppId?: string;
+};
+
+export type WorkflowCapabilityInspection = {
+  state: 'ready' | 'declared-only' | 'unavailable' | 'unknown';
+  appId?: string;
+  instanceId?: string;
+};
+
+export type WorkflowEventType =
+  | 'workflow.started'
+  | 'node.started'
+  | 'node.completed'
+  | 'node.failed'
+  | 'workflow.completed'
+  | 'workflow.failed';
+
+export type WorkflowEvent = {
+  runId: string;
+  workflowId: string;
+  sequence: number;
+  timestamp: string;
+  type: WorkflowEventType;
+  stepId?: string;
+  intent?: string;
+  context?: WorkflowJsonObject;
+  result?: unknown;
+  error?: string;
+  summary?: string;
+};
+
+export type WorkflowEventListener = (event: WorkflowEvent) => void;
+
+export type WorkflowEventSubscription = {
+  unsubscribe(): void;
+};
+
 export type WorkflowStepResult = {
   stepId: string;
   intent: string;
@@ -51,6 +90,7 @@ export type WorkflowTranscript = {
 export type WorkflowResolution = {
   workflowId: string;
   getResult(): Promise<WorkflowTranscript>;
+  subscribe(listener: WorkflowEventListener): WorkflowEventSubscription;
 };
 
 export type WorkflowRegistry = {
