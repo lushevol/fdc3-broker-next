@@ -30,7 +30,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.28.4",
-    "@finos/fdc3": "^2.2.0"
+    "@finos/fdc3": "^2.2.0",
+    "ratan-module-composition": "*"
   },
   "devDependencies": {
     "@testing-library/dom": "^9.3.4",

@@ -1,7 +1,7 @@
 {
-  "name": "ratan-fdc3-agent",
+  "name": "ratan-module-composition",
   "version": "0.0.1",
-  "description": "FDC3 agent API for MFE tiles",
+  "description": "Runtime-neutral cross-tile React module composition",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -25,26 +25,16 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "react": ">=16.9.0",
-    "react-dom": ">=16.9.0"
-  },
-  "dependencies": {
-    "@babel/runtime": "^7.28.4",
-    "@finos/fdc3": "^2.2.0",
-    "ratan-module-composition": "*"
+    "react": ">=16.9.0"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.3.1",
-    "@types/node": "^25.0.3",
     "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^8.51.0",
     "@typescript-eslint/parser": "^8.51.0",
-    "@vitejs/plugin-react": "^5.1.2",
     "@vitest/coverage-v8": "^4.0.16",
     "eslint": "^9.39.2",
     "happy-dom": "^20.5.0",
-    "ratan-fdc3-broker": "*",
+    "react": "^18.3.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.51.0",

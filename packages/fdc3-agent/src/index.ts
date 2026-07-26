@@ -272,6 +272,7 @@ export type {
   PrivateChannel,
 } from '@finos/fdc3';
 export type {
+  ModuleCompositionApi,
   RatanDesktopAgent,
   TileLifecycleApi,
   WorkflowDefinition,
@@ -284,6 +285,7 @@ export type {
   WorkflowStepResult,
   WorkflowTranscript,
 } from './types';
+export type { ExposedModule, ModuleLoaderApi, ModuleReference } from 'ratan-module-composition';
 
 // ============================================================================
 // Agent API

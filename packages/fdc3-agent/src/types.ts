@@ -8,6 +8,7 @@
  */
 
 import type { AppIdentifier, AppMetadata, DesktopAgent } from '@finos/fdc3';
+import type { ModuleLoaderApi } from 'ratan-module-composition';
 import type {
   WorkflowDefinition,
   WorkflowEvent,
@@ -70,7 +71,15 @@ export interface TileLifecycleApi {
   unregisterTile(instanceId: string): Promise<void> | void;
 }
 
-export type RatanDesktopAgent = DesktopAgent & WorkflowApi & TileLifecycleApi;
+/** Platform-only composition API. It is intentionally not part of FDC3. */
+export interface ModuleCompositionApi {
+  readonly modules: ModuleLoaderApi;
+}
+
+export type RatanDesktopAgent = DesktopAgent &
+  WorkflowApi &
+  TileLifecycleApi &
+  ModuleCompositionApi;
 
 /**
  * Global namespace for FDC3 state sharing across MFEs.

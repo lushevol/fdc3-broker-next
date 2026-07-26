@@ -16,6 +16,7 @@ const WorkflowDiscoveryTile = React.lazy(() => import('../../WorkflowDiscoveryTi
 const WorkflowPricingTile = React.lazy(() => import('../../WorkflowPricingTile'));
 const WorkflowRiskTile = React.lazy(() => import('../../WorkflowRiskTile'));
 const WorkflowOrchestratorTile = React.lazy(() => import('../../WorkflowOrchestratorTile'));
+const ModuleLoaderConsumerTile = React.lazy(() => import('../../components/ModuleLoaderConsumerTile'));
 
 const Routing: React.FC<TileProps> = (props: TileProps): ReactElement => {
   useController(props);
@@ -98,6 +99,14 @@ const Routing: React.FC<TileProps> = (props: TileProps): ReactElement => {
         element={
           <React.Suspense fallback={<Loader />}>
             <FDC3ConsoleTile {...props} />
+          </React.Suspense>
+        }
+      ></Route>
+      <Route
+        path="/module_loader_consumer/*"
+        element={
+          <React.Suspense fallback={<Loader />}>
+            <ModuleLoaderConsumerTile {...props} />
           </React.Suspense>
         }
       ></Route>

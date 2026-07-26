@@ -38,6 +38,7 @@ describe('ScopedDesktopAgent', () => {
       addEventListener: vi.fn(),
       registerTile: vi.fn(),
       unregisterTile: vi.fn(),
+      modules: { load: vi.fn() },
     } as unknown as Broker;
 
     scopedAgent = new ScopedDesktopAgent(mockBroker, mockSource);
@@ -168,5 +169,9 @@ describe('ScopedDesktopAgent', () => {
     expect(mockBroker.addEventListener).toHaveBeenCalledWith('userChannelChanged', handler);
     expect(mockBroker.registerTile).toHaveBeenCalledWith('chart-app-1', 'chart-app', metadata);
     expect(mockBroker.unregisterTile).toHaveBeenCalledWith('chart-app-1');
+  });
+
+  it('delegates the non-FDC3 module-composition capability to the broker', () => {
+    expect(scopedAgent.modules).toBe(mockBroker.modules);
   });
 });

@@ -7,7 +7,7 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   target: 'es2020',
-  external: ['react', 'react-dom', '@finos/fdc3', 'ratan-module-composition'],
+  external: ['react'],
   splitting: false,
   minify: process.env.NODE_ENV === 'production',
 });

@@ -139,6 +139,7 @@
     "ratan-fdc3-broker": "*",
     "ratan-fdc3-resolver-ui": "*",
     "ratan-fdc3-workflow-orchestrator": "*",
+    "ratan-module-composition": "*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.5",
