@@ -6,7 +6,6 @@ import {
   getProtocolToolDescriptors,
   runtimeToolkit,
 } from '../index';
-import { ChatbotSidebarV2 } from '../../index';
 
 const mockProviderProps: Array<Record<string, unknown>> = [];
 const mockFdc3Executor = {
@@ -68,7 +67,11 @@ describe('runtimeToolkit FDC3 tools', () => {
 
     expect(descriptors).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ name: 'propose_fdc3_action', source: 'human' }),
+        expect.objectContaining({
+          name: 'propose_fdc3_workflow',
+          source: 'human',
+          description: expect.stringContaining('ordered steps'),
+        }),
       ]),
     );
     expect(descriptors).not.toEqual(
@@ -91,5 +94,49 @@ describe('runtimeToolkit FDC3 tools', () => {
         expect.objectContaining({ name: 'propose_fdc3_action', source: 'human' }),
       ]),
     );
+  });
+
+  it('shows the agent-selected workflow plan before approval and the final transcript after execution', () => {
+    const toolkit = createRuntimeToolkit({ workflowExecutor: mockWorkflowExecutor });
+    const Approval = toolkit.propose_fdc3_workflow?.render as React.ComponentType<{
+      args: Record<string, unknown>;
+      interrupt: { type: 'human'; payload: unknown };
+      resume: (value: { confirmed: boolean }) => void;
+    }>;
+    const Transcript = toolkit.execute_fdc3_workflow?.render as React.ComponentType<{
+      result: unknown;
+    }>;
+    const resume = jest.fn();
+
+    const { rerender } = render(
+      <Approval
+        args={{ workflowId: 'trade.workflow.insight', input: { status: 'PENDING_VALIDATION' } }}
+        interrupt={{ type: 'human', payload: {} }}
+        resume={resume}
+      />,
+    );
+
+    expect(screen.getByText('Planned Steps')).toBeInTheDocument();
+    expect(screen.getByText(/discover-trade/i)).toBeInTheDocument();
+    expect(screen.getByText(/price-trade/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Approve' }));
+    expect(resume).toHaveBeenCalledWith({ confirmed: true });
+
+    rerender(
+      <Transcript
+        result={{
+          status: 'success',
+          summary: 'Completed 3 of 3 workflow steps.',
+          completedSteps: [
+            { stepId: 'discover-trade', status: 'success' },
+            { stepId: 'price-trade', status: 'success' },
+            { stepId: 'assess-risk', status: 'success' },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByTestId('fdc3-workflow-transcript')).toBeInTheDocument();
+    expect(screen.getByText('Completed 3 of 3 workflow steps.')).toBeInTheDocument();
   });
 });

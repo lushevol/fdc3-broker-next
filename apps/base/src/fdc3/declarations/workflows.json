@@ -8,6 +8,7 @@
       "properties": {
         "status": {
           "type": "string",
+          "default": "PENDING_VALIDATION",
           "enum": ["PENDING_VALIDATION"]
         },
         "select": {
@@ -15,7 +16,8 @@
           "enum": ["first"]
         },
         "originalRequest": {
-          "type": "string"
+          "type": "string",
+          "default": "Find pending validation trades and open the first chart."
         }
       },
       "required": ["status"]

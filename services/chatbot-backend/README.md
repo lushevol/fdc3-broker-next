@@ -87,7 +87,7 @@ npm run dev:rag:copilot
 npm run dev:flowzero-chatbot
 ```
 
-`npm run dev:flowzero-chatbot` starts the UI, `chatbot-backend`, and `flowzero-mcp-service` with `.env.profile.flowzero-chatbot`, which enables `flowzero-mcp` and disables Elasticsearch/RAG MCP providers. It requires real OpenAI-compatible model settings (`CHATBOT_OPENAI_API_KEY`, `CHATBOT_OPENAI_BASE_URL`, `CHATBOT_OPENAI_MODEL`) and refuses to start without them so local verification cannot accidentally use mock chatbot responses. Put secrets in exported shell variables or an ignored root `.env.profile.flowzero-chatbot.local` file. It uses `chatbot-backend`'s `dev:local` mode so the focused workflow-generation environment does not require `target/opentelemetry-javaagent.jar`.
+`npm run dev:flowzero-chatbot` starts the UI, `chatbot-backend`, and `flowzero-mcp-service` with `.env.profile.flowzero-chatbot`, which uses the real `https://api.deepseek.com` OpenAI-compatible endpoint with the `deepseek-chat` model, enables `flowzero-mcp`, and disables Elasticsearch/RAG MCP providers. It requires `CHATBOT_OPENAI_API_KEY` and refuses to start without it so local verification cannot accidentally use mock chatbot responses. Put that key in an exported shell variable or an ignored root `.env.profile.flowzero-chatbot.local` file. It uses `chatbot-backend`'s `dev:local` mode so the focused workflow-generation environment does not require `target/opentelemetry-javaagent.jar`.
 
 ## API Endpoints
 

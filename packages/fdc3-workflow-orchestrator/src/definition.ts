@@ -17,10 +17,11 @@ export function readPath(value: unknown, path: string): unknown {
     return value;
   }
   return path.split('.').reduce<unknown>((current, segment) => {
-    if (!isObject(current)) {
-      return undefined;
+    if (Array.isArray(current)) {
+      const index = Number(segment);
+      return Number.isInteger(index) ? current[index] : undefined;
     }
-    return current[segment];
+    return isObject(current) ? current[segment] : undefined;
   }, value);
 }
 
@@ -38,6 +39,13 @@ function writePath(target: JsonObject, path: string, value: unknown): void {
     }
     current = current[segment] as JsonObject;
   });
+}
+
+function cloneContext(context: JsonObject): JsonObject {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(context);
+  }
+  return JSON.parse(JSON.stringify(context)) as JsonObject;
 }
 
 function renderValue(value: unknown, input: JsonObject): unknown {
@@ -78,7 +86,7 @@ export function applyBindings(
   bindings: WorkflowInputBinding[] | undefined,
   results: Map<string, unknown>,
 ): JsonObject {
-  const bound = structuredClone(context);
+  const bound = cloneContext(context);
   for (const binding of bindings ?? []) {
     const source = results.get(binding.fromStepId);
     const value = readPath(source, binding.resultPath);

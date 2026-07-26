@@ -42,6 +42,17 @@ type WorkflowDeclaration = {
   workflowId?: string;
   title?: string;
   description?: string;
+  steps?: Array<{
+    id?: string;
+    intent?: string;
+  }>;
+};
+
+export type Fdc3ChatWorkflowDefinition = {
+  workflowId: string;
+  title: string;
+  description: string;
+  steps: Array<{ id: string; intent: string }>;
 };
 
 export type Fdc3ChatActionDefinition = {
@@ -132,4 +143,25 @@ export function getFdc3WorkflowCatalogDescription(): string {
         `${workflow.workflowId}: ${workflow.description ?? workflow.title ?? ''}`,
     )
     .join(' ');
+}
+
+export function getFdc3ChatWorkflowDefinition(
+  workflowId: string,
+): Fdc3ChatWorkflowDefinition | undefined {
+  const workflow = (workflows as WorkflowDeclaration[]).find(
+    (candidate) => candidate.workflowId === workflowId,
+  );
+  if (!workflow?.workflowId) {
+    return undefined;
+  }
+  return {
+    workflowId: workflow.workflowId,
+    title: workflow.title ?? workflow.workflowId,
+    description: workflow.description ?? '',
+    steps: (workflow.steps ?? [])
+      .filter((step): step is Required<Pick<NonNullable<WorkflowDeclaration['steps']>[number], 'id' | 'intent'>> =>
+        Boolean(step.id && step.intent),
+      )
+      .map((step) => ({ id: step.id, intent: step.intent })),
+  };
 }

@@ -495,6 +495,38 @@ describe('WorkflowOrchestrator', () => {
     });
   });
 
+  it('binds an indexed result from a prior step', async () => {
+    const workflow: WorkflowDefinition = {
+      ...baseWorkflow,
+      steps: [
+        baseWorkflow.steps[0],
+        {
+          id: 'chart',
+          intent: 'ViewChart',
+          contextTemplate: { type: 'fdc3.instrument', id: {} },
+          inputBindings: [
+            {
+              fromStepId: 'discover',
+              resultPath: 'trades.0.instrument',
+              contextPath: 'id.ticker',
+              required: true,
+            },
+          ],
+        },
+      ],
+    };
+    const client = clientReturning({ trades: [{ instrument: 'ACME' }] }, { opened: true });
+    const orchestrator = new WorkflowOrchestrator({ workflows: [workflow], client });
+
+    const transcript = await orchestrator.execute('trade.insight', { desk: 'FX' });
+
+    expect(transcript.status).toBe('success');
+    expect(transcript.completedSteps[1]?.context).toEqual({
+      type: 'fdc3.instrument',
+      id: { ticker: 'ACME' },
+    });
+  });
+
   it('creates nested binding objects and fails required bindings after a continued error', async () => {
     const nestedWorkflow: WorkflowDefinition = {
       ...baseWorkflow,

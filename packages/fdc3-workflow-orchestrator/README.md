@@ -134,3 +134,13 @@ The toolkit exposes:
 - `run_fdc3_workflow`
 
 Expected workflow failures never throw from a tool. The returned envelope includes stable failure codes, safe messages, a transcript, and recovery actions. The same definitions can be adapted to OpenAI function calling, MCP, LangChain, Spring AI, or another tool-capable agent runtime.
+
+## Chatbot approval flow
+
+Use the orchestration runtime as the single execution path for chatbot-driven FDC3 workflows:
+
+1. Have the agent select a declared workflow and present its ordered steps.
+2. Request explicit user approval before invoking `execute`.
+3. Pass `onEvent` to render live step progress and return the final `WorkflowTranscript` to the conversation.
+
+The runtime deliberately executes only registered workflow definitions. A chatbot must not execute LLM-supplied intents or bindings directly.
