@@ -14,8 +14,8 @@
     "@fm/platform-contracts": "^1.1.0",
     "@fm/platform-sdk": "^1.1.0",
     "@fm/ratan-design": "^1.1.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@babel/core": "^7.28.6",
@@ -30,8 +30,8 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/jest": "^29.5.14",
-    "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
     "babel-jest": "^29.7.0",
     "cross-env": "^7.0.3",
     "identity-obj-proxy": "^3.0.0",

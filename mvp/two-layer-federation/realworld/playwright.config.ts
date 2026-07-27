@@ -33,9 +33,9 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: 'node_modules/.bin/serve -s mvp/two-layer-federation/realworld/apps/portal-host/dist -l tcp://127.0.0.1:9200 -C -n --no-port-switching',
+      command: 'npm --workspace @fm/portal-host run dev -- --host 127.0.0.1 --port 9200',
       cwd: '../../..',
-      url: 'http://127.0.0.1:9200/registry.json',
+      url: 'http://127.0.0.1:9200/',
       reuseExistingServer: true,
       timeout: 120_000,
     },

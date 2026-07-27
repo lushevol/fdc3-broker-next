@@ -145,6 +145,8 @@ export interface ApplicationManifest {
 export interface FederatedApplicationModule {
   readonly manifest: ApplicationManifest;
   readonly Application: ComponentType<ApplicationProps>;
+  readonly mount?: (input: ApplicationProps & { readonly root: HTMLElement }) => void | Promise<void>;
+  readonly unmount?: (instanceId: string) => void | Promise<void>;
 }
 
 export type FederatedCompatibilityCode =

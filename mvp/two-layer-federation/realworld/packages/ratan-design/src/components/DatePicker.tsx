@@ -55,7 +55,7 @@ export function DatePicker({
         </DateInput>
         <Button className="ratan-date-trigger" aria-label={`Open ${label} calendar`}>▾</Button>
       </Group>
-      {helperText ? (error ? <FieldError className="ratan-field-message ratan-field-error">{helperText}</FieldError> : <Text className="ratan-field-message" slot="description">{helperText}</Text>) : null}
+      {helperText ? (error ? <FieldError className="ratan-field-message ratan-field-error">{helperText as never}</FieldError> : <Text className="ratan-field-message" slot="description">{helperText as never}</Text>) : null}
       <Popover className="ratan-date-popover">
         <Dialog className="ratan-date-dialog">
           <Calendar>

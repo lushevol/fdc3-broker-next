@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { PlatformClient } from '@fm/platform-sdk';
 import type { RatanDataGridProps } from '@fm/ratan-data-grid';
 import { AuthorizationLimits } from './AuthorizationLimits';
@@ -119,17 +120,16 @@ describe('Authorization Limits opt-in create/edit cohort', () => {
     expect(screen.getByRole('dialog', { name: 'Create Authorization Limit' })).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Currency' })).toBeDisabled();
 
-    fireEvent.change(screen.getByRole('spinbutton', { name: 'Limitation' }), {
-      target: { value: '' },
-    });
+    const limitationInput = screen.getByLabelText('Limitation');
+    await userEvent.clear(limitationInput);
+    fireEvent.blur(limitationInput);
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     expect(await screen.findByText('Profile is required.')).toBeInTheDocument();
     expect(screen.getByText('Limitation is required.')).toBeInTheDocument();
     expect(mutationService.create).not.toHaveBeenCalled();
 
-    fireEvent.change(screen.getByRole('spinbutton', { name: 'Limitation' }), {
-      target: { value: '100000000000' },
-    });
+    await userEvent.type(limitationInput, '100000000000');
+    fireEvent.blur(limitationInput);
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     expect(
       await screen.findByText('Limitation must be between 0 and 99999999999.'),
@@ -139,9 +139,9 @@ describe('Authorization Limits opt-in create/edit cohort', () => {
     fireEvent.change(screen.getByRole('textbox', { name: 'Profile' }), {
       target: { value: ' NEW-PROFILE ' },
     });
-    fireEvent.change(screen.getByRole('spinbutton', { name: 'Limitation' }), {
-      target: { value: '42' },
-    });
+    await userEvent.clear(limitationInput);
+    await userEvent.type(limitationInput, '42');
+    fireEvent.blur(limitationInput);
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
 
     await waitFor(() =>
@@ -171,9 +171,10 @@ describe('Authorization Limits opt-in create/edit cohort', () => {
     await screen.findByRole('heading', { name: 'LIM-1001' });
     fireEvent.click(screen.getByRole('button', { name: 'Edit Authorization Limit' }));
     expect(screen.getByRole('textbox', { name: 'Profile' })).toBeDisabled();
-    fireEvent.change(screen.getByRole('spinbutton', { name: 'Limitation' }), {
-      target: { value: '75' },
-    });
+    const limitationInput = screen.getByLabelText('Limitation');
+    await userEvent.clear(limitationInput);
+    await userEvent.type(limitationInput, '75');
+    fireEvent.blur(limitationInput);
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
     await waitFor(() =>
       expect(mutationService.edit).toHaveBeenCalledWith({

@@ -6,8 +6,9 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { App } from './App';
 import { loadApplicationRegistry } from './registry';
 import { entry } from './test-fixtures';
+import { vi } from 'vitest';
 
-jest.mock('./registry', () => ({ loadApplicationRegistry: jest.fn() }));
+vi.mock('./registry', () => ({ loadApplicationRegistry: vi.fn() }));
 const mockedLoad = loadApplicationRegistry as jest.MockedFunction<typeof loadApplicationRegistry>;
 const authenticatedIdentity: IdentityCapability = {
   getSnapshot: () => ({

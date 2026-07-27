@@ -99,8 +99,6 @@ export function AuthorizationLimitEditor({ mode, record, onSubmit, onClose }: Pr
           label="Limitation"
           value={limitation}
           onChange={setLimitation}
-          min={MIN_LIMIT}
-          max={MAX_LIMIT}
           required
           error={Boolean(limitationError)}
           helperText={limitationError}

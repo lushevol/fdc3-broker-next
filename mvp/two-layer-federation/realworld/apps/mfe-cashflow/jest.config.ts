@@ -4,7 +4,13 @@ export default {
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   transform: { '^.+\\.(j|t)sx?$': 'babel-jest' },
   transformIgnorePatterns: ['node_modules/(?!(@fm)/)'],
-  moduleNameMapper: { '\\.(css)$': 'identity-obj-proxy' },
+  moduleNameMapper: {
+    '\\.(css)$': 'identity-obj-proxy',
+    '^react$': '<rootDir>/node_modules/react',
+    '^react/(.*)$': '<rootDir>/node_modules/react/$1',
+    '^react-dom$': '<rootDir>/node_modules/react-dom',
+    '^react-dom/(.*)$': '<rootDir>/node_modules/react-dom/$1',
+  },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/index.tsx',

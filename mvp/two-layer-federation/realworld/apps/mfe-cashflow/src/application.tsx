@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
 import {
   APPLICATION_CONTRACT_VERSION,
   APPEARANCE_CONTRACT_VERSION,
@@ -213,4 +214,35 @@ export function createCashflowApplication(dependencies: CashflowRuntimeDependenc
 
 export const Application = createCashflowApplication();
 
-export default { manifest, Application };
+export interface IsolatedApplicationMountInput extends ApplicationProps {
+  readonly root: HTMLElement;
+}
+
+const mountedRoots = new Map<string, { container: HTMLDivElement; root: Root }>();
+
+/**
+ * Imperative boundary for hosts on a different React major. The component
+ * export remains available for same-major hosts; cross-major hosts use this
+ * entry point and never exchange React elements. CSS isolation is deliberately
+ * out of scope for this initial compatibility boundary.
+ */
+export function mount({ root, ...props }: IsolatedApplicationMountInput) {
+  const existing = mountedRoots.get(props.instanceId);
+  existing?.root.unmount();
+  existing?.container.remove();
+  const container = document.createElement('div');
+  root.append(container);
+  const applicationRoot = createRoot(container);
+  applicationRoot.render(<Application {...props} />);
+  mountedRoots.set(props.instanceId, { container, root: applicationRoot });
+}
+
+export function unmount(instanceId: string) {
+  const mounted = mountedRoots.get(instanceId);
+  if (!mounted) return;
+  mounted.root.unmount();
+  mounted.container.remove();
+  mountedRoots.delete(instanceId);
+}
+
+export default { manifest, Application, mount, unmount };

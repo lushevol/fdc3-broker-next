@@ -1,17 +1,12 @@
 import { createModuleFederationConfig } from '@module-federation/rsbuild-plugin';
-import pkg from './package.json';
 
 export default createModuleFederationConfig({
   name: 'mfe_cashflow',
   filename: 'remoteEntry.js',
   exposes: { './application': './src/application.tsx' },
   dts: false,
-  shared: {
-    react: { singleton: true, eager: true, requiredVersion: pkg.dependencies.react },
-    'react-dom': {
-      singleton: true,
-      eager: true,
-      requiredVersion: pkg.dependencies['react-dom'],
-    },
-  },
+  // An independently deployed application owns its React runtime. It must not
+  // consume the portal's React singleton, because host and application may be
+  // on different supported React major versions.
+  shared: {},
 });

@@ -63,7 +63,7 @@ test.describe('production two-layer pilot', () => {
     await page.getByRole('button', { name: 'Close Cashflow' }).click();
     await page.getByRole('button', { name: 'Open Cashflow' }).click();
     await expect(page.getByRole('searchbox')).toHaveValue('');
-    await expect(page.locator('[data-instance-id="cashflow-2"]')).toBeVisible();
+    await expect(page.locator('[data-remote-instance-id="cashflow-2"]')).toBeVisible();
   });
 
   test('runs standalone and contains recoverable remote failures', async ({ page }) => {
@@ -108,7 +108,7 @@ test.describe('production two-layer pilot', () => {
     await expect(page.getByRole('button', { name: 'Edit Authorization Limit' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Delete Authorization Limit' })).toHaveCount(0);
 
-    await page.goto('/cashflow/authorization-limits/details/LIM-1003');
+    await signIn(page, '/cashflow/authorization-limits/details/LIM-1003');
     await expect(page.getByRole('heading', { name: 'LIM-1003' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Approve Add' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Reject Add' })).toHaveCount(0);

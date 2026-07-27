@@ -5,16 +5,17 @@ import {
 } from '@fm/platform-contracts';
 import { App } from './App';
 import { loadApplicationRegistry } from './registry';
+import { vi } from 'vitest';
 import { entry } from './test-fixtures';
 
 let receivedIdentity: IdentityCapability | undefined;
-jest.mock('./PortalHost', () => ({
+vi.mock('./PortalHost', () => ({
   PortalHost: ({ identity }: { identity?: IdentityCapability }) => {
     receivedIdentity = identity;
     return <span>Injected host</span>;
   },
 }));
-jest.mock('./registry', () => ({ loadApplicationRegistry: jest.fn() }));
+vi.mock('./registry', () => ({ loadApplicationRegistry: vi.fn() }));
 const mockedLoad = loadApplicationRegistry as jest.MockedFunction<typeof loadApplicationRegistry>;
 
 it('threads the exact identity capability across asynchronous registry loading', async () => {

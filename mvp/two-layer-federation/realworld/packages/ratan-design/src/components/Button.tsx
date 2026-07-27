@@ -45,7 +45,7 @@ export function Button({
       isDisabled={disabled}
       isPending={isPending}
     >
-      {children}
+      {children as ReactAriaButtonProps['children']}
     </ReactAriaButton>
   );
 }
