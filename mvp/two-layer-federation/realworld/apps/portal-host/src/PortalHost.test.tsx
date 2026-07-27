@@ -44,6 +44,21 @@ describe('production PortalHost', () => {
     expect(await screen.findByText(/Remote cashflow-2/)).toBeInTheDocument();
   });
 
+  it('keeps independently mounted duplicate instances and restores the previous tab on close', async () => {
+    render(<PortalHost registry={{ applications: [entry] }} runtime={runtime()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+    await screen.findByText(/Remote cashflow-1/);
+    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+    expect(await screen.findByText(/Remote cashflow-2/)).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Cashflow 1' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cashflow 2' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Cashflow 1' }));
+    expect(screen.getByText(/Remote cashflow-1/)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Close Cashflow' }));
+    expect(screen.getByText(/Remote cashflow-2/)).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Cashflow 1' })).not.toBeInTheDocument();
+  });
+
   it('boots nested routes and responds to browser history', async () => {
     window.history.replaceState({}, '', '/cashflow/details/CF-1002');
     render(<PortalHost registry={{ applications: [entry] }} runtime={runtime()} />);

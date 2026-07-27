@@ -1,5 +1,7 @@
-import { Alert, AlertTitle, styled } from '@mui/material';
-import { useId, type ReactNode } from 'react';
+import {
+  useId,
+  type ReactNode,
+} from 'react';
 import { Button } from './Button';
 
 export type InlineAlertTone = 'info' | 'success' | 'warning' | 'error';
@@ -12,18 +14,6 @@ export interface InlineAlertProps {
   readonly onAction?: () => void;
 }
 
-const StyledAlert = styled(Alert)({
-  color: 'var(--ratan-color-content-primary)',
-  background: 'var(--ratan-color-surface-interactive)',
-  border: '1px solid var(--ratan-color-border-subtle)',
-  borderRadius: 'var(--ratan-radius-control)',
-  '& .MuiAlert-icon': { color: 'currentColor' },
-  '&[data-ratan-tone="error"]': {
-    color: 'var(--ratan-color-action-danger)',
-    borderColor: 'var(--ratan-color-action-danger)',
-  },
-});
-
 export function InlineAlert({
   tone,
   title,
@@ -32,23 +22,28 @@ export function InlineAlert({
   onAction,
 }: InlineAlertProps) {
   const titleId = useId();
-  const action =
-    actionLabel && onAction ? (
-      <Button variant="ghost" onClick={onAction}>
-        {actionLabel}
-      </Button>
-    ) : undefined;
-
   return (
-    <StyledAlert
-      severity={tone}
+    <div
+      className="ratan-inline-alert"
+      data-ratan-component="inline-alert"
+      data-ratan-tone={tone}
       role={tone === 'error' ? 'alert' : 'status'}
       aria-labelledby={title ? titleId : undefined}
-      data-ratan-tone={tone}
-      action={action}
     >
-      {title ? <AlertTitle id={titleId}>{title}</AlertTitle> : null}
-      {message}
-    </StyledAlert>
+      <span className="ratan-inline-alert-marker" aria-hidden="true" />
+      <div className="ratan-inline-alert-content">
+        {title ? (
+          <strong id={titleId} className="ratan-inline-alert-title">
+            {title}
+          </strong>
+        ) : null}
+        <div className="ratan-inline-alert-message">{message}</div>
+      </div>
+      {actionLabel && onAction ? (
+        <Button variant="ghost" onClick={onAction}>
+          {actionLabel}
+        </Button>
+      ) : null}
+    </div>
   );
 }

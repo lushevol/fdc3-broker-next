@@ -68,7 +68,8 @@ describe('production foundational components', () => {
     const button = screen.getByRole('button', { name: 'Focus target' });
     button.focus();
     expect(button).toHaveFocus();
-    expect(button.className).toContain('MuiButton');
+    expect(button).toHaveClass('ratan-button');
+    expect(button).toHaveAttribute('data-ratan-component', 'button');
     expect(view.container.querySelector('[data-ratan-scope="standalone"]')).toHaveAttribute(
       'data-ratan-density',
       'compact',

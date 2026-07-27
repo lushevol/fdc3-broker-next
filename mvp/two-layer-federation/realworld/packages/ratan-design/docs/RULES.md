@@ -3,7 +3,7 @@
 ## Public API
 
 - Export documented APIs only from `src/index.ts`.
-- Never export raw MUI components, MUI theme providers, `sx`, Emotion internals, or internal source paths.
+- Never export raw React Aria components, MUI components, theme providers, `sx`, styling-engine internals, or internal source paths.
 - Components are domain-neutral and must not import application or Ratan domain models.
 - Every new component requires behavior/accessibility tests and Storybook coverage.
 - Dialogs and feedback must remain application-composed; never add global overlay state, toast queues, or cross-MFE event buses.
@@ -13,13 +13,14 @@
 
 - Use semantic roles from `src/foundation/tokens.ts`; component literals for color, spacing, typography, radius, or focus are prohibited.
 - All custom properties use the `--ratan-*` prefix and are scoped to `.ratan-design-root`.
-- Do not add document-global theme selectors or depend on generated Emotion class names across roots.
+- Do not add document-global theme selectors or depend on generated library class names across roots.
 - Light/dark and compact/comfortable behavior must be tested together.
 
 ## Dependencies
 
-- React, ReactDOM, MUI, and Emotion remain peers and are externalized from the library build.
-- Ant Design, AG Grid, federation runtimes/loaders, and Ratan domain packages are forbidden.
+- React and ReactDOM remain peers and are externalized from the library build.
+- React Aria Components and internationalized date utilities are approved implementation dependencies.
+- MUI, Emotion, Ant Design, AG Grid, federation runtimes/loaders, and Ratan domain packages are forbidden.
 - Applications—not this package—configure Module Federation.
 
 ## Compatibility

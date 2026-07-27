@@ -1,0 +1,15 @@
+.fdc3-app { min-height: 100%; padding: clamp(1.25rem, 4vw, 3rem); color: var(--ratan-color-content-primary); background: var(--ratan-color-surface-default); }
+.fdc3-header, .fdc3-toolbar { display: flex; align-items: end; justify-content: space-between; gap: 1rem; }
+.fdc3-header { margin-bottom: 1.5rem; }
+.fdc3-header span { color: var(--ratan-color-action-primary); font-size: var(--ratan-font-size-label); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.fdc3-header h1 { margin: .25rem 0 0; font-size: clamp(1.75rem, 4vw, 3rem); letter-spacing: -.04em; }
+.fdc3-panel { display: grid; gap: 1rem; }
+.fdc3-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; }
+.fdc3-summary .ratan-card-body { min-height: 3rem; display: grid; align-content: center; font-size: 1.5rem; }
+.fdc3-toolbar .ratan-field { flex: 1; max-width: 36rem; }
+.fdc3-table-frame { overflow: auto; }
+.fdc3-table-frame table { width: 100%; border-collapse: collapse; }
+.fdc3-table-frame th, .fdc3-table-frame td { padding: .75rem; border-bottom: 1px solid var(--ratan-color-border-subtle); text-align: start; vertical-align: middle; }
+.fdc3-table-frame th { font-size: var(--ratan-font-size-label); color: var(--ratan-color-content-secondary); }
+.fdc3-actions { display: flex; gap: .25rem; }
+@media (max-width: 48rem) { .fdc3-header, .fdc3-toolbar { align-items: stretch; flex-direction: column; } .fdc3-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

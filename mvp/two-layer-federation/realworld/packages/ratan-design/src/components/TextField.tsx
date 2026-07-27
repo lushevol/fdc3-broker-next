@@ -1,38 +1,94 @@
-import { TextField as MuiTextField, styled, type TextFieldProps as MuiTextFieldProps } from '@mui/material';
-import type { ChangeEvent } from 'react';
+import {
+  FieldError,
+  Input,
+  Label,
+  Text,
+  TextField as ReactAriaTextField,
+} from 'react-aria-components';
+import type {
+  FocusEventHandler,
+  HTMLInputTypeAttribute,
+  InputHTMLAttributes,
+  ReactNode,
+} from 'react';
 
-export interface TextFieldProps
-  extends Omit<MuiTextFieldProps, 'label' | 'onChange' | 'size' | 'sx' | 'value'> {
+export interface TextFieldProps {
   readonly id: string;
   readonly label: string;
   readonly value: string;
   readonly onChange: (value: string) => void;
+  readonly type?: HTMLInputTypeAttribute;
+  readonly helperText?: ReactNode;
+  readonly error?: boolean;
+  readonly required?: boolean;
+  readonly disabled?: boolean;
+  readonly readOnly?: boolean;
+  readonly name?: string;
+  readonly placeholder?: string;
+  readonly autoFocus?: boolean;
+  readonly autoComplete?: string;
+  readonly className?: string;
+  readonly inputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    'id' | 'value' | 'onChange' | 'type'
+  >;
+  readonly onBlur?: FocusEventHandler<HTMLInputElement>;
 }
 
-const StyledTextField = styled(MuiTextField)({
-  '& .MuiInputLabel-root': { color: 'var(--ratan-color-content-secondary)' },
-  '& .MuiOutlinedInput-root': {
-    minHeight: 'var(--ratan-control-height)',
-    color: 'var(--ratan-color-content-primary)',
-    background: 'var(--ratan-color-surface-raised)',
-    borderRadius: 'var(--ratan-radius-control)',
-    '& fieldset': { borderColor: 'var(--ratan-color-border-strong)' },
-    '&:hover fieldset': { borderColor: 'var(--ratan-color-action-primary)' },
-    '&.Mui-focused fieldset': { borderColor: 'var(--ratan-color-focus-ring)' },
-    '&.Mui-focused': {
-      outline: 'var(--ratan-focus-width) solid var(--ratan-color-focus-ring)',
-      outlineOffset: 'var(--ratan-focus-offset)',
-    },
-  },
-});
-
-export function TextField({ onChange, inputProps, ...props }: TextFieldProps) {
+export function TextField({
+  id,
+  label,
+  value,
+  onChange,
+  type = 'text',
+  helperText,
+  error = false,
+  required = false,
+  disabled = false,
+  readOnly = false,
+  name,
+  placeholder,
+  autoFocus,
+  autoComplete,
+  className,
+  inputProps,
+  onBlur,
+}: TextFieldProps) {
   return (
-    <StyledTextField
-      {...props}
-      inputProps={{ ...inputProps, 'data-ratan-control': 'text-field' }}
-      onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
-      variant="outlined"
-    />
+    <ReactAriaTextField
+      className={['ratan-field', className].filter(Boolean).join(' ')}
+      data-ratan-component="text-field"
+      isDisabled={disabled}
+      isInvalid={error}
+      isReadOnly={readOnly}
+      isRequired={required}
+      name={name}
+      value={value}
+      onChange={onChange}
+    >
+      <Label className="ratan-field-label">{label}</Label>
+      <Input
+        {...inputProps}
+        id={id}
+        className="ratan-field-input"
+        data-ratan-control="text-field"
+        type={type}
+        placeholder={placeholder}
+        autoFocus={autoFocus}
+        autoComplete={autoComplete}
+        onBlur={onBlur}
+      />
+      {helperText ? (
+        error ? (
+          <FieldError className="ratan-field-message ratan-field-error">
+            {helperText}
+          </FieldError>
+        ) : (
+          <Text className="ratan-field-message" slot="description">
+            {helperText}
+          </Text>
+        )
+      ) : null}
+    </ReactAriaTextField>
   );
 }

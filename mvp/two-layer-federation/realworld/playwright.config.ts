@@ -19,6 +19,20 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
+      command: 'node_modules/.bin/serve -s mvp/two-layer-federation/realworld/apps/mfe-identity-profile/dist -l tcp://127.0.0.1:9202 -C -n --no-port-switching',
+      cwd: '../../..',
+      url: 'http://127.0.0.1:9202/mf-manifest.json',
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+    {
+      command: 'node_modules/.bin/serve -s mvp/two-layer-federation/realworld/apps/mfe-fdc3-admin/dist -l tcp://127.0.0.1:9204 -C -n --no-port-switching',
+      cwd: '../../..',
+      url: 'http://127.0.0.1:9204/mf-manifest.json',
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+    {
       command: 'node_modules/.bin/serve -s mvp/two-layer-federation/realworld/apps/portal-host/dist -l tcp://127.0.0.1:9200 -C -n --no-port-switching',
       cwd: '../../..',
       url: 'http://127.0.0.1:9200/registry.json',

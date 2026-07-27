@@ -5,6 +5,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Button } from '../src/components/Button';
@@ -31,19 +32,35 @@ function renderDesign(children: React.ReactNode) {
 }
 
 describe('NumberField', () => {
-  it('emits controlled numbers and null when cleared', () => {
+  it('emits controlled numbers and null when cleared', async () => {
     const onChange = vi.fn();
-    renderDesign(
-      <NumberField id="limit" label="Limit" value={12} onChange={onChange} />,
-    );
+    function Fixture() {
+      const [value, setValue] = useState<number | null>(12);
+      return (
+        <NumberField
+          id="limit"
+          label="Limit"
+          value={value}
+          onChange={(nextValue) => {
+            onChange(nextValue);
+            setValue(nextValue);
+          }}
+        />
+      );
+    }
+    const user = userEvent.setup();
+    renderDesign(<Fixture />);
 
-    const input = screen.getByRole('spinbutton', { name: 'Limit' });
-    expect(input).toHaveValue(12);
-    fireEvent.change(input, { target: { value: '27.5' } });
-    fireEvent.change(input, { target: { value: '' } });
+    const input = screen.getByRole('textbox', { name: 'Limit' });
+    expect(input).toHaveValue('12');
+    await user.clear(input);
+    await user.tab();
+    expect(onChange).toHaveBeenCalledWith(null);
+    await user.click(input);
+    await user.type(input, '27.5');
+    await user.tab();
 
-    expect(onChange).toHaveBeenNthCalledWith(1, 27.5);
-    expect(onChange).toHaveBeenNthCalledWith(2, null);
+    expect(onChange).toHaveBeenCalledWith(27.5);
     expect(input).toHaveAttribute('data-ratan-control', 'number-field');
   });
 
@@ -62,12 +79,11 @@ describe('NumberField', () => {
       />,
     );
 
-    const input = screen.getByRole('spinbutton', { name: /Bounded limit/ });
+    const input = screen.getByRole('textbox', { name: /Bounded limit/ });
     expect(input).toBeDisabled();
     expect(input).toBeRequired();
-    expect(input).toHaveAttribute('min', '0');
-    expect(input).toHaveAttribute('max', '100');
-    expect(input).toHaveAttribute('step', '0.5');
+    expect(input).toHaveAttribute('aria-roledescription', 'Number field');
+    expect(input).toHaveAttribute('inputmode', 'numeric');
   });
 
   it('associates helper and error text and exposes invalid state', () => {
@@ -80,7 +96,7 @@ describe('NumberField', () => {
         helperText="Enter a positive amount"
       />,
     );
-    const input = screen.getByRole('spinbutton', { name: 'Validated limit' });
+    const input = screen.getByRole('textbox', { name: 'Validated limit' });
     const helper = screen.getByText('Enter a positive amount');
     expect(input).toHaveAttribute('aria-describedby', helper.id);
     expect(input).not.toHaveAttribute('aria-invalid', 'true');
@@ -98,7 +114,7 @@ describe('NumberField', () => {
       </DesignSystemProvider>,
     );
     expect(
-      screen.getByRole('spinbutton', { name: 'Validated limit' }),
+      screen.getByRole('textbox', { name: 'Validated limit' }),
     ).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getByText('A limit is required')).toBeInTheDocument();
   });
@@ -112,7 +128,7 @@ describe('NumberField', () => {
         onChange={vi.fn()}
       />,
     );
-    const input = screen.getByRole('spinbutton', { name: 'Focus limit' });
+    const input = screen.getByRole('textbox', { name: 'Focus limit' });
     input.focus();
     expect(input).toHaveFocus();
   });
@@ -179,12 +195,10 @@ describe('Dialog', () => {
       key: 'Escape',
     });
     expect(onClose).toHaveBeenCalledTimes(2);
-    const dialogRoot = document.querySelector('.MuiDialog-root');
-    const dialogContainer = document.querySelector('.MuiDialog-container');
-    expect(dialogRoot).not.toBeNull();
-    expect(dialogContainer).not.toBeNull();
-    fireEvent.mouseDown(dialogContainer!);
-    fireEvent.click(dialogRoot!);
+    const dialogOverlay = document.querySelector('.ratan-modal-overlay');
+    expect(dialogOverlay).not.toBeNull();
+    fireEvent.mouseDown(dialogOverlay!, { button: 0 });
+    fireEvent.mouseUp(dialogOverlay!, { button: 0 });
 
     expect(onClose).toHaveBeenCalledTimes(3);
   });
@@ -209,10 +223,10 @@ describe('Dialog', () => {
     fireEvent.keyDown(screen.getByRole('dialog', { name: 'Pending' }), {
       key: 'Escape',
     });
-    const dialogRoot = document.querySelector('.MuiDialog-root');
-    const dialogContainer = document.querySelector('.MuiDialog-container');
-    fireEvent.mouseDown(dialogContainer!);
-    fireEvent.click(dialogRoot!);
+    const dialogOverlay = document.querySelector('.ratan-modal-overlay');
+    expect(dialogOverlay).not.toBeNull();
+    fireEvent.mouseDown(dialogOverlay!, { button: 0 });
+    fireEvent.mouseUp(dialogOverlay!, { button: 0 });
     expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'Wait' })).toBeInTheDocument();
   });
@@ -284,7 +298,7 @@ describe('ConfirmationDialog', () => {
     );
     const progress = screen.getByRole('button', { name: 'Delete in progress' });
     expect(progress).toBeDisabled();
-    expect(progress).toHaveAttribute('aria-busy', 'true');
+    expect(progress).toHaveAttribute('data-pending', 'true');
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
     expect(
       screen.queryByRole('button', { name: 'Close Delete limit' }),

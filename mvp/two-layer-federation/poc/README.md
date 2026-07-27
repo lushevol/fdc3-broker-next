@@ -1,4 +1,6 @@
-# Two-layer federation POC
+# Two-layer federation POC — frozen
+
+> **Frozen on 2026-07-27.** This track is retained as read-only architectural evidence. Do not add features, dependencies, or fixes here. All new implementation belongs in `../realworld`; see [the consolidation record](../realworld/docs/POC_CONSOLIDATION.md) for the porting status and the remaining compatibility work.
 
 This track is private, disposable evidence. Every workspace retains a `-poc` package identity and must remain isolated from realworld applications and packages.
 

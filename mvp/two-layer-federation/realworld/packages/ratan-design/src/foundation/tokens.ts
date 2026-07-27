@@ -13,6 +13,8 @@ export const COLOR_TOKEN_NAMES = [
   'actionOnPrimary',
   'actionDanger',
   'focusRing',
+  'overlayBackdrop',
+  'overlayShadow',
   'statusReadyContent',
   'statusReadySurface',
   'statusReviewContent',
@@ -34,6 +36,49 @@ export type DensityTokenName = (typeof DENSITY_TOKEN_NAMES)[number];
 export type DesignScheme = 'light' | 'dark';
 export type DesignDensity = 'compact' | 'comfortable';
 
+/**
+ * The local GDS reference is the authority for palette values and semantic
+ * naming. Dark mode is a Ratan composition of those same primitives because
+ * the supplied GDS reference defines a light theme only.
+ */
+export const GDS_OFFICIAL_TOKEN_SOURCE = 'gds-official/src/styles/theme.css' as const;
+
+export const gdsPrimitiveTokens = {
+  white: '#ffffff',
+  black: '#000000',
+  grey25: '#f9f9f9',
+  grey50: '#f2f2f2',
+  grey100: '#e5e5e5',
+  grey150: '#d9d9d9',
+  grey200: '#cccccc',
+  grey400: '#999999',
+  grey500: '#808080',
+  grey600: '#666666',
+  grey650: '#595959',
+  grey700: '#4d4d4d',
+  grey850: '#262626',
+  grey900: '#1a1a1a',
+  grey950: '#0d0d0d',
+  blue50: '#e5f1fc',
+  blue250: '#81b9f4',
+  blue350: '#4f9df0',
+  blue500: '#0473ea',
+  blue550: '#0367d2',
+  blue600: '#035cbb',
+  green50: '#ebfbe6',
+  green300: '#87e769',
+  green550: '#32bd00',
+  green700: '#207e00',
+  amber50: '#fef6e7',
+  amber350: '#fcc65b',
+  amber450: '#fab52c',
+  amber750: '#7d570a',
+  red50: '#fce6e7',
+  red300: '#ec6c73',
+  red400: '#e63b44',
+  red550: '#ca0913',
+} as const;
+
 export interface SemanticTokens {
   readonly color: Readonly<Record<DesignScheme, Readonly<Record<ColorTokenName, string>>>>;
   readonly density: Readonly<Record<DesignDensity, Readonly<Record<DensityTokenName, string>>>>;
@@ -46,58 +91,72 @@ export interface SemanticTokens {
     readonly radiusPill: string;
     readonly focusWidth: string;
     readonly focusOffset: string;
+    readonly opacityDisabled: string;
+    readonly opacityFieldDisabled: string;
+    readonly opacityPlaceholder: string;
+    readonly motionDurationFast: string;
+    readonly motionPressOffset: string;
+    readonly zIndexModal: string;
+    readonly dialogWidthSmall: string;
+    readonly dialogWidthMedium: string;
+    readonly dialogWidthLarge: string;
+    readonly dialogMaxHeight: string;
   };
 }
 
 export const semanticTokens = {
   color: {
     light: {
-      surfaceDefault: '#f5f7fb',
-      surfaceRaised: '#ffffff',
-      surfaceInteractive: '#e8eef6',
-      surfaceOverlay: '#ffffff',
-      contentPrimary: '#172033',
-      contentSecondary: '#53647c',
-      contentInverse: '#ffffff',
-      borderSubtle: '#cbd5e1',
-      borderStrong: '#8da0ba',
-      actionPrimary: '#006b5f',
-      actionPrimaryHover: '#00564c',
-      actionOnPrimary: '#ffffff',
-      actionDanger: '#b42335',
-      focusRing: '#007f72',
-      statusReadyContent: '#075f54',
-      statusReadySurface: '#d6f5ef',
-      statusReviewContent: '#815000',
-      statusReviewSurface: '#fff1c7',
-      statusBlockedContent: '#9b1c31',
-      statusBlockedSurface: '#ffe1e6',
-      statusNeutralContent: '#46566c',
-      statusNeutralSurface: '#e8edf4',
+      surfaceDefault: gdsPrimitiveTokens.white,
+      surfaceRaised: gdsPrimitiveTokens.white,
+      surfaceInteractive: gdsPrimitiveTokens.grey50,
+      surfaceOverlay: gdsPrimitiveTokens.white,
+      contentPrimary: gdsPrimitiveTokens.grey950,
+      contentSecondary: gdsPrimitiveTokens.grey700,
+      contentInverse: gdsPrimitiveTokens.white,
+      borderSubtle: gdsPrimitiveTokens.grey200,
+      borderStrong: gdsPrimitiveTokens.grey400,
+      actionPrimary: gdsPrimitiveTokens.blue500,
+      actionPrimaryHover: gdsPrimitiveTokens.blue350,
+      actionOnPrimary: gdsPrimitiveTokens.white,
+      actionDanger: gdsPrimitiveTokens.red550,
+      focusRing: gdsPrimitiveTokens.blue500,
+      overlayBackdrop: 'rgb(0 0 0 / 48%)',
+      overlayShadow: 'rgb(0 0 0 / 20%)',
+      statusReadyContent: gdsPrimitiveTokens.green700,
+      statusReadySurface: gdsPrimitiveTokens.green50,
+      statusReviewContent: gdsPrimitiveTokens.amber750,
+      statusReviewSurface: gdsPrimitiveTokens.amber50,
+      statusBlockedContent: gdsPrimitiveTokens.red550,
+      statusBlockedSurface: gdsPrimitiveTokens.red50,
+      statusNeutralContent: gdsPrimitiveTokens.grey700,
+      statusNeutralSurface: gdsPrimitiveTokens.grey50,
     },
     dark: {
-      surfaceDefault: '#0d1c2f',
-      surfaceRaised: '#11253c',
-      surfaceInteractive: '#183451',
-      surfaceOverlay: '#162c45',
-      contentPrimary: '#edf5ff',
-      contentSecondary: '#9bb0c7',
-      contentInverse: '#07121e',
-      borderSubtle: '#29435f',
-      borderStrong: '#527091',
-      actionPrimary: '#5eead4',
-      actionPrimaryHover: '#7cefdc',
-      actionOnPrimary: '#07121e',
-      actionDanger: '#ff9cab',
-      focusRing: '#7cefdc',
-      statusReadyContent: '#7cead5',
-      statusReadySurface: '#123b38',
-      statusReviewContent: '#ffd48b',
-      statusReviewSurface: '#45351e',
-      statusBlockedContent: '#ff9cab',
-      statusBlockedSurface: '#48242e',
-      statusNeutralContent: '#b5c3d5',
-      statusNeutralSurface: '#26374c',
+      surfaceDefault: gdsPrimitiveTokens.grey950,
+      surfaceRaised: gdsPrimitiveTokens.grey900,
+      surfaceInteractive: gdsPrimitiveTokens.grey850,
+      surfaceOverlay: gdsPrimitiveTokens.grey850,
+      contentPrimary: gdsPrimitiveTokens.white,
+      contentSecondary: gdsPrimitiveTokens.grey200,
+      contentInverse: gdsPrimitiveTokens.grey950,
+      borderSubtle: gdsPrimitiveTokens.grey600,
+      borderStrong: gdsPrimitiveTokens.grey500,
+      actionPrimary: gdsPrimitiveTokens.blue350,
+      actionPrimaryHover: gdsPrimitiveTokens.blue250,
+      actionOnPrimary: gdsPrimitiveTokens.grey950,
+      actionDanger: gdsPrimitiveTokens.red300,
+      focusRing: gdsPrimitiveTokens.blue250,
+      overlayBackdrop: 'rgb(0 0 0 / 68%)',
+      overlayShadow: 'rgb(0 0 0 / 42%)',
+      statusReadyContent: gdsPrimitiveTokens.green300,
+      statusReadySurface: gdsPrimitiveTokens.grey850,
+      statusReviewContent: gdsPrimitiveTokens.amber450,
+      statusReviewSurface: gdsPrimitiveTokens.grey850,
+      statusBlockedContent: gdsPrimitiveTokens.red300,
+      statusBlockedSurface: gdsPrimitiveTokens.grey850,
+      statusNeutralContent: gdsPrimitiveTokens.grey150,
+      statusNeutralSurface: gdsPrimitiveTokens.grey850,
     },
   },
   density: {
@@ -113,14 +172,24 @@ export const semanticTokens = {
     },
   },
   foundation: {
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    fontSizeBody: '0.8125rem',
+    fontFamily: '"SC Prosper Sans", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontSizeBody: '0.875rem',
     fontSizeLabel: '0.75rem',
     fontWeightStrong: '700',
     radiusControl: '0.5rem',
     radiusPill: '999px',
     focusWidth: '2px',
     focusOffset: '2px',
+    opacityDisabled: '0.48',
+    opacityFieldDisabled: '0.58',
+    opacityPlaceholder: '0.82',
+    motionDurationFast: '120ms',
+    motionPressOffset: '1px',
+    zIndexModal: '1000',
+    dialogWidthSmall: '30rem',
+    dialogWidthMedium: '44rem',
+    dialogWidthLarge: '64rem',
+    dialogMaxHeight: 'min(90vh, 52rem)',
   },
 } as const satisfies SemanticTokens;
 

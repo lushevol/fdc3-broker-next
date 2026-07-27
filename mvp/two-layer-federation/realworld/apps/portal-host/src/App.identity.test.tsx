@@ -1,5 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import type { IdentityCapability } from '@fm/platform-contracts';
+import {
+  IDENTITY_CONTRACT_VERSION,
+  type IdentityCapability,
+} from '@fm/platform-contracts';
 import { App } from './App';
 import { loadApplicationRegistry } from './registry';
 import { entry } from './test-fixtures';
@@ -16,7 +19,12 @@ const mockedLoad = loadApplicationRegistry as jest.MockedFunction<typeof loadApp
 
 it('threads the exact identity capability across asynchronous registry loading', async () => {
   const identity: IdentityCapability = {
-    getSnapshot: () => ({ state: 'anonymous', contractVersion: '1.0.0' }),
+    getSnapshot: () => ({
+      state: 'authenticated',
+      userId: 'operator',
+      permissions: ['portal:access'],
+      contractVersion: IDENTITY_CONTRACT_VERSION,
+    }),
     subscribe: () => () => undefined,
   };
   mockedLoad.mockResolvedValue({ applications: [entry] });

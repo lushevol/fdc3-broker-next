@@ -4,6 +4,8 @@ import { join } from 'node:path';
 const applicationRoots = [
   'mvp/two-layer-federation/realworld/apps/portal-host',
   'mvp/two-layer-federation/realworld/apps/mfe-cashflow',
+  'mvp/two-layer-federation/realworld/apps/mfe-identity-profile',
+  'mvp/two-layer-federation/realworld/apps/mfe-fdc3-admin',
 ];
 const packageRoots = [
   'mvp/two-layer-federation/realworld/packages/platform-contracts',
@@ -73,12 +75,11 @@ for (const root of applicationRoots) {
   }
 }
 
-const applicationCss = await readFile(
-  'mvp/two-layer-federation/realworld/apps/mfe-cashflow/src/styles.css',
-  'utf8',
-);
-if (/(^|[}\s,])(html|body|:root|\*)\s*[{,]/m.test(applicationCss)) {
-  throw new Error('Cashflow application CSS owns a document-global selector');
+for (const root of applicationRoots.filter((root) => !root.endsWith('portal-host'))) {
+  const applicationCss = await readFile(join(root, 'src/styles.css'), 'utf8');
+  if (/(^|[}\s,])(html|body|:root|\*)\s*[{,]/m.test(applicationCss)) {
+    throw new Error(`${root} application CSS owns a document-global selector`);
+  }
 }
 
 console.log(JSON.stringify({

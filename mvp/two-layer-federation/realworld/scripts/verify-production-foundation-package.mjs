@@ -55,9 +55,6 @@ try {
     'react',
     'react-dom',
     'zod',
-    '@emotion/react',
-    '@emotion/styled',
-    '@mui/material',
     'ag-grid-community',
     'ag-grid-react',
     '@types/react',
@@ -68,8 +65,9 @@ try {
 import { APPEARANCE_CONTRACT_VERSION, appearanceSnapshotSchema } from '@fm/platform-contracts';
 import { createAppearanceController } from '@fm/platform-sdk';
 import {
-  Button, ConfirmationDialog, Dialog, DesignSystemProvider, InlineAlert, NumberField,
-  StatusBadge, TextField, semanticTokens,
+  Avatar, Button, Card, ConfirmationDialog, Dialog, DesignSystemProvider, Disclosure,
+  EmptyState, InlineAlert, NumberField, PasswordField, StatusBadge, Switch, Tabs,
+  TagGroup, TextField, Toast, ToggleButton, semanticTokens,
 } from '@fm/ratan-design';
 import { RatanDataGrid, createColumnDefinitions } from '@fm/ratan-data-grid';
 import { existsSync } from 'node:fs';
@@ -80,7 +78,10 @@ const appearance = Object.freeze({
 });
 appearanceSnapshotSchema.parse(appearance);
 if (createAppearanceController(appearance).capability.getSnapshot().scheme !== 'dark') throw new Error('SDK export failed');
-if (!Button || !TextField || !NumberField || !StatusBadge || !Dialog || !ConfirmationDialog || !InlineAlert || !DesignSystemProvider || !semanticTokens.color.dark) throw new Error('Design export failed');
+if (!Avatar || !Button || !Card || !ConfirmationDialog || !Dialog || !DesignSystemProvider
+  || !Disclosure || !EmptyState || !InlineAlert || !NumberField || !PasswordField
+  || !StatusBadge || !Switch || !Tabs || !TagGroup || !TextField || !Toast
+  || !ToggleButton || !semanticTokens.color.dark) throw new Error('Design export failed');
 if (!RatanDataGrid || createColumnDefinitions([{ key: 'id', header: 'ID' }]).length !== 1) throw new Error('Grid export failed');
 const cssPath = import.meta.resolve('@fm/ratan-design/styles.css');
 if (!existsSync(new URL(cssPath))) throw new Error('Stylesheet export failed');
@@ -98,8 +99,8 @@ if (!blocked) throw new Error('Grid internal subpath was not blocked');
 import type { AppearanceSnapshot, PlatformCapabilities } from '@fm/platform-contracts';
 import { createAppearanceController, createPlatformClient } from '@fm/platform-sdk';
 import {
-  Button, ConfirmationDialog, Dialog, DesignSystemProvider, InlineAlert, NumberField,
-  StatusBadge, TextField,
+  Avatar, Button, Card, ConfirmationDialog, Dialog, DesignSystemProvider, InlineAlert,
+  NumberField, PasswordField, StatusBadge, Switch, TagGroup, TextField, ToggleButton,
 } from '@fm/ratan-design';
 import { RatanDataGrid, type RatanDataGridColumn } from '@fm/ratan-data-grid';
 
@@ -113,7 +114,12 @@ const columns: RatanDataGridColumn<Row>[] = [{ key: 'id', header: 'ID' }];
 export const Fixture = () => (
   <DesignSystemProvider appearance={controller.capability.getSnapshot()}>
     <TextField id="filter" label="Filter" value="" onChange={() => undefined} />
+    <PasswordField id="password" label="Password" value="" onChange={() => undefined} />
     <NumberField id="limit" label="Limit" value={1} min={0} onChange={() => undefined} />
+    <Avatar name="Verifier One" />
+    <Card title="Identity"><TagGroup label="Roles" tags={[]} /></Card>
+    <Switch label="Live" selected={false} onChange={() => undefined} />
+    <ToggleButton selected={false} onChange={() => undefined}>Compact</ToggleButton>
     <StatusBadge status="ready">Ready</StatusBadge>
     <InlineAlert tone="info" message="Local feedback" />
     <Button>Submit</Button>

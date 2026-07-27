@@ -1,5 +1,21 @@
 # @fm/ratan-design
 
+## Unreleased
+
+### Changed
+
+- Replaced MUI and Emotion internals with React Aria Components and scoped semantic CSS.
+- Removed MUI and Emotion peer dependencies and all MUI-derived public prop types.
+- Added optional local portal targeting to `DesignSystemProvider` for host and Tile overlay containment.
+- Preserved controlled Button, TextField, NumberField, StatusBadge, Dialog, ConfirmationDialog, and InlineAlert behavior with React Aria focus, dismissal, labeling, and validation semantics.
+- Added form/login, shell feedback, selection controls, and profile data-display primitives for the first migration waves.
+- Added the independent `mfe-identity-profile` verification consumer to exercise the packed public API in host-mounted and standalone modes.
+
+### Compatibility
+
+- `NumberField` now follows React Aria's locale-aware text editing semantics and exposes an accessible number-field description rather than relying on a native `type="number"` spinbutton.
+- Public Ratan APIs remain implementation-neutral; React Aria types are not re-exported.
+
 ## 1.1.0
 
 ### Added

@@ -6,6 +6,8 @@ This track contains production package identities and the migration implementati
 
 - `apps/portal-host` — direct Module Federation host on port 9200.
 - `apps/mfe-cashflow` — independently deployed Cashflow application on port 9201.
+- `apps/mfe-identity-profile` — independently deployed identity/profile component verification application on port 9202.
+- `apps/mfe-fdc3-admin` — independently deployed FDC3 declarations and catalog verification application on port 9204.
 - `packages/platform-contracts` — versioned application, appearance, and identity contracts.
 - `packages/platform-sdk` — typed application client for host capabilities.
 - `packages/ratan-design` — authoritative semantic-token and bounded-component design system.
@@ -13,6 +15,10 @@ This track contains production package identities and the migration implementati
 - `scripts` — realworld-only package and runtime boundary verification.
 - `tests/e2e` and `playwright.config.ts` — realworld browser acceptance.
 - `docs` — realworld architecture, verification, rollout, and compatibility guidance.
+
+## Active plans
+
+- [React Aria Ratan Design System and Verification Tiles Plan](./docs/REACT_ARIA_DESIGN_SYSTEM_PLAN.md)
 
 ## Commands
 
