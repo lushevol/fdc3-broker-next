@@ -21,6 +21,18 @@ The migrated application SHALL preserve Cashflow CN quick search, custom search/
 #### Scenario: Cashflow details
 - **WHEN** a user opens a Cashflow result
 - **THEN** the migrated details composition displays trade, cashflow, party, accounting, history, and exception information according to the returned data and entitlements
+- **AND** the composition opens in a modal dialog constrained to the Portal Host viewport
+- **AND** the user can close the dialog without changing the grid state
+
+#### Scenario: Saved custom filter
+- **WHEN** a user selects a saved custom filter
+- **THEN** the filter satisfies the unchanged Cashflow CN mandatory-field guards
+- **AND** the existing GraphQL list request returns only records matching that filter
+
+#### Scenario: Saved custom view
+- **WHEN** a user selects a saved custom view
+- **THEN** the grid applies its saved column visibility and ordering
+- **AND** local fixture mode does not report a false notification-transport failure
 
 #### Scenario: Entitled action
 - **WHEN** an entitled user invokes a supported maker/checker, hold, netting, splitting, settlement, SWIFT, failure, or exception action

@@ -18,6 +18,7 @@ interface CashflowDevResponse {
 interface GraphqlRequest {
   readonly operationName?: string;
   readonly query?: string;
+  readonly variables?: unknown;
 }
 
 const CASHFLOW_FIELDS = [
@@ -39,6 +40,7 @@ const CASHFLOW_FIELDS = [
   ['Trade_State', 'Trade State', 'String'],
   ['Settlement_Method', 'Settlement Method', 'String'],
   ['Delivery_Method', 'Delivery Method', 'String'],
+  ['Entity.Booking_Entity_SCI_FMID', 'Booking Entity FMID', 'String'],
   ['Entity.Booking_Entity_SCI_FMCODE', 'SCB Booking Entity', 'String'],
   ['Entity.Counterparty_SCI_FMCODE', 'Counterparty FMCODE', 'String'],
   ['Portfolio.Booking_Entity_Trade_Portfolio_Name', 'Portfolio', 'String'],
@@ -89,6 +91,7 @@ const cashflowRows = [
       Netting_Id: '',
     },
     Entity: {
+      Booking_Entity_SCI_FMID: 'FM Shanghai',
       Booking_Entity_SCI_FMCODE: 'FM Shanghai',
       Counterparty_SCI_FMCODE: 'Shanghai Clearing House',
     },
@@ -137,6 +140,7 @@ const cashflowRows = [
       Netting_Id: '',
     },
     Entity: {
+      Booking_Entity_SCI_FMID: 'FM Shanghai',
       Booking_Entity_SCI_FMCODE: 'FM Shanghai',
       Counterparty_SCI_FMCODE: 'Beijing Markets Ltd',
     },
@@ -167,6 +171,21 @@ const savedFilter = {
   body: JSON.stringify({
     combinator: 'and',
     rules: [
+      {
+        field: 'Cashflow.Payment_Date',
+        operator: '=',
+        value: '2026-07-29',
+      },
+      {
+        field: 'Cashflow.Cashflow_State',
+        operator: '=',
+        value: 'WAITING',
+      },
+      {
+        field: 'Entity.Booking_Entity_SCI_FMID',
+        operator: '=',
+        value: 'FM Shanghai',
+      },
       {
         field: 'Cashflow.Payment_Currency',
         operator: '=',
@@ -213,16 +232,22 @@ function graphqlResponse(body: GraphqlRequest | undefined): CashflowDevResponse 
     operationName === CASHFLOW_LIST_OPERATION
     || query.includes('cashflowUltraQuery')
   ) {
+    const requestText = JSON.stringify(body);
+    const results = requestText.includes('"USD"')
+      ? cashflowRows.filter(
+          ({ Cashflow }) => Cashflow.Payment_Currency === 'USD',
+        )
+      : cashflowRows;
     return {
       status: 200,
       body: {
         data: {
           cashflowUltraQuery: {
-            totalResult: cashflowRows.length,
+            totalResult: results.length,
             pageIndex: 0,
             itemsPerPage: 1000,
             lastPage: true,
-            results: cashflowRows,
+            results,
           },
         },
       },

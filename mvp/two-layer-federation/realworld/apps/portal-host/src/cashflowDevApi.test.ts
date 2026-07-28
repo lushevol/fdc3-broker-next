@@ -85,10 +85,61 @@ describe('Cashflow CN local transport contracts', () => {
       expect.objectContaining({ name: 'USD pending verification' }),
     ]);
     expect(filter?.body).toMatchObject({ rowKey: 'filter-usd-pending' });
+    const filterBody = JSON.parse(
+      String((filter?.body as { body?: string } | undefined)?.body),
+    ) as { rules: Array<{ field: string }> };
+    expect(filterBody.rules.map(({ field }) => field)).toEqual(
+      expect.arrayContaining([
+        'Cashflow.Payment_Date',
+        'Cashflow.Cashflow_State',
+        'Entity.Booking_Entity_SCI_FMID',
+        'Cashflow.Payment_Currency',
+      ]),
+    );
     expect(views?.body).toEqual([
       expect.objectContaining({ name: 'Operations essentials' }),
     ]);
     expect(view?.body).toMatchObject({ rowKey: 'view-operations' });
+  });
+
+  it('applies saved filter values to the unchanged list GraphQL contract', () => {
+    const response = resolveCashflowDevResponse({
+      method: 'POST',
+      pathname: '/api/ratan/stmcn/v1/cashflows',
+      body: {
+        operationName: CASHFLOW_LIST_OPERATION,
+        variables: {
+          payload: {
+            filters: {
+              combinator: 'and',
+              rules: [
+                {
+                  field: 'Cashflow.Payment_Currency',
+                  operator: '=',
+                  value: 'USD',
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+
+    expect(response?.body).toMatchObject({
+      data: {
+        cashflowUltraQuery: {
+          totalResult: 1,
+          results: [
+            expect.objectContaining({
+              Cashflow: expect.objectContaining({
+                Cashflow_Id: 'CF-CN-24001',
+                Payment_Currency: 'USD',
+              }),
+            }),
+          ],
+        },
+      },
+    });
   });
 
   it('provides notification and representative action contracts but ignores unknown routes', () => {

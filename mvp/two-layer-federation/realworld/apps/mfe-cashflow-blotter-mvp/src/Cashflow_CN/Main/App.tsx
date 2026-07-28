@@ -205,7 +205,7 @@ const App: FC<TileProps> = ({ parameters }) => {
         {featureScopedEnabled('Enable_Search_Bar') && <QuickFilters />}
         <GridFooter />
         <CashflowDataGrid />
-        <CashflowNotification />
+        {process.env.NODE_ENV !== "development" && <CashflowNotification />}
       </AgGridFilterContext.Provider>
     </StyledRoot>
   ) : null;

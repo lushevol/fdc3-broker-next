@@ -24,13 +24,20 @@ test('loads the migrated Cashflow CN workflow directly from the portal host', as
   await expect(page.getByText('Filters', { exact: true })).toBeVisible();
   await expect(page.getByText('Views', { exact: true })).toBeVisible();
   await page.getByTestId('select-fliter').click();
-  await expect(page.getByText('USD pending verification', { exact: true })).toBeVisible();
-  await page.keyboard.press('Escape');
+  await page.getByText('USD pending verification', { exact: true }).click();
+  await expect(page.getByText('1/1', { exact: true })).toBeVisible();
+  await expect(page.getByText('CF-CN-24001', { exact: true })).toBeVisible();
+  await expect(page.getByText('CF-CN-24002', { exact: true })).not.toBeVisible();
+
+  await page.getByRole('button', { name: 'Clear', exact: true }).first().click();
+  await expect(page.getByText('2/2', { exact: true })).toBeVisible();
   await page.getByTestId('selectView').click();
+  await page.getByRole('option', { name: /^Operations essentials/ }).click();
+  await expect(page.getByRole('columnheader', { name: 'Trade ID' })).toBeVisible();
   await expect(
-    page.getByRole('option', { name: /^Operations essentials/ }),
-  ).toBeVisible();
-  await page.keyboard.press('Escape');
+    page.getByRole('columnheader', { name: 'Counterparty FMCODE' }),
+  ).not.toBeVisible();
+  await expect(page.getByText('Notification Error', { exact: true })).not.toBeVisible();
   await expect(
     page.getByTestId('/advanced_search/entry_selector/setting_btn'),
   ).toBeEnabled();
@@ -44,6 +51,17 @@ test('loads the migrated Cashflow CN workflow directly from the portal host', as
   await expect(details.getByText('TRD-CN-90001', { exact: true })).toBeVisible();
   await expect(details.getByText('USD', { exact: true }).first()).toBeVisible();
   await expect(details.getByText('1,250,000', { exact: true })).toBeVisible();
+  const dialog = page.getByRole('dialog');
+  const dialogBounds = await dialog.boundingBox();
+  const viewport = page.viewportSize();
+  expect(dialogBounds).not.toBeNull();
+  expect(viewport).not.toBeNull();
+  expect(dialogBounds!.x).toBeGreaterThanOrEqual(0);
+  expect(dialogBounds!.y).toBeGreaterThanOrEqual(0);
+  expect(dialogBounds!.x + dialogBounds!.width).toBeLessThanOrEqual(viewport!.width);
+  expect(dialogBounds!.y + dialogBounds!.height).toBeLessThanOrEqual(viewport!.height);
+  await page.getByRole('button', { name: 'Close dialog' }).click();
+  await expect(dialog).not.toBeVisible();
 
   expect(requests.some((url) => url.includes('127.0.0.1:9206/mf-manifest.json'))).toBe(true);
   expect(requests.some((url) => url.includes('127.0.0.1:9205'))).toBe(false);

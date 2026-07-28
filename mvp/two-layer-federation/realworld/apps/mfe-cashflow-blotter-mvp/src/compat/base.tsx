@@ -11,7 +11,14 @@ import * as ReactRouterDomModule from 'react-router-dom';
 import {
   Button as MuiButton,
   CircularProgress,
+  Dialog as MuiDialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  type DialogProps as MuiDialogProps,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { createTheme } from '@mui/material/styles';
 
 interface BoundaryState {
@@ -206,10 +213,119 @@ export const FDC3Agent = {
     useIntentListener: (_intent: string, _handler: (context: unknown) => void) => undefined,
   },
 };
+
+interface CompatibilityDialogProps extends PropsWithChildren {
+  readonly open?: boolean;
+  readonly onClose?: () => void;
+  readonly titleComponents?: ReactNode;
+  readonly actionComponents?: ReactNode;
+  readonly defaultWidth?: number | string;
+  readonly defaultHeight?: number | string;
+  readonly dividers?: boolean;
+  readonly disablePortal?: boolean;
+  readonly fullScreen?: boolean;
+  readonly fullWidth?: boolean;
+  readonly scroll?: MuiDialogProps['scroll'];
+  readonly disableEscapeKeyDown?: boolean;
+  readonly className?: string;
+  readonly PaperProps?: MuiDialogProps['PaperProps'];
+  readonly 'data-testid'?: string;
+}
+
+function cssSize(value: number | string | undefined, fallback: string) {
+  if (value === undefined || value === 'auto') return fallback;
+  return typeof value === 'number' ? `${value}px` : value;
+}
+
+function CompatibilityDialog({
+  children,
+  open = true,
+  onClose,
+  titleComponents,
+  actionComponents,
+  defaultWidth,
+  defaultHeight,
+  dividers,
+  fullScreen,
+  fullWidth,
+  scroll = 'paper',
+  disableEscapeKeyDown,
+  className,
+  PaperProps,
+  'data-testid': testId,
+}: CompatibilityDialogProps) {
+  const requestedWidth = cssSize(defaultWidth, 'auto');
+  const requestedHeight = cssSize(defaultHeight, 'auto');
+  const hasTitle = titleComponents !== undefined && titleComponents !== null;
+
+  return (
+    <MuiDialog
+      open={open}
+      onClose={() => onClose?.()}
+      disablePortal={false}
+      fullScreen={fullScreen}
+      fullWidth={fullWidth}
+      scroll={scroll}
+      disableEscapeKeyDown={disableEscapeKeyDown}
+      className={className}
+      data-testid={testId}
+      maxWidth={false}
+      PaperProps={{
+        ...PaperProps,
+        style: {
+          ...PaperProps?.style,
+          width:
+            requestedWidth === 'auto'
+              ? 'auto'
+              : `min(${requestedWidth}, calc(100vw - 32px))`,
+          height:
+            requestedHeight === 'auto'
+              ? 'auto'
+              : `min(${requestedHeight}, calc(100vh - 32px))`,
+          maxWidth: 'calc(100vw - 32px)',
+          maxHeight: 'calc(100vh - 32px)',
+          margin: 16,
+        },
+      }}
+    >
+      {(hasTitle || onClose !== undefined) ? (
+        <DialogTitle
+          component="div"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            minHeight: 48,
+            padding: '4px 8px 4px 16px',
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {titleComponents as MuiDialogProps['children']}
+          </div>
+          {onClose && (
+            <IconButton aria-label="Close dialog" onClick={onClose} size="small">
+              <CloseIcon />
+            </IconButton>
+          )}
+        </DialogTitle>
+      ) : null}
+      <DialogContent
+        dividers={dividers}
+        sx={{ minHeight: 0, overflow: 'auto', padding: dividers ? undefined : 0 }}
+      >
+        {children as MuiDialogProps['children']}
+      </DialogContent>
+      {actionComponents !== undefined && actionComponents !== null ? (
+        <DialogActions>
+          {actionComponents as MuiDialogProps['children']}
+        </DialogActions>
+      ) : null}
+    </MuiDialog>
+  );
+}
+
 export const Dialog = {
-  default: ({ children, open = true }: PropsWithChildren<{ readonly open?: boolean }>) => (
-    open ? <div role="dialog">{children}</div> : null
-  ),
+  default: CompatibilityDialog,
 };
 
 export default {
