@@ -10,18 +10,21 @@ preserving their Single-SPA/SystemJS runtime relationship.
 
 ```text
 portal-host
-├── mfe-ratan-container-mvp
 └── mfe-cashflow-blotter-mvp
+    ├── @fm/ratan-design
+    └── @fm/ratan-data-grid
 ```
 
-Both MVPs are independently deployed Module Federation applications loaded
-directly by the portal host. The Cashflow Blotter MVP must not load or import
-the Ratan Container MVP.
+Cashflow is the independently deployed Module Federation application loaded
+directly by Portal Host. Ratan is a build-time package boundary for shared
+components, not a Portal Host application dependency. The standalone Ratan
+Migration MVP remains an inventory tool only; Portal Host does not register it
+and the Cashflow Blotter MVP does not load or import it.
 
 ## Acceptance
 
-1. Each MVP exposes `./application`, publishes a compatible application
-   manifest, and runs standalone.
+1. Cashflow exposes `./application`, publishes a compatible application
+   manifest, and runs standalone without a Ratan remote.
 2. Ratan Container MVP inventories the legacy container responsibilities and
    proves that reusable UI is consumed from versioned packages.
 3. Cashflow Blotter MVP renders a filterable operational slice with the

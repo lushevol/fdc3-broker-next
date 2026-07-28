@@ -33,17 +33,6 @@
     "identityContractVersion": "1.0.0",
     "capabilities": ["navigation", "notifications", "telemetry", "workspace", "appearance", "identity"]
   }, {
-    "id": "ratan-migration",
-    "displayName": "Ratan Migration MVP",
-    "remoteName": "mfe_ratan_migration",
-    "manifestUrl": "http://127.0.0.1:9205/mf-manifest.json",
-    "exposedModule": "./application",
-    "basePath": "/ratan-migration",
-    "contractVersion": "1.0.0",
-    "appearanceContractVersion": "1.0.0",
-    "identityContractVersion": "1.0.0",
-    "capabilities": ["navigation", "notifications", "telemetry", "workspace", "appearance", "identity"]
-  }, {
     "id": "cashflow-blotter",
     "displayName": "Cashflow CN",
     "remoteName": "mfe_cashflow_blotter",

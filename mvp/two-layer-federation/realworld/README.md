@@ -8,7 +8,7 @@ This track contains production package identities and the migration implementati
 - `apps/mfe-cashflow` — independently deployed Cashflow application on port 9201.
 - `apps/mfe-identity-profile` — independently deployed identity/profile component verification application on port 9202.
 - `apps/mfe-fdc3-admin` — independently deployed FDC3 declarations and catalog verification application on port 9204.
-- `apps/mfe-ratan-container-mvp` — independently deployed migration inventory for the legacy Ratan runtime on port 9205.
+- `apps/mfe-ratan-container-mvp` — standalone migration inventory for the legacy Ratan runtime on port 9205; it is not registered by Portal Host or required by Cashflow.
 - `apps/mfe-cashflow-blotter-mvp` — independently deployed Cashflow Blotter migration slice on port 9206.
 - `packages/platform-contracts` — versioned application, appearance, and identity contracts.
 - `packages/platform-sdk` — typed application client for host capabilities.

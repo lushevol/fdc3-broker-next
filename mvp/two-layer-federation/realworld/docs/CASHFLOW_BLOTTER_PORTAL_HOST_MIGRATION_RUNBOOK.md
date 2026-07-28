@@ -59,6 +59,12 @@ portal-host :9200
 both layers. The subpath shares are required because the legacy tree imports
 React DOM client/runtime modules as well as the package root.
 
+The Ratan container is not a runtime layer in this topology. Portal Host does
+not register its manifest, the browser acceptance stack does not start port
+`9205`, and Cashflow declares no Module Federation `remotes`. Reusable Ratan UI
+comes from `@fm/ratan-design`, `@fm/ratan-data-grid`, and temporarily bundled
+migration adapters while the remaining legacy Ratan surface is extracted.
+
 ## Implementation steps
 
 1. Characterize the legacy route and record every shell, Ratan, service,
@@ -78,10 +84,12 @@ React DOM client/runtime modules as well as the package root.
    remote origin; host-origin lazy-compile URLs otherwise return 404.
 9. Share React package roots and subpaths as singletons to prevent two React
    dispatchers across host and remote.
-10. Add serve-only Portal Host contract middleware on the existing REST and
+10. Remove the Ratan inventory application from the Portal Host registry and
+    browser startup graph; keep shared UI behind build-time package imports.
+11. Add serve-only Portal Host contract middleware on the existing REST and
     GraphQL routes so the actual application receives deterministic local data.
     The middleware is excluded from production builds.
-11. Register the remote in Portal Host and validate the route at
+12. Register the Cashflow remote in Portal Host and validate the route at
     `/cashflow-blotter`.
 
 ## Runtime issues found and resolved

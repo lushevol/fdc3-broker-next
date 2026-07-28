@@ -46,11 +46,16 @@ test('loads the migrated Cashflow CN workflow directly from the portal host', as
   await expect(details.getByText('1,250,000', { exact: true })).toBeVisible();
 
   expect(requests.some((url) => url.includes('127.0.0.1:9206/mf-manifest.json'))).toBe(true);
+  expect(requests.some((url) => url.includes('127.0.0.1:9205'))).toBe(false);
   expect(
-    requests.some((url) =>
-      /single-spa|system\.min|importmap|ratan_(?:cashflow|trades)|@fm\/base/i.test(url),
+    requests.filter((url) =>
+      /single-spa|system\.min|importmap|@fm\/base/i.test(url)
+      || (
+        /ratan[_-](?:container|migration)/i.test(url)
+        && /mf-manifest\.json|remoteEntry\.js/i.test(url)
+      ),
     ),
-  ).toBe(false);
+  ).toEqual([]);
   expect(
     pageErrors.filter((message) =>
       /module federation|reactcurrentdispatcher|invalid hook|system\.import|render exploded/i.test(

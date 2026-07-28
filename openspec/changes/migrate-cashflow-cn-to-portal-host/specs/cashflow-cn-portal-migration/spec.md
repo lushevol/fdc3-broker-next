@@ -58,6 +58,11 @@ The built Cashflow CN remote MUST NOT import, request, or invoke Single-SPA, Sys
 - **WHEN** Portal Host loads and exercises Cashflow CN
 - **THEN** no request is made for a base-shell, Ratan-container, SystemJS, or import-map asset
 
+#### Scenario: Ratan container is unavailable
+- **WHEN** no Ratan container application or manifest is running
+- **THEN** Portal Host still loads the Cashflow CN remote and completes its primary workflow
+- **AND** reusable Ratan UI arrives through Cashflow's build-time package dependencies or bundled migration adapters, not a Ratan application remote
+
 ### Requirement: Host integration is explicit
 The application SHALL receive appearance, identity, navigation, telemetry, notifications, workspace, configuration, and transport concerns through versioned contracts or Cashflow-owned adapters.
 
