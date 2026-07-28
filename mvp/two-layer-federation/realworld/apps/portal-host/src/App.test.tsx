@@ -25,18 +25,18 @@ describe('host bootstrap', () => {
     mockedLoad.mockReset();
     window.history.replaceState({}, '', '/');
   });
-  it('shows progress then a validated launcher', async () => {
+  it('shows progress then the validated workspace shell', async () => {
     mockedLoad.mockResolvedValue({ applications: [entry] });
     render(<App identity={authenticatedIdentity} />);
     expect(screen.getByRole('status')).toHaveTextContent('Loading');
-    expect(await screen.findByRole('button', { name: 'Open Cashflow' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'New tile' })).toBeInTheDocument();
   });
   it('contains errors, normalizes failures, and retries', async () => {
     mockedLoad.mockRejectedValueOnce('offline').mockResolvedValueOnce({ applications: [entry] });
     render(<App identity={authenticatedIdentity} />);
     expect(await screen.findByText('offline')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Retry registry' }));
-    expect(await screen.findByRole('button', { name: 'Open Cashflow' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'New tile' })).toBeInTheDocument();
   });
 
   it('preserves native registry errors', async () => {
@@ -65,7 +65,7 @@ describe('host bootstrap', () => {
       target: { value: 'test' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
-    expect(await screen.findByRole('button', { name: 'Open Cashflow' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'New tile' })).toBeInTheDocument();
     expect(authentication.authenticate).toHaveBeenCalledWith({
       username: 'test',
       password: 'test',

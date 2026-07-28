@@ -22,13 +22,18 @@ function runtime(): RemoteRuntime {
   }, Application: Cashflow }) };
 }
 
+function openCashflowTile() {
+  fireEvent.click(screen.getByRole('button', { name: 'New tile' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+}
+
 describe('production PortalHost', () => {
   beforeEach(() => { window.history.replaceState({}, '', '/'); window.localStorage.clear(); });
 
   it('opens, delegates capabilities, closes, and reopens fresh instances', async () => {
     const remote = runtime();
     render(<PortalHost registry={{ applications: [entry] }} runtime={remote} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+    openCashflowTile();
     expect(await screen.findByText(/Remote cashflow-1/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Notify' }));
     expect(screen.getByRole('status')).toHaveTextContent('Cashflow ready');
@@ -40,7 +45,7 @@ describe('production PortalHost', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Details' }));
     expect(window.location.pathname).toBe('/cashflow/details/CF-1001');
     fireEvent.click(screen.getByRole('button', { name: 'Close from app' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+    openCashflowTile();
     expect(await screen.findByText(/Remote cashflow-2/)).toBeInTheDocument();
   });
 
@@ -49,17 +54,53 @@ describe('production PortalHost', () => {
       <PortalHost registry={{ applications: [entry] }} runtime={runtime()} />,
     );
     expect(container.querySelector('[data-ratan-component="page-header"]')).toBeInTheDocument();
-    expect(container.querySelector('[data-ratan-component="side-navigation"]')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Open user menu' })).toBeInTheDocument();
     expect(container.querySelector('[data-ratan-component="workspace-tabs"]')).toBeInTheDocument();
-    expect(container.querySelector('[data-ratan-component="description-list"]')).toBeInTheDocument();
     expect(container.querySelector('[data-ratan-component="empty-state"]')).toBeInTheDocument();
+  });
+
+  it('finds tiles by title or description, then opens the selected tile', async () => {
+    render(<PortalHost registry={{ applications: [entry] }} runtime={runtime()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'New tile' }));
+    expect(screen.getByRole('dialog', { name: 'New tile' })).toBeInTheDocument();
+    expect(screen.getByText('Operations')).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search tiles' }), { target: { value: 'liquidity' } });
+    expect(screen.getByText('Cashflow')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+    expect(await screen.findByText(/Remote cashflow-1/)).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'New tile' })).not.toBeInTheDocument();
+  });
+
+  it('offers profile and logout from the avatar menu', () => {
+    const onLogout = jest.fn();
+    render(<PortalHost registry={{ applications: [entry] }} runtime={runtime()} onLogout={onLogout} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open user menu' }));
+    expect(screen.getByRole('menuitem', { name: 'Profile' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Logout' }));
+    expect(onLogout).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses fallback tile metadata and communicates profile, notification, and empty search actions', () => {
+    const platformEntry = { ...entry, id: 'identity', displayName: 'Identity profile', basePath: '/identity' };
+    render(<PortalHost registry={{ applications: [entry, platformEntry] }} runtime={runtime()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'New tile' }));
+    expect(screen.getByText('Platform')).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search tiles' }), { target: { value: 'unknown' } });
+    expect(screen.getByText('No matching tiles')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Close New tile' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Notifications' }));
+    expect(screen.getByRole('status')).toHaveTextContent('No new notifications.');
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open user menu' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Profile' }));
+    expect(screen.getByRole('status')).toHaveTextContent('Profile is not available in this pilot.');
   });
 
   it('keeps independently mounted duplicate instances and restores the previous tab on close', async () => {
     render(<PortalHost registry={{ applications: [entry] }} runtime={runtime()} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+    openCashflowTile();
     await screen.findByText(/Remote cashflow-1/);
-    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+    openCashflowTile();
     expect(await screen.findByText(/Remote cashflow-2/)).toBeVisible();
     expect(screen.getByRole('tab', { name: 'Cashflow 1' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Cashflow 2' })).toBeInTheDocument();
@@ -86,19 +127,17 @@ describe('production PortalHost', () => {
       identityContractVersion: IDENTITY_CONTRACT_VERSION,
     }, Application: ({ capabilities }: ApplicationProps) => { supplied = capabilities.appearance; return <span>Appearance remote</span>; } });
     render(<PortalHost registry={{ applications: [entry] }} runtime={remote} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+    openCashflowTile();
     await screen.findByText('Appearance remote');
     const identity = supplied;
     const listener = jest.fn();
     const unsubscribe = supplied?.subscribe(listener);
     fireEvent.click(screen.getByRole('button', { name: 'Use light theme' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Use comfortable density' }));
     await waitFor(() => expect(listener).toHaveBeenCalled());
     expect(supplied).toBe(identity);
-    expect(identity?.getSnapshot()).toMatchObject({ scheme: 'light', density: 'comfortable' });
+    expect(identity?.getSnapshot()).toMatchObject({ scheme: 'light', density: 'compact' });
     expect(document.querySelector('[data-ratan-scope="host"]')).toHaveAttribute('data-ratan-theme', 'light');
     fireEvent.click(screen.getByRole('button', { name: 'Use dark theme' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Use compact density' }));
     await waitFor(() => expect(identity?.getSnapshot()).toMatchObject({ scheme: 'dark', density: 'compact' }));
     unsubscribe?.();
   });
@@ -117,7 +156,7 @@ describe('production PortalHost', () => {
       },
     });
     render(<PortalHost registry={{ applications: [entry] }} runtime={remote} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+    openCashflowTile();
     await screen.findByText('Identity remote');
     expect(supplied?.getSnapshot()).toEqual({
       state: 'anonymous', contractVersion: IDENTITY_CONTRACT_VERSION,
@@ -153,7 +192,7 @@ describe('production PortalHost', () => {
       },
     });
     render(<PortalHost registry={{ applications: [entry] }} runtime={remote} identity={identity} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+    openCashflowTile();
     expect(await screen.findByText('Live identity authenticated')).toBeInTheDocument();
     expect(supplied).toBe(identity);
     act(() => {
@@ -168,7 +207,7 @@ describe('production PortalHost', () => {
     const remote = runtime();
     (remote.loadRemote as jest.Mock).mockRejectedValueOnce('offline');
     render(<PortalHost registry={{ applications: [entry] }} runtime={remote} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
+    openCashflowTile();
     expect(await screen.findByText('offline')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Retry Cashflow' }));
     expect(await screen.findByText(/Remote cashflow-1/)).toBeInTheDocument();

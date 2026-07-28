@@ -5,6 +5,11 @@ export {
   type ButtonVariant,
 } from './components/Button';
 export { Avatar, type AvatarProps } from './components/Avatar';
+export {
+  ActionMenu,
+  type ActionMenuItem,
+  type ActionMenuProps,
+} from './components/ActionMenu';
 export { Card, type CardProps } from './components/Card';
 export {
   ConfirmationDialog,

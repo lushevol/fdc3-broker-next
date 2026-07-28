@@ -9,12 +9,16 @@ import {
   type PlatformCapabilities,
 } from '@fm/platform-contracts';
 import {
-  DescriptionList,
+  ActionMenu,
+  Avatar,
+  Button,
+  Card,
   DesignSystemProvider,
+  Dialog,
   EmptyState,
+  IconButton,
   PageHeader,
-  SideNavigation,
-  StatusBadge,
+  TextField,
   Toast,
   ToggleButton,
   WorkspaceTabs,
@@ -28,8 +32,31 @@ interface Props {
   readonly registry: ApplicationRegistry;
   readonly runtime?: RemoteRuntime;
   readonly identity?: IdentityCapability;
+  readonly onLogout?: () => void;
 }
 interface Tab { entry: ApplicationRegistryEntry; instanceId: string }
+
+interface TileMetadata {
+  readonly category: string;
+  readonly icon: string;
+  readonly description: string;
+}
+
+const TILE_METADATA: Record<string, TileMetadata> = {
+  cashflow: {
+    category: 'Operations',
+    icon: '↗',
+    description: 'Monitor liquidity, intraday cash movements, and funding exposure.',
+  },
+};
+
+function tileMetadata(entry: ApplicationRegistryEntry): TileMetadata {
+  return TILE_METADATA[entry.id] ?? {
+    category: 'Platform',
+    icon: '◇',
+    description: `Open ${entry.displayName} in a dedicated workspace tab.`,
+  };
+}
 
 function navigate(path: string) { window.history.pushState({}, '', path); window.dispatchEvent(new PopStateEvent('popstate')); }
 
@@ -37,6 +64,7 @@ export function PortalHost({
   registry,
   runtime = moduleFederationRuntime,
   identity = ANONYMOUS_IDENTITY_CAPABILITY,
+  onLogout,
 }: Props) {
   const counts = useRef<Record<string, number>>({});
   const initial = findApplicationForPath(registry.applications, window.location.pathname);
@@ -47,6 +75,8 @@ export function PortalHost({
   });
   const [activeInstanceId, setActiveInstanceId] = useState<string | null>(initial ? `${initial.id}-1` : null);
   const [notification, setNotification] = useState<string | null>(null);
+  const [tilePickerOpen, setTilePickerOpen] = useState(false);
+  const [tileSearch, setTileSearch] = useState('');
   const [appearance, setAppearance] = useState(() => readStoredAppearance(window.localStorage));
   const appearanceRef = useRef(appearance);
   const listeners = useRef(new Set<(snapshot: AppearanceSnapshot) => void>());
@@ -103,28 +133,40 @@ export function PortalHost({
     workspace: { closeCurrent: () => close(active.instanceId) }, appearance: appearanceCapability,
     identity,
   }) : null, [active, appearanceCapability, close, identity]);
-  const launcherItems = useMemo(() => registry.applications.map((entry) => ({
-    id: entry.id,
-    label: entry.displayName,
-    ariaLabel: `Open ${entry.displayName}`,
-    description: entry.basePath,
-    trailingContent: '+',
-  })), [registry.applications]);
-  const openFromLauncher = useCallback((id: string) => {
-    const entry = registry.applications.find((application) => application.id === id);
-    if (entry) open(entry);
-  }, [open, registry.applications]);
+  const tilesByCategory = useMemo(() => {
+    const search = tileSearch.trim().toLocaleLowerCase();
+    const matching = registry.applications.filter((entry) => {
+      const tile = tileMetadata(entry);
+      return !search
+        || entry.displayName.toLocaleLowerCase().includes(search)
+        || tile.description.toLocaleLowerCase().includes(search);
+    });
+    return Array.from(matching.reduce((groups, entry) => {
+      const tile = tileMetadata(entry);
+      const entries = groups.get(tile.category) ?? [];
+      entries.push(entry);
+      groups.set(tile.category, entries);
+      return groups;
+    }, new Map<string, ApplicationRegistryEntry[]>()).entries())
+      .sort(([left], [right]) => left.localeCompare(right));
+  }, [registry.applications, tileSearch]);
+  const identitySnapshot = identity.getSnapshot();
+  const avatarName = identitySnapshot.state === 'authenticated' ? identitySnapshot.userId : 'Operations user';
+  const openTile = useCallback((entry: ApplicationRegistryEntry) => {
+    open(entry);
+    setTilePickerOpen(false);
+    setTileSearch('');
+  }, [open]);
 
   return (
     <DesignSystemProvider appearance={{ scheme: appearance.scheme, density: appearance.density, direction: appearance.direction }} scope="host">
       <div className="portal-shell">
         <PageHeader
-          className="portal-header"
-          eyebrow="FMO NEXT · TWO-LAYER RUNTIME"
-          title="Operations Workspace"
-          description="Launch and manage independently deployed post-trade applications."
+          className="portal-app-bar"
+          title="Markets Operations One"
           actions={(
             <>
+              <Button variant="primary" onClick={() => setTilePickerOpen(true)}>New tile</Button>
               <ToggleButton
                 selected={appearance.scheme === 'dark'}
                 ariaLabel={`Use ${appearance.scheme === 'dark' ? 'light' : 'dark'} theme`}
@@ -133,38 +175,21 @@ export function PortalHost({
                   return { ...current, scheme, preference: scheme };
                 })}
               >
-                {appearance.scheme === 'dark' ? 'Dark' : 'Light'} theme
+                Theme
               </ToggleButton>
-              <ToggleButton
-                selected={appearance.density === 'compact'}
-                ariaLabel={`Use ${appearance.density === 'compact' ? 'comfortable' : 'compact'} density`}
-                onChange={(selected) => setAppearance((current) => ({
-                  ...current,
-                  density: selected ? 'compact' : 'comfortable',
-                }))}
-              >
-                {appearance.density === 'compact' ? 'Compact' : 'Comfortable'} density
-              </ToggleButton>
-              <StatusBadge status="neutral">Host → Application</StatusBadge>
+              <IconButton label="Notifications" icon="●" onClick={() => setNotification('No new notifications.')} />
+              <ActionMenu
+                ariaLabel="User actions"
+                trigger={<Button className="portal-avatar-trigger" variant="ghost" aria-label="Open user menu"><Avatar name={avatarName} size="small" /></Button>}
+                items={[{ id: 'profile', label: 'Profile' }, { id: 'logout', label: 'Logout', tone: 'danger' }]}
+                onAction={(action) => {
+                  if (action === 'logout') onLogout?.();
+                  else setNotification('Profile is not available in this pilot.');
+                }}
+              />
             </>
           )}
         />
-        <aside className="launcher">
-          <SideNavigation
-            ariaLabel="Application launcher"
-            items={launcherItems}
-            selectedId={active?.entry.id}
-            title="Applications"
-            onAction={openFromLauncher}
-          />
-          <DescriptionList
-            className="launcher-metrics"
-            items={[
-              { id: 'composition', term: 'Composition', description: '2 layers' },
-              { id: 'legacy', term: 'Legacy runtime', description: 'None' },
-            ]}
-          />
-        </aside>
         <main className="workspace">
           <section className="workspace-surface" aria-label="Application workspace">
             <WorkspaceTabs
@@ -213,6 +238,44 @@ export function PortalHost({
             ) : null}
           </section>
         </main>
+        <Dialog
+          open={tilePickerOpen}
+          title="New tile"
+          description="Search the application catalog, then open a tile in this workspace."
+          width="large"
+          onClose={() => setTilePickerOpen(false)}
+        >
+          <TextField
+            id="tile-search"
+            label="Search tiles"
+            placeholder="Search by title or description"
+            value={tileSearch}
+            onChange={setTileSearch}
+          />
+          <div className="tile-picker-results">
+            {tilesByCategory.length ? tilesByCategory.map(([category, entries]) => (
+              <section key={category} className="tile-picker-category" aria-labelledby={`tile-category-${category}`}>
+                <h2 id={`tile-category-${category}`}>{category}</h2>
+                <div className="tile-picker-grid">
+                  {entries.map((entry) => {
+                    const tile = tileMetadata(entry);
+                    return (
+                      <Card
+                        key={entry.id}
+                        className="tile-picker-tile"
+                        title={entry.displayName}
+                        description={tile.description}
+                        actions={<Button aria-label={`Open ${entry.displayName}`} variant="secondary" onClick={() => openTile(entry)}>Open</Button>}
+                      >
+                        <span className="tile-picker-icon" aria-hidden="true">{tile.icon}</span>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </section>
+            )) : <EmptyState title="No matching tiles" description="Try a different title or description." icon="?" />}
+          </div>
+        </Dialog>
         {notification ? <Toast className="notification" message={notification} tone="success" onDismiss={() => setNotification(null)} /> : null}
       </div>
     </DesignSystemProvider>

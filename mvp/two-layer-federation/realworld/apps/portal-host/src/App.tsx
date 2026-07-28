@@ -86,5 +86,5 @@ export function App({
       </DesignSystemProvider>
     );
   }
-  return <PortalHost registry={registry} identity={activeIdentity} />;
+  return <PortalHost registry={registry} identity={activeIdentity} onLogout={() => setActiveIdentity(null)} />;
 }

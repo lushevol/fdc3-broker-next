@@ -18,7 +18,7 @@ capability injection, and layout composition.
 Ratan owns:
 
 - page-header presentation and action placement;
-- application-level side navigation;
+- dialogs, searchable fields, action menus, avatars, and notification controls;
 - closable workspace-tab behavior, including keyboard navigation;
 - cards, description lists, forms, fields, links, buttons, toggles, progress,
   empty states, error states, and toast feedback.
@@ -32,11 +32,15 @@ The portal host owns:
 
 ## Required behavior
 
-1. The shell header uses `PageHeader` and exposes the workspace title,
-   architecture eyebrow, appearance actions, and runtime seam.
-2. The application launcher uses `SideNavigation`. Each registry application
-   is an action that opens a fresh workspace instance.
-3. Open applications use `WorkspaceTabs`. Tabs support pointer activation,
+1. The shell header uses `PageHeader` as a single responsive app bar. It shows
+   `Markets Operations One` at the left and, at the right, New tile, theme,
+   notification, and avatar controls.
+2. New tile opens a Ratan `Dialog` with a Ratan `TextField`. Registry entries
+   are grouped by category and filter by title or description; selecting one
+   opens a fresh workspace instance.
+3. The avatar uses the Ratan action-menu primitive and exposes Profile and
+   Logout actions.
+4. Open applications use `WorkspaceTabs`. Tabs support pointer activation,
    Left/Right/Home/End keyboard navigation, an accessible close action, and
    persistent mounted panels while another tab is active.
 4. Login and shell information surfaces use `Card` and `DescriptionList`.
@@ -52,9 +56,9 @@ The portal host owns:
   `Host → Application` runtime seam.
 - Use only Ratan semantic tokens for color, typography, spacing, radius,
   elevation, focus, density, and motion.
-- Keep the launcher available beside the workspace on wide screens and stack it
-  above the workspace on narrower screens without overlap.
-- Follow the GDS page-header, side-panel-navigation, tabs, card, and progress
+- Keep the app bar one line while truncating the title and compacting controls
+  at narrow widths; never let actions overlap the workspace.
+- Follow the GDS page-header, modal, menu, tabs, card, and progress
   guidance checked into `packages/ratan-design/gds-official`.
 
 ## Acceptance
