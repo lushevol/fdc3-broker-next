@@ -8,6 +8,8 @@ This track contains production package identities and the migration implementati
 - `apps/mfe-cashflow` — independently deployed Cashflow application on port 9201.
 - `apps/mfe-identity-profile` — independently deployed identity/profile component verification application on port 9202.
 - `apps/mfe-fdc3-admin` — independently deployed FDC3 declarations and catalog verification application on port 9204.
+- `apps/mfe-ratan-container-mvp` — independently deployed migration inventory for the legacy Ratan runtime on port 9205.
+- `apps/mfe-cashflow-blotter-mvp` — independently deployed Cashflow Blotter migration slice on port 9206.
 - `packages/platform-contracts` — versioned application, appearance, and identity contracts.
 - `packages/platform-sdk` — typed application client for host capabilities.
 - `packages/ratan-design` — authoritative semantic-token and bounded-component design system.
@@ -38,3 +40,8 @@ npm run realworld:test:e2e
 `realworld:check` is the complete non-browser CI gate. Foundation-only and package-only building blocks remain available as `realworld:*:foundation` and `realworld:build:packages` commands for focused package work.
 
 Package identities and versions remain production-oriented even while this track is an isolated migration candidate. No realworld workspace may depend on a `*-poc` package or runtime artifact.
+
+The two legacy migration MVPs are described in
+[`docs/LEGACY_APP_MIGRATION_MVPS.md`](./docs/LEGACY_APP_MIGRATION_MVPS.md).
+The end-to-end Cashflow procedure is recorded in
+[`docs/CASHFLOW_BLOTTER_PORTAL_HOST_MIGRATION_RUNBOOK.md`](./docs/CASHFLOW_BLOTTER_PORTAL_HOST_MIGRATION_RUNBOOK.md).

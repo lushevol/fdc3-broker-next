@@ -1,7 +1,5 @@
 import { useMemo, type ReactNode } from 'react';
 import {
-  ClientSideRowModelModule,
-  ModuleRegistry,
   type CellKeyDownEvent,
   type ColDef,
   type RowClickedEvent,
@@ -9,8 +7,6 @@ import {
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import './styles.css';
-
-ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
 export interface RatanDataGridColumn<Row extends object> {
   readonly key: Extract<keyof Row, string>;
@@ -87,7 +83,7 @@ export function RatanDataGrid<Row extends object>({
         pagination
         paginationPageSize={pageSize}
         paginationPageSizeSelector={false}
-        rowSelection="single"
+        rowSelection={{ mode: 'singleRow' }}
         domLayout="autoHeight"
         getRowClass={({ data }) => data && getRowId(data) === selectedRowId ? 'ratan-row-selected' : undefined}
         onRowClicked={(event: RowClickedEvent<Row>) => { if (event.data) onSelectionChange?.(event.data); }}

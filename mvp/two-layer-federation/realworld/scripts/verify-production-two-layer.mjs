@@ -6,6 +6,8 @@ const applicationRoots = [
   'mvp/two-layer-federation/realworld/apps/mfe-cashflow',
   'mvp/two-layer-federation/realworld/apps/mfe-identity-profile',
   'mvp/two-layer-federation/realworld/apps/mfe-fdc3-admin',
+  'mvp/two-layer-federation/realworld/apps/mfe-ratan-container-mvp',
+  'mvp/two-layer-federation/realworld/apps/mfe-cashflow-blotter-mvp',
 ];
 const packageRoots = [
   'mvp/two-layer-federation/realworld/packages/platform-contracts',
@@ -69,9 +71,18 @@ for (const root of applicationRoots) {
   for (const forbiddenShare of ['@fm/ratan-design', '@fm/ratan-data-grid', '@mui/material', '@emotion/react', '@emotion/styled', 'ag-grid-community', 'ag-grid-react']) {
     if (sharedBlock.includes(forbiddenShare)) throw new Error(`${root} runtime-shares ${forbiddenShare}`);
   }
-  if (!/react:\s*{[^}]*singleton:\s*true/s.test(sharedBlock)
-    || !/['"]react-dom['"]:\s*{[^}]*singleton:\s*true/s.test(sharedBlock)) {
-    throw new Error(`${root} must share React and ReactDOM as singletons`);
+  const hasSingletonReact = /react:\s*{[^}]*singleton:\s*true/s.test(sharedBlock)
+    && /['"]react-dom['"]:\s*{[^}]*singleton:\s*true/s.test(sharedBlock);
+  const ownsIsolatedReact = /shared:\s*{\s*}/s.test(sharedBlock);
+  if (!hasSingletonReact && !ownsIsolatedReact) {
+    throw new Error(`${root} must use singleton React or an isolated application root`);
+  }
+  if (ownsIsolatedReact && !root.endsWith('portal-host')) {
+    const application = await readFile(join(root, 'src/application.tsx'), 'utf8');
+    if (!/export function mount\b/.test(application)
+      || !/export function unmount\b/.test(application)) {
+      throw new Error(`${root} owns React but does not expose mount and unmount`);
+    }
   }
 }
 

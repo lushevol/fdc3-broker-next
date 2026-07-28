@@ -1,0 +1,45 @@
+{
+  "name": "@fm/mfe-cashflow-blotter-mvp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build && tsc --noEmit",
+    "test": "cross-env BABEL_ENV=test jest --coverage --ci",
+    "lint": "eslint .",
+    "clean": "rm -rf dist coverage"
+  },
+  "dependencies": {
+    "@fm/platform-contracts": "^1.1.0",
+    "@fm/platform-sdk": "^1.1.0",
+    "@fm/ratan-data-grid": "1.0.0",
+    "@fm/ratan-design": "^1.1.0",
+    "ag-grid-community": "32.3.0",
+    "ag-grid-react": "32.3.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.6",
+    "@babel/plugin-transform-runtime": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@babel/runtime": "^7.28.4",
+    "@module-federation/rsbuild-plugin": "^2.1.0",
+    "@rsbuild/core": "^1.7.3",
+    "@rsbuild/plugin-react": "^1.4.6",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/jest": "^29.5.14",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "babel-jest": "^29.7.0",
+    "cross-env": "^7.0.3",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "typescript": "^5.9.3"
+  }
+}

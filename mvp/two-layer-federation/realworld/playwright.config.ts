@@ -33,6 +33,20 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
+      command: 'node_modules/.bin/serve -s mvp/two-layer-federation/realworld/apps/mfe-ratan-container-mvp/dist -l tcp://127.0.0.1:9205 -C -n --no-port-switching',
+      cwd: '../../..',
+      url: 'http://127.0.0.1:9205/mf-manifest.json',
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+    {
+      command: 'node_modules/.bin/serve -s mvp/two-layer-federation/realworld/apps/mfe-cashflow-blotter-mvp/dist -l tcp://127.0.0.1:9206 -C -n --no-port-switching',
+      cwd: '../../..',
+      url: 'http://127.0.0.1:9206/mf-manifest.json',
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+    {
       command: 'npm --workspace @fm/portal-host run dev -- --host 127.0.0.1 --port 9200',
       cwd: '../../..',
       url: 'http://127.0.0.1:9200/',
