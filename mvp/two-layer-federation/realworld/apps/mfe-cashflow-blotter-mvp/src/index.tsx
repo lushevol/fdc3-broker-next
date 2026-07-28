@@ -3,7 +3,7 @@ import { Application } from './application';
 import { standaloneCapabilities } from './standalone';
 
 const root = document.getElementById('root');
-if (!root) throw new Error('Cashflow Blotter MVP root element is missing');
+if (!root) throw new Error('Cashflow CN root element is missing');
 
 createRoot(root).render(
   <Application

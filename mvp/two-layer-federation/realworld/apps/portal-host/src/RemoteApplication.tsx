@@ -36,7 +36,11 @@ export function RemoteApplication({ entry, instanceId, capabilities, runtime }: 
     setState({ kind: 'loading' });
     loadFederatedApplication(entry, runtime, attempt > 0)
       .then((module) => { if (active) setState({ kind: 'ready', module }); })
-      .catch((reason: unknown) => { if (active) setState({ kind: 'error', error: reason instanceof Error ? reason : new Error(String(reason)) }); });
+      .catch((reason: unknown) => {
+        const error = reason instanceof Error ? reason : new Error(String(reason));
+        console.error(`Federated application load failure\n${error.stack ?? error.message}`);
+        if (active) setState({ kind: 'error', error });
+      });
     return () => { active = false; };
   }, [attempt, entry, runtime]);
   if (state.kind === 'loading') {

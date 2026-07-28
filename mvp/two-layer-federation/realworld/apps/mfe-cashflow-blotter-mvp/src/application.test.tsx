@@ -5,37 +5,12 @@ import {
   type PlatformCapabilities,
 } from '@fm/platform-contracts';
 import { createAppearanceController, createIdentityController } from '@fm/platform-sdk';
-import { fireEvent, render, screen } from '@testing-library/react';
-import {
-  Application,
-  cashflowColumns,
-  cashflowStatusTone,
-  cashflows,
-  filterCashflows,
-  manifest,
-} from './application';
+import { act, render, screen } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { Application, manifest } from './application';
 
-jest.mock('@fm/ratan-data-grid', () => ({
-  RatanDataGrid: ({
-    rows,
-    onSelectionChange,
-    getRowId,
-  }: {
-    rows: Array<{ id: string }>;
-    onSelectionChange: (row: { id: string }) => void;
-    getRowId: (row: { id: string }) => string;
-  }) => (
-    <div aria-label="Cashflow blotter">
-      {rows.map((row) => (
-        <button key={getRowId(row)} onClick={() => onSelectionChange(row)}>
-          {getRowId(row)}
-        </button>
-      ))}
-    </div>
-  ),
-}));
-
-function capabilities(): PlatformCapabilities {
+function platform() {
   const appearance = createAppearanceController({
     scheme: 'light',
     preference: 'light',
@@ -50,7 +25,7 @@ function capabilities(): PlatformCapabilities {
     permissions: ['cashflow:view'],
     contractVersion: IDENTITY_CONTRACT_VERSION,
   });
-  return {
+  const capabilities: PlatformCapabilities = {
     navigation: { navigate: jest.fn() },
     notifications: { show: jest.fn() },
     telemetry: { track: jest.fn() },
@@ -58,66 +33,69 @@ function capabilities(): PlatformCapabilities {
     appearance: appearance.capability,
     identity: identity.capability,
   };
+  return { appearance, capabilities };
 }
 
-describe('Cashflow Blotter migration MVP', () => {
-  it('publishes the migrated production identity', () => {
+describe('actual Cashflow CN Portal Host migration entry', () => {
+  it('publishes the Cashflow CN federated identity', () => {
     expect(manifest).toMatchObject({
       id: 'cashflow-blotter',
-      displayName: 'Cashflow Blotter MVP',
+      displayName: 'Cashflow CN',
       designSystemVersion: '1.1.0',
     });
   });
 
-  it('filters the migration dataset without a container runtime', () => {
-    expect(filterCashflows('atlas')).toEqual([expect.objectContaining({ id: 'CF-24001' })]);
-    expect(filterCashflows('')).toHaveLength(4);
-    expect(filterCashflows('review')).toEqual([expect.objectContaining({ id: 'CF-24002' })]);
-    expect(filterCashflows('missing')).toEqual([]);
-  });
-
-  it('formats amounts and maps every migrated status to a design-system tone', () => {
-    expect(cashflowStatusTone('Ready')).toBe('ready');
-    expect(cashflowStatusTone('Review')).toBe('review');
-    expect(cashflowStatusTone('Blocked')).toBe('blocked');
-
-    const amountColumn = cashflowColumns.find((column) => column.key === 'amount');
-    expect(amountColumn?.formatValue?.(1250000, cashflows[0])).toBe('1,250,000.00');
-
-    const statusColumn = cashflowColumns.find((column) => column.key === 'status');
-    render(
-      <>
-        {cashflows.map((record) => (
-          <span key={record.id}>{statusColumn?.renderCell?.(record)}</span>
-        ))}
-      </>,
-    );
-    expect(screen.getAllByText('Ready')).toHaveLength(2);
-    expect(screen.getByText('Review')).toBeInTheDocument();
-    expect(screen.getByText('Blocked')).toBeInTheDocument();
-  });
-
-  it('renders the package-owned grid and reports selection through host capabilities', () => {
-    const platform = capabilities();
+  it('renders the actual Cashflow CN entry rather than fixture records', () => {
+    const host = platform();
     const props: ApplicationProps = {
-      instanceId: 'cashflow-blotter-1',
+      instanceId: 'cashflow-cn-1',
       basePath: '/cashflow-blotter',
-      capabilities: platform,
+      capabilities: host.capabilities,
     };
-    render(<Application {...props} />);
+    const { container } = render(<Application {...props} />);
 
-    expect(screen.getByRole('heading', { name: 'Cashflow blotter' })).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Filter cashflows'), {
-      target: { value: 'atlas' },
-    });
-    expect(screen.getByRole('button', { name: 'CF-24001' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'CF-24002' })).not.toBeInTheDocument();
+    expect(screen.getByTestId('actual-cashflow-cn-root')).toBeInTheDocument();
+    expect(container.querySelector('[data-source="src/Cashflow_CN"]'))
+      .toBeInTheDocument();
+    expect(host.capabilities.telemetry.track).toHaveBeenCalledWith(
+      'cashflow-cn.migrated-root.mounted',
+      { source: 'src/Cashflow_CN' },
+    );
+    expect(screen.queryByText('CF-CN-24001')).not.toBeInTheDocument();
+  });
 
-    fireEvent.click(screen.getByRole('button', { name: 'CF-24001' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Notify host about CF-24001' }));
-    expect(platform.notifications.show).toHaveBeenCalledWith('Cashflow CF-24001 selected.');
-    expect(platform.telemetry.track).toHaveBeenCalledWith('cashflow-blotter.selected', {
-      id: 'CF-24001',
+  it('updates the migrated root when host appearance changes', () => {
+    const host = platform();
+    render(
+      <Application
+        instanceId="cashflow-cn-appearance"
+        basePath="/cashflow-blotter"
+        capabilities={host.capabilities}
+      />,
+    );
+    act(() => {
+      host.appearance.setSnapshot({
+        scheme: 'dark',
+        preference: 'dark',
+        density: 'comfortable',
+        locale: 'en-SG',
+        direction: 'rtl',
+        contractVersion: APPEARANCE_CONTRACT_VERSION,
+      });
     });
+    expect(document.querySelector('[data-ratan-theme="dark"]')).toBeInTheDocument();
+  });
+
+  it('keeps a mechanical provenance link to the production Cashflow CN root', () => {
+    const migrationEntry = readFileSync(resolve(__dirname, 'migrated-entry.tsx'), 'utf8');
+    const migratedRoot = resolve(__dirname, 'Cashflow_CN/index.tsx');
+    const legacyRoot = resolve(
+      __dirname,
+      '../../../../../../apps/mfe-cashflow-blotter/src/Cashflow_CN/index.tsx',
+    );
+    expect(migrationEntry).toContain("from '@migrated-cashflow-cn'");
+    expect(readFileSync(migratedRoot, 'utf8')).toBe(readFileSync(legacyRoot, 'utf8'));
+    expect(readFileSync(migratedRoot, 'utf8')).toContain('createStore');
+    expect(readFileSync(migratedRoot, 'utf8')).toContain('<Main {...props} />');
   });
 });

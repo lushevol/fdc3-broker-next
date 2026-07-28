@@ -45,7 +45,7 @@
     "capabilities": ["navigation", "notifications", "telemetry", "workspace", "appearance", "identity"]
   }, {
     "id": "cashflow-blotter",
-    "displayName": "Cashflow Blotter MVP",
+    "displayName": "Cashflow CN",
     "remoteName": "mfe_cashflow_blotter",
     "manifestUrl": "http://127.0.0.1:9206/mf-manifest.json",
     "exposedModule": "./application",

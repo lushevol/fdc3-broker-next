@@ -1,46 +1,9 @@
-.cashflow-blotter-app {
+.cashflow-cn-migrated-app {
   min-height: 100%;
-  padding: clamp(1.25rem, 4vw, 3rem);
   color: var(--ratan-color-content-primary);
   background: var(--ratan-color-surface-default);
 }
 
-.cashflow-blotter-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.cashflow-blotter-header h1 {
-  margin: 0.25rem 0;
-  font-size: clamp(1.8rem, 4vw, 3rem);
-}
-
-.cashflow-blotter-header p {
-  color: var(--ratan-color-content-secondary);
-}
-
-.cashflow-kicker {
-  color: var(--ratan-color-action-primary);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.cashflow-selection {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-@media (max-width: 48rem) {
-  .cashflow-blotter-header,
-  .cashflow-selection {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.cashflow-cn-migrated-app .kp--ratan_cashflow_blotter {
+  min-height: 100%;
 }

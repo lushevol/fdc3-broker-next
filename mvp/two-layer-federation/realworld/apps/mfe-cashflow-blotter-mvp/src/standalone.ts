@@ -23,8 +23,8 @@ const identity = createIdentityController({
 export const standaloneCapabilities: PlatformCapabilities = {
   navigation: { navigate: (path) => window.history.pushState({}, '', path) },
   notifications: { show: (message) => window.alert(message) },
-  telemetry: { track: (event, data) => console.info('cashflow-blotter-event', { event, data }) },
-  workspace: { closeCurrent: () => console.info('close Cashflow Blotter preview') },
+  telemetry: { track: (event, data) => console.info('cashflow-cn-event', { event, data }) },
+  workspace: { closeCurrent: () => console.info('close Cashflow CN preview') },
   appearance: appearance.capability,
   identity: identity.capability,
 };

@@ -5,7 +5,21 @@ export default createModuleFederationConfig({
   name: 'portal_host',
   dts: false,
   shared: {
-    react: { singleton: true, requiredVersion: pkg.dependencies.react },
-    'react-dom': { singleton: true, requiredVersion: pkg.dependencies['react-dom'] },
+    react: {
+      singleton: true,
+      requiredVersion: pkg.dependencies.react,
+    },
+    'react-dom': {
+      singleton: true,
+      requiredVersion: pkg.dependencies['react-dom'],
+    },
+    'react/': {
+      singleton: true,
+      requiredVersion: pkg.dependencies.react,
+    },
+    'react-dom/': {
+      singleton: true,
+      requiredVersion: pkg.dependencies['react-dom'],
+    },
   },
 });
