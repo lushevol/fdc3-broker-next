@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "mvn -DskipTests clean package",
+    "build": "../../scripts/mvn-build.sh",
     "dev": "mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Dserver.port=8082'",
     "test": "mvn test"
   }

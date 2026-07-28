@@ -16,5 +16,6 @@
         "speckit"
     ],
     "java.compile.nullAnalysis.mode": "automatic",
-    "vitest.disableWorkspaceWarning": true
+    "vitest.disableWorkspaceWarning": true,
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
