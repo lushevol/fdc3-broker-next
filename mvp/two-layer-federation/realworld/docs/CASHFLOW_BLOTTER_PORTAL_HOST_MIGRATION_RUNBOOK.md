@@ -27,6 +27,11 @@ Current status:
 The governing change is
 `openspec/changes/migrate-cashflow-cn-to-portal-host`.
 
+The full original-source plan, including decomposition of
+`apps/mfe-ratan-container`, ownership rules, phased exit gates, source-update
+procedure, and retirement criteria, is recorded in
+[`ORIGINAL_CASHFLOW_RATAN_PORTAL_MIGRATION_PLAN.md`](./ORIGINAL_CASHFLOW_RATAN_PORTAL_MIGRATION_PLAN.md).
+
 ## Source mapping
 
 | Legacy source | Realworld destination | Treatment |

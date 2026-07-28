@@ -3,6 +3,11 @@
     "lib": ["DOM", "ES2022"],
     "module": "ESNext",
     "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "react": ["node_modules/@types/react/index.d.ts"],
+      "react/jsx-runtime": ["node_modules/@types/react/jsx-runtime.d.ts"]
+    },
     "strict": true,
     "skipLibCheck": true,
     "isolatedModules": true,

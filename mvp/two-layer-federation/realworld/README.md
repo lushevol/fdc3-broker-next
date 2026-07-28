@@ -45,3 +45,6 @@ The two legacy migration MVPs are described in
 [`docs/LEGACY_APP_MIGRATION_MVPS.md`](./docs/LEGACY_APP_MIGRATION_MVPS.md).
 The end-to-end Cashflow procedure is recorded in
 [`docs/CASHFLOW_BLOTTER_PORTAL_HOST_MIGRATION_RUNBOOK.md`](./docs/CASHFLOW_BLOTTER_PORTAL_HOST_MIGRATION_RUNBOOK.md).
+The phased plan for migrating the original Cashflow CN source and decomposing
+the original Ratan Container into two-layer ownership is recorded in
+[`docs/ORIGINAL_CASHFLOW_RATAN_PORTAL_MIGRATION_PLAN.md`](./docs/ORIGINAL_CASHFLOW_RATAN_PORTAL_MIGRATION_PLAN.md).
