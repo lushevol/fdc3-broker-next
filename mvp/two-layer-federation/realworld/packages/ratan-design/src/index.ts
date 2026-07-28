@@ -35,6 +35,7 @@ export {
 } from './components/InlineAlert';
 export { IconButton, type IconButtonProps } from './components/IconButton';
 export { NumberField, type NumberFieldProps } from './components/NumberField';
+export { PageHeader, type PageHeaderProps } from './components/PageHeader';
 export {
   PasswordField,
   type PasswordFieldProps,
@@ -57,6 +58,11 @@ export {
   type SelectProps,
 } from './components/Select';
 export {
+  SideNavigation,
+  type SideNavigationItem,
+  type SideNavigationProps,
+} from './components/SideNavigation';
+export {
   Tabs,
   type TabDefinition,
   type TabsProps,
@@ -72,6 +78,11 @@ export {
   type ToggleButtonProps,
 } from './components/ToggleButton';
 export { Toast, type ToastProps } from './components/Toast';
+export {
+  WorkspaceTabs,
+  type WorkspaceTabDefinition,
+  type WorkspaceTabsProps,
+} from './components/WorkspaceTabs';
 export {
   DesignSystemProvider,
   type DesignAppearance,

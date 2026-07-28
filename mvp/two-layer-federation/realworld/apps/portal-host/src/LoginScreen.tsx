@@ -1,5 +1,7 @@
 import {
   Button,
+  Card,
+  DescriptionList,
   DesignSystemProvider,
   Divider,
   FieldGroup,
@@ -113,7 +115,7 @@ export function LoginScreen({
       scope="host"
     >
       <main className="login-page">
-        <section className="login-card" aria-labelledby="login-title">
+        <Card className="login-card" aria-labelledby="login-title">
           <div className="login-brand">
             <span className="login-eyebrow">FMO NEXT</span>
             <h1 id="login-title">Sign in</h1>
@@ -138,7 +140,7 @@ export function LoginScreen({
           <p className="login-demo-note">
             POC account: <code>test</code> / <code>test</code>
           </p>
-        </section>
+        </Card>
         <aside className="login-context" aria-label="Portal overview">
           <span className="login-context-index">01 / OPERATIONS</span>
           <div>
@@ -148,11 +150,14 @@ export function LoginScreen({
               reporting, and operational control.
             </p>
           </div>
-          <dl className="login-context-metrics">
-            <div><dt>Runtime</dt><dd>2 layers</dd></div>
-            <div><dt>Interop</dt><dd>FDC3 ready</dd></div>
-            <div><dt>Access</dt><dd>Role scoped</dd></div>
-          </dl>
+          <DescriptionList
+            className="login-context-metrics"
+            items={[
+              { id: 'runtime', term: 'Runtime', description: '2 layers' },
+              { id: 'interop', term: 'Interop', description: 'FDC3 ready' },
+              { id: 'access', term: 'Access', description: 'Role scoped' },
+            ]}
+          />
         </aside>
       </main>
     </DesignSystemProvider>

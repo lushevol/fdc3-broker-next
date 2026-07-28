@@ -5,11 +5,19 @@ import {
 } from './tokens';
 
 function kebabCase(value: string): string {
-  return value.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+  return value
+    .replace(/([a-zA-Z])(\d)/g, '$1-$2')
+    .replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 }
 
-function declarations(prefix: string, names: readonly string[], values: Readonly<Record<string, string>>) {
-  return names.map((name) => `    --ratan-${prefix}-${kebabCase(name)}: ${values[name]};`).join('\n');
+function declarations(
+  prefix: string,
+  names: readonly string[],
+  values: Readonly<Record<string, string>>,
+) {
+  return names
+    .map((name) => `    --ratan-${prefix}-${kebabCase(name)}: ${values[name]};`)
+    .join('\n');
 }
 
 export function generateTokenCss(tokens: SemanticTokens): string {
@@ -23,6 +31,8 @@ ${declarations('', foundationNames, tokens.foundation).replaceAll('--ratan--', '
     color: var(--ratan-color-content-primary);
     background: var(--ratan-color-surface-default);
     font-family: var(--ratan-font-family);
+    font-size: var(--ratan-font-size-body);
+    line-height: var(--ratan-line-height-body);
   }
 
   .ratan-design-root[data-ratan-theme="light"] {

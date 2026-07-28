@@ -21,6 +21,7 @@ export function ProgressCircle({
     <ProgressBar
       {...progressProps}
       className={['ratan-progress-circle', className].filter(Boolean).join(' ')}
+      data-indeterminate={value === undefined || undefined}
       data-ratan-component="progress-circle"
     >
       {({ percentage, isIndeterminate }) => (
@@ -34,7 +35,7 @@ export function ProgressCircle({
               r="13"
               pathLength="100"
               strokeDasharray="100"
-              strokeDashoffset={isIndeterminate ? 68 : 100 - (percentage ?? 0)}
+              strokeDashoffset={isIndeterminate ? 68 : 100 - Number(percentage)}
             />
           </svg>
           <span className="ratan-visually-hidden">{label}</span>

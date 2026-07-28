@@ -26,14 +26,13 @@
     "build:sb": "storybook build",
     "dev": "tsup src/index.ts --format esm --dts --watch --external react --external react-dom",
     "dev:sb": "storybook dev",
-    "dev:demo": "npx vite --config vite.demo.config.ts",
     "format": "prettier --write .",
-    "lint": "eslint src tests vitest.config.ts vite.demo.config.ts",
+    "lint": "eslint src tests vitest.config.ts",
     "test": "vitest run --coverage"
   },
   "peerDependencies": {
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react": ">=18.3.1 <20",
+    "react-dom": ">=18.3.1 <20"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

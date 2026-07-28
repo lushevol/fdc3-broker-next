@@ -1,4 +1,5 @@
 import React, { type ErrorInfo, type ReactNode } from 'react';
+import { ErrorState } from '@fm/ratan-design';
 
 interface Props { applicationName: string; resetKey: string; children: ReactNode }
 interface State { error: Error | null }
@@ -11,7 +12,14 @@ export class ApplicationBoundary extends React.Component<Props, State> {
     if (previous.resetKey !== this.props.resetKey && this.state.error) this.setState({ error: null });
   }
   render() {
-    if (this.state.error) return <section role="alert">{this.props.applicationName} failed: {this.state.error.message}</section>;
+    if (this.state.error) {
+      return (
+        <ErrorState
+          title={`${this.props.applicationName} failed:`}
+          message={` ${this.state.error.message}`}
+        />
+      );
+    }
     return this.props.children;
   }
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ApplicationRegistryEntry, FederatedApplicationModule, PlatformCapabilities } from '@fm/platform-contracts';
+import { Button, ErrorState, ProgressCircle } from '@fm/ratan-design';
 import { ApplicationBoundary } from './ApplicationBoundary';
 import { loadFederatedApplication, type RemoteRuntime } from './remote';
 
@@ -21,7 +22,9 @@ function IsolatedRemoteApplication({ module, entry, instanceId, capabilities }: 
       .catch((reason: unknown) => setError(reason instanceof Error ? reason : new Error(String(reason))));
     return () => { void module.unmount?.(instanceId); };
   }, [capabilities, entry.basePath, instanceId, module]);
-  if (error) return <section role="alert"><h2>Application unavailable</h2><p>{error.message}</p></section>;
+  if (error) {
+    return <ErrorState title="Application unavailable" message={error.message} />;
+  }
   return <div ref={surface} data-composition-boundary="independent-react-root" data-remote-instance-id={instanceId} />;
 }
 
@@ -36,8 +39,27 @@ export function RemoteApplication({ entry, instanceId, capabilities, runtime }: 
       .catch((reason: unknown) => { if (active) setState({ kind: 'error', error: reason instanceof Error ? reason : new Error(String(reason)) }); });
     return () => { active = false; };
   }, [attempt, entry, runtime]);
-  if (state.kind === 'loading') return <div role="status">Loading {entry.displayName}…</div>;
-  if (state.kind === 'error') return <section role="alert"><h2>Application unavailable</h2><p>{state.error.message}</p><button onClick={() => setAttempt((value) => value + 1)}>Retry {entry.displayName}</button></section>;
+  if (state.kind === 'loading') {
+    return (
+      <div className="remote-status" role="status">
+        <ProgressCircle label={`Loading ${entry.displayName}`} />
+        <span>Loading {entry.displayName}…</span>
+      </div>
+    );
+  }
+  if (state.kind === 'error') {
+    return (
+      <ErrorState
+        title="Application unavailable"
+        message={state.error.message}
+        action={(
+          <Button onClick={() => setAttempt((value) => value + 1)}>
+            Retry {entry.displayName}
+          </Button>
+        )}
+      />
+    );
+  }
   const { Application } = state.module;
   if (state.module.mount) return <IsolatedRemoteApplication module={state.module} entry={entry} instanceId={instanceId} capabilities={capabilities} />;
   return <ApplicationBoundary applicationName={entry.displayName} resetKey={`${instanceId}-${attempt}`}><Application instanceId={instanceId} basePath={entry.basePath} capabilities={capabilities} /></ApplicationBoundary>;

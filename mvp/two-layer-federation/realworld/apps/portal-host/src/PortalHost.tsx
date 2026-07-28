@@ -9,12 +9,15 @@ import {
   type PlatformCapabilities,
 } from '@fm/platform-contracts';
 import {
-  Button,
+  DescriptionList,
   DesignSystemProvider,
   EmptyState,
-  IconButton,
+  PageHeader,
+  SideNavigation,
+  StatusBadge,
   Toast,
   ToggleButton,
+  WorkspaceTabs,
 } from '@fm/ratan-design';
 import { persistAppearance, readStoredAppearance } from './appearance';
 import { ANONYMOUS_IDENTITY_CAPABILITY } from './identity';
@@ -100,36 +103,115 @@ export function PortalHost({
     workspace: { closeCurrent: () => close(active.instanceId) }, appearance: appearanceCapability,
     identity,
   }) : null, [active, appearanceCapability, close, identity]);
+  const launcherItems = useMemo(() => registry.applications.map((entry) => ({
+    id: entry.id,
+    label: entry.displayName,
+    ariaLabel: `Open ${entry.displayName}`,
+    description: entry.basePath,
+    trailingContent: '+',
+  })), [registry.applications]);
+  const openFromLauncher = useCallback((id: string) => {
+    const entry = registry.applications.find((application) => application.id === id);
+    if (entry) open(entry);
+  }, [open, registry.applications]);
 
   return (
     <DesignSystemProvider appearance={{ scheme: appearance.scheme, density: appearance.density, direction: appearance.direction }} scope="host">
       <div className="portal-shell">
-        <header className="portal-header"><div><span>FMO NEXT</span><h1>Operations Workspace</h1></div><div className="host-actions">
-          <ToggleButton
-            selected={appearance.scheme === 'dark'}
-            ariaLabel={`Use ${appearance.scheme === 'dark' ? 'light' : 'dark'} theme`}
-            onChange={(selected) => setAppearance((current) => {
-              const scheme = selected ? 'dark' : 'light';
-              return { ...current, scheme, preference: scheme };
-            })}
-          >
-            {appearance.scheme === 'dark' ? 'Dark' : 'Light'} theme
-          </ToggleButton>
-          <ToggleButton
-            selected={appearance.density === 'compact'}
-            ariaLabel={`Use ${appearance.density === 'compact' ? 'comfortable' : 'compact'} density`}
-            onChange={(selected) => setAppearance((current) => ({
-              ...current,
-              density: selected ? 'compact' : 'comfortable',
-            }))}
-          >
-            {appearance.density === 'compact' ? 'Compact' : 'Comfortable'} density
-          </ToggleButton>
-          <strong>Host → Application</strong>
-        </div></header>
-        <aside className="launcher" aria-label="Application launcher"><h2>Applications</h2>{registry.applications.map((entry) => <Button key={entry.id} variant="secondary" aria-label={`Open ${entry.displayName}`} onClick={() => open(entry)}>Open {entry.displayName}</Button>)}<dl><div><dt>Composition</dt><dd>2 layers</dd></div><div><dt>Legacy runtime</dt><dd>None</dd></div></dl></aside>
-        <main className="workspace"><div role="tablist" aria-label="Open applications">{tabs.map((tab) => { const ordinal = tab.instanceId.split('-').slice(-1)[0]; return <span className="tab" key={tab.instanceId}><Button variant="ghost" role="tab" aria-selected={tab.instanceId === activeInstanceId} onClick={() => setActiveInstanceId(tab.instanceId)}>{tab.entry.displayName} {ordinal}</Button><IconButton variant="ghost" label={`Close ${tab.entry.displayName}${tab.instanceId.endsWith('-1') ? '' : ` ${ordinal}`}`} icon="×" onClick={() => close(tab.instanceId)} /></span>; })}</div>
-          <section className="workspace-surface" aria-label="Application workspace">{active && capabilities ? tabs.map((tab) => <div key={tab.instanceId} hidden={tab.instanceId !== activeInstanceId}><RemoteApplication entry={tab.entry} instanceId={tab.instanceId} capabilities={tab.instanceId === activeInstanceId ? capabilities : { navigation: { navigate }, notifications: { show: setNotification }, telemetry: { track: (event, data) => console.info('platform-event', { application: tab.entry.id, event, data }) }, workspace: { closeCurrent: () => close(tab.instanceId) }, appearance: appearanceCapability, identity }} runtime={runtime} /></div>) : <EmptyState title="Choose an application" description="The host loads it directly from the registry." icon="+" />}</section>
+        <PageHeader
+          className="portal-header"
+          eyebrow="FMO NEXT · TWO-LAYER RUNTIME"
+          title="Operations Workspace"
+          description="Launch and manage independently deployed post-trade applications."
+          actions={(
+            <>
+              <ToggleButton
+                selected={appearance.scheme === 'dark'}
+                ariaLabel={`Use ${appearance.scheme === 'dark' ? 'light' : 'dark'} theme`}
+                onChange={(selected) => setAppearance((current) => {
+                  const scheme = selected ? 'dark' : 'light';
+                  return { ...current, scheme, preference: scheme };
+                })}
+              >
+                {appearance.scheme === 'dark' ? 'Dark' : 'Light'} theme
+              </ToggleButton>
+              <ToggleButton
+                selected={appearance.density === 'compact'}
+                ariaLabel={`Use ${appearance.density === 'compact' ? 'comfortable' : 'compact'} density`}
+                onChange={(selected) => setAppearance((current) => ({
+                  ...current,
+                  density: selected ? 'compact' : 'comfortable',
+                }))}
+              >
+                {appearance.density === 'compact' ? 'Compact' : 'Comfortable'} density
+              </ToggleButton>
+              <StatusBadge status="neutral">Host → Application</StatusBadge>
+            </>
+          )}
+        />
+        <aside className="launcher">
+          <SideNavigation
+            ariaLabel="Application launcher"
+            items={launcherItems}
+            selectedId={active?.entry.id}
+            title="Applications"
+            onAction={openFromLauncher}
+          />
+          <DescriptionList
+            className="launcher-metrics"
+            items={[
+              { id: 'composition', term: 'Composition', description: '2 layers' },
+              { id: 'legacy', term: 'Legacy runtime', description: 'None' },
+            ]}
+          />
+        </aside>
+        <main className="workspace">
+          <section className="workspace-surface" aria-label="Application workspace">
+            <WorkspaceTabs
+              ariaLabel="Open applications"
+              selectedId={activeInstanceId}
+              onClose={close}
+              onSelectionChange={setActiveInstanceId}
+              tabs={tabs.map((tab) => {
+                const ordinal = tab.instanceId.split('-').slice(-1)[0];
+                const tabCapabilities = tab.instanceId === activeInstanceId && capabilities
+                  ? capabilities
+                  : {
+                    navigation: { navigate },
+                    notifications: { show: setNotification },
+                    telemetry: {
+                      track: (event: string, data?: Record<string, unknown>) => console.info(
+                        'platform-event',
+                        { application: tab.entry.id, event, data },
+                      ),
+                    },
+                    workspace: { closeCurrent: () => close(tab.instanceId) },
+                    appearance: appearanceCapability,
+                    identity,
+                  };
+                return {
+                  id: tab.instanceId,
+                  label: `${tab.entry.displayName} ${ordinal}`,
+                  closeLabel: `Close ${tab.entry.displayName}${tab.instanceId.endsWith('-1') ? '' : ` ${ordinal}`}`,
+                  content: (
+                    <RemoteApplication
+                      entry={tab.entry}
+                      instanceId={tab.instanceId}
+                      capabilities={tabCapabilities}
+                      runtime={runtime}
+                    />
+                  ),
+                };
+              })}
+            />
+            {!active ? (
+              <EmptyState
+                title="Choose an application"
+                description="The host loads it directly from the registry."
+                icon="+"
+              />
+            ) : null}
+          </section>
         </main>
         {notification ? <Toast className="notification" message={notification} tone="success" onDismiss={() => setNotification(null)} /> : null}
       </div>

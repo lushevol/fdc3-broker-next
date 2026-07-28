@@ -15,6 +15,8 @@ export const COLOR_TOKEN_NAMES = [
   'focusRing',
   'overlayBackdrop',
   'overlayShadow',
+  'statusInfoContent',
+  'statusInfoSurface',
   'statusReadyContent',
   'statusReadySurface',
   'statusReviewContent',
@@ -41,7 +43,8 @@ export type DesignDensity = 'compact' | 'comfortable';
  * naming. Dark mode is a Ratan composition of those same primitives because
  * the supplied GDS reference defines a light theme only.
  */
-export const GDS_OFFICIAL_TOKEN_SOURCE = 'gds-official/src/styles/theme.css' as const;
+export const GDS_OFFICIAL_TOKEN_SOURCE =
+  'gds-official/src/styles/theme.css' as const;
 
 export const gdsPrimitiveTokens = {
   white: '#ffffff',
@@ -80,13 +83,23 @@ export const gdsPrimitiveTokens = {
 } as const;
 
 export interface SemanticTokens {
-  readonly color: Readonly<Record<DesignScheme, Readonly<Record<ColorTokenName, string>>>>;
-  readonly density: Readonly<Record<DesignDensity, Readonly<Record<DensityTokenName, string>>>>;
+  readonly color: Readonly<
+    Record<DesignScheme, Readonly<Record<ColorTokenName, string>>>
+  >;
+  readonly density: Readonly<
+    Record<DesignDensity, Readonly<Record<DensityTokenName, string>>>
+  >;
   readonly foundation: {
     readonly fontFamily: string;
     readonly fontSizeBody: string;
+    readonly lineHeightBody: string;
     readonly fontSizeLabel: string;
+    readonly lineHeightLabel: string;
+    readonly fontSizeTitle: string;
+    readonly lineHeightTitle: string;
     readonly fontWeightStrong: string;
+    readonly space4: string;
+    readonly space6: string;
     readonly radiusControl: string;
     readonly radiusPill: string;
     readonly focusWidth: string;
@@ -123,6 +136,8 @@ export const semanticTokens = {
       focusRing: gdsPrimitiveTokens.blue500,
       overlayBackdrop: 'rgb(0 0 0 / 48%)',
       overlayShadow: 'rgb(0 0 0 / 20%)',
+      statusInfoContent: gdsPrimitiveTokens.blue600,
+      statusInfoSurface: gdsPrimitiveTokens.blue50,
       statusReadyContent: gdsPrimitiveTokens.green700,
       statusReadySurface: gdsPrimitiveTokens.green50,
       statusReviewContent: gdsPrimitiveTokens.amber750,
@@ -149,6 +164,8 @@ export const semanticTokens = {
       focusRing: gdsPrimitiveTokens.blue250,
       overlayBackdrop: 'rgb(0 0 0 / 68%)',
       overlayShadow: 'rgb(0 0 0 / 42%)',
+      statusInfoContent: gdsPrimitiveTokens.blue250,
+      statusInfoSurface: gdsPrimitiveTokens.grey850,
       statusReadyContent: gdsPrimitiveTokens.green300,
       statusReadySurface: gdsPrimitiveTokens.grey850,
       statusReviewContent: gdsPrimitiveTokens.amber450,
@@ -172,10 +189,17 @@ export const semanticTokens = {
     },
   },
   foundation: {
-    fontFamily: '"SC Prosper Sans", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontFamily:
+      '"SC Prosper Sans", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     fontSizeBody: '0.875rem',
+    lineHeightBody: '1.375rem',
     fontSizeLabel: '0.75rem',
+    lineHeightLabel: '1rem',
+    fontSizeTitle: '1.125rem',
+    lineHeightTitle: '1.625rem',
     fontWeightStrong: '700',
+    space4: '1rem',
+    space6: '1.5rem',
     radiusControl: '0.5rem',
     radiusPill: '999px',
     focusWidth: '2px',
@@ -187,8 +211,8 @@ export const semanticTokens = {
     motionPressOffset: '1px',
     zIndexModal: '1000',
     dialogWidthSmall: '30rem',
-    dialogWidthMedium: '44rem',
-    dialogWidthLarge: '64rem',
+    dialogWidthMedium: '40rem',
+    dialogWidthLarge: '50rem',
     dialogMaxHeight: 'min(90vh, 52rem)',
   },
 } as const satisfies SemanticTokens;
@@ -214,10 +238,12 @@ function validatePath(
 export function validateSemanticTokens(candidate: unknown): string[] {
   const errors: string[] = [];
   for (const scheme of ['light', 'dark'] as const) {
-    for (const token of COLOR_TOKEN_NAMES) validatePath(candidate, ['color', scheme, token], errors);
+    for (const token of COLOR_TOKEN_NAMES)
+      validatePath(candidate, ['color', scheme, token], errors);
   }
   for (const density of ['compact', 'comfortable'] as const) {
-    for (const token of DENSITY_TOKEN_NAMES) validatePath(candidate, ['density', density, token], errors);
+    for (const token of DENSITY_TOKEN_NAMES)
+      validatePath(candidate, ['density', density, token], errors);
   }
   for (const token of Object.keys(semanticTokens.foundation)) {
     validatePath(candidate, ['foundation', token], errors);

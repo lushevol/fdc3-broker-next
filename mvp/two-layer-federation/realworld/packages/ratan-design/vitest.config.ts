@@ -1,6 +1,24 @@
 import { defineConfig } from 'vitest/config';
+import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
+  resolve: {
+    alias: [
+      {
+        find: /^react-dom(?=\/|$)/,
+        replacement: fileURLToPath(
+          new URL('../../../../../node_modules/react-dom', import.meta.url),
+        ),
+      },
+      {
+        find: /^react(?=\/|$)/,
+        replacement: fileURLToPath(
+          new URL('../../../../../node_modules/react', import.meta.url),
+        ),
+      },
+    ],
+    dedupe: ['react', 'react-dom'],
+  },
   // Configure Vitest (https://vitest.dev/config/)
   test: {
     environment: 'jsdom',

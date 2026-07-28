@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ApplicationRegistryEntry, PlatformCapabilities } from '@fm/platform-contracts';
 import { vi } from 'vitest';
 import { RemoteApplication } from './RemoteApplication';
@@ -30,11 +30,37 @@ describe('independent React remote boundary', () => {
       Application: () => null, mount, unmount,
     });
     const { unmount: unmountHost, container } = render(<RemoteApplication entry={entry} instanceId="cashflow-1" capabilities={capabilities} runtime={{ registerRemotes: vi.fn(), loadRemote: vi.fn() }} />);
-    await waitFor(() => expect(mount).toHaveBeenCalledOnce());
+    await waitFor(() => expect(mount).toHaveBeenCalledTimes(1));
     const root = container.querySelector('[data-composition-boundary]');
     expect(root).toHaveAttribute('data-mounted', 'true');
     expect(mount).toHaveBeenCalledWith(expect.objectContaining({ root, instanceId: 'cashflow-1', basePath: '/cashflow', capabilities }));
     unmountHost();
     expect(unmount).toHaveBeenCalledWith('cashflow-1');
+  });
+
+  it('uses Ratan feedback and retry controls for remote loading failures', async () => {
+    vi.mocked(loadFederatedApplication)
+      .mockRejectedValueOnce(new Error('remote offline'))
+      .mockResolvedValueOnce({
+        manifest: {
+          id: 'cashflow',
+          displayName: 'Cashflow',
+          contractVersion: '1.0.0',
+          appearanceContractVersion: '1.0.0',
+        },
+        Application: () => <span>Recovered application</span>,
+      });
+    const { container } = render(
+      <RemoteApplication
+        entry={entry}
+        instanceId="cashflow-1"
+        capabilities={capabilities}
+        runtime={{ registerRemotes: vi.fn(), loadRemote: vi.fn() }}
+      />,
+    );
+    expect(container.querySelector('[data-ratan-component="progress-circle"]')).toBeInTheDocument();
+    expect(await screen.findByRole('alert')).toHaveAttribute('data-ratan-component', 'error-state');
+    fireEvent.click(screen.getByRole('button', { name: 'Retry Cashflow' }));
+    expect(await screen.findByText('Recovered application')).toBeInTheDocument();
   });
 });

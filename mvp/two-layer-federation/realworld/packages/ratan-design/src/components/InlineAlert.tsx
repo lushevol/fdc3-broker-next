@@ -1,7 +1,4 @@
-import {
-  useId,
-  type ReactNode,
-} from 'react';
+import { useId, type ReactNode } from 'react';
 import { Button } from './Button';
 
 export type InlineAlertTone = 'info' | 'success' | 'warning' | 'error';
@@ -30,7 +27,6 @@ export function InlineAlert({
       role={tone === 'error' ? 'alert' : 'status'}
       aria-labelledby={title ? titleId : undefined}
     >
-      <span className="ratan-inline-alert-marker" aria-hidden="true" />
       <div className="ratan-inline-alert-content">
         {title ? (
           <strong id={titleId} className="ratan-inline-alert-title">
