@@ -29,15 +29,15 @@ The remaining material debt is explicit:
 - some Cashflow-used Ratan implementation is still compiled from
   `apps/mfe-ratan-container` through `@legacy-ratan`; it must be extracted into
   realworld ownership;
-- local Portal Host validation currently has no Cashflow backend, so the real
-  UI renders with `0/0` results and the notification connection reports
-  unavailable;
+- local Portal Host development supplies production-shaped contracts on the
+  unchanged legacy routes, so the real UI renders two grid rows, a saved
+  filter, a saved view, and Cashflow details without a backend;
 - the copied legacy tree still has pre-existing full-project TypeScript and
   lint debt; migration-owned shell/adapters are checked separately;
 - the production bundle is about 8.5 MB because the temporary Ratan source
   boundary prevents effective pruning;
-- data, detail, notification, and entitled-action parity still require
-  sanitized response contracts and integration services.
+- the local contract responses still require approval against the integration
+  service, and notification/export/entitled-action parity remain outstanding.
 
 ## Run and verify
 

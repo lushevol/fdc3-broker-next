@@ -2,7 +2,7 @@
 
 - [x] 1.1 Add a provenance test that requires the federated entry to render the actual Cashflow CN root and rejects the fixture facsimile
 - [x] 1.2 Inventory all Cashflow CN imports, globals, services, Ratan exports, dynamic modules, routes, permissions, and workflow actions
-- [ ] 1.3 Capture representative production-compatible list, detail, metadata, notification, and action responses for local contract tests
+- [x] 1.3 Capture representative production-compatible list, detail, metadata, notification, and action responses for local contract tests
 
 ## 2. Compile the Actual Application
 
@@ -16,7 +16,7 @@
 - [x] 3.2 Implement analysis, feature-flag, field/query, RTK Query, notification-center, and theme adapters
 - [ ] 3.3 Extract the transitive Cashflow-used Ratan components and utilities into build-time realworld ownership
 - [x] 3.4 Replace trade/cashflow `System.import` calls with typed local or host action adapters
-- [ ] 3.5 Add adapter contract tests for production and local fixture modes
+- [x] 3.5 Add adapter contract tests for production and local fixture modes
 
 ## 4. Move and Preserve Cashflow CN
 
@@ -33,7 +33,7 @@
 
 ## 6. Acceptance and Documentation
 
-- [ ] 6.1 Run unit/integration tests with at least 90 percent coverage of new migration adapters
-- [ ] 6.2 Run lint, TypeScript, production builds, OpenSpec validation, and GitNexus impact review
+- [x] 6.1 Run unit/integration tests with at least 90 percent coverage of new migration adapters
+- [x] 6.2 Run lint, TypeScript, production builds, OpenSpec validation, and GitNexus impact review
 - [ ] 6.3 Complete hosted browser acceptance for quick search, selection, details, and one entitled action
 - [x] 6.4 Update the runbook with the actual source mapping, adapter contracts, build steps, cutover, and rollback

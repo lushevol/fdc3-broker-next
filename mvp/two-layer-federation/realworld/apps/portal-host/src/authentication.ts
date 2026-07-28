@@ -33,7 +33,12 @@ const demoAuthenticationAdapter: AuthenticationAdapter = {
     return {
       state: 'authenticated',
       userId: username,
-      permissions: ['portal:access'],
+      permissions: [
+        'portal:access',
+        'RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Custom_Query_Builder',
+        'RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Custom_View_Builder_Private',
+        'RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Custom_View_Builder_Public',
+      ],
       contractVersion: IDENTITY_CONTRACT_VERSION,
     };
   },

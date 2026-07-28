@@ -27,7 +27,11 @@ describe('deterministic POC authentication', () => {
     ).resolves.toMatchObject({
       state: 'authenticated',
       userId: 'test',
-      permissions: ['portal:access'],
+      permissions: expect.arrayContaining([
+        'portal:access',
+        'RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Custom_Query_Builder',
+        'RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Custom_View_Builder_Private',
+      ]),
     });
     expect(DEMO_AUTHENTICATION_ADAPTER.ssoHref).toBe('/auth/sso');
   });

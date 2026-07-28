@@ -37,6 +37,16 @@ The migrated application SHALL preserve the legacy GraphQL list/detail queries, 
 - **WHEN** the remote runs with the documented local adapter
 - **THEN** captured contract-compatible responses travel through the same service and state boundaries as production responses
 
+#### Scenario: Local parity data
+- **WHEN** Portal Host runs its local development server and the actual Cashflow CN application requests business fields, saved filters, saved views, the Cashflow list, or Cashflow details
+- **THEN** the host returns production-shaped responses from versioned local contract fixtures on the unchanged legacy API routes
+- **AND** the application renders at least two grid rows, a saved custom filter, a saved custom view, and the selected Cashflow detail composition
+
+#### Scenario: Production transport remains unchanged
+- **WHEN** Portal Host is built for production
+- **THEN** local Cashflow fixtures are not included in the production middleware path
+- **AND** the migrated application continues to request the production GraphQL and REST routes
+
 ### Requirement: Legacy runtimes are absent
 The built Cashflow CN remote MUST NOT import, request, or invoke Single-SPA, SystemJS, import maps, `@fm/base`, or `@fm/ratan_container`.
 

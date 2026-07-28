@@ -15,8 +15,12 @@ Current status:
 - actual Cashflow CN UI renders in Portal Host through Module Federation;
 - the old Single-SPA/SystemJS runtime is not requested;
 - actual list/detail/workflow code and Redux state are present;
-- production data and workflow parity are not yet accepted because the local
-  stack has no Cashflow service contract;
+- local development serves production-shaped list, detail, field, custom
+  filter, custom view, notification, and representative action contracts on
+  the unchanged legacy routes;
+- the hosted acceptance test proves the actual AG Grid, two Cashflow records,
+  saved filter/view controls, and Cashflow detail composition;
+- production service and entitled workflow parity are not yet accepted;
 - Cashflow-used Ratan implementation still needs extraction from the legacy
   repository boundary.
 
@@ -74,7 +78,10 @@ React DOM client/runtime modules as well as the package root.
    remote origin; host-origin lazy-compile URLs otherwise return 404.
 9. Share React package roots and subpaths as singletons to prevent two React
    dispatchers across host and remote.
-10. Register the remote in Portal Host and validate the route at
+10. Add serve-only Portal Host contract middleware on the existing REST and
+    GraphQL routes so the actual application receives deterministic local data.
+    The middleware is excluded from production builds.
+11. Register the remote in Portal Host and validate the route at
     `/cashflow-blotter`.
 
 ## Runtime issues found and resolved
@@ -141,17 +148,25 @@ Portal Host verification:
 4. confirm the real filter panel appears (Cashflow ID, Trade ID, value-date
    range, currency, product taxonomy, counterparty, booking entity,
    beneficiary, state/sub-state, amount, and custom search/view);
-5. confirm `mf-manifest.json` is loaded from `9206`;
-6. confirm there are no Single-SPA, import-map, or legacy MFE network requests.
+5. confirm the grid reports `2/2` and contains `CF-CN-24001` and
+   `CF-CN-24002`;
+6. open **Filters** and confirm `USD pending verification`;
+7. open **Views** and confirm `Operations essentials`;
+8. double-click `CF-CN-24001` and confirm Trade Details and Cashflow Details
+   render `TRD-CN-90001`, `USD`, and `1,250,000`;
+9. confirm `mf-manifest.json` is loaded from `9206`;
+10. confirm there are no Single-SPA, import-map, or legacy MFE network
+    requests.
 
-Without a Cashflow backend, `0/0` is the correct current local result. It proves
-composition and source rendering, not business parity.
+The deterministic data is installed by Portal Host only in Vite serve mode.
+Production builds keep the application's existing GraphQL and REST routes and
+do not contain a fixture middleware path.
 
 ## Remaining work before production confidence
 
-1. Add sanitized list, detail, metadata, notification, and representative
-   action responses to contract tests or connect an integration service.
-2. Exercise quick search, filters, grid paging, details, notifications, export,
+1. Approve the sanitized local contracts against captured integration-service
+   responses and connect the production service.
+2. Exercise grid paging, notifications, export,
    and at least one entitled maker/checker workflow in Portal Host.
 3. Extract every Cashflow-used Ratan module into realworld packages; remove the
    temporary `@legacy-ratan` source alias.
