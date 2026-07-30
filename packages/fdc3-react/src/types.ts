@@ -6,6 +6,7 @@ import type {
   WorkflowDefinition,
 } from 'ratan-fdc3-broker';
 import type { ModuleLoaderApi } from 'ratan-module-composition';
+import type { FDC3ModuleLoaderOptions } from './module-loader';
 
 export interface FDC3PlatformAdapter {
   /** Current host authentication state. */
@@ -44,7 +45,10 @@ export interface FDC3RootProviderProps {
   platform: FDC3PlatformAdapter;
   directory?: FDC3DirectoryOptions;
   interop?: FDC3InteropOptions;
+  /** Advanced override. Most SystemJS hosts should rely on automatic runtime discovery. */
   moduleLoader?: ModuleLoaderApi;
+  /** Optional runtime adapters for hosts that need explicit module-loader configuration. */
+  moduleLoaderOptions?: FDC3ModuleLoaderOptions;
   workflows?: WorkflowDefinition[];
   userChannelIds?: string[];
   debug?: boolean;

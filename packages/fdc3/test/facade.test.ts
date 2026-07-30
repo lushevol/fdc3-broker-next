@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { FDC3ChildProvider, FDC3RootProvider, getAgentApi } from '../src';
+import {
+  createFDC3ModuleLoader,
+  FDC3ChildProvider,
+  FDC3RootProvider,
+  getAgentApi,
+  MODULE_LOAD_ENTITLEMENT_ACTION,
+} from '../src';
 import { AgentProvider } from '../src/agent';
 import { AppDirectoryClientImpl } from '../src/app-directory';
 import { Broker } from '../src/broker';
 import * as FinosFDC3 from '../src/finos';
 import * as OpenFinFDC3 from '../src/openfin';
+import { ModuleLoader } from '../src/module-loader';
 import { ResolverDialog } from '../src/resolver-ui';
 import { WorkflowOrchestrator } from '../src/workflow-orchestrator';
 
@@ -12,6 +19,9 @@ describe('ratan-fdc3 facade', () => {
   it('ships the root convenience API and every focused capability', () => {
     expect(FDC3RootProvider).toBeTypeOf('function');
     expect(FDC3ChildProvider).toBeTypeOf('function');
+    expect(createFDC3ModuleLoader).toBeTypeOf('function');
+    expect(MODULE_LOAD_ENTITLEMENT_ACTION).toBe('load-module');
+    expect(ModuleLoader).toBeTypeOf('function');
     expect(getAgentApi).toBeTypeOf('function');
     expect(AgentProvider).toBeTypeOf('function');
     expect(AppDirectoryClientImpl).toBeTypeOf('function');

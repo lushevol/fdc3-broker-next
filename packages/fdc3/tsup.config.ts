@@ -7,6 +7,7 @@ export default defineConfig({
     'app-directory': 'src/app-directory.ts',
     broker: 'src/broker.ts',
     finos: 'src/finos.ts',
+    'module-loader': 'src/module-loader.ts',
     openfin: 'src/openfin.ts',
     react: 'src/react.ts',
     'resolver-ui': 'src/resolver-ui.ts',

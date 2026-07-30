@@ -4,15 +4,7 @@ import { FDC3Integration } from './FDC3Integration';
 
 const mockWorkspaceOpenTile = jest.fn();
 let mockCapturedPlatform: FDC3PlatformAdapter | undefined;
-
-jest.mock(
-  'ratan-module-composition',
-  () => ({
-    ModuleLoader: class ModuleLoader {},
-    SystemJsModuleAdapter: class SystemJsModuleAdapter {},
-  }),
-  { virtual: true },
-);
+let mockCapturedModuleLoader: unknown;
 
 jest.mock('ratan-fdc3', () => {
   const React = jest.requireActual<typeof import('react')>('react');
@@ -20,12 +12,15 @@ jest.mock('ratan-fdc3', () => {
   return {
     FDC3RootProvider: ({
       children,
+      moduleLoader,
       platform,
     }: {
       children: React.ReactNode;
+      moduleLoader?: unknown;
       platform: FDC3PlatformAdapter;
     }) => {
       mockCapturedPlatform = platform;
+      mockCapturedModuleLoader = moduleLoader;
       return React.createElement(React.Fragment, null, children);
     },
   };
@@ -55,6 +50,7 @@ jest.mock('./useFDC3WorkspaceHelper', () => ({
 describe('FDC3Integration', () => {
   beforeEach(() => {
     mockCapturedPlatform = undefined;
+    mockCapturedModuleLoader = undefined;
     mockWorkspaceOpenTile.mockReset();
   });
 
@@ -86,5 +82,6 @@ describe('FDC3Integration', () => {
       appId: 'template_tile_fdc3_1',
       instanceId: 'workspace-1',
     });
+    expect(mockCapturedModuleLoader).toBeUndefined();
   });
 });

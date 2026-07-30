@@ -133,7 +133,6 @@
     "lucide-react": "^0.577.0",
     "moment": "^2.29.4",
     "ratan-fdc3": "*",
-    "ratan-module-composition": "*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.5",

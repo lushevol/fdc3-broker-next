@@ -3,7 +3,12 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { Context, DesktopAgent } from '@finos/fdc3';
 import { clearBroker, getAgentApi, setBroker, useAppIdentifier, useFDC3 } from 'ratan-fdc3-agent';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { FDC3ChildProvider, FDC3RootProvider, type FDC3PlatformAdapter } from '../src';
+import {
+  createFDC3ModuleLoader,
+  FDC3ChildProvider,
+  FDC3RootProvider,
+  type FDC3PlatformAdapter,
+} from '../src';
 import type { BrokerConfig, ResolverTarget } from 'ratan-fdc3-broker';
 
 vi.mock('ratan-fdc3-resolver-ui', () => ({
@@ -58,6 +63,133 @@ afterEach(() => {
 });
 
 describe('FDC3RootProvider', () => {
+  it('accepts a host Module Federation loading capability', async () => {
+    const RemoteComponent = () => <div>Federated component</div>;
+    const loadRemote = vi.fn(async () => ({ TradeSummary: RemoteComponent }));
+    const moduleLoader = createFDC3ModuleLoader({ loadRemote });
+
+    const loaded = await moduleLoader.load({
+      loader: 'module-federation',
+      moduleId: 'trades/summary',
+      exportName: 'TradeSummary',
+    });
+
+    expect(loadRemote).toHaveBeenCalledWith('trades/summary');
+    expect(loaded.Component).toBe(RemoteComponent);
+  });
+
+  it('owns SystemJS module-loader composition when the runtime is available', async () => {
+    const runtime = globalThis as typeof globalThis & {
+      System?: { import(moduleId: string): Promise<Record<string, unknown>> };
+    };
+    const previousSystem = runtime.System;
+    const RemoteComponent = () => <div>Remote component</div>;
+    const systemImport = vi.fn(async () => ({ default: RemoteComponent }));
+    runtime.System = { import: systemImport };
+
+    try {
+      const { unmount } = render(
+        <FDC3RootProvider apps={apps} platform={createPlatform()}>
+          <div />
+        </FDC3RootProvider>,
+      );
+
+      const loaded = await getAgentApi().modules.load({
+        loader: 'systemjs',
+        moduleId: '@fm/remote-tile',
+      });
+
+      expect(systemImport).toHaveBeenCalledWith('@fm/remote-tile');
+      expect(loaded.Component).toBe(RemoteComponent);
+      unmount();
+    } finally {
+      if (previousSystem) {
+        runtime.System = previousSystem;
+      } else {
+        delete runtime.System;
+      }
+    }
+  });
+
+  it('exposes module-load lifecycle control before SystemJS resolution', async () => {
+    const runtime = globalThis as typeof globalThis & {
+      System?: { import(moduleId: string): Promise<Record<string, unknown>> };
+    };
+    const previousSystem = runtime.System;
+    const systemImport = vi.fn(async () => ({ default: () => <div>Remote component</div> }));
+    const accessError = new Error('Module access denied');
+    const beforeLoad = vi.fn(() => {
+      throw accessError;
+    });
+    const onLoadError = vi.fn();
+    runtime.System = { import: systemImport };
+
+    try {
+      const { unmount } = render(
+        <FDC3RootProvider
+          apps={apps}
+          platform={createPlatform()}
+          moduleLoaderOptions={{ lifecycle: { beforeLoad, onLoadError } }}
+        >
+          <div />
+        </FDC3RootProvider>,
+      );
+      const reference = { loader: 'systemjs' as const, moduleId: '@fm/restricted-tile' };
+
+      await expect(getAgentApi().modules.load(reference)).rejects.toBe(accessError);
+      expect(beforeLoad).toHaveBeenCalledWith({
+        reference: { ...reference, exportName: 'default' },
+      });
+      expect(onLoadError).toHaveBeenCalledWith({
+        reference: { ...reference, exportName: 'default' },
+        error: accessError,
+      });
+      expect(systemImport).not.toHaveBeenCalled();
+      unmount();
+    } finally {
+      if (previousSystem) {
+        runtime.System = previousSystem;
+      } else {
+        delete runtime.System;
+      }
+    }
+  });
+
+  it('denies module loading through the host entitlement policy before resolution', async () => {
+    const runtime = globalThis as typeof globalThis & {
+      System?: { import(moduleId: string): Promise<Record<string, unknown>> };
+    };
+    const previousSystem = runtime.System;
+    const systemImport = vi.fn(async () => ({ default: () => <div>Remote component</div> }));
+    const validateEntitlements = vi.fn(async () => false);
+    runtime.System = { import: systemImport };
+
+    try {
+      const { unmount } = render(
+        <FDC3RootProvider apps={apps} platform={createPlatform({ validateEntitlements })}>
+          <div />
+        </FDC3RootProvider>,
+      );
+      const reference = { loader: 'systemjs' as const, moduleId: '@fm/restricted-tile' };
+
+      await expect(getAgentApi().modules.load(reference)).rejects.toEqual(
+        expect.objectContaining({
+          code: 'MODULE_ACCESS_DENIED',
+          reference: { ...reference, exportName: 'default' },
+        }),
+      );
+      expect(validateEntitlements).toHaveBeenCalledWith('@fm/restricted-tile', 'load-module');
+      expect(systemImport).not.toHaveBeenCalled();
+      unmount();
+    } finally {
+      if (previousSystem) {
+        runtime.System = previousSystem;
+      } else {
+        delete runtime.System;
+      }
+    }
+  });
+
   it('publishes a broker that calls the base-owned open capability', async () => {
     const platform = createPlatform();
 

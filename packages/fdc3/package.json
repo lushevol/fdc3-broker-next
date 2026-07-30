@@ -32,6 +32,11 @@
       "import": "./dist/finos.js",
       "require": "./dist/finos.cjs"
     },
+    "./module-loader": {
+      "types": "./dist/module-loader.d.ts",
+      "import": "./dist/module-loader.js",
+      "require": "./dist/module-loader.cjs"
+    },
     "./openfin": {
       "types": "./dist/openfin.d.ts",
       "import": "./dist/openfin.js",
@@ -55,7 +60,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "docs"
   ],
   "scripts": {
     "build": "tsup",
@@ -79,7 +85,8 @@
     "ratan-fdc3-broker": "*",
     "ratan-fdc3-react": "*",
     "ratan-fdc3-resolver-ui": "*",
-    "ratan-fdc3-workflow-orchestrator": "*"
+    "ratan-fdc3-workflow-orchestrator": "*",
+    "ratan-module-composition": "*"
   },
   "devDependencies": {
     "@emotion/react": "^11.14.0",

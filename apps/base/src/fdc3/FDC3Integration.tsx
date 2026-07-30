@@ -1,5 +1,4 @@
 import type { AppIdentifier } from 'ratan-fdc3';
-import { ModuleLoader, SystemJsModuleAdapter } from 'ratan-module-composition';
 import { FDC3RootProvider, type FDC3PlatformAdapter } from 'ratan-fdc3';
 import type React from 'react';
 import { useCallback, useMemo } from 'react';
@@ -126,10 +125,6 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
     }),
     [accessibleAppIds, openApp, store.token],
   );
-  const moduleLoader = useMemo(
-    () => new ModuleLoader([new SystemJsModuleAdapter((moduleId) => System.import(moduleId))]),
-    [],
-  );
   const postMessageAllowedOrigins = useMemo(getPostMessageAllowedOrigins, []);
 
   return (
@@ -137,7 +132,6 @@ export const FDC3Integration: React.FC<FDC3IntegrationProps> = ({ children }) =>
       apps={apps}
       platform={platform}
       workflows={workflows}
-      moduleLoader={moduleLoader}
       userChannelIds={USER_CHANNEL_IDS}
       debug={process.env.NODE_ENV === 'development'}
       showConsole={
