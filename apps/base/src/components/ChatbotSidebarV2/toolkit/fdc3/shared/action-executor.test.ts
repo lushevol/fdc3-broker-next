@@ -1,13 +1,13 @@
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 jest.mock(
-  'ratan-fdc3-agent',
+  'ratan-fdc3',
   () => ({
     getAgentApi: jest.fn(),
   }),
   { virtual: true },
 );
 
-import { getAgentApi } from 'ratan-fdc3-agent';
+import { getAgentApi } from 'ratan-fdc3';
 import { createFdc3ActionExecutor } from './action-executor';
 
 describe('createFdc3ActionExecutor', () => {
@@ -38,13 +38,10 @@ describe('createFdc3ActionExecutor', () => {
       { continuationPayload: true },
     );
 
-    expect(raiseIntent).toHaveBeenCalledWith(
-      'SearchTrades',
-      {
-        type: 'fdc3.trade.query',
-        filters: { status: 'PENDING_VALIDATION' },
-      },
-    );
+    expect(raiseIntent).toHaveBeenCalledWith('SearchTrades', {
+      type: 'fdc3.trade.query',
+      filters: { status: 'PENDING_VALIDATION' },
+    });
     expect(result).toEqual(
       expect.objectContaining({
         status: 'ok',

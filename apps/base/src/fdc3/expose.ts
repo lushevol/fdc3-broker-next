@@ -4,5 +4,5 @@ import {
   useFDC3,
   useIntentListener,
   useUserChannels,
-} from 'ratan-fdc3-agent';
+} from 'ratan-fdc3';
 export default { AgentProvider, useAppIdentifier, useFDC3, useIntentListener, useUserChannels };

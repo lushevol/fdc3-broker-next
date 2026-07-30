@@ -1,7 +1,7 @@
-import type { Context } from '@finos/fdc3';
+import type { Context } from 'ratan-fdc3';
 import type { AdminModuleProps } from '../../common/interface';
 import type { JSONSchema7 } from 'json-schema';
-import { AppDefinition } from 'ratan-fdc3-app-directory';
+import type { AppDefinition } from 'ratan-fdc3/app-directory';
 
 export type FDC3DeclarationProps = AdminModuleProps;
 

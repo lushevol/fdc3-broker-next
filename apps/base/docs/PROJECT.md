@@ -18,7 +18,7 @@ The always-mounted shell UI micro-frontend providing login, navigation, FDC3 int
 
 - **Login/SSO Authentication** — Login page with SSO integration and session management
 - **Navigation** — AppBar, Drawer, workspace tab management with dynamic tile loading
-- **FDC3 2.2 Interop** — Broker initialization, resolver, app directory, and intent routing via `FDC3Integration.tsx`
+- **FDC3 2.2 Interop** — Thin host adapter around reusable root/child providers from the single `ratan-fdc3` distribution
 - **AI Chatbot** — SSE streaming via `AssistantUIRuntimeProvider`, tool routing, frontend tool registry, generative UI
 - **Shared Re-exports** — `root.tsx` exports 40+ components, hooks, services, and utilities for consumption by other MFEs via `System.import('@fm/base')`
 - **Admin Module** — CRUD for tiles, categories, import maps, and FDC3 declarations
@@ -51,13 +51,10 @@ npm run storybook
 
 ## Monorepo Dependencies
 
-| Package                    | Purpose                                                                               |
-| -------------------------- | ------------------------------------------------------------------------------------- |
-| `ratan-fdc3-agent`         | FDC3 Agent hooks (`useFDC3`, `useIntentListener`, `useUserChannels`, `AgentProvider`) |
-| `ratan-fdc3-broker`        | FDC3 Broker runtime                                                                   |
-| `ratan-fdc3-app-directory` | FDC3 App Directory service                                                            |
-| `ratan-fdc3-resolver-ui`   | FDC3 intent resolver UI                                                               |
-| `ratan-design`             | Design system (MUI + Emotion + tokens)                                                |
+| Package        | Purpose                                                                                  |
+| -------------- | ---------------------------------------------------------------------------------------- |
+| `ratan-fdc3`   | Complete FDC3 distribution: providers, agent, broker, app directory, resolver, workflows |
+| `ratan-design` | Design system (MUI + Emotion + tokens)                                                   |
 
 ## Environment Files
 

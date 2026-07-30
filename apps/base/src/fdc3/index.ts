@@ -1,8 +1,7 @@
 /**
  * FDC3 Integration Examples for Base MFE
  *
- * Example components demonstrating how to set up and integrate FDC3
- * in the base MFE.
+ * Thin base-platform adapter for the reusable FDC3 root provider.
  *
  * @packageDocumentation
  */

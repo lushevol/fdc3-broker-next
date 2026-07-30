@@ -34,7 +34,7 @@
 
 import type { Broker } from 'ratan-fdc3-broker';
 import React, { useContext, useEffect, useState } from 'react';
-import { getAgentApi, getCurrentTile, setCurrentTile } from './agent';
+import { getAgentApi } from './agent';
 import { ScopedDesktopAgent } from './scoped-agent';
 import type {
   AppIdentifier,
@@ -139,16 +139,14 @@ export const AgentProvider: React.FC<{
   const agent = React.useMemo<RatanDesktopAgent | null>(() => {
     if (!appIdentifier) {
       // No scoping required — use the raw broker directly.
-      try { return getAgentApi(); } catch { return null; }
+      try {
+        return getAgentApi();
+      } catch {
+        return null;
+      }
     }
     return tryCreateScopedAgent(appIdentifier);
   }, [appIdentifier]);
-
-  // Bridge MFE boundaries: store the tile identity in the shared
-  // window.__RATAN_FDC3__ namespace so that useFDC3() in child MFEs
-  // (which cannot share React context) can build a properly scoped
-  // ScopedDesktopAgent as a fallback.
-  setCurrentTile(appIdentifier ?? null);
 
   // Async fallback when the broker wasn't ready during render (edge case).
   // Resets the agent if it was null and the broker appears later.
@@ -318,18 +316,6 @@ export function useFDC3(): RatanDesktopAgent {
   const { agent } = useContext(AgentContext);
   if (agent) {
     return agent;
-  }
-
-  // The React context from AgentProvider is NOT shared across MFE boundaries
-  // (each MFE bundles its own copy of ratan-fdc3-agent).  As a fallback, check
-  // the global tile source set by FDC3TileProvider during render.
-  const tileSource = getCurrentTile();
-  if (tileSource) {
-    try {
-      return new ScopedDesktopAgent(getAgentApi() as unknown as Broker, tileSource);
-    } catch {
-      // fall through to getAgentApi()
-    }
   }
 
   return getAgentApi();

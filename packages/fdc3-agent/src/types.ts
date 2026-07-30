@@ -7,13 +7,10 @@
  * @packageDocumentation
  */
 
-import type { AppIdentifier, AppMetadata, DesktopAgent } from '@finos/fdc3';
+import type { AppMetadata, DesktopAgent } from '@finos/fdc3';
 import type { ModuleLoaderApi } from 'ratan-module-composition';
 import type {
   WorkflowDefinition,
-  WorkflowEvent,
-  WorkflowEventListener,
-  WorkflowEventSubscription,
   WorkflowJsonObject,
   WorkflowOptions,
   WorkflowResolution,
@@ -94,13 +91,6 @@ declare global {
   interface Window {
     __RATAN_FDC3__?: {
       brokerInstance?: RatanDesktopAgent | null;
-      /**
-       * Identity of the tile currently rendering, set by FDC3TileProvider.
-       * Bridges MFE boundaries so that useFDC3() in a tile MFE (which cannot
-       * share React context with the base MFE) can build a properly scoped
-       * ScopedDesktopAgent.
-       */
-      currentTile?: AppIdentifier | null;
     };
   }
 }

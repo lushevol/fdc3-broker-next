@@ -1,5 +1,5 @@
-import * as fdc3 from '@finos/fdc3';
-import * as openFinFdc3 from 'openfin-fdc3';
+import * as fdc3 from 'ratan-fdc3/finos';
+import * as openFinFdc3 from 'ratan-fdc3/openfin';
 import React from 'react';
 import useDispatcher from '../../../hooks/dispathcer';
 import { useContext } from '../../../hooks/provider';

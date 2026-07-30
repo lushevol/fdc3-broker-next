@@ -54,10 +54,16 @@
 
 ## FDC3 Rules
 
-- Always use `ratan-fdc3-agent` hooks: `useFDC3`, `useIntentListener`, `useUserChannels`, `AgentProvider`.
+- Base declares only `ratan-fdc3`; never add its internal implementation packages as direct dependencies.
+- Use `ratan-fdc3` hooks: `useFDC3`, `useIntentListener`, and `useUserChannels`.
 - **Never** access the FDC3 Broker directly from tiles — go through the agent hooks exposed via `FDC3Agent` namespace.
-- FDC3 configuration lives in `FDC3Integration.tsx` — broker, resolver, and app directory are initialized there.
-- To register a new intent: add a listener in `FDC3Integration` or a tile using `useIntentListener`.
+- Base root integration must only adapt host capabilities into `FDC3RootProvider`.
+- Base child integration must only wrap remote components with `FDC3ChildProvider` and their identity.
+- Base owns workspace behavior, authentication state, accessible-tile discovery, single-view policy, and entitlement policy.
+- `workspaceOpenTile` stays in base and is passed as the provider's `openApp` capability; FDC3 calls it without depending on base workspace types or implementation.
+- Broker, resolver, app-directory synchronization, bridge, queue, publication, and child registration logic belong behind `ratan-fdc3`.
+- Do not add product-specific tile, workspace, routing, or store logic to an FDC3 package.
+- Register product intent handlers in the owning tile using `useIntentListener`.
 
 ## Chatbot Rules
 

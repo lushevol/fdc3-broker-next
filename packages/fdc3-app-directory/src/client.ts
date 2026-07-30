@@ -150,6 +150,24 @@ export class AppDirectoryClientImpl implements AppDirectoryClientInterface {
   }
 
   /**
+   * Replaces the local application snapshot used by local-only and local-first modes.
+   *
+   * This keeps a long-lived directory instance current without changing the shared
+   * AppDirectoryClient contract or recreating consumers such as the FDC3 broker.
+   */
+  replaceLocalApps(apps: AppDefinition[]): void {
+    const nextApps = new Map<string, AppDefinition>();
+
+    apps.forEach((app) => {
+      if (app.appId) {
+        nextApps.set(app.appId, app);
+      }
+    });
+
+    this.localApps = nextApps;
+  }
+
+  /**
    * Get all apps the user is entitled to access.
    *
    * Makes an HTTP GET request to the `/v2/apps` endpoint to retrieve all

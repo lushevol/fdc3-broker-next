@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, expect, it, jest } from '@jest/globals';
 jest.mock(
-  'ratan-fdc3-agent',
+  'ratan-fdc3',
   () => ({
     getAgentApi: jest.fn(),
   }),
@@ -50,9 +50,7 @@ describe('FDC3 chat flow', () => {
     });
     const toolkit = createRuntimeToolkit({ fdc3Executor: executor });
 
-    const result = await (
-      toolkit.execute_fdc3_action as ExecuteFdc3ActionTool
-    ).execute({
+    const result = await (toolkit.execute_fdc3_action as ExecuteFdc3ActionTool).execute({
       actionId: 'trade-blotter.pending-validation',
     });
 
@@ -83,9 +81,7 @@ describe('FDC3 chat flow', () => {
     });
     const toolkit = createRuntimeToolkit({ fdc3Executor: executor });
 
-    const result = await (
-      toolkit.execute_fdc3_action as ExecuteFdc3ActionTool
-    ).execute({
+    const result = await (toolkit.execute_fdc3_action as ExecuteFdc3ActionTool).execute({
       actionId: 'trade-blotter.pending-validation',
     });
 

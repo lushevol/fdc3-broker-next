@@ -48,6 +48,18 @@ describe('AppDirectoryClientImpl - Modes', () => {
     vi.mocked(fetch).mockClear();
   });
 
+  it('replaces local apps for a long-lived broker directory', async () => {
+    client = new AppDirectoryClientImpl({
+      baseUrl: 'https://api.example.com',
+      localApps: [localApp],
+      mode: 'local-only',
+    });
+
+    client.replaceLocalApps([{ ...localApp, appId: 'replacement-app' }]);
+
+    await expect(client.getAllApps()).resolves.toEqual([{ ...localApp, appId: 'replacement-app' }]);
+  });
+
   describe('Mode: remote-only (Default)', () => {
     it('should ignore local apps and fetch only remote', async () => {
       client = new AppDirectoryClientImpl({

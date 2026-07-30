@@ -3,36 +3,30 @@ import { render, screen, waitFor } from '@testing-library/react';
 import Container from './Container';
 import type { Container as ContainerProps } from '../../../hooks/model/workspaces';
 
-const mockFDC3TileProvider = jest.fn(
+const mockFDC3ChildProvider = jest.fn(
   ({
+    appIdentifier,
     children,
-    instanceId,
-    tile,
   }: {
+    appIdentifier: { appId: string; instanceId: string };
     children: React.ReactNode;
-    instanceId: string;
-    tile: string;
   }) => (
     <div
       data-testid="fdc3-tile-provider"
-      data-instance-id={instanceId}
-      data-tile={tile}
+      data-instance-id={appIdentifier.instanceId}
+      data-app-id={appIdentifier.appId}
     >
       {children}
     </div>
   ),
 );
 
-jest.mock(
-  '../../../fdc3/FDC3Integration',
-  () => ({
-    FDC3TileProvider: (props: {
-      children: React.ReactNode;
-      instanceId: string;
-      tile: string;
-    }) => mockFDC3TileProvider(props),
-  }),
-);
+jest.mock('ratan-fdc3', () => ({
+  FDC3ChildProvider: (props: {
+    appIdentifier: { appId: string; instanceId: string };
+    children: React.ReactNode;
+  }) => mockFDC3ChildProvider(props),
+}));
 
 jest.mock('../../../components/ErrorBoundry', () => ({
   __esModule: true,
@@ -62,7 +56,7 @@ const remoteTileProps: ContainerProps = {
 
 describe('Container FDC3 integration', () => {
   beforeEach(() => {
-    mockFDC3TileProvider.mockClear();
+    mockFDC3ChildProvider.mockClear();
     (System.import as jest.Mock).mockClear();
   });
 
@@ -71,7 +65,7 @@ describe('Container FDC3 integration', () => {
 
     const provider = await screen.findByTestId('fdc3-tile-provider');
 
-    expect(provider).toHaveAttribute('data-tile', '/template_tile_fdc3_2');
+    expect(provider).toHaveAttribute('data-app-id', 'template_tile_fdc3_2');
     expect(provider).toHaveAttribute('data-instance-id', 'tile-instance-1');
     await waitFor(() => {
       expect(System.import).toHaveBeenCalledWith('@fm/template');

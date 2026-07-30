@@ -13,13 +13,14 @@ Client-side FDC3 Agent that tiles use to interact with FDC3 operations. Acts as 
 
 ## Key Features
 
-- **AgentProvider** — React context that creates a `ScopedDesktopAgent` for the tile
+- **AgentProvider** — React context that creates a `ScopedDesktopAgent` for one explicit child identity
 - **useFDC3** — Hook returning the scoped `DesktopAgent`
 - **useIntentListener** / **useContextListener** — Hooks for registering FDC3 listeners that auto-cleanup
 - **useCurrentChannel** / **useUserChannels** / **useAppIdentifier** — Channel & identity hooks
 - **ScopedDesktopAgent** — Wraps every FDC3 call to inject the tile's `AppIdentifier` as `source`
 - **ErrorBoundary** — Re-exported from `ratan-fdc3-broker` with `theme="agent"`
 - **Auto-retry** — Polls every 100 ms until the broker becomes available
+- **Concurrent child isolation** — No mutable global "current tile" identity
 
 ## Peer Dependencies
 

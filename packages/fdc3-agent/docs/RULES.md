@@ -8,7 +8,12 @@
 
 ## React Integration
 
-- Always wrap tile components in `<AgentProvider>` before using FDC3 hooks.
+- Platform composition should wrap child applications with
+  `FDC3ChildProvider` from `ratan-fdc3-react`.
+- If using this package directly, wrap each child with its own
+  `<AgentProvider appIdentifier={...}>` before using FDC3 hooks.
+- Child identity is React-context scoped; never store a "current tile" identity
+  in a process-wide or window-global mutable value.
 
 ## ScopedDesktopAgent
 
