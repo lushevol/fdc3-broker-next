@@ -24,7 +24,7 @@
     "build": "tsup src/index.ts --format esm --dts --clean --external react --external react-dom --external @fm/ratan-design",
     "dev": "tsup src/index.ts --format esm --dts --watch --external react --external react-dom --external @fm/ratan-design",
     "format": "prettier --write package.json README.md src tests vitest.config.ts vitest.setup.ts tsconfig.json",
-    "lint": "eslint src/index.ts src/provider.tsx src/dialog.tsx src/elements/sc-dialog.ts tests vitest.config.ts vitest.setup.ts",
+    "lint": "eslint src/index.ts src/provider.tsx src/dialog.tsx src/status-badge.tsx src/elements/sc-dialog.ts src/elements/sc-badge.ts tests vitest.config.ts vitest.setup.ts",
     "test": "vitest run --coverage"
   },
   "dependencies": {

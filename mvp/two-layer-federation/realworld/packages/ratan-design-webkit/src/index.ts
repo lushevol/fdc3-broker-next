@@ -5,16 +5,10 @@
  * validated and promoted from the imported component source.
  */
 export * from '@fm/ratan-design';
-export {
-  Dialog,
-  type DialogProps,
-  type DialogWidth,
-} from './dialog';
-export {
-  defineScDialog,
-  SC_DIALOG_TAG_NAME,
-  ScDialog,
-} from './elements/sc-dialog';
+export { Dialog, type DialogProps, type DialogWidth } from './dialog';
+export { defineScDialog, SC_DIALOG_TAG_NAME, ScDialog } from './elements/sc-dialog';
+export { defineScBadge, SC_BADGE_TAG_NAME, ScBadge } from './elements/sc-badge';
+export { StatusBadge, type StatusBadgeProps, type StatusTone } from './status-badge';
 export {
   WebkitDesignSystemProvider,
   WebkitDesignSystemProvider as DesignSystemProvider,

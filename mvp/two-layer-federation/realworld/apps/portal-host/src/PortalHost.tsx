@@ -18,6 +18,7 @@ import {
   EmptyState,
   IconButton,
   PageHeader,
+  StatusBadge,
   TextField,
   Toast,
   ToggleButton,
@@ -34,7 +35,10 @@ interface Props {
   readonly identity?: IdentityCapability;
   readonly onLogout?: () => void;
 }
-interface Tab { entry: ApplicationRegistryEntry; instanceId: string }
+interface Tab {
+  entry: ApplicationRegistryEntry;
+  instanceId: string;
+}
 
 interface TileMetadata {
   readonly category: string;
@@ -51,14 +55,19 @@ const TILE_METADATA: Record<string, TileMetadata> = {
 };
 
 function tileMetadata(entry: ApplicationRegistryEntry): TileMetadata {
-  return TILE_METADATA[entry.id] ?? {
-    category: 'Platform',
-    icon: '◇',
-    description: `Open ${entry.displayName} in a dedicated workspace tab.`,
-  };
+  return (
+    TILE_METADATA[entry.id] ?? {
+      category: 'Platform',
+      icon: '◇',
+      description: `Open ${entry.displayName} in a dedicated workspace tab.`,
+    }
+  );
 }
 
-function navigate(path: string) { window.history.pushState({}, '', path); window.dispatchEvent(new PopStateEvent('popstate')); }
+function navigate(path: string) {
+  window.history.pushState({}, '', path);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+}
 
 export function PortalHost({
   registry,
@@ -73,7 +82,9 @@ export function PortalHost({
     counts.current[initial.id] = 1;
     return [{ entry: initial, instanceId: `${initial.id}-1` }];
   });
-  const [activeInstanceId, setActiveInstanceId] = useState<string | null>(initial ? `${initial.id}-1` : null);
+  const [activeInstanceId, setActiveInstanceId] = useState<string | null>(
+    initial ? `${initial.id}-1` : null,
+  );
   const [notification, setNotification] = useState<string | null>(null);
   const [tilePickerOpen, setTilePickerOpen] = useState(false);
   const [tileSearch, setTileSearch] = useState('');
@@ -81,11 +92,20 @@ export function PortalHost({
   const appearanceRef = useRef(appearance);
   const listeners = useRef(new Set<(snapshot: AppearanceSnapshot) => void>());
   appearanceRef.current = appearance;
-  const appearanceCapability = useMemo<AppearanceCapability>(() => ({
-    getSnapshot: () => appearanceRef.current,
-    subscribe(listener) { listeners.current.add(listener); return () => listeners.current.delete(listener); },
-  }), []);
-  useEffect(() => { persistAppearance(window.localStorage, appearance); listeners.current.forEach((listener) => listener(appearance)); }, [appearance]);
+  const appearanceCapability = useMemo<AppearanceCapability>(
+    () => ({
+      getSnapshot: () => appearanceRef.current,
+      subscribe(listener) {
+        listeners.current.add(listener);
+        return () => listeners.current.delete(listener);
+      },
+    }),
+    [],
+  );
+  useEffect(() => {
+    persistAppearance(window.localStorage, appearance);
+    listeners.current.forEach((listener) => listener(appearance));
+  }, [appearance]);
 
   const open = useCallback((entry: ApplicationRegistryEntry, updatePath = true) => {
     const count = (counts.current[entry.id] ?? 0) + 1;
@@ -98,17 +118,21 @@ export function PortalHost({
     if (updatePath && window.location.pathname !== entry.basePath) navigate(entry.basePath);
   }, []);
 
-  const close = useCallback((instanceId: string) => {
-    const index = tabs.findIndex((tab) => tab.instanceId === instanceId);
-    if (index < 0) return;
-    const next = tabs.filter((tab) => tab.instanceId !== instanceId);
-    setTabs(next);
-    if (activeInstanceId !== instanceId) return;
-    const replacement = next[Math.max(0, index - 1)] ?? next[0];
-    setActiveInstanceId(replacement?.instanceId ?? null);
-    if (replacement && window.location.pathname !== replacement.entry.basePath) navigate(replacement.entry.basePath);
-    if (!replacement && window.location.pathname !== '/') navigate('/');
-  }, [activeInstanceId, tabs]);
+  const close = useCallback(
+    (instanceId: string) => {
+      const index = tabs.findIndex((tab) => tab.instanceId === instanceId);
+      if (index < 0) return;
+      const next = tabs.filter((tab) => tab.instanceId !== instanceId);
+      setTabs(next);
+      if (activeInstanceId !== instanceId) return;
+      const replacement = next[Math.max(0, index - 1)] ?? next[0];
+      setActiveInstanceId(replacement?.instanceId ?? null);
+      if (replacement && window.location.pathname !== replacement.entry.basePath)
+        navigate(replacement.entry.basePath);
+      if (!replacement && window.location.pathname !== '/') navigate('/');
+    },
+    [activeInstanceId, tabs],
+  );
 
   useEffect(() => {
     const sync = () => {
@@ -119,7 +143,8 @@ export function PortalHost({
       }
       const existing = tabs.find((tab) => tab.entry.id === entry.id);
       if (existing) setActiveInstanceId(existing.instanceId);
-      else if (counts.current[entry.id]) setActiveInstanceId(`${entry.id}-${counts.current[entry.id]}`);
+      else if (counts.current[entry.id])
+        setActiveInstanceId(`${entry.id}-${counts.current[entry.id]}`);
       else open(entry, false);
     };
     window.addEventListener('popstate', sync);
@@ -127,68 +152,114 @@ export function PortalHost({
   }, [open, registry.applications, tabs]);
 
   const active = tabs.find((tab) => tab.instanceId === activeInstanceId);
-  const capabilities = useMemo<PlatformCapabilities | null>(() => active ? ({
-    navigation: { navigate }, notifications: { show: setNotification },
-    telemetry: { track: (event, data) => console.info('platform-event', { application: active.entry.id, event, data }) },
-    workspace: { closeCurrent: () => close(active.instanceId) }, appearance: appearanceCapability,
-    identity,
-  }) : null, [active, appearanceCapability, close, identity]);
+  const capabilities = useMemo<PlatformCapabilities | null>(
+    () =>
+      active
+        ? {
+            navigation: { navigate },
+            notifications: { show: setNotification },
+            telemetry: {
+              track: (event, data) =>
+                console.info('platform-event', { application: active.entry.id, event, data }),
+            },
+            workspace: { closeCurrent: () => close(active.instanceId) },
+            appearance: appearanceCapability,
+            identity,
+          }
+        : null,
+    [active, appearanceCapability, close, identity],
+  );
   const tilesByCategory = useMemo(() => {
     const search = tileSearch.trim().toLocaleLowerCase();
     const matching = registry.applications.filter((entry) => {
       const tile = tileMetadata(entry);
-      return !search
-        || entry.displayName.toLocaleLowerCase().includes(search)
-        || tile.description.toLocaleLowerCase().includes(search);
+      return (
+        !search ||
+        entry.displayName.toLocaleLowerCase().includes(search) ||
+        tile.description.toLocaleLowerCase().includes(search)
+      );
     });
-    return Array.from(matching.reduce((groups, entry) => {
-      const tile = tileMetadata(entry);
-      const entries = groups.get(tile.category) ?? [];
-      entries.push(entry);
-      groups.set(tile.category, entries);
-      return groups;
-    }, new Map<string, ApplicationRegistryEntry[]>()).entries())
-      .sort(([left], [right]) => left.localeCompare(right));
+    return Array.from(
+      matching
+        .reduce((groups, entry) => {
+          const tile = tileMetadata(entry);
+          const entries = groups.get(tile.category) ?? [];
+          entries.push(entry);
+          groups.set(tile.category, entries);
+          return groups;
+        }, new Map<string, ApplicationRegistryEntry[]>())
+        .entries(),
+    ).sort(([left], [right]) => left.localeCompare(right));
   }, [registry.applications, tileSearch]);
   const identitySnapshot = identity.getSnapshot();
-  const avatarName = identitySnapshot.state === 'authenticated' ? identitySnapshot.userId : 'Operations user';
-  const openTile = useCallback((entry: ApplicationRegistryEntry) => {
-    open(entry);
-    setTilePickerOpen(false);
-    setTileSearch('');
-  }, [open]);
+  const avatarName =
+    identitySnapshot.state === 'authenticated' ? identitySnapshot.userId : 'Operations user';
+  const openTile = useCallback(
+    (entry: ApplicationRegistryEntry) => {
+      open(entry);
+      setTilePickerOpen(false);
+      setTileSearch('');
+    },
+    [open],
+  );
 
   return (
-    <DesignSystemProvider appearance={{ scheme: appearance.scheme, density: appearance.density, direction: appearance.direction }} scope="host">
+    <DesignSystemProvider
+      appearance={{
+        scheme: appearance.scheme,
+        density: appearance.density,
+        direction: appearance.direction,
+      }}
+      scope="host"
+    >
       <div className="portal-shell">
         <PageHeader
           className="portal-app-bar"
           title="Markets Operations One"
-          actions={(
+          actions={
             <>
-              <Button variant="primary" onClick={() => setTilePickerOpen(true)}>New tile</Button>
+              <Button variant="primary" onClick={() => setTilePickerOpen(true)}>
+                New tile
+              </Button>
               <ToggleButton
                 selected={appearance.scheme === 'dark'}
                 ariaLabel={`Use ${appearance.scheme === 'dark' ? 'light' : 'dark'} theme`}
-                onChange={(selected) => setAppearance((current) => {
-                  const scheme = selected ? 'dark' : 'light';
-                  return { ...current, scheme, preference: scheme };
-                })}
+                onChange={(selected) =>
+                  setAppearance((current) => {
+                    const scheme = selected ? 'dark' : 'light';
+                    return { ...current, scheme, preference: scheme };
+                  })
+                }
               >
                 Theme
               </ToggleButton>
-              <IconButton label="Notifications" icon="●" onClick={() => setNotification('No new notifications.')} />
+              <IconButton
+                label="Notifications"
+                icon="●"
+                onClick={() => setNotification('No new notifications.')}
+              />
               <ActionMenu
                 ariaLabel="User actions"
-                trigger={<Button className="portal-avatar-trigger" variant="ghost" aria-label="Open user menu"><Avatar name={avatarName} size="small" /></Button>}
-                items={[{ id: 'profile', label: 'Profile' }, { id: 'logout', label: 'Logout', tone: 'danger' }]}
+                trigger={
+                  <Button
+                    className="portal-avatar-trigger"
+                    variant="ghost"
+                    aria-label="Open user menu"
+                  >
+                    <Avatar name={avatarName} size="small" />
+                  </Button>
+                }
+                items={[
+                  { id: 'profile', label: 'Profile' },
+                  { id: 'logout', label: 'Logout', tone: 'danger' },
+                ]}
                 onAction={(action) => {
                   if (action === 'logout') onLogout?.();
                   else setNotification('Profile is not available in this pilot.');
                 }}
               />
             </>
-          )}
+          }
         />
         <main className="workspace">
           <section className="workspace-surface" aria-label="Application workspace">
@@ -199,21 +270,24 @@ export function PortalHost({
               onSelectionChange={setActiveInstanceId}
               tabs={tabs.map((tab) => {
                 const ordinal = tab.instanceId.split('-').slice(-1)[0];
-                const tabCapabilities = tab.instanceId === activeInstanceId && capabilities
-                  ? capabilities
-                  : {
-                    navigation: { navigate },
-                    notifications: { show: setNotification },
-                    telemetry: {
-                      track: (event: string, data?: Record<string, unknown>) => console.info(
-                        'platform-event',
-                        { application: tab.entry.id, event, data },
-                      ),
-                    },
-                    workspace: { closeCurrent: () => close(tab.instanceId) },
-                    appearance: appearanceCapability,
-                    identity,
-                  };
+                const tabCapabilities =
+                  tab.instanceId === activeInstanceId && capabilities
+                    ? capabilities
+                    : {
+                        navigation: { navigate },
+                        notifications: { show: setNotification },
+                        telemetry: {
+                          track: (event: string, data?: Record<string, unknown>) =>
+                            console.info('platform-event', {
+                              application: tab.entry.id,
+                              event,
+                              data,
+                            }),
+                        },
+                        workspace: { closeCurrent: () => close(tab.instanceId) },
+                        appearance: appearanceCapability,
+                        identity,
+                      };
                 return {
                   id: tab.instanceId,
                   label: `${tab.entry.displayName} ${ordinal}`,
@@ -253,30 +327,60 @@ export function PortalHost({
             onChange={setTileSearch}
           />
           <div className="tile-picker-results">
-            {tilesByCategory.length ? tilesByCategory.map(([category, entries]) => (
-              <section key={category} className="tile-picker-category" aria-labelledby={`tile-category-${category}`}>
-                <h2 id={`tile-category-${category}`}>{category}</h2>
-                <div className="tile-picker-grid">
-                  {entries.map((entry) => {
-                    const tile = tileMetadata(entry);
-                    return (
-                      <Card
-                        key={entry.id}
-                        className="tile-picker-tile"
-                        title={entry.displayName}
-                        description={tile.description}
-                        actions={<Button aria-label={`Open ${entry.displayName}`} variant="secondary" onClick={() => openTile(entry)}>Open</Button>}
-                      >
-                        <span className="tile-picker-icon" aria-hidden="true">{tile.icon}</span>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </section>
-            )) : <EmptyState title="No matching tiles" description="Try a different title or description." icon="?" />}
+            {tilesByCategory.length ? (
+              tilesByCategory.map(([category, entries]) => (
+                <section
+                  key={category}
+                  className="tile-picker-category"
+                  aria-labelledby={`tile-category-${category}`}
+                >
+                  <h2 id={`tile-category-${category}`}>{category}</h2>
+                  <div className="tile-picker-grid">
+                    {entries.map((entry) => {
+                      const tile = tileMetadata(entry);
+                      return (
+                        <Card
+                          key={entry.id}
+                          className="tile-picker-tile"
+                          title={entry.displayName}
+                          description={tile.description}
+                          actions={
+                            <Button
+                              aria-label={`Open ${entry.displayName}`}
+                              variant="secondary"
+                              onClick={() => openTile(entry)}
+                            >
+                              Open
+                            </Button>
+                          }
+                        >
+                          <span className="tile-picker-icon" aria-hidden="true">
+                            {tile.icon}
+                          </span>
+                          <StatusBadge status="ready">Available</StatusBadge>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </section>
+              ))
+            ) : (
+              <EmptyState
+                title="No matching tiles"
+                description="Try a different title or description."
+                icon="?"
+              />
+            )}
           </div>
         </Dialog>
-        {notification ? <Toast className="notification" message={notification} tone="success" onDismiss={() => setNotification(null)} /> : null}
+        {notification ? (
+          <Toast
+            className="notification"
+            message={notification}
+            tone="success"
+            onDismiss={() => setNotification(null)}
+          />
+        ) : null}
       </div>
     </DesignSystemProvider>
   );

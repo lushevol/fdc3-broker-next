@@ -1,6 +1,6 @@
 import { LitElement } from 'lit';
 import { safeMixin, TConstructor } from '../shared/mixin.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import SlPopup from '@shoelace-style/shoelace/dist/components/popup/popup.component.js';
 
 type TVirtualAnchor = {

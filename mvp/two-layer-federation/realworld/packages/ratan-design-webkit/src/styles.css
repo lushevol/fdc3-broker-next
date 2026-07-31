@@ -31,7 +31,7 @@
     line-height: var(--ratan-line-height-body);
   }
 
-  [data-ratan-component="dialog"] {
+  [data-ratan-component='dialog'] {
     display: contents;
   }
 
@@ -59,6 +59,14 @@
   .ratan-webkit-dialog-close:focus-visible {
     outline: 2px solid var(--ratan-color-focus-ring);
     outline-offset: 2px;
+  }
+}
+
+@layer ratan-webkit.components {
+  .ratan-status-badge[data-ratan-implementation='webkit'] {
+    min-height: auto;
+    padding: 0;
+    background: transparent;
   }
 }
 
