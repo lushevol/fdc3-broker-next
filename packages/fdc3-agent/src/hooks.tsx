@@ -137,15 +137,7 @@ export const AgentProvider: React.FC<{
   // synchronous creation always succeeds in practice.  The async fallback in
   // the effect below handles the vanishingly rare broker-not-ready edge case.
   const agent = React.useMemo<RatanDesktopAgent | null>(() => {
-    if (!appIdentifier) {
-      // No scoping required — use the raw broker directly.
-      try {
-        return getAgentApi();
-      } catch {
-        return null;
-      }
-    }
-    return tryCreateScopedAgent(appIdentifier);
+    return tryGetAgent(appIdentifier);
   }, [appIdentifier]);
 
   // Async fallback when the broker wasn't ready during render (edge case).
@@ -160,23 +152,21 @@ export const AgentProvider: React.FC<{
     let mounted = true;
 
     const retry = () => {
-      const scoped = tryCreateScopedAgent(appIdentifier);
+      const scoped = tryGetAgent(appIdentifier);
       if (!mounted) return;
       if (scoped) {
         setAsyncAgent(scoped);
         setError(null);
-      } else if (appIdentifier) {
+      } else {
         setTimeout(retry, 100);
       }
     };
 
     // Show initial error state (useful for debugging the edge case)
-    if (appIdentifier) {
-      try {
-        getAgentApi();
-      } catch (err) {
-        if (mounted) setError(err as Error);
-      }
+    try {
+      getAgentApi();
+    } catch (err) {
+      if (mounted) setError(err as Error);
     }
 
     setTimeout(retry, 100);
@@ -212,12 +202,13 @@ export const AgentProvider: React.FC<{
   return <AgentContext.Provider value={value}>{children}</AgentContext.Provider>;
 };
 
-/** Helper: create a ScopedDesktopAgent when the broker is available, or return null. */
-function tryCreateScopedAgent(appIdentifier: AppIdentifier | undefined): RatanDesktopAgent | null {
-  if (!appIdentifier) return null;
+/** Helper: resolve the raw or scoped agent when the broker is available. */
+function tryGetAgent(appIdentifier: AppIdentifier | undefined): RatanDesktopAgent | null {
   try {
     const brokerInstance = getAgentApi();
-    return new ScopedDesktopAgent(brokerInstance as unknown as Broker, appIdentifier);
+    return appIdentifier
+      ? new ScopedDesktopAgent(brokerInstance as unknown as Broker, appIdentifier)
+      : brokerInstance;
   } catch {
     return null;
   }
@@ -421,10 +412,16 @@ export function useIntentListener(intent: string, handler: IntentHandler): void 
 
   useEffect(() => {
     let listener: Listener | null = null;
+    let disposed = false;
 
     const setupListener = async () => {
       try {
-        listener = await fdc3.addIntentListener(intent, handler);
+        const registeredListener = await fdc3.addIntentListener(intent, handler);
+        if (disposed) {
+          await registeredListener.unsubscribe();
+        } else {
+          listener = registeredListener;
+        }
       } catch (error) {
         console.error('Error adding intent listener:', error);
       }
@@ -433,8 +430,10 @@ export function useIntentListener(intent: string, handler: IntentHandler): void 
     setupListener();
 
     return () => {
+      disposed = true;
       if (listener) {
-        listener.unsubscribe();
+        void listener.unsubscribe();
+        listener = null;
       }
     };
   }, [fdc3, intent, handler]);
@@ -516,10 +515,16 @@ export function useContextListener(
 
   useEffect(() => {
     let listener: Listener | null = null;
+    let disposed = false;
 
     const setupListener = async () => {
       try {
-        listener = await fdc3.addContextListener(contextType, handler);
+        const registeredListener = await fdc3.addContextListener(contextType, handler);
+        if (disposed) {
+          await registeredListener.unsubscribe();
+        } else {
+          listener = registeredListener;
+        }
       } catch (error) {
         console.error('Error adding context listener:', error);
       }
@@ -528,8 +533,10 @@ export function useContextListener(
     setupListener();
 
     return () => {
+      disposed = true;
       if (listener) {
-        listener.unsubscribe();
+        void listener.unsubscribe();
+        listener = null;
       }
     };
   }, [fdc3, contextType, handler]);

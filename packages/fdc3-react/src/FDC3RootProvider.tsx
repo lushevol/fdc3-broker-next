@@ -150,6 +150,7 @@ export const FDC3RootProvider: React.FC<FDC3RootProviderProps> = ({
       resolverCompletionRef.current?.(null);
       resolverCompletionRef.current = null;
       destroyFDC3LogService();
+      broker.destroy();
 
       try {
         if (getAgentApi() === broker) {

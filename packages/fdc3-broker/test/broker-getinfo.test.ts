@@ -113,10 +113,6 @@ describe('Broker getInfo()', () => {
     it('should return valid version format', async () => {
       const info = await broker.getInfo();
 
-      // Version should be semver-like or similar format
-      const versionPattern = /^\d+\.\d+(\.\d+)?([-.].+)?$/;
-      const isValidVersion = versionPattern.test(info.providerVersion);
-
       // Provider version should follow some version format
       expect(info.providerVersion).toMatch(/\d/);
     });

@@ -63,6 +63,19 @@ afterEach(() => {
 });
 
 describe('FDC3RootProvider', () => {
+  it('destroys the owned broker when the provider unmounts', () => {
+    const { unmount } = render(
+      <FDC3RootProvider apps={apps} platform={createPlatform()}>
+        <div />
+      </FDC3RootProvider>,
+    );
+    const destroy = vi.spyOn(getAgentApi(), 'destroy');
+
+    unmount();
+
+    expect(destroy).toHaveBeenCalledOnce();
+  });
+
   it('accepts a host Module Federation loading capability', async () => {
     const RemoteComponent = () => <div>Federated component</div>;
     const loadRemote = vi.fn(async () => ({ TradeSummary: RemoteComponent }));

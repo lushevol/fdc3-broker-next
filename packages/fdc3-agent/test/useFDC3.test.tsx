@@ -3,7 +3,7 @@
  * @see plan.md#T094
  */
 
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, render, renderHook, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '@testing-library/jest-dom';
 import { clearBroker, getAgentApi, setBroker } from '../src/agent';
@@ -78,6 +78,86 @@ describe('useFDC3 hook', () => {
   });
 
   describe('with AgentProvider', () => {
+    it('renders a diagnostic when a scoped provider starts before the broker', async () => {
+      clearBroker();
+
+      render(
+        <AgentProvider appIdentifier={{ appId: 'late-app', instanceId: 'late-1' }}>
+          <div>Child content</div>
+        </AgentProvider>,
+      );
+
+      expect(await screen.findByText(/FDC3 Agent not initialized/)).toBeInTheDocument();
+      expect(screen.queryByText('Child content')).not.toBeInTheDocument();
+    });
+
+    it('recovers when the broker becomes available during the retry window', async () => {
+      vi.useFakeTimers();
+      clearBroker();
+      try {
+        render(
+          <AgentProvider appIdentifier={{ appId: 'late-app', instanceId: 'late-1' }}>
+            <div>Recovered content</div>
+          </AgentProvider>,
+        );
+        setBroker(mockDesktopAgent);
+
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(100);
+        });
+
+        expect(screen.getByText('Recovered content')).toBeInTheDocument();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('continues retrying until the broker becomes available', async () => {
+      vi.useFakeTimers();
+      clearBroker();
+      try {
+        render(
+          <AgentProvider appIdentifier={{ appId: 'late-app', instanceId: 'late-1' }}>
+            <div>Eventually recovered</div>
+          </AgentProvider>,
+        );
+
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(100);
+        });
+        expect(screen.queryByText('Eventually recovered')).not.toBeInTheDocument();
+
+        setBroker(mockDesktopAgent);
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(100);
+        });
+        expect(screen.getByText('Eventually recovered')).toBeInTheDocument();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+
+    it('stops a pending provider retry after unmount', async () => {
+      vi.useFakeTimers();
+      clearBroker();
+      try {
+        const { unmount } = render(
+          <AgentProvider appIdentifier={{ appId: 'late-app', instanceId: 'late-1' }}>
+            <div />
+          </AgentProvider>,
+        );
+        unmount();
+        setBroker(mockDesktopAgent);
+
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(100);
+        });
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('should return DesktopAgent instance from context', async () => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <AgentProvider>{children}</AgentProvider>

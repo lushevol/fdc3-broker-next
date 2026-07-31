@@ -102,4 +102,23 @@ describe('PerformanceTracker', () => {
     const entries = performance.getEntriesByType?.('measure') ?? [];
     expect(entries.some((entry) => entry.name.startsWith('fdc3:raiseIntent:'))).toBe(true);
   });
+
+  it('bounds retained metrics and works without the User Timing API', () => {
+    const tracker = new PerformanceTracker();
+    for (let index = 0; index < 101; index += 1) {
+      const id = tracker.start(`operation-${index}`);
+      tracker.end(id);
+    }
+    expect(tracker.getPerfLogs()).toHaveLength(100);
+
+    const originalPerformance = globalThis.performance;
+    vi.stubGlobal('performance', { now: () => 1 });
+    try {
+      const embeddedTracker = new PerformanceTracker();
+      const id = embeddedTracker.start('embedded-operation');
+      expect(embeddedTracker.end(id)).toBe(0);
+    } finally {
+      vi.stubGlobal('performance', originalPerformance);
+    }
+  });
 });

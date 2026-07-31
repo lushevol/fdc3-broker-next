@@ -77,4 +77,16 @@ describe('Logger', () => {
 
     expect(debug).toHaveBeenCalledWith('[FDC3:DEBUG] now visible', '');
   });
+
+  it('uses stable empty placeholders when optional log payloads are omitted', () => {
+    const logger = new Logger(true, LogLevel.DEBUG);
+
+    logger.warn('warning without data');
+    logger.error('error without details');
+    logger.security('security without data');
+
+    expect(warn).toHaveBeenCalledWith('[FDC3:WARN] warning without data', '');
+    expect(error).toHaveBeenCalledWith('[FDC3:ERROR] error without details', '', '');
+    expect(warn).toHaveBeenCalledWith('[FDC3:SECURITY] security without data', '');
+  });
 });

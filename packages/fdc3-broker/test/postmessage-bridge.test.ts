@@ -180,6 +180,80 @@ describe('PostMessageBridge', () => {
   });
 
   describe('raiseIntentExternal', () => {
+    it('uses the configured trusted origin when no target origin is supplied', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://example.com'],
+      });
+
+      const promise = bridge.raiseIntentExternal('ViewChart', { type: 'fdc3.instrument' });
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+
+      expect(mockPostMessage).toHaveBeenCalledWith(sentMessage, 'http://example.com');
+
+      messageHandler?.({
+        data: {
+          type: 'fdc3-pm-response',
+          correlationId: sentMessage.correlationId,
+          method: 'raiseIntent',
+          success: true,
+          payload: { source: { appId: 'external-app' }, intent: 'ViewChart' },
+          meta: { timestamp: new Date().toISOString(), origin: 'http://example.com' },
+        },
+        origin: 'http://example.com',
+        source: window.parent,
+      } as MessageEvent);
+
+      await expect(promise).resolves.toEqual(
+        expect.objectContaining({ source: { appId: 'external-app' } }),
+      );
+    });
+
+    it('ignores responses from a different allowed origin or source window', async () => {
+      const bridge = new PostMessageBridge({
+        allowedOrigins: ['http://target.com', 'http://other.com'],
+      });
+      const promise = bridge.raiseIntentExternal(
+        'ViewChart',
+        { type: 'fdc3.instrument' },
+        undefined,
+        'http://target.com',
+      );
+      const sentMessage = mockPostMessage.mock.calls[0][0] as PostMessageRequest;
+      let settled = false;
+      void promise.then(() => {
+        settled = true;
+      });
+
+      const response = {
+        type: 'fdc3-pm-response',
+        correlationId: sentMessage.correlationId,
+        method: 'raiseIntent',
+        success: true,
+        payload: { source: { appId: 'external-app' }, intent: 'ViewChart' },
+        meta: { timestamp: new Date().toISOString(), origin: 'http://target.com' },
+      };
+
+      messageHandler?.({
+        data: response,
+        origin: 'http://other.com',
+        source: window.parent,
+      } as MessageEvent);
+      messageHandler?.({
+        data: response,
+        origin: 'http://target.com',
+        source: { postMessage: vi.fn() } as unknown as Window,
+      } as MessageEvent);
+      await Promise.resolve();
+      expect(settled).toBe(false);
+
+      messageHandler?.({
+        data: response,
+        origin: 'http://target.com',
+        source: window.parent,
+      } as MessageEvent);
+      await expect(promise).resolves.toBeDefined();
+    });
+
     it('should throw when bridge is disabled', async () => {
       const bridge = new PostMessageBridge({
         allowedOrigins: [],

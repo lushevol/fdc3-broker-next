@@ -128,14 +128,14 @@ export class ScopedDesktopAgent implements RatanDesktopAgent {
   }
 
   async getInfo(): Promise<ImplementationMetadata> {
-    return this.broker.getInfo();
+    return this.broker.getInfo(this.source);
   }
 
   async addEventListener(
     eventType: FDC3EventTypes | null,
     handler: EventHandler,
   ): Promise<Listener> {
-    return this.broker.addEventListener(eventType, handler);
+    return this.broker.addEventListener(eventType, handler, this.source);
   }
 
   // Alias methods for compatibility
