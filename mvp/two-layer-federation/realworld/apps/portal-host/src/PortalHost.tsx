@@ -22,7 +22,7 @@ import {
   Toast,
   ToggleButton,
   WorkspaceTabs,
-} from '@fm/ratan-design';
+} from '@fm/ratan-design-webkit';
 import { persistAppearance, readStoredAppearance } from './appearance';
 import { ANONYMOUS_IDENTITY_CAPABILITY } from './identity';
 import { RemoteApplication } from './RemoteApplication';

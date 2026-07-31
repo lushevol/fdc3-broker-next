@@ -1,5 +1,5 @@
 import React, { type ErrorInfo, type ReactNode } from 'react';
-import { ErrorState } from '@fm/ratan-design';
+import { ErrorState } from '@fm/ratan-design-webkit';
 
 interface Props { applicationName: string; resetKey: string; children: ReactNode }
 interface State { error: Error | null }

@@ -3,7 +3,7 @@
 ## Ratan-first UI
 
 - All basic user-interface components must come from the public
-  `@fm/ratan-design` API: buttons and links styled as actions; text, number,
+  `@fm/ratan-design-webkit` API: buttons and links styled as actions; text, number,
   password, date, select, switch, and text-area inputs; tabs and navigation;
   cards and description lists; dialogs; alerts, toasts, progress, empty states,
   and error states.

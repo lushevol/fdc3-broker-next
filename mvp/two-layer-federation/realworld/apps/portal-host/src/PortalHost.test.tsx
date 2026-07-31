@@ -62,13 +62,15 @@ describe('production PortalHost', () => {
   it('finds tiles by title or description, then opens the selected tile', async () => {
     render(<PortalHost registry={{ applications: [entry] }} runtime={runtime()} />);
     fireEvent.click(screen.getByRole('button', { name: 'New tile' }));
-    expect(screen.getByRole('dialog', { name: 'New tile' })).toBeInTheDocument();
+    const dialog = document.querySelector('sc-dialog');
+    expect(dialog).toHaveProperty('label', 'New tile');
+    expect(dialog).toHaveAttribute('data-ratan-component', 'dialog');
     expect(screen.getByText('Operations')).toBeInTheDocument();
     fireEvent.change(screen.getByRole('textbox', { name: 'Search tiles' }), { target: { value: 'liquidity' } });
     expect(screen.getByText('Cashflow')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
     expect(await screen.findByText(/Remote cashflow-1/)).toBeInTheDocument();
-    expect(screen.queryByRole('dialog', { name: 'New tile' })).not.toBeInTheDocument();
+    expect(document.querySelector('sc-dialog')).not.toBeInTheDocument();
   });
 
   it('offers profile and logout from the avatar menu', () => {
@@ -87,7 +89,8 @@ describe('production PortalHost', () => {
     expect(screen.getByText('Platform')).toBeInTheDocument();
     fireEvent.change(screen.getByRole('textbox', { name: 'Search tiles' }), { target: { value: 'unknown' } });
     expect(screen.getByText('No matching tiles')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Close New tile' }));
+    fireEvent(document.querySelector('sc-dialog') as Element, new CustomEvent('sc-hide'));
+    expect(document.querySelector('sc-dialog')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Notifications' }));
     expect(screen.getByRole('status')).toHaveTextContent('No new notifications.');
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }));

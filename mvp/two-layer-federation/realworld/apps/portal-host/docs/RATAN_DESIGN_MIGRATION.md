@@ -3,15 +3,22 @@
 ## Principle
 
 All basic UI components in the portal host come from the public
-`@fm/ratan-design` API. Host code may compose page landmarks and remote mount
-boundaries, but it must not create a local visual or interactive replacement
-for a Ratan primitive.
+`@fm/ratan-design-webkit` API. Host code may compose page landmarks and remote
+mount boundaries, but it must not create a local visual or interactive
+replacement for a Ratan primitive.
 
 ## Requirement
 
 The portal host must compose its production user interface from the public
-`@fm/ratan-design` API. The host continues to own application state, routing,
-capability injection, and layout composition.
+`@fm/ratan-design-webkit` API. The host continues to own application state,
+routing, capability injection, and layout composition.
+
+The WebKit package is the migration boundary. It activates the `--sc-*` token
+layer and preserves the established React component contracts while imported
+Lit components are validated and promoted individually. Dismissible dialogs
+now render the promoted `ScDialog` implementation; non-dismissible dialogs
+retain the established implementation until WebKit exposes equivalent
+dismissal controls.
 
 ## Design ownership
 

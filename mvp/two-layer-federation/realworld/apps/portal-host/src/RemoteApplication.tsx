@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ApplicationRegistryEntry, FederatedApplicationModule, PlatformCapabilities } from '@fm/platform-contracts';
-import { Button, ErrorState, ProgressCircle } from '@fm/ratan-design';
+import {
+  Button,
+  ErrorState,
+  ProgressCircle,
+} from '@fm/ratan-design-webkit';
 import { ApplicationBoundary } from './ApplicationBoundary';
 import { loadFederatedApplication, type RemoteRuntime } from './remote';
 

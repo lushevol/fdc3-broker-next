@@ -11,7 +11,7 @@ import {
   PasswordField,
   Tabs,
   TextField,
-} from '@fm/ratan-design';
+} from '@fm/ratan-design-webkit';
 import {
   useState,
   type FormEvent,

@@ -22,7 +22,13 @@ export class ScDialog extends ScElement {
   }
 
   renderDialogStyle() {
-    const dialogStyle = html` <style></style> `;
+    const dialogStyle = html`
+      <style>
+        sl-dialog::part(close-button) {
+          display: none;
+        }
+      </style>
+    `;
 
     return html` ${dialogStyle} `;
   }
@@ -33,27 +39,36 @@ export class ScDialog extends ScElement {
       <sl-dialog
         .label=${this.label}
         .open=${this.open}
-        class='sc-dialog'
+        class="sc-dialog"
+        @sl-request-close=${() => {
+          this.open = false;
+          this.emit('sc-hide', {
+            detail: {
+              open: false,
+            },
+          });
+        }}
         @sl-show=${(event: CustomEvent) => {
-    this.stopDefaultEvent(event);
-    this.emit('sc-show', {
-      detail: {
-        open: true,
-      },
-    });
-  }}
+          this.stopDefaultEvent(event);
+          this.emit('sc-show', {
+            detail: {
+              open: true,
+            },
+          });
+        }}
         @sl-hide=${(event: CustomEvent) => {
-    this.stopDefaultEvent(event);    
-    this.emit('sc-hide', {
-      detail: {
-        open: false,
-      },
-    });
-  }}
+          this.stopDefaultEvent(event);
+          this.emit('sc-hide', {
+            detail: {
+              open: false,
+            },
+          });
+        }}
       >
         <slot></slot>
-        <slot name='label'></slot>
-        <slot name='footer'></slot>
+        <slot name="label"></slot>
+        <slot name="header-actions" slot="header-actions"></slot>
+        <slot name="footer"></slot>
       </sl-dialog>
     `;
   }

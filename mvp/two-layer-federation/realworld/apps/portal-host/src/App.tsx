@@ -5,7 +5,7 @@ import {
   DesignSystemProvider,
   ErrorState,
   ProgressCircle,
-} from '@fm/ratan-design';
+} from '@fm/ratan-design-webkit';
 import { PortalHost } from './PortalHost';
 import {
   createIdentityCapability,

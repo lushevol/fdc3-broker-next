@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
-import '@fm/ratan-design/styles.css';
+import '@fm/ratan-design-webkit/styles.css';
 import './styles.css';
 
 const root = document.getElementById('root');
