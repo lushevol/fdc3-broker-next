@@ -1,0 +1,37 @@
+# mfe webapps
+{% for app in mfe_webapps %}
+upstream {{ app.name }}-{{ ratan_env }} {
+    least_conn;
+    {% for host in groups['frontend_webapps'] %}
+    server {{ nginx_instances[host].ansible_ssh_host }}:{{ app.port }};
+    {% endfor %}
+}
+{% endfor %}
+
+include config-ratan/non_ratan_upstream.conf;
+
+# backend services
+{% for app in backend_services %}
+
+{%- set backend_hosts = ratan_env -%}
+{% if app.app_name in backend_instances -%}
+{%- set backend_hosts = backend_instances[app.app_name] -%}
+{% endif %}
+
+upstream {{ app.name }}-{{ ratan_env }} {
+    least_conn;
+    {% for host in groups[backend_hosts] %}
+    server {{ nginx_instances[host].ansible_ssh_host }}:{{ app.port }} max_fails=3 fail_timeout=60s;
+    {% endfor %}
+}
+{% endfor %}
+
+# infra services
+{% for app in infra_services %}
+upstream {{ app.name }}-{{ ratan_env }} {
+    least_conn;
+    {% for host in groups[app.name] %}
+    server {{ nginx_instances[host].ansible_ssh_host }}:{{ app.port }};
+    {% endfor %}
+}
+{% endfor %}

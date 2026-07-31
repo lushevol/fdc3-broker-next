@@ -30,7 +30,7 @@ export default defineConfig({
   dev: {
     lazyCompilation: false,
   },
-  output: { assetPrefix: 'http://127.0.0.1:9206/' },
+  output: { assetPrefix: 'auto' },
   resolve: {
     alias: {
       stompjs: path.join(workspaceDir, 'src/compat/stomp.ts'),

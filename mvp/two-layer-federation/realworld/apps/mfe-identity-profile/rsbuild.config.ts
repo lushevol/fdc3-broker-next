@@ -14,5 +14,5 @@ export default defineConfig({
       'Cache-Control': 'no-store',
     },
   },
-  output: { assetPrefix: 'http://127.0.0.1:9202/' },
+  output: { assetPrefix: 'auto' },
 });

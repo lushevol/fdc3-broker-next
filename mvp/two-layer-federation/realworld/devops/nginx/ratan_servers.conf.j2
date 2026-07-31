@@ -1,0 +1,335 @@
+# proxy server {{ nginx_listen_port }}
+
+{% if backend_ssl_enabled | bool %}
+    {%- set backend_protocal = "https" -%}
+    {%- set grpc_protocal = "grpcs" -%}
+{% else %}
+    {%- set backend_protocal = "http" -%}
+    {%- set grpc_protocal = "grpc" -%}
+{% endif %}
+
+{% if ssl_enabled | bool %}
+    {%- set frontend_protocal = "https" -%}
+{% else %}
+    {%- set frontend_protocal = "http" -%}
+{% endif %}
+
+{%- set content_security_policies = [] -%}
+{% for app in frontend_webapps -%}
+    {{ content_security_policies.append(frontend_protocal + "://"  + app.host + ":" + (alb_port | string)) }}
+{%- endfor %}
+
+
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+# server config
+
+server {
+
+    {% if ssl_enabled|bool -%}
+    listen           {{ nginx_listen_port }} ssl;
+    {% else %}
+    listen           {{ nginx_listen_port }};
+    {% endif %}
+
+    server_name      fmo-shell{{ server_domain_suffix }};
+    gzip             on;
+    gzip_min_length  100;
+    gzip_buffers     8 32k;
+    gzip_types       text/plain text/css application/x-javascript text/xml application/xml text/javascript application/json;
+    gzip_vary        on;
+
+    add_header       X-XSS-Protection "1; mode=block";
+    add_header       X-Content-Type-Options nosniff;
+    add_header       Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' data:; frame-src {{ content_security_policies | join(' ') }}";
+    add_header       Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    if ($request_method ~ ^(TRACE|TRACK|OPTIONS)$) {
+        return 444;
+    }
+
+    {% if ssl_enabled|bool -%}
+    include config-ratan/ratan_ssl.conf;
+    {% endif %}
+
+    location ^~ /api/ {
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass {{backend_protocal}}://api-gateway-{{ ratan_env }};
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+
+    location /zipkin {
+        auth_basic "Restricted Area";
+        auth_basic_user_file {{ frontend_config_path }}/ratan.password;
+        proxy_pass {{ backend_protocal }}://zipkin-{{ ratan_env }};
+    }
+
+    location / {
+        return 302 https://{{ nginx_server_name }}:{{ nginx_listen_port }};
+    }
+
+}
+
+server {
+
+    {% if ssl_enabled|bool -%}
+    listen           {{ nginx_listen_port }} ssl http2;
+    {% else %}
+    listen           {{ nginx_listen_port }};
+    {% endif %}
+
+    server_name      {{ nginx_server_name }};
+    gzip             on;
+    gzip_min_length  100;
+    gzip_buffers     8 32k;
+    gzip_types       text/plain text/css application/x-javascript text/xml application/xml text/javascript application/json application/javascript;
+    gzip_vary        on;
+
+    add_header       X-XSS-Protection "1; mode=block";
+    add_header       X-Frame-Options SAMEORIGIN;
+    add_header       Referrer-Policy "same-origin";
+    add_header       X-Content-Type-Options nosniff;
+    add_header       Content-Security-Policy "default-src 'self' https: http:; font-src 'self' data: https: http:; script-src blob: fmo-mfe.uk.dev.net:8453 uklvadapp1342.uk.dev.net:8453 uklvadapp1344.uk.dev.net:8453 uklvadapp1346.uk.dev.net:8453 fmo-mfe-fmrp1.pi.dev.net:8453 fmo-mfe-fmrp2.pi.dev.net:8453 fmo-mfe-preprod.pi.dev.net:8453 fmo-mfe.gdc.standardchartered.com:8453 'sha256-tebHgdaDZ6TWUMJWNAVOa7L1SwN1PO4g6XyapHyomK8=' 'sha256-CytrTGH5wF3O+BNikORjMDOOL87Z4DDjyKV5yShb3ZM='; img-src 'self' data: https: http:; connect-src 'self' data: https: http: wss: ws://localhost:*; style-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:; object-src 'none'; frame-src 'self' blob:";
+    add_header       Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    error_page 497 301 =307 https://$host:$server_port$request_uri;
+
+    if ($request_method ~ ^(TRACE|TRACK|OPTIONS)$) {
+        return 444;
+    }
+
+    {% if ssl_enabled|bool -%}
+    include config-ratan/ratan_ssl.conf;
+    {% endif %}
+
+    {%- for app in mfe_webapps %}
+
+    {% if app.name not in ["mfe-root-config", "mfe-openfin"] -%}
+    location /{{ app.endpoint }}/ {
+        rewrite ^/{{ app.endpoint }}/(.*)$ /$1 break;
+        proxy_redirect    off;
+        proxy_set_header  Host $host;
+        proxy_set_header  X-Real-IP $remote_addr;
+        proxy_set_header  X-Forwarded-Proto http;
+        proxy_set_header  X-Forwarded-For $remote_addr;
+        proxy_set_header  X-Forwarded-Host $remote_addr;
+        proxy_pass http://{{ app.name }}-{{ ratan_env }};
+    }
+    {% endif %}
+
+    {% endfor %}
+
+    # mfe openfin
+    location /mfe_openfin/ {
+        rewrite ^/mfe_openfin/(.*)$ /$1 break;
+        proxy_hide_header Content-Security-Policy;
+        add_header        X-CSP-Override "true";
+        proxy_redirect    off;
+        proxy_set_header  Host $host;
+        proxy_set_header  X-Real-IP $remote_addr;
+        proxy_set_header  X-Forwarded-Proto http;
+        proxy_set_header  X-Forwarded-For $remote_addr;
+        proxy_set_header  X-Forwarded-Host $remote_addr;
+        proxy_pass http://mfe-openfin-{{ ratan_env }};
+    }
+
+    # mfe health for EKS
+    location /health {
+        proxy_redirect    off;
+        proxy_set_header  Host $host;
+        proxy_set_header  X-Real-IP $remote_addr;
+        proxy_set_header  X-Forwarded-Proto http;
+        proxy_set_header  X-Forwarded-For $remote_addr;
+        proxy_set_header  X-Forwarded-Host $remote_addr;
+        proxy_pass http://mfe-base-{{ ratan_env }}/health;
+    }
+
+    # mfe base backend: Auth Service
+    location /api/auth/ {
+        rewrite ^/api/auth/(.*)$ /$1 break;
+        proxy_redirect    off;
+        proxy_set_header  Host $host;
+        proxy_set_header  X-Real-IP $remote_addr;
+        proxy_set_header  X-Forwarded-Proto http;
+        proxy_set_header  X-Forwarded-For $remote_addr;
+        proxy_set_header  X-Forwarded-Host $remote_addr;
+        proxy_pass {{backend_protocal}}://api-gateway-{{ ratan_env }};
+    }
+
+    # ratan backend: stmcn GraphQL Service
+    location /api/ratan/stmcn/v1/cashflows {
+        proxy_redirect    off;
+        proxy_set_header  Host $host;
+        proxy_set_header  X-Real-IP $remote_addr;
+        proxy_set_header  X-Forwarded-Proto http;
+        proxy_set_header  X-Forwarded-For $remote_addr;
+        proxy_set_header  X-Forwarded-Host $remote_addr;
+        proxy_pass {{backend_protocal}}://api-gateway-{{ ratan_env }}/graphql;
+    }
+
+    # ratan backend: cashflow notification socket Service
+    location /api/ratan/notification/ {
+        rewrite ^/api/ratan/notification/(.*)$ /$1 break;
+        proxy_pass {{backend_protocal}}://query-service-{{ ratan_env }};
+        proxy_redirect    off;
+        proxy_set_header  Host $host;
+        proxy_set_header  X-Real-IP $remote_addr;
+        proxy_set_header  X-Forwarded-Proto http;
+        proxy_set_header  X-Forwarded-For $remote_addr;
+        proxy_set_header  X-Forwarded-Host $remote_addr;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+    }
+    
+    # ratan sse: Server-sent event location   
+    location /api/ratan/sse/ {
+        rewrite ^/api/ratan/sse/(.*)$ /$1 break;
+        proxy_pass {{backend_protocal}}://api-gateway-{{ ratan_env }};
+        proxy_redirect    off;
+        proxy_set_header  Host $host;
+        proxy_set_header  X-Real-IP $remote_addr;
+        proxy_set_header  X-Forwarded-Proto http;
+        proxy_set_header  X-Forwarded-For $remote_addr;
+        proxy_set_header  X-Forwarded-Host $remote_addr;
+        proxy_http_version 1.1; 
+        proxy_set_header Connection '';
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 180s;
+        proxy_send_timeout 180s;
+   }
+
+    # mfe base backend: Analytics Service
+    location /api/analytics/ {
+        rewrite ^/api/analytics/(.*)$ /$1 break;
+        proxy_redirect    off;
+        proxy_set_header  Host $host;
+        proxy_set_header  X-Real-IP $remote_addr;
+        proxy_set_header  X-Forwarded-Proto http;
+        proxy_set_header  X-Forwarded-For $remote_addr;
+        proxy_set_header  X-Forwarded-Host $remote_addr;
+        proxy_pass {{backend_protocal}}://api-gateway-{{ ratan_env }};
+    }
+
+    location /api/ratan/da/ {
+        rewrite ^/api/ratan/da/(.*)$ /$1 break;
+        proxy_redirect    off;
+        proxy_set_header  Host $host;
+        proxy_set_header  X-Real-IP $remote_addr;
+        proxy_set_header  X-Forwarded-Proto http;
+        proxy_set_header  X-Forwarded-For $remote_addr;
+        proxy_set_header  X-Forwarded-Host $remote_addr;
+        proxy_set_header  request-source nginx-direct;
+        proxy_pass {{backend_protocal}}://data-ambassador-{{ ratan_env }};
+    }
+
+    # ratan backend: api gateway Service
+    location /api/ratan/ {
+        rewrite ^/api/ratan/(.*)$ /$1 break;
+        proxy_redirect    off;
+        proxy_set_header  Host $host;
+        proxy_set_header  X-Real-IP $remote_addr;
+        proxy_set_header  X-Forwarded-Proto http;
+        proxy_set_header  X-Forwarded-For $remote_addr;
+        proxy_set_header  X-Forwarded-Host $remote_addr;
+        proxy_read_timeout 360s;
+        proxy_pass {{backend_protocal}}://api-gateway-{{ ratan_env }};
+    }
+
+    # ratan grpc data provide service
+    location /RatanBusinessDataProvideService/ {
+        grpc_pass {{grpc_protocal}}://api-gateway-{{ ratan_env }};
+    }
+
+    include config-ratan/non_ratan_proxy.conf;
+
+    location / {
+        proxy_redirect    off;
+        proxy_set_header  Host $host;
+        proxy_set_header  X-Real-IP $remote_addr;
+        proxy_set_header  X-Forwarded-Proto http;
+        proxy_set_header  X-Forwarded-For $remote_addr;
+        proxy_set_header  X-Forwarded-Host $remote_addr;
+        proxy_pass http://mfe-root-config-{{ ratan_env }};
+    }
+
+}
+
+
+{%- for app in infra_services %}
+    {% if app.enabled|bool %}
+server {
+
+    {% if ssl_enabled|bool -%}
+    listen           {{ nginx_listen_port }} ssl;
+    {% else %}
+    listen           {{ nginx_listen_port }};
+    {% endif %}
+
+    server_name      {{ app.host }};
+
+    gzip             on;
+    gzip_min_length  100;
+    gzip_buffers     8 32k;
+    gzip_types       text/plain text/css application/x-javascript text/xml application/xml text/javascript application/json;
+    gzip_vary        on;
+
+    add_header       X-XSS-Protection "1; mode=block";
+    add_header       X-Content-Type-Options nosniff;
+    add_header       Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    if ($request_method ~ ^(TRACE|TRACK|OPTIONS)$) {
+        return 444;
+    }
+
+    {% if ssl_enabled|bool -%}
+        include config-ratan/ratan_ssl.conf;
+    {% endif %}
+
+    location / {
+        proxy_pass {{ backend_protocal }}://{{ app.name }}-{{ ratan_env }};
+    }
+}
+    {% endif %}
+{% endfor %}
+
+{%- for app in backend_services %}
+    {% if app.exposed|bool %}
+server {
+
+    {% if ssl_enabled|bool -%}
+    listen           {{ nginx_listen_port }} ssl;
+    {% else %}
+    listen           {{ nginx_listen_port }};
+    {% endif %}
+
+    server_name      {{ app.host }};
+
+    gzip             on;
+    gzip_min_length  100;
+    gzip_buffers     8 32k;
+    gzip_types       text/plain text/css application/x-javascript text/xml application/xml text/javascript application/json;
+    gzip_vary        on;
+
+    add_header       X-XSS-Protection "1; mode=block";
+    add_header       X-Content-Type-Options nosniff;
+    add_header       Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    if ($request_method ~ ^(TRACE|TRACK|OPTIONS)$) {
+        return 444;
+    }
+
+    {% if ssl_enabled|bool -%}
+        include config-ratan/ratan_ssl.conf;
+    {% endif %}
+
+    location / {
+        proxy_pass {{ backend_protocal }}://{{ app.name }}-{{ ratan_env }};
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+}
+    {% endif %}
+{% endfor %}

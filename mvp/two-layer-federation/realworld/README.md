@@ -35,6 +35,8 @@ npm run realworld:verify:packages
 npm run realworld:verify:boundaries
 npm run realworld:check
 npm run realworld:test:e2e
+npm run realworld:deploy:up
+npm run realworld:deploy:verify:live
 ```
 
 `realworld:check` is the complete non-browser CI gate. Foundation-only and package-only building blocks remain available as `realworld:*:foundation` and `realworld:build:packages` commands for focused package work.
@@ -48,3 +50,7 @@ The end-to-end Cashflow procedure is recorded in
 The phased plan for migrating the original Cashflow CN source and decomposing
 the original Ratan Container into two-layer ownership is recorded in
 [`docs/ORIGINAL_CASHFLOW_RATAN_PORTAL_MIGRATION_PLAN.md`](./docs/ORIGINAL_CASHFLOW_RATAN_PORTAL_MIGRATION_PLAN.md).
+
+The production-shaped immutable nginx deployment, promotion model, and rollback
+procedure are documented in
+[`docs/PRODUCTION_DEPLOYMENT.md`](./docs/PRODUCTION_DEPLOYMENT.md).

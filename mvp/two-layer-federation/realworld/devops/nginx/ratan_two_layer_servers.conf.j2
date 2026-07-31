@@ -1,0 +1,36 @@
+# Dedicated hostname keeps each request on exactly one composition root during
+# coexistence: legacy root-config OR the direct two-layer portal, never both.
+server {
+    {% if ssl_enabled | bool -%}
+    listen {{ nginx_listen_port }} ssl http2;
+    {% else %}
+    listen {{ nginx_listen_port }};
+    {% endif %}
+
+    server_name {{ two_layer_server_name }};
+
+    {% if ssl_enabled | bool -%}
+    include config-ratan/ratan_ssl.conf;
+    {% endif %}
+
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header Referrer-Policy same-origin always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    if ($request_method ~ ^(TRACE|TRACK)$) {
+        return 444;
+    }
+
+    location / {
+        proxy_http_version 1.1;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass http://portal-host-two-layer-{{ ratan_env }};
+    }
+}
+

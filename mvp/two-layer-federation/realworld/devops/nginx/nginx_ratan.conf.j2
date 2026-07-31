@@ -1,0 +1,54 @@
+# Ratan Nginx configuration
+
+open_file_cache           max=50000 inactive=20s;
+open_file_cache_valid     30s;
+open_file_cache_min_uses  2;
+open_file_cache_errors    on;
+sendfile                  on;
+tcp_nopush                on;
+tcp_nodelay               on;
+
+types_hash_max_size       2048;
+include                   /apps/nginx/instances/{{ nginx_process_name }}/mime.types;
+default_type              application/octet-stream;
+limit_conn_zone           $binary_remote_addr zone=conn_limit_per_ip:20m;
+limit_req_zone            $binary_remote_addr zone=req_limit_per_ip:20m rate=30r/s;
+limit_req_status          444;
+limit_conn_status         503;
+underscores_in_headers    on;
+
+keepalive_requests        100;
+keepalive_timeout         180s;
+
+proxy_connect_timeout     20;
+proxy_send_timeout        180s;
+proxy_read_timeout        180s;
+
+gzip                      on;
+gzip_vary                 on;
+gzip_proxied              any;
+gzip_comp_level           6;
+gzip_disable              "MSIE [1-6]\.";
+gzip_http_version         1.1;
+gzip_types                text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript;
+
+proxy_busy_buffers_size   512k;
+proxy_buffers             4 512k;
+proxy_buffer_size         256k;
+client_max_body_size      30M;
+client_header_buffer_size 256k;
+large_client_header_buffers 64 256k;
+
+
+# Load configuration files
+include config-ratan/ratan_upstreams.conf;
+include config-ratan/ratan_servers.conf;
+
+{% if two_layer_enabled | default(false) | bool -%}
+include config-ratan/ratan_two_layer_upstreams.conf;
+include config-ratan/ratan_two_layer_servers.conf;
+{% endif %}
+
+{% if ratan_env in ['uat2', 'uat4', 'uat6'] -%}
+include config-ratan/ratan_mfe.conf;
+{% endif %}
