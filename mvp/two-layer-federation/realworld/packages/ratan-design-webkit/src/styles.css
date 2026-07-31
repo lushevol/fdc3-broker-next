@@ -68,6 +68,17 @@
     padding: 0;
     background: transparent;
   }
+
+  sc-divider.ratan-divider[data-ratan-implementation='webkit'] {
+    height: auto;
+    min-height: auto;
+    border: 0;
+    background: transparent;
+  }
+
+  sc-divider.ratan-divider[data-ratan-implementation='webkit'][data-orientation='vertical'] {
+    width: auto;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
