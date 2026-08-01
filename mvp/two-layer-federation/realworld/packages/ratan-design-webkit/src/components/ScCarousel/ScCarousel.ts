@@ -2,7 +2,7 @@ import { html, LitElement, PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import SlCarousel from '@shoelace-style/shoelace/dist/components/carousel/carousel.component.js';
 import SlCarouselItem from '@shoelace-style/shoelace/dist/components/carousel-item/carousel-item.component.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import ScTheme from '../../styles/ScTheme.js';
 import ScCarouselStyle from './ScCarousel.style.js';
 import { ScIcon } from '../ScIcon/ScIcon.js';

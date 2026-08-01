@@ -1,5 +1,5 @@
 import { html, LitElement } from 'lit';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import ScTheme from '../../styles/ScTheme.js';
 
 /**

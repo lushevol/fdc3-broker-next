@@ -1,6 +1,6 @@
 import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import '../../../elements/sc-icon.js';
 import '../../../elements/sc-link.js';
 import ScTheme from '../../styles/ScTheme.js';

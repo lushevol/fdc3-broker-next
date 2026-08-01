@@ -1,6 +1,6 @@
 import { LitElement, PropertyValueMap, html } from 'lit';
 import { state, property, queryAsync } from 'lit/decorators.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import { Annotation } from './Annotation.js';
 import { ImgViewer } from './ImgViewer.js';
 import ScTheme from '../../styles/ScTheme.js';

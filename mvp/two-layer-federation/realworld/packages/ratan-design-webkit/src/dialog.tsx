@@ -1,18 +1,7 @@
-import {
-  Dialog as EstablishedDialog,
-  type DialogProps,
-  type DialogWidth,
-} from '@fm/ratan-design';
-import {
-  useEffect,
-  useRef,
-  type CSSProperties,
-} from 'react';
+import { Dialog as EstablishedDialog, type DialogProps, type DialogWidth } from '@fm/ratan-design';
+import { useEffect, useRef, type CSSProperties } from 'react';
 import type * as React from 'react';
-import {
-  defineScDialog,
-  type ScDialog,
-} from './elements/sc-dialog.js';
+import { defineScDialog, type ScDialog } from '../elements/sc-dialog.js';
 
 const DIALOG_WIDTHS: Record<DialogWidth, string> = {
   small: 'var(--ratan-dialog-width-small)',
@@ -113,9 +102,7 @@ export function Dialog({
       >
         <span aria-hidden="true">×</span>
       </button>
-      {description ? (
-        <p className="ratan-dialog-description">{description}</p>
-      ) : null}
+      {description ? <p className="ratan-dialog-description">{description}</p> : null}
       <div className="ratan-dialog-body">{children}</div>
       {actions ? (
         <div slot="footer" className="ratan-dialog-actions">
@@ -131,10 +118,7 @@ declare module 'react' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
-      'sc-dialog': React.DetailedHTMLProps<
-        React.HTMLAttributes<ScDialog>,
-        ScDialog
-      >;
+      'sc-dialog': React.DetailedHTMLProps<React.HTMLAttributes<ScDialog>, ScDialog>;
     }
   }
 }

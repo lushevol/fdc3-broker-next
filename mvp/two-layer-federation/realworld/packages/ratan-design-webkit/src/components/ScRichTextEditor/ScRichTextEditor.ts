@@ -2,7 +2,7 @@ import { html, LitElement, nothing } from 'lit';
 
 import ScTheme from '../../styles/ScTheme.js';
 import style from './styles/ScRichTextEditor.style.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import './ScRteEditor.js';
 import * as allFormatting from './formats.js';
 import { property, query } from 'lit/decorators.js';

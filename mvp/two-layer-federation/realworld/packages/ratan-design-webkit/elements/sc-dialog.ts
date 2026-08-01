@@ -1,9 +1,9 @@
 import '@webcomponents/scoped-custom-element-registry';
-import { ScDialog } from '../components/ScDialog.js';
+
+import { ScDialog } from '../src/components/ScDialog.js';
 
 export const SC_DIALOG_TAG_NAME = 'sc-dialog';
 
-/** Registers the WebKit dialog once and remains safe across MFE reloads. */
 export function defineScDialog(
   registry: CustomElementRegistry | null | undefined = globalThis.customElements,
 ): void {
@@ -14,3 +14,9 @@ export function defineScDialog(
 defineScDialog();
 
 export { ScDialog };
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'sc-dialog': ScDialog;
+  }
+}

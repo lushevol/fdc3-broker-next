@@ -2,7 +2,7 @@ import { html, LitElement, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 
 import SlTooltip from '@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import ScTheme from '../../styles/ScTheme.js';
 import { POSITION } from '../../shared/util.js';
 import {

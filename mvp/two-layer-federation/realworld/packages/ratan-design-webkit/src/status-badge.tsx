@@ -5,7 +5,7 @@ import {
 } from '@fm/ratan-design';
 import { useEffect, useRef } from 'react';
 import type * as React from 'react';
-import { defineScBadge, type ScBadge } from './elements/sc-badge.js';
+import { defineScBadge, type ScBadge } from '../elements/sc-badge.js';
 
 const STATUS_COLORS: Record<StatusTone, string> = {
   ready: 'green',

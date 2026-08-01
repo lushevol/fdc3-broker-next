@@ -1,6 +1,6 @@
 import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import { BUTTON_STATE, BUTTON_TYPE, SIZE } from '../../shared/util.js';
 import { btnTypeConverter, sizeConverter, stateConverter } from '../../shared/converter.js';
 export class ButtonBase extends ScopedElementsMixin(LitElement) {

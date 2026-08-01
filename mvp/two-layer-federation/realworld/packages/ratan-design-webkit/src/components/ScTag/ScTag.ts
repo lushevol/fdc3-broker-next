@@ -2,7 +2,7 @@ import { html, LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
 import SlTag from '@shoelace-style/shoelace/dist/components/tag/tag.component.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import ScTheme from '../../styles/ScTheme.js';
 import '../../../elements/sc-tooltip.js';
 import '../../../elements/sc-icon.js';

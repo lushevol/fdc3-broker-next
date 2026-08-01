@@ -1,5 +1,5 @@
 import { html, LitElement } from 'lit';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
+import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import { ScTableauDashboard } from './ScTableauDashboard/ScTableauDashboard.js';
 import { ScMSTRDashboard } from './MSTRDashboard/MSTRDashboard.js';
 import { property } from 'lit/decorators.js';

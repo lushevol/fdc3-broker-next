@@ -6,35 +6,49 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
     },
-    "./styles.css": "./dist/index.css"
+    "./elements": {
+      "types": "./dist/elements/index.d.ts",
+      "import": "./dist/elements/index.js",
+      "default": "./dist/elements/index.js"
+    },
+    "./styles.css": "./dist/src/index.css"
   },
-  "types": "./dist/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "files": [
     "dist",
     "README.md"
   ],
-  "sideEffects": [
-    "*.css"
-  ],
+  "sideEffects": true,
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean --external react --external react-dom --external @fm/ratan-design",
+    "build": "tsup src/index.ts elements/index.ts --format esm --dts --clean --external react --external react-dom --external @fm/ratan-design",
     "dev": "tsup src/index.ts --format esm --dts --watch --external react --external react-dom --external @fm/ratan-design",
     "format": "prettier --write package.json README.md src tests vitest.config.ts vitest.setup.ts tsconfig.json",
-    "lint": "eslint src/index.ts src/provider.tsx src/dialog.tsx src/divider.tsx src/status-badge.tsx src/elements/sc-dialog.ts src/elements/sc-divider.ts src/elements/sc-badge.ts tests vitest.config.ts vitest.setup.ts",
+    "lint": "eslint src/index.ts src/provider.tsx src/dialog.tsx src/divider.tsx src/status-badge.tsx src/assets/icons src/controllers/virtualizer/virtualizer.ts elements/sc-dialog.ts elements/sc-divider.ts elements/sc-badge.ts tests vitest.config.ts vitest.setup.ts",
     "test": "vitest run --coverage"
   },
   "dependencies": {
     "@fm/ratan-design": "^1.1.0",
     "@lit/context": "^1.1.6",
     "@lit/localize": "^0.12.2",
+    "@open-wc/lit-helpers": "^0.7.0",
     "@open-wc/scoped-elements": "^3.0.10",
+    "@open-wc/testing": "^5.0.0",
     "@shoelace-style/shoelace": "^2.20.1",
+    "@tableau/embedding-api": "^3.16.1",
+    "@tanstack/lit-table": "^8.21.3",
+    "@tanstack/virtual-core": "^3.17.7",
     "@webcomponents/scoped-custom-element-registry": "^0.0.10",
-    "lit": "^3.3.3"
+    "dayjs": "^1.11.21",
+    "dompurify": "^3.4.12",
+    "driver.js": "^1.8.0",
+    "isomorphic-dompurify": "^3.21.0",
+    "lit": "^3.3.3",
+    "trusted-types": "^2.0.0",
+    "xlsx-republish": "^0.20.3"
   },
   "peerDependencies": {
     "react": ">=18.3.1 <20",

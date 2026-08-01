@@ -1,9 +1,9 @@
 import '@webcomponents/scoped-custom-element-registry';
-import { ScBadge } from '../components/ScBadge/ScBadge.js';
+
+import { ScBadge } from '../src/components/ScBadge/ScBadge.js';
 
 export const SC_BADGE_TAG_NAME = 'sc-badge';
 
-/** Registers the WebKit badge once and remains safe across MFE reloads. */
 export function defineScBadge(
   registry: CustomElementRegistry | null | undefined = globalThis.customElements,
 ): void {
@@ -14,3 +14,8 @@ export function defineScBadge(
 defineScBadge();
 
 export { ScBadge };
+declare global {
+  interface HTMLElementTagNameMap {
+    'sc-badge': ScBadge;
+  }
+}

@@ -1,9 +1,9 @@
 import '@webcomponents/scoped-custom-element-registry';
-import { ScDivider } from '../components/ScDivider/ScDivider.js';
+
+import { ScDivider } from '../src/components/ScDivider/ScDivider.js';
 
 export const SC_DIVIDER_TAG_NAME = 'sc-divider';
 
-/** Registers the WebKit divider once and remains safe across MFE reloads. */
 export function defineScDivider(
   registry: CustomElementRegistry | null | undefined = globalThis.customElements,
 ): void {
@@ -14,3 +14,8 @@ export function defineScDivider(
 defineScDivider();
 
 export { ScDivider };
+declare global {
+  interface HTMLElementTagNameMap {
+    'sc-divider': ScDivider;
+  }
+}

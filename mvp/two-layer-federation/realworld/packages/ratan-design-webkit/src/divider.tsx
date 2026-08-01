@@ -1,7 +1,7 @@
 import type { DividerProps } from '@fm/ratan-design';
 import { useEffect, useRef } from 'react';
 import type * as React from 'react';
-import { defineScDivider, type ScDivider } from './elements/sc-divider.js';
+import { defineScDivider, type ScDivider } from '../elements/sc-divider.js';
 
 /** React compatibility contract for the promoted Lit divider. */
 export function Divider({ orientation = 'horizontal', className }: DividerProps) {
