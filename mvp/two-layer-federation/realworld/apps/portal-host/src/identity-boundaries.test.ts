@@ -51,7 +51,7 @@ it('keeps Ratan as shared code rather than a Portal Host application dependency'
   ).toEqual([]);
   expect(cashflowPackage.dependencies).toMatchObject({
     '@fm/ratan-data-grid': expect.any(String),
-    '@fm/ratan-design': expect.any(String),
+    '@fm/ratan-design-webkit': expect.any(String),
   });
   expect(cashflowFederation).not.toMatch(/\bremotes\s*:/);
 });

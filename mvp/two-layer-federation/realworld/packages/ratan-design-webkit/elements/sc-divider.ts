@@ -1,5 +1,3 @@
-import '@webcomponents/scoped-custom-element-registry';
-
 import { ScDivider } from '../src/components/ScDivider/ScDivider.js';
 
 export const SC_DIVIDER_TAG_NAME = 'sc-divider';

@@ -3,6 +3,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   resolve: {
+    conditions: ['browser'],
     alias: [
       {
         find: /^react-dom(?=\/|$)/,
@@ -26,10 +27,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: [
-        'src/index.ts',
-        'src/provider.tsx',
-        'src/dialog.tsx',
-        'src/elements/sc-dialog.ts',
+        'src/wrapper/ReactWrapper.ts',
       ],
       thresholds: {
         lines: 90,

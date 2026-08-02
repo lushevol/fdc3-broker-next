@@ -40,7 +40,6 @@ export class ScTabGroup extends ScElement {
   private activeTab?: ScTab;
   private mutationObserver: MutationObserver;
   private resizeObserver: ResizeObserver;
-  private removedPanelName: string[] = [];
   private tabs: ScTab[] = [];
   private panels: ScTabPanel[] = [];
 
@@ -402,34 +401,6 @@ export class ScTabGroup extends ScElement {
       : ''}`;
   }
 
-  hideClosedTab() {
-    this.tabs.forEach(tab => {
-      if (this.removedPanelName.includes(tab.panel)) {
-        tab.remove();
-      }
-    });
-    this.panels.forEach(panel => {
-      if (this.removedPanelName.includes(panel.name)) {
-        panel.remove();
-      }
-    });
-  }
-
-  handleClose(e: CustomEvent) {
-    const removeMe = e.detail.tab as ScTab;
-    if (!removeMe) return;
-    this.removedPanelName.push(removeMe.panel);
-    this.hideClosedTab();
-    const index = this.tabs.indexOf(removeMe);
-    const nextActiveIndex = index + 1 >= this.tabs.length ? 0 : index + 1;
-    if (this.activeTab === removeMe) {
-      this.setActiveTab(this.tabs[nextActiveIndex], {
-        scrollBehavior: 'smooth',
-      });
-    }
-    this.syncTabsAndPanels();
-  }
-
   render() {
     const baseClass = classMap({
       'tab-group': true,
@@ -443,7 +414,6 @@ export class ScTabGroup extends ScElement {
         class=${baseClass}
         @click=${this.handleClick}
         @keydown=${this.handleKeyDown}
-        @sc-close=${this.handleClose}
       >
         <div 
         class=${classMap({

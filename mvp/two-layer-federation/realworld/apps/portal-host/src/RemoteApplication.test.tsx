@@ -58,8 +58,8 @@ describe('independent React remote boundary', () => {
         runtime={{ registerRemotes: vi.fn(), loadRemote: vi.fn() }}
       />,
     );
-    expect(container.querySelector('[data-ratan-component="progress-circle"]')).toBeInTheDocument();
-    expect(await screen.findByRole('alert')).toHaveAttribute('data-ratan-component', 'error-state');
+    expect(container.querySelector('sc-spinner')).toBeInTheDocument();
+    expect(await screen.findByRole('alert')).toHaveProperty('title', 'Application unavailable');
     fireEvent.click(screen.getByRole('button', { name: 'Retry Cashflow' }));
     expect(await screen.findByText('Recovered application')).toBeInTheDocument();
   });

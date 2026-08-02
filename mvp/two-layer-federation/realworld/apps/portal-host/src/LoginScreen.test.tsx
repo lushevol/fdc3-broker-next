@@ -7,6 +7,13 @@ const authentication: AuthenticationAdapter = {
   authenticate: jest.fn(),
 };
 
+function enter(label: string, value: string) {
+  fireEvent(
+    screen.getByLabelText(label),
+    new CustomEvent('sc-input', { detail: { value } }),
+  );
+}
+
 describe('portal login', () => {
   beforeEach(() => jest.clearAllMocks());
 
@@ -14,16 +21,14 @@ describe('portal login', () => {
     render(<LoginScreen authentication={authentication} onAuthenticated={jest.fn()} />);
 
     const submit = screen.getByRole('button', { name: 'Sign in' });
-    expect(document.querySelector('sc-divider')).toHaveAttribute('data-ratan-component', 'divider');
-    expect(submit).toBeDisabled();
-    fireEvent.change(screen.getByLabelText('Username'), {
-      target: { value: 'test' },
-    });
-    expect(submit).toBeDisabled();
-    fireEvent.change(screen.getByLabelText('Password'), {
-      target: { value: 'test' },
-    });
-    expect(submit).toBeEnabled();
+    expect(document.querySelector('sc-divider')).toBeInstanceOf(
+      customElements.get('sc-divider')!,
+    );
+    expect(submit).toHaveProperty('disabled', true);
+    enter('Username', 'test');
+    expect(submit).toHaveProperty('disabled', true);
+    enter('Password', 'test');
+    expect(submit).toHaveProperty('disabled', false);
   });
 
   it('submits trimmed credentials from the keyboard and reports progress', async () => {
@@ -35,19 +40,18 @@ describe('portal login', () => {
         }),
     );
     render(<LoginScreen authentication={authentication} onAuthenticated={onAuthenticated} />);
-    fireEvent.change(screen.getByLabelText('Username'), {
-      target: { value: '  test  ' },
-    });
-    fireEvent.change(screen.getByLabelText('Password'), {
-      target: { value: 'test' },
-    });
+    enter('Username', '  test  ');
+    enter('Password', 'test');
     fireEvent.submit(screen.getByRole('button', { name: 'Sign in' }).closest('form')!);
 
     expect(onAuthenticated).toHaveBeenCalledWith({
       username: 'test',
       password: 'test',
     });
-    expect(screen.getByRole('button', { name: 'Signing in…' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Signing in…' })).toHaveProperty(
+      'disabled',
+      true,
+    );
     finish?.();
     await waitFor(() => expect(screen.queryByText('Signing in…')).not.toBeInTheDocument());
   });
@@ -57,19 +61,14 @@ describe('portal login', () => {
       .fn()
       .mockRejectedValue(new Error('The username or password is incorrect.'));
     render(<LoginScreen authentication={authentication} onAuthenticated={onAuthenticated} />);
-    fireEvent.change(screen.getByLabelText('Username'), {
-      target: { value: 'wrong' },
-    });
-    fireEvent.change(screen.getByLabelText('Password'), {
-      target: { value: 'wrong' },
-    });
+    enter('Username', 'wrong');
+    enter('Password', 'wrong');
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'The username or password is incorrect.',
     );
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Single sign-on' }));
-    expect(screen.getByRole('link', { name: 'Sign in with SSO' })).toHaveAttribute(
+    expect(screen.getByLabelText('Sign in with SSO')).toHaveProperty(
       'href',
       '/test-sso',
     );
@@ -80,12 +79,8 @@ describe('portal login', () => {
     render(<LoginScreen authentication={authentication} onAuthenticated={onAuthenticated} />);
     fireEvent.submit(screen.getByRole('button', { name: 'Sign in' }).closest('form')!);
     expect(onAuthenticated).not.toHaveBeenCalled();
-    fireEvent.change(screen.getByLabelText('Username'), {
-      target: { value: 'test' },
-    });
-    fireEvent.change(screen.getByLabelText('Password'), {
-      target: { value: 'test' },
-    });
+    enter('Username', 'test');
+    enter('Password', 'test');
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Sign in failed. Try again.');
   });

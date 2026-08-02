@@ -20,6 +20,13 @@ const authenticatedIdentity: IdentityCapability = {
   subscribe: () => () => undefined,
 };
 
+function enter(label: string, value: string) {
+  fireEvent(
+    screen.getByLabelText(label),
+    new CustomEvent('sc-input', { detail: { value } }),
+  );
+}
+
 describe('host bootstrap', () => {
   beforeEach(() => {
     mockedLoad.mockReset();
@@ -58,12 +65,8 @@ describe('host bootstrap', () => {
     };
     render(<App authentication={authentication} />);
     expect(mockedLoad).not.toHaveBeenCalled();
-    fireEvent.change(screen.getByLabelText('Username'), {
-      target: { value: 'test' },
-    });
-    fireEvent.change(screen.getByLabelText('Password'), {
-      target: { value: 'test' },
-    });
+    enter('Username', 'test');
+    enter('Password', 'test');
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
     expect(await screen.findByRole('button', { name: 'New tile' })).toBeInTheDocument();
     expect(authentication.authenticate).toHaveBeenCalledWith({
@@ -81,12 +84,8 @@ describe('host bootstrap', () => {
       }),
     };
     render(<App authentication={authentication} />);
-    fireEvent.change(screen.getByLabelText('Username'), {
-      target: { value: 'test' },
-    });
-    fireEvent.change(screen.getByLabelText('Password'), {
-      target: { value: 'test' },
-    });
+    enter('Username', 'test');
+    enter('Password', 'test');
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Authentication did not create a signed-in session.',

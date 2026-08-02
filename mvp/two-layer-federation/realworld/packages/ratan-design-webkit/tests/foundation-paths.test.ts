@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { LayerHierarchyMixin as canonicalLayerHierarchyMixin } from '../src/mixins/layer-hierarchy-mixin.js';
 import { ObserverMxin as canonicalObserverMixin } from '../src/mixins/observer-mixin.js';
@@ -20,5 +22,37 @@ describe('WebKit canonical foundation paths', () => {
     expect(canonicalLayerHierarchyMixin).toBe(styleLayerHierarchyMixin);
     expect(canonicalObserverMixin).toBe(styleObserverMixin);
     expect(canonicalRangeMixin).toBe(styleRangeMixin);
+  });
+
+  it('has no runtime dependency on the legacy design package', () => {
+    const packageJson = JSON.parse(
+      readFileSync(resolve(process.cwd(), 'package.json'), 'utf8'),
+    ) as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+      peerDependencies?: Record<string, string>;
+    };
+    const sourceFiles = [
+      '../src/index.ts',
+      '../src/wrapper/ReactWrapper.ts',
+    ].map((file) => readFileSync(resolve(import.meta.dirname, file), 'utf8'));
+
+    const removedRootComponents = [
+      'provider.tsx',
+      'dialog.tsx',
+      'divider.tsx',
+      'status-badge.tsx',
+      'react-components.tsx',
+    ];
+
+    expect(packageJson.dependencies?.['@fm/ratan-design']).toBeUndefined();
+    expect(packageJson.devDependencies?.['@fm/ratan-design']).toBeUndefined();
+    expect(packageJson.peerDependencies?.['@fm/ratan-design']).toBeUndefined();
+    expect(sourceFiles.join('\n')).not.toContain('@fm/ratan-design');
+    expect(
+      removedRootComponents.some((file) =>
+        existsSync(resolve(import.meta.dirname, '..', 'src', file)),
+      ),
+    ).toBe(false);
   });
 });

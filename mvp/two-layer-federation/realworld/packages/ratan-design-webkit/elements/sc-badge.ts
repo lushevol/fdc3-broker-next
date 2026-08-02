@@ -1,5 +1,3 @@
-import '@webcomponents/scoped-custom-element-registry';
-
 import { ScBadge } from '../src/components/ScBadge/ScBadge.js';
 
 export const SC_BADGE_TAG_NAME = 'sc-badge';

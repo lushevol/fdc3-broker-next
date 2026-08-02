@@ -8,26 +8,25 @@ import {
   type IdentityCapability,
   type PlatformCapabilities,
 } from '@fm/platform-contracts';
-import {
-  ActionMenu,
-  Avatar,
-  Button,
-  Card,
-  DesignSystemProvider,
-  Dialog,
-  EmptyState,
-  IconButton,
-  PageHeader,
-  StatusBadge,
-  TextField,
-  Toast,
-  ToggleButton,
-  WorkspaceTabs,
-} from '@fm/ratan-design-webkit';
 import { persistAppearance, readStoredAppearance } from './appearance';
 import { ANONYMOUS_IDENTITY_CAPABILITY } from './identity';
 import { RemoteApplication } from './RemoteApplication';
 import { moduleFederationRuntime, type RemoteRuntime } from './remote';
+import {
+  ScAvatar,
+  ScBadge,
+  ScButton,
+  ScCard,
+  ScDialog,
+  ScIconButton,
+  ScMenu,
+  ScMenuItem,
+  ScTab,
+  ScTabGroup,
+  ScTabPanel,
+  ScTextInput,
+  ScToast,
+} from './webkit';
 
 interface Props {
   readonly registry: ApplicationRegistry;
@@ -87,6 +86,7 @@ export function PortalHost({
   );
   const [notification, setNotification] = useState<string | null>(null);
   const [tilePickerOpen, setTilePickerOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [tileSearch, setTileSearch] = useState('');
   const [appearance, setAppearance] = useState(() => readStoredAppearance(window.localStorage));
   const appearanceRef = useRef(appearance);
@@ -204,72 +204,100 @@ export function PortalHost({
   );
 
   return (
-    <DesignSystemProvider
-      appearance={{
-        scheme: appearance.scheme,
-        density: appearance.density,
-        direction: appearance.direction,
-      }}
-      scope="host"
+    <div
+      className="ratan-webkit-root"
+      data-ratan-scope="host"
+      data-ratan-theme={appearance.scheme}
+      data-ratan-density={appearance.density}
+      data-design-system="ratan-webkit"
+      dir={appearance.direction}
     >
       <div className="portal-shell">
-        <PageHeader
-          className="portal-app-bar"
-          title="Markets Operations One"
-          actions={
-            <>
-              <Button variant="primary" onClick={() => setTilePickerOpen(true)}>
-                New tile
-              </Button>
-              <ToggleButton
-                selected={appearance.scheme === 'dark'}
-                ariaLabel={`Use ${appearance.scheme === 'dark' ? 'light' : 'dark'} theme`}
-                onChange={(selected) =>
-                  setAppearance((current) => {
-                    const scheme = selected ? 'dark' : 'light';
-                    return { ...current, scheme, preference: scheme };
-                  })
-                }
+        <header className="portal-app-bar">
+          <h1>Markets Operations One</h1>
+          <div className="portal-app-bar-actions">
+            <ScButton type="primary" role="button" aria-label="New tile" onClick={() => setTilePickerOpen(true)}>
+              New tile
+            </ScButton>
+            <ScButton
+              type="text"
+              role="button"
+              aria-label={`Use ${appearance.scheme === 'dark' ? 'light' : 'dark'} theme`}
+              selectable="toggle"
+              selected={appearance.scheme === 'dark'}
+              onClick={() =>
+                setAppearance((current) => {
+                  const scheme = current.scheme === 'dark' ? 'light' : 'dark';
+                  return { ...current, scheme, preference: scheme };
+                })
+              }
+            >
+              Theme
+            </ScButton>
+            <ScIconButton
+              name="notification"
+              role="button"
+              aria-label="Notifications"
+              onClick={() => setNotification('No new notifications.')}
+            />
+            <div className="portal-user-menu">
+              <ScButton
+                className="portal-avatar-trigger"
+                type="text"
+                role="button"
+                aria-label="Open user menu"
+                aria-expanded={userMenuOpen}
+                onClick={() => setUserMenuOpen((open) => !open)}
               >
-                Theme
-              </ToggleButton>
-              <IconButton
-                label="Notifications"
-                icon="●"
-                onClick={() => setNotification('No new notifications.')}
-              />
-              <ActionMenu
-                ariaLabel="User actions"
-                trigger={
-                  <Button
-                    className="portal-avatar-trigger"
-                    variant="ghost"
-                    aria-label="Open user menu"
-                  >
-                    <Avatar name={avatarName} size="small" />
-                  </Button>
-                }
-                items={[
-                  { id: 'profile', label: 'Profile' },
-                  { id: 'logout', label: 'Logout', tone: 'danger' },
-                ]}
-                onAction={(action) => {
-                  if (action === 'logout') onLogout?.();
-                  else setNotification('Profile is not available in this pilot.');
-                }}
-              />
-            </>
-          }
-        />
+                <ScAvatar id={avatarName} size="sm" aria-label={avatarName}>
+                  {avatarName.slice(0, 1).toUpperCase()}
+                </ScAvatar>
+              </ScButton>
+              {userMenuOpen ? (
+                <ScMenu
+                  aria-label="User actions"
+                  onScSelect={(event: CustomEvent<{ item: { value: string } }>) => {
+                    const action = event.detail.item.value;
+                    setUserMenuOpen(false);
+                    if (action === 'logout') onLogout?.();
+                    else setNotification('Profile is not available in this pilot.');
+                  }}
+                >
+                  <ScMenuItem value="profile" role="menuitem" aria-label="Profile">
+                    Profile
+                  </ScMenuItem>
+                  <ScMenuItem value="logout" role="menuitem" aria-label="Logout">
+                    Logout
+                  </ScMenuItem>
+                </ScMenu>
+              ) : null}
+            </div>
+          </div>
+        </header>
         <main className="workspace">
           <section className="workspace-surface" aria-label="Application workspace">
-            <WorkspaceTabs
-              ariaLabel="Open applications"
-              selectedId={activeInstanceId}
-              onClose={close}
-              onSelectionChange={setActiveInstanceId}
-              tabs={tabs.map((tab) => {
+            <ScTabGroup
+              aria-label="Open applications"
+              onScTabSelect={(event: CustomEvent<{ name: string }>) => setActiveInstanceId(event.detail.name)}
+            >
+              {tabs.map((tab) => {
                 const ordinal = tab.instanceId.split('-').slice(-1)[0];
+                return (
+                  <ScTab
+                    key={tab.instanceId}
+                    slot="nav"
+                    panel={tab.instanceId}
+                    active={tab.instanceId === activeInstanceId}
+                    closable
+                    aria-label={`${tab.entry.displayName} ${ordinal}`}
+                    title={`Close ${tab.entry.displayName}${tab.instanceId.endsWith('-1') ? '' : ` ${ordinal}`}`}
+                    onScClose={() => close(tab.instanceId)}
+                  >
+                    {tab.entry.displayName} {ordinal}
+                  </ScTab>
+                );
+              })}
+              {tabs.map((tab) => {
                 const tabCapabilities =
                   tab.instanceId === activeInstanceId && capabilities
                     ? capabilities
@@ -288,43 +316,46 @@ export function PortalHost({
                         appearance: appearanceCapability,
                         identity,
                       };
-                return {
-                  id: tab.instanceId,
-                  label: `${tab.entry.displayName} ${ordinal}`,
-                  closeLabel: `Close ${tab.entry.displayName}${tab.instanceId.endsWith('-1') ? '' : ` ${ordinal}`}`,
-                  content: (
+                return (
+                  <ScTabPanel key={tab.instanceId} name={tab.instanceId} active={tab.instanceId === activeInstanceId}>
                     <RemoteApplication
                       entry={tab.entry}
                       instanceId={tab.instanceId}
                       capabilities={tabCapabilities}
                       runtime={runtime}
                     />
-                  ),
-                };
+                  </ScTabPanel>
+                );
               })}
-            />
+            </ScTabGroup>
             {!active ? (
-              <EmptyState
-                title="Choose an application"
-                description="The host loads it directly from the registry."
-                icon="+"
-              />
+              <section className="portal-empty-state">
+                <span aria-hidden="true">+</span>
+                <h2>Choose an application</h2>
+                <p>The host loads it directly from the registry.</p>
+              </section>
             ) : null}
           </section>
         </main>
-        <Dialog
-          open={tilePickerOpen}
-          title="New tile"
-          description="Search the application catalog, then open a tile in this workspace."
-          width="large"
-          onClose={() => setTilePickerOpen(false)}
+        {tilePickerOpen ? (
+        <ScDialog
+          open
+          label="New tile"
+          role="dialog"
+          aria-label="New tile"
+          style={{ '--width': '50rem' }}
+          onScHide={() => setTilePickerOpen(false)}
         >
-          <TextField
+          <ScIconButton slot="header-actions" name="cross" role="button" aria-label="Close New tile" onClick={() => setTilePickerOpen(false)} />
+          <p>Search the application catalog, then open a tile in this workspace.</p>
+          <ScTextInput
             id="tile-search"
             label="Search tiles"
+            role="textbox"
+            aria-label="Search tiles"
             placeholder="Search by title or description"
             value={tileSearch}
-            onChange={setTileSearch}
+            onScInput={(event: CustomEvent<{ value: string }>) => setTileSearch(event.detail.value)}
           />
           <div className="tile-picker-results">
             {tilesByCategory.length ? (
@@ -339,49 +370,46 @@ export function PortalHost({
                     {entries.map((entry) => {
                       const tile = tileMetadata(entry);
                       return (
-                        <Card
+                        <ScCard
                           key={entry.id}
                           className="tile-picker-tile"
-                          title={entry.displayName}
-                          description={tile.description}
-                          actions={
-                            <Button
-                              aria-label={`Open ${entry.displayName}`}
-                              variant="secondary"
-                              onClick={() => openTile(entry)}
-                            >
-                              Open
-                            </Button>
-                          }
                         >
+                          <div className="tile-picker-tile-content">
+                          <h3>{entry.displayName}</h3>
+                          <p>{tile.description}</p>
                           <span className="tile-picker-icon" aria-hidden="true">
                             {tile.icon}
                           </span>
-                          <StatusBadge status="ready">Available</StatusBadge>
-                        </Card>
+                          <ScBadge type="text" color="green" label="Available" aria-label="Available" />
+                          <ScButton type="secondary" role="button" aria-label={`Open ${entry.displayName}`} onClick={() => openTile(entry)}>
+                            Open
+                          </ScButton>
+                          </div>
+                        </ScCard>
                       );
                     })}
                   </div>
                 </section>
               ))
             ) : (
-              <EmptyState
-                title="No matching tiles"
-                description="Try a different title or description."
-                icon="?"
-              />
+              <section className="portal-empty-state">
+                <span aria-hidden="true">?</span>
+                <h2>No matching tiles</h2>
+                <p>Try a different title or description.</p>
+              </section>
             )}
           </div>
-        </Dialog>
+        </ScDialog>
+        ) : null}
         {notification ? (
-          <Toast
-            className="notification"
-            message={notification}
-            tone="success"
-            onDismiss={() => setNotification(null)}
-          />
+          <div className="notification" role="status">
+            <ScToast open type="success" title="Notification" onScHide={() => setNotification(null)}>
+              {notification}
+            </ScToast>
+            <ScIconButton name="cross" role="button" aria-label="Dismiss notification" onClick={() => setNotification(null)} />
+          </div>
         ) : null}
       </div>
-    </DesignSystemProvider>
+    </div>
   );
 }

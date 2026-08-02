@@ -1,5 +1,3 @@
-import '@webcomponents/scoped-custom-element-registry';
-
 import { ScDialog } from '../src/components/ScDialog.js';
 
 export const SC_DIALOG_TAG_NAME = 'sc-dialog';

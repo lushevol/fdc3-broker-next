@@ -79,6 +79,13 @@ export default css`
     color: var(--sc-tab-icon-color, var(--sc-color-grey-400));
   }
 
+  .tab .close-icon {
+    display: inline-flex;
+    flex: 0 0 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+
   .tab .counter {
     padding: 0px 6px;
     border: 2px solid

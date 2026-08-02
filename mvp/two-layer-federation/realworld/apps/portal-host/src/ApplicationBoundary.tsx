@@ -1,5 +1,5 @@
 import React, { type ErrorInfo, type ReactNode } from 'react';
-import { ErrorState } from '@fm/ratan-design-webkit';
+import { ScAlert } from './webkit';
 
 interface Props { applicationName: string; resetKey: string; children: ReactNode }
 interface State { error: Error | null }
@@ -18,10 +18,14 @@ export class ApplicationBoundary extends React.Component<Props, State> {
   render() {
     if (this.state.error) {
       return (
-        <ErrorState
+        <ScAlert
+          role="alert"
           title={`${this.props.applicationName} failed:`}
-          message={` ${this.state.error.message}`}
-        />
+          type="error"
+          icon
+        >
+          {` ${this.state.error.message}`}
+        </ScAlert>
       );
     }
     return this.props.children;

@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ApplicationRegistryEntry, FederatedApplicationModule, PlatformCapabilities } from '@fm/platform-contracts';
-import {
-  Button,
-  ErrorState,
-  ProgressCircle,
-} from '@fm/ratan-design-webkit';
 import { ApplicationBoundary } from './ApplicationBoundary';
 import { loadFederatedApplication, type RemoteRuntime } from './remote';
+import { ScAlert, ScButton, ScSpinner } from './webkit';
 
 interface Props { entry: ApplicationRegistryEntry; instanceId: string; capabilities: PlatformCapabilities; runtime: RemoteRuntime }
 type State = { kind: 'loading' } | { kind: 'ready'; module: FederatedApplicationModule } | { kind: 'error'; error: Error };
@@ -27,7 +23,7 @@ function IsolatedRemoteApplication({ module, entry, instanceId, capabilities }: 
     return () => { void module.unmount?.(instanceId); };
   }, [capabilities, entry.basePath, instanceId, module]);
   if (error) {
-    return <ErrorState title="Application unavailable" message={error.message} />;
+    return <ScAlert role="alert" title="Application unavailable" type="error" icon>{error.message}</ScAlert>;
   }
   return <div ref={surface} data-composition-boundary="independent-react-root" data-remote-instance-id={instanceId} />;
 }
@@ -50,22 +46,24 @@ export function RemoteApplication({ entry, instanceId, capabilities, runtime }: 
   if (state.kind === 'loading') {
     return (
       <div className="remote-status" role="status">
-        <ProgressCircle label={`Loading ${entry.displayName}`} />
+        <ScSpinner aria-label={`Loading ${entry.displayName}`} role="progressbar" />
         <span>Loading {entry.displayName}…</span>
       </div>
     );
   }
   if (state.kind === 'error') {
     return (
-      <ErrorState
+      <ScAlert
+        role="alert"
         title="Application unavailable"
-        message={state.error.message}
-        action={(
-          <Button onClick={() => setAttempt((value) => value + 1)}>
-            Retry {entry.displayName}
-          </Button>
-        )}
-      />
+        type="error"
+        icon
+      >
+        <span>{state.error.message}</span>
+        <ScButton type="primary" role="button" aria-label={`Retry ${entry.displayName}`} onClick={() => setAttempt((value) => value + 1)}>
+          Retry {entry.displayName}
+        </ScButton>
+      </ScAlert>
     );
   }
   const { Application } = state.module;
