@@ -48,13 +48,12 @@ describe('Authorization Limits policy and service boundaries', () => {
       'sx=',
     ];
     expect(forbiddenReferences.filter((reference) => source.includes(reference))).toEqual([]);
+    expect(source).not.toContain("from '@fm/ratan-design'");
     for (const component of [
-      'Dialog',
-      'ConfirmationDialog',
-      'TextField',
-      'NumberField',
-      'Button',
-      'InlineAlert',
+      'ScDialog',
+      'ScTextInput',
+      'ScButton',
+      'ScAlert',
     ]) {
       expect(source).toContain(component);
     }

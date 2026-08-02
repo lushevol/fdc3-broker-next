@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { ConfirmationDialog, InlineAlert } from '@fm/ratan-design';
 import type { AuthorizationLimitAction } from './authorization-limits-policy';
 import type { AuthorizationLimitRecord } from './authorization-limits-repository';
+import { ScAlert, ScButton, ScDialog, ScIconButton } from './webkit';
 
 export type AuthorizationLimitTransitionAction = Exclude<
   AuthorizationLimitAction,
@@ -109,23 +109,37 @@ export function AuthorizationLimitTransitionDialog({
   };
 
   return (
-    <ConfirmationDialog
+    <ScDialog
       open
-      title={presentation.title}
-      message={
-        <div className="authorization-limit-transition-message">
-          <p>{presentation.message}</p>
-          <p>Profile: {record.profile} · Currency: {record.currency}</p>
-          {error ? (
-            <InlineAlert tone="error" title="Transition failed" message={error} />
-          ) : null}
-        </div>
-      }
-      confirmLabel={presentation.confirmLabel}
-      tone={presentation.tone}
-      loading={loading}
-      onConfirm={confirm}
-      onCancel={onClose}
-    />
+      label={presentation.title}
+      role="dialog"
+      aria-label={presentation.title}
+      onScHide={onClose}
+    >
+      {!loading ? (
+        <ScIconButton slot="header-actions" name="cross" role="button" aria-label={`Close ${presentation.title}`} onClick={onClose} />
+      ) : null}
+      <div className="authorization-limit-transition-message">
+        <p>{presentation.message}</p>
+        <p>Profile: {record.profile} · Currency: {record.currency}</p>
+        {error ? (
+          <ScAlert role="alert" type="error" title="Transition failed">{error}</ScAlert>
+        ) : null}
+      </div>
+      <div slot="footer" className="dialog-actions">
+        <ScButton type="tertiary" role="button" disabled={loading} onClick={onClose}>Cancel</ScButton>
+        <ScButton
+          type={presentation.tone === 'danger' ? 'secondary' : 'primary'}
+          state={presentation.tone === 'danger' ? 'error' : undefined}
+          role="button"
+          loading={loading}
+          disabled={loading}
+          aria-label={loading ? `${presentation.confirmLabel} in progress` : presentation.confirmLabel}
+          onClick={confirm}
+        >
+          {presentation.confirmLabel}
+        </ScButton>
+      </div>
+    </ScDialog>
   );
 }

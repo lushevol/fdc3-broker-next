@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { PlatformClient } from '@fm/platform-sdk';
 import { RatanDataGrid, type RatanDataGridColumn } from '@fm/ratan-data-grid';
-import { Button, InlineAlert, StatusBadge, TextField, type StatusTone } from '@fm/ratan-design';
+import { ScAlert, ScBadge, ScButton, ScTextInput } from './webkit';
 import { AuthorizationLimitEditor } from './AuthorizationLimitEditor';
 import {
   AuthorizationLimitTransitionDialog,
@@ -37,17 +37,17 @@ type EditorState =
   | { readonly mode: 'create' }
   | { readonly mode: 'edit'; readonly record: AuthorizationLimitRecord };
 
-function statusTone(status: AuthorizationLimitRecord['status']): StatusTone {
-  if (status === 'CONFIRMED') return 'ready';
-  if (status === 'DELETE_PENDING') return 'blocked';
-  return 'review';
+function statusColor(status: AuthorizationLimitRecord['status']) {
+  if (status === 'CONFIRMED') return 'green';
+  if (status === 'DELETE_PENDING') return 'red';
+  return 'orange';
 }
 
 export const authorizationLimitColumns: readonly RatanDataGridColumn<AuthorizationLimitRecord>[] = [
   { key: 'profile', header: 'Profile', flex: 1, minWidth: 190 },
   { key: 'currency', header: 'Currency', width: 120 },
   { key: 'limitation', header: 'Limitation', width: 180, formatValue: (value) => formatUsdLimit(Number(value)) },
-  { key: 'status', header: 'Status', width: 170, renderCell: (row) => <StatusBadge status={statusTone(row.status)}>{row.status.replace('_', ' ')}</StatusBadge> },
+  { key: 'status', header: 'Status', width: 170, renderCell: (row) => <ScBadge type="text" color={statusColor(row.status)} label={row.status.replace('_', ' ')} aria-label={row.status.replace('_', ' ')} /> },
 ];
 
 export function AuthorizationLimits({
@@ -155,15 +155,15 @@ export function AuthorizationLimits({
     />
   ) : null;
   const localFeedback = feedback
-    ? <InlineAlert tone="success" message={feedback} />
+    ? <ScAlert role="status" type="success">{feedback}</ScAlert>
     : null;
 
   if (detailId) {
     return <section className="authorization-limits authorization-limit-details">
-      <Button variant="ghost" onClick={() => client.navigate(route)}>Back to Authorization Limits</Button>
+      <ScButton type="tertiary" role="button" onClick={() => client.navigate(route)}>Back to Authorization Limits</ScButton>
       {localFeedback}
       {loading ? <p role="status">Loading Authorization Limit…</p> : detail ? <>
-        <header><div><span className="section-label">Authorization Limit</span><h2>{detail.limitationId}</h2></div><StatusBadge status={statusTone(detail.status)}>{detail.status.replace('_', ' ')}</StatusBadge></header>
+        <header><div><span className="section-label">Authorization Limit</span><h2>{detail.limitationId}</h2></div><ScBadge type="text" color={statusColor(detail.status)} label={detail.status.replace('_', ' ')} aria-label={detail.status.replace('_', ' ')} /></header>
         <dl className="details-grid">
           <div><dt>Profile</dt><dd>{detail.profile}</dd></div><div><dt>Currency</dt><dd>{detail.currency}</dd></div>
           <div><dt>Limitation</dt><dd>{formatUsdLimit(detail.limitation)}</dd></div><div><dt>Status</dt><dd>{detail.status}</dd></div>
@@ -172,17 +172,18 @@ export function AuthorizationLimits({
         </dl>
         <div className="authorization-limit-actions">
           {policy?.actionsFor(detail).map((action) => action === 'edit' ? (
-            <Button key={action} onClick={() => setEditor({ mode: 'edit', record: detail })}>
+            <ScButton key={action} type="primary" role="button" onClick={() => setEditor({ mode: 'edit', record: detail })}>
               Edit Authorization Limit
-            </Button>
+            </ScButton>
           ) : action !== 'create' ? (
-            <Button
+            <ScButton
               key={action}
-              variant={authorizationLimitTransitionPresentation[action].tone === 'danger' ? 'danger' : 'secondary'}
+              type={authorizationLimitTransitionPresentation[action].tone === 'danger' ? 'negative' : 'secondary'}
+              role="button"
               onClick={() => setTransition({ action, record: detail })}
             >
               {authorizationLimitTransitionPresentation[action].trigger}
-            </Button>
+            </ScButton>
           ) : null)}
         </div>
         <p className="migration-note">{mutation
@@ -195,9 +196,9 @@ export function AuthorizationLimits({
   }
 
   return <section className="authorization-limits">
-    <header className="authorization-limits-header"><div><span className="section-label">Migration cohort 1</span><h2>Authorization Limits</h2><p>{mutation ? 'Opt-in mutation composition · production activation remains gated' : 'Read-only list and details · mutations remain in legacy'}</p></div><div className="authorization-limits-summary"><strong>{filtered.length} limits</strong>{policy?.create.allowed ? <Button onClick={() => setEditor({ mode: 'create' })}>Create Authorization Limit</Button> : null}</div></header>
+    <header className="authorization-limits-header"><div><span className="section-label">Migration cohort 1</span><h2>Authorization Limits</h2><p>{mutation ? 'Opt-in mutation composition · production activation remains gated' : 'Read-only list and details · mutations remain in legacy'}</p></div><div className="authorization-limits-summary"><strong>{filtered.length} limits</strong>{policy?.create.allowed ? <ScButton type="primary" role="button" onClick={() => setEditor({ mode: 'create' })}>Create Authorization Limit</ScButton> : null}</div></header>
     {localFeedback}
-    <TextField id="authorization-limits-filter" label="Filter Authorization Limits" type="search" value={query} onChange={setQuery} />
+    <ScTextInput id="authorization-limits-filter" label="Filter Authorization Limits" type="search" role="searchbox" aria-label="Filter Authorization Limits" value={query} onScInput={(event: CustomEvent<{ value: string }>) => setQuery(event.detail.value)} />
     <RatanDataGrid
       ariaLabel="Authorization Limits"
       rows={filtered}

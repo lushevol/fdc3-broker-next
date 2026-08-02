@@ -5,7 +5,7 @@ import {
   type PlatformCapabilities,
 } from '@fm/platform-contracts';
 import { createAppearanceController, createIdentityController } from '@fm/platform-sdk';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import {
   Application,
   defaultDeclarations,
@@ -62,7 +62,7 @@ describe('FDC3 admin verification application', () => {
     const { platform } = mount();
     fireEvent.click(screen.getByRole('button', { name: 'Create declaration' }));
     fireEvent.click(screen.getByRole('button', { name: /Application/ }));
-    fireEvent.click(screen.getByRole('option', { name: 'FDC3 Admin' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'FDC3 Admin' }));
     fireEvent.change(screen.getByRole('textbox', { name: 'Interop JSON' }), {
       target: { value: '{ invalid' },
     });
@@ -78,7 +78,7 @@ describe('FDC3 admin verification application', () => {
     expect(screen.getByText('fdc3-admin')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Delete declaration fdc3-admin' }));
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
-    expect(screen.queryByText('fdc3.chat.init')).not.toBeInTheDocument();
+    expect(screen.queryByRole('rowheader', { name: 'fdc3-admin' })).not.toBeInTheDocument();
   });
 
   it('edits existing declarations and exposes the empty and adapter paths', () => {
@@ -87,12 +87,12 @@ describe('FDC3 admin verification application', () => {
     expect(platform.notifications.show).toHaveBeenCalledWith('FDC3 adapter simulation ready');
     fireEvent.click(screen.getByRole('button', { name: 'Edit declaration cashflow' }));
     expect(screen.getByRole('dialog', { name: 'Edit cashflow' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Cashflow Application' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Application' })).toBeDisabled();
     fireEvent.change(screen.getByRole('textbox', { name: 'Interop JSON' }), {
       target: { value: formatInterop({ appId: 'cashflow', listensFor: [], raises: ['StartChat'], contexts: ['fdc3.chat.init'] }) },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Save declaration' }));
-    expect(screen.getByText('fdc3.chat.init')).toBeInTheDocument();
+    expect(screen.getAllByText('fdc3.chat.init')).not.toHaveLength(0);
     fireEvent.change(screen.getByRole('searchbox', { name: 'Search FDC3' }), { target: { value: 'nothing-here' } });
     expect(screen.getByText('No matching declarations')).toBeInTheDocument();
     fireEvent.change(screen.getByRole('searchbox', { name: 'Search FDC3' }), { target: { value: '' } });
@@ -111,7 +111,7 @@ describe('FDC3 admin verification application', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create intent' }));
     fireEvent.change(screen.getByRole('textbox', { name: 'Intent name' }), { target: { value: 'RaiseAlert' } });
     fireEvent.change(screen.getByRole('textbox', { name: 'Description' }), { target: { value: 'Raise an operations alert.' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Create intent' }));
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Create intent' })).getByRole('button', { name: 'Create intent' }));
     expect(screen.getByText('RaiseAlert')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Delete ViewInstrument' }));
     expect(screen.getByRole('dialog', { name: 'Delete intent' })).toHaveTextContent('cashflow');
@@ -127,7 +127,7 @@ describe('FDC3 admin verification application', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Context catalog' }));
     fireEvent.click(screen.getByRole('button', { name: 'Create context' }));
     fireEvent.change(screen.getByRole('textbox', { name: 'Context type' }), { target: { value: 'fdc3.alert' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Create context' }));
+    fireEvent.click(within(screen.getByRole('dialog', { name: 'Create context' })).getByRole('button', { name: 'Create context' }));
     expect(screen.getByText('fdc3.alert')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Edit fdc3.alert' }));
     fireEvent.change(screen.getByRole('textbox', { name: 'Description' }), { target: { value: 'Alert context.' } });

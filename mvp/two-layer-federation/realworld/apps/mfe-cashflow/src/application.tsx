@@ -1,3 +1,4 @@
+import '@webcomponents/scoped-custom-element-registry';
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import {
@@ -8,16 +9,9 @@ import {
   type ApplicationProps,
 } from '@fm/platform-contracts';
 import { createPlatformClient } from '@fm/platform-sdk';
-import {
-  Button,
-  DesignSystemProvider,
-  StatusBadge,
-  TextField,
-  type StatusTone,
-} from '@fm/ratan-design';
-import '@fm/ratan-design/styles.css';
 import '@fm/ratan-data-grid/styles.css';
 import './styles.css';
+import { ScBadge, ScButton, ScTextInput } from './webkit';
 import { AuthorizationLimits } from './AuthorizationLimits';
 import { composeAuthorizationLimitsRuntime } from './authorization-limits-runtime';
 import type { AuthorizationLimitsService } from './authorization-limits-service';
@@ -76,6 +70,12 @@ export interface CashflowRuntimeDependencies {
 
 const unsubscribeIdentity = () => undefined;
 
+const statusColor = (status: CashflowRecord['status']) => ({
+  Ready: 'green',
+  Review: 'orange',
+  Blocked: 'red',
+})[status];
+
 export function createCashflowApplication(dependencies: CashflowRuntimeDependencies = {}) {
   const runtimeDependencies = Object.freeze({ ...dependencies });
 
@@ -115,17 +115,15 @@ export function createCashflowApplication(dependencies: CashflowRuntimeDependenc
       || path.startsWith(`${basePath}/authorization-limits/`);
 
     return (
-    <DesignSystemProvider
-      appearance={{
-        scheme: appearance.scheme,
-        density: appearance.density,
-        direction: appearance.direction,
-      }}
-      scope="application"
+    <div
+      className="cashflow-webkit-scope"
+      data-scheme={appearance.scheme}
+      data-density={appearance.density}
+      dir={appearance.direction}
     >
       {isAuthorizationLimits ? (
         <article className="cashflow-app" data-instance-id={instanceId}>
-          <Button variant="ghost" onClick={() => client.navigate(basePath)}>Back to Cashflow</Button>
+          <ScButton type="tertiary" role="button" onClick={() => client.navigate(basePath)}>Back to Cashflow</ScButton>
           <AuthorizationLimits
             basePath={basePath}
             path={path}
@@ -136,14 +134,14 @@ export function createCashflowApplication(dependencies: CashflowRuntimeDependenc
         </article>
       ) : detailId ? (
         <article className="cashflow-app cashflow-details" data-instance-id={instanceId}>
-          <Button variant="ghost" onClick={() => client.navigate(basePath)}>
+          <ScButton type="tertiary" role="button" onClick={() => client.navigate(basePath)}>
             Back to cashflows
-          </Button>
+          </ScButton>
           {detail ? (
             <>
               <header className="details-heading">
                 <div><span className="section-label">Cashflow record</span><h2>{detail.id}</h2></div>
-                <StatusBadge status={detail.status.toLowerCase() as StatusTone}>{detail.status}</StatusBadge>
+                <ScBadge type="text" color={statusColor(detail.status)} label={detail.status} aria-label={detail.status} />
               </header>
               <dl className="details-grid">
                 <div><dt>Counterparty</dt><dd>{detail.counterparty}</dd></div>
@@ -151,12 +149,14 @@ export function createCashflowApplication(dependencies: CashflowRuntimeDependenc
                 <div><dt>Amount</dt><dd>{formatNumber.format(detail.amount)}</dd></div>
                 <div><dt>Instance</dt><dd>{instanceId}</dd></div>
               </dl>
-              <Button
+              <ScButton
+                type="primary"
+                role="button"
                 aria-label={`Notify host about ${detail.id}`}
                 onClick={() => client.notify(`Cashflow ${detail.id} selected`)}
               >
                 Notify portal host
-              </Button>
+              </ScButton>
             </>
           ) : <p role="alert">Cashflow record was not found.</p>}
         </article>
@@ -164,14 +164,16 @@ export function createCashflowApplication(dependencies: CashflowRuntimeDependenc
         <article className="cashflow-app" data-instance-id={instanceId}>
           <header className="cashflow-header">
             <div><span className="section-label">Ratan operations</span><h2>Cashflow blotter</h2></div>
-            <div className="cashflow-header-actions"><Button variant="secondary" onClick={() => client.navigate(`${basePath}/authorization-limits`)}>Authorization Limits</Button><strong>{filtered.length} records</strong></div>
+            <div className="cashflow-header-actions"><ScButton type="secondary" role="button" onClick={() => client.navigate(`${basePath}/authorization-limits`)}>Authorization Limits</ScButton><strong>{filtered.length} records</strong></div>
           </header>
-          <TextField
+          <ScTextInput
             id={`${instanceId}-filter`}
             label="Filter cashflows"
             type="search"
+            role="searchbox"
+            aria-label="Filter cashflows"
             value={query}
-            onChange={setQuery}
+            onScInput={(event: CustomEvent<{ value: string }>) => setQuery(event.detail.value)}
           />
           <div className="cashflow-table-frame">
             <table>
@@ -180,14 +182,14 @@ export function createCashflowApplication(dependencies: CashflowRuntimeDependenc
                 {filtered.map((record) => (
                   <tr key={record.id} aria-selected={record.id === selectedId}>
                     <th scope="row">
-                      <button aria-label={`Select ${record.id}`} onClick={() => {
+                      <ScButton type="tertiary" role="button" aria-label={`Select ${record.id}`} onClick={() => {
                         setSelectedId(record.id);
                         client.track('cashflow.selected', { id: record.id });
-                      }}>{record.id}</button>
+                      }}>{record.id}</ScButton>
                     </th>
                     <td>{record.counterparty}</td><td>{record.currency}</td>
                     <td>{formatNumber.format(record.amount)}</td>
-                    <td><StatusBadge status={record.status.toLowerCase() as StatusTone}>{record.status}</StatusBadge></td>
+                    <td><ScBadge type="text" color={statusColor(record.status)} label={record.status} aria-label={record.status} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -196,15 +198,17 @@ export function createCashflowApplication(dependencies: CashflowRuntimeDependenc
           {selected ? (
             <footer className="selection-bar">
               <strong>Selected {selected.id}</strong>
-              <Button
+              <ScButton
+                type="primary"
+                role="button"
                 aria-label={`View ${selected.id} details`}
                 onClick={() => client.navigate(`${basePath}/details/${encodeURIComponent(selected.id)}`)}
-              >View details</Button>
+              >View details</ScButton>
             </footer>
           ) : null}
         </article>
       )}
-    </DesignSystemProvider>
+    </div>
     );
   }
 

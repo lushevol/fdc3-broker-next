@@ -1,3 +1,4 @@
+import '@webcomponents/scoped-custom-element-registry';
 import {
   APPLICATION_CONTRACT_VERSION,
   APPEARANCE_CONTRACT_VERSION,
@@ -6,24 +7,22 @@ import {
   type ApplicationProps,
 } from '@fm/platform-contracts';
 import { createPlatformClient } from '@fm/platform-sdk';
-import {
-  Button,
-  Card,
-  ConfirmationDialog,
-  DesignSystemProvider,
-  Dialog,
-  EmptyState,
-  IconButton,
-  InlineAlert,
-  Select,
-  StatusBadge,
-  Tabs,
-  TextArea,
-  TextField,
-} from '@fm/ratan-design';
-import '@fm/ratan-design/styles.css';
 import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
 import './styles.css';
+import {
+  ScAlert,
+  ScBadge,
+  ScButton,
+  ScCard,
+  ScDialog,
+  ScIconButton,
+  ScMenu,
+  ScMenuItem,
+  ScTab,
+  ScTabGroup,
+  ScTabPanel,
+  ScTextInput,
+} from './webkit';
 
 export const manifest: ApplicationManifest = {
   id: 'fdc3-admin',
@@ -170,41 +169,45 @@ function MasterList({
   };
   const removeReferences = removing ? references(removing) : [];
   return (
-    <Card
-      title={title}
-      description="Deterministic master data for declaration validation."
-      actions={<Button onClick={openNew}>Create {kind}</Button>}
-    >
-      {rows.length === 0 ? <EmptyState title={`No ${kind}s`} description="Create the first catalog entry." /> : (
+    <ScCard className="fdc3-catalog-card">
+      <header className="fdc3-card-header">
+        <div><h2>{title}</h2><p>Deterministic master data for declaration validation.</p></div>
+        <ScButton type="primary" role="button" onClick={openNew}>Create {kind}</ScButton>
+      </header>
+      {rows.length === 0 ? <section className="fdc3-empty-state"><h3>{`No ${kind}s`}</h3><p>Create the first catalog entry.</p></section> : (
         <div className="fdc3-table-frame">
           <table>
             <thead><tr><th scope="col">{kind === 'intent' ? 'Intent name' : 'Context type'}</th><th scope="col">Description</th><th scope="col">Actions</th></tr></thead>
             <tbody>{rows.map((row) => {
               const value = getValue(row);
-              return <tr key={value}><th scope="row">{value}</th><td>{row.description}</td><td className="fdc3-actions"><IconButton label={`Edit ${value}`} icon="✎" variant="ghost" onClick={() => openEdit(row)} /><IconButton label={`Delete ${value}`} icon="×" variant="danger" onClick={() => setRemoving(value)} /></td></tr>;
+              return <tr key={value}><th scope="row">{value}</th><td>{row.description}</td><td className="fdc3-actions"><ScIconButton name="edit" role="button" aria-label={`Edit ${value}`} onClick={() => openEdit(row)} /><ScIconButton name="trash--line" role="button" aria-label={`Delete ${value}`} onClick={() => setRemoving(value)} /></td></tr>;
             })}</tbody>
           </table>
         </div>
       )}
-      <Dialog
-        open={editing !== null}
-        title={editing ? `Edit ${kind}` : `Create ${kind}`}
-        onClose={() => setEditing(null)}
-        actions={<><Button variant="secondary" onClick={() => setEditing(null)}>Cancel</Button><Button onClick={save} disabled={!name.trim()}>{editing ? 'Save changes' : `Create ${kind}`}</Button></>}
+      {editing !== null ? <ScDialog
+        open
+        label={editing ? `Edit ${kind}` : `Create ${kind}`}
+        role="dialog"
+        aria-label={editing ? `Edit ${kind}` : `Create ${kind}`}
+        onScHide={() => setEditing(null)}
       >
-        <TextField id={`${kind}-name`} label={kind === 'intent' ? 'Intent name' : 'Context type'} value={name} onChange={setName} disabled={Boolean(editing)} required helperText={editing ? 'The catalog key cannot change after declarations reference it.' : 'Use a unique FDC3 identifier.'} />
-        <TextArea id={`${kind}-description`} label="Description" value={description} onChange={setDescription} rows={3} />
-      </Dialog>
-      <ConfirmationDialog
-        open={removing !== null}
-        title={`Delete ${kind}`}
-        message={removeReferences.length ? `${removing} is used by ${removeReferences.join(', ')}. Delete it anyway?` : `Delete ${removing}?`}
-        confirmLabel="Delete"
-        tone="danger"
-        onCancel={() => setRemoving(null)}
-        onConfirm={() => { if (removing) onDelete(removing); setRemoving(null); }}
-      />
-    </Card>
+        <ScIconButton slot="header-actions" name="cross" role="button" aria-label={`Close ${editing ? `Edit ${kind}` : `Create ${kind}`}`} onClick={() => setEditing(null)} />
+        <ScTextInput id={`${kind}-name`} label={kind === 'intent' ? 'Intent name' : 'Context type'} role="textbox" aria-label={kind === 'intent' ? 'Intent name' : 'Context type'} value={name} onScInput={(event: CustomEvent<{ value: string }>) => setName(event.detail.value)} disabled={Boolean(editing)} required helpText={editing ? 'The catalog key cannot change after declarations reference it.' : 'Use a unique FDC3 identifier.'} />
+        <ScTextInput id={`${kind}-description`} label="Description" role="textbox" aria-label="Description" value={description} onScInput={(event: CustomEvent<{ value: string }>) => setDescription(event.detail.value)} multiline rows={3} />
+        <div slot="footer" className="dialog-actions"><ScButton type="tertiary" role="button" onClick={() => setEditing(null)}>Cancel</ScButton><ScButton type="primary" role="button" onClick={save} disabled={!name.trim()}>{editing ? 'Save changes' : `Create ${kind}`}</ScButton></div>
+      </ScDialog> : null}
+      {removing !== null ? <ScDialog
+        open
+        label={`Delete ${kind}`}
+        role="dialog"
+        aria-label={`Delete ${kind}`}
+        onScHide={() => setRemoving(null)}
+      >
+        <p>{removeReferences.length ? `${removing} is used by ${removeReferences.join(', ')}. Delete it anyway?` : `Delete ${removing}?`}</p>
+        <div slot="footer" className="dialog-actions"><ScButton type="tertiary" role="button" onClick={() => setRemoving(null)}>Cancel</ScButton><ScButton type="secondary" state="error" role="button" onClick={() => { onDelete(removing); setRemoving(null); }}>Delete</ScButton></div>
+      </ScDialog> : null}
+    </ScCard>
   );
 }
 
@@ -223,6 +226,7 @@ export function Application({ instanceId, capabilities }: ApplicationProps) {
   const [interop, setInterop] = useState(formatInterop({ appId: '', listensFor: [], raises: [], contexts: [] }));
   const [interopError, setInteropError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<string | null>(null);
+  const [appMenuOpen, setAppMenuOpen] = useState(false);
 
   const appOptions = [
     { id: 'cashflow', label: 'Cashflow' },
@@ -261,34 +265,48 @@ export function Application({ instanceId, capabilities }: ApplicationProps) {
   const declarationsPanel = (
     <section className="fdc3-panel">
       <div className="fdc3-summary">
-        <Card title="Declarations"><strong>{declarations.length}</strong></Card>
-        <Card title="Intents"><strong>{intents.length}</strong></Card>
-        <Card title="Contexts"><strong>{contexts.length}</strong></Card>
-        <Card title="Identity"><StatusBadge status={identity?.state === 'authenticated' ? 'ready' : 'neutral'}>{identity?.state ?? 'anonymous'}</StatusBadge></Card>
+        <ScCard><h3>Declarations</h3><strong>{declarations.length}</strong></ScCard>
+        <ScCard><h3>Intents</h3><strong>{intents.length}</strong></ScCard>
+        <ScCard><h3>Contexts</h3><strong>{contexts.length}</strong></ScCard>
+        <ScCard><h3>Identity</h3><ScBadge type="text" color={identity?.state === 'authenticated' ? 'green' : 'grey'} label={identity?.state ?? 'anonymous'} aria-label={identity?.state ?? 'anonymous'} /></ScCard>
       </div>
-      <div className="fdc3-toolbar"><TextField id="fdc3-search" label="Search FDC3" value={search} onChange={setSearch} type="search" /><Button onClick={() => openEditor()}>Create declaration</Button></div>
-      <Card title="Application declarations" description="A searchable master-detail declaration registry.">
-        {filtered.length === 0 ? <EmptyState title="No matching declarations" description="Change the search or create a declaration." /> : <div className="fdc3-table-frame"><table><thead><tr><th scope="col">Application</th><th scope="col">Listens</th><th scope="col">Raises</th><th scope="col">Contexts</th><th scope="col">Actions</th></tr></thead><tbody>{filtered.map((declaration) => <tr key={declaration.appId}><th scope="row">{declaration.appId}</th><td>{declaration.listensFor.length}</td><td>{declaration.raises.length}</td><td>{declaration.contexts.join(', ') || '—'}</td><td className="fdc3-actions"><IconButton label={`Edit declaration ${declaration.appId}`} icon="✎" variant="ghost" onClick={() => openEditor(declaration)} /><IconButton label={`Delete declaration ${declaration.appId}`} icon="×" variant="danger" onClick={() => setRemoving(declaration.appId)} /></td></tr>)}</tbody></table></div>}
-      </Card>
+      <div className="fdc3-toolbar"><ScTextInput id="fdc3-search" label="Search FDC3" role="searchbox" aria-label="Search FDC3" value={search} onScInput={(event: CustomEvent<{ value: string }>) => setSearch(event.detail.value)} type="search" /><ScButton type="primary" role="button" onClick={() => openEditor()}>Create declaration</ScButton></div>
+      <ScCard className="fdc3-declarations-card">
+        <header className="fdc3-card-header"><div><h2>Application declarations</h2><p>A searchable master-detail declaration registry.</p></div></header>
+        {filtered.length === 0 ? <section className="fdc3-empty-state"><h3>No matching declarations</h3><p>Change the search or create a declaration.</p></section> : <div className="fdc3-table-frame"><table><thead><tr><th scope="col">Application</th><th scope="col">Listens</th><th scope="col">Raises</th><th scope="col">Contexts</th><th scope="col">Actions</th></tr></thead><tbody>{filtered.map((declaration) => <tr key={declaration.appId}><th scope="row">{declaration.appId}</th><td>{declaration.listensFor.length}</td><td>{declaration.raises.length}</td><td>{declaration.contexts.join(', ') || '—'}</td><td className="fdc3-actions"><ScIconButton name="edit" role="button" aria-label={`Edit declaration ${declaration.appId}`} onClick={() => openEditor(declaration)} /><ScIconButton name="trash--line" role="button" aria-label={`Delete declaration ${declaration.appId}`} onClick={() => setRemoving(declaration.appId)} /></td></tr>)}</tbody></table></div>}
+      </ScCard>
     </section>
   );
 
-  return <DesignSystemProvider appearance={{ scheme: appearance.scheme, density: appearance.density, direction: appearance.direction }} scope="application">
+  return <div className="fdc3-webkit-scope" data-scheme={appearance.scheme} data-density={appearance.density} dir={appearance.direction}>
     <article className="fdc3-app" data-instance-id={instanceId}>
-      <header className="fdc3-header"><div><span>Component verification / FDC3</span><h1>Interop declarations</h1></div><Button variant="secondary" onClick={() => client.notify('FDC3 adapter simulation ready')}>Test adapter</Button></header>
-      <Tabs ariaLabel="FDC3 administration" tabs={[
-        { id: 'declarations', label: 'Declarations', content: declarationsPanel },
-        { id: 'intents', label: 'Intent catalog', content: <MasterList title="FDC3 intents" kind="intent" rows={intents} onSave={upsertIntent} onDelete={(name) => setIntents((current) => current.filter((value) => value.name !== name))} references={(name) => references('intent', name)} /> },
-        { id: 'contexts', label: 'Context catalog', content: <MasterList title="FDC3 contexts" kind="context" rows={contexts} onSave={upsertContext} onDelete={(name) => setContexts((current) => current.filter((value) => value.type !== name))} references={(name) => references('context', name)} /> },
-      ]} />
-      <Dialog open={editing !== undefined} title={editing ? `Edit ${editing.appId}` : 'Create declaration'} width="large" onClose={() => setEditing(undefined)} actions={<><Button variant="secondary" onClick={() => setEditing(undefined)}>Cancel</Button><Button onClick={saveDeclaration} disabled={!appId}>Save declaration</Button></>}>
-        <Select id="declaration-app" label="Application" options={appOptions} selectedId={appId || undefined} onChange={setAppId} disabled={Boolean(editing)} required helperText="Choose the tile that owns this declaration." />
-        <TextArea id="declaration-interop" label="Interop JSON" value={interop} onChange={setInterop} rows={16} error={Boolean(interopError)} helperText={interopError ?? 'Edit the FDC3 intent and context contract.'} />
-        {interopError ? <InlineAlert tone="error" title="Interop JSON is invalid" message={interopError} /> : null}
-      </Dialog>
-      <ConfirmationDialog open={removing !== null} title="Delete declaration" message={`Delete the ${removing} declaration? This operation only changes the local verification fixture.`} confirmLabel="Delete" tone="danger" onCancel={() => setRemoving(null)} onConfirm={() => { if (removing) setDeclarations((current) => current.filter((value) => value.appId !== removing)); setRemoving(null); }} />
+      <header className="fdc3-header"><div><span>Component verification / FDC3</span><h1>Interop declarations</h1></div><ScButton type="secondary" role="button" onClick={() => client.notify('FDC3 adapter simulation ready')}>Test adapter</ScButton></header>
+      <ScTabGroup aria-label="FDC3 administration">
+        <ScTab slot="nav" panel="declarations" active aria-label="Declarations">Declarations</ScTab>
+        <ScTab slot="nav" panel="intents" aria-label="Intent catalog">Intent catalog</ScTab>
+        <ScTab slot="nav" panel="contexts" aria-label="Context catalog">Context catalog</ScTab>
+        <ScTabPanel name="declarations" active>{declarationsPanel}</ScTabPanel>
+        <ScTabPanel name="intents"><MasterList title="FDC3 intents" kind="intent" rows={intents} onSave={upsertIntent} onDelete={(name) => setIntents((current) => current.filter((value) => value.name !== name))} references={(name) => references('intent', name)} /></ScTabPanel>
+        <ScTabPanel name="contexts"><MasterList title="FDC3 contexts" kind="context" rows={contexts} onSave={upsertContext} onDelete={(name) => setContexts((current) => current.filter((value) => value.type !== name))} references={(name) => references('context', name)} /></ScTabPanel>
+      </ScTabGroup>
+      {editing !== undefined ? <ScDialog open label={editing ? `Edit ${editing.appId}` : 'Create declaration'} role="dialog" aria-label={editing ? `Edit ${editing.appId}` : 'Create declaration'} onScHide={() => setEditing(undefined)}>
+        <ScIconButton slot="header-actions" name="cross" role="button" aria-label={`Close ${editing ? `Edit ${editing.appId}` : 'Create declaration'}`} onClick={() => setEditing(undefined)} />
+        <div className="fdc3-application-picker">
+          <span>Application</span>
+          <ScButton type="secondary" role="button" aria-label="Application" disabled={Boolean(editing)} onClick={() => setAppMenuOpen((open) => !open)}>{appOptions.find((option) => option.id === appId)?.label ?? 'Choose application'}</ScButton>
+          {appMenuOpen ? <ScMenu aria-label="Applications">{appOptions.map((option) => <ScMenuItem key={option.id} role="menuitem" aria-label={option.label} onClick={() => { setAppId(option.id); setAppMenuOpen(false); }}>{option.label}</ScMenuItem>)}</ScMenu> : null}
+          <small>Choose the tile that owns this declaration.</small>
+        </div>
+        <ScTextInput id="declaration-interop" label="Interop JSON" role="textbox" aria-label="Interop JSON" value={interop} onScInput={(event: CustomEvent<{ value: string }>) => setInterop(event.detail.value)} multiline rows={16} error={Boolean(interopError)} errorMessage={interopError ?? ''} helpText={interopError ? '' : 'Edit the FDC3 intent and context contract.'} />
+        {interopError ? <ScAlert role="alert" type="error" title="Interop JSON is invalid">{interopError}</ScAlert> : null}
+        <div slot="footer" className="dialog-actions"><ScButton type="tertiary" role="button" onClick={() => setEditing(undefined)}>Cancel</ScButton><ScButton type="primary" role="button" onClick={saveDeclaration} disabled={!appId}>Save declaration</ScButton></div>
+      </ScDialog> : null}
+      {removing !== null ? <ScDialog open label="Delete declaration" role="dialog" aria-label="Delete declaration" onScHide={() => setRemoving(null)}>
+        <p>{`Delete the ${removing} declaration? This operation only changes the local verification fixture.`}</p>
+        <div slot="footer" className="dialog-actions"><ScButton type="tertiary" role="button" onClick={() => setRemoving(null)}>Cancel</ScButton><ScButton type="secondary" state="error" role="button" onClick={() => { setDeclarations((current) => current.filter((value) => value.appId !== removing)); setRemoving(null); }}>Delete</ScButton></div>
+      </ScDialog> : null}
     </article>
-  </DesignSystemProvider>;
+  </div>;
 }
 
 export { formatInterop, parseInterop };

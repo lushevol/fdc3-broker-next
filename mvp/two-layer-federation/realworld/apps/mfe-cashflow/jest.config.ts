@@ -5,6 +5,7 @@ export default {
   transform: { '^.+\\.(j|t)sx?$': 'babel-jest' },
   transformIgnorePatterns: ['node_modules/(?!(@fm)/)'],
   moduleNameMapper: {
+    '^@fm/ratan-design-webkit/react$': '<rootDir>/src/test/webkit-react-stub.tsx',
     '\\.(css)$': 'identity-obj-proxy',
     '^react$': '<rootDir>/node_modules/react',
     '^react/(.*)$': '<rootDir>/node_modules/react/$1',
@@ -15,6 +16,8 @@ export default {
     'src/**/*.{ts,tsx}',
     '!src/index.tsx',
     '!src/test-setup.ts',
+    '!src/test/**',
+    '!src/webkit.ts',
   ],
   coverageDirectory: './coverage',
   coverageReporters: ['text', 'lcov'],

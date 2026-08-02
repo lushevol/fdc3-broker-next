@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { PlatformClient } from '@fm/platform-sdk';
 import type { RatanDataGridProps } from '@fm/ratan-data-grid';
@@ -333,8 +333,9 @@ describe('Authorization Limits opt-in delete and transition cohort', () => {
       );
       await screen.findByRole('heading', { name: id });
       fireEvent.click(screen.getByRole('button', { name: trigger }));
-      expect(screen.getByRole('dialog', { name: title })).toBeInTheDocument();
-      fireEvent.click(screen.getByRole('button', { name: confirmLabel }));
+      const dialog = screen.getByRole('dialog', { name: title });
+      expect(dialog).toBeInTheDocument();
+      fireEvent.click(within(dialog).getByRole('button', { name: confirmLabel }));
       await waitFor(() =>
         expect(mutationService[method]).toHaveBeenCalledWith(command),
       );
