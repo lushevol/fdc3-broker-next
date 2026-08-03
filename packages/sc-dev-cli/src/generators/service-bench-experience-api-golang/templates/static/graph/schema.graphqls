@@ -1,0 +1,20 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+directive @binding(constraint: String!) on INPUT_FIELD_DEFINITION | ARGUMENT_DEFINITION
+
+type SampleDto {
+    name: String!
+    description: String!
+}
+
+type Mutation {
+  post_sample(
+    name: String! @binding(constraint: "required,max=20"),
+    description: String!): SampleDto!
+}
+
+type Query {
+  get_sample: SampleDto!
+}

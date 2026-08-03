@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+  <title>sc-web-kit demo page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css" />
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDyslexicMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScLightModeRte.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkModeRte.css" />
+
+  <!-- Custom style -->
+  <style>
+    body {
+      padding: 24px;
+    }
+
+    .sc-mode-dark {
+      background-color: var(--sc-color-blue-900)
+    }
+
+    .table-cell {
+      border-color: var(--sc-color-grey-15);
+      vertical-align: top;
+    }
+  </style>
+
+  <!-- Register all sc-* custom elements -->
+  <script type="module">
+    import '../dist/elements/index.js';
+    import '@scdevkit/webkit/elements/index.js';
+    import '../dist/demo/local/ScDataGraphQLProvider.js';
+    import { html } from '/node_modules/lit-html/lit-html.js';
+    window.html = html;
+
+  </script>
+
+</head>
+<sc-demo-graphql-provider>
+  <sc-icon-provider>
+    <div class="table w-full shadow-lg max-h-96 components-body">
+      <div class="table-header-group font-bold sticky top-0 bg-white z-10">
+        <div class="table-row">
+          <div class="table-cell border px-4 py-4">Component</div>
+          <div class="table-cell border px-4 py-4">Example</div>
+          <div class="table-cell border px-4">
+            <div class="py-4" style="max-width: 300px;">
+              <sc-dropdown-input label="Mode" value="light">
+                <sc-dropdown-option value="light">Light</sc-dropdown-option>
+                <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+                <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+              </sc-dropdown-input>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="table-row-group h-96 overflow-y-auto">
+        <div class="table-row">
+          <div class="table-cell border px-4 py-4">Rich Text Editor</div>
+          <div class="table-cell border px-4 py-4">Default</div>
+          <div class="table-cell border px-4 py-4">
+            <div class="py-4" id="rte-1">
+              <script type="module">
+                import { html, render } from 'lit';
+
+                const toolbar = [
+                  'undo',
+                  'redo',
+                  'separate',
+                  'askai',
+                  'aishortcuts',
+                  'separate',
+                  'fontstyle',
+                  'separate',
+                  'copy',
+                  'paste',
+                  'separate',
+                  'bold',
+                  'italic',
+                  'underline',
+                  'strikethrough',
+                  'subscript',
+                  'superscript',
+                  'backcolor',
+                  'forecolor',
+                  'clear',
+                  'separate',
+                  'alignleft',
+                  'aligncenter',
+                  'alignright',
+                  'orderedlist',
+                  'unorderedlist',
+                  'outdent',
+                  'indent',
+                  'separate',
+                  'addlink',
+                  'insertimage',
+                  'unlink',
+                  'quote',
+                  'table',
+                  'revisionhistory',
+                ];
+
+                const value = `
+                  <h1>Heading 1</h1>
+                  <h2>Heading 2</h2>
+                  <h3>Heading 3</h3>
+                  <h4>Heading 4</h4>
+                  <h5>Heading 5</h5>
+                  <h6>Heading 6</h6>
+                  <p>Paragraph</p>
+                  <div></div>
+                  <table style="width: 90%; border-collapse: collapse;">
+                    <colgroup>
+                      <col style="width: 30%;">
+                      <col style="width: 30%;">
+                      <col style="width: 30%;">
+                    </colgroup>
+                    <tbody>
+                      <tr>
+                        <td>Table Data 1</td>
+                        <td>Table Data 2</td>
+                        <td>Table Data 3</td>
+                      </tr>
+                      <tr>
+                        <td>Table Data 4</td>
+                        <td>Table Data 5</td>
+                        <td>Table Data 6</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  `;
+
+                const revisions = [{
+                  id: 'rev1',
+                  authorId: '2027226',
+                  content: `
+                  <h1>Heading 1</h1>
+                  <h2>Heading 2</h2>
+                  <h2>Heading 3</h2>
+                  <h4>Heading 4</h4>
+                  <h5>Heading 5</h5>
+                  <h6>Heading 6</h6>
+                  <p>Paragraph</p>
+                  <div></div>
+                  <table style="width: 90%; border-collapse: collapse;">
+                    <colgroup>
+                      <col style="width: 30%;">
+                      <col style="width: 30%;">
+                      <col style="width: 30%;">
+                    </colgroup>
+                    <tbody>
+                      <tr>
+                        <td>Table Data 1</td>
+                        <td>Table Data 2</td>
+                        <td>Tablea sd Data 3</td>
+                      </tr>
+                      <tr>
+                        <td>Table Data 4</td>
+                        <td>Table Data 5</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  `,
+                  dateCreated: '2025-12-04T15:48:32Z',
+                }];
+
+                render(html`
+                  <sc-rich-text-editor-v2
+                    label="Text Editor Label"
+                    required
+                    show-count
+                    max-length=10000
+                    help-text="Help Text Content"
+                    enable-fullscreen
+                    .toolbar=${toolbar}
+                    .value=${value}
+                    .revisions=${revisions}
+                    @sc-mention=${console.log}
+                  >
+                  </sc-rich-text-editor-v2>
+                `, document.getElementById('rte-1'));
+              </script>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-icon-provider>
+</sc-demo-graphql-provider>
+<!-- Custom script -->
+<script type="text/javascript">
+  var modes = ['light', 'dark', 'dyslexic']
+  var activeMode = modes[0]
+  function changeMode(mode) {
+    var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child');
+    componentCells.forEach((componentCell) => {
+      modes.forEach((mode) => {
+        componentCell.classList.remove(`sc-mode-${mode}`)
+      })
+      componentCell.classList.add(`sc-mode-${mode}`)
+      if (componentCell.classList.contains('inverse')) {
+        if (mode === 'dark') {
+          componentCell.style.backgroundColor = 'var(--sc-color-white)'
+        } else {
+          componentCell.style.backgroundColor = 'var(--sc-color-blue-900)'
+        }
+      }
+    })
+  }
+  document.getElementsByTagName('sc-dropdown-input')[0].addEventListener('sc-select', ({ detail: { value } }) => {
+    changeMode(value);
+  });
+  changeMode(activeMode);
+</script>
+
+<script type="module">
+  import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+  changeIconLibrary();
+  function changeIconLibrary() {
+    document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+  }
+</script>
+
+</html>

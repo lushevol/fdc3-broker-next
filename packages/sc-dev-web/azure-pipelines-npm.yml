@@ -1,0 +1,330 @@
+trigger:
+  - develop
+  - feature/*
+  - release/*
+  - catalyst/*
+parameters:
+  - name: releaseId
+    type: string
+    displayName: Release WorkItem ID
+    default: '0'
+  - name: packageVersion
+    type: string
+    displayName: Package Version
+    default: 3.0.1-$(Build.BuildNumber)
+  - name: devkitHelmVersion
+    type: string
+    displayName: DevKit Helm Version
+    default: 1.1.1+20260521.5
+  - name: rollbackBuildNumber
+    type: string
+    displayName: Last successful Release Build Number to rollback
+    default: '0'
+  - name: buildpackVersion
+    type: string
+    displayName: Buildpack Version
+    default: '20260604.5'
+variables:
+  - group: ServicePrincipleAKS
+  - name: ITAM
+    value: '55313'
+  - name: imageName
+    value: webkit
+  - name: imageTag
+    value: $(Build.SourceBranchName)_$(Build.BuildNumber)
+  - name: imageRepo
+    value: ado
+  - name: imagePrefix
+    value: sc
+  - name: functionName
+    value: sc-webkit
+  - name: notifyEmail
+    value: app.platform@sc.com
+resources:
+  repositories:
+    - repository: modular-templates
+      name: dj-core/governed-templates
+      ref: main
+      type: git
+extends:
+  template: governed-template/build-and-deploy.yml@modular-templates
+  parameters:
+    ITAM: '${{variables.ITAM}}'
+    devFactory: true
+    featureRelease: true
+    releaseId: '${{ parameters.releaseId }}'
+    buildStackName: sc-devkit-node
+    buildStackParams:
+      pool: sc-linux
+      newCodeReferenceBranch: 'main'
+      featureBranchScan: true
+      featureRelease: true
+      imageTag: '${{variables.imageTag}}'
+      imageRepo: '${{variables.imageRepo}}'
+      imagePrefix: '${{variables.imagePrefix}}'
+      imageName: '${{variables.imageName}}'
+      imageListFilePath: image.yml
+      calculateImageDigest: true
+      postInputFileList:
+        - image.yml
+      postVariableList:
+        - name: mainContainerImageName
+          value: 'ado\/$(Build.Repository.Name)\/${{variables.imageRepo}}\/${{variables.imagePrefix}}-${{variables.imageName}}'
+      buildpackImageName: 'buildpack-node:${{parameters.buildpackVersion}}'
+      builderImageName: 'builder-node:${{parameters.buildpackVersion}}'
+      nodeVersion: 20.10.0
+      npmTaskList:
+        - name: Set version
+          task: 'version ${{ parameters.packageVersion }} --no-git-tag-version'
+        - name: Run Build
+          task: run build
+        - name: Run Test
+          task: run test
+      generateUnitTestReport: true
+      generateCodeCoverage: true
+      testResultsFiles: $(Build.SourcesDirectory)/$(Build.Repository.Name)/report/junit-report.xml
+      sonarSources: ./src
+    deployStackName: knative
+    secondaryDeployStackName: knativeaks
+    deployStackParams:
+      functionName: '${{variables.functionName}}'
+      imageTag: '${{variables.imageTag}}'
+      imageRepo: 'ado/$(Build.Repository.Name)/${{variables.imageRepo}}'
+      imagePrefix: '${{variables.imagePrefix}}'
+      imageName: '${{variables.imageName}}'
+      devkitHelmVersion: '${{parameters.devkitHelmVersion}}'
+      runQaRollback: false
+    deployEnvironments:
+      - name: ct1_dev_hk
+        environment: dev
+        displayName: CT1-DEV-HK
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        helmReleaseName: 'dev-${{variables.ITAM}}-${{variables.functionName}}'
+        secureFileName: 55313_NonProd_sket410_kubeconfig
+        dependsOn:
+          - CI
+        extraHelmArgs: '--set functionType=ui --set internalEnvCode=dev'
+      - name: ct1_sit_hk
+        environment: dev
+        displayName: CT1-SIT-HK
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        helmReleaseName: 'sit-${{variables.ITAM}}-${{variables.functionName}}'
+        secureFileName: 55313_NonProd_sket410_kubeconfig
+        dependsOn:
+          - CI
+        extraHelmArgs: '--set functionType=ui --set internalEnvCode=sit' 
+      - name: gdcw2_uat_ark
+        environment: dev
+        displayName: GDCW2-UAT-ARK
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-NonProd-skek408-ark-kubeconfig
+        dependsOn:
+          - CI
+        extraHelmArgs: '--set functionType=ui'
+      - name: ct1_uat_hk
+        environment: dev
+        displayName: CT1-UAT-HK
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        helmReleaseName: 'uat-${{variables.ITAM}}-${{variables.functionName}}'
+        secureFileName: 55313_NonProd_sket410_kubeconfig
+        dependsOn:
+          - ct1_sit_hk
+        extraHelmArgs: '--set functionType=ui --set internalEnvCode=uat'
+      - name: qa
+        environment: qa
+        displayName: CT1-QA-HK
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313_NonProd_sket410_kubeconfig
+        dependsOn:
+          - ct1_uat_hk
+        extraHelmArgs: '--set functionType=ui'
+      - name: release_checks
+        environment: pre-release
+        displayName: Release Checks
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        hasGenie: false
+        qaStageName: qa
+        dependsOn:
+          - qa
+      - name: release
+        environment: release
+        displayName: Release
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        hasGenie: false
+        dependsOn:
+          - release_checks
+      - name: cn1_prod_uct
+        environment: production
+        displayName: CN1-PRD-UCT
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-skec002-cnp-kubeconfig
+        dependsOn:
+          - release
+        extraHelmArgs: '--set functionType=ui --set enableNodeSelector=true'
+      - name: rollback_cn1_prod_uct
+        environment: production
+        displayName: Rollback CN1-PRD-UCT
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: '${{parameters.rollbackBuildNumber}}'
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-skec002-cnp-kubeconfig
+        dependsOn:
+          - cn1_prod_uct
+        extraHelmArgs: '--set functionType=ui --set enableNodeSelector=true'
+      - name: cn1_prod_wgq
+        environment: production
+        displayName: CN1-PRD-WGQ
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-skec002-cnd-kubeconfig
+        dependsOn:
+          - release
+        extraHelmArgs: '--set functionType=ui --set enableNodeSelector=true'
+      - name: rollback_cn1_prod_wgq
+        environment: production
+        displayName: Rollback CN1-PRD-WGQ
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: '${{parameters.rollbackBuildNumber}}'
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-skec002-cnd-kubeconfig
+        dependsOn:
+          - cn1_prod_wgq
+        extraHelmArgs: '--set functionType=ui --set enableNodeSelector=true'
+      - name: ct1_prod_hk
+        environment: production
+        displayName: CT1-PRD-HK
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-sked009-hk-kubeconfig
+        dependsOn:
+          - release
+        extraHelmArgs: '--set functionType=ui'
+      - name: rollback_ct1_prod_hk
+        environment: production
+        displayName: Rollback CT1-PRD-HK
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: '${{parameters.rollbackBuildNumber}}'
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-sked009-hk-kubeconfig
+        dependsOn:
+          - ct1_prod_hk
+        extraHelmArgs: '--set functionType=ui'
+      - name: ct1_prod_sg
+        environment: production
+        displayName: CT1-PRD-SG
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-sked009-sg-kubeconfig
+        dependsOn:
+          - release
+        extraHelmArgs: '--set functionType=ui'
+      - name: rollback_ct1_prod_sg
+        environment: production
+        displayName: Rollback CT1-PRD-SG
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: '${{parameters.rollbackBuildNumber}}'
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-sked009-sg-kubeconfig
+        dependsOn:
+          - ct1_prod_sg
+        extraHelmArgs: '--set functionType=ui'
+      - name: gdcw1_prod_ark
+        environment: production
+        displayName: GDCW1-PRD-ARK
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-ark-kubeconfig
+        dependsOn:
+          - release
+        extraHelmArgs: '--set functionType=ui'
+      - name: rollback_gdcw1_prod_ark
+        environment: production
+        displayName: Rollback GDCW1-PRD-ARK
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: '${{parameters.rollbackBuildNumber}}'
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-ark-kubeconfig
+        dependsOn:
+          - gdcw1_prod_ark
+        extraHelmArgs: '--set functionType=ui'
+      - name: gdcw1_prod_watford
+        environment: production
+        displayName: GDCW1-PRD-WATFORD
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-watford-kubeconfig
+        dependsOn:
+          - release
+        extraHelmArgs: '--set functionType=ui'
+      - name: rollback_gdcw1_prod_watford
+        environment: production
+        displayName: Rollback GDCW1-PRD-WATFORD
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: '${{parameters.rollbackBuildNumber}}'
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-watford-kubeconfig
+        dependsOn:
+          - gdcw1_prod_watford
+        extraHelmArgs: '--set functionType=ui'
+      - name: gdcw2_prod_ark
+        environment: production
+        displayName: GDCW2-PRD-ARK
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-skeu408-ark-kubeconfig
+        dependsOn:
+          - release
+        extraHelmArgs: '--set functionType=ui'
+      - name: rollback_gdcw2_prod_ark
+        environment: production
+        displayName: Rollback GDCW2-PRD-ARK
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: '${{parameters.rollbackBuildNumber}}'
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-skeu408-ark-kubeconfig
+        dependsOn:
+          - gdcw2_prod_ark
+        extraHelmArgs: '--set functionType=ui'
+      - name: gdcw2_prod_watford
+        environment: production
+        displayName: GDCW2-PRD-WATFORD
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-skeu408-wat-kubeconfig
+        dependsOn:
+          - release
+        extraHelmArgs: '--set functionType=ui'
+      - name: rollback_gdcw2_prod_watford
+        environment: production
+        displayName: Rollback GDCW2-PRD-WATFORD
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: '${{parameters.rollbackBuildNumber}}'
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-skeu408-wat-kubeconfig
+        dependsOn:
+          - gdcw2_prod_watford
+        extraHelmArgs: '--set functionType=ui'

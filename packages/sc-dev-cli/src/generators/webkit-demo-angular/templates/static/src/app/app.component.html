@@ -1,0 +1,7 @@
+<app-header />
+<app-home *ngIf="selectedPage === 'home'"  />
+<app-pay-transfer *ngIf="selectedPage === 'pay-transfer'"  />
+<app-invest *ngIf="selectedPage === 'invest'"  />
+<app-discover *ngIf="selectedPage === 'discover'" />
+<app-services *ngIf="selectedPage === 'services'" />
+<app-footer (onMenuChange)="handleMenuChange($event)" />

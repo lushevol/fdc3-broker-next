@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <base href="/">
+  <meta charset="utf-8">
+  <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        background: #fafafa;
+      }
+      html.sc-mode-dark {
+        background: #111111;
+      }
+  </style>
+  <link rel="stylesheet" href="./node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css">
+  <link rel="stylesheet" href="./node_modules/@scdevkit/service-bench-core/dist/styles/SbDarkMode.css">
+</head>
+<body>
+  <div id="sb-root"></div>
+  <script type="module">
+    import '@scdevkit/webkit/elements'; // eslint-disable-line import/no-unresolved
+    import '@scdevkit/webkit-datavis/elements'; // eslint-disable-line import/no-unresolved
+    import '@scdevkit/data/elements';
+    import '@scdevkit/service-bench-core/elements';
+    import '@scdevkit/service-bench-core/elements/sb-components.js';
+    import '@scdevkit/webkit/styles/follow-system.js';
+    import { html, render } from 'lit';
+    
+    render(
+      html`
+        <service-bench
+          .menus=${[{
+            "title": "My Plugin",
+            "path": "/<??= name ??>/home",
+            "icon": "home--line"
+          }]}
+          .routes=${[{
+            "path": "/<??= name ??>/*",
+            "component": "sb-app-<??= name ??>",
+            "routeDefinition": "/app/<??= name ??>/manifests/routes.json"
+          }]}
+        >
+        </service-bench>
+      `,
+      document.querySelector('#sb-root')
+    );
+  </script>
+</body>
+</html>

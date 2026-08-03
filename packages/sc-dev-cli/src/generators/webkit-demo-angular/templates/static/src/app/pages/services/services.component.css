@@ -1,0 +1,9 @@
+.user-card {
+  border: 1px solid transparent;
+  border-left-width: 4px;
+  border-top-color: #e8e8e8;
+  border-right-color: #e8e8e8;
+  border-bottom-color: #e8e8e8;
+  background: linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(to bottom, #2c3a88, #0061c8) border-box;
+}

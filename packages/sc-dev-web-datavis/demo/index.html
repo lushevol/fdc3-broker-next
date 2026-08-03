@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <title>sc-webkit-datavis</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css">
+  <style>
+    body {
+      padding: 24px;
+    }
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 25px;
+    }
+
+    .chart-pie-container {
+      width: 300px;
+      height: 300px;
+    }
+
+    .chart-line-container {
+      width: 500px;
+      height: 250px;
+    }
+
+    h3 {
+      margin: 0;
+      padding: 30px 0 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="sb-root"></div>
+  <script type="module" lang='ts'>
+    import { html, render } from 'lit';
+    import '../dist/elements/index.js';
+    const data1 = {
+      labels: [
+        'App1',
+        'App2',
+        'App3',
+        'App4',
+        'App5',
+        'App6',
+      ],
+      datasets: [{
+        label: 'Apps Dataset',
+        data: [90, 70, 50, 20, 10, 10],
+        hoverOffset: 4
+      }]
+    };
+
+    const data2 = {
+      labels: [
+        'App1',
+        'App2',
+        'App3',
+        'App4',
+        'App5',
+        'App6',
+        'App7',
+        'App8',
+        'App9',
+        'App10',
+      ],
+      datasets: [{
+        label: 'Apps Dataset 2',
+        data: [100, 80, 60, 40, 30, 20, 15, 10, 5, 5],
+        hoverOffset: 4
+      }]
+    };
+
+    const data3 = {
+      labels: [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+      ],
+      datasets: [
+        {
+          label: 'Data1',
+          data: [55, 59, 80, 45, 37, 60],
+          backgroundColor: [
+            '--sc-color-blue-dark',
+          ],
+          borderColor: '--sc-color-blue-dark',
+        },
+        {
+          label: 'Data2',
+          data: [71, 56, 32, 41, 65, 52],
+          backgroundColor: [
+            '--sc-color-blue-darker',
+          ],
+          borderColor: '--sc-color-blue-darker',
+        },
+        {
+          label: 'Data3',
+          data: [81, 26, 38, 57, 43, 30],
+          backgroundColor: [
+            '--sc-color-blue-light',
+          ],
+          borderColor: '--sc-color-blue-light',
+        },
+      ],
+    };
+
+    const tensionLineData = {
+      labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+      datasets: [
+        {
+          label: 'Data1',
+          data: [55, 59, 80, 45, 37, 60],
+          tension: 0.4,
+          backgroundColor: ['--sc-color-blue-dark'],
+          borderColor: '--sc-color-blue-dark',
+        },
+        {
+          label: 'Data2',
+          data: [71, 56, 32, 41, 65, 52],
+          tension: 0.4,
+          backgroundColor: ['--sc-color-blue-darker'],
+          borderColor: '--sc-color-blue-darker',
+        },
+        {
+          label: 'Data3',
+          data: [81, 26, 38, 57, 43, 30],
+          tension: 0.4,
+          backgroundColor: ['--sc-color-blue-light'],
+          borderColor: '--sc-color-blue-light',
+        },
+      ],
+    };
+
+    const polarAreaData = {
+      labels: ['App1', 'App2', 'App3', 'App4', 'App5'],
+      datasets: [
+        {
+          label: 'Apps Dataset',
+          data: [11, 16, 7, 3, 14],
+          backgroundColor: [
+            '--sc-color-blue-dark',
+            '--sc-color-blue-darker',
+            '--sc-color-green-dark',
+            '--sc-color-grey-70',
+            '--sc-color-blue-light',
+          ],
+        },
+      ],
+    };
+    
+    const radarData = {
+      labels: ['App1', 'App2', 'App3', 'App4', 'App5', 'App6'],
+      datasets: [
+        {
+          label: 'Data1',
+          data: [65, 59, 90, 81, 56, 55],
+          fill: true,
+          backgroundColor: '--sc-color-blue-light,0.3',
+          borderColor: '--sc-color-blue',
+        }, {
+          label: 'Data2',
+          data: [28, 48, 40, 19, 96, 27],
+          fill: true,
+          backgroundColor: '--sc-color-green,0.3',
+          borderColor: '--sc-color-green-dark',
+        },
+      ],
+    };
+
+    const bubbleData = {
+      datasets: [
+        {
+          label: 'Data1',
+          data: [{
+            x: 20,
+            y: 30,
+            r: 15
+          }, {
+            x: 40,
+            y: 10,
+            r: 10
+          }],
+          backgroundColor: '--sc-color-blue-dark'
+        },
+        {
+          label: 'Data2',
+          data: [{
+            x: 35,
+            y: 20,
+            r: 12
+          }, {
+            x: 26,
+            y: 10,
+            r: 10
+          }],
+          backgroundColor: '--sc-color-blue-darker'
+        },
+        {
+          label: 'Data3',
+          data: [{
+            x: 30,
+            y: 20,
+            r: 15
+          }, {
+            x: 36,
+            y: 15,
+            r: 15
+          }],
+          backgroundColor: '--sc-color-blue-lighter'
+        }
+      ],
+    };
+
+    const scatterData = {
+      datasets: [
+        {
+          label: 'Data1',
+          data: [{
+            x: -10,
+            y: 0
+          }, {
+            x: 0,
+            y: 10
+          }, {
+            x: 10,
+            y: 5
+          }, {
+            x: 0.5,
+            y: 5.5
+          }],
+          backgroundColor: '--sc-color-blue-dark'
+        },
+        {
+          label: 'Data2',
+          data: [{
+            x: -6,
+            y: 4
+          }, {
+            x: 5,
+            y: 8
+          }, {
+            x: 7,
+            y: 5
+          }, {
+            x: 0.9,
+            y: 6.5
+          }],
+          backgroundColor: '--sc-color-green'
+        },
+      ],
+    };
+
+    const areaData = {
+      labels: [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+      ],
+      datasets: [
+        {
+          label: 'Data1',
+          data: [55, 59, 80, 45, 37, 60],
+          pointStyle: false,
+          borderColor: '--sc-color-blue-darker',
+          backgroundColor: '--sc-color-blue-darker,0.5',
+          tension: 0.4,
+        },
+        {
+          label: 'Data2',
+          data: [71, 56, 32, 41, 65, 52],
+          pointStyle: false,
+          borderColor: '--sc-color-blue',
+          backgroundColor: '--sc-color-blue,0.5',
+          tension: 0.4,
+        },
+      ],
+    };
+
+    const areaData2 = {
+      labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+      datasets: [
+        {
+          label: 'Data1',
+          data: [55, 59, 80, 45, 37, 60],
+          borderColor: '--sc-color-blue-darker',
+          backgroundColor: '--sc-color-blue-darker,0.5',
+        },
+        {
+          label: 'Data2',
+          data: [71, 56, 32, 41, 65, 52],
+          borderColor: '--sc-color-blue',
+          backgroundColor: '--sc-color-blue,0.5',
+        },
+      ],
+    };
+
+    const lineCombinedData = {
+      labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+      datasets: [
+        {
+          type: 'line',
+          label: 'Line Dataset',
+          data: [28, 48, 40, 19, 86, 27],
+          fill: false,
+          tension: 0.4,
+          borderWidth: 2,
+          order: 1
+        },
+        {
+          type: 'bubble',
+          label: 'Bubble Dataset',
+          data: [
+            { x: 0, y: 45, r: 15 },
+            { x: 1, y: 52, r: 20 },
+            { x: 2, y: 60, r: 10 },
+            { x: 3, y: 55, r: 18 },
+            { x: 4, y: 70, r: 12 },
+            { x: 5, y: 40, r: 25 }
+          ],
+          order: 0
+        }
+      ]
+    };
+
+    const dualYData = {
+      labels: [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+      ],
+      datasets: [
+        {
+          label: 'Data1',
+          yAxisID: 'y',
+          data: [55, 59, 80, 45, 37, 60],
+        },
+        {
+          label: 'Data2',
+          yAxisID: 'y1',
+          data: [7, 5, 2, 1, 6, 2],
+        },
+      ],
+    };
+    const showshowLegend = true;
+    const hideGridLines = { display: false };
+
+    render(
+      html`
+        <div class='container'>
+          <div>
+            <h3>Doughnut Chart</h3>
+            <div class='chart-pie-container'>
+              <sc-doughnut-chart .data=${data1}>
+              </sc-doughnut-chart>
+            </div>
+          </div>
+
+          <div>
+            <h3>Doughnut Chart (Risk palette)</h3>
+            <div class='chart-pie-container'>
+              <sc-doughnut-chart .data=${data1} palette="risk">
+              </sc-doughnut-chart>
+            </div>
+          </div>
+
+          <div>
+            <h3>Doughnut Chart (Accessible palette)</h3>
+            <div class='chart-pie-container'>
+              <sc-doughnut-chart .data=${data2} palette="accessible">
+              </sc-doughnut-chart>
+            </div>
+          </div>
+        </div>
+        <div class='container'>
+          <div>
+            <h3>Pie Chart</h3>
+            <div class='chart-pie-container'>
+              <sc-pie-chart
+                .data=${data1}
+                .options=${
+                  {
+                    onClick: (e, elements) => {
+                      console.log(e, elements);
+                    }
+                  }
+                }
+              >
+              </sc-pie-chart>
+            </div>
+          </div>
+          
+          <div>
+            <h3>Pie Chart (Risk palette)</h3>
+            <div class='chart-pie-container'>
+              <sc-pie-chart .data=${data1} palette="risk">
+              </sc-pie-chart>
+            </div>
+          </div>
+          
+          <div>
+            <h3>Pie Chart (Accessible palette)</h3>
+            <div class='chart-pie-container'>
+              <sc-pie-chart .data=${data2} palette="accessible">
+              </sc-pie-chart>
+            </div>
+          </div>
+        </div>
+
+        <div class='container'>
+          <div>
+            <h3>Gauge Chart</h3>
+            <div class='chart-pie-container'>
+              <sc-gauge-chart min="0" max="100" value="30" custom-color='--sc-color-red-100'>
+              </sc-gauge-chart>
+            </div>
+          </div>
+          <div>
+            <h3>Gauge Chart</h3>
+            <div class='chart-pie-container'>
+              <sc-gauge-chart min="0" max="100" value="30" custom-color='--sc-color-violet-500'>
+              </sc-gauge-chart>
+            </div>
+          </div>
+
+          <div>
+            <h3>Gauge Chart with donut</h3>
+            <div class='chart-pie-container'>
+              <sc-gauge-chart min="0" max="100" value="75" donut>
+              </sc-gauge-chart>
+            </div>
+          </div>
+        </div>
+
+        <div class='container'>
+          <div>
+            <h3>Bar Chart</h3>
+            <div class='chart-line-container'>
+              <sc-bar-chart
+                .data=${data3}
+                vertical-grid-lines=${JSON.stringify(hideGridLines)}
+              >
+              </sc-bar-chart>
+            </div>
+          </div>
+
+          <div>
+            <h3>Horizontal Bar Chart</h3>
+            <div class='chart-line-container'>
+              <sc-bar-chart
+                .data=${data3}
+                .horizontal=${true}
+                horizontal-grid-lines=${JSON.stringify(hideGridLines)}
+              >
+              </sc-bar-chart>
+            </div>
+          </div>
+        </div>
+
+        <div class='container'>
+          <div>
+            <h3>Bar Chart (Accessible palette)</h3>
+            <div class='chart-line-container'>
+              <sc-bar-chart
+                .data=${data3}
+                horizontal-grid-lines=${JSON.stringify(hideGridLines)}
+                palette='accessible'
+              >
+              </sc-bar-chart>
+            </div>
+          </div>
+
+          <div>
+            <h3>Bar, Line and Bubble Combined Chart</h3>
+            <div class='chart-line-container'>
+              <sc-bar-chart
+                .data=${{
+                  labels: [
+                    'January',
+                    'February',
+                    'March',
+                    'April'
+                  ],
+                  datasets: [{
+                    type: 'bar',
+                    label: 'Bar Dataset',
+                    data: [30, 20, 15, 40],
+                    order: 2,
+                  }, {
+                    type: 'line',
+                    label: 'Line Dataset',
+                    data: [35, 30, 20, 50],
+                    fill: false,
+                    order: 1,
+                  }, {
+                    type: 'bubble',
+                    label: 'Bubble Dataset',
+                    data: [{
+                      x: 30,
+                      y: 20,
+                      r: 15
+                    }, {
+                      x: 36,
+                      y: 15,
+                      r: 15
+                    }],
+                    order: 0,
+                    backgroundColor: '--sc-color-blue-lighter'
+                  }]
+                }}
+              >
+              </sc-bar-chart>
+            </div>
+          </div>
+        </div>
+
+        <div class='container'>
+          <div>
+            <h3>Bar Chart with Data Labels</h3>
+            <div class='chart-line-container'>
+              <sc-bar-chart
+                .data=${data3}
+                vertical-grid-lines=${JSON.stringify(hideGridLines)}
+                .dataLabels=${{
+                  display: true,
+                  anchor: 'end',
+                  align: 'top',
+                }}
+              >
+              </sc-bar-chart>
+            </div>
+          </div>
+        </div>
+
+        <div class='container'>
+          <div>
+            <h3>Stacked Bar Chart</h3>
+            <div class='chart-line-container'>
+              <sc-stacked-bar-chart
+                .data=${data3}
+                vertical-grid-lines=${JSON.stringify(hideGridLines)}
+              >
+              </sc-stacked-bar-chart>
+            </div>
+          </div>
+
+          <div>
+            <h3>Horizontal Stacked Bar Chart</h3>
+            <div class='chart-line-container'>
+              <sc-stacked-bar-chart
+                .data=${data3}
+                .horizontal=${true}
+                horizontal-grid-lines=${JSON.stringify(hideGridLines)}
+              >
+              </sc-stacked-bar-chart>
+            </div>
+          </div>
+        </div>
+
+        <div class='container'>
+          <div>
+            <h3>Line Chart</h3>
+            <div class='chart-line-container'>
+              <sc-line-chart
+                .data=${data3}
+                vertical-grid-lines=${JSON.stringify(hideGridLines)}
+              >
+              </sc-line-chart>
+            </div>
+          </div>
+
+          <div>
+            <h3>Line Chart with Tesion</h3>
+            <div class='chart-line-container'>
+              <sc-line-chart
+                .data=${tensionLineData}
+                vertical-grid-lines=${JSON.stringify(hideGridLines)}
+              >
+              </sc-line-chart>
+            </div>
+          </div>
+        </div>
+
+        <div class='container'>
+          <div>
+            <h3>Polar Area Chart</h3>
+            <div style='width: 450px; height: 450px'>
+              <sc-polar-area-chart .data=${polarAreaData} palette="custom" .customColors=${['--sc-color-blue-100', '--sc-color-green-200', '--sc-color-blue-300', '--sc-color-yellow-300', '--sc-color-blue-500']}>
+              </sc-polar-area-chart>
+            </div>
+          </div>
+
+          <div>
+            <h3>Radar Chart</h3>
+            <div style='width: 450px; height: 450px'>
+              <sc-radar-chart .data=${radarData}>
+              </sc-radar-chart>
+            </div>
+          </div>
+        </div>
+
+        <div class='container'>
+          <div>
+            <h3>Bubble Chart</h3>
+            <div class='chart-line-container'>
+              <sc-bubble-chart .data=${bubbleData}>
+              </sc-bubble-chart>
+            </div>
+          </div>
+
+          <div>
+            <h3>Scatter Chart</h3>
+            <div class='chart-line-container'>
+              <sc-scatter-chart .data=${scatterData}>
+              </sc-scatter-chart>
+            </div>
+          </div>
+        </div>
+
+        <div class='container'>
+          <div>
+            <h3>Area Chart</h3>
+            <div class='chart-line-container'>
+              <sc-area-chart
+                .data=${areaData}
+                vertical-grid-lines=${JSON.stringify(hideGridLines)}
+                y-axis='{ "max": 100 }'
+              >
+              </sc-area-chart>
+            </div>
+          </div>
+
+          <div>
+            <h3>Area Chart</h3>
+            <div class='chart-line-container'>
+              <sc-area-chart
+                .data=${areaData2}
+                vertical-grid-lines=${JSON.stringify(hideGridLines)}
+                y-axis='{"max": 100 }'
+              >
+              </sc-area-chart>
+            </div>
+          </div>
+        </div>
+
+        <div class='container'>
+          <div>
+            <h3>Line and Bubble Combined Chart</h3>
+            <div class='chart-line-container'>
+              <sc-line-chart
+                .data=${lineCombinedData}
+                vertical-grid-lines=${JSON.stringify(hideGridLines)}
+              >
+              </sc-line-chart>
+            </div>
+          </div>
+
+          <div>
+            <h3>Dual Y Chart</h3>
+            <div class='chart-line-container'>
+              <sc-bar-chart
+                .data=${dualYData}
+                .options=${
+                  {
+                    scales: {
+                      y1: {
+                        position: 'right',
+                        grid: {
+                          drawOnChartArea: false
+                        },
+                        title: {
+                          display: true,
+                          text: 'Orders'
+                        }
+                      }
+                    }
+                }}
+                vertical-grid-lines=${JSON.stringify(hideGridLines)}
+              >
+              </sc-area-chart>
+            </div>
+          </div>
+        </div>
+      `,
+      document.querySelector('#sb-root')
+    );
+  </script>
+</body>
+</html>

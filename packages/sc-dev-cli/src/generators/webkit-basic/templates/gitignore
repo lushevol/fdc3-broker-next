@@ -1,0 +1,27 @@
+## editors
+/.idea
+/.vscode
+/.scdevcli
+/.github/
+
+## system files
+.DS_Store
+
+## npm
+/node_modules/
+/npm-debug.log
+
+## testing
+/coverage/
+
+## temp folders
+/.tmp/
+/backup/
+
+# build
+/_site/
+/dist/
+/out-tsc/
+
+storybook-static
+custom-elements.json

@@ -1,0 +1,1169 @@
+import {Meta} from '@storybook/blocks';
+import '../../../src/styles/ScGDSStyleGuide.css';
+
+<Meta title="Concepts/Developer/V1 - V2 Migration Guide" />
+
+<style>
+{`
+  a.sbdocs-a {
+    color: var(--sc-link-primary-color, var(--sc-color-blue-500));
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  a.sbdocs-a:hover {
+    color: var(--sc-link-hover-color, var(--sc-color-blue-400));
+  }
+  summary {
+    cursor: pointer;
+  }
+`}
+</style>
+
+
+# V1 - V2 Migration Guide
+
+### In this page
+* [Added Component Attributes](#added-component-attributes)
+* [Changed Component Attributes](#changed-component-attributes)
+* [Removed Component Attributes](#removed-component-attributes)
+* [Changes Table](#changes)
+* [Data Grid (new table)](#data-grid-new-table)
+  - [Interfaces change](#interfaces-change)
+  - [New features](#new-features)
+* [Migrate SC WebKit to v2](#migrate-sc-webkit-to-v2)
+
+
+## Added Component Attributes
+
+* [Accordion](?path=/docs/components-accordion--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> `border`
+* [Avatar](?path=/docs/components-avatar--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> "dot" `badge-type`
+* [Badge](?path=/docs/components-badge--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> "sm | md | lg" `size`
+* [Banner](?path=/docs/components-banner--overview#attributes) <br/>
+  <sc-tag type="primary">added</sc-tag> `closable`<br/>
+  <sc-tag type="primary">added</sc-tag> "white" `background-color`
+* [Breadcrumb](?path=/docs/components-breadcrumb-breadcrumb--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> `fill`
+* [Button](?path=/docs/components-button-button--overview#attributes) <br/>
+  <sc-tag type="primary">added</sc-tag> `left-icon`<br/>
+  <sc-tag type="primary">added</sc-tag> `right-icon`<br/>
+  <sc-tag type="primary">added</sc-tag> `compact`
+* [Button Group](?path=/docs/components-button-group--overview#attributes) <br/>
+  <sc-tag type="primary">added</sc-tag> "sm | md | lg" `size`
+* [Card](?path=/docs/components-card-card--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> `text-align`<br/>
+  <sc-tag type="primary">added</sc-tag> `vertical-align`<br/>
+  <sc-tag type="primary">added</sc-tag> `disabled`<br/>
+  <sc-tag type="primary">added</sc-tag> `tags-group`<br/>
+  <sc-tag type="primary">added</sc-tag> `supplementary-details`<br/>
+  <sc-tag type="primary">added</sc-tag> `clickable`<br/>
+  <sc-tag type="primary">added</sc-tag> `button-no-pill`<br/>
+  <sc-tag type="primary">added</sc-tag> `button-state-primary`<br/>
+  <sc-tag type="primary">added</sc-tag> `button-state-secondary`<br/>
+  <sc-tag type="primary">added</sc-tag> `button-text-primary`<br/>
+  <sc-tag type="primary">added</sc-tag> `button-text-secondary`<br/>
+  <sc-tag type="primary">added</sc-tag> `button-text-secondary`<br/>
+  <sc-tag type="primary">added</sc-tag> `expandable`
+* [Content Loader](?path=/docs/components-content-loader--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> "rectangle" `type`
+* [Divider](?path=/docs/components-divider--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> "filled|card-header" `mode`
+* [Dropdown](?path=/docs/components-dropdown-dropdown--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> "sm | md | lg" `size`<br/>
+  <sc-tag type="primary">added</sc-tag> `text-align`<br/>
+  <sc-tag type="primary">added</sc-tag> `prefix-icon`<br/>
+  <sc-tag type="primary">added</sc-tag> `advanced-search-text`<br/>
+  <sc-tag type="primary">added</sc-tag> `retry`<br/>
+  <sc-tag type="primary">added</sc-tag> `hint`<br/>
+  <sc-tag type="primary">added</sc-tag> `hint-placement`
+* [Dropdown Multi Select](?path=/docs/components-dropdown-dropdown-multi-select--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> `multiple-rows`
+* [Data View](?path=/docs/table-data-view--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> `horizontal-align`<br/>
+  <sc-tag type="primary">added</sc-tag> `vertical-align`
+* [File Item](?path=/docs/components-file-file-item--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> `extra`<br/>
+  <sc-tag type="primary">added</sc-tag> "uploading|error" `status`
+* [Text Input](?path=/docs/components-form-input-text-input--overview#attributes), [Number Input](?path=/docs/components-form-input-number-input--overview#attributes), [Password Input](?path=/docs/components-form-input-password-input--overview#attributes), [Formatted Input](?path=/docs/components-form-input-formatted-input--overview#attributes), [Card Number Input](?path=/docs/components-form-input-card-number-input--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> "sm | md | lg" `size`<br/>
+  <sc-tag type="primary">added</sc-tag> `hint`<br/>
+  <sc-tag type="primary">added</sc-tag> `hint-placement`<br/>
+  <sc-tag type="primary">added</sc-tag> `clearable`<br/>
+  <sc-tag type="primary">added</sc-tag> false|true|"auto" `resizable`
+* [Label](?path=/docs/components-label--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> `hint`<br/>
+  <sc-tag type="primary">added</sc-tag> `hint-placement`
+* [Modal](?path=/docs/components-modal--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> `button-state-secondary`<br/>
+  <sc-tag type="primary">added</sc-tag> `button-no-pill`<br/>
+  <sc-tag type="primary">added</sc-tag> `button-text-primary`<br/>
+  <sc-tag type="primary">added</sc-tag> `button-text-secondary`<br/>
+  <sc-tag type="primary">added</sc-tag> `button-text-tertiary`<br/>
+  <sc-tag type="primary">added</sc-tag> `button-text-left`<br/>
+  <sc-tag type="primary">added</sc-tag> `footer-divider`<br/>
+  <sc-tag type="primary">added</sc-tag> "button | pagination | alternative" `footer-type`<br/>
+  <sc-tag type="primary">added</sc-tag> `no-footer`
+* [Pagination](?path=/docs/components-pagination--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> "sm | md | lg" `size`<br/>
+  <sc-tag type="primary">added</sc-tag> `label`<br/>
+  <sc-tag type="primary">added</sc-tag> `no-truncation`<br/>
+  <sc-tag type="primary">added</sc-tag> `jump-first-last-page`
+* [Progress Bar](?path=/docs/components-progress-bar--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> "sm | md | lg" `size`<br/>
+  <sc-tag type="primary">added</sc-tag> `show-label`
+* [Search Field](?path=/docs/components-searchfield--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> "sm | md | lg" `size`<br/>
+  <sc-tag type="primary">added</sc-tag> `clearable`
+* [Snackbar](?path=/docs/components-snackbar--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> `icon-hide`
+* [Spacer](?path=/docs/components-spacer--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> `size`
+* [Tabs](?path=/docs/components-tabs--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> "filled | segmented" `type`
+* [Tag](?path=/docs/components-tag-tag--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> "blue | dark-blue | red | amber | green | grey | black | white | grey-dash" `type`<br/>
+  <sc-tag type="primary">added</sc-tag> `icon-name`<br/>
+  <sc-tag type="primary">added</sc-tag> `max-width`<br/>
+  <sc-tag type="primary">added</sc-tag> "filled | link" `mode`
+* [Tooltip](?path=/docs/components-tooltip--overview#attributes)<br/>
+  <sc-tag type="primary">added</sc-tag> "top-start | top-end | bottom-start | bottom-end | left-start | left-end | right-start | right-end" `placement`<br/>
+  <sc-tag type="primary">added</sc-tag> "dark | light | success | warning | error | primary" `mode`<br/>
+  <sc-tag type="primary">added</sc-tag> `header`
+
+## Changed Component Attributes
+* [Badge](?path=/docs/components-badge--overview#attributes)<br/>
+  <sc-tag type="warning">changed</sc-tag>  default `color` to "blue"
+* [Button](?path=/docs/components-button-button--overview#attributes)<br/>
+  <sc-tag type="warning">changed</sc-tag> default `type` to "primary"
+* [Icon Card](?path=/docs/components-card-icon-card--overview)<br/>
+  <sc-tag type="warning">changed</sc-tag> default `image-align` to "left"
+* [Dot Status](?path=/docs/components-dot-status--overview#attributes)<br/>
+  <sc-tag type="warning">changed</sc-tag> Replace the "disabled" to "neutral" `type`
+* [Timer](?path=/docs/components-timer--overview#attributes)<br/>
+  <sc-tag type="warning">changed</sc-tag> Rename size small → sm, medium → md, large → lg
+
+## Removed Component Attributes
+* [Alert](?path=/docs/components-alert--overview#attributes)<br/>
+  <sc-tag type="error">removed</sc-tag> "disabled | transparent" `type`
+* [Avatar](?path=/docs/components-avatar--overview#attributes)<br/>
+  <sc-tag type="error">removed</sc-tag> "xl" `size`
+* [Banner](?path=/docs/components-banner--overview#attributes)<br/>
+  <sc-tag type="error">removed</sc-tag> `round-corner`
+* [Button](?path=/docs/components-button-button--overview#attributes)<br/>
+  <sc-tag type="error">removed</sc-tag> `fill`<br/>
+  <sc-tag type="error">removed</sc-tag> `icon`<br/>
+  <sc-tag type="error">removed</sc-tag> `inverse`
+* [Icon Button](?path=/docs/components-button-icon-button--overview#attributes)<br/>
+  <sc-tag type="error">removed</sc-tag> `loading`<br/>
+  <sc-tag type="error">removed</sc-tag> `inverse`
+* [Card](?path=/docs/components-card-card--overview#attributes)<br/>
+  <sc-tag type="error">removed</sc-tag> `sub-title-size`
+* [Spinner](?path=/docs/components-spinner--overview#attributes)<br/>
+  <sc-tag type="error">removed</sc-tag> "xxs | xs | xl | xxl" `size`
+* [Stepper](?path=/docs/components-stepper--overview#attributes)<br/>
+  <sc-tag type="error">removed</sc-tag> "left|right" `title-position`
+* [Tag](?path=/docs/components-tag--overview#attributes)<br/>
+  <sc-tag type="error">removed</sc-tag> `fill`
+
+
+## Changes
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Added</th>
+      <th>Changed</th>
+      <th>Removed</th>
+    </tr>
+  </thead>
+  <tbody valign="top">
+    <tr>
+      <td>[Accordion](?path=/docs/components-accordion--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add border type</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Alert](?path=/docs/components-alert--overview)</td>
+      <td></td>
+      <td></td>
+      <td><sc-tag type="error">removed</sc-tag> Remove disabled and transparent types</td>
+    </tr>
+    <tr>
+      <td>[Avatar](?path=/docs/components-avatar--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add a new dot badge type, and more badge color</td>
+      <td></td>
+      <td><sc-tag type="error">removed</sc-tag> Remove xl size</td>
+    </tr>
+    <tr>
+      <td>[Badge](?path=/docs/components-badge--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add a new dot badge type and more color<br/><sc-tag type="primary">added</sc-tag> Support different sizes</td>
+      <td><sc-tag type="warning">changed</sc-tag> Change the default color to blue</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Banner](?path=/docs/components-banner--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add `closable` attribute<br/><sc-tag type="primary">added</sc-tag> Add white `background-color`</td>
+      <td></td>
+      <td><sc-tag type="error">removed</sc-tag> Remove the `round-corner` attribute</td>
+    </tr>
+    <tr>
+      <td>[Breadcrumb](?path=/docs/components-breadcrumb-breadcrumb--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add `fill` attribute</td>
+      <td><sc-tag type="warning">changed</sc-tag> Change the color to gray</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Button](?path=/docs/components-button-button--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add `left-icon` and `right-icon`<br/><sc-tag type="primary">added</sc-tag> Add `compact` mode</td>
+      <td><sc-tag type="warning">changed</sc-tag> Change type default value to primary<br/><sc-tag type="warning">changed</sc-tag> Remove warning and error from type and replace it by `state`
+        attribute</td>
+      <td><sc-tag type="error">removed</sc-tag> Remove `fill` attribute<br/><sc-tag type="error">removed</sc-tag> Remove `icon`<br/><sc-tag type="error">removed</sc-tag> Remove `inverse` attribute</td>
+    </tr>
+    <tr>
+      <td>[Icon Button](?path=/docs/components-button-icon-button--overview)</td>
+      <td></td>
+      <td></td>
+      <td><sc-tag type="error">removed</sc-tag> Remove `loading` and `inverse` attributes</td>
+    </tr>
+    <tr>
+      <td>[Button Group](?path=/docs/components-button-group--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add `size` attribute</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Card](?path=/docs/components-card-card--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Support horizontal and vertical alignment<br/><sc-tag type="primary">added</sc-tag> Add disabled state<br/><sc-tag type="primary">added</sc-tag> Add `tags-group`<br/><sc-tag type="primary">added</sc-tag> Add
+        `supplementary-details` and can set the button details<br/><sc-tag type="primary">added</sc-tag> Support `clickable` card<br/><sc-tag type="primary">added</sc-tag> Support `expandable`
+        card</td>
+      <td></td>
+      <td><sc-tag type="error">removed</sc-tag> Remove `sub-title-size` attribute</td>
+    </tr>
+    <tr>
+      <td>[Icon Card](?path=/docs/components-card-icon-card--overview)</td>
+      <td></td>
+      <td><sc-tag type="warning">changed</sc-tag> `image-align` default value changed to left</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Checkbox](?path=/docs/components-checkbox-checkbox--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add parent checkbox</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Content Loader](?path=/docs/components-content-loader--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add rectangle type</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Divider](?path=/docs/components-divider--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Support filled and card header modes</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Dot Status](?path=/docs/components-dot-status--overview)</td>
+      <td></td>
+      <td><sc-tag type="warning">changed</sc-tag> Replace the disabled type by neutral type</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Dropdown](?path=/docs/components-dropdown-dropdown--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add `size` attribute<br/><sc-tag type="primary">added</sc-tag> Add `text-align` attribute to support text align left and right<br/><sc-tag type="primary">added</sc-tag> Add
+        `prefix-icon` attribute to support prefix icon<br/><sc-tag type="primary">added</sc-tag> Add `advanced-search-text` to show the advanced search
+        box<br/><sc-tag type="primary">added</sc-tag> Add `retry-button` to show the retry button text when options are loading or cannot be found<br/>-
+        Add `hint` and `hint-placement` attributes</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Dropdown Multi Select](?path=/docs/components-dropdown-dropdown-multi-select--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add `multiple-rows` attribute to allow multiple rows</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Data View](?path=/docs/table-data-view--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add `horizontal-align` and `vertical-align`</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[File Input](?path=/docs/components-file-file-input--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add button file</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[File Item](?path=/docs/components-file-file-item--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add `extra` attribute to set the extra text<br/><sc-tag type="primary">added</sc-tag> Add default, uploading, error `status` attribute</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>
+        Form Input:<br/>
+        - [Text Input](?path=/docs/components-form-input-text-input--overview) <br/>
+        - [Number Input](?path=/docs/components-form-input-number-input--overvie) <br />
+        - [Password Input](?path=/docs/components-form-input-password-input--overview) <br/>
+        - [Formatted Input](?path=/docs/components-form-input-formatted-input--overview) <br/>
+        - [Card Number Input](?path=/docs/components-form-input-card-number-input--overview)
+      </td>
+      <td><sc-tag type="primary">added</sc-tag> Add `hint` and `hint-placement` attributes<br/><sc-tag type="primary">added</sc-tag> Add sm, md, lg sizes<br/><sc-tag type="primary">added</sc-tag> Add `clearable` attribute<br/><sc-tag type="primary">added</sc-tag> Add false|true|"auto" `resizable` attribute. If "auto", row acts as max row height.</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Timer](?path=/docs/components-timer--overview)</td>
+      <td></td>
+      <td><sc-tag type="warning">changed</sc-tag> Rename the size value(small, large → sm, md, lg)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Icons](?path=/docs/components-icon--overview)</td>
+      <td></td>
+      <td><sc-tag type="warning">changed</sc-tag> Rename `stop-circle--fill` to `stop--fill`<br/><sc-tag type="warning">changed</sc-tag> Rename `stop-circle--line` to `stop--line`</td>
+      <td><sc-tag type="error">removed</sc-tag> Remove `trash-alt--fill` and `trash-alt--line`</td>
+    </tr>
+    <tr>
+      <td>[Label](?path=/docs/components-label--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add `hint` and `hint-placement` attributes</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Modal](?path=/docs/components-modal--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add footer button<br/><sc-tag type="primary">added</sc-tag> Add `no-footer` attribute to hide the footer button<br/><sc-tag type="primary">added</sc-tag> Support button, page and
+        alternative footer types</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Pagination](?path=/docs/components-pagination--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add `size` attribute to support sm and md sizes<br/><sc-tag type="primary">added</sc-tag> Add `label` attribute to show the label<br/><sc-tag type="primary">added</sc-tag> Add
+        `no-truncation` attribute to hide truncation between pages<br/><sc-tag type="primary">added</sc-tag> Add `jump-first-last-page` attribute to show
+        the icons to jump to first and last pages</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Progress Bar](?path=/docs/components-progress-bar--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add more sizes<br/><sc-tag type="primary">added</sc-tag> Allow to show label by setting `show-label` attribute</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Search Field](?path=/docs/components-searchfield--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add sm, md, lg sizes<br/><sc-tag type="primary">added</sc-tag> Add `clearable`</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Snackbar](?path=/docs/components-snackbar--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add `icon-hide` attribute to hide the icon</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Spacer](?path=/docs/components-spacer--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add different number sizes</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Spinner](?path=/docs/components-spinner--overview)</td>
+      <td></td>
+      <td></td>
+      <td><sc-tag type="error">removed</sc-tag> Remove the xxs, xs, xl, xxl sizes</td>
+    </tr>
+    <tr>
+      <td>[Stepper](?path=/docs/components-stepper--overview)</td>
+      <td></td>
+      <td></td>
+      <td><sc-tag type="error">removed</sc-tag> Remove the left and right position</td>
+    </tr>
+    <tr>
+      <td>[Tabs](?path=/docs/components-tabs--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add filled and segmented types</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Tag](?path=/docs/components-tag--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Support more types<br/><sc-tag type="primary">added</sc-tag> Add `icon-name` attribute to show icon<br/><sc-tag type="primary">added</sc-tag> Add `max-width` to set the max
+        width<br/><sc-tag type="primary">added</sc-tag> Add `mode` attribute and move fill inside the mode</td>
+      <td></td>
+      <td><sc-tag type="error">removed</sc-tag> Remove `fill` attribute</td>
+    </tr>
+    <tr>
+      <td>[Tooltip](?path=/docs/components-tooltip--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> Add more placement<br/><sc-tag type="primary">added</sc-tag> Add more modes<br/><sc-tag type="primary">added</sc-tag> Add header to set the tooltip header</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Color](?path=/story/colors-colors--all)</td>
+      <td>
+        <sc-tag type="primary">added</sc-tag> Add the following variables:
+        ```css
+        --sc-color-white: #ffffff;
+        --sc-color-black: #000000;
+        --sc-color-white-rgb: 255, 255, 255;
+        --sc-color-black-rgb: 0, 0, 0;
+        ```
+        <details>
+          <summary>grey</summary>
+          ```css
+          --sc-color-grey-50: #F2F2F2;
+          --sc-color-grey-100: #E5E5E5;
+          --sc-color-grey-150: #D9D9D9;
+          --sc-color-grey-200: #CCCCCC;
+          --sc-color-grey-250: #BFBFBF;
+          --sc-color-grey-300: #B2B2B2;
+          --sc-color-grey-350: #A6A6A6;
+          --sc-color-grey-400: #999999;
+          --sc-color-grey-450: #8C8C8C;
+          --sc-color-grey-500: #808080;
+          --sc-color-grey-550: #737373;
+          --sc-color-grey-600: #666666;
+          --sc-color-grey-650: #595959;
+          --sc-color-grey-700: #4D4D4D;
+          --sc-color-grey-750: #404040;
+          --sc-color-grey-800: #333333;
+          --sc-color-grey-850: #262626;
+          --sc-color-grey-900: #1A1A1A;
+          --sc-color-grey-950: #0D0D0D;
+          --sc-color-grey-50-dark: #0D0D0D;
+          --sc-color-grey-100-dark: #1A1A1A;
+          --sc-color-grey-150-dark: #262626;
+          --sc-color-grey-200-dark: #333333;
+          --sc-color-grey-250-dark: #404040;
+          --sc-color-grey-300-dark: #4D4D4D;
+          --sc-color-grey-350-dark: #595959;
+          --sc-color-grey-400-dark: #666666;
+          --sc-color-grey-450-dark: #737373;
+          --sc-color-grey-500-dark: #808080;
+          --sc-color-grey-550-dark: #8C8C8C;
+          --sc-color-grey-600-dark: #999999;
+          --sc-color-grey-650-dark: #A6A6A6;
+          --sc-color-grey-700-dark: #B2B2B2;
+          --sc-color-grey-750-dark: #BFBFBF;
+          --sc-color-grey-800-dark: #CCCCCC;
+          --sc-color-grey-850-dark: #D9D9D9;
+          --sc-color-grey-900-dark: #E5E5E5;
+          --sc-color-grey-950-dark: #F2F2F2;
+          / grey rgb version with same HEX value /
+          --sc-color-grey-50-rgb: 242, 242, 242;
+          ```
+        </details>
+
+        <details>
+          <summary>blue</summary>
+          ```css
+          --sc-color-blue-50: #E5F1FC;
+          --sc-color-blue-100: #CCE3FA;
+          --sc-color-blue-150: #B3D5F8;
+          --sc-color-blue-200: #9AC7F6;
+          --sc-color-blue-250: #81B9F4;
+          --sc-color-blue-300: #68ABF2;
+          --sc-color-blue-350: #4F9DF0;
+          --sc-color-blue-400: #368FEE;
+          --sc-color-blue-450: #1D81EC;
+          --sc-color-blue-460: #007AFF;
+          --sc-color-blue-500: #0473EA;
+          --sc-color-blue-550: #0367D2;
+          --sc-color-blue-600: #035CBB;
+          --sc-color-blue-650: #0250A3;
+          --sc-color-blue-700: #02458C;
+          --sc-color-blue-750: #023975;
+          --sc-color-blue-800: #012E5D;
+          --sc-color-blue-850: #012246;
+          --sc-color-blue-900: #00172E;
+          --sc-color-blue-950: #000B17;
+          --sc-color-blue-50-dark: #000B17;
+          --sc-color-blue-100-dark: #00172E;
+          --sc-color-blue-150-dark: #012246;
+          --sc-color-blue-200-dark: #012E5D;
+          --sc-color-blue-250-dark: #023975;
+          --sc-color-blue-300-dark: #02458C;
+          --sc-color-blue-350-dark: #0250A3;
+          --sc-color-blue-400-dark: #035CBB;
+          --sc-color-blue-450-dark: #0367D2;
+          --sc-color-blue-500-dark: #0473EA;
+          --sc-color-blue-550-dark: #1D81EC;
+          --sc-color-blue-600-dark: #368FEE;
+          --sc-color-blue-650-dark: #4F9DF0;
+          --sc-color-blue-700-dark: #68ABF2;
+          --sc-color-blue-750-dark: #81B9F4;
+          --sc-color-blue-800-dark: #9AC7F6;
+          --sc-color-blue-850-dark: #B3D5F8;
+          --sc-color-blue-900-dark: #CCE3FA;
+          --sc-color-blue-950-dark: #E5F1FC;
+          / blue rgb version with same HEX value /
+          --sc-color-blue-900-rgb: 0, 23, 46;
+          ```
+        </details>
+
+        <details>
+          <summary>green</summary>
+          ```css
+          --sc-color-green-50: #EBFBE6;
+          --sc-color-green-100: #D7F7CD;
+          --sc-color-green-150: #C3F3B4;
+          --sc-color-green-200: #AFEF9B;
+          --sc-color-green-250: #9BEB82;
+          --sc-color-green-300: #87E769;
+          --sc-color-green-350: #73E350;
+          --sc-color-green-400: #5FDF37;
+          --sc-color-green-450: #4BDB1E;
+          --sc-color-green-500: #38D200;
+          --sc-color-green-550: #32BD00;
+          --sc-color-green-600: #2CA800;
+          --sc-color-green-650: #269300;
+          --sc-color-green-700: #207E00;
+          --sc-color-green-750: #1A6900;
+          --sc-color-green-800: #145400;
+          --sc-color-green-850: #0E3F00;
+          --sc-color-green-900: #082A00;
+          --sc-color-green-950: #021500;
+          --sc-color-green-50-dark: #021500;;
+          --sc-color-green-100-dark: #082A00;;
+          --sc-color-green-150-dark: #0E3F00;;
+          --sc-color-green-200-dark: #145400;;
+          --sc-color-green-250-dark: #1A6900;;
+          --sc-color-green-300-dark: #207E00;;
+          --sc-color-green-350-dark: #269300;;
+          --sc-color-green-400-dark: #2CA800;;
+          --sc-color-green-450-dark: #32BD00;
+          --sc-color-green-500-dark: #38D200;;
+          --sc-color-green-550-dark: #4BDB1E;;
+          --sc-color-green-600-dark: #5FDF37;;
+          --sc-color-green-650-dark: #73E350;;
+          --sc-color-green-700-dark: #87E769;;
+          --sc-color-green-750-dark: #9BEB82;;
+          --sc-color-green-800-dark: #AFEF9B;;
+          --sc-color-green-850-dark: #C3F3B4;;
+          --sc-color-green-900-dark: #D7F7CD;;
+          --sc-color-green-950-dark: #EBFBE6;
+          ```
+        </details>
+
+        <details>
+          <summary>amber</summary>
+          ```css
+          --sc-color-amber-50: #FEF6E7;
+          --sc-color-amber-100: #FEEFD0;
+          --sc-color-amber-150: #FDE6B8;
+          --sc-color-amber-200: #FDDEA1;
+          --sc-color-amber-250: #FDD689;
+          --sc-color-amber-300: #FCCE72;
+          --sc-color-amber-350: #FCC65B;
+          --sc-color-amber-400: #FBBD43;
+          --sc-color-amber-450: #FAB52C;
+          --sc-color-amber-500: #FAAD14;
+          --sc-color-amber-550: #E19C12;
+          --sc-color-amber-600: #C88A10;
+          --sc-color-amber-650: #AF790E;
+          --sc-color-amber-700: #96680C;
+          --sc-color-amber-750: #7D570A;
+          --sc-color-amber-800: #644508;
+          --sc-color-amber-850: #4B3406;
+          --sc-color-amber-900: #322304;
+          --sc-color-amber-950: #191102;
+          --sc-color-amber-50-dark: #191102;
+          --sc-color-amber-100-dark: #322304;
+          --sc-color-amber-150-dark: #4B3406;
+          --sc-color-amber-200-dark: #644508;
+          --sc-color-amber-250-dark: #7D570A;
+          --sc-color-amber-300-dark: #96680C;
+          --sc-color-amber-350-dark: #AF790E;
+          --sc-color-amber-400-dark: #C88A10;
+          --sc-color-amber-450-dark: #E19C12;
+          --sc-color-amber-500-dark: #FAAD14;
+          --sc-color-amber-550-dark: #FAB52C;
+          --sc-color-amber-600-dark: #FBBD43;
+          --sc-color-amber-650-dark: #FCC65B;
+          --sc-color-amber-700-dark: #FCCE72;
+          --sc-color-amber-750-dark: #FDD689;
+          --sc-color-amber-800-dark: #FDDEA1;
+          --sc-color-amber-850-dark: #FDE6B8;
+          --sc-color-amber-900-dark: #FEEFD0;
+          --sc-color-amber-950-dark: #FEF6E7;
+          ```
+        </details>
+
+        <details>
+          <summary>red</summary>
+          ```css
+          --sc-color-red-50: #FCE6E7;
+          --sc-color-red-100: #F9CED0;
+          --sc-color-red-150: #F6B5B8;
+          --sc-color-red-200: #F39DA1;
+          --sc-color-red-250: #EF848A;
+          --sc-color-red-300: #EC6C73;
+          --sc-color-red-350: #E9545B;
+          --sc-color-red-400: #E63B44;
+          --sc-color-red-450: #E3232C;
+          --sc-color-red-500: #E00A15;
+          --sc-color-red-550: #CA0913;
+          --sc-color-red-600: #B30811;
+          --sc-color-red-650: #9D070F;
+          --sc-color-red-700: #86060D;
+          --sc-color-red-750: #70050B;
+          --sc-color-red-800: #5A0408;
+          --sc-color-red-850: #430306;
+          --sc-color-red-900: #2D0204;
+          --sc-color-red-950: #160102;
+          --sc-color-red-50-dark: #160102;
+          --sc-color-red-100-dark: #2D0204;
+          --sc-color-red-150-dark: #430306;
+          --sc-color-red-200-dark: #5A0408;
+          --sc-color-red-250-dark: #70050B;
+          --sc-color-red-300-dark: #86060D;
+          --sc-color-red-350-dark: #9D070F;
+          --sc-color-red-400-dark: #B30811;
+          --sc-color-red-450-dark: #CA0913;
+          --sc-color-red-500-dark: #E00A15;
+          --sc-color-red-550-dark: #E3232C;
+          --sc-color-red-600-dark: #E63B44;
+          --sc-color-red-650-dark: #E9545B;
+          --sc-color-red-700-dark: #EC6C73;
+          --sc-color-red-750-dark: #EF848A;
+          --sc-color-red-800-dark: #F39DA1;
+          --sc-color-red-850-dark: #F6B5B8;
+          --sc-color-red-900-dark: #F9CED0;
+          --sc-color-red-950-dark: #FCE6E7;
+          ```
+        </details>
+
+        <details>
+          <summary>purple</summary>
+          ```css
+          --sc-color-purple-50: #F2E8FE;
+          --sc-color-purple-100: #E5D1FE;
+          --sc-color-purple-150: #D8BBFD;
+          --sc-color-purple-200: #CBA4FD;
+          --sc-color-purple-250: #BE8EFD;
+          --sc-color-purple-300: #B177FC;
+          --sc-color-purple-350: #A460FC;
+          --sc-color-purple-400: #974AFB;
+          --sc-color-purple-450: #8A33FB;
+          --sc-color-purple-500: #7E1DFB;
+          --sc-color-purple-550: #711AE1;
+          --sc-color-purple-600: #6417C8;
+          --sc-color-purple-650: #5814AF;
+          --sc-color-purple-700: #4B1196;
+          --sc-color-purple-750: #3F0E7D;
+          --sc-color-purple-800: #320B64;
+          --sc-color-purple-850: #25084B;
+          --sc-color-purple-900: #190532;
+          --sc-color-purple-950: #0C0219;
+          --sc-color-purple-50-dark: #0C0219;
+          --sc-color-purple-100-dark: #190532;
+          --sc-color-purple-150-dark: #25084B;
+          --sc-color-purple-200-dark: #320B64;
+          --sc-color-purple-250-dark: #3F0E7D;
+          --sc-color-purple-300-dark: #4B1196;
+          --sc-color-purple-350-dark: #5814AF;
+          --sc-color-purple-400-dark: #6417C8;
+          --sc-color-purple-450-dark: #711AE1;
+          --sc-color-purple-550-dark: #8A33FB;
+          --sc-color-purple-600-dark: #974AFB;
+          --sc-color-purple-650-dark: #A460FC;
+          --sc-color-purple-700-dark: #B177FC;
+          --sc-color-purple-750-dark: #BE8EFD;
+          --sc-color-purple-800-dark: #CBA4FD;
+          --sc-color-purple-850-dark: #D8BBFD;
+          --sc-color-purple-900-dark: #E5D1FE;
+          --sc-color-purple-950-dark: #F2E8FE;
+          ```
+        </details>
+      </td>
+      <td><sc-tag type="warning">changed</sc-tag> Change `--sc-color-grey-100` value from `#525355` to `#E5E5E5`</td>
+      <td>
+        <sc-tag type="error">removed</sc-tag> Remove following variables:
+        
+        <details>
+          <summary>grey</summary>
+          ```css
+          --sc-color-grey-5: #FAFAFA;
+          --sc-color-grey-10: #F2F2F2;
+          --sc-color-grey-15: #E5E5E5;
+          --sc-color-grey-25: #D4D4D4;
+          --sc-color-grey-30: #CCCCCC;
+          --sc-color-grey-40: #B2B2B2;
+          --sc-color-grey-50: #A8A9AA;
+          --sc-color-grey-70: #858687;
+          --sc-color-grey-80: #666666;
+          --sc-color-grey-black: #212121;
+
+          --sc-color-grey-dm-10: #3A3A3A;
+          --sc-color-grey-dm-30: #2E2E2E;
+          --sc-color-grey-dm-50: #252525;
+          --sc-color-grey-dm-70: #1F1F1F;
+          --sc-color-grey-dm-90: #181818;
+          --sc-color-grey-dm-100: #111111;
+          ```
+        </details>
+
+        <details>
+          <summary>blue</summary>
+          ```css
+          --sc-color-blue-lightest: #E7F1FD;
+          --sc-color-blue-lighter: #C3DEFA;
+          --sc-color-blue-light: #7BB6F5;
+          --sc-color-blue: #0473EA;
+          --sc-color-blue-dark: #0B56A8;
+          --sc-color-blue-gradient-alt: #254498;
+          --sc-color-blue-darker: #0C3A66;
+          --sc-color-blue-darkest: #061D33;
+
+          --sc-color-blue-dm: #007AFF;
+          ```
+        </details>
+
+        <details>
+          <summary>green</summary>
+          ```css
+          --sc-color-green-lightest: #EBFAE5;
+          --sc-color-green-lighter: #CDF4BF;
+          --sc-color-green-light: #92E773;
+          --sc-color-green: #38D200;
+          --sc-color-green-dark: #238500;
+          --sc-color-green-darker: #1B6600;
+          --sc-color-green-darkest: #0B2900;
+          ```
+        </details>
+
+        <details>
+          <summary>red</summary>
+          ```css
+          --sc-color-red-lighter: #FBE5E5;
+          --sc-color-red-light: #FBCCD1;
+          --sc-color-red: #D50000;
+          --sc-color-red-dark: #C30303;
+          --sc-color-red-darker: #880000;
+          --sc-color-red-dm: #FF2E22;
+          ```
+        </details>
+
+        <details>
+          <summary>yellow</summary>
+          ```css
+          --sc-color-yellow-lightest: #FDEFBF;
+          --sc-color-yellow-lighter: #FFECBC;
+          --sc-color-yellow-light: #FFD463;
+          --sc-color-yellow: #FFC120;
+          --sc-color-yellow-dark: #DBA121;
+          --sc-color-yellow-darker: #BA861E;
+          ```
+        </details>
+
+        <details>
+          <summary>purple</summary>
+          ```css
+          --sc-color-purple-50: #4848BD;
+          --sc-color-purple-dm-50: #7a7ae7;
+          ```
+        </details>
+
+        <details>
+          <summary>status colors</summary>
+          ```css
+          --sc-color-error-80: var(--sc-color-red-dark);
+          --sc-color-error-50: var(--sc-color-red);
+          --sc-color-error-20: var(--sc-color-red-light);
+          --sc-color-error-dm: var(--sc-color-red-dm);
+
+          --sc-color-warning-80: #E4B300;
+          --sc-color-warning-50: #F5C000;
+          --sc-color-warning-20: #FCECB3;
+
+          --sc-color-success: var(--sc-color-green);
+
+          --sc-color-info: var(--sc-color-grey-25);
+
+          --sc-color-disabled: var(--sc-color-grey-50);
+
+          --sc-color-amber: #ef6923;
+          --sc-color-pending: #00859b;
+          --sc-color-pending-dm: #d9f8fd;
+          ```
+        </details>
+
+        <details>
+          <summary>interaction colors</summary>
+          ```css
+          --sc-color-blue-hover: #1586FF;
+          --sc-color-red-hover: #D91919;
+          --sc-color-yellow-hover: #FFC736;
+
+          --sc-color-blue-press: var(--sc-color-blue-dark);
+          --sc-color-red-press: #AA0000;
+          --sc-color-yellow-press: var(--sc-color-yellow-dark);
+          ```
+        </details>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+## Data Grid (new table)
+
+### Interfaces change
+
+<table>
+  <thead>
+    <tr>
+      <th>Interface of previous table</th>
+      <th>Action</th>
+      <th>Alternative interface</th>
+      <th>Alternative API way</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+
+  <tbody valign="top">
+
+    <tr>
+      <td>
+          select-all-rows: boolean
+      </td>
+      <td>
+        <sc-tag type="warning">CHANGE</sc-tag>
+      </td>
+      <td>
+           DefaultSelectedRows: rowid[]
+      </td>
+      <td>
+        ```javascript
+          const dataGrid = document.querySelector('sc-data-grid');
+          dataGrid.toggleAllRowsSelected()
+        ```
+      </td>
+      <td>
+      </td>
+    </tr>
+    
+    <tr>
+      <td>
+          expandable: boolean
+      </td>
+      <td>
+        <sc-tag type="warning">CHANGE</sc-tag>
+      </td>
+      <td>
+          <div>isCellExpandable: Function</div>
+          <div>columnDefinition.rowGrouping: boolean</div>
+      </td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td>
+          select-scope: all | page
+      </td>
+      <td>
+        <sc-tag type="warning">CHANGE</sc-tag>
+      </td>
+      <td>
+        row-selection-strategy: all | currentPage
+      </td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td>
+          column-chooser: boolean
+      </td>
+      <td>
+        <sc-tag type="warning">CHANGE</sc-tag>
+      </td>
+      <td>
+        row-selection: boolean
+      </td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>
+          sort: string
+      </td>
+      <td>
+        <sc-tag type="warning">CHANGE</sc-tag>
+      </td>
+      <td>
+        columnDefinition.sort: 'asc' | 'desc' | 'none'
+      </td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>
+          sc-tr-expanded: Function
+      </td>
+      <td>
+        <sc-tag type="warning">CHANGE</sc-tag>
+      </td>
+      <td>
+        <div>sc-master-expand: Function</div>
+        <div>sc-group-expand: Function</div>
+      </td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>
+          rowExpandable: Function
+      </td>
+      <td>
+        <sc-tag type="warning">CHANGE</sc-tag>
+      </td>
+      <td>
+        <div>isCellExpandable: Function</div>
+        <div>DefaultSelectedRows: rowid[]</div>
+      </td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>
+          rowExpandRender: Function
+      </td>
+      <td>
+        <sc-tag type="warning">CHANGE</sc-tag>
+      </td>
+      <td>
+        masterCellRenderer: Function
+      </td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>
+          selectedRows: Function
+      </td>
+      <td>
+        <sc-tag type="warning">CHANGE</sc-tag>
+      </td>
+      <td>
+        DefaultSelectedRows: rowid[]
+      </td>
+      <td></td>
+      <td></td>
+    </tr>
+
+
+    <tr>
+      <td>
+          expand-mode: boolean
+      </td>
+      <td>
+        <sc-tag type="error">REMOVE</sc-tag>
+      </td>
+      <td></td>
+      <td>
+        ```javascript
+          grid.addEventListener('sc-master-expand', (e) => {
+            const cell = e.detail.cell;
+            const isExpanded = e.detail.isExpanded;
+            grid.table.setMasterCell(() => {
+              if (!isExpanded) {
+                return {};
+              }
+              return {
+                [cell.row.id]: cell,
+              }
+            })
+          })
+        ```
+      </td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td>
+          sticky-header: boolean
+      </td>
+      <td>
+        <sc-tag type="error">REMOVE</sc-tag>
+      </td>
+      <td></td>
+      <td></td>
+      <td>Header always sticky on top by default if you limit height of Data Grid</td>
+    </tr>
+    <tr>
+      <td>
+          sc-tr-create
+      </td>
+      <td>
+        <sc-tag type="error">REMOVE</sc-tag>
+      </td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>
+          sc-tr-mouseover
+      </td>
+      <td>
+        <sc-tag type="error">REMOVE</sc-tag>
+      </td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>
+          sc-tr-mouseout
+      </td>
+      <td>
+        <sc-tag type="error">REMOVE</sc-tag>
+      </td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+
+  </tbody>
+</table>
+
+### New features
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Descriptions</th>
+      <th>Reference</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Column spanning</td>
+      <td>Allow cells to span multiple columns, return 1 means no spanning</td>
+      <td>[Link](?path=/story/table-data-grid--column-spanning)</td>
+    </tr>
+    <tr>
+      <td>Row spanning</td>
+      <td>Allow cells to span multiple rows</td>
+      <td>[Link](?path=/story/table-data-grid--row-spanning)</td>
+    </tr>
+    <tr>
+      <td>Column sizing</td>
+      <td>
+        Allow to optionally specify the width of each column, including min and max widths.
+        Support flex field to occupy the remaining space with other flex column
+      </td>
+      <td>[Link](?path=/story/table-data-grid--basic)</td>
+    </tr>
+    <tr>
+      <td>Row grouping</td>
+      <td>Enable to group rows with equivalent cell values under shared parent rows	</td>
+      <td>[Link](?path=/story/table-data-grid--row-grouping)</td>
+    </tr>
+    <tr>
+      <td>Customize cell type</td>
+      <td>The cell data type for content displaying, by default the grid will infer cell data types when pass row data into grid</td>
+      <td>[Link](?path=/story/table-data-grid--cell-data-type)</td>
+    </tr>
+    <tr>
+      <td>Advanced filtering</td>
+      <td>Filter popup to adjust all filters together</td>
+      <td>[Link](?path=/story/table-data-grid--client-side-row-filtering)</td>
+    </tr>
+    <tr>
+      <td>Column visibility</td>
+      <td>Allow table columns to be hidden or shown dynamically</td>
+      <td>[Link](?path=/story/table-data-grid--column-manager)</td>
+    </tr>
+    <tr>
+      <td>Column ordering</td>
+      <td>Allow to adjust column order dynamically</td>
+      <td>[Link](?path=/story/table-data-grid--column-manager)</td>
+    </tr>
+  </tbody>
+</table>
+
+## Migrate SC WebKit to v2
+
+### Manually update
+1. Run 
+```sh
+npm install @scdevkit/webkit@latest
+```
+2. Update your code according the change logs.
+
+### Semi-automatic update
+1. Run in your project to update related components.
+```sh
+npx @scdevkit/cli@latest
+```
+2. Update Steps
+
+<table>
+  <thead>
+    <tr>
+      <th>Step</th>
+      <th>Screenshot</th>
+      <th>Comment</th>
+    </tr>
+  </thead>
+  <tbody valign="top">
+    <tr>
+      <td>Update project</td>
+      <td><img src="./images/image-2025-4-12_11-39-40.png" /></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Update service bench</td>
+      <td><img src="./images/image-2025-4-11_17-51-43.png" /></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Update SC Webkit version</td>
+      <td><img src="./images/image-2025-4-11_17-56-33.png" /></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>
+        can select
+        * current directory (should be the root of the project)
+        * manually input
+      </td>
+      <td><img src="./images/image-2025-4-12_11-43-54.png" /><br/><img src="./images/image-2025-4-11_18-2-29.png" /><br/><img src="./images/image-2025-4-11_18-3-45.png" /></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Start to scan</td>
+      <td><img src="./images/image-2025-4-12_13-7-11.png" /></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Choose to </td>
+      <td><img src="./images/image-2025-4-21_14-43-36.png" /></td>
+      <td>After scanning, it will show the statistics data.</td>
+    </tr>
+    <tr>
+      <td>Auto-fixing</td>
+      <td><img src="./images/image-2025-4-21_14-45-46.png" /><br/><img src="./images/image-2025-4-21_14-47-18.png" /></td>
+      <td>After fixing, it will show the statistics of fixing part.</td>
+    </tr>
+    <tr>
+      <td>Complete scanning & fixing log</td>
+      <td>Named like: "./.log/.scdevkit-cli-webkit-version-scanner-\{\{TIMESTAMP\}\}.log"<br/><img src="./images/image-2025-4-21_14-50-54.png" /></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+

@@ -1,0 +1,6 @@
+<template>
+    <category><%= cliCategory %></category>
+    <type><%= cliType %></type>
+    <name><%= name %></name>
+    <applicationId><%= applicationId %></applicationId>
+</template>

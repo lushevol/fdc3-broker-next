@@ -1,0 +1,1248 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <title>sc-web-kit demo page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css" />
+  <!-- <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" /> -->
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDyslexicMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkModeExt.css" />
+
+  <!-- Custom style -->
+  <style>
+    body {
+      padding: 24px;
+    }
+    .sc-mode-dark {
+      background-color: var(--sc-color-grey-100)
+    }
+  </style>
+</head>
+<div id="webkit-ext-container"></div>
+
+  <!-- Custom script -->
+  <script type="text/javascript">
+    var modes = ['light', 'dark', 'dyslexic']
+    var activeMode = modes[0]
+    function changeMode(event) {
+      const mode = event.detail.value;
+        var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child');
+        componentCells.forEach((componentCell) => {
+            modes.forEach((mode) => {
+                componentCell.classList.remove(`sc-mode-${mode}`)
+            })
+            componentCell.classList.add(`sc-mode-${mode}`)
+            if (componentCell.classList.contains('inverse')) {
+                if (mode === 'dark') {
+                    componentCell.style.backgroundColor = 'var(--sc-color-white)'
+                } else {
+                    componentCell.style.backgroundColor = 'var(--sc-color-grey-100)'
+                }
+            }
+        })
+    }
+    changeMode(activeMode);
+    </script>
+
+    <script type="module">
+      // Register all sc-* custom elements 
+      import '../dist/elements/index.js';
+      import '@scdevkit/webkit/elements/index.js';
+      import '@scdevkit/data/elements/index.js';
+      import '../dist/demo/local/ScDataGraphQLProvider.js';
+      import { html } from '/node_modules/lit-html/lit-html.js';
+      import { render } from 'lit';
+      import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+
+      window.html = html;
+
+      const arr = ['1638918']
+
+      render(html`
+      <sc-demo-graphql-provider>
+        <sc-icon-provider .iconLibraries=${[CountryIconLibrary, MainIconLibrary]}>
+          <h1 class="text-xl mb-4">Components</h1>
+          <div class="table w-full shadow-lg max-h-96 components-body">
+              <div class="table-header-group font-bold sticky top-0 bg-white z-10">
+                  <div class="table-row">
+                      <div class="table-cell border px-4 py-4">Component</div>
+                      <div class="table-cell border px-4 py-4">Example</div>
+                      <div class="table-cell border px-4">
+                          <div class="py-4" style="max-width: 300px;">
+                              <sc-dropdown-input label="Mode" value="light" @sc-select=${changeMode}>
+                                  <sc-dropdown-option value="light">Light</sc-dropdown-option>
+                                  <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+                                  <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+                              </sc-dropdown-input>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Calendar</div>
+                    <div class="table-cell border px-4 py-4">Default</div>
+                    <div class="table-cell border px-4 py-4">
+                      <sc-calendar
+                        id="default-calendar"
+                        class="default-calendar"
+                        show-header-toolbar
+                        .availableCalendars=${['Outlook-Calendar', 'Outlook-Ng, Ching Ting']}
+                      ></sc-calendar>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                  <div class="table-cell border px-4 py-4">Employee</div>
+                  <div class="table-cell border px-4 py-4">Employee Grouped Avatar</div>
+                  <div class="table-cell border px-4 py-4">
+                    <div>
+                      <sc-employee-grouped-avatar
+                        size='sm'
+                        ids='[${Array.from({ length: 5 }, (_, i) => (1574871 + i).toString())}]'
+                      >
+                      </sc-employee-grouped-avatar>
+                    </div>
+                    <div style="max-width: 300px;">
+                      <sc-employee-grouped-avatar
+                        ids='[${Array.from({ length: 10 }, (_, i) => (1574871 + i).toString())}]'
+                      >
+                      </sc-employee-grouped-avatar>
+                    </div>
+                    <div style="max-width: 600px;">
+                      <sc-employee-grouped-avatar
+                        max-number=6
+                        ids='[${Array.from({ length: 100 }, (_, i) => (1574871 + i).toString())}]'
+                      >
+                      </sc-employee-grouped-avatar>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card Vertical</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card vertical id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card Vertical (Additional info link)</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card additional-info-link vertical id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card Vertical Center</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card vertical center-aligned id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card Vertical Center Compact</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card mode='compact' vertical center-aligned id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Disabled</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card disabled id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card Vertical - Disabled</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card disabled vertical id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card Vertical Center - Disabled</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card disabled vertical center-aligned id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Name</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-name id=1574871></sc-employee-name>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Custom Fields</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card id=1574871 fields='["id", "location","avatar","businessTitle","department","email","phone"]'></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Custom Fields</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card id=1574871 fields='["location","businessTitle"]'></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Actions</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card class=employee-card-with-actions id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Compact Mode</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card mode=compact id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Avatar Size</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card avatar-size=sm id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Tag Mode</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card mode=tag id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Tag Link Mode</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card link mode=tag id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Tag Transparent Mode</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card transparent mode=tag id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Tag Transparent Link Mode</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card transparent link mode=tag id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Tag Transparent Link Mode (compact)</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card compact transparent link mode=tag id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Tag Transparent Link Mode (Avatar sm)</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card transparent link mode=tag id=1574871 avatar-size=sm></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Tag Mode - Disabled</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card disabled mode=tag id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Tag Link Mode - Disabled</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card disabled link mode=tag id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Tag Transparent Mode - Disabled</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card disabled transparent mode=tag id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Tag Transparent Link Mode - Disabled</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card disabled transparent link mode=tag id=1574871></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - Custom fields</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card data='{"name":"Test","email":"Test@sc.com","id":"1234567","phone":"12345657","location":"Singapore","department":"TSA","businessTitle":"Developer"}'>
+                          <div slot=fields>
+                            <div>Custom elements</div>
+                          </div>
+                        </sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - No Actions</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card no-actions>
+                          <div slot=fields>
+                            <div>Custom elements</div>
+                          </div>
+                        </sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Card - No Avatar</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-card mode=tag id=1574871 fields='[]'></sc-employee-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Input</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-input show-card="" value="1638918"></sc-employee-input>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Input - Title</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-input required disabled>
+                          <div slot=label>This is a title</div>
+                        </sc-employee-input>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Input - Readonly</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-input required readonly value="1638918">
+                          <div slot=label>This is a title</div>
+                        </sc-employee-input>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Input - Error</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-input error>
+                          <div slot=label>This is a title</div>
+                          <div slot=error>This is error message</div>
+                        </sc-employee-input>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Name</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-name id=1574871></sc-employee-name>
+                    </div>
+                </div>
+              </div>
+
+              <div class="table-row-group h-96">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Multi Input Readonly</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-multi-input label='Readonly employee' .value=${arr} readonly></sc-employee-multi-input>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Multi Input - Title</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-multi-input required .value=${['1399899']}>
+                          <div slot=label>This is a title</div>
+                        </sc-employee-multi-input>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Multi Input - Readonly</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-multi-input required readonly>
+                          <div slot=label>This is a title</div>
+                        </sc-employee-multi-input>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Multi Input - Error</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-multi-input error .value=${['1399899']}>
+                          <div slot=label>This is a title</div>
+                          <div slot=error>This is error message</div>
+                        </sc-employee-multi-input>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Multi Input - Min 2 Max 4</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-multi-input min-count="2" max-count="4" .value=${['1399899', '1574871']}>
+                          <div slot=label>Choose 2 to 4 employees</div>
+                        </sc-employee-multi-input>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Name</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-name id=1574871></sc-employee-name>
+                    </div>
+                </div>
+              </div>
+
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Avatar</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-avatar id=1626487></sc-employee-avatar>
+                    </div>
+                </div>
+              </div>
+
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Employee</div>
+                    <div class="table-cell border px-4 py-4">Employee Avatar</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-employee-avatar id=1626487></sc-employee-avatar>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Case</div>
+                    <div class="table-cell border px-4 py-4">Case Card</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-case-card id=123456></sc-case-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Case</div>
+                    <div class="table-cell border px-4 py-4">Case Card - Custom Fields</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-case-card id=123456 fields='["requestedFor"]'></sc-case-card>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Case</div>
+                    <div class="table-cell border px-4 py-4">Case Card - Id as Title</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-case-card id=123456 major-field=id></sc-case-card>
+                    </div>
+                </div>
+              </div>
+
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Organisation</div>
+                    <div class="table-cell border px-4 py-4">Organisation Role</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-organisation-role
+                          id=1574871
+                          name='Masked, Kendall'
+                          title='Senior Manager'
+                          department='TSA PRJ SG DevOps'
+                          connection='{"open":true,"label":"21"}'
+                        ></sc-organisation-role>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Organisation</div>
+                    <div class="table-cell border px-4 py-4">Custom fields</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-organisation-role
+                          name='Masked, Kendall'
+                          title='Senior Manager'
+                          phone='123432'
+                        ></sc-organisation-role>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Organisation</div>
+                    <div class="table-cell border px-4 py-4">Custom fields</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-organisation-role
+                          class=custom-organisation-role
+                          name='Masked, Kendall'
+                          title='Senior Manager'
+                          department='TSA PRJ SG DevOps'
+                        ></sc-organisation-role>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Organisation</div>
+                    <div class="table-cell border px-4 py-4">Custom card</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-organisation-role
+                          class=organisation-role-custom-card
+                        ></sc-organisation-role>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Organisation</div>
+                    <div class="table-cell border px-4 py-4">Organisation Hierarchy</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-organisation-hierarchy></sc-organisation-hierarchy>
+                    </div>
+                </div>
+              </div>
+              <div class="table-row-group h-96 overflow-y-auto">
+                <div class="table-row">
+                    <div class="table-cell border px-4 py-4">Organisation</div>
+                    <div class="table-cell border px-4 py-4">Organisation Hierarchy Custom Card</div>
+                    <div class="table-cell border px-4 py-4">
+                        <sc-organisation-hierarchy class=organisation-hierarchy-custom-card></sc-organisation-hierarchy>
+                    </div>
+                </div>
+              </div>
+          </div>
+        </div>
+        <div class="table-row-group h-96 overflow-y-auto">
+          <div class="table-row">
+              <div class="table-cell border px-4 py-4">Case List</div>
+              <div class="table-cell border px-4 py-4">My actions of casa</div>
+              <div class="table-cell border px-4 py-4">
+                  <sc-case-list list-type="myActions" system-code='demo' case-type-key="casa" list-title="CASA account opening" user-id="1431830" fields='["requestBy"]'></sc-case-list>
+              </div>
+          </div>
+        </div>
+        <div class="table-row-group h-96 overflow-y-auto">
+          <div class="table-row">
+              <div class="table-cell border px-4 py-4">Case List</div>
+              <div class="table-cell border px-4 py-4">My submissions</div>
+              <div class="table-cell border px-4 py-4">
+                  <sc-case-list list-type="mySubmissions" system-code='demo' case-type-key="casa" list-title="My Submissions" user-id="1431830"></sc-case-list>
+              </div>
+          </div>
+
+          </sc-icon-provider>
+        </sc-demo-graphql-provider>        
+      `, document.querySelector('#webkit-ext-container'))
+
+      const defaultCalendar = document.querySelector('.default-calendar');
+      defaultCalendar.events = [
+        {
+          id: '1',
+          title: 'ServiceBench Standup',
+          start: '2025-09-17T10:00:00',
+          end: '2025-09-17T10:30:00',
+          extendedProps: {
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Calendar',
+              isDefault: true
+            },
+            location: { displayName: 'nyc', locationType: 'default' },
+            showAs: 'busy',
+            originalStartTimeZone: 'Asia/Singapore',
+            originalEndTimeZone: 'Asia/Singapore',
+            recurrenceDetails: {
+              pattern: {
+                type: 'weekly',
+                interval: 1
+              },
+              range: {
+                type: 'endDate',
+                startDate: '2025-09-17T10:00:00',
+                endDate: '2025-12-01T10:30:00',
+                recurrenceTimeZone: 'Asia/Singapore'
+              }
+            }
+          },
+          rrule: {
+            freq: 'WEEKLY',
+            interval: 1,
+            byweekday: ['MO', 'TU', 'WE', 'TH', 'FR'],
+            dtstart: '2025-09-17T10:00:00',
+            until: '2025-12-01T10:30:00'
+          }
+        },
+        { 
+          id: '2', 
+          title: 'Team Meeting', 
+          start: '2025-09-24T10:30:00', 
+          end: '2025-09-24T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Calendar',
+              isDefault: true
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'Asia/Singapore', 
+            originalEndTimeZone: 'Asia/Singapore' 
+          } 
+        },
+        { 
+          id: '3', 
+          title: 'KMS Meeting', 
+          start: '2025-09-17T12:30:00', 
+          end: '2025-09-17T13:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Calendar',
+              isDefault: true
+            },
+            showAs: 'tentative', 
+            originalStartTimeZone: 'Asia/Singapore', 
+            originalEndTimeZone: 'Asia/Singapore' 
+          } 
+        },
+        { 
+          id: '4', 
+          title: 'Project Deadline', 
+          start: '2025-09-18', 
+          end: '2025-09-18', 
+          allDay: true, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Calendar',
+              isDefault: true
+            },
+            location: { displayName: 'la', locationType: 'default' }, 
+            showAs: 'busy', 
+            originalStartTimeZone: 'Asia/Singapore', 
+            originalEndTimeZone: 'Asia/Singapore' 
+          } 
+        },
+        { 
+          id: '5', 
+          title: 'Doctor Appointment', 
+          start: '2025-09-14T09:00:00', 
+          end: '2025-09-14T10:00:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Calendar',
+              isDefault: true
+            },
+            location: { displayName: 'chi', locationType: 'default' }, 
+            showAs: 'busy', 
+            originalStartTimeZone: 'Asia/Singapore', 
+            originalEndTimeZone: 'Asia/Singapore' 
+          } 
+        },
+        { 
+          id: '6', 
+          title: 'Lunch with Sarah', 
+          start: '2025-09-20T12:00:00', 
+          end: '2025-09-20T13:00:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Calendar',
+              isDefault: true
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'Asia/Singapore', 
+            originalEndTimeZone: 'Asia/Singapore' 
+          } 
+        },
+        { 
+          id: '7', 
+          title: 'Conference', 
+          start: '2025-10-02', 
+          end: '2025-10-04', 
+          allDay: true, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Calendar',
+              isDefault: true
+            },
+            location: { displayName: 'bos', locationType: 'default' }, 
+            showAs: 'busy', 
+            originalStartTimeZone: 'Asia/Singapore', 
+            originalEndTimeZone: 'Asia/Singapore' 
+          } 
+        },
+        { 
+          id: '10', 
+          title: 'Hackathon', 
+          start: '2025-10-08', 
+          end: '2025-10-09', 
+          allDay: true, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Calendar',
+              isDefault: true
+            },
+            location: { displayName: 'sf', locationType: 'default' }, 
+            showAs: 'free', 
+            originalStartTimeZone: 'Asia/Singapore', 
+            originalEndTimeZone: 'Asia/Singapore' 
+          } 
+        },
+        { 
+          id: '12', 
+          title: 'Business Trip', 
+          start: '2025-09-30', 
+          end: '2025-10-02', 
+          allDay: true, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Calendar',
+              isDefault: true
+            },
+            location: { displayName: 'nyc', locationType: 'default' }, 
+            showAs: 'workingElsewhere', 
+            originalStartTimeZone: 'Asia/Singapore', 
+            originalEndTimeZone: 'Asia/Singapore' 
+          } 
+        },
+        { 
+          id: '13', 
+          title: 'China Trip', 
+          start: '2025-10-10', 
+          end: '2025-10-13', 
+          allDay: true, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Calendar',
+              isDefault: true
+            },
+            location: { displayName: 'nyc', locationType: 'default' }, 
+            showAs: 'workingElsewhere', 
+            originalStartTimeZone: 'Asia/Shanghai', 
+            originalEndTimeZone: 'Asia/Shanghai' 
+          } 
+        },
+        { 
+          id: '14', 
+          title: 'Monthly Review', 
+          start: '2025-10-16T14:00:00', 
+          end: '2025-10-16T16:00:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Calendar',
+              isDefault: true
+            },
+            location: { displayName: 'chi', locationType: 'default' }, 
+            showAs: 'busy', 
+            originalStartTimeZone: 'Asia/Singapore', 
+            originalEndTimeZone: 'Asia/Singapore' 
+          } 
+        },
+        { 
+          id: '15', 
+          title: 'Planned Leave', 
+          start: '2025-10-02', 
+          end: '2025-10-08', 
+          allDay: true, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Calendar',
+              isDefault: true
+            },
+            showAs: 'oof', 
+            originalStartTimeZone: 'Asia/Singapore', 
+            originalEndTimeZone: 'Asia/Singapore' 
+          } 
+        },
+        { 
+          id: '16', 
+          title: 'Personal Meeting', 
+          start: '2025-10-15T10:30:00', 
+          end: '2025-10-15T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Calendar',
+              isDefault: true
+            },
+            showAs: 'free', 
+            originalStartTimeZone: 'Asia/Singapore', 
+            originalEndTimeZone: 'Asia/Singapore',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '17', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '18', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '19', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '20', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '21', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '22', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '23', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '24', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '25', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '26', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '27', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '28', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '29', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+        { 
+          id: '30', 
+          title: 'Team Bonding', 
+          start: '2025-10-14T10:30:00', 
+          end: '2025-10-14T12:30:00', 
+          allDay: false, 
+          extendedProps: { 
+            calendarSource: {
+              source: 'Outlook',
+              name: 'Ng, Ching Ting',
+              isDefault: false
+            },
+            showAs: 'busy', 
+            originalStartTimeZone: 'tzone://Microsoft/Utc', 
+            originalEndTimeZone: 'tzone://Microsoft/Utc',
+            sensitivity: 'private' 
+          } 
+        },
+      ];
+
+      const employeeCard = document.querySelector('.employee-card-with-actions');
+      employeeCard.actions = [
+        html`<div @click=${() => alert(123)}>Edit</div>`,
+        html`<div>View</div>`,
+      ]
+
+      const orgHierarchy = document.querySelector('sc-organisation-hierarchy');
+      const roles = [{
+        id: '1389585',
+        name: 'Johnson, Kingston',
+        title: 'Head, Application Platform',
+        department: 'IT-Projs-ET Integration Svcs',
+        location: 'Singapore'
+      }, {
+        id: '1574871',
+        name: 'Masked, Kendall',
+        title: 'Senior Manager',
+        department: 'TSA PRJ SG DevOps',
+        connection: {"open":true,"label":"21"},
+        location: 'Singapore'
+      }, [
+        {
+          id: '1577986',
+          name: 'Sulistyo',
+          title: 'Product Engineer',
+          department: 'TSA PRJ SG DevOps',
+          location: 'Singapore'
+        }, {
+          id: "1547358",
+          name: 'Li Wen',
+          title: 'Testing Lead',
+          department: 'TSA PRJ SG DevOps',
+          location: 'Singapore'
+        }, {
+          id: "1399899",
+          name: 'Wang Yufang',
+          title: 'Product Engineer Manager',
+          department: 'China - Tianjin (GBS)',
+          location: 'Tianjin'
+        }
+      ]]
+      
+      orgHierarchy.roles = roles;
+      const orgCustomRole = document.querySelector('.custom-organisation-role');
+      console.log('stringify', ...[
+        {
+          text: 'Custom text'
+        },
+        {
+          icon: 'home--line',
+          text: () => html`<sc-link>View more</sc-link>`
+        }
+      ])
+      orgCustomRole.setAttribute('custom-fields', JSON.stringify([
+        {
+          text: 'Custom text'
+        },
+        {
+          icon: 'home--line',
+          text: html`<sc-link>View more</sc-link>`
+        }
+      ]))
+      // orgCustomRole.customFields = [
+      //   {
+      //     text: 'Custom text'
+      //   },
+      //   {
+      //     icon: 'home--line',
+      //     text: html`<sc-link>View more</sc-link>`
+      //   }
+      // ]
+
+      const setCustomCard = (department, id, name) => {
+        return html`
+          <div style='text-align: left; width: 250px'>
+            <div style='font-size: 12px'>Business Function</div>
+            <div style='font-weight: 700; margin: 10px 0'>${department}</div>
+            <div style='display: flex'>
+              <sc-employee-avatar avatar-size=md id=${id}></sc-employee-avatar>
+              <sc-link style='margin-left: 8px'>${name}</sc-link>  
+            </div>
+            <div style='display: flex; font-size: 12px'>
+              <sc-icon name='people--line' size=xs></sc-icon>
+              <span style='margin-left: 8px'>1,230</span>  
+            </div>
+          </div>
+        `
+      }
+      const orgCustomCard = document.querySelector('.organisation-role-custom-card');
+      orgCustomCard.customCard = setCustomCard('IT-TPS-TSA Arch & Gov', '1574871', 'Masked, Kendall')
+
+      const orgHierarchyCustomCard = document.querySelector('.organisation-hierarchy-custom-card');
+      orgHierarchyCustomCard.roles = roles.map(role => {
+        const customCard = '';
+        if (Array.isArray(role)) {
+          return role.map(p => {
+            return {
+              customCard: setCustomCard(p.department, p.id, p.name)
+            }
+          })
+        } else {
+          return {
+            customCard: setCustomCard(role.department, role.id, role.name)
+          }
+        }
+      })
+    </script>
+
+</body>
+</html>

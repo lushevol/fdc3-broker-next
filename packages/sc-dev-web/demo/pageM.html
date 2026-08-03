@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+    <title>sc-web-kit demo page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+    <!-- Custom style -->
+    <style>
+        body {
+            padding: 24px;
+        }
+
+        .sc-mode-dark {
+            background-color: var(--sc-color-blue-900)
+        }
+
+        .table-cell {
+            border-color: var(--sc-color-grey-15);
+            vertical-align: top;
+        }
+
+        .side-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 10px 8px;
+            background-color: var(--sc-color-white);
+            border-radius: 8px;
+            box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-height: 100vh;
+            overflow-y: auto;
+            z-index: 999999999;
+        }
+        
+        .side-bar div {
+            padding: 5px 0;
+        }
+
+        .side-bar div .selected {
+            color: var(--sc-color-blue-500);
+        }
+    </style>
+
+    <!-- Register all sc-* custom elements -->
+    <script type="module">
+        import '../dist/elements/index.js';
+        import { html } from '/node_modules/lit-html/lit-html.js';
+        window.html = html;
+    </script>
+</head>
+<sc-icon-provider>
+    <div id='side-bar' class='side-bar'>
+        <script type="text/javascript">
+            const sidebar = document.querySelector('#side-bar');
+            const initials = [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
+                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
+                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
+                'Y', 'Z'
+            ];
+            const currentPage = 'M';
+            const content = [];
+            initials.forEach(initial => {
+                content.push(`<div>`);
+                content.push(`<a class="${currentPage === initial ? 'selected' : ''}" href="/demo/page${initial}.html">${initial}</a>`);
+                content.push(`</div>`);
+            })
+            sidebar.innerHTML = content.join('');
+        </script>
+    </div>
+
+    <div class="table w-full shadow-lg max-h-96 components-body">
+        <div class="table-header-group font-bold sticky top-0 bg-white z-10">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Component</div>
+                <div class="table-cell border px-4 py-4">Example</div>
+                <div class="table-cell border px-4">
+                    <div class="py-4" style="max-width: 300px;">
+                        <sc-dropdown-input label="Mode" value="light">
+                            <sc-dropdown-option value="light">Light</sc-dropdown-option>
+                            <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+                            <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+                        </sc-dropdown-input>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-row-group h-96 overflow-y-auto">
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Menu Bar</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-menu-bar class='menu-bar'>
+                    </sc-menu-bar>
+                    <script type="text/javascript">
+                      const menubar = document.querySelector('.menu-bar');
+                      menubar.data = [
+                        {
+                          title: 'Call activity',
+                          width: 'calc(100vw - 120px)',
+                          leftPosition: '100px',
+                          menuItems: [
+                            {title: 'Menu item 1', description: 'Find your colleagues, join communities and manage your profile', category: 'Title1', prefixIcon: 'home--line'},
+                            {title: 'Menu item 2', description: 'Find your colleagues, join communities and manage your profile', category: 'Title1'},
+                            {title: 'Menu item 3', description: 'Find your colleagues, join communities and manage your profile', category: 'Title1'},
+                            {title: 'Menu item 4', description: 'Find your colleagues, join communities and manage your profile', category: 'Title1'},
+                            {title: 'Menu item 5', description: 'Find your colleagues, join communities and manage your profile', category: 'Title1'},
+                            {title: 'Menu item 1', description: 'Find your colleagues, join communities and manage your profile', category: 'Title2'},
+                            {title: 'Menu item 1', description: 'Find your colleagues, join communities and manage your profile', category: 'Title3'},
+                            {title: 'Menu item 2', description: 'Find your colleagues, join communities and manage your profile', category: 'Title3'},
+                            {title: 'Menu item 3', description: 'Find your colleagues, join communities and manage your profile', category: 'Title3'},
+                            {title: 'Menu item 1', description: 'Find your colleagues, join communities and manage your profile', category: 'Title4'},
+                            {title: 'Menu item 2', description: 'Find your colleagues, join communities and manage your profile', category: 'Title4'},
+                          ]
+                        },
+                        {
+                          title: 'My customers',
+                          menuItems: [
+                            {title: 'Menu item 1', prefixIcon: 'home--line',  href: '#'},
+                            {title: 'Menu item 2'},
+                            {title: 'Menu item 3'},
+                            {title: 'Menu item 4'},
+                            {title: 'Menu item 5'},
+                            {title: 'Menu item 6'},
+                          ]
+                        },
+                        {
+                          title: 'My dashboard',
+                          href: '#'
+                        },
+                        {
+                          title: 'My service',
+                          href: '#'
+                        },
+                      ];
+                    </script>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Menu</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-menu>
+                        <sc-menu-label>Directions</sc-menu-label>
+                        <sc-menu-item value="undo">
+                            Undo
+                            <sc-menu slot="submenu">
+                                <sc-menu-item value="redo">Redo</sc-menu-item>
+                            </sc-menu>
+                        </sc-menu-item>
+                        <sc-menu-item value="redo">Redo</sc-menu-item>
+                        <sc-menu-label>Actions</sc-menu-label>
+                        <sc-menu-item value="cut">Cut</sc-menu-item>
+                        <sc-menu-item value="copy">Copy</sc-menu-item>
+                        <sc-menu-item value="paste">Paste</sc-menu-item>
+                        <sc-menu-item value="delete">Delete</sc-menu-item>
+                    </sc-menu>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Menu</div>
+                <div class="table-cell border px-4 py-4">Custom</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-menu>
+                        <sc-menu-item>Option 1</sc-menu-item>
+                        <sc-menu-item>Option 2</sc-menu-item>
+                        <sc-menu-item>Option 3</sc-menu-item>
+                        <sc-menu-item type="checkbox" checked>Checkbox</sc-menu-item>
+                        <sc-menu-item disabled>Disabled</sc-menu-item>
+                        <sc-menu-item>
+                            Prefix Icon
+                            <sl-icon slot="prefix" name="home--line"></sl-icon>
+                        </sc-menu-item>
+                        <sc-menu-item>
+                            Suffix Icon
+                            <sc-icon slot="suffix" name="shield-off--line"></sc-icon>
+                        </sc-menu-item>
+                    </sc-menu>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Menu</div>
+                <div class="table-cell border px-4 py-4">Custom width</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-menu width='400px' >
+                        <sc-menu-label>Directions</sc-menu-label>
+                        <sc-menu-item value="undo">Undo</sc-menu-item>
+                        <sc-menu-item value="redo">Redo</sc-menu-item>
+                        <sc-menu-label>Actions</sc-menu-label>
+                        <sc-menu-item value="cut">Cut</sc-menu-item>
+                        <sc-menu-item value="copy">Copy</sc-menu-item>
+                        <sc-menu-item value="paste">Paste</sc-menu-item>
+                        <sc-menu-item value="delete">Delete</sc-menu-item>
+                    </sc-menu>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Modal</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="modal-button-no-footer">Open modal</sc-button>
+                    <sc-modal 
+                        class="modal-no-footer" 
+                        color="default" 
+                        icon 
+                        >
+                    <div slot="header">Transaction instruction</div>
+                    <div slot="title">
+                        Ref no. UIINT7CUSTA25347
+                    </div>
+                    </sc-modal>
+                    <script type="text/javascript">
+                    const modalNoFooter = document.querySelector('.modal-no-footer');
+                    const modalNoFooterButton = document.querySelector('.modal-button-no-footer');
+                
+                    modalNoFooterButton.addEventListener('click', () => {
+                        modalNoFooter.setAttribute('open', '');
+                    });
+                
+                    modalNoFooter.addEventListener('sc-hide', () => {
+                        modalNoFooter.removeAttribute('open');
+                    });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Modal</div>
+                <div class="table-cell border px-4 py-4">Default with Slot Text</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="modal-button-no-footer-2">Open modal</sc-button>
+                    <sc-modal 
+                        class="modal-no-footer-2" 
+                        color="default" 
+                        icon 
+                        >
+                        <div slot="header">Transaction instruction</div>
+                        <div slot="title">
+                            Ref no. UIINT7CUSTA25347
+                        </div>
+                    </sc-modal>
+                    <script type="text/javascript">
+                    const modalNoFooter2 = document.querySelector('.modal-no-footer-2');
+                    const modalNoFooterButton2 = document.querySelector('.modal-button-no-footer-2');
+                
+                    modalNoFooterButton2.addEventListener('click', () => {
+                        modalNoFooter2.setAttribute('open', '');
+                    });
+                
+                    modalNoFooter2.addEventListener('sc-hide', () => {
+                        modalNoFooter2.removeAttribute('open');
+                    });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Modal</div>
+                <div class="table-cell border px-4 py-4">Default with Alternative Footer</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="modal-button-transactional">Open modal</sc-button>
+                    <sc-modal 
+                        class="modal-transactional" 
+                        color="default" 
+                        icon 
+                        footer-type="alternative" 
+                        >
+                    <div slot="header">Transaction instruction</div>
+                    <div slot="title">
+                        Ref no. UIINT7CUSTA25347
+                        <div style="font-size: 14px; font-style: normal; font-weight: 400;">
+                        Width :- Small(424px), Medium(647px), large(1094px)
+                        </div>
+                    </div>
+                    <div 
+                        slot="alternative-footer" 
+                        style="display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        cursor: pointer;
+                        ">
+                        <sc-icon name="key" size="md" compact style="margin-right: 8px;"></sc-icon>
+                        Activate device token
+                    </div>
+                    slot text
+                    </sc-modal>
+                    <script type="text/javascript">
+                    const modalTransactional = document.querySelector('.modal-transactional');
+                    const modalTransactionalButton = document.querySelector('.modal-button-transactional');
+                
+                    modalTransactionalButton.addEventListener('click', () => {
+                        modalTransactional.setAttribute('open', '');
+                    });
+                
+                    modalTransactional.addEventListener('sc-hide', () => {
+                        modalTransactional.removeAttribute('open');
+                    });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Modal</div>
+                <div class="table-cell border px-4 py-4">Blue with Pagination Footer</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="modal-button-pagination">Open modal</sc-button>
+                    <sc-modal 
+                        class="modal-pagination" 
+                        color="blue" 
+                        icon 
+                        footer-type="pagination" 
+                        pagination-label
+                        pagination-total="80"
+                        pagination-page-size="20"
+                        pagination-size-changer
+                        pagination-current-page="2"
+                        pagination-disabled-pages="[4]"
+                        >
+                    <div slot="header">Pagination instruction</div>
+                    <div slot="title">
+                        Ref no. UIINT7CUSTA25347
+                        <div style="font-size: 14px; font-style: normal; font-weight: 400;">
+                        Width :- Small(424px), Medium(647px), large(1094px)
+                        </div>
+                    </div>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+                    </sc-modal>
+                    <script type="text/javascript">
+                    const modalPagination = document.querySelector('.modal-pagination');
+                    const modalPaginationButton = document.querySelector('.modal-button-pagination');
+                
+                    modalPaginationButton.addEventListener('click', () => {
+                        modalPagination.setAttribute('open', '');
+                    });
+                
+                    modalPagination.addEventListener('sc-hide', () => {
+                        modalPagination.removeAttribute('open');
+                    });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Modal</div>
+                <div class="table-cell border px-4 py-4">Blue with Button Footer</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="modal-button-button">Open modal</sc-button>
+                    <sc-modal 
+                        class="modal-button" 
+                        size="sm"
+                        color="blue" 
+                        icon 
+                        footer-type="button"
+                        button-type-secondary="error"
+                        button-text-secondary="Way out"
+                        button-text-primary="Decision"
+                        button-text-tertiary="Restoratative"
+                        button-text-left="Link"
+                        >
+                        <div slot="header">Button instruction</div>
+                        <div slot="title">
+                            Ref no. UIINT7CUSTA25347
+                            <div style="font-size: 14px; font-style: normal; font-weight: 400;">
+                                Width :- Small(424px), Medium(647px), large(1094px)
+                            </div>
+                        </div>
+                        slot text
+                    </sc-modal>
+                    <script type="text/javascript">
+                        const modalButton = document.querySelector('.modal-button');
+                        const modalButtonButton = document.querySelector('.modal-button-button');
+                    
+                        modalButtonButton.addEventListener('click', () => {
+                            modalButton.setAttribute('open', '');
+                        });
+                    
+                        modalButton.addEventListener('sc-hide', () => {
+                            modalButton.removeAttribute('open');
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Modal</div>
+                <div class="table-cell border px-4 py-4">Blue with Button Footer and Button Disable</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="modal-button-disabled">Open modal</sc-button>
+                    <sc-modal 
+                        class="modal-primary-disabled" 
+                        size="sm"
+                        color="blue" 
+                        icon 
+                        footer-type="button"
+                        button-type-secondary="error"
+                        button-text-secondary="Way out"
+                        button-text-primary="Decision"
+                        button-text-tertiary="Restoratative"
+                        button-text-left="Link"
+                        button-disable-primary
+                        button-disable-secondary
+                        >
+                        <div slot="header-text">Button instruction</div>
+                        <div slot="title-text">
+                            Ref no. UIINT7CUSTA25347
+                            <div style="font-size: 14px; font-style: normal; font-weight: 400;">
+                                Width :- Small(424px), Medium(647px), large(1094px)
+                            </div>
+                        </div>
+                        slot text
+                    </sc-modal>
+                    <script type="text/javascript">
+                        const modalPrimaryDisabled = document.querySelector('.modal-primary-disabled');
+                        const modalButtonDisabled = document.querySelector('.modal-button-disabled');
+                    
+                        modalButtonDisabled.addEventListener('click', () => {
+                            modalPrimaryDisabled.setAttribute('open', '');
+                        });
+                    
+                        modalButtonDisabled.addEventListener('sc-hide', () => {
+                            modalPrimaryDisabled.removeAttribute('open');
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Modal</div>
+                <div class="table-cell border px-4 py-4">With Button Footer Slot</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="modal-button-with-footer">Open modal</sc-button>
+                    <sc-modal 
+                        class="modal-with-footer" 
+                        color="default" 
+                        icon 
+                        footer-type="button"
+                    >
+                        <div slot="header">Transaction instruction</div>
+                        <div slot="title">
+                            Ref no. UIINT7CUSTA25348
+                        </div>
+                        <div slot="footer-button">
+                            <sc-button>Cancel</sc-button>
+                            <sc-button>Confirm</sc-button>
+                        </div>
+                        <div slot="footer-left">
+                            <sc-button>Left</sc-button>
+                        </div>
+                    </sc-modal>
+                    <script type="text/javascript">
+                    const modalWithFooter = document.querySelector('.modal-with-footer');
+                    const modalWithFooterButton = document.querySelector('.modal-button-with-footer');
+                
+                    modalWithFooterButton.addEventListener('click', () => {
+                        modalWithFooter.setAttribute('open', '');
+                    });
+                
+                    modalWithFooter.addEventListener('sc-hide', () => {
+                        modalWithFooter.removeAttribute('open');
+                    });
+                    </script>
+                </div>
+            </div>
+</sc-icon-provider>
+<!-- Custom script -->
+<script type="text/javascript">
+    var modes = ['light', 'dark', 'dyslexic']
+    var activeMode = modes[0]
+    function changeMode(mode) {
+        var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child');
+        componentCells.forEach((componentCell) => {
+            modes.forEach((mode) => {
+                componentCell.classList.remove(`sc-mode-${mode}`)
+            })
+            componentCell.classList.add(`sc-mode-${mode}`)
+            if (componentCell.classList.contains('inverse')) {
+                if (mode === 'dark') {
+                    componentCell.style.backgroundColor = 'var(--sc-color-white)'
+                } else {
+                    componentCell.style.backgroundColor = 'var(--sc-color-blue-900)'
+                }
+            }
+        })
+    }
+    document.getElementsByTagName('sc-dropdown-input')[0].addEventListener('sc-select', ({ detail: { value } }) => {
+        changeMode(value);
+    });
+    changeMode(activeMode);
+
+</script>
+
+<script type="module">
+    import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+    changeIconLibrary();
+    function changeIconLibrary() {
+        document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+    }
+</script>
+
+</html>

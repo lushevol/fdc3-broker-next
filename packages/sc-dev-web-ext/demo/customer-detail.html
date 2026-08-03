@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <title>sc-web-kit demo page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css" />
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDyslexicMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+
+  <!-- Custom style -->
+  <style>
+    body {
+      padding: 0;
+    }
+    .sc-mode-dark {
+      background-color: var(--sc-color-grey-100)
+    }
+  </style>
+</head>
+<div id="webkit-ext-container"></div>
+<body>
+
+<!-- Custom script -->
+<script type="module">
+  // Register all sc-* custom elements
+  // Register all sc-* custom elements 
+  import '../dist/elements/index.js';
+  import '@scdevkit/webkit/elements/index.js';
+  import '@scdevkit/data/elements/index.js';
+  import '../dist/src/components/local/ScDataGraphQLProvider.js';
+  import { html } from '/node_modules/lit-html/lit-html.js';
+  import { render } from 'lit';
+  import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+
+  const customizeField = event => {
+    console.log('fields', event.detail);
+    const ele = document.querySelector('.custom-field');
+    const fields = event.detail.fields;
+    fields.push({
+      category: 'Risk Information',
+      fields: [
+        {
+          label: 'ReferenceId',
+          key: 'risk.referenceId'
+        },
+        {
+          label: 'Created At',
+          key: 'risk.riskDetails[0].createdAt',
+          type: 'date'
+        }, {
+          label: 'Expiry Date',
+          key: 'risk.riskDetails[0].riskExpiryDate',
+          type: 'date'
+        }
+      ]
+    })
+    ele.fields = fields;
+  }
+
+  render(html`
+    <sc-demo-graphql-provider>
+      <sc-icon-provider .iconLibraries=${[CountryIconLibrary, MainIconLibrary]}>
+        <sc-customer-detail reference-id='3560000000600908' country-code='IN'></sc-customer-detail>
+        <sc-divider size="xxs" line-width="xxs" text-align="left" title="Divider">
+          Multiple columns
+        </sc-divider>
+        <sc-customer-detail reference-id='3560000000600908' country-code='IN' columns=2></sc-customer-detail>
+        <sc-divider size="xxs" line-width="xxs" text-align="left" title="Divider">
+          Custom fields
+        </sc-divider>
+        <sc-customer-detail class=custom-field reference-id='3560000000600908' country-code='IN' @sc-loaded=${customizeField}></sc-customer-detail>
+
+      </sc-icon-provider>
+    </sc-demo-graphql-provider>
+  `, document.querySelector('#webkit-ext-container'))
+ 
+  
+</script>
+</body>
+</html>

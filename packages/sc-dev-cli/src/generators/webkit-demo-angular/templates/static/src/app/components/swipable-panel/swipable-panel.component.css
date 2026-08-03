@@ -1,0 +1,12 @@
+.swipable-panel {
+  width: 100%;
+  position: absolute;
+  bottom: 60px;
+  background: #fff;
+  transition: height 0.3s ease;
+  overflow: hidden;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  border-top-color: #e8e8e8;
+  border-top-width: 0px;
+}

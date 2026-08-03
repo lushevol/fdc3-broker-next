@@ -1,0 +1,15 @@
+import { css } from 'lit';
+
+export default css`
+/* Roboto-mono mode component definition */
+  :host,
+  .sc-mode-roboto-mono {
+    --sc-font-family: "Roboto Mono", "SC Prosper Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --sl-font-sans: var(--sc-font-family);
+    --sl-font-mono: var(--sc-font-family);
+    --sl-font-serif: var(--sc-font-family);
+    font-family: var(--sc-font-family);
+  }
+
+`;
+  

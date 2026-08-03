@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+    <title>sc-web-kit demo page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+    <!-- Custom style -->
+    <style>
+        body {
+            padding: 24px;
+        }
+
+        .sc-mode-dark {
+            background-color: var(--sc-color-blue-900)
+        }
+
+        .table-cell {
+            border-color: var(--sc-color-grey-15);
+            vertical-align: top;
+        }
+
+        .side-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 10px 8px;
+            background-color: var(--sc-color-white);
+            border-radius: 8px;
+            box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-height: 100vh;
+            overflow-y: auto;
+            z-index: 999999999;
+        }
+        
+        .side-bar div {
+            padding: 5px 0;
+        }
+
+        .side-bar div .selected {
+            color: var(--sc-color-blue-500);
+        }
+    </style>
+
+    <!-- Register all sc-* custom elements -->
+    <script type="module">
+        import '../dist/elements/index.js';
+        import { html } from '/node_modules/lit-html/lit-html.js';
+        window.html = html;
+    </script>
+</head>
+<sc-icon-provider>
+    <div id='side-bar' class='side-bar'>
+        <script type="text/javascript">
+            const sidebar = document.querySelector('#side-bar');
+            const initials = [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
+                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
+                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
+                'Y', 'Z'
+            ];
+            const currentPage = 'F';
+            const content = [];
+            initials.forEach(initial => {
+                content.push(`<div>`);
+                content.push(`<a class="${currentPage === initial ? 'selected' : ''}" href="/demo/page${initial}.html">${initial}</a>`);
+                content.push(`</div>`);
+            })
+            sidebar.innerHTML = content.join('');
+        </script>
+    </div>
+
+    <div class="table w-full shadow-lg max-h-96 components-body">
+        <div class="table-header-group font-bold sticky top-0 bg-white z-10">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Component</div>
+                <div class="table-cell border px-4 py-4">Example</div>
+                <div class="table-cell border px-4">
+                    <div class="py-4" style="max-width: 300px;">
+                        <sc-dropdown-input label="Mode" value="light">
+                            <sc-dropdown-option value="light">Light</sc-dropdown-option>
+                            <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+                            <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+                        </sc-dropdown-input>
+                        <sc-dropdown-input label='Locale' value='en' id="local-picker">
+                            <sc-dropdown-option value="en">English</sc-dropdown-option>
+                            <sc-dropdown-option value="zh-CN">中文 (简体)</sc-dropdown-option>
+                        </sc-dropdown-input>
+                        <script type="module">
+                          import { locales, setLocale, getLocale } from '../dist/src/i18n/localization.js';
+                          const localPicker = document.querySelector('#local-picker');
+                          localPicker.addEventListener('sc-select', e => {
+                            setLocale(e.detail.value);
+                          });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-row-group h-96 overflow-y-auto">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input id="file-input-single" label="File" deletable>
+                        <script type="module">
+                            document.querySelector('#file-input-single').addEventListener('sc-remove', (data) => {
+                                console.log(data.detail);
+                            })
+                        </script>
+                    </sc-file-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">Basic with Max Size</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input id="file-input-single" label="File" max-size="102400" deletable>
+                        <script type="module">
+                            document.querySelector('#file-input-single').addEventListener('sc-remove', (data) => {
+                                console.log(data.detail);
+                            })
+                        </script>
+                    </sc-file-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">Multiple & with icon and border file item</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input 
+                        multiple 
+                        label="File" 
+                        accept="image/jpeg, image/png"
+                    >
+                    </sc-file-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">Multiple & no icon and no border file item</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input multiple 
+                        label="File" 
+                        accept="image/jpeg, image/png" 
+                        no-border 
+                        no-icon
+                    >
+                    </sc-file-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">With files - selectable, deletable</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input id='file-input-data-init' 
+                        multiple 
+                        label="File" 
+                        accept="image/jpeg, image/png"
+                        selectable 
+                        deletable
+                    >
+                    </sc-file-input>
+                    <script type="module">
+                        document.querySelector('#file-input-data-init').value = [
+                            { name: 'test1.png', size: 200, selectable: true, deletable: true },
+                            { name: 'test2.jpg', size: 10000, selectable: true, deletable: true }
+                        ];
+                        document.querySelector('#file-input-data-init').addEventListener('sc-change', (data) => {
+                            console.log(data.detail);
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">With files - not selectable, not deletable</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input id='file-input-data-init2' 
+                        multiple 
+                        label="File" 
+                        accept="image/jpeg, image/png">
+                    </sc-file-input>
+                    <script type="module">
+                        document.querySelector('#file-input-data-init2').value = [
+                            { name: 'test1.png', size: 200  },
+                            { name: 'test2.jpg', size: 10000 }
+                        ];
+                        document.querySelector('#file-input-data-init2').addEventListener('sc-change', (data) => {
+                            console.log(data.detail);
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">Tooltip only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input tooltip="Enter your 8 digits number" tooltip-placement="right">
+                    </sc-file-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">Required only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input required>
+                    </sc-file-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input label-size="xxs">
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-file-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input label-size="xs" success=true>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-file-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input label-size="sm" error=true>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-file-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input label-size="md" border-type="box" success=true>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-file-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input label-size="lg" border-type="box" required error=true
+                        success-message="Success message" error-message="Error message">
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-file-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input id="file-input-data-readonly" multiple max-size="100" placeholder="" label="File"
+                        required readonly width="60%">
+                    </sc-file-input>
+                    <script type="module">
+                        document.querySelector('#file-input-data-readonly').value = [
+                            { name: 'test1.png', size: 200, selectable: true },
+                            { name: 'test2.jpg', size: 10000, selectable: true }
+                        ];
+                        document.querySelector('#file-input-data-readonly').addEventListener('sc-change', (data) => {
+                            console.log(data.detail);
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input id="file-input-data-disabled" multiple label="Attachment" disabled>
+                    </sc-file-input>
+                    <script type="module">
+                        document.querySelector('#file-input-data-disabled').value = [
+                            { name: 'test1.png', size: 200 },
+                            { name: 'test2.jpg', size: 10000 }
+                        ];
+                        document.querySelector('#file-input-data-disabled').addEventListener('sc-change', (data) => {
+                            console.log(data.detail);
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Input</div>
+                <div class="table-cell border px-4 py-4">No label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-input value="1234567890">
+                    </sc-file-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Item</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-item class="test-file-item-event" name="test1.docx" deletable file-id="test-file-item-1" /></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.docx" status="uploading"></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.docx" status="error"></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.pdf" size="4000" icon-size='xxs'></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.xlsx" size="4000" icon-size='xs'></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.pptx" size="4000" icon-size='sm'></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.pptx" size="4000" icon-size='md'></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.pptx" size="4000" icon-size='lg'></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.xlsx" size="4000" icon-size='xl'></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.docx" size="4000" icon-size='xxl' selectable></sc-file-item>
+                </div>
+                <script type="text/javascript">
+                    const fileItem1 = document.querySelector('.test-file-item-event');
+                    fileItem1.addEventListener('sc-remove', (e) => {
+                        console.log('file deleted', e);
+                    })
+                    fileItem1.addEventListener('sc-loaded', (e) => {
+                        console.log('file loaded', e);
+                    })
+                </script>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Item</div>
+                <div class="table-cell border px-4 py-4">Extra</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-item name="test1.docx" extra="Hint text here"></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.docx" status="uploading" extra="Hint text here"></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.docx" status="error" extra="Something went wrong!"></sc-file-item>
+                    <br />
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Item</div>
+                <div class="table-cell border px-4 py-4">No border</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-item name="test1.docx" no-border></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.pdf" size="4000" icon-size='xxs' no-border></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.xlsx" size="4000" icon-size='xs' no-border></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.pptx" size="4000" icon-size='sm' no-border></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.pptx" size="4000" icon-size='md' no-border></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.pptx" size="4000" icon-size='lg' no-border></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.xlsx" size="4000" icon-size='xl' no-border></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.docx" size="4000" icon-size='xxl' no-border selectable></sc-file-item>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Item</div>
+                <div class="table-cell border px-4 py-4">No icon</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-item name="test1.docx" size="4000" no-icon></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.docx" size="4000" no-icon selectable></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.docx" size="4000" no-icon no-border></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.docx" size="4000" no-icon no-border selectable></sc-file-item>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Item</div>
+                <div class="table-cell border px-4 py-4">Selectable and deletable</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-item class='sc-file-item file-selectable' selectable name="test1.csv" size="4000"
+                        deletable status="error"></sc-file-item>
+                    <br />
+                    <sc-file-item class='sc-file-item file-selectable' selectable name="test1.csv" size="4000"
+                        deletable status="uploading"></sc-file-item>
+                    <br />
+                    <sc-file-item class='sc-file-item' selectable name="test1.csv" size="4000" no-border deletable>
+                    </sc-file-item>
+                    <script type="text/javascript">
+                        const fileItem = document.querySelector('.sc-file-item.file-selectable');
+                        fileItem.addEventListener('sc-select', () => {
+                            alert('File selected');
+                        })
+                        fileItem.addEventListener('sc-remove', () => {
+                            alert('File deleted');
+                        })
+                        fileItem.addEventListener('sc-cancel', () => {
+                            alert('File canceled');
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Item</div>
+                <div class="table-cell border px-4 py-4">Progress</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-item name="test1.pdf" size="4000" progress-size="1000"></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.xlsx" size="4000" progress-size="1000" progress-type="warning">
+                    </sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.docx" size="4000" progress-size="1000" progress-type="error" selectable>
+                    </sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.zip" size="4000" progress-size="1000" progress-text="Progress info"
+                        selectable deletable></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.pdf" size="4000" progress-size="1000" no-border></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.xlsx" size="4000" progress-size="1000" progress-type="warning" no-border>
+                    </sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.docx" size="4000" progress-size="1000" progress-type="error" no-border
+                        selectable></sc-file-item>
+                    <br />
+                    <sc-file-item name="test1.zip" size="4000" progress-size="1000" progress-text="Progress info"
+                        no-border selectable deletable></sc-file-item>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Item</div>
+                <div class="table-cell border px-4 py-4">Width</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-item name="Invalid.xlsx" size="4000" width='invalid' deletable></sc-file-item>
+                    <br />
+                    <sc-file-item name="Width auto.docx" width='auto' deletable></sc-file-item>
+                    <br />
+                    <sc-file-item name="Width 100%.pptx" size="4000" width='100%' deletable></sc-file-item>
+                    <br />
+                    <sc-file-item name="Width 250px.pdf" size="4000" width='250px' deletable></sc-file-item>
+                    <br />
+                    <sc-file-item name="Width max-content.pptx" size="4000" width='max-content' deletable></sc-file-item>
+                    <br />
+                    <sc-file-item name="Width 20vw.pptx" size="4000" width='20vw' deletable></sc-file-item>
+                    <br />
+                    <sc-file-item
+                        name="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut la.pptx"
+                        size="4000" width='30vw' deletable></sc-file-item>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File Item</div>
+                <div class="table-cell border px-4 py-4">Width and No Border</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-item name="Invalid.xlsx" size="4000" width='invalid' no-border deletable></sc-file-item>
+                    <br />
+                    <sc-file-item name="Width auto.docx" width='auto' no-border deletable></sc-file-item>
+                    <br />
+                    <sc-file-item name="Width 100%.pptx" size="4000" width='100%' no-border deletable></sc-file-item>
+                    <br />
+                    <sc-file-item name="Width 250px.pdf" size="4000" width='250px' no-border deletable></sc-file-item>
+                    <br />
+                    <sc-file-item name="Width max-content.pptx" size="4000" width='max-content' no-border deletable>
+                    </sc-file-item>
+                    <br />
+                    <sc-file-item name="Width 20vw.pptx" size="4000" width='20vw' no-border deletable></sc-file-item>
+                    <br />
+                    <sc-file-item
+                        name="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut la.pptx"
+                        size="4000" width='30vw' no-border deletable></sc-file-item>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File List</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-list>
+                        <sc-file-item name="test1.pdf" size="4000" deletable></sc-file-item>
+                        <sc-file-item name="test2.docx" size="300" deletable></sc-file-item>
+                        <sc-file-item name="test3.xlsx" size="20000000" deletable></sc-file-item>
+                    </sc-file-list>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">File List</div>
+                <div class="table-cell border px-4 py-4">Horizontal</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-file-list direction="horizontal">
+                        <sc-file-item name="test1.pdf" size="4000"></sc-file-item>
+                        <sc-file-item name="test2.docx" size="300"></sc-file-item>
+                        <sc-file-item name="test3.xlsx" size="20000000"></sc-file-item>
+                    </sc-file-list>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input placeholder="XX - XXX - XXXX" help-text="Should be digit" value="12,345,6789"
+                        blocks='2,3,4' max-length=16>
+                        Basic
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Delimiter</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input placeholder="XX , XXX , XXXX" blocks='2,3,4' delimiter=' , '>
+                        Set delimiter
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Custom format</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input id='custom-format-input' placeholder="Please input your email, e.g test@sc.com" border-type="box"
+                        format='\w+@sc\.com' required>
+                        Custom format and box
+                    </sc-formatted-input>
+                    <script type="module">
+                      const customFormatInput = document.querySelector('#custom-format-input');
+                      customFormatInput.addEventListener('sc-validate-status', e => {
+                        if (e.detail.status === 'error') {
+                          customFormatInput.error = true;
+                          customFormatInput.errorMessage = 'Please type email address with @sc.com';
+                        } else {
+                          customFormatInput.error = false;
+                          customFormatInput.errorMessage = '';
+                        }
+                      });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Tooltip only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input tooltip="Enter your 16 digits number" tooltip-placement="right">
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Required only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input required format='xafdewr32'>
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Box input</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input label="Your number" tooltip="Enter your 16 digits number"
+                        tooltip-placement="right" placeholder="Enter any number" help-text="Please enter number only"
+                        value="12345" border-type="box" max-length=16 required>
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Using slot (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input label-size="xxs" placeholder="Please input your email, e.g test@sc.com"
+                        format='\w+@sc\.com'>
+                        <div>
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Using slot (xs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input label-size="xs" placeholder="Please input your email, e.g test@sc.com"
+                        format='\w+@sc\.com' success=true>
+                        <div>
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Using slot (sm label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input label-size="sm" placeholder="Please input your email, e.g test@sc.com"
+                        format='\w+@sc\.com' error=true>
+                        <div>
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Using slot (md label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input label-size="md" placeholder="Please input your email, e.g test@sc.com"
+                        border-type="box" format='\w+@sc\.com' success=true>
+                        <div>
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Using slot (lg label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input label-size="lg" placeholder="Please input your email, e.g test@sc.com"
+                        border-type="box" format='\w+@sc\.com' required error=true success-message="Success message"
+                        error-message="Error message">
+                        <div>
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input placeholder="Please input your email, e.g test@sc.com" value="1234567890"
+                        format='\w+@sc\.com' required readonly>
+                        <div>
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Readonly Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input placeholder="Please input your email, e.g test@sc.com" value="1234567890"
+                        border-type="box" format='\w+@sc\.com' required readonly>
+                        <div>
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Formatted Input</div>
+                <div class="table-cell border px-4 py-4">Readonly max rows (overflow test)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input
+                        label="Readonly long value"
+                        value="LONGTOKEN_1234567890ABCDEFGHI JKLMNOPQRSTUVWXYZ123. 4567890ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+                        readonly
+                        max-rows
+                        readonly-rows="2"
+                        border-type="box"
+                        style="max-width: 320px;"
+                    >
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">FormattedInput</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input placeholder="Please input your email, e.g test@sc.com" value="test@sc.com"
+                        format='\w+@sc\.com' required disabled>
+                        <div>
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">FormattedInput</div>
+                <div class="table-cell border px-4 py-4">Disabled Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input placeholder="Please input your email, e.g test@sc.com" border-type="box"
+                        format='\w+@sc\.com' required disabled value="test@sc.com">
+                        <div>
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">FormattedInput</div>
+                <div class="table-cell border px-4 py-4">No label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input value="test@sc.com" success=true>
+                    </sc-formatted-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">FormattedInput</div>
+                <div class="table-cell border px-4 py-4">No label Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-formatted-input value="test@sc.com" border-type="box" error=true>
+                    </sc-formatted-input>
+                </div>
+            </div>
+        </div>
+    </div>
+</sc-icon-provider>
+<!-- Custom script -->
+<script type="text/javascript">
+    var modes = ['light', 'dark', 'dyslexic']
+    var activeMode = modes[0]
+    function changeMode(mode) {
+        var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child');
+        componentCells.forEach((componentCell) => {
+            modes.forEach((mode) => {
+                componentCell.classList.remove(`sc-mode-${mode}`)
+            })
+            componentCell.classList.add(`sc-mode-${mode}`)
+            if (componentCell.classList.contains('inverse')) {
+                if (mode === 'dark') {
+                    componentCell.style.backgroundColor = 'var(--sc-color-white)'
+                } else {
+                    componentCell.style.backgroundColor = 'var(--sc-color-blue-900)'
+                }
+            }
+        })
+    }
+    document.getElementsByTagName('sc-dropdown-input')[0].addEventListener('sc-select', ({ detail: { value } }) => {
+        changeMode(value);
+    });
+    changeMode(activeMode);
+
+</script>
+
+<script type="module">
+    import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+    changeIconLibrary();
+    function changeIconLibrary() {
+        document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+    }
+</script>
+
+</html>

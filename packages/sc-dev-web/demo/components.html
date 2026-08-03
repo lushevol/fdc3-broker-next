@@ -1,0 +1,1787 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <title>sc-web-kit demo page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+  <!-- Custom style -->
+  <style>
+    body {
+      padding: 24px;
+    }
+    .sc-mode-dark {
+      background-color: var(--sc-color-blue-900)
+    }
+  </style>
+
+  <!-- Register all sc-* custom elements -->
+  <script type="module">
+    import '../dist/elements/index.js'
+  </script>
+
+</head>
+<body>
+
+    <h1 class="text-xl mb-4">Components</h1>
+
+    <div class="table w-full shadow-lg max-h-96">
+
+        <div class="table-header-group font-bold sticky top-0 bg-white z-10">
+          <div class="table-row">
+            <div class="table-cell border px-4 py-4">Component</div>
+            <div class="table-cell border px-4 py-4">Example</div>
+            <div class="table-cell border px-4">
+                <div class="py-4" style="max-width: 300px;">
+                    <sc-dropdown-input label="Mode" value="light">
+                        <sc-dropdown-option value="light">Light</sc-dropdown-option>
+                        <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+                        <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-row-group h-96 overflow-y-auto">
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Accordion</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-accordion summary="Lorem ipsum dolor sit amet">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                    </sc-accordion>
+                    <sc-accordion summary="Lorem ipsum dolor sit amet" open>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                    </sc-accordion>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="info" open>
+                        Info
+                    </sc-alert>
+                    <sc-alert type="success" open>
+                        Success
+                    </sc-alert>
+                    <sc-alert type="warning" open>
+                        Warning
+                    </sc-alert>
+                    <sc-alert type="error" open>
+                        Error
+                    </sc-alert>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Banner</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="info" mode="banner" open>
+                        Info
+                    </sc-alert>
+                    <sc-alert type="success" mode="banner" open>
+                        Success
+                    </sc-alert>
+                    <sc-alert type="warning" mode="banner" open>
+                        Warning
+                    </sc-alert>
+                    <sc-alert type="error" mode="banner" open>
+                        Error
+                    </sc-alert>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Closable</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="info" open closable>
+                        Info
+                    </sc-alert>
+                    <sc-alert type="success" open closable>
+                        Success
+                    </sc-alert>
+                    <sc-alert type="warning" open closable>
+                        Warning
+                    </sc-alert>
+                    <sc-alert type="error" open closable>
+                        Error
+                    </sc-alert>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Collapsible</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="info" open title="Toggle me">
+                        Info
+                    </sc-alert>
+                    <sc-alert type="success" open title="Toggle me">
+                        Success
+                    </sc-alert>
+                    <sc-alert type="warning" open title="Toggle me">
+                        Warning
+                    </sc-alert>
+                    <sc-alert type="error" open title="Toggle me">
+                        Error
+                    </sc-alert>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Back</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-back to="#">
+                    </sc-back>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Badge</div>
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-badge type="alert">
+                    </sc-badge>
+                    <sc-badge type="alert" number="9">
+                    </sc-badge>
+                    <sc-badge type="alert" number="99">
+                    </sc-badge>
+                    <sc-badge type="alert" number="999">
+                    </sc-badge>
+                    <sc-badge type="alert" number="9999">
+                    </sc-badge>
+                    <sc-badge type="alert" number="99999">
+                    </sc-badge>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Badge</div>
+                <div class="table-cell border px-4 py-4">Brand</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-badge type="brand">
+                    </sc-badge>
+                    <sc-badge type="brand" number="9">
+                    </sc-badge>
+                    <sc-badge type="brand" number="99">
+                    </sc-badge>
+                    <sc-badge type="brand" number="999">
+                    </sc-badge>
+                    <sc-badge type="brand" number="9999">
+                    </sc-badge>
+                    <sc-badge type="brand" number="99999">
+                    </sc-badge>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Breadcrumb</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-breadcrumb>
+                        <sc-breadcrumb-item href="#" target="_blank"> Home</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Guideline</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Color</sc-breadcrumb-item>
+                    </sc-breadcrumb>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Breadcrumb</div>
+                <div class="table-cell border px-4 py-4">Custom separator</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-breadcrumb separatorIcon="arrowhead-right">
+                        <sc-icon slot="separator" name="arrowhead-right" compact></sc-icon>
+                        <sc-breadcrumb-item href="#" target="_blank"> Home</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Guideline</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Color</sc-breadcrumb-item>
+                    </sc-breadcrumb>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Breadcrumb</div>
+                <div class="table-cell border px-4 py-4">Prefix and suffix</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-breadcrumb>
+                        <sc-breadcrumb-item href="#" target="_blank">
+                          <sc-icon slot="prefix" name="home--line" compact></sc-icon>
+                          Home
+                        </sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Guideline</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>
+                          Color
+                          <sc-icon slot="suffix" name="shield-off--line" compact></sc-icon>
+                        </sc-breadcrumb-item>
+                    </sc-breadcrumb>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Breadcrumb</div>
+                <div class="table-cell border px-4 py-4">Compressed</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-breadcrumb compressed>
+                        <sc-breadcrumb-item href="#" target="_blank">Home</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Guideline</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Web Design</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Web Develop</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Web Testing</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Color</sc-breadcrumb-item>
+                    </sc-breadcrumb>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Primary</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button size="xxs" fill>
+                        Primary xxs
+                      </sc-button>
+                      <sc-button size="xs" fill>
+                        Primary xs
+                      </sc-button>
+                      <sc-button size="sm" fill>
+                        Primary small
+                      </sc-button>
+                      <sc-button fill>
+                        Primary middle
+                      </sc-button>
+                      <sc-button size="lg" fill>
+                        Primary large
+                      </sc-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Secondary</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button size="xxs">
+                        Default xxs
+                      </sc-button>
+                      <sc-button size="xs">
+                        Default xs
+                      </sc-button>
+                      <sc-button size="sm">
+                        Default small
+                      </sc-button>
+                      <sc-button>
+                        Default middle
+                      </sc-button>
+                      <sc-button size="lg">
+                        Default large
+                      </sc-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Primary with prefix icon</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button size="xxs" fill icon="image--fill">
+                        Primary xxs
+                      </sc-button>
+                      <sc-button size="xs" fill icon="image--fill">
+                        Primary xs
+                      </sc-button>
+                      <sc-button size="sm" fill icon="image--fill">
+                        Primary small
+                      </sc-button>
+                      <sc-button fill icon="image--fill">
+                        Primary middle
+                      </sc-button>
+                      <sc-button size="lg" fill icon="image--fill">
+                        Primary large
+                      </sc-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Primary with suffix icon</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button size="xxs" fill icon="logout" iconPosition="right">
+                        Logout
+                      </sc-button>
+                      <sc-button size="xs" fill icon="logout" iconPosition="right">
+                        Logout
+                      </sc-button>
+                      <sc-button size="sm" fill icon="logout" iconPosition="right">
+                        Logout
+                      </sc-button>
+                      <sc-button fill icon="logout" iconPosition="right">
+                        Logout
+                      </sc-button>
+                      <sc-button size="lg" fill icon="logout" iconPosition="right">
+                        Logout
+                      </sc-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Primary - Inverse</div>
+                <div class="table-cell border px-4 py-4 inverse">
+                    <sc-button fill inverse>
+                        Primary Inverse
+                    </sc-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Secondary - Inverse</div>
+                <div class="table-cell border px-4 py-4 inverse">
+                    <sc-button inverse>
+                        Secondary Inverse
+                    </sc-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Primary - Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button fill disabled>
+                        Primary Disabled
+                      </sc-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Icon - Primary</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-button size="sm" fill name='thumbs-up--fill'>
+                        Primary small
+                      </sc-icon-button>
+                      <sc-icon-button fill name='thumbs-up--fill'>
+                        Primary middle
+                      </sc-icon-button>
+                      <sc-icon-button size='lg' fill name='thumbs-up--fill'>
+                        Primary large
+                      </sc-icon-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                      <sc-card>
+                        <img slot='prefix' src='images/logo.svg'/>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                        <div slot='title'>This is the title of card</div>
+                        <div slot='body'>This is the body of card</div>
+                        <sc-icon slot='suffix' name='arrow-ios-forward' size='md'/>
+                      </sc-card>
+                      <br>
+                      <sc-card>
+                        <sc-icon slot='prefix' name='country-chn' size='md'></sc-icon>
+                        <div slot='title'>This is the title of card</div>
+                        <sc-icon slot='suffix' name='arrow-ios-forward' size='md'></sc-icon>
+                      </sc-card>
+                      <br>
+                      <sc-card layout='image-right'>
+                        <img slot='prefix' src='images/logo.svg'/>
+                        <div slot='title'>This is the title of card</div>
+                        <div slot='body'>This is the body of card</div>
+                      </sc-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-card
+                    title='This is the title of card'
+                    sub-title='This is the sub title of card'
+                    body='This is the body of the card'
+                  >
+                  </sc-radio-card>
+                  <br>
+                  <sc-radio-card disabled>
+                    <h4 slot='title'>This is the title of card</h4>
+                    <sc-icon slot='suffix' name='arrow-ios-forward' size='md'/>
+                  </sc-radio-card>
+                  <br>
+                  <sc-radio-card layout='right' checked>
+                      <div>Custom body</div>
+                    </sc-radio-card>
+                </div>
+            </div>
+
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Check</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-check-card
+                    title='This is the title of card'
+                    sub-title='This is the sub title of card'
+                    body='This is the body of the card'
+                  >
+                  </sc-check-card>
+                  <br>
+                  <sc-check-card checked>
+                    <h4 slot='title'>This is the title of card</h4>
+                    <sc-icon slot='suffix' name='arrow-ios-forward' size='md'/>
+                  </sc-check-card>
+                  <br>
+                  <sc-check-card layout='right' disabled>
+                      <div>Custom body</div>
+                    </sc-check-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Icon</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-card><h3>Test</h3></sc-icon-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Icon - Title in</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-card layout="title-in" image="images/logo.svg">
+                        <div slot="title">Title in</div>
+                      </sc-icon-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Icon - Title out</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-card layout="title-out" image="images/logo.svg">
+                        <div slot="title">Title out</div>
+                      </sc-icon-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Icon - Content cover</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-card layout="content-cover" image="images/logo.svg">
+                        <div slot="title">Content cover</div>
+                      </sc-icon-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Icon - Sizes</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-card size="half">
+                        <div slot="title">Half size</div>
+                        <img slot="content" src="images/logo.svg" />
+                      </sc-icon-card>
+                      <br>
+                      <sc-icon-card size="one-third" image="images/logo.svg" title-size='md'>
+                        <div slot="title">One third</div>
+                      </sc-icon-card>
+                      <br>
+                      <sc-icon-card size="one-fourth" layout="title-out" image="images/logo.svg">
+                        <div slot="title">One fourth</div>
+                      </sc-icon-card>
+                      <br>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Carousel</div>
+                <div class="table-cell border px-4 py-4">Aspect ratio</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-carousel pagination aspect-ratio='16/9'>
+                        <sc-carousel-item>
+                          <sc-card style='width: 320px' height='180px'>
+                            <img slot='body' src="images/logo.svg"/>
+                            <div >Hello world</div>
+                          </sc-card>
+                        </sc-carousel-item>
+                        <sc-carousel-item>
+                          <sc-card style='width: 100%'>
+                            Hello world
+                          </sc-card>
+                        </sc-carousel-item>
+                    </sc-carousel>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox class="sc-checkbox">Default</sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Checked</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox class="sc-checkbox" checked>Checked</sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Indeterminate</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox class="sc-checkbox" indeterminate>Indeterminate</sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox class="sc-checkbox" disabled>Disabled</sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dialog</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="dialog-button">Show dialog</sc-button>
+                    <sc-dialog label="Hello" class="sc-dialog">
+                      <div>
+                        This is a testing dialog
+                      </div>
+                    </sc-dialog>
+                    <script type="text/javascript">
+                        const dialog = document.querySelector('.sc-dialog');
+                        const dialogButton = document.querySelector('.dialog-button');
+                        dialogButton.addEventListener('click', () => {
+                            dialog.setAttribute('open', true)
+                        });
+                        dialog.addEventListener('sc-hide', () => {
+                            dialog.removeAttribute('open')
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dot Status</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dot-status mode="default" type="info">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="success">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="warning">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="error">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="neutral">
+                    </sc-dot-status>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dot Status</div>
+                <div class="table-cell border px-4 py-4">Inline</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dot-status mode="default" type="info" inline="true">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="success" inline="true">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="warning" inline="true">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="error" inline="true">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="neutral" inline="true">
+                    </sc-dot-status>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dot Status</div>
+                <div class="table-cell border px-4 py-4">Advanced</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dot-status mode="advanced" status="error">
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="minor-error">
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="warning">
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="success">
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="partially-success">
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="pending">
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="info">
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="draft">
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="missing-info">
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="rejected">
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="on-hold">
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="not-started">
+                    </sc-dot-status>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dot Status</div>
+                <div class="table-cell border px-4 py-4">Advanced - Outline</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dot-status mode="advanced" status="error" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="minor-error" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="warning" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="success" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="partially-success" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="pending" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="info" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="draft" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="missing-info" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="rejected" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="on-hold" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="advanced" status="not-started" outline>
+                    </sc-dot-status>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dot Status</div>
+                <div class="table-cell border px-4 py-4">Advanced - Custom label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dot-status mode="advanced" status="error" label="Custom label">
+                    </sc-dot-status>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label='Select from dropdown' value='spanish' help-text='Help text'>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                      </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Multiple values</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select label='Select from dropdown' help-text='Help text' value='["english"]'>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                      </sc-multiple-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Grid</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-grid-container fluid>
+                        <sc-grid-row class='p-2'>
+                          <sc-grid-column xs='12' sm='6' lg='3'>Col 1</sc-grid-column>
+                          <sc-grid-column xs='12' sm='6' lg='4'>Col 2</sc-grid-column>
+                        </sc-grid-row>
+                      </sc-grid-container>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Icon</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon name="api" size="xxs">
+                    </sc-icon>
+                    <sc-icon name="api" size="xs">
+                    </sc-icon>
+                    <sc-icon name="api" size="sm">
+                    </sc-icon>
+                    <sc-icon name="api" size="md">
+                    </sc-icon>
+                    <sc-icon name="api" size="lg">
+                    </sc-icon>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Link</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-link onclick="alert('Link is clicked!')">
+                        Default
+                      </sc-link>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Link</div>
+                <div class="table-cell border px-4 py-4">Inline</div>
+                <div class="table-cell border px-4 py-4">
+                    <div>
+                        Go to
+                        <sc-link inline href="https://www.sc.com">
+                          sc.com
+                        </sc-link>
+                      </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Link</div>
+                <div class="table-cell border px-4 py-4">Inverse</div>
+                <div class="table-cell border px-4 py-4 inverse">
+                    <sc-link inverse>
+                        Inverse
+                      </sc-link>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Modal</div>
+                <div class="table-cell border px-4 py-4">No close icon</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="modal-button">Open modal</sc-button>
+                    <sc-modal
+                      class="modal"
+                      no-close-icon="true"
+                    >
+                      <div slot="header" style="display: flex; align-items: center;">
+                        <sc-icon name="info-circle--line" inline compact size="md" style="margin-right: 8px; margin-top:2px;"></sc-icon>
+                        <span>Header</span>
+                      </div>
+                      <div slot="footer">
+                        <sc-button fill class="mr-2">Save</sc-button>
+                        <sc-button id="close-modal">Cancel</sc-button>
+                      </div>
+                      No close icon
+                    </sc-modal>
+                    <script type="text/javascript">
+                        const modal = document.querySelector('.modal');
+                        const closeModalButton = document.querySelector('#close-modal');
+                        const modalButton = document.querySelector('.modal-button');
+                        modalButton.addEventListener('click', () => {
+                            modal.setAttribute('open', true)
+                        });
+                        closeModalButton.addEventListener('click', () => {
+                            modal.removeAttribute('open')
+                        });
+                        modal.addEventListener('sc-hide', () => {
+                            modal.removeAttribute('open')
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Modal</div>
+                <div class="table-cell border px-4 py-4">No header</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="modal-button-header">Open modal</sc-button>
+                    <sc-modal
+                      class="modal-header"
+                      no-header="true"
+                    >
+                      <div slot="header" style="display: flex; align-items: center;">
+                        <sc-icon name="info-circle--line" inline compact size="md" style="margin-right: 8px; margin-top:2px;"></sc-icon>
+                        <span>Header</span>
+                      </div>
+                      <div slot="footer" class="text-right">
+                        <sc-button fill class="mr-2">Save</sc-button>
+                        <sc-button id="close-modal-header">Cancel</sc-button>
+                      </div>
+                      No header
+                    </sc-modal>
+                    <script type="text/javascript">
+                        const modalHeader = document.querySelector('.modal-header');
+                        const closeModalButtonHeader = document.querySelector('#close-modal-header');
+                        const modalButtonHeader = document.querySelector('.modal-button-header');
+                        modalButtonHeader.addEventListener('click', () => {
+                            modalHeader.setAttribute('open', true)
+                        });
+                        closeModalButtonHeader.addEventListener('click', () => {
+                            modalHeader.removeAttribute('open')
+                        });
+                        modalHeader.addEventListener('sc-hide', () => {
+                            modalHeader.removeAttribute('open')
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Modal</div>
+                <div class="table-cell border px-4 py-4">Prevent close when click outside</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="modal-button-outside">Open modal</sc-button>
+                    <sc-modal
+                        class="modal-outside"
+                        close-when-click-outside="false"
+                    >
+                        <div slot="header" style="display: flex; align-items: center;">
+                            <sc-icon name="info-circle--line" inline compact size="md" style="margin-right: 8px; margin-top:2px;"></sc-icon>
+                            <span>Header</span>
+                        </div>
+                        <div slot="footer">
+                            <sc-button fill class="mr-2">Save</sc-button>
+                            <sc-button id="close-modal-outside">Cancel</sc-button>
+                        </div>
+                        Do not close when click outside
+                    </sc-modal>
+                    <script type="text/javascript">
+                        const modalOutside = document.querySelector('.modal-outside');
+                        const closeModalButtonOutside = document.querySelector('#close-modal-outside');
+                        const modalButtonOutside = document.querySelector('.modal-button-outside');
+                        modalButtonOutside.addEventListener('click', () => {
+                            modalOutside.setAttribute('open', true)
+                        });
+                        closeModalButtonOutside.addEventListener('click', () => {
+                            modalOutside.removeAttribute('open')
+                        });
+                        modalOutside.addEventListener('sc-hide', () => {
+                            modalOutside.removeAttribute('open')
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Pagination</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-pagination total=100 page-size='30' size-changer quick-jumper current-page='2'></sc-pagination>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Panel</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button onclick="togglePanelVisibility()">Toggle panel</sc-button>
+                    <sc-sticky-panel summary="Panel sample" open style="display:none">
+                        This is panel slot
+                    </sc-sticky-panel>
+                    <script type="text/javascript">
+                        var panelShown = false;
+                        function togglePanelVisibility() {
+                            var panel = document.getElementsByTagName('sc-sticky-panel')[0];
+                            if (panelShown) {
+                                panel.style.display = 'none'
+                            } else {
+                                panel.style.display = 'block'
+                            }
+                            panelShown = !panelShown
+                        }
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">ProgressBar</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                      <div class="mb-3">
+                        <sc-progress-bar value="50" class="sc-progress-bar">
+                          <div>Due one 25 Dec 2025</div>
+                          <div slot="label">50% completed</div>
+                        </sc-progress-bar>
+                        <sc-icon-button class="sc-progress-bar-minus-button" size="sm" fill name='minus'>
+                            Primary small
+                          </sc-icon-button>
+                        <sc-icon-button class="sc-progress-bar-plus-button" size="sm" fill name='plus'>
+                            Primary small
+                          </sc-icon-button>
+                      </div>
+                      <div class="mb-3">
+                        <sc-progress-bar value="40" type='disabled' />
+                      </div>
+                      <div class="mb-3">
+                        <sc-progress-bar value="60" type='warning' />
+                      </div>
+                      <div class="mb-2">
+                        <sc-progress-bar value="80" type='error' />
+                      </div>
+                      <script type="text/javascript">
+                            const progressBar = document.querySelector('.sc-progress-bar');
+                            const progressBarPlusButton = document.querySelector('.sc-progress-bar-plus-button');
+                            progressBarPlusButton.addEventListener('click', () => {
+                                const value = Math.min(100, + progressBar.value + 10);
+                                progressBar.value = value;
+                                progressBar.querySelector('div[slot=label]').innerHTML = `${value}% completed`;
+                            });
+                            const progressBarMinusButton = document.querySelector('.sc-progress-bar-minus-button');
+                            progressBarMinusButton.addEventListener('click', () => {
+                                const value = Math.max(0, +progressBar.value - 10);
+                                progressBar.value = value;
+                                progressBar.querySelector('div[slot=label]').innerHTML = `${value}% completed`;
+                            });
+                      </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group class="sc-radio">
+                        <sc-radio value="1">Default</sc-radio>
+                      </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group class="sc-radio">
+                        <sc-radio disabled value="1">Disabled</sc-radio>
+                      </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio groups</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group class="sc-radio" >
+                        <sc-radio disabled value="1">Radio 1</sc-radio>
+                        <sc-radio value="2">Radio 2</sc-radio>
+                        <sc-radio value="3">Radio 3</sc-radio>
+                        <sc-radio value="4">Radio 4</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio groups</div>
+                <div class="table-cell border px-4 py-4">Horizontal</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group class="sc-radio" horizontal>
+                        <sc-radio disabled value="1">Radio 1</sc-radio>
+                        <sc-radio value="2">Radio 2</sc-radio>
+                        <sc-radio value="3">Radio 3</sc-radio>
+                        <sc-radio value="4">Radio 4</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Rating</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                        <sc-rating size="xxs" value="1" label='Rating'>
+                        </sc-rating>
+                        <sc-rating size="xs" value="2">
+                        </sc-rating>
+                        <sc-rating size="sm" value="3">
+                        </sc-rating>
+                        <sc-rating size="md" value="4">
+                        </sc-rating>
+                        <sc-rating size="lg" value="5">
+                        </sc-rating>
+                        <sc-rating size="lg" value="5" tooltip='Tooltip content'>
+                            <div slot='label'>Rating label</div>
+                        </sc-rating>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Rating</div>
+                <div class="table-cell border px-4 py-4">Max 10</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-rating  max="10" value="5" >
+                    </sc-rating>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Rating</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-rating  value="1" readonly>
+                    </sc-rating>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Search</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-search-field class='sc-search-field' empty-text='No data found'></sc-search-field>
+                    <script type="text/javascript">
+                        const searchField = document.querySelector('.sc-search-field');
+                        searchField.addEventListener('sc-search', event => {
+                            console.log('sc-search', event.detail.value)
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Search</div>
+                <div class="table-cell border px-4 py-4">Suggestion</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-search-field class='sc-search-field-suggestion' empty-text='No data found' show-suggestion threshold=1></sc-search-field>
+                    <script type="text/javascript">
+                        const searchFieldSuggestion = document.querySelector('.sc-search-field-suggestion');
+                        searchFieldSuggestion.addEventListener('sc-input', event => {
+                            let v = event.detail.value;
+                            const suggestions = ['English', 'Mandarin', 'Hindi', 'Spanish', 'French'];
+                            const escapeRegExp = (text) => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+                            const list = suggestions.filter(s => new RegExp(`(${escapeRegExp(v ?? '')})`,'ig').test(s));
+                            setTimeout(() => {
+                                searchFieldSuggestion.updateSuggestion(list.map(l => ({
+                                    value: l,
+                                    text: l
+                                })))
+                            }, 3000)
+                        });
+                        searchFieldSuggestion.addEventListener('sc-search', event => {
+                            console.log('sc-search', event.detail.value)
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Search</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-search-field class='sc-search-field' disabled empty-text='No data found'></sc-search-field>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Sheet (ActionSheet)</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="sc-button-action-sheet">Open action sheet</sc-button>
+                    <sc-action-sheet class="sc-action-sheet" label="Select an action" primary-action="submit" primary-action-label="Submit" secondary-action="cancel" secondary-action-label="Cancel" other-action="skip" other-action-label="Skip"></sc-action-sheet>
+                    <script type="text/javascript">
+                        const actionSheet = document.querySelector('.sc-action-sheet');
+                        const openButtonActionSheet = document.querySelector('.sc-button-action-sheet');
+                        openButtonActionSheet.addEventListener('click', () => {
+                            actionSheet.setAttribute('open', true)
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Sheet (BottomSheet)</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="sc-button-bottom-sheet">Open bottom sheet</sc-button>
+                    <sc-bottom-sheet class="sc-bottom-sheet" label="Bottom sheet drawer">
+                        Open bottom sheet
+                    </sc-bottom-sheet>
+                    <script type="text/javascript">
+                        const bottomSheet = document.querySelector('.sc-bottom-sheet');
+                        const openButtonBottomSheet = document.querySelector('.sc-button-bottom-sheet');
+                        openButtonBottomSheet.addEventListener('click', () => {
+                            bottomSheet.setAttribute('open', true)
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Sheet (BottomSheet)</div>
+                <div class="table-cell border px-4 py-4">Expandable</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="sc-button-bottom-sheet-expandable">Open bottom sheet</sc-button>
+                    <sc-bottom-sheet class="sc-bottom-sheet-expandable" label="Bottom sheet drawer" expandable="true">
+                        Open bottom sheet
+                    </sc-bottom-sheet>
+                    <script type="text/javascript">
+                        const bottomSheetExpandable = document.querySelector('.sc-bottom-sheet-expandable');
+                        const openButtonBottomSheetExpandable = document.querySelector('.sc-button-bottom-sheet-expandable');
+                        openButtonBottomSheetExpandable.addEventListener('click', () => {
+                            bottomSheetExpandable.setAttribute('open', true)
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Sheet (BottomSheet)</div>
+                <div class="table-cell border px-4 py-4">Custom height</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="sc-button-bottom-sheet-customheight">Open bottom sheet</sc-button>
+                    <sc-bottom-sheet class="sc-bottom-sheet-customheight" label="Bottom sheet drawer" height="calc(75vh)">
+                        Open bottom sheet
+                    </sc-bottom-sheet>
+                    <script type="text/javascript">
+                        const bottomSheetHeight = document.querySelector('.sc-bottom-sheet-customheight');
+                        const openButtonBottomSheetHeight = document.querySelector('.sc-button-bottom-sheet-customheight');
+                        openButtonBottomSheetHeight.addEventListener('click', () => {
+                            bottomSheetHeight.setAttribute('open', true)
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Sheet (SideSheet)</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="sc-button-side-sheet">Open side sheet</sc-button>
+                    <sc-side-sheet class="sc-side-sheet" label="Side sheet drawer">
+                      Open side sheet
+                    </sc-side-sheet>
+                    <script type="text/javascript">
+                        const drawer = document.querySelector('.sc-side-sheet');
+                        const openButton = document.querySelector('.sc-button-side-sheet');
+                        openButton.addEventListener('click', () => {
+                            drawer.setAttribute('open', true)
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Sheet (SideSheet)</div>
+                <div class="table-cell border px-4 py-4">Floating content</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="sc-button-side-sheet-content">Open side sheet</sc-button>
+                    <sc-side-sheet class="sc-side-sheet-content" label="Floating content">
+                        <sc-dropdown-input label='Select from dropdown' value='spanish' help-text='Help text'>
+                            <sc-dropdown-option value="english">English</sc-dropdown-option>
+                            <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                            <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                            <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                            <sc-dropdown-option value="french">French</sc-dropdown-option>
+                            <div slot='empty-text'>No data, please try another value</div>
+                          </sc-dropdown-input>
+                    </sc-side-sheet>
+                    <script type="text/javascript">
+                        const drawerContent = document.querySelector('.sc-side-sheet-content');
+                        const openButtonContent = document.querySelector('.sc-button-side-sheet-content');
+                        openButtonContent.addEventListener('click', () => {
+                            drawerContent.setAttribute('open', true)
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Sheet (SideSheet)</div>
+                <div class="table-cell border px-4 py-4">Left</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="sc-button-side-sheet-left">Open side sheet</sc-button>
+                    <sc-side-sheet class="sc-side-sheet-left" hide-close-icon label="Left drawer" position="left">Left position</sc-side-sheet>
+                    <script type="text/javascript">
+                        const drawerLeft = document.querySelector('.sc-side-sheet-left');
+                        const openButtonLeft = document.querySelector('.sc-button-side-sheet-left');
+                        openButtonLeft.addEventListener('click', () => {
+                            drawerLeft.setAttribute('open', true)
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Sheet (SideSheet)</div>
+                <div class="table-cell border px-4 py-4">Custom width</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="sc-button-side-sheet-width">Open side sheet</sc-button>
+                    <sc-side-sheet class="sc-side-sheet-width" label="Custom width" width="250px">Custom width</sc-side-sheet>
+                    <script type="text/javascript">
+                        const drawerWidth = document.querySelector('.sc-side-sheet-width');
+                        const openButtonWidth = document.querySelector('.sc-button-side-sheet-width');
+                        openButtonWidth.addEventListener('click', () => {
+                            drawerWidth.setAttribute('open', true)
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Sheet (SideSheet)</div>
+                <div class="table-cell border px-4 py-4">Footer</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button class="sc-button-side-sheet-footer">Open side sheet</sc-button>
+                    <sc-side-sheet class="sc-side-sheet-footer" label="Sidesheet">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur mi ullamcorper sed cras
+                    </sc-side-sheet>
+                    <script type="text/javascript">
+                        const drawerFooter = document.querySelector('.sc-side-sheet-footer');
+                        const openButtonFooter = document.querySelector('.sc-button-side-sheet-footer');
+                        openButtonFooter.addEventListener('click', () => {
+                            drawerFooter.setAttribute('open', true)
+                            drawerFooter.noFooter = false;
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Spacer</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    xs
+                    <sc-spacer size="xs"></sc-spacer>
+                    sm
+                    <sc-spacer size="sm"></sc-spacer>
+                    md
+                    <sc-spacer size="md"></sc-spacer>
+                    lg
+                    <sc-spacer size="lg"></sc-spacer>
+                    xl
+                    <sc-spacer size="xl"></sc-spacer>
+                    xxl
+                    <sc-spacer size="xxl"></sc-spacer>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Spinner</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-spinner size="sm">
+                    </sc-spinner>
+                    <sc-spinner size="md">
+                    </sc-spinner>
+                    <sc-spinner size="lg">
+                    </sc-spinner>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Spinner</div>
+                <div class="table-cell border px-4 py-4">Page</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-spinner type="page">
+                    </sc-spinner>
+                </div>
+            </div>           
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Stepper</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-stepper>
+                        <sc-step ><span slot="title">First</span></sc-step>
+                        <sc-step ><span slot="title">Second</span></sc-step>
+                        <sc-step ><span slot="title">Third</span></sc-step>
+                    </sc-stepper>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Stepper</div>
+                <div class="table-cell border px-4 py-4">Different step status</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-stepper>
+                        <sc-step status="finish"><span slot="title">First</span><span slot="description">This is finish step</span></sc-step>
+                        <sc-step active><span slot="title">Second</span><span slot="description">This is active step</span></sc-step>
+                        <sc-step disabled><span slot="title">Third</span><span slot="description">This is disabled step</span></sc-step>
+                    </sc-stepper>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Stepper</div>
+                <div class="table-cell border px-4 py-4">Text at top</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-stepper direction="horizontal" title-position="top">
+                        <sc-step active status="error"><span slot="title">First</span></sc-step>
+                        <sc-step><span slot="title">Second</span></sc-step>
+                        <sc-step><span slot="title">Third</span></sc-step>
+                    </sc-stepper>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Stepper</div>
+                <div class="table-cell border px-4 py-4">Text at right</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-stepper direction="horizontal" title-position="right">
+                    <sc-step status="finish"><span slot="title">First</span></sc-step>
+                    <sc-step active><span slot="title">Second</span></sc-step>
+                    <sc-step ><span slot="title">Third</span></sc-step>
+                    </sc-stepper>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Stepper</div>
+                <div class="table-cell border px-4 py-4">Text at left</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-stepper direction="horizontal" title-position="left">
+                        <sc-step status="error"><span slot="title">First</span></sc-step>
+                        <sc-step active><span slot="title">Second</span></sc-step>
+                        <sc-step status="process" ><span slot="title">Third</span></sc-step>
+                    </sc-stepper>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Stepper</div>
+                <div class="table-cell border px-4 py-4">Indicator only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-stepper direction="horizontal" step-type="indicator">
+                        <sc-step status="error"><span slot="title">First</span></sc-step>
+                        <sc-step active><span slot="title">Second</span></sc-step>
+                        <sc-step disabled><span slot="title">Third</span></sc-step>
+                    </sc-stepper>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Stepper</div>
+                <div class="table-cell border px-4 py-4">Vertical</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-stepper direction="vertical" step-type="full">
+                        <sc-step status="error"><span slot="title">First</span><span slot="description">This is error step</span></sc-step>
+                        <sc-step active><span slot="title">Second</span><span slot="description">This is active step</span></sc-step>
+                        <sc-step disabled><span slot="title">Third</span><span slot="description">This is disabled step</span></sc-step>
+                    </sc-stepper>
+                </div>
+            </div>           
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Stepper</div>
+                <div class="table-cell border px-4 py-4">Vertical - Indicator only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-stepper direction="vertical" step-type="indicator">
+                        <sc-step status="finish"><span slot="title">First</span></sc-step>
+                        <sc-step active><span slot="title">Second</span></sc-step>
+                        <sc-step><span slot="title">Third</span></sc-step>
+                    </sc-stepper>
+                </div>
+            </div>   
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Tab</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-tab-group class="sc-tabs">
+                        <sc-tab slot="nav" panel="tab1">
+                          tab1-name
+                        </sc-tab>
+                        <sc-tab-divider slot="nav"></sc-tab-divider>
+                        <sc-tab slot="nav" panel="tab2" active>
+                          tab2-name
+                        </sc-tab>
+                        <sc-tab slot="nav" panel="tab3" disabled>
+                          tab3-name
+                        </sc-tab>
+                        <sc-tab slot="nav" panel="tab4">
+                          tab4-name
+                        </sc-tab>
+                        <sc-tab slot="nav" panel="tab5">
+                          tab5-name
+                        </sc-tab>
+                        <sc-tab slot="nav" panel="tab6">
+                          tab6-name
+                        </sc-tab>
+                        <sc-tab-panel name="tab1">Tab1 content</sc-tab-panel>
+                        <sc-tab-panel name="tab2">Tab2 content</sc-tab-panel>
+                        <sc-tab-panel name="tab3">Tab3 content</sc-tab-panel>
+                        <sc-tab-panel name="tab4">Tab4 content</sc-tab-panel>
+                        <sc-tab-panel name="tab5">Tab5 content</sc-tab-panel>
+                        <sc-tab-panel name="tab6">Tab6 content</sc-tab-panel>
+                      </sc-tab-group>
+                      <script type="text/javascript">
+                          const tabs = document.querySelector('.sc-tabs');
+                          tabs.addEventListener('sc-tab-select', e => {
+                              console.log('selected tab is', e.detail.name)
+                          });
+                      </script>
+                </div>
+            </div> 
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Tab</div>
+                <div class="table-cell border px-4 py-4">no active bottom line & scroll button & align center</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-tab-group class="sc-tabs" no-active-bottom-line no-scroll-controls alignment="center">
+                        <sc-tab slot="nav" panel="tab1">
+                          tab1-name
+                        </sc-tab>
+                        <sc-tab-divider slot="nav"></sc-tab-divider>
+                        <sc-tab slot="nav" panel="tab2" active>
+                          tab2-name
+                        </sc-tab>
+                        <sc-tab slot="nav" panel="tab3" disabled>
+                          tab3-name
+                        </sc-tab>
+                        <sc-tab slot="nav" panel="tab4">
+                          tab4-name
+                        </sc-tab>
+                        <sc-tab slot="nav" panel="tab5">
+                          tab5-name
+                        </sc-tab>
+                        <sc-tab slot="nav" panel="tab6">
+                          tab6-name
+                        </sc-tab>
+                        <sc-tab-panel name="tab1">Tab1 content</sc-tab-panel>
+                        <sc-tab-panel name="tab2">Tab2 content</sc-tab-panel>
+                        <sc-tab-panel name="tab3">Tab3 content</sc-tab-panel>
+                        <sc-tab-panel name="tab4">Tab4 content</sc-tab-panel>
+                        <sc-tab-panel name="tab5">Tab5 content</sc-tab-panel>
+                        <sc-tab-panel name="tab6">Tab6 content</sc-tab-panel>
+                      </sc-tab-group>
+                </div>
+            </div> 
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Tag</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="table">
+                        <div class="table-row">
+                            <div class="table-cell px-1 py-1">
+                                <sc-tag type="default">
+                                    Default
+                                  </sc-tag>
+                            </div>
+                            <div class="table-cell px-1 py-1">
+                                <sc-tag type="default" fill>
+                                    Default
+                                  </sc-tag>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="table-cell px-1 py-1">
+                                <sc-tag type="primary">
+                                    Primary
+                                  </sc-tag>
+                            </div>
+                            <div class="table-cell px-1 py-1">
+                                <sc-tag type="primary" fill>
+                                    Primary fill
+                                  </sc-tag>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="table-cell px-1 py-1">
+                                <sc-tag type="success">
+                                    Success
+                                  </sc-tag>
+                            </div>
+                            <div class="table-cell px-1 py-1">
+                                <sc-tag type="success" fill>
+                                    Success fill
+                                  </sc-tag>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="table-cell px-1 py-1">
+                                <sc-tag type="warning">
+                                    Warning
+                                  </sc-tag>
+                            </div>
+                            <div class="table-cell px-1 py-1">
+                                <sc-tag type="warning" fill>
+                                    Warning fill
+                                  </sc-tag>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="table-cell px-1 py-1">
+                                <sc-tag type="error">
+                                    Error
+                                  </sc-tag>
+                            </div>
+                            <div class="table-cell px-1 py-1">
+                                <sc-tag type="error" fill>
+                                    Error fill
+                                  </sc-tag>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>   
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Tag</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-tag disabled>
+                        Disabled
+                      </sc-tag>
+                </div>
+            </div>   
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">TextInput</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-text-input class="sc-text-input" help-text="Help text">
+                        Default text input label
+                      </sc-text-input>
+                    <script type="text/javascript">
+                        function printInputValue(e) {
+                            console.log('input value is', e.detail.value)
+                        }
+                        const textInput = document.querySelector('.sc-text-input');
+                        textInput.addEventListener('sc-input', printInputValue);
+                    </script>
+                </div>
+            </div> 
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">TextInput</div>
+                <div class="table-cell border px-4 py-4">Multiple line</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-text-input multiple resizable>
+                        Default text input label
+                      </sc-text-input>
+                </div>
+            </div> 
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">TextInput</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-text-input readonly value="This is text">
+                        Default text input label
+                      </sc-text-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">TextInput</div>
+                <div class="table-cell border px-4 py-4">Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-text-input error error-message="Error message">
+                        Default text input label
+                      </sc-text-input>
+                </div>
+            </div> 
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">TextInput</div>
+                <div class="table-cell border px-4 py-4">Success</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-text-input success>
+                        Default text input label
+                        <div slot="success">Success message</div>
+                      </sc-text-input>
+                </div>
+            </div> 
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">TextInput</div>
+                <div class="table-cell border px-4 py-4">Password</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-text-input type="password" placeholder="Input password">
+                        Password
+                      </sc-text-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">TextInput</div>
+                <div class="table-cell border px-4 py-4">Password (Error)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-text-input type="password" error placeholder="Input password">
+                        Password
+                        <div slot="error">Error password</div>
+                      </sc-text-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">TimeInput</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-time-input placeholder="Select time here" value='07:10:50' label='Time input'></sc-time-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">TimeInput</div>
+                <div class="table-cell border px-4 py-4">Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-time-input error placeholder="Select time here" label='Time input'>
+                        <div slot="error">Error message</div>
+                      </sc-time-input>               
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">TimeInput</div>
+                <div class="table-cell border px-4 py-4">Disabled hours / minutes</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-time-input placeholder="Select time here" label='Time input' disabled-hours="[2,5,7]" disabled-minutes="[10,15,30]"></sc-time-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Toggle</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-toggle value="auto" class="sc-toggle" size='sm'>
+                        <sc-toggle-option value="light">
+                          Light
+                        </sc-toggle-option>
+                        <sc-toggle-option value="dark">
+                          Dark
+                        </sc-toggle-option>
+                        <sc-toggle-option value="auto">
+                          Auto
+                        </sc-toggle-option>
+                    </sc-toggle>
+                    <script type="text/javascript">
+                        const toggle = document.querySelector('.sc-toggle');
+                        toggle.addEventListener('sc-select', event => {
+                            console.log('toggle value is ', event.detail.value)
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Tooltip</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="table">
+                        <div class="table-row">
+                            <div class="table-cell px-1 py-1">
+                                Top (default)
+                                <sc-tooltip content="Tooltip Content"><sc-icon name="info--circle--line" size="md" compact> </sc-icon></sc-tooltip>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="table-cell px-1 py-1">
+                                Bottom
+                                <sc-tooltip content="Tooltip Content" placement="bottom"><sc-icon name="info--circle--line" size="md" compact> </sc-icon></sc-tooltip>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="table-cell px-1 py-1">
+                                <sc-tooltip content="Tooltip Content" placement="left"><sc-icon name="info--circle--line" size="md" compact> </sc-icon></sc-tooltip>
+                                Left
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="table-cell px-1 py-1">
+                                Right
+                                <sc-tooltip content="Tooltip Content" placement="right"><sc-icon name="info--circle--line" size="md" compact> </sc-icon></sc-tooltip>
+                            </div>
+                        </div>
+                    </div>                
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">ValueInput</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-value-input placeholder="Input number">
+                        Value input
+                    </sc-value-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">ValueInput</div>
+                <div class="table-cell border px-4 py-4">Default, min, and max value</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-value-input value="30" min="25" max="35" placeholder="Input number">
+                        Value input
+                      </sc-value-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">ValueInput</div>
+                <div class="table-cell border px-4 py-4">Help</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-value-input help  min="100" placeholder="Input number">
+                        Value input
+                        <div slot="help">The max value is 100</div>
+                      </sc-value-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">ValueInput</div>
+                <div class="table-cell border px-4 py-4">Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-value-input error placeholder="Input number">
+                        Value input
+                        <div slot="error">Error message</div>
+                      </sc-value-input>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+  <!-- Custom script -->
+  <script type="text/javascript">
+    var modes = ['light', 'dark', 'dyslexic']
+    var activeMode = modes[0]
+    function changeMode(mode) {
+        var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child');
+        componentCells.forEach((componentCell) => {
+            modes.forEach((mode) => {
+                componentCell.classList.remove(`sc-mode-${mode}`)
+            })
+            componentCell.classList.add(`sc-mode-${mode}`)
+            if (componentCell.classList.contains('inverse')) {
+                if (mode === 'dark') {
+                    componentCell.style.backgroundColor = 'var(--sc-color-white)'
+                } else {
+                    componentCell.style.backgroundColor = 'var(--sc-color-blue-900)'
+                }
+            }
+        })
+    }
+    document.getElementsByTagName('sc-dropdown-input')[0].addEventListener('sc-select', ({ detail: { value }}) => {
+        changeMode(value);
+    });
+    changeMode(activeMode);
+    </script>
+
+</body>
+</html>

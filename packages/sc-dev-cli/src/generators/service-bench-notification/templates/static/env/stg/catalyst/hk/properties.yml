@@ -1,0 +1,57 @@
+hcv:
+  role: 55313_<%= componentId %>-<%= name.replace(/-exp-api$/, '') %>-plugin_app_k8s_55313_role
+  data:
+    - path: scb/55313/<%= componentId %>-<%= name.replace(/-exp-api$/, '') %>-plugin/app/kv/data/trust_store_stg
+      sourceName: cert
+      targetName: truststore.jks
+      type: file
+    - path: scb/55313/<%= componentId %>-<%= name.replace(/-exp-api$/, '') %>-plugin/app/kv/data/trust_store_stg
+      sourceName: cert_key
+      targetName: TRUSTSTORE_PASSWORD
+      type: static
+    - path: scb/55313/<%= componentId %>-<%= name.replace(/-exp-api$/, '') %>-plugin/app/kv/data/key_store_stg
+      sourceName: cert
+      targetName: keystore.jks
+      type: file
+    - path: scb/55313/<%= componentId %>-<%= name.replace(/-exp-api$/, '') %>-plugin/app/kv/data/key_store_stg
+      sourceName: cert_key
+      targetName: KEYSTORE_PASSWORD
+      type: static
+
+enableSIP: true
+enableSEP: true
+binaryData:
+  - filename: config.json
+    base64enc: true
+    data: |
+      [
+      {
+        "match": {
+          "method": ["POST"],
+         "body": "[\\s\\S]*?((post|get|put|delete|patch)_\\w*)[\\s\\S]*"
+        },
+        "handlers": [
+          {
+            "id": "authenticator",
+            "config": {
+              "jwks_uri": "https://stg-authn.55325.hk.app.standardchartered.com/ns03/realms/staff/protocol/openid-connect/certs",
+              "required_scope": []
+            }
+          }
+        ]
+      },
+      {
+        "match": {
+            "method": ["POST"],
+            "body": "\\{(\\s*\"operationName\"\\s*:\\s*\"IntrospectionQuery\"\\s*,)?\\s*\"query\"\\s*:\\s*\"query\\s+IntrospectionQuery\\s+\\{\\s+__schema\\s+\\{\\s+queryType\\s+\\{\\s+name\\s+}\\s+mutationType\\s+\\{\\s+name\\s+}\\s+subscriptionType\\s+\\{\\s+name\\s+}\\s+types\\s+\\{\\s+\\.\\.\\.\\s+on\\s+__Type\\{\\s+kind\\s+name\\s+description\\s+fields\\(includeDeprecated:\\s+true\\)\\s+\\{\\s+name\\s+description\\s+args\\s+\\{\\s+\\.\\.\\.\\s+on\\s+__InputValue\\{\\s+name\\s+description\\s+type\\s+\\{\\s+\\.\\.\\.\\s+on\\s+__Type\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+defaultValue\\s+}\\s+}\\s+type\\s+\\{\\s+\\.\\.\\.\\s+on\\s+__Type\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+isDeprecated\\s+deprecationReason\\s+}\\s+inputFields\\s+\\{\\s+\\.\\.\\.\\s+on\\s+__InputValue\\{\\s+name\\s+description\\s+type\\s+\\{\\s+\\.\\.\\.\\s+on\\s+__Type\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+defaultValue\\s+}\\s+}\\s+interfaces\\s+\\{\\s+\\.\\.\\.\\s+on\\s+__Type\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+enumValues\\(includeDeprecated:\\s+true\\)\\s+\\{\\s+name\\s+description\\s+isDeprecated\\s+deprecationReason\\s+}\\s+possibleTypes\\s+\\{\\s+\\.\\.\\.\\s+on\\s+__Type\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+directives\\s+\\{\\s+name\\s+description\\s+locations\\s+args\\s+\\{\\s+\\.\\.\\.\\s+on\\s+__InputValue\\{\\s+name\\s+description\\s+type\\s+\\{\\s+\\.\\.\\.\\s+on\\s+__Type\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+ofType\\s+\\{\\s+kind\\s+name\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+}\\s+defaultValue\\s+}\\s+}\\s+}\\s+}\\s+}\\s*\"\\s*}"
+          },
+        "handlers": []
+      },
+      {
+        "match": {
+            "url": "/q/health/live",
+            "method": ["GET"]
+        },
+        "handlers": []
+      }
+      ]

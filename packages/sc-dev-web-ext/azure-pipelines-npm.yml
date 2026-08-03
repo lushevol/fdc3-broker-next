@@ -1,0 +1,44 @@
+trigger:
+  - release/*
+  - develop
+  - feature/*
+
+parameters:
+  - name: releaseId
+    type: string
+    displayName: Release WorkItem ID
+    default: '551'
+  - name: packageVersion
+    type: string
+    displayName: Package Version
+    default: "0.1.0-$(Build.BuildNumber)"
+
+resources:
+  repositories:
+    - repository: modular-templates
+      name: dj-core/governed-templates
+      ref: "main"
+      type: git
+
+extends:
+  template: governed-template/build.yml@modular-templates
+  parameters:
+    releaseId: ${{ parameters.releaseId }}
+    buildStackName: node
+    featureRelease: true
+    buildStackParams:
+      pool: 'sc-linux'
+      nodeVersion: '16.15.0'
+      featureRelease: true
+      npmTaskList:
+        - name: 'Set version'
+          task: version ${{ parameters.packageVersion }} --no-git-tag-version
+        - name: 'Run Build'
+          task: run build
+        - name: 'Run Test'
+          task: run test
+      sonarSources: './src'
+      sonarExclusions: '**/src/index.ts, **/styles/**, **/src/assets/images/**, **/src/shared/**, **/*.style.ts'
+      generateUnitTestReport: true
+      generateCodeCoverage: true
+      testResultsFiles: $(Build.SourcesDirectory)/$(Build.Repository.Name)/report/junit-report.xml

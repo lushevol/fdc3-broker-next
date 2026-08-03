@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+    <title>sc-web-kit demo page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+    <!-- Custom style -->
+    <style>
+        body {
+            padding: 24px;
+        }
+
+        .sc-mode-dark {
+            background-color: var(--sc-color-blue-900)
+        }
+
+        .table-cell {
+            border-color: var(--sc-color-grey-15);
+            vertical-align: top;
+        }
+
+        .side-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 10px 8px;
+            background-color: var(--sc-color-white);
+            border-radius: 8px;
+            box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-height: 100vh;
+            overflow-y: auto;
+            z-index: 999999999;
+        }
+        
+        .side-bar div {
+            padding: 5px 0;
+        }
+
+        .side-bar div .selected {
+            color: var(--sc-color-blue-500);
+        }
+    </style>
+
+    <!-- Register all sc-* custom elements -->
+    <script type="module">
+        import '../dist/elements/index.js';
+        import { html } from '/node_modules/lit-html/lit-html.js';
+        window.html = html;
+    </script>
+</head>
+<sc-icon-provider>
+    <div id='side-bar' class='side-bar'>
+        <script type="text/javascript">
+            const sidebar = document.querySelector('#side-bar');
+            const initials = [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
+                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
+                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
+                'Y', 'Z'
+            ];
+            const currentPage = 'N';
+            const content = [];
+            initials.forEach(initial => {
+                content.push(`<div>`);
+                content.push(`<a class="${currentPage === initial ? 'selected' : ''}" href="/demo/page${initial}.html">${initial}</a>`);
+                content.push(`</div>`);
+            })
+            sidebar.innerHTML = content.join('');
+        </script>
+    </div>
+
+    <div class="table w-full shadow-lg max-h-96 components-body">
+        <div class="table-header-group font-bold sticky top-0 bg-white z-10">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Component</div>
+                <div class="table-cell border px-4 py-4">Example</div>
+                <div class="table-cell border px-4">
+                    <div class="py-4" style="max-width: 300px;">
+                        <sc-dropdown-input label="Mode" value="light">
+                            <sc-dropdown-option value="light">Light</sc-dropdown-option>
+                            <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+                            <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+                        </sc-dropdown-input>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-row-group h-96 overflow-y-auto">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input placeholder="Input whole number">
+                        <div slot='label'>Number</div>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Digit</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input type="digit" value="-45.28.24" max-decimals="3" min="-100" placeholder="Input digit" help-text="Should be digit">
+                        <div slot='label'>Number</div>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Default, min, and max value</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input placeholder="Input number" value="30" min="-25" max="35">
+                        Number
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Tooltip only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input tooltip="Enter your 16 digits number" tooltip-placement="right">
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Clearable</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input clearable>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Required only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input required>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Box input</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input label="Your number" tooltip="Enter your 16 digits number" tooltip-placement="right"
+                        placeholder="Enter any number" help-text="Please enter number only" value="12345"
+                        border-type="box" max-length=16 required>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input label-size="xxs">
+                        <div >
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input label-size="xs" success=true>
+                        <div >
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input label-size="sm" error=true>
+                        <div >
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input label-size="md" border-type="box" success=true>
+                        <div >
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input label-size="lg" border-type="box" required error=true
+                        success-message="Success message" error-message="Error message">
+                        <div >
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input value="1234567890" required readonly>
+                        <div >
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Readonly Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input value="1234567890" border-type="box" required readonly>
+                        <div >
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input value="123" max=400 min=20 required disabled>
+                        <div >
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">Disabled Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input value="1234567890" border-type="box" required disabled>
+                        <div >
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">No label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input value="1234567890" success=true>
+                    </sc-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Number</div>
+                <div class="table-cell border px-4 py-4">No label Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-number-input value="1234567890" border-type="box" error=true>
+                    </sc-number-input>
+                </div>
+            </div>
+        </div>
+</sc-icon-provider>
+<!-- Custom script -->
+<script type="text/javascript">
+    var modes = ['light', 'dark', 'dyslexic']
+    var activeMode = modes[0]
+    function changeMode(mode) {
+        var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child');
+        componentCells.forEach((componentCell) => {
+            modes.forEach((mode) => {
+                componentCell.classList.remove(`sc-mode-${mode}`)
+            })
+            componentCell.classList.add(`sc-mode-${mode}`)
+            if (componentCell.classList.contains('inverse')) {
+                if (mode === 'dark') {
+                    componentCell.style.backgroundColor = 'var(--sc-color-white)'
+                } else {
+                    componentCell.style.backgroundColor = 'var(--sc-color-blue-900)'
+                }
+            }
+        })
+    }
+    document.getElementsByTagName('sc-dropdown-input')[0].addEventListener('sc-select', ({ detail: { value } }) => {
+        changeMode(value);
+    });
+    changeMode(activeMode);
+
+</script>
+
+<script type="module">
+    import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+    changeIconLibrary();
+    function changeIconLibrary() {
+        document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+    }
+</script>
+
+</html>

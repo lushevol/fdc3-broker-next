@@ -1,0 +1,9 @@
+<div
+  (touchstart)="handleTouchStart($event)"
+  (touchmove)="handleTouchMove($event)"
+  (touchend)="handleTouchEnd($event)"
+  class="swipable-panel"
+  [style.height]="panelHeight"
+>
+  <ng-content></ng-content>
+</div>

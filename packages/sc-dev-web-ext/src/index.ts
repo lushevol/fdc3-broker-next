@@ -1,0 +1,1 @@
+// export { ScAlert } from './components/ScAlert/ScAlert.js';

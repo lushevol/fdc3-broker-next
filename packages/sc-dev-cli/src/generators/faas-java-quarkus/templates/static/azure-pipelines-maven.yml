@@ -1,0 +1,124 @@
+trigger:
+  - release/*
+  - develop
+  - feature/*
+
+parameters:
+  - name: releaseId
+    type: string
+    displayName: Release WorkItem ID
+    default: "551"
+  - name: devkitHelmVersion
+    type: string
+    default: "1.0.0+20240625.11"
+  - name: buildpackImageName
+    type: string
+    default: "buildpack-quarkus:20240629.14"
+  - name: builderImageName
+    type: string
+    default: "builder-quarkus:20240629.14"
+
+
+resources:
+  repositories:
+    - repository: modular-templates
+      name: dj-core/governed-templates
+      ref: "main"
+      type: git
+
+variables:
+  - name: ITAM
+    value: '<%= applicationId %>'
+  - name: imageName
+    value: '<%= name %>'
+  - name: imageTag
+    value: '$(Build.SourceBranchName)_$(Build.BuildNumber)'
+  - name: imagePrefix
+    value: 'sc-devkit'
+  - name: functionName
+    value: '<%= name %>'
+
+extends:
+  template: governed-template/build-and-deploy.yml@modular-templates
+  parameters:
+    ITAM: '${{variables.ITAM}}'
+    featureRelease: true
+    releaseId: ${{ parameters.releaseId }}
+    buildStackName: sc-devkit-maven
+    buildStackParams:
+      pool: 'sc-linux'
+      goals: "clean package -Dquarkus.package.type=uber-jar"
+      imageTag: '${{variables.imageTag}}'
+      imagePrefix: '${{variables.imagePrefix}}'
+      imageName: '${{variables.imageName}}'
+      buildpackImageName: '${{parameters.buildpackImageName}}'
+      builderImageName: '${{parameters.builderImageName}}'
+      featureBranchScan: true
+      featureRelease: true
+    deployStackName: knative
+    deployStackParams:
+      functionName: "${{variables.functionName}}"
+      imageTag: '${{variables.imageTag}}'
+      imagePrefix: '${{variables.imagePrefix}}'
+      imageName: '${{variables.imageName}}'
+      devkitHelmVersion: '${{parameters.devkitHelmVersion}}'
+    deployEnvironments:
+      - name: dev
+        environment: dev
+        displayName: DEV
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-kubeconfig'
+        dependsOn:
+          - CI
+      - name: qa
+        environment: qa
+        displayName: UAT
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-kubeconfig'
+        dependsOn:
+          - CI
+
+      - name: stage
+        environment: staging
+        displayName: STAGE
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-kubeconfig'
+        dependsOn:
+          - qa
+
+      - name: release_checks
+        environment: pre-release
+        displayName: Release Checks
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        dependsOn:
+          - stage
+        hasGenie: false
+        qaStageName: qa
+
+      - name: release
+        environment: release
+        displayName: Release
+        dependsOn:
+          - release_checks
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        hasGenie: false
+
+      - name: prod
+        environment: production
+        displayName: PROD
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-kubeconfig'
+        dependsOn:
+          - release

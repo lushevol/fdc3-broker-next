@@ -1,0 +1,51 @@
+loggers:
+  ApplicationLog:
+    level: DEBUG
+    handlers:
+      - type: console
+        format: json
+        json_format:
+          timestamp: asctime
+          logType: name
+          logLevel: levelname
+          serviceName: serviceName
+          methodName: methodName
+          message: message
+          context: context
+  ErrorLog:
+    level: DEBUG
+    handlers:
+      - type: console
+        format: json
+        json_format:
+          timestamp: asctime
+          logType: name
+          logLevel: levelname
+          serviceName: serviceName
+          methodName: methodName
+          message: message
+          context: context
+  SystemLog:
+    level: DEBUG
+    handlers:
+      - type: console
+        format: text
+        text_format: "%(asctime)s [%(methodName)s] %(levelname)s [%(name)s] %(serviceName)s - %(message)s"
+  TransactionLog:
+    level: DEBUG
+    handlers:
+      - type: console
+        format: text
+        text_format: "%(asctime)s [%(methodName)s] %(levelname)s [%(name)s] %(serviceName)s - %(message)s"
+  SecurityLog:
+    level: DEBUG
+    handlers:
+      - type: console
+        format: text
+        text_format: "%(asctime)s [%(methodName)s] %(levelname)s [%(name)s] %(serviceName)s - %(message)s"
+  AuditLog:
+    level: DEBUG
+    handlers:
+      - type: console
+        format: text
+        text_format: "%(asctime)s [%(methodName)s] %(levelname)s [%(name)s] %(serviceName)s - %(message)s"

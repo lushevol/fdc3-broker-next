@@ -1,0 +1,118 @@
+import { css } from 'lit';
+
+export default css`
+h1,
+.h1 {
+  line-height: 1.6;
+  font-size: 2.5rem;
+}
+
+h2,
+.h2 {
+  line-height: 1.25;
+  font-size: 2rem;
+}
+
+h3,
+.h3 {
+  line-height: 1.33;
+  font-size: 1.5rem;
+}
+
+h4,
+.h4 {
+  line-height: 1.4;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+h5,
+.h5 {
+  line-height: 1.4;
+  font-size: 1.25rem;
+}
+
+h6,
+.h6 {
+  font-size: 1rem;
+}
+
+small,
+.small {
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+.font-weight {
+  font-weight: 600;
+}
+
+.font-hero-numerals {
+  font-feature-settings: "ss01" on;
+}
+
+.hero {
+  font-size: 3.75rem;
+  font-weight: 600;
+  line-height: 1.33;
+}
+
+.lead {
+  line-height: 1.4;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.header-1200 {
+  font-size: 3.5rem;
+  line-height: 1.2857;
+}
+.header-1000 {
+  font-size: 3rem;
+  line-height: 1.3333;
+}
+.header-800 {
+  font-size: 2.5rem;
+  line-height: 1.4;
+}
+.header-600 {
+  font-size: 2rem;
+  line-height: 1.5;
+}
+.header-500 {
+  font-size: 1.75rem;
+  line-height: 1.5714;
+}
+.header-350 {
+  font-size: 1.375rem;
+  line-height: 1.7272;
+}
+.header-250 {
+  font-size: 1.125rem;
+  line-height: 1.8888;
+}
+
+.body-250 {
+  font-size: 1.125rem;
+  line-height: 1.4444;
+}
+.body-200 {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.body-150 {
+  font-size: 0.875rem;
+  line-height: 1.5714;
+}
+.body-100 {
+  font-size: 0.75rem;
+  line-height: 1.6666;
+}
+.body-50 {
+  font-size: 0.625rem;
+  line-height: 1.8;
+}
+`;

@@ -1,0 +1,1717 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+    <title>sc-web-kit demo page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+    <!-- Custom style -->
+    <style>
+        body {
+            padding: 24px;
+        }
+
+        .sc-mode-dark {
+            background-color: var(--sc-color-blue-900)
+        }
+
+        .table-cell {
+            border-color: var(--sc-color-grey-15);
+            vertical-align: top;
+        }
+
+        .side-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 10px 8px;
+            background-color: var(--sc-color-white);
+            border-radius: 8px;
+            box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-height: 100vh;
+            overflow-y: auto;
+            z-index: 999999999;
+        }
+        
+        .side-bar div {
+            padding: 5px 0;
+        }
+
+        .side-bar div .selected {
+            color: var(--sc-color-blue-500);
+        }
+    </style>
+
+    <!-- Register all sc-* custom elements -->
+    <script type="module">
+        import '../dist/elements/index.js';
+        import { html } from '/node_modules/lit-html/lit-html.js';
+        window.html = html;
+    </script>
+</head>
+<sc-icon-provider>
+    <div id='side-bar' class='side-bar'>
+        <script type="text/javascript">
+            const sidebar = document.querySelector('#side-bar');
+            const initials = [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
+                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
+                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
+                'Y', 'Z'
+            ];
+            const currentPage = 'C';
+            const content = [];
+            initials.forEach(initial => {
+                content.push(`<div>`);
+                content.push(`<a class="${currentPage === initial ? 'selected' : ''}" href="/demo/page${initial}.html">${initial}</a>`);
+                content.push(`</div>`);
+            })
+            sidebar.innerHTML = content.join('');
+        </script>
+    </div>
+
+    <div class="table w-full shadow-lg max-h-96 components-body">
+        <div class="table-header-group font-bold sticky top-0 bg-white z-10">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Component</div>
+                <div class="table-cell border px-4 py-4">Example</div>
+                <div class="table-cell border px-4">
+                    <div class="py-4" style="max-width: 300px;">
+                        <sc-dropdown-input label="Mode" value="light">
+                            <sc-dropdown-option value="light">Light</sc-dropdown-option>
+                            <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+                            <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+                        </sc-dropdown-input>
+                        <sc-dropdown-input label='Locale' value='en' id="local-picker">
+                            <sc-dropdown-option value="en">English</sc-dropdown-option>
+                            <sc-dropdown-option value="zh-CN">中文 (简体)</sc-dropdown-option>
+                        </sc-dropdown-input>
+                        <script type="module">
+                          import { locales, setLocale, getLocale } from '../dist/src/i18n/localization.js';
+                          const localPicker = document.querySelector('#local-picker');
+                          localPicker.addEventListener('sc-select', e => {
+                            setLocale(e.detail.value);
+                          });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-row-group h-96 overflow-y-auto">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card id='myCard' title='Card basic setup' sub-title='This is the sub title of card'
+                        body='This is the body of card' action-button="more-vertical">
+                    </sc-card>
+                    <br />
+                    <sc-card title-size="lg" sub-title-size="xs">
+                        <div slot='title'>Card with suffix slot and font size</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                        <div slot='suffix' class="text-right">Suffix</div>
+                    </sc-card>
+                    <br />
+                    <sc-card class="sc-card-icon" icon="arrow-ios-forward" icon-size="md" hover-highlight>
+                        <div slot='title'>Card with icon setting and hover</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                    </sc-card>
+                    <script type="text/javascript">
+                        const card = document.querySelector('.sc-card-icon');
+                        card.addEventListener('sc-action', () => {
+                            alert('icon clicked');
+                        })
+                    </script>
+                    <br />
+                    <sc-card title-size="sm" text-align="center" sub-title-size="md" space-size="md" selected>
+                        <div slot='title'>Card selected and alignment</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                        <div slot='body'>This is the body of card</div>
+                    </sc-card>
+                    <br />
+                    <sc-card title-size="xs" no-border>
+                        <div slot='title'>Card without border</div>
+                        <div slot='body'>This is the body of card</div>
+                    </sc-card>
+                    <br />
+                    <sc-card title-size="lg" sub-title-size="xs" icon="arrow-ios-forward" icon-size="md">
+                        <div slot='title'>Card full layout</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                        <div slot='body'>This is the body of card</div>
+                        <div slot='prefix'>Prefix</div>
+                        <div slot='suffix' class="text-right mr-2">Suffix</div>
+                    </sc-card>
+                    <br />
+                    <sc-card icon="arrow-ios-forward" icon-size="md">
+                        <div slot="header" class="mb-3" style="width:100%;">
+                            <h5>Card header</h5>
+                            <sc-divider size="xxs" vertical style="--sc-divider-color:var(--sc-color-grey-25)">
+                            </sc-divider>
+                        </div>
+                        <div slot='title'>Card with header and footer</div>
+                        <div slot='body'>This is the body of card</div>
+                        <div slot="footer" class="text-right pt-3" style="width:100%;">
+                            <sc-icon name="bell--line" size="md"></sc-icon>
+                            <sc-spacer></sc-spacer>
+                            <sc-icon name="info-circle--line" size="md"></sc-icon>
+                            <sc-spacer></sc-spacer>
+                            <sc-icon name="message-circle--line" size="md"></sc-icon>
+                        </div>
+                    </sc-card>
+                    <br />
+                    <sc-card title-size="md" sub-title-size="lg">
+                        <div slot='title'>Card font size test (MD)</div>
+                        <div slot='sub-title'>Sub title (LG)</div>
+                    </sc-card>
+                    <br />
+                    <sc-card title-size="xs" sub-title-size="sm">
+                        <div slot='title'>Card font size test (XS)</div>
+                        <div slot='sub-title'>Sub title (SM)</div>
+                    </sc-card>
+                    <br />
+                    <sc-card title-size="xxs" sub-title-size="xs">
+                        <div slot='title'>Card font size test (XXS)</div>
+                        <div slot='sub-title'>Sub title (XS)</div>
+                    </sc-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Check</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-check-card title='Card basic setup' sub-title='This is the sub title of card'
+                        body='This is the body of card'>
+                    </sc-check-card>
+                    <br />
+                    <sc-check-card title-size="lg" sub-title-size="xs">
+                        <div slot='title'>Card with suffix slot and font size</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                        <div slot='suffix' class="text-right">Suffix</div>
+                    </sc-check-card>
+                    <br />
+                    <sc-check-card class="sc-check-card-icon" icon="arrow-ios-forward" icon-size="md" hover-highlight>
+                        <div slot='title'>Card with icon setting and hover</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                    </sc-check-card>
+                    <script type="text/javascript">
+                        const checkCard = document.querySelector('.sc-check-card-icon');
+                        checkCard.addEventListener('sc-action', () => {
+                            alert('icon clicked');
+                        })
+                    </script>
+                    <br />
+                    <sc-check-card title-size="sm" text-align="center" sub-title-size="md" space-size="md" checked>
+                        <div slot='title'>Card selected and alignment</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                        <div slot='body'>This is the body of card</div>
+                    </sc-check-card>
+                    <br />
+                    <sc-check-card title-size="xs" no-border disabled>
+                        <div slot='title'>Card without border and disabled</div>
+                        <div slot='body'>This is the body of card</div>
+                    </sc-check-card>
+                    <br />
+                    <sc-check-card title-size="lg" sub-title-size="xs" icon="arrow-ios-forward" icon-size="md">
+                        <div slot='title'>Card full layout</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                        <div slot='body'>This is the body of card</div>
+                        <div slot='prefix'>Prefix</div>
+                        <div slot='suffix' class="text-right mr-2">Suffix</div>
+                    </sc-check-card>
+                    <br />
+                    <sc-check-card icon="arrow-ios-forward" icon-size="md">
+                        <div slot="header" class="mb-3" style="width:100%;">
+                            <h5>Card header</h5>
+                            <sc-divider size="xxs" vertical style="--sc-divider-color:var(--sc-color-grey-25)">
+                            </sc-divider>
+                        </div>
+                        <div slot='title'>Card with header and footer</div>
+                        <div slot='body'>This is the body of card</div>
+                        <div slot="footer" class="text-right pt-3" style="width:100%;">
+                            <sc-icon name="bell--line" size="md"></sc-icon>
+                            <sc-spacer></sc-spacer>
+                            <sc-icon name="info-circle--line" size="md"></sc-icon>
+                            <sc-spacer></sc-spacer>
+                            <sc-icon name="message-circle--line" size="md"></sc-icon>
+                        </div>
+                    </sc-check-card>
+                    <br />
+                    <sc-check-card checkbox-position='right'>
+                        <div slot='title'>Card with checkbox on the right</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                    </sc-check-card>                                        
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-card title='Card basic setup' sub-title='This is the sub title of card'
+                        body='This is the body of card'>
+                    </sc-radio-card>
+                    <br />
+                    <sc-radio-card title-size="lg" sub-title-size="xs">
+                        <div slot='title'>Card with suffix slot and font size</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                        <div slot='suffix' class="text-right">Suffix</div>
+                    </sc-radio-card>
+                    <br />
+                    <sc-radio-card class="sc-radio-card-icon" icon="arrow-ios-forward" icon-size="md" hover-highlight>
+                        <div slot='title'>Card with icon setting and hover</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                    </sc-radio-card>
+                    <script type="text/javascript">
+                        const radioCard = document.querySelector('.sc-radio-card-icon');
+                        radioCard.addEventListener('sc-action', () => {
+                            alert('icon clicked');
+                        })
+                    </script>
+                    <br />
+                    <sc-radio-card title-size="sm" text-align="center" sub-title-size="md" space-size="md" checked>
+                        <div slot='title'>Card selected and alignment</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                        <div slot='body'>This is the body of card</div>
+                    </sc-radio-card>
+                    <br />
+                    <sc-radio-card title-size="xs" no-border disabled>
+                        <div slot='title'>Card without border and disabled</div>
+                        <div slot='body'>This is the body of card</div>
+                    </sc-radio-card>
+                    <br />
+                    <sc-radio-card title-size="lg" sub-title-size="xs" icon="arrow-ios-forward" icon-size="md">
+                        <div slot='title'>Card full layout</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                        <div slot='body'>This is the body of card</div>
+                        <div slot='prefix'>Prefix</div>
+                        <div slot='suffix' class="text-right mr-2">Suffix</div>
+                    </sc-radio-card>
+                    <br />
+                    <sc-radio-card icon="arrow-ios-forward" icon-size="md">
+                        <div slot="header" class="mb-3" style="width:100%;">
+                            <h5>Card header</h5>
+                            <sc-divider size="xxs" vertical style="--sc-divider-color:var(--sc-color-grey-25)">
+                            </sc-divider>
+                        </div>
+                        <div slot='title'>Card with header and footer</div>
+                        <div slot='body'>This is the body of card</div>
+                        <div slot="footer" class="text-right pt-3" style="width:100%;">
+                            <sc-icon name="bell--line" size="md"></sc-icon>
+                            <sc-spacer></sc-spacer>
+                            <sc-icon name="info-circle--line" size="md"></sc-icon>
+                            <sc-spacer></sc-spacer>
+                            <sc-icon name="message-circle--line" size="md"></sc-icon>
+                        </div>
+                    </sc-radio-card>
+                    <br />
+                    <sc-radio-card radio-position='right'>
+                        <div slot='title'>Card with radio on the right</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                    </sc-radio-card>                    
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Image</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-image-card title='Card basic setup' sub-title='This is the sub title of card'
+                        body='This is the body of card' src='images/logo.svg'>
+                    </sc-image-card>
+                    <br />
+                    <sc-image-card title-size="lg" sub-title-size="xs" src='images/logo.svg'>
+                        <div slot='title'>Card with suffix slot and font size</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                        <div slot='suffix' class="text-right">Suffix</div>
+                    </sc-image-card>
+                    <br />
+                    <sc-image-card class="sc-image-card-icon" icon="arrow-ios-forward" icon-size="md"
+                        src='images/logo.svg' hover-highlight>
+                        <div slot='title'>Card with icon setting and hover</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                    </sc-image-card>
+                    <script type="text/javascript">
+                        const imageCard = document.querySelector('.sc-image-card-icon');
+                        imageCard.addEventListener('sc-action', () => {
+                            alert('icon clicked');
+                        })
+                    </script>
+                    <br />
+                    <sc-image-card title-size="sm" text-align="center" src='images/logo.svg' sub-title-size="md"
+                        space-size="md" selected>
+                        <div slot='title'>Card selected and alignment</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                        <div slot='body'>This is the body of card</div>
+                    </sc-image-card>
+                    <br />
+                    <sc-image-card title-size="xs" src='images/logo.svg' no-border disabled>
+                        <div slot='title'>Card without border and disabled</div>
+                        <div slot='body'>This is the body of card</div>
+                    </sc-image-card>
+                    <br />
+                    <sc-image-card title-size="lg" src='images/logo.svg' sub-title-size="xs" icon="arrow-ios-forward"
+                        icon-size="md">
+                        <div slot='title'>Card full layout</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                        <div slot='body'>This is the body of card</div>
+                        <div slot='prefix'>Prefix</div>
+                        <div slot='suffix' class="text-right mr-2">Suffix</div>
+                    </sc-image-card>
+                    <br />
+                    <sc-image-card src='images/logo.svg' icon="arrow-ios-forward" icon-size="md">
+                        <div slot="header" class="mb-3" style="width:100%;">
+                            <h5>Card header</h5>
+                            <sc-divider size="xxs" vertical style="--sc-divider-color:var(--sc-color-grey-25)">
+                            </sc-divider>
+                        </div>
+                        <div slot='title'>Card with header and footer</div>
+                        <div slot='body'>This is the body of card</div>
+                        <div slot="footer" class="text-right pt-3" style="width:100%;">
+                            <sc-icon name="bell--line" size="md"></sc-icon>
+                            <sc-spacer></sc-spacer>
+                            <sc-icon name="info-circle--line" size="md"></sc-icon>
+                            <sc-spacer></sc-spacer>
+                            <sc-icon name="message-circle--line" size="md"></sc-icon>
+                        </div>
+                    </sc-image-card>                    
+                    <br />
+                    <sc-image-card src='images/logo.svg' image-position='right'>
+                        <div slot='title'>Card with image on the right</div>
+                        <div slot='sub-title'>This is the sub title of card</div>
+                    </sc-image-card>
+                    <br />
+                    <sc-image-card src='images/pride.png' image-position='background' background-position='90% -4%'
+                        background-repeat='no-repeat' background-color='cadetblue'>
+                        <div slot='title' style='color:#fff'>
+                            <h5>Card with image as background</h5>
+                        </div>
+                    </sc-image-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Icon - Image Title in</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-card title="Basic" src="images/logo.svg">
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card title-size="lg" hover-highlight>
+                        <div slot="title">Large title and hover</div>
+                        <div slot="body">This is the body of card</div>
+                        <div slot="image"><img src="images/hello.png" /></div>
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card title="With body and selected" title-size="md" body="This is the body of card"
+                        src="images/logo.svg" selected>
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card title="Basic" src="images/logo.svg" image-align="left" text-align="left">
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card src="images/logo.svg" image-align="left" text-align="left" size="custom" width="100%">
+                        <div slot="header" class="mb-3" style="width:100%;">
+                            <h5>Card header</h5>
+                            <sc-divider size="xxs" vertical style="--sc-divider-color:var(--sc-color-grey-25)">
+                            </sc-divider>
+                        </div>
+                        <div slot="title">Header and content</div>
+                        <div slot="body">This is the body of card</div>
+                        Additional content here
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card title-size="xs" src="images/logo.svg" image-align="right"
+                        text-align="right" size="custom" width="250px">
+                        <div slot="header" class="mb-3" style="width:100%;">
+                            <h5>Card header</h5>
+                        </div>
+                        <div slot="title">Text alignment and header</div>
+                        <div slot="body">This is the body of card</div>
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card src="images/logo.svg" no-border>
+                        <div slot="title">No border</div>
+                        <div slot="body">This is the body of card</div>
+                    </sc-icon-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Icon - Image Title out</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-card layout="title-out" title="Basic" src="images/logo.svg">
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card layout="title-out" title-size="lg" hover-highlight>
+                        <div slot="title">Large title and hover</div>
+                        <div slot="body">This is the body of card</div>
+                        <div slot="image"><img src="images/hello.png" /></div>
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card layout="title-out" title="With body and selected" title-size="md" body="This is the body of card"
+                        src="images/logo.svg" selected>
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card title="Basic" src="images/logo.svg" image-align="left" text-align="left">
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card layout="title-out" src="images/logo.svg" image-align="left" text-align="left" size="custom" width="100%">
+                        <div slot="header" class="mb-3" style="width:100%;">
+                            <h5>Card header</h5>
+                            <sc-divider size="xxs" vertical style="--sc-divider-color:var(--sc-color-grey-25)">
+                            </sc-divider>
+                        </div>
+                        <div slot="title">Header and content</div>
+                        <div slot="body">This is the body of card</div>
+                        Additional content here
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card layout="title-out" title-size="xs" src="images/logo.svg" image-align="right"
+                        text-align="right" size="custom" width="250px">
+                        <div slot="header" class="mb-3" style="width:100%;">
+                            <h5>Card header</h5>
+                        </div>
+                        <div slot="title">Text alignment and header</div>
+                        <div slot="body">This is the body of card</div>
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card layout="title-out" title="No border" body="This is the body of card"
+                        src="images/logo.svg" no-border>
+                    </sc-icon-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Icon - Icon Title in</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-card mode="icon" icon="bell--line" title="Basic with icon">
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card mode="icon" title-size="lg" space-size="xxs" hover-highlight>
+                        <div slot="title">Large icon and title and spacing and hover</div>
+                        <div slot="body">This is the body of card</div>
+                        <div slot="icon">
+                            <sc-icon name="checkmark-circle--fill" size="xl"></sc-icon>
+                        </div>
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card mode="icon" icon="bell--line" title="Basic with icon" image-align="left"
+                        text-align="left">
+                        <div>
+                            I'm not <strong>just</strong> a card, I'm a <em>card</em> with HTML!
+                        </div>
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card mode="icon" icon="bell--line" icon-size="xs" image-align="right" text-align="right"
+                        title="Small  icon and text alignment" body="This is the body of card" selected size="custom"
+                        width="100%">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut lab
+                    </sc-icon-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Icon - Icon Title out</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-card layout="title-out" mode="icon" icon="bell--line" title="Basic with icon">
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card layout="title-out" mode="icon" title-size="lg" space-size="xxs" hover-highlight>
+                        <div slot="title">Large icon and title and spacing and hover</div>
+                        <div slot="body">This is the body of card</div>
+                        <div slot="icon">
+                            <sc-icon name="checkmark-circle--fill" size="xl"></sc-icon>
+                        </div>
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card layout="title-out" mode="icon" icon="bell--line" title="Basic with icon" image-align="left"
+                        text-align="left">
+                        <div>
+                            I'm not <strong>just</strong> a card, I'm a <em>card</em> with HTML!
+                        </div>
+                    </sc-icon-card>
+                    <br />
+                    <sc-icon-card layout="title-out" mode="icon" icon="bell--line" icon-size="xs" image-align="right" text-align="right"
+                        title="Small  icon and text alignment" body="This is the body of card" selected size="custom"
+                        width="100%">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut lab
+                    </sc-icon-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Icon - Content cover</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-card layout="content-cover" src="images/logo.svg">
+                        <div slot="title">Content cover</div>
+                    </sc-icon-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card</div>
+                <div class="table-cell border px-4 py-4">Icon - Sizes</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-card size="full" src="images/logo.svg">
+                        <div slot="title">Full size</div>
+                    </sc-icon-card>
+                    <br>
+                    <sc-icon-card size="half" src="images/logo.svg" title-size='sm'>
+                        <div slot="title">Half size</div>
+                    </sc-icon-card>
+                    <br>
+                    <sc-icon-card size="one-third" src="images/logo.svg" title-size='md'>
+                        <div slot="title">One third</div>
+                    </sc-icon-card>
+                    <br>
+                    <sc-icon-card size="one-fourth" layout="title-out" src="images/logo.svg" title-size='lg'>
+                        <div slot="title">One fourth</div>
+                    </sc-icon-card>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Employee Card</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-employee-card id=1626487>
+                    </sc-employee-card>
+                </div>
+            </div>
+            <!--
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Carousel</div>
+                <div class="table-cell border px-4 py-4">Aspect ratio</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-carousel pagination aspect-ratio='16/9'>
+                        <sc-carousel-item>
+                            <sc-card style='width: 320px' height='180px'>
+                                <img slot='body' src="images/logo.svg" />
+                                <div>Hello world</div>
+                            </sc-card>
+                        </sc-carousel-item>
+                        <sc-carousel-item>
+                            <sc-card style='width: 100%'>
+                                Hello world
+                            </sc-card>
+                        </sc-carousel-item>
+                    </sc-carousel>
+                </div>
+            </div>
+            -->
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Basic - vertical</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group label="What's your favorite fruits">
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Selected</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group 
+                        id="favoriteFruitsGroup"
+                        label="What's your favorite fruits" 
+                        value="[1,3]">
+                        <sc-checkbox value="1">Banana</sc-checkbox>
+                        <sc-checkbox value="2">Watermelon</sc-checkbox>
+                        <sc-checkbox value="3">Apple</sc-checkbox>
+                        <sc-checkbox value="4">Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Tooltip only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group tooltip="Select your favorite fruits" tooltip-placement="right">
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Required only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group required>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group value='[1,3]' label-size="xxs">
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group value='[1,3]' label-size="xs" success=true required>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group label-size="sm" value='[1,3]'
+                        class='sc-checkbox-group3' error=true>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group label-size="md" value='[1,3]'
+                        class='sc-checkbox-group4' success=true>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group label-size="lg" value='[1,3]'
+                        class='sc-checkbox-group4' error=true>
+                        <sc-checkbox value='1' disabled>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group readonly value='[1,3]'>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>                        
+                    </sc-checkbox-group>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group disabled label="What's your favorite fruits" value='[1,3]'>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">No label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group value='[1,3]' success=true>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Water<strong>melon</strong></sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Horizontal</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group direction='horizontal' label="What's your favorite fruits">
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                </div>
+            </div>       
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Selected</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group value='[1,3]' direction='horizontal' label="What's your favorite fruits">
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                </div>
+            </div>           
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Tooltip only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group direction='horizontal' tooltip="Select your favorite fruits" tooltip-placement="right">
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Required only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group direction='horizontal' required>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group direction='horizontal' value='[1,3]' label-size="xxs">
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group direction='horizontal' value='[1,3]' label-size="xs" success=true required>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group direction='horizontal' label-size="sm" value='[1,3]' error=true>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group direction='horizontal' label-size="md" value='[1,3]' success=true>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group direction='horizontal' label-size="lg" value='[1,3]' error=true>
+                        <sc-checkbox value='1' disabled>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group direction='horizontal' readonly value='[1,3]'>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group direction='horizontal' disabled label="What's your favorite fruits" value='[1,3]'>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">No label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group direction='horizontal' value='[1,3]' error=true>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox Group</div>
+                <div class="table-cell border px-4 py-4">Manaually Set</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox-group class=checkbox-manually-setting direction='horizontal'>
+                        <sc-checkbox value='1'>Banana</sc-checkbox>
+                        <sc-checkbox value='2'>Watermelon</sc-checkbox>
+                        <sc-checkbox value='3'>Apple</sc-checkbox>
+                        <sc-checkbox value='4'>Orange</sc-checkbox>
+                    </sc-checkbox-group>
+                    <sc-button class=checkbox-set-btn>Reset</sc-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox label="Select is you agree">
+                        I agree to the terms and conditions
+                    </sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Checked</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox label="Select is you agree" checked>
+                        I agree to the terms and conditions
+                    </sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Indeterminate</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox label="Select is you agree" indeterminate>
+                        I agree to the terms and conditions
+                    </sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Tooltip only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox tooltip="Select if you agrees" tooltip-placement="right">
+                        I agree to the terms and conditions
+                    </sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Required only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox required>
+                        I agree to the terms and conditions
+                    </sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox label-size="xxs">
+                        I agree to the terms and conditions
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox label-size="xs" success=true>
+                        I agree to the terms and conditions
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox label-size="sm" error=true>
+                        I agree to the terms and conditions
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox label-size="md" border-type="box" success=true>
+                        I agree to the terms and conditions
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox label-size="lg" border-type="box" required error=true
+                        success-message="Success message" error-message="Error message">
+                        I agree to the terms and conditions
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox required readonly>
+                        I <strong>agree</strong> to the terms and conditions
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox required disabled>
+                        I <strong>agree</strong> to the terms and conditions
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Checkbox</div>
+                <div class="table-cell border px-4 py-4">No label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-checkbox success=true>
+                        I <strong>agree</strong> to the terms and conditions
+                    </sc-checkbox>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Content Loader</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-content-loader height="10px"></sc-content-loader>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Content Loader</div>
+                <div class="table-cell border px-4 py-4">Square</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-content-loader type='square' height="50px"></sc-content-loader>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Content Loader</div>
+                <div class="table-cell border px-4 py-4">Rectangle</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-content-loader type='rectangle' height="16px"></sc-content-loader>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Content Loader</div>
+                <div class="table-cell border px-4 py-4">Pill</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-content-loader type='line' height="10px"></sc-content-loader>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Content Loader</div>
+                <div class="table-cell border px-4 py-4">Square</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-content-loader type='square' height="50px"></sc-content-loader>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Content Loader</div>
+                <div class="table-cell border px-4 py-4">Combined</div>
+                <div class="table-cell border px-4 py-4">
+                    <div style="display:flex;max-width:300px;">
+                        <sc-content-loader type='circle' height="60px"></sc-content-loader>
+                        <div style="display:flex;flex-direction:column;width:100%;margin:0 10px;">
+                            <sc-content-loader height="10px" radius="none"></sc-content-loader>
+                            <sc-spacer vertical></sc-spacer>
+                            <sc-content-loader height="10px" radius="none"></sc-content-loader>
+                            <sc-spacer vertical></sc-spacer>
+                            <sc-content-loader height="25px" radius="none"></sc-content-loader>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Copy</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-copy class="sc-copy" value="Copy me!"></sc-copy>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Copy</div>
+                <div class="table-cell border px-4 py-4">Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-copy class="sc-copy"></sc-copy>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Copy</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-copy class="sc-copy" value="Copy me!" disabled></sc-copy>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Copy</div>
+                <div class="table-cell border px-4 py-4">Copy from</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-copy class="sc-copy" from="copy-el">
+                        <div slot="help-text">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                    </sc-copy>
+                    <span id="copy-el">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                        incididunt ut labore et dolore magna aliqua</span>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Copy</div>
+                <div class="table-cell border px-4 py-4">Custom icon, help text and message</div>
+                <div class="table-cell border px-4 py-4">
+                    <span id="copy-info">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                        incididunt ut labore et dolore magna aliqua</span>
+                    <sc-copy class="sc-copy" from="copy-info" tooltip-placement='right' help-text="Click to copy"
+                        success-message="Copied successfully!">
+                        <sc-icon name="info-circle--line" slot="label"></sc-icon>
+                    </sc-copy>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Copy - Text</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-copy class="sc-copy" mode="text" value="Copy me!"></sc-copy>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Copy - Text</div>
+                <div class="table-cell border px-4 py-4">Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-copy class="sc-copy" mode="text"></sc-copy>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Copy - Text</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-copy class="sc-copy" mode="text" value="Copy me!" disabled></sc-copy>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Copy - Text</div>
+                <div class="table-cell border px-4 py-4">Copy from </div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-copy class="sc-copy" mode="text" from="copy-el"></sc-copy>
+                    <br />
+                    <span id="copy-el">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                        incididunt ut labore et dolore magna aliqua</span>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Copy - Text</div>
+                <div class="table-cell border px-4 py-4">Custom label and message</div>
+                <div class="table-cell border px-4 py-4">
+                    <span id="copy-info">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                        incididunt ut labore et dolore magna aliqua</span>
+                    <br />
+                    <sc-copy class="sc-copy" mode="text" from="copy-info" tooltip-placement='right'
+                        label="Click to copy" success-message="Copied successfully!"></sc-copy>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input help-text="Should be digit" value="12345678" max-length=16>
+                        Card number
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Box with suffix icon</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input border-type="box">
+                        Card number
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Without suffix icon</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input no-suffix-icon>
+                        Card number
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Tooltip only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input tooltip="Enter your 16 digits number" tooltip-placement="right">
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Required only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input required>
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Box input</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input label="Your card number" tooltip="Enter your 16 digits number"
+                        tooltip-placement="right" placeholder="Enter any number" help-text="Please enter number only"
+                        value="12345" border-type="box" max-length=99 no-suffix-icon required>
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input label-size="xxs">
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input label-size="xs" success=true>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input label-size="sm" error=true>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input label-size="md" border-type="box" success=true>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input label-size="lg" border-type="box" required error=true
+                        success-message="Success message" error-message="Error message">
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input value="1234567890" required readonly>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Readonly Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input value="1234567890" border-type="box" required readonly>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input value="1234567890" required disabled>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">Disabled Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input value="1234567890" border-type="box" required disabled>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">No label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input value="1234567890" success=true>
+                    </sc-card-number-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Card number</div>
+                <div class="table-cell border px-4 py-4">No label Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-card-number-input value="1234567890" border-type="box" error=true>
+                    </sc-card-number-input>
+                </div>
+            </div>
+        </div>
+    </div>
+</sc-icon-provider>
+<!-- Custom script -->
+<script type="text/javascript">
+    var modes = ['light', 'dark', 'dyslexic']
+    var activeMode = modes[0]
+    function changeMode(mode) {
+        var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child');
+        componentCells.forEach((componentCell) => {
+            modes.forEach((mode) => {
+                componentCell.classList.remove(`sc-mode-${mode}`)
+            })
+            componentCell.classList.add(`sc-mode-${mode}`)
+            if (componentCell.classList.contains('inverse')) {
+                if (mode === 'dark') {
+                    componentCell.style.backgroundColor = 'var(--sc-color-white)'
+                } else {
+                    componentCell.style.backgroundColor = 'var(--sc-color-blue-900)'
+                }
+            }
+        })
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        const myCard = document.getElementById('myCard');
+        myCard.tagsGroup = [
+            { type: 'red', iconName: 'alert-circle--line', content: 'High risk' },
+            { type: 'amber', iconName: 'alert-triangle--line', content: 'Pending approval' },
+            { type: 'primary', iconName: 'info-circle--line', content: 'Information' }
+        ];
+        myCard.supplementaryDetails = [
+            { iconName: 'clock--line', details: '9 APIs' },
+            { iconName: 'calendar--line', details: '20 September 2023' },
+            { iconName: 'clock--line', details: '23 min read' }
+        ];
+    });
+    document.getElementsByTagName('sc-dropdown-input')[0].addEventListener('sc-select', ({ detail: { value } }) => {
+        changeMode(value);
+    });
+    changeMode(activeMode);
+
+    const btn = document.querySelector('.checkbox-set-btn');
+    const checkbox = document.querySelector('.checkbox-manually-setting');
+    checkbox.addEventListener('sc-change', e => {
+        checkbox.value = e.detail.value;
+    })
+    btn.addEventListener('click', () => {
+        checkbox.value = undefined
+    })
+    document.addEventListener('DOMContentLoaded', () => {
+    const checkboxGroup = document.getElementById('favoriteFruitsGroup');
+    checkboxGroup.addEventListener('sc-change', handleCheckboxGroupChange);
+    });
+
+    function handleCheckboxGroupChange(event) {
+        const checkboxGroup = event.target;
+        const selectedValues = event.detail.value;
+        checkboxGroup.value = selectedValues;
+        console.log('Selected values:', selectedValues);
+    }
+
+</script>
+
+<script type="module">
+    import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+    changeIconLibrary();
+    function changeIconLibrary() {
+        document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+    }
+</script>
+
+</html>

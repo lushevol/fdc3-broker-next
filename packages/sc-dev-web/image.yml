@@ -1,0 +1,5 @@
+images:
+  main-container-image:
+    imagePath: mainContainerImageName
+    version: imageTags
+    promote: true

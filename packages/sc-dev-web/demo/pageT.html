@@ -1,0 +1,4576 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+  <title>sc-web-kit demo page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+  <!-- Custom style -->
+  <style>
+    body {
+      padding: 24px;
+    }
+
+    .sc-mode-dark {
+      background-color: var(--sc-color-blue-900)
+    }
+
+    .table-cell {
+      border-color: var(--sc-color-grey-15);
+      vertical-align: top;
+    }
+
+    .side-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      padding: 10px 8px;
+      background-color: var(--sc-color-white);
+      border-radius: 8px;
+      box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      max-height: 100vh;
+      overflow-y: auto;
+      z-index: 999999999;
+    }
+
+    .side-bar div {
+      padding: 5px 0;
+    }
+
+    .side-bar div .selected {
+      color: var(--sc-color-blue-500);
+    }
+  </style>
+
+  <!-- Register all sc-* custom elements -->
+  <script type="module">
+    import '../dist/elements/index.js';
+    import { html } from '/node_modules/lit-html/lit-html.js';
+    window.html = html;
+
+  </script>
+
+</head>
+<sc-icon-provider>
+
+  <div id='side-bar' class='side-bar'>
+    <script type="text/javascript">
+      const sidebar = document.querySelector('#side-bar');
+      const initials = [
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+        'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+        'Y', 'Z'
+      ];
+      const currentPage = 'T';
+      const content = [];
+      initials.forEach(initial => {
+        content.push(`<div>`);
+        content.push(`<a class="${currentPage === initial ? 'selected' : ''}" href="/demo/page${initial}.html">${initial}</a>`);
+        content.push(`</div>`);
+      })
+      sidebar.innerHTML = content.join('');
+    </script>
+  </div>
+
+  <div class="table w-full shadow-lg max-h-96 components-body">
+    <div class="table-header-group font-bold sticky top-0 bg-white z-10">
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Component</div>
+        <div class="table-cell border px-4 py-4">Example</div>
+        <div class="table-cell border px-4">
+          <div class="py-4" style="max-width: 300px;">
+            <sc-dropdown-input label="Mode" value="light">
+              <sc-dropdown-option value="light">Light</sc-dropdown-option>
+              <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+              <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+            </sc-dropdown-input>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="table-row-group h-96 overflow-y-auto">
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tab</div>
+        <div class="table-cell border px-4 py-4">Basic</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-tab-group class="sc-tabs">
+            <sc-tab slot="nav" panel="tab1">
+              <div style='display: flex;'>
+                <sc-icon name=file--line></sc-icon>
+                Tab1-name
+                <sc-icon name=cross></sc-icon>
+              </div>
+            </sc-tab>
+            <sc-tab-divider slot="nav"></sc-tab-divider>
+            <sc-tab slot="nav" panel="tab2" active>
+              tab2-name
+            </sc-tab>
+            <sc-tab slot="nav" panel="tab3" disabled>
+              tab3-name
+            </sc-tab>
+            <sc-tab slot="nav" panel="tab4">
+              tab4-name
+            </sc-tab>
+            <sc-tab slot="nav" panel="tab5">
+              tab5-name
+            </sc-tab>
+            <sc-tab slot="nav" panel="tab6">
+              tab6-name
+            </sc-tab>
+            <sc-tab-panel name="tab1">Tab1 content</sc-tab-panel>
+            <sc-tab-panel name="tab2">Tab2 content</sc-tab-panel>
+            <sc-tab-panel name="tab3">Tab3 content</sc-tab-panel>
+            <sc-tab-panel name="tab4">Tab4 content</sc-tab-panel>
+            <sc-tab-panel name="tab5">Tab5 content</sc-tab-panel>
+            <sc-tab-panel name="tab6">Tab6 content</sc-tab-panel>
+          </sc-tab-group>
+          <script type="text/javascript">
+            const tabs = document.querySelector('.sc-tabs');
+            tabs.addEventListener('sc-tab-select', e => {
+              console.log('selected tab is', e.detail.name)
+            });
+          </script>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tab</div>
+        <div class="table-cell border px-4 py-4">no active bottom line & scroll button & align center</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-tab-group class="sc-tabs" no-active-bottom-line no-scroll-controls alignment="center">
+            <sc-tab slot="nav" panel="tab1">
+              tab1-name
+            </sc-tab>
+            <sc-tab-divider slot="nav"></sc-tab-divider>
+            <sc-tab slot="nav" panel="tab2" active>
+              tab2-name
+            </sc-tab>
+            <sc-tab slot="nav" panel="tab3" disabled>
+              tab3-name
+            </sc-tab>
+            <sc-tab slot="nav" panel="tab4">
+              tab4-name
+            </sc-tab>
+            <sc-tab slot="nav" panel="tab5">
+              tab5-name
+            </sc-tab>
+            <sc-tab slot="nav" panel="tab6">
+              tab6-name
+            </sc-tab>
+            <sc-tab-panel name="tab1">Tab1 content</sc-tab-panel>
+            <sc-tab-panel name="tab2">Tab2 content</sc-tab-panel>
+            <sc-tab-panel name="tab3">Tab3 content</sc-tab-panel>
+            <sc-tab-panel name="tab4">Tab4 content</sc-tab-panel>
+            <sc-tab-panel name="tab5">Tab5 content</sc-tab-panel>
+            <sc-tab-panel name="tab6">Tab6 content</sc-tab-panel>
+          </sc-tab-group>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Text Input</div>
+        <div class="table-cell border px-4 py-4">Max Length - pre-populated value truncation</div>
+        <div class="table-cell border px-4 py-4">
+          <div style="display: grid; gap: 12px; max-width: 420px;">
+            <sc-text-input
+              id="maxlen-input-case"
+              label="Single line (max-length=5)"
+              max-length="5"
+              show-character-count
+            ></sc-text-input>
+
+            <sc-text-input
+              id="maxlen-textarea-case"
+              label="Multiline (max-length=8)"
+              multiline
+              max-length="8"
+              show-character-count
+            ></sc-text-input>
+
+            <div id="maxlen-case-result" style="font-weight: 600;"></div>
+          </div>
+          <script type="text/javascript">
+            (() => {
+              const inputCase = document.getElementById('maxlen-input-case');
+              const textareaCase = document.getElementById('maxlen-textarea-case');
+              const result = document.getElementById('maxlen-case-result');
+
+              if (!inputCase || !textareaCase || !result) {
+                return;
+              }
+
+              // Set long values through property assignment to verify watcher-based truncation.
+              inputCase.value = '123456789';
+              textareaCase.value = 'abcdefghijk';
+
+              requestAnimationFrame(() => {
+                const singlePass = inputCase.value === '12345';
+                const multilinePass = textareaCase.value === 'abcdefgh';
+                const pass = singlePass && multilinePass;
+
+                result.textContent = pass
+                  ? 'PASS: value is truncated when set via property.'
+                  : `FAIL: single="${inputCase.value}" multiline="${textareaCase.value}"`;
+                result.style.color = pass ? 'var(--sc-color-green-500)' : 'var(--sc-color-red-500)';
+              });
+            })();
+          </script>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tab</div>
+        <div class="table-cell border px-4 py-4">show tabs bottom line</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-tab-group class="sc-tabs" show-tabs-bottom-line>
+            <sc-tab slot="nav" panel="tab1">
+              <div style='display: flex;'>
+                <sc-icon name=file--line></sc-icon>
+                Tab1-name
+                <sc-icon name=cross></sc-icon>
+              </div>
+            </sc-tab>
+            <sc-tab-divider slot="nav"></sc-tab-divider>
+            <sc-tab slot="nav" panel="tab2" active>
+              tab2-name
+            </sc-tab>
+            <sc-tab slot="nav" panel="tab3" disabled>
+              tab3-name
+            </sc-tab>
+            <sc-tab slot="nav" panel="tab4">
+              tab4-name
+            </sc-tab>
+            <sc-tab slot="nav" panel="tab5">
+              tab5-name
+            </sc-tab>
+            <sc-tab slot="nav" panel="tab6">
+              tab6-name
+            </sc-tab>
+            <sc-tab-panel name="tab1">Tab1 content</sc-tab-panel>
+            <sc-tab-panel name="tab2">Tab2 content</sc-tab-panel>
+            <sc-tab-panel name="tab3">Tab3 content</sc-tab-panel>
+            <sc-tab-panel name="tab4">Tab4 content</sc-tab-panel>
+            <sc-tab-panel name="tab5">Tab5 content</sc-tab-panel>
+            <sc-tab-panel name="tab6">Tab6 content</sc-tab-panel>
+          </sc-tab-group>
+          <script type="text/javascript">
+            const tabs = document.querySelector('.sc-tabs');
+            tabs.addEventListener('sc-tab-select', e => {
+              console.log('selected tab is', e.detail.name)
+            });
+          </script>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Basic</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table">
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="default">
+                  Default
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="default" fill>
+                  Default fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="primary">
+                  Primary
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="primary" fill>
+                  Primary fill
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="blue">
+                  Blue
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="blue" fill>
+                  Blue fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="dark-blue">
+                  Dark blue
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="dark-blue" fill>
+                  Dark blue fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="success">
+                  Success
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="success" fill>
+                  Success fill
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="green">
+                  Green
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="green" fill>
+                  Green fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="warning">
+                  Warning
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="warning" fill>
+                  Warning fill
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="amber">
+                  Amber
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="amber" fill>
+                  Amber fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="error">
+                  Error
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="error" fill>
+                  Error fill
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="red">
+                  Red
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="red" fill>
+                  Red fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey">
+                  Grey
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey" fill>
+                  Grey fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="black">
+                  Black
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="black" fill>
+                  Black fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="white">
+                  White
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="white" fill>
+                  White fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey-dash">
+                  Grey dash
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey-dash" fill>
+                  Grey dash fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="transparent">
+                  Transparent
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="transparent" fill>
+                  Transparent fill
+                </sc-tag>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Disabled</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="default" disabled>
+                Default
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="primary" disabled>
+                Primary
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="blue" disabled>
+                Blue
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="dark-blue" disabled>
+                Dark blue
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="success" disabled>
+                Success
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="green" disabled>
+                Green
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="warning" disabled>
+                Warning
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="amber" disabled>
+                Amber
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="error" disabled>
+                Error
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="red" disabled>
+                Red
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="grey" disabled>
+                Grey
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="black" disabled>
+                Black
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="white" disabled>
+                White
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="grey-dash" disabled>
+                Grey dash
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="transparent" disabled>
+                Transparent
+              </sc-tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Link</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table">
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="default" link>
+                  Default
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="default" fill link>
+                  Default fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="primary" link>
+                  Primary
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="primary" fill link>
+                  Primary fill
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="blue" link>
+                  Blue
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="blue" fill link>
+                  Blue fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="dark-blue" link>
+                  Dark blue
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="dark-blue" fill link>
+                  Dark blue fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="success" link>
+                  Success
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="success" fill link>
+                  Success fill
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="green" link>
+                  Green
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="green" fill link>
+                  Green fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="warning" link>
+                  Warning
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="warning" fill link>
+                  Warning fill
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="amber" link>
+                  Amber
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="amber" fill link>
+                  Amber fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="error" link>
+                  Error
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="error" fill link>
+                  Error fill
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="red" link>
+                  Red
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="red" fill link>
+                  Red fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey" link>
+                  Grey
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey" fill link>
+                  Grey fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="black" link>
+                  Black
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="black" fill link>
+                  Black fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="white" link>
+                  White
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="white" fill link>
+                  White fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey-dash" link>
+                  Grey dash
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey-dash" fill link>
+                  Grey dash fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="transparent" link>
+                  Transparent
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="transparent" fill link>
+                  Transparent fill
+                </sc-tag>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Max Width</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table">
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="default" max-width="50px">
+                  Default
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="default" fill max-width="50px">
+                  Default fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="primary" max-width="50px">
+                  Primary
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="primary" fill max-width="50px">
+                  Primary fill
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="blue" max-width="50px">
+                  Blue
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="blue" fill max-width="50px">
+                  Blue fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="dark-blue" max-width="50px">
+                  Dark blue
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="dark-blue" fill max-width="50px">
+                  Dark blue fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="success" max-width="50px">
+                  Success
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="success" fill max-width="50px">
+                  Success fill
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="green" max-width="50px">
+                  Green
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="green" fill max-width="50px">
+                  Green fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="warning" max-width="50px">
+                  Warning
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="warning" fill max-width="50px">
+                  Warning fill
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="amber" max-width="50px">
+                  Amber
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="amber" fill max-width="50px">
+                  Amber fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="error" max-width="50px">
+                  Error
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="error" fill max-width="50px">
+                  Error fill
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="red" max-width="50px">
+                  Red
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="red" fill max-width="50px">
+                  Red fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey" max-width="50px">
+                  Grey
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey" fill max-width="50px">
+                  Grey fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="black" max-width="50px">
+                  Black
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="black" fill max-width="50px">
+                  Black fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="white" max-width="50px">
+                  White
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="white" fill max-width="50px">
+                  White fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey-dash" max-width="50px">
+                  Grey dash
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey-dash" fill max-width="50px">
+                  Grey dash fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="transparent" max-width="50px">
+                  Transparent
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="transparent" fill max-width="50px">
+                  Transparent fill
+                </sc-tag>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Basic - Icon</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table">
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="default" icon icon-name="clock--line">
+                  Default
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="default" fill icon icon-name="clock--line">
+                  Default fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="primary" icon icon-name="clock--line">
+                  Primary
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="primary" fill icon icon-name="clock--line">
+                  Primary fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="dark-blue" icon icon-name="clock--line">
+                  Dark blue
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="dark-blue" fill icon icon-name="clock--line">
+                  Dark blue fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="success" icon icon-name="clock--line">
+                  Success
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="success" fill icon icon-name="clock--line">
+                  Success fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="warning" icon icon-name="clock--line">
+                  Warning
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="warning" fill icon icon-name="clock--line">
+                  Warning fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="error" icon icon-name="clock--line">
+                  Error
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="error" fill icon icon-name="clock--line">
+                  Error fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey" icon icon-name="clock--line">
+                  Grey
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey" fill icon icon-name="clock--line">
+                  Grey fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="black" icon icon-name="clock--line">
+                  Black
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="black" fill icon icon-name="clock--line">
+                  Black fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="white" icon icon-name="clock--line">
+                  White
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="white" fill icon icon-name="clock--line">
+                  White fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey-dash" icon icon-name="clock--line">
+                  Grey dash
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="grey-dash" fill icon icon-name="clock--line">
+                  Grey dash fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="transparent" icon icon-name="clock--line">
+                  Transparent
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="transparent" fill icon icon-name="clock--line">
+                  Transparent fill
+                </sc-tag>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Basic - Icon with Max Width</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table">
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="default" icon max-width="70px" icon-name="clock--line">
+                  Default
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="default" fill icon max-width="70px" icon-name="clock--line">
+                  Default fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="primary" icon max-width="70px" icon-name="clock--line">
+                  Primary
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="primary" fill icon max-width="70px" icon-name="clock--line">
+                  Primary fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="success" icon max-width="70px" icon-name="clock--line">
+                  Success
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="success" fill icon max-width="70px" icon-name="clock--line">
+                  Success fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="warning" icon max-width="70px" icon-name="clock--line">
+                  Warning
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="warning" fill icon max-width="70px" icon-name="clock--line">
+                  Warning fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="error" icon max-width="70px" icon-name="clock--line">
+                  Error
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="error" fill icon max-width="70px" icon-name="clock--line">
+                  Error fill
+                </sc-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="transparent" icon max-width="70px" icon-name="clock--line">
+                  Transparent
+                </sc-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tag type="transparent" fill icon max-width="70px" icon-name="clock--line">
+                  Transparent fill
+                </sc-tag>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Disabled - Icon</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="default" disabled icon icon-name="clock--line">
+                Default
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="primary" disabled icon icon-name="clock--line">
+                Primary
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="blue" disabled icon icon-name="clock--line">
+                Blue
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="dark-blue" disabled icon icon-name="clock--line">
+                Dark blue
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="success" disabled icon icon-name="clock--line">
+                Success
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="green" disabled icon icon-name="clock--line">
+                Green
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="warning" disabled icon icon-name="clock--line">
+                Warning
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="amber" disabled icon icon-name="clock--line">
+                Amber
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="error" disabled icon icon-name="clock--line">
+                Error
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="red" disabled icon icon-name="clock--line">
+                Red
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="grey" disabled icon icon-name="clock--line">
+                Grey
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="black" disabled icon icon-name="clock--line">
+                Black
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="white" disabled icon icon-name="clock--line">
+                White
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="grey-dash" disabled icon icon-name="clock--line">
+                Grey dash
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="transparent" disabled icon icon-name="clock--line">
+                Transparent
+              </sc-tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Disabled - Icon with Max Width</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="default" disabled icon icon-name="clock--line" max-width="70px">
+                Default
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="primary" disabled icon icon-name="clock--line" max-width="70px">
+                Primary
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="blue" disabled icon icon-name="clock--line" max-width="70px">
+                Blue
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="dark-blue" disabled icon icon-name="clock--line" max-width="70px">
+                Dark blue
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="success" disabled icon icon-name="clock--line" max-width="70px">
+                Success
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="green" disabled icon icon-name="clock--line" max-width="70px">
+                Green
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="warning" disabled icon icon-name="clock--line" max-width="70px">
+                Warning
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="amber" disabled icon icon-name="clock--line" max-width="70px">
+                Amber
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="error" disabled icon icon-name="clock--line" max-width="70px">
+                Error
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="red" disabled icon icon-name="clock--line" max-width="70px">
+                Red
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="grey" disabled icon icon-name="clock--line" max-width="70px">
+                Grey
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="black" disabled icon icon-name="clock--line" max-width="70px">
+                Black
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="white" disabled icon icon-name="clock--line" max-width="70px">
+                White
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="grey-dash" disabled icon icon-name="clock--line" max-width="70px">
+                Grey dash
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="transparent" disabled icon icon-name="clock--line" max-width="70px">
+                Transparent
+              </sc-tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Link - Icon</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="default" link icon icon-name="clock--line">
+                Default
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="primary" link icon icon-name="clock--line">
+                Primary
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="blue" link icon icon-name="clock--line">
+                Blue
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="dark-blue" link icon icon-name="clock--line">
+                Dark blue
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="success" link icon icon-name="clock--line">
+                Success
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="green" link icon icon-name="clock--line">
+                Green
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="warning" link icon icon-name="clock--line">
+                Warning
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="amber" link icon icon-name="clock--line">
+                Amber
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="error" link icon icon-name="clock--line">
+                Error
+              </sc-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="red" link icon icon-name="clock--line">
+                Red
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="grey" link icon icon-name="clock--line">
+                Grey
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="black" link icon icon-name="clock--line">
+                Black
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="white" link icon icon-name="clock--line">
+                White
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="grey-dash" link icon icon-name="clock--line">
+                Grey dash
+              </sc-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-tag type="transparent" link icon icon-name="clock--line">
+                Transparent
+              </sc-tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Closable - Default</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table">
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="default">
+                  Default
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="default" fill>
+                  Default fill
+                </sc-closable-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="primary">
+                  Primary
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="primary" fill>
+                  Primary fill
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="blue">
+                  Blue
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="blue" fill>
+                  Blue fill
+                </sc-closable-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="dark-blue">
+                  Dark blue
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="dark-blue" fill>
+                  Dark blue fill
+                </sc-closable-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="success">
+                  Success
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="success" fill>
+                  Success fill
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="green">
+                  Green
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="green" fill>
+                  Green fill
+                </sc-closable-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="warning">
+                  Warning
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="warning" fill>
+                  Warning fill
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="amber">
+                  Amber
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="amber" fill>
+                  Amber fill
+                </sc-closable-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="error">
+                  Error
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="error" fill>
+                  Error fill
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="red">
+                  Red
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="red" fill>
+                  Red fill
+                </sc-closable-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="grey">
+                  Grey
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="grey" fill>
+                  Grey fill
+                </sc-closable-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="black">
+                  Black
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="black" fill>
+                  Black fill
+                </sc-closable-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="white">
+                  White
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="white" fill>
+                  White fill
+                </sc-closable-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="grey-dash">
+                  Grey dash
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="grey-dash" fill>
+                  Grey dash fill
+                </sc-closable-tag>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="transparent">
+                  Transparent
+                </sc-closable-tag>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-closable-tag type="transparent" fill>
+                  Transparent fill
+                </sc-closable-tag>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Closable - Alternate</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="default" mode='alternate'>
+                Default
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="primary" mode='alternate'>
+                Primary
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="blue" mode='alternate'>
+                Blue
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="success" mode='alternate'>
+                Success
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="green" mode='alternate'>
+                Green
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="warning" mode='alternate'>
+                Warning
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="amber" mode='alternate'>
+                Amber
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="error" mode='alternate'>
+                Error
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="red" mode='alternate'>
+                Red
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey" mode='alternate'>
+                Grey
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="black" mode='alternate'>
+                Black
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="white" mode='alternate'>
+                White
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey-dash" mode='alternate'>
+                Grey dash
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="transparent" mode='alternate'>
+                Transparent
+              </sc-closable-tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Closable - Alternate Max Width</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="default" mode='alternate' max-width="80px">
+                Default
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="primary" mode='alternate' max-width="80px">
+                Primary
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="success" mode='alternate' max-width="80px">
+                Success
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="warning" mode='alternate' max-width="80px">
+                Warning
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="error" mode='alternate' max-width="80px">
+                Error
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey" mode='alternate' max-width="80px">
+                Grey
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="black" mode='alternate' max-width="80px">
+                Black
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="white" mode='alternate' max-width="80px">
+                White
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey-dash" mode='alternate' max-width="80px">
+                Grey dash
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="transparent" mode='alternate' max-width="80px">
+                Transparent
+              </sc-closable-tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Closable - Disabled</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="default" disabled icon icon-name="clock--line">
+                Default
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="primary" disabled icon icon-name="clock--line">
+                Primary
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="blue" disabled icon icon-name="clock--line">
+                Blue
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="dark-blue" disabled icon icon-name="clock--line">
+                Dark blue
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="success" disabled icon icon-name="clock--line">
+                Success
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="green" disabled icon icon-name="clock--line">
+                Green
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="warning" disabled icon icon-name="clock--line">
+                Warning
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="amber" disabled icon icon-name="clock--line">
+                Amber
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="error" disabled icon icon-name="clock--line">
+                Error
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="red" disabled icon icon-name="clock--line">
+                Red
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey" disabled icon icon-name="clock--line">
+                Grey
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="black" disabled icon icon-name="clock--line">
+                Black
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="white" disabled icon icon-name="clock--line">
+                White
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey-dash" disabled icon icon-name="clock--line">
+                Grey dash
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="transparent" disabled icon icon-name="clock--line">
+                Transparent
+              </sc-closable-tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Closable - Link</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="default" link icon icon-name="clock--line">
+                Default
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="primary" link icon icon-name="clock--line">
+                Primary
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="blue" link icon icon-name="clock--line">
+                Blue
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="dark-blue" link icon icon-name="clock--line">
+                Dark blue
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="success" link icon icon-name="clock--line">
+                Success
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="green" link icon icon-name="clock--line">
+                Green
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="warning" link icon icon-name="clock--line">
+                Warning
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="amber" link icon icon-name="clock--line">
+                Amber
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="error" link icon icon-name="clock--line">
+                Error
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="red" link icon icon-name="clock--line">
+                Red
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey" link icon icon-name="clock--line">
+                Grey
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="black" link icon icon-name="clock--line">
+                Black
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="white" link icon icon-name="clock--line">
+                White
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey-dash" link icon icon-name="clock--line">
+                Grey dash
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="transparent" link icon icon-name="clock--line">
+                Transparent
+              </sc-closable-tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Closable - Max Width</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="default" max-width="70px">
+                Default
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="default" fill max-width="70px">
+                Default fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="primary" max-width="70px">
+                Primary
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="primary" fill max-width="70px">
+                Primary fill
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="blue" max-width="70px">
+                Blue
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="blue" fill max-width="70px">
+                Blue fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="dark-blue" max-width="70px">
+                Dark blue
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="dark-blue" fill max-width="70px">
+                Dark blue fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="success" max-width="70px">
+                Success
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="success" fill max-width="70px">
+                Success fill
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="green" max-width="70px">
+                Green
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="green" fill max-width="70px">
+                Green fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="warning" max-width="70px">
+                Warning
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="warning" fill max-width="70px">
+                Warning fill
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="amber" max-width="70px">
+                Amber
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="amber" fill max-width="70px">
+                Amber fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="error" max-width="70px">
+                Error
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="error" fill max-width="70px">
+                Error fill
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="red" max-width="70px">
+                Red
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="red" fill max-width="70px">
+                Red fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey" max-width="70px">
+                Grey
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey" fill max-width="70px">
+                Grey fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="black" max-width="70px">
+                Black
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="black" fill max-width="70px">
+                Black fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="white" max-width="70px">
+                White
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="white" fill max-width="70px">
+                White fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey-dash" max-width="70px">
+                Grey dash
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey-dash" fill max-width="70px">
+                Grey dash fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="transparent" max-width="70px">
+                Transparent
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="transparent" fill max-width="70px">
+                Transparent fill
+              </sc-closable-tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Closable - Icon</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="default" icon icon-name="clock--line">
+                Default
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="default" fill icon icon-name="clock--line">
+                Default fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="primary" icon icon-name="clock--line">
+                Primary
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="primary" fill icon icon-name="clock--line">
+                Primary fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="success" icon icon-name="clock--line">
+                Success
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="success" fill icon icon-name="clock--line">
+                Success fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="warning" icon icon-name="clock--line">
+                Warning
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="warning" fill icon icon-name="clock--line">
+                Warning fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="error" icon icon-name="clock--line">
+                Error
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="error" fill icon icon-name="clock--line">
+                Error fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="transparent" icon icon-name="clock--line">
+                Transparent
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="transparent" fill icon icon-name="clock--line">
+                Transparent fill
+              </sc-closable-tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Closable - Icon with Max Width</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="default" icon max-width="90px" icon-name="clock--line">
+                Default
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="default" fill icon max-width="90px" icon-name="clock--line">
+                Default fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="primary" icon max-width="90px" icon-name="clock--line">
+                Primary
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="primary" fill icon max-width="90px" icon-name="clock--line">
+                Primary fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="success" icon max-width="90px" icon-name="clock--line">
+                Success
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="success" fill icon max-width="90px" icon-name="clock--line">
+                Success fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="warning" icon max-width="90px" icon-name="clock--line">
+                Warning
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="warning" fill icon max-width="90px" icon-name="clock--line">
+                Warning fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="error" icon max-width="90px" icon-name="clock--line">
+                Error
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="error" fill icon max-width="90px" icon-name="clock--line">
+                Error fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey" icon max-width="90px" icon-name="clock--line">
+                Grey
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey" fill icon max-width="90px" icon-name="clock--line">
+                Grey fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="black" icon max-width="90px" icon-name="clock--line">
+                Black
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="black" fill icon max-width="90px" icon-name="clock--line">
+                Black fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="white" icon max-width="90px" icon-name="clock--line">
+                White
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="white" fill icon max-width="90px" icon-name="clock--line">
+                White fill
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey-dash" icon max-width="90px" icon-name="clock--line">
+                Grey dash
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey-dash" fill icon max-width="90px" icon-name="clock--line">
+                Grey dash
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="transparent" icon max-width="90px" icon-name="clock--line">
+                Transparent
+              </sc-closable-tag>
+            </div>
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="transparent" fill icon max-width="90px" icon-name="clock--line">
+                Transparent fill
+              </sc-closable-tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Closable - Alternate with Icon</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="default" mode='alternate' icon icon-name="clock--line">
+                Default
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="primary" mode='alternate' icon icon-name="clock--line">
+                Primary
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="dark-blue" mode='alternate' icon icon-name="clock--line">
+                Dark Blue
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="success" mode='alternate' icon icon-name="clock--line">
+                Success
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="warning" mode='alternate' icon icon-name="clock--line">
+                Warning
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="error" mode='alternate' icon icon-name="clock--line">
+                Error
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey" mode='alternate' icon icon-name="clock--line">
+                Grey
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="black" mode='alternate' icon icon-name="clock--line">
+                Black
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="white" mode='alternate' icon icon-name="clock--line">
+                White
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey-dash" mode='alternate' icon icon-name="clock--line">
+                Grey dash
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="transparent" mode='alternate' icon icon-name="clock--line">
+                Transparent
+              </sc-closable-tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tag</div>
+        <div class="table-cell border px-4 py-4">Closable - Alternate Max Width with Icon</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="default" mode='alternate' icon max-width="90px" icon-name="clock--line">
+                Default
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="primary" mode='alternate' icon max-width="90px" icon-name="clock--line">
+                Primary
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="dark-blue" mode='alternate' icon max-width="90px" icon-name="clock--line">
+                Dark Blue
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="success" mode='alternate' icon max-width="90px" icon-name="clock--line">
+                Success
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="warning" mode='alternate' icon max-width="90px" icon-name="clock--line">
+                Warning
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="error" mode='alternate' icon max-width="90px" icon-name="clock--line">
+                Error
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey" mode='alternate' icon max-width="90px" icon-name="clock--line">
+                Grey
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="black" mode='alternate' icon max-width="90px" icon-name="clock--line">
+                Black
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="white" mode='alternate' icon max-width="90px" icon-name="clock--line">
+                White
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="grey-dash" mode='alternate' icon max-width="90px" icon-name="clock--line">
+                Grey dash
+              </sc-closable-tag>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell px-1 py-1">
+              <sc-closable-tag type="transparent" mode='alternate' icon max-width="90px" icon-name="clock--line">
+                Transparent
+              </sc-closable-tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">TimeInput</div>
+        <div class="table-cell border px-4 py-4">Basic</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-time-input class="text-time-input-basic" placeholder="Select time here" value='07:10:50'>Time
+            input</sc-time-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">TimeInput</div>
+        <div class="table-cell border px-4 py-4">Error</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-time-input error placeholder="Select time here">
+            <div slot='label'>Time input</div>
+            <!-- <div slot="error">Error message</div> -->
+          </sc-time-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">TimeInput</div>
+        <div class="table-cell border px-4 py-4">Success</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-time-input success success-message='Success message by attribute' placeholder="Select time here"
+            tooltip='Tooltip content'>
+            Time input
+          </sc-time-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">TimeInput</div>
+        <div class="table-cell border px-4 py-4">Disabled hours / minutes</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-time-input placeholder="Select time here" label='Time input' disabled-hours="[2,5,7]"
+            disabled-minutes="[10,15,30]"></sc-time-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">TimeInput</div>
+        <div class="table-cell border px-4 py-4">Readonly</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-time-input placeholder="Select time here" label='Time input' value='07:10:50' readonly></sc-time-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">TimeInput</div>
+        <div class="table-cell border px-4 py-4">Disabled</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-time-input placeholder="Select time here" label='Time input' value='07:10:50' disabled></sc-time-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">TimeInput</div>
+        <div class="table-cell border px-4 py-4">Disabled Box</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-time-input placeholder="Select time here" label='Time input' value='07:10:50' disabled
+            border-type='box'></sc-time-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Timer</div>
+        <div class="table-cell border px-4 py-4">Default Timer</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-timer duration-value="15" duration-unit="second" label="Timer" size="small" border-radius="md"
+            state-interval-time="5" time-out-message="Submission time out. Please resubmit the form again"></sc-timer>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Timer</div>
+        <div class="table-cell border px-4 py-4">Timer With Hour Digit</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-timer duration-value="2" duration-unit="hour" label="Timer with Hour digit" need-hour-digit=""
+            size="small" border-radius="md" state-interval-time="2400"
+            time-out-message="Submission time out. Please resubmit the form again"></sc-timer>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Timer</div>
+        <div class="table-cell border px-4 py-4">Small Timer</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-timer duration-value="15" duration-unit="second" label="This is small size" size="small"
+            border-radius="md" state-interval-time="5"
+            time-out-message="Submission time out. Please resubmit the form again"></sc-timer>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Timer</div>
+        <div class="table-cell border px-4 py-4">Large Timer</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-timer duration-value="2" duration-unit="minute" label="This is large size" size="large" border-radius="md"
+            state-interval-time="40" time-out-message="Submission time out. Please resubmit the form again"></sc-timer>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Timer</div>
+        <div class="table-cell border px-4 py-4">No Background</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-timer duration-value="30" duration-unit="second" label="No background" no-background="" size="small"
+            border-radius="md" state-interval-time="10"
+            time-out-message="Submission time out. Please resubmit the form again"></sc-timer>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Basic</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input class=text-input-basic placeholder="Input text" help-text="Should be alphanumeric">
+            Text Input
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Tooltip only</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input tooltip="Enter your text" tooltip-placement="right">
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Required only</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input required>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Box input</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input label="Your text" tooltip="Enter your text" tooltip-placement="right"
+            placeholder="Enter any text" help-text="Please enter text only" value="12345" border-type="box" max-length=8
+            required>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Clearable</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input placeholder="Input text" clearable help-text="Should be alphanumeric">
+            Text Input
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Prefix</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input placeholder="Input text" prefix-icon='person--line' clear error
+            help-text="Should be alphanumeric">
+            Text Input
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Suffix</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input placeholder="Input text" clear multiline suffix-icon='lock--line' suffix-label='1234' error
+            help-text="Should be alphanumeric">
+            Text Input
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Box Suffix</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input placeholder="Input text" border-type="box" prefix-icon='person--line' clear
+            suffix-icon='lock--line' suffix-label='1234' help-text="Should be alphanumeric">
+            Text Input
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Character Counter</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input placeholder="Input text" show-character-count multiline max-length=100
+            help-text="Should be alphanumeric">
+            Text Input
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input label-size="xxs">
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input label-size="xs" success=true>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+            <div slot="success">
+              I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input label-size="sm" error=true>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+            <div slot="error">
+              I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input label-size="md" border-type="box" success=true>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+            <div slot="success">
+              I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input label-size="lg" border-type="box" required error=true success-message="Success message"
+            error-message="Error message">
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Readonly</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input value="1234567890" required readonly>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Readonly Box</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input value="1234567890" border-type="box" required readonly>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Disabled</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input value="1234567890" required disabled>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">Disabled Box</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input value="1234567890" border-type="box" required disabled>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">No label</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input value="1234567890">
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Text Input</div>
+        <div class="table-cell border px-4 py-4">No label Box</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input value="1234567890" border-type="box">
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Basic</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input placeholder="Text Input" max-length=10 help-text="Should be alphanumeric" multiline>
+            Textarea
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Resizable</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input placeholder="Text Input" help-text="Should be alphanumeric" multiline resizable>
+            Textarea
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Rows</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input help-text="Should be alphanumeric" placeholder="Text Input" multiline rows="5">
+            Textarea
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Tooltip only</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input tooltip="Enter your text" tooltip-placement="right" multiline>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Required only</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input multiline required>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Box input</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input label="Your text" tooltip="Enter your text" tooltip-placement="right"
+            placeholder="Enter any text" help-text="Please enter text only" value="12345" border-type="box" max-length=8
+            multiline required>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input label-size="xxs" multiline>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input label-size="xs" multiline success=true>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+            <div slot="success">
+              I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input label-size="sm" multiline error=true>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+            <div slot="error">
+              I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input label-size="md" border-type="box" multiline success=true>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+            <div slot="success">
+              I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input label-size="lg" border-type="box" multiline required error=true
+            success-message="Success message" error-message="Error message">
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Readonly</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input value="1234567890" multiline required readonly>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Readonly Box</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input value="1234567890" border-type="box" multiline required readonly>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Disabled</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input value="1234567890" multiline required disabled>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">Disabled Box</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input value="1234567890" border-type="box" multiline required disabled>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">No label</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input value="1234567890" multiline>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Form Input - Textarea</div>
+        <div class="table-cell border px-4 py-4">No label Box</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-text-input value="1234567890" border-type="box" multiline>
+          </sc-text-input>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toast</div>
+        <div class="table-cell border px-4 py-4">Basic</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-button onclick="toggleToast('success-toast')">Open success toast</sc-button>
+          <sc-toast id='success-toast' type='success'>File upload complete</sc-toast>
+          <sc-button onclick="toggleToast('warning-toast')">Open warning toast</sc-button>
+          <sc-toast id='warning-toast' type='warning'>File upload warning</sc-toast>
+          <sc-button onclick="toggleToast('error-toast')">Open error toast</sc-button>
+          <sc-toast id='error-toast' type='error'>File upload error</sc-toast>
+          <sc-button onclick="toggleToast('info-toast')">Open info toast</sc-button>
+          <sc-toast id='info-toast' type='info'>File upload info</sc-toast>
+          <sc-button onclick="toggleToast('disabled-toast')">Open disabled toast</sc-button>
+          <sc-toast id='disabled-toast' type='disabled'>File upload disabled</sc-toast>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toast</div>
+        <div class="table-cell border px-4 py-4">Closable</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-button onclick="toggleToast('closable-toast')">Open toast</sc-button>
+          <sc-toast id='closable-toast' placement='bottom-right' type='warning' closable>
+            File upload warning
+          </sc-toast>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toast</div>
+        <div class="table-cell border px-4 py-4">Show title & longer timeout</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-button onclick="toggleToast('title-toast')">Open toast</sc-button>
+          <sc-toast id='title-toast' placement='top-left' type='warning' duration=6000>
+            File upload warning
+            <div slot='title'>Warning toast</div>
+          </sc-toast>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toast</div>
+        <div class="table-cell border px-4 py-4">Not dismiss</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-button onclick="toggleToast('dismiss-toast')">Open toast</sc-button>
+          <sc-toast id='dismiss-toast' placement='bottom-left' type='error' duration=Infinity closable
+            title='Server connection error'>
+            <sc-icon name='clock--line'></sc-icon> Please try again
+            <sc-icon name='message-circle--line' slot='title'></sc-icon>
+            <span slot='title' style="margin-left: 4px;">This is title</span>
+          </sc-toast>
+          <script type="text/javascript">
+            function toggleToast(id) {
+              var toast = document.getElementById(id);
+              if (toast) {
+                toast.setAttribute('open', true);
+              }
+            }
+          </script>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toggle</div>
+        <div class="table-cell border px-4 py-4">Basic</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-toggle>
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+          </sc-toggle>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toggle</div>
+        <div class="table-cell border px-4 py-4">Different size</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-toggle size='sm'>
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+          </sc-toggle>
+          <sc-toggle size='md'>
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+          </sc-toggle>
+          <sc-toggle size='lg' value="dark">
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+          </sc-toggle>
+        </div>
+      </div>
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toggle</div>
+        <div class="table-cell border px-4 py-4">Tooltip only</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-toggle tooltip="Your preferred mode" tooltip-placement="right">
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+          </sc-toggle>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toggle</div>
+        <div class="table-cell border px-4 py-4">Required only</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-toggle required>
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+          </sc-toggle>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toggle</div>
+        <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-toggle label-size="xxs">
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+          </sc-toggle>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toggle</div>
+        <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-toggle label-size="xs" success=true>
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+            <div slot="success">
+              I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+            </div>
+          </sc-toggle>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toggle</div>
+        <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-toggle label-size="sm" error=true>
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+            <div slot="error">
+              I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+            </div>
+          </sc-toggle>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toggle</div>
+        <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-toggle label-size="md" success=true>
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+            <div slot="success">
+              I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+            </div>
+          </sc-toggle>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toggle</div>
+        <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-toggle label-size="lg" required error=true success-message="Success message"
+            error-message="Error message">
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+            <div slot="label-tooltip">
+              I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+            </div>
+            <div slot="help">
+              I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+            </div>
+          </sc-toggle>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toggle</div>
+        <div class="table-cell border px-4 py-4">Readonly</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-toggle value="dark" required readonly>
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+          </sc-toggle>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toggle</div>
+        <div class="table-cell border px-4 py-4">Disabled</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-toggle value="dark" required disabled>
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+            <div slot="label">
+              I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+            </div>
+          </sc-toggle>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Toggle</div>
+        <div class="table-cell border px-4 py-4">No label</div>
+        <div class="table-cell border px-4 py-4">
+          <sc-toggle value="dark">
+            <sc-toggle-option value="light">
+              Light
+            </sc-toggle-option>
+            <sc-toggle-option value="dark">
+              Dark
+            </sc-toggle-option>
+            <sc-toggle-option value="auto">
+              Auto
+            </sc-toggle-option>
+          </sc-toggle>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tooltip</div>
+        <div class="table-cell border px-4 py-4">Click</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table">
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                Top
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tooltip content="Tooltip Content">
+                  <sc-icon name="info-circle--line" size="md" compact> </sc-icon>
+                </sc-tooltip>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                Bottom
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tooltip content="Tooltip Content" placement="bottom">
+                  <sc-icon name="info-circle--line" size="md" compact> </sc-icon>
+                </sc-tooltip>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                Left
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tooltip content="Tooltip Content" placement="left">
+                  <sc-icon name="info-circle--line" size="md" compact> </sc-icon>
+                </sc-tooltip>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                Right
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tooltip content="Tooltip Content" placement="right">
+                  <sc-icon name="info-circle--line" size="md" compact> </sc-icon>
+                </sc-tooltip>
+              </div>
+            </div>
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                Light mode
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tooltip content="Tooltip Content" mode=light placement="bottom">
+                  <sc-icon name="info-circle--line" size="md" compact> </sc-icon>
+                </sc-tooltip>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tooltip</div>
+        <div class="table-cell border px-4 py-4">Hover</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table">
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-tooltip trigger="hover">
+                  <div slot="content">
+                    I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                  </div>
+                  <sc-icon name="info-circle--line" size="md" compact> </sc-icon>
+                </sc-tooltip>
+              </div>
+              <div class="table-cell px-1 py-1">
+                <sc-tooltip content="Delayed showing tooltip" trigger="hover" hover-show-delay="1000">
+                  <sc-icon name="info-circle--line" size="md" compact></sc-icon>
+                </sc-tooltip>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tooltip</div>
+        <div class="table-cell border px-4 py-4">Manual</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table">
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-button class="tooltip-trigger" size="md">Toggle tooltip</sc-button>
+                <span class="px-3"></span>
+                <sc-tooltip content="Tooltip Content" trigger="manual" class="manual-tooltip">
+                  <sc-icon name="info-circle--line" size="md" compact> </sc-icon>
+                </sc-tooltip>
+                <script type="text/javascript">
+                  const tooltip = document.querySelector('.manual-tooltip');
+                  const tooltipTrigger = document.querySelector('.tooltip-trigger');
+                  tooltipTrigger.addEventListener('click', event => {
+                    tooltip.open = !tooltip.open;
+                  });
+                </script>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+          <div class="table-cell border px-4 py-4">Typography - Title</div>
+          <div class="table-cell border px-4 py-4">Default</div>
+          <div class="table-cell border px-4 py-4">
+              <div class="mb-3">
+                  <sc-title>H1</sc-title>
+                  <sc-title level=2>H2</sc-title>
+                  <sc-title level=3>H3</sc-title>
+                  <sc-title level=4>H4</sc-title>
+                  <sc-title level=5>H5</sc-title>
+                  <sc-title level=6>H6</sc-title>
+              </div>
+          </div>
+      </div>
+      <div class="table-row">
+          <div class="table-cell border px-4 py-4">Typography - Title</div>
+          <div class="table-cell border px-4 py-4">Hero</div>
+          <div class="table-cell border px-4 py-4">
+              <div class="mb-3">
+                  <sc-title hero>H1</sc-title>
+                  <sc-title hero level=2>H2</sc-title>
+                  <sc-title hero level=3>H3</sc-title>
+                  <sc-title hero level=4>H4</sc-title>
+                  <sc-title hero level=5>H5</sc-title>
+                  <sc-title hero level=6>H6</sc-title>
+              </div>
+          </div>
+      </div>
+      <div class="table-row">
+          <div class="table-cell border px-4 py-4">Typography - Title</div>
+          <div class="table-cell border px-4 py-4">Ellipsis</div>
+          <div class="table-cell border px-4 py-4">
+              <div class="mb-3" style='width: 300px'>
+                  <sc-title ellipsis>H1 long long long long long long long long text</sc-title>
+                  <sc-title ellipsis level=2>H2 long long long long long long long long text</sc-title>
+                  <sc-title ellipsis level=3>H3 long long long long long long long long text</sc-title>
+                  <sc-title ellipsis level=4>H4 long long long long long long long long text</sc-title>
+                  <sc-title ellipsis level=5>H5 long long long long long long long long text</sc-title>
+                  <sc-title ellipsis level=6>H6 long long long long long long long long text</sc-title>
+              </div>
+          </div>
+      </div>
+      <div class="table-row">
+          <div class="table-cell border px-4 py-4">Typography - Title</div>
+          <div class="table-cell border px-4 py-4">Ellipsis with row</div>
+          <div class="table-cell border px-4 py-4">
+              <div class="mb-3" style='width: 300px'>
+                  <sc-title ellipsis row=2>H1 long long long long long long long long text</sc-title>
+                  <sc-title ellipsis level=2 row=1>H2 long long long long long long long long text</sc-title>
+                  <sc-title ellipsis level=3 row=3>H3 long long long long long long long long long long long long long long long long text</sc-title>
+                  <sc-title ellipsis level=4>H4 long long long long long long long long text</sc-title>
+                  <sc-title ellipsis level=5>H5 long long long long long long long long text</sc-title>
+                  <sc-title ellipsis level=6>H6 long long long long long long long long text</sc-title>
+              </div>
+          </div>
+      </div>
+      <div class="table-row">
+          <div class="table-cell border px-4 py-4">Typography - Paragraph</div>
+          <div class="table-cell border px-4 py-4">Basic</div>
+          <div class="table-cell border px-4 py-4">
+              <div class="mb-3">
+                  <sc-paragraph>Paragraph</sc-paragraph>
+                  <sc-paragraph size=sm>Paragraph sm size</sc-paragraph>
+                  <sc-paragraph size=xs>Paragraph xs size</sc-paragraph>
+              </div>
+          </div>
+      </div>
+      <div class="table-row">
+          <div class="table-cell border px-4 py-4">Typography - Paragraph</div>
+          <div class="table-cell border px-4 py-4">Ellipsis</div>
+          <div class="table-cell border px-4 py-4">
+              <div class="mb-3" style='width: 300px'>
+                  <sc-paragraph ellipsis>Paragraph long long long long long long long long text</sc-paragraph>
+                  <sc-paragraph ellipsis size=sm>Paragraph sm size long long long long long long long long text</sc-paragraph>
+                  <sc-paragraph ellipsis size=xs>Paragraph xs size long long long long long long long long text</sc-paragraph>
+              </div>
+          </div>
+      </div>
+      <div class="table-row">
+          <div class="table-cell border px-4 py-4">Typography - Paragraph</div>
+          <div class="table-cell border px-4 py-4">Ellipsis with row</div>
+          <div class="table-cell border px-4 py-4">
+              <div class="mb-3" style='width: 300px'>
+                  <sc-paragraph ellipsis>Paragraph long long long long long long long long text</sc-paragraph>
+                  <sc-paragraph ellipsis row=2 size=sm>Paragraph sm size long long long long long long long long long long long long long long long long text</sc-paragraph>
+                  <sc-paragraph ellipsis row=3 size=xs>Paragraph xs size long long long long long long long long long long long long long long long long text</sc-paragraph>
+              </div>
+          </div>
+      </div>
+      
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Rich Text Editor</div>
+        <div class="table-cell border px-4 py-4">Default</div>
+        <div class="table-cell border px-4 py-4">
+          <div class="table">
+            <div class="table-row">
+              <div class="table-cell px-1 py-1">
+                <sc-rich-text-editor label=Text-editor required>
+                </sc-rich-text-editor>
+                <script>
+                  const editor = document.body.querySelector('sc-rich-text-editor');
+                  editor.toolbar = [
+                    'undo',
+                    'redo',
+                    'separate',
+                    'fontstyle',
+                    'separate',
+                    'bold',
+                    'italic',
+                    'underline',
+                    'strikethrough',
+                    'subscript',
+                    'superscript',
+                    'backcolor',
+                    'forecolor',
+                    'clear',
+                    'separate',
+                    'alignleft',
+                    'aligncenter',
+                    'alignright',
+                    'orderedlist',
+                    'unorderedlist',
+                    'outdent',
+                    'indent',
+                    'separate',
+                    'addlink',
+                    'insertimage',
+                    'unlink',
+                    'quote',
+                  ];
+
+                  editor.addEventListener('sc-change', (e) => {
+                    console.log(e, '===e');
+                  })
+
+                  // setTimeout(function () {
+                  //   const p = document.createElement('p');
+                  //   const br = document.createElement('br');
+                  //   p.appendChild(br);
+
+                  //   const p2 = document.createElement('p');
+                  //   const span2 = document.createElement('span');
+                  //   span2.innerHTML = '1212321313';
+                  //   p2.appendChild(span2);
+                  //   editor.updateContent([p, p2]);
+                  // }, 5000);
+                </script>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tree</div>
+        <div class="table-cell border px-4 py-4">Load all data one time</div>
+        <div class="table-cell border px-4 py-4" >
+          <sc-tree show-indent-lines></sc-tree>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tree</div>
+        <div class="table-cell border px-4 py-4">Load all data and has default select node</div>
+        <div class="table-cell border px-4 py-4" >
+          <sc-tree show-indent-lines></sc-tree>
+        </div>
+      </div>
+
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tree</div>
+        <div class="table-cell border px-4 py-4">Load all data and has disabled node</div>
+        <div class="table-cell border px-4 py-4" >
+          <sc-tree></sc-tree>
+        </div>
+      </div>
+    
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tree</div>
+        <div class="table-cell border px-4 py-4">Delay loading all data at once</div>
+        <div class="table-cell border px-4 py-4" >
+          <sc-tree class="sc-tree-alzy"></sc-tree>
+        </div>
+      </div>
+
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tree</div>
+        <div class="table-cell border px-4 py-4">Drag &amp; Drop reorder (draggable)</div>
+        <div class="table-cell border px-4 py-4">
+          <div style="display:flex;gap:1.5rem;align-items:flex-start;">
+            <sc-tree class="sc-tree-drag" show-indent-lines draggable style="width:260px;flex-shrink:0"></sc-tree>
+            <div style="flex:1;min-width:320px">
+              <div style="font-size:0.75rem;font-weight:600;margin-bottom:0.5rem;color:var(--sc-color-blue-900)">Current data (after drop)</div>
+              <pre class="sc-tree-drag-data" style="
+                background:var(--sc-color-grey-5,#f5f5f5);
+                border:1px solid var(--sc-color-grey-15,#e0e0e0);
+                border-radius:0.25rem;
+                padding:0.75rem;
+                font-size:0.72rem;
+                line-height:1.6;
+                min-height:6rem;
+                max-height:18rem;
+                overflow-y:auto;
+                white-space:pre-wrap;
+                word-break:break-all;
+                width:100%;
+                box-sizing:border-box;
+              ">— no changes yet —</pre>
+            </div>
+            <div style="flex:1;min-width:320px">
+              <div style="font-size:0.75rem;font-weight:600;margin-bottom:0.5rem;color:var(--sc-color-blue-900)">sc-drop event log</div>
+              <pre class="sc-tree-drag-log" style="
+                background:var(--sc-color-grey-5,#f5f5f5);
+                border:1px solid var(--sc-color-grey-15,#e0e0e0);
+                border-radius:0.25rem;
+                padding:0.75rem;
+                font-size:0.72rem;
+                line-height:1.6;
+                min-height:6rem;
+                max-height:18rem;
+                overflow-y:auto;
+                white-space:pre-wrap;
+                word-break:break-all;
+                width:100%;
+                box-sizing:border-box;
+              ">— waiting for drop —</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Action Slot: add / rename / delete example ── -->
+      <div class="table-row">
+        <div class="table-cell border px-4 py-4">Tree</div>
+        <div class="table-cell border px-4 py-4">
+          Action slot — add / rename / delete
+          <div style="margin-top:0.5rem;font-size:0.72rem;color:var(--sc-color-grey-60)">
+            Hover a node to reveal <strong>+</strong> (add child) and <strong>···</strong> (rename / delete).
+          </div>
+        </div>
+        <div class="table-cell border px-4 py-4">
+          <sc-tree class="sc-tree-actions" show-indent-lines style="width:280px"></sc-tree>
+        </div>
+        <sc-toast
+          placement="top-right"
+          duration="2000"
+          id="tree-toast"
+        >
+        <div id="tree-toast-body"></div>
+      </sc-toast>
+      </div>
+    </div>
+  </div>
+  <div>
+    <sc-table class='sc-table' sort='fruit,asc'></sc-table>
+  </div>
+
+  
+
+
+
+
+  </div>
+
+  <div class='sc-mode-dark'>
+    <sc-table total="20" compact class='sc-table-custom-html' pagination page-size=5 column-chooser
+      size-changer></sc-table>
+  </div>
+</sc-icon-provider>
+<!-- Custom script -->
+<script type="text/javascript">
+  var modes = ['light', 'dark', 'dyslexic']
+  var activeMode = modes[0]
+  function changeMode(mode) {
+    var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child');
+    componentCells.forEach((componentCell) => {
+      modes.forEach((mode) => {
+        componentCell.classList.remove(`sc-mode-${mode}`)
+      })
+      componentCell.classList.add(`sc-mode-${mode}`)
+      if (componentCell.classList.contains('inverse')) {
+        if (mode === 'dark') {
+          componentCell.style.backgroundColor = 'var(--sc-color-white)'
+        } else {
+          componentCell.style.backgroundColor = 'var(--sc-color-blue-900)'
+        }
+      }
+    })
+  }
+  document.getElementsByTagName('sc-dropdown-input')[0].addEventListener('sc-select', ({ detail: { value } }) => {
+    changeMode(value);
+  });
+  changeMode(activeMode);
+
+  const customHeader = (value, property) => html`
+      <div>
+        ${value}
+        <sc-icon name='home--line'></sc-icon>
+      </div>
+    `;
+
+  // const customColumn = (value, property) => html`
+  //   <sc-link>
+  //     ${value}
+  //   </sc-link>
+  // `;
+
+  const customColumn = (value, property) => html`
+        <sc-dropdown-input value="light" label='Mode'>
+            <sc-dropdown-option value="light">Light</sc-dropdown-option>
+            <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+            <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+        </sc-dropdown-input>
+    `;
+
+  const customAction = (value, property) => {
+    if (value <= 1) return '';
+    return html`
+            <sc-button>
+                Edit
+            </sc-button>
+            `
+  };
+
+
+  // set table data
+  const defaultTreeWithIcon = [{
+    value: '1',
+    label: 'label 1',
+    prefixIcon: 'folder--line',
+    expanded: true,
+    children: [{
+      value: '1-1',
+      label: 'label 1-1',
+      prefixIcon: 'file-text--line',
+    }, {
+      value: '1-2',
+      label: 'label 1-2',
+      prefixIcon: 'file-text--line',
+    }]
+  }, {
+    value: '2',
+    label: 'label 2',
+    prefixIcon: 'folder--line',
+    expanded: false,
+    children: [{
+      value: '2-1',
+      label: 'label 2-1',
+      prefixIcon: 'file-text--line'
+    }, {
+      value: '2-2',
+      label: 'label 2-2',
+      prefixIcon: 'file-text--line'
+    }]
+  }];
+  const defaultTreeWithoutIcon = [{
+    value: '1',
+    label: 'label 1',
+    expanded: true,
+    children: [{
+      value: '1-1',
+      label: 'label 1-1'
+    }, {
+      value: '1-2',
+      label: 'label 1-2'
+    }]
+  }, {
+    value: '2',
+    label: 'label 2',
+    expanded: false,
+    children: [{
+      value: '2-1',
+      label: 'label 2-1',
+    }, {
+      value: '2-2',
+      label: 'label 2-2',
+    }]
+  }];
+  const defaultTreeWithoutIcon2 = [{
+    value: '1',
+    label: 'label 1',
+    expanded: true,
+    children: [{
+      value: '1-1',
+      label: 'label 1-1'
+    }, {
+      value: '1-2',
+      label: 'label 1-2'
+    }]
+  }, {
+    value: '2',
+    label: 'label 2',
+    expanded: false,
+    children: [{
+      value: '2-1',
+      label: 'label 2-1',
+      disabled: true
+    }, {
+      value: '2-2',
+      label: 'label 2-2',
+    }]
+  }];
+  const trees = document.querySelectorAll('sc-tree');
+  trees[0].data = defaultTreeWithIcon;
+  trees[0].selection = 'single';
+
+  trees[0].addEventListener('sc-select', (event) => {
+    // provide the callback function for user to get the selected data
+    console.log(event.detail.value)
+    tree.selected = event.detail.value
+  })
+
+  trees[1].data = defaultTreeWithoutIcon;
+  trees[1].selection = 'single';
+
+  trees[1].selected = '1-1';
+
+  trees[2].data = defaultTreeWithoutIcon2;
+  trees[2].selection = 'multiple';
+
+
+  trees[3].data = [{
+    value: '1',
+    label: 'label 1',
+    expanded: true,
+    children: [{
+      value: '1-1',
+      label: 'label 1-1'
+    }, {
+      value: '1-2',
+      label: 'label 1-2'
+    }]
+  }, {
+    value: '2',
+    label: 'label 2',
+    expanded: false,
+    hasChildren: true,
+    children: []
+  }];
+  trees[1].selection = 'single';
+
+  
+  trees[3].loadChildren = loadChildrenFunc;
+  async function loadChildrenFunc(parentItem) {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    const mockData = [{
+      value: '2-1',
+      label: 'label 2-1',
+      prefixIcon: 'file-text--line'
+    }, {
+      value: '2-2',
+      label: 'label 2-2',
+      prefixIcon: 'file-text--line'
+    }]
+    return Promise.resolve(mockData)
+  }
+
+  trees[3]?.addEventListener('sc-loaded', (event) => {
+    // provide the callback function for user to get the selected data
+    console.log(event.detail.value)
+    tree.selected = event.detail.value
+  })
+
+  // ── Drag & Drop tree (trees[4]) ──────────────────────────────────
+  const dragLog = document.querySelector('.sc-tree-drag-log');
+  const dragTree = document.querySelector('.sc-tree-drag');
+  dragTree.loadChildren = loadChildrenFunc;
+  dragTree.draggable = true;
+  dragTree.data = [
+    {
+      value: 'root-1',
+      label: 'Documents',
+      prefixIcon: 'folder--line',
+      expanded: true,
+      children: [
+        {
+          value: 'doc-reports',
+          label: 'Reports',
+          prefixIcon: 'folder--line',
+          expanded: true,
+          children: [
+            { value: 'doc-1', label: 'Q1-Report.pdf',   prefixIcon: 'file-text--line' },
+            { value: 'doc-2', label: 'Q2-Report.pdf',   prefixIcon: 'file-text--line' },
+            { value: 'doc-3', label: 'Q3-Report.pdf',   prefixIcon: 'file-text--line' },
+          ]
+        },
+        {
+          value: 'doc-finance',
+          label: 'Finance',
+          prefixIcon: 'folder--line',
+          expanded: false,
+          children: [
+            { value: 'fin-1', label: 'Budget.xlsx',     prefixIcon: 'file-text--line' },
+            { value: 'fin-2', label: 'Forecast.xlsx',   prefixIcon: 'file-text--line' },
+          ]
+        },
+        { 
+          value: 'doc-notes', label: 'Notes.txt',       prefixIcon: 'file-text--line',     
+          expanded: false,
+          hasChildren: true,
+          children: [] 
+        },
+      ]
+    },
+    {
+      value: 'root-2',
+      label: 'Images',
+      prefixIcon: 'folder--line',
+      expanded: true,
+      children: [
+        {
+          value: 'img-photos',
+          label: 'Photos',
+          prefixIcon: 'folder--line',
+          expanded: true,
+          children: [
+            { value: 'img-1', label: 'Vacation.png',    prefixIcon: 'file-text--line' },
+            { value: 'img-2', label: 'Profile.jpg',     prefixIcon: 'file-text--line' },
+          ]
+        },
+        {
+          value: 'img-design',
+          label: 'Design',
+          prefixIcon: 'folder--line',
+          expanded: false,
+          children: [
+            { value: 'des-1', label: 'Banner.psd',      prefixIcon: 'file-text--line' },
+            { value: 'des-2', label: 'Logo.ai',         prefixIcon: 'file-text--line' },
+            { value: 'des-3', label: 'Icon-set.svg',    prefixIcon: 'file-text--line' },
+          ]
+        },
+      ]
+    },
+    {
+      value: 'root-3',
+      label: 'Archive',
+      prefixIcon: 'folder--line',
+      expanded: true,
+      children: [
+        { value: 'arc-1', label: '2023-backup.zip',     prefixIcon: 'file-text--line' },
+        { value: 'arc-2', label: '2024-backup.zip',     prefixIcon: 'file-text--line' },
+      ]
+    },
+    {
+      value: 'root-4',
+      label: 'Scripts',
+      prefixIcon: 'folder--line',
+      expanded: false,
+      children: [
+        { value: 'scr-1', label: 'build.sh',            prefixIcon: 'file-text--line' },
+        { value: 'scr-2', label: 'deploy.sh',           prefixIcon: 'file-text--line' },
+        { value: 'scr-3', label: 'seed.sql',            prefixIcon: 'file-text--line' },
+      ]
+    }
+  ];
+  dragTree.selection = 'multiple';
+  // dragTree.selectedItems = ['doc-1', 'doc-2', 'doc-3']
+
+  const dragDataPanel = document.querySelector('.sc-tree-drag-data');
+
+  function renderTreeText(nodes, indent) {
+    indent = indent || '';
+    return nodes.map(function(n) {
+      const line = indent + (n.children && n.children.length ? '▸ ' : '  ') + n.label + ' (' + n.value + ')';
+      const childLines = (n.children && n.children.length)
+        ? renderTreeText(n.children, indent + '    ')
+        : [];
+      return [line].concat(childLines).join('\n');
+    }).join('\n');
+  }
+  dragTree.addEventListener('sc-select', (event) => {
+    // provide the callback function for user to get the selected data
+    console.log(event.detail.value)
+  })
+
+  dragTree.addEventListener('sc-drop', (event) => {
+    const { sourceValue, targetValue, position, data } = event.detail;
+    // feed the reordered data back so the tree reflects the new order
+    dragTree.data = data;
+    // dragTree.selectedItems = ['doc-1', 'doc-2']
+
+    // Look up a node's label by its value from a tree data array
+    function findLabel(nodes, val) {
+      for (const n of nodes) {
+        if (n.value === val) return n.label;
+        if (n.children && n.children.length) {
+          const found = findLabel(n.children, val);
+          if (found) return found;
+        }
+      }
+      return val; // fallback to value if not found
+    }
+
+    const sourceLabel = findLabel(data, sourceValue) || sourceValue;
+    const targetLabel = findLabel(data, targetValue) || targetValue;
+
+    // append to event log
+    const entry = `[${new Date().toLocaleTimeString()}]\n  moved: "${sourceLabel}"\n  → ${position} "${targetLabel}"\n\n`;
+    dragLog.textContent = entry + dragLog.textContent;
+    // show live tree structure
+    dragDataPanel.textContent = renderTreeText(data);
+    console.log('sc-drop', event.detail);
+  });
+
+  function showToast(type='success', message='') {
+    const toast = document.getElementById('tree-toast');
+    const toastBody = document.getElementById('tree-toast-body');
+    if (toast) {
+      toast.open = true;
+      toast.type = type;
+      if (toastBody) {
+        toastBody.innerHTML = message;
+      }
+    }
+  }
+   // ── Action tree (actionRenderer) ────────────────────────────────
+  (function () {
+    const actionTree = document.querySelector('.sc-tree-actions');
+
+    // ── initial data ───────────────────────────────────────────────
+    let actionData = [
+      {
+        value: 'page-home', label: 'Home', prefixIcon: 'folder--line', expanded: true,
+        children: [
+          { value: 'page-about',   label: 'About us',   prefixIcon: 'file-text--line', children: [] },
+          { value: 'page-contact', label: 'Contact',    prefixIcon: 'file-text--line', children: [] },
+          { value: 'error', label: 'Error node',    prefixIcon: 'file-text--line', children: [] },
+          { value: 'not deletable', label: 'Not deletable',    prefixIcon: 'file-text--line', children: [] },
+          { value: 'page-long-title', label: 'This is a very long title for a page node to test ellipsis and overflow in the tree view', prefixIcon: 'file-text--line', children: [] },
+        ],
+      },
+      {
+        value: 'page-blog', label: 'Blog', prefixIcon: 'folder--line', expanded: false,
+        children: [
+          { value: 'page-post-1', label: 'First post', prefixIcon: 'file-text--line', children: [] },
+        ],
+      },
+    ];
+    // ── actionRenderer ─────────────────────────────────────────────
+    function actionRenderer({ currentNode, parentNode, tree }) {
+      return html`
+        <div style="display:inline-flex;align-items:center;gap:0.25rem;">
+          <sc-icon
+            name="plus"
+            size="sm"
+            title="Add sibling"
+            @click=${async (e) => {
+              e.stopPropagation();
+              const newNode = { value: `New-${Math.random().toString(36).substr(2, 9)}`, label: 'New page', prefixIcon: 'file-text--line', children: [] };
+              // Simulate a mock backend response with a delay
+              await new Promise(resolve => setTimeout(resolve, 1000));
+
+              // if error
+              if (currentNode.value === 'error') {
+                showToast('error', 'Add node error');
+                return;
+              }
+              actionData = addNode(actionData, currentNode.value, newNode);
+              actionTree.data = JSON.parse(JSON.stringify(actionData));
+              tree.updateComplete.then(() => tree.startEditing(newNode.value));
+            }}
+          ></sc-icon>
+
+          <sc-dropdown-input
+            hoist
+            hide-tick-mark
+            @sc-select=${
+              async (e) => {
+                e.stopPropagation();
+                const val = e.detail?.value;
+
+                if (val === 'rename') {
+                  tree.startEditing(currentNode.value);
+                } else if (val === 'delete' && parentNode) {
+                  // Simulate a mock backend response with a delay
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  if (currentNode.value === 'error') {
+                    // if error
+                    showToast('error', 'Delete node error');
+                    return;
+                  }
+                  const snapshot = JSON.parse(JSON.stringify(actionData));
+                  actionData = removeNode(actionData, currentNode.value);
+                  actionTree.data = JSON.parse(JSON.stringify(actionData));
+
+                  const revertId = `revert-${Date.now()}`;
+                  showToast('success', `"${currentNode.label}" deleted. <a href="#" id="${revertId}">Undo</a>`);
+                  document.getElementById(revertId)?.addEventListener('click', (ev) => {
+                    ev.preventDefault();
+                    actionData = snapshot;
+                    actionTree.data = JSON.parse(JSON.stringify(actionData));
+                    showToast('success', 'Delete reverted.');
+                  });
+                }
+                }
+              }
+          >
+            <div slot="trigger">
+              <sc-icon name="more-horizontal" size="sm" style="cursor:pointer"></sc-icon>
+            </div>
+
+            <sc-dropdown-option value="rename">
+              <div style="display:flex;align-items:center;gap:0.5rem;">
+                <sc-icon name="edit-alt--line" size="sm"></sc-icon>
+                <span>Rename</span>
+              </div>
+            </sc-dropdown-option>
+
+            <sc-dropdown-option value="delete" disabled=${!parentNode || currentNode.value==='not deletable' ? 'true' : ''}>
+              <div style="display:flex;align-items:center;gap:0.5rem;${!parentNode || currentNode.value==='not deletable' ? 'color:grey' : 'color:#D50000;'}">
+                <sc-icon name="trash--line" size="sm"></sc-icon>
+                <span>Delete</span>
+              </div>
+            </sc-dropdown-option>
+          </sc-dropdown-input>
+        </div>
+      `;
+    };
+    actionTree.actionRenderer = actionRenderer;
+    actionTree.data = JSON.parse(JSON.stringify(actionData));
+
+    actionTree.draggable = true;
+
+    // ── sc-drop: keep actionData in sync after drag-reorder ────────
+    actionTree.addEventListener('sc-drop', (e) => {
+      actionData = e.detail.data;
+    });
+
+    // ── sc-edit-save: apply rename to data ─────────────────────────
+    actionTree.addEventListener('sc-edit-save', (e) => {
+      const { currentNode, newLabel, cancel } = e.detail;
+      if (!newLabel.trim()) { cancel(); return; }
+      const siblings = findSiblings(actionData, currentNode.value);
+      const isDuplicate = siblings.some(
+        n => n.value !== currentNode.value && n.label === newLabel.trim()
+      );
+      if (isDuplicate) {
+        showToast('error', `"${newLabel.trim()}" already exists at this level.`);
+        cancel();
+        return;
+      }
+      actionData = renameNode(actionData, currentNode.value, newLabel);
+      actionTree.data = JSON.parse(JSON.stringify(actionData));
+    });
+
+    // Returns the sibling array that contains the node with the given value
+    function findSiblings(nodes, value) {
+      if (nodes.some(n => n.value === value)) return nodes;
+      for (const n of nodes) {
+        if (n.children?.length) {
+          const found = findSiblings(n.children, value);
+          if (found) return found;
+        }
+      }
+      return [];
+    }
+
+      // Insert newNode as a sibling immediately after the node with siblingValue
+    function addNode(nodes, siblingValue, newNode) {
+      const idx = nodes.findIndex(n => n.value === siblingValue);
+      if (idx !== -1) {
+        const result = [...nodes];
+        result.splice(idx + 1, 0, newNode);
+        return result;
+      }
+      return nodes.map(n => {
+        if (n.children?.length) return { ...n, children: addNode(n.children, siblingValue, newNode) };
+        return n;
+      });
+    }
+
+    function removeNode(nodes, value) {
+      return nodes
+        .filter(n => n.value !== value)
+        .map(n => ({ ...n, children: n.children ? removeNode(n.children, value) : [] }));
+    }
+
+    function renameNode(nodes, value, newLabel) {
+      return nodes.map(n => {
+        if (n.value === value) return { ...n, label: newLabel };
+        if (n.children?.length) return { ...n, children: renameNode(n.children, value, newLabel) };
+        return n;
+      });
+    }
+  })();
+
+
+  // trees[4].data = [{
+  //   value: '1',
+  //   label: 'label 1',
+  //   expanded: true,
+  //   children: [{
+  //     value: '1-1',
+  //     label: 'label 1-1'
+  //   }, {
+  //     value: '1-2',
+  //     label: 'label 1-2'
+  //   }]
+  // }, {
+  //   value: '2',
+  //   label: 'label 2',
+  //   expanded: false,
+  //   hasChildren: true,
+  //   children: []
+  // }];;
+  // trees[4].loadChildren = loadChildrenFunc;
+  // trees[4].refresh = true;
+
+  // trees[4].addEventListener('sc-loaded', (event) => {
+  //   // provide the callback function for user to get the selected data
+  //   console.log(event.detail.value)
+  //   tree.selected = event.detail.value
+  // })
+
+    // set table data
+    const table = document.querySelector('sc-table');
+    table.data = [
+        { fruit: 'apple', color: 'green', weight: '100gr' },
+        { fruit: 'banana', color: 'yellow', weight: '140gr' }
+    ]
+    table.conf = [
+        { property: 'fruit', 
+          header: () => html`Fruit <sc-icon name='home--line'></sc-icon>`, 
+          hidden: false,
+          cell: (value, properties) => {
+            //   console.log(value, properties)
+              return html`<sc-link>${value}</sc-link>`
+          },
+          columnStyle: 'min-width: 200px',
+          sort: true,
+        },
+        { property: 'color',columnStyle: 'min-width: 200px', header: 'Color', hidden: false, sort: true },
+        { property: 'weight',columnStyle: 'min-width: 200px', header: 'Weight', hidden: false }
+    ]
+
+    const table2 = document.querySelector('.sc-table-custom-html');
+    const data2 = [
+        { fruit: 'apple', color: 'green', weight: '100gr', action: 1 },
+        { fruit: 'banana', color: 'yellow', weight: '140gr', action: 2 },
+        { fruit: 'grapes', color: 'purple', weight: '140gr', action: 3 },
+        { fruit: 'apple1', color: 'green1', weight: '100gr', action: 1 },
+        { fruit: 'banana1', color: 'yellow2', weight: '140gr', action: 2 },
+        { fruit: 'grapes1', color: 'purple3', weight: '140gr', action: 3 },
+        { fruit: 'apple2', color: 'green4', weight: '100gr', action: 1 },
+        { fruit: 'banana2', color: 'yellow5', weight: '140gr', action: 2 },
+        { fruit: 'grapes2', color: 'purple6', weight: '140gr', action: 3 },
+        { fruit: 'apple3', color: 'green7', weight: '100gr', action: 1 },
+        { fruit: 'banana3', color: 'yellow8', weight: '140gr', action: 2 },
+        { fruit: 'grapes3', color: 'purple9', weight: '140gr', action: 3 }
+    ]
+    table2.data = data2;
+    table2.conf = [
+        { property: 'fruit', header: 'Fruit', hidden: false, filter: true },
+        { property: 'color', 
+          header: () => html`Color <sc-icon name='home--line'></sc-icon>`, 
+          hidden: false,
+          cell: (value, properties) => {
+              return html`<sc-link>${value}</sc-link>`
+          },
+          columnStyle: 'width: 200px',
+          sort: true,
+          filter: true,
+          filterParams: {
+            lookup(keyword) {
+              return new Promise(res => {
+                res(data2.filter(_ => keyword ? _.color.includes(keyword) : true).map(d => ({
+                    label: d.color,
+                    value: d.color,
+                  })));
+              });
+            },
+          }
+        },
+        { property: 'weight', header: 'Weight', hidden: false },
+        { property: 'action', header: 'Action',
+            cell: customAction
+        }
+    ]
+
+    table2.addEventListener('sc-page-change', (event) => {
+        // console.log('Event detail', event)
+        if (event.detail.page > 1) {
+            table2.data = [
+                { fruit: 'banana-new', color: 'yellow', weight: '140gr', action: 2 },
+                { fruit: 'grapes-new', color: 'purple', weight: '140gr', action: 3 },
+                { fruit: 'apple-new', color: 'green', weight: '100gr', action: 1 },
+                { fruit: 'banana-new', color: 'yellow', weight: '140gr', action: 2 },
+                { fruit: 'grapes-new', color: 'purple', weight: '140gr', action: 3 }
+            ]
+        } else {
+            table2.data = [
+                { fruit: 'apple', color: 'green', weight: '100gr', action: 1 },
+                { fruit: 'banana', color: 'yellow', weight: '140gr', action: 2 },
+                { fruit: 'grapes', color: 'purple', weight: '140gr', action: 3 },
+                { fruit: 'apple1', color: 'green2', weight: '100gr', action: 1 },
+                { fruit: 'banana1', color: 'yellow2', weight: '140gr', action: 2 },
+                { fruit: 'grapes1', color: 'purple2', weight: '140gr', action: 3 },
+                { fruit: 'apple2', color: 'green3', weight: '100gr', action: 1 },
+                { fruit: 'banana2', color: 'yellow3', weight: '140gr', action: 2 },
+                { fruit: 'grapes2', color: 'purple3', weight: '140gr', action: 3 },
+                { fruit: 'apple3', color: 'green4', weight: '100gr', action: 1 },
+                { fruit: 'banana3', color: 'yellow4', weight: '140gr', action: 2 },
+                { fruit: 'grapes3', color: 'purple4', weight: '140gr', action: 3 }
+            ]
+        }
+        
+    })
+
+
+  table2.addEventListener('sc-filter', event => {
+    console.log('filter', event.detail)
+    if (event.detail.value?.length === 0) {
+      table2.data = data2;
+    } else {
+      table2.data = data2.filter(d => event.detail.value.includes(d.color))
+    }
+  })
+  const textInput = document.querySelector('.text-input-basic');
+  textInput.readonly = true;
+  setTimeout(() => {
+    textInput.readonly = false;
+  }, 10000)
+  textInput.addEventListener('sc-input', event => console.log(event.detail))
+  // time input addEventListener
+  const textTimeInput = document.querySelector('.text-time-input-basic');
+  textTimeInput.addEventListener('sc-focus', event => {
+    console.log('sc-focus ', event.detail)
+  })
+  textTimeInput.addEventListener('sc-blur', event => {
+    console.log('sc-blur ', event.detail)
+  })
+</script>
+
+<script type="module">
+  import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+  changeIconLibrary();
+  function changeIconLibrary() {
+    document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+  }
+</script>
+
+</html>

@@ -1,0 +1,22 @@
+@import url('./ScLightMode.css');
+
+:host,
+.sc-theme-cpbb {
+  --sc-form-input-border: 1px solid var(--sc-color-grey-80);
+  --sc-form-input-error-border: 1px solid var(--sc-color-red);
+  --sc-form-input-success-border: 1px solid var(--sc-color-green-dark);
+  --sc-form-input-focus-border-color: var(--sc-color-blue-500);
+  --sc-form-input-border-radius-size: 8px;
+  --sc-form-input-line-height: 1.2;
+  --sc-form-input-padding-top: 5px;
+  --sc-form-input-padding-bottom: 5px;
+  --sc-form-input-padding-left: 12px;
+  --sc-form-input-padding-right: 12px;
+
+  --sc-tab-margin: 0.5rem;
+}
+
+:host,
+.sc-theme-cpbb .sc-mode-dark, 
+.sc-theme-cpbb.sc-mode-dark {
+}

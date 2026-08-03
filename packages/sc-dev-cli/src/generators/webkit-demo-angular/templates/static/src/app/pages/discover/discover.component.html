@@ -1,0 +1,73 @@
+<div class="flex mx-3">
+    <h4 class="headline py-1">Products and Solutions</h4>
+</div>
+<div class="flex space-x-2 mt-4 mb-4 ">
+    <div class="flex pl-3">
+        <image-button 
+            [title]="allProduct.title" 
+            [highlight]="selectedProduct.id === allProduct.id"
+            (click)="handleProductChange(allProduct)" 
+        />
+    </div>
+    <div class="divider"></div>
+    <div class="flex space-x-2 overflow-y-auto no-scrollbar px-2" style="margin-left: 0px">
+        <image-button *ngFor="let item of products" 
+            [title]="item.title"
+            [image]="item.icon?? ''"
+            [highlight]="selectedProduct.id === item.id" 
+            (click)="handleProductChange(item)" 
+        />
+    </div>
+</div>
+
+<div class="mx-2 mb-4">
+    <h4 class="pl-2">{{title}}</h4>
+    <div class="flex flex-wrap justify-center space-between mt-1 mb-3">
+        <div *ngFor="let item of selectedProduct.solutions" class="basis-1/3 p-2 grow">
+            <sc-icon-card 
+                [image]="item.icon" 
+                width="100%" 
+                size="one-third" 
+                height="110px"
+                (click)="handleShowSideSheet(true)"
+            >
+                <div slot="title" class="font-semibold line-clamp-2">
+                    {{item.title}}
+                </div>
+            </sc-icon-card>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="selectedProduct.feature" class="mx-3 mb-5">
+    <h4>{{selectedProduct.feature.title}}</h4>
+    <div class="bg-white rounded-xl py-3 mt-3 p-3 pb-0 ">
+        <div *ngFor="let item of selectedProduct.feature.features" class="mb-4">
+            <list 
+                [title]="item.title" 
+                [copy]="item.copy" 
+                iconRight='arrow-ios-forward'
+                (click)="handleShowSideSheet(true)" 
+            />
+        </div>
+    </div>
+</div>
+
+<div *ngIf="promotions" class="mx-2 mb-4 p-2">
+    <div *ngFor="let item of promotions" class="mb-4">
+        <sc-card 
+            vertical-align="middle" 
+            [image]="item.icon" 
+            [title]="item.title"
+            icon="newwindow"
+            (click)="handleShowSideSheet(true)" 
+        />
+    </div>
+</div>
+
+<sc-side-sheet 
+    [open]="showSideSheet" 
+    (onScHide)="handleShowSideSheet(false)"
+>
+    <app-not-available />
+</sc-side-sheet>

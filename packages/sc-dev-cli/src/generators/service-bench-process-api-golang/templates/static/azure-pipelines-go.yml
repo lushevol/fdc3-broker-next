@@ -1,0 +1,320 @@
+trigger:
+  - develop
+  - main
+  - feature/*
+
+parameters:
+  - name: releaseId
+    type: string
+    displayName: Release WorkItem ID
+    default: "0"
+  - name: packageVersion
+    type: string
+    displayName: Package Version
+    default: '1.0.0-$(Build.BuildId)'
+  - name: devkitHelmVersion
+    type: string
+    default: '1.1.1+20251104.3' # Update this value to the latest DevKit Helm version , sample 1.1.1+20251104.3
+  - name: buildpackImageName
+    type: string
+    default: "buildpack-go:xxxxxxxx.x" # Update this value to the latest buildpack version, sample:buildpack-go:fea-20250823.1
+  - name: builderImageName
+    type: string
+    default: "builder-go:xxxxxxxx.x" # Update this value to the latest buildpack version, sample:builder-go:fea-20250823.1
+  - name: rollbackBuildNumber
+    type: string
+    displayName: Last successful Release Build Number to rollback
+    default: "0"
+
+resources:
+  repositories:
+    - repository: governed-templates
+      name: dj-core/governed-templates
+      ref: "main"
+      type: git
+
+variables:
+  - group: ServicePrincipleAKS
+  - name: ITAM
+    value: '55313'
+  - name: imageName
+    value: 'xxx'
+  - name: imageTag
+    value: '$(Build.SourceBranchName)_$(Build.BuildNumber)'
+  - name: imageRepo
+    value: 'ado'
+  - name: imagePrefix
+    value: 'sc-devkit'
+  - name: functionName
+    value: 'xxx'
+  - name: notifyEmail
+    value: <your_team_email>@sc.com' # Update this value to the team email address
+
+extends:
+  template: governed-template/build-and-deploy.yml@governed-templates
+  parameters:
+    ITAM: '${{variables.ITAM}}'
+    devFactory: true
+    featureRelease: true
+    releaseId: ${{ parameters.releaseId }}
+    buildStackName: sc-devkit-go
+    buildStackParams:
+      pool: 'sc-linux'
+      goVersion: 1.23.0
+      goBuildTargets:
+        goEnvironmentVariables:
+          GOBIN: '$(Build.ArtifactStagingDirectory)'
+        goOs: 'linux'
+        goArch: 'amd64'
+      imageTag: '${{variables.imageTag}}'
+      imageRepo: '${{variables.imageRepo}}'
+      imagePrefix: '${{variables.imagePrefix}}'
+      imageName: '${{variables.imageName}}'
+      buildpackImageName: '${{parameters.buildpackImageName}}'
+      builderImageName: '${{parameters.builderImageName}}'
+      imageListFilePath: "image.yml"
+      calculateImageDigest: true
+      postInputFileList:
+        - "image.yml"
+      postVariableList:
+        - name: "mainContainerImageName"
+          value: 'ado\/$(Build.Repository.Name)\/${{variables.imageRepo}}\/${{variables.imagePrefix}}-${{variables.imageName}}'
+      sonarSources: './'
+      sonarExclusions: '**/*_test.go,**/vendor/**,**/static/**,kubernetes/**,**/*.go'
+      srcDir: './'
+      featureBranchScan: false
+      featureRelease: true
+      targetPathArtifactory: 'generic-release/ado'
+      skipEarlyFeedback: true
+      extraFoldersToPackage:
+        - "env"
+    # end of CI
+    #CD start
+    deployStackName: knative
+    secondaryDeployStackName: knativeaks
+    deployStackParams:
+      functionName: '${{variables.functionName}}'
+      imageTag: '${{variables.imageTag}}'
+      imageRepo: 'ado/$(Build.Repository.Name)/${{variables.imageRepo}}'
+      imagePrefix: '${{variables.imagePrefix}}'
+      imageName: '${{variables.imageName}}'
+      devkitHelmVersion: '${{parameters.devkitHelmVersion}}'
+      runQaRollback: false
+    deployEnvironments:
+      - name: ct1_sit
+        displayName: CT1-SIT
+        secureFileName: 55313_NonProd_sket410_kubeconfig
+        k8s_params:
+          namespacePrefix: sit
+        dependsOn:
+          - CI
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        environment: dev
+        extraHelmArgs: '-f $(Build.ArtifactStagingDirectory)/env/ct1_sit/properties.yml'
+
+      - name: ct1_uat
+        displayName: CT1-UAT
+        secureFileName: 55313_NonProd_sket410_kubeconfig
+        k8s_params:
+          namespacePrefix: uat
+        dependsOn:
+          - CI
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        environment: dev
+        extraHelmArgs: '-f $(Build.ArtifactStagingDirectory)/env/ct1_uat/properties.yml'
+
+      - name: ct1_q_a
+        displayName: CT1-Q_A
+        secureFileName: 55313_NonProd_sket410_kubeconfig
+        dependsOn:
+          - CI
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        environment: dev
+        extraHelmArgs: '-f $(Build.ArtifactStagingDirectory)/env/ct1_qa/properties.yml'
+
+      - name: cn1_uat_sct
+        environment: dev
+        displayName: CN1-UAT
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-NonProd-sken002-cnp-kubeconfig
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/cn1_uat/properties.yml
+        dependsOn:
+          - CI
+
+      - name: gdcw2_uat
+        environment: dev
+        displayName: GDCW2-UAT
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-NonProd-skek408-ark-kubeconfig
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/gdcw2_uat/properties.yml
+        dependsOn:
+          - CI
+
+      - name: qa
+        environment: qa
+        displayName: CT1-QA
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313_NonProd_sket410_kubeconfig
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/ct1_qa/properties.yml
+        dependsOn:
+          - ct1_uat
+
+      - name: release_checks
+        environment: pre-release
+        displayName: Release Checks
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        hasGenie: false
+        qaStageName: qa
+        dependsOn:
+          - qa
+      - name: release
+        environment: release
+        displayName: Release
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        hasGenie: false
+        dependsOn:
+          - release_checks
+
+      - name: cn1_prod_uct
+        environment: production
+        displayName: CN1-PRD-UCT
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-skec002-cnp-kubeconfig
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/cn1_prod_uct/properties.yml
+        dependsOn:
+          - release
+
+      - name: rollback_cn1_prod_uct
+        environment: production
+        displayName: Rollback CN1-PRD-UCT
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: ${{parameters.rollbackBuildNumber}}
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-skec002-cnp-kubeconfig
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/cn1_prod_uct/properties.yml
+        dependsOn:
+          - cn1_prod_uct
+
+      - name: cn1_prod_wgq
+        environment: production
+        displayName: CN1-PRD-WGQ
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-skec002-cnd-kubeconfig
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/cn1_prod_wgq/properties.yml
+        dependsOn:
+          - release
+
+      - name: rollback_cn1_prod_wgq
+        environment: production
+        displayName: Rollback CN1-PRD-WGQ
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: ${{parameters.rollbackBuildNumber}}
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-skec002-cnd-kubeconfig
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/cn1_prod_wgq/properties.yml
+        dependsOn:
+          - cn1_prod_wgq
+
+      - name: ct1_prod_hk
+        environment: production
+        displayName: CT1-PRD-HK
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-sked009-hk-kubeconfig
+        dependsOn:
+          - release
+        extraHelmArgs: '-f $(Build.ArtifactStagingDirectory)/env/ct1_prod_hk/properties.yml'
+      - name: rollback_ct1_prod_hk
+        environment: production
+        displayName: Rollback CT1-PRD-HK
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: '${{parameters.rollbackBuildNumber}}'
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-sked009-hk-kubeconfig
+        dependsOn:
+          - ct1_prod_hk
+        extraHelmArgs: '-f $(Build.ArtifactStagingDirectory)/env/ct1_prod_hk/properties.yml'
+      - name: ct1_prod_sg
+        environment: production
+        displayName: CT1-PRD-SG
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-sked009-sg-kubeconfig
+        dependsOn:
+          - release
+        extraHelmArgs: '-f $(Build.ArtifactStagingDirectory)/env/ct1_prod_sg/properties.yml'
+      - name: rollback_ct1_prod_sg
+        environment: production
+        displayName: Rollback CT1-PRD-SG
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: '${{parameters.rollbackBuildNumber}}'
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-sked009-sg-kubeconfig
+        dependsOn:
+          - ct1_prod_sg
+        extraHelmArgs: '-f $(Build.ArtifactStagingDirectory)/env/ct1_prod_sg/properties.yml'
+
+      - name: gdcw2_prod_ark
+        environment: production
+        displayName: GDCW2-PRD-ARK
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-skeu408-ark-kubeconfig
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/gdcw2_prod_ark/properties.yml
+        dependsOn:
+          - release
+
+      - name: rollback_gdcw2_prod_ark
+        environment: production
+        displayName: Rollback GDCW2-PRD-ARK
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: ${{parameters.rollbackBuildNumber}}
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-skeu408-ark-kubeconfig
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/gdcw2_prod_ark/properties.yml
+        dependsOn:
+          - gdcw2_prod_ark
+
+      - name: gdcw2_prod_watford
+        environment: production
+        displayName: GDCW2-PRD-WATFORD
+        enableManualPIT: true
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        secureFileName: 55313-Prod-skeu408-wat-kubeconfig
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/gdcw2_prod_watford/properties.yml
+        dependsOn:
+          - release
+
+      - name: rollback_gdcw2_prod_watford
+        environment: production
+        displayName: Rollback GDCW2-PRD-WATFORD
+        notifyUsers: '${{variables.notifyEmail}}'
+        pool: sc-linux
+        rollbackBuildNumber: ${{parameters.rollbackBuildNumber}}
+        functionName: '${{variables.functionName}}'
+        secureFileName: 55313-Prod-skeu408-wat-kubeconfig
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/gdcw2_prod_watford/properties.yml
+        dependsOn:
+          - gdcw2_prod_watford
+

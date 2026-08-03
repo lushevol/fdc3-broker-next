@@ -1,0 +1,243 @@
+{{- $JFROG := ternary .Values.DEVFACTORY_JFOG .Values.ONPREM_JFROG .Values.isDevFactory }}
+{{- $JFROGBASE := ternary .Values.DEVFACTORY_JFROG_BASE .Values.ONPREM_JFROG_BASE .Values.isDevFactory }}
+
+{{- if $.Values.server.enabled }}
+{{- range $rawService := (list "frontend" "internalFrontend" "history" "matching" "worker") }}
+{{- $service := include "serviceName" (list $rawService) }}
+{{- $serviceValues := index $.Values.server $rawService }}
+{{- if or (not (hasKey $serviceValues "enabled")) $serviceValues.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "temporal.componentname" (list $ $service) }}
+  namespace: {{ quote $.Values.k8sNamespace }}
+  annotations:
+    {{- include "temporal.resourceAnnotations" (list $ $service "deployment") | nindent 4 }}
+  labels:
+    {{- include "temporal.resourceLabels" (list $ $service "deployment") | nindent 4 }}
+spec:
+  replicas: {{ default $.Values.server.replicaCount $serviceValues.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "temporal.name" $ }}
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+      app.kubernetes.io/component: {{ $service }}
+  template:
+    metadata:
+      annotations:
+        # vault.hashicorp.com
+        vault.hashicorp.com/auth-path: {{ printf "%s/auth/k8s/%s" $.Values.lob $.Values.kubernetesServiceHost | quote }}
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/agent-share-process-namespace: 'true'
+        vault.hashicorp.com/agent-run-as-user: '1000'
+        vault.hashicorp.com/agent-run-as-group: '10001'
+        vault.hashicorp.com/log-level: "debug"
+        vault.hashicorp.com/role: {{ $.Values.k8sRole | quote }}
+        vault.hashicorp.com/agent-set-security-context: 'true'
+        vault.hashicorp.com/agent-inject-secret-db-creds: {{ $.Values.dbEndPoint | quote }}
+        vault.hashicorp.com/agent-inject-template-db-creds: |
+           {{ print "{{- with secret \"" $.Values.dbEndPoint "\" -}}" }}
+           #!/bin/bash
+           {{ print "export TEMPORAL_STORE_PASSWORD={{.Data.password}}" }}
+           {{ print "export TEMPORAL_VISIBILITY_STORE_PASSWORD={{.Data.password}}" }}
+           {{ print "{{- end}}" }}
+        vault.hashicorp.com/agent-inject-perms-db-creds: '0755'
+        vault.hashicorp.com/agent-inject-command-db-creds: |
+           [[ ! -f /vault/secrets/last_run.txt ]] || [[ $(($(date +%s) - $(cat /vault/secrets/last_run.txt))) -gt 270 ]] && { ps aux | grep -v 'grep' | grep -v 'ps aux' | grep temporal-server | awk "{print\$1}" | xargs -r kill -9 && echo ok || echo skipkill; date +%s > /vault/secrets/last_run.txt; } || { echo wait270s; }
+        checksum/config: {{ include (print $.Template.BasePath "/server-configmap.yaml") $ | sha256sum }}
+        {{- if (dig "metrics" "annotations" "enabled" $.Values.server.metrics.annotations.enabled $serviceValues) }}
+        prometheus.io/job: {{ $.Chart.Name }}-{{ $service }}
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9090'
+        {{- end }}
+        {{- include "temporal.resourceAnnotations" (list $ $service "pod") | nindent 8 }}
+      labels:
+        createdAt: "{{ now | unixEpoch }}"
+        {{- include "temporal.resourceLabels" (list $ $service "pod") | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      {{ include "temporal.serviceAccount" $ }}
+      {{- if semverCompare ">=1.13.0" $.Chart.AppVersion}}
+      {{- with $.Values.server.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      serviceAccountName: vault-auth-sa
+      shareProcessNamespace: true
+      {{- if or (or $.Values.server.additionalInitContainers $.Values.cassandra.enabled) (or $.Values.elasticsearch.enabled $.Values.elasticsearch.external)}}
+      initContainers:
+        {{- with $.Values.server.additionalInitContainers }}
+          {{- toYaml . | nindent 8}}
+        {{- end }}
+        {{- if $.Values.cassandra.enabled }}
+        - name: check-cassandra
+          image: "{{ $.Values.cassandra.image.repo }}:{{ $.Values.cassandra.image.tag }}"
+          imagePullPolicy: {{ $.Values.cassandra.image.pullPolicy }}
+          command: ['sh', '-c', 'until cqlsh {{ include "cassandra.host" $ }} {{ $.Values.cassandra.config.ports.cql }} -e "SHOW VERSION"; do echo waiting for cassandra to start; sleep 1; done;']
+          {{- with $serviceValues.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: check-cassandra-temporal-schema
+          image: "{{ $.Values.cassandra.image.repo }}:{{ $.Values.cassandra.image.tag }}"
+          imagePullPolicy: {{ $.Values.cassandra.image.pullPolicy }}
+          command: ['sh', '-c', 'until cqlsh {{ include "cassandra.host" $ }} {{ $.Values.cassandra.config.ports.cql }} -e "SELECT keyspace_name FROM system_schema.keyspaces" | grep {{ $.Values.server.config.persistence.default.cassandra.keyspace }}$; do echo waiting for default keyspace to become ready; sleep 1; done;']
+          {{- with $serviceValues.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- end }}
+        {{- if or $.Values.elasticsearch.enabled $.Values.elasticsearch.external }}
+        - name: check-elasticsearch-index
+          image: "{{ $JFROGBASE }}/{{ $.Values.admintools.image.repository }}:{{ $.Values.admintools.image.tag }}"
+          imagePullPolicy: {{ $.Values.admintools.image.pullPolicy }}
+          command: ['sh', '-c', 'until curl --silent --fail --user "$ES_USER:$ES_PWD" $ES_SCHEME://$ES_HOST:$ES_PORT/$ES_VISIBILITY_INDEX 2>&1 > /dev/null; do echo waiting for elasticsearch index to become ready; sleep 1; done;']
+          env:
+            {{- include "temporal.admintools-env" (list $ "visibility") | nindent 12 }}
+          {{- with $serviceValues.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ $.Chart.Name }}-{{ $service }}
+          image: "{{ $JFROGBASE }}/{{ $.Values.server.image.repository }}{{ $.Values.server.image.digest }}"
+          imagePullPolicy: {{ $.Values.server.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args: [". /vault/secrets/db-creds && sh /etc/temporal/entrypoint.sh  "]
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: SERVICES
+              value: {{ $service }}
+
+          {{- if and (hasKey $.Values.server "internalFrontend") $.Values.server.internalFrontend.enabled }}
+            - name: USE_INTERNAL_FRONTEND
+              value: "1"
+          {{- end }}
+          {{- if $.Values.server.versionCheckDisabled }}
+            - name: TEMPORAL_VERSION_CHECK_DISABLED
+              value: "1"
+          {{- end }}
+          {{- if or $.Values.server.additionalEnv $serviceValues.additionalEnv }}
+          {{- toYaml (default $.Values.server.additionalEnv $serviceValues.additionalEnv) | nindent 12 }}
+          {{- end }}
+          {{- if $.Values.server.additionalEnvSecretName }}
+          envFrom:
+            - secretRef:
+                name: {{ $.Values.server.additionalEnvSecretName }}
+          {{- end }}
+          # For Istio service mesh - make sure ports are defined here and in the headless service, see:
+          # https://istio.io/latest/docs/ops/configuration/traffic-management/traffic-routing/#headless-services
+          ports:
+          {{- if ne $service "worker" }}
+            - name: rpc
+              containerPort: {{ $serviceValues.service.port }}
+              protocol: TCP
+          {{- end }}
+            - name: membership
+              containerPort: {{ $serviceValues.service.membershipPort }}
+              protocol: TCP
+          {{- if or (eq $service "frontend") (eq $service "internal-frontend") }}
+            - name: http
+              containerPort: {{ $serviceValues.service.httpPort }}
+              protocol: TCP
+          {{- end }}
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+          {{- if ne $service "worker" }}
+          livenessProbe:
+             initialDelaySeconds: 150
+             tcpSocket:
+               port: rpc
+          readinessProbe:
+            initialDelaySeconds: 50
+            tcpSocket:
+              port: rpc
+          {{- else if eq $service "worker"}}
+          livenessProbe:
+            exec:
+              command:
+                - ls
+                - /
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - ls
+                - /
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          {{- end }}
+          volumeMounts:
+            - name: sa-token
+              mountPath: "/var/run/secrets/kubernetes.io/serviceaccount"
+            - name: config
+              mountPath: /etc/temporal/config/config_template.yaml
+              subPath: config_template.yaml
+            - name: dynamic-config
+              mountPath: /etc/temporal/dynamic_config
+            {{- if $.Values.server.additionalVolumeMounts }}
+            {{- toYaml $.Values.server.additionalVolumeMounts | nindent 12}}
+            {{- end }}
+          resources:
+            {{- toYaml (default $.Values.server.resources $serviceValues.resources) | nindent 12 }}
+          {{- with $serviceValues.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: sa-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  expirationSeconds: 3600
+              - secret:
+                  name: temporal-app-sa-token
+                  items:
+                    - key: "ca.crt"
+                      path: "ca.crt"
+                      mode: 420
+        - name: config
+          configMap:
+            name: "{{ include "temporal.fullname" $ }}-config"
+        - name: dynamic-config
+          configMap:
+            name: "{{ include "temporal.fullname" $ }}-dynamic-config"
+            items:
+            - key: dynamic_config.yaml
+              path: dynamic_config.yaml
+        {{- if $.Values.server.additionalVolumes }}
+        {{- toYaml $.Values.server.additionalVolumes | nindent 8}}
+        {{- end }}
+      {{- with (default $.Values.server.nodeSelector $serviceValues.nodeSelector) }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with (default $.Values.server.affinity $serviceValues.affinity) }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with (default $.Values.server.tolerations $serviceValues.tolerations) }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with $serviceValues.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+---
+{{- end }}
+{{- end }}
+{{- end }}

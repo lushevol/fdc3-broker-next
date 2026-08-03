@@ -1,0 +1,126 @@
+envData:
+  - name: SB_ENV_ID
+    value: ct1_sit_hk
+  - name: SB_ENV_TYPE
+    value: SIT
+
+hcv:
+  role: 55313_XX_app_k8s_XX
+  data:
+    - path: scb/55313/xx/app/kv/data/trust_store_ts_cert
+      sourceName: trust_store_ts_cert
+      targetName: truststore.jks
+      type: file
+    - path: scb/55313/xx/app/kv/data/trust_store_ts_cert_key
+      sourceName: trust_store_ts_cert_key
+      targetName: TRUSTSTORE_PASSWORD
+      type: static
+    - path: scb/55313/xx/app/kv/data/key_store_ks_cert
+      sourceName: key_store_ks_cert
+      targetName: keystore.jks
+      type: file
+    - path: scb/55313/xx/app/kv/data/key_store_ks_cert_key
+      sourceName: key_store_ks_cert_key
+      targetName: KEYSTORE_PASSWORD
+      type: static
+
+functionType: private-api
+enableSIP: false
+enableEgressKeystore: false
+enableSEP: false
+
+binaryData:
+  - filename: config.json
+    base64enc: true
+    data: |
+      { 
+        "common" : {
+          "authentication": {
+              "token_url": "https://sit-authn.idp.global.standardchartered.com/ns03/realms/internal-system/protocol/openid-connect/token",
+              "client_id": "xx-gbl-sys",
+              "key_alias": "xx"
+          }
+        },
+        "rules": [
+          {
+            "match": {
+              "url": "/q/[\\S\\s]*",
+              "method": [
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE"
+              ]
+            },
+            "handlers": []
+          },
+          {
+            "match": {
+              "url": "/.*",
+              "method": [
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "HEAD",
+                "PATCH",
+                "OPTIONS",
+                "CONNECT",
+                "TRACE"
+              ]
+            },
+            "handlers": [
+              {
+                "id": "authenticator",
+                "config": {
+                  "jwks_uri": "https://sit-authn.idp.global.standardchartered.com/ns03/realms/internal-system/protocol/openid-connect/certs",
+                  "required_audience": ["case_centre-gbl", "case_centre-cn"]
+                }
+              }
+            ]
+          }
+        ]
+      }
+  - filename: config-egress.json
+    base64enc: true
+    data: |
+      {
+        "common" : {
+          "authentication": {
+              "token_url": "https://sit-authn.idp.global.standardchartered.com/ns03/realms/internal-system/protocol/openid-connect/token",
+              "client_id": "xx-gbl-sys",
+              "key_alias": "xx"
+          }
+        },
+        "rules": [
+          {
+            "match": {
+              "url": "/api/[\\S\\s]*",
+              "method": [
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE"
+              ]
+            },
+            "handlers": [
+              {
+                "id": "tokenGenerator"
+              }
+            ]
+          },  
+          {
+            "match": {
+              "url": ".*",
+              "method": [
+                "CONNECT",
+                "GET",
+                "POST",
+                "DELETE",
+                "PUT"
+              ]
+            },
+            "handlers": []
+          }
+        ]
+      }

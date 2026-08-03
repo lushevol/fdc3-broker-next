@@ -1,0 +1,17 @@
+<footer class="bg-white bottom-0 left-0 flex space-between py-3 fixed w-full">
+  <div
+    *ngFor="let item of navigation"
+    class="basis-1/5 text-center"
+    [ngClass]="{ active: selectedFooter === item.id }"
+    (click)="handleMenuChange(item.id)"
+  >
+    <img
+      [src]="item.icons[selectedFooter === item.id ? 1 : 0]"
+      width="24px"
+      height="24px"
+      [alt]="item.title"
+      class="m-auto"
+    />
+    <span class="text-xs">{{ item.title }}</span>
+  </div>
+</footer>

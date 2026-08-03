@@ -1,0 +1,2 @@
+# config all KEYS to be in CAPS
+GRAPHQL_DISABLE_INTROSPECTION = False

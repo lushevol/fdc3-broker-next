@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <parent>
+        <groupId>com.sc.devkit</groupId>
+        <artifactId>graphql-parent</artifactId>
+        <version>4.0.0-8057307</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.sc.faas.graphql</groupId>
+    <artifactId><%= name %></artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sc.devkit</groupId>
+            <artifactId>devkit-graphql-common</artifactId>
+            <version>4.0.0-8057564</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.5.3</version>
+                <executions>
+                    <execution>
+                        <id>create-app-config-zip</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <descriptor>src/assembly/app-config.xml</descriptor>
+                        </configuration>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
