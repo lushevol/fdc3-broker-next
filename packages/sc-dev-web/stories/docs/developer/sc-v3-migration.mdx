@@ -1,0 +1,102 @@
+import {Meta} from '@storybook/blocks';
+import '../../../src/styles/ScGDSStyleGuide.css';
+
+<Meta title="Concepts/Developer/V2 - V3 Migration Guide" />
+
+<style>
+{`
+  a.sbdocs-a {
+    color: var(--sc-link-primary-color, var(--sc-color-blue-500));
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  a.sbdocs-a:hover {
+    color: var(--sc-link-hover-color, var(--sc-color-blue-400));
+  }
+  summary {
+    cursor: pointer;
+  }
+`}
+</style>
+
+# V2 - V3 Migration Guide
+
+### In this page
+* [Added Components](#added-components)
+* [Features](#features)
+* [Fixes](#fixes)
+* [Changes Table](#changes)
+* [Renamed Icons](#renamed-icons)
+
+## Added Components
+
+* [Relationship](?path=/docs/business-components-relationship-relationship--overview)<br/>
+  <sc-tag type="primary">added</sc-tag> Relationship component
+* [Comment](?path=/docs/business-components-comment--overview)<br/>
+  <sc-tag type="primary">added</sc-tag> Comment component
+* [Status filter](?path=/docs/components-status-filter-status-filter--overview)<br/>
+  <sc-tag type="primary">added</sc-tag> Status filter component
+
+## Features
+
+* Mobile and tablet updates for dropdown, date input, rating button, button group, time input, menu bar, action bar, layout <sc-tag type="primary">added</sc-tag>
+* Storybook mobile support <sc-tag type="primary">added</sc-tag>
+* Radio group keyboard accessibility <sc-tag type="primary">added</sc-tag>
+* Enhanced `sc-stepper` vertical alginment to always show the active step if there are too many steps <sc-tag type="primary">added</sc-tag>
+* Dropdown highlight GDS alignment <sc-tag type="primary">added</sc-tag>
+* Multi dropdown supports creating a tag when the value does not exist in the option list <sc-tag type="primary">added</sc-tag>
+* Calendar update: supports multiple calendars and mobile <sc-tag type="primary">added</sc-tag>
+
+## Fixes
+
+* Checkbox group disabled bug (#11737696) <sc-tag type="success">fixed</sc-tag>
+* Dropdown performance and parent check (#11241383, #11823335) <sc-tag type="success">fixed</sc-tag>
+* Column layout additional height attribute (#11802499) <sc-tag type="success">fixed</sc-tag>
+* Component prop types (#8243736) <sc-tag type="success">fixed</sc-tag>
+* File events and listeners propagation (#11215882) <sc-tag type="success">fixed</sc-tag>
+
+## Renamed Icons
+
+* `pin--fill` → `location--fill` <sc-tag type="warning">renamed</sc-tag>
+* `pin--line` → `location--line` <sc-tag type="warning">renamed</sc-tag>
+
+## Changes
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Added</th>
+      <th>Changed</th>
+      <th>Removed</th>
+    </tr>
+  </thead>
+  <tbody valign="top">
+    <tr>
+      <td>[Relationship](?path=/docs/business-components-relationship-relationship--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> New component</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Comment](?path=/docs/business-components-comment--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> New component</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Status filter](?path=/docs/components-status-filter-status-filter--overview)</td>
+      <td><sc-tag type="primary">added</sc-tag> New component</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>[Icons](?path=/docs/components-icon--overview)</td>
+      <td></td>
+      <td><sc-tag type="warning">changed</sc-tag> Rename `pin--fill` → `location--fill`<br/><sc-tag type="warning">changed</sc-tag> Rename `pin--line` → `location--line`</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+

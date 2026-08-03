@@ -1,0 +1,7 @@
+node_modules
+coverage
+report
+.devkit/
+.scdevcli/
+.github/
+backup/

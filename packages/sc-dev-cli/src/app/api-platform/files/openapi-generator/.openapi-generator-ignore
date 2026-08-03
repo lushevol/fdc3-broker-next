@@ -1,0 +1,12 @@
+# ${project.baseDir}/.openapi-generator-ignore
+
+pom.xml
+build.gradle
+README.md
+settings.gradle
+.openapi-generator/
+
+**/webapp/
+
+**/RestResourceRoot.java
+**/RestApplication.java

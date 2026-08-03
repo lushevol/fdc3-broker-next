@@ -1,0 +1,22 @@
+export const contexts = {
+  FROM: 'form',
+  COMPONENT: 'component',
+  PAGE: 'page',
+  ACTION: 'action',
+  DATASOURCE: 'dataSource',
+  PROCESS_API: 'process-api',
+  DATA: 'data',
+  CUSTOM_COMPONENTS: 'custom-components',
+  INVALID_COMPONENTS: 'invalid-components',
+  ERROR_MESSAGES: 'error-messages',
+  STYLES: 'styles',
+  ACTIVE_COMPONENT: 'active-component',
+  MODE: 'mode',
+  DRAG_DROP: 'drag-drop',
+  PREDEFINED: 'predefined',
+  EDITPROPERTIES: 'edit-properties',
+  COMMENT: 'comment',
+  COMMENTDATA: 'comment-data',
+  FORM_INSTANCE: 'form-instance',
+};
+

@@ -2,11 +2,10 @@ import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import SlBadge from '@shoelace-style/shoelace/dist/components/badge/badge.component.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import ScTheme from '../../styles/ScTheme.js';
 import { COLOR, BADGE_TYPE, COMPACT_SIZE } from '../../shared/util.js';
 
-export class ScBadge extends ScopedElementsMixin(LitElement) {
+export class ScBadge extends LitElement {
   static styles = ScTheme.getStyles();
 
   static get scopedElements() {
@@ -16,7 +15,7 @@ export class ScBadge extends ScopedElementsMixin(LitElement) {
   }
 
   @property() type: `${BADGE_TYPE}` = BADGE_TYPE.number;
-  
+
   @property() color: `${COLOR}` = COLOR.blue;
 
   @property({ type: Number }) number?: number;
@@ -30,8 +29,8 @@ export class ScBadge extends ScopedElementsMixin(LitElement) {
   @property() size: `${COMPACT_SIZE}` = COMPACT_SIZE.md;
 
   getBadgeSize() {
-    const number = this.number ?? 0; 
-    
+    const number = this.number ?? 0;
+
     // Set dot hight value and text hight value according to "size" attribute.
     let dotHightValue;
     let textHightValue;
@@ -55,27 +54,29 @@ export class ScBadge extends ScopedElementsMixin(LitElement) {
         break;
     }
 
-    const height = this.type === BADGE_TYPE.text || this.type === BADGE_TYPE.dot
-      ? this.label === '' || this.type === 'dot'
-        ? dotHightValue 
-        : textHightValue // text badge
-      : this.number === null // here and down are for number badge
-        ? dotHightValue 
-        : textHightValue;
-    const width = this.type === BADGE_TYPE.text || this.type === BADGE_TYPE.dot
-      ? this.label === '' || this.type === 'dot'
-        ? dotHightValue  // Set width same to height so the badge could be circle
-        : 'auto'  // text badge
-      : this.number === null 
-        ? dotHightValue // Set width same to height so the badge could be circle
-        : this.outlined && number < 10 // here and down are for number badge
-          ? '1.0625rem' 
-          : number < 10 
-            ? '1.375rem' 
-            : number < 100 
-              ? '1.75rem' 
-              : '2.5rem';
-    return { width , height };
+    const height =
+      this.type === BADGE_TYPE.text || this.type === BADGE_TYPE.dot
+        ? this.label === '' || this.type === 'dot'
+          ? dotHightValue
+          : textHightValue // text badge
+        : this.number === null // here and down are for number badge
+          ? dotHightValue
+          : textHightValue;
+    const width =
+      this.type === BADGE_TYPE.text || this.type === BADGE_TYPE.dot
+        ? this.label === '' || this.type === 'dot'
+          ? dotHightValue // Set width same to height so the badge could be circle
+          : 'auto' // text badge
+        : this.number === null
+          ? dotHightValue // Set width same to height so the badge could be circle
+          : this.outlined && number < 10 // here and down are for number badge
+            ? '1.0625rem'
+            : number < 10
+              ? '1.375rem'
+              : number < 100
+                ? '1.75rem'
+                : '2.5rem';
+    return { width, height };
   }
 
   getFontSize() {
@@ -91,7 +92,7 @@ export class ScBadge extends ScopedElementsMixin(LitElement) {
         fontSize = '0.875rem';
         break;
       default:
-        fontSize = '0.75rem';  // default is md's value
+        fontSize = '0.75rem'; // default is md's value
         break;
     }
     return fontSize;
@@ -109,8 +110,7 @@ export class ScBadge extends ScopedElementsMixin(LitElement) {
           font-size: ${fontSize};
           font-weight: 400;
           width: ${width};
-          height: ${this.type === BADGE_TYPE.dot ? height : 
-                            this.outlined ? '1.375rem' : height};
+          height: ${this.type === BADGE_TYPE.dot ? height : this.outlined ? '1.375rem' : height};
           padding: ${this.type === BADGE_TYPE.text && this.label !== '' ? '0 .25rem' : 0};
           border: none;
         }
@@ -121,11 +121,11 @@ export class ScBadge extends ScopedElementsMixin(LitElement) {
     switch (this.color) {
       case COLOR.blue:
         if (this.outlined) {
-          backgroundColor = 'var(--sc-badge-blue-outlined-background-color, var(--sc-color-white));';
+          backgroundColor =
+            'var(--sc-badge-blue-outlined-background-color, var(--sc-color-white));';
           borderColor = 'var(--sc-badge-blue-outlined-border-color, var(--sc-color-blue-500))';
           color = 'var(--sc-badge-blue-outlined-text-color, var(--sc-color-blue-500));';
-        }
-        else {
+        } else {
           backgroundColor = 'var(--sc-badge-blue-fill-background-color, var(--sc-color-blue-500));';
           borderColor = 'var(--sc-badge-blue-fill-border-color, var(--sc-color-blue-500))';
           color = 'var(--sc-badge-blue-fill-text-color, var(--sc-color-white));';
@@ -133,36 +133,39 @@ export class ScBadge extends ScopedElementsMixin(LitElement) {
         break;
       case COLOR['dark-blue']:
         if (this.outlined) {
-          backgroundColor = 'var(--sc-badge-dark-blue-outlined-background-color, var(--sc-color-white));';
+          backgroundColor =
+            'var(--sc-badge-dark-blue-outlined-background-color, var(--sc-color-white));';
           borderColor = 'var(--sc-badge-dark-blue-outlined-border-color, var(--sc-color-blue-650))';
           color = 'var(--sc-badge-dark-blue-outlined-text-color, var(--sc-color-blue-650));';
-        }
-        else {
-          backgroundColor = 'var(--sc-badge-dark-blue-fill-background-color, var(--sc-color-blue-650));';
+        } else {
+          backgroundColor =
+            'var(--sc-badge-dark-blue-fill-background-color, var(--sc-color-blue-650));';
           borderColor = 'var(--sc-badge-dark-blue-fill-border-color, var(--sc-color-blue-650))';
           color = 'var(--sc-badge-dark-blue-fill-text-color, var(--sc-color-white));';
         }
         break;
       case COLOR.amber:
         if (this.outlined) {
-          backgroundColor = 'var(--sc-badge-amber-outlined-background-color, var(--sc-color-white));';
+          backgroundColor =
+            'var(--sc-badge-amber-outlined-background-color, var(--sc-color-white));';
           borderColor = 'var(--sc-badge-amber-outlined-border-color, var(--sc-color-amber-500))';
           color = 'var(--sc-badge-amber-outlined-text-color, var(--sc-color-amber-750));';
-        }
-        else {
-          backgroundColor = 'var(--sc-badge-amber-fill-background-color, var(--sc-color-amber-500));';
+        } else {
+          backgroundColor =
+            'var(--sc-badge-amber-fill-background-color, var(--sc-color-amber-500));';
           borderColor = 'var(--sc-badge-amber-fill-border-color, var(--sc-color-amber-500))';
           color = 'var(--sc-badge-amber-fill-text-color, var(--sc-color-blue-900));';
         }
         break;
       case COLOR.green:
         if (this.outlined) {
-          backgroundColor = 'var(--sc-badge-green-outlined-background-color, var(--sc-color-white));';
+          backgroundColor =
+            'var(--sc-badge-green-outlined-background-color, var(--sc-color-white));';
           borderColor = 'var(--sc-badge-green-outlined-border-color, var(--sc-color-green-300))';
           color = 'var(--sc-badge-green-outlined-text-color, var(--sc-color-green-700));';
-        }
-        else {
-          backgroundColor = 'var(--sc-badge-green-fill-background-color, var(--sc-color-green-700));';
+        } else {
+          backgroundColor =
+            'var(--sc-badge-green-fill-background-color, var(--sc-color-green-700));';
           borderColor = 'var(--sc-badge-green-fill-border-color, var(--sc-color-green-700))';
           color = 'var(--sc-badge-green-fill-text-color, var(--sc-color-white));';
         }
@@ -172,8 +175,7 @@ export class ScBadge extends ScopedElementsMixin(LitElement) {
           backgroundColor = 'var(--sc-badge-red-outlined-background-color, var(--sc-color-white));';
           borderColor = 'var(--sc-badge-red-outlined-border-color, var(--sc-color-red-200))';
           color = 'var(--sc-badge-red-outlined-text-color, var(--sc-color-red-500));';
-        }
-        else {
+        } else {
           backgroundColor = 'var(--sc-badge-red-fill-background-color, var(--sc-color-red-500));';
           borderColor = 'var(--sc-badge-red-fill-border-color, var(--sc-color-red-500))';
           color = 'var(--sc-badge-red-fill-text-color, var(--sc-color-white));';
@@ -184,8 +186,7 @@ export class ScBadge extends ScopedElementsMixin(LitElement) {
           backgroundColor = 'var(--sc-badge-red-outlined-background-color, var(--sc-color-white));';
           borderColor = 'var(--sc-badge-grey-outlined-border-color, var(--sc-color-grey-650))';
           color = 'var(--sc-badge-grey-outlined-text-color, var(--sc-color-grey-650));';
-        }
-        else {
+        } else {
           backgroundColor = 'var(--sc-badge-grey-fill-background-color, var(--sc-color-grey-650));';
           borderColor = 'var(--sc-badge-grey-fill-border-color, var(--sc-color-grey-650))';
           color = 'var(--sc-badge-grey-fill-text-color, var(--sc-color-white));';
@@ -194,17 +195,18 @@ export class ScBadge extends ScopedElementsMixin(LitElement) {
       case COLOR.transparent:
         if (this.outlined) {
           backgroundColor = 'transparent';
-          borderColor = 'var(--sc-badge-transparent-outlined-border-color, var(--sc-color-grey-650))';
+          borderColor =
+            'var(--sc-badge-transparent-outlined-border-color, var(--sc-color-grey-650))';
           color = 'var(--sc-badge-transparent-outlined-text-color, var(--sc-color-grey-650));';
-        }
-        else {
-          backgroundColor = 'var(--sc-badge-transparent-fill-background-color, var(--sc-color-grey-650));';
+        } else {
+          backgroundColor =
+            'var(--sc-badge-transparent-fill-background-color, var(--sc-color-grey-650));';
           borderColor = 'var(--sc-badge-transparent-fill-border-color, var(--sc-color-grey-650))';
           color = 'var(--sc-badge-transparent-fill-text-color, var(--sc-color-white));';
         }
         break;
     }
-    
+
     const colorStyle = html`
       <style>
         .sc-badge::part(base) {
@@ -224,7 +226,7 @@ export class ScBadge extends ScopedElementsMixin(LitElement) {
       if (_number !== null) {
         const number = Number(_number);
         if (isNaN(number)) {
-          content = '-'; 
+          content = '-';
         } else {
           const kilo = Math.floor(number / 1000);
           if (kilo === 0) {
@@ -253,10 +255,10 @@ export class ScBadge extends ScopedElementsMixin(LitElement) {
       } else if (this.label) {
         content = this.label;
       }
-    } 
+    }
     return html`
       ${this.renderCustomStyle()}
-      <sl-badge class='sc-badge' pill='true'> ${content} </sl-badge>
+      <sl-badge class="sc-badge" pill="true"> ${content} </sl-badge>
     `;
   }
 }

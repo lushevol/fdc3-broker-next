@@ -1,0 +1,220 @@
+/* Block elements reset */
+html, body, div, p, blockquote, pre,
+h1, h2, h3, h4, h5, h6,
+dl, dt, dd, ol, ul, li,
+fieldset, form, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, section, summary {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: baseline;
+  font-family: 'SC Prosper Sans', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol';
+}
+
+/* Inline elements reset */
+a, abbr, acronym, address, cite, code,
+dfn, img, kbd, q, s, samp,
+time, mark, audio, video, embed,
+ruby, label, applet, object, iframe, center {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: baseline;
+}
+
+/* Text formatting preserve semantic styles */
+b, strong { font-weight: bold !important; }
+i, em { font-style: italic !important; }
+u { text-decoration: underline !important; }
+sub { vertical-align: sub; font-size: smaller; }
+sup { vertical-align: super; font-size: smaller; }
+
+/* Span must inherit formatting from parent */
+span {
+  font-weight: inherit;
+  font-style: inherit;
+  text-decoration: inherit;
+}
+
+
+ins,
+ins * {
+  background: #ebfbe6;
+}
+
+del,
+del * {
+  background: #fce6e7;
+  color: #999999;
+}
+
+
+h1 {
+  line-height: 1.6;
+  font-size: 2.1875rem;
+  font-weight: normal;
+}
+h2 {
+  line-height: 1.35;
+  font-size: 1.75rem;
+  font-weight: normal;
+}
+h3 {
+  line-height: 1.33;
+  font-size: 1.3125rem;
+  font-weight: normal;
+}
+h4 {
+  line-height: 1.4;
+  font-weight: 700;
+  font-size: 1.09375rem;
+}
+h5 {
+  line-height: 1.4;
+  font-size: 1.09375rem;
+  font-weight: normal;
+}
+h6,
+div,
+p,
+aside,
+section {
+  font-weight: 400;
+}
+h6 {
+  font-size: 0.875rem;
+  font-weight: normal;
+}
+
+div {
+  font-size: 1rem;
+}
+
+p {
+  font-size: 0.875rem;
+}
+
+span {
+  font-size: inherit;
+}
+
+aside {
+  font-size: 0.75rem;
+}
+
+section {
+  font-size: 0.625rem;
+}
+
+blockquote:not(blockquote[style]) {
+  padding-left: 20px;
+  position: relative;
+}
+
+blockquote:not(blockquote[style]):before {
+  content: '';
+  position: absolute;
+  width: 5px;
+  height: 100%;
+  left: 0px;
+  top: 0px;
+  background-color: #ccc;
+}
+
+/* List styles and for bullets */
+ul,
+ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+ul ul,
+ol ol,
+ul ol,
+ol ul {
+  margin: 0.5em 0;
+}
+
+li {
+  line-height: 1.4;
+}
+
+/* Table styles */
+table {
+  border-spacing: 0px;
+  outline: unset !important;
+}
+
+th {
+  background: #fff;
+  color: #00172e;
+  text-align: left;
+  white-space: nowrap;
+  font-weight: normal;
+  font-size: 0.875rem;
+  border-bottom: 2px solid;
+  border-color: #666666;
+  padding-left: 5px;
+  padding-right: 0;
+  box-sizing: border-box;
+}
+
+tbody tr {
+  background-color: transparent;
+}
+
+td {
+  font-size: 0.875rem;
+  font-weight: normal;
+  color: #00172e;
+  cursor: inherit;
+  padding-left: 5px;
+  padding-right: 0;
+  box-sizing: border-box;
+}
+
+/* Target only cells without Excel border styling */
+tbody tr:not(:first-child) td:not([style*='border-top']):not([style*='border-right']):not([style*='border-bottom']):not([style*='border-left']):not([style*='border:']) {
+  border-top: 1px solid;
+  border-color: #d9d9d9 !important;
+}
+
+tbody td:not([style*='border-top']):not([style*='border-right']):not([style*='border-bottom']):not([style*='border-left']):not([style*='border:']) {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: #d9d9d9 !important;
+}
+
+tbody td {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  box-sizing: border-box !important;
+}
+
+/* Override TinyMCE's default table borders only when no Excel borders exist */
+table:not([style*='border']) tbody td:not([style*='border']) {
+  border: 1px solid #d9d9d9 !important;
+}
+
+/* Ensure Excel inline border styles take precedence by using higher specificity */
+tbody td[style*='border-top'],
+tbody td[style*='border-right'],
+tbody td[style*='border-bottom'],
+tbody td[style*='border-left'],
+tbody td[style*='border:'] {
+  border-image: initial !important;
+}
+
+/* Ensure hover doesn't override custom background colors */
+tbody tr:hover td:not([style*='background-color']) {
+  background: #e7f2fd;
+}
+
+tbody tr:hover td[style*='background-color'] {
+  filter: brightness(0.95);
+}

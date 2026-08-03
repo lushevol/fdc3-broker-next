@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <base href="/">
+  <meta charset="utf-8">
+  <style>
+    body {
+      background: #fafafa;
+      margin: 0;
+    }
+  </style>
+  <link rel="stylesheet" href="./node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css">
+  <link rel="stylesheet" href="./node_modules/@scdevkit/service-bench-core/dist/styles/SbDarkMode.css">
+  <link rel="stylesheet" href="/dist/styles/DarkMode.css">
+</head>
+<body>
+  <div id="sb-root"></div>
+  <script type="module" lang='ts'>
+    import '@scdevkit/webkit/elements'; // eslint-disable-line import/no-unresolved
+    import '@scdevkit/webkit-ext/elements';
+    import '@scdevkit/data/elements';
+    import '@scdevkit/docviewer/elements';
+    import './elements/form-editor.js'
+    import { html, render } from 'lit';
+    import '../dist/local/ScDataGraphQLProvider.js';
+    import '../dist/local/ScDataRestProvider.js';
+
+    render(
+      html`
+        <sc-demo-graphql-provider>
+          <sc-demo-rest-provider>
+            <sc-form-editor></sc-form-editor>
+          </sc-demo-rest-provider>
+        </sc-demo-graphql-provider>
+      `,
+      document.querySelector('#sb-root')
+    );
+  </script>
+</body>
+</html>

@@ -1,11 +1,5 @@
 import { useEffect, useState } from 'react';
 import type { ApplicationRegistry, IdentityCapability } from '@fm/platform-contracts';
-import {
-  Button,
-  DesignSystemProvider,
-  ErrorState,
-  ProgressCircle,
-} from '@fm/ratan-design';
 import { PortalHost } from './PortalHost';
 import {
   createIdentityCapability,
@@ -15,6 +9,7 @@ import {
 import { ANONYMOUS_IDENTITY_CAPABILITY } from './identity';
 import { LoginScreen } from './LoginScreen';
 import { loadApplicationRegistry } from './registry';
+import { ScAlert, ScButton, ScParagraph, ScSpinner } from './webkit';
 
 interface AppProps {
   readonly identity?: IdentityCapability;
@@ -35,9 +30,16 @@ export function App({
     if (!activeIdentity) return undefined;
     let active = true;
     setError(null);
-    loadApplicationRegistry().then((value) => { if (active) setRegistry(value); })
-      .catch((reason: unknown) => { if (active) setError(reason instanceof Error ? reason : new Error(String(reason))); });
-    return () => { active = false; };
+    loadApplicationRegistry()
+      .then((value) => {
+        if (active) setRegistry(value);
+      })
+      .catch((reason: unknown) => {
+        if (active) setError(reason instanceof Error ? reason : new Error(String(reason)));
+      });
+    return () => {
+      active = false;
+    };
   }, [activeIdentity, attempt]);
   if (!activeIdentity) {
     return (
@@ -55,36 +57,52 @@ export function App({
   }
   if (error) {
     return (
-      <DesignSystemProvider
-        appearance={{ scheme: 'dark', density: 'comfortable', direction: 'ltr' }}
-        scope="host"
+      <div
+        className="ratan-webkit-root"
+        data-ratan-scope="host"
+        data-ratan-theme="dark"
+        data-ratan-density="comfortable"
+        data-design-system="ratan-webkit"
+        dir="ltr"
       >
         <main className="host-status-surface">
-          <ErrorState
-            title="Portal registry unavailable"
-            message={error.message}
-            action={(
-              <Button onClick={() => setAttempt((value) => value + 1)}>
-                Retry registry
-              </Button>
-            )}
-          />
+          <ScAlert role="alert" title="Portal registry unavailable" type="error" icon>
+            <ScParagraph>{error.message}</ScParagraph>
+            <ScButton
+              type="primary"
+              role="button"
+              aria-label="Retry registry"
+              onClick={() => setAttempt((value) => value + 1)}
+            >
+              Retry registry
+            </ScButton>
+          </ScAlert>
         </main>
-      </DesignSystemProvider>
+      </div>
     );
   }
   if (!registry) {
     return (
-      <DesignSystemProvider
-        appearance={{ scheme: 'dark', density: 'comfortable', direction: 'ltr' }}
-        scope="host"
+      <div
+        className="ratan-webkit-root"
+        data-ratan-scope="host"
+        data-ratan-theme="dark"
+        data-ratan-density="comfortable"
+        data-design-system="ratan-webkit"
+        dir="ltr"
       >
         <main className="host-status-surface" role="status">
-          <ProgressCircle label="Loading application registry" />
-          <span>Loading application registry…</span>
+          <ScSpinner aria-label="Loading application registry" role="progressbar" />
+          <ScParagraph>Loading application registry…</ScParagraph>
         </main>
-      </DesignSystemProvider>
+      </div>
     );
   }
-  return <PortalHost registry={registry} identity={activeIdentity} onLogout={() => setActiveIdentity(null)} />;
+  return (
+    <PortalHost
+      registry={registry}
+      identity={activeIdentity}
+      onLogout={() => setActiveIdentity(null)}
+    />
+  );
 }

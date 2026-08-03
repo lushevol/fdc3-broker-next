@@ -128,7 +128,7 @@ export class ScToggle extends FormInputBase {
       bgCover.style.width = `${this.selectedOption.clientWidth  }px`;
       bgCover.style.height = `${this.selectedOption.clientHeight  }px`;
       const { index } = this.selectedOption;
-      const preOptions = this.querySelectorAll('sc-toggle-option');
+      const preOptions = this.querySelectorAll<ScToggleOption>('sc-toggle-option');
 
       if (preOptions) {
         let left = 0;
@@ -204,7 +204,7 @@ export class ScToggle extends FormInputBase {
   renderFormControl() {
     if (this.readonly) {
       let text: string = this.value;
-      const options = this.querySelectorAll('sc-toggle-option');
+      const options = this.querySelectorAll<ScToggleOption>('sc-toggle-option');
       if (options) {
         const activeOption = Array.from(options).find(c => c.value == this.value); // eslint-disable-line
         if (activeOption) {

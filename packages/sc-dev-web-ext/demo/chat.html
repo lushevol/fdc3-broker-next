@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <title>ScChat Local Demo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css" />
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDyslexicMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkModeExt.css" />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      box-sizing: border-box;
+      background: var(--sc-color-grey-100);
+      min-height: 100vh;
+    }
+
+    .chat-test-shell {
+      max-width: 980px;
+      margin: 0 auto;
+      background: var(--sc-color-white);
+      border: 1px solid var(--sc-color-grey-150);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .chat-test-shell + .chat-test-shell {
+      margin-top: 20px;
+    }
+
+    .chat-test-title {
+      margin: 0 0 8px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--sc-color-grey-900);
+    }
+
+    .chat-test-note {
+      margin: 0 0 16px;
+      color: var(--sc-color-grey-700);
+      font-size: 14px;
+    }
+
+    .chat-event-log {
+      margin: 16px 0 0;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--sc-color-grey-150);
+      background: var(--sc-color-grey-50);
+      color: var(--sc-color-grey-800);
+      font-size: 12px;
+      line-height: 1.45;
+      max-height: 220px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    sc-chat {
+      display: block;
+      min-height: 560px;
+      height: 72vh;
+    }
+
+  </style>
+</head>
+<body>
+  <div id="webkit-ext-container"></div>
+
+  <script type="module">
+    import '../dist/elements/index.js';
+    import '../dist/demo/local/ScDataGraphQLProvider.js';
+    import '@scdevkit/webkit/elements/index.js';
+    import '@scdevkit/data/elements/index.js';
+    import { html } from '/node_modules/lit-html/lit-html.js';
+    import { render } from 'lit';
+    import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+
+    const settings = {
+      size: 'xl',
+      model: 'SB_SUPPORT',
+      apiProtocol: 'ag-ui',
+      // agUiApiName: 'ag-ui',
+      // agUiResource: 'ag-ui/chat',
+    };
+
+    const agUiMetadata = {
+      userId: 'demo-user',
+      channel: 'chat-demo',
+      toolsetId: 'SME账户',
+      categoryId: 'CDD',
+    };
+
+    const agUiMockSettings = {
+      ...settings,
+      agUiResource: '/mock-ag-ui/chat',
+    };
+
+    const cancelDemoSettings = {
+      ...settings,
+      agUiResource: '/ag-ui/chat',
+      cancelApiName: 'ag-ui-api',
+      cancelResource: '/ag-ui/chat/cancel',
+    };
+
+    const runtimeChatSettings = {
+      ...settings,
+      agUiApiName: 'ag-ui-api',
+      agUiResource: '/mock-ag-ui/runtime',
+      inputPlaceholder: 'Ask your backend agent a question',
+    };
+
+    const runtimeAgUiMetadata = {
+      ...agUiMetadata,
+      channel: 'runtime-chat-demo',
+    };
+
+    const runtimeLogs = [];
+    const runtimeLogLimit = 80;
+
+    const renderRuntimeLog = () => {
+      const runtimeLogEl = document.querySelector('#chat-runtime-log');
+      if (!runtimeLogEl) {
+        return;
+      }
+      runtimeLogEl.textContent = runtimeLogs.join('\n');
+    };
+
+    const appendRuntimeLog = (name, detail) => {
+      let payload = '';
+      try {
+        payload = JSON.stringify(detail);
+      } catch (error) {
+        payload = String(detail);
+      }
+      const now = new Date().toLocaleTimeString();
+      runtimeLogs.unshift(`[${now}] ${name} ${payload}`);
+      if (runtimeLogs.length > runtimeLogLimit) {
+        runtimeLogs.length = runtimeLogLimit;
+      }
+      renderRuntimeLog();
+    };
+
+    const headerActionLogs = [];
+    const headerActionLogLimit = 80;
+
+    const renderHeaderActionLog = () => {
+      const eventLogEl = document.querySelector('#chat-header-action-log');
+      if (!eventLogEl) {
+        return;
+      }
+      eventLogEl.textContent = headerActionLogs.join('\n');
+    };
+
+    const appendHeaderActionLog = (name, detail) => {
+      let payload = '';
+      try {
+        payload = JSON.stringify(detail);
+      } catch (error) {
+        payload = String(detail);
+      }
+      const now = new Date().toLocaleTimeString();
+      headerActionLogs.unshift(`[${now}] ${name} ${payload}`);
+      if (headerActionLogs.length > headerActionLogLimit) {
+        headerActionLogs.length = headerActionLogLimit;
+      }
+      renderHeaderActionLog();
+    };
+
+    const headerActionSettings = {
+      ...settings,
+      headerActions: [
+        {
+          id: 'history',
+          icon: 'history',
+          title: 'Open history',
+          eventDetail: {
+            target: 'history',
+          },
+        },
+        {
+          id: 'link',
+          label: 'Copy link',
+          icon: 'link',
+          handler: () => {
+            const shareLink = `${window.location.origin}/demo/chat.html`;
+            if (navigator?.clipboard?.writeText) {
+              navigator.clipboard.writeText(shareLink).catch(error => {
+                console.warn('Failed to copy link:', error);
+              });
+            }
+            appendHeaderActionLog('header-action:copy-link', {
+              link: shareLink,
+            });
+          },
+        },
+        {
+          id: 'faq',
+          label: 'FAQ',
+          leftIcon: 'question-circle',
+          eventDetail: {
+            target: 'faq',
+          },
+        },
+      ],
+    };
+
+    const eventLogs = [];
+    const eventLogLimit = 80;
+
+    const renderEventLog = () => {
+      const eventLogEl = document.querySelector('#chat-event-log');
+      if (!eventLogEl) {
+        return;
+      }
+      eventLogEl.textContent = eventLogs.join('\n');
+    };
+
+    const appendEventLog = (name, detail) => {
+      let payload = '';
+      try {
+        payload = JSON.stringify(detail);
+      } catch (error) {
+        payload = String(detail);
+      }
+      const now = new Date().toLocaleTimeString();
+      eventLogs.unshift(`[${now}] ${name} ${payload}`);
+      if (eventLogs.length > eventLogLimit) {
+        eventLogs.length = eventLogLimit;
+      }
+      renderEventLog();
+    };
+
+    const handleLifecycleEvent = event => {
+      const detail = event.detail || {};
+      if (event.type === 'sc-change' && detail.type === 'assistant-delta') {
+        appendEventLog(event.type, { type: detail.type, delta: detail.delta });
+        return;
+      }
+      appendEventLog(event.type, detail);
+    };
+
+    const cancelLogs = [];
+    const cancelLogLimit = 80;
+
+    const renderCancelLog = () => {
+      const cancelLogEl = document.querySelector('#chat-cancel-log');
+      if (!cancelLogEl) {
+        return;
+      }
+      cancelLogEl.textContent = cancelLogs.join('\n');
+    };
+
+    const appendCancelLog = (name, detail) => {
+      let payload = '';
+      try {
+        payload = JSON.stringify(detail);
+      } catch (error) {
+        payload = String(detail);
+      }
+      const now = new Date().toLocaleTimeString();
+      cancelLogs.unshift(`[${now}] ${name} ${payload}`);
+      if (cancelLogs.length > cancelLogLimit) {
+        cancelLogs.length = cancelLogLimit;
+      }
+      renderCancelLog();
+    };
+
+    const handleCancelDemoEvent = event => {
+      const detail = event.detail || {};
+      if (event.type === 'sc-change' && detail.type === 'assistant-delta') {
+        appendCancelLog(event.type, { type: detail.type, delta: detail.delta });
+        return;
+      }
+      appendCancelLog(event.type, detail);
+    };
+
+    window.addEventListener('sc-demo-mock-cancel', event => {
+      appendCancelLog('mock-cancel-api', event.detail || {});
+    });
+
+    window.addEventListener('sc-demo-mock-chat', event => {
+      appendCancelLog('mock-chat-api', event.detail || {});
+
+      const detail = event.detail || {};
+      if (detail.metadata?.channel === 'runtime-chat-demo') {
+        appendRuntimeLog('mock-runtime-api', detail);
+      }
+    });
+
+    const handleHeaderActionEvent = event => {
+      const detail = event.detail || {};
+      if (detail.type !== 'header-action') {
+        return;
+      }
+      appendHeaderActionLog(event.type, detail);
+    };
+
+    const legacySseSettings = {
+      size: 'xl',
+      model: 'SB_SUPPORT',
+      apiProtocol: 'legacy-graphql',
+      legacyResource: '/sse',
+    };
+
+    const localMockData = [
+      {
+        user: 'bot',
+        text: 'This chat is running with disable-api mode.',
+        id: 'local-bot-1',
+      },
+      {
+        user: 'bot',
+        text: 'Send a message and demo/chat.html will mock the response via sc-post.',
+        id: 'local-bot-2',
+      },
+    ];
+
+    const handleLocalPost = event => {
+      const chatEl = event.currentTarget;
+      const detail = event.detail || {};
+      console.log('sc-post event detail:', detail);
+      const messages = detail.runAgentInput?.messages || [];
+      const latestUserMessage = [...messages].reverse().find(item => item?.role === 'user');
+      const message = typeof latestUserMessage?.content === 'string' ? latestUserMessage.content : '';
+
+      const conversations = messages
+        .map(item => {
+          if (item?.role === 'assistant' && typeof item.content === 'string') {
+            return { user: 'bot', text: item.content, id: item.id };
+          }
+          if (item?.role === 'user' && typeof item.content === 'string') {
+            return { user: 'user', text: item.content, id: item.id };
+          }
+          return null;
+        })
+        .filter(Boolean);
+
+      if (!chatEl || !message) {
+        return;
+      }
+
+      const now = Date.now();
+      const mockReplies = [
+        {
+          user: 'bot',
+          text: `Mock reply: received your message "${message}".`,
+          id: `local-bot-${now}-1`,
+        },
+        {
+          user: 'bot',
+          text: 'API is disabled, this message is appended from demo/chat.html.',
+          id: `local-bot-${now}-2`,
+        },
+      ];
+
+      chatEl.data = [...conversations, ...mockReplies];
+    };
+
+    render(
+      html`
+        <sc-demo-graphql-provider>
+          <sc-icon-provider .iconLibraries=${[CountryIconLibrary, MainIconLibrary]}>
+            <div class="chat-test-shell">
+              <h1 class="chat-test-title">ScChat API Mode</h1>
+              <p class="chat-test-note">
+                Default chat mode that can call API adapters.
+              </p>
+              <sc-chat .settings=${settings} .metadata=${agUiMetadata}></sc-chat>
+            </div>
+
+            <div class="chat-test-shell">
+              <h1 class="chat-test-title">ScChat disable-api + data Mode</h1>
+              <p class="chat-test-note">
+                This case passes data directly, disables API calls, listens to sc-post,
+                and appends mocked bot replies back into data.
+              </p>
+              <sc-chat
+                .settings=${settings}
+                .metadata=${agUiMetadata}
+                .data=${localMockData}
+                ?disable-api=${true}
+                @sc-post=${handleLocalPost}
+              ></sc-chat>
+            </div>
+
+            <div class="chat-test-shell">
+              <h1 class="chat-test-title">ScChat Legacy /sse Mode (Non AG-UI)</h1>
+              <p class="chat-test-note">
+                This case uses legacy-graphql protocol and routes to legacy resource sse (/sse).
+              </p>
+              <sc-chat .settings=${legacySseSettings}></sc-chat>
+            </div>
+
+            <div class="chat-test-shell">
+              <h1 class="chat-test-title">ScChat Custom Header Actions</h1>
+              <p class="chat-test-note">
+                This case uses settings.headerActions to add custom actions in chat-header,
+                including icon-only action (history), callback action (copy link), and event action (FAQ).
+              </p>
+              <sc-chat
+                .settings=${headerActionSettings}
+                .metadata=${agUiMetadata}
+                @sc-action=${handleHeaderActionEvent}
+              ></sc-chat>
+              <pre id="chat-header-action-log" class="chat-event-log"></pre>
+            </div>
+
+            <div class="chat-test-shell">
+              <h1 class="chat-test-title">ScChat AG-UI Mock Lifecycle Test</h1>
+              <p class="chat-test-note">
+                This case mocks AG-UI SSE locally and demonstrates lifecycle interactions.
+                Send normal text to get stream success, send text containing "error" to trigger backend error,
+                click stop while streaming to test cancel, then use Retry action in bot message.
+              </p>
+              <sc-chat
+                .settings=${agUiMockSettings}
+                .metadata=${agUiMetadata}
+                @sc-post=${handleLifecycleEvent}
+                @sc-action=${handleLifecycleEvent}
+                @sc-change=${handleLifecycleEvent}
+                @sc-submit-success=${handleLifecycleEvent}
+                @sc-submit-error=${handleLifecycleEvent}
+                @sc-cancel=${handleLifecycleEvent}
+              ></sc-chat>
+              <pre id="chat-event-log" class="chat-event-log"></pre>
+            </div>
+
+            <div class="chat-test-shell">
+              <h1 class="chat-test-title">ScChat Cancel API Example</h1>
+              <p class="chat-test-note">
+                This case configures cancel API with cancelApiName/cancelResource.
+                Send a message first, then click stop while streaming.
+                The log shows mock-chat-api when sending, then sc-cancel and mock-cancel-api when stopping.
+              </p>
+              <sc-chat
+                .settings=${cancelDemoSettings}
+                .metadata=${agUiMetadata}
+                @sc-post=${handleCancelDemoEvent}
+                @sc-action=${handleCancelDemoEvent}
+                @sc-change=${handleCancelDemoEvent}
+                @sc-submit-success=${handleCancelDemoEvent}
+                @sc-submit-error=${handleCancelDemoEvent}
+                @sc-cancel=${handleCancelDemoEvent}
+              ></sc-chat>
+              <pre id="chat-cancel-log" class="chat-event-log"></pre>
+            </div>
+
+            <div class="chat-test-shell">
+              <h1 class="chat-test-title">ScChat Runtime Example</h1>
+              <p class="chat-test-note">
+                This runtime case uses local mock data from /mock-ag-ui/runtime.
+                Try: "hello" for success, "please interrupt this" for interrupt widget, then fill OTP fields and submit,
+                or send "error" to trigger mock backend error.
+              </p>
+              <sc-chat .settings=${runtimeChatSettings} show-log .metadata=${runtimeAgUiMetadata}></sc-chat>
+              <pre id="chat-runtime-log" class="chat-event-log"></pre>
+            </div>
+          </sc-icon-provider>
+        </sc-demo-graphql-provider>
+      `,
+      document.querySelector('#webkit-ext-container')
+    );
+  </script>
+</body>
+</html>

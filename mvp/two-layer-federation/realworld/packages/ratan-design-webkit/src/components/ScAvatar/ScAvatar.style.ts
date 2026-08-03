@@ -16,11 +16,11 @@ export default css`
   --_focus-ring-color: var(--sc-avatar-focus-ring-color);
 
   /* Colors - defaults */
-  --_bg-color: var(--sc-avatar-default-background-color);
+  --_bg-color: var(--sc-avatar-default-background-color, #2563eb);
   --_hover-stroke: var(--sc-avatar-hover-stroke-default);
   --_pressed-stroke: var(--sc-avatar-pressed-stroke-default);
   --_selected-stroke: var(--sc-avatar-selected-stroke-default);
-  --_outline-stroke: var(--sc-avatar-default-background-color);
+  --_outline-stroke: var(--sc-avatar-default-background-color, #2563eb);
 }
 
 /* Stroke Overlay (for images) */
@@ -153,11 +153,11 @@ sc-badge {
 
   :host([background='default']),
   :host(:not([background])) {
-    --_bg-color: var(--sc-avatar-default-background-color);
+    --_bg-color: var(--sc-avatar-default-background-color, #2563eb);
     --_hover-stroke: var(--sc-avatar-hover-stroke-default);
     --_pressed-stroke: var(--sc-avatar-pressed-stroke-default);
     --_selected-stroke: var(--sc-avatar-selected-stroke-default);
-    --_outline-stroke: var(--sc-avatar-default-background-color);
+    --_outline-stroke: var(--sc-avatar-default-background-color, #2563eb);
   }
 
   :host([data-has-image]) {
@@ -173,7 +173,7 @@ sc-badge {
 
   /* Default (Filled) */
   :host(:not([outlined])) .avatar-box {
-    color: var(--sc-color-white);
+    color: var(--sc-color-white, #ffffff);
   }
 
   /* Outlined */

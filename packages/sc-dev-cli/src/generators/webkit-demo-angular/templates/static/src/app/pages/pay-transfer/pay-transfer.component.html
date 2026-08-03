@@ -1,0 +1,97 @@
+<div class="mx-2">
+    <h4 class="pl-2">Pay &amp; Transfer</h4>
+    <div class="grid grid-cols-2 justify-center space-between mt-1 mb-3">
+        <div *ngFor="let item of payTransfer" class="p-2">
+            <sc-icon-card
+                [image]="item.icon"
+                width="100%"
+                height="150px"
+                size="half"
+                (click)="handleShowSideSheet(true)"
+            >
+                <div slot="title" class="text-base font-semibold line-clamp-2">{{item.title}}</div>
+            </sc-icon-card>
+        </div>
+    </div>
+</div>
+<div class="mx-2 mb-5">
+    <div class="grid grid-cols-4 justify-center space-between mt-1 mb-4">
+        <div *ngFor="let item of quickLinks">
+            <div class="px-3">
+                <sc-icon-card
+                    [image]="item.icon"
+                    width="100%"
+                    height="60px"
+                    size="one-fourth"
+                    layout="title-out"
+                    (click)="handleShowSideSheet(true)"
+                />
+            </div>
+            <div class="mt-1 px-1 text-center text-xs font-semibold line-clamp-3">{{item.title}}</div>
+        </div>
+    </div>
+</div>
+<swipable-panel
+    minHeight="320px"
+    maxHeight="87%"
+    (onMaximise)="handlePanelChange(true)"
+    (onMinimise)="handlePanelChange(false)"
+>
+    <div class="flex space-x-2 mt-3 mb-3 justify-center overflow-y-auto no-scrollbar">
+        <image-button *ngFor="let item of listOptions"
+            [title]="item.title"
+            [highlight]="selectedTab.id === item.id"
+            [compact]="true"
+            (click)="handleTabSelect(item)"
+        />
+    </div>
+    <div *ngIf="selectedTab.id === 'myPayees'">        
+        <div *ngIf="isPanelMaximise">
+            <div class="border-bottom mb-3">
+                <div class="px-3">
+                    <sc-search-field />
+                </div>
+                <div class="flex space-x-3 mt-3 mb-3 pl-3 overflow-y-auto no-scrollbar">
+                    <image-button *ngFor="let item of payeeFilters"
+                        [title]="item.title"
+                        [highlight]="selectedPayeeFilter.id === item.id"
+                        [compact]="true"
+                        (click)="handlePayeeFilter(item)"
+                    />
+                </div>
+            </div>
+            <div class="mb-3 px-3 text-sm">
+                {{selectedPayeeFilter.id === "all" ? "" : "All"}} {{selectedPayeeFilter.title}} Payees
+            </div>
+        </div>  
+        <div *ngFor="let item of payees" class="mb-3 text-left mx-3">
+            <sc-card
+                vertical-align="top"
+                [title]="item.title"
+                [body]="item.copy"
+                icon="info-circle--line"
+            >   
+                <sc-icon *ngIf="item.channel === 'M'"
+                    slot="prefix"
+                    name="smartphone--line"
+                    size="md"
+                ></sc-icon>
+                <div *ngIf="item.channel === 'I'"
+                    slot="prefix"
+                    class="font-semibold text-lg text-center"
+                >
+                    {{item.title.substring(0, 1)}}
+                </div>
+            </sc-card>
+        </div>
+    </div>
+    <div *ngIf="selectedTab.id !== 'myPayees'">
+        <app-not-available />
+    </div>
+</swipable-panel>
+<sc-side-sheet
+    [open]="showSideSheet"
+    (onScHide)="handleShowSideSheet(false)"
+>
+    <app-not-available />
+</sc-side-sheet>

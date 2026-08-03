@@ -1,0 +1,8 @@
+{
+  "dev": {
+    "publicOrigin": "https://localhost:9443"
+  },
+  "test": {
+    "publicOrigin": "https://localhost:9543"
+  }
+}

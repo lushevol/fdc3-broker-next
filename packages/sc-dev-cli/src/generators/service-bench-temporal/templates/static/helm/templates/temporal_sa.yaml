@@ -1,0 +1,786 @@
+{{- $JFROG := ternary .Values.DEVFACTORY_JFOG .Values.ONPREM_JFROG .Values.isDevFactory }}
+{{- $JFROGBASE := ternary .Values.DEVFACTORY_JFROG_BASE .Values.ONPREM_JFROG_BASE .Values.isDevFactory }}
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: {{.Values.k8sNamespace | quote}}
+  name: temporal-app-sa
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "-100"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: temporal-app-sa-token
+  namespace: {{.Values.k8sNamespace | quote}}
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "-90"
+    kubernetes.io/service-account.name: temporal-app-sa
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: temporal-app-admin-role
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "-80"
+rules:
+  - apiGroups:
+      - cert-manager.io
+    resources:
+      - certificates
+      - certificaterequests
+      - issuers
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - patch
+      - update
+  - apiGroups:
+      - cert-manager.io
+    resources:
+      - certificates/status
+    verbs:
+      - update
+  - apiGroups:
+      - acme.cert-manager.io
+    resources:
+      - challenges
+      - orders
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - patch
+      - update
+  - apiGroups:
+      - cert-manager.io
+    resources:
+      - certificates
+      - certificaterequests
+      - issuers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - acme.cert-manager.io
+    resources:
+      - challenges
+      - orders
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - eventing.knative.dev
+      - messaging.knative.dev
+      - sources.knative.dev
+      - flows.knative.dev
+      - bindings.knative.dev
+    resources:
+      - brokers
+      - eventtypes
+      - triggers
+      - channels
+      - inmemorychannels
+      - subscriptions
+      - apiserversources
+      - containersources
+      - pingsources
+      - sinkbindings
+      - parallels
+      - sequences
+    verbs:
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - serving.knative.dev
+    resources:
+      - metrics
+      - podautoscalers
+      - images
+      - brokers
+      - eventtypes
+      - triggers
+      - parallels
+      - sequences
+      - channels
+      - inmemorychannels
+      - subscriptions
+      - certificates
+      - clusterdomainclaims
+      - ingresses
+      - serverlessservices
+      - configurations
+      - domainmappings
+      - revisions
+      - routes
+      - services
+      - apiserversources
+      - containersources
+      - pingsources
+      - sinkbindings
+    verbs:
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - networking.internal.knative.dev
+      - autoscaling.internal.knative.dev
+      - caching.internal.knative.dev
+    resources:
+      - metrics
+      - podautoscalers
+      - images
+      - brokers
+      - eventtypes
+      - triggers
+      - parallels
+      - sequences
+      - channels
+      - inmemorychannels
+      - subscriptions
+      - certificates
+      - clusterdomainclaims
+      - ingresses
+      - serverlessservices
+      - configurations
+      - domainmappings
+      - revisions
+      - routes
+      - services
+      - apiserversources
+      - containersources
+      - pingsources
+      - sinkbindings
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - logging.banzaicloud.io
+    resources:
+      - flows
+      - outputs
+      - clusterflows
+      - clusteroutputs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - alertmanagers
+      - prometheuses
+      - prometheuses/finalizers
+      - alertmanagers/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - thanosrulers
+      - thanosrulers/finalizers
+      - servicemonitors
+      - podmonitors
+      - prometheusrules
+      - podmonitors
+      - probes
+      - alertmanagerconfigs
+    verbs:
+      - '*'
+  - apiGroups:
+      - ""
+    resources:
+      - pods/attach
+      - pods/exec
+      - pods/portforward
+      - pods/proxy
+      - secrets
+      - services/proxy
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - serviceaccounts
+    verbs:
+      - impersonate
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - pods/attach
+      - pods/exec
+      - pods/portforward
+      - pods/proxy
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - pods/eviction
+    verbs:
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - events
+      - persistentvolumeclaims
+      - replicationcontrollers
+      - replicationcontrollers/scale
+      - secrets
+      - serviceaccounts
+      - services
+      - services/proxy
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - patch
+      - update
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - serviceaccounts/token
+    verbs:
+      - create
+  - apiGroups:
+      - apps
+    resources:
+      - daemonsets
+      - deployments
+      - deployments/rollback
+      - deployments/scale
+      - replicasets
+      - replicasets/scale
+      - statefulsets
+      - statefulsets/scale
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - patch
+      - update
+      - list
+      - watch
+  - apiGroups:
+      - autoscaling
+    resources:
+      - horizontalpodautoscalers
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - patch
+      - update
+  - apiGroups:
+      - batch
+    resources:
+      - cronjobs
+      - jobs
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - patch
+      - update
+  - apiGroups:
+      - extensions
+    resources:
+      - daemonsets
+      - deployments
+      - deployments/rollback
+      - deployments/scale
+      - ingresses
+      - networkpolicies
+      - replicasets
+      - replicasets/scale
+      - replicationcontrollers/scale
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - patch
+      - update
+  - apiGroups:
+      - policy
+    resources:
+      - poddisruptionbudgets
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - patch
+      - update
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+      - networkpolicies
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - patch
+      - update
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - metrics.k8s.io
+    resources:
+      - pods
+      - nodes
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+      - patch
+      - update
+  - apiGroups:
+      - eventing.knative.dev
+      - messaging.knative.dev
+      - sources.knative.dev
+      - flows.knative.dev
+      - bindings.knative.dev
+    resources:
+      - brokers
+      - eventtypes
+      - triggers
+      - channels
+      - inmemorychannels
+      - subscriptions
+      - apiserversources
+      - containersources
+      - pingsources
+      - sinkbindings
+      - parallels
+      - sequences
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - serving.knative.dev
+      - networking.internal.knative.dev
+      - autoscaling.internal.knative.dev
+      - caching.internal.knative.dev
+    resources:
+      - metrics
+      - podautoscalers
+      - images
+      - brokers
+      - eventtypes
+      - triggers
+      - parallels
+      - sequences
+      - channels
+      - inmemorychannels
+      - subscriptions
+      - certificates
+      - clusterdomainclaims
+      - ingresses
+      - serverlessservices
+      - configurations
+      - domainmappings
+      - revisions
+      - routes
+      - services
+      - apiserversources
+      - containersources
+      - pingsources
+      - sinkbindings
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - alertmanagers
+      - prometheuses
+      - prometheuses/finalizers
+      - alertmanagers/finalizers
+      - thanosrulers
+      - thanosrulers/finalizers
+      - servicemonitors
+      - podmonitors
+      - prometheusrules
+      - podmonitors
+      - probes
+      - probes/finalizers
+      - alertmanagerconfigs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - endpoints
+      - persistentvolumeclaims
+      - persistentvolumeclaims/status
+      - pods
+      - replicationcontrollers
+      - replicationcontrollers/scale
+      - serviceaccounts
+      - services
+      - services/status
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - bindings
+      - events
+      - limitranges
+      - namespaces/status
+      - pods/log
+      - pods/status
+      - replicationcontrollers/status
+      - resourcequotas
+      - resourcequotas/status
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+      - patch
+      - update
+  - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - controllerrevisions
+      - daemonsets
+      - daemonsets/status
+      - deployments
+      - deployments/scale
+      - deployments/status
+      - replicasets
+      - replicasets/scale
+      - replicasets/status
+      - statefulsets
+      - statefulsets/scale
+      - statefulsets/status
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - autoscaling
+    resources:
+      - horizontalpodautoscalers
+      - horizontalpodautoscalers/status
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - batch
+    resources:
+      - cronjobs
+      - cronjobs/status
+      - jobs
+      - jobs/status
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+    resources:
+      - daemonsets
+      - daemonsets/status
+      - deployments
+      - deployments/scale
+      - deployments/status
+      - ingresses
+      - ingresses/status
+      - networkpolicies
+      - replicasets
+      - replicasets/scale
+      - replicasets/status
+      - replicationcontrollers/scale
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - policy
+    resources:
+      - poddisruptionbudgets
+      - poddisruptionbudgets/status
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+      - ingresses/status
+      - networkpolicies
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - bindings.knative.dev
+    resources:
+      - ""
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+      - deletecollection
+      - edit
+      - use
+      - apply
+      - scale
+  - apiGroups:
+      - eventing.knative.dev
+    resources:
+      - eventtypes
+      - brokers
+      - triggers
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+      - deletecollection
+      - edit
+      - use
+      - apply
+      - scale
+  - apiGroups:
+      - flows.knative.dev
+    resources:
+      - parallels
+      - sequences
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+      - deletecollection
+      - edit
+      - use
+      - apply
+      - scale
+  - apiGroups:
+      - messaging.knative.dev
+    resources:
+      - channels
+      - inmemorychannels
+      - subscriptions
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+      - deletecollection
+      - edit
+      - use
+      - apply
+      - scale
+  - apiGroups:
+      - serving.knative.dev
+    resources:
+      - metrics
+      - podautoscalers
+      - images
+      - brokers
+      - eventtypes
+      - triggers
+      - parallels
+      - sequences
+      - channels
+      - inmemorychannels
+      - subscriptions
+      - certificates
+      - clusterdomainclaims
+      - ingresses
+      - serverlessservices
+      - configurations
+      - domainmappings
+      - revisions
+      - routes
+      - services
+      - apiserversources
+      - containersources
+      - pingsources
+      - sinkbindings
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+      - deletecollection
+      - edit
+      - use
+      - apply
+      - scale
+  - apiGroups:
+      - sources.knative.dev
+    resources:
+      - apiserversources
+      - containersources
+      - pingsources
+      - sinkbindings
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+      - deletecollection
+      - edit
+      - use
+      - apply
+      - scale
+  - apiGroups:
+      - logging.banzaicloud.io
+    resources:
+      - flows
+      - outputs
+    verbs:
+      - '*'
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - thanosrulers
+      - thanosrulers/finalizers
+      - servicemonitors
+      - podmonitors
+      - prometheusrules
+      - podmonitors
+      - probes
+      - probes/finalizers
+      - alertmanagerconfigs
+    verbs:
+      - '*'
+  - apiGroups:
+      - authorization.k8s.io
+    resources:
+      - localsubjectaccessreviews
+    verbs:
+      - create
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - rolebindings
+      - roles
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - get
+      - list
+      - patch
+      - update
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: temporal-app-sa-rolebinding
+  namespace: {{.Values.k8sNamespace | quote}}
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "-70"
+    helm.sh/hook-delete-policy: before-hook-creation
+subjects:
+  - kind: ServiceAccount
+    name: temporal-app-sa
+    namespace: {{.Values.k8sNamespace | quote}}
+  - kind: ServiceAccount
+    name: vault-auth-sa
+    namespace: {{.Values.k8sNamespace | quote}}
+roleRef:
+  kind: ClusterRole
+  name: temporal-app-admin-role
+  apiGroup: rbac.authorization.k8s.io

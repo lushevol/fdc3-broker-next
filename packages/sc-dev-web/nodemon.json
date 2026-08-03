@@ -1,0 +1,5 @@
+{
+    "watch": ["src/styles/**/!(_)*.js", "src/styles/**/!(_)*.css"],
+    "verbose": true,
+    "ext": "js,css"
+}

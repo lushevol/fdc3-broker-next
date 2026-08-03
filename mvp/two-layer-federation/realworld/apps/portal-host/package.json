@@ -13,8 +13,9 @@
   },
   "dependencies": {
     "@fm/platform-contracts": "^1.1.0",
-    "@fm/ratan-design": "^1.1.0",
+    "@fm/ratan-design-webkit": "^0.1.0",
     "@module-federation/enhanced": "^2.1.0",
+    "@webcomponents/scoped-custom-element-registry": "^0.0.10",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },

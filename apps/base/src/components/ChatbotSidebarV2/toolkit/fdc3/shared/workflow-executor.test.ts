@@ -1,10 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals';
 
-jest.mock(
-  'ratan-fdc3-agent',
-  () => ({ getAgentApi: jest.fn() }),
-  { virtual: true },
-);
+jest.mock('ratan-fdc3', () => ({ getAgentApi: jest.fn() }), { virtual: true });
 
 import { createFdc3WorkflowExecutor, getStandardFdc3Workflows } from './workflow-executor';
 
@@ -68,17 +64,13 @@ describe('createFdc3WorkflowExecutor', () => {
       expect.objectContaining({ trade: { tradeId: 'TR-42' } }),
       { appId: 'template_tile_workflow_pricing' },
     );
-    expect(onEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'workflow.completed' }),
-    );
+    expect(onEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'workflow.completed' }));
   });
 
   it('uses a declared single-value enum as the safe default for omitted workflow input', async () => {
     const raiseIntent = jest.fn().mockImplementation(async (intent: string) => ({
       getResult: async () =>
-        intent === 'SearchTrades'
-          ? { trades: [{ instrument: 'ACME' }] }
-          : { opened: true },
+        intent === 'SearchTrades' ? { trades: [{ instrument: 'ACME' }] } : { opened: true },
     }));
     const executor = createFdc3WorkflowExecutor({
       getAgentApi: () => ({ raiseIntent }),

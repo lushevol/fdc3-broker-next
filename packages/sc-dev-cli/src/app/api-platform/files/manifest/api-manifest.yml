@@ -1,0 +1,16 @@
+spec:
+  connectivity:
+    type: http-rest #enum: http-rest
+    pattern: INTERNAL #enum: OPEN | PARTNER | EXPERIENCE | INTERNAL
+  documentation:
+    - type: OPENAPI
+      $ref: ./api/openapi.json
+      deprecated: true #optional, used when spec version to be deprecated
+  application:
+    itam:
+      id: '<%= applicationId %>'
+      name: Individual Client Master BA
+    ecm:
+      id: 1.2.2.1.1
+      category: Client Identity Master
+    segment: RETAIL # enum: RETAIL | CORPORATE | GROUP

@@ -1,0 +1,9 @@
+{
+    "locale": {
+        "languages": [
+            { "id": "en", "name": "English" },
+            { "id": "zh-CN", "name": "中文 (简体)"}
+        ]
+    },
+    "env": "local"
+}

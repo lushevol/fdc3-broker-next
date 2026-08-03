@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+  <title>sc-web-kit demo page - slider component</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+  <!-- Custom style -->
+  <style>
+    body {
+      padding: 24px;
+    }
+
+    .sc-mode-dark {
+      background-color: var(--sc-color-blue-900)
+    }
+  </style>
+
+  <!-- Register all sc-* custom elements -->
+  <script type="module">
+    import '../dist/elements/index.js'
+  </script>
+
+</head>
+
+<body>
+
+  <h1 class="text-xl mb-4 flex-1">Slider</h1>
+
+  <div class="w-full min-h-100vh">
+    <sc-slider type="string" value="md" label="Size of text display in Service Bench" help-text="The size also depends on your device settings, as well as your browser settings. Be sure to check that before adjusting this.">
+      <sc-slider-stop value="xs">Extra-Small</sc-slider-stop>
+      <sc-slider-stop value="sm">Small</sc-slider-stop>
+      <sc-slider-stop value="md">Default</sc-slider-stop>
+      <sc-slider-stop value="lg">Large</sc-slider-stop>
+      <sc-slider-stop value="xl">Extra-Large</sc-slider-stop>
+    </sc-slider>
+    
+    <br/><br/>
+    <br/><br/>
+
+    <sc-slider value="3" step="3" stop-step="6" min="-24" max="24" label="Decibels"></sc-slider>
+    
+    <br/><br/>
+    <br/><br/>
+
+    <sc-slider type="range" value="[-6, 34]" step="5" stop-step="30" min="-30" max="210" label="Range"></sc-slider>
+
+    <br/><br/>
+    <br/><br/>
+
+    <sc-slider value="0" stop-step="100" min="250" max="1250" label="Price Block" realtime></sc-slider>
+    
+    <br/><br/>
+    <br/><br/>
+
+    <sc-slider error error-message="test error" type="range" max="1" label="empty"></sc-slider>
+    
+    <br/><br/>
+    <br/><br/>
+
+    <sc-slider></sc-slider>
+    
+  </div>
+
+  <!-- Custom script -->
+  <script type="text/javascript">
+    // var rte = document.querySelector('sc-rich-text-editor-2');
+  </script>
+
+</body>
+
+</html>

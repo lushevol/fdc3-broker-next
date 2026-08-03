@@ -1,4 +1,4 @@
-import type { AppIdentifier } from 'ratan-fdc3-broker';
+import type { AppIdentifier } from 'ratan-fdc3';
 import type { Container } from '../hooks/model/workspaces';
 
 export const isSingleViewTarget = (
@@ -8,10 +8,7 @@ export const isSingleViewTarget = (
 ): boolean =>
   Boolean(
     target &&
-      targetAppId &&
-      app.appId === targetAppId &&
-      (!app.instanceId || app.instanceId === target.id),
+    targetAppId &&
+    app.appId === targetAppId &&
+    (!app.instanceId || app.instanceId === target.id),
   );
-
-export const getSingleViewBrokerOptions = (target: Container | undefined) =>
-  target ? { forceExternalIntentSourceInstanceIds: [target.id] } : {};

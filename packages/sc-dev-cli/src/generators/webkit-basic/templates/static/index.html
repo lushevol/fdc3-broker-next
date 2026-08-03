@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <base href="/">
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="./node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css" />
+  <title>SC WebKit - Basic</title>
+  <!-- Register custom elements -->
+  <script type="module">
+    import './node_modules/@scdevkit/webkit/dist/elements'
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <img src="assets/logo-scwebkit.svg" alt="WebKit Logo">
+    <h2>Congratulations, your WebKit project is running now.</h2>
+    
+    <br>
+
+    <script>
+      function openDocumentation() {
+        window.open("http://go/scwebkit", "blank");
+      }
+    </script>
+
+    <p><sc-button onclick="openDocumentation()">View components</sc-button></p>
+    <p>
+      This button is created using the following code in <code>index.html</code>
+      <br>
+      <code>&lt;sc-button onclick="openDocumentation()"&gt;View components&lt;/sc-button&gt;</code>
+      <br>
+      Try updating the file to try other WebKit components.
+    </p>
+    <p>
+
+    <br>
+
+    <h2>What's next ?</h2>
+    <div style="text-align: left; min-width: 320px;">
+      <ul>
+        <li>Join SC WebKit community at <a href="http://go/scwebkit-community" target="blank">http://go/scwebkit-community</a> for latest updates</li>
+        <li>Check feature request and ideas at <a href="http://go/scwebkit-ideas" target="blank">http://go/scwebkit-ideas</a> and start contributing</li>
+        <li>Find out more about WebKit from <a href="http://go/scwebkit-info" target="blank">http://go/scwebkit-info</a></li>
+        <li>Contact us at <a href="mailto:scwebkit@sc.com" target="blank">scwebkit@sc.com</a></li>
+      </ul>
+    </div>
+
+  </div>
+</body>
+
+</html>

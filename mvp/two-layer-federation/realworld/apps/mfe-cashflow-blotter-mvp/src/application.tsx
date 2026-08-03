@@ -6,8 +6,8 @@ import {
   type ApplicationProps,
 } from '@fm/platform-contracts';
 import { createPlatformClient } from '@fm/platform-sdk';
-import { DesignSystemProvider } from '@fm/ratan-design';
-import '@fm/ratan-design/styles.css';
+import { DesignSystemProvider } from '@fm/ratan-design-webkit';
+import '@fm/ratan-design-webkit/styles.css';
 import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import { configurePlatformBridge, PlatformProvider } from './compat/base';
 import { MigratedCashflowCnEntry } from './migrated-entry';

@@ -1,6 +1,7 @@
 import type { ModuleReference } from './types';
 
 export type ModuleCompositionErrorCode =
+  | 'MODULE_ACCESS_DENIED'
   | 'UNSUPPORTED_LOADER'
   | 'MISSING_COMPONENT_EXPORT'
   | 'INVALID_COMPONENT_EXPORT'

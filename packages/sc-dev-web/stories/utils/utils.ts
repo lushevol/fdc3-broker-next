@@ -1,0 +1,2 @@
+// eslint-disable-next-line max-len
+export const loremIpsum = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam condimentum scelerisque sodales. Morbi euismod tempor nunc vitae maximus. Nunc vel nulla lectus. In porta consectetur arcu. Donec in ornare purus, vitae imperdiet justo. Mauris sit amet lacinia enim. Mauris non libero nec turpis venenatis semper. Pellentesque hendrerit eros at urna posuere, dignissim dignissim tellus dapibus.';

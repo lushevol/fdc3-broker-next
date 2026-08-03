@@ -1,5 +1,9 @@
 # FMO Post Trade Portal - Cashflow Blotter
 
+Status: historical design analysis retained as source evidence. Current
+implementation status is in
+[`../../docs/CURRENT_STATE.md`](../../docs/CURRENT_STATE.md).
+
 ## Design System Analysis Blueprint
 
 **Source:** `original-websites/cashflowblotter-light/index.html`

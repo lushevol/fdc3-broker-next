@@ -4,7 +4,7 @@ import { ColumnDef, RowData, Table, TableState } from '@tanstack/lit-table';
 import { property, state } from 'lit/decorators.js';
 import { storybook } from '../../../shared/storybook.decorators.js';
 import { TColumn } from '../types/ColumnDef.js';
-import { Virtualizer } from '@tanstack/virtual-core';
+import type { Virtualizer } from '@tanstack/virtual-core';
 
 export type TMixin = {
   table: Table<unknown>;

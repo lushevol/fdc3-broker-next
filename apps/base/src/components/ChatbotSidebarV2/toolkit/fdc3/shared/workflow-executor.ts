@@ -1,11 +1,11 @@
-import { getAgentApi } from 'ratan-fdc3-agent';
+import { getAgentApi } from 'ratan-fdc3';
 import {
   WorkflowOrchestrator,
   type JsonObject,
   type WorkflowDefinition,
   type WorkflowEvent,
   type WorkflowTranscript,
-} from 'ratan-fdc3-workflow-orchestrator';
+} from 'ratan-fdc3/workflow-orchestrator';
 import declaredWorkflows from '../../../../../fdc3/declarations/workflows.json';
 
 export type Fdc3WorkflowExecutorInput = {
@@ -69,7 +69,12 @@ function matchesInputSchema(input: JsonObject, schema: JsonObject | undefined): 
     return true;
   }
   return Object.entries(properties).every(([key, property]) => {
-    if (input[key] === undefined || !property || typeof property !== 'object' || Array.isArray(property)) {
+    if (
+      input[key] === undefined ||
+      !property ||
+      typeof property !== 'object' ||
+      Array.isArray(property)
+    ) {
       return true;
     }
     const values = (property as JsonObject).enum;
@@ -77,29 +82,34 @@ function matchesInputSchema(input: JsonObject, schema: JsonObject | undefined): 
   });
 }
 
-function applyDeclaredInputDefaults(
-  input: JsonObject,
-  schema: JsonObject | undefined,
-): JsonObject {
+function applyDeclaredInputDefaults(input: JsonObject, schema: JsonObject | undefined): JsonObject {
   if (!schema || !schema.properties || typeof schema.properties !== 'object') {
     return input;
   }
 
-  return Object.entries(schema.properties).reduce<JsonObject>((resolved, [key, property]) => {
-    if (resolved[key] !== undefined || !property || typeof property !== 'object' || Array.isArray(property)) {
+  return Object.entries(schema.properties).reduce<JsonObject>(
+    (resolved, [key, property]) => {
+      if (
+        resolved[key] !== undefined ||
+        !property ||
+        typeof property !== 'object' ||
+        Array.isArray(property)
+      ) {
+        return resolved;
+      }
+      const definition = property as JsonObject;
+      if (definition.default !== undefined) {
+        resolved[key] = definition.default;
+        return resolved;
+      }
+      const values = definition.enum;
+      if (Array.isArray(values) && values.length === 1) {
+        resolved[key] = values[0];
+      }
       return resolved;
-    }
-    const definition = property as JsonObject;
-    if (definition.default !== undefined) {
-      resolved[key] = definition.default;
-      return resolved;
-    }
-    const values = definition.enum;
-    if (Array.isArray(values) && values.length === 1) {
-      resolved[key] = values[0];
-    }
-    return resolved;
-  }, { ...input });
+    },
+    { ...input },
+  );
 }
 
 function toStandardWorkflow(workflow: DeclaredWorkflow): WorkflowDefinition {
@@ -129,9 +139,11 @@ export function getStandardFdc3Workflows(): WorkflowDefinition[] {
   return standardWorkflows;
 }
 
-export function createFdc3WorkflowExecutor(deps: {
-  getAgentApi?: typeof getAgentApi;
-} = {}): Fdc3WorkflowExecutor {
+export function createFdc3WorkflowExecutor(
+  deps: {
+    getAgentApi?: typeof getAgentApi;
+  } = {},
+): Fdc3WorkflowExecutor {
   const getFdc3Api = deps.getAgentApi ?? getAgentApi;
   const orchestrator = new WorkflowOrchestrator({
     workflows: standardWorkflows,

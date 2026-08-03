@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fm.example/schemas/application-ownership.schema.json",
+  "title": "Federated application ownership record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "applicationId",
+    "accountableTeam",
+    "supportRota",
+    "criticality",
+    "dataClassification",
+    "slo",
+    "releaseApprover",
+    "rollbackContact"
+  ],
+  "properties": {
+    "applicationId": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+    "accountableTeam": { "type": "string", "minLength": 1 },
+    "supportRota": { "type": "string", "minLength": 1 },
+    "criticality": { "enum": ["tier-1", "tier-2", "tier-3"] },
+    "dataClassification": { "enum": ["public", "internal", "confidential", "restricted"] },
+    "slo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["availabilityPercent", "activationP95Ms"],
+      "properties": {
+        "availabilityPercent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "activationP95Ms": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "releaseApprover": { "type": "string", "minLength": 1 },
+    "rollbackContact": { "type": "string", "minLength": 1 }
+  }
+}

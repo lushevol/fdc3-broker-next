@@ -224,6 +224,29 @@ describe('ResolverDialog', () => {
   });
 
   describe('keyboard navigation integration', () => {
+    it('selects an app exactly once when Enter is pressed on its card', () => {
+      const onSelect = vi.fn();
+      render(<ResolverDialog {...defaultProps} onSelect={onSelect} />);
+      const firstApp = screen.getByText('Chart App').closest('[role="option"]')!;
+
+      fireEvent.keyDown(firstApp, { key: 'Enter', code: 'Enter' });
+
+      expect(onSelect).toHaveBeenCalledOnce();
+      expect(onSelect).toHaveBeenCalledWith(mockTargets[0]);
+    });
+
+    it('does not select an app when Enter is pressed on Cancel', () => {
+      const onSelect = vi.fn();
+      render(<ResolverDialog {...defaultProps} onSelect={onSelect} />);
+
+      fireEvent.keyDown(screen.getByRole('button', { name: 'Cancel' }), {
+        key: 'Enter',
+        code: 'Enter',
+      });
+
+      expect(onSelect).not.toHaveBeenCalled();
+    });
+
     it('should set focus on first target initially', () => {
       render(<ResolverDialog {...defaultProps} />);
 

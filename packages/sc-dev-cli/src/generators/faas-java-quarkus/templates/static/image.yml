@@ -1,0 +1,5 @@
+images:
+  sample-java:
+    imagePath: sc-app-platform/sc-devkit-<%= name %>
+    version: imageTags
+    promote: true

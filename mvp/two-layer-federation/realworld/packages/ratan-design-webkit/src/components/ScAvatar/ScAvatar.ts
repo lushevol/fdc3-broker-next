@@ -61,8 +61,6 @@ export class ScAvatar extends ScElement {
     '[default]',
   );
     
-  private readonly hasDefaultSlot = this.hasSlotController.test('[default]');
-
   /**
    * xl size is deprecated.
    */
@@ -320,7 +318,7 @@ export class ScAvatar extends ScElement {
         baseColor = 'var(--sc-avatar-yellow-background-color)';
         break;
       default:
-        baseColor = 'var(--sc-avatar-default-background-color)';
+        baseColor = 'var(--sc-avatar-default-background-color, #2563eb)';
         break;
     }
 
@@ -474,7 +472,7 @@ export class ScAvatar extends ScElement {
   renderAvatar() {
     if (this.src && !this._error) {
       return html`<img src=${this.src} @error=${this.onImageError}></img>`;
-    } else if (this.hasDefaultSlot) {
+    } else if (this.hasSlotController.test('[default]')) {
       return html`<slot></slot>`;
     } else {
       return html`<sc-icon class='default-avatar' name="person--line"></sc-icon>`;

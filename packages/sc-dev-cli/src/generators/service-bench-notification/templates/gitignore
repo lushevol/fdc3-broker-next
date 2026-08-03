@@ -1,0 +1,8 @@
+target/
+env/**/secret.properties
+.idea/
+.devkit/
+.scdevcli/
+.github/
+backup/
+55313*/**

@@ -1,9 +1,8 @@
 import { html, LitElement } from 'lit';
 import SlCarouselItem from '@shoelace-style/shoelace/dist/components/carousel-item/carousel-item.component.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import ScTheme from '../../styles/ScTheme.js';
 
-export class ScCarouselItem extends ScopedElementsMixin(LitElement) {
+export class ScCarouselItem extends LitElement {
   static styles = ScTheme.getStyles();
 
   connectedCallback() {

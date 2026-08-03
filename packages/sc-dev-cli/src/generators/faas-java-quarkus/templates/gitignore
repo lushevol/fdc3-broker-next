@@ -1,0 +1,6 @@
+target/
+env/**/secret.properties
+.idea/
+.scdevcli/
+.github/
+backup/

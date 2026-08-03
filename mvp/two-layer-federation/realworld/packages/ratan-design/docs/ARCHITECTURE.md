@@ -1,5 +1,9 @@
 # @fm/ratan-design — Architecture
 
+Status: legacy package architecture. Active Portal Host UI architecture is
+documented in [`../../../docs/ARCHITECTURE.md`](../../../docs/ARCHITECTURE.md)
+and implemented by `@fm/ratan-design-webkit`.
+
 ## Runtime position
 
 The package is bundled independently into each deployable. Runtime composition remains `host -> application`; design-system code is not a third runtime layer. Separate roots communicate appearance through `@fm/platform-contracts`, then construct local providers.

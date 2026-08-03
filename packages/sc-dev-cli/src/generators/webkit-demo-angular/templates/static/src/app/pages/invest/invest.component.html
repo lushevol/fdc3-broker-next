@@ -1,0 +1,45 @@
+<div class="mx-2 mt-2 mb-3 px-2">
+    <sc-card (click)="handleShowSideSheet(true)">
+        <div slot="title" class="text-sm font-semibold">
+            Investment Profile: 4 - Moderately Aggressive (Active)
+        </div>
+    </sc-card>
+</div>
+<div class="mx-2 mb-5 px-2">
+    <sc-card 
+        vertical-align="top" 
+        title="MyPortfolio" 
+        icon="arrow-ios-forward" 
+        (click)="handleShowSideSheet(true)"
+    >
+        <div slot="body" class="text-sm">
+            View your investments at a glance
+        </div>
+    </sc-card>
+</div>
+<div class="mx-2">
+    <h4 class="pl-2">Investment Solutions</h4>
+    <div class="flex flex-wrap justify-center space-between mt-2 mb-5">
+        <div *ngFor="let item of solutions" class="basis-1/3 p-2 grow">
+            <sc-icon-card 
+                [image]="item.icon" 
+                width="100%" 
+                size="one-third" 
+                (click)="handleShowSideSheet(true)"
+            >
+                <div slot="title" class="font-semibold line-clamp-2">{{item.title}}</div>
+            </sc-icon-card>
+        </div>
+    </div>
+    <div *ngFor="let item of relatedItems" class="mx-2 mb-5 px-2">
+        <sc-card space-size="xs" [title]="item.title" (click)="handleShowSideSheet(true)">
+            <img slot="prefix" width="180px" [src]="item.icon" class="rounded-lg" alt="" />
+            <div slot="sub-title" class="mt-1 mr-2">
+                {{item.headline}}
+            </div>
+        </sc-card>
+    </div>
+</div>
+<sc-side-sheet [open]="showSideSheet" (onScHide)="handleShowSideSheet(false)">
+    <app-not-available />
+</sc-side-sheet>

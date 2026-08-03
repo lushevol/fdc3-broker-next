@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+
+/* text style start */
+h1,
+.h1 {
+  line-height: 1.6;
+  font-size: 40px;
+}
+
+h2,
+.h2 {
+  line-height: 1.25;
+  font-size: 32px;
+}
+
+h3,
+.h3 {
+  line-height: 1.33;
+  font-size: 24px;
+}
+
+h4,
+.h4 {
+  line-height: 1.4;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+h5,
+.h5 {
+  line-height: 1.4;
+  font-size: 20px;
+}
+
+h6,
+.h6 {
+  font-size: 16px;
+}
+
+small {
+  font-size: 0.75rem;
+  line-height: 1.33;
+}
+
+a {
+  font-weight: 600;
+}
+
+.font-weight {
+  font-weight: 600;
+}
+
+.font-hero-numerals {
+  font-feature-settings: "ss01" on;
+}
+
+.hero {
+  font-size: 60px;
+  font-weight: 600;
+  line-height: 1.33;
+}
+
+.lead {
+  line-height: 1.4;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+pre,
+code,
+kbd,
+samp {
+  white-space: pre-wrap; /* Since CSS 2.1 */
+  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+  white-space: -pre-wrap; /* Opera 4-6 */
+  white-space: -o-pre-wrap; /* Opera 7 */
+  word-wrap: break-word; /* Internet Explorer 5.5+ */
+  line-height: 1.33;
+}
+
+/* Bootstrap 4.4 classes */
+.text-break {
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+.text-medium {
+  font-size: 0.85em;
+}
+
+/* text style end */
+
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /*Color definition*/
+    --sc-color-darker-yellow: #dba121;
+    --sc-color-lighter-red: #d91919;
+    --sc-color-darker-red: #aa0000;
+
+    --sc-color-blue-lightest: #e7f2fd;
+    --sc-color-blue-lighter: #c3defa;
+    --sc-color-blue-light: #7bb6f5;
+    --sc-color-blue: #0473ea;
+    --sc-color-blue-dark: #0b56a8;
+    --sc-color-blue-darker: #0c3a66;
+    --sc-color-blue-darkest: #061d33;
+    --sc-color-blue-hover: #1586ff;
+
+    --sc-color-green-lightest: #ebfae5;
+    --sc-color-green-lighter: #cdf4bf;
+    --sc-color-green-light: #92e773;
+    --sc-color-green: #38d200;
+    --sc-color-green-dark: #238500;
+    --sc-color-green-darker: #1b6600;
+    --sc-color-green-darkest: #0b2900;
+
+    --sc-color-purple: #4848bd;
+
+    --sc-color-red-lightest: #fbe5e5;
+    --sc-color-red-lighter: #fbccd1;
+    --sc-color-red: #d50000;
+    --sc-color-red-darker: #c30303;
+    --sc-color-red-darkest: #880000;
+
+    --sc-color-yellow-lightest: #fdefbf;
+    --sc-color-yellow-lighter: #ffecbc;
+    --sc-color-yellow-light: #ffd463;
+    --sc-color-yellow: #f5c000;
+    --sc-color-yellow-dark: #dba121;
+    --sc-color-yellow-darker: #9d7b00;
+    --sc-color-yellow-darkest: #ba861e;
+
+    --sc-color-white: #ffffff;
+    --sc-color-grey-5: #fafafa;
+    --sc-color-grey-15: #e5e5e5;
+    --sc-color-grey-25: #d4d4d4;
+    --sc-color-grey-40: #b2b2b2;
+    --sc-color-grey-50: #a8a9aa;
+    --sc-color-grey-70: #858687;
+    --sc-color-grey-80: #666666;
+    --sc-color-grey-100: #525355;
+    --sc-color-black: #212121;
+
+    --sc-color-purple-50: #4848bd;
+
+    /* dark mode colors */
+    --sc-color-dm-blue: #007aff;
+    --sc-color-dm-red: #ff2e22;
+    --sc-color-dm-darkest: #111111;
+    --sc-color-dm-darker: #181818;
+    --sc-color-dm-dark: #1f1f1f;
+    --sc-color-dm-less-dark: #252525;
+    --sc-color-dm-lesser-dark: #2e2e2e;
+    --sc-color-dm-lessest-dark: #3a3a3a;
+
+    /* status colors */
+    --sc-color-error: var(--sc-color-red);
+    --sc-color-dm-error: var(--sc-color-dm-red);
+    --sc-color-warning: var(--sc-color-yellow);
+    --sc-color-info: var(--sc-color-grey-25);
+    --sc-color-disabled: var(--sc-color-grey-50);
+
+    --sc-color-amber: #ef6923;
+    --sc-color-warning-80: #e4b300;
+    --sc-color-pending: #00859b;
+    --sc-color-dm-pending: #d9f8fd;
+    --sc-color-dm-purple-50: #7a7ae7;
+
+  }
+}

@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { html, css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import ScElement from '../../shared/sc-element.js';
 import { ToolMixin } from '../../mixins/tool-mixin.js';
@@ -8,7 +8,6 @@ import { map } from 'lit/directives/map.js';
 import { range } from 'lit/directives/range.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-@customElement('sc-rte-action-table')
 export class RTEActionTable extends ToolMixin(ScElement) {
   static styles = css`
     :host {
@@ -140,3 +139,5 @@ export class RTEActionTable extends ToolMixin(ScElement) {
     </sc-tooltip>`;
   }
 }
+
+if (!customElements.get('sc-rte-action-table')) customElements.define('sc-rte-action-table', RTEActionTable);

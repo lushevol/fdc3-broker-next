@@ -1,5 +1,9 @@
 # Original Cashflow and Ratan to Portal Host migration plan
 
+Status: historical phased plan with an active remaining-work ledger. Current
+implementation facts are maintained in [`CURRENT_STATE.md`](./CURRENT_STATE.md)
+and the [Cashflow migration runbook](./CASHFLOW_BLOTTER_PORTAL_HOST_MIGRATION_RUNBOOK.md).
+
 ## Purpose
 
 This document records the migration plan for:
@@ -16,7 +20,7 @@ The target is the production two-layer runtime under
 portal-host
 └── independently deployed Cashflow CN remote
     ├── platform contracts and SDK
-    ├── versioned Ratan design/grid packages
+    ├── versioned Ratan WebKit/grid packages
     └── Cashflow-owned components, adapters, state, and workflows
 ```
 
@@ -37,8 +41,8 @@ The governing OpenSpec change is
 3. Portal Host owns application registration, loading, identity delivery,
    appearance, navigation, notifications, telemetry, workspace lifecycle, and
    failure containment.
-4. Reusable Ratan UI is consumed through versioned build-time packages such as
-   `@fm/ratan-design` and `@fm/ratan-data-grid`.
+4. Reusable Ratan UI is consumed through versioned build-time packages:
+   `@fm/ratan-design-webkit` and `@fm/ratan-data-grid`.
 5. Cashflow must continue to load and complete its primary workflow when port
    `9205` and the Ratan container manifest are unavailable.
 6. The built runtime must not request Single-SPA, SystemJS, an import map,
@@ -51,18 +55,18 @@ The governing OpenSpec change is
 
 ## Starting point and current status
 
-| Area | Status | Evidence or remaining condition |
-| --- | --- | --- |
-| Actual Cashflow CN source | Proven | copied from `apps/mfe-cashflow-blotter/src/Cashflow_CN` and rendered by the realworld remote |
-| Portal Host registration | Proven | route `/cashflow-blotter` loads the remote on port `9206` |
-| Ratan runtime independence | Proven | hosted acceptance passes with port `9205` unavailable |
-| Grid, saved filter/view, details | Proven locally | real AG Grid, production-shaped local contracts, responsive details dialog |
-| Dynamic SystemJS applications | Replaced | typed navigation/action adapters replace trade and cashflow `System.import` calls |
-| Legacy Ratan implementation | Interim | Cashflow still compiles part of `apps/mfe-ratan-container/src` through `@legacy-ratan` |
-| Full migrated-tree TypeScript/lint | Pending | migration-owned shell and adapters pass; inherited full-tree debt remains |
-| Production service parity | Pending | GraphQL, REST, identity, permissions, STOMP, export, and actions require integration acceptance |
-| Entitled workflow acceptance | Pending | exercise at least one maker/checker or lifecycle action end to end |
-| Bundle optimization | Pending | remove the legacy source boundary and reduce the current large bundle |
+| Area                               | Status         | Evidence or remaining condition                                                                 |
+| ---------------------------------- | -------------- | ----------------------------------------------------------------------------------------------- |
+| Actual Cashflow CN source          | Proven         | copied from `apps/mfe-cashflow-blotter/src/Cashflow_CN` and rendered by the realworld remote    |
+| Portal Host registration           | Proven         | route `/cashflow-blotter` loads the remote on port `9206`                                       |
+| Ratan runtime independence         | Proven         | hosted acceptance passes with port `9205` unavailable                                           |
+| Grid, saved filter/view, details   | Proven locally | real AG Grid, production-shaped local contracts, responsive details dialog                      |
+| Dynamic SystemJS applications      | Replaced       | typed navigation/action adapters replace trade and cashflow `System.import` calls               |
+| Legacy Ratan implementation        | Interim        | Cashflow still compiles part of `apps/mfe-ratan-container/src` through `@legacy-ratan`          |
+| Full migrated-tree TypeScript/lint | Pending        | migration-owned shell and adapters pass; inherited full-tree debt remains                       |
+| Production service parity          | Pending        | GraphQL, REST, identity, permissions, STOMP, export, and actions require integration acceptance |
+| Entitled workflow acceptance       | Pending        | exercise at least one maker/checker or lifecycle action end to end                              |
+| Bundle optimization                | Pending        | remove the legacy source boundary and reduce the current large bundle                           |
 
 The standalone `apps/mfe-ratan-container-mvp` remains an inventory and
 decomposition evidence application. It is not registered by Portal Host and
@@ -72,30 +76,30 @@ must never become a Cashflow prerequisite.
 
 ### Original Cashflow Blotter
 
-| Original area | Target owner | Migration treatment |
-| --- | --- | --- |
-| `src/Cashflow_CN` | `apps/mfe-cashflow-blotter-mvp/src/Cashflow_CN` | copy with provenance; preserve behavior before refactoring |
-| Cashflow-specific `src/Root` support | Cashflow remote or Cashflow package | copy only the transitive Cashflow-owned surface |
-| generated Cashflow types | Cashflow remote or generated contract package | preserve generation provenance and version |
-| Single-SPA lifecycle and route shell | deleted | replace with the federated `application.tsx` entry |
-| `@fm/base` imports | Cashflow compatibility adapter, then platform SDK/design packages | replace runtime shell access with explicit contracts |
-| `@fm/ratan_container` imports | temporary facade, then extracted packages/application code | eliminate the runtime namespace and final source alias |
-| trade/cashflow `System.import` | typed application/host action | navigate or render through an explicit capability |
-| GraphQL and REST services | Cashflow-owned transport adapter | keep endpoint and payload semantics unchanged |
-| Redux store, reducers, actions | Cashflow remote | retain through the composition migration |
+| Original area                        | Target owner                                                      | Migration treatment                                        |
+| ------------------------------------ | ----------------------------------------------------------------- | ---------------------------------------------------------- |
+| `src/Cashflow_CN`                    | `apps/mfe-cashflow-blotter-mvp/src/Cashflow_CN`                   | copy with provenance; preserve behavior before refactoring |
+| Cashflow-specific `src/Root` support | Cashflow remote or Cashflow package                               | copy only the transitive Cashflow-owned surface            |
+| generated Cashflow types             | Cashflow remote or generated contract package                     | preserve generation provenance and version                 |
+| Single-SPA lifecycle and route shell | deleted                                                           | replace with the federated `application.tsx` entry         |
+| `@fm/base` imports                   | Cashflow compatibility adapter, then platform SDK/design packages | replace runtime shell access with explicit contracts       |
+| `@fm/ratan_container` imports        | temporary facade, then extracted packages/application code        | eliminate the runtime namespace and final source alias     |
+| trade/cashflow `System.import`       | typed application/host action                                     | navigate or render through an explicit capability          |
+| GraphQL and REST services            | Cashflow-owned transport adapter                                  | keep endpoint and payload semantics unchanged              |
+| Redux store, reducers, actions       | Cashflow remote                                                   | retain through the composition migration                   |
 
 ### Original Ratan Container
 
-| Original responsibility | Target owner | Examples |
-| --- | --- | --- |
-| tokens and domain-neutral controls | `@fm/ratan-design` | buttons, dialogs, fields, status and feedback primitives |
-| AG Grid integration | `@fm/ratan-data-grid` | grid wrapper, column behavior, reusable grid cells |
-| shell identity/navigation/notifications/telemetry | Portal Host capabilities through `@fm/platform-sdk` | no copied shell store or hook-backed globals |
-| Cashflow-specific builders and selectors | Cashflow remote or Cashflow-owned package | filter selector, view selector, Cashflow query composition |
-| Cashflow-specific dialogs and workflow UI | Cashflow remote or Cashflow-owned package | history, counterparty, SWIFT, settlement and action dialogs |
-| genuinely reusable pure utilities | a versioned realworld utility package | filtering, conversion, date, and field helpers after dependency review |
-| static mutable globals | typed configuration adapter | initialize per application root; remove implicit module side effects |
-| Ratan application entry and Single-SPA lifecycle | inventory only, then retired | never added to the production Portal Host registry |
+| Original responsibility                           | Target owner                                        | Examples                                                                                    |
+| ------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| tokens and domain-neutral controls                | `@fm/ratan-design-webkit`                           | registered custom elements, React wrappers, dialogs, fields, status and feedback primitives |
+| AG Grid integration                               | `@fm/ratan-data-grid`                               | grid wrapper, column behavior, reusable grid cells                                          |
+| shell identity/navigation/notifications/telemetry | Portal Host capabilities through `@fm/platform-sdk` | no copied shell store or hook-backed globals                                                |
+| Cashflow-specific builders and selectors          | Cashflow remote or Cashflow-owned package           | filter selector, view selector, Cashflow query composition                                  |
+| Cashflow-specific dialogs and workflow UI         | Cashflow remote or Cashflow-owned package           | history, counterparty, SWIFT, settlement and action dialogs                                 |
+| genuinely reusable pure utilities                 | a versioned realworld utility package               | filtering, conversion, date, and field helpers after dependency review                      |
+| static mutable globals                            | typed configuration adapter                         | initialize per application root; remove implicit module side effects                        |
+| Ratan application entry and Single-SPA lifecycle  | inventory only, then retired                        | never added to the production Portal Host registry                                          |
 
 A module is not reusable merely because it lives under
 `mfe-ratan-container`. If it imports Cashflow state, services, fields,
@@ -155,7 +159,7 @@ state tests execute the copied application rather than a substitute screen.
 Migrate one transitive cohort at a time:
 
 1. Start with leaf modules that have no Cashflow state or service imports.
-2. Move visual primitives and tokens into `@fm/ratan-design`.
+2. Move visual primitives and tokens into `@fm/ratan-design-webkit`.
 3. Move AG Grid abstractions into `@fm/ratan-data-grid`.
 4. Move host concerns to platform contracts and SDK adapters.
 5. Move Cashflow-aware selectors, builders, dialogs, and workflow components
@@ -295,4 +299,3 @@ Hosted acceptance must prove:
 - [Legacy application migration MVP topology](./LEGACY_APP_MIGRATION_MVPS.md)
 - [Realworld architecture](./ARCHITECTURE.md)
 - [Ratan design migration](../apps/portal-host/docs/RATAN_DESIGN_MIGRATION.md)
-

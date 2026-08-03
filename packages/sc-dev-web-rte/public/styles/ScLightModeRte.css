@@ -1,0 +1,22 @@
+:root,
+:host,
+.sc-mode-light {
+  --sc-mode: light;
+ /* rich text editor */
+ --sc-rich-text-editor-main-border-color: var(--sc-color-grey-200);
+ --sc-rich-text-editor-main-bg-color: var(--sc-color-white);
+ --sc-rich-text-editor-main-color: var(--sc-color-black);
+ --sc-rich-text-editor-main-focus-border-color: var(--sc-color-blue-500);
+ --sc-rich-text-editor-icon-color: var(--sc-color-blue-900);
+ --sc-rich-text-editor-icon-color-active: var(--sc-color-blue-600);
+ --sc-rich-text-editor-icon-hover-color: var(--sc-color-blue-400);
+ --sc-rich-text-editor-bg-color: transparent;
+ --sc-rich-text-editor-active-bg-color: var(--sc-color-blue-50);
+ --sc-rich-text-editor-count-color: var(--sc-color-grey-650);
+ --sc-rich-text-editor-count-error-color: var(--sc-color-red-500);
+ --sc-rich-text-editor-separate-color: var(--sc-color-grey-200);
+ --sc-rich-text-editor-table-cell-border-color: var(--sc-color-grey-150);
+ --sc-rich-text-editor-table-cell-bg-color: var(--sc-color-grey-100);
+ --sc-rich-text-editor-table-cell-hover-border-color: var(--sc-color-blue-100);
+ --sc-rich-text-editor-table-cell-hover-bg-color: var(--sc-color-blue-100);
+}

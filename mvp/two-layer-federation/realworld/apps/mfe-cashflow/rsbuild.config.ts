@@ -23,5 +23,5 @@ export default defineConfig({
     // design system) to this copy rather than their development React 19 copy.
     alias: { react: localReact, 'react-dom': localReactDom },
   },
-  output: { assetPrefix: 'http://127.0.0.1:9201/' },
+  output: { assetPrefix: 'auto' },
 });

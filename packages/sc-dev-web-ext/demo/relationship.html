@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <title>sc-web-kit demo page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css" />
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDyslexicMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScLightModeExt.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkModeExt.css" />
+
+  <!-- Custom style -->
+  <style>
+    body {
+      margin: 0;
+      margin-right: 10rem;
+      padding: 0;
+    }
+    .sc-mode-dark {
+      background-color: var(--sc-color-grey-100)
+    }
+  </style>
+</head>
+<div id="webkit-ext-container"></div>
+<body>
+
+<!-- Custom script -->
+<script type="module">
+  // Register all sc-* custom elements
+  // Register all sc-* custom elements 
+  import '../dist/elements/index.js';
+  import '@scdevkit/webkit/elements/index.js';
+  import '@scdevkit/data/elements/index.js';
+  import '../dist/demo/local/ScDataGraphQLProvider.js';
+  import { html } from '/node_modules/lit-html/lit-html.js';
+  import { render } from 'lit';
+  import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+
+
+  const data = [{
+      id: '1389585',
+      name: 'Johnson, Kingston',
+      businessTitle: 'Head, Application Platform',
+      department: 'IT-Projs-ET Integration Svcs',
+      location: 'Singapore',
+      email: 'kingston.johnson@sc.com',
+      links: [{
+        id: '3440000005279031',
+        relationship: 'Owner',
+      }],
+    }, {
+      id: '3440000005279031',
+      name: 'App Platform',
+      type: 'entity',
+    }, {
+      id: '1574871',
+      name: 'Thian, Hon Fui',
+      businessTitle: 'Sr. Engineering Manager',
+      department: 'TSA PRJ SG DevOps',
+      connection: { "open": true, "label": "21" },
+      location: 'Singapore',
+      email: 'honfui.thian@sc.com',
+      links: [{
+        id: '3440000005279030',
+        relationship: 'Owner',
+      }, {
+        id: '1389585',
+        relationship: 'Guarantor',
+      }],
+    }, {
+      id: '3440000005279030',
+      name: 'Service Bench',
+      type: 'entity',
+    }, {
+      id: '1577986',
+      name: 'Wuryantobroto, Sulistyo',
+      businessTitle: 'Lead Software Engineer',
+      department: 'IT-TPS-T&A WKS Observability',
+      location: 'Singapore',
+      email: 'Sulistyo.Wuryantobroto@sc.com',
+      links: [{
+        id: '1574871',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: "1547358",
+      name: 'Li Wen',
+      businessTitle: 'Testing Lead',
+      department: 'TSA PRJ SG DevOps',
+      location: 'Singapore',
+      links: [{
+        id: '1574871',
+        relationship: 'Beneficiary',
+      }],
+    }, {
+      id: "1632470",
+      name: 'Li Qiang',
+      businessTitle: 'Senior Software Engineer',
+      department: 'IT-TPS-T&A Cloud Operations',
+      location: 'Singapore',
+      links: [{
+        id: '1574871',
+        relationship: 'Beneficiary',
+      }],
+    }, {
+      id: "1399899",
+      name: 'Wang Yufang',
+      businessTitle: 'Product Engineer Manager',
+      department: 'China - Tianjin (GBS)',
+      location: 'Tianjin',
+      rel: 'POA',
+      links: [{
+        id: '1574871',
+        relationship: 'POA',
+      }],
+    }, {
+      id: '1664072',
+      name: 'Feng, Shiyu',
+      businessTitle: 'Senior Software Engineer',
+      department: 'IT-Proj-IC-T&A SE App Platform',
+      location: 'Tianjin',
+      links: [{
+        id: '1399899',
+        relationship: 'Beneficiary',
+      }],
+    }, {
+      id: '1626487',
+      name: 'Zhao, Haixi',
+      businessTitle: 'Lead Software Engineer',
+      department: 'IT-TPS-T&A WKS Observability',
+      location: 'Tianjin',
+      links: [{
+        id: '1399899',
+        relationship: 'Beneficiary',
+      }],
+    }, {
+      id: '2027226',
+      name: 'Santos, Jaycee',
+      businessTitle: 'Senior Software Engineer',
+      department: 'IT-Projects-TC-T&A SE DevOps',
+      location: 'Manila',
+      email: 'jaycee.santos@sc.com',
+      links: [{
+        id: '1574871',
+        relationship: 'Beneficiary',
+      }, {
+        id: '2026658',
+        relationship: 'Matrix Manager',
+      }]
+    }, {
+      id: '2027194',
+      name: 'Real, Aaron',
+      businessTitle: 'Senior Software Engineer',
+      department: 'IT-Projects-TC-T&A SE DevOps',
+      location: 'Manila',
+      email: 'Aaron.Real@sc.com',
+      links: [{
+        id: '1574871',
+        relationship: 'Beneficiary',
+      }, {
+        id: '2026658',
+        relationship: 'Matrix Manager',
+      }]
+    }, {
+      id: '2013454',
+      name: 'Ng, Ching Ting',
+      businessTitle: 'Software Engineer',
+      department: 'IT-Prj-IC-T&A-Tech Delivery',
+      location: 'Singapore',
+      email: 'ChingTing.Ng@sc.com',
+      links: [{
+        id: '1574871',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '1649583',
+      name: 'Chee, Carlsson',
+      businessTitle: 'Design Director',
+      department: 'IT-Proj-IC-T&A SE Msg Platform',
+      location: 'Singapore',
+      email: 'Carlsson.Chee@sc.com',
+      links: [{
+        id: '1574871',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '1614703',
+      name: 'Vijaya Kumar P',
+      businessTitle: 'Senior Software Engineer',
+      department: 'IT-Proj-IC-T&A SE aXes Academy',
+      location: 'Chennai',
+      email: 'VijayaKumar.P1@sc.com',
+      links: [{
+        id: '1574871',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '1656337',
+      name: 'Li2, Dan',
+      businessTitle: 'Senior Software Engineer',
+      department: 'IT-Proj-IC-T&A SE App Platform',
+      location: 'Tianjin',
+      email: 'Dan.Li2@sc.com',
+      links: [{
+        id: '1399899',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '1431830',
+      name: 'Jiao, Lancy Qinglan',
+      businessTitle: 'Lead Software Engineer',
+      department: 'IT-TPS-T&A WKS Observability',
+      location: 'Tianjin',
+      email: 'QingLan.Jiao@sc.com',
+      links: [{
+        id: '1399899',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '1399902',
+      name: 'Wang, Cindy',
+      businessTitle: 'Engineer',
+      department: 'IT-Proj-IC-T&A SE App Platform',
+      location: 'Tianjin',
+      email: 'CindyZiYin.Wang@sc.com',
+      links: [{
+        id: '1399899',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '1664550',
+      name: 'Liu, Sara',
+      businessTitle: 'Senior Experience Designer',
+      department: 'IT-Proj-IC-T&A SE App Platform',
+      location: 'Tianjin',
+      email: 'SaraJinghan.Liu@sc.com',
+      links: [{
+        id: '1399899',
+        relationship: 'Beneficiary',
+      }, {
+        id: '1649583',
+        relationship: 'UX team',
+      }]
+    }, {
+      id: '2026176',
+      name: 'Yue, Troy',
+      businessTitle: 'Senior Software Engineer',
+      department: 'IT-Proj-IC-T&A SE App Platform',
+      location: 'Tianjin',
+      email: 'Troy.Yue@sc.com',
+      links: [{
+        id: '1399899',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '2026933',
+      name: 'Xianliang, Zhang',
+      businessTitle: 'Senior Software Engineer',
+      department: 'IT-Proj-IC-T&A SE App Platform',
+      location: 'Tianjin',
+      email: 'Zhang.Xianliang@sc.com',
+      links: [{
+        id: '1399899',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '1653204',
+      name: 'Song, Linlin Song',
+      businessTitle: 'Lead Software Engineer',
+      department: 'IT-Proj-IC-T&A SE App Platform',
+      location: 'Tianjin',
+      email: 'Linlin.Song@sc.com',
+      links: [{
+        id: '1399899',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '1431823',
+      name: 'Meng, Chalmers',
+      businessTitle: 'Senior Site Reliability Engineer',
+      department: 'IT-TPS-T&A WKS Observability',
+      location: 'Tianjin',
+      email: 'Chalmers.Meng@sc.com',
+      links: [{
+        id: '1574871',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '2027744',
+      name: 'Hou, Binglei',
+      businessTitle: 'Site Reliability Engineer',
+      department: 'IT-Proj-IC-T&A SE App Platform',
+      location: 'Tianjin',
+      email: 'binglei.hou@sc.com',
+      links: [{
+        id: '1431823',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '2033365',
+      name: 'Tang, Lei',
+      businessTitle: 'Site Reliability Engineer',
+      department: 'IT-Proj-IC-T&A SE App Platform',
+      location: 'Tianjin',
+      email: 'Lei.Tang@sc.com',
+      links: [{
+        id: '1431823',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '2031779',
+      name: 'Yu, Xuezhong',
+      businessTitle: 'Site Reliability Engineer',
+      department: 'IT-Proj-IC-T&A SE App Platform',
+      location: 'Tianjin',
+      email: 'Xuezhong.Yu@sc.com',
+      links: [{
+        id: '1431823',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '1238480',
+      name: 'R, Venkatesh',
+      businessTitle: 'Site Reliability Engineer',
+      department: 'IT-Proj-IC-T&A SE aXes Academy',
+      location: 'Chennai',
+      email: 'Venkatesh.Ramachandran@sc.com',
+      links: [{
+        id: '1431823',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '2027330',
+      name: 'Cajuday, Ayron Wyette',
+      businessTitle: 'Site Reliability Engineer',
+      department: 'IT-Projects-TC-T&A SE DevOps',
+      location: 'Makati City',
+      email: 'AyronWyette.Cajuday@sc.com',
+      links: [{
+        id: '1431823',
+        relationship: 'Beneficiary',
+      }, {
+        id: '2026658',
+        relationship: 'Matrix Manager',
+      }]
+    }, {
+      id: '2027410',
+      name: 'Ordona, Alfie',
+      businessTitle: 'Site Reliability Engineer',
+      department: 'IT-Projects-TC-T&A SE DevOps',
+      location: 'Makati City',
+      email: 'AyronWyette.Cajuday@sc.com',
+      links: [{
+        id: '1431823',
+        relationship: 'Beneficiary',
+      }, {
+        id: '2026658',
+        relationship: 'Matrix Manager',
+      }]
+
+    }, {
+      id: '1579493',
+      name: 'Tan, Harry',
+      businessTitle: 'Sr. Engineering Manager - SC IDP',
+      department: 'IT-TPS-T&A Cloud Operations',
+      location: 'Singapore',
+      email: 'Harry.Tan@sc.com',
+      links: [{
+        id: '1389585',
+        relationship: 'Beneficiary',
+      }, {
+        id: '3440000005279029',
+        relationship: 'Owner',
+      }]
+    }, {
+      id: '3440000005279029',
+      name: 'Identity Platform',
+      type: 'entity',
+    }, {
+      id: '2023418',
+      name: 'Yue, Wenjie',
+      businessTitle: 'Platform Engineer',
+      department: 'IT-Proj-IC-T&A SE App Platform',
+      location: 'Tianjin',
+      email: 'Wenjie.Yue@sc.com',
+      links: [{
+        id: '1579493',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '1631160',
+      name: 'Liu, Jimmy',
+      businessTitle: 'Lead Platform Engineer',
+      department: 'IT-Proj-IC-T&A SE App Platform',
+      location: 'Tianjin',
+      email: 'Jimmy.Liu@sc.com',
+      links: [{
+        id: '1579493',
+        relationship: 'Beneficiary',
+      }]
+    }, {
+      id: '1574206',
+      name: 'Sun, Bill',
+      businessTitle: 'Head, Solution Delivery',
+      department: 'IT-Projects-IC-T&A SE DevOps',
+      location: 'Singapore',
+      email: 'Bill.Sun@sc.com',
+      links: [{
+        id: '1389585',
+        relationship: 'Beneficiary',
+      }],
+    }, {
+      id: '2026658',
+      name: 'Los Banos, Joseph Paulo',
+      businessTitle: 'Engineering Manager',
+      department: 'IT-Projects-TC-T&A SE DevOps',
+      location: 'Makati City',
+      email: 'JosephPaulo.LosBanos@sc.com',
+      links: [{
+        id: '1574206',
+        relationship: 'Beneficiary',
+      }],
+    }];
+
+
+  render(html`
+    <sc-demo-graphql-provider>
+      <sc-icon-provider .iconLibraries=${[CountryIconLibrary, MainIconLibrary]}>
+        <sc-relationship .data=${data} .selectIds=${['1389585']} 
+          size="lg"
+          minimap search legend export 
+          style="width: 100%; height: 100dvh;"
+          @sc-select=${(e)=>console.log(e.type, e.detail)}
+          @sc-hover=${(e)=>console.log(e.type, e.detail)}
+        ></sc-relationship>
+      </sc-icon-provider>
+    </sc-demo-graphql-provider>
+  `, document.querySelector('#webkit-ext-container'))
+ 
+</script>
+</body>
+</html>

@@ -141,7 +141,7 @@ describe('ScopedDesktopAgent', () => {
     expect(mockBroker.findIntentsByContext).toHaveBeenCalledWith(context, 'fdc3.chart');
   });
 
-  it('should delegate channel utility methods without source where the broker owns global state', async () => {
+  it('should delegate global channel utilities and scope implementation metadata', async () => {
     await scopedAgent.getOrCreateChannel('shared-channel');
     await scopedAgent.getUserChannels();
     await scopedAgent.getSystemChannels();
@@ -150,7 +150,7 @@ describe('ScopedDesktopAgent', () => {
     expect(mockBroker.getOrCreateChannel).toHaveBeenCalledWith('shared-channel');
     expect(mockBroker.getUserChannels).toHaveBeenCalled();
     expect(mockBroker.getUserChannels).toHaveBeenCalledTimes(2);
-    expect(mockBroker.getInfo).toHaveBeenCalled();
+    expect(mockBroker.getInfo).toHaveBeenCalledWith(mockSource);
   });
 
   it('should map joinChannel to source-aware joinUserChannel', async () => {
@@ -166,7 +166,11 @@ describe('ScopedDesktopAgent', () => {
     await scopedAgent.registerTile('chart-app-1', 'chart-app', metadata);
     await scopedAgent.unregisterTile('chart-app-1');
 
-    expect(mockBroker.addEventListener).toHaveBeenCalledWith('userChannelChanged', handler);
+    expect(mockBroker.addEventListener).toHaveBeenCalledWith(
+      'userChannelChanged',
+      handler,
+      mockSource,
+    );
     expect(mockBroker.registerTile).toHaveBeenCalledWith('chart-app-1', 'chart-app', metadata);
     expect(mockBroker.unregisterTile).toHaveBeenCalledWith('chart-app-1');
   });

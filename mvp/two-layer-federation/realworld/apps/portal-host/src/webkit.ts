@@ -1,0 +1,23 @@
+import { createComponent } from '@fm/ratan-design-webkit/react';
+
+export const ScAlert = createComponent('sc-alert');
+export const ScAvatar = createComponent('sc-avatar');
+export const ScBadge = createComponent('sc-badge');
+export const ScButton = createComponent('sc-button');
+export const ScCard = createComponent('sc-card');
+export const ScDialog = createComponent('sc-dialog');
+export const ScDivider = createComponent('sc-divider');
+export const ScIconButton = createComponent('sc-icon-button');
+export const ScLink = createComponent('sc-link');
+export const ScMenu = createComponent('sc-menu');
+export const ScMenuItem = createComponent('sc-menu-item');
+export const ScPasswordInput = createComponent('sc-password-input');
+export const ScParagraph = createComponent('sc-paragraph');
+export const ScSpinner = createComponent('sc-spinner');
+export const ScTab = createComponent('sc-tab');
+export const ScTabGroup = createComponent('sc-tab-group');
+export const ScTabPanel = createComponent('sc-tab-panel');
+export const ScTextInput = createComponent('sc-text-input');
+export const ScToast = createComponent('sc-toast');
+export const ScToggle = createComponent('sc-toggle');
+export const ScTitle = createComponent('sc-title');

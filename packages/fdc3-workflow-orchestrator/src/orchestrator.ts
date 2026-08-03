@@ -1,5 +1,6 @@
 import { applyBindings, renderContext, validateWorkflowDefinition } from './definition';
 import { createFailure } from './failures';
+import { validateJsonSchema } from './json-schema';
 import type {
   CapabilityCheck,
   CapabilityInspection,
@@ -632,9 +633,8 @@ export class WorkflowOrchestrator {
   }
 
   private validInput(workflow: WorkflowDefinition, input: JsonObject): boolean {
-    if (!workflow.validateInput) {
-      return true;
-    }
+    if (!validateJsonSchema(workflow.inputSchema, input)) return false;
+    if (!workflow.validateInput) return true;
     try {
       return workflow.validateInput(input);
     } catch {

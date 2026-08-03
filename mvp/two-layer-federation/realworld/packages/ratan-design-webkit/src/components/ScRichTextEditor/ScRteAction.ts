@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { html, css, nothing } from 'lit';
-import { property, customElement, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import SlButton from '@shoelace-style/shoelace/dist/components/button/button.component.js';
 import SlDropdown from '@shoelace-style/shoelace/dist/components/dropdown/dropdown.component.js';
 import SlMenuItem from '@shoelace-style/shoelace/dist/components/menu-item/menu-item.component.js';
@@ -18,7 +18,6 @@ import { MARKS, fontBackColor, fontSize, fontTextColor } from './constant.js';
 import { ToolMixin } from '../../mixins/tool-mixin.js';
 import { INTERNAL_EVENTS } from '../../shared/sc-custom-events.js';
 
-@customElement('sc-rte-action')
 export class RTEAction extends ToolMixin(ScElement) {
   static styles = ScTheme.getStyles().concat([
     css`
@@ -424,6 +423,8 @@ export class RTEAction extends ToolMixin(ScElement) {
     </sc-tooltip>`;
   }
 }
+
+if (!customElements.get('sc-rte-action')) customElements.define('sc-rte-action', RTEAction);
 
 interface Option {
   name: string;

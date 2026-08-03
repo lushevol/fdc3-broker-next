@@ -110,9 +110,12 @@ export class ScTab extends ScElement {
       this.closable,
       () =>
         html` <sc-icon
+          class="close-icon"
           @click=${this.handleClose}
           name="cross"
           customSize="16"
+          role="button"
+          aria-label="Close tab"
         ></sc-icon>`
     )}`;
   }

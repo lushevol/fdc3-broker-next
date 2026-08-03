@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <base href="/">
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="./node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css" />
+  <title>SC WebKit - Basic (Lit)</title>
+  <!-- Register custom elements -->
+   <script type="module">
+     import './node_modules/@scdevkit/webkit/dist/elements'
+   </script>
+</head>
+
+<body>
+  <app-<??= name ??>></app-<??= name ??>>
+
+  <script type="module" src="./src/app-<??= name ??>.js"></script>
+</body>
+
+</html>

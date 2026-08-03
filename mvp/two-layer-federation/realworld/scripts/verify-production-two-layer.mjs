@@ -68,7 +68,7 @@ for (const root of roots) {
 for (const root of applicationRoots) {
   const federation = await readFile(join(root, 'module-federation.config.ts'), 'utf8');
   const sharedBlock = federation.slice(federation.indexOf('shared:'));
-  for (const forbiddenShare of ['@fm/ratan-design', '@fm/ratan-data-grid', '@mui/material', '@emotion/react', '@emotion/styled', 'ag-grid-community', 'ag-grid-react']) {
+  for (const forbiddenShare of ['@fm/ratan-design', '@fm/ratan-design-webkit', '@fm/ratan-data-grid', '@mui/material', '@emotion/react', '@emotion/styled', 'ag-grid-community', 'ag-grid-react']) {
     if (sharedBlock.includes(forbiddenShare)) throw new Error(`${root} runtime-shares ${forbiddenShare}`);
   }
   const hasSingletonReact = /react:\s*{[^}]*singleton:\s*true/s.test(sharedBlock)
@@ -97,5 +97,5 @@ console.log(JSON.stringify({
   verified: true,
   runtimeLayers: ['portal-host', 'federated-application'],
   singletonShares: ['react', 'react-dom'],
-  productionPackages: ['@fm/platform-contracts', '@fm/platform-sdk', '@fm/ratan-design', '@fm/ratan-data-grid'],
+  productionPackages: ['@fm/platform-contracts', '@fm/platform-sdk', '@fm/ratan-design', '@fm/ratan-design-webkit', '@fm/ratan-data-grid'],
 }));

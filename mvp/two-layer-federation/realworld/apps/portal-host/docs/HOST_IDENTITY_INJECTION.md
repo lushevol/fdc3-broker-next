@@ -1,8 +1,18 @@
 # Host identity injection and legacy authentication separation
 
+Status: the capability boundary remains current; the anonymous-only bootstrap
+description below has been superseded by the local verification login. Last
+reviewed 3 August 2026. See
+[`../../../docs/CURRENT_STATE.md`](../../../docs/CURRENT_STATE.md).
+
 ## Outcome
 
-The production two-layer host now accepts an optional live `IdentityCapability` and delivers the exact capability to directly loaded applications. The default bootstrap supplies one stable frozen anonymous capability, so current runtime behavior remains fail-closed and Authorization Limits remains read-only.
+The two-layer host accepts an optional live `IdentityCapability` and delivers
+the exact capability to directly loaded applications. The default application
+starts with the frozen anonymous capability, presents the local login screen,
+and creates an authenticated capability only after the configured
+`AuthenticationAdapter` succeeds. Authorization Limits mutation activation
+remains independently gated.
 
 This is an injection seam, not an authentication implementation.
 
@@ -12,7 +22,10 @@ This is an injection seam, not an authentication implementation.
 - `PortalHost({ registry, runtime?, identity? })` includes that same capability reference in application props.
 - A supplied capability owns its own snapshot and subscription lifecycle; the host does not translate permissions or copy snapshots.
 - Without a supplied capability, `ANONYMOUS_IDENTITY_CAPABILITY` returns one frozen `{ state: "anonymous", contractVersion: "1.0.0" }` snapshot and a no-op unsubscribe.
-- Current `bootstrap.tsx` renders `<App />`, intentionally selecting the anonymous fallback.
+- Current `bootstrap.tsx` renders `<App />`. `App` begins with the anonymous
+  fallback and displays `LoginScreen`; the deterministic local adapter accepts
+  `test` / `test` and publishes an authenticated snapshot for browser
+  verification.
 
 Production authentication adapters must publish through the validated platform SDK identity controller before being injected.
 
@@ -40,17 +53,17 @@ The legacy service swallows request failures and returns empty/undefined values.
 
 ## Production replacement ownership
 
-| Legacy concern | Legacy owner/path | Production owner |
-| --- | --- | --- |
-| Login/SSO response handling | `apps/base` | Approved host authentication adapter |
-| Session expiry/refresh/logout | Base store and login utilities | Authentication adapter plus secure session transport |
-| Credential storage | `SET_TOKEN` and base state/storage | Approved secure credential/session mechanism; never `IdentitySnapshot` |
-| Request authorization header | Base Axios interceptor | Application transport configured by the approved session mechanism |
-| User identity normalization | Base login utility and container `getUser()` | Host authentication adapter → `IdentitySnapshot` |
-| Entitlement normalization | Base entity/user formats and container `hasPermission()` | Authentication/entitlement adapter emits opaque permission identifiers |
-| Domain maker/checker decisions | Container helper plus legacy Cashflow utilities | Cashflow `AuthorizationLimitsPolicy` |
-| Domain service composition | Container/shared globals | Cashflow application factory and runtime composer |
-| Runtime application loading | Single-SPA/container chain | Portal host directly loads the federated application |
+| Legacy concern                 | Legacy owner/path                                        | Production owner                                                       |
+| ------------------------------ | -------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Login/SSO response handling    | `apps/base`                                              | Approved host authentication adapter                                   |
+| Session expiry/refresh/logout  | Base store and login utilities                           | Authentication adapter plus secure session transport                   |
+| Credential storage             | `SET_TOKEN` and base state/storage                       | Approved secure credential/session mechanism; never `IdentitySnapshot` |
+| Request authorization header   | Base Axios interceptor                                   | Application transport configured by the approved session mechanism     |
+| User identity normalization    | Base login utility and container `getUser()`             | Host authentication adapter → `IdentitySnapshot`                       |
+| Entitlement normalization      | Base entity/user formats and container `hasPermission()` | Authentication/entitlement adapter emits opaque permission identifiers |
+| Domain maker/checker decisions | Container helper plus legacy Cashflow utilities          | Cashflow `AuthorizationLimitsPolicy`                                   |
+| Domain service composition     | Container/shared globals                                 | Cashflow application factory and runtime composer                      |
+| Runtime application loading    | Single-SPA/container chain                               | Portal host directly loads the federated application                   |
 
 ## Explicit prohibitions
 
@@ -59,6 +72,9 @@ The new host identity path contains no references to `SET_TOKEN`, local/session 
 Identity remains a minimal observable authorization context, not a credential bus. The design system remains unrelated to identity and permissions.
 
 ## Activation sequence
+
+The local adapter is verification infrastructure, not production
+authentication. Production activation still requires:
 
 1. Select the production SSO/login source and secure session owner.
 2. Normalize authenticated `userId` and approved entitlement identifiers through `createIdentityController`.
@@ -79,17 +95,18 @@ Identity remains a minimal observable authorization context, not a credential bu
 
 ## Acceptance evidence
 
-| Gate | Result |
-| --- | --- |
-| Host tests | 19 tests passed; 95.91% statements, 92.2% branches, 93.44% functions, 96.03% lines |
-| Identity fallback | 100% statements, branches, functions, and lines |
-| Static checks | Host ESLint and strict TypeScript passed |
-| Production build | Platform contracts/SDK, design system, data grid, Cashflow, and host built in dependency order |
-| Isolation diff | Platform packages, Cashflow, registry, design/grid packages, and federation configuration unchanged in this slice |
-| Runtime boundaries | Exactly host and federated-application layers; only React and ReactDOM singleton shares |
-| OpenSpec | `inject-host-identity-source` passed strict validation |
-| Browser rollback | Pending: Chrome launch approval was rejected because the approval service reached its usage limit; no browser test reached application code |
+| Gate                 | Result                                                                                                            |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Host tests           | Latest focused run: 46 tests passed                                                                               |
+| Identity fallback    | 100% statements, branches, functions, and lines                                                                   |
+| Static checks        | Host ESLint and strict TypeScript passed                                                                          |
+| Production build     | WebKit, Portal Host, Cashflow, Identity/Profile, and FDC3 Admin passed in dependency order                        |
+| Isolation diff       | Platform packages, Cashflow, registry, design/grid packages, and federation configuration unchanged in this slice |
+| Runtime boundaries   | Exactly host and federated-application layers; only React and ReactDOM singleton shares                           |
+| OpenSpec             | `inject-host-identity-source` passed strict validation                                                            |
+| Browser verification | Live Chrome passed login, identity delivery, host/profile avatars, remote loading, dialogs, and tab lifecycle     |
 
-Portal host builds at 530.4 KB / 158.6 KB gzip, approximately 0.1 KB larger with no rounded gzip increase. Cashflow remains 1930.0 KB / 510.2 KB gzip.
-
-The change is not fully accepted until the existing five Chrome rollback journeys pass against this exact build, including explicit absence of Create, Edit, Delete, Approve Add, and Reject Add.
+Historical bundle measurements are retained in version control but are not
+repeated here because current builds include the WebKit migration and additional
+verification applications. Production authentication and mutation activation
+remain unaccepted until the activation sequence above is completed.

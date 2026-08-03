@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en-GB" class='sc-theme-cpbb'>
+<head>
+  <title>sc-web-kit grid demo page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/demo/grid.css" />
+  <style>
+    body {
+      padding: 24px;
+    }
+  </style>
+
+  <link rel="stylesheet" type="text/css" href="/dist/styles/util.css" />
+
+</head>
+<body>
+  <h1 class="my-4 text-xl">Grid</h1>
+  <div class="w-full shadow-lg">
+    <div class="three-columns-grid">
+      <div class="one">row index 1, col index 1</div>
+      <div class="two">row index 1, col index 2-3</div>
+      <div class="three">row index 2-4, col index 1</div>
+      <div class="four">row index 3, col index 3</div>
+      <div class="five">row index 4, col index 2</div>
+      <div class="six">row index 4, col index 3</div>
+      <div class="col-span-2">Span 2 column</div>
+    </div>
+    <div class="flex-column-grid my-4">
+      <div class="fix-col-one">Fix 100px</div>
+      <div class="flex-col-two">Remaining length of row</div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -108,7 +108,9 @@ describe('production Cashflow application', () => {
     }} />);
     const create = await screen.findByRole('button', { name: 'Create Authorization Limit' });
     fireEvent.click(create);
-    expect(screen.getByRole('dialog', { name: 'Create Authorization Limit' })).toBeInTheDocument();
+    const dialog = screen.getByRole('dialog', { name: 'Create Authorization Limit' });
+    expect(dialog).toBeInTheDocument();
+    expect(dialog.parentElement).toBe(document.body);
     act(() => identity.setSnapshot({ state: 'anonymous', contractVersion: IDENTITY_CONTRACT_VERSION }));
     expect(screen.queryByRole('button', { name: 'Create Authorization Limit' })).not.toBeInTheDocument();
     expect(screen.queryByRole('dialog', { name: 'Create Authorization Limit' })).not.toBeInTheDocument();
@@ -125,8 +127,8 @@ describe('production Cashflow application', () => {
 
   it('uses public primitives, selects, navigates, tracks, and notifies', () => {
     const { platform } = mount();
-    expect(screen.getByRole('searchbox')).toHaveAttribute('data-ratan-control', 'text-field');
-    expect(screen.getAllByText('Ready')[0].closest('[data-status]')).toHaveAttribute('data-status', 'ready');
+    expect(screen.getByRole('searchbox')).toHaveAttribute('type', 'search');
+    expect(screen.getAllByText('Ready')[0].closest('[data-color]')).toHaveAttribute('data-color', 'green');
     fireEvent.click(screen.getByRole('button', { name: 'Select CF-1002' }));
     fireEvent.click(screen.getByRole('button', { name: 'View CF-1002 details' }));
     expect(platform.navigation.navigate).toHaveBeenCalledWith('/cashflow/details/CF-1002');
@@ -136,12 +138,13 @@ describe('production Cashflow application', () => {
     expect(platform.telemetry.track).toHaveBeenCalledWith('cashflow.details.opened', { id: 'CF-1002' });
   });
 
-  it('updates its local provider without losing selected state', () => {
+  it('updates its local appearance scope without losing selected state', () => {
     const controller = createAppearanceController(appearance);
     mount(capabilities(controller));
     fireEvent.click(screen.getByRole('button', { name: 'Select CF-1001' }));
     act(() => controller.setSnapshot({ ...appearance, scheme: 'light', preference: 'light', density: 'comfortable' }));
-    expect(document.querySelector('[data-ratan-scope="application"]')).toHaveAttribute('data-ratan-theme', 'light');
+    expect(document.querySelector('.cashflow-webkit-scope')).toHaveAttribute('data-scheme', 'light');
+    expect(document.querySelector('.cashflow-webkit-scope')).toHaveAttribute('data-density', 'comfortable');
     expect(screen.getByRole('button', { name: 'View CF-1001 details' })).toBeInTheDocument();
   });
 

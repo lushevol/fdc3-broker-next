@@ -6,7 +6,7 @@
 import type { AppDirectoryClient } from '@fm/fdc3-app-directory';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Broker } from '../src/broker';
-import type { AppIdentifier, BrokerConfig, Context, IntentResolution } from '../src/types';
+import type { BrokerConfig, Context, IntentResolution } from '../src/types';
 
 describe('Broker.raiseIntent()', () => {
   let broker: Broker;

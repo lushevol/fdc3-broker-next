@@ -1,5 +1,9 @@
 # Cashflow CN to Portal Host migration runbook
 
+Status: active runbook, updated 3 August 2026. The shared UI boundary is now
+`@fm/ratan-design-webkit`; remaining Cashflow CN compatibility debt is tracked
+below and in [`CURRENT_STATE.md`](./CURRENT_STATE.md).
+
 ## Scope and status
 
 Only the legacy Cashflow CN route is in scope. Dashboard, group management,
@@ -34,17 +38,17 @@ procedure, and retirement criteria, is recorded in
 
 ## Source mapping
 
-| Legacy source | Realworld destination | Treatment |
-| --- | --- | --- |
-| `apps/mfe-cashflow-blotter/src/Cashflow_CN` | `apps/mfe-cashflow-blotter-mvp/src/Cashflow_CN` | copied as the migration baseline; targeted runtime fixes only |
-| `apps/mfe-cashflow-blotter/src/Root` | `apps/mfe-cashflow-blotter-mvp/src/Root` | copied Cashflow-owned bridge; legacy package names resolve to local adapters |
-| `apps/mfe-cashflow-blotter/src/generated` | `apps/mfe-cashflow-blotter-mvp/src/generated` | copied generated types required by Cashflow |
-| `Cashflow_Dashboard/Main/common/utils.ts` | same relative path in MVP | copied single transitive date helper |
-| legacy route/Single-SPA lifecycle | `src/migrated-entry.tsx`, `src/application.tsx` | replaced by a federated React entry |
-| `@fm/base` | `src/compat/base.tsx` | compile-time Portal Host compatibility adapter |
-| `@fm/ratan_container` | `src/compat/ratan-container.ts` | compile-time facade for Cashflow-used exports |
-| dynamic trade/cashflow `System.import` | `related-applications.tsx`, `quick-search-items.ts` | typed host navigation handoff |
-| Node-oriented `stompjs` entry | `src/compat/stomp.ts` | browser STOMP wrapper |
+| Legacy source                               | Realworld destination                               | Treatment                                                                    |
+| ------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `apps/mfe-cashflow-blotter/src/Cashflow_CN` | `apps/mfe-cashflow-blotter-mvp/src/Cashflow_CN`     | copied as the migration baseline; targeted runtime fixes only                |
+| `apps/mfe-cashflow-blotter/src/Root`        | `apps/mfe-cashflow-blotter-mvp/src/Root`            | copied Cashflow-owned bridge; legacy package names resolve to local adapters |
+| `apps/mfe-cashflow-blotter/src/generated`   | `apps/mfe-cashflow-blotter-mvp/src/generated`       | copied generated types required by Cashflow                                  |
+| `Cashflow_Dashboard/Main/common/utils.ts`   | same relative path in MVP                           | copied single transitive date helper                                         |
+| legacy route/Single-SPA lifecycle           | `src/migrated-entry.tsx`, `src/application.tsx`     | replaced by a federated React entry                                          |
+| `@fm/base`                                  | `src/compat/base.tsx`                               | compile-time Portal Host compatibility adapter                               |
+| `@fm/ratan_container`                       | `src/compat/ratan-container.ts`                     | compile-time facade for Cashflow-used exports                                |
+| dynamic trade/cashflow `System.import`      | `related-applications.tsx`, `quick-search-items.ts` | typed host navigation handoff                                                |
+| Node-oriented `stompjs` entry               | `src/compat/stomp.ts`                               | browser STOMP wrapper                                                        |
 
 The migration copies the source so that the new workspace has visible,
 reviewable ownership. The Cashflow entry itself is not an alias back to the
@@ -67,7 +71,7 @@ React DOM client/runtime modules as well as the package root.
 The Ratan container is not a runtime layer in this topology. Portal Host does
 not register its manifest, the browser acceptance stack does not start port
 `9205`, and Cashflow declares no Module Federation `remotes`. Reusable Ratan UI
-comes from `@fm/ratan-design`, `@fm/ratan-data-grid`, and temporarily bundled
+comes from `@fm/ratan-design-webkit`, `@fm/ratan-data-grid`, and temporarily bundled
 migration adapters while the remaining legacy Ratan surface is extracted.
 
 ## Implementation steps
@@ -99,17 +103,17 @@ migration adapters while the remaining legacy Ratan surface is extracted.
 
 ## Runtime issues found and resolved
 
-| Failure | Cause | Migration fix |
-| --- | --- | --- |
-| `ReactCurrentDispatcher` failure | React/React DOM subpaths were not shared consistently | singleton root and trailing-slash shares |
-| invalid hook call during module evaluation | legacy `getUser()` invoked hook-backed shell state at import time | pure module-level identity bridge |
-| `ratanConfig` undefined | legacy global side effect was absent | initialize Ratan static configuration in facade |
-| `process` undefined | copied code referenced compile-time environment globals | Rsbuild source definitions |
-| `DateFormat` temporal dead zone | legacy circular module became eager in the new graph | cycle-free `dateFormats.ts` |
-| `Provider.useContext` missing | legacy base exposed a provider namespace, not only a component | compatible provider/context namespace |
-| `stomp.over` missing / Node `net` | package selected its Node entry | browser STOMP adapter |
-| remote chunk 404 | lazy compilation generated host-relative compilation URLs | disable remote lazy compilation |
-| trade module runtime dependency | Ratan quick search used `System.import("@fm/ratan_trades")` | local quick-search adapter |
+| Failure                                    | Cause                                                             | Migration fix                                   |
+| ------------------------------------------ | ----------------------------------------------------------------- | ----------------------------------------------- |
+| `ReactCurrentDispatcher` failure           | React/React DOM subpaths were not shared consistently             | singleton root and trailing-slash shares        |
+| invalid hook call during module evaluation | legacy `getUser()` invoked hook-backed shell state at import time | pure module-level identity bridge               |
+| `ratanConfig` undefined                    | legacy global side effect was absent                              | initialize Ratan static configuration in facade |
+| `process` undefined                        | copied code referenced compile-time environment globals           | Rsbuild source definitions                      |
+| `DateFormat` temporal dead zone            | legacy circular module became eager in the new graph              | cycle-free `dateFormats.ts`                     |
+| `Provider.useContext` missing              | legacy base exposed a provider namespace, not only a component    | compatible provider/context namespace           |
+| `stomp.over` missing / Node `net`          | package selected its Node entry                                   | browser STOMP adapter                           |
+| remote chunk 404                           | lazy compilation generated host-relative compilation URLs         | disable remote lazy compilation                 |
+| trade module runtime dependency            | Ratan quick search used `System.import("@fm/ratan_trades")`       | local quick-search adapter                      |
 
 ## Boundary verification
 

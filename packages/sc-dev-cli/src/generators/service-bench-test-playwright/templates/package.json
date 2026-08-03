@@ -1,0 +1,36 @@
+{
+  "name": "<??= applicationId ??><??= componentId ? `-${componentId}` : '' ??>-<??= name ??>-e2e",
+  "version": "1.0.0",
+  "description": "Playwright E2E test suite for <??= pluginDisplayName ??> (ITAM: <??= applicationId ??>)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test":                "playwright test",
+    "test:headed":         "playwright test --headed",
+    "test:debug":          "playwright test --debug",
+    "test:ui":             "playwright test --ui",
+    "test:smoke":          "playwright test --grep @smoke",
+    "test:regression":     "playwright test --grep @regression",
+    "test:sit":            "cross-env E2E_ENV=sit playwright test",
+    "test:sit-stg":        "cross-env E2E_ENV=sit-stg playwright test",
+    "test:uat":            "cross-env E2E_ENV=uat playwright test",
+    "test:uat-stg":        "cross-env E2E_ENV=uat-stg playwright test",
+    "test:qa":             "cross-env E2E_ENV=qa playwright test",
+    "test:sit:smoke":      "cross-env E2E_ENV=sit playwright test --grep @smoke",
+    "test:uat:smoke":      "cross-env E2E_ENV=uat playwright test --grep @smoke",
+    "test:sit:regression": "cross-env E2E_ENV=sit playwright test --grep @regression",
+    "test:report":         "playwright show-report",
+    "test:list":           "playwright test --list",
+    "typecheck":           "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^20.12.0",
+    "cross-env": "^7.0.3",
+    "genie-playwright": "latest",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=20.10.0"
+  }
+}

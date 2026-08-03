@@ -1,0 +1,64 @@
+trigger:
+  - release/*
+  - develop
+  - feature/*
+
+parameters:
+  - name: releaseId
+    type: string
+    displayName: Release WorkItem ID
+    default: "551"
+  - name: packageVersion
+    type: string
+    displayName: Package Version
+    default: '1.0.0-$(Build.BuildId)'    
+  - name: buildpackImageName
+    type: string
+    default: "buildpack-quarkus:20250219.1"
+  - name: builderImageName
+    type: string
+    default: "builder-quarkus:20250219.1"
+
+resources:
+  repositories:
+    - repository: modular-templates
+      name: dj-core/governed-templates
+      ref: "main"
+      type: git
+
+variables:
+  - name: ITAM
+    value: '<%= applicationId %>'
+  - name: imageName
+    value: '<%= name %>'
+  - name: imageTag
+    value: '$(Build.SourceBranchName)_$(Build.BuildNumber)'
+  - name: imageRepo
+    value: 'sc-app-platform'
+  - name: imagePrefix
+    value: 'process-api'
+
+extends:
+  template: governed-template/build@modular-templates
+  parameters:
+    ITAM: '${{parameters.ITAM}}'
+    featureRelease: true
+    releaseId: ${{ parameters.releaseId }}
+    buildStackName: sc-devkit-maven
+    buildStackParams:
+      pool: 'sc-linux'
+      goals: "clean package -Dquarkus.package.type=uber-jar"
+      packageVersion: '${{parameters.packageVersion}}'      
+      imageTag: '${{parameters.imageTag}}'
+      imageRepo: '${{variables.imageRepo}}'
+      imagePrefix: '${{parameters.imagePrefix}}'
+      imageName: '${{parameters.imageName}}'
+      buildpackImageName: '${{parameters.buildpackImageName}}'
+      builderImageName: '${{parameters.builderImageName}}'
+      imageListFilePath: "image.yml"
+      testResultsFiles: '**/surefire-reports/TEST-*.xml'
+      sonarCoverageJacocoXmlReportPaths: '**/jacoco-report/jacoco.xml'
+      sonarExclusions: '**/jacoco/**/*.js,**/*Test*.java,**/generated/**/*.java,**/configuration/**/*,**/*.yml,**/*.yaml,**/*.xml'
+      featureBranchScan: true
+      featureRelease: true
+# end of CI

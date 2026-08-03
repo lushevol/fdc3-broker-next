@@ -1,8 +1,8 @@
 // import { loadRemote } from '@module-federation/enhanced/runtime';
 import React, { type ReactElement, Suspense } from 'react';
+import { FDC3ChildProvider } from 'ratan-fdc3';
 import ErrorBoundry from '../../../components/ErrorBoundry';
 import Splash from '../../../components/Splash';
-import { FDC3TileProvider } from '../../../fdc3/FDC3Integration';
 import type { Container as ContainerProps } from '../../../hooks/model/workspaces';
 
 const AdminModule = React.lazy(() => import('../../../admin'));
@@ -32,10 +32,15 @@ const Container: React.FC<ContainerProps> = (props: ContainerProps): ReactElemen
             tabId={props.tabId}
           />
         ) : (
-          <FDC3TileProvider tile={props.tile} instanceId={props.id}>
+          <FDC3ChildProvider
+            appIdentifier={{
+              appId: props.tile.replace(/\//g, ''),
+              instanceId: props.id,
+            }}
+          >
             <Comp {...props} />
             {/* <MfContainer /> */}
-          </FDC3TileProvider>
+          </FDC3ChildProvider>
         )}
       </Suspense>
     </ErrorBoundry>

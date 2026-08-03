@@ -1,0 +1,78 @@
+server {
+  listen 8080;
+  server_name ${SERVER_NAME};
+
+  location = /healthz {
+    access_log off;
+    default_type application/json;
+    return 200 '{"status":"ok","environment":"${DEPLOYMENT_ENV}"}\n';
+  }
+
+  location / {
+    return 308 https://$host:8443$request_uri;
+  }
+}
+
+server {
+  listen 8443 ssl;
+  server_name ${SERVER_NAME};
+
+  ssl_certificate /etc/nginx/tls/tls.crt;
+  ssl_certificate_key /etc/nginx/tls/tls.key;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_session_cache shared:SSL:10m;
+  ssl_session_timeout 10m;
+
+  root /srv/realworld/environments/${DEPLOYMENT_ENV}/host;
+  index index.html;
+
+  add_header X-Content-Type-Options nosniff always;
+  add_header X-Frame-Options SAMEORIGIN always;
+  add_header Referrer-Policy same-origin always;
+  add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+  add_header Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'" always;
+
+  location = /healthz {
+    access_log off;
+    default_type application/json;
+    add_header Cache-Control "no-store" always;
+    return 200 '{"status":"ok","environment":"${DEPLOYMENT_ENV}"}\n';
+  }
+
+  location = /registry.json {
+    alias /srv/realworld/registries/active/${DEPLOYMENT_ENV}.json;
+    default_type application/json;
+    add_header Cache-Control "no-store, max-age=0" always;
+    add_header Pragma "no-cache" always;
+  }
+
+  location = /registry-pointer.json {
+    alias /srv/realworld/registries/active/${DEPLOYMENT_ENV}.pointer.json;
+    default_type application/json;
+    add_header Cache-Control "no-store, max-age=0" always;
+  }
+
+  location ^~ /registries/revisions/ {
+    alias /srv/realworld/registries/revisions/;
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    try_files $uri =404;
+  }
+
+  location ^~ /artifacts/ {
+    alias /srv/realworld/artifacts/;
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    add_header Cross-Origin-Resource-Policy same-origin always;
+    try_files $uri =404;
+  }
+
+  location ~* \.(?:css|js|mjs|woff2?|png|jpg|jpeg|gif|svg|ico)$ {
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    try_files $uri =404;
+  }
+
+  location / {
+    add_header Cache-Control "no-store, max-age=0" always;
+    try_files $uri $uri/ /index.html;
+  }
+}

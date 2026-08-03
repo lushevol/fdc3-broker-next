@@ -1,0 +1,16 @@
+dev:
+  server:
+    port: 8083
+sit:
+  server:
+    port: 8082
+
+server:
+  port: 8080
+#database:
+#  user: sb-55313-182-dev
+#  host: hkifz4pl1wfkq00.hk.standardchartered.com:6524
+#  name: pg_sb_case_management_dev_01
+#  schema: sb_55313_182_case_management
+#  sslmode: require
+

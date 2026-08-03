@@ -1,0 +1,234 @@
+trigger:
+  - release/*
+  - develop
+  - feature/*
+
+parameters:
+  - name: releaseId
+    type: string
+    displayName: Release WorkItem ID
+    default: "551"
+  - name: devkitHelmVersion
+    type: string
+    default: "1.1.0+20250113.6"
+  - name: rollbackBuildNumber
+    type: string
+    default: "0" # Please set this to last successful Release Build Number e.g. 20241115.6 for release
+
+variables:
+  - name: ITAM
+    value: '55313'
+  - name: subITAM
+    value: '<%= componentId %>'
+  - name: imageTag
+    value: '1.0.0_4906217'
+  - name: functionName
+    value: 'notification-process-api'
+
+resources:
+  repositories:
+    - repository: modular-templates
+      name: dj-core/governed-templates
+      ref: "main"
+      type: git
+
+extends:
+  template: governed-template/build-and-deploy.yml@modular-templates
+  parameters:
+    ITAM: '${{variables.ITAM}}'
+    subITAM: '${{variables.subITAM}}'
+    featureRelease: true
+    releaseId: ${{ parameters.releaseId }}
+    buildStackName: generic
+    buildStackParams:
+      pool: sc-linux
+      folderPathArchive: env
+      archiveType: zip
+      targetPathArtifactory: 'generic-release'
+      featureBranchScan: true
+      featureRelease: true
+# end of CI
+# start of CD
+    deployStackName: knative
+    deployStackParams:
+      functionName: '${{variables.functionName}}'
+      imageTag: '${{variables.imageTag}}'
+      imageRepo: 'sc-app-platform'
+      imagePrefix: 'sc-devkit'
+      imageName: 'sb-notification'
+      devkitHelmVersion: '${{parameters.devkitHelmVersion}}'
+      runQaRollback: false #IMPORTANT(QA rollback)
+    deployEnvironments:
+      - name: dev
+        environment: dev
+        devApproval: false
+        displayName: HK-SIT-JUMBO
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-NonProd-jumbo-sit-kubeconfig'
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/dev/properties.yml
+        dependsOn:
+          - CI
+      - name: qa
+        environment: qa
+        displayName: HK-UAT-JUMBO
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-NonProd-jumbo-uat-kubeconfig'
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/qa/properties.yml
+        dependsOn:
+          - dev
+      - name: rollback_qa #IMPORTANT(QA rollback) include all the ansible related parameters in deployStackParams to rollback_qa stage
+        environment: qa
+        displayName: Rollback QA #IMPORTANT(QA rollback)
+        notifyUsers: <your_team_email>@sc.com #IMPORTANT(QA rollback)
+        pool: sc-linux #IMPORTANT(QA rollback)
+        secureFileName: '55313-NonProd-jumbo-uat-kubeconfig' #IMPORTANT(QA rollback)
+        rollbackBuildNumber: ${{parameters.rollbackBuildNumber}} #IMPORTANT(QA rollback), the previous working release BuildNumber
+      - name: release_checks
+        environment: pre-release
+        displayName: Release Checks
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        dependsOn:
+          - qa        
+        hasGenie: false
+        qaStageName: qa
+      - name: release
+        environment: release
+        displayName: Release
+        dependsOn:
+          - release_checks
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        hasGenie: false
+      - name: pre_prod_1
+        environment: production
+        enableManualPIT: true
+        displayName: HK-STG-JUMBO
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-Prod-jumbo-stg-kubeconfig'
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/stg/properties.yml
+        dependsOn:
+          - release
+      - name: pre_prod_2
+        environment: production
+        enableManualPIT: true
+        displayName: HK-STG-MEGA
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-Prod-mega-stg-kubeconfig'
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/stg/properties.yml
+        dependsOn:
+          - release
+      - name: pre_prod_3
+        environment: production
+        displayName: HK-STG-CATALYST
+        enableManualPIT: true
+        notifyUsers: |
+          app.platform@sc.com
+        pool: sc-linux
+        secureFileName: '55313_NonProd_sked008_hk_kubeconfig'
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/stg/catalyst/hk/properties.yml
+        dependsOn:
+          - release
+      - name: pre_prod_4
+        environment: production
+        displayName: SG-STG-CATALYST
+        enableManualPIT: true
+        notifyUsers: |
+          app.platform@sc.com
+        pool: sc-linux
+        secureFileName: '55313_NonProd_sked008_sg_kubeconfig'
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/stg/catalyst/sg/properties.yml
+        dependsOn:
+          - release
+      # Rollback for preprod
+      - name: rollback_preprod_1
+        environment: production
+        displayName: Rollback PreProd 1
+        notifyUsers: <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-Prod-jumbo-stg-kubeconfig'
+        rollbackBuildNumber: ${{parameters.rollbackBuildNumber}}
+        dependsOn:
+          - pre_prod_1
+      - name: rollback_preprod_2
+        environment: production
+        displayName: Rollback PreProd 2
+        notifyUsers: <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-Prod-mega-stg-kubeconfig'
+        rollbackBuildNumber: ${{parameters.rollbackBuildNumber}}
+        dependsOn:
+          - pre_prod_2
+      - name: rollback_preprod_3
+        environment: production
+        displayName: Rollback PreProd 3
+        notifyUsers: <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313_NonProd_sked008_hk_kubeconfig'
+        rollbackBuildNumber: ${{parameters.rollbackBuildNumber}}
+        dependsOn:
+          - pre_prod_3
+      - name: rollback_preprod_4
+        environment: production
+        displayName: Rollback PreProd 4
+        notifyUsers: <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313_NonProd_sked008_sg_kubeconfig'
+        rollbackBuildNumber: ${{parameters.rollbackBuildNumber}}
+        dependsOn:
+          - pre_prod_4
+      #### END ROLLBACK FOR PREPROD
+      - name: prod_1
+        environment: production
+        enableManualPIT: true
+        displayName: HK-PRD-JUMBO
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-Prod-jumbo-kubeconfig'
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/prod/properties.yml
+        dependsOn:
+          - pre_prod_1
+          - pre_prod_2
+      - name: prod_2
+        environment: production
+        enableManualPIT: true
+        displayName: HK-PRD-MEGA
+        notifyUsers: |
+          <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-Prod-mega-kubeconfig'
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/env/prod/properties.yml
+        dependsOn:
+          - pre_prod_1
+          - pre_prod_2
+      # Rollback for prod
+      - name: rollback_prod_1
+        environment: production
+        displayName: Rollback Prod 1
+        notifyUsers: <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-Prod-jumbo-kubeconfig'
+        rollbackBuildNumber: ${{parameters.rollbackBuildNumber}}
+        dependsOn:
+          - prod_1
+      - name: rollback_prod_2
+        environment: production
+        displayName: Rollback Prod 2
+        notifyUsers: <your_team_email>@sc.com
+        pool: sc-linux
+        secureFileName: '55313-Prod-mega-kubeconfig'
+        rollbackBuildNumber: ${{parameters.rollbackBuildNumber}}
+        dependsOn:
+          - prod_2
+      #### END ROLLBACK FOR PROD

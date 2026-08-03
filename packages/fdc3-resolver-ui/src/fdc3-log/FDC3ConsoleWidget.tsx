@@ -449,12 +449,13 @@ interface ActivityTabProps {
   onToggleCategory: (cat: string) => void;
   onSearchChange: (val: string) => void;
   filteredCount: number;
+  totalCount: number;
 }
 
 function ActivityTab({
   logs, expandedId, onToggleExpand, logEndRef,
   levels, activeLevels, categories, activeCategories,
-  searchFilter, onToggleLevel, onToggleCategory, onSearchChange, filteredCount,
+  searchFilter, onToggleLevel, onToggleCategory, onSearchChange, filteredCount, totalCount,
 }: ActivityTabProps) {
   return (
     <>
@@ -492,7 +493,7 @@ function ActivityTab({
           logs.map((entry) => {
             const isExpanded = expandedId === entry.id;
             const detailText = entry.data
-              ? typeof entry.data === 'string' ? entry.data : JSON.stringify(entry.data, null, 2).slice(0, 1000)
+              ? typeof entry.data === 'string' ? entry.data : JSON.stringify(entry.data, null, 2)
               : '';
             const showTile = entry.tileId || entry.tileName;
 
@@ -530,9 +531,9 @@ function ActivityTab({
             );
           })
         )}
-        {filteredCount > 0 && filteredCount < logs.length && (
+        {filteredCount > 0 && filteredCount < totalCount && (
           <div style={{ padding: '4px 8px', fontSize: '10px', color: '#606060', textAlign: 'center' }}>
-            Showing {filteredCount} of {logs.length} entries
+            Showing {filteredCount} of {totalCount} entries
           </div>
         )}
         <div ref={logEndRef} />
@@ -857,7 +858,7 @@ const FDC3ConsoleWidget: React.FC<FDC3ConsoleWidgetProps> = ({
               logEndRef={logEndRef} levels={levelList} activeLevels={activeLevels}
               categories={categoryList} activeCategories={activeCategories} searchFilter={searchFilter}
               onToggleLevel={toggleLevel} onToggleCategory={toggleCategory}
-              onSearchChange={setSearchFilter} filteredCount={filteredLogs.length} />
+              onSearchChange={setSearchFilter} filteredCount={filteredLogs.length} totalCount={logs.length} />
           )}
           {activeTab === 'listeners' && <ListenersTab listeners={listeners} channels={channels} currentChannelId={currentChannelId} />}
           {activeTab === 'actions' && <ActionsTab />}

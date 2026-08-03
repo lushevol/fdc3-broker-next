@@ -7,15 +7,13 @@ import { MockAppDirectoryService } from '../../fdc3-app-directory/src/mock';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Broker } from '../src/broker';
 import { LogLevel } from '../src/logger';
-import type { AppIdentifier, BrokerConfig, Context } from '../src/types';
+import type { BrokerConfig, Context } from '../src/types';
 
 describe('Broker Logging', () => {
   let broker: Broker;
   let mockConfig: BrokerConfig;
   let consoleDebugSpy: ReturnType<typeof vi.spyOn>;
   let consoleInfoSpy: ReturnType<typeof vi.spyOn>;
-  let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
-  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
   const mockApps = [
     {
@@ -62,8 +60,8 @@ describe('Broker Logging', () => {
     // Spy on console methods
     consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
     consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
-    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const mockAppDirectory = new MockAppDirectoryService();
     mockApps.forEach((app) => mockAppDirectory.registerApp(app));
@@ -177,9 +175,9 @@ describe('Broker Logging', () => {
       await (broker as any).joinUserChannel('green', source);
 
       // Should log channel join operation
-      expect(consoleDebugSpy).toHaveBeenCalled();
-      const debugCalls = consoleDebugSpy.mock.calls;
-      const hasLog = debugCalls.some(([msg, data]) => {
+      expect(consoleInfoSpy).toHaveBeenCalled();
+      const infoCalls = consoleInfoSpy.mock.calls;
+      const hasLog = infoCalls.some(([msg, data]) => {
         const fullLog = `${msg} ${JSON.stringify(data)}`;
         return fullLog.includes('green') || fullLog.includes('channel');
       });
@@ -194,7 +192,7 @@ describe('Broker Logging', () => {
       await (broker as any).addIntentListener('ViewChart', handler, source);
 
       // Should log listener registration
-      expect(consoleDebugSpy).toHaveBeenCalled();
+      expect(consoleInfoSpy).toHaveBeenCalled();
     });
   });
 
@@ -304,7 +302,7 @@ describe('Broker Logging', () => {
       );
 
       // Should log successful operation
-      expect(consoleDebugSpy).toHaveBeenCalled();
+      expect(consoleInfoSpy).toHaveBeenCalled();
     });
 
     it('should log failed intent resolution', async () => {
@@ -321,7 +319,7 @@ describe('Broker Logging', () => {
       };
 
       // Pass explicit target with matching listener
-      const resolution = await (broker as any).raiseIntent(
+      await (broker as any).raiseIntent(
         'ViewChart',
         context,
         { appId: 'app-a', instanceId: 'tile-1' },
@@ -329,7 +327,7 @@ describe('Broker Logging', () => {
       );
 
       // Should log successful operation (intent resolution worked)
-      expect(consoleDebugSpy).toHaveBeenCalled();
+      expect(consoleInfoSpy).toHaveBeenCalled();
     });
 
     it('should log intent resolution with multiple targets', async () => {
@@ -353,7 +351,7 @@ describe('Broker Logging', () => {
       await (broker as any).raiseIntent('ViewChart', context, source2, source1);
 
       // Should log that multiple targets were found
-      expect(consoleDebugSpy).toHaveBeenCalled();
+      expect(consoleInfoSpy).toHaveBeenCalled();
     });
   });
 
@@ -365,7 +363,7 @@ describe('Broker Logging', () => {
       await (broker as any).joinUserChannel('red', source);
 
       // Should log channel join
-      expect(consoleDebugSpy).toHaveBeenCalled();
+      expect(consoleInfoSpy).toHaveBeenCalled();
     });
 
     it('should log broadcast operations', async () => {
@@ -395,7 +393,7 @@ describe('Broker Logging', () => {
       await (broker as any).addContextListener('fdc3.chart', handler, source);
 
       // Should log listener addition
-      expect(consoleDebugSpy).toHaveBeenCalled();
+      expect(consoleInfoSpy).toHaveBeenCalled();
     });
 
     it('should log current channel retrieval', async () => {
@@ -442,7 +440,7 @@ describe('Broker Logging', () => {
       listener2.unsubscribe();
 
       // Should log operations
-      expect(consoleDebugSpy).toHaveBeenCalled();
+      expect(consoleInfoSpy).toHaveBeenCalled();
     });
 
     it('should handle missing tile context gracefully', async () => {
@@ -486,13 +484,15 @@ describe('Broker Logging', () => {
     });
 
     it('should include timestamp information in logs', async () => {
+      const events: Array<{ timestamp: number }> = [];
+      broker.subscribeToLogs((event) => events.push(event));
       await broker.registerTile('tile-1', 'app-a');
       const source = { appId: 'app-a', instanceId: 'tile-1' };
 
       await (broker as any).joinUserChannel('red', source);
 
-      // Debug logs should be called
-      expect(consoleDebugSpy).toHaveBeenCalled();
+      expect(events.length).toBeGreaterThan(0);
+      expect(events.every((event) => Number.isFinite(event.timestamp))).toBe(true);
     });
 
     it('should serialize complex objects in logs', async () => {

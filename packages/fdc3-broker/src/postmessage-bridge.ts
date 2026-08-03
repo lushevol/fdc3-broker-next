@@ -94,6 +94,8 @@ export class PostMessageBridge {
       resolve: (value: unknown) => void;
       reject: (reason: Error) => void;
       timeout: ReturnType<typeof setTimeout>;
+      expectedOrigin: string;
+      expectedSources: Set<MessageEventSource>;
     }
   > = new Map();
   private intentHandler:
@@ -172,7 +174,7 @@ export class PostMessageBridge {
 
     switch (envelope.type) {
       case 'fdc3-pm-response':
-        this.handleResponse(envelope as PostMessageResponse);
+        this.handleResponse(event, envelope as PostMessageResponse);
         break;
       case 'fdc3-pm-event':
         this.handleEvent(envelope as PostMessageEvent);
@@ -222,10 +224,25 @@ export class PostMessageBridge {
   /**
    * Handle response messages
    */
-  private handleResponse(response: PostMessageResponse): void {
+  private handleResponse(event: MessageEvent, response: PostMessageResponse): void {
     const pending = this.pendingRequests.get(response.correlationId);
     if (!pending) {
       this.logger.debug('Received response for unknown request', {
+        correlationId: response.correlationId,
+      });
+      return;
+    }
+
+    if (pending.expectedOrigin !== '*' && event.origin !== pending.expectedOrigin) {
+      this.logger.warn('Ignoring response from unexpected origin', {
+        correlationId: response.correlationId,
+        expectedOrigin: pending.expectedOrigin,
+        actualOrigin: event.origin,
+      });
+      return;
+    }
+    if (event.source && !pending.expectedSources.has(event.source)) {
+      this.logger.warn('Ignoring response from unexpected window', {
         correlationId: response.correlationId,
       });
       return;
@@ -258,7 +275,7 @@ export class PostMessageBridge {
    * Generate a unique correlation ID
    */
   private generateCorrelationId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    return globalThis.crypto.randomUUID();
   }
 
   /**
@@ -277,6 +294,13 @@ export class PostMessageBridge {
       }
 
       const correlationId = this.generateCorrelationId();
+      const expectedSources = new Set<MessageEventSource>();
+      if (window.parent && window.parent !== window) {
+        expectedSources.add(window.parent);
+      }
+      if (targetOrigin === '*' && window.opener) {
+        expectedSources.add(window.opener);
+      }
       const request: PostMessageRequest = {
         type: 'fdc3-pm-request',
         correlationId,
@@ -299,6 +323,8 @@ export class PostMessageBridge {
         resolve: resolve as (value: unknown) => void,
         reject,
         timeout,
+        expectedOrigin: targetOrigin,
+        expectedSources,
       });
 
       // Send message to target (broadcast to all frames if target is '*')
@@ -374,20 +400,25 @@ export class PostMessageBridge {
     intent: string,
     context: Context,
     target?: AppIdentifier,
-    targetOrigin: string = '*',
+    targetOrigin?: string,
   ): Promise<IntentResolution> {
     if (!this.enabled) {
       throw new Error('PostMessage bridge is not enabled');
+    }
+
+    const resolvedTargetOrigin = targetOrigin ?? this.getAllTargetOrigins()[0];
+    if (!resolvedTargetOrigin) {
+      throw new Error('No allowed PostMessage target origin configured');
     }
 
     this.logger.debug('Raising intent via PostMessage', {
       intent,
       context,
       target,
-      targetOrigin,
+      targetOrigin: resolvedTargetOrigin,
     });
 
-    const response = await this.sendRequest<IntentResolution>(targetOrigin, 'raiseIntent', {
+    const response = await this.sendRequest<IntentResolution>(resolvedTargetOrigin, 'raiseIntent', {
       intent,
       context,
       target,

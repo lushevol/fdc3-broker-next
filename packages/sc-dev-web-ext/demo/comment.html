@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <title>sc-web-kit demo page</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/node_modules/@scdevkit/styles/dist/util.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/node_modules/@scdevkit/webkit/dist/styles/ScDyslexicMode.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/dist/styles/ScDarkModeExt.css"
+    />
+
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/node_modules/@scdevkit/webkit/dist/styles/ScLightMode.css"
+    />
+    <!-- Custom style -->
+    <style>
+      body {
+        padding: 0;
+      }
+      .sc-mode-dark {
+        background-color: var(--sc-color-grey-100);
+      }
+    </style>
+  </head>
+  <div id="webkit-ext-container"></div>
+  <body>
+    <!-- Custom script -->
+    <script type="module">
+      // Register all sc-* custom elements
+      // Register all sc-* custom elements
+      import '../dist/elements/index.js';
+      import '../dist/demo/local/ScDataGraphQLProvider.js';
+      import '@scdevkit/webkit/elements/index.js';
+      import '@scdevkit/data/elements/index.js';
+      import { html } from '/node_modules/lit-html/lit-html.js';
+      import { render } from 'lit';
+      import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+
+      const userinfo = {
+        bankid: '1664072',
+        name: 'Jane Doe',
+        avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
+      };
+      // generate comments base on interface Comment also link some replies to parent comments
+
+      function makeComment({
+        id,
+        text,
+        user,
+        parentID,
+        createdAt,
+        updatedAt,
+        likes,
+        likedByCurrentUser,
+      }) {
+        return {
+          id,
+          text,
+          createdAt: createdAt || new Date(),
+          updatedAt,
+          user,
+          parentID,
+          likes,
+          likedByCurrentUser,
+        };
+      }
+
+      const users = [
+        {
+          bankid: '1664072',
+          name: 'Jane Doe',
+          avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
+        },
+        {
+          bankid: '1664072',
+          name: 'John Smith',
+          avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
+        },
+        {
+          bankid: '1664072',
+          name: 'Alice Lee',
+          avatarUrl: 'https://randomuser.me/api/portraits/women/65.jpg',
+        },
+        {
+          bankid: '1664072',
+          name: 'Bob Chan',
+          avatarUrl: 'https://randomuser.me/api/portraits/men/76.jpg',
+        },
+        {
+          bankid: '1664072',
+          name: 'Priya Patel',
+          avatarUrl: 'https://randomuser.me/api/portraits/women/12.jpg',
+        },
+      ];
+
+      let commentId = 1;
+      function nextId() {
+        return `c${commentId++}`;
+      }
+
+      let comments = [];
+      for (let i = 0; i < 2; i++) {
+        const parentId = nextId();
+        const comment = makeComment({
+          likes: i + 1,
+          id: parentId,
+          text: `Parent comment ${i + 1}`,
+          user: users[i % users.length],
+          createdAt: new Date(Date.now() - (i + 1) * 3600 * 1000),
+        });
+
+        // Add sample attachments to first comment
+        if (i === 0) {
+          comment.attachments = [
+            {
+              id: 'att-1',
+              fileName: 'sample-document.pdf',
+              fileSize: 1024 * 150, // 150 KB
+              fileType: 'application/pdf',
+              fileUrl: 'https://example.com/sample.pdf',
+              uploadedBy: users[0].bankid,
+              uploadedAt: new Date(),
+              commentId: parentId,
+            },
+            {
+              id: 'att-2',
+              fileName: 'screenshot.png',
+              fileSize: 1024 * 1024 * 2.5, // 2.5 MB
+              fileType: 'image/png',
+              fileUrl: 'https://via.placeholder.com/600x400.png?text=Preview',
+              uploadedBy: users[0].bankid,
+              uploadedAt: new Date(),
+              commentId: parentId,
+            },
+          ];
+        }
+
+        comments.push(comment);
+        // for (let j = 0; j < 3; j++) {
+        //   const childId = nextId();
+        //   comments.push(
+        //     makeComment({
+        //       id: childId,
+        //       text: `Child comment ${j + 1} of parent ${i + 1}`,
+        //       user: users[(i + j) % users.length],
+        //       parentID: parentId,
+        //       createdAt: new Date(Date.now() - (i + 1) * 3600 * 1000 - (j + 1) * 60000),
+        //     })
+        //   );
+        //   for (let k = 0; k < 3; k++) {
+        //     comments.push(
+        //       makeComment({
+        //         id: nextId(),
+        //         text: `Grandchild comment ${k + 1} of child ${j + 1} (parent ${i + 1})`,
+        //         user: users[(i + j + k) % users.length],
+        //         parentID: childId,
+        //         createdAt: new Date(
+        //           Date.now() -
+        //             (i + 1) * 3600 * 1000 -
+        //             (j + 1) * 60000 -
+        //             (k + 1) * 1000
+        //         ),
+        //       })
+        //     );
+        //   }
+        // }
+      }
+
+      // Only pass extra options beyond the built-in defaults (All, Mine, Newest, Oldest)
+      const posterOptions = [
+        { label: 'John Smith', value: 'johnsmith' },
+      ];
+      const sorterOptions = [
+        { label: 'Most Replies', value: 'most-replies' },
+      ];
+      const toolbar = ['bold', 'italic'];
+
+      const moreActions = [
+        {
+          id: 'pin',
+          label: 'Pin',
+          icon: 'pin',
+          handler: comment => console.log('Pin action:', comment),
+        },
+      ];
+
+      const reminderConfig = {
+        options: [
+          { label: 'Completed', value: 'completed' },
+          { label: 'Closed', value: 'closed' },
+        ],
+        defaultStatus: 'completed',
+      };
+
+      render(
+        html`
+          <sc-demo-graphql-provider>
+            <sc-icon-provider
+              .iconLibraries=${[CountryIconLibrary, MainIconLibrary]}
+            >
+            <sc-column-layout layout="Main Content Middle" height="auto" unfloatable="" right-column-collapsible="" right-column-size="" additional-height="0px" additional-slot-height="0rem" style="">
+        
+            <div slot="title">Right Column Collapsible</div>
+          
+        
+        
+        
+        
+        <div slot="left">
+          <sc-list-navigation>
+            <sc-list-navigation-item title="Client information" selected=""></sc-list-navigation-item>
+            <sc-list-navigation-item title="Services"></sc-list-navigation-item>
+          </sc-list-navigation>
+        </div>
+        <div style="padding: 12px;" slot="right">
+          <sc-comment
+                  manual-sorting
+                  max-visible-replies="2"
+                  enable-upload
+                  enable-file-input-deletion
+                  max-files-per-comment="5"
+                  enable-delete
+                  enable-reminder
+                  compact
+                  @sc-view-sort-change=${({ detail }) => {
+                console.log(detail);
+                }}
+                  
+                  .toolbar=${toolbar}
+                  .posterFilters=${{
+                    johnsmith: (comment, userBankid) =>
+                      comment.user.name === 'John Smith',
+                  }}
+                  .sorterComparators=${{
+                    'most-replies': (a, b) => {
+                      const countReplies = targetId =>
+                        comments.reduce(
+                          (count, c) =>
+                            count + (c.parentID === targetId ? 1 : 0),
+                          0
+                        );
+                      return countReplies(b.id) - countReplies(a.id);
+                    },
+                  }}
+                  .moreActions=${moreActions}
+                  .reminderConfig=${reminderConfig}
+                  .actions=${[
+                    {
+                      icon: 'email--line',
+                      label: 'email',
+                      handler(comment) {
+                        console.log(comment);
+                      },
+                    },
+                  ]}
+                  enable-edit
+                  enable-share
+                  enable-like
+                  .comments=${comments}
+                  .userInfo=${userinfo}
+                  @sc-change=${e => {
+                    comments = e.detail.allComments;
+                    console.log(12, comments);
+                    const component = document.querySelector('sc-comment');
+                    if (component) component.comments = comments;
+                  }}
+                  @sc-action-trigger=${e => {
+                    console.log('Action:', e.detail);
+                  }}
+                  @sc-reminder-trigger=${e => {
+                    console.log('Reminder trigger:', e.detail);
+                  }}
+                  @sc-toggle-replies=${e => {
+                    console.log('Toggle replies:', e.detail);
+                  }}
+                  @sc-attachment-preview=${e => {
+                    console.log('Attachment preview:', e.detail);
+                  }}
+                  @sc-comment-file-upload=${e => {
+                    console.log('File upload:', e.detail);
+                  }}
+                  @sc-comment-file-delete=${e => {
+                    console.log('File delete:', e.detail);
+                  }}
+                  @sc-comment-file-download=${e => {
+                    console.log('File download:', e.detail);
+                  }}
+                  @sc-comment-file-error=${e => {
+                    console.log('File error:', e.detail);
+                  }}
+                >
+                </sc-comment>
+        </div>
+        
+        
+        
+        <div slot="middle" style="">
+          <sc-box height="100%" style="margin-top: 12px;">
+            <h3>Client information</h3>
+            <sc-spacer vertical="" size="md"></sc-spacer>
+            <div>
+              <sc-grid-row>
+                <sc-grid-column xs="3">Legal entity name</sc-grid-column>
+                <sc-grid-column xs="9">BR Advisors HK Ltd</sc-grid-column>
+              </sc-grid-row>
+              <sc-spacer vertical="" size="sm"></sc-spacer>
+              <sc-grid-row>
+                <sc-grid-column xs="3">Registered address</sc-grid-column>
+                <sc-grid-column xs="9">Hong Kong</sc-grid-column>
+              </sc-grid-row>
+              <sc-spacer vertical="" size="sm"></sc-spacer>
+              <sc-grid-row>
+                <sc-grid-column xs="3">Operational address</sc-grid-column>
+                <sc-grid-column xs="9">-</sc-grid-column>
+              </sc-grid-row>
+              <sc-spacer vertical="" size="sm"></sc-spacer>
+              <sc-grid-row>
+                <sc-grid-column xs="3">Incorporation number</sc-grid-column>
+                <sc-grid-column xs="9">-</sc-grid-column>
+              </sc-grid-row>
+              <sc-spacer vertical="" size="xs"></sc-spacer>
+            </div>
+          </sc-box>
+        </div>
+      </sc-column-layout>
+              <div style="padding: 15px;">
+                <sc-comment
+                  manual-sorting
+                  max-visible-replies="2"
+                  enable-upload
+                  enable-file-input-deletion
+                  max-files-per-comment="5"
+                  enable-delete
+                  enable-reminder
+                  @sc-view-sort-change=${({ detail }) => {
+                console.log(detail);
+                }}
+                  
+                  .toolbar=${toolbar}
+                  .posterFilters=${{
+                    johnsmith: (comment, userBankid) =>
+                      comment.user.name === 'John Smith',
+                  }}
+                  .sorterComparators=${{
+                    'most-replies': (a, b) => {
+                      const countReplies = targetId =>
+                        comments.reduce(
+                          (count, c) =>
+                            count + (c.parentID === targetId ? 1 : 0),
+                          0
+                        );
+                      return countReplies(b.id) - countReplies(a.id);
+                    },
+                  }}
+                  .moreActions=${moreActions}
+                  .reminderConfig=${reminderConfig}
+                  .actions=${[
+                    {
+                      icon: 'email--line',
+                      label: 'email',
+                      handler(comment) {
+                        console.log(comment);
+                      },
+                    },
+                  ]}
+                  enable-edit
+                  enable-share
+                  enable-like
+                  .comments=${comments}
+                  .userInfo=${userinfo}
+                  @sc-change=${e => {
+                    comments = e.detail.allComments;
+                    console.log(12, comments);
+                    const component = document.querySelector('sc-comment');
+                    if (component) component.comments = comments;
+                  }}
+                  @sc-action-trigger=${e => {
+                    console.log('Action:', e.detail);
+                  }}
+                  @sc-reminder-trigger=${e => {
+                    console.log('Reminder trigger:', e.detail);
+                  }}
+                  @sc-toggle-replies=${e => {
+                    console.log('Toggle replies:', e.detail);
+                  }}
+                  @sc-attachment-preview=${e => {
+                    console.log('Attachment preview:', e.detail);
+                  }}
+                  @sc-comment-file-upload=${e => {
+                    console.log('File upload:', e.detail);
+                  }}
+                  @sc-comment-file-delete=${e => {
+                    console.log('File delete:', e.detail);
+                  }}
+                  @sc-comment-file-download=${e => {
+                    console.log('File download:', e.detail);
+                  }}
+                  @sc-comment-file-error=${e => {
+                    console.log('File error:', e.detail);
+                  }}
+                >
+                </sc-comment>
+              </div>
+            </sc-icon-provider>
+          </sc-demo-graphql-provider>
+        `,
+        document.querySelector('#webkit-ext-container')
+      );
+      const comment = document.querySelector('sc-comment');
+    </script>
+  </body>
+</html>

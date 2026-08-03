@@ -6,7 +6,7 @@
  * @see research.md#L25-L61 (FDC3 API surface)
  */
 
-import type { ContextMetadata } from '@finos/fdc3';
+import type { ContextMetadata, EventHandler, FDC3EventTypes } from '@finos/fdc3';
 import type { AppDirectoryClient } from 'ratan-fdc3-app-directory';
 import { UnavailableModuleLoader } from 'ratan-module-composition';
 import type { ModuleLoaderApi } from 'ratan-module-composition';
@@ -58,6 +58,20 @@ type PendingIntentListener = {
   resolve: () => void;
   reject: (error: Error) => void;
   timeoutId?: ReturnType<typeof setTimeout>;
+};
+
+type DesktopContextListenerRegistration = {
+  id: string;
+  contextType: string | null;
+  handler: (context: Context, metadata?: ContextMetadata) => void;
+  source?: AppIdentifier;
+};
+
+type DesktopEventListenerRegistration = {
+  id: string;
+  eventType: FDC3EventTypes | null;
+  handler: EventHandler;
+  source?: AppIdentifier;
 };
 
 // Lazy load PostMessage bridge only when needed
@@ -116,7 +130,8 @@ export class Broker implements DesktopAgent {
 
   // Track listeners
   private intentListeners = new Map<string, Listener[]>();
-  private contextListeners = new Map<string, Listener>();
+  private contextListeners = new Map<string, DesktopContextListenerRegistration>();
+  private eventListeners = new Map<string, DesktopEventListenerRegistration>();
   private listenerIds = new WeakMap<Listener, string>();
   private nextListenerId = 0;
 
@@ -810,8 +825,12 @@ export class Broker implements DesktopAgent {
         'context',
       );
 
-      // Broadcast to internal channel
+      // Broadcast to direct Channel listeners.
       await channel.broadcast(context);
+
+      // DesktopAgent listeners follow the current user channel rather than a
+      // Channel object captured at registration time.
+      await this.deliverDesktopContext(channel.id, context);
       this.logger.debug(
         'Context broadcast to internal channel',
         {
@@ -844,7 +863,6 @@ export class Broker implements DesktopAgent {
    * @param contextType - Context type to filter on, or null to receive all contexts
    * @param handler - Function to call when matching context is broadcast
    * @returns Promise resolving to a Listener object with unsubscribe method
-   * @throws Error if no channel has been joined
    *
    * @example
    * ```typescript
@@ -900,34 +918,68 @@ export class Broker implements DesktopAgent {
       'context',
     );
 
-    // Get current tile's channel
-    const currentChannel = await this.getCurrentChannel(actualSource);
+    const listenerId = `context_${this.nextListenerId++}`;
+    const registration: DesktopContextListenerRegistration = {
+      id: listenerId,
+      contextType,
+      handler,
+      source: actualSource,
+    };
+    this.contextListeners.set(listenerId, registration);
 
-    if (!currentChannel) {
-      throw new Error('No channel joined. Call joinUserChannel() first.');
-    }
-
-    // Add listener to channel
-    const listener = await currentChannel.addContextListener(contextType, handler);
+    const listener = {
+      id: listenerId,
+      unsubscribe: async () => {
+        this.contextListeners.delete(listenerId);
+        if (actualSource?.instanceId) {
+          this.tileRegistry.removeContextListener(actualSource.instanceId, listenerId);
+        }
+      },
+    } satisfies Listener & { id: string };
 
     // Also track in tile registry for cleanup
     if (actualSource?.instanceId) {
       this.tileRegistry.addContextListener(actualSource.instanceId, {
-        id: (listener as any).id,
+        id: listenerId,
         contextType,
         handler,
       });
-
-      return {
-        ...listener,
-        unsubscribe: async () => {
-          await listener.unsubscribe();
-          this.tileRegistry.removeContextListener(actualSource.instanceId!, (listener as any).id);
-        },
-      };
     }
 
     return listener;
+  }
+
+  private async deliverDesktopContext(
+    channelId: string,
+    context: Context,
+  ): Promise<void> {
+    for (const registration of this.contextListeners.values()) {
+      if (registration.contextType && registration.contextType !== context.type) {
+        continue;
+      }
+      const instanceId = registration.source?.instanceId;
+      if (!instanceId || this.channelManager.getTileChannel(instanceId)?.id !== channelId) {
+        continue;
+      }
+      try {
+        await registration.handler(context);
+      } catch (error) {
+        this.logger.error('Context listener failed:', error as Error);
+      }
+    }
+  }
+
+  private async replayCurrentContext(source: AppIdentifier, channel: Channel): Promise<void> {
+    for (const registration of this.contextListeners.values()) {
+      if (registration.source?.instanceId !== source.instanceId) {
+        continue;
+      }
+      const context = await channel.getCurrentContext(registration.contextType ?? undefined);
+      if (!context) {
+        continue;
+      }
+      await registration.handler(context);
+    }
   }
 
   /**
@@ -1842,6 +1894,9 @@ export class Broker implements DesktopAgent {
       // Update tile registry
       this.tileRegistry.setTileChannel(source.instanceId, channel);
 
+      await this.replayCurrentContext(source, channel);
+      this.emitDesktopEvent('userChannelChanged', { currentChannelId: channel.id }, source);
+
       // Sync with OpenFin if available
       const bridge = await this.getOpenFinBridge();
       if (bridge?.isEnabled()) {
@@ -1924,7 +1979,11 @@ export class Broker implements DesktopAgent {
     this.channelManager.leaveChannel(source.instanceId);
 
     // Update tile registry
-    this.tileRegistry.setTileChannel(source.instanceId, undefined as any);
+    const tile = this.tileRegistry.getTile(source.instanceId);
+    if (tile) {
+      tile.currentChannel = undefined;
+    }
+    this.emitDesktopEvent('userChannelChanged', { currentChannelId: null }, source);
   }
 
   /**
@@ -1947,21 +2006,46 @@ export class Broker implements DesktopAgent {
    * });
    * ```
    */
-  async addEventListener(eventType: any, _handler: (event: any) => void): Promise<Listener> {
+  async addEventListener(
+    eventType: FDC3EventTypes | null,
+    handler: EventHandler,
+    source?: AppIdentifier,
+  ): Promise<Listener> {
     this.logger.debug('addEventListener', { eventType });
 
     const listenerId = `evt_${this.nextListenerId++}`;
     const listener = {
       id: listenerId,
       unsubscribe: async () => {
-        // Implementation for removing event listener
+        this.eventListeners.delete(listenerId);
       },
-    };
+    } satisfies Listener & { id: string };
+
+    this.eventListeners.set(listenerId, { id: listenerId, eventType, handler, source });
 
     // Store listener ID in WeakMap
     this.listenerIds.set(listener, listenerId);
 
     return listener;
+  }
+
+  private emitDesktopEvent(
+    eventType: FDC3EventTypes,
+    details: { currentChannelId: string | null },
+    source: AppIdentifier,
+  ): void {
+    for (const registration of this.eventListeners.values()) {
+      if (registration.eventType !== null && registration.eventType !== eventType) {
+        continue;
+      }
+      if (
+        registration.source?.instanceId &&
+        registration.source.instanceId !== source.instanceId
+      ) {
+        continue;
+      }
+      registration.handler({ type: eventType, details });
+    }
   }
 
   /**
@@ -1983,7 +2067,7 @@ export class Broker implements DesktopAgent {
    * console.log(`Provider: ${info.provider} ${info.providerVersion}`);
    * ```
    */
-  async getInfo(): Promise<ImplementationMetadata> {
+  async getInfo(source?: AppIdentifier): Promise<ImplementationMetadata> {
     this.logger.debug('getInfo', {});
 
     return {
@@ -1992,11 +2076,14 @@ export class Broker implements DesktopAgent {
       providerVersion: '0.0.1',
       optionalFeatures: {
         // Optional features supported by this implementation
-        OriginatingAppMetadata: true,
+        OriginatingAppMetadata: false,
         UserChannelMembershipAPIs: true,
         DesktopAgentBridging: false,
       },
-      appMetadata: undefined as any,
+      appMetadata: {
+        appId: source?.appId ?? '@fm/fdc3-broker',
+        instanceId: source?.instanceId ?? 'broker',
+      },
     };
   }
 
@@ -2166,8 +2253,40 @@ export class Broker implements DesktopAgent {
       }
     }
 
+    for (const [listenerId, registration] of this.contextListeners) {
+      if (registration.source?.instanceId === instanceId) {
+        this.contextListeners.delete(listenerId);
+      }
+    }
+    for (const [listenerId, registration] of this.eventListeners) {
+      if (registration.source?.instanceId === instanceId) {
+        this.eventListeners.delete(listenerId);
+      }
+    }
+    this.channelManager.leaveChannel(instanceId);
+
     this.tileRegistry.updateTileState(instanceId, 'unmounted');
     this.tileRegistry.unregisterTile(instanceId);
+  }
+
+  /** Releases global bridge handlers and all broker-owned listener registrations. */
+  destroy(): void {
+    this.postMessageBridge?.destroy();
+    this.postMessageBridge = null;
+    this.openFinBridge = null;
+
+    for (const pending of this.pendingIntentListeners.values()) {
+      for (const listener of pending) {
+        if (listener.timeoutId) {
+          clearTimeout(listener.timeoutId);
+        }
+        listener.reject(new Error('Broker destroyed'));
+      }
+    }
+    this.pendingIntentListeners.clear();
+    this.intentListeners.clear();
+    this.contextListeners.clear();
+    this.eventListeners.clear();
   }
 
   /**

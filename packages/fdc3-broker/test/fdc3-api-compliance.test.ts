@@ -18,7 +18,6 @@ import type {
   Context,
   DesktopAgent,
   ImplementationMetadata,
-  Intent,
   IntentResolution,
   Listener,
 } from '../src/types';

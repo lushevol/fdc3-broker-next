@@ -2,7 +2,6 @@ import { html, LitElement, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 
 import SlTooltip from '@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import ScTheme from '../../styles/ScTheme.js';
 import { POSITION } from '../../shared/util.js';
 import {
@@ -34,7 +33,7 @@ enum MODE {
   glassy = 'glassy',
 }
 
-export class ScTooltip extends ScopedElementsMixin(LitElement) {
+export class ScTooltip extends LitElement {
   static styles = ScTheme.getStyles();
 
   static get scopedElements() {

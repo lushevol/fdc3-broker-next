@@ -7,11 +7,18 @@ const rootNodeModules = fileURLToPath(new URL('../../../../../node_modules/', im
 export default defineConfig({
   plugins: [react()],
   resolve: {
+    conditions: ['browser'],
     // Testing Library remains hoisted with the legacy product test stack.
     // Keep its renderer and all linked sources on one React copy; browser
     // verification exercises the portal's production React 19 runtime.
     dedupe: ['react', 'react-dom'],
     alias: {
+      '@fm/ratan-design-webkit/react': fileURLToPath(
+        new URL('../../packages/ratan-design-webkit/src/wrapper/ReactWrapper.ts', import.meta.url),
+      ),
+      '@fm/ratan-design-webkit/elements': fileURLToPath(
+        new URL('../../packages/ratan-design-webkit/elements/index.ts', import.meta.url),
+      ),
       'react-dom': `${rootNodeModules}react-dom`,
       react: `${rootNodeModules}react`,
     },

@@ -1,12 +1,7 @@
 import { useState } from 'react';
-import {
-  Button,
-  Dialog,
-  InlineAlert,
-  NumberField,
-  TextField,
-} from '@fm/ratan-design';
+import { createPortal } from 'react-dom';
 import type { AuthorizationLimitRecord } from './authorization-limits-repository';
+import { ScAlert, ScButton, ScDialog, ScParagraph, ScTextInput } from './webkit';
 
 const MIN_LIMIT = 0;
 const MAX_LIMIT = 99_999_999_999;
@@ -30,11 +25,12 @@ export function AuthorizationLimitEditor({ mode, record, onSubmit, onClose }: Pr
   const submit = async () => {
     const normalizedProfile = profile.trim();
     const nextProfileError = normalizedProfile ? null : 'Profile is required.';
-    const nextLimitationError = limitation === null
-      ? 'Limitation is required.'
-      : limitation < MIN_LIMIT || limitation > MAX_LIMIT
-        ? `Limitation must be between ${MIN_LIMIT} and ${MAX_LIMIT}.`
-        : null;
+    const nextLimitationError =
+      limitation === null
+        ? 'Limitation is required.'
+        : limitation < MIN_LIMIT || limitation > MAX_LIMIT
+          ? `Limitation must be between ${MIN_LIMIT} and ${MAX_LIMIT}.`
+          : null;
     setProfileError(nextProfileError);
     setLimitationError(nextLimitationError);
     setRequestError(null);
@@ -45,65 +41,76 @@ export function AuthorizationLimitEditor({ mode, record, onSubmit, onClose }: Pr
       await onSubmit(normalizedProfile, limitation);
       onClose();
     } catch (reason) {
-      setRequestError(reason instanceof Error ? reason.message : 'Authorization Limit mutation failed.');
+      setRequestError(
+        reason instanceof Error ? reason.message : 'Authorization Limit mutation failed.',
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <Dialog
-      open
-      title={title}
-      description="Profile limits use fixed USD currency."
-      onClose={onClose}
-      dismissible={!loading}
-      actions={
-        <>
-          <Button variant="ghost" disabled={loading} onClick={onClose}>Cancel</Button>
-          <Button
-            disabled={loading}
-            aria-busy={loading || undefined}
-            aria-label={loading ? 'Submit in progress' : undefined}
-            onClick={submit}
-          >
-            {loading ? 'Submitting…' : 'Submit'}
-          </Button>
-        </>
-      }
-    >
+  return createPortal(
+    <ScDialog open label={title} role="dialog" aria-label={title} onScHide={onClose}>
+      <ScParagraph>Profile limits use fixed USD currency.</ScParagraph>
       <div className="authorization-limit-editor-form">
         {requestError ? (
-          <InlineAlert tone="error" title={`Unable to ${mode} Authorization Limit`} message={requestError} />
+          <ScAlert role="alert" type="error" title={`Unable to ${mode} Authorization Limit`}>
+            {requestError}
+          </ScAlert>
         ) : null}
-        <TextField
+        <ScTextInput
           id="authorization-limit-profile"
           label="Profile"
+          role="textbox"
+          aria-label="Profile"
           value={profile}
-          onChange={setProfile}
+          onScInput={(event: CustomEvent<{ value: string }>) => setProfile(event.detail.value)}
           disabled={mode === 'edit'}
           required
           error={Boolean(profileError)}
-          helperText={profileError}
+          errorMessage={profileError ?? ''}
         />
-        <TextField
+        <ScTextInput
           id="authorization-limit-currency"
           label="Currency"
+          role="textbox"
+          aria-label="Currency"
           value="USD"
-          onChange={() => undefined}
           disabled
           required
         />
-        <NumberField
+        <ScTextInput
           id="authorization-limit-value"
           label="Limitation"
+          type="number"
+          role="spinbutton"
+          aria-label="Limitation"
           value={limitation}
-          onChange={setLimitation}
+          onScInput={(event: CustomEvent<{ value: string }>) => {
+            const value = event.detail.value;
+            setLimitation(value === '' ? null : Number(value));
+          }}
           required
           error={Boolean(limitationError)}
-          helperText={limitationError}
+          errorMessage={limitationError ?? ''}
         />
       </div>
-    </Dialog>
+      <div slot="footer" className="dialog-actions">
+        <ScButton type="tertiary" role="button" disabled={loading} onClick={onClose}>
+          Cancel
+        </ScButton>
+        <ScButton
+          type="primary"
+          role="button"
+          disabled={loading}
+          aria-busy={loading || undefined}
+          aria-label={loading ? 'Submit in progress' : 'Submit'}
+          onClick={submit}
+        >
+          {loading ? 'Submitting…' : 'Submit'}
+        </ScButton>
+      </div>
+    </ScDialog>,
+    document.body,
   );
 }

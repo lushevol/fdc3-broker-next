@@ -1,0 +1,25 @@
+{
+  "name": "@scdevkit/styles",
+  "description": "SC Styles",
+  "license": "MIT",
+  "author": "sc-styles",
+  "version": "0.0.3",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "module": "dist/src/index.js",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./dist/util.css",
+    "./util-cpbb.css": "./dist/util-cpbb.css"
+  },
+  "scripts": {
+    "build": "npx tailwind -i src/util.css -o dist/util.css && npm run build-cpbb",
+    "build-cpbb": "node scripts/make-cpbb.js"
+  },
+  "dependencies": {
+    "tailwindcss": "^3.4.1"
+  },
+  "devDependencies": {}
+}

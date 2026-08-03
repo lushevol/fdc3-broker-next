@@ -1,0 +1,139 @@
+body {
+  background-color: #f8f8f8;
+  overflow-x: hidden;
+}
+
+footer {
+  background-color: #fff;
+  border-top: 1px solid #e8e8e8;
+}
+
+footer .active span {
+  color: #0061c8;
+}
+
+.content {
+  height: calc(100vh - 168px);
+}
+
+.headline {
+  border-bottom: 2px solid #000;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.divider {
+  width: 1px;
+  border-right: 3px solid #e8e8e8;
+  height: 25px;
+  margin: 0px;
+  margin-top: 5px;
+}
+
+.highlight {
+  background-color: #eaf0f8;
+  color: #256bbb;
+}
+
+.highlight-border {
+  border: 2px solid #256bbb;
+  border-radius: 20px;
+}
+
+.border-bottom {
+  border-bottom: 1px solid #e8e8e8;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 5px 10px 0px;
+}
+
+.quick-links {
+  color: #000;
+}
+
+.features {
+  background-color: #fff;
+}
+
+.image-button {
+  background-color: #fff;
+}
+
+.swipable-panel {
+  background: #fff;
+  border-top-color: #e8e8e8;
+}
+
+.user-card {
+  background: linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(to bottom, #2c3a88, #0061c8) border-box;
+  border: 1px solid transparent;
+  border-top-color: #e8e8e8;
+  border-right-color: #e8e8e8;
+  border-bottom-color: #e8e8e8;
+}
+
+/*
+  FOR DARK MODE
+*/
+.sc-mode-dark {
+  background-color: #111111 !important;
+}
+
+.sc-mode-dark footer {
+  border-top: 1px solid #1f1f1f;
+  background-color: #111111 !important;
+}
+
+.sc-mode-dark .headline {
+  border-bottom: 2px solid #e5e5e5;
+}
+
+.sc-mode-dark .divider {
+  width: 1px;
+  border-right: 3px solid #252525;
+  height: 25px;
+  margin: 0px;
+  margin-top: 5px;
+}
+
+.sc-mode-dark .highlight {
+  background-color: #c5c4c4 !important;
+  color: #252525 !important;
+}
+
+.sc-mode-dark .border-bottom {
+  border-bottom: 1px solid #252525;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 5px 10px 0px;
+}
+
+.sc-mode-dark .quick-links {
+  color: #e5e5e5;
+}
+
+.sc-mode-dark .features {
+  background-color: #1f1f1f;
+}
+
+.sc-mode-dark .text-muted {
+  color: #858687;
+}
+
+.sc-mode-dark .image-button {
+  background-color: #1f1f1f;
+}
+
+.sc-mode-dark .swipable-panel {
+  background: #252525;
+  border-top-color: #2e2e2e;
+}
+
+.sc-mode-dark .user-card {
+  background: linear-gradient(#1f1f1f, #1f1f1f) padding-box,
+    linear-gradient(to bottom, #2c3a88, #0061c8) border-box;
+  border: 1px solid transparent;
+  border-top-color: #1f1f1f;
+  border-right-color: #1f1f1f;
+  border-bottom-color: #1f1f1f;
+  color: #e5e5e5;
+}

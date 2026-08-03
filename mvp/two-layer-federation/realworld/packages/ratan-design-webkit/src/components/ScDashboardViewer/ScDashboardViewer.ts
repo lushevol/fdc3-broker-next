@@ -1,12 +1,11 @@
 import { html, LitElement } from 'lit';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements';
 import { ScTableauDashboard } from './ScTableauDashboard/ScTableauDashboard.js';
 import { ScMSTRDashboard } from './MSTRDashboard/MSTRDashboard.js';
 import { property } from 'lit/decorators.js';
 import { ScDashboardViewerType } from './typings.js';
 import { spread } from '@open-wc/lit-helpers';
 
-export class ScDashboardViewer extends ScopedElementsMixin(LitElement) {
+export class ScDashboardViewer extends LitElement {
 
   @property({
     type: String,

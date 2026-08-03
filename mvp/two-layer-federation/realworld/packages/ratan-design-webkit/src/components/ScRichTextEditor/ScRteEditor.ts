@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { css, LitElement } from 'lit';
 import { html, unsafeStatic } from 'lit/static-html.js';
-import { property, customElement, state, query } from 'lit/decorators.js';
+import { property, state, query } from 'lit/decorators.js';
 import './ScRteToolbar.js';
 import './ScRteViewer.js';
 import * as allFormatting from './formats.js';
@@ -12,7 +12,6 @@ import { watch } from '../../shared/watch.js';
 import { INTERNAL_EVENTS } from '../../shared/sc-custom-events.js';
 import { TConfiguration } from './typeUtils.js';
 
-@customElement('sc-rte-editor')
 export class RTEEditor extends LitElement {
   static styles = css``;
 
@@ -124,3 +123,5 @@ export class RTEEditor extends LitElement {
     return this.scRteViewer.isExceedCharacter();
   }
 }
+
+if (!customElements.get('sc-rte-editor')) customElements.define('sc-rte-editor', RTEEditor);

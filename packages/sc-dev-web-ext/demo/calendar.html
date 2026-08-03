@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <title>sc-web-kit demo page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css" />
+  <!-- <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" /> -->
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDyslexicMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+
+  <!-- Custom style -->
+  <style>
+    body {
+      padding: 0;
+    }
+    .sc-mode-dark {
+      background-color: var(--sc-color-grey-100)
+    }
+  </style>
+</head>
+<div id="webkit-ext-container"></div>
+<body>
+
+<!-- Custom script -->
+<script type="module">
+  // Register all sc-* custom elements
+  // Register all sc-* custom elements 
+  import '../dist/elements/index.js';
+  import '@scdevkit/webkit/elements/index.js';
+  import '@scdevkit/data/elements/index.js';
+  import '../dist/demo/local/ScDataGraphQLProvider.js';
+  import { html } from '/node_modules/lit-html/lit-html.js';
+  import { render } from 'lit';
+  import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+
+  render(html`
+    <sc-calendar 
+      id="default-calendar"
+      class="default-calendar" 
+      show-header-toolbar
+    ></sc-calendar>
+  `, document.querySelector('#webkit-ext-container'))
+
+const defaultCalendar = document.querySelector('.default-calendar');
+defaultCalendar.events = [
+    { title: 'All Day Event', start: '2025-03-17' },
+    { title: 'Team Meeting', start: '2025-03-17T10:30:00', end: '2025-03-17T12:30:00' },
+    { title: 'Lunch Break', start: '2025-03-17T12:30:00' },
+    { title: 'Project Deadline', start: '2025-03-18' },
+    { title: 'Client Call', start: '2025-03-18T14:00:00', end: '2025-03-18T15:00:00' },
+    { title: 'Gym', start: '2025-03-19T07:00:00' },
+    { title: 'Doctor Appointment', start: '2025-03-19T09:00:00', end: '2025-03-19T10:00:00' },
+    { title: 'Lunch with Sarah', start: '2025-03-20T12:00:00' },
+    { title: 'Team Building Activity', start: '2025-03-21T15:00:00', end: '2025-03-21T17:00:00' },
+    { title: 'Conference', start: '2025-03-22', end: '2025-03-24' },
+    { title: 'Weekend Trip', start: '2025-03-23', end: '2025-03-25' },
+    { title: 'Board Meeting', start: '2025-03-25T09:00:00', end: '2025-03-25T11:00:00' },
+    { title: 'Yoga Class', start: '2025-03-26T18:00:00' },
+    { title: 'Dinner with Friends', start: '2025-03-27T19:00:00' },
+    { title: 'Hackathon', start: '2025-03-28', end: '2025-03-29' },
+    { title: 'Family Gathering', start: '2025-03-29T12:00:00' },
+    { title: 'Business Trip', start: '2025-03-30', end: '2025-04-01' },
+    { title: 'Workshop', start: '2025-03-31T10:00:00', end: '2025-03-31T12:00:00' },
+    { title: 'Monthly Review', start: '2025-04-01T14:00:00', end: '2025-04-01T16:00:00' }
+];
+ 
+</script>
+</body>
+</html>

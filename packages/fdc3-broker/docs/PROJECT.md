@@ -2,10 +2,10 @@
 
 > Parent: [Monorepo AGENTS.md](../../../AGENTS.md)
 
-| Field  | Value                                                               |
-| ------ | ------------------------------------------------------------------- |
-| Type   | NPM Package (FDC3 2.2 DesktopAgent Broker Implementation)           |
-| Status | Active Development (17/17 DesktopAgent methods, 88% test pass rate) |
+| Field  | Value                                                     |
+| ------ | --------------------------------------------------------- |
+| Type   | NPM Package (FDC3 2.2 DesktopAgent Broker Implementation) |
+| Status | Active Development (core DesktopAgent surface implemented) |
 
 ## Purpose
 

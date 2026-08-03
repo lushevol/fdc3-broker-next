@@ -1,0 +1,10 @@
+{
+    "defaultRoute": "home",
+    "routes": [
+        {
+            "path": "home",
+            "component": "sb-<??= name ??>-home",
+            "element": "home.js"
+        }
+    ]
+}

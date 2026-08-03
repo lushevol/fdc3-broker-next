@@ -1,0 +1,219 @@
+trigger:
+  - develop
+  - release/*
+  - feature/*
+
+parameters:
+  - name: releaseId
+    type: string
+    displayName: Release WorkItem ID
+    default: "0"
+  - name: devkitHelmVersion
+    type: string
+    default: "x.x.x+xxxxxxxx.x"
+  - name: buildpackImageName
+    type: string
+    default: "buildpack-python:xxxxxxxx.x"
+  - name: builderImageName
+    type: string
+    default: "builder-python:xxxxxxxx.x"
+  - name: buildpackVersion
+    type: string
+    default: "xxxxxxxx.x"
+  - name: packageVersion
+    type: string
+    displayName: Package Version
+    default: "x.x.x-$(Build.BuildId)"
+
+resources:
+  repositories:
+    - repository: modular-templates
+      name: dj-core/governed-templates
+      ref: "main"
+      type: git
+
+variables:
+  - group: ServicePrincipleAKS
+  - name: ITAM
+    value: "xxxxx"
+  - name: subITAM
+    value: "xxx"
+  - name: imageName
+    value: "proc-api"
+  - name: imageTag
+    value: "$(Build.SourceBranchName)_$(Build.BuildNumber)"
+  - name: imageRepo
+    value: "sc-app-platform"
+  - name: imagePrefix
+    value: "sc-devkit"
+  - name: functionName
+    value: "proc-api"
+  - name: notifyEmail
+    value: your_team@sc.com # Update this value to the team email address
+
+extends:
+  template: governed-template/build-and-deploy.yml@modular-templates
+  parameters:
+    ITAM: "${{variables.ITAM}}"
+    featureRelease: true
+    releaseId: ${{ parameters.releaseId }}
+    buildStackName: sc-devkit-python
+    buildStackParams:
+      pool: "sc-linux"
+      featureBranchScan: true
+      featureRelease: true
+      dockerBuild: true
+      packageVersion: "${{parameters.packageVersion}}"
+      imageTag: "${{variables.imageTag}}"
+      imageRepo: "${{variables.imageRepo}}"
+      imagePrefix: "${{variables.imagePrefix}}"
+      imageName: "${{variables.imageName}}"
+      buildpackImageName: "buildpack-python:${{parameters.buildpackVersion}}"
+      builderImageName: "builder-python:${{parameters.buildpackVersion}}"
+      imageListFilePath: "image.yml"
+      calculateImageDigest: true
+      postInputFileList:
+        - image.yml
+      postVariableList:
+        - name: mainContainerImageName
+          value: 'ado\/$(Build.Repository.Name)\/${{variables.imageRepo}}\/${{variables.imagePrefix}}-${{variables.imageName}}'
+      extraPackArgs: "--env BP_CPYTHON_VERSION=3.12.*"
+      archiveType: zip
+      deploymentFolderName: env
+      unitTestArgs: "-sv --tb=no test/"
+      pythonVersion: 3.12.7
+      testRequirementsFilePath: requirements.txt
+      usePyprojectToml: false
+      sonarExclusions: '**/env/**'
+    # end of CI
+    # start of CD
+    deployStackName: knative
+    deployStackParams:
+      functionName: "${{variables.functionName}}"
+      imageTag: "${{variables.imageTag}}"
+      imageRepo: "${{variables.imageRepo}}"
+      imagePrefix: "${{variables.imagePrefix}}"
+      imageName: "${{variables.imageName}}"
+      devkitHelmVersion: "${{parameters.devkitHelmVersion}}"
+    deployEnvironments:
+      - name: dev
+        environment: dev
+        displayName: UK-DEV-ARK
+        notifyUsers: |
+          your_team@sc.com
+        pool: sc-linux
+        secureFileName: "55313-NonProd-dev-kubeconfig"
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/dev/properties.yml --set functionType=private-api
+        dependsOn:
+          - CI
+      - name: sit
+        environment: dev
+        displayName: HK-SIT-JUMBO
+        notifyUsers: |
+          your_team@sc.com
+        pool: sc-linux
+        secureFileName: "55313-NonProd-jumbo-sit-kubeconfig"
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/sit/properties.yml --set functionType=private-api
+        dependsOn:
+          - CI
+      - name: qa
+        environment: qa
+        displayName: HK-UAT-JUMBO
+        notifyUsers: |
+          your_team@sc.com
+        pool: sc-linux
+        secureFileName: "55313-NonProd-jumbo-uat-kubeconfig"
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/qa/properties.yml --set functionType=private-api
+        dependsOn:
+          - sit
+      - name: release_checks
+        environment: pre-release
+        displayName: Release Checks
+        notifyUsers: |
+          your_team@sc.com
+        pool: sc-linux
+        dependsOn:
+          - qa
+        hasGenie: false
+        qaStageName: qa
+      - name: release
+        environment: release
+        displayName: Release
+        dependsOn:
+          - release_checks
+        notifyUsers: |
+          your_team@sc.com
+        pool: sc-linux
+        hasGenie: false
+      - name: stg_1
+        environment: staging
+        displayName: HK-STG-JUMBO
+        notifyUsers: |
+          your_team@sc.com
+        pool: sc-linux
+        secureFileName: "55313-Prod-jumbo-stg-kubeconfig"
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/stg-jumbo/properties.yml --set functionType=private-api
+        dependsOn:
+          - release
+      - name: stg_2
+        environment: staging
+        displayName: HK-STG-MEGA
+        notifyUsers: |
+          your_team@sc.com
+        pool: sc-linux
+        secureFileName: "55313-Prod-mega-stg-kubeconfig"
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/stg-mega/properties.yml --set functionType=private-api
+        dependsOn:
+          - release
+      - name: stg_3
+        environment: staging
+        displayName: UK-STG-ARK
+        notifyUsers: |
+          your_team@sc.com
+        pool: sc-linux
+        secureFileName: "55313-Prod-ark-stg-kubeconfig"
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/stg-ark/properties.yml --set functionType=private-api
+        dependsOn:
+          - release
+      - name: prod_1
+        environment: production
+        displayName: HK-PRD-JUMBO
+        notifyUsers: |
+          your_team@sc.com
+        pool: sc-linux
+        secureFileName: "55313-Prod-jumbo-kubeconfig"
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/prod-jumbo/properties.yml --set functionType=private-api
+        dependsOn:
+          - stg_1
+          - stg_2
+      - name: prod_2
+        environment: production
+        displayName: HK-PRD-MEGA
+        notifyUsers: |
+          your_team@sc.com
+        pool: sc-linux
+        secureFileName: "55313-Prod-mega-kubeconfig"
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/prod-mega/properties.yml --set functionType=private-api
+        dependsOn:
+          - stg_1
+          - stg_2
+      - name: prod_3
+        environment: production
+        displayName: UK-PRD-ARK
+        notifyUsers: |
+          your_team@sc.com
+        pool: sc-linux
+        secureFileName: "55313-Prod-ark-kubeconfig"
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/prod-ark/properties.yml --set functionType=private-api
+        dependsOn:
+          - stg_3
+      - name: prod_4
+        environment: production
+        displayName: UK-PRD-WATFORD
+        notifyUsers: |
+          your_team@sc.com
+        pool: sc-linux
+        secureFileName: "55313-Prod-watford-kubeconfig"
+        extraHelmArgs: -f $(Build.ArtifactStagingDirectory)/prod-watford/properties.yml --set functionType=private-api
+        dependsOn:
+          - stg_3

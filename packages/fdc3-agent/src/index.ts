@@ -310,7 +310,7 @@ export type { ExposedModule, ModuleLoaderApi, ModuleReference } from 'ratan-modu
  *
  * @see {@link ./agent.ts} For detailed documentation
  */
-export { clearBroker, getAgentApi, setBroker, setCurrentTile, getCurrentTile } from './agent';
+export { clearBroker, getAgentApi, setBroker } from './agent';
 
 // ============================================================================
 // React Hooks

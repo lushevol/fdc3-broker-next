@@ -1,7 +1,7 @@
 /* eslint-disable indent */
 import { html, css, nothing } from 'lit';
 import { html as sHtml, unsafeStatic } from 'lit/static-html.js';
-import { property, query, customElement, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { editorCommand } from './core/utils.js';
 import { classMap } from 'lit/directives/class-map.js';
 import '../../../elements/sc-table.js';
@@ -20,7 +20,6 @@ import { RteViewMixin } from './mixins/rte-view-mixin.js';
 import { INTERNAL_EVENTS } from '../../shared/sc-custom-events.js';
 import { sanitizeHTML, trustHTML } from '../../shared/trusted-types-policy.js';
 
-@customElement('sc-rte-viewer')
 export class RTEViewer extends ObserverMxin(
   RteViewMixin(ToolMixin(PopupMixin(RangeMixin(ScElement))))
 ) {
@@ -489,3 +488,5 @@ export class RTEViewer extends ObserverMxin(
     document.removeEventListener('click', this.onClickDoc);
   }
 }
+
+if (!customElements.get('sc-rte-viewer')) customElements.define('sc-rte-viewer', RTEViewer);

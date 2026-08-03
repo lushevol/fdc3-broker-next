@@ -1,0 +1,23 @@
+                              ${AnsiColor.BRIGHT_BLUE}.:-==-.${AnsiColor.DEFAULT}
+                           ${AnsiColor.BRIGHT_BLUE}.:========-${AnsiColor.DEFAULT}
+                         ${AnsiColor.BRIGHT_BLUE}:============${AnsiColor.DEFAULT}
+                      ${AnsiColor.BRIGHT_BLUE}:-=============.${AnsiColor.DEFAULT}
+                   ${AnsiColor.BRIGHT_BLUE}:==============:.${AnsiColor.DEFAULT}    ${AnsiColor.BRIGHT_GREEN}...${AnsiColor.DEFAULT}
+                  ${AnsiColor.BRIGHT_BLUE}============-:${AnsiColor.DEFAULT}    ${AnsiColor.BRIGHT_GREEN}.:======:${AnsiColor.DEFAULT}
+                 ${AnsiColor.BRIGHT_BLUE}:=========-:${AnsiColor.DEFAULT}     ${AnsiColor.BRIGHT_GREEN}:==========.${AnsiColor.DEFAULT}
+                 ${AnsiColor.BRIGHT_BLUE}:=========-.${AnsiColor.DEFAULT}      ${AnsiColor.BRIGHT_GREEN}-=========.${AnsiColor.DEFAULT}
+                  ${AnsiColor.BRIGHT_BLUE}============-.${AnsiColor.DEFAULT}     ${AnsiColor.BRIGHT_GREEN}.-====-.${AnsiColor.DEFAULT}
+                   ${AnsiColor.BRIGHT_BLUE}-=============-:${AnsiColor.DEFAULT}
+                     ${AnsiColor.BRIGHT_BLUE}.-==============:${AnsiColor.DEFAULT}
+                  ${AnsiColor.BRIGHT_GREEN}:${AnsiColor.DEFAULT}     ${AnsiColor.BRIGHT_BLUE}.-==============:.${AnsiColor.DEFAULT}
+                 ${AnsiColor.BRIGHT_GREEN}===-:${AnsiColor.DEFAULT}     ${AnsiColor.BRIGHT_BLUE}:-==============:${AnsiColor.DEFAULT}
+                ${AnsiColor.BRIGHT_GREEN}-=======:${AnsiColor.DEFAULT}     ${AnsiColor.BRIGHT_BLUE}.-=============.${AnsiColor.DEFAULT}
+                ${AnsiColor.BRIGHT_GREEN}==========-:.${AnsiColor.DEFAULT}    ${AnsiColor.BRIGHT_BLUE}.:===========${AnsiColor.DEFAULT}
+                ${AnsiColor.BRIGHT_GREEN}.=============-.${AnsiColor.DEFAULT}    ${AnsiColor.BRIGHT_BLUE}.:========${AnsiColor.DEFAULT}
+                  ${AnsiColor.BRIGHT_GREEN}-==============-.${AnsiColor.DEFAULT}    ${AnsiColor.BRIGHT_BLUE}.:====:${AnsiColor.DEFAULT}
+                    ${AnsiColor.BRIGHT_GREEN}.-==============:${AnsiColor.DEFAULT}     ${AnsiColor.BRIGHT_BLUE}.:-${AnsiColor.DEFAULT}
+                       ${AnsiColor.BRIGHT_GREEN}.-==============:${AnsiColor.DEFAULT}
+                   ${AnsiColor.BRIGHT_BLUE}...${AnsiColor.DEFAULT}    ${AnsiColor.BRIGHT_GREEN}.-==============-.${AnsiColor.DEFAULT}
+                ${AnsiColor.BRIGHT_BLUE}.-======:${AnsiColor.DEFAULT}    ${AnsiColor.BRIGHT_GREEN}.:==============:${AnsiColor.DEFAULT}
+                ${AnsiColor.BRIGHT_BLUE}==========-.${AnsiColor.DEFAULT}     ${AnsiColor.BRIGHT_GREEN}:============${AnsiColor.DEFAULT}
+                ${AnsiColor.BRIGHT_BLUE}-========-.${AnsiColor.DEFAULT}        ${AnsiColor.BRIGHT_GREEN}.-========-${AnsiColor.DEFAULT}

@@ -1,9 +1,8 @@
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import ScElement from '../../shared/sc-element.js';
 import ScTheme from '../../styles/ScTheme.js';
 
-@customElement('sc-slider-stop')
 export class ScSliderStop extends ScElement {
   static styles = ScTheme.getStyles().concat([css`
     :host {
@@ -66,3 +65,5 @@ export class ScSliderStop extends ScElement {
     </div>`;
   }
 }
+
+if (!customElements.get('sc-slider-stop')) customElements.define('sc-slider-stop', ScSliderStop);

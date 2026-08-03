@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+  <title>sc-web-kit demo page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+  <!-- Custom style -->
+  <style>
+    body {
+      padding: 24px;
+    }
+
+    .sc-mode-dark {
+      background-color: var(--sc-color-blue-900)
+    }
+  </style>
+
+  <!-- Register all sc-* custom elements -->
+  <script type="module">
+    import '../dist/elements/index.js'
+  </script>
+
+</head>
+
+<body>
+
+  <h1 class="text-xl mb-4 flex-1">Rich Text Editor</h1>
+
+  <div class="w-full min-h-100vh">
+    <sc-demo-data-provider>
+      <sc-rich-text-editor
+        shortcut>
+      </sc-rich-text-editor>
+    </sc-demo-data-provider>
+  </div>
+
+  <!-- Custom script -->
+  <script type="text/javascript">
+    var rte = document.querySelector('sc-rich-text-editor');
+    rte.value = '<h1>Header title</h1>'+
+      '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse gravida nulla ligula, vitae volutpat ligula ornare non. Nulla facilisi. Praesent dictum at nibh eu fringilla. Donec dictum ac nulla vel scelerisque. Aenean malesuada dolor quis quam molestie, eu eleifend eros ornare. Sed at dapibus urna, non congue metus. Vivamus porttitor velit sed quam pellentesque, sit amet consequat enim imperdiet. Aenean vestibulum ex sed tincidunt varius. Vivamus at eros et velit cursus eleifend. Suspendisse potenti. Phasellus eu nisl accumsan, condimentum dolor in, finibus nunc.</p>'+
+      '<ul><li>bullet 1</li><li>bullet 2</li><li>bullet 3</li><li>bullet 4</li></ul>'+
+      '<ol><li>list 1</li><li>list 2</li><li>list 3</li><li>list 4</li></ol>'+
+      '<p><b>bold</b> <u>underlined</u> <i>italic</i> <s>strikethrough</s> <sub>subscript</sub> <sup>superscript</sup></p>'+
+      '<blockquote>Ut iaculis diam mauris, ut faucibus mi interdum eu. Aenean in porta orci. Integer eget dolor risus. Nulla pellentesque ultricies tellus, sed dictum magna iaculis sed. Cras elementum rutrum eros et convallis. Vivamus sit amet luctus odio.</blockquote>'+
+      '<p></p><table style="border-collapse: collapse; width: 79.3965%;" border="1"><colgroup><col style="width: 33.3333%;"><col style="width: 33.3333%;"><col style="width: 33.3333%;"></colgroup><tbody><tr><td>header A</td><td>Header B</td><td>Header C</td></tr><tr><td>row 1a</td><td>row 1b</td><td>row 1c</td></tr><tr><td>row 2a</td><td>row 2b</td><td>row 2c</td></tr></tbody></table>';
+    rte.revisions = [
+      {
+        id: '1',
+        dateCreated: '2025-05-01T06:02:00Z',
+        authorId: '1574871',
+        content:
+          '<h1>Header Title</h1>'+
+          '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse gravida nulla ligula, vitae volutpat ligula ornare non. Nulla facilisi. Praesent dictum at nibh eu fringilla. Donec dictum ac nulla vel scelerisque. Aenean malesuada dolor quis quam molestie, eu eleifend eros ornare. Sed at dapibus urna, non congue metus. Vivamus porttitor velit sed quam pellentesque, sit amet consequat enim imperdiet. Aenean vestibulum ex sed tincidunt varius. Vivamus at eros et velit cursus eleifend. Suspendisse potenti. Phasellus eu nisl accumsan, condimentum dolor in, finibus nunc.</p>'+
+          '<ul><li>bullet 1</li><li>bullet 2</li><li>bullet 3</li></ul>'+
+          '<ol><li>list 1</li><li>list 2</li><li>list 3</li></ol>'+
+          '<p><b>bold</b> <u>underlined</u> <i>italic</i> <s>strikethrough</s> <sub>subscript</sub> <sup>superscript</sup></p>'+
+          '<p style="text-align:right">Aligned right</p>'+
+          '<p style="text-align:center">Aligned center</p>'+
+          '<blockquote>Ut iaculis diam mauris, ut faucibus mi interdum eu. Aenean in porta orci. Integer eget dolor risus. Nulla pellentesque ultricies tellus, sed dictum magna iaculis sed. Cras elementum rutrum eros et convallis. Vivamus sit amet luctus odio. Maecenas eu magna nulla. Vestibulum vitae quam ut orci porta tempus in ut orci.</blockquote>'+
+          '<p></p><table style="border-collapse: collapse; width: 79.3965%;" border="1"><colgroup><col style="width: 33.3333%;"><col style="width: 33.3333%;"><col style="width: 33.3333%;"></colgroup><tbody><tr><td>header A</td><td>Header B</td><td>Header C</td></tr><tr><td>row 1a</td><td>row 1b</td><td>row 1c</td></tr><tr><td>row 2a</td><td>row 2b</td><td>row 2c</td></tr><tr><td>row 3a</td><td>row 3b</td><td>row 3c</td></tr></tbody></table>',
+      },
+      {
+        id: '2',
+        dateCreated: '2025-05-02T08:34:00Z',
+        authorId: '2027226',
+        content:
+          '<h1>Header Title</h1>'+
+          '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse gravida nulla ligula, vitae volutpat ligula ornare non. Nulla facilisi. Praesent dictum at nibh eu fringilla. Donec dictum ac nulla vel scelerisque. Aenean malesuada dolor quis quam molestie, eu eleifend eros ornare. Sed at dapibus urna, non congue metus. Vivamus porttitor velit sed quam pellentesque, sit amet consequat enim imperdiet. Aenean vestibulum ex sed tincidunt varius. Vivamus at eros et velit cursus eleifend. Suspendisse potenti. Phasellus eu nisl accumsan, condimentum dolor in, finibus nunc.</p>'+
+          '<ul><li>bullet 1</li><li>bullet 2</li><li>bullet 3</li></ul>'+
+          '<ol><li>list 1</li><li>list 2</li><li>list 3</li></ol>'+
+          '<p><b>bold</b> <u>underlined</u> <i>italic</i> <s>strikethrough</s> <sub>subscript</sub> <sup>superscript</sup></p>'+
+          '<p style="padding-left:80px">Indented</p>'+
+          '<blockquote>Ut iaculis diam mauris, ut faucibus mi interdum eu. Aenean in porta orci. Integer eget dolor risus. Nulla pellentesque ultricies tellus, sed dictum magna iaculis sed. Cras elementum rutrum eros et convallis. Vivamus sit amet luctus odio. Maecenas eu magna nulla. Vestibulum vitae quam ut orci porta tempus in ut orci.</blockquote>'+
+          '<p></p><table style="border-collapse: collapse; width: 79.3965%;" border="1"><colgroup><col style="width: 33.3333%;"><col style="width: 33.3333%;"><col style="width: 33.3333%;"></colgroup><tbody><tr><td>HeadA</td><td>HeadB</td><td>HeadC</td></tr><tr><td>row 1a</td><td>row 1b</td><td>row 1c</td></tr><tr><td>row 2a</td><td>row 2b</td><td>row 2c</td></tr><tr><td>row 2.5a</td><td>row 2.5b</td><td>row 2.5c</td></tr><tr><td>row 3a</td><td>row 3b</td><td>row 3c</td></tr></tbody></table>',
+      },
+      {
+        id: '3',
+        dateCreated: '2025-05-01T06:02:00Z',
+        authorId: '1574871',
+        content:
+          '<h2>Header2 title</h2>'+
+          '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse gravida nulla ligula, vitae volutpat ligula ornare non.</p>'+
+          '<p>Nulla facilisi. Praesent dictum at nibh eu fringilla. Donec dictum ac nulla vel scelerisque. Aenean malesuada dolor quis quam molestie, eu eleifend eros ornare. Sed at dapibus urna, non congue metus. Vivamus porttitor velit sed quam pellentesque, sit amet consequat enim imperdiet. Aenean vestibulum ex sed tincidunt varius. Vivamus at eros et velit cursus eleifend. Suspendisse potenti.</p>'+
+          '<ul><li>bullet 1</li><li>bullet 2</li><li>bullet 3</li></ul>'+
+          '<ol><li>list 1</li><li>list 2</li><li>list 3</li></ol>'+
+          '<p><b>bold</b> <u>underlined</u> <i>italic</i> <s>strikethrough</s> <sub>subscript</sub> <sup>superscript</sup></p>'+
+          '<p style="padding-left:40px">Indented</p>'+
+          '<blockquote>Ut iaculis diam mauris, ut faucibus mi interdum eu. Aenean in porta orci. Integer eget dolor risus. Nulla pellentesque ultricies tellus, sed dictum magna iaculis sed. Cras elementum rutrum eros et convallis. Vivamus sit amet luctus odio. Maecenas eu magna nulla. Vestibulum vitae quam ut orci porta tempus in ut orci.</blockquote>'+
+          '<p></p><table style="border-collapse: collapse; width: 79.3965%;" border="1"><colgroup><col style="width: 33.3333%;"><col style="width: 33.3333%;"><col style="width: 33.3333%;"></colgroup><tbody><tr><td>HeadA</td><td>HeadB</td><td>HeadC</td></tr><tr><td>row 1a</td><td>row 1b</td><td>row 1c</td></tr><tr><td>row 2a</td><td>row 2b</td><td>row 2c</td></tr><tr><td>row 3a</td><td>row 3b</td><td>row 3c</td></tr></tbody></table>',
+      },
+      {
+        id: '4',
+        dateCreated: '2025-05-02T08:34:00Z',
+        authorId: '2027226',
+        content:
+          '<h2>Header title</h2>'+
+          '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse gravida nulla ligula, vitae volutpat ligula ornare non.</p>'+
+          '<p>Nulla facilisi. Praesent dictum at nibh eu fringilla. Donec dictum ac nulla vel scelerisque. Aenean malesuada dolor quis quam molestie, eu eleifend eros ornare. Sed at dapibus urna, non congue metus. Vivamus porttitor velit sed quam pellentesque, sit amet consequat enim imperdiet. Aenean vestibulum ex sed tincidunt varius. Vivamus at eros et velit cursus eleifend. Suspendisse potenti.</p>'+
+          '<ul><li>bullet A</li><li>bullet B</li><li>bullet C</li><li>bullet D</li></ul>'+
+          '<ol><li>List 1</li><li>List 2</li><li>List 3</li></ol>'+
+          '<p><b>bold</b> <u>underlined</u> <i>italic</i> <s>strikethrough</s> <sub>subscript</sub> <sup>superscript</sup></p>'+
+          '<p></p><table style="border-collapse: collapse; width: 79.3965%;" border="1"><colgroup><col style="width: 33.3333%;"><col style="width: 33.3333%;"><col style="width: 33.3333%;"></colgroup><tbody><tr><td>header A</td><td>Header B</td><td>Header C</td></tr><tr><td>row 1a</td><td>row 1b</td><td>row 1c</td></tr><tr><td>row 2a</td><td>row 2b</td><td>row 2c</td></tr></tbody></table>',
+      },
+    ];
+  </script>
+
+</body>
+
+</html>

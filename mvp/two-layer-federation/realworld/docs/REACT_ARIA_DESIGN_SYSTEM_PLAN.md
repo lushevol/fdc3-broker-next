@@ -1,8 +1,14 @@
 # React Aria Ratan Design System and Verification Tiles Plan
 
+> Historical plan, superseded on 3 August 2026 for active Portal Host UI by
+> `@fm/ratan-design-webkit`. Keep this document as design and coverage history;
+> use [`CURRENT_STATE.md`](./CURRENT_STATE.md),
+> [`ARCHITECTURE.md`](./ARCHITECTURE.md), and the WebKit package README for
+> current implementation rules.
+
 ## 1. Status, authority, and outcome
 
-- **Status:** Implementation in progress; foundation, login, shell core, and profile verification remote complete
+- **Status:** Superseded implementation plan; retained as historical evidence
 - **Target track:** `mvp/two-layer-federation/realworld/`
 - **Design-system package:** `packages/ratan-design` (`@fm/ratan-design`)
 - **Source inventory:** `apps/base`
@@ -81,87 +87,87 @@ The implementation must create a checked-in ledger with one row per source compo
 
 ### 5.1 Foundations and actions
 
-| Legacy area | Target |
-| --- | --- |
-| `Button` | `Button` with primary, secondary, danger, ghost, link, pending, disabled, and icon slots |
-| `LoadingButton`, `SearchButton`, `ResetButton` | Button variants and pending-state composition |
-| `ToggleButton`, theme `Switch` | `ToggleButton`, `ToggleButtonGroup`, `Switch` |
-| `BuilderButton` | Button + Popover + Tabs composition |
-| `SurveyButton`, `Tile` action | IconButton/Button variants with Tooltip |
-| MUI icons throughout base | One approved icon adapter and accessible `Icon`/`IconButton`; default evaluation target is Lucide |
-| `ScWebkit` | Scoped base styles/scrollbar tokens; no React component unless behavior requires one |
+| Legacy area                                    | Target                                                                                            |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `Button`                                       | `Button` with primary, secondary, danger, ghost, link, pending, disabled, and icon slots          |
+| `LoadingButton`, `SearchButton`, `ResetButton` | Button variants and pending-state composition                                                     |
+| `ToggleButton`, theme `Switch`                 | `ToggleButton`, `ToggleButtonGroup`, `Switch`                                                     |
+| `BuilderButton`                                | Button + Popover + Tabs composition                                                               |
+| `SurveyButton`, `Tile` action                  | IconButton/Button variants with Tooltip                                                           |
+| MUI icons throughout base                      | One approved icon adapter and accessible `Icon`/`IconButton`; default evaluation target is Lucide |
+| `ScWebkit`                                     | Scoped base styles/scrollbar tokens; no React component unless behavior requires one              |
 
 ### 5.2 Forms and selection
 
-| Legacy area | Target |
-| --- | --- |
-| `Input` | `TextField`, `PasswordField`, textarea variant |
-| `Label` and `Select` | `Select`, `ListBox`, `ListBoxItem`, `FieldLabel`, `FieldDescription`, `FieldError` |
-| MUI Autocomplete use | `ComboBox` and reusable tag/multi-select composition |
-| `SearchInput` | `SearchField` with clear action |
-| `SwitchTime` | FieldGroup + Switch composition |
-| Date/time localization provider | Provider-level locale contract and `@internationalized/date` values |
-| `DatePicker` | `DateField`, `Calendar`, `DatePicker` |
-| `TimePicker` | `TimeField` |
-| `DateTimePicker` | composed DatePicker + TimeField with one typed value contract |
-| `DateRangePicker` | `DateRangePicker` + RangeCalendar |
+| Legacy area                     | Target                                                                             |
+| ------------------------------- | ---------------------------------------------------------------------------------- |
+| `Input`                         | `TextField`, `PasswordField`, textarea variant                                     |
+| `Label` and `Select`            | `Select`, `ListBox`, `ListBoxItem`, `FieldLabel`, `FieldDescription`, `FieldError` |
+| MUI Autocomplete use            | `ComboBox` and reusable tag/multi-select composition                               |
+| `SearchInput`                   | `SearchField` with clear action                                                    |
+| `SwitchTime`                    | FieldGroup + Switch composition                                                    |
+| Date/time localization provider | Provider-level locale contract and `@internationalized/date` values                |
+| `DatePicker`                    | `DateField`, `Calendar`, `DatePicker`                                              |
+| `TimePicker`                    | `TimeField`                                                                        |
+| `DateTimePicker`                | composed DatePicker + TimeField with one typed value contract                      |
+| `DateRangePicker`               | `DateRangePicker` + RangeCalendar                                                  |
 
 ### 5.3 Layout, navigation, and overlays
 
-| Legacy area | Target |
-| --- | --- |
-| `AppBar` | host-owned ShellHeader built from layout and action primitives |
-| `Drawer`, `NewTile` | Dialog/Modal + launcher navigation pattern |
-| Drawer `Menu`/`MenuItem` | Menu, MenuItem, SubmenuTrigger, Section, Header, Separator |
-| `SortableTab`, `TabItem`, `TabPanel` | Tabs, TabList, Tab, TabPanel plus host-owned sortable workspace composition |
-| Tab rename/overflow menu | TextField + Menu + Dialog confirmation patterns |
+| Legacy area                                | Target                                                                                                               |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `AppBar`                                   | host-owned ShellHeader built from layout and action primitives                                                       |
+| `Drawer`, `NewTile`                        | Dialog/Modal + launcher navigation pattern                                                                           |
+| Drawer `Menu`/`MenuItem`                   | Menu, MenuItem, SubmenuTrigger, Section, Header, Separator                                                           |
+| `SortableTab`, `TabItem`, `TabPanel`       | Tabs, TabList, Tab, TabPanel plus host-owned sortable workspace composition                                          |
+| Tab rename/overflow menu                   | TextField + Menu + Dialog confirmation patterns                                                                      |
 | `Dialog`, draggable title, timeout dialogs | Modal, Dialog, DialogHeader/Body/Footer; optional movable/resizable behavior remains a separately tested composition |
-| Avatar menu | Avatar + Menu + Tooltip |
-| `Profile` | Card, Disclosure/Accordion, TagGroup, Avatar, Divider, definition-list patterns |
+| Avatar menu                                | Avatar + Menu + Tooltip                                                                                              |
+| `Profile`                                  | Card, Disclosure/Accordion, TagGroup, Avatar, Divider, definition-list patterns                                      |
 
 ### 5.4 Feedback and status
 
-| Legacy area | Target |
-| --- | --- |
-| `Loader`, `PageLoader` | ProgressBar, ProgressCircle, Skeleton, page-loading pattern |
-| `Splash` | host-owned blocking loading surface |
-| `Empty` | EmptyState pattern |
-| `FallbackError`, `ErrorBoundry` | ErrorState plus owner-specific ErrorBoundary |
-| `Snackbar` | ToastRegion and Toast; isolate React Aria’s unstable toast API behind a stable Ratan API |
-| `SearchCondition` | InlineAlert/status summary |
-| `SearchConditionContainer` | Disclosure + status summary composition |
-| `Timeout` | ConfirmationDialog/session-expiry composition |
-| `Version` | InlineAlert + metadata pattern |
-| Admin `Status` | StatusBadge + Tooltip |
-| `Survey` | ConfirmationDialog/feedback composition |
+| Legacy area                     | Target                                                                                   |
+| ------------------------------- | ---------------------------------------------------------------------------------------- |
+| `Loader`, `PageLoader`          | ProgressBar, ProgressCircle, Skeleton, page-loading pattern                              |
+| `Splash`                        | host-owned blocking loading surface                                                      |
+| `Empty`                         | EmptyState pattern                                                                       |
+| `FallbackError`, `ErrorBoundry` | ErrorState plus owner-specific ErrorBoundary                                             |
+| `Snackbar`                      | ToastRegion and Toast; isolate React Aria’s unstable toast API behind a stable Ratan API |
+| `SearchCondition`               | InlineAlert/status summary                                                               |
+| `SearchConditionContainer`      | Disclosure + status summary composition                                                  |
+| `Timeout`                       | ConfirmationDialog/session-expiry composition                                            |
+| `Version`                       | InlineAlert + metadata pattern                                                           |
+| Admin `Status`                  | StatusBadge + Tooltip                                                                    |
+| `Survey`                        | ConfirmationDialog/feedback composition                                                  |
 
 ### 5.5 Data display and detail
 
-| Legacy area | Target |
-| --- | --- |
-| `Table` | semantic Ratan Table for ordinary datasets |
+| Legacy area            | Target                                                            |
+| ---------------------- | ----------------------------------------------------------------- |
+| `Table`                | semantic Ratan Table for ordinary datasets                        |
 | `TableDetail`, `Field` | DescriptionList, editable field rows, Select/ComboBox composition |
-| `SearchGrid` | responsive layout primitive |
-| Admin common `Main` | page/table toolbar composition |
-| Admin actions | Menu/IconButton action-cell pattern |
-| `CopyText` | CopyButton with success announcement |
-| `DateTime` display | localized `DateTimeText` formatter |
-| MUI X DataGrid uses | lower-priority `@fm/ratan-data-grid` TanStack adapter |
+| `SearchGrid`           | responsive layout primitive                                       |
+| Admin common `Main`    | page/table toolbar composition                                    |
+| Admin actions          | Menu/IconButton action-cell pattern                               |
+| `CopyText`             | CopyButton with success announcement                              |
+| `DateTime` display     | localized `DateTimeText` formatter                                |
+| MUI X DataGrid uses    | lower-priority `@fm/ratan-data-grid` TanStack adapter             |
 
 ### 5.6 Page and feature compositions
 
-| Legacy area | Target owner and verification |
-| --- | --- |
-| Login page and login tab panel | Portal Host; first implementation wave |
-| Home shell, launcher, workspace, tabs | Portal Host; second implementation wave |
-| SingleView | Portal Host routing/workspace composition |
-| Profile | Identity/Profile verification Tile; third implementation wave |
-| Category admin | Admin/component verification Tile |
-| Tile admin | Admin/component verification Tile |
-| ImportMap admin | Admin/component verification Tile |
-| FDC3 declaration tabs, editors, intent/context master lists, dialogs | FDC3 verification Tile; fourth implementation wave |
-| Routing and Snackbar orchestration | Portal Host |
-| ChatbotSidebarV2 and descendants | Explicitly excluded |
+| Legacy area                                                          | Target owner and verification                                 |
+| -------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Login page and login tab panel                                       | Portal Host; first implementation wave                        |
+| Home shell, launcher, workspace, tabs                                | Portal Host; second implementation wave                       |
+| SingleView                                                           | Portal Host routing/workspace composition                     |
+| Profile                                                              | Identity/Profile verification Tile; third implementation wave |
+| Category admin                                                       | Admin/component verification Tile                             |
+| Tile admin                                                           | Admin/component verification Tile                             |
+| ImportMap admin                                                      | Admin/component verification Tile                             |
+| FDC3 declaration tabs, editors, intent/context master lists, dialogs | FDC3 verification Tile; fourth implementation wave            |
+| Routing and Snackbar orchestration                                   | Portal Host                                                   |
+| ChatbotSidebarV2 and descendants                                     | Explicitly excluded                                           |
 
 ## 6. Target package structure
 
@@ -331,12 +337,12 @@ Every wave follows the repository protocol: specification, failing tests, minimu
 
 ## 8. Independent verification applications
 
-| Application | Default port | Primary responsibility |
-| --- | ---: | --- |
-| `apps/mfe-identity-profile` | 9202 | Login-related field behaviors, profile, avatar, disclosure, cards, tags |
-| `apps/mfe-component-lab` | 9203 | Remaining controls, dates, overlays, feedback, search, Category/Tile/ImportMap admin compositions |
-| `apps/mfe-fdc3-admin` | 9204 | FDC3 declaration editor, intent/context lists, master-detail, validation, dialogs |
-| `apps/mfe-data-lab` | 9205 | Semantic table and lower-priority TanStack advanced-grid behavior |
+| Application                 | Default port | Primary responsibility                                                                            |
+| --------------------------- | -----------: | ------------------------------------------------------------------------------------------------- |
+| `apps/mfe-identity-profile` |         9202 | Login-related field behaviors, profile, avatar, disclosure, cards, tags                           |
+| `apps/mfe-component-lab`    |         9203 | Remaining controls, dates, overlays, feedback, search, Category/Tile/ImportMap admin compositions |
+| `apps/mfe-fdc3-admin`       |         9204 | FDC3 declaration editor, intent/context lists, master-detail, validation, dialogs                 |
+| `apps/mfe-data-lab`         |         9205 | Semantic table and lower-priority TanStack advanced-grid behavior                                 |
 
 Each application must:
 

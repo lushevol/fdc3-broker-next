@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <title>sc-web-kit demo page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css" />
+  <!-- <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" /> -->
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDyslexicMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkModeExt.css" />
+
+  <!-- Custom style -->
+  <style>
+    body {
+      padding: 24px;
+    }
+    .sc-mode-dark {
+      background-color: var(--sc-color-grey-100)
+    }
+  </style>
+</head>
+<div id="webkit-ext-container"></div>
+
+  <!-- Custom script -->
+  <script type="text/javascript">
+    var modes = ['light', 'dark', 'dyslexic']
+    var activeMode = modes[0]
+    function changeMode(event) {
+      const mode = event.detail.value;
+        var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child');
+        componentCells.forEach((componentCell) => {
+            modes.forEach((mode) => {
+                componentCell.classList.remove(`sc-mode-${mode}`)
+            })
+            componentCell.classList.add(`sc-mode-${mode}`)
+            if (componentCell.classList.contains('inverse')) {
+                if (mode === 'dark') {
+                    componentCell.style.backgroundColor = 'var(--sc-color-white)'
+                } else {
+                    componentCell.style.backgroundColor = 'var(--sc-color-grey-100)'
+                }
+            }
+        })
+    }
+    changeMode(activeMode);
+    </script>
+
+    <script type="module">
+      // Register all sc-* custom elements 
+      import '../dist/elements/index.js';
+      import '@scdevkit/webkit/elements/index.js';
+      import '@scdevkit/data/elements/index.js';
+      import '../dist/demo/local/ScDataGraphQLProvider.js';
+      import { html } from '/node_modules/lit-html/lit-html.js';
+      import { render } from 'lit';
+      import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+
+      window.html = html;
+
+      const tagsGroup = [
+        {
+          "type": "red",
+          "iconName": "alert-circle--line",
+          "content": "High risk"
+        },
+        {
+          "type": "amber",
+          "iconName": "alert-triangle--line",
+          "content": "Pending approval"
+        },
+        {
+          "type": "primary",
+          "iconName": "info-circle--line",
+          "content": "Information"
+        }
+      ];
+
+      render(html`
+      <sc-demo-graphql-provider>
+        <sc-icon-provider .iconLibraries=${[CountryIconLibrary, MainIconLibrary]}>
+          <h1 class="text-xl mb-4">Components</h1>
+          <div class="table w-full shadow-lg max-h-96 components-body">
+              <div class="table-header-group font-bold sticky top-0 bg-white z-10">
+                  <div class="table-row">
+                      <div class="table-cell border px-4 py-4">Component</div>
+                      <div class="table-cell border px-4 py-4">Example</div>
+                      <div class="table-cell border px-4">
+                          <div class="py-4" style="max-width: 300px;">
+                              <sc-dropdown-input label="Mode" value="light" @sc-select=${changeMode}>
+                                  <sc-dropdown-option value="light">Light</sc-dropdown-option>
+                                  <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+                                  <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+                              </sc-dropdown-input>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+             
+
+             <div class="table-row-group h-96 overflow-y-auto">
+              <div class="table-row">
+                <div class="table-cell border px-4 py-4">Link Card Image</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-link-card 
+                      style="--sc-link-card-image-width:18.75rem;--sc-link-card-image-height:12.25rem;"
+                      title='Getting started' 
+                      body='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris' 
+                      link-text="Link address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if needed"
+                      href="https://www.baidu.com"
+                      target="_blank"
+                      src='images/link-card-bg.png'
+                      tags-group=${JSON.stringify(tagsGroup)}
+                    >
+                    </sc-link-card>
+                </div>
+              </div>
+              <div class="table-row">
+                <div class="table-cell border px-4 py-4">Link Card Image Vertical</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-link-card 
+                      style="--sc-link-card-image-width:100%;--sc-link-card-image-height:12.25rem;"
+                      title='Getting started' 
+                      body='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris' 
+                      link-text="Link address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if needed"
+                      href="https://www.baidu.com"
+                      target="_blank"
+                      src='images/link-card-bg.png'
+                      tags-group=${JSON.stringify(tagsGroup)}
+                      direction="vertical"
+                    >
+                    </sc-link-card>
+                </div>
+              </div>
+              <div class="table-row">
+                <div class="table-cell border px-4 py-4">Link Card Icon</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-link-card 
+                      icon="file-text--line"
+                      link-icon-name="newwindow"
+                      title='Getting started' 
+                      body='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris' 
+                      link-text="Link address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if needed"
+                      href="https://www.baidu.com"
+                      target="_blank"
+                      tags-group=${JSON.stringify(tagsGroup)}
+                    >
+                    </sc-link-card>
+                </div>
+              </div>
+              <div class="table-row">
+                <div class="table-cell border px-4 py-4">Link Card Without supporting visual</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-link-card 
+                      title='Getting started' 
+                      body='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris' 
+                      link-text="Link address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if neededLink address can go as far as 2 lines if needed Link address can go as far as 2 lines if needed"
+                      href="https://www.baidu.com"
+                      target="_blank"
+                      tags-group=${JSON.stringify(tagsGroup)}
+                    >
+                    </sc-link-card>
+                </div>
+              </div>
+              <div class="table-row">
+                <div class="table-cell border px-4 py-4">Link Card Customize</div>
+                <div class="table-cell border px-4 py-4">
+                  <sc-link-card actions=[] title-size="lg" sub-title-size="xs" src='images/logo.svg'>
+                      <div slot='title'>Card with suffix slot and font size</div>
+                      <div slot='sub-title'>This is the sub title of card</div>
+                      <div slot='suffix' class="text-right">Suffix</div>
+                  </sc-link-card>
+                </div>
+                </div>
+            </div>
+        </div>
+          </sc-icon-provider>
+        </sc-demo-graphql-provider>        
+      `, document.querySelector('#webkit-ext-container'))
+
+    </script>
+
+</body>
+</html>

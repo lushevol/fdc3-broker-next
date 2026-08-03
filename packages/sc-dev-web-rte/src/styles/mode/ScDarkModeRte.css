@@ -1,0 +1,22 @@
+/* Dark mode component definition */
+:host,
+.sc-mode-dark {
+  --sc-mode: dark;
+  /* rich text editor */
+  --sc-rich-text-editor-main-border-color: var(--sc-color-grey-400-dark);
+  --sc-rich-text-editor-main-bg-color: var(--sc-color-grey-150-dark);
+  --sc-rich-text-editor-main-color: var(--sc-color-white);
+  --sc-rich-text-editor-main-focus-border-color: var(--sc-color-blue-500-dark);
+  --sc-rich-text-editor-icon-color: var(--sc-color-blue-800-dark);
+  --sc-rich-text-editor-icon-color-active: var(--sc-color-blue-950-dark);
+  --sc-rich-text-editor-icon-hover-color: var(--sc-color-blue-600-dark);
+  --sc-rich-text-editor-bg-color: transparent;
+  --sc-rich-text-editor-active-bg-color: var(--sc-color-blue-100-dark);
+  --sc-rich-text-editor-count-color: var(--sc-color-grey-650-dark);
+  --sc-rich-text-editor-count-error-color: var(--sc-color-red-500-dark);
+  --sc-rich-text-editor-separate-color: var(--sc-color-grey-200-dark);
+  --sc-rich-text-editor-table-cell-border-color: var(--sc-color-grey-150-dark);
+  --sc-rich-text-editor-table-cell-bg-color: var(--sc-color-grey-100-dark);
+  --sc-rich-text-editor-table-cell-hover-border-color: var(--sc-color-blue-100-dark);
+  --sc-rich-text-editor-table-cell-hover-bg-color: var(--sc-color-blue-100-dark);
+}

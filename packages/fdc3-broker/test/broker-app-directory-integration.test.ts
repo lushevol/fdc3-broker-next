@@ -118,11 +118,6 @@ describe('Broker + App Directory Integration', () => {
     });
 
     it('should find intents by context type', async () => {
-      const chartContext: Context = {
-        type: 'fdc3.chart',
-        id: { ticker: 'AAPL' },
-      };
-
       const apps = await mockAppDirectory.findByContextType('fdc3.chart');
 
       expect(apps.length).toBeGreaterThan(0);
