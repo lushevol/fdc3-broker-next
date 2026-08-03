@@ -1,7 +1,7 @@
 import { ScModal } from '../src/components/ScModal/ScModal.js';
 export * from '../src/components/ScModal/ScModal.js';
 
-window.customElements.define('sc-modal', ScModal);
+if (!window.customElements.get('sc-modal')) window.customElements.define('sc-modal', ScModal);
 
 declare global {
   interface HTMLElementTagNameMap {

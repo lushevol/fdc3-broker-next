@@ -1,7 +1,7 @@
 import { ScCardNumberInput } from '../src/components/ScFormInput/ScCardNumberInput.js';
 export * from '../src/components/ScFormInput/ScCardNumberInput.js';
 
-window.customElements.define('sc-card-number-input', ScCardNumberInput);
+if (!window.customElements.get('sc-card-number-input')) window.customElements.define('sc-card-number-input', ScCardNumberInput);
 
 declare global {
   interface HTMLElementTagNameMap {

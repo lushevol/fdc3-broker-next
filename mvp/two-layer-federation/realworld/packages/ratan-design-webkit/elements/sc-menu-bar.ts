@@ -1,7 +1,7 @@
 import { ScMenuBar } from '../src/components/ScMenuBar/ScMenuBar.js';
 export * from '../src/components/ScMenuBar/ScMenuBar.js';
 
-window.customElements.define('sc-menu-bar', ScMenuBar);
+if (!window.customElements.get('sc-menu-bar')) window.customElements.define('sc-menu-bar', ScMenuBar);
 
 declare global {
   interface HTMLElementTagNameMap {

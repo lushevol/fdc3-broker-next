@@ -3,7 +3,7 @@ import { ScColorFileIcon } from '../src/components/ScFileList/ScColorFileIcon.js
 export * from '../src/components/ScFileList/ScFileIcon.js';
 export * from '../src/components/ScFileList/ScColorFileIcon.js';
 
-window.customElements.define('sc-file-icon', ScFileIcon);
+if (!window.customElements.get('sc-file-icon')) window.customElements.define('sc-file-icon', ScFileIcon);
 declare global {
   interface HTMLElementTagNameMap {
     'sc-file-icon': ScFileIcon;

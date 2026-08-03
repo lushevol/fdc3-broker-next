@@ -1,5 +1,8 @@
 # GDS alignment
 
+Status: retained design-reference guidance. Active WebKit implementation status
+is tracked in [`../../../docs/CURRENT_STATE.md`](../../../docs/CURRENT_STATE.md).
+
 `gds-official` is a checked-in design reference, not a production dependency.
 Ratan exposes a small, scoped semantic API for the components used by the
 Portal Host, Cashflow, Identity Profile, and FDC3 Admin applications.

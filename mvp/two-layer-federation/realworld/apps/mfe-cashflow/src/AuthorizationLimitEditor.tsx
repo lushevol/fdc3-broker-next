@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { AuthorizationLimitRecord } from './authorization-limits-repository';
-import { ScAlert, ScButton, ScDialog, ScIconButton, ScTextInput } from './webkit';
+import { ScAlert, ScButton, ScDialog, ScParagraph, ScTextInput } from './webkit';
 
 const MIN_LIMIT = 0;
 const MAX_LIMIT = 99_999_999_999;
@@ -24,11 +25,12 @@ export function AuthorizationLimitEditor({ mode, record, onSubmit, onClose }: Pr
   const submit = async () => {
     const normalizedProfile = profile.trim();
     const nextProfileError = normalizedProfile ? null : 'Profile is required.';
-    const nextLimitationError = limitation === null
-      ? 'Limitation is required.'
-      : limitation < MIN_LIMIT || limitation > MAX_LIMIT
-        ? `Limitation must be between ${MIN_LIMIT} and ${MAX_LIMIT}.`
-        : null;
+    const nextLimitationError =
+      limitation === null
+        ? 'Limitation is required.'
+        : limitation < MIN_LIMIT || limitation > MAX_LIMIT
+          ? `Limitation must be between ${MIN_LIMIT} and ${MAX_LIMIT}.`
+          : null;
     setProfileError(nextProfileError);
     setLimitationError(nextLimitationError);
     setRequestError(null);
@@ -39,27 +41,22 @@ export function AuthorizationLimitEditor({ mode, record, onSubmit, onClose }: Pr
       await onSubmit(normalizedProfile, limitation);
       onClose();
     } catch (reason) {
-      setRequestError(reason instanceof Error ? reason.message : 'Authorization Limit mutation failed.');
+      setRequestError(
+        reason instanceof Error ? reason.message : 'Authorization Limit mutation failed.',
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <ScDialog
-      open
-      label={title}
-      role="dialog"
-      aria-label={title}
-      onScHide={onClose}
-    >
-      {!loading ? (
-        <ScIconButton slot="header-actions" name="cross" role="button" aria-label={`Close ${title}`} onClick={onClose} />
-      ) : null}
-      <p>Profile limits use fixed USD currency.</p>
+  return createPortal(
+    <ScDialog open label={title} role="dialog" aria-label={title} onScHide={onClose}>
+      <ScParagraph>Profile limits use fixed USD currency.</ScParagraph>
       <div className="authorization-limit-editor-form">
         {requestError ? (
-          <ScAlert role="alert" type="error" title={`Unable to ${mode} Authorization Limit`}>{requestError}</ScAlert>
+          <ScAlert role="alert" type="error" title={`Unable to ${mode} Authorization Limit`}>
+            {requestError}
+          </ScAlert>
         ) : null}
         <ScTextInput
           id="authorization-limit-profile"
@@ -99,7 +96,9 @@ export function AuthorizationLimitEditor({ mode, record, onSubmit, onClose }: Pr
         />
       </div>
       <div slot="footer" className="dialog-actions">
-        <ScButton type="tertiary" role="button" disabled={loading} onClick={onClose}>Cancel</ScButton>
+        <ScButton type="tertiary" role="button" disabled={loading} onClick={onClose}>
+          Cancel
+        </ScButton>
         <ScButton
           type="primary"
           role="button"
@@ -111,6 +110,7 @@ export function AuthorizationLimitEditor({ mode, record, onSubmit, onClose }: Pr
           {loading ? 'Submitting…' : 'Submit'}
         </ScButton>
       </div>
-    </ScDialog>
+    </ScDialog>,
+    document.body,
   );
 }

@@ -5,7 +5,7 @@ import '../elements/sc-icon.js';
 import '../elements/sc-button.js';
 export * from '../src/components/ScDocumentImageViewer/ScDocumentImageViewer.js';
 
-window.customElements.define('sc-document-image-viewer', ScDocumentImageViewer);
+if (!window.customElements.get('sc-document-image-viewer')) window.customElements.define('sc-document-image-viewer', ScDocumentImageViewer);
 
 declare global {
   interface HTMLElementTagNameMap {

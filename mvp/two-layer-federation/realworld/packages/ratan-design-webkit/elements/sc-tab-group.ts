@@ -7,10 +7,10 @@ export * from '../src/components/ScTab/ScTabGroup.js';
 export * from '../src/components/ScTab/ScTabPanel.js';
 export * from '../src/components/ScTab/ScTabDivider.js';
 
-window.customElements.define('sc-tab-group', ScTabGroup);
-window.customElements.define('sc-tab', ScTab);
-window.customElements.define('sc-tab-panel', ScTabPanel);
-window.customElements.define('sc-tab-divider', ScTabDivider);
+if (!window.customElements.get('sc-tab-group')) window.customElements.define('sc-tab-group', ScTabGroup);
+if (!window.customElements.get('sc-tab')) window.customElements.define('sc-tab', ScTab);
+if (!window.customElements.get('sc-tab-panel')) window.customElements.define('sc-tab-panel', ScTabPanel);
+if (!window.customElements.get('sc-tab-divider')) window.customElements.define('sc-tab-divider', ScTabDivider);
 
 declare global {
   interface HTMLElementTagNameMap {

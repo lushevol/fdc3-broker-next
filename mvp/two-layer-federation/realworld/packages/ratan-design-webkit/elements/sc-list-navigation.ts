@@ -3,8 +3,8 @@ import { ScListNavigation } from '../src/components/ScListNavigation/ScListNavig
 export * from '../src/components/ScListNavigation/ScListNavigationItem.js';
 export * from '../src/components/ScListNavigation/ScListNavigation.js';
 
-window.customElements.define('sc-list-navigation-item', ScListNavigationItem);
-window.customElements.define('sc-list-navigation', ScListNavigation);
+if (!window.customElements.get('sc-list-navigation-item')) window.customElements.define('sc-list-navigation-item', ScListNavigationItem);
+if (!window.customElements.get('sc-list-navigation')) window.customElements.define('sc-list-navigation', ScListNavigation);
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -1,6 +1,10 @@
 # @fm/ratan-design — Project Overview
 
-> Parent: [Monorepo AGENTS.md](../../../AGENTS.md)
+Status: legacy compatibility/reference workspace. New active Portal Host UI
+belongs to `@fm/ratan-design-webkit`. See
+[`../../../docs/CURRENT_STATE.md`](../../../docs/CURRENT_STATE.md).
+
+> Parent: [Monorepo AGENTS.md](../../../../../../AGENTS.md)
 
 ## Purpose
 

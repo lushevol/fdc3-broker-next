@@ -61,6 +61,7 @@ describe('FDC3 admin verification application', () => {
   it('creates, validates, edits, searches, and deletes a declaration', () => {
     const { platform } = mount();
     fireEvent.click(screen.getByRole('button', { name: 'Create declaration' }));
+    expect(screen.getByRole('dialog', { name: 'Create declaration' }).parentElement).toBe(document.body);
     fireEvent.click(screen.getByRole('button', { name: /Application/ }));
     fireEvent.click(screen.getByRole('menuitem', { name: 'FDC3 Admin' }));
     fireEvent.change(screen.getByRole('textbox', { name: 'Interop JSON' }), {
@@ -107,6 +108,7 @@ describe('FDC3 admin verification application', () => {
     mount();
     fireEvent.click(screen.getByRole('tab', { name: 'Intent catalog' }));
     fireEvent.click(screen.getByRole('button', { name: 'Create intent' }));
+    expect(screen.getByRole('dialog', { name: 'Create intent' }).parentElement).toBe(document.body);
     fireEvent.click(screen.getByRole('button', { name: 'Close Create intent' }));
     fireEvent.click(screen.getByRole('button', { name: 'Create intent' }));
     fireEvent.change(screen.getByRole('textbox', { name: 'Intent name' }), { target: { value: 'RaiseAlert' } });

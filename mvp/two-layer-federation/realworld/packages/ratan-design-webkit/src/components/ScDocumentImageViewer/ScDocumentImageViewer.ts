@@ -1,6 +1,5 @@
 import { LitElement, PropertyValueMap, html } from 'lit';
 import { state, property, queryAsync } from 'lit/decorators.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import { Annotation } from './Annotation.js';
 import { ImgViewer } from './ImgViewer.js';
 import ScTheme from '../../styles/ScTheme.js';
@@ -48,7 +47,7 @@ const defaultPanelConfig = {
   containerWidth: 0,
 };
 
-export class ScDocumentImageViewer extends ScopedElementsMixin(LitElement) {
+export class ScDocumentImageViewer extends LitElement {
 
   static styles = ScTheme.getStyles().concat([ScImgDocViewerStyle]);
 

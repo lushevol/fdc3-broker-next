@@ -1,8 +1,16 @@
 # Realworld production deployment
 
+Status: current Wave 0 deployment contract. The local application/UI matrix is
+newer than the Wave 0 allowlist; see [`CURRENT_STATE.md`](./CURRENT_STATE.md).
+
 ## Outcome
 
-The realworld portal and the Wave 0 Cashflow remote can be built once, packaged under immutable digest-addressed paths, and served through hardened nginx in two environments without rebuilding. Environment selection is confined to the active registry pointer. The local deployment uses the same static contract intended for an OCI/EKS origin or CDN/object-store origin.
+The Realworld portal and the Wave 0 Cashflow remote can be built once, packaged
+under immutable digest-addressed paths, and served through hardened nginx in
+two environments without rebuilding. Environment selection is confined to the
+active registry pointer. Identity/Profile, FDC3 Admin, and migration MVPs remain
+outside the production allowlist until their independent conformance and
+promotion gates are approved.
 
 ```mermaid
 flowchart LR

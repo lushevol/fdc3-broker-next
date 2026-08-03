@@ -1,10 +1,12 @@
 import { ScRichTextEditor } from '../src/components/ScRichTextEditor/ScRichTextEditor.js';
 export * from '../src/components/ScRichTextEditor/ScRichTextEditor.js';
 
-window.customElements.define(
-  'sc-rich-text-editor',
-  ScRichTextEditor as unknown as CustomElementConstructor,
-);
+if (!window.customElements.get('sc-rich-text-editor')) {
+  window.customElements.define(
+    'sc-rich-text-editor',
+    ScRichTextEditor as unknown as CustomElementConstructor,
+  );
+}
 
 declare global {
   interface HTMLElementTagNameMap {

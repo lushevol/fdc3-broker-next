@@ -6,9 +6,9 @@ export * from '../src/components/ScGrid/ScGridContainer.js';
 export * from '../src/components/ScGrid/ScGridRow.js';
 export * from '../src/components/ScGrid/ScGridColumn.js';
 
-window.customElements.define('sc-grid-container', ScGridContainer);
-window.customElements.define('sc-grid-row', ScGridRow);
-window.customElements.define('sc-grid-column', ScGridColumn);
+if (!window.customElements.get('sc-grid-container')) window.customElements.define('sc-grid-container', ScGridContainer);
+if (!window.customElements.get('sc-grid-row')) window.customElements.define('sc-grid-row', ScGridRow);
+if (!window.customElements.get('sc-grid-column')) window.customElements.define('sc-grid-column', ScGridColumn);
 
 declare global {
   interface HTMLElementTagNameMap {

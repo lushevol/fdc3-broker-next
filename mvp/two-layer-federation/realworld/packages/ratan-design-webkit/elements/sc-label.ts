@@ -1,7 +1,7 @@
 import { ScLabel } from '../src/components/ScLabel/ScLabel.js';
 export * from '../src/components/ScLabel/ScLabel.js';
 
-window.customElements.define('sc-label', ScLabel);
+if (!window.customElements.get('sc-label')) window.customElements.define('sc-label', ScLabel);
 declare global {
   interface HTMLElementTagNameMap {
     'sc-label': ScLabel;

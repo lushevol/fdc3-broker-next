@@ -1,5 +1,10 @@
 # Cashflow CN source migration
 
+Status: active migration slice. Shared UI now resolves through
+`@fm/ratan-design-webkit`; the remaining debt below belongs to the copied
+Cashflow CN compatibility surface. Last reviewed 3 August 2026. See the
+[current-state record](../../docs/CURRENT_STATE.md).
+
 This workspace is the two-layer-federation migration of the real
 `apps/mfe-cashflow-blotter/src/Cashflow_CN` application. It is not the earlier
 fixture-based Cashflow lookalike.
@@ -26,6 +31,9 @@ compatibility adapters.
 
 The remaining material debt is explicit:
 
+- the copied Cashflow domain tree still contains Ant Design and compatibility
+  adapters; shared Ratan component imports resolve to the WebKit boundary, but
+  domain-specific compatibility code still requires cohort-by-cohort removal;
 - some Cashflow-used Ratan implementation is still compiled from
   `apps/mfe-ratan-container` through `@legacy-ratan`; it must be extracted into
   realworld ownership;

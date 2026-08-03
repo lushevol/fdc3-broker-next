@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { AuthorizationLimitAction } from './authorization-limits-policy';
 import type { AuthorizationLimitRecord } from './authorization-limits-repository';
-import { ScAlert, ScButton, ScDialog, ScIconButton } from './webkit';
+import { ScAlert, ScButton, ScDialog, ScParagraph } from './webkit';
 
 export type AuthorizationLimitTransitionAction = Exclude<
   AuthorizationLimitAction,
@@ -85,12 +86,7 @@ interface Props {
   readonly onClose: () => void;
 }
 
-export function AuthorizationLimitTransitionDialog({
-  action,
-  record,
-  onExecute,
-  onClose,
-}: Props) {
+export function AuthorizationLimitTransitionDialog({ action, record, onExecute, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const presentation = authorizationLimitTransitionPresentation[action];
@@ -108,7 +104,7 @@ export function AuthorizationLimitTransitionDialog({
     }
   };
 
-  return (
+  return createPortal(
     <ScDialog
       open
       label={presentation.title}
@@ -116,30 +112,36 @@ export function AuthorizationLimitTransitionDialog({
       aria-label={presentation.title}
       onScHide={onClose}
     >
-      {!loading ? (
-        <ScIconButton slot="header-actions" name="cross" role="button" aria-label={`Close ${presentation.title}`} onClick={onClose} />
-      ) : null}
       <div className="authorization-limit-transition-message">
-        <p>{presentation.message}</p>
-        <p>Profile: {record.profile} · Currency: {record.currency}</p>
+        <ScParagraph>{presentation.message}</ScParagraph>
+        <ScParagraph>
+          Profile: {record.profile} · Currency: {record.currency}
+        </ScParagraph>
         {error ? (
-          <ScAlert role="alert" type="error" title="Transition failed">{error}</ScAlert>
+          <ScAlert role="alert" type="error" title="Transition failed">
+            {error}
+          </ScAlert>
         ) : null}
       </div>
       <div slot="footer" className="dialog-actions">
-        <ScButton type="tertiary" role="button" disabled={loading} onClick={onClose}>Cancel</ScButton>
+        <ScButton type="tertiary" role="button" disabled={loading} onClick={onClose}>
+          Cancel
+        </ScButton>
         <ScButton
           type={presentation.tone === 'danger' ? 'secondary' : 'primary'}
           state={presentation.tone === 'danger' ? 'error' : undefined}
           role="button"
           loading={loading}
           disabled={loading}
-          aria-label={loading ? `${presentation.confirmLabel} in progress` : presentation.confirmLabel}
+          aria-label={
+            loading ? `${presentation.confirmLabel} in progress` : presentation.confirmLabel
+          }
           onClick={confirm}
         >
           {presentation.confirmLabel}
         </ScButton>
       </div>
-    </ScDialog>
+    </ScDialog>,
+    document.body,
   );
 }

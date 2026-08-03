@@ -2,7 +2,7 @@ import { ScDashboardViewer } from '../src/components/ScDashboardViewer/ScDashboa
 
 export * from '../src/components/ScDashboardViewer/ScDashboardViewer.js';
 
-window.customElements.define('sc-dashboard-viewer', ScDashboardViewer);
+if (!window.customElements.get('sc-dashboard-viewer')) window.customElements.define('sc-dashboard-viewer', ScDashboardViewer);
 
 declare global {
   interface HTMLElementTagNameMap {

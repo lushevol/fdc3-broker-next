@@ -1,5 +1,5 @@
 import { css, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import '../../../elements/sc-date-picker.js';
 import '../../../elements/sc-dropdown-input.js';
 import '../../../elements/sc-number-input.js';
@@ -19,7 +19,6 @@ import {
 import { E_CELL_DATA_TYPE } from './widgets/CellDataType.js';
 import { getFilterModes } from './widgets/FilterModes.js';
 
-@customElement('sc-data-grid-column-typed-filter')
 export class ScDataGridColumnTypedFilter<
   K extends string & keyof T,
   T extends AnyFilterMode = AnyFilterMode
@@ -229,3 +228,5 @@ export class ScDataGridColumnTypedFilter<
     </div>`;
   }
 }
+
+if (!customElements.get('sc-data-grid-column-typed-filter')) customElements.define('sc-data-grid-column-typed-filter', ScDataGridColumnTypedFilter);

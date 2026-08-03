@@ -29,16 +29,16 @@ export * from '../src/components/ScDatePicker/YearGridButton/ScYearGridButton.js
 export * from '../src/components/ScDatePicker/MonthCalendar/ScMonthCalendar.js';
 export * from '../src/components/ScDatePicker/DateSelectTime/ScDateSelectTime.js';
 
-window.customElements.define('sc-date-picker', ScDatePicker);
-window.customElements.define('sc-date-range-picker', ScDateRangePicker);
-window.customElements.define('sc-date-input', ScDateInput);
-window.customElements.define('sc-date-range-input', ScDateRangeInput);
-window.customElements.define('sc-date-input-surface', ScDateInputSurface);
-window.customElements.define('sc-month-grid', ScMonthGrid);
-window.customElements.define('sc-year-grid', ScYearGrid);
-window.customElements.define('sc-year-grid-button', ScYearGridButton);
-window.customElements.define('sc-month-calendar', ScMonthCalendar);
-window.customElements.define('sc-date-time-select', ScDateSelectTime);
+if (!window.customElements.get('sc-date-picker')) window.customElements.define('sc-date-picker', ScDatePicker);
+if (!window.customElements.get('sc-date-range-picker')) window.customElements.define('sc-date-range-picker', ScDateRangePicker);
+if (!window.customElements.get('sc-date-input')) window.customElements.define('sc-date-input', ScDateInput);
+if (!window.customElements.get('sc-date-range-input')) window.customElements.define('sc-date-range-input', ScDateRangeInput);
+if (!window.customElements.get('sc-date-input-surface')) window.customElements.define('sc-date-input-surface', ScDateInputSurface);
+if (!window.customElements.get('sc-month-grid')) window.customElements.define('sc-month-grid', ScMonthGrid);
+if (!window.customElements.get('sc-year-grid')) window.customElements.define('sc-year-grid', ScYearGrid);
+if (!window.customElements.get('sc-year-grid-button')) window.customElements.define('sc-year-grid-button', ScYearGridButton);
+if (!window.customElements.get('sc-month-calendar')) window.customElements.define('sc-month-calendar', ScMonthCalendar);
+if (!window.customElements.get('sc-date-time-select')) window.customElements.define('sc-date-time-select', ScDateSelectTime);
 
 declare global {
   interface HTMLElementTagNameMap {

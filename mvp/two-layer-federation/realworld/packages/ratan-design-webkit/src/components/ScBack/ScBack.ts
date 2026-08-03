@@ -1,11 +1,10 @@
 import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import '../../../elements/sc-icon.js';
 import '../../../elements/sc-link.js';
 import ScTheme from '../../styles/ScTheme.js';
 
-export class ScBack extends ScopedElementsMixin(LitElement) {
+export class ScBack extends LitElement {
   constructor() {
     super();
   }

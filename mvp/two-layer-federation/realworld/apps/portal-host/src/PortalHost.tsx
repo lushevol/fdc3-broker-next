@@ -21,11 +21,13 @@ import {
   ScIconButton,
   ScMenu,
   ScMenuItem,
+  ScParagraph,
   ScTab,
   ScTabGroup,
   ScTabPanel,
   ScTextInput,
   ScToast,
+  ScTitle,
 } from './webkit';
 
 interface Props {
@@ -214,9 +216,14 @@ export function PortalHost({
     >
       <div className="portal-shell">
         <header className="portal-app-bar">
-          <h1>Markets Operations One</h1>
+          <ScTitle level={1}>Markets Operations One</ScTitle>
           <div className="portal-app-bar-actions">
-            <ScButton type="primary" role="button" aria-label="New tile" onClick={() => setTilePickerOpen(true)}>
+            <ScButton
+              type="primary"
+              role="button"
+              aria-label="New tile"
+              onClick={() => setTilePickerOpen(true)}
+            >
               New tile
             </ScButton>
             <ScButton
@@ -241,18 +248,18 @@ export function PortalHost({
               onClick={() => setNotification('No new notifications.')}
             />
             <div className="portal-user-menu">
-              <ScButton
+              <ScAvatar
                 className="portal-avatar-trigger"
-                type="text"
+                id={avatarName}
+                size="sm"
+                clickable
                 role="button"
                 aria-label="Open user menu"
                 aria-expanded={userMenuOpen}
                 onClick={() => setUserMenuOpen((open) => !open)}
               >
-                <ScAvatar id={avatarName} size="sm" aria-label={avatarName}>
-                  {avatarName.slice(0, 1).toUpperCase()}
-                </ScAvatar>
-              </ScButton>
+                {avatarName.slice(0, 1).toUpperCase()}
+              </ScAvatar>
               {userMenuOpen ? (
                 <ScMenu
                   aria-label="User actions"
@@ -278,7 +285,9 @@ export function PortalHost({
           <section className="workspace-surface" aria-label="Application workspace">
             <ScTabGroup
               aria-label="Open applications"
-              onScTabSelect={(event: CustomEvent<{ name: string }>) => setActiveInstanceId(event.detail.name)}
+              onScTabSelect={(event: CustomEvent<{ name: string }>) =>
+                setActiveInstanceId(event.detail.name)
+              }
             >
               {tabs.map((tab) => {
                 const ordinal = tab.instanceId.split('-').slice(-1)[0];
@@ -317,7 +326,11 @@ export function PortalHost({
                         identity,
                       };
                 return (
-                  <ScTabPanel key={tab.instanceId} name={tab.instanceId} active={tab.instanceId === activeInstanceId}>
+                  <ScTabPanel
+                    key={tab.instanceId}
+                    name={tab.instanceId}
+                    active={tab.instanceId === activeInstanceId}
+                  >
                     <RemoteApplication
                       entry={tab.entry}
                       instanceId={tab.instanceId}
@@ -331,82 +344,99 @@ export function PortalHost({
             {!active ? (
               <section className="portal-empty-state">
                 <span aria-hidden="true">+</span>
-                <h2>Choose an application</h2>
-                <p>The host loads it directly from the registry.</p>
+                <ScTitle level={2}>Choose an application</ScTitle>
+                <ScParagraph>The host loads it directly from the registry.</ScParagraph>
               </section>
             ) : null}
           </section>
         </main>
         {tilePickerOpen ? (
-        <ScDialog
-          open
-          label="New tile"
-          role="dialog"
-          aria-label="New tile"
-          style={{ '--width': '50rem' }}
-          onScHide={() => setTilePickerOpen(false)}
-        >
-          <ScIconButton slot="header-actions" name="cross" role="button" aria-label="Close New tile" onClick={() => setTilePickerOpen(false)} />
-          <p>Search the application catalog, then open a tile in this workspace.</p>
-          <ScTextInput
-            id="tile-search"
-            label="Search tiles"
-            role="textbox"
-            aria-label="Search tiles"
-            placeholder="Search by title or description"
-            value={tileSearch}
-            onScInput={(event: CustomEvent<{ value: string }>) => setTileSearch(event.detail.value)}
-          />
-          <div className="tile-picker-results">
-            {tilesByCategory.length ? (
-              tilesByCategory.map(([category, entries]) => (
-                <section
-                  key={category}
-                  className="tile-picker-category"
-                  aria-labelledby={`tile-category-${category}`}
-                >
-                  <h2 id={`tile-category-${category}`}>{category}</h2>
-                  <div className="tile-picker-grid">
-                    {entries.map((entry) => {
-                      const tile = tileMetadata(entry);
-                      return (
-                        <ScCard
-                          key={entry.id}
-                          className="tile-picker-tile"
-                        >
-                          <div className="tile-picker-tile-content">
-                          <h3>{entry.displayName}</h3>
-                          <p>{tile.description}</p>
-                          <span className="tile-picker-icon" aria-hidden="true">
-                            {tile.icon}
-                          </span>
-                          <ScBadge type="text" color="green" label="Available" aria-label="Available" />
-                          <ScButton type="secondary" role="button" aria-label={`Open ${entry.displayName}`} onClick={() => openTile(entry)}>
-                            Open
-                          </ScButton>
-                          </div>
-                        </ScCard>
-                      );
-                    })}
-                  </div>
+          <ScDialog
+            open
+            label="New tile"
+            role="dialog"
+            aria-label="New tile"
+            style={{ '--width': '50rem' }}
+            onScHide={() => setTilePickerOpen(false)}
+          >
+            <ScParagraph>
+              Search the application catalog, then open a tile in this workspace.
+            </ScParagraph>
+            <ScTextInput
+              id="tile-search"
+              label="Search tiles"
+              role="textbox"
+              aria-label="Search tiles"
+              placeholder="Search by title or description"
+              value={tileSearch}
+              onScInput={(event: CustomEvent<{ value: string }>) =>
+                setTileSearch(event.detail.value)
+              }
+            />
+            <div className="tile-picker-results">
+              {tilesByCategory.length ? (
+                tilesByCategory.map(([category, entries]) => (
+                  <section
+                    key={category}
+                    className="tile-picker-category"
+                    aria-labelledby={`tile-category-${category}`}
+                  >
+                    <ScTitle level={2} id={`tile-category-${category}`}>
+                      {category}
+                    </ScTitle>
+                    <div className="tile-picker-grid">
+                      {entries.map((entry) => {
+                        const tile = tileMetadata(entry);
+                        return (
+                          <ScCard key={entry.id} className="tile-picker-tile">
+                            <div className="tile-picker-tile-content">
+                              <ScTitle level={3}>{entry.displayName}</ScTitle>
+                              <ScParagraph>{tile.description}</ScParagraph>
+                              <span className="tile-picker-icon" aria-hidden="true">
+                                {tile.icon}
+                              </span>
+                              <ScBadge
+                                type="text"
+                                color="green"
+                                label="Available"
+                                aria-label="Available"
+                              />
+                              <ScButton
+                                type="secondary"
+                                role="button"
+                                aria-label={`Open ${entry.displayName}`}
+                                onClick={() => openTile(entry)}
+                              >
+                                Open
+                              </ScButton>
+                            </div>
+                          </ScCard>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ))
+              ) : (
+                <section className="portal-empty-state">
+                  <span aria-hidden="true">?</span>
+                  <ScTitle level={2}>No matching tiles</ScTitle>
+                  <ScParagraph>Try a different title or description.</ScParagraph>
                 </section>
-              ))
-            ) : (
-              <section className="portal-empty-state">
-                <span aria-hidden="true">?</span>
-                <h2>No matching tiles</h2>
-                <p>Try a different title or description.</p>
-              </section>
-            )}
-          </div>
-        </ScDialog>
+              )}
+            </div>
+          </ScDialog>
         ) : null}
         {notification ? (
           <div className="notification" role="status">
-            <ScToast open type="success" title="Notification" onScHide={() => setNotification(null)}>
+            <ScToast
+              open
+              closable
+              type="success"
+              title="Notification"
+              onScHide={() => setNotification(null)}
+            >
               {notification}
             </ScToast>
-            <ScIconButton name="cross" role="button" aria-label="Dismiss notification" onClick={() => setNotification(null)} />
           </div>
         ) : null}
       </div>

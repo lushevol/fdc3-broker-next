@@ -1,7 +1,6 @@
 import { LitElement } from 'lit';
 import { localized } from '@lit/localize';
 import { createContext, consume } from '@lit/context';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import { property, state } from 'lit/decorators.js';
 import { CUSTOM_EVENTS_TYPE, INTERNAL_EVENTS } from './sc-custom-events.js';
 import { createMediaQuery, getGlobalMediaQuery } from './mediaQuery.js';
@@ -86,7 +85,7 @@ export type ScEventInit<T> = T extends keyof GlobalEventHandlersEventMap
 // type ValidEventTypeMap = EventTypesWithRequiredDetail | EventTypesWithoutRequiredDetail;
 
 @localized()
-export default class ScElement extends ScopedElementsMixin(LitElement) {
+export default class ScElement extends LitElement {
   constructor() {
     super();
 

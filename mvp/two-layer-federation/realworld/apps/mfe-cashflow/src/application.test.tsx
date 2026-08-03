@@ -108,7 +108,9 @@ describe('production Cashflow application', () => {
     }} />);
     const create = await screen.findByRole('button', { name: 'Create Authorization Limit' });
     fireEvent.click(create);
-    expect(screen.getByRole('dialog', { name: 'Create Authorization Limit' })).toBeInTheDocument();
+    const dialog = screen.getByRole('dialog', { name: 'Create Authorization Limit' });
+    expect(dialog).toBeInTheDocument();
+    expect(dialog.parentElement).toBe(document.body);
     act(() => identity.setSnapshot({ state: 'anonymous', contractVersion: IDENTITY_CONTRACT_VERSION }));
     expect(screen.queryByRole('button', { name: 'Create Authorization Limit' })).not.toBeInTheDocument();
     expect(screen.queryByRole('dialog', { name: 'Create Authorization Limit' })).not.toBeInTheDocument();

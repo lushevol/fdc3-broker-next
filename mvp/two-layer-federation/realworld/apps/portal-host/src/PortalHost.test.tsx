@@ -75,7 +75,7 @@ describe('production PortalHost', () => {
     expect(await screen.findByText(/Remote cashflow-1/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Notify' }));
     expect(screen.getByRole('status')).toHaveTextContent('Cashflow ready');
-    fireEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }));
+    fireEvent(document.querySelector('sc-toast') as Element, new CustomEvent('sc-hide'));
     const info = jest.spyOn(console, 'info').mockImplementation(() => undefined);
     fireEvent.click(screen.getByRole('button', { name: 'Track' }));
     expect(info).toHaveBeenCalledWith('platform-event', expect.objectContaining({ event: 'test' }));
@@ -139,7 +139,7 @@ describe('production PortalHost', () => {
     expect(document.querySelector('sc-dialog')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Notifications' }));
     expect(screen.getByRole('status')).toHaveTextContent('No new notifications.');
-    fireEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }));
+    fireEvent(document.querySelector('sc-toast') as Element, new CustomEvent('sc-hide'));
     fireEvent.click(screen.getByRole('button', { name: 'Open user menu' }));
     selectMenuItem('profile');
     expect(screen.getByRole('status')).toHaveTextContent('Profile is not available in this pilot.');

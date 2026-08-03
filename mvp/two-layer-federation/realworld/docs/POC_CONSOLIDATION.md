@@ -1,20 +1,23 @@
 # POC consolidation into realworld
 
+Status: historical consolidation record. Current implementation and
+verification status is maintained in [`CURRENT_STATE.md`](./CURRENT_STATE.md).
+
 The POC was frozen on 2026-07-27 at commit `8d162420204f9fde6a0d74be209c41425cf4b357`. It remains read-only evidence and is not a dependency or source-copy target.
 
 ## Last-day POC evidence and realworld disposition
 
-| POC evidence | Realworld disposition | Status |
-| --- | --- | --- |
-| Direct host-to-remote Module Federation loading | `portal-host` loads manifest-addressed application modules directly | Complete |
-| Registry-directed remote release URL without rebuilding the host | Runtime registry plus production release-swap acceptance | In progress |
-| Multiple independent tile instances, activation, and previous-tab selection on close | Instance-based realworld workspace state | In progress |
-| Host-owned capabilities and instance-attributed telemetry | Typed platform contracts and SDK | Complete; expand per-instance verification |
-| Remote failure containment/retry | `RemoteApplication` and hosted browser coverage | Complete |
-| React 19/Vite Host proof | React 19/Vite portal host with React 18 Cashflow mounted through an independent root | Complete |
-| Web Component/Shadow Root application isolation and asset adoption | CSS isolation investigation, including CSS Modules/CSS-in-JS/Tailwind sample tiles | Deferred to backlog |
-| OpenFin/browser adapter parity | Typed FDC3 capability with production adapter verification | Planned |
-| POC Cashflow/Positions composition | Realworld Cashflow plus lower-priority Data Lab/TanStack migration | In progress |
+| POC evidence                                                                         | Realworld disposition                                                                | Status                                                              |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| Direct host-to-remote Module Federation loading                                      | `portal-host` loads manifest-addressed application modules directly                  | Complete                                                            |
+| Registry-directed remote release URL without rebuilding the host                     | Runtime registry plus production release-swap acceptance                             | Implemented locally; production promotion gates remain              |
+| Multiple independent tile instances, activation, and previous-tab selection on close | Instance-based realworld workspace state                                             | Complete and live-browser verified                                  |
+| Host-owned capabilities and instance-attributed telemetry                            | Typed platform contracts and SDK                                                     | Complete; expand per-instance verification                          |
+| Remote failure containment/retry                                                     | `RemoteApplication` and hosted browser coverage                                      | Complete                                                            |
+| React 19/Vite Host proof                                                             | React 19/Vite portal host with React 18 Cashflow mounted through an independent root | Complete                                                            |
+| Web Component/Shadow Root application isolation and asset adoption                   | CSS isolation investigation, including CSS Modules/CSS-in-JS/Tailwind sample tiles   | Deferred to backlog                                                 |
+| OpenFin/browser adapter parity                                                       | Typed FDC3 capability with production adapter verification                           | Planned                                                             |
+| POC Cashflow/Positions composition                                                   | Realworld Cashflow, Authorization Limits, Identity/Profile, and FDC3 Admin remotes   | Active applications complete; later domains remain separate cohorts |
 
 ## Migration rules
 

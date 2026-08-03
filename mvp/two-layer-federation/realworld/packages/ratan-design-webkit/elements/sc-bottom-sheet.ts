@@ -1,7 +1,7 @@
 import { ScBottomSheet } from '../src/components/ScSheet/ScBottomSheet.js';
 export * from '../src/components/ScSheet/ScBottomSheet.js';
 
-window.customElements.define('sc-bottom-sheet', ScBottomSheet);
+if (!window.customElements.get('sc-bottom-sheet')) window.customElements.define('sc-bottom-sheet', ScBottomSheet);
 
 declare global {
   interface HTMLElementTagNameMap {

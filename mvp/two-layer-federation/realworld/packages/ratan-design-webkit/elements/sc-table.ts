@@ -4,9 +4,9 @@ import { ScTableHeaderWithSort } from '../src/components/ScTable/TableHeaders/Sc
 export * from '../src/components/ScTable/ScTable.js';
 export * from '../src/components/ScTable/TableHeaders/ScTableHeaderWithSort.js';
 
-window.customElements.define('sc-table', ScTable);
-window.customElements.define('sc-table-header-with-sort', ScTableHeaderWithSort);
-window.customElements.define('sc-table-filter', ScTableFilter);
+if (!window.customElements.get('sc-table')) window.customElements.define('sc-table', ScTable);
+if (!window.customElements.get('sc-table-header-with-sort')) window.customElements.define('sc-table-header-with-sort', ScTableHeaderWithSort);
+if (!window.customElements.get('sc-table-filter')) window.customElements.define('sc-table-filter', ScTableFilter);
 
 declare global {
   interface HTMLElementTagNameMap {

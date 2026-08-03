@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import { html, css, LitElement } from 'lit';
-import { property, query, state, customElement } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import * as allFormatting from './formats.js';
 import { TViewContext, TConfiguration } from './typeUtils.js';
 import { watch } from '../../shared/watch.js';
@@ -8,7 +8,6 @@ import { fontBackColor, fontTextColor } from './constant.js';
 import { rgb2hex } from './core/utils.js';
 import '../../../elements/sc-toast.js';
 
-@customElement('sc-rte-toolbar')
 export class RTEToolbar extends LitElement {
   static styles = css`
     .rte-toolbar-container {
@@ -220,3 +219,5 @@ export class RTEToolbar extends LitElement {
       </sc-toast>`;
   }
 }
+
+if (!customElements.get('sc-rte-toolbar')) customElements.define('sc-rte-toolbar', RTEToolbar);

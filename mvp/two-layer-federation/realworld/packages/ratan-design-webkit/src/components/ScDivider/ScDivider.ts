@@ -1,6 +1,5 @@
 import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import ScTheme from '../../styles/ScTheme.js';
 import { HasSlotController } from '../../shared/slot.js';
 import { SIZE, TEXT_ALIGN, FontSizeMapping } from '../../shared/util.js';
@@ -11,7 +10,7 @@ enum DIVIDER_MODE {
   'card-header' = 'card-header',
 }
 
-export class ScDivider extends ScopedElementsMixin(LitElement) {
+export class ScDivider extends LitElement {
   static styles = ScTheme.getStyles();
 
   @property({ type: String }) title = '';

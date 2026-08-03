@@ -1,6 +1,6 @@
 import { Column, Table } from '@tanstack/lit-table';
 import { css, html, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import '../../../elements/sc-radio-group.js';
 import '../../../elements/sc-radio.js';
@@ -20,7 +20,6 @@ import { getFilterFn, getFilterWidget } from './widgets/FilterModes.js';
 
 
 
-@customElement('sc-data-grid-column-multiple-filter')
 export class ScDataGridColumnMultiFilter extends ScElement {
   static styles = ScTheme.getStyles().concat([
     css`
@@ -210,3 +209,5 @@ export class ScDataGridColumnMultiFilter extends ScElement {
     </div>`;
   }
 }
+
+if (!customElements.get('sc-data-grid-column-multiple-filter')) customElements.define('sc-data-grid-column-multiple-filter', ScDataGridColumnMultiFilter);

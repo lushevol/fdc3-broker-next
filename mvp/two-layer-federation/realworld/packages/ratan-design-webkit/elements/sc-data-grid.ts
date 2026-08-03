@@ -32,19 +32,19 @@ export * from '../src/components/ScDataGrid/ScDataGridColumnManager.js';
 export * from '../src/components/ScDataGrid/ScDataGridEditing.js';
 export * from '../src/components/ScDataGrid/ScDataGridOverlapping.js';
 
-window.customElements.define('sc-data-grid', ScDataGrid);
-window.customElements.define('sc-data-grid-cell', ScDataGridCell);
-window.customElements.define('sc-data-grid-column-filter', ScDataGridColumnFilter);
-window.customElements.define('sc-data-grid-dragging-shadow', ScDataGridDraggingShadow);
-window.customElements.define('sc-data-grid-column-set-filter', ScDataGridColumnSetFilter);
-window.customElements.define('sc-data-grid-master-cell', ScDataGridMasterCell);
-window.customElements.define('sc-data-grid-selection-cell', ScDataGridSelectionCell);
-window.customElements.define('sc-data-grid-composite-filter', ScDataGridCompositeFilter);
-window.customElements.define('sc-data-grid-column-manager', ScDataGridColumnManager);
+if (!window.customElements.get('sc-data-grid')) window.customElements.define('sc-data-grid', ScDataGrid);
+if (!window.customElements.get('sc-data-grid-cell')) window.customElements.define('sc-data-grid-cell', ScDataGridCell);
+if (!window.customElements.get('sc-data-grid-column-filter')) window.customElements.define('sc-data-grid-column-filter', ScDataGridColumnFilter);
+if (!window.customElements.get('sc-data-grid-dragging-shadow')) window.customElements.define('sc-data-grid-dragging-shadow', ScDataGridDraggingShadow);
+if (!window.customElements.get('sc-data-grid-column-set-filter')) window.customElements.define('sc-data-grid-column-set-filter', ScDataGridColumnSetFilter);
+if (!window.customElements.get('sc-data-grid-master-cell')) window.customElements.define('sc-data-grid-master-cell', ScDataGridMasterCell);
+if (!window.customElements.get('sc-data-grid-selection-cell')) window.customElements.define('sc-data-grid-selection-cell', ScDataGridSelectionCell);
+if (!window.customElements.get('sc-data-grid-composite-filter')) window.customElements.define('sc-data-grid-composite-filter', ScDataGridCompositeFilter);
+if (!window.customElements.get('sc-data-grid-column-manager')) window.customElements.define('sc-data-grid-column-manager', ScDataGridColumnManager);
 
-window.customElements.define('sc-data-grid-editing', ScDataGridEditing);
+if (!window.customElements.get('sc-data-grid-editing')) window.customElements.define('sc-data-grid-editing', ScDataGridEditing);
 
-window.customElements.define('sc-data-grid-overlapping', ScDataGridOverlapping);
+if (!window.customElements.get('sc-data-grid-overlapping')) window.customElements.define('sc-data-grid-overlapping', ScDataGridOverlapping);
 
 declare global {
   interface HTMLElementTagNameMap {

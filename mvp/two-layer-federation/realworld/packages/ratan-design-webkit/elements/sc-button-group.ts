@@ -3,8 +3,8 @@ import { ScButtonGroupItem } from '../src/components/ScButtonGroup/ScButtonGroup
 export * from '../src/components/ScButtonGroup/ScButtonGroup.js';
 export * from '../src/components/ScButtonGroup/ScButtonGroupItem.js';
 
-window.customElements.define('sc-button-group', ScButtonGroup);
-window.customElements.define('sc-button-group-item', ScButtonGroupItem);
+if (!window.customElements.get('sc-button-group')) window.customElements.define('sc-button-group', ScButtonGroup);
+if (!window.customElements.get('sc-button-group-item')) window.customElements.define('sc-button-group-item', ScButtonGroupItem);
 
 declare global {
   interface HTMLElementTagNameMap {

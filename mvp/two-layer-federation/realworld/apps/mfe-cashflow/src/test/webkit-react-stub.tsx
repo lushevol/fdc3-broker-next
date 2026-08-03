@@ -41,7 +41,11 @@ export function createComponent(tagName: string): React.ComponentType<WebKitProp
       </label>;
     }
     if (tagName === 'sc-dialog') {
-      return bool(props.open) ? <div role="dialog" aria-label={label}>{props.children}</div> : null;
+      const onHide = props.onScHide as (() => void) | undefined;
+      return bool(props.open) ? <div role="dialog" aria-label={label}>
+        <button type="button" aria-label={`Close ${label}`} onClick={onHide} />
+        {props.children}
+      </div> : null;
     }
     if (tagName === 'sc-alert') {
       return <div role={text(props.role) ?? 'alert'}><strong>{text(props.title)}</strong>{props.children}</div>;
@@ -60,6 +64,13 @@ export function createComponent(tagName: string): React.ComponentType<WebKitProp
     }
     if (tagName === 'sc-tab-panel') {
       return <div role="tabpanel">{props.children}</div>;
+    }
+    if (tagName === 'sc-title') {
+      const level = Math.min(6, Math.max(1, Number(props.level) || 1));
+      return React.createElement(`h${level}`, { id: text(props.id), className: text(props.className) }, props.children);
+    }
+    if (tagName === 'sc-paragraph') {
+      return <p className={text(props.className)} role={text(props.role)}>{props.children}</p>;
     }
     return <section aria-label={label}>{props.children}</section>;
   }

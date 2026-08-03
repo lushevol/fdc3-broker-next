@@ -1,5 +1,9 @@
 # @fm/ratan-design
 
+This changelog applies to the retained legacy compatibility package. Active
+WebKit UI changes are documented by `@fm/ratan-design-webkit` and the Realworld
+[current-state record](../../docs/CURRENT_STATE.md).
+
 ## Unreleased
 
 ### Changed

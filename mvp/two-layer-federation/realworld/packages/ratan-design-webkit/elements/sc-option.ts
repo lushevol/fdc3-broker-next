@@ -1,7 +1,7 @@
 import { ScOption } from '../src/components/common/ScOption.js';
 export * from '../src/components/common/ScOption.js';
 
-window.customElements.define('sc-option', ScOption);
+if (!window.customElements.get('sc-option')) window.customElements.define('sc-option', ScOption);
 declare global {
   interface HTMLElementTagNameMap {
     'sc-option': ScOption;

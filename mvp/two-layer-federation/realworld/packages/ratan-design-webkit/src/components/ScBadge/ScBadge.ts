@@ -2,11 +2,10 @@ import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import SlBadge from '@shoelace-style/shoelace/dist/components/badge/badge.component.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import ScTheme from '../../styles/ScTheme.js';
 import { COLOR, BADGE_TYPE, COMPACT_SIZE } from '../../shared/util.js';
 
-export class ScBadge extends ScopedElementsMixin(LitElement) {
+export class ScBadge extends LitElement {
   static styles = ScTheme.getStyles();
 
   static get scopedElements() {

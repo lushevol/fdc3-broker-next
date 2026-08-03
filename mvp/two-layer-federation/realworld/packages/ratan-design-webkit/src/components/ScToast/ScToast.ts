@@ -5,6 +5,8 @@ import { classMap } from 'lit/directives/class-map.js';
 import { AnimateAlertBase } from '../common/AnimateAlertBase/AnimateAlertBase.js';
 import ScToastStyle from './ScToast.style.js';
 import '../../../elements/sc-icon.js';
+import '../../../elements/sc-paragraph.js';
+import '../../../elements/sc-title.js';
 
 export class ScToast extends AnimateAlertBase {
 
@@ -65,12 +67,17 @@ export class ScToast extends AnimateAlertBase {
 
   renderMessage() {
     return html`
-      <div class='sc-toast-title'>
+      <sc-title class='sc-toast-title' level='6'>
         <slot name='title'>${this.title}</slot>
-      </div>
-      <div class='sc-toast-body' style=${this.rows === 'auto' ? '' : `-webkit-line-clamp: ${this.rows}`}>
+      </sc-title>
+      <sc-paragraph
+        class='sc-toast-body'
+        .rows=${this.rows === 'auto' ? 999 : this.rows}
+        .ellipsis=${this.rows !== 'auto'}
+        style=${this.rows === 'auto' ? '' : `-webkit-line-clamp: ${this.rows}`}
+      >
         <slot></slot>
-      </div>
+      </sc-paragraph>
     `;
   }
 

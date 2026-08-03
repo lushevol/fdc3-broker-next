@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { PlatformClient } from '@fm/platform-sdk';
 import { RatanDataGrid, type RatanDataGridColumn } from '@fm/ratan-data-grid';
-import { ScAlert, ScBadge, ScButton, ScTextInput } from './webkit';
+import { ScAlert, ScBadge, ScButton, ScParagraph, ScTextInput, ScTitle } from './webkit';
 import { AuthorizationLimitEditor } from './AuthorizationLimitEditor';
 import {
   AuthorizationLimitTransitionDialog,
@@ -46,8 +46,25 @@ function statusColor(status: AuthorizationLimitRecord['status']) {
 export const authorizationLimitColumns: readonly RatanDataGridColumn<AuthorizationLimitRecord>[] = [
   { key: 'profile', header: 'Profile', flex: 1, minWidth: 190 },
   { key: 'currency', header: 'Currency', width: 120 },
-  { key: 'limitation', header: 'Limitation', width: 180, formatValue: (value) => formatUsdLimit(Number(value)) },
-  { key: 'status', header: 'Status', width: 170, renderCell: (row) => <ScBadge type="text" color={statusColor(row.status)} label={row.status.replace('_', ' ')} aria-label={row.status.replace('_', ' ')} /> },
+  {
+    key: 'limitation',
+    header: 'Limitation',
+    width: 180,
+    formatValue: (value) => formatUsdLimit(Number(value)),
+  },
+  {
+    key: 'status',
+    header: 'Status',
+    width: 170,
+    renderCell: (row) => (
+      <ScBadge
+        type="text"
+        color={statusColor(row.status)}
+        label={row.status.replace('_', ' ')}
+        aria-label={row.status.replace('_', ' ')}
+      />
+    ),
+  },
 ];
 
 export function AuthorizationLimits({
@@ -59,7 +76,9 @@ export function AuthorizationLimits({
 }: Props) {
   const route = `${basePath}/authorization-limits`;
   const detailPrefix = `${route}/details/`;
-  const detailId = path.startsWith(detailPrefix) ? decodeURIComponent(path.slice(detailPrefix.length)) : null;
+  const detailId = path.startsWith(detailPrefix)
+    ? decodeURIComponent(path.slice(detailPrefix.length))
+    : null;
   const [attempt, setAttempt] = useState(0);
   const [rows, setRows] = useState<readonly AuthorizationLimitRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,7 +92,7 @@ export function AuthorizationLimits({
   } | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const policy = useMemo(
-    () => mutation ? createAuthorizationLimitsPolicy(mutation.principal) : null,
+    () => (mutation ? createAuthorizationLimitsPolicy(mutation.principal) : null),
     [mutation],
   );
 
@@ -86,18 +105,30 @@ export function AuthorizationLimits({
     let active = true;
     setLoading(true);
     setError(null);
-    repository.list()
-      .then((records) => { if (active) setRows(records); })
-      .catch((reason: unknown) => { if (active) setError(reason instanceof Error ? reason.message : String(reason)); })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+    repository
+      .list()
+      .then((records) => {
+        if (active) setRows(records);
+      })
+      .catch((reason: unknown) => {
+        if (active) setError(reason instanceof Error ? reason.message : String(reason));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [attempt, repository]);
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     if (!normalized) return rows;
-    return rows.filter((record) => [record.limitationId, record.profile, record.currency, record.status]
-      .some((value) => value.toLowerCase().includes(normalized)));
+    return rows.filter((record) =>
+      [record.limitationId, record.profile, record.currency, record.status].some((value) =>
+        value.toLowerCase().includes(normalized),
+      ),
+    );
   }, [query, rows]);
   const detail = detailId ? rows.find((record) => record.limitationId === detailId) : undefined;
   const submitEditor = async (profile: string, limitation: number) => {
@@ -114,8 +145,9 @@ export function AuthorizationLimits({
       limitation,
       expectedVersion: editor.record.version,
     });
-    setRows((current) => current.map((record) =>
-      record.limitationId === updated.limitationId ? updated : record));
+    setRows((current) =>
+      current.map((record) => (record.limitationId === updated.limitationId ? updated : record)),
+    );
     setFeedback('Authorization Limit updated.');
   };
   const editorDialog = editor ? (
@@ -138,7 +170,10 @@ export function AuthorizationLimits({
     if (action === 'delete') {
       await mutation.service.remove(key);
     } else {
-      const command = { ...key, status: record.status as Exclude<typeof record.status, 'CONFIRMED'> };
+      const command = {
+        ...key,
+        status: record.status as Exclude<typeof record.status, 'CONFIRMED'>,
+      };
       if (action.startsWith('approve-')) await mutation.service.confirm(command);
       else await mutation.service.reject(command);
     }
@@ -154,66 +189,164 @@ export function AuthorizationLimits({
       onClose={() => setTransition(null)}
     />
   ) : null;
-  const localFeedback = feedback
-    ? <ScAlert role="status" type="success">{feedback}</ScAlert>
-    : null;
+  const localFeedback = feedback ? (
+    <ScAlert role="status" type="success">
+      {feedback}
+    </ScAlert>
+  ) : null;
 
   if (detailId) {
-    return <section className="authorization-limits authorization-limit-details">
-      <ScButton type="tertiary" role="button" onClick={() => client.navigate(route)}>Back to Authorization Limits</ScButton>
-      {localFeedback}
-      {loading ? <p role="status">Loading Authorization Limit…</p> : detail ? <>
-        <header><div><span className="section-label">Authorization Limit</span><h2>{detail.limitationId}</h2></div><ScBadge type="text" color={statusColor(detail.status)} label={detail.status.replace('_', ' ')} aria-label={detail.status.replace('_', ' ')} /></header>
-        <dl className="details-grid">
-          <div><dt>Profile</dt><dd>{detail.profile}</dd></div><div><dt>Currency</dt><dd>{detail.currency}</dd></div>
-          <div><dt>Limitation</dt><dd>{formatUsdLimit(detail.limitation)}</dd></div><div><dt>Status</dt><dd>{detail.status}</dd></div>
-          <div><dt>Version</dt><dd>{detail.version}</dd></div><div><dt>Updated</dt><dd>{detail.updatedAt}</dd></div>
-          <div><dt>Created by</dt><dd>{detail.createdBy}</dd></div><div><dt>Updated by</dt><dd>{detail.updatedBy}</dd></div>
-        </dl>
-        <div className="authorization-limit-actions">
-          {policy?.actionsFor(detail).map((action) => action === 'edit' ? (
-            <ScButton key={action} type="primary" role="button" onClick={() => setEditor({ mode: 'edit', record: detail })}>
-              Edit Authorization Limit
-            </ScButton>
-          ) : action !== 'create' ? (
-            <ScButton
-              key={action}
-              type={authorizationLimitTransitionPresentation[action].tone === 'danger' ? 'negative' : 'secondary'}
-              role="button"
-              onClick={() => setTransition({ action, record: detail })}
-            >
-              {authorizationLimitTransitionPresentation[action].trigger}
-            </ScButton>
-          ) : null)}
-        </div>
-        <p className="migration-note">{mutation
-          ? 'Opt-in mutation composition. Runtime activation awaits an approved authenticated service adapter.'
-          : 'Read-only migration cohort. Create, edit, delete, approve, and reject remain in the legacy workflow.'}</p>
-      </> : <p role="alert">Authorization Limit record was not found.</p>}
-      {editorDialog}
-      {transitionDialog}
-    </section>;
+    return (
+      <section className="authorization-limits authorization-limit-details">
+        <ScButton type="tertiary" role="button" onClick={() => client.navigate(route)}>
+          Back to Authorization Limits
+        </ScButton>
+        {localFeedback}
+        {loading ? (
+          <ScParagraph role="status">Loading Authorization Limit…</ScParagraph>
+        ) : detail ? (
+          <>
+            <header>
+              <div>
+                <ScParagraph className="section-label" size="sm">
+                  Authorization Limit
+                </ScParagraph>
+                <ScTitle level={2}>{detail.limitationId}</ScTitle>
+              </div>
+              <ScBadge
+                type="text"
+                color={statusColor(detail.status)}
+                label={detail.status.replace('_', ' ')}
+                aria-label={detail.status.replace('_', ' ')}
+              />
+            </header>
+            <dl className="details-grid">
+              <div>
+                <dt>Profile</dt>
+                <dd>{detail.profile}</dd>
+              </div>
+              <div>
+                <dt>Currency</dt>
+                <dd>{detail.currency}</dd>
+              </div>
+              <div>
+                <dt>Limitation</dt>
+                <dd>{formatUsdLimit(detail.limitation)}</dd>
+              </div>
+              <div>
+                <dt>Status</dt>
+                <dd>{detail.status}</dd>
+              </div>
+              <div>
+                <dt>Version</dt>
+                <dd>{detail.version}</dd>
+              </div>
+              <div>
+                <dt>Updated</dt>
+                <dd>{detail.updatedAt}</dd>
+              </div>
+              <div>
+                <dt>Created by</dt>
+                <dd>{detail.createdBy}</dd>
+              </div>
+              <div>
+                <dt>Updated by</dt>
+                <dd>{detail.updatedBy}</dd>
+              </div>
+            </dl>
+            <div className="authorization-limit-actions">
+              {policy?.actionsFor(detail).map((action) =>
+                action === 'edit' ? (
+                  <ScButton
+                    key={action}
+                    type="primary"
+                    role="button"
+                    onClick={() => setEditor({ mode: 'edit', record: detail })}
+                  >
+                    Edit Authorization Limit
+                  </ScButton>
+                ) : action !== 'create' ? (
+                  <ScButton
+                    key={action}
+                    type={
+                      authorizationLimitTransitionPresentation[action].tone === 'danger'
+                        ? 'negative'
+                        : 'secondary'
+                    }
+                    role="button"
+                    onClick={() => setTransition({ action, record: detail })}
+                  >
+                    {authorizationLimitTransitionPresentation[action].trigger}
+                  </ScButton>
+                ) : null,
+              )}
+            </div>
+            <ScParagraph className="migration-note">
+              {mutation
+                ? 'Opt-in mutation composition. Runtime activation awaits an approved authenticated service adapter.'
+                : 'Read-only migration cohort. Create, edit, delete, approve, and reject remain in the legacy workflow.'}
+            </ScParagraph>
+          </>
+        ) : (
+          <ScParagraph role="alert">Authorization Limit record was not found.</ScParagraph>
+        )}
+        {editorDialog}
+        {transitionDialog}
+      </section>
+    );
   }
 
-  return <section className="authorization-limits">
-    <header className="authorization-limits-header"><div><span className="section-label">Migration cohort 1</span><h2>Authorization Limits</h2><p>{mutation ? 'Opt-in mutation composition · production activation remains gated' : 'Read-only list and details · mutations remain in legacy'}</p></div><div className="authorization-limits-summary"><strong>{filtered.length} limits</strong>{policy?.create.allowed ? <ScButton type="primary" role="button" onClick={() => setEditor({ mode: 'create' })}>Create Authorization Limit</ScButton> : null}</div></header>
-    {localFeedback}
-    <ScTextInput id="authorization-limits-filter" label="Filter Authorization Limits" type="search" role="searchbox" aria-label="Filter Authorization Limits" value={query} onScInput={(event: CustomEvent<{ value: string }>) => setQuery(event.detail.value)} />
-    <RatanDataGrid
-      ariaLabel="Authorization Limits"
-      rows={filtered}
-      columns={authorizationLimitColumns}
-      getRowId={(row) => row.limitationId}
-      selectedRowId={selectedId}
-      onSelectionChange={(row) => setSelectedId(row.limitationId)}
-      onActivate={(row) => client.navigate(`${detailPrefix}${encodeURIComponent(row.limitationId)}`)}
-      pageSize={5}
-      loading={loading}
-      error={error}
-      onRetry={() => setAttempt((value) => value + 1)}
-      emptyMessage="No Authorization Limits match the current filter."
-    />
-    {editorDialog}
-    {transitionDialog}
-  </section>;
+  return (
+    <section className="authorization-limits">
+      <header className="authorization-limits-header">
+        <div>
+          <ScParagraph className="section-label" size="sm">
+            Migration cohort 1
+          </ScParagraph>
+          <ScTitle level={2}>Authorization Limits</ScTitle>
+          <ScParagraph>
+            {mutation
+              ? 'Opt-in mutation composition · production activation remains gated'
+              : 'Read-only list and details · mutations remain in legacy'}
+          </ScParagraph>
+        </div>
+        <div className="authorization-limits-summary">
+          <ScParagraph>{filtered.length} limits</ScParagraph>
+          {policy?.create.allowed ? (
+            <ScButton type="primary" role="button" onClick={() => setEditor({ mode: 'create' })}>
+              Create Authorization Limit
+            </ScButton>
+          ) : null}
+        </div>
+      </header>
+      {localFeedback}
+      <ScTextInput
+        id="authorization-limits-filter"
+        label="Filter Authorization Limits"
+        type="search"
+        role="searchbox"
+        aria-label="Filter Authorization Limits"
+        value={query}
+        onScInput={(event: CustomEvent<{ value: string }>) => setQuery(event.detail.value)}
+      />
+      <RatanDataGrid
+        ariaLabel="Authorization Limits"
+        rows={filtered}
+        columns={authorizationLimitColumns}
+        getRowId={(row) => row.limitationId}
+        selectedRowId={selectedId}
+        onSelectionChange={(row) => setSelectedId(row.limitationId)}
+        onActivate={(row) =>
+          client.navigate(`${detailPrefix}${encodeURIComponent(row.limitationId)}`)
+        }
+        pageSize={5}
+        loading={loading}
+        error={error}
+        onRetry={() => setAttempt((value) => value + 1)}
+        emptyMessage="No Authorization Limits match the current filter."
+      />
+      {editorDialog}
+      {transitionDialog}
+    </section>
+  );
 }

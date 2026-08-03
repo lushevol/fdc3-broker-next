@@ -1,7 +1,7 @@
 import { ScFormattedInput } from '../src/components/ScFormInput/ScFormattedInput.js';
 export * from '../src/components/ScFormInput/ScFormattedInput.js';
 
-window.customElements.define('sc-formatted-input', ScFormattedInput);
+if (!window.customElements.get('sc-formatted-input')) window.customElements.define('sc-formatted-input', ScFormattedInput);
 
 declare global {
   interface HTMLElementTagNameMap {

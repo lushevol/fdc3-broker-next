@@ -1,5 +1,9 @@
 # @fm/ratan-design — Rules
 
+Status: rules for the legacy compatibility package only. Active WebKit rules
+are documented in
+[`../../ratan-design-webkit/README.md`](../../ratan-design-webkit/README.md).
+
 ## Public API
 
 - Export documented APIs only from `src/index.ts`.

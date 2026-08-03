@@ -5,9 +5,9 @@ export * from '../src/components/ScDropdown/ScDropdownInput.js';
 export * from '../src/components/ScDropdown/ScDropdownMultiSelect.js';
 export * from '../src/components/ScDropdown/ScDropdownOption.js';
 
-window.customElements.define('sc-dropdown-input', ScDropdownInput);
-window.customElements.define('sc-dropdown-multi-select', ScDropdownMultiSelect);
-window.customElements.define('sc-dropdown-option', ScDropdownOption);
+if (!window.customElements.get('sc-dropdown-input')) window.customElements.define('sc-dropdown-input', ScDropdownInput);
+if (!window.customElements.get('sc-dropdown-multi-select')) window.customElements.define('sc-dropdown-multi-select', ScDropdownMultiSelect);
+if (!window.customElements.get('sc-dropdown-option')) window.customElements.define('sc-dropdown-option', ScDropdownOption);
 
 declare global {
   interface HTMLElementTagNameMap {

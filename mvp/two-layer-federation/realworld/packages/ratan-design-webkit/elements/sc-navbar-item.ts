@@ -1,7 +1,7 @@
 import { ScNavbarItem } from '../src/components/ScNavbar/ScNavbarItem.js';
 export * from '../src/components/ScNavbar/ScNavbarItem.js';
 
-window.customElements.define('sc-navbar-item', ScNavbarItem);
+if (!window.customElements.get('sc-navbar-item')) window.customElements.define('sc-navbar-item', ScNavbarItem);
 
 declare global {
   interface HTMLElementTagNameMap {

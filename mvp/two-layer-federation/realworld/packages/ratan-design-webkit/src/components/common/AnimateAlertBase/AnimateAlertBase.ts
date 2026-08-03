@@ -9,7 +9,6 @@ import AlertBaseStyle from './AnimateAlertBase.style.js';
 import { getPositionFixedContainer } from '../../../shared/fixed-container.js';
 
 export class AnimateAlertBase extends ScElement {
-
   static styles = ScTheme.getStyles().concat([AlertBaseStyle]);
 
   @property({ type: Boolean, reflect: true }) closable = false;
@@ -18,14 +17,20 @@ export class AnimateAlertBase extends ScElement {
 
   @property({ type: Boolean, reflect: true, attribute: 'icon-hide' }) iconHide = false;
 
-  @property({ type: String }) type: 'success'| 'warning' | 'error' | 'info' | 'disabled' | 'loading' = 'success';
+  @property({ type: String }) type:
+    | 'success'
+    | 'warning'
+    | 'error'
+    | 'info'
+    | 'disabled'
+    | 'loading' = 'success';
 
   @property({ type: Number }) duration = 3000;
 
   @property({ type: Boolean }) truncate = false;
 
   @property({ type: String })
-    placement: 'top' | 'bottom' | 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right' = 'top';
+  placement: 'top' | 'bottom' | 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right' = 'top';
 
   private _currentStack: AnimateAlertBase[] | undefined;
 
@@ -40,7 +45,7 @@ export class AnimateAlertBase extends ScElement {
   @query('.alert') base: HTMLElement;
 
   @queryAssignedElements({ selector: 'sc-button', slot: 'action' })
-    actionButtons: Array<any>;
+  actionButtons: Array<any>;
 
   override disconnectedCallback(): void {
     this.autoHideTimeout && clearTimeout(this.autoHideTimeout);
@@ -81,7 +86,7 @@ export class AnimateAlertBase extends ScElement {
    * (e.g. `animation: none` set externally, or an unsupported property).
    */
   private _waitForAnimation(): Promise<void> {
-    return new Promise<void>(resolve => {
+    return new Promise<void>((resolve) => {
       const ac = new AbortController();
       this._animationEndController = ac;
 
@@ -94,12 +99,18 @@ export class AnimateAlertBase extends ScElement {
       const fallbackTimer = window.setTimeout(cleanup, 300);
 
       this.base.addEventListener('animationend', cleanup, { once: true, signal: ac.signal });
-      ac.signal.addEventListener('abort', () => { clearTimeout(fallbackTimer); resolve(); }, { once: true });
+      ac.signal.addEventListener(
+        'abort',
+        () => {
+          clearTimeout(fallbackTimer);
+          resolve();
+        },
+        { once: true },
+      );
     });
   }
 
-  setDuration() {
-  }
+  setDuration() {}
 
   private restartAutoHide() {
     clearTimeout(this.autoHideTimeout);
@@ -141,7 +152,9 @@ export class AnimateAlertBase extends ScElement {
       this._stopCurrentAnimation();
       this._stackPush();
       this.base.hidden = false;
-      this._resetAndStartAnimation(() => { this.base.dataset.state = 'open'; });
+      this._resetAndStartAnimation(() => {
+        this.base.dataset.state = 'open';
+      });
 
       await this._waitForAnimation();
 
@@ -158,7 +171,9 @@ export class AnimateAlertBase extends ScElement {
       clearTimeout(this.autoHideTimeout);
 
       this._stopCurrentAnimation();
-      this._resetAndStartAnimation(() => { this.base.dataset.state = 'hiding'; });
+      this._resetAndStartAnimation(() => {
+        this.base.dataset.state = 'hiding';
+      });
 
       await this._waitForAnimation();
 
@@ -202,9 +217,7 @@ export class AnimateAlertBase extends ScElement {
     const { p, stack } = this._stackRemove();
     if (p > -1 && stack) {
       // update all after the removed one
-      stack
-        .slice(p)
-        .forEach((item, i) => item._updateOffsetFrom(stack.slice(0, p + i)));
+      stack.slice(p).forEach((item, i) => item._updateOffsetFrom(stack.slice(0, p + i)));
     }
   }
   private _stackRemove() {
@@ -225,7 +238,6 @@ export class AnimateAlertBase extends ScElement {
       this.base.style.removeProperty('margin-top');
     }
   }
-
 
   /** Shows the alert. */
   async show() {
@@ -256,22 +268,18 @@ export class AnimateAlertBase extends ScElement {
   }
 
   renderCloseIcon() {
-    return html`
-      <sc-icon name='cross' size='md'></sc-icon>
-    `;
+    return html` <sc-icon name="cross" size="md"></sc-icon> `;
   }
 
   renderDelimiter() {
-    return html`<slot name='delimiter'></slot>`;
+    return html`<slot name="delimiter"></slot>`;
   }
 
   renderButtons() {
     return html``;
   }
 
-  formatAction() {
-
-  }
+  formatAction() {}
 
   classes() {
     return '';
@@ -280,7 +288,7 @@ export class AnimateAlertBase extends ScElement {
   render() {
     return html`
       <div
-        class='
+        class="
           ${this.classes()}
           alert
           alert--${this.type}
@@ -288,41 +296,46 @@ export class AnimateAlertBase extends ScElement {
           ${this.closable ? 'closable' : ''}
           ${this.placement}
           ${this.truncate ? 'sc-truncate' : ''}
-        '
-        part='base'
-        role='alert'
+        "
+        part="base"
+        role="alert"
         aria-hidden=${!this.open}
         @mouseenter=${this.handleMouseOver}
         @mouseleave=${this.handleMouseOut}
       >
-        ${!this.iconHide ? html`
-          <div part="icon" class="alert-icon ${this.type}">
-            <slot name='icon'>
-              ${this.renderIcon()}
-            </slot>
-          </div>
-        ` : null}
-        <div part="message" class="alert-message" aria-live="polite">
-          ${this.renderMessage()}
-        </div>
-        <slot name='action' @slotchange=${this.formatAction} style="height:100%">
+        ${!this.iconHide
+          ? html`
+              <div part="icon" class="alert-icon ${this.type}">
+                <slot name="icon"> ${this.renderIcon()} </slot>
+              </div>
+            `
+          : null}
+        <div part="message" class="alert-message" aria-live="polite">${this.renderMessage()}</div>
+        <slot name="action" @slotchange=${this.formatAction} style="height:100%">
           ${this.renderButtons()}
         </slot>
         ${this.renderDelimiter()}
-        ${this.closable ? html`
-          <div part='close-icon' class='close-icon' @click=${this.handleCloseClick}>
-            <slot name='close-icon'>${this.renderCloseIcon()}</slot>
-          </div>
-        ` : null}
+        ${this.closable
+          ? html`
+              <button
+                type="button"
+                part="close-icon"
+                class="close-icon"
+                aria-label="Close"
+                @click=${this.handleCloseClick}
+              >
+                <slot name="close-icon">${this.renderCloseIcon()}</slot>
+              </button>
+            `
+          : null}
       </div>
     `;
   }
 }
 
-
 const stacksKey = Symbol('__scAniAlertStacks');
 
 function getStackList(el: HTMLElement, placement: string): AnimateAlertBase[] {
   const container = getPositionFixedContainer(el) as any;
-  return (container[stacksKey] ??= {})[placement] ??= [];
+  return ((container[stacksKey] ??= {})[placement] ??= []);
 }

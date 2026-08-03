@@ -1,6 +1,5 @@
 import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import ScTheme from '../../styles/ScTheme.js';
 
 type SpacerSize = '04' | '08' | '12' | '16' | '20' | '24' |
@@ -9,7 +8,7 @@ type SpacerSize = '04' | '08' | '12' | '16' | '20' | '24' |
 /**
  * @summary Spacer is used to add space between rows.
  */
-export class ScSpacer extends ScopedElementsMixin(LitElement) {
+export class ScSpacer extends LitElement {
   static styles = ScTheme.getStyles();
 
   @property({ type: String, reflect: true }) size: SpacerSize = '04';

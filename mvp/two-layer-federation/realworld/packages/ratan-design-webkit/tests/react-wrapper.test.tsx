@@ -1,8 +1,14 @@
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { createComponent } from '../src/wrapper/ReactWrapper.js';
 
 describe('ReactWrapper', () => {
+  it('registers native dependencies used inside WebKit component templates', () => {
+    expect(customElements.get('sl-button')).toBeTypeOf('function');
+    expect(customElements.get('sl-dialog')).toBeTypeOf('function');
+    expect(customElements.get('sl-menu')).toBeTypeOf('function');
+  });
+
   it('wraps registered components from the WebKit component catalog', () => {
     const Button = createComponent('sc-button');
     const Divider = createComponent('sc-divider');
@@ -42,6 +48,21 @@ describe('ReactWrapper', () => {
     fireEvent(input, new CustomEvent('sc-input', { detail: { value: 'cashflow' } }));
 
     expect(onScInput).toHaveBeenCalledOnce();
+  });
+
+  it('renders React avatar initials through the default slot', async () => {
+    const Avatar = createComponent('sc-avatar');
+    const IconButton = createComponent('sc-icon-button');
+    const { container } = render(<><Avatar id="trader-mary" size="sm">TM</Avatar><IconButton name="notification" /></>);
+    const avatar = container.querySelector('sc-avatar') as HTMLElement & { id: string; size: string };
+    const iconButton = container.querySelector('sc-icon-button') as HTMLElement & { name: string };
+
+    await waitFor(() => expect(avatar.shadowRoot?.querySelector('slot')).not.toBeNull());
+    expect(avatar).toHaveTextContent('TM');
+    expect(avatar.shadowRoot?.textContent).toContain('var(--sc-avatar-default-background-color, #2563eb)');
+    expect(avatar.id).toBe('trader-mary');
+    expect(avatar.size).toBe('sm');
+    expect(iconButton.name).toBe('notification');
   });
 
   it('fails clearly for an unregistered tag', () => {

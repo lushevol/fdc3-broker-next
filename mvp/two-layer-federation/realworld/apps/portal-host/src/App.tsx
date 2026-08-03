@@ -9,7 +9,7 @@ import {
 import { ANONYMOUS_IDENTITY_CAPABILITY } from './identity';
 import { LoginScreen } from './LoginScreen';
 import { loadApplicationRegistry } from './registry';
-import { ScAlert, ScButton, ScSpinner } from './webkit';
+import { ScAlert, ScButton, ScParagraph, ScSpinner } from './webkit';
 
 interface AppProps {
   readonly identity?: IdentityCapability;
@@ -30,9 +30,16 @@ export function App({
     if (!activeIdentity) return undefined;
     let active = true;
     setError(null);
-    loadApplicationRegistry().then((value) => { if (active) setRegistry(value); })
-      .catch((reason: unknown) => { if (active) setError(reason instanceof Error ? reason : new Error(String(reason))); });
-    return () => { active = false; };
+    loadApplicationRegistry()
+      .then((value) => {
+        if (active) setRegistry(value);
+      })
+      .catch((reason: unknown) => {
+        if (active) setError(reason instanceof Error ? reason : new Error(String(reason)));
+      });
+    return () => {
+      active = false;
+    };
   }, [activeIdentity, attempt]);
   if (!activeIdentity) {
     return (
@@ -50,16 +57,23 @@ export function App({
   }
   if (error) {
     return (
-      <div className="ratan-webkit-root" data-ratan-scope="host" data-ratan-theme="dark" data-ratan-density="comfortable" data-design-system="ratan-webkit" dir="ltr">
+      <div
+        className="ratan-webkit-root"
+        data-ratan-scope="host"
+        data-ratan-theme="dark"
+        data-ratan-density="comfortable"
+        data-design-system="ratan-webkit"
+        dir="ltr"
+      >
         <main className="host-status-surface">
-          <ScAlert
-            role="alert"
-            title="Portal registry unavailable"
-            type="error"
-            icon
-          >
-            <span>{error.message}</span>
-            <ScButton type="primary" role="button" aria-label="Retry registry" onClick={() => setAttempt((value) => value + 1)}>
+          <ScAlert role="alert" title="Portal registry unavailable" type="error" icon>
+            <ScParagraph>{error.message}</ScParagraph>
+            <ScButton
+              type="primary"
+              role="button"
+              aria-label="Retry registry"
+              onClick={() => setAttempt((value) => value + 1)}
+            >
               Retry registry
             </ScButton>
           </ScAlert>
@@ -69,13 +83,26 @@ export function App({
   }
   if (!registry) {
     return (
-      <div className="ratan-webkit-root" data-ratan-scope="host" data-ratan-theme="dark" data-ratan-density="comfortable" data-design-system="ratan-webkit" dir="ltr">
+      <div
+        className="ratan-webkit-root"
+        data-ratan-scope="host"
+        data-ratan-theme="dark"
+        data-ratan-density="comfortable"
+        data-design-system="ratan-webkit"
+        dir="ltr"
+      >
         <main className="host-status-surface" role="status">
           <ScSpinner aria-label="Loading application registry" role="progressbar" />
-          <span>Loading application registry…</span>
+          <ScParagraph>Loading application registry…</ScParagraph>
         </main>
       </div>
     );
   }
-  return <PortalHost registry={registry} identity={activeIdentity} onLogout={() => setActiveIdentity(null)} />;
+  return (
+    <PortalHost
+      registry={registry}
+      identity={activeIdentity}
+      onLogout={() => setActiveIdentity(null)}
+    />
+  );
 }

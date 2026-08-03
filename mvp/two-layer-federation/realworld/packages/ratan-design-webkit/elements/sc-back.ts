@@ -1,7 +1,7 @@
 import { ScBack } from '../src/components/ScBack/ScBack.js';
 export * from '../src/components/ScBack/ScBack.js';
 
-window.customElements.define('sc-back', ScBack);
+if (!window.customElements.get('sc-back')) window.customElements.define('sc-back', ScBack);
 
 declare global {
   interface HTMLElementTagNameMap {

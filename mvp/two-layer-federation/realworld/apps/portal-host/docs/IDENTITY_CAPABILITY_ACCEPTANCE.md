@@ -1,8 +1,15 @@
 # Platform identity capability acceptance
 
+Status: capability contract accepted; runtime login status updated 3 August 2026. See [`../../../docs/CURRENT_STATE.md`](../../../docs/CURRENT_STATE.md).
+
 ## Outcome
 
-The production two-layer platform now has an additive, independently versioned identity contract. The host owns the capability; federated applications consume a minimal read-only snapshot. The current host publishes only a truthful anonymous snapshot, so this change does not claim that authentication exists and does not activate Authorization Limits mutations.
+The production two-layer platform has an additive, independently versioned
+identity contract. The host owns the capability; federated applications consume
+a minimal read-only snapshot. The local host now starts anonymous and can
+publish an authenticated snapshot through its deterministic verification login.
+This does not claim production authentication and does not by itself activate
+Authorization Limits mutations.
 
 ## Public contract
 
@@ -15,13 +22,13 @@ The public capability contains only synchronous `getSnapshot()` and `subscribe()
 
 ## Ownership
 
-| Owner | Responsibility |
-| --- | --- |
-| Portal host | Adapt an approved authentication/session source into identity snapshots and deliver the capability directly to applications |
-| Platform contracts | Define identity states, runtime validation, capability types, version negotiation, and stable compatibility errors |
-| Platform SDK | Provide optional client access and a validated observable identity controller |
-| Cashflow application | Declare supported identity contract version and translate an authenticated snapshot into an application-domain principal only at composition time |
-| Authorization Limits backend | Remain authoritative for authorization regardless of UI permission affordances |
+| Owner                        | Responsibility                                                                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Portal host                  | Adapt an approved authentication/session source into identity snapshots and deliver the capability directly to applications                       |
+| Platform contracts           | Define identity states, runtime validation, capability types, version negotiation, and stable compatibility errors                                |
+| Platform SDK                 | Provide optional client access and a validated observable identity controller                                                                     |
+| Cashflow application         | Declare supported identity contract version and translate an authenticated snapshot into an application-domain principal only at composition time |
+| Authorization Limits backend | Remain authoritative for authorization regardless of UI permission affordances                                                                    |
 
 Applications must not derive identity from browser storage, URL state, legacy globals, display labels, or credentials. The design system has no identity or authorization responsibility.
 
@@ -35,9 +42,15 @@ Applications must not derive identity from browser storage, URL state, legacy gl
 
 Identity fields are optional for applications that do not request the capability. When the registry includes `identity`, both its entry and the remote manifest must declare exactly the supported identity contract version; otherwise loading fails with `IDENTITY_CONTRACT_UNSUPPORTED`. Package semantic versions and runtime protocol versions therefore evolve independently.
 
-## Current runtime behavior
+## Current local runtime behavior
 
-The production registry requests identity for Cashflow, Cashflow declares identity `1.0.0`, and the host supplies `{ state: "anonymous", contractVersion: "1.0.0" }`. The standalone Cashflow preview supplies the same state. No code constructs an Authorization Limits mutation capability from this snapshot, and no HTTP adapter is instantiated.
+The registry requests identity for the relevant applications and each remote
+declares identity contract `1.0.0`. Before login, the host holds
+`{ state: "anonymous", contractVersion: "1.0.0" }`. The local `test` / `test`
+adapter then supplies an authenticated `test` identity with deterministic
+verification permissions. Production session credentials are never placed in
+the identity snapshot. Authorization Limits services and mutation policy remain
+separate activation concerns.
 
 ## Activation gate
 
@@ -56,14 +69,16 @@ Identity alone is never sufficient to activate mutations.
 
 The acceptance run covers strict identity validation, rejected extra credential fields, conditional compatibility, stable error codes, optional SDK behavior, observable immutable snapshots, host-owned anonymous delivery, standalone behavior, Cashflow read-only regression, package builds, lint, two-layer runtime boundaries, and browser rollback journeys.
 
-| Gate | Result |
-| --- | --- |
-| Platform contracts | 19 tests passed; 100% statements/functions/lines; lint and declaration build passed |
-| Platform SDK | 8 tests passed; 100% statements/branches/functions/lines; lint and declaration build passed |
-| Portal host | 11 tests passed; lint, strict TypeScript, and production build passed |
-| Cashflow | 72 tests passed; 97.16% statements, 93.87% branches, 95.4% functions, 97.91% lines; lint, strict TypeScript, and production build passed |
-| Runtime boundaries | Exactly `portal-host` and `federated-application`; only React and ReactDOM singleton shares |
-| Browser rollback | 5/5 Chrome journeys passed, including explicit absence of Create, Edit, Delete, Approve Add, and Reject Add |
-| Specification | `openspec validate add-platform-identity-capability --strict` passed |
+| Gate                 | Result                                                                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------- |
+| Platform contracts   | 19 tests passed; 100% statements/functions/lines; lint and declaration build passed                  |
+| Platform SDK         | 8 tests passed; 100% statements/branches/functions/lines; lint and declaration build passed          |
+| Portal host          | Latest focused run: 46 tests; lint and production build passed                                       |
+| Cashflow             | Latest focused run: 84 tests; lint and production build passed                                       |
+| Runtime boundaries   | Exactly `portal-host` and `federated-application`; only React and ReactDOM singleton shares          |
+| Browser verification | Live Chrome passed login, profile identity rendering, active remote loading, and workspace lifecycle |
+| Specification        | `openspec validate add-platform-identity-capability --strict` passed                                 |
 
-Built size was 530.3 KB / 158.6 KB gzip for the host and 1928.8 KB / 509.8 KB gzip for Cashflow. Compared with the preceding rounded baseline, identity support adds approximately 1.6 KB total / 0.8 KB gzip while preserving the same runtime layers and shared-singleton policy.
+The historical bundle figures associated with the original capability change
+are no longer a current baseline after the WebKit and verification-application
+migrations. The two-layer and shared-singleton policies remain unchanged.

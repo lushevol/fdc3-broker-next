@@ -4,8 +4,8 @@ import { ScIconProvider } from '../src/components/ScIcon/ScIconProvider.js';
 export * from '../src/components/ScIcon/ScIcon.js';
 export * from '../src/components/ScIcon/ScIconProvider.js';
 
-window.customElements.define('sc-icon', ScIcon);
-window.customElements.define('sc-icon-provider', ScIconProvider);
+if (!window.customElements.get('sc-icon')) window.customElements.define('sc-icon', ScIcon);
+if (!window.customElements.get('sc-icon-provider')) window.customElements.define('sc-icon-provider', ScIconProvider);
 
 declare global {
   interface HTMLElementTagNameMap {

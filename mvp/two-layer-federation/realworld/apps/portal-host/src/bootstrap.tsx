@@ -1,4 +1,3 @@
-import '@webcomponents/scoped-custom-element-registry';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';

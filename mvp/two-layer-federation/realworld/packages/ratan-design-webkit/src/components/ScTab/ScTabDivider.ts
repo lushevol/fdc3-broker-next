@@ -1,12 +1,11 @@
 import { html, LitElement } from 'lit';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import ScTheme from '../../styles/ScTheme.js';
 
 /**
  * @summary Tab divider is used inside [tab groups] to represent divider between tabs.
  */
 
-export class ScTabDivider extends ScopedElementsMixin(LitElement) {
+export class ScTabDivider extends LitElement {
   static styles = ScTheme.getStyles();
 
   renderTabGroupStyle() {

@@ -1,6 +1,5 @@
 import { LitElement } from 'lit';
 import { safeMixin, TConstructor } from '../shared/mixin.js';
-import { ScopedElementsMixin } from '@open-wc/scoped-elements/lit-element.js';
 import SlPopup from '@shoelace-style/shoelace/dist/components/popup/popup.component.js';
 
 type TVirtualAnchor = {
@@ -17,7 +16,7 @@ type TPopup = {
 
 export const PopupMixin = safeMixin(
   <T extends TConstructor<LitElement>>(superClass: T): TConstructor<TPopup> & T => {
-    class PopupMixin extends ScopedElementsMixin(superClass) {
+    class PopupMixin extends superClass {
       static get scopedElements() {
         return {
           'sl-popup': SlPopup,

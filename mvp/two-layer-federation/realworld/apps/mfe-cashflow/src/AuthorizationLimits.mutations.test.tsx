@@ -264,7 +264,7 @@ describe('Authorization Limits opt-in create/edit cohort', () => {
     const progress = await screen.findByRole('button', { name: 'Submit in progress' });
     expect(progress).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
-    expect(screen.queryByRole('button', { name: 'Close Create Authorization Limit' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Close Create Authorization Limit' })).toBeInTheDocument();
     fireEvent.click(progress);
     expect(create).toHaveBeenCalledTimes(1);
     resolveCreate(authorizationLimitFixtures[0]);
@@ -430,7 +430,7 @@ describe('Authorization Limits opt-in delete and transition cohort', () => {
     const progress = await screen.findByRole('button', { name: 'Create in progress' });
     expect(progress).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
-    expect(screen.queryByRole('button', { name: 'Close Approve Add?' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Close Approve Add?' })).toBeInTheDocument();
     fireEvent.click(progress);
     expect(confirm).toHaveBeenCalledTimes(1);
     resolveConfirm(authorizationLimitFixtures[2]);

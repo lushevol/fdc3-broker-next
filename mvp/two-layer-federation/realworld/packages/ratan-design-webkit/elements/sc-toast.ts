@@ -1,7 +1,7 @@
 import { ScToast } from '../src/components/ScToast/ScToast.js';
 export * from '../src/components/ScToast/ScToast.js';
 
-window.customElements.define('sc-toast', ScToast);
+if (!window.customElements.get('sc-toast')) window.customElements.define('sc-toast', ScToast);
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -3,8 +3,8 @@ import { ScCheckboxGroup } from '../src/components/ScCheckbox/ScCheckboxGroup.js
 export * from '../src/components/ScCheckbox/ScCheckbox.js';
 export * from '../src/components/ScCheckbox/ScCheckboxGroup.js';
 
-window.customElements.define('sc-checkbox', ScCheckbox);
-window.customElements.define('sc-checkbox-group', ScCheckboxGroup);
+if (!window.customElements.get('sc-checkbox')) window.customElements.define('sc-checkbox', ScCheckbox);
+if (!window.customElements.get('sc-checkbox-group')) window.customElements.define('sc-checkbox-group', ScCheckboxGroup);
 
 declare global {
   interface HTMLElementTagNameMap {
