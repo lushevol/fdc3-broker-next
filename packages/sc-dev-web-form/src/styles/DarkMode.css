@@ -1,0 +1,8 @@
+:host, .sc-mode-dark {
+  --sc-form-designer-drag-icon-background-color: var(--sc-color-grey-dm-50);
+  --sc-form-designer-drag-icon-color: var(--sc-color-blue-460);
+  --sc-form-designer-drop-zone-background-color: var(--sc-color-grey-dm-50);
+  --sc-form-designer-drop-zone-border-color: var(--sc-color-blue-460);
+  --sc-form-designer-code-snippet-background-color: none;
+  --sc-form-designer-code-snippet-save-icon-color: var(--sc-color-green-100);
+}

@@ -8,6 +8,8 @@ import {
   type ButtonProps as MuiButtonProps,
   type TextFieldProps as MuiTextFieldProps,
 } from '@mui/material';
+import createCache from '@emotion/cache';
+import { CacheProvider } from '@emotion/react';
 import type { ChangeEvent, PropsWithChildren, ReactNode } from 'react';
 import { useMemo } from 'react';
 import './tokens.css';
@@ -63,13 +65,22 @@ export function createRatanTheme(appearance: DesignAppearance) {
 export function DesignSystemProvider({
   appearance,
   scope = 'application',
+  styleTarget,
   children,
-}: PropsWithChildren<{ appearance: DesignAppearance; scope?: 'host' | 'application' | 'standalone' }>) {
+}: PropsWithChildren<{
+  appearance: DesignAppearance;
+  scope?: 'host' | 'application' | 'standalone';
+  styleTarget?: HTMLElement | ShadowRoot;
+}>) {
   const theme = useMemo(
     () => createRatanTheme(appearance),
     [appearance.density, appearance.direction, appearance.scheme],
   );
-  return (
+  const cache = useMemo(
+    () => styleTarget ? createCache({ key: `ratan-${scope}`, container: styleTarget, prepend: true }) : null,
+    [scope, styleTarget],
+  );
+  const content = (
     <ThemeProvider theme={theme}>
       <div
         className="ratan-design-root"
@@ -82,6 +93,7 @@ export function DesignSystemProvider({
       </div>
     </ThemeProvider>
   );
+  return cache ? <CacheProvider value={cache}>{content}</CacheProvider> : content;
 }
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';

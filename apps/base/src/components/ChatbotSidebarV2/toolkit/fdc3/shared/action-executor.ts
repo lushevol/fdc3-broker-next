@@ -1,4 +1,4 @@
-import { getAgentApi } from 'ratan-fdc3-agent';
+import { getAgentApi } from 'ratan-fdc3';
 import { createDeclarationBackedFdc3ActionProvider } from './action-provider';
 
 type IntentResolution = {
@@ -8,11 +8,7 @@ type IntentResolution = {
 type Fdc3ContextObject = Record<string, unknown> & { type: string };
 
 type AgentApiLike = {
-  raiseIntent(
-    intent: string,
-    context: Fdc3ContextObject,
-    app?: unknown,
-  ): Promise<IntentResolution>;
+  raiseIntent(intent: string, context: Fdc3ContextObject, app?: unknown): Promise<IntentResolution>;
 };
 
 type Fdc3ExecutionTile = {
@@ -83,10 +79,7 @@ function normalizeSuccessPayload(input: {
   };
 }
 
-function normalizeErrorPayload(
-  intent: string,
-  error: unknown,
-): Fdc3ActionContinuationError {
+function normalizeErrorPayload(intent: string, error: unknown): Fdc3ActionContinuationError {
   return {
     status: 'error',
     intent,
@@ -94,9 +87,11 @@ function normalizeErrorPayload(
   };
 }
 
-export function createFdc3ActionExecutor(deps: {
-  getAgentApi?: () => AgentApiLike;
-} = {}): Fdc3ActionExecutor {
+export function createFdc3ActionExecutor(
+  deps: {
+    getAgentApi?: () => AgentApiLike;
+  } = {},
+): Fdc3ActionExecutor {
   const provider = createDeclarationBackedFdc3ActionProvider();
   const getFdc3Api = deps.getAgentApi ?? getAgentApi;
 

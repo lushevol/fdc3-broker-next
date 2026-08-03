@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
 import {
   APPLICATION_CONTRACT_VERSION,
   APPEARANCE_CONTRACT_VERSION,
@@ -9,13 +10,31 @@ import { createPlatformClient } from '@fm/platform-sdk-poc';
 import { filterCashflows, summarizeCashflows, type CashflowRecord } from '@fm/ratan-sdk-poc';
 import { CashflowTable } from '@fm/ratan-ui-poc';
 import { Button, DesignSystemProvider, StatusBadge, TextField, type StatusTone } from '@fm/ratan-design-poc';
+import '@fm/ratan-design-poc/styles.css';
 import './styles.css';
 
-export const manifest: ApplicationManifest = {
-  id: 'cashflow',
-  displayName: 'Cashflow',
-  contractVersion: APPLICATION_CONTRACT_VERSION,
+export const applicationManifest: ApplicationManifest = {
+  id: 'cashflow', displayName: 'Cashflow', contractVersion: APPLICATION_CONTRACT_VERSION,
   appearanceContractVersion: APPEARANCE_CONTRACT_VERSION,
+};
+
+export const manifest = { tileId: 'cashflow', contractVersion: '0.1' as const };
+
+type TileMountInput = {
+  tileId: string;
+  instanceId: string;
+  root: ShadowRoot;
+  capabilities: { close(): void; telemetry: { track(action: string, outcome?: 'succeeded' | 'failed'): void }; fdc3: { raise(intent: string): Promise<void> } };
+};
+
+const mountedRoots = new Map<string, Root>();
+const HOST_APPEARANCE = {
+  scheme: 'dark' as const,
+  preference: 'dark' as const,
+  density: 'compact' as const,
+  locale: 'en-US',
+  direction: 'ltr' as const,
+  contractVersion: APPEARANCE_CONTRACT_VERSION,
 };
 
 const records: CashflowRecord[] = [
@@ -40,7 +59,7 @@ function useBrowserPath() {
   return path;
 }
 
-export function Application({ instanceId, basePath, capabilities }: ApplicationProps) {
+export function Application({ instanceId, basePath, capabilities, styleTarget }: ApplicationProps & { styleTarget?: ShadowRoot }) {
   const client = useMemo(() => createPlatformClient(capabilities), [capabilities]);
   const appearance = useSyncExternalStore(
     client.subscribeToAppearance,
@@ -146,10 +165,38 @@ export function Application({ instanceId, basePath, capabilities }: ApplicationP
     <DesignSystemProvider
       appearance={{ scheme: appearance.scheme, density: appearance.density, direction: appearance.direction }}
       scope="application"
+      styleTarget={styleTarget}
     >
       {content}
     </DesignSystemProvider>
   );
 }
 
-export default { manifest, Application };
+export function mount(input: TileMountInput): void {
+  const root = createRoot(input.root);
+  mountedRoots.set(input.instanceId, root);
+  root.render(
+    <Application
+      instanceId={input.instanceId}
+      basePath="/cashflow"
+      styleTarget={input.root}
+      capabilities={{
+        navigation: { navigate: (path) => { window.history.pushState({}, '', path); window.dispatchEvent(new PopStateEvent('popstate')); } },
+        notifications: { show: (message) => input.capabilities.telemetry.track(`cashflow.notification.${message}`) },
+        telemetry: { track: (event) => input.capabilities.telemetry.track(event) },
+        workspace: { closeCurrent: input.capabilities.close },
+        appearance: {
+          getSnapshot: () => HOST_APPEARANCE,
+          subscribe: () => () => undefined,
+        },
+      }}
+    />,
+  );
+}
+
+export function unmount(instanceId: string): void {
+  mountedRoots.get(instanceId)?.unmount();
+  mountedRoots.delete(instanceId);
+}
+
+export default { manifest, mount, unmount };

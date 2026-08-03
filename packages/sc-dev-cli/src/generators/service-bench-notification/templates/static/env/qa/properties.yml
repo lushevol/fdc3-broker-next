@@ -1,0 +1,112 @@
+hcv:
+  role: 55313_<%= componentId %>-<%= name.replace(/-exp-api$/, '') %>-plugin_app_k8s_55313_role
+  data:
+    - path: tsa/55313/<%= componentId %>-<%= name.replace(/-process-api$/, '') %>-plugin/app/kv/data/trust_store_uat
+      sourceName: cert
+      targetName: truststore.jks
+      type: file
+    - path: tsa/55313/<%= componentId %>-<%= name.replace(/-process-api$/, '') %>-plugin/app/kv/data/trust_store_uat
+      sourceName: cert_key
+      targetName: TRUSTSTORE_PASSWORD
+      type: static
+    - path: tsa/55313/<%= componentId %>-<%= name.replace(/-process-api$/, '') %>-plugin/app/kv/data/key_store_uat
+      sourceName: cert
+      targetName: keystore.jks
+      type: file
+    - path: tsa/55313/<%= componentId %>-<%= name.replace(/-process-api$/, '') %>-plugin/app/kv/data/key_store_uat
+      sourceName: cert_key
+      targetName: KEYSTORE_PASSWORD
+      type: static
+      # please configure the db path
+    - path: tsa/55313/<%= componentId %>-<%= name.replace(/-process-api$/, '') %>-plugin/
+      sourceName:
+      type: db
+      targetName: NOTIFICATION_DB_PWD
+
+envData:
+  - name: NOTIFICATION_SCHEMA
+    value: # notification schema name
+  - name: NOTIFICATION_DB_URL
+    value: # jdbc link to db,eg. jdbc:postgresql://{db-host}:port/{databaseName}?stringtype=unspecified
+  - name: NOTIFICATION_DB_USER
+    value: # username for db
+  - name: NOTIFICATION_TASK_SCHEDULE_INTERVAL # check the schedule request every 20min
+    value: "20m"
+  - name: NOTIFICATION_TASK_RETRY_INTERVAL # retry the failed request evert 30min
+    value: "30m"
+  - name: NOTIFICATION_RETRY_MAX_TIME # retry the max times
+    value: "3"
+  - name: NOTIFICATION_RETRY_BEFORE_DAYS # retry the time window = current time - 3 days
+    value: "3"
+  - name: NOTIFICATION_PROCESS_API_HOST
+    value: https://servicebench-uat.global.standardchartered.com/api/notification
+
+functionType: private-api
+enableRestLivenessProbe: true
+
+enableSIP: true
+binaryData:
+  - filename: config.json
+    base64enc: true
+    data: |
+      [
+      {
+        "match": {
+          "url": "[\\S\\s]*",
+          "method": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE"
+          ]
+        },
+        "handlers": [
+          {
+            "id": "authenticator",
+            "config": {
+              "jwks_uri": "https://uat-authn.idp.global.standardchartered.com/ns03/realms/internal-system/protocol/openid-connect/certs",
+              "required_scope": []
+            }
+          }
+        ]
+      }
+      ]
+  - filename: config-egress.json
+    base64enc: true
+    data: |
+      [{
+        "match": {
+          "url": "/api/[\\S\\s]*",
+          "method": [
+            "GET",
+            "POST",
+            "DELETE",
+            "PUT"
+          ]
+        },
+        "handlers": [
+          {
+            "id": "tokenGenerator",
+            "config": {
+              "authType": "SIGNED_JWT",
+              "tokenUrl": "https://uat-authn.idp.global.standardchartered.com/ns03/realms/internal-system/protocol/openid-connect/token",
+              "clientId": "<client-id>",
+              "keyAlias": "<key-alias>"
+            }
+          }
+        ]
+      },
+      {
+        "match": {
+          "url": "[\\S\\s]*",
+          "method": [
+            "CONNECT",
+            "GET",
+            "POST",
+            "DELETE",
+            "PUT"
+          ]
+        },
+        "handlers": [
+        ]
+      }]

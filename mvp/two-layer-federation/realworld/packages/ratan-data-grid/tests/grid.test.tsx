@@ -3,10 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createColumnDefinitions, RatanDataGrid, type RatanDataGridColumn } from '../src';
 
 let gridProps: Record<string, unknown> = {};
-vi.mock('ag-grid-community', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('ag-grid-community')>();
-  return { ...actual, ModuleRegistry: { registerModules: vi.fn() } };
-});
 vi.mock('ag-grid-react', () => ({ AgGridReact: (props: Record<string, unknown>) => { gridProps = props; return <div data-testid="ag-grid" />; } }));
 
 interface Row { id: string; amount: number; status: string }
@@ -54,6 +50,7 @@ describe('RatanDataGrid', () => {
     render(<RatanDataGrid ariaLabel="limits" rows={rows} columns={columns} getRowId={(row) => row.id} selectedRowId="one" pageSize={5} onSelectionChange={select} onActivate={activate} />);
     expect(screen.getByRole('region', { name: 'limits' })).toContainElement(screen.getByTestId('ag-grid'));
     expect(gridProps.paginationPageSize).toBe(5);
+    expect(gridProps.rowSelection).toEqual({ mode: 'singleRow' });
     expect((gridProps.getRowId as (value: { data: Row }) => string)({ data: rows[0] })).toBe('one');
     expect((gridProps.getRowClass as (value: { data: Row }) => string)({ data: rows[0] })).toBe('ratan-row-selected');
     (gridProps.onRowClicked as (value: { data: Row }) => void)({ data: rows[0] });

@@ -4,8 +4,13 @@ export { ModuleLoader, UnavailableModuleLoader } from './module-loader';
 export type {
   ExposedModule,
   LoadRemote,
+  ModuleLoadContext,
+  ModuleLoadErrorContext,
+  ModuleLoadLifecycleHooks,
+  ModuleLoadSuccessContext,
   ModuleLoaderApi,
   ModuleLoaderKind,
+  ModuleLoaderOptions,
   ModuleNamespace,
   ModuleReference,
   ModuleRuntimeAdapter,

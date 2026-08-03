@@ -1,13 +1,15 @@
 import {
-  Dialog as MuiDialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  IconButton,
-  styled,
-} from '@mui/material';
-import { useId, type ReactNode } from 'react';
+  Dialog as ReactAriaDialog,
+  Heading,
+  Modal,
+  ModalOverlay,
+} from 'react-aria-components';
+import {
+  useId,
+  type ReactNode,
+} from 'react';
+import { useDesignSystemContext } from '../provider';
+import { Button } from './Button';
 
 export type DialogWidth = 'small' | 'medium' | 'large';
 
@@ -22,44 +24,6 @@ export interface DialogProps {
   readonly dismissible?: boolean;
 }
 
-const maxWidths: Record<DialogWidth, 'sm' | 'md' | 'lg'> = {
-  small: 'sm',
-  medium: 'md',
-  large: 'lg',
-};
-
-const StyledDialog = styled(MuiDialog)({
-  '& .MuiDialog-paper': {
-    color: 'var(--ratan-color-content-primary)',
-    background: 'var(--ratan-color-surface-raised)',
-    border: '1px solid var(--ratan-color-border-subtle)',
-    borderRadius: 'var(--ratan-radius-control)',
-  },
-  '& .MuiDialogTitle-root': {
-    paddingInlineEnd:
-      'calc(var(--ratan-control-height) + var(--ratan-control-gap))',
-    fontSize: 'var(--ratan-font-size-body)',
-    fontWeight: 'var(--ratan-font-weight-strong)',
-  },
-  '& .MuiDialogContentText-root': {
-    color: 'var(--ratan-color-content-secondary)',
-  },
-  '& .MuiDialogActions-root': {
-    padding: 'var(--ratan-control-padding-inline)',
-  },
-});
-
-const CloseButton = styled(IconButton)({
-  position: 'absolute',
-  insetBlockStart: 'var(--ratan-control-gap)',
-  insetInlineEnd: 'var(--ratan-control-gap)',
-  color: 'var(--ratan-color-content-secondary)',
-  '&.Mui-focusVisible': {
-    outline: 'var(--ratan-focus-width) solid var(--ratan-color-focus-ring)',
-    outlineOffset: 'var(--ratan-focus-offset)',
-  },
-});
-
 export function Dialog({
   open,
   title,
@@ -70,40 +34,59 @@ export function Dialog({
   width = 'small',
   dismissible = true,
 }: DialogProps) {
-  const titleId = useId();
   const descriptionId = useId();
+  const { appearance, portalContainer } = useDesignSystemContext();
 
   return (
-    <StyledDialog
-      open={open}
-      onClose={dismissible ? onClose : undefined}
-      aria-labelledby={titleId}
-      aria-describedby={description ? descriptionId : undefined}
-      maxWidth={maxWidths[width]}
-      fullWidth
-      PaperProps={
-        { 'data-ratan-width': width } as React.HTMLAttributes<HTMLDivElement>
-      }
+    <ModalOverlay
+      className="ratan-design-root ratan-modal-overlay"
+      data-ratan-component="modal-overlay"
+      data-ratan-theme={appearance?.scheme}
+      data-ratan-density={appearance?.density}
+      dir={appearance?.direction}
+      isOpen={open}
+      isDismissable={dismissible}
+      isKeyboardDismissDisabled={!dismissible}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onClose();
+      }}
+      UNSTABLE_portalContainer={portalContainer}
     >
-      <DialogTitle id={titleId}>{title}</DialogTitle>
-      {dismissible ? (
-        <CloseButton
-          aria-label={`Close ${title}`}
-          onClick={onClose}
-          size="small"
+      <Modal className="ratan-modal">
+        <ReactAriaDialog
+          className="ratan-dialog"
+          data-ratan-component="dialog"
+          data-ratan-width={width}
+          aria-describedby={description ? descriptionId : undefined}
         >
-          <span aria-hidden="true">×</span>
-        </CloseButton>
-      ) : null}
-      <DialogContent>
-        {description ? (
-          <DialogContentText id={descriptionId}>
-            {description}
-          </DialogContentText>
-        ) : null}
-        {children}
-      </DialogContent>
-      {actions ? <DialogActions>{actions}</DialogActions> : null}
-    </StyledDialog>
+          <header className="ratan-dialog-header">
+            <Heading className="ratan-dialog-title" slot="title">
+              {title}
+            </Heading>
+            {dismissible ? (
+              <Button
+                className="ratan-dialog-close"
+                variant="ghost"
+                aria-label={`Close ${title}`}
+                onClick={onClose}
+              >
+                <span aria-hidden="true">×</span>
+              </Button>
+            ) : null}
+          </header>
+          <div className="ratan-dialog-body">
+            {description ? (
+              <p id={descriptionId} className="ratan-dialog-description">
+                {description}
+              </p>
+            ) : null}
+            {children}
+          </div>
+          {actions ? (
+            <footer className="ratan-dialog-actions">{actions}</footer>
+          ) : null}
+        </ReactAriaDialog>
+      </Modal>
+    </ModalOverlay>
   );
 }

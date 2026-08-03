@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "artifactIdentity": "applicationId + semanticVersion + sourceRevision + buildId + sha256",
+  "supportedProtocolMajors": [1],
+  "retentionDays": {
+    "promoted": 365,
+    "preview": 14,
+    "auditEvidence": 2555
+  },
+  "recovery": {
+    "registryRpoMinutes": 5,
+    "registryRtoMinutes": 30,
+    "rollbackDecisionMinutes": 10
+  },
+  "sourceMaps": {
+    "publishPublicly": false,
+    "retainPrivatelyDays": 90
+  },
+  "canary": {
+    "initialMechanism": "dedicated registry hostname",
+    "stagesPercent": [0, 1, 10, 50, 100],
+    "minimumSyntheticPasses": 3,
+    "minimumSoakMinutes": 15
+  }
+}

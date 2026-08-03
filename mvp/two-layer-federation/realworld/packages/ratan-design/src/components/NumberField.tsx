@@ -1,5 +1,15 @@
-import { TextField as MuiTextField, styled } from '@mui/material';
-import type { ChangeEvent, ReactNode } from 'react';
+import {
+  FieldError,
+  Group,
+  Input,
+  Label,
+  NumberField as ReactAriaNumberField,
+  Text,
+} from 'react-aria-components';
+import type {
+  FocusEventHandler,
+  ReactNode,
+} from 'react';
 
 export interface NumberFieldProps {
   readonly id: string;
@@ -13,55 +23,74 @@ export interface NumberFieldProps {
   readonly error?: boolean;
   readonly required?: boolean;
   readonly disabled?: boolean;
+  readonly readOnly?: boolean;
   readonly name?: string;
   readonly placeholder?: string;
   readonly autoFocus?: boolean;
-  readonly onBlur?: () => void;
+  readonly className?: string;
+  readonly onBlur?: FocusEventHandler<HTMLInputElement>;
 }
 
-const StyledNumberField = styled(MuiTextField)({
-  '& .MuiInputLabel-root': { color: 'var(--ratan-color-content-secondary)' },
-  '& .MuiOutlinedInput-root': {
-    minHeight: 'var(--ratan-control-height)',
-    color: 'var(--ratan-color-content-primary)',
-    background: 'var(--ratan-color-surface-raised)',
-    borderRadius: 'var(--ratan-radius-control)',
-    '& fieldset': { borderColor: 'var(--ratan-color-border-strong)' },
-    '&:hover fieldset': { borderColor: 'var(--ratan-color-action-primary)' },
-    '&.Mui-focused fieldset': { borderColor: 'var(--ratan-color-focus-ring)' },
-    '&.Mui-focused': {
-      outline: 'var(--ratan-focus-width) solid var(--ratan-color-focus-ring)',
-      outlineOffset: 'var(--ratan-focus-offset)',
-    },
-  },
-});
-
 export function NumberField({
+  id,
+  label,
   value,
   onChange,
   min,
   max,
   step,
-  ...props
+  helperText,
+  error = false,
+  required = false,
+  disabled = false,
+  readOnly = false,
+  name,
+  placeholder,
+  autoFocus,
+  className,
+  onBlur,
 }: NumberFieldProps) {
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const rawValue = event.target.value;
-    if (rawValue === '') {
-      onChange(null);
-      return;
-    }
-    const nextValue = Number(rawValue);
-    onChange(Number.isFinite(nextValue) ? nextValue : null);
-  };
-
   return (
-    <StyledNumberField
-      {...props}
-      value={value ?? ''}
-      type="number"
-      inputProps={{ min, max, step, 'data-ratan-control': 'number-field' }}
-      onChange={handleChange}
-      variant="outlined"
-    />
+    <ReactAriaNumberField
+      className={['ratan-field', 'ratan-number-field', className]
+        .filter(Boolean)
+        .join(' ')}
+      data-ratan-component="number-field"
+      isDisabled={disabled}
+      isInvalid={error}
+      isReadOnly={readOnly}
+      isRequired={required}
+      minValue={min}
+      maxValue={max}
+      step={step}
+      name={name}
+      value={value ?? Number.NaN}
+      onChange={(nextValue) =>
+        onChange(Number.isNaN(nextValue) ? null : nextValue)
+      }
+    >
+      <Label className="ratan-field-label">{label}</Label>
+      <Group className="ratan-field-control">
+        <Input
+          id={id}
+          className="ratan-field-input"
+          data-ratan-control="number-field"
+          placeholder={placeholder}
+          autoFocus={autoFocus}
+          onBlur={onBlur}
+        />
+      </Group>
+      {helperText ? (
+        error ? (
+          <FieldError className="ratan-field-message ratan-field-error">
+            {helperText}
+          </FieldError>
+        ) : (
+          <Text className="ratan-field-message" slot="description">
+            {helperText}
+          </Text>
+        )
+      ) : null}
+    </ReactAriaNumberField>
   );
 }

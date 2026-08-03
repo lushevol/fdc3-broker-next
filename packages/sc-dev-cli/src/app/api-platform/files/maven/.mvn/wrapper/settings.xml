@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<settings
+    xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+ 
+    <offline>false</offline>
+    
+    <profiles>
+        <profile>
+            <id>public-repository-group</id>
+            <repositories>
+                <repository>
+                    <id>artifactory-repo</id>
+                    <name>Artifactory Repo</name>
+                    <url>https://artifactory.global.standardchartered.com/artifactory/maven-release/</url>
+                    <layout>default</layout>
+                    <releases>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>gradle-release</id>
+                    <name>Gradle Release</name>
+                    <url>https://artifactory.global.standardchartered.com/artifactory/gradle-release/</url>
+                    <layout>default</layout>
+                    <releases>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>artifactory-snapshot</id>
+                    <name>Artifactory Repo</name>
+                    <url>https://artifactory.global.standardchartered.com/artifactory/maven-snapshot/</url>
+                    <layout>default</layout>
+                    <releases>
+                        <enabled>false</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>artifactory-central</id>
+                    <name>Artifactory Repo</name>
+                    <url>https://artifactory.global.standardchartered.com/artifactory/maven-central-cache/</url>
+                    <layout>default</layout>
+                    <releases>
+                        <enabled>false</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </snapshots>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>plugin-artifactory-repo</id>
+                    <name>Artifactory Repo</name>
+                    <url>https://artifactory.global.standardchartered.com/artifactory/maven-release/</url>
+                    <layout>default</layout>
+                    <releases>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </snapshots>
+                </pluginRepository>
+                <pluginRepository>
+                    <id>plugin-artifactory-snapshot</id>
+                    <name>Artifactory Repo</name>
+                    <url>https://artifactory.global.standardchartered.com/artifactory/maven-snapshot/</url>
+                    <layout>default</layout>
+                    <releases>
+                        <enabled>false</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
+  <activeProfiles>
+        <activeProfile>public-repository-group</activeProfile>
+  </activeProfiles>
+  <mirrors>
+    <mirror>
+         <id>artifactory-central</id>
+         <mirrorOf>central</mirrorOf>
+         <url>https://artifactory.global.standardchartered.com/artifactory/maven-central-cache/</url>
+    </mirror>
+  </mirrors>
+</settings>

@@ -1,0 +1,20 @@
+//@ts-ignore
+import * as Container from '@fm/base';
+export const ErrorBoundry = Container.ErrorBoundry.default;
+export const Splash = Container.Splash.default;
+export const ContainerProvider = Container.Provider;
+export const ReactRouterDom = Container.ReactRouterDom;
+export const Service = Container.Service;
+export const Hooks = Container.Hooks;
+export const CommonUtil = Container.CommonUtil;
+export const ChannelUtil = Container.ChannelUtil;
+export const useContainerDispatcher = Container.Dispatcher.default;
+export const ThemeConfig = Container.ThemeConfig.default;
+export const ThemeUtil = Container.ThemeUtil;
+export const { Time } = Container.Time;
+export const Button = Container.Button.default;
+export const ExtendTokenService = Container.ExtendService.extendToken;
+export const LoadingButton = Container.LoadingButton.default;
+export const useAnalytics = Container.Analytics.default;
+export const FDC3Agent = Container.FDC3Agent.default;
+export default Container;

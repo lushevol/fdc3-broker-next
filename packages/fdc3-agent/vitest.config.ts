@@ -12,7 +12,20 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'lcov', 'cobertura'],
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts', 'test/**'],
+      exclude: [
+        'src/**/*.test.ts',
+        'src/**/*.spec.ts',
+        'src/index.ts',
+        'src/types.ts',
+        'src/ErrorBoundary.tsx',
+        'test/**',
+      ],
+      thresholds: {
+        lines: 90,
+        branches: 90,
+        functions: 90,
+        statements: 90,
+      },
     },
     reporters: ['junit', 'vitest-sonar-reporter'],
     outputFile: {

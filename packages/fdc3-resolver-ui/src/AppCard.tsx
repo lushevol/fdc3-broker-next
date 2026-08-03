@@ -163,6 +163,7 @@ export const AppCard: React.FC<AppCardProps> = ({
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
+      event.stopPropagation();
       handleClick();
     }
   };

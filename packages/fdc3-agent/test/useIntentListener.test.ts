@@ -458,6 +458,13 @@ describe('useIntentListener hook', () => {
 
     it('should handle rapid mount/unmount', async () => {
       const handler = vi.fn();
+      const unsubscribe = vi.fn();
+      let resolveRegistration: ((listener: Listener) => void) | undefined;
+      vi.mocked(mockBroker.addIntentListener).mockReturnValue(
+        new Promise((resolve) => {
+          resolveRegistration = resolve;
+        }),
+      );
 
       const { unmount } = renderHook(() => useIntentListener('ViewChart', handler));
 
@@ -466,8 +473,11 @@ describe('useIntentListener hook', () => {
         unmount();
       });
 
-      // Should not cause errors
-      expect(true).toBe(true);
+      await act(async () => {
+        resolveRegistration?.({ unsubscribe });
+      });
+
+      await waitFor(() => expect(unsubscribe).toHaveBeenCalledOnce());
     });
   });
 

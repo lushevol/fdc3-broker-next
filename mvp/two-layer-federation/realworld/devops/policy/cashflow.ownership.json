@@ -1,0 +1,13 @@
+{
+  "applicationId": "cashflow",
+  "accountableTeam": "Cashflow application team",
+  "supportRota": "Cashflow non-production POC rota",
+  "criticality": "tier-2",
+  "dataClassification": "internal",
+  "slo": {
+    "availabilityPercent": 99.9,
+    "activationP95Ms": 3000
+  },
+  "releaseApprover": "Cashflow release owner",
+  "rollbackContact": "Platform on-call"
+}

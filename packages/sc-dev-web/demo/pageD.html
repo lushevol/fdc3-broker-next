@@ -1,0 +1,2018 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+    <title>sc-web-kit demo page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+    <!-- Custom style -->
+    <style>
+        body {
+            padding: 24px;
+        }
+
+        .sc-mode-dark {
+            background-color: var(--sc-color-blue-900)
+        }
+
+        .table-cell {
+            border-color: var(--sc-color-grey-15);
+            vertical-align: top;
+        }
+
+        .side-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 10px 8px;
+            background-color: var(--sc-color-white);
+            border-radius: 8px;
+            box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-height: 100vh;
+            overflow-y: auto;
+            z-index: 999999999;
+        }
+        
+        .side-bar div {
+            padding: 5px 0;
+        }
+
+        .side-bar div .selected {
+            color: var(--sc-color-blue-500);
+        }
+    </style>
+
+    <!-- Register all sc-* custom elements -->
+    <script type="module">
+        import '../dist/elements/index.js';
+        import { html } from '/node_modules/lit-html/lit-html.js';
+        import dayjs from 'dayjs/esm/index.js';
+        window.html = html;
+        window.dayjs = dayjs;
+    </script>
+</head>
+<sc-icon-provider>
+    <div id='side-bar' class='side-bar'>
+        <script type="text/javascript">
+            const sidebar = document.querySelector('#side-bar');
+            const initials = [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
+                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
+                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
+                'Y', 'Z'
+            ];
+            const currentPage = 'D';
+            const content = [];
+            initials.forEach(initial => {
+                content.push(`<div>`);
+                content.push(`<a class="${currentPage === initial ? 'selected' : ''}" href="/demo/page${initial}.html">${initial}</a>`);
+                content.push(`</div>`);
+            })
+            sidebar.innerHTML = content.join('');
+        </script>
+    </div>
+
+    <div class="table w-full shadow-lg max-h-96 components-body">
+        <div class="table-cell border px-4">
+                    <div class="py-4" style="max-width: 300px;">
+                        <sc-dropdown-input label="Mode" value="light">
+                            <sc-dropdown-option value="light">Light</sc-dropdown-option>
+                            <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+                            <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+                        </sc-dropdown-input>
+                        <sc-dropdown-input label='Locale' value='en' id="local-picker">
+                            <sc-dropdown-option value="en">English</sc-dropdown-option>
+                            <sc-dropdown-option value="zh-CN">中文 (简体)</sc-dropdown-option>
+                        </sc-dropdown-input>
+                        <script type="module">
+                          import { locales, setLocale, getLocale } from '../dist/src/i18n/localization.js';
+                          const localPicker = document.querySelector('#local-picker');
+                          localPicker.addEventListener('sc-select', e => {
+                            setLocale(e.detail.value);
+                          });
+                        </script>
+                    </div>
+                </div>
+        <div class="table-row-group h-96 overflow-y-auto">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date</div>
+                <div class="table-cell border px-4 py-4">Date Full Date</div>
+                <div class="table-cell border px-4 py-4 text-center">
+                    <sc-date date="2025-06-16T09:05:52.831Z" size="sm"></sc-date>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date</div>
+                <div class="table-cell border px-4 py-4">Date Short Date</div>
+                <div class="table-cell border px-4 py-4 text-center">
+                    <sc-date date-type="short-date" date="2025-06-16T09:05:52.831Z" size="md"></sc-date>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date</div>
+                <div class="table-cell border px-4 py-4">Show Time</div>
+                <div class="table-cell border px-4 py-4 text-center">
+                    <sc-date show-time date-type="short-date" date="2025-06-16T09:05:52.831Z" size="md"></sc-date>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date</div>
+                <div class="table-cell border px-4 py-4">Show Time with hide-seconds</div>
+                <div class="table-cell border px-4 py-4 text-center">
+                    <sc-date hide-seconds show-time date="2025-06-16T09:05:52.831Z" size="md"></sc-date>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date</div>
+                <div class="table-cell border px-4 py-4">Time Only</div>
+                <div class="table-cell border px-4 py-4 text-center">
+                    <sc-date time-only date-type="short-date" date="2025-06-16T09:05:52.831Z" size="md"></sc-date>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date</div>
+                <div class="table-cell border px-4 py-4">Time Only with hide-seconds</div>
+                <div class="table-cell border px-4 py-4 text-center">
+                    <sc-date hide-seconds time-only date="2025-06-16T09:05:52.831Z" size="md"></sc-date>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date</div>
+                <div class="table-cell border px-4 py-4">Date Full Date with show-timezone</div>
+                <div class="table-cell border px-4 py-4 text-center">
+                    <sc-date show-timezone show-time date="2025-06-16T09:05:52.831Z" size="lg"></sc-date>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date</div>
+                <div class="table-cell border px-4 py-4">Date Full Date with invalid date</div>
+                <div class="table-cell border px-4 py-4 text-center">
+                    <sc-date show-timezone date="kkk" size="lg"></sc-date>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Divider</div>
+                <div class="table-cell border px-4 py-4">Horizontal</div>
+                <div class="table-cell border px-4 py-4 text-center">
+                    Default
+                    <sc-divider></sc-divider>
+                    Default
+                    <br/>
+                    <br/>
+                    xxs
+                    <sc-divider size="xxs"></sc-divider>
+                    xxs
+                    <br/>
+                    <br/>
+                    xs
+                    <sc-divider size="xs"></sc-divider>
+                    xs
+                    <br/>
+                    <br/>
+                    sm
+                    <sc-divider size="sm"></sc-divider>
+                    sm
+                    <br/>
+                    <br/>
+                    md
+                    <sc-divider size="md"></sc-divider>
+                    md
+                    <br/>
+                    <br/>
+                    lg
+                    <sc-divider size="lg"></sc-divider>
+                    lg
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Divider</div>
+                <div class="table-cell border px-4 py-4">Horizontal line width and height</div>
+                <div class="table-cell border px-4 py-4 text-center">
+                    xxs
+                    <sc-divider line-width="xs" line-height="xs"></sc-divider>
+                    xxs
+                    <br/>
+                    <br/>
+                    xs
+                    <sc-divider line-width="sm" line-height="sm"></sc-divider>
+                    xs
+                    <br/>
+                    <br/>
+                    sm
+                    <sc-divider line-width="sm" line-height="sm"></sc-divider>
+                    sm
+                    <br/>
+                    <br/>
+                    md
+                    <sc-divider line-width="md" line-height="md"></sc-divider>
+                    md
+                    <br/>
+                    <br/>
+                    lg
+                    <sc-divider line-width="lg" line-height="lg"></sc-divider>
+                    lg
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Divider</div>
+                <div class="table-cell border px-4 py-4">Vertical</div>
+                <div class="table-cell border px-4 py-4">
+                    Default
+                    <sc-divider vertical></sc-divider>
+                    Default
+                    <br/>
+                    <br/>
+                    xxs
+                    <sc-divider size="xxs" vertical></sc-divider>
+                    xxs
+                    <br/>
+                    <br/>
+                    xs
+                    <sc-divider size="xs" vertical></sc-divider>
+                    xs
+                    <br/>
+                    <br/>
+                    sm
+                    <sc-divider size="sm" vertical></sc-divider>
+                    sm
+                    <br/>
+                    <br/>                   
+                    md
+                    <sc-divider size="md" vertical></sc-divider>
+                    md
+                    <br/>
+                    <br/>
+                    lg
+                    <sc-divider size="lg" vertical></sc-divider>
+                    lg
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Divider</div>
+                <div class="table-cell border px-4 py-4">Vertical with customized title and width</div>
+                <div class="table-cell border px-4 py-4">                    
+                    <sc-divider text-align="left" vertical>
+                        <div slot="title">Row 1 (<b>default</b>)</div>
+                    </sc-divider>
+                    <sc-divider text-align="left" size="xxs" vertical>
+                        <div slot="title">Row 2 (xxs)</div>
+                    </sc-divider>
+                    <sc-divider style="--sc-divider-color:red;" size="xs" line-width="xs" vertical>
+                        <div slot="title">
+                            <h5>Row 3 (xs)</h5>
+                        </div>
+                    </sc-divider>
+                    <sc-divider text-align="right" size="sm" line-width="sm" vertical>
+                        <div slot="title">
+                            <h4>Row 4 (sm)</h4>
+                        </div>
+                    </sc-divider>
+                    <sc-divider text-align="justify" size="md" line-width="md" vertical>
+                        <div slot="title">
+                            <h3>
+                                <sc-icon name="info-circle--line" size="md" inline></sc-icon> Row 5 (md)
+                            </h3>
+                        </div>
+                    </sc-divider>
+                    <sc-divider size="lg" line-width="lg" vertical>
+                        <div slot="title">
+                            <h2>Row 6 (lg)</h2>
+                        </div>
+                    </sc-divider>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Divider</div>
+                <div class="table-cell border px-4 py-4">Card Header</div>
+                <div class="table-cell border px-4 py-4">                    
+                    <sc-divider mode='card-header' card-number="2" optional-text="(optional text)">
+                        <div slot="title"><b>Card header</b></div>
+                    </sc-divider>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Divider</div>
+                <div class="table-cell border px-4 py-4">Text Divider</div>
+                <div class="table-cell border px-4 py-4">                    
+                    <sc-divider text-align="left" size="xs" line-width="xs" vertical>
+                        <div slot="title">2.1 Section name</div>
+                    </sc-divider>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Divider</div>
+                <div class="table-cell border px-4 py-4">Filled Divider</div>
+                <div class="table-cell border px-4 py-4">         
+                    <sc-divider mode='filled'></sc-divider>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Divider</div>
+                <div class="table-cell border px-4 py-4">Line Divider</div>
+                <div class="table-cell border px-4 py-4">        
+                    <sc-divider vertical></sc-divider>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dot Status</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dot-status mode="default" type="info">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="success">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="warning">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="error">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="minor-error">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="pending-action">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="draft">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="neutral">
+                    </sc-dot-status>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dot Status</div>
+                <div class="table-cell border px-4 py-4">Compact</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dot-status mode="default" type="info" compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="success" compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="warning" compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="error" compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="minor-error" compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="pending-action" compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="draft" compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="neutral" compact>
+                    </sc-dot-status>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dot Status</div>
+                <div class="table-cell border px-4 py-4">Inline</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dot-status mode="default" type="info" inline="true">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="success" inline="true">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="warning" inline="true">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="error" inline="true">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="minor-error" inline="true">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="pending-action" inline="true">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="draft" inline="true">
+                    </sc-dot-status>
+                    <sc-dot-status mode="default" type="neutral" inline="true">
+                    </sc-dot-status>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dot Status</div>
+                <div class="table-cell border px-4 py-4">Icon</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dot-status mode="icon" status="error">
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="minor-error">
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="warning">
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="success">
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="partially-success">
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="pending">
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="info">
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="draft">
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="missing-info">
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="rejected">
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="on-hold">
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="not-started">
+                    </sc-dot-status>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dot Status</div>
+                <div class="table-cell border px-4 py-4">Icon - Outline</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dot-status mode="icon" status="error" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="minor-error" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="warning" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="success" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="partially-success" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="pending" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="info" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="draft" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="missing-info" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="rejected" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="on-hold" outline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="not-started" outline>
+                    </sc-dot-status>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dot Status</div>
+                <div class="table-cell border px-4 py-4">Icon - Outline Compact</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dot-status mode="icon" status="error" outline compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="minor-error" outline compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="warning" outline compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="success" outline compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="partially-success" outline compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="pending" outline compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="info" outline compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="draft" outline compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="missing-info" outline compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="rejected" outline compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="on-hold" outline compact>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="not-started" outline compact>
+                    </sc-dot-status>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dot Status</div>
+                <div class="table-cell border px-4 py-4">Icon - Inline</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dot-status mode="icon" status="error" inline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="minor-error" inline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="warning" inline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="success" inline>
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="partially-success" inline>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dot Status</div>
+                <div class="table-cell border px-4 py-4">Icon - Custom label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dot-status mode="icon" status="error" label="Custom label">
+                    </sc-dot-status>
+                    <sc-dot-status mode="icon" status="error" label="Custom label">
+                    </sc-dot-status>
+                </div>
+            </div>
+
+             <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label='Select from dropdown' value='spanish' help-text='Help text'>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Basic with Icon</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input size="sm" label='Select from dropdown' dropdown-header="Languages" help-text='Help text' prefix-icon="clock--line">
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-input>
+                    <sc-dropdown-input size="md" label='Select from dropdown' dropdown-header="Languages" help-text='Help text' prefix-icon="clock--line">
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-input>
+                    <sc-dropdown-input size="lg" label='Select from dropdown' dropdown-header="Languages" help-text='Help text' prefix-icon="clock--line">
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Basic Clearable</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label='Select from dropdown' dropdown-header="Languages" help-text='Help text' prefix-icon="clock--line" advanced-search-text="Advanced search" clearable>
+                        <sc-dropdown-option value="1">English
+                            <div style="color: blue; font-size: 12px;">First Language</div>
+                        </sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot='side-sheet-content'>Some side sheet content</div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Basic with Advanced Search</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label='Select from dropdown' dropdown-header="Languages" help-text='Help text' prefix-icon="clock--line" advanced-search-text="Advanced search">
+                        <sc-dropdown-option value="english">English
+                            <div style="color: blue;">First Language</div>
+                        </sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot='side-sheet-content'>Some side sheet content</div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Basic Loading</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label='Select from dropdown' dropdown-header="Languages" loading-text="Dropdown items loading please wait..." loading>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">No Options</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label='Select from dropdown' dropdown-header="Languages">
+                        <div slot='empty-text'>No results found</div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input size="sm" label='Select from dropdown' dropdown-header="Languages" help-text='Help text' prefix-icon="clock--line" disabled>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input size="sm" label='Select from dropdown' dropdown-header="Languages" prefix-icon="clock--line" error>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot='error'>Please select a dropdown</div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Tooltip only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input tooltip="Enter your 8 digits number" tooltip-placement="right">
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Required only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input required>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Box input</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label="Select from dropdown" tooltip="Select one from dropdown"
+                        tooltip-placement="right" placeholder="Enter any number" help-text="Select one only"
+                        value="12345" border-type="box" max-length=8 required>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label-size="xxs">
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label-size="xs" success=true>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Show the custom Label using displayValue property</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input id="custom-dropdown-label" label-size="sm" >
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Show the custom Label using displayValue property 2</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label-size="sm">
+                        <sc-dropdown-option value="english" displayValue="C-English">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin" displayValue="C-Mandarin">Mandarin</sc-dropdown-option>
+                    </sc-dropdown-input>
+                </div>
+            </div> 
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Show the custom Label using displayValue property 2</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label-size="sm" readonly value="english">
+                        <sc-dropdown-option value="english" displayValue="C-English">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin" displayValue="C-Mandarin">Mandarin</sc-dropdown-option>
+                    </sc-dropdown-input>
+                </div>
+            </div>  
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Show Dot status using prefix slot</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label-size="sm" id="custom-dropdown-dot-status" value="english" >
+                        <div slot="prefix"><sc-dot-status mode="default" type="success" status="" label=""></sc-dot-status></div>
+                        <sc-dropdown-option value="english" displayValue="C-English">
+                            <sc-dot-status mode="default" type="success" status="" label="English">
+                        </sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin" displayValue="C-Mandarin">
+                            <sc-dot-status mode="default" type="warning" status="" label="Mandarin"></sc-dot-status>
+                        </sc-dropdown-option>
+                    </sc-dropdown-input>
+                </div>
+            </div> 
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Show Dot status using prefix slot - readonly model</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label-size="sm" id="custom-dropdown-dot-status" value="english" readonly>
+                        <div slot="prefix"><sc-dot-status mode="default" type="success" status="" label=""></sc-dot-status></div>
+                        <sc-dropdown-option value="english" displayValue="C-English">
+                            <sc-dot-status mode="default" type="success" status="" label="English">
+                        </sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin" displayValue="C-Mandarin">
+                            <sc-dot-status mode="default" type="warning" status="" label="Mandarin"></sc-dot-status>
+                        </sc-dropdown-option>
+                    </sc-dropdown-input>
+                </div>
+            </div> 
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label-size="sm" error=true>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label-size="md" border-type="box" success=true>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input label-size="lg" border-type="box" required error=true
+                        success-message="Success message" error-message="Error message" placeholder="Select one from list">
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input value="hindi" required readonly>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Readonly Box</div>
+                <div class="table-cell border px-4 py-4">                    
+                    <sc-dropdown-input value="hindi" border-type="box" required readonly>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input value="hindi" required disabled>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">Disabled Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input value="hindi" border-type="box" required disabled>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">No label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input value="1234567890" success=true>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Input</div>
+                <div class="table-cell border px-4 py-4">No label Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-input value="1234567890" border-type="box" error=true>
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4" style="width: 20%;">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4" style="width: 20%;">Show the custom Label using displayValue property</div>
+                <div class="table-cell border px-4 py-4" style="width: 60%;">
+                    <sc-dropdown-multi-select 
+                        label='Select from dropdown' 
+                        select-all
+                        min-count="2"
+                    >
+                        <sc-dropdown-option value="english" displayValue="C-English">English<sc-link>Test</sc-link></sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin" displayValue="C-Mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi" displayValue="C-Hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish" displayValue="C-Spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french" displayValue="C-French">French</sc-dropdown-option>
+                        <sc-dropdown-option value="french1" displayValue="C-French1">French1</sc-dropdown-option>
+                        <sc-dropdown-option value="french2" displayValue="C-French2">French2</sc-dropdown-option>
+                        <sc-dropdown-option value="french3" displayValue="C-French3">French3</sc-dropdown-option>
+                        <sc-dropdown-option value="french4" displayValue="C-French4">French4</sc-dropdown-option>
+                        <sc-dropdown-option value="french5" >French5</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div> 
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4" style="width: 20%;">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4" style="width: 20%;">Basic</div>
+                <div class="table-cell border px-4 py-4" style="width: 60%;">
+                    <sc-dropdown-multi-select 
+                        label='Select from dropdown' 
+                        value='["english", "mandarin", "hindi","spanish","french","french1","french2","french3","french4","french5"]'
+                        prefix-icon="clock--line"
+                        advanced-search-text="Advanced search"
+                    >
+                        <sc-dropdown-option value="english">English<sc-link>Test</sc-link></sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <sc-dropdown-option value="french1">French1</sc-dropdown-option>
+                        <sc-dropdown-option value="french2">French2</sc-dropdown-option>
+                        <sc-dropdown-option value="french3">French3</sc-dropdown-option>
+                        <sc-dropdown-option value="french4">French4</sc-dropdown-option>
+                        <sc-dropdown-option value="french5">French5</sc-dropdown-option>
+                        <sc-dropdown-option value="french6">French6</sc-dropdown-option>
+                        <sc-dropdown-option value="french7">French7</sc-dropdown-option>
+                        <sc-dropdown-option value="french8">French8</sc-dropdown-option>
+                        <sc-dropdown-option value="french9">French9</sc-dropdown-option>
+                        <sc-dropdown-option value="turkish">Turkish</sc-dropdown-option>
+                        <sc-dropdown-option value="japanese">Japanese</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <!-- <div slot='label-tooltip'>Label by slot</div> -->
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4" style="width: 20%;">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4" style="width: 20%;">Basic with Select All</div>
+                <div class="table-cell border px-4 py-4" style="width: 60%;">
+                    <sc-dropdown-multi-select 
+                        label='Select from dropdown' 
+                        prefix-icon="clock--line"
+                        advanced-search-text="Advanced search"
+                        select-all
+                    >
+                        <sc-dropdown-option value="english">English<sc-link>Test</sc-link></sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <sc-dropdown-option value="french1">French1</sc-dropdown-option>
+                        <sc-dropdown-option value="french2">French2</sc-dropdown-option>
+                        <sc-dropdown-option value="french3">French3</sc-dropdown-option>
+                        <sc-dropdown-option value="french4">French4</sc-dropdown-option>
+                        <sc-dropdown-option value="french5">French5</sc-dropdown-option>
+                        <sc-dropdown-option value="french6">French6</sc-dropdown-option>
+                        <sc-dropdown-option value="french7">French7</sc-dropdown-option>
+                        <sc-dropdown-option value="french8">French8</sc-dropdown-option>
+                        <sc-dropdown-option value="french9">French9</sc-dropdown-option>
+                        <sc-dropdown-option value="turkish">Turkish</sc-dropdown-option>
+                        <sc-dropdown-option value="japanese">Japanese</sc-dropdown-option>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4" style="width: 20%;">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4" style="width: 20%;">Basic without Checkbox</div>
+                <div class="table-cell border px-4 py-4" style="width: 60%;">
+                    <sc-dropdown-multi-select 
+                        label='Select from dropdown' 
+                        value='["english"]'
+                        hide-checkbox=""
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <sc-dropdown-option value="french1">French1</sc-dropdown-option>
+                        <sc-dropdown-option value="french2">French2</sc-dropdown-option>
+                        <sc-dropdown-option value="french3">French3</sc-dropdown-option>
+                        <sc-dropdown-option value="french4">French4</sc-dropdown-option>
+                        <sc-dropdown-option value="french5">French5</sc-dropdown-option>
+                        <sc-dropdown-option value="french6">French6</sc-dropdown-option>
+                        <sc-dropdown-option value="french7">French7</sc-dropdown-option>
+                        <sc-dropdown-option value="french8">French8</sc-dropdown-option>
+                        <sc-dropdown-option value="french9">French9</sc-dropdown-option>
+                        <sc-dropdown-option value="turkish">Turkish</sc-dropdown-option>
+                        <sc-dropdown-option value="japanese">Japanese</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <!-- <div slot='label-tooltip'>Label by slot</div> -->
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">Basic with Long Selection</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        label='Select from dropdown' 
+                        value='["long"]'
+                        prefix-icon="clock--line"
+                    >
+                        <sc-dropdown-option value="english">English<sc-link>Test</sc-link></sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <sc-dropdown-option value="turkish">Turkish</sc-dropdown-option>
+                        <sc-dropdown-option value="japanese">Japanese</sc-dropdown-option>
+                        <sc-dropdown-option value="long">A really super extremely long statement for an example of a long text that needs truncation</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <!-- <div slot='label-tooltip'>Label by slot</div> -->
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4" style="width: 20%;">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4" style="width: 20%;">Multiple Rows</div>
+                <div class="table-cell border px-4 py-4" style="width: 60%;">
+                    <sc-dropdown-multi-select 
+                        label='Select from dropdown' 
+                        value='["english", "mandarin", "hindi","spanish","french","french1","french2","french3","french4","french5"]'
+                        prefix-icon="clock--line"
+                        multiple-rows
+                    >
+                        <sc-dropdown-option value="english">English<sc-link>Test</sc-link></sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <sc-dropdown-option value="french1">French1</sc-dropdown-option>
+                        <sc-dropdown-option value="french2">French2</sc-dropdown-option>
+                        <sc-dropdown-option value="french3">French3</sc-dropdown-option>
+                        <sc-dropdown-option value="french4">French4</sc-dropdown-option>
+                        <sc-dropdown-option value="french5">French5</sc-dropdown-option>
+                        <sc-dropdown-option value="french6">French6</sc-dropdown-option>
+                        <sc-dropdown-option value="french7">French7</sc-dropdown-option>
+                        <sc-dropdown-option value="french8">French8</sc-dropdown-option>
+                        <sc-dropdown-option value="french9">French9</sc-dropdown-option>
+                        <sc-dropdown-option value="turkish">Turkish</sc-dropdown-option>
+                        <sc-dropdown-option value="japanese">Japanese</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">Tooltip only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        tooltip="Select one or multiple" 
+                        tooltip-placement="right"
+                        value='["english", "mandarin"]'
+                    >
+                    <sc-dropdown-option value="english">English</sc-dropdown-option>
+                    <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                    <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                    <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                    <sc-dropdown-option value="french">French</sc-dropdown-option>
+                    <sc-dropdown-option value="french1">French1</sc-dropdown-option>
+                    <sc-dropdown-option value="french2">French2</sc-dropdown-option>
+                    <sc-dropdown-option value="french3">French3</sc-dropdown-option>
+                    <sc-dropdown-option value="french4">French4</sc-dropdown-option>
+                    <sc-dropdown-option value="french5">French5</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">Required only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        value='["english", "mandarin"]'
+                        required
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">Box input</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        label="Select from dropdown" 
+                        tooltip="Select one from dropdown"
+                        tooltip-placement="right" 
+                        placeholder="Select one or multiple" 
+                        help-text="Select one or multiple only"
+                        value='["english", "mandarin"]'
+                        border-type="box" 
+                        max-length=8 
+                        required
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        label-size="xxs"
+                        value='["english", "mandarin"]'
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        label-size="xs" 
+                        success=true
+                        value='["english", "mandarin"]'
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        label-size="sm" 
+                        error=true
+                        value='["english", "mandarin"]'
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        label-size="md" 
+                        border-type="box" 
+                        success=true
+                        value='["english", "mandarin"]'
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        label-size="lg" 
+                        border-type="box" 
+                        required 
+                        error=true
+                        success-message="Success message" 
+                        error-message="Error message" 
+                        placeholder="Select one from list"
+                        value='["english", "mandarin"]'
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        value='["english", "mandarin"]' 
+                        required 
+                        readonly
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">Readonly Box</div>
+                <div class="table-cell border px-4 py-4">                    
+                    <sc-dropdown-multi-select 
+                        value='["english", "mandarin"]'
+                        border-type="box" 
+                        required 
+                        readonly
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        value='["english", "mandarin"]' 
+                        required 
+                        disabled
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">Disabled Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        value='["english", "mandarin"]'
+                        border-type="box" 
+                        required 
+                        disabled
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">No label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        value='["english", "mandarin"]'
+                        success=true
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Dropdown Multi Select Input</div>
+                <div class="table-cell border px-4 py-4">No label Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-dropdown-multi-select 
+                        value='["english", "mandarin"]'
+                        border-type="box"
+                        error=true
+                    >
+                        <sc-dropdown-option value="english">English</sc-dropdown-option>
+                        <sc-dropdown-option value="mandarin">Mandarin</sc-dropdown-option>
+                        <sc-dropdown-option value="hindi">Hindi</sc-dropdown-option>
+                        <sc-dropdown-option value="spanish">Spanish</sc-dropdown-option>
+                        <sc-dropdown-option value="french">French</sc-dropdown-option>
+                        <div slot='empty-text'>No data, please try another value</div>
+                    </sc-dropdown-multi-select>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date Input</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-input></sc-date-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date Input</div>
+                <div class="table-cell border px-4 py-4">With Action Bar and Quick Selector</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-input quick-selector show-action-bar></sc-date-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date Range Input</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-range-input></sc-date-range-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date Range Input</div>
+                <div class="table-cell border px-4 py-4">With Quick Selector</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-range-input quick-selector></sc-date-range-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date Picker</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-picker start-view='yearGrid'></sc-date-picker>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date Picker</div>
+                <div class="table-cell border px-4 py-4">With Action Bar and Quick Selector</div>
+                <div class="table-cell border px-4 py-4" style="height: 22rem;">
+                    <sc-date-picker
+                        id="action-bar-quick-selector-date-picker"
+                        quick-selector
+                        show-action-bar
+                    ></sc-date-picker>
+                    <script>
+                        const datePicker = document.getElementById('action-bar-quick-selector-date-picker');
+                        datePicker.quickSelectorItems = [
+                            { amount: -2, unit: 'year' },
+                            { amount: -6, unit: 'month' },
+                            { amount: 1, unit: 'week' },
+                            { amount: 3, unit: 'day' },
+                            { amount: -5, unit: 'year' },
+                            { amount: 1, unit: 'year' },
+                            { amount: -2, unit: 'month' },
+                            { amount: -10, unit: 'day' },
+                            { amount: 2, unit: 'week' },
+                            { amount: 1, unit: 'month' }
+                        ];
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date Range Picker</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-range-picker></sc-date-range-picker>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date Range Picker</div>
+                <div class="table-cell border px-4 py-4">With Quick Selector</div>
+                <div class="table-cell border px-4 py-4" style="height: 20rem;">
+                    <sc-date-range-picker quick-selector></sc-date-range-picker>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Form Input - Date Input</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-input picker='month' min='2024-04' max='Sep 2028' placeholder='Select the date' value='2024-09' format='DD/MM/YY'></sc-date-input>
+                    <sc-date-input picker='year' min='2024' max='2028' placeholder='Select the date' value='2024' format='DD/MM/YY'></sc-date-input>
+                    <sc-date-input disabled-days='[6,7]' first-day-of-week="2" class='date-input-value-test' format='DD/MM/YYYY'></sc-date-input>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Form Input - Date Input</div>
+                <div class="table-cell border px-4 py-4">Show Time</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-input show-time show-action-bar format='MM/DD/YYYY HH:mm'></sc-date-input>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Form Input - Date Input</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-input label='Readonly status' value='2024-09-04' readonly></sc-date-input>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Form Input - Date Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-input label-size="xxs">
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-date-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Form Input - Date Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-input label-size="xs" success=true>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-date-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Form Input - Date Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-input label-size="sm" error=true>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-date-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Form Input - Date Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-input label-size="md" border-type="box" success=true>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-date-input>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Form Input - Date Input</div>
+                <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-input label-size="lg" border-type="box" required error=true
+                        success-message="Success message" error-message="Error message">
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-date-input>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Form Input - Date Range input</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-range-input picker="month" class='date-range-input'></sc-date-range-input>
+                    <sc-date-range-input picker="year"></sc-date-range-input>
+                    <sc-date-range-input></sc-date-range-input>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Form Input - Date Range input</div>
+                <div class="table-cell border px-4 py-4">Show Time</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-range-input show-time seconds show-action-bar format='YYYY-MM-DD HH:mm:ss'></sc-date-range-input>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Form Input - Date Range input</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-range-input class='date-range-input' label='Readonly' readonly></sc-date-range-input>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Form Input - Date Range input</div>
+                <div class="table-cell border px-4 py-4">Readonly with value</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-range-input class='date-range-input' label='Readonly' readonly value='{"start":"2024-09-04","end":"2024-10-04"}'></sc-date-range-input>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Date Range input</div>
+                <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-date-range-input label-size="xxs" value='{"start":"2024-09-04","end":"2024-10-04"}'>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-date-range-input>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Data View</div>
+                <div class="table-cell border px-4 py-4">Default(table mode)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-data-view compact columns=2 class=data-view></sc-data-view>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Data View</div>
+                <div class="table-cell border px-4 py-4">View mode</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-data-view compact class=data-view mode=view></sc-data-view>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Data View</div>
+                <div class="table-cell border px-4 py-4">Custom data</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-data-view class=custom-data-view></sc-data-view>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Data View</div>
+                <div class="table-cell border px-4 py-4">Custom data in view mode</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-data-view class=custom-data-view mode=view></sc-data-view>
+                </div>
+            </div> 
+        </div>
+</sc-icon-provider>
+<!-- Custom script -->
+<script type="module">
+    import { html } from '/node_modules/lit-html/lit-html.js';
+    import dayjs from 'dayjs/esm/index.js';
+    window.html = html;
+    window.dayjs = dayjs;
+    var modes = ['light', 'dark', 'dyslexic']
+    var activeMode = modes[0]
+    function changeMode(mode) {
+        var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child');
+        componentCells.forEach((componentCell) => {
+            modes.forEach((mode) => {
+                componentCell.classList.remove(`sc-mode-${mode}`)
+            })
+            componentCell.classList.add(`sc-mode-${mode}`)
+            if (componentCell.classList.contains('inverse')) {
+                if (mode === 'dark') {
+                    componentCell.style.backgroundColor = 'var(--sc-color-white)'
+                } else {
+                    componentCell.style.backgroundColor = 'var(--sc-color-blue-900)'
+                }
+            }
+        })
+    }
+    document.getElementsByTagName('sc-dropdown-input')[0].addEventListener('sc-select', ({ detail: { value } }) => {
+        changeMode(value);
+    });
+    changeMode(activeMode);
+
+    const dateRangeInput = document.getElementsByClassName('date-range-input')[0];
+    dateRangeInput.startConfig = {placeholder: 'Select start date'};
+    dateRangeInput.endConfig = {placeholder: 'Select end date'};
+    dateRangeInput.addEventListener('sc-change', event => {
+        console.log('date range input value', event.detail)
+    })
+
+    const dateInput = document.getElementsByTagName('sc-date-input')[0];
+    dateInput.addEventListener('sc-change', event => {
+        console.log('date input value', event.detail)
+    })
+
+    const dataViews = document.getElementsByTagName('sc-data-view');
+    Array.from(dataViews).forEach(dataView => {
+        dataView.data = [
+            { 
+                field: {
+                    value: 'Request ID',
+                }, 
+                value: {
+                    value: 'REQ1237'
+                } 
+            },
+            { 
+                field: {
+                    value: 'Effective Date',
+                }, 
+                value: {
+                    value: '22 Feb 2022'
+                } 
+            },
+            { 
+                field: {
+                    value: 'Effective Date-1',
+                }, 
+                value: {
+                    value: '22 Feb 2023'
+                } 
+            },
+            { 
+                field: {
+                    value: 'Effective Date-2',
+                }, 
+                value: {
+                    value: '22 Feb 2024'
+                } 
+            },
+            { 
+                field: {
+                    value: 'Effective Date-3',
+                }, 
+                value: {
+                    value: '22 Feb 2024'
+                } 
+            },
+        ]
+    });
+
+    const HierarchicalData = [{
+  label: () => html`
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <div style="flex-grow: 1;">
+        <div>Label 1</div>
+        <div style="font-size: 10px;">
+          SUBTEXT LEFT ROW1 • MORE SUBTEXT
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 14px;">
+          Text right <sc-icon name="clock--line" size="xs" style="margin-left: 4px;"></sc-icon>
+        </div>
+        <div style="color: red; font-size: 12px;">
+          Status
+        </div>
+      </div>
+    </div>
+  `,
+  value: 'value1',
+  children: [{
+    label: 'Label 3',
+    value: 'label3',
+    children: [{
+      label: 'Label 5',
+      value: 'label5',
+    }, {
+      label: 'Label 6',
+      value: 'label6',
+    }],
+  }, {
+    label: 'Label 4',
+    value: 'label4',
+  }],
+}, {
+  label: () => html`<div>Label 2</div>`,
+  value: 'value2',
+}];
+    const md = document.querySelector('sc-dropdown-multi-select');
+    // md.data = HierarchicalData;
+    md.addEventListener('sc-select', (e) => {
+        console.log('value', e.detail.value)
+        md.value = e.detail.value
+    })
+    const customDataViews = document.getElementsByClassName('custom-data-view');
+
+    Array.from(customDataViews).forEach(customDataView => {
+        customDataView.data = [
+            { 
+                field: {
+                    value: 'Request ID',
+                    style: 'color: var(--sc-color-red)'
+                }, 
+                value: {
+                    value: (currentRowIndex, currentColIndex, row) => html`<sc-link>REQ1237, I'm in row ${currentRowIndex}, col ${currentColIndex}</sc-link>`
+                } 
+            },
+            { 
+                field: {
+                    value: 'Effective Date',
+                }, 
+                value: {
+                    value: '22 Feb 2022',
+                    style: 'text-align: right'
+                } 
+            },
+            { 
+                field: {
+                    value: (currentRowIndex, currentColIndex, row) => html`<sc-link>Effective Date-2, I'm in row ${currentRowIndex}, col ${currentColIndex}</sc-link>`,
+                }, 
+                value: {
+                    value: '22 Feb 2023'
+                } 
+            },
+            { 
+                field: {
+                    value: 'Effective Date-2',
+                }, 
+                value: {
+                    value: '22 Feb 2024'
+                } 
+            },
+            { 
+                field: {
+                    value: 'Effective Date-3',
+                }, 
+                value: {
+                    value: '22 Feb 2024'
+                } 
+            },
+        ]
+    })
+
+    const dateInput2 = document.querySelector('.date-input-value-test');
+    dateInput2.value = window.dayjs('2025-07-01');
+    const customDropdownIns = document.getElementById('custom-dropdown-label');
+    customDropdownIns.data = [{
+        label: 'label-1',
+        value: 'value-1',
+        displayValue: 'L-1'
+    }, {
+        label: 'label-2',
+        value: 'value-2',
+        displayValue: 'L-2'
+    }];
+
+    const customDropdownDosIns = document.getElementById('custom-dropdown-dot-status');
+    customDropdownDosIns.addEventListener('sc-select', event => {
+        const DosIns = customDropdownDosIns.querySelectorAll('sc-dot-status')[0];
+        DosIns.setAttribute('type', event.detail.value === 'english' ? 'success': 'warning')
+    })
+
+    
+</script>
+
+<script type="module">
+    import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+    changeIconLibrary();
+    function changeIconLibrary() {
+        document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+    }
+</script>
+
+</html>

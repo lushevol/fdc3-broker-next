@@ -30,7 +30,7 @@
  * @packageDocumentation
  */
 
-import type { AppIdentifier, DesktopAgent, RatanDesktopAgent } from './types';
+import type { DesktopAgent, RatanDesktopAgent } from './types';
 
 /**
  * Gets or creates the global FDC3 namespace on window.
@@ -229,33 +229,4 @@ export function getAgentApi(): RatanDesktopAgent {
  */
 export function clearBroker(): void {
   setBrokerInstance(null);
-}
-
-// ---------------------------------------------------------------------------
-// Current tile identity  (bridges MFE boundaries for FDC3 source scoping)
-//
-// The AgentProvider React context is NOT shared across MFE boundaries because
-// ratan-fdc3-agent is bundled into each MFE independently.  To ensure that
-// useFDC3() in a tile MFE receives a scoped agent, the base MFE's
-// FDC3TileProvider stores the tile's identity here during render.
-// ---------------------------------------------------------------------------
-
-/**
- * Store the identity of the tile currently being rendered, so that
- * useFDC3() in child MFEs can create a properly scoped ScopedDesktopAgent.
- *
- * Called during the render phase of FDC3TileProvider (base MFE).
- */
-export function setCurrentTile(tile: AppIdentifier | null): void {
-  const ns = getGlobalNamespace();
-  if (ns) ns.currentTile = tile;
-}
-
-/**
- * Retrieve the tile identity set by the nearest FDC3TileProvider, or null
- * when no tile is currently rendering.
- */
-export function getCurrentTile(): AppIdentifier | null {
-  const ns = getGlobalNamespace();
-  return ns?.currentTile ?? null;
 }

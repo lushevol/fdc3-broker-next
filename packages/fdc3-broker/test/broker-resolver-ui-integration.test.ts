@@ -578,8 +578,8 @@ describe('Broker + Resolver UI Integration', () => {
         },
       });
 
-      const intent1 = broker.raiseIntent('ViewChart', mockContext);
-      const intent2 = broker.raiseIntent('ViewQuote', {
+      void broker.raiseIntent('ViewChart', mockContext);
+      void broker.raiseIntent('ViewQuote', {
         type: 'fdc3.quote',
         id: { ticker: 'MSFT' },
       });

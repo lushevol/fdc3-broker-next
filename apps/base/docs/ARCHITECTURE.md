@@ -34,7 +34,7 @@ src/
 │   ├── Splash/              # Splash/screen loading
 │   └── ...                  # Button, Dialog, Input, Select, Snackbar, etc.
 ├── fdc3/                    # FDC3 integration layer
-│   ├── FDC3Integration.tsx  # Broker/resolver/app-directory setup (543 lines)
+│   ├── FDC3Integration.tsx  # Base-to-FDC3 platform adapter
 │   ├── expose.ts            # Re-exports AgentProvider hooks
 │   └── useFDC3WorkspaceHelper.ts
 ├── hooks/                   # Custom React hooks
@@ -81,7 +81,7 @@ App.tsx
       LocalizationProvider (AdapterDayjs)
         → Provider (AppContext, rootVersion)
           → ThemeProvider (MUI createTheme, light/dark)
-            → FDC3Integration (broker, resolver, app-directory)
+            → FDC3Integration (base platform adapter → FDC3RootProvider)
               → Routing (react-router-dom)
 ```
 
@@ -122,19 +122,23 @@ App.tsx
 - **Reducers:** `src/hooks/reducer/` with `ActionType` constants
 - **No external state library** — no Redux, Zustand, or MobX
 
-## FDC3 Integration (`FDC3Integration.tsx`, 543 lines)
+## FDC3 Integration
 
-`FDC3Integration` wraps the app's children and:
+Base has two deliberately small integration points:
 
-1. Initializes the FDC3 Broker (`ratan-fdc3-broker`)
-2. Sets up the Resolver UI (`ratan-fdc3-resolver-ui`)
-3. Connects the App Directory (`ratan-fdc3-app-directory`)
-4. Registers intent listeners and channel callbacks
-5. Provides `AgentProvider` context for child components
+1. `FDC3Integration` maps base-owned authentication, tile catalog, entitlement policy,
+   single-view policy, and `workspaceOpenTile` capability into `FDC3RootProvider`.
+2. `pages/Home/common/Container.tsx` wraps each remote child with
+   `FDC3ChildProvider` and supplies its app/instance identity.
+
+`ratan-fdc3` owns the FDC3 broker, app-directory synchronization, resolver,
+interop bridges, queued-intent replay, global publication, and child registration
+lifecycle. It calls the host-provided `openApp` capability; it does not know how
+base workspaces or tiles are implemented.
 
 **Re-exports** (`fdc3/expose.ts`):
 
-- `AgentProvider`, `useFDC3`, `useIntentListener`, `useUserChannels`, `useAppIdentifier` from `ratan-fdc3-agent`
+- `AgentProvider`, `useFDC3`, `useIntentListener`, `useUserChannels`, `useAppIdentifier` from `ratan-fdc3`
 
 Other MFEs should import FDC3 hooks via `System.import('@fm/base').FDC3Agent` — never access the Broker directly.
 

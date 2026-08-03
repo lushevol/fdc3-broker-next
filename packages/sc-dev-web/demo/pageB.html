@@ -1,0 +1,1451 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+    <title>sc-web-kit demo page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+    <!-- Custom style -->
+    <style>
+        body {
+            padding: 24px;
+        }
+
+        .sc-mode-dark {
+            background-color: var(--sc-color-blue-900)
+        }
+
+        .table-cell {
+            border-color: var(--sc-color-grey-15);
+            vertical-align: top;
+        }
+
+        .side-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 10px 8px;
+            background-color: var(--sc-color-white);
+            border-radius: 8px;
+            box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-height: 100vh;
+            overflow-y: auto;
+            z-index: 999999999;
+        }
+        
+        .side-bar div {
+            padding: 5px 0;
+        }
+
+        .side-bar div .selected {
+            color: var(--sc-color-blue-500);
+        }
+    </style>
+
+    <!-- Register all sc-* custom elements -->
+    <script type="module">
+        import '../dist/elements/index.js';
+        import { html } from '/node_modules/lit-html/lit-html.js';
+        window.html = html;
+    </script>
+</head>
+<sc-icon-provider>
+    <div id='side-bar' class='side-bar'>
+        <script type="text/javascript">
+            const sidebar = document.querySelector('#side-bar');
+            const initials = [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
+                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
+                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
+                'Y', 'Z'
+            ];
+            const currentPage = 'B';
+            const content = [];
+            initials.forEach(initial => {
+                content.push(`<div>`);
+                content.push(`<a class="${currentPage === initial ? 'selected' : ''}" href="/demo/page${initial}.html">${initial}</a>`);
+                content.push(`</div>`);
+            })
+            sidebar.innerHTML = content.join('');
+        </script>
+    </div>
+
+    <div class="table w-full shadow-lg max-h-96 components-body">
+        <div class="table-header-group font-bold sticky top-0 bg-white z-10">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Component</div>
+                <div class="table-cell border px-4 py-4">Example</div>
+                <div class="table-cell border px-4">
+                    <div class="py-4" style="max-width: 300px;">
+                        <sc-dropdown-input label="Mode" value="light">
+                            <sc-dropdown-option value="light">Light</sc-dropdown-option>
+                            <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+                            <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+                        </sc-dropdown-input>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-row-group h-96 overflow-y-auto">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Back</div>
+                <div class="table-cell border px-4 py-4">Link</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-back to="#">
+                    </sc-back>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Back</div>
+                <div class="table-cell border px-4 py-4">History</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-back mode="history" label="Return to previous page">
+                    </sc-back>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Back</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-back disabled>
+                    </sc-back>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Badge</div>
+                <div class="table-cell border px-4 py-4">Number filled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-badge color="blue">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="dark-blue" number="9">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="amber" number="99">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="green" number="999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="grey" number="9999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="red" number="99999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="blue" number="999999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="transparent" number="999999">
+                    </sc-badge>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Badge</div>
+                <div class="table-cell border px-4 py-4">Number outlined</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-badge outlined color="blue">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="dark-blue" number="9">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="amber" number="99">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="green" number="999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="grey" number="9999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="red" number="99999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="blue" number="999999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="transparent" number="999999">
+                    </sc-badge>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Badge</div>
+                <div class="table-cell border px-4 py-4">Text filled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-badge color="blue" type="text">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="dark-blue" type="text" label="9">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="amber" type="text" label="99">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="green" type="text" label="999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="grey" type="text" label="9999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="red" type="text" label="99999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="blue" type="text" label="999999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="transparent" type="text" label="999999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge color="transparent" type="text" label="Lorem ipsum">
+                    </sc-badge>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Badge</div>
+                <div class="table-cell border px-4 py-4">Text outlined</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-badge outlined color="blue" type="text">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="dark-blue" type="text" label="9">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="amber" type="text" label="99">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="green" type="text" label="999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="grey" type="text" label="9999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="red" type="text" label="99999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="blue" type="text" label="999999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="transparent" type="text" label="999999">
+                    </sc-badge>
+                    <br/>
+                    <sc-badge outlined color="transparent" type="text" label="Lorem ipsum">
+                    </sc-badge>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Banner</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-banner
+                        title='Banner'
+                        body='Body info'
+                        background-color='gradient-blue'
+                        image-src='images/hero.svg'
+                    >
+                    </sc-banner>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Banner</div>
+                <div class="table-cell border px-4 py-4">Basic ODS</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-banner
+                        background-color='white'
+                        image-src='images/hero.svg'
+                        closable
+                    >
+                        <div slot='title'>
+                            Introducing a new feature for creating funds transfer 
+                            <span style="color: var(--sc-brand-grey);">– a friendly, powerful way for you and your teams to create their transactions.</span>
+                        </div>
+                        <div slot="body">
+                            <div style="display: flex; color: var(--sc-color-blue-500); align-items: center;">
+                                CTA placement<div style="position: relative; margin-left: 2px;"><sc-icon name="arrow-ios-forward"></sc-icon></div>
+                            </div>
+                        </div>
+                    </sc-banner>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Banner</div>
+                <div class="table-cell border px-4 py-4">Info with slot & text center</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-banner
+                        background-color='gradient-blue'
+                        text-alignment='center'
+                    >
+                        <div slot='title'><div style='font-size: 32px;'>This is title</div></div>
+                        <div slot='body'>
+                            <div>This is description</div>
+                            <div style='margin-top: 12px;'>
+                                <sc-button fill>Click here</sc-button>
+                            </div>
+                        </div>
+                    </sc-banner>
+                    <sc-banner
+                        background-color='light-grey'
+                        text-alignment='center'
+                    >
+                        <div slot='title'><div style='font-size: 32px;'>This is title</div></div>
+                        <div slot='body'>
+                            <div>This is description</div>
+                            <div style='margin-top: 12px;'>
+                                <sc-button fill>Click here</sc-button>
+                            </div>
+                        </div>
+                    </sc-banner>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Banner</div>
+                <div class="table-cell border px-4 py-4">Round corner & trustpoint</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-banner round-corner trustpoint
+                        background-color='light-blue'
+                        image-src='images/hero.svg'
+                    >
+                        <div slot='title'><div style='font-size: 32px;'>This is title</div></div>
+                        <div slot='body'>
+                            <div>This is description</div>
+                            <div style='margin-top: 12px;'>
+                                <sc-button fill>Click here</sc-button>
+                            </div>
+                        </div>
+                    </sc-banner>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Banner</div>
+                <div class="table-cell border px-4 py-4">Image left & text right</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-banner round-corner image-position='left' text-alignment='right'
+                        background-color='alt-blue'
+                        image-src='images/hero.svg'
+                    >
+                        <div slot='title'><div style='font-size: 32px;'>This is title</div></div>
+                        <div slot='body'>
+                            <div>This is description</div>
+                            <div style='margin-top: 12px;'>
+                                <sc-button fill>Click here</sc-button>
+                            </div>
+                        </div>
+                    </sc-banner>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Bottom Navbar</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-bottom-navbar id="bottom-navbar-basic">
+                        <sc-navbar-item name="home" label="Home" icon="home--line" active-icon="home--fill" active></sc-navbar-item>
+                        <sc-navbar-item name="pay" label="Pay & transfer" icon="creditcard--line" active-icon="creditcard--fill"></sc-navbar-item>
+                        <sc-navbar-item name="invest" label="Invest" icon="trending-up"></sc-navbar-item>
+                        <sc-navbar-item name="discover" label="Discover" icon="search"></sc-navbar-item>
+                        <sc-navbar-item name="services" label="Services" icon="person--line" active-icon="person--fill"></sc-navbar-item>
+                    </sc-bottom-navbar>
+                    <script type="module">
+                        document.querySelector('#bottom-navbar-basic').addEventListener('sc-select', (data) => {
+                            console.log(data.detail);
+                        })
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Bottom Navbar</div>
+                <div class="table-cell border px-4 py-4">Badge</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-bottom-navbar>
+                        <sc-navbar-item name="home" label="Home" icon="home--line" active-icon="home--fill" active badge></sc-navbar-item>
+                        <sc-navbar-item name="pay" label="Pay & transfer" icon="creditcard--line" active-icon="creditcard--fill" badge="8"></sc-navbar-item>
+                        <sc-navbar-item name="invest" label="Invest" icon="trending-up" badge="27"></sc-navbar-item>
+                        <sc-navbar-item name="discover" label="Discover" icon="search" badge="143"></sc-navbar-item>
+                        <sc-navbar-item name="services" label="Services" icon="person--line" active-icon="person--fill" badge="9876"></sc-navbar-item>
+                    </sc-bottom-navbar>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Box</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-box radius='lg' space-size="lg" type='transparent'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                    <br />
+                    <sc-box radius='md' space-size="md" type='info'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                    <br />
+                    <sc-box radius='sm' space-size="sm" type='success'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                    <br />
+                    <sc-box radius='xs' space-size="xs" type='warning'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                    <br />
+                    <sc-box radius='xxs' space-size="xxs" type='error'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                    <br />
+                    <sc-box radius='none' space-size="none" type='disabled'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                    <br />
+                    <sc-box>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Box</div>
+                <div class="table-cell border px-4 py-4">Outline</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-box radius='lg' space-size="lg" type='transparent' view='outline'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                    <br />
+                    <sc-box radius='md' space-size="md" type='info' view='outline'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                    <br />
+                    <sc-box radius='sm' space-size="sm" type='success' view='outline'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                    <br />
+                    <sc-box radius='xs' space-size="xs" type='warning' view='outline'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                    <br />
+                    <sc-box radius='xxs' space-size="xxs" type='error' view='outline'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                    <br />
+                    <sc-box radius='none' space-size="none" type='disabled' view='outline'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                    <br />
+                    <sc-box view='outline'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-box>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Breadcrumb</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-breadcrumb>
+                        <sc-breadcrumb-item href="#" target="_blank"> Home</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Guideline</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Color</sc-breadcrumb-item>
+                    </sc-breadcrumb>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Breadcrumb</div>
+                <div class="table-cell border px-4 py-4">Custom separator</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-breadcrumb separatorIcon="arrowhead-right">
+                        <sc-icon slot="separator" name="arrowhead-right"></sc-icon>
+                        <sc-breadcrumb-item href="#" target="_blank"> Home</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Guideline</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Color</sc-breadcrumb-item>
+                    </sc-breadcrumb>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Breadcrumb</div>
+                <div class="table-cell border px-4 py-4">Prefix and suffix</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-breadcrumb>
+                        <sc-breadcrumb-item href="#" target="_blank">
+                            <sc-icon slot="prefix" name="home--line"></sc-icon>
+                            Home
+                        </sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Guideline</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>
+                            Color
+                            <sc-icon slot="suffix" name="shield-off--line"></sc-icon>
+                        </sc-breadcrumb-item>
+                    </sc-breadcrumb>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Breadcrumb</div>
+                <div class="table-cell border px-4 py-4">Compressed</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-breadcrumb compressed>
+                        <sc-breadcrumb-item href="#" target="_blank">Home</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Guideline</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Web Design</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Web Develop</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Web Testing</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Color</sc-breadcrumb-item>
+                    </sc-breadcrumb>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Breadcrumb</div>
+                <div class="table-cell border px-4 py-4">fill</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-breadcrumb fill compressed>
+                        <sc-breadcrumb-item href="#" target="_blank"> Home</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Guideline</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Web Design</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Web Develop</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Web Testing</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Color<sc-icon slot="suffix" name="shield-off--line"></sc-icon></sc-breadcrumb-item>
+                    </sc-breadcrumb>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Primary Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button>Default</sc-button>
+                        <sc-button size="xxs">Default xxs</sc-button>
+                        <sc-button size="xs">Default xs</sc-button>
+                        <sc-button size="sm">Default sm</sc-button>
+                        <sc-button size="md">Default md</sc-button>
+                        <sc-button size="lg">Default lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Primary Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button state="error">Error</sc-button>
+                        <sc-button state="error" size="xxs">Error xxs</sc-button>
+                        <sc-button state="error" size="xs">Error xs</sc-button>
+                        <sc-button state="error" size="sm">Error sm</sc-button>
+                        <sc-button state="error" size="md">Error md</sc-button>
+                        <sc-button state="error" size="lg">Error lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Primary Alert</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button state="alert">Alert</sc-button>
+                        <sc-button state="alert" size="xxs">Alert xxs</sc-button>
+                        <sc-button state="alert" size="xs">Alert xs</sc-button>
+                        <sc-button state="alert" size="sm">Alert sm</sc-button>
+                        <sc-button state="alert" size="md">Alert md</sc-button>
+                        <sc-button state="alert" size="lg">Alert lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Primary Success</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button state="success">Success</sc-button>
+                        <sc-button state="success" size="xxs">Success xxs</sc-button>
+                        <sc-button state="success" size="xs">Success xs</sc-button>
+                        <sc-button state="success" size="sm">Success sm</sc-button>
+                        <sc-button state="success" size="md">Success md</sc-button>
+                        <sc-button state="success" size="lg">Success lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Primary Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button disabled>Disabled</sc-button>
+                        <sc-button disabled size="xxs">Disabled xxs</sc-button>
+                        <sc-button disabled size="xs">Disabled xs</sc-button>
+                        <sc-button disabled size="sm">Disabled sm</sc-button>
+                        <sc-button disabled size="md">Disabled md</sc-button>
+                        <sc-button disabled size="lg">Disabled lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Default - with prefix icon</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button left-icon="checkmark-circle--line">Icon </sc-button>
+                        <sc-button left-icon="checkmark-circle--line" state="error" size="xxs">Icon xxs</sc-button>
+                        <sc-button left-icon="checkmark-circle--line" state="error" size="xs">Icon xs</sc-button>
+                        <sc-button left-icon="checkmark-circle--line" disabled size="sm">Icon sm</sc-button>
+                        <sc-button left-icon="checkmark-circle--line" state="alert" size="md">Icon md</sc-button>
+                        <sc-button left-icon="checkmark-circle--line" state="success" size="lg">Icon lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Default - with suffix icon</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button right-icon="checkmark-circle--line">Icon </sc-button>
+                        <sc-button right-icon="checkmark-circle--line" state="error" size="xxs">Icon xxs</sc-button>
+                        <sc-button right-icon="checkmark-circle--line" state="error" size="xs">Icon xs</sc-button>
+                        <sc-button right-icon="checkmark-circle--line" disabled size="sm">Icon sm</sc-button>
+                        <sc-button right-icon="checkmark-circle--line" state="alert" size="md">Icon md</sc-button>
+                        <sc-button right-icon="checkmark-circle--line" state="success" size="lg">Icon lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Default Loading</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button loading>Loading</sc-button>
+                        <sc-button state="error" size="xxs" loading>Loading xxs</sc-button>
+                        <sc-button state="error" size="xs" loading>Loading xs</sc-button>
+                        <sc-button disabled size="sm" loading>Loading sm</sc-button>
+                        <sc-button state="alert" size="md" loading>Loading md</sc-button>
+                        <sc-button state="success" size="lg" loading>Loading lg</sc-button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Secondary Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="secondary">Default</sc-button>
+                        <sc-button type="secondary" size="xxs">Default xxs</sc-button>
+                        <sc-button type="secondary" size="xs">Default xs</sc-button>
+                        <sc-button type="secondary" size="sm">Default sm</sc-button>
+                        <sc-button type="secondary" size="md">Default md</sc-button>
+                        <sc-button type="secondary" size="lg">Default lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Secondary Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="secondary" state="error">Error</sc-button>
+                        <sc-button type="secondary" state="error" size="xxs">Error xxs</sc-button>
+                        <sc-button type="secondary" state="error" size="xs">Error xs</sc-button>
+                        <sc-button type="secondary" state="error" size="sm">Error sm</sc-button>
+                        <sc-button type="secondary" state="error" size="md">Error md</sc-button>
+                        <sc-button type="secondary" state="error" size="lg">Error lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Secondary Alert</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="secondary" state="alert">Alert</sc-button>
+                        <sc-button type="secondary" state="alert" size="xxs">Alert xxs</sc-button>
+                        <sc-button type="secondary" state="alert" size="xs">Alert xs</sc-button>
+                        <sc-button type="secondary" state="alert" size="sm">Alert sm</sc-button>
+                        <sc-button type="secondary" state="alert" size="md">Alert md</sc-button>
+                        <sc-button type="secondary" state="alert" size="lg">Alert lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Secondary Success</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="secondary" state="success">Success</sc-button>
+                        <sc-button type="secondary" state="success" size="xxs">Success xxs</sc-button>
+                        <sc-button type="secondary" state="success" size="xs">Success xs</sc-button>
+                        <sc-button type="secondary" state="success" size="sm">Success sm</sc-button>
+                        <sc-button type="secondary" state="success" size="md">Success md</sc-button>
+                        <sc-button type="secondary" state="success" size="lg">Success lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Secondary Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="secondary" disabled>Disabled</sc-button>
+                        <sc-button type="secondary" disabled size="xxs">Disabled xxs</sc-button>
+                        <sc-button type="secondary" disabled size="xs">Disabled xs</sc-button>
+                        <sc-button type="secondary" disabled size="sm">Disabled sm</sc-button>
+                        <sc-button type="secondary" disabled size="md">Disabled md</sc-button>
+                        <sc-button type="secondary" disabled size="lg">Disabled lg</sc-button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Secondary Loading</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="secondary" loading>Loading</sc-button>
+                        <sc-button type="secondary" state="error" size="xxs" loading>Loading xxs</sc-button>
+                        <sc-button type="secondary" state="error" size="xs" loading>Loading xs</sc-button>
+                        <sc-button type="secondary" disabled size="sm" loading>Loading sm</sc-button>
+                        <sc-button type="secondary" state="alert" size="md" loading>Loading md</sc-button>
+                        <sc-button type="secondary" state="success" size="lg" loading>Loading lg</sc-button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Text Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="text">Default</sc-button>
+                        <sc-button type="text" size="xxs">Default xxs</sc-button>
+                        <sc-button type="text" size="xs">Default xs</sc-button>
+                        <sc-button type="text" size="sm">Default sm</sc-button>
+                        <sc-button type="text" size="md">Default md</sc-button>
+                        <sc-button type="text" size="lg">Default lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Text Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="text" state="error">Error</sc-button>
+                        <sc-button type="text" state="error" size="xxs">Error xxs</sc-button>
+                        <sc-button type="text" state="error" size="xs">Error xs</sc-button>
+                        <sc-button type="text" state="error" size="sm">Error sm</sc-button>
+                        <sc-button type="text" state="error" size="md">Error md</sc-button>
+                        <sc-button type="text" state="error" size="lg">Error lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Text Alert</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="text" state="alert">Alert</sc-button>
+                        <sc-button type="text" state="alert" size="xxs">Alert xxs</sc-button>
+                        <sc-button type="text" state="alert" size="xs">Alert xs</sc-button>
+                        <sc-button type="text" state="alert" size="sm">Alert sm</sc-button>
+                        <sc-button type="text" state="alert" size="md">Alert md</sc-button>
+                        <sc-button type="text" state="alert" size="lg">Alert lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Text Success</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="text" state="success">Success</sc-button>
+                        <sc-button type="text" state="success" size="xxs">Success xxs</sc-button>
+                        <sc-button type="text" state="success" size="xs">Success xs</sc-button>
+                        <sc-button type="text" state="success" size="sm">Success sm</sc-button>
+                        <sc-button type="text" state="success" size="md">Success md</sc-button>
+                        <sc-button type="text" state="success" size="lg">Success lg</sc-button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Text Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="text" state="success" disabled>Success</sc-button>
+                        <sc-button type="text" state="success" disabled size="xxs">Success xxs</sc-button>
+                        <sc-button type="text" state="success" disabled size="xs">Success xs</sc-button>
+                        <sc-button type="text" state="success" disabled size="sm">Success sm</sc-button>
+                        <sc-button type="text" state="success" disabled size="md">Success md</sc-button>
+                        <sc-button type="text" state="success" disabled size="lg">Success lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Link Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="link">Default</sc-button>
+                        <sc-button type="link" size="xxs">Default xxs</sc-button>
+                        <sc-button type="link" size="xs">Default xs</sc-button>
+                        <sc-button type="link" size="sm">Default sm</sc-button>
+                        <sc-button type="link" size="md">Default md</sc-button>
+                        <sc-button type="link" size="lg">Default lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Link Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="link" state="error">Error</sc-button>
+                        <sc-button type="link" state="error" size="xxs">Error xxs</sc-button>
+                        <sc-button type="link" state="error" size="xs">Error xs</sc-button>
+                        <sc-button type="link" state="error" size="sm">Error sm</sc-button>
+                        <sc-button type="link" state="error" size="md">Error md</sc-button>
+                        <sc-button type="link" state="error" size="lg">Error lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Link Alert</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="link" state="alert">Alert</sc-button>
+                        <sc-button type="link" state="alert" size="xxs">Alert xxs</sc-button>
+                        <sc-button type="link" state="alert" size="xs">Alert xs</sc-button>
+                        <sc-button type="link" state="alert" size="sm">Alert sm</sc-button>
+                        <sc-button type="link" state="alert" size="md">Alert md</sc-button>
+                        <sc-button type="link" state="alert" size="lg">Alert lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Link Success</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="link" state="success">Success</sc-button>
+                        <sc-button type="link" state="success" size="xxs">Success xxs</sc-button>
+                        <sc-button type="link" state="success" size="xs">Success xs</sc-button>
+                        <sc-button type="link" state="success" size="sm">Success sm</sc-button>
+                        <sc-button type="link" state="success" size="md">Success md</sc-button>
+                        <sc-button type="link" state="success" size="lg">Success lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Link Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="link" state="success" disabled>Success</sc-button>
+                        <sc-button type="link" state="success" disabled size="xxs">Success xxs</sc-button>
+                        <sc-button type="link" state="success" disabled size="xs">Success xs</sc-button>
+                        <sc-button type="link" state="success" disabled size="sm">Success sm</sc-button>
+                        <sc-button type="link" state="success" disabled size="md">Success md</sc-button>
+                        <sc-button type="link" state="success" disabled size="lg">Success lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Custom width</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button width="300px">
+                        Custom width
+                    </sc-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Primary No pill</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button no-pill>No pill</sc-button>
+                        <sc-button size="xxs" no-pill>No pill xxs</sc-button>
+                        <sc-button size="xs" no-pill>No pill xs</sc-button>
+                        <sc-button size="sm" no-pill>No pill sm</sc-button>
+                        <sc-button size="md" no-pill>No pill md</sc-button>
+                        <sc-button size="lg" no-pill disabled>No pill lg</sc-button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Secondary - No pill</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex flex-wrap gap-8 items-center">
+                        <sc-button type="secondary" no-pill>No pill</sc-button>
+                        <sc-button type="secondary" size="xxs" no-pill>No pill xxs</sc-button>
+                        <sc-button type="secondary" size="xs" no-pill>No pill xs</sc-button>
+                        <sc-button type="secondary" size="sm" no-pill>No pill sm</sc-button>
+                        <sc-button type="secondary" size="md" no-pill>No pill md</sc-button>
+                        <sc-button type="secondary" size="lg" no-pill disabled>No pill lg</sc-button>
+                    </div>
+                </div>
+            </div><div class="table-row">
+            <div class="table-cell border px-4 py-4">Button</div>
+            <div class="table-cell border px-4 py-4">Icon - Default</div>
+            <div class="table-cell border px-4 py-4">
+                <sc-icon-button size="xxs" name='thumbs-up--fill'>
+                </sc-icon-button>
+                <sc-icon-button size="xs" name='thumbs-up--fill'>
+                </sc-icon-button>
+                <sc-icon-button size="sm" name='thumbs-up--fill'>
+                </sc-icon-button>
+                <sc-icon-button size="md" name='thumbs-up--fill'>
+                </sc-icon-button>
+                <sc-icon-button size='lg' name='thumbs-up--fill'>
+                </sc-icon-button>
+            </div>
+        </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Icon - Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-button size="xxs" state="error" name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size="xs" state="error" name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size="sm" state="error" name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size="md" state="error" name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size='lg' state="error" name='thumbs-up--fill'>
+                    </sc-icon-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Icon - Fill Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-button size="xxs" fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size="xs" fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size="sm" fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size='md' fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size='lg' fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Icon - Fill Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-button size="xxs" state="error" fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size="xs" state="error" fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size="sm" state="error" fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size='md' state="error" fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size='lg' state="error" fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Icon - Fill Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-button size="xxs" disabled fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size="xs" disabled fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size="sm" disabled fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size='md' disabled fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button size='lg' disabled fill name='thumbs-up--fill'>
+                    </sc-icon-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Icon - Default Loading</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-button loading size="xs" state="error" name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button loading size="sm" name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button loading size="md" name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button loading size='lg' name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button loading name='thumbs-up--fill' disabled>
+                    </sc-icon-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Icon - Fill Loading</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-button fill loading size="xs" state="error" name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button fill loading size="sm" name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button fill loading size="md" name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button fill loading size='lg' name='thumbs-up--fill'>
+                    </sc-icon-button>
+                    <sc-icon-button fill loading name='thumbs-up--fill' disabled>
+                    </sc-icon-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Icon - Inverse</div>
+                <div class="table-cell border px-4 py-4 inverse">
+                    <sc-icon-button inverse name='thumbs-up--fill'>
+                        Fill middle
+                    </sc-icon-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Icon - Fill Inverse</div>
+                <div class="table-cell border px-4 py-4 inverse">
+                    <sc-icon-button fill inverse name='thumbs-up--fill'>
+                        Fill middle
+                    </sc-icon-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Icon - No border</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-icon-button no-border size="xxs" name='thumbs-up--fill'>
+                        Fill middle
+                    </sc-icon-button>
+                    <sc-icon-button no-border state='error' size="sm" name='thumbs-up--fill'>
+                        Fill middle
+                    </sc-icon-button>
+                    <sc-icon-button no-border state='error' size="md" name='thumbs-up--fill' disabled>
+                        Fill middle
+                    </sc-icon-button>
+                    <sc-icon-button no-border size="lg" name='thumbs-up--fill'>
+                        Fill middle
+                    </sc-icon-button>
+                    <sc-icon-button no-border name='thumbs-up--fill'>
+                        Fill middle
+                    </sc-icon-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button</div>
+                <div class="table-cell border px-4 py-4">Icon - Inverse & No border</div>
+                <div class="table-cell border px-4 py-4 inverse">
+                    <sc-icon-button no-border size="xxs" inverse name='thumbs-up--fill'>
+                        Fill middle
+                    </sc-icon-button>
+                    <sc-icon-button no-border size="sm" inverse state='error' name='thumbs-up--fill'>
+                        Fill middle
+                    </sc-icon-button>
+                    <sc-icon-button no-border size="md" inverse state='error' name='thumbs-up--fill' disabled>
+                        Fill middle
+                    </sc-icon-button>
+                    <sc-icon-button no-border size="lg" inverse name='thumbs-up--fill'>
+                        Fill middle
+                    </sc-icon-button>
+                    <sc-icon-button no-border inverse name='thumbs-up--fill'>
+                        Fill middle
+                    </sc-icon-button>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Multiple select sm</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group
+                        label="Select options"
+                        help-text="You may select multiple"     
+                        size="sm"                   
+                    >
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Multiple select md</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group
+                        label="Select options"
+                        help-text="You may select multiple"         
+                        size="md"               
+                    >
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Multiple select lg</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group
+                        label="Select options"
+                        help-text="You may select multiple"   
+                        size="lg"                     
+                    >
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Single select</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group 
+                        label="Select one"
+                        single-select
+                    >
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Single select - many options</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group 
+                        label="Select one"
+                        single-select
+                    >
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                        <sc-button-group-item value="opt4">Option D</sc-button-group-item>
+                        <sc-button-group-item value="opt5">Option E</sc-button-group-item>
+                        <sc-button-group-item value="opt6">Option F</sc-button-group-item>
+                        <sc-button-group-item value="opt7">Option G</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Item Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group value='["opt3"]' required success-message='success message' help-text='help text'>
+                        <div slot='label'>Button group label</div>
+                        <sc-button-group-item value="opt1" disabled>Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Item Active-Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group value='["opt1"]' required success-message='success message' help-text='help text'>
+                        <div slot='label'>Button group label</div>
+                        <sc-button-group-item value="opt1" disabled>Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Tooltip only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group tooltip="Enter your 16 digits number" tooltip-placement="right">
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Required only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group required>
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group label-size="xxs">
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group label-size="xs" success=true>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group label-size="sm" error>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group label-size="md" border-type="box" success=true>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group label-size="lg" border-type="box" required error=true
+                    success-message="Success message" error-message="Error message">
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group readonly id='readonly-button-group' required readonly>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                    <script type="text/javascript">
+                        const readonlyButtonGroup = document.querySelector('#readonly-button-group');
+                        if (readonlyButtonGroup) {
+                            readonlyButtonGroup.value = ['opt2', 'opt3']
+                        }
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group value='["opt3"]' disabled error-message='error message'>
+                        <div slot='label'>Button group label</div>
+                        <sc-button-group-item value="opt1" disabled>Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Button Group</div>
+                <div class="table-cell border px-4 py-4">No label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-button-group value='["opt3"]' success=true>
+                        <sc-button-group-item value="opt1">Option A</sc-button-group-item>
+                        <sc-button-group-item value="opt2">Option B</sc-button-group-item>
+                        <sc-button-group-item value="opt3">Option C</sc-button-group-item>
+                    </sc-button-group>
+                </div>
+            </div>
+
+        </div>
+</sc-icon-provider>
+<!-- Custom script -->
+<script type="text/javascript">
+    var modes = ['light', 'dark', 'dyslexic']
+    var activeMode = modes[0]
+    function changeMode(mode) {
+        var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child');
+        componentCells.forEach((componentCell) => {
+            modes.forEach((mode) => {
+                componentCell.classList.remove(`sc-mode-${mode}`)
+            })
+            componentCell.classList.add(`sc-mode-${mode}`)
+            if (componentCell.classList.contains('inverse')) {
+                if (mode === 'dark') {
+                    componentCell.style.backgroundColor = 'var(--sc-color-white)'
+                } else {
+                    componentCell.style.backgroundColor = 'var(--sc-color-blue-900)'
+                }
+            }
+        })
+    }
+    document.getElementsByTagName('sc-dropdown-input')[0].addEventListener('sc-select', ({ detail: { value } }) => {
+        changeMode(value);
+    });
+    changeMode(activeMode);
+
+</script>
+
+<script type="module">
+    import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+    changeIconLibrary();
+    function changeIconLibrary() {
+        document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+    }
+</script>
+
+</html>

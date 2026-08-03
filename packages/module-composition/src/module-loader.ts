@@ -2,7 +2,9 @@ import type { ComponentType } from 'react';
 import { ModuleCompositionError } from './errors';
 import type {
   ExposedModule,
+  ModuleLoadErrorContext,
   ModuleLoaderApi,
+  ModuleLoaderOptions,
   ModuleReference,
   ModuleRuntimeAdapter,
 } from './types';
@@ -17,31 +19,61 @@ export class ModuleLoader implements ModuleLoaderApi {
   private readonly adapters = new Map<ModuleReference['loader'], ModuleRuntimeAdapter>();
   private readonly loads = new Map<string, Promise<ExposedModule>>();
 
-  constructor(adapters: readonly ModuleRuntimeAdapter[]) {
+  constructor(
+    adapters: readonly ModuleRuntimeAdapter[],
+    private readonly options: ModuleLoaderOptions = {},
+  ) {
     for (const adapter of adapters) {
       this.adapters.set(adapter.loader, adapter);
     }
   }
 
-  load<Props = Record<string, never>>(reference: ModuleReference): Promise<ExposedModule<Props>> {
-    const key = JSON.stringify({
+  async load<Props = Record<string, never>>(
+    reference: ModuleReference,
+  ): Promise<ExposedModule<Props>> {
+    const normalizedReference: Required<ModuleReference> = {
       ...reference,
       exportName: reference.exportName ?? DEFAULT_EXPORT,
-    });
-    const existing = this.loads.get(key);
-    if (existing) {
-      return existing as Promise<ExposedModule<Props>>;
-    }
+    };
 
+    try {
+      await this.options.lifecycle?.beforeLoad?.({ reference: normalizedReference });
+
+      const key = JSON.stringify(normalizedReference);
+      const existing = this.loads.get(key);
+      const fromCache = Boolean(existing);
+      const module = await (existing ?? this.startLoad(normalizedReference, key));
+
+      await this.options.lifecycle?.afterLoad?.({
+        reference: normalizedReference,
+        module,
+        fromCache,
+      });
+      return module as ExposedModule<Props>;
+    } catch (error: unknown) {
+      await this.notifyLoadError({ reference: normalizedReference, error });
+      throw error;
+    }
+  }
+
+  private startLoad(reference: Required<ModuleReference>, key: string): Promise<ExposedModule> {
     const load = this.resolve(reference).catch((error: unknown) => {
       this.loads.delete(key);
       throw error;
     });
     this.loads.set(key, load);
-    return load as Promise<ExposedModule<Props>>;
+    return load;
   }
 
-  private async resolve(reference: ModuleReference): Promise<ExposedModule> {
+  private async notifyLoadError(context: ModuleLoadErrorContext): Promise<void> {
+    try {
+      await this.options.lifecycle?.onLoadError?.(context);
+    } catch {
+      // Error observers must not hide the original load or authorization failure.
+    }
+  }
+
+  private async resolve(reference: Required<ModuleReference>): Promise<ExposedModule> {
     const adapter = this.adapters.get(reference.loader);
     if (!adapter) {
       throw new ModuleCompositionError(
@@ -52,7 +84,7 @@ export class ModuleLoader implements ModuleLoaderApi {
     }
 
     const namespace = await adapter.loadModule(reference.moduleId);
-    const exportName = reference.exportName ?? DEFAULT_EXPORT;
+    const exportName = reference.exportName;
     if (!(exportName in namespace)) {
       throw new ModuleCompositionError(
         'MISSING_COMPONENT_EXPORT',
@@ -72,7 +104,7 @@ export class ModuleLoader implements ModuleLoaderApi {
 
     return {
       Component: component,
-      metadata: { ...reference, exportName },
+      metadata: reference,
     };
   }
 }

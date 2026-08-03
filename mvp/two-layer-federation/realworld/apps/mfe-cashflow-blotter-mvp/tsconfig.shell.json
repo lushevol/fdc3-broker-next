@@ -1,0 +1,27 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@migrated-cashflow-cn": ["src/types/migrated-cashflow-cn.d.ts"]
+    }
+  },
+  "include": [
+    "src/application.tsx",
+    "src/compat/base.tsx",
+    "src/index.tsx",
+    "src/migrated-entry.tsx",
+    "src/standalone.ts",
+    "src/types/migrated-cashflow-cn.d.ts",
+    "*.ts"
+  ],
+  "exclude": [
+    "src/Cashflow_CN",
+    "src/Cashflow_Dashboard",
+    "src/Root",
+    "src/generated",
+    "src/compat/ratan-container.ts",
+    "src/compat/stomp.ts",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
+  ]
+}

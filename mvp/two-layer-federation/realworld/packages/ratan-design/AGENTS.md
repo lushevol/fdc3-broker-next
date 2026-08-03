@@ -15,5 +15,5 @@ npm run dev:sb
 
 - Keep the public API bounded to `src/index.ts`.
 - Use semantic `--ratan-*` tokens and local provider roots.
-- React/MUI/Emotion are peers; do not add runtime composition or domain dependencies.
+- React and ReactDOM are peers. React Aria is the behavior layer; MUI and Emotion are prohibited.
 - Update tests, stories, and release guidance for every public change.

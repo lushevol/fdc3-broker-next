@@ -1,0 +1,46 @@
+services:
+  realworld-dev:
+    build:
+      context: ./nginx/two-layer
+    image: fdc3-realworld-static:${IMAGE_TAG:-local}
+    environment:
+      DEPLOYMENT_ENV: dev
+      SERVER_NAME: localhost
+    ports:
+      - '9080:8080'
+      - '9443:8443'
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+      - /etc/nginx/conf.d
+    volumes:
+      - ./runtime:/srv/realworld:ro
+      - ./tls:/etc/nginx/tls:ro
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  realworld-test:
+    build:
+      context: ./nginx/two-layer
+    image: fdc3-realworld-static:${IMAGE_TAG:-local}
+    environment:
+      DEPLOYMENT_ENV: test
+      SERVER_NAME: localhost
+    ports:
+      - '9180:8080'
+      - '9543:8443'
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+      - /etc/nginx/conf.d
+    volumes:
+      - ./runtime:/srv/realworld:ro
+      - ./tls:/etc/nginx/tls:ro
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped

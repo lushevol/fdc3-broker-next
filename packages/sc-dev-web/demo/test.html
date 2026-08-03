@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+  <title>sc-web-kit demo page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+  <!-- Custom style -->
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    .sc-mode-dark {
+      background-color: var(--sc-color-grey-100)
+    }
+  </style>
+
+  <!-- Register all sc-* custom elements -->
+  <script type="module">
+    import '../dist/elements/index.js';
+    import { html } from '/node_modules/lit-html/lit-html.js';
+    window.html = html;
+
+  </script>
+
+</head>
+
+<body>
+  <button class="change-mode">change-mode</button>
+  <div style="height: 500px">
+    <sc-data-grid filterable row-selection sortable pagination page-size="5" column-visibility
+      column-ordering></sc-data-grid>
+  </div>
+  <hr>
+
+  <script>
+    const grid = document.querySelector('sc-data-grid');
+    const columns = [
+    {
+    header: 'group',
+    id: 'group',
+    columns: [{
+      header: 'subGroup',
+      id: 'subGroup',
+      columns: [{
+        property: 'visits',
+        id: 'visits',
+      }]
+    }, {
+      property: 'progress',
+      hide: true
+    }]
+  },
+  {
+    property: 'firstName',
+    header: 'First name',
+    flex: 1,
+    enableResizing: true,
+  },
+  {
+    property: 'lastName',
+    header: 'Last name',
+    minSize: 60,
+    flex: 2,
+  },
+  {
+    property: 'age',
+    minSize: 40,
+  },
+    ];
+    let data = [{
+      firstName: 'tanner',
+      lastName: 'linsley',
+      age: 24,
+      visits: 100,
+      status: 'In Relationship',
+      progress: 10,
+    }, {
+      firstName: 'tanner',
+      lastName: 'linsley',
+      age: 24,
+      visits: 100,
+      status: 'In Relationship',
+      progress: 10,
+    }, {
+      firstName: 'tanner',
+      lastName: 'linsley',
+      age: 24,
+      visits: 100,
+      status: 'In Relationship',
+      progress: 10,
+    }, {
+      firstName: 'tanner',
+      lastName: 'linsley',
+      age: 24,
+      visits: 100,
+      status: 'In Relationship',
+      progress: 10,
+    }, {
+      firstName: 'tanner',
+      lastName: 'linsley',
+      age: 24,
+      visits: 100,
+      status: 'In Relationship',
+      progress: 10,
+    }, {
+      firstName: 'tanner',
+      lastName: 'linsley',
+      age: 24,
+      visits: 100,
+      status: 'In Relationship',
+      progress: 10,
+    },
+    {
+      uuid: 'test-1',
+      firstName: 'tanner - test 1',
+      lastName: 'linsley',
+      age: 24,
+      visits: 100,
+      status: 'In Relationship',
+      progress: 10,
+    }, {
+      uuid: 'test-2',
+      firstName: 'tanner - test 2',
+      lastName: 'linsley',
+      age: 24,
+      visits: 100,
+      status: 'In Relationship',
+      progress: 10,
+    },
+    {
+      firstName: 'tanner',
+      lastName: 'linsley',
+      age: 24,
+      visits: 100,
+      status: 'In Relationship',
+      progress: 1,
+    }]
+    // data = []
+    grid.data = data;
+    grid.columns = columns;
+    grid.isCellExpandable = () => {
+      return true
+    }
+  </script>
+
+
+</body>
+
+</html>

@@ -4,9 +4,9 @@ import { describe, expect, it } from 'vitest';
 import packageJson from '../package.json';
 
 const forbiddenDependency =
-  /^(?:antd|@ant-design\/|ag-grid|@module-federation\/|single-spa|systemjs|@fm\/ratan-(?:sdk|ui)|formik|react-hook-form|final-form|react-final-form)/;
+  /^(?:@mui\/|@emotion\/|antd|@ant-design\/|ag-grid|@module-federation\/|single-spa|systemjs|@fm\/ratan-(?:sdk|ui)|formik|react-hook-form|final-form|react-final-form)/;
 const forbiddenImport =
-  /from\s+['"](?:antd|@ant-design\/[^'"]+|ag-grid[^'"]*|@module-federation\/[^'"]+|single-spa|systemjs|@fm\/ratan-(?:sdk|ui)[^'"]*|formik|react-hook-form|final-form|react-final-form|(?:\.\.\/)+\.\.\/apps\/[^'"]*)['"]/g;
+  /from\s+['"](?:@mui\/[^'"]+|@emotion\/[^'"]+|antd|@ant-design\/[^'"]+|ag-grid[^'"]*|@module-federation\/[^'"]+|single-spa|systemjs|@fm\/ratan-(?:sdk|ui)[^'"]*|formik|react-hook-form|final-form|react-final-form|(?:\.\.\/)+\.\.\/apps\/[^'"]*)['"]/g;
 
 function sourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -51,7 +51,7 @@ describe('production design dependency boundaries', () => {
     );
     expect(publicIndex).not.toMatch(/from\s+['"]@mui\//);
     expect(publicIndex).not.toMatch(/from\s+['"]@emotion\//);
-    expect(publicIndex).not.toMatch(/styled|ThemeProvider|Mui[A-Z]/);
+    expect(publicIndex).not.toMatch(/styled|ThemeProvider|Mui[A-Z]|Aria[A-Z]/);
   });
 
   it('does not expose raw styling slots through new interaction props', () => {

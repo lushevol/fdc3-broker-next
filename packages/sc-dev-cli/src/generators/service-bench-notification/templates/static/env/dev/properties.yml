@@ -1,0 +1,110 @@
+# HCV Sample Code. Please uncomment this section once your HCV is ready to test Ingress
+hcv:
+  role: 55313_<%= componentId %>-<%= name.replace(/-process-api$/, '') %>-plugin_app_k8s_55313_role
+  data:
+      # please configure the db path
+    - path: tsa/55313/<%= componentId %>-<%= name.replace(/-process-api$/, '') %>-plugin/
+      sourceName:
+      type: db
+      targetName: NOTIFICATION_DB_PWD
+
+envData:
+  - name: NOTIFICATION_SCHEMA
+    value: # notification schema name
+  - name: NOTIFICATION_DB_URL
+    value: # jdbc link to db,eg. jdbc:postgresql://{db-host}:port/{databaseName}?stringtype=unspecified
+  - name: NOTIFICATION_DB_USER
+    value: # username for db
+  - name: NOTIFICATION_TASK_SCHEDULE_INTERVAL # check the schedule request every 20min
+    value: "20m"
+  - name: NOTIFICATION_TASK_RETRY_INTERVAL # retry the failed request evert 30min
+    value: "30m"
+  - name: NOTIFICATION_RETRY_MAX_TIME # retry the max times
+    value: "3"
+  - name: NOTIFICATION_RETRY_BEFORE_DAYS # retry the time window = current time - 3 days
+    value: "3"
+  - name: NOTIFICATION_PROCESS_API_HOST
+    value: https://servicebench-sit.global.standardchartered.com/api/notification
+
+
+# Please enable both to test ingress and egress once ready.
+enableSIP: false
+enableEgressKeystore: false
+enableSEP: false
+
+functionType: private-api
+enableRestLivenessProbe: true
+
+binaryData:
+  - filename: config.json
+    base64enc: true
+    data: |
+      [
+      {
+        "match": {
+            "url": "/q/health/live",
+            "method": ["GET"]
+        },
+        "handlers": []
+      },
+      {
+        "match": {
+          "url": "[\\S\\s]*",
+          "method": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE"
+          ]
+        },
+        "handlers": [
+          {
+            "id": "authenticator",
+            "config": {
+              "jwks_uri": "https://sit-authn.idp.global.standardchartered.com/ns03/realms/internal-system/protocol/openid-connect/certs",
+              "required_scope": []
+            }
+          }
+        ]
+      }
+      
+      ]
+  - filename: config-egress.json
+    base64enc: true
+    data: |
+      [{
+        "match": {
+          "url": "/api/[\\S\\s]*",
+          "method": [
+            "GET",
+            "POST",
+            "DELETE",
+            "PUT"
+          ]
+        },
+        "handlers": [
+          {
+            "id": "tokenGenerator",
+            "config": {
+              "authType": "SIGNED_JWT",
+              "tokenUrl": "https://sit-authn.idp.global.standardchartered.com/ns03/realms/internal-system/protocol/openid-connect/token",
+              "clientId": "<client-id>",
+              "keyAlias": "<key-alias>"
+            }
+          }
+        ]
+      },
+      {
+        "match": {
+          "url": "[\\S\\s]*",
+          "method": [
+            "CONNECT",
+            "GET",
+            "POST",
+            "DELETE",
+            "PUT"
+          ]
+        },
+        "handlers": [
+        ]
+      }]

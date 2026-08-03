@@ -1,0 +1,10 @@
+.idea/
+*.iml
+.scdevcli/
+target/
+.devkit/
+.vscode/
+__pycache__/
+.pytest_cache/
+.coverage*
+htmlcov/

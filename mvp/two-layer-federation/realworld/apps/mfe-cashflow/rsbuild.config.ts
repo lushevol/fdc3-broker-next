@@ -1,7 +1,11 @@
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
+import { fileURLToPath, URL } from 'node:url';
 import moduleFederationConfig from './module-federation.config';
+
+const localReact = fileURLToPath(new URL('./node_modules/react', import.meta.url));
+const localReactDom = fileURLToPath(new URL('./node_modules/react-dom', import.meta.url));
 
 export default defineConfig({
   plugins: [pluginReact(), pluginModuleFederation(moduleFederationConfig)],
@@ -14,5 +18,10 @@ export default defineConfig({
       'Cache-Control': 'no-store',
     },
   },
-  output: { assetPrefix: 'http://127.0.0.1:9201/' },
+  resolve: {
+    // Cashflow owns React 18. Resolve workspace dependencies (including the
+    // design system) to this copy rather than their development React 19 copy.
+    alias: { react: localReact, 'react-dom': localReactDom },
+  },
+  output: { assetPrefix: 'auto' },
 });

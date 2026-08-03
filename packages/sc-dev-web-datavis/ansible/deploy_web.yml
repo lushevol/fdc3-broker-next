@@ -1,0 +1,130 @@
+---
+- hosts: web_server
+  vars:
+    final_deploy_dir: '{{ web_deploy_dir }}/{{ deploy_dir }}'
+    temp_dir: '{{ temp_deploy_dir }}/{{ component_name }}'
+    component_name: '{{ component_name }}'
+    component_version: '{{ component_version }}'
+    package_location: '{{ artifact_repo }}/{{ npm_package_repo_dir }}/{{ component_repo_dir }}'
+    package_version: '{{ component_version }}'
+    package_name: '-/{{ component_name }}-{{ component_version }}.tgz'
+
+  tasks:
+    - name: Test connection
+      ping:
+
+    - name: Clean up temporary directory
+      file:
+        state: absent
+        path: '{{ temp_dir }}'
+      become: yes
+      become_user: tsp-app
+
+    - name: Create temporary directory
+      file:
+        state: directory
+        path: '{{ temp_dir }}'
+        mode: 0755
+      become: yes
+      become_user: tsp-app
+
+    - name: Download package from Artifactory
+      get_url:
+        url: '{{ package_location }}/{{ package_name }}'
+        dest: '{{ temp_dir }}/package.tgz'
+        mode: 0755
+        force: yes
+      become: yes
+      become_user: tsp-app
+
+    - name: Extract package
+      command: "tar --warning=no-unknown-keyword -zxf {{ temp_dir }}/package.tgz -C {{ temp_dir }}"
+      become: yes
+      become_user: tsp-app
+
+    - name: Update file timestamp
+      command: "find {{ temp_dir }} -type f -exec touch {} +"
+      become: yes
+      become_user: tsp-app
+
+    - name: Set file permissions
+      file:
+        path: "{{ temp_dir }}"
+        recurse: yes
+        mode: 0755
+      become: yes
+      become_user: tsp-app
+
+    - name: Create web deployment directory
+      file:
+        state: directory
+        path: "{{ web_deploy_dir }}"
+        mode: 0755
+      become: yes
+      become_user: tsp-app
+
+    - name: Create final deployment directory
+      file:
+        state: directory
+        path: "{{ final_deploy_dir }}"
+        mode: 0755
+      become: yes
+      become_user: tsp-app
+
+    - name: Synchronise package storybook-static directory into deployment directory
+      command: "rsync -az --exclude=*.map --exclude index.html {{ temp_dir }}/package/storybook-static/ {{ final_deploy_dir }}"
+      become: yes
+      become_user: tsp-app
+
+    - name: Checking package environment directory
+      stat:
+        path: "{{ temp_dir }}/package/env/{{ env }}/"
+      register: env_path
+      become: yes
+      become_user: tsp-app
+
+    - name: Synchronise package environment directory into deployment directory
+      when: env_path.stat.exists
+      command: "rsync -az {{ temp_dir }}/package/env/{{ env }}/ {{ final_deploy_dir }}"
+      become: yes
+      become_user: tsp-app
+
+    - name: Checking index.html
+      stat:
+        path: "{{ temp_dir }}/package/storybook-static/index.html"
+      register: index_path
+      become: yes
+      become_user: tsp-app
+
+    - name: Update CDN paths for index.html
+      when: index_path.stat.exists
+      command: "sed -i -e 's|/tsp/|{{ cdn_url_prefix }}/tsp/|g' {{ temp_dir }}/package/storybook-static/index.html"
+      become: yes
+      become_user: tsp-app
+
+    - name: Copy index.html into deployment directory
+      when: index_path.stat.exists
+      command: "rsync -az {{ temp_dir }}/package/storybook-static/index.html {{ final_deploy_dir }}/index.html"
+      become: yes
+      become_user: tsp-app
+
+    - name: Create package versions directory
+      file:
+        state: directory
+        path: "{{ app_deploy_dir }}/versions"
+        mode: 0755
+      become: yes
+      become_user: tsp-app
+
+    - name: Create package version file
+      file:
+        state: touch
+        path: "{{ app_deploy_dir }}/versions/{{ component_name }}"
+        mode: 0644
+      become: yes
+      become_user: tsp-app
+
+    - name: Save version into the file
+      shell: "printf '{{ component_name }}-{{ component_version }}' > {{ app_deploy_dir }}/versions/{{ component_name }}"
+      become: yes
+      become_user: tsp-app

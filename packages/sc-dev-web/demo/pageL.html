@@ -1,0 +1,1238 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+    <title>sc-web-kit demo page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+    <link rel="stylesheet" type="text/css" href="/public/styles/util.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+    <!-- Custom style -->
+    <style>
+        body {
+            padding: 24px 24px 0;
+        }
+
+        .sc-mode-dark {
+            background-color: var(--sc-color-blue-900)
+        }
+
+        .table-cell {
+            border-color: var(--sc-color-grey-15);
+            vertical-align: top;
+        }
+
+        .side-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 10px 8px;
+            background-color: var(--sc-color-white);
+            border-radius: 8px;
+            box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-height: 100vh;
+            overflow-y: auto;
+            z-index: 999999999;
+        }
+        
+        .side-bar div {
+            padding: 5px 0;
+        }
+
+        .side-bar div .selected {
+            color: var(--sc-color-blue-500);
+        }
+
+        *,
+        ::before,
+        ::after {
+            box-sizing: content-box;
+        }
+    </style>
+
+    <!-- Register all sc-* custom elements -->
+    <script type="module">
+        import '../dist/elements/index.js';
+        import { html } from '/node_modules/lit-html/lit-html.js';
+        window.html = html;
+    </script>
+</head>
+<sc-icon-provider>
+    <div id='side-bar' class='side-bar'>
+        <script type="text/javascript">
+            const sidebar = document.querySelector('#side-bar');
+            const initials = [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
+                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
+                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
+                'Y', 'Z'
+            ];
+            const currentPage = 'L';
+            const content = [];
+            initials.forEach(initial => {
+                content.push(`<div>`);
+                content.push(`<a class="${currentPage === initial ? 'selected' : ''}" href="/demo/page${initial}.html">${initial}</a>`);
+                content.push(`</div>`);
+            })
+            sidebar.innerHTML = content.join('');
+        </script>
+    </div>
+
+    <div class="table w-full shadow-lg max-h-96 components-body">
+        <div class="table-header-group font-bold sticky top-0 bg-white z-10">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Component</div>
+                <div class="table-cell border px-4 py-4">Example</div>
+                <div class="table-cell border px-4">
+                    <div class="py-4" style="max-width: 300px;">
+                        <sc-dropdown-input label="Mode" value="light">
+                            <sc-dropdown-option value="light">Light</sc-dropdown-option>
+                            <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+                            <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+                        </sc-dropdown-input>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-row-group h-96 overflow-y-auto">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Label</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-label label='Employee name'>
+                        Self slot info
+                    </sc-label>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Label</div>
+                <div class="table-cell border px-4 py-4">Tooltip</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-label label='Employee name' tooltip='Tooltip content here' required>
+                    </sc-label>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Label</div>
+                <div class="table-cell border px-4 py-4">Size</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-label label='Employee name (xxs)' label-size="xxs" tooltip='Tooltip content here' required>
+                    </sc-label>
+                    <sc-label label='Employee name (xs)' label-size="xs" tooltip='Tooltip content here' required>
+                    </sc-label>
+                    <sc-label label='Employee name (sm)' label-size="sm" tooltip='Tooltip content here' required>
+                    </sc-label>
+                    <sc-label label='Employee name (md)' label-size="md" tooltip='Tooltip content here' required>
+                    </sc-label>
+                    <sc-label label='Employee name (lg)' label-size="lg" tooltip='Tooltip content here' required>
+                    </sc-label>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Label</div>
+                <div class="table-cell border px-4 py-4">Slot</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-label tooltip-placement="left" label-size="md">
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                    </sc-label>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Link</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-link onclick="alert('Link is clicked!')" iconArrow iconPlus>
+                        Default
+                    </sc-link>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Link</div>
+                <div class="table-cell border px-4 py-4">Block</div>
+                <div class="table-cell border px-4 py-4">
+                    <div>
+                        For more information, please click on link below:
+                        <sc-link href="https://www.sc.com" block>
+                            Introduction to SC Webkit
+                        </sc-link>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Link</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-link disabled>
+                        Disabled
+                    </sc-link>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Link</div>
+                <div class="table-cell border px-4 py-4">Inverse</div>
+                <div class="table-cell border px-4 py-4 inverse">
+                    <sc-link inverse>
+                        Inverse
+                    </sc-link>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">List Item</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-list-item title='Header Text 1' body='Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+                            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'></sc-list-item>
+                    <sc-list-item title='Header Text 2' body='Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+                            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'></sc-list-item>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">List Item</div>
+                <div class="table-cell border px-4 py-4">HTML content</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-list-item help='helper text 1' title-size="md">
+                        <div slot="title">
+                            I'm not <strong>just</strong> an accordion, I'm an <em>accordion</em> with HTML!
+                        </div>
+                        <div slot="body">
+                            Lorem ipsum dolor <strong>elit</strong> sit amet, consectetur adipiscing elit, sed do
+                            eiusmod tempor incididunt ut labore et dolore magna aliqua
+                        </div>
+                    </sc-list-item>
+                    <sc-list-item help='helper text 2' title-size="sm">
+                        <div slot="title">
+                            I'm not <strong>just</strong> an accordion, I'm an <em>accordion</em> with HTML!
+                        </div>
+                        <div slot="body">
+                            Lorem ipsum dolor <strong>elit</strong> sit amet, consectetur adipiscing elit, sed do
+                            eiusmod tempor incididunt ut labore et dolore magna aliqua
+                        </div>
+                    </sc-list-item>
+                    <sc-list-item help='helper text 2' title-size="xs">
+                        <div slot="title">
+                            I'm not <strong>just</strong> an accordion, I'm an <em>accordion</em> with HTML!
+                        </div>
+                        <div slot="body">
+                            Lorem ipsum dolor <strong>elit</strong> sit amet, consectetur adipiscing elit, sed do
+                            eiusmod tempor incididunt ut labore et dolore magna aliqua
+                        </div>
+                    </sc-list-item>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">List Item</div>
+                <div class="table-cell border px-4 py-4">Line clamp</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-list-item help='helper text 1' title-size="md" title-line='1' body-line='1'>
+                        <div slot="title">
+                            I'm not <strong>just</strong> an accordion, I'm an <em>accordion</em> with HTML! Lorem ipsum
+                            dolor <strong>elit</strong> sit amet, consectetur adipiscing
+                        </div>
+                        <div slot="body">
+                            Lorem ipsum dolor <strong>elit</strong> sit amet, consectetur adipiscing elit, sed do
+                            eiusmod tempor incididunt ut labore et dolore magna aliqua
+                        </div>
+                    </sc-list-item>
+                    <sc-list-item help='helper text 2' title-size="sm" title-line='2' body-line='2'>
+                        <div slot="title">
+                            I'm not <strong>just</strong> an accordion, I'm an <em>accordion</em> with HTML! Lorem ipsum
+                            dolor <strong>elit</strong> sit amet, consectetur adipiscing. Lorem ipsum dolor
+                            <strong>elit</strong> sit amet, consectetur adipiscing
+                        </div>
+                        <div slot="body">
+                            Lorem ipsum dolor <strong>elit</strong> sit amet, consectetur adipiscing elit, sed do
+                            eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor
+                            <strong>elit</strong> sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                            incididunt ut labore et dolore magna aliqua
+                        </div>
+                    </sc-list-item>
+                    <sc-list-item help='helper text 2' title-size="xs" title-line='1' body-line='3'>
+                        <div slot="title">
+                            I'm not <strong>just</strong> an accordion, I'm an <em>accordion</em> with HTML!
+                        </div>
+                        <div slot="body">
+                            Lorem ipsum dolor <strong>elit</strong> sit amet, consectetur adipiscing elit, sed do
+                            eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor
+                            <strong>elit</strong> sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                            incididunt ut labore et dolore magna aliqua
+                        </div>
+                    </sc-list-item>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">List Item</div>
+                <div class="table-cell border px-4 py-4">Title sizes</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-list-item title='Header Text 1' title-size="lg" body='Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+                            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'></sc-list-item>
+                    <sc-list-item title='Header Text 2' title-size="md" body='Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+                            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'></sc-list-item>
+                    <sc-list-item title='Header Text 2' title-size="sm" body='Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+                            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'></sc-list-item>
+                    <sc-list-item title='Header Text 2' title-size="xs" body='Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+                            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'></sc-list-item>
+                    <sc-list-item title='Header Text 2' title-size="xxs" body='Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+                            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'></sc-list-item>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">List Navigation</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-list-navigation>
+                        <sc-list-navigation-item title='Personal details Personal detailsPersonal detailsPersonal details' body='Your particulars Your particulars Your particulars Your particulars'
+                            prefix='message-circle--line' title-line=2 body-line=3 disabled></sc-list-navigation-item>
+                        <sc-list-navigation-item selected title='Contact information' body='Home, mobile and email'
+                            prefix='message-circle--line'></sc-list-navigation-item>
+                        <sc-list-navigation-item title='Privacy settings' body='Keeping you safe'
+                            prefix='message-circle--line'></sc-list-navigation-item>
+                    </sc-list-navigation>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">List Navigation</div>
+                <div class="table-cell border px-4 py-4">Data</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-list-navigation class='list-navigation-by-data' searchable>
+                    </sc-list-navigation>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">List Navigation</div>
+                <div class="table-cell border px-4 py-4">Data - Virtual Icon</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-list-navigation class='list-navigation-by-data-2'>
+                    </sc-list-navigation>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">List Navigation</div>
+                <div class="table-cell border px-4 py-4">No body text</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-list-navigation>
+                        <sc-list-navigation-item selected title='Personal details' prefix='message-circle--line'>
+                        </sc-list-navigation-item>
+                        <sc-list-navigation-item title='Contact information' prefix='message-circle--line'>
+                        </sc-list-navigation-item>
+                        <sc-list-navigation-item title='Privacy settings' prefix='message-circle--line'>
+                        </sc-list-navigation-item>
+                    </sc-list-navigation>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">List Navigation</div>
+                <div class="table-cell border px-4 py-4">No prefix and sub title</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-list-navigation>
+                        <sc-list-navigation-item title='Personal details' suffix=''></sc-list-navigation-item>
+                        <sc-list-navigation-item title='Contact information' suffix=''></sc-list-navigation-item>
+                        <sc-list-navigation-item selected title='Privacy settings' suffix=''></sc-list-navigation-item>
+                    </sc-list-navigation>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">List Navigation</div>
+                <div class="table-cell border px-4 py-4">Title sizes</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-list-navigation>
+                        <sc-list-navigation-item title-size="lg" no-suffix selected>
+                            <div slot="prefix" class="m-3" style="color:#0473EA;">
+                                <sc-icon name='message-circle--line' size="md"></sc-icon>
+                            </div>
+                            <div slot="title">
+                                Personal details
+                            </div>
+                            <div slot="body">
+                                Your particulars
+                            </div>
+                        </sc-list-navigation-item>
+                        <sc-list-navigation-item title-size="md" no-suffix>
+                            <div slot="prefix" class="m-3" style="color:#0473EA;">
+                                <sc-icon name='message-circle--line' size="md"></sc-icon>
+                            </div>
+                            <div slot="title">
+                                Contact information
+                            </div>
+                            <div slot="body">
+                                Home, mobile and email
+                            </div>
+                        </sc-list-navigation-item>
+                        <sc-list-navigation-item title-size="sm" no-suffix>
+                            <div slot="prefix" class="m-3" style="color:#0473EA;">
+                                <sc-icon name='message-circle--line' size="md"></sc-icon>
+                            </div>
+                            <div slot="title">
+                                Privacy settings
+                            </div>
+                            <div slot="body">
+                                Keeping you safe
+                            </div>
+                        </sc-list-navigation-item>
+                        <sc-list-navigation-item title-size="xs" no-suffix>
+                            <div slot="prefix" class="m-3" style="color:#0473EA;">
+                                <sc-icon name='message-circle--line' size="md"></sc-icon>
+                            </div>
+                            <div slot="title">
+                                Privacy settings
+                            </div>
+                            <div slot="body">
+                                Keeping you safe
+                            </div>
+                            <div slot="suffix" class="m-2">
+                                <sc-icon name='message-circle--line' size="md"></sc-icon>
+                            </div>
+                        </sc-list-navigation-item>
+                        <sc-list-navigation-item title-size="xxs" no-suffix>
+                            <div slot="prefix" class="m-3" style="color:#0473EA;">
+                                <sc-icon name='message-circle--line' size="md"></sc-icon>
+                            </div>
+                            <div slot="title">
+                                Privacy settings
+                            </div>
+                            <div slot="body">
+                                Keeping you safe
+                            </div>
+                        </sc-list-navigation-item>
+                    </sc-list-navigation>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">List Navigation</div>
+                <div class="table-cell border px-4 py-4">Box</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-list-navigation box space-size="sm">
+                        <sc-list-navigation-item title='Personal details' selected></sc-list-navigation-item>
+                        <sc-list-navigation-item title='Contact information'></sc-list-navigation-item>
+                        <sc-list-navigation-item title='Privacy settings'></sc-list-navigation-item>
+                    </sc-list-navigation>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class='full-view'>
+        <sc-column-layout layout='Main Content Right' height='cover' title='Layout: Main Content Right'>
+            <div slot='left'>
+                <sc-list-navigation>
+                    <sc-list-navigation-item title='Client information' selected></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Services'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Account holdings'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Activities'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Events and notifications'></sc-list-navigation-item>
+                </sc-list-navigation>
+            </div>
+            <div slot='right' style='padding-bottom: 24px;'>
+                <sc-card>
+                    <sc-grid-row no-gutters>
+                        <sc-grid-column xs='12' md='9'>
+                            <h3>Client information</h3>
+                        </sc-grid-column>
+                        <sc-grid-column xs='12' md='3'>
+                            <sc-search-field></sc-search-field>
+                        </sc-grid-column>
+                    </sc-grid-row>
+                    <sc-spacer vertical size='md'></sc-spacer>
+                    <div>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Legal entity name</sc-grid-column>
+                            <sc-grid-column xs='9'>BR Advisors HK Ltd</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Registered address</sc-grid-column>
+                            <sc-grid-column xs='9'>Hong Kong, 12/F Forward Tower One Garden Road</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Operational address</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Incorporation number</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Verify legal from and current existence</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Regulated by</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Country of incorporation</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Evidence of majority ownership status of any subsidiary</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='xs'></sc-spacer>
+                    </div>
+                </sc-card>
+            </div>
+        </sc-column-layout>
+    </div>
+    <div class='full-view'>
+        <sc-column-layout layout='Main Content Left' height='cover' right-column-collapsible title='Layout: Main Content Left'>
+            <div slot='left'>
+                <sc-card>
+                    <div style='padding-bottom: 24px;'>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                        consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </div>
+                </sc-card>
+            </div>
+            <div slot='right'>
+                <sc-card>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                </sc-card>
+            </div>
+        </sc-column-layout>
+    </div>
+    <div class='full-view'>
+        <sc-column-layout layout='Main Content Middle' height='cover' title="Layout: Main Content Middle - Additional offset" additional-height='100px'>
+            <div slot='breadcrumb'>
+                <sc-breadcrumb>
+                    <sc-breadcrumb-item href="#" target="_blank"> Home</sc-breadcrumb-item>
+                    <sc-breadcrumb-item>Guideline</sc-breadcrumb-item>
+                    <sc-breadcrumb-item>Color</sc-breadcrumb-item>
+                </sc-breadcrumb>
+            </div>
+            <div slot='additional'>
+                Additional information here!
+            </div>
+            <div slot='left'>
+                <sc-list-navigation>
+                    <sc-list-navigation-item title='Client information' selected></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Services'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Account holdings'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Activities'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Events and notifications'></sc-list-navigation-item>
+                </sc-list-navigation>
+            </div>
+            <div slot='middle' style='padding-bottom: 24px;'>
+                <sc-card>
+                    <sc-grid-row no-gutters>
+                        <sc-grid-column xs='12' md='9'>
+                            <h3>Client information</h3>
+                        </sc-grid-column>
+                        <sc-grid-column xs='12' md='3'>
+                            <sc-search-field></sc-search-field>
+                        </sc-grid-column>
+                    </sc-grid-row>
+                    <sc-spacer vertical size='md'></sc-spacer>
+                    <div>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Legal entity name</sc-grid-column>
+                            <sc-grid-column xs='9'>BR Advisors HK Ltd</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Registered address</sc-grid-column>
+                            <sc-grid-column xs='9'>Hong Kong, 12/F Forward Tower One Garden Road</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Operational address</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Incorporation number</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Verify legal from and current existence</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Regulated by</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Country of incorporation</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Evidence of majority ownership status of any subsidiary</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='xs'></sc-spacer>
+                    </div>
+                </sc-card>
+            </div>
+            <div slot='right'>
+                <sc-card>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                </sc-card>
+            </div>
+        </sc-column-layout>
+    </div>
+    <div class='full-view'>
+        <sc-column-layout layout='Main Content Middle' height='cover' right-column-collapsible additional-height='100px'>
+            <div slot="title">
+                <div>Layout: Main Content Middle - collapsible</div>
+            </div>
+            <sc-breadcrumb slot='sticky-breadcrumb'>
+                <sc-breadcrumb-item href="#" target="_blank"> Home</sc-breadcrumb-item>
+                <sc-breadcrumb-item>Guideline</sc-breadcrumb-item>
+                <sc-breadcrumb-item>Color</sc-breadcrumb-item>
+            </sc-breadcrumb>
+            <sc-button fill slot='sticky-button'>Save</sc-button>
+            <sc-button slot='sticky-button'>Cancel</sc-button>
+            <div slot='additional'>
+                Additional information here!
+            </div>
+            <div slot='left'>
+                <sc-list-navigation>
+                    <sc-list-navigation-item title='Client information' selected></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Services'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Account holdings'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Activities'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Events and notifications'></sc-list-navigation-item>
+                </sc-list-navigation>
+            </div>
+            <div slot='middle'>
+                <sc-card height='100%'>
+                    <sc-grid-row no-gutters>
+                        <sc-grid-column xs='12' md='9'>
+                            <h3>Client information</h3>
+                        </sc-grid-column>
+                        <sc-grid-column xs='12' md='3'>
+                            <sc-search-field></sc-search-field>
+                        </sc-grid-column>
+                    </sc-grid-row>
+                    <sc-spacer vertical size='md'></sc-spacer>
+                    <div>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Legal entity name</sc-grid-column>
+                            <sc-grid-column xs='9'>BR Advisors HK Ltd</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Registered address</sc-grid-column>
+                            <sc-grid-column xs='9'>Hong Kong, 12/F Forward Tower One Garden Road</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Operational address</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Incorporation number</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Verify legal from and current existence</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Regulated by</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Country of incorporation</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Evidence of majority ownership status of any subsidiary</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='xs'></sc-spacer>
+                    </div>
+                </sc-card>
+            </div>
+            <div slot='right'>
+                <sc-card>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                </sc-card>
+                <sc-spacer vertical size='sm'></sc-spacer>
+                <sc-card>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                </sc-card>
+                <sc-spacer vertical size='sm'></sc-spacer>
+                <sc-card>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                </sc-card>
+                <sc-spacer vertical size='sm'></sc-spacer>
+            </div>
+        </sc-column-layout>
+    </div>
+    <div class='full-view'>
+        <sc-column-layout layout='Main Content Middle'>
+            <div slot='title'>
+                Layout: Main Content Middle - auto height
+            </div>
+            <div slot='breadcrumb'>
+                <sc-breadcrumb>
+                    <sc-breadcrumb-item href="#" target="_blank"> Home</sc-breadcrumb-item>
+                    <sc-breadcrumb-item>Guideline</sc-breadcrumb-item>
+                    <sc-breadcrumb-item>Color</sc-breadcrumb-item>
+                </sc-breadcrumb>
+            </div>
+            <div slot='left'>
+                <sc-list-navigation >
+                    <sc-list-navigation-item title='Personal details' selected></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Contact information'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Privacy settings'></sc-list-navigation-item>
+                </sc-list-navigation>
+            </div>
+            <div slot='middle' style='padding-bottom: 24px;'>
+                <sc-card>
+                    <div>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </div>
+                </sc-card>
+            </div>
+            <div slot='right' height='100%'>
+                <sc-card>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                </sc-card>
+            </div>
+        </sc-column-layout>
+    </div>
+    <div class='full-view'>
+        <sc-landing-layout
+            height='cover'
+            banner-image-src='images/home-hero-people.svg'
+        >
+            <div slot='banner-title'>Banner title</div>
+            <div slot='banner-body'>Banner body</div>
+            <div slot='content'>
+                <sc-card>
+                    <div>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </div>
+                </sc-card>
+            </div>
+        </sc-landing-layout>
+    </div>
+        <div class='full-view'>
+                <sc-landing-layout
+                        id='landing-layout-with-actions'
+                        height='cover'
+                        banner-image-src='images/home-hero-people.svg'
+                >
+                        <div slot='banner-title'>Banner title with actions</div>
+                        <div slot='banner-body'>Select actions from the top-right dropdowns.</div>
+                        <div slot='content'>
+                                <sc-card>
+                                        <div>
+                                        This is a demo for header actions on sc-landing-layout.
+                                        Open browser console to inspect emitted sc-action payloads.
+                                        </div>
+                                </sc-card>
+                        </div>
+                </sc-landing-layout>
+                <script type="text/javascript">
+                    var landingLayoutWithActions = document.getElementById('landing-layout-with-actions');
+                    if (landingLayoutWithActions) {
+                        landingLayoutWithActions.headerPrimaryActions = [
+                            { label: 'Primary actions', value: 'primary-default' },
+                        ];
+                        landingLayoutWithActions.headerSecondaryActions = [
+                            { label: 'Secondary actions', value: 'secondary-default' },
+                            { label: 'Save draft', value: 'save-draft' },
+                            { label: 'Preview', value: 'preview' },
+                        ];
+                        landingLayoutWithActions.headerOptionalActions = [
+                            { label: 'Archive', value: 'archive' },
+                            { label: 'Delete', value: 'delete' },
+                        ];
+
+                        landingLayoutWithActions.addEventListener('sc-action', function (e) {
+                            console.log('landing-layout sc-action', e.detail);
+                        });
+                    }
+                </script>
+        </div>
+    <div class='full-view'>
+        <sc-search-layout
+            id='single-search-layout'
+            description='To get started, please search using either customer name, relationship numbers or their entity identification numbers'
+            single-search-placeholder='Search for name, description...'
+        >
+            <div slot='title'>Search</div>
+            <div slot='result'>
+                <sc-grid-row>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;">
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;">
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;">
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;">
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;">
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;">
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                </sc-grid-row>
+            </div>
+        </sc-search-layout>
+
+        <script type="text/javascript">
+          var singleSearchLayout = document.getElementById('single-search-layout');
+          if (singleSearchLayout) {
+            singleSearchLayout.addEventListener('sc-search', (e) => {
+              // alert('search value: ' + e.detail.value);
+            });
+          }
+        </script>
+    </div>
+    <div class='full-view'>
+        <sc-search-layout
+            description='To get started, please search using either customer name, relationship numbers or their entity identification numbers'
+            single-search-placeholder='Search for name, description...'
+        >
+            <div slot='title'>Search</div>
+            <div slot='empty-message'>
+                <span>Search for an existing individual or entity or <sc-link>start new onboarding</sc-link>.</span>
+            </div>
+        </sc-search-layout>
+    </div>
+    <div class='full-view'>
+        <sc-search-layout
+            description='To get started, please search using either customer name, relationship numbers or their entity identification numbers'
+            single-search-placeholder='Search for name, description...'
+            loading
+            hide-image
+        >
+            <div slot='title'>Search</div>
+            <div slot='result'>
+                <sc-grid-row>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;">
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;">
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;">
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;">
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;">
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;">
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                </sc-grid-row>
+            </div>
+        </sc-search-layout>
+    </div>
+    <div class='full-view'>
+        <sc-search-layout id='multi-search-layout' multiple-search placeholder='Search for name, description...' image-src='images/home-hero-people.svg'
+        >
+            <div slot='title'><sc-title level="2">Customer search</sc-title></div>
+            <div slot='description'><sc-paragraph size="md">To get started,please search using either customer name, relationship numbers or their entity identification numbers</sc-paragraph></div>
+            <div slot='basic-search'>
+                <sc-grid-row>
+                    <sc-grid-column xs='6' md='4' lg='4' style="margin-bottom:12px;">
+                        <sc-text-input border-type='box' placeholder="Input text">
+                            Text Input 1
+                        </sc-text-input>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='4' style="margin-bottom:12px;" >
+                        <sc-text-input border-type='box' placeholder="Input text">
+                            Text Input 2
+                        </sc-text-input>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='4' style="margin-bottom:12px;" >
+                        <sc-text-input border-type='box' placeholder="Input text">
+                            Text Input 3
+                        </sc-text-input>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='4' style="margin-bottom:12px;" >
+                        <sc-text-input border-type='box' placeholder="Input text">
+                            Text Input 4
+                        </sc-text-input>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='4' style="margin-bottom:12px;" >
+                        <sc-text-input border-type='box' placeholder="Input text">
+                            Text Input 5
+                        </sc-text-input>
+                    </sc-grid-column>
+                </sc-grid-row>
+            </div>
+            <div slot='advance-search'>
+                <sc-grid-row>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;">
+                        <sc-text-input border-type='box' placeholder="Input text">
+                            Advance search 1
+                        </sc-text-input>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;" >
+                        <sc-text-input border-type='box' placeholder="Input text">
+                            Advance search 2
+                        </sc-text-input>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;" >
+                        <sc-text-input border-type='box' placeholder="Input text">
+                            Advance search 3
+                        </sc-text-input>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style="margin-bottom:12px;" >
+                        <sc-text-input border-type='box' placeholder="Input text">
+                            Advance search 4
+                        </sc-text-input>
+                    </sc-grid-column>
+                </sc-grid-row>
+            </div>
+            <div slot='result'>
+                <sc-grid-row>
+                    <sc-grid-column xs='6' md='4' lg='3' style='margin-bottom:12px;'>
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style='margin-bottom:12px;'>
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style='margin-bottom:12px;'>
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style='margin-bottom:12px;'>
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style='margin-bottom:12px;'>
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                    <sc-grid-column xs='6' md='4' lg='3' style='margin-bottom:12px;'>
+                        <sc-card>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                                consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                            </div>
+                        </sc-card>
+                    </sc-grid-column>
+                </sc-grid-row>
+            </div>
+        </sc-search-layout>
+
+        <script type="text/javascript">
+            var multiSearchLayout = document.getElementById('multi-search-layout');
+            if (multiSearchLayout) {
+                            multiSearchLayout.headerPrimaryActions = [
+                                { label: 'Create case', value: 'create-case' },
+                                { label: 'Export', value: 'export' },
+                                { label: 'Assign owner', value: 'assign-owner' },
+                            ];
+
+                            multiSearchLayout.addEventListener('sc-action', function (e) {
+                                console.log('multi-search-layout sc-action detail', e.detail);
+                            });
+
+              // multiSearchLayout.addEventListener('sc-clear', () => {
+              //   alert('clear');
+              // });
+              // multiSearchLayout.addEventListener('sc-search', (e) => {
+              //   alert('search value: ' + e.detail.value);
+              // });
+              // multiSearchLayout.addEventListener('sc-advance-search-hide', () => {
+              //   alert('advance search hide');
+              // });
+              // multiSearchLayout.addEventListener('sc-advance-search-show', () => {
+              //   alert('advance search show');
+              // });
+            }
+
+            const listNavigationByData = document.querySelector('.list-navigation-by-data');
+            listNavigationByData.items = [
+                {
+                    key: '1',
+                    title: 'Menu 1',
+                    body: html`<sc-button>Click</sc-button>Menu body 1`,
+                }, {
+                    key: '2',
+                    title: 'Menu 2',
+                    body: 'Menu body 2',
+                    children: [
+                        {
+                            key: '2-1',
+                            title: 'Menu 2-1',
+                            body: 'Menu body 2-1',
+                            selected: true
+                        }, 
+                        {
+                            key: '2-2',
+                            title: 'Menu 2-2',
+                            body: 'Menu body 2-2',
+                            children: [
+                                {
+                                    key: '2-2-1',
+                                    title: 'Menu 2-2-1',
+                                    body: 'Menu body 2-2-1',
+                                },  
+                            ]
+                        }, 
+                    ]
+                }, {
+                    key: '3',
+                    title: 'Menu 3',
+                    body: 'Menu body 3',
+                }, 
+            ]
+            const listNavigationByData2 = document.querySelector('.list-navigation-by-data-2');
+            listNavigationByData2.items = [
+                {
+                    key: 1,
+                    title: 'Menu 1',
+                    body: 'Menu body 1',
+                    prefix: 'home--line'
+                }, {
+                    key: 2,
+                    title: 'Menu 2',
+                    body: 'Menu body 2',
+                    prefix: 'home--line',
+                    children: [
+                        {
+                            key: '2-1',
+                            title: 'Menu 2-1',
+                            body: 'Menu body 2-1',
+                            prefix: 'home--line'
+                        }, 
+                        {
+                            key: '2-2',
+                            title: 'Menu 2-2',
+                            body: 'Menu body 2-2',
+                            prefix: 'home--line',
+                            children: [
+                                {
+                                    key: '2-2-1',
+                                    title: 'Menu 2-2-1',
+                                    body: 'Menu body 2-2-1',
+                                    prefix: 'home--line'
+                                },  
+                            ]
+                        }, 
+                    ]
+                }, {
+                    key: 3,
+                    title: 'Menu 3',
+                    body: 'Menu body 3',
+                }, 
+            ]
+        </script>
+    </div>
+    <div class='full-view'>
+        <sc-basic-layout limit-width>
+            <div slot='title'>Search</div>
+            <div>
+                <span>Search for an existing individual or entity or <sc-link>start new onboarding</sc-link>.</span>
+            </div>
+        </sc-basic-layout>
+    </div>
+</sc-icon-provider>
+<!-- Custom script -->
+<script type="text/javascript">
+    var modes = ['light', 'dark', 'dyslexic']
+    var activeMode = modes[0]
+    function changeMode(mode) {
+        var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child, .full-view');
+        componentCells.forEach((componentCell) => {
+            modes.forEach((mode) => {
+                componentCell.classList.remove(`sc-mode-${mode}`)
+            })
+            componentCell.classList.add(`sc-mode-${mode}`)
+            if (componentCell.classList.contains('inverse')) {
+                if (mode === 'dark') {
+                    componentCell.style.backgroundColor = 'var(--sc-color-white)'
+                } else {
+                    componentCell.style.backgroundColor = 'var(--sc-color-blue-900)'
+                }
+            }
+        })
+    }
+    document.getElementsByTagName('sc-dropdown-input')[0].addEventListener('sc-select', ({ detail: { value } }) => {
+        changeMode(value);
+    });
+    changeMode(activeMode);
+
+</script>
+
+<script type="module">
+    import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+    changeIconLibrary();
+    function changeIconLibrary() {
+        document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+    }
+</script>
+
+</html>

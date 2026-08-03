@@ -1,0 +1,1 @@
+export const generateUniqueId = () => Date.now().toString(36).slice(2);

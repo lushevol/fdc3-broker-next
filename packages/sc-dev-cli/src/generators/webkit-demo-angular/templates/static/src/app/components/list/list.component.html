@@ -1,0 +1,18 @@
+<div class="flex flex-row">
+    <div *ngIf="iconLeft" class="pr-3 text-left">
+        <sc-icon [name]="iconLeft" [size]="iconLeftSize" compact />
+    </div>
+    <div *ngIf="imageLeft" class="pr-3 text-left">
+        <img [src]="imageLeft" [width]="size(imageLeftSize)" alt="" />
+    </div>
+    <div class="grow">
+        <span class="font-semibold">{{title}}</span>
+        <p class="text-muted">{{copy}}</p>
+    </div>
+    <div *ngIf="iconRight" class="pt-1 pl-3 text-right">
+        <sc-icon [name]="iconRight" [size]="iconRightSize" compact />
+    </div>
+    <div *ngIf="imageRight" class="pt-1 pl-3 text-right">
+        <img [src]="imageRight" [width]="size(imageRightSize)" alt="" />
+    </div>
+</div>

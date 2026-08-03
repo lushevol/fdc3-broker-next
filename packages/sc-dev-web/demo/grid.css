@@ -1,0 +1,52 @@
+.three-columns-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 24px 12px;
+  grid-auto-rows: minmax(100px, auto);
+}
+.one {
+  grid-column: 1;
+  grid-row: 1;
+  background: #7BB6F5;
+}
+.two {
+  grid-column: 2 / 4;
+  grid-row: 1 / 3;
+  background: #92E773;
+}
+.three {
+  grid-row: 2 / 5;
+  grid-column: 1;
+  background: #A8A9AA;
+}
+.four {
+  grid-column: 3;
+  grid-row: 3;
+  background: #D50000;
+}
+.five {
+  grid-column: 2;
+  grid-row: 4;
+  background: #F6C6CE;
+}
+.six {
+  grid-column: 3;
+  grid-row: 4;
+  background: #440044;
+}
+.col-span-2 {
+  grid-column: span 2;
+  background: #F5C000;
+}
+
+.flex-column-grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 100px 1fr;
+}
+.fix-col-one {
+  background-color: lime;
+}
+.flex-col-two {
+  background-color: yellow;
+}

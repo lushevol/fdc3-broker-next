@@ -1,5 +1,8 @@
 # Authorization Limits create/edit cohort acceptance
 
+Status: behavior retained and migrated to Ratan WebKit. Last reviewed 3 August 2026. Current program status is in
+[`../../../docs/CURRENT_STATE.md`](../../../docs/CURRENT_STATE.md).
+
 This cohort composes create/edit behavior against the production design system and application mutation ports. It is deliberately opt-in: the current production bootstrap does not supply `AuthorizationLimitsMutationCapability`, so deployed list/details behavior remains read-only.
 
 ## Bootstrap and rollback contract
@@ -25,27 +28,32 @@ Principal and service are one coherent capability; partial configuration is not 
 - Categorized failures remain local, keep the form open, and permit retry after loading ends.
 - Delete and all pending approve/reject controls remain absent.
 
-The composition uses only `Dialog`, `TextField`, `NumberField`, `Button`, and `InlineAlert` from `@fm/ratan-design@1.1.0`. Form state, validation, service invocation, reconciliation, and feedback decisions stay inside Cashflow.
+The current composition uses `ScDialog`, `ScTextInput`, `ScButton`,
+`ScIconButton`, and `ScAlert` through the local
+`@fm/ratan-design-webkit/react` boundary. Dialogs are portalled to
+`document.body` so overlays are not clipped by the remote mount. Form state,
+validation, service invocation, reconciliation, and feedback decisions stay
+inside Cashflow.
 
 ## Verification evidence
 
-| Gate | Result |
-| --- | --- |
-| Focused create/edit tests | 6 passed: opt-in/Visitor visibility, create/edit, bounds, pending deferral, error retry, loading safety |
-| Full Cashflow suite | 40 passed; 96.84% statements, 93.89% branches, 93.75% functions, 97.51% lines |
+| Gate                             | Result                                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Focused create/edit tests        | 6 passed: opt-in/Visitor visibility, create/edit, bounds, pending deferral, error retry, loading safety      |
+| Full Cashflow suite              | 40 passed; 96.84% statements, 93.89% branches, 93.75% functions, 97.51% lines                                |
 | Design and package compatibility | Design 1.1.0 45-test release and packed-consumer evidence retained; production foundation/grid builds passed |
-| Production pilot regression | Grid 6 tests and portal host 10 tests passed |
-| Static checks | Strict TypeScript, Cashflow/pilot lint, production application and host builds passed |
-| Runtime boundaries | Two layers retained; only React and ReactDOM shared as federation singletons |
-| Browser regression | 5/5 Chrome journeys passed with explicit absence of Create and Edit in the current bootstrap |
-| OpenSpec | `compose-authorization-limit-create-edit` passed strict validation |
+| Production pilot regression      | Grid 6 tests and portal host 10 tests passed                                                                 |
+| Static checks                    | Strict TypeScript, Cashflow/pilot lint, production application and host builds passed                        |
+| Runtime boundaries               | Two layers retained; only React and ReactDOM shared as federation singletons                                 |
+| Browser regression               | 5/5 Chrome journeys passed with explicit absence of Create and Edit in the current bootstrap                 |
+| OpenSpec                         | `compose-authorization-limit-create-edit` passed strict validation                                           |
 
 ## Bundle evidence
 
-| Cashflow remote | Before composition | After composition | Delta |
-| --- | ---: | ---: | ---: |
-| Uncompressed total | 1,911.1 KB | 1,923.4 KB | +12.3 KB |
-| Gzip total | 505.0 KB | 508.5 KB | +3.5 KB |
+| Cashflow remote    | Before composition | After composition |    Delta |
+| ------------------ | -----------------: | ----------------: | -------: |
+| Uncompressed total |         1,911.1 KB |        1,923.4 KB | +12.3 KB |
+| Gzip total         |           505.0 KB |          508.5 KB |  +3.5 KB |
 
 The code is bundled even while runtime injection is absent. The delta is accepted for the bounded cohort; a future route-level split may defer editor code, but must not create a new federation layer or runtime UI container.
 

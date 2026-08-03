@@ -1,0 +1,140 @@
+:root,
+:host,
+ .sc-mode-light {
+   /* Employee */
+    --sc-employee-background-color: var(--sc-color-white);
+    --sc-employee-color: var(--sc-color-grey-650);
+    --sc-employee-department-color: var(--sc-color-grey-500);
+    --sc-employee-field-color: var(--sc-color-grey-650);
+    --sc-employee-icon-color: var(--sc-color-blue-300);
+    --sc-employee-tag-border-color: var(--sc-color-grey-150);
+    --sc-employee-name-color: var(--sc-color-blue-900);
+    --sc-employee-more-actions-color: var(--sc-color-blue-850);
+    --sc-employee-name-disabled-color: var(--sc-color-grey-500);
+    --sc-employee-field-link-color: var(--sc-color-blue-500);
+    --sc-employee-card-field-item-hover-color: var(--sc-color-blue-400);
+    --sc-employee-tag-hover-border-color: var(--sc-color-blue-400);
+    --sc-employee-tag-pressed-border-color: var(--sc-color-blue-600);
+    --sc-employee-card-transparent-background-color: transparent;
+    --sc-employee-card-transparent-border-color: transparent;
+    --sc-employee-card-transparent-box-shadow-color: transparent;
+    --sc-employee-card-transparent-hover-border-color: transparent;
+    --sc-employee-card-transparent-pressed-border-color: transparent;
+    --sc-employee-tag-transparent-hover-background-color: var(--sc-color-blue-50);
+    --sc-employee-tag-transparent-pressed-color: var(--sc-color-blue-600);
+    --sc-employee-tag-link-hover-color: var(--sc-color-blue-400);
+    --sc-employee-tag-link-pressed-color: var(--sc-color-blue-600);
+    --sc-employee-name-default-color: var(--sc-color-blue-900);
+    --sc-employee-grouped-avatar-border-color: var(--sc-color-white);
+    --sc-employee-avatar-background-color: var(--sc-color-white);
+    --sc-employee-copy-tooltip-background-color: var(--sc-color-blue-900);
+    --sc-employee-tooltip-border-color: var(--sc-color-grey-150);
+
+    /* Org */
+    --sc-org-connector-background-color: var(--sc-color-grey-150);
+    --sc-org-role-icon-color: var(--sc-color-blue-500);
+    --sc-org-role-department-color: var(--sc-color-grey-650);
+    --sc-org-badge-border-color: var(--sc-color-grey-150);
+    
+    /* Calendar */
+    --sc-calendar-header-background-color: var(--sc-color-white);
+    --sc-calendar-border-color: var(--sc-color-grey-150);
+    --sc-calendar-today-background-color: var(--sc-color-blue-50);
+    --sc-calendar-highlight-background-color: var(--sc-color-blue-500);
+    --sc-calendar-now-indicator-color: var(--sc-shades-orange-500);
+    --sc-scrollbar-background-color: var(--sc-color-grey-250);
+    --sc-calendar-background-color: var(--sc-color-white);
+    --sc-calendar-list-navigation-item-selected-background-color: var(--sc-color-white);
+    --sc-calendar-list-navigation-item-selected-border-color: transparent;
+    --sc-calendar-header-border-top-color: var(--sc-color-grey-150);
+    --sc-calendar-header-border-left-color: var(--sc-color-grey-150);
+    --sc-calendar-header-text-color: var(--sc-color-blue-900);
+    --sc-date-picker-border-color: var(--sc-color-grey-150);
+    --sc-calendar-timegrid-slot-minor-top-border-color: var(--sc-color-grey-50);
+    --sc-calendar-main-border-top-color: var(--sc-color-grey-150);
+    --sc-calendar-header-toolbar-border-right-color: var(--sc-color-grey-150);
+    --sc-calendar-header-toolbar-border-left-color: var(--sc-color-grey-150);
+    --sc-calendar-background-event-text-color: var(--sc-color-white);
+    --sc-calendar-week-header-background: var(--sc-color-grey-50);
+    --sc-calendar-week-timestamp-background: var(--sc-color-grey-50);
+    --sc-calendar-today-text-color: var(--sc-color-blue-500);
+    --sc-calendar-not-today-text-color: var(--sc-color-blue-900);
+    --sc-calendar-page-background-color: var(--sc-color-white);
+    --sc-calendar-month-today-border-color: var(--sc-color-blue-500);
+    --sc-calendar-month-today-color: var(--sc-color-blue-500);
+    --sc-calendar-month-today-background-color: var(--sc-color-blue-50);
+    --sc-calendar-event-icon-color: var(--sc-color-blue-900);
+    --sc-calendar-date-picker-color: var(--sc-color-blue-900); 
+    --sc-calendar-date-picker-background-color: var(--sc-color-white);
+    --sc-calendar-event-color: var(--sc-color-blue-900);
+    --sc-floating-collapsed-background-color: var(--sc-color-white);
+    
+    --sc-calendar-event-blue-background-color: var(--sc-color-blue-100);
+    --sc-calendar-event-green-background-color: var(--sc-color-green-100);
+    --sc-calendar-event-red-background-color: var(--sc-color-red-100);
+    --sc-calendar-event-teal-background-color: var(--sc-color-teal-100);
+    --sc-calendar-event-magenta-background-color: var(--sc-color-magenta-100);
+    --sc-calendar-event-violet-background-color: var(--sc-color-violet-100);
+    --sc-calendar-event-orange-background-color: var(--sc-color-orange-100);
+    --sc-calendar-event-olive-background-color: var(--sc-color-olive-100);
+    --sc-calendar-event-oof-background-color: var(--sc-color-purple-100);
+
+    --sc-calendar-event-blue-status-color: var(--sc-color-blue-700);
+    --sc-calendar-event-green-status-color: var(--sc-color-green-700);
+    --sc-calendar-event-amber-status-color: var(--sc-color-amber-700);
+    --sc-calendar-event-red-status-color: var(--sc-color-red-700);
+    --sc-calendar-event-teal-status-color: var(--sc-color-teal-700);
+    --sc-calendar-event-magenta-status-color: var(--sc-color-magenta-700);
+    --sc-calendar-event-violet-status-color: var(--sc-color-violet-700);
+    --sc-calendar-event-orange-status-color: var(--sc-color-orange-700);
+    --sc-calendar-event-olive-status-color: var(--sc-color-olive-700);
+    --sc-calendar-oof-status-background-color: var(--sc-color-purple-700);
+    --sc-calendar-oof-status-border-color: var(--sc-color-purple-700);
+    
+    /* comment */
+    --sc-comment-color: var(--sc-brand-grey);
+    --sc-comment-compact-username-color: var(--sc-color-blue-500);
+    --sc-comment-reply-time-color: var(--sc-color-grey-700);
+    --sc-comment-action-button-color: var(--sc-color-blue-500);
+    --sc-card-supplementary-detail-color: var(--sc-color-blue-750);
+
+    /* Chat */
+    --sc-chat-widget-border-color: var(--sc-color-grey-150);
+    --sc-chat-widget-background-color: var(--sc-color-white);
+    --sc-chat-layout-background-color: var(--sc-color-white);
+    --sc-chat-header-border-color: var(--sc-color-grey-150);
+    --sc-chat-header-action-icon-color: var(--sc-color-grey-700);
+    --sc-chat-status-streaming-background-color: var(--sc-color-blue-50);
+    --sc-chat-status-streaming-color: var(--sc-color-blue-700);
+    --sc-chat-status-success-background-color: var(--sc-color-green-50);
+    --sc-chat-status-success-color: var(--sc-color-green-700);
+    --sc-chat-status-error-background-color: var(--sc-color-red-50);
+    --sc-chat-status-error-color: var(--sc-color-red-600);
+    --sc-chat-status-cancelled-background-color: var(--sc-color-grey-100);
+    --sc-chat-status-cancelled-color: var(--sc-color-grey-700);
+    --sc-chat-runtime-panel-border-color: var(--sc-color-grey-150);
+    --sc-chat-runtime-panel-background-color: var(--sc-color-white);
+    --sc-chat-runtime-debug-text-color: var(--sc-color-grey-700);
+    --sc-chat-chatbox-background: var(--sc-color-blue-50);
+    --sc-chat-avatar-fallback-color: var(--sc-color-grey-600);
+    --sc-chat-message-color: var(--sc-color-grey-600);
+    --sc-chat-markdown-pre-border-color: var(--sc-color-grey-150);
+    --sc-chat-link-color: var(--sc-color-blue-500);
+    --sc-chat-link-hover-color: var(--sc-color-blue-400);
+    --sc-chat-retry-icon-color: var(--sc-color-blue);
+
+    --sc-relationship-color: var(--sc-color-grey-25);
+    --sc-relationship-node-color: var(--sc-color-grey-400);
+    --sc-relationship-node-selected-color: var(--sc-color-grey-400);
+    --sc-relationship-node-hover-color: var(--sc-color-grey-400);
+    --sc-relationship-node-border-color: var(--sc-color-grey-400);
+    --sc-relationship-node-border-selected-color: var(--sc-color-blue-650);
+    --sc-relationship-node-border-hover-color: var(--sc-color-blue-350);
+    --sc-relationship-node-font-color: var(--sc-color-grey-650);
+    --sc-relationship-node-font-selected-color: var(--sc-color-grey-650);
+    --sc-relationship-link-color: var(--sc-color-grey-300);
+    --sc-relationship-link-selected-color: var(--sc-color-blue-650);
+    --sc-relationship-link-hover-color: var(--sc-color-blue-450);
+    --sc-relationship-link-font-color: var(--sc-color-grey-650);
+    --sc-relationship-link-font-selected-color: var(--sc-color-blue-650);
+ }

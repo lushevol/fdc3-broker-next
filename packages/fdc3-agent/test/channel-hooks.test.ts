@@ -230,6 +230,26 @@ describe('Channel Hooks', () => {
       expect(unsubscribe).toHaveBeenCalled();
     });
 
+    it('unsubscribes when registration resolves after unmount', async () => {
+      const unsubscribe = vi.fn();
+      let resolveRegistration: ((listener: Listener) => void) | undefined;
+      const mockBroker = getAgentApi() as DesktopAgent;
+      vi.mocked(mockBroker.addContextListener).mockReturnValue(
+        new Promise((resolve) => {
+          resolveRegistration = resolve;
+        }),
+      );
+
+      const { unmount } = renderHook(() => useContextListener('fdc3.chart', vi.fn()));
+      unmount();
+
+      await act(async () => {
+        resolveRegistration?.({ unsubscribe });
+      });
+
+      await waitFor(() => expect(unsubscribe).toHaveBeenCalledOnce());
+    });
+
     it('should re-register when context type changes', async () => {
       const handler = vi.fn();
 

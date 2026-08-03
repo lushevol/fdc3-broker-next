@@ -1,0 +1,48 @@
+.ratan-migration-app {
+  min-height: 100%;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  color: var(--ratan-color-content-primary);
+  background: var(--ratan-color-surface-default);
+}
+
+.migration-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.migration-header h1 {
+  margin: 0.25rem 0;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+}
+
+.migration-header p,
+.migration-grid p {
+  color: var(--ratan-color-content-secondary);
+}
+
+.migration-kicker {
+  color: var(--ratan-color-action-primary);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.migration-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(16rem, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 48rem) {
+  .migration-header {
+    flex-direction: column;
+  }
+
+  .migration-grid {
+    grid-template-columns: 1fr;
+  }
+}

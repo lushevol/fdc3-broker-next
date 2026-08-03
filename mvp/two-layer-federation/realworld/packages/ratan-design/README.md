@@ -1,17 +1,27 @@
 # @fm/ratan-design
 
+> Legacy compatibility and reference package for the Realworld migration.
+> Portal Host, Cashflow, Identity/Profile, FDC3 Admin, and Cashflow Blotter MVP
+> use `@fm/ratan-design-webkit` for active shared UI. Do not add new active-host
+> UI here. Last reviewed 3 August 2026; see
+> [`../../docs/CURRENT_STATE.md`](../../docs/CURRENT_STATE.md).
+
 Production design foundation for the two-layer portal. Applications consume this package at build time and create a local provider for each React root. It is never a Module Federation remote and does not provide domain workflows.
 
 ## Public API
 
-- `DesignSystemProvider` — local MUI/Emotion provider for resolved scheme, density, and direction
+- `DesignSystemProvider` — local React Aria/CSS provider for resolved scheme, density, direction, and optional overlay container
 - `Button` — primary, secondary, danger, and ghost actions
 - `TextField` — accessible controlled text input
-- `NumberField` — controlled `number | null` input with native numeric constraints
+- `NumberField` — locale-aware controlled `number | null` input with bounded numeric constraints
 - `StatusBadge` — ready, review, blocked, and neutral semantics
 - `Dialog` — accessible, compositional modal with bounded width and dismissal behavior
 - `ConfirmationDialog` — default/danger confirmation with disabled and loading safety
 - `InlineAlert` — application-local semantic feedback with an optional action
+- Login/form: `Form`, `FieldGroup`, `PasswordField`, `Tabs`, `Divider`, and `Link`
+- Shell/feedback: `PageHeader`, `IconButton`, `Switch`, `ToggleButton`, `ProgressCircle`, `EmptyState`, `ErrorState`, and `Toast`
+- Navigation: `SideNavigation`, `Tabs`, and closable `WorkspaceTabs`
+- Profile/display: `Avatar`, `Card`, `Disclosure`, `TagGroup`, and `DescriptionList`
 - `semanticTokens` — typed semantic token metadata
 - `@fm/ratan-design/styles.css` — generated scoped token stylesheet
 
@@ -47,7 +57,7 @@ import {
 </DesignSystemProvider>;
 ```
 
-Consumers must install compatible React 18, MUI 5, and Emotion peers. MUI is an implementation detail: do not infer public behavior from generated classes and do not import internal package paths.
+Consumers must install compatible React 18.3 or React 19 peers. React Aria Components is an internal behavior dependency: do not infer public behavior from its classes, import it through Ratan, or import internal package paths.
 
 `Dialog`, `ConfirmationDialog`, and `InlineAlert` are presentation primitives. Applications retain lifecycle, validation, request state, authorization, maker/checker policy, service calls, and success/error decisions. See [interaction ownership](docs/INTERACTION_FOUNDATION.md).
 
@@ -58,9 +68,8 @@ npm --workspace @fm/ratan-design test
 npm --workspace @fm/ratan-design run build
 npm --workspace @fm/ratan-design run lint
 npm --workspace @fm/ratan-design run dev:sb
-npm --workspace @fm/ratan-design run dev:demo
 ```
 
-The generated token artifact is checked in at `src/generated/tokens.css`; its drift test compares it byte-for-byte with the typed source.
+The generated token artifact is checked in at `src/generated/tokens.css`; its drift test compares it byte-for-byte with the typed source. The checked-in [`gds-official`](./gds-official/) reference is the authority for the palette, semantic color conventions, and typography scale. Ratan publishes scoped `--ratan-*` aliases so applications do not inherit global GDS CSS or its implementation dependencies.
 
-See [architecture](docs/ARCHITECTURE.md), [rules](docs/RULES.md), and [release governance](docs/RELEASE_GOVERNANCE.md).
+See [GDS alignment](docs/GDS_ALIGNMENT.md), [architecture](docs/ARCHITECTURE.md), [rules](docs/RULES.md), and [release governance](docs/RELEASE_GOVERNANCE.md).

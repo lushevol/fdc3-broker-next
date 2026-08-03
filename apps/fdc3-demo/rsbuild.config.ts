@@ -10,6 +10,12 @@ export default defineConfig({
       index: './src/index.tsx',
     },
   },
+  resolve: {
+    alias: {
+      '@fm/fdc3-agent': 'ratan-fdc3-agent',
+      '@fm/fdc3-broker': 'ratan-fdc3-broker',
+    },
+  },
   server: {
     port,
     headers: {

@@ -1,0 +1,9 @@
+flask
+flask-compress
+flask-cors
+gunicorn
+gunicorn[gevent]
+gunicorn[gthread]
+pytest
+PyYAML
+coverage

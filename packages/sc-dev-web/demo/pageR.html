@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+    <title>sc-web-kit demo page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+    <!-- Custom style -->
+    <style>
+        body {
+            padding: 24px;
+        }
+
+        .sc-mode-dark {
+            background-color: var(--sc-color-blue-900)
+        }
+
+        .table-cell {
+            border-color: var(--sc-color-grey-15);
+            vertical-align: top;
+        }
+
+        .side-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 10px 8px;
+            background-color: var(--sc-color-white);
+            border-radius: 8px;
+            box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-height: 100vh;
+            overflow-y: auto;
+            z-index: 999999999;
+        }
+        
+        .side-bar div {
+            padding: 5px 0;
+        }
+
+        .side-bar div .selected {
+            color: var(--sc-color-blue-500);
+        }
+    </style>
+
+    <!-- Register all sc-* custom elements -->
+    <script type="module">
+        import '../dist/elements/index.js';
+        import { html } from '/node_modules/lit-html/lit-html.js';
+        window.html = html;
+    </script>
+</head>
+<sc-icon-provider>
+    <div id='side-bar' class='side-bar'>
+        <script type="text/javascript">
+            const sidebar = document.querySelector('#side-bar');
+            const initials = [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
+                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
+                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
+                'Y', 'Z'
+            ];
+            const currentPage = 'R';
+            const content = [];
+            initials.forEach(initial => {
+                content.push(`<div>`);
+                content.push(`<a class="${currentPage === initial ? 'selected' : ''}" href="/demo/page${initial}.html">${initial}</a>`);
+                content.push(`</div>`);
+            })
+            sidebar.innerHTML = content.join('');
+        </script>
+    </div>
+
+    <div class="table w-full shadow-lg max-h-96 components-body">
+        <div class="table-header-group font-bold sticky top-0 bg-white z-10">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Component</div>
+                <div class="table-cell border px-4 py-4">Example</div>
+                <div class="table-cell border px-4">
+                    <div class="py-4" style="max-width: 300px;">
+                        <sc-dropdown-input label="Mode" value="light">
+                            <sc-dropdown-option value="light">Light</sc-dropdown-option>
+                            <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+                            <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+                        </sc-dropdown-input>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-row-group h-96 overflow-y-auto">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Basic - vertical</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group label="What's your favorite fruit">
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Basic with Very Long Text</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group label="What's your favorite fruit? What's your favorite fruit? This is an extremely long label to test out the truncation" tooltip="What's your fav fruit?">
+                        <sc-radio value='1'>Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Help Text on 1 Radio</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group label="What's your favorite fruit">
+                        <sc-radio value='1' tooltipPlacement="top" help-text="Select this option if you like bananas">Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Selected</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group label="What's your favorite fruit" value='1'>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Tooltip only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group tooltip="What's your favorite fruit" tooltip-placement="right">
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Label, Tooltip & Help Text on Radio Group</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group label="What's your favorite fruit" 
+                                    tooltip="What's your favorite fruit" 
+                                    tooltip-placement="right"
+                                    help-text="Choose your favorite fruit">
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Required only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group required>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group label-size="xxs">
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group label-size="xs" success=true required>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group label-size="sm" error=true>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group label-size="md" success=true>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group label-size="lg" required error=true>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group readonly value='1'>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group disabled label="What's your favorite fruit">
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Active-Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group value='1' disabled label="What's your favorite fruit">
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group label="What's your favorite fruit" error>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Active-Error</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group value='1' label="What's your favorite fruit">
+                        <sc-radio value='1' error>Banana</sc-radio>
+                        <sc-radio value='2' error>Watermelon</sc-radio>
+                        <sc-radio value='3' error>Apple</sc-radio>
+                        <sc-radio value='4' error>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Active-Error with Error Message</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group value='1' error label="What's your favorite fruit" error-message="You must select one fruit">
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Active-Error with Help Text</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group value='1' error label="What's your favorite fruit">
+                        <sc-radio value='1' help-text="You must select banana">Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">No label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group success=true>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Water<strong>melon</strong></sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Horizontal</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group direction='horizontal' label="What's your favorite fruit">
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Selected</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group value='3' direction='horizontal' label="What's your favorite fruit">
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Tooltip only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group direction='horizontal' tooltip="Select your favorite fruits" tooltip-placement="right">
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Required only</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group direction='horizontal' required>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Using slots (xxs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group direction='horizontal' value='[1,3]' label-size="xxs">
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Using slots (xs label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group direction='horizontal' label-size="xs" success=true required>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Using slots (sm label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group direction='horizontal' label-size="sm" error=true>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Using slots (md label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group direction='horizontal' label-size="md" success=true>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Using slots (lg label)</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group direction='horizontal' label-size="lg" error=true>
+                        <sc-radio value='1' disabled>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <div slot="label-tooltip">
+                            I'm not <strong>just</strong> a tooltip, I'm a <em>tooltip</em> with HTML!
+                        </div>
+                        <div slot="help">
+                            I'm not <strong>just</strong> a help text, I'm a <em>help text</em> with HTML!
+                        </div>
+                        <div slot="success">
+                            I'm not <strong>just</strong> a success text, I'm a <em>success text</em> with HTML!
+                        </div>
+                        <div slot="error">
+                            I'm not <strong>just</strong> a error text, I'm a <em>error text</em> with HTML!
+                        </div>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group direction='horizontal' readonly >
+                        <div slot="label">
+                            I'm not <strong>just</strong> a label, I'm a <em>label</em> with HTML!
+                        </div>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group direction='horizontal' value='2' disabled label="What's your favorite fruits">
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Radio</div>
+                <div class="table-cell border px-4 py-4">No label</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-radio-group direction='horizontal' value='1' error=true>
+                        <sc-radio value='1'>Banana</sc-radio>
+                        <sc-radio value='2'>Watermelon</sc-radio>
+                        <sc-radio value='3'>Apple</sc-radio>
+                        <sc-radio value='4'>Orange</sc-radio>
+                    </sc-radio-group>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Rating</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-rating size="xxs" value="1" label='Rating'>
+                    </sc-rating>
+                    <sc-rating size="xs" value="2">
+                    </sc-rating>
+                    <sc-rating size="sm" value="3">
+                    </sc-rating>
+                    <sc-rating size="md" value="4">
+                    </sc-rating>
+                    <sc-rating size="lg" value="5">
+                    </sc-rating>
+                    <sc-rating size="lg" value="5" tooltip='Tooltip content'>
+                        <div slot='label'>Rating label</div>
+                    </sc-rating>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Rating</div>
+                <div class="table-cell border px-4 py-4">Max 10</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-rating max="10" value="5">
+                    </sc-rating>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Rating</div>
+                <div class="table-cell border px-4 py-4">Readonly</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-rating value="1" readonly>
+                    </sc-rating>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Rating</div>
+                <div class="table-cell border px-4 py-4">Button mode</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-rating max="10" value="5" mode='button'>
+                    </sc-rating>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Rating</div>
+                <div class="table-cell border px-4 py-4">Button mode</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-rating class='sc-button-rating' max="10" value=1 mode='button'>
+                        <div slot='label'>Rating label</div>
+                    </sc-rating>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Repeater</div>
+                <div class="table-cell border px-4 py-4">Append</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-repeater position="append">
+                        <sc-text-input tooltip="" tooltip-placement="top" label-size="xs" value="" placeholder="" rows="5" prefix-icon="" suffix-icon="" suffix-label="" help-text="" border-type="box" max-length="10" success-message="" error-message="" hide=""> 
+                        </sc-text-input>
+                    </sc-repeater>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Repeater</div>
+                <div class="table-cell border px-4 py-4">Prepend</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-repeater position="prepend">
+                        <sc-text-input tooltip="" tooltip-placement="top" label-size="xs" value="" placeholder="" rows="5" prefix-icon="" suffix-icon="" suffix-label="" help-text="" border-type="box" max-length="10" success-message="" error-message="" hide=""></sc-text-input></sc-repeater>
+                    </sc-repeater>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Repeater</div>
+                <div class="table-cell border px-4 py-4">Starting Empty</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-repeater position="startingEmpty">
+                        <sc-text-input tooltip="" tooltip-placement="top" label-size="xs" value="" placeholder="" rows="5" prefix-icon="" suffix-icon="" suffix-label="" help-text="" border-type="box" max-length="10" success-message="" error-message="" hide=""> 
+                        </sc-text-input>
+                    </sc-repeater>                        
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Repeater</div>
+                <div class="table-cell border px-4 py-4">Button Expand</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-repeater position="append" button-expand="">
+                        <sc-text-input tooltip="" tooltip-placement="top" label-size="xs" value="" placeholder="" rows="5" prefix-icon="" suffix-icon="" suffix-label="" help-text="" border-type="box" max-length="10" success-message="" error-message="" hide=""> 
+                        </sc-text-input>
+                    </sc-repeater>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Repeater</div>
+                <div class="table-cell border px-4 py-4">Disabled</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-repeater position="append" disabled="">
+                        <sc-text-input tooltip="" tooltip-placement="top" label-size="xs" value="" placeholder="" rows="5" prefix-icon="" suffix-icon="" suffix-label="" help-text="" border-type="box" max-length="10" success-message="" error-message="" hide=""> 
+                        </sc-text-input>
+                    </sc-repeater>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Repeater</div>
+                <div class="table-cell border px-4 py-4">Group</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-repeater position="append">
+                        <div style="padding-bottom :10px; padding-top: 10px">
+                          <sc-text-input tooltip="" tooltip-placement="top" label-size="xs" value="" placeholder="" rows="5" prefix-icon="" suffix-icon="" suffix-label="" help-text="" border-type="box" max-length="10" success-message="" error-message=""> </sc-text-input>
+                          <sc-text-input tooltip="" tooltip-placement="top" label-size="xs" value="" placeholder="" rows="5" prefix-icon="" suffix-icon="" suffix-label="" help-text="" border-type="box" max-length="10" success-message="" error-message=""> 
+                          </sc-text-input>
+                          </div>
+                    </sc-repeater>                        
+                </div>
+            </div>
+
+                <script>
+                    const rating = document.querySelector('.sc-button-rating');
+                    rating.options = [
+                        {
+                            label: 'First',
+                            value: 1
+                        }, {
+                            label: 'Second',
+                            value: 2
+                        }, {
+                            label: 'Third',
+                            value: 3
+                        }
+                    ]
+                </script>
+            </div>
+        </div>
+</sc-icon-provider>
+<!-- Custom script -->
+<script type="text/javascript">
+    var modes = ['light', 'dark', 'dyslexic']
+    var activeMode = modes[0]
+    function changeMode(mode) {
+        var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child');
+        componentCells.forEach((componentCell) => {
+            modes.forEach((mode) => {
+                componentCell.classList.remove(`sc-mode-${mode}`)
+            })
+            componentCell.classList.add(`sc-mode-${mode}`)
+            if (componentCell.classList.contains('inverse')) {
+                if (mode === 'dark') {
+                    componentCell.style.backgroundColor = 'var(--sc-color-white)'
+                } else {
+                    componentCell.style.backgroundColor = 'var(--sc-color-blue-900)'
+                }
+            }
+        })
+    }
+    document.getElementsByTagName('sc-dropdown-input')[0].addEventListener('sc-select', ({ detail: { value } }) => {
+        changeMode(value);
+    });
+    changeMode(activeMode);
+
+    const ScRating = document.querySelector('sc-rating');
+    ScRating.addEventListener('sc-change', (event) => {
+        console.log('rating', event.detail.value)
+    })
+</script>
+
+<script type="module">
+    import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+    changeIconLibrary();
+    function changeIconLibrary() {
+        document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+    }
+</script>
+
+</html>

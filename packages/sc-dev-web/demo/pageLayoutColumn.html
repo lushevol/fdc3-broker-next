@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+    <title>sc-web-kit demo page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+    <link rel="stylesheet" type="text/css" href="/public/styles/util.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+    <!-- Custom style -->
+    <style>
+        body {
+        }
+
+        *,
+        ::before,
+        ::after {
+            box-sizing: content-box;
+        }
+    </style>
+
+    <!-- Register all sc-* custom elements -->
+    <script type="module">
+        import '../dist/elements/index.js';
+        import { html } from '/node_modules/lit-html/lit-html.js';
+        window.html = html;
+    </script>
+</head>
+<sc-icon-provider>
+        <sc-column-layout layout='Main Content Middle' right-column-collapsible additional-height='100px'>
+            <div slot="title">
+                <div>Layout: Main Content Middle - collapsible</div>
+            </div>
+                    <sc-breadcrumb slot='sticky-breadcrumb'>
+                        <sc-breadcrumb-item href="#" target="_blank"> Home</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Guideline</sc-breadcrumb-item>
+                        <sc-breadcrumb-item>Color</sc-breadcrumb-item>
+                    </sc-breadcrumb>
+                    <sc-button fill slot='sticky-button'>Save</sc-button>
+                    <sc-button slot='sticky-button'>Cancel</sc-button>
+            <div slot='additional'>
+                Additional information here!
+            </div>
+            <div slot='left'>
+                <sc-list-navigation>
+                    <sc-list-navigation-item title='Client information' selected></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Services'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Account holdings'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Activities'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Events and notifications'></sc-list-navigation-item>
+                </sc-list-navigation>
+            </div>
+            <div slot='middle'>
+                <sc-card height='100%'>
+                    <sc-grid-row no-gutters>
+                        <sc-grid-column xs='12' md='9'>
+                            <h3>Client information</h3>
+                        </sc-grid-column>
+                        <sc-grid-column xs='12' md='3'>
+                            <sc-search-field></sc-search-field>
+                        </sc-grid-column>
+                    </sc-grid-row>
+                    <sc-spacer vertical size='md'></sc-spacer>
+                    <div>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Legal entity name</sc-grid-column>
+                            <sc-grid-column xs='9'>BR Advisors HK Ltd</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Registered address</sc-grid-column>
+                            <sc-grid-column xs='9'>Hong Kong, 12/F Forward Tower One Garden Road</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Operational address</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Incorporation number</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Verify legal from and current existence</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Regulated by</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Country of incorporation</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Evidence of majority ownership status of any subsidiary</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='xs'></sc-spacer>
+                    </div>
+                </sc-card>
+            </div>
+            <div slot='right'>
+                <sc-card>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                </sc-card>
+                <sc-spacer vertical size='sm'></sc-spacer>
+                <sc-card>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                </sc-card>
+                <sc-spacer vertical size='sm'></sc-spacer>
+                <sc-card>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                </sc-card>
+                <sc-spacer vertical size='sm'></sc-spacer>
+            </div>
+        </sc-column-layout>
+</sc-icon-provider>
+<!-- Custom script -->
+
+<script type="module">
+    import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+    changeIconLibrary();
+    function changeIconLibrary() {
+        document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+    }
+</script>
+
+</html>

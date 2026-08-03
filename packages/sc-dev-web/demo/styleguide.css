@@ -1,0 +1,271 @@
+/* Global definition */
+:root {
+  /*Color definition*/
+  --sc-color-brand-blue: #0473EA;
+  --sc-color-bright-blue: #7BB6F5;
+  --sc-color-lightest-blue: #E7F1FD;
+  --sc-color-dark-blue: #0B56A8;
+  --sc-color-light-blue: #7BB6F5;
+  --sc-color-lighter-blue: #1586FF;
+  --sc-color-blue-dm: #007AFF;
+
+  --sc-color-brand-green: #38D200;
+  --sc-color-bright-green: #92E773;
+
+  --sc-color-dark-green: #238500;
+  --sc-color-white: #FFFFFF;
+  --sc-color-grey-black: #212121;
+
+  --sc-color-lighter-yellow: #FFC736;
+  --sc-color-yellow: #F5C000;
+  --sc-color-yellow-dark: #DBA121;
+
+  --sc-color-red-lighter: #D91919;
+  --sc-color-red: #D50000;
+  --sc-color-red-darker: #AA0000;
+
+  --sc-color-grey-50: #A8A9AA;
+
+  --sc-font-family: "SC Prosper Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --sc-color-dm-red: #FF2E22;
+  --sc-color-grey100: #525355;
+  --sc-color-grey80: #666666;
+  --sc-color-grey50: #A8A9AA;
+  --sc-color-dm-grey50: #858687;
+  --sc-color-grey40: #B2B2B2;
+  --sc-color-grey25: #D4D4D4;
+  --sc-color-grey-black: #000000;
+}
+
+/* Component definition */
+:root {
+  /* Button */
+  --sc-button-focus-outline-color: var(--sc-color-light-blue);
+
+  --sc-button-primary-background-color: var(--sc-color-brand-blue);
+  --sc-button-primary-border-color: var(--sc-color-brand-blue);
+  --sc-button-primary-text-color: var(--sc-color-white);
+
+  --sc-button-primary-press-background-color: var(--sc-color-dark-blue);
+  --sc-button-primary-press-border-color: var(--sc-color-dark-blue);
+  --sc-button-primary-press-text-color: var(--sc-color-white);
+
+  --sc-button-primary-hover-background-color: var(--sc-color-lighter-blue);
+  --sc-button-primary-hover-border-color: var(--sc-color-lighter-blue);
+  --sc-button-primary-hover-text-color: var(--sc-color-white);
+
+  --sc-button-primary-inverse-background-color: var(--sc-color-white);
+  --sc-button-primary-inverse-border-color: var(--sc-color-white);
+  --sc-button-primary-inverse-text-color: var(--sc-color-brand-blue);
+
+  --sc-button-primary-inverse-press-text-color: var(--sc-color-dark-blue);
+  --sc-button-primary-inverse-hover-text-color: var(--sc-color-lighter-blue);
+
+  --sc-button-secondary-background-color: transparent;
+  --sc-button-secondary-border-color: var(--sc-color-brand-blue);
+  --sc-button-secondary-text-color: var(--sc-color-brand-blue);
+
+  --sc-button-secondary-press-background-color: transparent;
+  --sc-button-secondary-press-border-color: var(--sc-color-dark-blue);
+  --sc-button-secondary-press-text-color: var(--sc-color-dark-blue);
+
+  --sc-button-secondary-hover-background-color: transparent;
+  --sc-button-secondary-hover-border-color: var(--sc-color-lighter-blue);
+  --sc-button-secondary-hover-text-color: var(--sc-color-lighter-blue);
+
+  --sc-button-secondary-inverse-background-color: transparent;
+  --sc-button-secondary-inverse-border-color: var(--sc-color-white);
+  --sc-button-secondary-inverse-text-color: var(--sc-color-white);
+
+  --sc-button-primary-warning-background-color: var(--sc-color-amber-500);
+  --sc-button-primary-warning-border-color: var(--sc-color-amber-500);
+  --sc-button-primary-warning-text-color: var(--sc-color-grey-black);
+
+  --sc-button-primary-warning-press-background-color: var(--sc-color-yellow-dark);
+  --sc-button-primary-warning-press-border-color: var(--sc-color-yellow-dark);
+  --sc-button-primary-warning-press-text-color: var(--sc-color-grey-black);
+
+  --sc-button-primary-warning-hover-background-color: var(--sc-color-lighter-yellow);
+  --sc-button-primary-warning-hover-border-color: var(--sc-color-lighter-yellow);
+  --sc-button-primary-warning-hover-text-color: var(--sc-color-grey-black);
+
+  --sc-button-secondary-warning-background-color: transparent;
+  --sc-button-secondary-warning-border-color: var(--sc-color-amber-500);
+  --sc-button-secondary-warning-text-color: var(--sc-color-amber-500);
+
+  --sc-button-secondary-warning-press-background-color: transparent;
+  --sc-button-secondary-warning-press-border-color: var(--sc-color-yellow-dark);
+  --sc-button-secondary-warning-press-text-color: var(--sc-color-yellow-dark);
+
+  --sc-button-secondary-warning-hover-background-color: transparent;
+  --sc-button-secondary-warning-hover-border-color: var(--sc-color-lighter-yellow);
+  --sc-button-secondary-warning-hover-text-color: var(--sc-color-lighter-yellow);
+
+  --sc-button-primary-danger-background-color: var(--sc-color-red);
+  --sc-button-primary-danger-border-color: var(--sc-color-red);
+  --sc-button-primary-danger-text-color: var(--sc-color-white);
+
+  --sc-button-primary-danger-press-background-color: var(--sc-color-red-darker);
+  --sc-button-primary-danger-press-border-color: var(--sc-color-red-darker);
+  --sc-button-primary-danger-press-text-color: var(--sc-color-white);
+
+  --sc-button-primary-danger-hover-background-color: var(--sc-color-red-lighter);
+  --sc-button-primary-danger-hover-border-color: var(--sc-color-red-lighter);
+  --sc-button-primary-danger-hover-text-color: var(--sc-color-white);
+
+  --sc-button-secondary-danger-background-color: transparent;
+  --sc-button-secondary-danger-border-color: var(--sc-color-red);
+  --sc-button-secondary-danger-text-color: var(--sc-color-red);
+
+  --sc-button-secondary-danger-press-background-color: transparent;
+  --sc-button-secondary-danger-press-border-color: var(--sc-color-red-darker);
+  --sc-button-secondary-danger-press-text-color: var(--sc-color-red-darker);
+
+  --sc-button-secondary-danger-hover-background-color: transparent;
+  --sc-button-secondary-danger-hover-border-color: var(--sc-color-red-lighter);
+  --sc-button-secondary-danger-hover-text-color: var(--sc-color-red-lighter);
+
+  --sc-button-inverse-border-color: var(--sc-color-white);
+  --sc-button-default-border-color: var(--sc-color-brand-blue);
+
+  --sc-button-disabled-background-color: var(--sc-color-grey-50);
+  --sc-button-disabled-border-color: var(--sc-color-grey-50);
+  --sc-button-disabled-text-color: var(--sc-color-white);
+
+  /* Link */
+  --sc-link-primary-color: var(--sc-color-brand-blue);
+  --sc-link-hover-color: var(--sc-color-dark-blue);
+  --sc-link-inverse-color: var(--sc-color-white);
+
+  /* SideSheet */
+  --sc-side-sheet-background-color: var(--sc-color-white);
+  --sc-side-sheet-font-color: var(--sc-color-grey100);
+
+  /* Checkbox */
+  --sc-checkbox-font-color: var(--sc-color-grey50);
+  --sc-checkbox-checked-background-color: var(--sc-color-brand-blue);
+  --sc-checkbox-checked-border-color: var(--sc-color-brand-blue);
+  --sc-checkbox-disabled-background-color: var(--sc-color-grey50);
+  --sc-checkbox-disabled-border-color: var(--sc-color-grey50);
+  --sc-checkbox-indeterminate-background-color: var(--sc-color-brand-blue);
+  --sc-checkbox-indeterminate-border-color: var(--sc-color-brand-blue);
+  --sc-checkbox-default-border-color: var(--sc-color-grey100);
+  --sc-checkbox-default-background-color: var(--sc-color-white);
+
+  /* Radio */
+  --sc-radio-font-color: var(--sc-color-grey100);
+  --sc-radio-checked-background-color: var(--sc-color-brand-blue);
+  --sc-radio-checked-border-color: var(--sc-color-brand-blue);
+  --sc-radio-disabled-background-color: var(--sc-color-grey50);
+  --sc-radio-disabled-border-color: var(--sc-color-grey50);
+  --sc-radio-default-border-color: '#d4d4d4';
+  --sc-radio-default-background-color: var(--sc-color-grey25);
+  --sc-radio-highlighted-default-background-color: var(--sc-color-white);
+  --sc-radio-disabled-font-color: var(--sc-color-grey25);
+  --sc-radio-highlighted-default-border-color: var(--sc-color-grey50);
+  --sc-radio-before-highlighted-background-color: var(--sc-color-lightest-blue);
+
+  /* Form input */
+  --sc-form-input-color: var(--sc-color-grey100);
+  --sc-form-control-placeholder-color: var(--sc-color-grey50);
+  --sc-form-control-background-color: var(--sc-color-white);
+  --sc-form-group-help-color: var(--sc-color-grey80);
+  --sc-form-group-error-color: var(--sc-color-red);
+  --sc-form-input-error-border-color:  var(--sc-color-red);
+  --sc-form-group-success-color: var(--sc-color-dark-green);
+  --sc-form-input-success-border-color: var(--sc-color-dark-green);
+  --sc-form-control-color: var(--sc-color-grey100);
+  --sc-form-input-focus-border-color: var(--sc-color-brand-blue);
+  --sc-form-input-active-shadow-color: rgba(0, 122, 255, 0.25);
+  --sc-form-group-label-required-color: var(--sc-color-red);
+
+  /* Card */
+  --sc-card-text-color: var(--sc-color-grey100);
+  --sc-card-background-color: var(--sc-color-white);
+
+  /* Carousel */
+  --sc-carousel-pagination-active-color: var(--sc-color-brand-blue);
+
+  /* Tooltip */
+  --sc-tooltip-background-color: var(--sc-color-grey100)
+
+}
+
+/* Dark theme component definition */
+.sc-mode-dark {
+  /* Button */
+  --sc-button-primary-background-color: var(--sc-color-blue-dm);
+  --sc-button-primary-border-color: var(--sc-color-blue-dm);
+
+  --sc-button-primary-inverse-text-color: var(--sc-color-blue-dm);
+
+  --sc-button-secondary-border-color: var(--sc-color-blue-dm);
+  --sc-button-secondary-text-color: var(--sc-color-blue-dm);
+
+  --sc-button-default-border-color: var(--sc-color-blue-dm);
+
+  /* Link */
+  --sc-link-primary-color: var(--sc-color-blue-dm);
+
+  /* SideSheet */
+  --sc-side-sheet-background-color: var(--sc-color-grey-black);
+  --sc-side-sheet-font-color: var(--sc-color-white);
+
+  /* Checkbox */
+  --sc-checkbox-font-color: var(--sc-color-white);
+  --sc-checkbox-checked-background-color: var(--sc-color-blue-dm);
+  --sc-checkbox-checked-border-color: var(--sc-color-blue-dm);
+  --sc-checkbox-disabled-background-color: var(--sc-color-dm-grey50);
+  --sc-checkbox-disabled-border-color: var(--sc-color-dm-grey50);
+  --sc-checkbox-indeterminate-background-color: var(--sc-color-blue-dm);
+  --sc-checkbox-indeterminate-border-color: var(--sc-color-blue-dm);
+  --sc-checkbox-default-border-color: var(--sc-color-white);
+  --sc-checkbox-default-background-color: transparent;
+
+  /* Radio */
+  --sc-radio-font-color: var(--sc-color-white);
+  --sc-radio-checked-background-color: var(--sc-color-brand-blue);
+  --sc-radio-checked-border-color: var(--sc-color-brand-blue);
+  --sc-radio-disabled-background-color: var(--sc-color-grey80);
+  --sc-radio-disabled-border-color: var(--sc-color-grey80);
+  --sc-radio-default-border-color: var(--sc-color-grey50);
+  --sc-radio-default-background-color: transparent;
+  --sc-radio-disabled-font-color: var(--sc-color-grey80);
+  --sc-radio-highlighted-default-border-color: var(--sc-color-grey50);
+  --sc-radio-highlighted-default-background-color: transparent;
+  --sc-radio-before-highlighted-background-color: var(--sc-color-dark-blue);
+
+  /* Form input */
+  --sc-form-input-color: var(--sc-color-white);
+  --sc-form-control-placeholder-color: var(--sc-color-grey40);
+  --sc-form-control-background-color: transparent;
+  --sc-form-group-help-color: var(--sc-color-grey25);
+  --sc-form-group-error-color: var(--sc-color-dm-red);
+  --sc-form-input-error-border-color:  var(--sc-color-dm-red);
+  --sc-form-group-success-color: var(--sc-color-brand-green);
+  --sc-form-input-success-border-color: var(--sc-color-brand-green);
+  --sc-form-control-color: var(--sc-color-white);
+  --sc-form-input-focus-border-color: var(--sc-color-blue-dm);
+  --sc-form-input-active-shadow-color: rgba(12, 58, 102, 0.25);
+  --sc-form-group-label-required-color: var(--sc-color-dm-red);
+
+  /* Card */
+  --sc-card-text-color: var(--sc-color-white);
+  --sc-card-background-color: #1F1F1F;
+
+  /* Carousel */
+  --sc-carousel-pagination-active-color: var(--sc-color-dark-blue);
+  --sc-carousel-pagination-color: #000;
+
+  /* Tooltip */
+  --sc-tooltip-background-color: var(--sc-color-grey100)
+
+}
+
+@media screen and (max-width: 680px){
+  :root {
+    --sc-button-width: '100%';
+    --sc-button-margin-left: '20px';
+    --sc-button-margin-right: '20px';
+  }
+}

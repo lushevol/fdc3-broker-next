@@ -1,0 +1,10 @@
+# Direct two-layer portal delivery. The upstream is the immutable static nginx
+# image (or an equivalent CDN/origin adapter), not a Node application server.
+upstream portal-host-two-layer-{{ ratan_env }} {
+    least_conn;
+    {% for host in groups[two_layer_frontend_group | default('frontend_webapps')] %}
+    server {{ nginx_instances[host].ansible_ssh_host }}:{{ two_layer_static_port }} max_fails=3 fail_timeout=30s;
+    {% endfor %}
+    keepalive 32;
+}
+

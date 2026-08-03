@@ -14,12 +14,13 @@
     "./styles.css": "./dist/index.css"
   },
   "scripts": {
-    "build": "tsup src/index.tsx --format esm --dts --clean --external react --external react-dom --external @mui/material --external @emotion/react --external @emotion/styled",
+    "build": "tsup src/index.tsx --format esm --dts --clean --external react --external react-dom --external @mui/material --external @emotion/cache --external @emotion/react --external @emotion/styled",
     "test": "vitest run --coverage",
     "lint": "eslint .",
     "clean": "rm -rf dist coverage"
   },
   "peerDependencies": {
+    "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.15.0",
@@ -27,6 +28,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.15.0",

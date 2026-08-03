@@ -1,6 +1,6 @@
 # FDC3 2.2 Conformance Verification
 
-This document verifies that the `@fm/fdc3-broker` implementation conforms to the FDC3 2.2 DesktopAgent API specification.
+This document records the package's automated FDC3 2.2 DesktopAgent API verification. It is not a substitute for FINOS certification.
 
 ## Implementation Status: ✅ COMPLETE
 
@@ -44,22 +44,11 @@ This document verifies that the `@fm/fdc3-broker` implementation conforms to the
 
 ### Test Coverage
 
-| Category               | Tests | Passing | Rate |
-| ---------------------- | ----- | ------- | ---- |
-| All Tests              | 540   | 475     | 88%  |
-| API Compliance         | 37    | 33      | 89%  |
-| Intent Resolution      | +++   | ✅      | 100% |
-| Channel Management     | +++   | ✅      | 100% |
-| Context Broadcasting   | +++   | ✅      | 100% |
-| Entitlement Validation | 19    | 18      | 95%  |
+| Category   | Tests | Passing | Rate |
+| ---------- | ----- | ------- | ---- |
+| Full suite | 740   | 740     | 100% |
 
-### Known Limitations
-
-1. **OpenFin Bridge Tests** (~16 tests) - Require actual OpenFin runtime
-2. **Performance Timing Tests** (~7 tests) - Timing-sensitive edge cases
-3. **Debug Logging Tests** (~8 tests) - Debug mode coverage verification
-
-These limitations do not affect FDC3 API conformance.
+The unit suite uses mocked browser and OpenFin surfaces. Run the official conformance framework against a deployed broker for certification evidence.
 
 ### Compliance Verification
 
@@ -86,10 +75,10 @@ npm test
 
 ### Conclusion
 
-The `@fm/fdc3-broker` implementation is **FDC3 2.2 compliant** for all core DesktopAgent API functionality. The implementation passes 88% of unit tests and all critical API conformance tests.
+The package implements the core FDC3 2.2 DesktopAgent surface and its current unit suite passes in full. `getInfo()` reports optional originating-app context metadata as unsupported because channel listeners currently receive context without metadata.
 
 ---
 
-Generated: 2025-12-28
-Version: @fm/fdc3-broker 1.0.0
+Updated: 2026-08-01
+Package: ratan-fdc3-broker 0.0.1
 FDC3 Version: 2.2

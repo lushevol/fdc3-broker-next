@@ -1,0 +1,5 @@
+projectName: service bench
+description: Database deployment
+database:
+  vendor: postgres
+  dockerImage: 16-bullseye

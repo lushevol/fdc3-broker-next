@@ -1,38 +1,42 @@
 # Authorization Limits grid cohort acceptance
 
+Status: implemented and live-browser verified with the WebKit application
+shell. Last reviewed 3 August 2026. See
+[`../../../docs/CURRENT_STATE.md`](../../../docs/CURRENT_STATE.md).
+
 This cohort migrates only the read-only Authorization Limits list/details behavior into `@fm/mfe-cashflow`. The unchanged legacy application remains the fallback for production data, entitlements, mutations, and maker/checker approvals.
 
 ## Package and license decision
 
-| Item | Decision |
-| --- | --- |
-| Adapter | `@fm/ratan-data-grid@1.0.0` |
-| Grid runtime | `ag-grid-community@32.3.0` and `ag-grid-react@32.3.0` |
-| Grid license | MIT (Community edition) |
-| Enterprise modules | None installed, imported, exported, or required |
-| Delivery | Build-time package and application dependency; not a host capability or federation remote |
-| Public API | Bounded rows, columns, identity, selection, activation, pagination, and infrastructure states |
-| Deliberately blocked | Raw `GridApi`, `GridOptions`, `AgGridReact`, arbitrary grid options, enterprise modules |
+| Item                 | Decision                                                                                      |
+| -------------------- | --------------------------------------------------------------------------------------------- |
+| Adapter              | `@fm/ratan-data-grid@1.0.0`                                                                   |
+| Grid runtime         | `ag-grid-community@32.3.0` and `ag-grid-react@32.3.0`                                         |
+| Grid license         | MIT (Community edition)                                                                       |
+| Enterprise modules   | None installed, imported, exported, or required                                               |
+| Delivery             | Build-time package and application dependency; not a host capability or federation remote     |
+| Public API           | Bounded rows, columns, identity, selection, activation, pagination, and infrastructure states |
+| Deliberately blocked | Raw `GridApi`, `GridOptions`, `AgGridReact`, arbitrary grid options, enterprise modules       |
 
 ## Automated evidence
 
-| Gate | Result |
-| --- | --- |
-| Grid package tests | 6 passed; 100% statements/functions/lines, 97.14% branches |
-| Cashflow tests after cohort | 12 passed; 96.22% statements, 86.04% branches, 93.61% functions, 96.55% lines |
-| Portal regression tests | 10 passed; prior host acceptance retained |
-| Packed package consumer | JavaScript, declarations, CSS export, peers, and blocked internal subpath passed |
-| Boundary scan | No Ant, legacy Ratan imports, `src/Root`, enterprise grid, POC, or legacy runtime dependency |
-| Browser matrix | Existing four production-pilot journeys plus Authorization Limits grid journey passed |
+| Gate                        | Result                                                                                       |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| Grid package tests          | 6 passed; 100% statements/functions/lines, 97.14% branches                                   |
+| Cashflow tests after cohort | 12 passed; 96.22% statements, 86.04% branches, 93.61% functions, 96.55% lines                |
+| Portal regression tests     | 10 passed; prior host acceptance retained                                                    |
+| Packed package consumer     | JavaScript, declarations, CSS export, peers, and blocked internal subpath passed             |
+| Boundary scan               | No Ant, legacy Ratan imports, `src/Root`, enterprise grid, POC, or legacy runtime dependency |
+| Browser matrix              | Existing four production-pilot journeys plus Authorization Limits grid journey passed        |
 
 The grid journey verifies filtering, Community sorting, client pagination, pointer double-click, Enter-key activation, details/back routing, mutation-deferral messaging, and compact/comfortable semantic row heights. Loading, empty, error/retry, selection, unknown details, and standalone repository behavior are covered at component level.
 
 ## Bundle evidence
 
-| Cashflow remote | Before grid cohort | After grid cohort | Delta |
-| --- | ---: | ---: | ---: |
-| Uncompressed total | 775.5 KB | 1,893.9 KB | +1,118.4 KB |
-| Gzip total | 233.1 KB | 500.5 KB | +267.4 KB |
+| Cashflow remote    | Before grid cohort | After grid cohort |       Delta |
+| ------------------ | -----------------: | ----------------: | ----------: |
+| Uncompressed total |           775.5 KB |        1,893.9 KB | +1,118.4 KB |
+| Gzip total         |           233.1 KB |          500.5 KB |   +267.4 KB |
 
 The isolated AG Grid JavaScript chunk is 1,111.8 KB / 294.3 KB gzip; its Community CSS chunk is 224.1 KB / 37.1 KB gzip. The aggregate gzip delta is smaller than the sum because earlier shared chunks and explicit production token CSS changed independently.
 

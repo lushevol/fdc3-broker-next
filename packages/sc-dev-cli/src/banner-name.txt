@@ -1,0 +1,4 @@
+                    ${AnsiColor.BRIGHT_BLUE}Standard Chartered Bank${AnsiColor.DEFAULT}
+                         ${AnsiColor.BRIGHT_GREEN}App Platform${AnsiColor.DEFAULT}
+
+                         ${AnsiColor.BRIGHT_WHITE}SC DevKit CLI${AnsiColor.DEFAULT}                         

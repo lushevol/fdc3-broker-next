@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <title>sc-tour shadow root demo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+  <link rel="stylesheet" type="text/css" href="/node_modules/driver.js/dist/driver.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+  <style>
+    body {
+      padding: 24px;
+      font-family: var(--sc-font-family, sans-serif);
+    }
+    .demo-shell {
+      display: grid;
+      gap: 32px;
+      max-width: 760px;
+    }
+    .demo-section {
+      display: grid;
+      gap: 12px;
+    }
+    .demo-section h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .hint {
+      margin: 0;
+      color: var(--sc-color-blue-700, #1e3a8a);
+    }
+  </style>
+
+  <script type="module">
+    import '../dist/elements/index.js';
+
+    /* ── 1-level shadow root (original demo) ─────────────────────────── */
+    class ShadowTourTarget extends HTMLElement {
+      constructor() {
+        super();
+        const root = this.attachShadow({ mode: 'open' });
+        root.innerHTML = `
+          <style>
+            .card {
+              display: grid;
+              gap: 12px;
+              padding: 16px;
+              border-radius: 12px;
+              border: 1px solid var(--sc-color-blue-200, #bfdbfe);
+              background: var(--sc-color-blue-50, #eff6ff);
+            }
+            .title { font-weight: 600; }
+            .badge {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              padding: 4px 10px;
+              border-radius: 999px;
+              background: var(--sc-color-blue-100, #dbeafe);
+            }
+          </style>
+          <div class="card">
+            <div id="shadow-step-start" class="title">Shadow root container</div>
+            <div id="shadow-step-badge" class="badge">Shadow badge target</div>
+            <sc-button id="shadow-step-button" variant="primary">Shadow action</sc-button>
+          </div>
+          <sc-box radius="sm" view="default" space-size="sm" type="default" height="auto">
+            <span id="shadow-step-description">
+              Dear colleagues, as a reminder of the importance of adhering to our Clean Desk Policy.
+            </span>
+            <sc-tour
+              id="shadow-tour"
+              show-progress
+              overlay-opacity="0.35"
+              steps='[
+                {"element":".text-xl","popover":{"title":"Document target","description":"This element is in the document light DOM."}},
+                {"element":"#shadow-step-badge","popover":{"title":"Badge target","description":"Resolves inside one shadow root."}},
+                {"element":"#shadow-step-description","popover":{"title":"Description target","description":"Non-interactive element inside the shadow root."}},
+                {"element":"#shadow-step-button","popover":{"title":"Button target","description":"Shadow root button highlight."}}
+              ]'
+            ></sc-tour>
+          </sc-box>
+        `;
+      }
+    }
+    customElements.define('shadow-tour-target', ShadowTourTarget);
+
+    /* ── 3-level nested shadow roots ─────────────────────────────────── */
+
+    /**
+     * Level 3 — deepest layer; owns the sc-tour.
+     * Steps target elements at every level to prove the full chain is traversed.
+     */
+    class TourLevelThree extends HTMLElement {
+      constructor() {
+        super();
+        const root = this.attachShadow({ mode: 'open' });
+        root.innerHTML = `
+          <style>
+            :host { display: block; }
+            .l3-box {
+              margin-top: 8px;
+              padding: 12px 16px;
+              border-radius: 8px;
+              background: var(--sc-color-teal-50, #f0fdfa);
+              border: 1px solid var(--sc-color-teal-300, #5eead4);
+            }
+            .l3-label { font-weight: 600; color: var(--sc-color-teal-700, #0f766e); }
+          </style>
+          <div class="l3-box">
+            <div class="l3-label">Level 3 shadow root (deepest — sc-tour lives here)</div>
+            <p id="l3-target">Target inside level 3 shadow root.</p>
+          </div>
+          <sc-tour
+            id="nested-tour"
+            show-progress
+            overlay-opacity="0.4"
+            steps='[
+              {"element":"#shadow-step-description","popover":{"title":"Step 1 — document","description":"tour-level-one is in the page light DOM, three shadow root levels above sc-tour."}},
+              {"element":"#l1-target","popover":{"title":"Step 2 — level 1 shadow root","description":"#l1-target is inside level 1 shadow root."}},
+              {"element":"#l2-target","popover":{"title":"Step 3 — level 2 shadow root","description":"#l2-target is inside level 2 shadow root."}},
+              {"element":"#l3-target","popover":{"title":"Step 4 — level 3 shadow root","description":"#l3-target shares the same shadow root as sc-tour."}}
+            ]'
+          ></sc-tour>
+        `;
+      }
+    }
+    customElements.define('tour-level-three', TourLevelThree);
+
+    /** Level 2 — middle layer; renders tour-level-three inside its shadow root. */
+    class TourLevelTwo extends HTMLElement {
+      constructor() {
+        super();
+        const root = this.attachShadow({ mode: 'open' });
+        root.innerHTML = `
+          <style>
+            :host { display: block; }
+            .l2-box {
+              padding: 12px 16px;
+              border-radius: 8px;
+              background: var(--sc-color-purple-50, #faf5ff);
+              border: 1px solid var(--sc-color-purple-300, #d8b4fe);
+            }
+            .l2-label { font-weight: 600; color: var(--sc-color-purple-700, #7e22ce); }
+          </style>
+          <div class="l2-box">
+            <div class="l2-label">Level 2 shadow root</div>
+            <p id="l2-target">Target inside level 2 shadow root.</p>
+            <tour-level-three></tour-level-three>
+          </div>
+        `;
+      }
+    }
+    customElements.define('tour-level-two', TourLevelTwo);
+
+    /** Level 1 — outermost component; placed directly in the document. */
+    class TourLevelOne extends HTMLElement {
+      constructor() {
+        super();
+        const root = this.attachShadow({ mode: 'open' });
+        root.innerHTML = `
+          <style>
+            :host { display: block; }
+            .l1-box {
+              padding: 16px;
+              border-radius: 10px;
+              background: var(--sc-color-blue-50, #eff6ff);
+              border: 2px solid var(--sc-color-blue-400, #60a5fa);
+            }
+            .l1-label { font-weight: 700; color: var(--sc-color-blue-700, #1d4ed8); }
+          </style>
+          <div class="l1-box">
+            <div class="l1-label">Level 1 shadow root (outermost)</div>
+            <p id="l1-target">Target inside level 1 shadow root.</p>
+            <tour-level-two></tour-level-two>
+          </div>
+        `;
+      }
+    }
+    customElements.define('tour-level-one', TourLevelOne);
+
+    /* ── Wire up start buttons ────────────────────────────────────────── */
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1-level tour
+      const start1 = document.querySelector('#shadow-tour-start');
+      const tour1 = document.querySelector('shadow-tour-target')?.shadowRoot?.querySelector('#shadow-tour');
+      if (start1 && tour1) {
+        start1.addEventListener('click', () => tour1.start());
+      }
+
+      // 3-level tour — drill down through each shadow root to reach sc-tour
+      const start3 = document.querySelector('#nested-tour-start');
+      const l1 = document.querySelector('tour-level-one');
+      const l2 = l1?.shadowRoot?.querySelector('tour-level-two');
+      const l3 = l2?.shadowRoot?.querySelector('tour-level-three');
+      const tour3 = l3?.shadowRoot?.querySelector('#nested-tour');
+      if (start3 && tour3) {
+        start3.addEventListener('click', () => tour3.start());
+      }
+    });
+  </script>
+</head>
+<body>
+  <div class="demo-shell">
+    <h1 class="text-xl">ScTour — shadow root demos</h1>
+
+    <!-- 1-level demo -->
+    <section class="demo-section">
+      <h2>1-level shadow root</h2>
+      <p class="hint">sc-tour lives inside one component shadow root. Steps target elements in the document and inside that shadow root.</p>
+      <shadow-tour-target></shadow-tour-target>
+      <sc-button id="shadow-tour-start">Start 1-level tour</sc-button>
+    </section>
+
+    <!-- 3-level demo -->
+    <section class="demo-section">
+      <h2>3-level nested shadow roots</h2>
+      <p class="hint">
+        sc-tour lives three shadow root levels deep (document → level 1 → level 2 → level 3).
+        The tour steps target elements at every level, including the outer component in the document light DOM.
+      </p>
+      <tour-level-one></tour-level-one>
+      <sc-button id="nested-tour-start">Start 3-level tour</sc-button>
+    </section>
+  </div>
+</body>
+</html>

@@ -10,5 +10,38 @@
     "appearanceContractVersion": "1.0.0",
     "identityContractVersion": "1.0.0",
     "capabilities": ["navigation", "notifications", "telemetry", "workspace", "appearance", "identity"]
+  }, {
+    "id": "identity-profile",
+    "displayName": "Identity & Profile",
+    "remoteName": "mfe_identity_profile",
+    "manifestUrl": "http://127.0.0.1:9202/mf-manifest.json",
+    "exposedModule": "./application",
+    "basePath": "/identity-profile",
+    "contractVersion": "1.0.0",
+    "appearanceContractVersion": "1.0.0",
+    "identityContractVersion": "1.0.0",
+    "capabilities": ["navigation", "notifications", "telemetry", "workspace", "appearance", "identity"]
+  }, {
+    "id": "fdc3-admin",
+    "displayName": "FDC3 Admin",
+    "remoteName": "mfe_fdc3_admin",
+    "manifestUrl": "http://127.0.0.1:9204/mf-manifest.json",
+    "exposedModule": "./application",
+    "basePath": "/fdc3-admin",
+    "contractVersion": "1.0.0",
+    "appearanceContractVersion": "1.0.0",
+    "identityContractVersion": "1.0.0",
+    "capabilities": ["navigation", "notifications", "telemetry", "workspace", "appearance", "identity"]
+  }, {
+    "id": "cashflow-blotter",
+    "displayName": "Cashflow CN",
+    "remoteName": "mfe_cashflow_blotter",
+    "manifestUrl": "http://127.0.0.1:9206/mf-manifest.json",
+    "exposedModule": "./application",
+    "basePath": "/cashflow-blotter",
+    "contractVersion": "1.0.0",
+    "appearanceContractVersion": "1.0.0",
+    "identityContractVersion": "1.0.0",
+    "capabilities": ["navigation", "notifications", "telemetry", "workspace", "appearance", "identity"]
   }]
 }

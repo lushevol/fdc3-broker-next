@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en-GB" class='sc-theme-cpbb'>
+<head>
+  <title>sc-web-kit grid demo page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/demo/grid.css" />
+  <style>
+    body {
+      padding: 24px;
+    }
+    .container {
+      display: flex;
+      height: 400px;
+      position: relative;
+    }
+    .left-content {
+      flex: 1;
+    }
+  </style>
+
+  <link rel="stylesheet" type="text/css" href="/dist/styles/util.css" />
+  <script type="module">
+    import '../dist/elements/index.js';
+    import { html } from '/node_modules/lit-html/lit-html.js';
+    window.html = html;
+
+  </script>
+</head>
+<body>
+  <h1 class="my-4 text-xl">Draggable Side sheet</h1>
+  <div class=container>
+    <div class=left-content>Left panel</div>
+    <sc-draggable-side-sheet label=header fixed>
+      <div>Side sheet content</div>
+    </sc-draggable-side-sheet>
+  </div>
+
+</body>
+</html>

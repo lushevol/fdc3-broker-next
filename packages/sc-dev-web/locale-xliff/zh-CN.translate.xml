@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<body>
+<trans-unit id="sc-editor-cant-inject-into-table">
+  <source>Not support inject table inside table</source>
+  <target>不支持插入子表格，敬请期待</target>
+</trans-unit>
+<trans-unit id="sc-editor-incompatible">
+  <source>Your browser does not support Text-Editor. Please use others like Chrome, Edge, Safari</source>
+  <target>当前浏览器不支持此功能，推荐使用谷歌、Edge或Safari</target>
+</trans-unit>
+<trans-unit id="sc-copy-help-text">
+  <source>Copy content</source>
+  <target>复制内容</target>
+</trans-unit>
+<trans-unit id="sc-copy-success-text">
+  <source>Copied</source>
+  <target>已复制</target>
+</trans-unit>
+<trans-unit id="sc-copy-error-text">
+  <source>Could not copy</source>
+  <target>无法复制</target>
+</trans-unit>
+<trans-unit id="sc-dropdown-select-all">
+  <source>Select all</source>
+  <target>全选</target>
+</trans-unit>
+<trans-unit id="sc-file-zone-placeholder">
+  <source>Drag and drop files here to upload, or </source>
+  <target>拖拽文件到此处上传，或</target>
+</trans-unit>
+<trans-unit id="sc-file-zone-placeholder-brw">
+  <source>browse</source>
+  <target>浏览</target>
+</trans-unit>
+<trans-unit id="sc-file-drop-zone-supported-file-formats">
+  <source>Supported file formats</source>
+  <target>支持的文件格式</target>
+</trans-unit>
+<trans-unit id="sc-form-input-collapse-all">
+  <source>Collapse all</source>
+  <target>收起全部</target>
+</trans-unit>
+<trans-unit id="sc-form-input-expand-all">
+  <source>Expand all</source>
+  <target>展开全部</target>
+</trans-unit>
+<trans-unit id="sc-pagination-pages-next">
+  <source>Next</source>
+  <target>下</target>
+</trans-unit>
+<trans-unit id="sc-pagination-pages-previous">
+  <source>Previous</source>
+  <target>上</target>
+</trans-unit>
+<trans-unit id="sc-pagination-pages">
+  <source>Pages</source>
+  <target>页</target>
+</trans-unit>
+<trans-unit id="sc-pagination-document">
+  <source>Document</source>
+  <target>文档</target>
+</trans-unit>
+<trans-unit id="sc-pagination-document-of">
+  <source>of</source>
+  <target> / </target>
+</trans-unit>
+<trans-unit id="sc-pagination-previous-page">
+  <source>Previous Page</source>
+  <target>上一页</target>
+</trans-unit>
+<trans-unit id="sc-pagination-next-page">
+  <source>Next Page</source>
+  <target>下一页</target>
+</trans-unit>
+<trans-unit id="sc-pagination-per-page">
+  <source>Per Page</source>
+  <target>每页</target>
+</trans-unit>
+<trans-unit id="sc-pagination-go">
+  <source>Go</source>
+  <target>跳转</target>
+</trans-unit>
+<trans-unit id="sc-search-field-type-to-search">
+  <source>Type to search</source>
+  <target>输入搜索内容</target>
+</trans-unit>
+<trans-unit id="sc-search-field-no-suggestion">
+  <source>No suggestions</source>
+  <target>没有建议</target>
+</trans-unit>
+<trans-unit id="sc-dot-status-info">
+  <source>Information</source>
+  <target>信息</target>
+</trans-unit>
+<trans-unit id="sc-dot-status-success">
+  <source>Success</source>
+  <target>成功</target>
+</trans-unit>
+<trans-unit id="sc-dot-status-warning">
+  <source>Warning</source>
+  <target>警告</target>
+</trans-unit>
+<trans-unit id="sc-dot-status-error">
+  <source>Error</source>
+  <target>错误</target>
+</trans-unit>
+<trans-unit id="sc-dot-status-disabled">
+  <source>Disabled</source>
+  <target>禁止</target>
+</trans-unit>
+<trans-unit id="sc-dot-status-minor-error">
+  <source>Minor Error</source>
+  <target>轻微错误</target>
+</trans-unit>
+<trans-unit id="sc-dot-status-partially-success">
+  <source>Partially approved</source>
+  <target>部分批准</target>
+</trans-unit>
+<trans-unit id="sc-dot-status-pending">
+  <source>Pending action</source>
+  <target>等待操作</target>
+</trans-unit>
+<trans-unit id="sc-dot-status-draft">
+  <source>Draft</source>
+  <target>草稿</target>
+</trans-unit>
+<trans-unit id="sc-dot-status-missing-info">
+  <source>Undefined/missing</source>
+  <target>未定义/找不到</target>
+</trans-unit>
+<trans-unit id="sc-dot-status-rejected">
+  <source>Rejected/Cancelled</source>
+  <target>拒绝/取消</target>
+</trans-unit>
+<trans-unit id="sc-dot-status-on-hold">
+  <source>On hold</source>
+  <target>暂停</target>
+</trans-unit>
+<trans-unit id="sc-dot-status-not-started">
+  <source>Not Started</source>
+  <target>未开始</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-undo">
+  <source>Undo</source>
+  <target>撤销</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-redo">
+  <source>Redo</source>
+  <target>恢复</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-bold">
+  <source>Bold</source>
+  <target>粗体</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-italic">
+  <source>Italic</source>
+  <target>斜体</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-underline">
+  <source>Underline</source>
+  <target>下划线</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-strikethrough">
+  <source>Strikethrough</source>
+  <target>删除线</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-subscript">
+  <source>Subscript</source>
+  <target>下标</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-superscript">
+  <source>Superscript</source>
+  <target>上标</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-backcolor">
+  <source>Back Color</source>
+  <target>文字背景色</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-textcolor">
+  <source>Text Color</source>
+  <target>文字颜色</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-alignleft">
+  <source>Justify Left</source>
+  <target>左对齐</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-aligncenter">
+  <source>Justify Center</source>
+  <target>居中对齐</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-alignright">
+  <source>Justify Right</source>
+  <target>右对齐</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-orderedlist">
+  <source>Ordered List</source>
+  <target>有序列表</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-unorderedlist">
+  <source>Unordered List</source>
+  <target>无序列表</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-outdent">
+  <source>Outdent</source>
+  <target>减少缩进</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-indent">
+  <source>Indent</source>
+  <target>增加缩进</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-link">
+  <source>Link</source>
+  <target>超链接</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-unlink">
+  <source>Unlink</source>
+  <target>取消链接</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-quote">
+  <source>Block Quote</source>
+  <target>引用</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-clear">
+  <source>Clear</source>
+  <target>清除格式</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-insert-table">
+  <source>Insert Table</source>
+  <target>插入表格</target>
+</trans-unit>
+<trans-unit id="sc-editor-toolbar-ask-ai">
+  <source>AI Assistant</source>
+  <target>AI助手</target>
+</trans-unit>
+<trans-unit id="sc-file-input-add-btn-title">
+  <source>Add Files</source>
+  <target>添加文件</target>
+</trans-unit>
+<trans-unit id="sc-file-input-invalid-format">
+  <source>Invalid File Format</source>
+  <target>非法文件格式</target>
+</trans-unit>
+<trans-unit id="sc-file-input-exceed-limit-size">
+  <source>Exceeded Limit Size</source>
+  <target>文件大小超过限制</target>
+</trans-unit>
+<trans-unit id="sc-file-zone-placeholder-active-txt">
+  <source>Drop your files here to upload</source>
+  <target>把文件放这里上传</target>
+<trans-unit id="sc-table-no-available-data">
+  <source>No available data</source>
+  <target>暂无可用数据</target>
+</trans-unit>
+<trans-unit id="sc-action-bar-default-back-text">
+  <source>Back</source>
+  <target>返回</target>
+</trans-unit>
+<trans-unit id="sc-date-select-time-confirm">
+  <source>Confirm</source>
+  <target>确认</target>
+</trans-unit>
+</body>

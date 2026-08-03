@@ -2,24 +2,24 @@
 
 - [ ] 1.1 Record the approved runtime delivery substrate (CDN/object storage or mandatory OCI/EKS) and trusted host/remote origin topology
 - [ ] 1.2 Record approved signing, SBOM, provenance, vulnerability, license, and workload-identity services
-- [ ] 1.3 Define application artifact identity, protocol-major support window, retention policy, RPO/RTO, source-map policy, and initial canary mechanism
-- [ ] 1.4 Create the application ownership record schema covering team, support rota, criticality, data classification, SLO, approver, and rollback contact
-- [ ] 1.5 Assign platform, application, DevOps/SRE, security, and release-owner responsibilities for the Cashflow DevOps POC
+- [x] 1.3 Define application artifact identity, protocol-major support window, retention policy, RPO/RTO, source-map policy, and initial canary mechanism
+- [x] 1.4 Create the application ownership record schema covering team, support rota, criticality, data classification, SLO, approver, and rollback contact
+- [x] 1.5 Assign platform, application, DevOps/SRE, security, and release-owner responsibilities for the Cashflow DevOps POC
 
 ## 2. Immutable artifact foundation
 
 - [ ] 2.1 Add tested release-metadata generation for application name/version, commit, build ID, digest, contract, capabilities, and shared runtime ranges
-- [ ] 2.2 Add a reproducible production packaging command for the portal host and Cashflow remote that excludes environment secrets
-- [ ] 2.3 Implement immutable version-path publication to the selected static/OCI artifact store and reject overwrite attempts
-- [ ] 2.4 Implement post-publication digest verification and an artifact-catalog record linking source, output, and evidence
-- [ ] 2.5 Configure and test cache headers for hashed assets, versioned federation entries/manifests, host HTML, registry revisions, and active pointers
-- [ ] 2.6 Configure TLS, CORS, CSP, and trusted-origin policy for the deployed host and Cashflow remote
-- [ ] 2.7 Prove the identical Cashflow artifact digest can be delivered in two non-production environments with runtime-only public configuration
+- [x] 2.2 Add a reproducible production packaging command for the portal host and Cashflow remote that excludes environment secrets
+- [x] 2.3 Implement immutable version-path publication to the selected static/OCI artifact store and reject overwrite attempts
+- [x] 2.4 Implement post-publication digest verification and an artifact-catalog record linking source, output, and evidence
+- [x] 2.5 Configure and test cache headers for hashed assets, versioned federation entries/manifests, host HTML, registry revisions, and active pointers
+- [x] 2.6 Configure TLS, CORS, CSP, and trusted-origin policy for the deployed host and Cashflow remote
+- [x] 2.7 Prove the identical Cashflow artifact digest can be delivered in two non-production environments with runtime-only public configuration
 
 ## 3. Registry control plane
 
 - [ ] 3.1 Define and test the production registry schema with artifact version/digest, immutable URL, protocol range, capabilities, ownership, and release evidence
-- [ ] 3.2 Create immutable registry-revision storage and a separate environment active-pointer model
+- [x] 3.2 Create immutable registry-revision storage and a separate environment active-pointer model
 - [ ] 3.3 Implement candidate validation for schema, duplicate routes/IDs, trusted origins, artifact reachability/digest, contracts, capabilities, and signatures
 - [ ] 3.4 Implement separate authorization for artifact publication, promotion request, approval, activation, and rollback
 - [ ] 3.5 Record complete promotion audit events with requester, approver, revisions, selected digests, evidence, timestamps, and outcomes
@@ -40,10 +40,10 @@
 ## 5. Wave 0 deployed DevOps POC
 
 - [ ] 5.1 Build Cashflow once in CI and publish its signed immutable artifact and evidence
-- [ ] 5.2 Create DEV and test registry revisions selecting the same Cashflow digest
-- [ ] 5.3 Promote the Cashflow digest from DEV to test without rebuilding the host or remote
-- [ ] 5.4 Run deployed header, origin, manifest, compatibility, and artifact-digest checks in both environments
-- [ ] 5.5 Adapt and run the existing three federation Playwright journeys against each deployed registry revision
+- [x] 5.2 Create DEV and test registry revisions selecting the same Cashflow digest
+- [x] 5.3 Promote the Cashflow digest from DEV to test without rebuilding the host or remote
+- [x] 5.4 Run deployed header, origin, manifest, compatibility, and artifact-digest checks in both environments
+- [x] 5.5 Adapt and run the existing three federation Playwright journeys against each deployed registry revision
 - [ ] 5.6 Publish a deliberately broken canary revision and prove deployed/synthetic verification detects it
 - [ ] 5.7 Roll back to the previous registry revision and verify recovery within ten minutes with no artifact overwrite or rebuild
 - [ ] 5.8 Capture Wave 0 evidence proving identical digests, signature enforcement, cache policy, audit history, failure detection, and rollback

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en-GB" class="sc-mode-dar">
+
+<head>
+  <title>RTE Markdown Demo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css" />
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDyslexicMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkModeRte.css" />
+
+  <!-- Custom style -->
+  <style>
+    body {
+      padding: 24px;
+    }
+    sc-text-input::part(input) {
+      height: 98dvh;
+    }
+  </style>
+
+  <!-- Register all sc-* custom elements -->
+  <script type="module">
+    import '../dist/elements/index.js';
+    import '../dist/demo/local/ScDataGraphQLProvider.js';
+    import '@scdevkit/webkit/elements';
+    import { html } from '/node_modules/lit-html/lit-html.js';
+    window.html = html;
+  </script>
+
+</head>
+<sc-demo-graphql-provider>
+  <sc-icon-provider>
+    <div style="display:flex;gap:1rem">
+      <textarea id="markdown-input" style="width:40%;max-height:96%;padding:0.5rem; font-family:monospace; font-size:0.75rem;" label="Raw Markdown" multiline></textarea>
+      <div id="rte-1" style="width: 60%;"></div>
+      </div>
+    </div>
+  </sc-icon-provider>
+</sc-demo-graphql-provider>
+<!-- Custom script -->
+<script type="module">
+  import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+  changeIconLibrary();
+  function changeIconLibrary() {
+    document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+  }
+</script>
+<script type="module">
+  import { html, render } from 'lit';
+  import { debounce } from '../dist/src/shared/debounce.js';
+
+  const input = document.querySelector('#markdown-input');
+
+  let value = `# Heading 1
+
+## Heading 2
+
+### Heading 3
+
+#### Heading 4
+
+##### Heading 5
+
+###### Heading 6
+
+Paragraph
+
+| Table Data 1 | Table Data 2 | Table Data 3 |
+| --- | --- | --- |  
+| Table Data 4 | Table Data 5 | Table Data 6 |
+`;
+
+  input.value = value;
+
+  render(html`
+      <sc-rich-text-editor-v2
+      label="RichText Editor"
+      format="md"
+      required
+      .value=${value}
+      @sc-mention=${console.log}
+      @sc-change=${console.log}
+      >
+      </sc-rich-text-editor-v2>
+  `, document.getElementById('rte-1'));
+
+  const rte = document.querySelector('sc-rich-text-editor-v2');
+  rte.addEventListener('sc-change', (e) => {
+    if (document.activeElement !== input)
+      input.value = e.detail.md;
+  });
+
+  input.addEventListener('input', debounce(() => {
+    if (document.activeElement === input)
+      rte.value = input.value;
+  }, 500));
+</script>
+
+</html>

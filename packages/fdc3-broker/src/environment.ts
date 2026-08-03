@@ -47,6 +47,6 @@ export function isPostMessageAvailable(): boolean {
  * Declare global fin type for OpenFin
  */
 declare global {
-  // eslint-disable-next-line no-var
+   
   var fin: any;
 }

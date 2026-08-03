@@ -1,0 +1,9 @@
+.cashflow-cn-migrated-app {
+  min-height: 100%;
+  color: var(--ratan-color-content-primary);
+  background: var(--ratan-color-surface-default);
+}
+
+.cashflow-cn-migrated-app .kp--ratan_cashflow_blotter {
+  min-height: 100%;
+}

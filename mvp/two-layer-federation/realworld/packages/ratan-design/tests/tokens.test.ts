@@ -6,6 +6,8 @@ import { generateTokenCss } from '../src/foundation/generate-token-css';
 import {
   COLOR_TOKEN_NAMES,
   DENSITY_TOKEN_NAMES,
+  GDS_OFFICIAL_TOKEN_SOURCE,
+  gdsPrimitiveTokens,
   semanticTokens,
   validateSemanticTokens,
 } from '../src/foundation/tokens';
@@ -19,6 +21,20 @@ describe('production design tokens', () => {
     expect(Object.keys(semanticTokens.color.light)).toEqual(COLOR_TOKEN_NAMES);
     expect(Object.keys(semanticTokens.color.dark)).toEqual(COLOR_TOKEN_NAMES);
     expect(validateSemanticTokens(semanticTokens)).toEqual([]);
+  });
+
+  it('maps semantic roles to the checked-in GDS official token source', () => {
+    expect(GDS_OFFICIAL_TOKEN_SOURCE).toBe('gds-official/src/styles/theme.css');
+    expect(semanticTokens.color.light).toMatchObject({
+      surfaceDefault: gdsPrimitiveTokens.white,
+      contentPrimary: gdsPrimitiveTokens.grey950,
+      actionPrimary: gdsPrimitiveTokens.blue500,
+      actionDanger: gdsPrimitiveTokens.red550,
+    });
+    expect(semanticTokens.foundation).toMatchObject({
+      fontFamily: expect.stringContaining('SC Prosper Sans'),
+      fontSizeBody: '0.875rem',
+    });
   });
 
   it('defines complete compact and comfortable density roles', () => {

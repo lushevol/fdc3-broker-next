@@ -139,7 +139,13 @@
  * @see {@link AppCard} - Component that receives the focus state
  */
 
-import { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
+
+const INTERACTIVE_SELECTOR = 'button, a, input, select, textarea, [contenteditable="true"]';
+
+function isInteractiveTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && target.closest(INTERACTIVE_SELECTOR) !== null;
+}
 
 /**
  * Options for the keyboard navigation hook.
@@ -201,6 +207,9 @@ export const useResolverKeyboard = (options: UseResolverKeyboardOptions) => {
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!isOpen) return;
+      if ((event.key === 'Enter' || event.key === ' ') && isInteractiveTarget(event.target)) {
+        return;
+      }
 
       switch (event.key) {
         case 'ArrowDown':
@@ -255,5 +264,3 @@ export const useResolverKeyboard = (options: UseResolverKeyboardOptions) => {
 
   return focusedIndex;
 };
-
-import React from 'react';

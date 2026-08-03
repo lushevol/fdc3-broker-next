@@ -3,7 +3,7 @@
  * @see plan.md#T145
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   getRuntimeEnvironment,
   isOpenFinAvailable,

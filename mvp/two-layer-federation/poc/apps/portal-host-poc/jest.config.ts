@@ -4,6 +4,11 @@ export default {
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   transform: { '^.+\\.(j|t)sx?$': 'babel-jest' },
   moduleNameMapper: {
+    '^react$': '<rootDir>/../../../../../node_modules/react',
+    '^react/jsx-runtime$': '<rootDir>/../../../../../node_modules/react/jsx-runtime.js',
+    '^react/jsx-dev-runtime$': '<rootDir>/../../../../../node_modules/react/jsx-dev-runtime.js',
+    '^react-dom$': '<rootDir>/../../../../../node_modules/react-dom',
+    '^react-dom/(.*)$': '<rootDir>/../../../../../node_modules/react-dom/$1',
     '\\.(css)$': 'identity-obj-proxy',
     '^@fm/platform-contracts-poc$': '<rootDir>/../../packages/platform-contracts-poc/src/index.ts',
     '^@fm/ratan-design-poc$': '<rootDir>/../../packages/ratan-design-poc/src/index.tsx',

@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+    <title>sc-web-kit demo page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScInterMode.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScRobotoMonoMode.css" />
+
+    <!-- Custom style -->
+    <style>
+        body {
+            padding: 24px;
+        }
+
+        .sc-mode-dark {
+            background-color: var(--sc-color-blue-900)
+        }
+
+        .table-cell {
+            border-color: var(--sc-color-grey-15);
+            vertical-align: top;
+        }
+
+        .side-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 10px 8px;
+            background-color: var(--sc-color-white);
+            border-radius: 8px;
+            box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-height: 100vh;
+            overflow-y: auto;
+            z-index: 999999999;
+        }
+        
+        .side-bar div {
+            padding: 5px 0;
+        }
+
+        .side-bar div .selected {
+            color: var(--sc-color-blue-500);
+        }
+    </style>
+
+    <!-- Register all sc-* custom elements -->
+    <script type="module">
+        import '../dist/elements/index.js';
+        import { html } from '/node_modules/lit-html/lit-html.js';
+        window.html = html;
+    </script>
+    <script type="module">
+        const defaultConfig = {
+            'left-back': {
+                back:{
+                    mode: 'href',
+                    to: '#',
+                    label: 'Back',
+                    disabled: false,
+                },
+            },
+            'left-actions':[
+                {
+                    text: 'title-1'
+                },
+                {
+                    buttonDropdown: {
+                        value: '',
+                        name: 'My View',
+                        iconName: 'file-text--line',
+                        disabled: false,
+                        width: '120px',
+                        'option-width': '120px',
+                        data: [
+                            { label: 'Option 1', value: '1' },
+                            { label: 'Option 2', value: '2' },
+                            { label: 'Option 3', value: '3' },
+                        ],
+                        'sc-select': (e)=>{
+                            console.log('My View sc-select test ', e.detail);
+                        }
+                    }
+                },
+                {
+                    buttonDropdown: {
+                        value: '',
+                        name: 'Templates',
+                        iconName: 'grid--line',
+                        disabled: false,
+                        width: '120px',
+                        'option-width': '120px',
+                        data: [
+                            { label: 'Option 1', value: 'Templates1' },
+                            { label: 'Option 2', value: 'Template2' },
+                            { label: 'Option 3', value: 'Template3' },
+                        ],
+                        'sc-select': (e)=>{
+                            console.log('Templates sc-select test ', e.detail);
+                        }
+                    }
+                },
+                {
+                    button: {
+                        type: 'link',
+                        leftIcon: 'alert-circle--line',
+                        disabled: false,
+                        buttonText: 'Show Tips',
+                        width: '120px',
+                        tooltipText:'show tips',
+                        'click': (e)=>{
+                            console.log('Show Tips click ');
+                        }
+                    }
+                },
+                {
+                    button: {
+                        leftIcon: 'alert-circle--line',
+                        disabled: false,
+                        buttonText: 'Click',
+                        width: '120px',
+                        'click': (e)=>{
+                            console.log('Click button clicked ');
+                        }
+                    }
+                }
+            ],
+            'right-helper':{
+                label:'Last saved: 3 hours ago',
+                tooltip:'Tooltip content here',
+                required: false
+            },
+            'right-groups':[
+                {
+                    button: {
+                        type: 'link',
+                        disabled: false,
+                        width: '80px',
+                        buttonText: 'Save Draft',
+                        'click': (e)=>{
+                            console.log('Save Draft click ');
+                        }
+                    }
+                },
+                {
+                    button: {
+                        type: 'secondary',
+                        disabled: false,
+                        width: '80px',
+                        buttonText: 'Cancel',
+                        'click': (e)=>{
+                            console.log('Cancel click ');
+                        }
+                    }
+                },
+                {
+                    button: {
+                        type: 'primary',
+                        disabled: false,
+                        // width: '80px',
+                        buttonText: 'Submit',
+                        'click': (e)=>{
+                            console.log('Submit click ');
+                        }
+                    }
+                },
+                
+            ]
+        };
+        window.defaultActionConfig = defaultConfig
+    </script>
+</head>
+<sc-icon-provider>
+    <div id='side-bar' class='side-bar'>
+        <script type="text/javascript">
+            const sidebar = document.querySelector('#side-bar');
+            const initials = [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
+                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
+                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
+                'Y', 'Z'
+            ];
+            const currentPage = 'A';
+            const content = [];
+            initials.forEach(initial => {
+                content.push(`<div>`);
+                content.push(`<a class="${currentPage === initial ? 'selected' : ''}" href="/demo/page${initial}.html">${initial}</a>`);
+                content.push(`</div>`);
+            })
+            sidebar.innerHTML = content.join('');
+        </script>
+    </div>
+
+    <div class="table w-full shadow-lg max-h-96 components-body">
+        <div class="table-header-group font-bold sticky top-0 bg-white z-10">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Component</div>
+                <div class="table-cell border px-4 py-4">Example</div>
+                <div class="table-cell border px-4">
+                    <div class="py-4" style="max-width: 300px;">
+                        <sc-dropdown-input label="Mode" value="light">
+                            <sc-dropdown-option value="light">Light</sc-dropdown-option>
+                            <sc-dropdown-option value="dark">Dark</sc-dropdown-option>
+                            <sc-dropdown-option value="dyslexic">Accessibility (Dyslexic)</sc-dropdown-option>
+                            <sc-dropdown-option value="inter">Inter</sc-dropdown-option>
+                            <sc-dropdown-option value="roboto-mono">Roboto Mono</sc-dropdown-option>
+                        </sc-dropdown-input>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-row-group h-96 overflow-y-auto">
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">ActionBar</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-action-bar id="action-bar-basic" z-index="9"></sc-action-bar>
+                    <script type="module">
+                        const actionBarBasic = document.getElementById('action-bar-basic');
+                        actionBarBasic.setAttribute('hide-bottom-border', true);
+                        actionBarBasic.config = window.defaultActionConfig;
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">ActionBar</div>
+                <div class="table-cell border px-4 py-4">Back with breadcrumb</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-action-bar id="action-bar-show-breadcrumb" z-index="8"></sc-action-bar>
+                    <script type="module">
+                        const actionBarBreadcrumb = document.getElementById('action-bar-show-breadcrumb');
+                        actionBarBreadcrumb.config = {
+                            'left-back': {
+                                breadcrumb:{
+                                    data: [
+                                        { name: 'Home', href: '#', target: '_blank' },
+                                        { name: 'Section', href: '#', target: '_blank' },
+                                        { name: 'Sub-section', href: '#', target: '_blank' },
+                                    ],
+                                },
+                            },
+                            'right-groups': [...window.defaultActionConfig['right-groups']],
+                            'left-actions':[
+                                {
+                                    text: 'title-2'
+                                },
+                            ]
+                        };
+                    </script>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">ActionBar</div>
+                <div class="table-cell border px-4 py-4">Custom</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-action-bar z-index="7">
+                        <div slot="left-actions">left-actions</div>
+                        <div slot="right-helper">right-helper-text</div>
+                        <div slot="right-groups">right-groups</div>
+                    </sc-action-bar>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Accordion</div>
+                <div class="table-cell border px-4 py-4">Basic</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-accordion summary="Lorem ipsum dolor sit amet">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem
+                        duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                    </sc-accordion>
+                    <sc-accordion summary="Lorem ipsum dolor sit amet" sub-summary="Lorem ipsum dolor" tooltip="Lorem ipsum dolor sit amet">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem
+                        duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                    </sc-accordion>
+                    <sc-accordion summary="Lorem ipsum dolor sit amet" open>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem
+                        duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                    </sc-accordion>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Accordion</div>
+                <div class="table-cell border px-4 py-4">No Border</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-accordion summary="Lorem ipsum dolor sit amet" borderless>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem
+                        duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                    </sc-accordion>
+                    <sc-accordion summary="Lorem ipsum dolor sit amet" sub-summary="Lorem ipsum dolor" tooltip="Lorem ipsum dolor sit amet" borderless>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem
+                        duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                    </sc-accordion>
+                    <sc-accordion summary="Lorem ipsum dolor sit amet" borderless open>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem
+                        duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                    </sc-accordion>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Accordion</div>
+                <div class="table-cell border px-4 py-4">Icon left and HTML</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-accordion summary="Lorem ipsum dolor sit amet" icon-position="left">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem
+                        duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                    </sc-accordion>
+                    <sc-accordion summary="Lorem ipsum dolor sit amet" icon-position="left" sub-summary="Lorem ipsum dolor" tooltip="Lorem ipsum dolor sit amet">
+                        <div slot="label-content">Lorem ipsum dolor sit amet</div>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem
+                        duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                    </sc-accordion>
+                    <sc-accordion icon-position="left" tooltip="Lorem ipsum dolor sit amet">
+                        <div slot="summary">
+                            I'm not <strong>just</strong> an accordion, I'm an <em>accordion</em> with HTML!
+                        </div>
+                        <sc-link onclick="alert('Link is clicked!')" slot="label-content">sc-link component<sc-icon name="newwindow" style="margin-left:8px;"></sc-icon></sc-link>
+                        <sc-alert type="info">
+                            Info body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                        </sc-alert>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem
+                        duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                    </sc-accordion>
+                    <sc-accordion summary="Lorem ipsum dolor sit amet, consectetur adipiscing elit.  dolor sit amet, consectetur adipiscingconsectetur adipiscing elit.  dolor sit amet, consectetur adipiscing
+                             elit. Nulla morbi ultrices massa" icon-position="left">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem
+                        duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                    </sc-accordion>
+                    <sc-accordion icon-position="left" summary-line="1">
+                        <div slot="summary">
+                            Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis
+                            lorem duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                            Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis
+                            lorem duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                            Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis
+                            lorem duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                        </div>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem
+                        duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+
+                    </sc-accordion>
+                    <sc-accordion icon-position="left" summary-line="2">
+                        <div slot="summary">
+                            Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis
+                            lorem duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                            Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis
+                            lorem duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                            Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis
+                            lorem duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                        </div>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem
+                        duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+
+                    </sc-accordion>
+                    <sc-accordion icon-position="left" summary-line="3">
+                        <div slot="summary">
+                            Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis
+                            lorem duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                            Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis
+                            lorem duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                            Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis
+                            lorem duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+                        </div>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        Ac purus venenatis auctor at viverra aenean molestie elementum, nunc. Non justo, lobortis lorem
+                        duis facilisi neque leo. Vulputate tortor quam diam facilisi tristique.
+
+                    </sc-accordion>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="default">
+                        Default body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="info">
+                        Info body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="success">
+                        Success body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="warning">
+                        Warning body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="error">
+                        Error body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="disabled">
+                        Disabled body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Default - Collapsible</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="default" title="Default title">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="info" title="Info title">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="success" title="Success title">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="warning" title="Warning title">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="error" title="Error title">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="disabled" title="Disabled title">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Default - Closable</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="default" closable>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert class='closable-alert' type="info" closable>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="success" closable>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="warning" closable>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="error" closable>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="disabled" closable>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Default - HTML content</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="info">
+                        <div slot="title">
+                            I'm not <strong>just</strong> an alert, I'm an <em>alert</em> with HTML!
+                        </div>
+                        Lorem ipsum dolor sit amet, <b>consectetur adipiscing elit</b>.
+                        <sc-icon name="bell--line"></sc-icon> Nulla morbi ultrices massa, consectetur mi ullamcorper sed
+                        cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Banner</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="default" mode="banner">
+                        Default body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="info" mode="banner">
+                        Info body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="success" mode="banner">
+                        Success body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="warning" mode="banner">
+                        Warning body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="error" mode="banner">
+                        Error body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="disabled" mode="banner">
+                        Disabled body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Banner Full Width</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="default" mode="banner" full-width>
+                        Default body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="info" mode="banner" full-width>
+                        Info body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="success" mode="banner" full-width>
+                        Success body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="warning" mode="banner" full-width>
+                        Warning body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="error" mode="banner" full-width>
+                        Error body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                    <sc-alert type="disabled" mode="banner" full-width>
+                        Disabled body - Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </sc-alert>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Banner - Collapsible</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="default" title="Default title" mode="banner">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="info" title="Info title" mode="banner">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="success" title="Success title" mode="banner">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="warning" title="Warning title" mode="banner">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="error" title="Error title" mode="banner">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="disabled" title="Disabled title" mode="banner">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Banner - Closable</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="default" mode="banner" closable>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="info" mode="banner" closable>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="success" mode="banner" closable>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="warning" mode="banner" closable>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="error" mode="banner" closable>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="disabled" mode="banner" closable>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa, consectetur
+                        mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Banner - HTML content</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="info" mode="banner">
+                        <div slot="title">
+                            I'm not <strong>just</strong> an alert, I'm an <em>alert</em> with HTML!
+                        </div>
+                        Lorem ipsum dolor sit amet, <b>consectetur adipiscing elit</b>.
+                        <sc-icon name="bell--line"></sc-icon> Nulla morbi ultrices massa, consectetur mi ullamcorper sed
+                        cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Alert</div>
+                <div class="table-cell border px-4 py-4">Custom</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-alert type="info">
+                        <div slot="title">
+                            I'm not <strong>just</strong> an alert, I'm an <em>alert</em> with HTML!
+                        </div>
+                        Lorem ipsum dolor sit amet, <b>consectetur adipiscing elit</b>.
+                        <sc-icon name="bell--line"></sc-icon> Nulla morbi ultrices massa, consectetur mi ullamcorper sed
+                        cras aliquam. Et phasellus varius nisl et cras sagittis.
+                        <sc-icon name="bell--line" slot="icon"></sc-icon>
+                    </sc-alert>
+                    <sc-alert closable>
+                        <sc-icon name="bell--line" slot="icon"></sc-icon>
+                        Lorem ipsum dolor sit amet, <b>consectetur adipiscing elit</b>.
+                        <sc-icon name="bell--line"></sc-icon> Nulla morbi ultrices massa, consectetur mi ullamcorper sed
+                        cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="default" mode="banner">
+                        <div slot="title">
+                            Lorem ipsum dolor sit amet, <b>consectetur adipiscing elit</b>. 
+                            Nulla morbi ultrices massa, consectetur mi ullamcorper sed cras aliquam. 
+                        </div>
+                        Lorem ipsum dolor sit amet, <b>consectetur adipiscing elit</b>.
+                        <sc-icon name="bell--line"></sc-icon> Nulla morbi ultrices massa, consectetur mi ullamcorper sed
+                        cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="default" mode="banner">
+                        <div slot="title">
+                            I'm not <strong>just</strong> an alert, I'm an <em>alert</em> with HTML!
+                        </div>
+                        Lorem ipsum dolor sit amet, <b>consectetur adipiscing elit</b>.
+                        <sc-icon name="bell--line"></sc-icon> Nulla morbi ultrices massa, consectetur mi ullamcorper sed
+                        cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                    <sc-alert type="default" mode="banner" closable>
+                        Lorem ipsum dolor sit amet, <b>consectetur adipiscing elit</b>.
+                        <sc-icon name="bell--line"></sc-icon> Nulla morbi ultrices massa, consectetur mi ullamcorper sed
+                        cras aliquam. Et phasellus varius nisl et cras sagittis.
+                    </sc-alert>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Avatar</div>
+                <div class="table-cell border px-4 py-4">Default</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-avatar></sc-avatar>
+                    <sc-avatar background="red"></sc-avatar>
+                    <sc-avatar background="green"></sc-avatar>
+                    <sc-avatar background="blue"></sc-avatar>
+                    <sc-avatar background="yellow"></sc-avatar>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Avatar</div>
+                <div class="table-cell border px-4 py-4">Size</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-avatar size="sm"></sc-avatar>
+                    <sc-avatar size="md"></sc-avatar>
+                    <sc-avatar size="lg"></sc-avatar>
+                    <sc-avatar size="xl"></sc-avatar>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Avatar</div>
+                <div class="table-cell border px-4 py-4">Shape</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-avatar shape="circle"></sc-avatar>
+                    <sc-avatar shape="square"></sc-avatar>
+                </div>
+            </div>
+                        
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Avatar</div>
+                <div class="table-cell border px-4 py-4">Badge - Color</div>
+                <div class="table-cell border px-4 py-4">
+                    <div class="flex gap-5">
+                        <sc-avatar show-badge="true" badge-number="24"></sc-avatar>
+                        <sc-avatar show-badge="true" badge-number="24" badge-color="info"></sc-avatar>
+                        <sc-avatar show-badge="true" badge-number="24" badge-color="success"></sc-avatar>
+                        <sc-avatar show-badge="true" badge-number="24" badge-color="warning"></sc-avatar>
+                        <sc-avatar show-badge="true" badge-number="24" badge-color="error"></sc-avatar>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Avatar</div>
+                <div class="table-cell border px-4 py-4">Badge - Number</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-avatar show-badge="true" badge-number="24"></sc-avatar>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Avatar</div>
+                <div class="table-cell border px-4 py-4">Badge - Text</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-avatar show-badge="true" badge-label="SC" badge-type="text"></sc-avatar>
+                </div>
+            </div>
+
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Avatar</div>
+                <div class="table-cell border px-4 py-4">Image</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-avatar src="images/sc-logo.png"></sc-avatar>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div class="table-cell border px-4 py-4">Avatar</div>
+                <div class="table-cell border px-4 py-4">Slot</div>
+                <div class="table-cell border px-4 py-4">
+                    <sc-avatar>SC</sc-avatar>
+                </div>
+            </div>
+        </div>
+</sc-icon-provider>
+<!-- Custom script -->
+<script type="text/javascript">
+    var modes = ['light', 'dark', 'dyslexic', 'inter', 'roboto-mono']
+    var activeMode = modes[0]
+    function changeMode(mode) {
+        var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child');
+        componentCells.forEach((componentCell) => {
+            modes.forEach((mode) => {
+                componentCell.classList.remove(`sc-mode-${mode}`)
+            })
+            componentCell.classList.add(`sc-mode-${mode}`)
+            if (componentCell.classList.contains('inverse')) {
+                if (mode === 'dark') {
+                    componentCell.style.backgroundColor = 'var(--sc-color-white)'
+                } else {
+                    componentCell.style.backgroundColor = 'var(--sc-color-blue-900)'
+                }
+            }
+        })
+    }
+    document.getElementsByTagName('sc-dropdown-input')[0].addEventListener('sc-select', ({ detail: { value } }) => {
+        changeMode(value);
+    });
+    changeMode(activeMode);
+
+    const closableAlert = document.querySelector('.closable-alert');
+    closableAlert.addEventListener('sc-hide', () => {
+        console.log('hide')
+    })
+</script>
+
+<script type="module">
+    import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+    changeIconLibrary();
+    function changeIconLibrary() {
+        document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+    }
+</script>
+
+</html>

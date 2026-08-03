@@ -1,5 +1,30 @@
 # @fm/ratan-design
 
+This changelog applies to the retained legacy compatibility package. Active
+WebKit UI changes are documented by `@fm/ratan-design-webkit` and the Realworld
+[current-state record](../../docs/CURRENT_STATE.md).
+
+## Unreleased
+
+### Changed
+
+- Replaced MUI and Emotion internals with React Aria Components and scoped semantic CSS.
+- Removed MUI and Emotion peer dependencies and all MUI-derived public prop types.
+- Added optional local portal targeting to `DesignSystemProvider` for host and Tile overlay containment.
+- Preserved controlled Button, TextField, NumberField, StatusBadge, Dialog, ConfirmationDialog, and InlineAlert behavior with React Aria focus, dismissal, labeling, and validation semantics.
+- Added form/login, shell feedback, selection controls, and profile data-display primitives for the first migration waves.
+- Added the independent `mfe-identity-profile` verification consumer to exercise the packed public API in host-mounted and standalone modes.
+- Aligned the current consumer surface with the checked-in GDS reference: pill actions, intent feedback colours, component typography, modal widths, and resolved DatePicker tokens.
+- Removed the obsolete standalone demo entry point; Storybook remains the component development surface.
+- Added GDS-aligned `PageHeader`, `SideNavigation`, and closable keyboard-navigable `WorkspaceTabs` components for the portal-host migration.
+- Migrated portal-host navigation, surfaces, loading, error, and retry UI to the public Ratan component boundary.
+
+### Compatibility
+
+- `NumberField` now follows React Aria's locale-aware text editing semantics and exposes an accessible number-field description rather than relying on a native `type="number"` spinbutton.
+- Public Ratan APIs remain implementation-neutral; React Aria types are not re-exported.
+- React and ReactDOM peers accept supported React 18.3 and React 19 consumers.
+
 ## 1.1.0
 
 ### Added

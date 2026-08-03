@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ConfirmationDialog, InlineAlert } from '@fm/ratan-design';
+import { createPortal } from 'react-dom';
 import type { AuthorizationLimitAction } from './authorization-limits-policy';
 import type { AuthorizationLimitRecord } from './authorization-limits-repository';
+import { ScAlert, ScButton, ScDialog, ScParagraph } from './webkit';
 
 export type AuthorizationLimitTransitionAction = Exclude<
   AuthorizationLimitAction,
@@ -85,12 +86,7 @@ interface Props {
   readonly onClose: () => void;
 }
 
-export function AuthorizationLimitTransitionDialog({
-  action,
-  record,
-  onExecute,
-  onClose,
-}: Props) {
+export function AuthorizationLimitTransitionDialog({ action, record, onExecute, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const presentation = authorizationLimitTransitionPresentation[action];
@@ -108,24 +104,44 @@ export function AuthorizationLimitTransitionDialog({
     }
   };
 
-  return (
-    <ConfirmationDialog
+  return createPortal(
+    <ScDialog
       open
-      title={presentation.title}
-      message={
-        <div className="authorization-limit-transition-message">
-          <p>{presentation.message}</p>
-          <p>Profile: {record.profile} · Currency: {record.currency}</p>
-          {error ? (
-            <InlineAlert tone="error" title="Transition failed" message={error} />
-          ) : null}
-        </div>
-      }
-      confirmLabel={presentation.confirmLabel}
-      tone={presentation.tone}
-      loading={loading}
-      onConfirm={confirm}
-      onCancel={onClose}
-    />
+      label={presentation.title}
+      role="dialog"
+      aria-label={presentation.title}
+      onScHide={onClose}
+    >
+      <div className="authorization-limit-transition-message">
+        <ScParagraph>{presentation.message}</ScParagraph>
+        <ScParagraph>
+          Profile: {record.profile} · Currency: {record.currency}
+        </ScParagraph>
+        {error ? (
+          <ScAlert role="alert" type="error" title="Transition failed">
+            {error}
+          </ScAlert>
+        ) : null}
+      </div>
+      <div slot="footer" className="dialog-actions">
+        <ScButton type="tertiary" role="button" disabled={loading} onClick={onClose}>
+          Cancel
+        </ScButton>
+        <ScButton
+          type={presentation.tone === 'danger' ? 'secondary' : 'primary'}
+          state={presentation.tone === 'danger' ? 'error' : undefined}
+          role="button"
+          loading={loading}
+          disabled={loading}
+          aria-label={
+            loading ? `${presentation.confirmLabel} in progress` : presentation.confirmLabel
+          }
+          onClick={confirm}
+        >
+          {presentation.confirmLabel}
+        </ScButton>
+      </div>
+    </ScDialog>,
+    document.body,
   );
 }

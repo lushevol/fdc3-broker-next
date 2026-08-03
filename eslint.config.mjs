@@ -20,4 +20,20 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     },
   },
+  {
+    files: ['packages/fdc3-broker/**/*.{ts,tsx}'],
+    rules: {
+      // The broker deliberately probes untyped OpenFin globals and malformed values in
+      // conformance/security tests. Keep the exception local to this integration boundary.
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^(_|intent$)',
+          caughtErrors: 'all',
+          caughtErrorsIgnorePattern: '^error$',
+        },
+      ],
+    },
+  },
 );

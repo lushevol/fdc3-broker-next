@@ -1,0 +1,11 @@
+# ── Node ──────────────────────────────────────────────────────────────────────
+node_modules/
+.github/
+
+# ── Playwright artefacts ──────────────────────────────────────────────────────
+playwright-report/
+test-results/
+report/
+
+# ── Auth session (contains real credentials — never commit) ───────────────────
+tests/auth/auth-state.json

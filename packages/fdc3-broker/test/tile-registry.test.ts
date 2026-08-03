@@ -5,7 +5,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TileRegistryImpl } from '../src/tile-registry';
-import type { AppMetadata, TileInstance } from '../src/types';
+import type { TileInstance } from '../src/types';
 
 describe('TileRegistryImpl', () => {
   let registry: TileRegistryImpl;
@@ -492,5 +492,13 @@ describe('TileRegistryImpl', () => {
       expect(() => registry.clear()).not.toThrow();
       expect(registry.getTileCount()).toBe(0);
     });
+  });
+
+  it('treats listener removal for unknown tiles as an idempotent no-op', () => {
+    const listener = { id: 'missing-listener', contextType: null, handler: vi.fn() };
+
+    expect(() => registry.removeIntentListener('missing-tile', 'ViewChart')).not.toThrow();
+    expect(() => registry.addContextListener('missing-tile', listener)).not.toThrow();
+    expect(() => registry.removeContextListener('missing-tile', listener.id)).not.toThrow();
   });
 });

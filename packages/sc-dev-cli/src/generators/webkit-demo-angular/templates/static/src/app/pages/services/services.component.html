@@ -1,0 +1,74 @@
+<div class="mx-3 mb-4">
+    <h4 class="mb-2">Services &amp; Settings</h4>
+    <div class="rounded-md mb-1 p-3 user-card">
+        <h3>{{user.name}}</h3>
+        <span>{{user.type}}</span>
+    </div>
+    <span class="text-muted text-sm">
+        Last login: {{user.lastLogin}}
+    </span>
+</div>
+<div class="mb-5">
+    <div class="mx-3 flex">
+        <div class="flex grow items-center">
+            <h4>Digital Services</h4>
+        </div>
+        <div class="flex justify-items-end">
+            <sc-link 
+                compact 
+                (click)="handleShowSideSheet(true)">
+                View All
+            </sc-link>
+        </div>
+    </div>
+    <div class="flex space-between mb-3 ml-2 overflow-x-auto no-scrollbar">
+        <div *ngFor="let item of services" class="p-2">
+            <sc-icon-card 
+                [image]="item.icon"
+                width="26vw" 
+                size="one-third" 
+                (click)="handleShowSideSheet(true)"
+            >
+                <div slot="title" class="font-semibold line-clamp-2">{{item.title}}</div>
+            </sc-icon-card>
+        </div>
+    </div>
+    <div *ngFor="let item of additionalServices" class="mx-3 mb-3">
+        <sc-card 
+            vertical-align="top" 
+            [image]="item.icon" 
+            [title]="item.title"
+            [body]="item.copy"
+            (click)="handleShowSideSheet(true)" 
+        />
+    </div>
+</div>
+<div class="mx-3">
+    <h4 class="mb-2">SC Referral Club</h4>
+    <img
+        [src]="bannerIcon"
+        class="rounded-xl"
+        alt=""
+    />
+</div>
+<div class="mx-3 mb-5">
+    <div *ngFor="let item of settings" class="mt-5">
+        <h4 class="mb-3">{{item.title}}</h4>
+            <div *ngFor="let option of item.options" class="mb-3">
+                <sc-card                        
+                    [vertical-align]="option.copy ? 'top' : 'middle'"
+                    [image]="option.icon"
+                    [title]="option.title"
+                    [body]="option.copy"
+                    icon="arrow-ios-forward"
+                    (click)="handleShowSideSheet(true)"
+                />
+            </div>
+    </div>
+</div>
+<sc-side-sheet
+    [open]="showSideSheet"
+    (onScHide)="handleShowSideSheet(false)"
+>
+    <app-not-available />
+</sc-side-sheet>

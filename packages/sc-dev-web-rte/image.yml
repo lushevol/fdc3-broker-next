@@ -1,0 +1,5 @@
+images:
+  sb-plugin-profile:
+    imagePath: sc-app-platform/sc-webkit-rte
+    version: imageTags
+    promote: true

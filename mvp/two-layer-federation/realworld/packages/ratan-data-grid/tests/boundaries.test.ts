@@ -9,6 +9,7 @@ describe('package boundaries', () => {
     const source = `${readFileSync('src/index.tsx', 'utf8')}\n${readFileSync('src/styles.css', 'utf8')}`;
     expect(source).not.toMatch(/antd|single-spa|systemjs|module-federation|ratan[_-]container|@fm\/ratan-design|src\/Root/i);
     expect(source).not.toMatch(/export\s+.*(?:GridApi|GridOptions|AgGridReact)/);
+    expect(source).not.toMatch(/ModuleRegistry|ClientSideRowModelModule/);
   });
 
   it('keeps theme selectors scoped and covers both densities', () => {

@@ -1,0 +1,11 @@
+flask
+flask-compress
+flask-cors
+strawberry-graphql
+marshmallow
+requests
+gunicorn
+pytest
+pytest-mock
+PyYAML
+coverage

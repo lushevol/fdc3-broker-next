@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+    <title>sc-web-kit demo page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" />
+    <link rel="stylesheet" type="text/css" href="/public/styles/util.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkMode.css" />
+    <link rel="stylesheet" type="text/css" href="/dist/styles/ScDyslexicMode.css" />
+
+    <!-- Custom style -->
+    <style>
+        body {
+            padding: 24px 24px 0;
+        }
+
+        .sc-mode-dark {
+            background-color: var(--sc-color-grey-100)
+        }
+
+        .table-cell {
+            border-color: var(--sc-color-grey-15);
+            vertical-align: top;
+        }
+
+        .side-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            padding: 10px 8px;
+            background-color: var(--sc-color-white);
+            border-radius: 8px;
+            box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-height: 100vh;
+            overflow-y: auto;
+            z-index: 999999999;
+        }
+        
+        .side-bar div {
+            padding: 5px 0;
+        }
+
+        .side-bar div .selected {
+            color: var(--sc-color-blue);
+        }
+
+        *,
+        ::before,
+        ::after {
+            box-sizing: content-box;
+        }
+    </style>
+
+    <!-- Register all sc-* custom elements -->
+    <script type="module">
+        import '../dist/elements/index.js';
+        import { html } from '/node_modules/lit-html/lit-html.js';
+        window.html = html;
+    </script>
+</head>
+<sc-icon-provider>
+    <div id='side-bar' class='side-bar'>
+        <script type="text/javascript">
+            const sidebar = document.querySelector('#side-bar');
+            const initials = [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
+                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
+                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 
+                'Y', 'Z'
+            ];
+            const currentPage = 'L';
+            const content = [];
+            initials.forEach(initial => {
+                content.push(`<div>`);
+                content.push(`<a class="${currentPage === initial ? 'selected' : ''}" href="/demo/page${initial}.html">${initial}</a>`);
+                content.push(`</div>`);
+            })
+            sidebar.innerHTML = content.join('');
+        </script>
+    </div>
+
+    <div class='full-view'>
+        <sc-column-layout layout='Main Content Middle' unfloatable height='cover' right-column-collapsible >
+            <div slot=title>Title</div>
+            <div slot='left'>
+                <sc-list-navigation>
+                    <sc-list-navigation-item title='Client information' selected></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Services'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Account holdings'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Activities'></sc-list-navigation-item>
+                    <sc-list-navigation-item title='Events and notifications'></sc-list-navigation-item>
+                </sc-list-navigation>
+            </div>
+            <div slot="right">
+                <sc-box>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla morbi ultrices massa,
+                    consectetur mi ullamcorper sed cras aliquam. Et phasellus varius nisl et cras sagittis.
+                </sc-box>
+              </div>
+            <div slot='middle'>
+                <sc-card>
+                    <sc-grid-row no-gutters>
+                        <sc-grid-column xs='12' md='9'>
+                            <h3>Client information</h3>
+                        </sc-grid-column>
+                        <sc-grid-column xs='12' md='3'>
+                            <sc-search-field></sc-search-field>
+                        </sc-grid-column>
+                    </sc-grid-row>
+                    <sc-spacer vertical size='md'></sc-spacer>
+                    <div>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Legal entity name</sc-grid-column>
+                            <sc-grid-column xs='9'>BR Advisors HK Ltd</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Registered address</sc-grid-column>
+                            <sc-grid-column xs='9'>Hong Kong, 12/F Forward Tower One Garden Road</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Operational address</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Incorporation number</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Verify legal from and current existence</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Regulated by</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Country of incorporation</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='sm'></sc-spacer>
+                        <sc-grid-row no-gutters>
+                            <sc-grid-column xs='3'>Evidence of majority ownership status of any subsidiary</sc-grid-column>
+                            <sc-grid-column xs='9'>-</sc-grid-column>
+                        </sc-grid-row>
+                        <sc-spacer vertical size='xs'></sc-spacer>
+                    </div>
+                </sc-card>
+            </div>
+        </sc-column-layout>
+    </div>
+</sc-icon-provider>
+<!-- Custom script -->
+<script type="text/javascript">
+    var modes = ['light', 'dark', 'dyslexic']
+    var activeMode = modes[0]
+    function changeMode(mode) {
+        var componentCells = document.querySelectorAll('.table .table-row > .table-cell:last-child, .full-view');
+        componentCells.forEach((componentCell) => {
+            modes.forEach((mode) => {
+                componentCell.classList.remove(`sc-mode-${mode}`)
+            })
+            componentCell.classList.add(`sc-mode-${mode}`)
+            if (componentCell.classList.contains('inverse')) {
+                if (mode === 'dark') {
+                    componentCell.style.backgroundColor = 'var(--sc-color-white)'
+                } else {
+                    componentCell.style.backgroundColor = 'var(--sc-color-grey-100)'
+                }
+            }
+        })
+    }
+    document.getElementsByTagName('sc-dropdown-input')[0].addEventListener('sc-select', ({ detail: { value } }) => {
+        changeMode(value);
+    });
+    changeMode(activeMode);
+
+</script>
+
+<script type="module">
+    import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+    changeIconLibrary();
+    function changeIconLibrary() {
+        document.getElementsByTagName('sc-icon-provider')[0].iconLibraries = [MainIconLibrary, CountryIconLibrary];
+    }
+</script>
+
+</html>

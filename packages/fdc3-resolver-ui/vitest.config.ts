@@ -17,8 +17,17 @@ export default defineConfig({
         'src/**/*.test.tsx',
         'src/**/*.spec.ts',
         'src/**/*.spec.tsx',
+        'src/index.ts',
+        'src/types.ts',
+        'src/fdc3-log/index.ts',
         'test/**',
       ],
+      thresholds: {
+        lines: 90,
+        branches: 90,
+        functions: 90,
+        statements: 90,
+      },
     },
     reporters: ['junit', 'vitest-sonar-reporter'],
     outputFile: {

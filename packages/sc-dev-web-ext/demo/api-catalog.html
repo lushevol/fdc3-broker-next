@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <title>sc-web-kit demo page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDarkMode.css" />
+  <!-- <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/styles/dist/util.css" /> -->
+  <link rel="stylesheet" type="text/css" href="/node_modules/@scdevkit/webkit/dist/styles/ScDyslexicMode.css" />
+  <link rel="stylesheet" type="text/css" href="/dist/styles/ScDarkModeExt.css" />
+
+  <!-- Custom style -->
+  <style>
+    body {
+      padding: 24px;
+    }
+    .sc-mode-dark {
+      background-color: var(--sc-color-grey-100)
+    }
+  </style>
+</head>
+<div id="webkit-ext-container"></div>
+
+  <!-- Custom script -->
+<script type="module">
+  // Register all sc-* custom elements 
+  import '../dist/elements/index.js';
+  import '@scdevkit/webkit/elements/index.js';
+  import '../dist/demo/local/ScDataGraphQLProvider.js';
+  import { html } from '/node_modules/lit-html/lit-html.js';
+  import { render } from 'lit';
+  import { CountryIconLibrary, MainIconLibrary } from '@scdevkit/icons';
+
+  window.html = html;
+
+  render(html`
+  <sc-demo-graphql-provider>
+    <sc-icon-provider .iconLibraries=${[CountryIconLibrary, MainIconLibrary]}>
+      <h1 class="text-xl mb-4">Components</h1>
+      <hr>
+      <sc-api-catalog 
+        label="API Label"
+        .value=${{
+          artifactId: "51778-CollateralAPIsforVenue", 
+          method: "post",
+          path: "/v1/scb/digitalassets/collateral/key-instructions"
+        }}
+        @sc-select=${(e) => console.log('sc-select', e.detail.value)}
+      >
+        <span slot="hint">Select an API</span>
+      </sc-api-catalog>
+
+      </sc-icon-provider>
+    </sc-demo-graphql-provider>        
+  `, document.querySelector('#webkit-ext-container'));
+
+</script>
+
+</body>
+</html>

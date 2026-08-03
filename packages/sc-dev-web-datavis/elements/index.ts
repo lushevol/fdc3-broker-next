@@ -1,0 +1,11 @@
+import './sc-doughnut-chart.js';
+import './sc-pie-chart.js';
+import './sc-bar-chart.js';
+import './sc-line-chart.js';
+import './sc-area-chart.js';
+import './sc-stacked-bar-chart.js';
+import './sc-polar-area-chart.js';
+import './sc-radar-chart.js';
+import './sc-bubble-chart.js';
+import './sc-scatter-chart.js';
+import './sc-gauge-chart.js';

@@ -34,6 +34,40 @@ function clientReturning(...results: unknown[]): Fdc3IntentClient {
 }
 
 describe('WorkflowOrchestrator', () => {
+  it('enforces the declared JSON input schema without a custom validator', async () => {
+    const workflow: WorkflowDefinition = {
+      ...baseWorkflow,
+      inputSchema: {
+        type: 'object',
+        properties: { desk: { type: 'string', minLength: 1 } },
+        required: ['desk'],
+        additionalProperties: false,
+      },
+    };
+    const client = clientReturning({});
+    const orchestrator = new WorkflowOrchestrator({ workflows: [workflow], client });
+
+    const missing = await orchestrator.execute('trade.insight', { unexpected: true });
+    const wrongType = await orchestrator.execute('trade.insight', { desk: 42 });
+
+    expect(missing.failures[0]?.code).toBe('INVALID_INPUT');
+    expect(wrongType.failures[0]?.code).toBe('INVALID_INPUT');
+    expect(client.raiseIntent).not.toHaveBeenCalled();
+  });
+
+  it('combines JSON Schema validation with a custom input validator', async () => {
+    const validateInput = vi.fn(() => false);
+    const orchestrator = new WorkflowOrchestrator({
+      workflows: [{ ...baseWorkflow, validateInput }],
+      client: clientReturning({}),
+    });
+
+    const transcript = await orchestrator.execute('trade.insight', { desk: 'FX' });
+
+    expect(transcript.failures[0]?.code).toBe('INVALID_INPUT');
+    expect(validateInput).toHaveBeenCalledWith({ desk: 'FX' });
+  });
+
   it.each([
     [{ ...baseWorkflow, steps: [] }, 'must contain at least one step'],
     [

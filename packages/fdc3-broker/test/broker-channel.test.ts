@@ -6,7 +6,7 @@
 import { MockAppDirectoryService } from '../../fdc3-app-directory/src/mock';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Broker } from '../src/broker';
-import type { BrokerConfig, Channel, Context, PrivateChannel } from '../src/types';
+import type { BrokerConfig, Context } from '../src/types';
 
 describe('Broker Channel Methods', () => {
   let broker: Broker;
@@ -376,13 +376,17 @@ describe('Broker Channel Methods', () => {
       expect(handler).toHaveBeenCalledTimes(2);
     });
 
-    it('should throw when not on channel', async () => {
+    it('should allow registration before joining a channel', async () => {
       broker['registerTile']('tile-1', 'test-app');
       const source = { appId: 'test-app', instanceId: 'tile-1' };
+      const handler = vi.fn();
 
-      await expect(broker.addContextListener('fdc3.chart', vi.fn() as any, source)).rejects.toThrow(
-        'No channel joined',
+      await expect(broker.addContextListener('fdc3.chart', handler, source)).resolves.toEqual(
+        expect.objectContaining({ unsubscribe: expect.any(Function) }),
       );
+      await broker.joinUserChannel('red', source);
+      await broker.broadcast(mockContext, source);
+      expect(handler).toHaveBeenCalledWith(mockContext);
     });
 
     it('should unsubscribe listener', async () => {

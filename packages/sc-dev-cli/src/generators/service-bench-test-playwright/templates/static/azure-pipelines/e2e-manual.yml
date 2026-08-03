@@ -1,0 +1,100 @@
+# azure-pipelines/e2e-manual.yml
+#
+# <??= pluginDisplayName ??> E2E Test Pipeline — Manual Trigger
+# ITAM: <??= applicationId ??>
+#
+# Trigger: manual only
+#
+# One-time setup:
+#   1. Create this pipeline in ADO pointing to this YAML file
+#   2. In the pipeline Variables tab, add secret variables:
+#        test_account  — Bank ID of the dedicated E2E service account
+#        test_pwd      — Password (mark as secret)
+#   3. Pipeline must run on sc-genie pool (enforced by governed-template).
+#      The genie-playwright reporter will NOT function on any other pool.
+#
+# Tag reference:
+#   @smoke       — core-path TCs, ~5 min  (default)
+#   @regression  — full suite, ~20 min
+#   @slow        — long-running tests (AI responses, etc.)
+#   all          — run every TC (no tag filter)
+
+trigger: none
+pr:     none
+
+parameters:
+
+  - name:        targetEnv
+    displayName: "Target Environment"
+    type:        string
+    default:     sit
+    values:
+      - sit
+      - sit-stg
+      - uat
+      - uat-stg
+      - qa
+      - qa-stg
+      - dev
+
+  - name:        testTag
+    displayName: "Test Tag"
+    type:        string
+    default:     "@smoke"
+    values:
+      - "@smoke"
+      - "@regression"
+      - "@slow"
+      - "all"
+
+  - name:        browser
+    displayName: "Browser"
+    type:        string
+    default:     edge
+    values:
+      - edge
+      - chromium
+
+  - name:        releaseWorkItem
+    displayName: "ADO Release Work Item ID (leave blank for standalone runs)"
+    type:        string
+    default:     ""
+
+variables:
+  - name: E2E_ENV
+    value: ${{ parameters.targetEnv }}
+  - name: E2E_BROWSER
+    value: ${{ parameters.browser }}
+  - name: TEST_GREP
+    ${{ if eq(parameters.testTag, 'all') }}:
+      value: ""
+    ${{ else }}:
+      value: ${{ parameters.testTag }}
+  - name: RELEASE_WORK_ITEM
+    value: ${{ parameters.releaseWorkItem }}
+  - name: CI
+    value: "true"
+
+resources:
+  repositories:
+    - repository: governed-templates
+      name:        dj-core/governed-templates
+      ref:         "main"
+      type:        git
+
+extends:
+  template: governed-template/test.yml@governed-templates
+  parameters:
+    ITAM:          "<??= applicationId ??>"
+    releaseId:     "${{ parameters.releaseWorkItem }}"
+    testStackName: playwright
+    testStackParams:
+      nodeVersion: "20.18.2"
+      nodeProperties:
+        TEST_ACCOUNT:      $(test_account)
+        TEST_PWD:          $(test_pwd)
+        E2E_ENV:           $(E2E_ENV)
+        E2E_BROWSER:       $(E2E_BROWSER)
+        TEST_GREP:         $(TEST_GREP)
+        RELEASE_WORK_ITEM: $(RELEASE_WORK_ITEM)
+        CI:                "true"

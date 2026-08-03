@@ -46,7 +46,7 @@ export function ConfirmationDialog({
           <Button
             variant={tone === 'danger' ? 'danger' : 'primary'}
             disabled={loading || confirmDisabled}
-            aria-busy={loading || undefined}
+            pending={loading}
             aria-label={loading ? `${confirmLabel} in progress` : undefined}
             onClick={onConfirm}
           >

@@ -1,0 +1,21 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: "<%= name %>"
+  namespace: "<%= applicationId %>"
+spec:
+  template:
+    spec:
+      containers:
+        - image: 192.168.49.1:5000/<%= name %>:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            exec:
+              command: ["ls /opt/app"]
+          envFrom:
+            - configMapRef:
+                name: <%= name %>-config
+            - secretRef:
+                name: <%= name %>-secret

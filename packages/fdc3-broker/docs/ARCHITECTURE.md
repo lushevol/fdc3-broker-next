@@ -80,5 +80,5 @@ fdc3-broker → fdc3-app-directory   (AppDirectoryClient + AppDefinition types)
 
 ## Testing
 
-- 24 test files, 540 tests (88% passing)
-- FDC3 conformance verified
+- 740 unit tests, all passing (verified 2026-08-01)
+- Core FDC3 behavior is covered by API-compliance and integration suites; official FINOS certification must be run separately

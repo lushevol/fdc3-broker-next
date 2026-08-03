@@ -1,0 +1,1463 @@
+@import url('./ScLightMode.css');
+
+/* Dark mode component definition */
+  :host,
+  .sc-mode-dark {
+    --sc-mode: dark;
+    /* ActionBar */
+    --sc-action-bar-background-color: var(--sc-color-black);
+    --sc-action-bar-border-color: var(--sc-color-grey-800);
+    /* Scrollbar */
+    --sc-scrollbar-track-color: var(--sc-color-grey-50-dark);
+    --sc-scrollbar-thumb-color: var(--sc-color-grey-400-dark);
+    --sc-scrollbar-thumb-hover-color: var(--sc-color-grey-400-dark);
+    --sc-scrollbar-thumb-active-color: var(--sc-color-grey-400-dark);
+    --sc-scrollbar-border-color: var(--sc-color-grey-400-dark);
+    --sc-scrollbar-border-hover-color: var(--sc-color-grey-400-dark);
+    --sc-scrollbar-border-active-color: var(--sc-color-grey-400-dark);
+    --sc-scrollbar-shadow-color: var(--sc-color-grey-100-dark);
+    /* @deprecated remove when no longer used */
+    --sc-scrollbar-background-color: var(--sc-color-grey-500-dark);
+
+    /* Button */
+    --sc-button-focus-outline-color: var(--sc-color-blue-250-dark);
+
+    /*Button primary default state*/
+    --sc-button-primary-background-color: var(--sc-color-blue-500-dark);
+    --sc-button-primary-border-color: var(--sc-color-blue-500-dark);
+    --sc-button-primary-text-color: var(--sc-color-white);
+    --sc-button-primary-hover-background-color: var(--sc-color-blue-450-dark);
+    --sc-button-primary-hover-border-color: var(--sc-color-blue-450-dark);
+    --sc-button-primary-press-background-color: var(--sc-color-blue-600-dark);
+    --sc-button-primary-press-border-color: var(  --sc-color-blue-600-dark);
+    --sc-button-primary-press-text-color: var(--sc-color-blue-900-dark);
+    --sc-button-primary-select-background-color: var(--sc-color-blue-650-dark);
+    --sc-button-primary-select-border-color: var(  --sc-color-blue-650-dark);
+    --sc-button-primary-select-text-color: var(--sc-color-white);
+
+    /*Button primary default state and inverse*/
+    --sc-button-primary-inverse-background-color: transparent;
+    --sc-button-primary-inverse-border-color: var(--sc-color-blue-500-dark);
+    --sc-button-primary-inverse-text-color: var(--sc-color-blue-500-dark);
+    --sc-button-primary-inverse-hover-background-color: var(--sc-color-blue-50-dark);
+    --sc-button-primary-inverse-hover-border-color: var(--sc-color-blue-500-dark);
+    --sc-button-primary-inverse-hover-text-color: var(--sc-color-blue-650-dark);
+    --sc-button-primary-inverse-press-background-color: var(--sc-color-blue-650-dark);
+    --sc-button-primary-inverse-press-border-color: var(--sc-color-blue-500-dark);
+    --sc-button-primary-inverse-press-text-color: var(--sc-color-blue-50-dark);
+    --sc-button-primary-inverse-press-outline-color: var(--sc-color-blue-500-dark);
+
+    /*Button primary error state */
+    --sc-button-primary-error-background-color: var(--sc-color-red-350-dark);
+    --sc-button-primary-error-border-color: var(--sc-color-red-350-dark);
+    --sc-button-primary-error-text-color: var(--sc-color-white);
+    --sc-button-primary-error-hover-background-color: var(--sc-color-red-300-dark);
+    --sc-button-primary-error-hover-border-color: var(--sc-color-red-300-dark);
+    --sc-button-primary-error-hover-text-color: var(--sc-color-white);
+    --sc-button-primary-error-press-background-color: var(--sc-color-red-250-dark);
+    --sc-button-primary-error-press-border-color: var(--sc-color-red-250-dark);
+    --sc-button-primary-error-press-text-color: var(--sc-color-red-900-dark);
+    --sc-button-primary-error-select-background-color: var(--sc-color-red-200-dark);
+    --sc-button-primary-error-select-border-color: var(--sc-color-red-200-dark);
+    --sc-button-primary-error-select-text-color: var(--sc-color-white);
+
+    /*Button primary alert state */
+    --sc-button-primary-alert-background-color: var(--sc-color-amber-650-dark);
+    --sc-button-primary-alert-border-color: var(--sc-color-amber-650-dark);
+    --sc-button-primary-alert-text-color: var(--sc-color-black);
+    --sc-button-primary-alert-hover-background-color: var(--sc-color-amber-550-dark);
+    --sc-button-primary-alert-hover-border-color: var(--sc-color-amber-550-dark);
+    --sc-button-primary-alert-hover-text-color: var(--sc-color-black);
+    --sc-button-primary-alert-press-background-color: var(--sc-color-amber-500-dark);
+    --sc-button-primary-alert-press-border-color: var(--sc-color-amber-500-dark);
+    --sc-button-primary-alert-press-text-color: var(--sc-color-amber-100-dark);
+    --sc-button-primary-alert-select-background-color: var(--sc-color-amber-450-dark);
+    --sc-button-primary-alert-select-border-color: var(--sc-color-amber-450-dark);
+    --sc-button-primary-alert-select-text-color: var(--sc-color-black);
+
+    /*Button primary success state */
+    --sc-button-primary-success-background-color: var(--sc-color-green-350-dark);
+    --sc-button-primary-success-border-color: var(--sc-color-green-350-dark);
+    --sc-button-primary-success-text-color: var(--sc-color-white);
+    --sc-button-primary-success-hover-background-color: var(--sc-color-green-300-dark);
+    --sc-button-primary-success-hover-border-color: var(--sc-color-green-300-dark);
+    --sc-button-primary-success-hover-text-color: var(--sc-color-white);
+    --sc-button-primary-success-press-background-color: var(--sc-color-green-250-dark);
+    --sc-button-primary-success-press-border-color: var(--sc-color-green-250-dark);
+    --sc-button-primary-success-press-text-color: var(--sc-color-green-900-dark);
+    --sc-button-primary-success-select-background-color: var(--sc-color-green-200-dark);
+    --sc-button-primary-success-select-border-color: var(--sc-color-green-200-dark);
+    --sc-button-primary-success-select-text-color: var(--sc-color-white);
+
+    /*Button secondary default state*/
+    --sc-button-secondary-background-color: var(--sc-color-grey-150-dark);
+    --sc-button-secondary-border-color: var(--sc-color-grey-400-dark);
+    --sc-button-secondary-text-color: var(--sc-color-blue-800-dark);
+    --sc-button-secondary-hover-background-color: var(--sc-color-grey-150-dark);
+    --sc-button-secondary-hover-border-color: var(--sc-color-blue-450-dark);
+    --sc-button-secondary-hover-text-color: var(--sc-color-blue-750-dark);
+    --sc-button-secondary-press-background-color: var(--sc-color-grey-150-dark);
+    --sc-button-secondary-press-border-color: var(--sc-color-blue-600-dark);
+    --sc-button-secondary-press-text-color: var(--sc-color-blue-900-dark);
+    --sc-button-secondary-select-background-color: var(--sc-color-blue-150-dark);
+    --sc-button-secondary-select-border-color: var(--sc-color-blue-650-dark);
+    --sc-button-secondary-select-text-color: var(--sc-color-blue-950-dark);
+
+    /*Button secondary default state and inverse*/
+    --sc-button-secondary-inverse-background-color: var(--sc-color-blue-900-dark);
+    --sc-button-secondary-inverse-border-color: var(--sc-color-blue-900-dark);
+    --sc-button-secondary-inverse-text-color: var(--sc-color-grey-200-dark);
+    --sc-button-secondary-inverse-hover-background-color: var(--sc-color-grey-200-dark);
+    --sc-button-secondary-inverse-hover-border-color: var(--sc-color-grey-400-dark);
+    --sc-button-secondary-inverse-hover-text-color: var(--sc-color-blue-900-dark);
+    --sc-button-secondary-inverse-press-background-color: var(--sc-color-grey-400-dark);
+    --sc-button-secondary-inverse-press-border-color: var(--sc-color-grey-400-dark);
+    --sc-button-secondary-inverse-press-text-color: var(--sc-color-blue-900-dark);
+
+    /*Button secondary error state */
+    --sc-button-secondary-error-background-color: var(--sc-color-grey-150-dark);
+    --sc-button-secondary-error-border-color: var(--sc-color-red-350-dark);
+    --sc-button-secondary-error-text-color: var(--sc-color-red-850-dark);
+    --sc-button-secondary-error-hover-background-color: var(--sc-color-grey-150-dark);
+    --sc-button-secondary-error-hover-border-color: var(--sc-color-red-600-dark);
+    --sc-button-secondary-error-hover-text-color: var(--sc-color-red-800-dark);
+    --sc-button-secondary-error-press-background-color: var(--sc-color-grey-150-dark);
+    --sc-button-secondary-error-press-border-color: var(--sc-color-red-650-dark);
+    --sc-button-secondary-error-press-text-color: var(--sc-color-amber-750-dark);
+    --sc-button-secondary-error-select-background-color: var(--sc-color-red-250-dark);
+    --sc-button-secondary-error-select-border-color: var(--sc-color-red-850-dark);
+    --sc-button-secondary-error-select-text-color: var(--sc-color-red-700-dark);
+
+    /*Button secondary alert state */
+    --sc-button-secondary-alert-background-color: var(--sc-color-grey-150-dark);
+    --sc-button-secondary-alert-border-color: var(--sc-color-amber-400-dark);
+    --sc-button-secondary-alert-text-color: var(--sc-color-amber-850-dark);
+    --sc-button-secondary-alert-hover-background-color: var(--sc-color-grey-150-dark);
+    --sc-button-secondary-alert-hover-border-color: var(--sc-color-amber-450-dark);
+    --sc-button-secondary-alert-hover-text-color: var(--sc-color-amber-800-dark);
+    --sc-button-secondary-alert-press-background-color: var(--sc-color-grey-150-dark);
+    --sc-button-secondary-alert-press-border-color: var(--sc-color-amber-500-dark);
+    --sc-button-secondary-alert-press-text-color: var(--sc-color-amber-750-dark);
+    --sc-button-secondary-alert-select-background-color: var(--sc-color-amber-150-dark);
+    --sc-button-secondary-alert-select-border-color: var(--sc-color-amber-550-dark);
+    --sc-button-secondary-alert-select-text-color: var(--sc-color-amber-700-dark);
+
+    /*Button secondary success state */
+    --sc-button-secondary-success-background-color: var(--sc-color-grey-150-dark);
+    --sc-button-secondary-success-border-color: var(--sc-color-green-700-dark);
+    --sc-button-secondary-success-text-color: var(--sc-color-green-850-dark);
+    --sc-button-secondary-success-hover-background-color: var(--sc-color-grey-150-dark);
+    --sc-button-secondary-success-hover-border-color: var(--sc-color-green-750-dark);
+    --sc-button-secondary-success-hover-text-color: var(--sc-color-green-800-dark);
+    --sc-button-secondary-success-press-background-color: var(--sc-color-grey-150-dark);
+    --sc-button-secondary-success-press-border-color: var(--sc-color-green-800-dark);
+    --sc-button-secondary-success-press-text-color: var(--sc-color-green-750-dark);
+    --sc-button-secondary-success-select-background-color: var(--sc-color-green-150-dark);
+    --sc-button-secondary-success-select-border-color: var(--sc-color-green-850-dark);
+    --sc-button-secondary-success-select-text-color: var(--sc-color-green-700-dark);
+
+    /*Button text default state*/
+    --sc-button-text-background-color: transparent;
+    --sc-button-text-border-color: transparent;
+    --sc-button-text-text-color: var(--sc-color-blue-800-dark);
+    --sc-button-text-hover-background-color: var(--sc-color-blue-200-dark);
+    --sc-button-text-hover-border-color: transparent;
+    --sc-button-text-hover-text-color: var(--sc-color-blue-750-dark);
+    --sc-button-text-press-background-color: var(--sc-color-blue-100-dark);
+    --sc-button-text-press-border-color: transparent;
+    --sc-button-text-press-text-color: var(--sc-color-blue-900-dark);
+    --sc-button-text-select-background-color: var(--sc-color-blue-100-dark);
+    --sc-button-text-select-border-color: transparent;
+    --sc-button-text-select-text-color: var(--sc-color-blue-950-dark);
+
+    /*Button text error state*/
+    --sc-button-text-error-background-color: transparent;
+    --sc-button-text-error-border-color: transparent;
+    --sc-button-text-error-text-color: var(--sc-color-red-850-dark);
+    --sc-button-text-error-hover-background-color: var(--sc-color-red-200-dark);
+    --sc-button-text-error-hover-border-color: transparent;
+    --sc-button-text-error-hover-text-color: var(--sc-color-red-800-dark);
+    --sc-button-text-error-press-background-color: var(--sc-color-red-100-dark);
+    --sc-button-text-error-press-border-color: transparent;
+    --sc-button-text-error-press-text-color: var(--sc-color-red-750-dark);
+    --sc-button-text-error-select-background-color: var(--sc-color-red-250-dark);
+    --sc-button-text-error-select-border-color: transparent;
+    --sc-button-text-error-select-text-color: var(--sc-color-red-700-dark);
+
+    /*Button text alert state*/
+    --sc-button-text-alert-background-color: transparent;
+    --sc-button-text-alert-border-color: transparent;
+    --sc-button-text-alert-text-color: var(--sc-color-amber-850-dark);
+    --sc-button-text-alert-hover-background-color: var(--sc-color-amber-100-dark);
+    --sc-button-text-alert-hover-border-color: transparent;
+    --sc-button-text-alert-hover-text-color: var(--sc-color-amber-800-dark);
+    --sc-button-text-alert-press-background-color: var(--sc-color-amber-100-dark);
+    --sc-button-text-alert-press-border-color: transparent;
+    --sc-button-text-alert-press-text-color: var(--sc-color-amber-750-dark);
+    --sc-button-text-alert-select-background-color: var(--sc-color-amber-150-dark);
+    --sc-button-text-alert-select-border-color: transparent;
+    --sc-button-text-alert-select-text-color: var(--sc-color-amber-700-dark);
+
+    /*Button text success state*/
+    --sc-button-text-success-background-color: transparent;
+    --sc-button-text-success-border-color: transparent;
+    --sc-button-text-success-text-color: var(--sc-color-green-850-dark);
+    --sc-button-text-success-hover-background-color: var(--sc-color-green-100-dark);
+    --sc-button-text-success-hover-border-color: transparent;
+    --sc-button-text-success-hover-text-color: var(--sc-color-green-800-dark);
+    --sc-button-text-success-press-background-color: var(--sc-color-green-100-dark);
+    --sc-button-text-success-press-border-color: transparent;
+    --sc-button-text-success-press-text-color: var(--sc-color-green-750-dark);
+    --sc-button-text-success-select-background-color: var(--sc-color-green-150-dark);
+    --sc-button-text-success-select-border-color: transparent;
+    --sc-button-text-success-select-text-color: var(--sc-color-green-700-dark);
+
+    /*Button link default state*/
+    --sc-button-link-background-color: transparent;
+    --sc-button-link-border-color: transparent;
+    --sc-button-link-text-color: var(--sc-color-blue-800-dark);
+    --sc-button-link-hover-background-color: transparent;
+    --sc-button-link-hover-border-color: transparent;
+    --sc-button-link-hover-text-color: var(--sc-color-blue-750-dark);
+    --sc-button-link-press-background-color: transparent;
+    --sc-button-link-press-border-color: transparent;
+    --sc-button-link-press-text-color: var(--sc-color-blue-900-dark);
+    --sc-button-link-select-background-color: transparent;
+    --sc-button-link-select-border-color: transparent;
+    --sc-button-link-select-text-color: var(--sc-color-blue-950-dark);
+
+    /*Button link error state*/
+    --sc-button-link-error-background-color: transparent;
+    --sc-button-link-error-border-color: transparent;
+    --sc-button-link-error-text-color: var(--sc-color-red-850-dark);
+    --sc-button-link-error-hover-background-color: transparent;
+    --sc-button-link-error-hover-border-color: transparent;
+    --sc-button-link-error-hover-text-color: var(--sc-color-red-800-dark);
+    --sc-button-link-error-press-background-color: transparent;
+    --sc-button-link-error-press-border-color: transparent;
+    --sc-button-link-error-press-text-color: var(--sc-color-red-750-dark);
+    --sc-button-link-error-select-background-color: transparent;
+    --sc-button-link-error-select-border-color: transparent;
+    --sc-button-link-error-select-text-color: var(--sc-color-red-700-dark);
+    
+    /*Button link alert state*/
+    --sc-button-link-alert-background-color: transparent;
+    --sc-button-link-alert-border-color: transparent;
+    --sc-button-link-alert-text-color: var(--sc-color-amber-850-dark);
+    --sc-button-link-alert-hover-background-color: transparent;
+    --sc-button-link-alert-hover-border-color: transparent;
+    --sc-button-link-alert-hover-text-color: var(--sc-color-amber-800-dark);
+    --sc-button-link-alert-press-background-color: transparent;
+    --sc-button-link-alert-press-border-color: transparent;
+    --sc-button-link-alert-press-text-color: var(--sc-color-amber-750-dark);
+    --sc-button-link-alert-select-background-color: transparent;
+    --sc-button-link-alert-select-border-color: transparent;
+    --sc-button-link-alert-select-text-color: var(--sc-color-amber-700-dark);
+
+    /*Button link success state*/
+    --sc-button-link-success-background-color: transparent;
+    --sc-button-link-success-border-color: transparent;
+    --sc-button-link-success-text-color: var(--sc-color-green-850-dark);
+    --sc-button-link-success-hover-background-color: transparent;
+    --sc-button-link-success-hover-border-color: transparent;
+    --sc-button-link-success-hover-text-color: var(--sc-color-green-800-dark);
+    --sc-button-link-success-press-background-color: transparent;
+    --sc-button-link-success-press-border-color: transparent;
+    --sc-button-link-success-press-text-color: var(--sc-color-green-750-dark);
+    --sc-button-link-success-select-background-color: transparent;
+    --sc-button-link-success-select-border-color: transparent;
+    --sc-button-link-success-select-text-color: var(--sc-color-green-700-dark);
+
+    /*Button Disabled*/
+    --sc-button-primary-disabled-background-color: var(--sc-color-grey-50-dark);
+    --sc-button-primary-disabled-border-color: transparent;
+    --sc-button-primary-disabled-text-color: var(--sc-color-grey-500-dark);
+    --sc-button-secondary-disabled-background-color: var(--sc-color-grey-50-dark);
+    --sc-button-secondary-disabled-border-color: var(--sc-color-grey-200-dark);
+    --sc-button-secondary-disabled-text-color: var(--sc-color-grey-500-dark);
+    --sc-button-text-disabled-background-color: var(--sc-color-grey-100-dark);
+    --sc-button-text-disabled-border-color: transparent;
+    --sc-button-text-disabled-text-color: var(--sc-color-grey-400-dark);
+    --sc-button-link-disabled-background-color: transparent;
+    --sc-button-link-disabled-border-color: transparent;
+    --sc-button-link-disabled-text-color: var(--sc-color-grey-400-dark);
+
+    /*Button padding*/
+    --sc-button-display: inline-block;
+    --sc-button-margin-left: 0;
+    --sc-button-margin-right: 0;
+
+    /* Link */
+    --sc-link-primary-color: var(--sc-color-blue-500-dark);
+    --sc-link-hover-color: var(--sc-color-blue-400-dark);
+    --sc-link-inverse-color: var(--sc-color-white);
+
+    /* Icon */
+    --sc-icon-primary-color: var(--sc-color-blue-500);
+
+    /* Tag */
+    --sc-tag-blue-fill-background-color: var(--sc-color-blue-500-dark);
+    --sc-tag-blue-fill-border-color: var(--sc-color-blue-500-dark);
+    --sc-tag-blue-fill-text-color: var(--sc-color-white);
+    --sc-tag-blue-outline-background-color: var(--sc-color-blue-50-dark);
+    --sc-tag-blue-outline-border-color: var(--sc-color-blue-200-dark);
+    --sc-tag-blue-outline-text-color: var(--sc-color-blue-500-dark);
+    --sc-tag-blue-link-background-color: var(--sc-color-black);
+    --sc-tag-blue-link-border-color: var(--sc-color-black);
+    --sc-tag-blue-link-text-color: var(--sc-color-blue-500-dark);
+    --sc-tag-blue-disabled-background-color: var(--sc-color-blue-400-dark);
+    --sc-tag-blue-disabled-border-color: var(--sc-color-blue-400-dark);
+    --sc-tag-blue-disabled-text-color: var(--sc-color-white);
+   
+    --sc-tag-dark-blue-fill-background-color: var(--sc-color-blue-650-dark);
+    --sc-tag-dark-blue-fill-border-color: var(--sc-color-blue-650-dark);
+    --sc-tag-dark-blue-fill-text-color: var(--sc-color-white);
+    --sc-tag-dark-blue-outline-background-color: var(--sc-color-blue-100-dark);
+    --sc-tag-dark-blue-outline-border-color: var(--sc-color-blue-300-dark);
+    --sc-tag-dark-blue-outline-text-color: var(--sc-color-blue-650-dark);
+    --sc-tag-dark-blue-link-background-color: var(--sc-color-black);
+    --sc-tag-dark-blue-link-border-color: var(--sc-color-black);
+    --sc-tag-dark-blue-link-text-color: var(--sc-color-blue-500-dark);
+    --sc-tag-dark-blue-disabled-background-color: var(--sc-color-blue-200-dark);
+    --sc-tag-dark-blue-disabled-border-color: var(--sc-color-blue-200-dark);
+    --sc-tag-dark-blue-disabled-text-color: var(--sc-color-white);
+
+    --sc-tag-red-fill-background-color: var(--sc-color-red-500-dark);
+    --sc-tag-red-fill-border-color: var(--sc-color-red-500-dark);
+    --sc-tag-red-fill-text-color: var(--sc-color-white);
+    --sc-tag-red-outline-background-color: var(--sc-color-red-100-dark);
+    --sc-tag-red-outline-border-color: var(--sc-color-red-200-dark);
+    --sc-tag-red-outline-text-color: var(--sc-color-red-500-dark);
+    --sc-tag-red-link-background-color: var(--sc-color-black);
+    --sc-tag-red-link-border-color: var(--sc-color-black);
+    --sc-tag-red-link-text-color: var(--sc-color-red-500-dark);
+    --sc-tag-red-disabled-background-color: var(--sc-color-red-200-dark);
+    --sc-tag-red-disabled-border-color: var(--sc-color-red-200-dark);
+    --sc-tag-red-disabled-text-color: var(--sc-color-white);
+
+    --sc-tag-amber-fill-background-color: var(--sc-color-amber-450-dark);
+    --sc-tag-amber-fill-border-color: var(--sc-color-amber-450-dark);
+    --sc-tag-amber-fill-text-color: var(--sc-color-amber-850-dark);
+    --sc-tag-amber-outline-background-color: var(--sc-color-amber-150-dark);
+    --sc-tag-amber-outline-border-color: var(--sc-color-amber-300-dark);
+    --sc-tag-amber-outline-text-color: var(--sc-color-amber-750-dark);
+    --sc-tag-amber-link-background-color: var(--sc-color-black);
+    --sc-tag-amber-link-border-color: var(--sc-color-black);
+    --sc-tag-amber-link-text-color: var(--sc-color-amber-850-dark);
+    --sc-tag-amber-disabled-background-color: var(--sc-color-amber-200-dark);
+    --sc-tag-amber-disabled-border-color: var(--sc-color-amber-200-dark);
+    --sc-tag-amber-disabled-text-color: var(--sc-color-amber-700-dark);
+
+    --sc-tag-green-fill-background-color: var(--sc-color-green-700-dark);
+    --sc-tag-green-fill-border-color: var(--sc-color-green-700-dark);
+    --sc-tag-green-fill-text-color: var(--sc-color-white);
+    --sc-tag-green-outline-background-color: var(--sc-color-green-100-dark);
+    --sc-tag-green-outline-border-color: var(--sc-color-green-300-dark);
+    --sc-tag-green-outline-text-color: var(--sc-color-green-700-dark);
+    --sc-tag-green-link-background-color: var(--sc-color-black);
+    --sc-tag-green-link-border-color: var(--sc-color-black);
+    --sc-tag-green-link-text-color: var(--sc-color-green-700-dark);
+    --sc-tag-green-disabled-background-color: var(--sc-color-green-200-dark);
+    --sc-tag-green-disabled-border-color: var(--sc-color-green-200-dark);
+    --sc-tag-green-disabled-text-color: var(--sc-color-white);
+
+    --sc-tag-grey-fill-background-color: var(--sc-color-grey-600-dark);
+    --sc-tag-grey-fill-border-color: var(--sc-color-grey-600-dark);
+    --sc-tag-grey-fill-text-color: var(--sc-color-white);
+    --sc-tag-grey-outline-background-color: var(--sc-color-grey-100-dark);
+    --sc-tag-grey-outline-border-color: var(--sc-color-grey-300-dark);
+    --sc-tag-grey-outline-text-color: var(--sc-color-grey-600-dark);
+    --sc-tag-grey-link-background-color: var(--sc-color-black);
+    --sc-tag-grey-link-border-color: var(--sc-color-black);
+    --sc-tag-grey-link-text-color: var(--sc-color-grey-650-dark);
+    --sc-tag-grey-disabled-background-color: var(--sc-color-grey-200-dark);
+    --sc-tag-grey-disabled-border-color: var(--sc-color-grey-200-dark);
+    --sc-tag-grey-disabled-text-color: var(--sc-color-white);
+
+    --sc-tag-black-fill-background-color: var(--sc-color-black);
+    --sc-tag-black-fill-border-color: var(--sc-color-black);
+    --sc-tag-black-fill-text-color: var(--sc-color-white);
+    --sc-tag-black-outline-background-color: var(--sc-color-grey-200-dark);
+    --sc-tag-black-outline-border-color: var(--sc-color-grey-500-dark);
+    --sc-tag-black-outline-text-color: var(--sc-color-black);
+    --sc-tag-black-link-background-color: var(--sc-color-black);
+    --sc-tag-black-link-border-color: var(--sc-color-black);
+    --sc-tag-black-link-text-color: var(--sc-color-white);
+    --sc-tag-black-disabled-background-color: var(--sc-color-grey-400-dark);
+    --sc-tag-black-disabled-border-color: var(--sc-color-grey-400-dark);
+    --sc-tag-black-disabled-text-color: var(--sc-color-white);
+
+    --sc-tag-white-fill-background-color: var(--sc-color-white);
+    --sc-tag-white-fill-border-color: var(--sc-color-white);
+    --sc-tag-white-fill-text-color: var(--sc-color-black);
+    --sc-tag-white-outline-background-color: var(--sc-color-grey-50-dark);
+    --sc-tag-white-outline-border-color: var(--sc-color-grey-300-dark);
+    --sc-tag-white-outline-text-color: var(--sc-color-grey-600-dark);
+    --sc-tag-white-link-background-color: var(--sc-color-white);
+    --sc-tag-white-link-border-color: var(--sc-color-white);
+    --sc-tag-white-link-text-color: var(--sc-color-blue-900-dark);
+    --sc-tag-white-disabled-background-color: var(--sc-color-white);
+    --sc-tag-white-disabled-border-color: var(--sc-color-white);
+    --sc-tag-white-disabled-text-color: var(--sc-color-grey-450-dark);
+
+    --sc-tag-transparent-fill-background-color: var(--sc-color-black);
+    --sc-tag-transparent-fill-border-color: var(--sc-color-black);
+    --sc-tag-transparent-fill-text-color: var(--sc-color-black);
+    --sc-tag-transparent-outline-border-color: var(--sc-color-grey-300-dark);
+    --sc-tag-transparent-outline-text-color: var(--sc-color-grey-600-dark);
+    --sc-tag-transparent-disabled-border-color: var(--sc-color-white);
+    --sc-tag-transparent-disabled-text-color: var(--sc-color-grey-450-dark);
+
+    --sc-tag-grey-dash-fill-background-color: var(--sc-color-white);
+    --sc-tag-grey-dash-fill-border-color: var(--sc-color-grey-300-dark);
+    --sc-tag-grey-dash-fill-text-color: var(--sc-color-black);
+    --sc-tag-grey-dash-outline-background-color: var(--sc-color-grey-50-dark);
+    --sc-tag-grey-dash-outline-border-color: var(--sc-color-grey-300-dark);
+    --sc-tag-grey-dash-outline-text-color: var(--sc-color-grey-600-dark);
+    --sc-tag-grey-dash-link-background-color: var(--sc-color-white);
+    --sc-tag-grey-dash-link-border-color: var(--sc-color-grey-300-dark);
+    --sc-tag-grey-dash-link-text-color: var(--sc-color-blue-900-dark);
+    --sc-tag-grey-dash-disabled-background-color: var(--sc-color-grey-50-dark);
+    --sc-tag-grey-dash-disabled-border-color: var(--sc-color-grey-300-dark);
+    --sc-tag-grey-dash-disabled-text-color: var(--sc-color-grey-450-dark);
+    
+    /* --sc-closable-tag-blue-border-color: var(--sc-color-blue-500);
+    --sc-closable-tag-blue-text-color: var(--sc-color-blue-500);
+    --sc-closable-tag-blue-icon-color: var(--sc-color-white);
+
+    --sc-closable-tag-dark-blue-border-color: var(--sc-color-blue-dark);
+    --sc-closable-tag-dark-blue-text-color: var(--sc-color-blue-dark);
+    --sc-closable-tag-dark-blue-icon-color: var(--sc-color-white);
+
+    --sc-closable-tag-green-border-color: var(--sc-color-green-dark);
+    --sc-closable-tag-green-text-color: var(--sc-color-green-dark);
+    --sc-closable-tag-green-icon-color: var(--sc-color-white);
+
+    --sc-closable-tag-amber-border-color: var(--sc-color-amber-500);
+    --sc-closable-tag-amber-text-color: var(--sc-color-yellow-darker);
+    --sc-closable-tag-amber-icon-color: var(--sc-color-white);
+     
+    --sc-closable-tag-red-border-color: var(--sc-color-red);
+    --sc-closable-tag-red-text-color: var(--sc-color-red);
+    --sc-closable-tag-red-icon-color: var(--sc-color-white);
+
+    --sc-closable-tag-grey-border-color: var(--sc-color-grey-600);
+    --sc-closable-tag-grey-text-color: var(--sc-color-grey-600);
+    --sc-closable-tag-grey-icon-color: var(--sc-color-white);
+
+    --sc-closable-tag-black-border-color: var(--sc-color-black);
+    --sc-closable-tag-black-text-color: var(--sc-color-black);
+    --sc-closable-tag-black-icon-color: var(--sc-color-white);
+
+    --sc-closable-tag-transparent-border-color: var(--sc-color-grey-300);
+    --sc-closable-tag-transparent-text-color: var(--sc-color-grey-300);
+    --sc-closable-tag-transparent-icon-color: var(--sc-color-white);
+
+    --sc-closable-tag-grey-dash-border-color: var(--sc-color-grey-300);
+    --sc-closable-tag-grey-dash-text-color: var(--sc-color-grey-300);
+    --sc-closable-tag-grey-dash-icon-color: var(--sc-color-white);
+
+    --sc-closable-tag-disabled-background-color: var(--sc-color-grey-50);
+    --sc-closable-tag-disabled-border-color: var(--sc-color-grey-50);
+    --sc-closable-tag-disabled-text-color: var(--sc-color-white); */
+
+    /* Alert */
+    --sc-alert-close-button-color: var(--sc-color-grey-400-dark);
+
+    --sc-alert-default-default-background-color: transparent;
+    --sc-alert-default-default-border-color: var(--sc-color-grey-350-dark);
+    --sc-alert-default-default-text-color: var(--sc-color-grey-500-dark);
+    --sc-alert-default-default-icon-background-color: var(--sc-color-grey-350-dark);
+    --sc-alert-default-default-icon-text-color: var(--sc-color-white);
+    --sc-alert-default-banner-background-color: var(--sc-color-grey-100-dark);
+    --sc-alert-default-banner-text-color: var(--sc-color-grey-500-dark);
+
+    --sc-alert-info-default-background-color: transparent;
+    --sc-alert-info-default-border-color: var(--sc-color-blue-350-dark);
+    --sc-alert-info-default-text-color: var(--sc-color-blue-500-dark);
+    --sc-alert-info-default-icon-background-color: var(--sc-color-blue-350-dark);
+    --sc-alert-info-default-icon-text-color: var(--sc-color-white);
+    --sc-alert-info-banner-background-color: var(--sc-color-blue-100-dark);
+    --sc-alert-info-banner-text-color: var(--sc-color-blue-600-dark);
+
+    --sc-alert-success-default-background-color: transparent;
+    --sc-alert-success-default-border-color: var(--sc-color-green-500-dark);
+    --sc-alert-success-default-text-color: var(--sc-color-green-600-dark);
+    --sc-alert-success-default-icon-background-color: var(--sc-color-green-500-dark);
+    --sc-alert-success-default-icon-text-color: var(--sc-color-white);
+    --sc-alert-success-banner-background-color: var(--sc-color-green-100-dark);
+    --sc-alert-success-banner-text-color: var(--sc-color-green-600-dark);
+
+    --sc-alert-warning-default-background-color: transparent;
+    --sc-alert-warning-default-border-color: var(--sc-color-amber-400-dark);
+    --sc-alert-warning-default-text-color: var(--sc-color-amber-700-dark);
+    --sc-alert-warning-default-icon-background-color: var(--sc-color-amber-400-dark);
+    --sc-alert-warning-default-icon-text-color: var(--sc-color-white);
+    --sc-alert-warning-banner-background-color: var(--sc-color-amber-100-dark);
+    --sc-alert-warning-banner-text-color: var(--sc-color-amber-700-dark);
+
+    --sc-alert-error-default-background-color: transparent;
+    --sc-alert-error-default-border-color: var(--sc-color-red-500-dark);
+    --sc-alert-error-default-text-color: var(--sc-color-red-600-dark);
+    --sc-alert-error-default-icon-background-color: var(--sc-color-red-500-dark);
+    --sc-alert-error-default-icon-text-color: var(--sc-color-white);
+    --sc-alert-error-banner-background-color: var(--sc-color-red-100-dark);
+    --sc-alert-error-banner-text-color: var(--sc-color-red-600-dark);
+    
+    --sc-alert-disabled-default-background-color: transparent;
+    --sc-alert-disabled-default-border-color: var(--sc-color-grey-50-dark);
+    --sc-alert-disabled-default-text-color: var(--sc-color-blue-900-dark);
+    --sc-alert-disabled-default-icon-background-color: var(--sc-color-grey-50-dark);
+    --sc-alert-disabled-default-icon-text-color: var(--sc-color-white);
+    --sc-alert-disabled-banner-background-color: var(--sc-color-grey-100-dark);
+    --sc-alert-disabled-banner-text-color: var(--sc-color-blue-900-dark);
+
+    /* Alert */
+    --sc-spinner-indicator-blue-color: var(--sc-color-blue-500-dark);
+    --sc-spinner-track-blue-color: var(--sc-color-blue-500-dark);
+    --sc-spinner-indicator-white-color: var(--sc-color-white);
+    --sc-spinner-track-white-color: var(--sc-color-white);
+    --sc-spinner-indicator-alt-color: var(--sc-color-green-500-dark);
+    --sc-spinner-track-deep-blue-color: var(--sc-color-blue-650-dark);
+
+    /* SideSheet */
+    --sc-side-sheet-background-color: var(--sc-color-black);
+    --sc-side-sheet-font-color: var(--sc-color-blue-900-dark);
+    --sc-side-sheet-close-icon-color: var(--sc-color-blue-900-dark);
+    --sc-side-sheet-footer-border-top:var(--sc-color-grey-150-dark);
+    --sc-side-sheet-header-border-bottom:var(--sc-color-grey-150-dark);
+    --sc-side-sheet-title-color:var(--sc-color-blue-900-dark);
+    --sc-side-sheet-background-color:var(--sc-color-black);
+    --sc-side-sheet-font-color:var(--sc-color-blue-900-dark);
+
+    /* BottomSheet */
+    --sc-bottom-sheet-background-color:var(--sc-color-black);
+    --sc-bottom-sheet-font-color: var(--sc-color-blue-900-dark);
+    --sc-bottom-sheet-draggable-color: var(--sc-color-grey-250-dark);
+    --sc-bottom-sheet-close-icon-color: var(--sc-color-blue-900-dark);
+
+    /* ActionSheet */
+    --sc-action-sheet-background-color: var(--sc-color-black);
+    --sc-action-sheet-font-color: var(--sc-color-blue-900-dark);
+
+    /* Checkbox */
+    --sc-checkbox-font-color: var(--sc-color-blue-900-dark);
+    --sc-checkbox-checked-background-color: var(--sc-color-blue-500-dark);
+    --sc-checkbox-checked-border-color: var(--sc-color-blue-500-dark);
+    --sc-checkbox-disabled-background-color: var(--sc-color-grey-300-dark);
+    --sc-checkbox-disabled-border-color: var(--sc-color-grey-300-dark);
+    --sc-checkbox-indeterminate-background-color: var(--sc-color-blue-500-dark);
+    --sc-checkbox-indeterminate-border-color: var(--sc-color-blue-500-dark);
+    --sc-checkbox-default-border-color: var(--sc-color-blue-500-dark);
+    --sc-checkbox-default-background-color: var(--sc-color-grey-200-dark);
+    --sc-checkbox-checked-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M7.2%2016.8L13.2%2022.6L24.8%2010.6%22%20stroke%3D%22white%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+    --sc-checkbox-indeterminate-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20fill%3D%22none%22%3E%3Crect%20x%3D%227%22%20y%3D%2214.5%22%20width%3D%2218%22%20height%3D%223%22%20rx%3D%221.5%22%20fill%3D%22white%22%2F%3E%3C%2Fsvg%3E");
+    --sc-checkbox-group-parent-line-color: var(--sc-color-blue-500-dark);
+
+    /* Radio */
+    --sc-radio-font-color: var(--sc-color-blue-900-dark);
+    --sc-radio-checked-background-color: var(--sc-color-blue-700-dark);
+    --sc-radio-checked-border-color: var(--sc-color-blue-350-dark);
+    --sc-radio-disabled-background-color: var(--sc-color-grey-100-dark);
+    --sc-radio-disabled-border-color: var(--sc-color-grey-150-dark);
+    --sc-radio-default-border-color: var(--sc-color-grey-300-dark);
+    --sc-radio-default-background-color: var(--sc-color-grey-300-dark);
+    --sc-radio-highlighted-default-background-color: var(--sc-color-grey-200-dark);
+    --sc-radio-highlighted-checked-background-color: var(--sc-color-blue-150-dark);
+    --sc-radio-disabled-font-color: var(--sc-color-grey-150-dark);
+    --sc-radio-highlighted-default-border-color: var(--sc-color-grey-50-dark);
+    --sc-radio-before-highlighted-background-color: var(
+      --sc-color-blue-50-dark
+    );
+    --sc-radio-inner-focused-color: var(--sc-color-white);
+    --sc-radio-outer-focused-color: var(--sc-color-blue-300-dark);
+    --sc-radio-error-color: var(--sc-color-red-300-dark);
+    --sc-radio-error-background-color: var(--sc-color-red-300-dark);
+    --sc-radio-help-text-color: var(--sc-color-grey-650-dark);
+    --sc-radio-help-text-error-color: var(--sc-color-red-300-dark);
+    --sc-radio-group-help-text-color: var(--sc-color-grey-650-dark);
+    --sc-radio-inner-focused-color: var(--sc-color-white);
+    /* --sc-radio-outer-focused-color: var(--sc-color-blue-light);
+    --sc-radio-error-color: var(--sc-color-red);
+    --sc-radio-error-background-color: var(--sc-color-red-500);
+    --sc-radio-help-text-color: var(--sc-color-grey-650);
+    --sc-radio-help-text-error-color: var(--sc-color-red-500);
+    --sc-radio-group-help-text-color: var(--sc-color-grey-650); */
+    --sc-radio-before-disabled-background-color: var(
+      --sc-color-grey-300-dark
+    );
+
+    /* Form input */
+    --sc-form-input-color: var(--sc-color-blue-900-dark);
+    --sc-form-control-placeholder-color: var(--sc-color-grey-600-dark);
+    --sc-form-control-disabled-placeholder-color: var(--sc-color-grey-400-dark);
+    --sc-form-control-background-color: var(--sc-color-grey-200-dark);
+    --sc-form-control-border-color: var(--sc-color-grey-400-dark);
+    --sc-form-group-help-color: var(--sc-color-grey-650-dark);
+    --sc-form-group-error-color: var(--sc-color-red-500-dark);
+    --sc-form-input-error-border-color: var(--sc-color-red-500-dark);
+    --sc-form-group-success-color: var(--sc-color-green-700-dark);
+    --sc-form-input-success-border-color: var(--sc-color-green-700-dark);
+    --sc-form-control-color: var(--sc-color-blue-900-dark);
+    --sc-form-input-focus-border-color: var(--sc-color-blue-500-dark);
+    --sc-form-input-focus-outline-color: var(--sc-color-blue-100-dark);
+    --sc-form-input-active-shadow-color: rgba(0, 122, 255, 0.25);
+    --sc-form-group-label-required-color: var(--sc-color-red-500-dark);
+    --sc-form-disabled-input-border-color: var(--sc-color-grey-150-dark);
+    --sc-form-disabled-input-background-color: var(--sc-color-grey-50-dark);
+    --sc-form-disabled-input-placholder-color: var(--sc-color-grey-50-dark);
+    --sc-form-disabled-input-text-color: var(--sc-color-grey-400-dark);
+    --sc-form-input-clear-icon-color: var(--sc-color-grey-350-dark);
+    --sc-form-input-prefix-icon: var(--sc-color-grey-600-dark);
+    --sc-form-input-border-color: var(--sc-color-grey-600);
+
+    /* Card */
+    --sc-card-box-shadow-color: rgba(var(--sc-color-white-rgb), 0.15);
+    --sc-card-text-color: var(--sc-color-blue-900-dark);
+    --sc-card-title-color: var(--sc-color-grey-900-dark);
+    --sc-card-sub-title-color: var(--sc-color-grey-650-dark);
+    --sc-card-body-color: var(--sc-color-grey-600-dark);
+    --sc-card-background-color: var(--sc-color-grey-200-dark);
+    --sc-card-checked-background-color: var(--sc-color-blue-50-dark);
+    --sc-card-hover-background-color: var(--sc-color-blue-50-dark);
+    --sc-card-selected-background: var(--sc-color-blue-50-dark);
+    --sc-card-supplementary-detail-color: var(--sc-color-blue-750-dark);
+    --sc-card-border-color: transparent;
+    --sc-card-hover-border-color: var(--sc-color-grey-400-dark);
+    --sc-card-selected-border-color: var(--sc-color-grey-400-dark);
+    --sc-card-disabled-border-color: var(--sc-color-grey-400-dark);
+    --sc-card-disabled-background: var(--sc-color-grey-100-dark);
+    --sc-card-action-button-text-color: var(--sc-color-blue-900-dark);
+    --sc-card-drag-color: var(--sc-color-grey-400-dark);
+    --sc-card-expandable-color: var(--sc-color-blue-500-dark);
+    --sc-card-footer-border-top-color: var(--sc-color-grey-400-dark);
+    --sc-card-non-clickable-box-shadow: none;
+    --sc-card-non-clickable-border-color: var(--sc-color-grey-150-dark);
+    --sc-card-hover-non-clickable-border-color: transparent;
+    --sc-card-action-button-background-color: transparent;
+    --sc-card-action-button-border-color: transparent;
+    --sc-card-action-button-hover-background-color: transparent;
+    --sc-card-action-button-hover-border-color: transparent;
+    --sc-card-action-button-hover-text-color: var(--sc-color-blue-900-dark);
+    --sc-card-action-button-press-background-color: transparent;
+    --sc-card-action-button-press-border-color: transparent;
+    --sc-card-action-button-press-text-color: var(--sc-color-blue-900-dark);
+
+    /* Carousel */
+    --sc-carousel-pagination-active-color: var(--sc-color-blue-500-dark);
+    --sc-carousel-pagination-color: var(--sc-color-grey-250-dark);
+
+    /* Badge */
+    --sc-badge-blue-outlined-background-color: var(--sc-color-black);
+    --sc-badge-blue-outlined-border-color: var(--sc-color-blue-500-dark);
+    --sc-badge-blue-outlined-text-color: var(--sc-color-blue-500-dark);
+    --sc-badge-blue-fill-background-color: var(--sc-color-blue-500-dark);
+    --sc-badge-blue-fill-border-color: var(--sc-color-blue-500-dark);
+    --sc-badge-blue-fill-text-color: var(--sc-color-white);
+     
+    --sc-badge-dark-blue-outlined-background-color: var(--sc-color-black);
+    --sc-badge-dark-blue-outlined-border-color: var(--sc-color-blue-650-dark);
+    --sc-badge-dark-blue-outlined-text-color: var(--sc-color-blue-650-dark);
+    --sc-badge-dark-blue-fill-background-color: var(--sc-color-blue-650-dark);
+    --sc-badge-dark-blue-fill-border-color: var(--sc-color-blue-650-dark);
+    --sc-badge-dark-blue-fill-text-color: var(--sc-color-white);
+     
+    --sc-badge-amber-outlined-background-color: var(--sc-color-black);
+    --sc-badge-amber-outlined-border-color: var(--sc-color-amber-500-dark);
+    --sc-badge-amber-outlined-text-color: var(--sc-color-amber-750-dark);
+    --sc-badge-amber-fill-background-color: var(--sc-color-amber-500-dark);
+    --sc-badge-amber-fill-border-color: var(--sc-color-amber-500-dark);
+    --sc-badge-amber-fill-text-color: var(--sc-color-blue-900-white);
+
+    --sc-badge-green-outlined-background-color: var(--sc-color-black);
+    --sc-badge-green-outlined-border-color: var(--sc-color-green-300-dark);
+    --sc-badge-green-outlined-text-color: var(--sc-color-green-700-dark);
+    --sc-badge-green-fill-background-color: var(--sc-color-green-700-dark);
+    --sc-badge-green-fill-border-color: var(--sc-color-green-700-dark);
+    --sc-badge-green-fill-text-color: var(--sc-color-white);
+     
+    --sc-badge-red-outlined-background-color: var(--sc-color-black);
+    --sc-badge-red-outlined-border-color: var(--sc-color-red-200-dark);
+    --sc-badge-red-outlined-text-color: var(--sc-color-red-500-dark);
+    --sc-badge-red-fill-background-color: var(--sc-color-red-500-dark);
+    --sc-badge-red-fill-border-color: var(--sc-color-red-500-dark);
+    --sc-badge-red-fill-text-color: var(--sc-color-white);
+
+    --sc-badge-grey-outlined-background-color: var(--sc-color-black);
+    --sc-badge-grey-outlined-border-color: var(--sc-color-grey-650-dark);
+    --sc-badge-grey-outlined-text-color: var(--sc-color-grey-650-dark);
+    --sc-badge-grey-fill-background-color: var(--sc-color-grey-650-dark);
+    --sc-badge-grey-fill-border-color: var(--sc-color-grey-650-dark);
+    --sc-badge-grey-fill-text-color: var(--sc-color-white);
+
+    --sc-badge-transparent-outlined-border-color: var(--sc-color-grey-650-dark);
+    --sc-badge-transparent-outlined-text-color: var(--sc-color-grey-grey-650-dark);
+    --sc-badge-transparent-fill-background-color: var(--sc-color-grey-650-dark);
+    --sc-badge-transparent-fill-border-color: var(--sc-color-grey-650-dark);
+    --sc-badge-transparent-fill-text-color: var(--sc-color-white);
+
+
+    /* DotStatus */
+    --sc-dot-status-text-color: var(--sc-color-blue-900-dark);
+
+    --sc-dot-status-default-info-background-color: var(--sc-color-blue-500-dark);
+    --sc-dot-status-default-success-background-color: var(--sc-color-green-500-dark);
+    --sc-dot-status-default-warning-background-color: var(--sc-color-amber-500-dark);
+    --sc-dot-status-default-error-background-color: var(--sc-color-red-500-dark);
+    --sc-dot-status-default-minor-error-background-color: var(--sc-shades-orange-500-dark);
+    --sc-dot-status-default-pending-background-color: var(--sc-shades-teal-500-dark);
+    --sc-dot-status-default-draft-background-color: var( --sc-shades-purple-500-dark);
+    --sc-dot-status-default-urgent-error-background-color: var(--sc-color-grey-700);
+    --sc-dot-status-default-neutral-background-color: var(--sc-color-grey-250-dark);
+
+    --sc-dot-status-advanced-error-icon-color: var(--sc-color-red-500-dark);
+    --sc-dot-status-advanced-minor-error-icon-color: var(--sc-shades-orange-500-dark);
+    --sc-dot-status-advanced-warning-icon-color: var(--sc-color-amber-500-dark);
+    --sc-dot-status-advanced-success-icon-color: var(--sc-color-green-500-dark);
+    --sc-dot-status-advanced-pending-approval-icon-color: var(
+      --sc-color-green-500-dark
+    );
+    --sc-dot-status-advanced-pending-icon-color: var(--sc-shades-teal-500-dark);
+    --sc-dot-status-advanced-info-icon-color: var(--sc-color-blue-500-dark);
+    --sc-dot-status-advanced-draft-icon-color: var(--sc-shades-purple-500-dark);
+    --sc-dot-status-advanced-missing-info-icon-color: var(--sc-color-grey-400-dark);
+    --sc-dot-status-advanced-rejected-icon-color: var(--sc-color-red-600-dark);
+    --sc-dot-status-advanced-on-hold-icon-color: var(--sc-color-grey-400-dark);
+    --sc-dot-status-advanced-not-started-icon-color: var(--sc-color-grey-400-dark);
+
+    /* Rating */
+    --sc-rating-active-color: var(--sc-color-blue-500-dark);
+    --sc-rating-inactive-color: var(--sc-color-blue-500-dark);
+    --sc-rating-readonly-active-color: var(--sc-color-blue-250-dark);
+    --sc-rating-readonly-inactive-color: var(--sc-color-grey-150-dark);
+
+    /* Modal */
+    --sc-modal-close-icon-color: var(--sc-color-blue-800-dark);
+    --sc-modal-background-color: var(--sc-color-grey-850);
+    --sc-modal-header-border-bottom-color: var(--sc-color-grey-400-dark);
+    --sc-modal-header-text-color: var(--sc-color-grey-950-dark);
+    --sc-modal-title-text-color: var(--sc-color-grey-850-dark);
+    --sc-modal-content-text-color: var(--sc-color-grey-950-dark);
+    --sc-modal-footer-border-top-color: var(--sc-color-grey-400-dark);
+    --sc-modal-alternative-footer-color: var(--sc-color-blue-500-dark);
+    --sc-modal-alternative-footer-background-color: var(--sc-color-grey-100-dark);
+    --sc-modal-default-background-color: var(--sc-color-grey-850);
+    --sc-modal-default-icon-color: var(--sc-color-green-500-dark);
+    --sc-modal-blue-background-color: var(--sc-color-blue-150-dark);
+    --sc-modal-blue-icon-color: var(--sc-color-blue-500-dark);
+    --sc-modal-green-background-color: var(--sc-color-green-150-dark);
+    --sc-modal-green-icon-color: var(--sc-color-green-500-dark);
+    --sc-modal-amber-background-color: var(--sc-color-amber-150-dark);
+    --sc-modal-amber-icon-color: var(--sc-color-amber-550-dark);
+    --sc-modal-red-background-color: var(--sc-color-red-250-dark);
+    --sc-modal-red-icon-color: var(--sc-color-red-300-dark);
+
+    /* Tooltip */
+    --sc-tooltip-background-color: var(--sc-color-grey-200-dark);
+    --sc-tooltip-light-background-color: var(--sc-color-grey-300-dark);
+    --sc-tooltip-light-border-color: var(--sc-color-grey-50-dark);
+    --sc-tooltip-success-background-color: var(--sc-color-green-700-dark);
+    --sc-tooltip-warning-background-color: var(--sc-color-amber-500-dark);
+    --sc-tooltip-error-background-color: var(--sc-color-red-500-dark);
+    --sc-tooltip-primary-background-color: var(--sc-color-blue-500-dark);
+    --sc-tooltip-glassy-border-color: var(--sc-color-grey-200-dark);
+    --sc-tooltip-glassy-background-color: #33333399;
+    --sc-tooltip-glassy-background-image-blur: linear-gradient(to top, #333333, #33333300 80%);
+
+    /* Toggle */
+    --sc-toggle-border-color: var(--sc-color-blue-500-dark);
+    --sc-toggle-background-color: var(--sc-color-black);
+    --sc-toggle-selected-background-color: var(--sc-color-blue-500-dark);
+    --sc-toggle-option-color: var(--sc-color-blue-900-dark);
+    --sc-toggle-selected-color: var(--sc-color-white);
+    --sc-toggle-disabled-background-color: var(--sc-color-grey-50-dark);
+
+    /* Progress bar */
+    --sc-progress-bar-background-color: var(--sc-color-grey-150-dark);
+    --sc-progress-bar-label-color: var(--sc-color-grey-650-dark);
+    --sc-progress-bar-help-text-color: var(--sc-color-grey-600-dark);
+    --sc-progress-bar-indicator-default-background-color: var(--sc-color-green-400-dark);
+    --sc-progress-bar-indicator-primary-background-color: var(--sc-color-blue-400-dark);
+    --sc-progress-bar-indicator-disabled-background-color: var(--sc-color-grey-50-dark);
+    --sc-progress-bar-indicator-warning-background-color: var(--sc-color-amber-400-dark);
+    --sc-progress-bar-indicator-error-background-color: var(--sc-color-red-400-dark);
+    --sc-progress-bar-indicator-info-background-color: var(--sc-color-blue-400-dark);
+
+    /* Pagination */
+    --sc-pagination-border-radius: 0.25rem;
+
+    /* Default State */
+    --sc-pagination-border-color: var(--sc-color-grey-450-dark);
+    --sc-pagination-background-color: var(--sc-color-grey-150-dark);
+    --sc-pagination-color: var(--sc-color-blue-800-dark);
+
+    /* Hover */
+    --sc-pagination-hover-color: var(--sc-color-blue-350-dark);
+    --sc-pagination-hover-border-color: var(--sc-color-blue-350-dark);
+
+    /* Disabled State */
+    --sc-pagination-disabled-border-color: var(--sc-color-grey-200-dark);
+    --sc-pagination-disabled-background-color: var(--sc-color-grey-50-dark);
+    --sc-pagination-disabled-color: var(--sc-color-grey-500-dark);
+
+    /* Active/Selected State */
+    --sc-pagination-active-background-color: var(--sc-color-blue-100-dark);
+    --sc-pagination-active-border-color: var(--sc-color-blue-350-dark);
+    --sc-pagination-active-color: var(--sc-color-blue-950-dark);
+
+    /* Navigation */
+    --sc-pagination-nav-border-color: var(--sc-color-grey-450-dark);
+    --sc-pagination-nav-background-color: var(--sc-color-grey-150-dark);
+
+    /* Jump (...) */
+    --sc-pagination-jump-color: var(--sc-color-grey-400-dark);
+    --sc-pagination-jump-border-color: var(--sc-color-grey-450-dark);
+
+    /* Document Mode */
+    --sc-pagination-document-color: var(--sc-color-blue-800-dark);
+
+    /* Quick Jumper & Size Changer */
+    --sc-pagination-input-border-color: var(--sc-color-grey-450-dark);
+    --sc-pagination-input-color: var(--sc-color-blue-800-dark);
+    --sc-pagination-dropdown-background: var(--sc-color-grey-150-dark);
+    --sc-pagination-dropdown-hover-background: var(--sc-color-blue-100-dark);
+    --sc-pagination-caret-color: var(--sc-color-blue-350-dark);
+
+    /* Focus */
+    --sc-pagination-focus-ring-color: var(--sc-color-blue-350-dark);
+  
+    /* Search field*/
+    --sc-search-field-input-border-color: var(--sc-color-grey-150-dark);
+    --sc-search-field-input-background-color: var(--sc-color-black);
+    --sc-search-field-input-color: var(--sc-color-blue-900-dark);
+    --sc-search-field-input-placeholder-color: var(--sc-color-grey-400-dark);
+    --sc-search-field-input-focus-border-color: var(--sc-color-blue-500-dark);
+    --sc-search-field-input-suffix-color: var(--sc-color-blue-500-dark);
+    --sc-search-field-disabled-input-border-color: var(--sc-color-grey-150-dark);
+    --sc-search-field-disabled-input-background-color: var(--sc-color-grey-50-dark);
+    --sc-search-field-disabled-input-placeholder-color: var(--sc-color-grey-50-dark);
+    --sc-search-field-disabled-input-text-color: var(--sc-color-grey-400-dark);
+    --sc-search-field-disabled-input-suffix-color: var(--sc-color-grey-50-dark);
+
+    /* Dropdown */
+    --sc-dropdown-border-color: rgba(var(--sc-color-blue-900-rgb), 0.15);
+    --sc-dropdown-background-color: var(--sc-color-grey-150-dark);
+    --sc-dropdown-color: var(--sc-color-blue-900-dark);
+    --sc-dropdown-item-background-color: var(--sc-color-grey-150-dark);
+    --sc-dropdown-item-background-hover-color: var(--sc-color-grey-200-dark);
+    --sc-dropdown-item-background-pressed-color: var(--sc-color-grey-50-dark);
+    --sc-dropdown-item-background-selected-color: var(--sc-color-blue-100-dark);
+    --sc-dropdown-item-tick-color: var(--sc-color-blue-950-dark);
+    --sc-dropdown-error-color: var(--sc-color-blue-900-dark);
+    --sc-dropdown-error-item-background-color: var(--sc-color-grey-150-dark);
+    --sc-dropdown-error-item-background-hover-color: var(--sc-color-grey-200-dark);
+    --sc-dropdown-error-item-background-pressed-color: var(--sc-color-grey-50-dark);
+    --sc-dropdown-error-item-background-selected-color: var(--sc-color-blue-100-dark);
+    --sc-dropdown-error-item-tick-color: var(--sc-color-blue-950-dark);
+    --sc-dropdown-disabled-color: var(--sc-color-grey-500-dark);
+    --sc-dropdown-header-color: var(--sc-brand-grey);
+    --sc-dropdown-empty-text-color: var(--sc-brand-grey);
+    --sc-dropdown-loading-text-color: var(--sc-brand-grey);
+    --sc-dropdown-advanced-search-border-color: var(--sc-color-grey-150-dark);
+    --sc-dropdown-advanced-search-color: var(--sc-color-blue-500-dark);
+    --sc-dropdown-focus-outline-color: var(--sc-color-blue-100-dark);
+    --sc-dropdown-retry-button-color: var(--sc-color-blue-500-dark);
+    --sc-dropdown-input-border-color: var(--sc-color-grey-600);
+    --sc-dropdown-input-arrow-color: var(--sc-color-blue-850-dark);
+    --sc-dropdown-input-multiple-background-color: var(--sc-color-grey-200-dark);
+    --sc-dropdown-expand-icon-color: var(--sc-color-grey-400-dark);
+
+    /* Panel */
+    --sc-panel-icon-color: var(--sc-color-blue-500-dark);
+    --sc-panel-title-color: var(--sc-color-blue-900-dark);
+    --sc-panel-content-color: var(--sc-color-grey-600-dark);
+    --sc-panel-background-color: var(--sc-color-black);
+
+    /* Time input */
+    --sc-time-input-list-background-color: var(--sc-color-black);
+    --sc-time-input-list-item-focus-background-color: var(--sc-color-blue-100-dark);
+    --sc-time-input-list-item-focus-color: var(--sc-color-blue-500-dark);
+    --sc-time-input-list-title-border-color: var(--sc-color-grey-100-dark);
+    --sc-time-input-scroll-bar-color: var(--sc-color-grey-150-dark);
+    --sc-time-input-list-item-color: var(--sc-color-blue-900-dark);
+    --sc-time-input-list-title-color: var(--sc-color-grey-500-dark);
+    --sc-time-input-list-item-disabled-color: var(--sc-color-grey-50-dark);
+    --sc-time-input-list-box-shadow-color: rgba(var(--sc-color-blue-900-rgb), 0.15);
+
+    /* Tab */
+    --sc-tab-color: var(--sc-color-grey-650-dark);
+    --sc-tab-color-filled: var(--sc-color-white);
+    --sc-tab-color-segmented: var(--sc-color-grey-650-dark);
+   
+    --sc-tab-hover-color: var(--sc-color-blue-250-dark);
+    --sc-tab-hover-icon-color: var(--sc-color-blue-250-dark);
+    --sc-tab-hover-counter-color: var(--sc-color-grey-650-dark);
+    --sc-tab-filled-hover-counter-color: var(--sc-color-blue-250-dark);
+    
+    --sc-tab-focus-outline-color: var(--sc-color-blue-250-dark);
+    --sc-tab-filled-focus-outline-color: var(--sc-color-blue-100-dark);
+    --sc-tab-segmented-focus-outline-color: var(--sc-color-blue-250-dark);
+   
+    --sc-tab-filled-disabled-color: var(--sc-color-blue-250-dark);
+   
+    --sc-tab-counter-border-color: var(--sc-color-grey-150-dark);
+    --sc-tab-active-counter-border-color: var(--sc-color-blue-260-dark);
+    --sc-tab-segmented-active-counter-border-color: var(--sc-color-blue-250-dark);
+    --sc-tab-active-counter-border-color: var(--sc-color-blue-250-dark);
+    --sc-tab-filled-focus-counter-border-color: transparent;
+   
+    --sc-tab-error-color: var(--sc-color-red-500-dark);
+    --sc-tab-error-icon-color: var(--sc-color-red-500-dark);
+    --sc-tab-error-counter-border-color: var(--sc-color-red-200-dark);
+    --sc-tab-error-counter-background-color: var(--sc-color-red-50-dark);
+   
+    --sc-tab-active-color: var(--sc-color-blue-500-dark);
+    --sc-tab-filled-active-color: var(--sc-color-blue-900-dark);
+    --sc-tab-filled-active-background-color: var(--sc-color-black);
+    --sc-tab-segmented-active-color: var(--sc-color-blue-500-dark);
+    --sc-tab-segmented-active-background-color: var(--sc-color-blue-50-dark);
+    --sc-tab-segmented-active-border-color: var(--sc-color-blue-250-dark);
+   
+    --sc-tab-icon-color: var(--sc-color-grey-400-dark);
+    --sc-tab-active-icon-color: var(--sc-color-blue-500-dark);
+    --sc-tab-filled-active-icon-color: var(--sc-color-blue-250-dark);
+    --sc-tab-group-filled-background: var(--sc-color-prosper-blue);
+   
+    --sc-tab-divider-color: var(--sc-color-grey-150-dark);
+    --sc-tab-group-scroll-button-color: var(--sc-color-grey-600);
+    --sc-tab-group-scroll-button-background-color: var(--sc-color-grey-800);
+    
+    /* Breadcrumb */
+    --sc-breadcrumb-item-text-color: var(--sc-color-blue-500-dark);
+    --sc-breadcrumb-last-item-text-color: var(--sc-color-blue-900-dark);
+    --sc-breadcrumb-item-menu-text-color: var(--sc-color-blue-900-dark);
+    --sc-breadcrumb-separator-color: var(--sc-color-blue-500-dark);
+    --sc-breadcrumb-background-color: var(--sc-color-grey-100-dark);
+
+    /* Stepper */
+    --sc-step-title-hover-color: var(--sc-color-blue-500-dark);
+    --sc-step-time-hover-color: var(--sc-color-blue-500-dark);
+    --sc-step-description-hover-color: var(--sc-color-blue-500-dark);
+    --sc-step-indicator-hover-background: transparent;
+    --sc-step-indicator-hover-border-color: var(--sc-color-blue-500-dark);
+    --sc-step-indicator-hover-color: var(--sc-color-blue-500-dark);
+
+    --sc-step-title-color: var(--sc-color-blue-900-dark);
+    --sc-step-time-color: var(--sc-color-blue-900-dark);
+    --sc-step-description-color: var(--sc-color-blue-900-dark);
+    --sc-step-indicator-background: transparent;
+    --sc-step-indicator-border-color: var(--sc-color-grey-50);
+    --sc-step-indicator-color: var(--sc-color-grey-50-dark);
+    --sc-step-separator-style: solid;
+    --sc-step-separator-color: var(--sc-color-grey-50-dark);
+
+    --sc-step-current-indicator-background: var(--sc-color-blue-500-dark);
+    --sc-step-current-indicator-color: var(--sc-color-white);
+    --sc-step-current-indicator-border-color: var(--sc-color-blue-500-dark);
+    --sc-step-current-title-color: var(--sc-color-blue-900-dark);
+    --sc-step-current-description-color: var(--sc-color-blue-900-dark);
+    --sc-step-current-step-separator-color: var(--sc-color-blue-500-dark);
+
+    --sc-step-incomplete-indicator-background: var(--sc-color-grey-250-dark);
+    --sc-step-incomplete-indicator-color: var(--sc-color-white);
+    --sc-step-incomplete-indicator-border-color: var(--sc-color-grey-250-dark);
+    --sc-step-incomplete-title-color: var(--sc-color-grey-250-dark);
+    --sc-step-incomplete-time-color: var(--sc-color-grey-250-dark);
+    --sc-step-incomplete-description-color: var(--sc-color-grey-250-dark);
+    --sc-step-incomplete-view-color: var(--sc-color-grey-250-dark);
+    --sc-step-incomplete-step-separator-color: var(--sc-color-grey-250-dark);
+
+    --sc-step-finish-indicator-background: var(--sc-color-green-500-dark);
+    --sc-step-finish-indicator-border-color: var(--sc-color-green-500-dark);
+    --sc-step-finish-indicator-color: var(--sc-color-white);
+    --sc-step-finish-title-color: var(--sc-color-blue-900-dark);
+    --sc-step-finish-time-color: var(--sc-color-blue-900-dark);
+    --sc-step-finish-description-color: var(--sc-color-blue-900-dark);
+    --sc-step-finish-step-separator-color: var(--sc-color-green-500-dark);
+
+    --sc-step-error-indicator-background: var(--sc-color-red-500-dark);
+    --sc-step-error-indicator-border-color: var(--sc-color-red-500-dark);
+    --sc-step-error-indicator-color: var(--sc-color-white);
+    --sc-step-error-title-color: var(--sc-color-blue-900-dark);
+    --sc-step-error-time-color: var(--sc-color-blue-900-dark);
+    --sc-step-error-description-color: var(--sc-color-blue-900-dark);
+    --sc-step-error-step-separator-color: var(--sc-color-red-500-dark);
+
+    --sc-step-process-indicator-background: var(--sc-color-blue-400-dark);
+    --sc-step-process-indicator-border-color: var(--sc-color-blue-400-dark);
+    --sc-step-process-indicator-color: var(--sc-color-white);
+    --sc-step-process-title-color: var(--sc-color-blue-900-dark);
+    --sc-step-process-description-color: var(--sc-color-blue-900-dark);
+
+    --sc-step-disabled-indicator-color: var(--sc-color-grey-400-dark);
+    --sc-step-disabled-indicator-border-color: var(--sc-color-grey-400-dark);
+    --sc-step-disabled-indicator-background: var(--sc-color-grey-400-dark);
+    --sc-step-disabled-title-color: var(--sc-color-grey-400-dark);
+    --sc-step-disabled-description-color: var(--sc-color-grey-400-dark);
+
+    /* Accordion */
+    --sc-accordion-icon-color: var(--sc-color-blue-900-dark);
+    --sc-accordion-title-color: var(--sc-color-blue-900-dark);
+    --sc-accordion-sub-title-color: var(--sc-color-grey-500-dark);
+    --sc-accordion-label-color: var(--sc-color-blue-900-dark);
+    --sc-accordion-content-color: var(--sc-color-blue-900-dark);
+    --sc-accordion-background-color: transparent;
+    --sc-accordion-divider-color: var(--sc-color-grey-150-dark);
+
+    /* Avatar */
+    --sc-avatar-green-background-color: var(--sc-color-green-500-dark);
+    --sc-avatar-blue-background-color: var(--sc-color-blue-400-dark);
+    --sc-avatar-red-background-color: var(--sc-color-red-300-dark);
+    --sc-avatar-yellow-background-color: var(--sc-color-amber-450-dark);
+    --sc-avatar-default-background-color: var(--sc-color-grey-400-dark);
+    --sc-avatar-outlined-background-color: var(--sc-color-black);
+
+    /* Avatar Interactive Stroke Colors (Dark Mode) */
+    --sc-avatar-hover-stroke-red: var(--sc-color-red-400);
+    --sc-avatar-hover-stroke-green: var(--sc-color-green-550);
+    --sc-avatar-hover-stroke-blue: var(--sc-color-blue-350);
+    --sc-avatar-hover-stroke-yellow: var(--sc-color-amber-200);
+    --sc-avatar-hover-stroke-default: var(--sc-color-blue-350);
+
+    --sc-avatar-pressed-stroke-red: var(--sc-color-red-650);
+    --sc-avatar-pressed-stroke-green: var(--sc-color-green-800);
+    --sc-avatar-pressed-stroke-blue: var(--sc-color-blue-600);
+    --sc-avatar-pressed-stroke-yellow: var(--sc-color-amber-450);
+    --sc-avatar-pressed-stroke-default: var(--sc-color-blue-600);
+
+    --sc-avatar-selected-stroke-red: var(--sc-color-red-700);
+    --sc-avatar-selected-stroke-green: var(--sc-color-green-850);
+    --sc-avatar-selected-stroke-blue: var(--sc-color-blue-650);
+    --sc-avatar-selected-stroke-yellow: var(--sc-color-amber-500);
+    --sc-avatar-selected-stroke-default: var(--sc-color-blue-650);
+
+    /* Avatar Disabled & Focus (Dark Mode) */
+    --sc-avatar-disabled-stroke: var(--sc-color-grey-200);
+    --sc-avatar-disabled-icon: var(--sc-color-grey-400);
+    --sc-avatar-disabled-background: var(--sc-color-grey-100);
+    --sc-avatar-outline-image-stroke: var(--sc-color-grey-650);
+    --sc-avatar-focus-ring-color: var(--sc-color-blue-200);
+
+    /* Divider */
+    --sc-divider-color: var(--sc-color-grey-400-dark);
+    --sc-divider-text-color: var(--sc-color-blue-900-dark);
+    --sc-divider-filled-background-color: var(--sc-color-grey-50-dark);
+    --sc-divider-filled-color: var(--sc-color-grey-150-dark);
+    --sc-divider-optional-text-color: var(--sc-color-grey-400-dark);
+    --sc-divider-indicator-background-color: var(--sc-color-blue-500-dark);
+    --sc-divider-indicator-color: var(--sc-color-white);
+    --sc-divider-indicator-border-color: var(--sc-color-blue-500-dark);
+
+    /* List Navigation */
+    --sc-list-navigation-background-color: transparent;
+    --sc-list-navigation-hover-color: var(--sc-color-blue-500-dark);
+    --sc-list-navigation-title-color: var(--sc-color-blue-900-dark);
+    --sc-list-navigation-title-disabled-color: var(--sc-color-grey-400-dark);
+    --sc-list-navigation-sub-title-color: var(--sc-color-grey-600-dark);
+    --sc-list-navigation-border-color: var(--sc-color-grey-250-dark);
+    --sc-list-navigation-prefix-icon-color: var(--sc-color-blue-900-dark);
+    --sc-list-navigation-suffix-icon-color: var(--sc-color-grey-300-dark);
+    --sc-list-navigation-arrow-color: var(--sc-color-blue-900-dark);
+    --sc-list-navigation-item-background-color: transparent;
+    --sc-list-navigation-item-selected-background-color: var(--sc-color-blue-50-dark);
+    --sc-navigation-title-font-weight: 600;
+
+    /* Card Number Input */
+    --sc-card-number-suffix-icon-color: var(--sc-color-green-500-dark);
+
+    /* Copy */
+    --sc-copy-label-color: var(--sc-color-blue-900-dark);
+    --sc-copy-error-color: var(--sc-color-red-500-dark);
+    --sc-copy-success-color: var(--sc-color-green-500-dark);
+    --sc-focus-ring-color: var(--sc-color-blue-500-dark);
+    --sc-copy-display-message: var(--sc-color-blue-900-dark);
+
+    /* Switch */
+    --sc-switch-label-color: var(--sc-color-blue-900-dark);
+    --sc-switch-background-color: var(--sc-color-grey-300-dark);
+    --sc-switch-disabled-background-color: var(--sc-color-grey-150-dark);
+    --sc-switch-thumb-background-color: var(--sc-color-white);
+    --sc-switch-thumb-disabled-background-color: var(--sc-color-white);
+    --sc-switch-focus-background-color: var(--sc-color-blue-500-dark);
+    --sc-switch-thumb-hover-background-color: var(--sc-color-white);
+    --sc-switch-checked-background-color: var(--sc-color-blue-500-dark);
+    /* --sc-switch-checked-hover-background-color: var(--sc-color-blue-hover); */
+    --sc-switch-required-content-color: var(--sc-color-red-500-dark);
+    --sc-switch-text-label-color: var(--sc-color-white);
+    --sc-switch-focus-ring-color: var(--sc-color-blue-250-dark);
+    --sc-switch-loading-spinner-color: var(--sc-color-grey-150-dark);
+    --sc-switch-loading-checked-background-color: var(--sc-color-blue-200-dark);
+    --sc-switch-loading-checked-spinner-color: var(--sc-color-blue-200-dark);
+    --sc-switch-checked-disabled-background-color: var(--sc-color-blue-200-dark);
+
+    /* Table */
+    --sc-table-th-background: var(--sc-color-black);
+    --sc-table-th-color: var(--sc-color-blue-900-dark);
+    --sc-table-td-color: var(--sc-color-blue-900-dark);
+    --sc-table-td-background: var(--sc-color-black);
+    --sc-table-divider-color: var(--sc-color-grey-150-dark);
+    --sc-table-td-border-top: var(--sc-color-grey-150-dark);
+    --sc-table-tr-hover-background-color: var(--sc-color-blue-50-dark);
+    --sc-table-tr-background: var(--sc-color-black);
+
+    /* File Item */
+    --sc-file-item-border-color: var(--sc-color-grey-600);
+    --sc-file-item-file-size-color: var(--sc-color-blue-900-dark);
+    --sc-file-item-file-name-color: var(--sc-color-blue-900-dark);
+    --sc-file-item-close-icon-color: var(--sc-color-grey-600-dark);
+    --sc-file-item-hover-background-color: var(--sc-color-grey-50-dark);
+    --sc-file-item-pending-color: var(--sc-color-blue-250-dark);
+    --sc-file-item-error-color: var(--sc-color-red-500-dark);
+    --sc-file-item-error-background-color: var(--sc-color-red-50-dark);
+    --sc-file-item-file-extra-color: var(--sc-color-grey-400-dark);
+
+    /* File Icon */
+    --sc-file-icon-color: var(--sc-color-blue-900-dark);
+
+    /* File drop zone */
+    --sc-file-input-drop-zone-text-color: var(--sc-color-grey-50-dark);
+    --sc-file-input-drop-zone-disabled-text-color: var(--sc-color-grey-50-dark);
+    --sc-file-input-drop-zone-active-text-color: var(--sc-color-grey-50-dark);
+    --sc-file-input-drop-container-background-color: transparent;
+    /* --sc-file-input-drop-container-active-background-color: var(--sc-color-blue-lightest); */
+    --sc-file-input-drop-container-disabled-background-color: var(--sc-color-grey-50-dark);
+    --sc-file-input-drop-container-border-color: var(--sc-color-grey-150-dark);
+    --sc-file-input-drop-container-active-border-color: var(--sc-color-blue-500-dark);
+    --sc-file-input-drop-container-disabled-border-color: var(--sc-color-grey-150-dark);
+    --sc-file-drop-zone-accept-text-color: var(--sc-color-grey-400-dark);
+    --sc-file-input-drop-container-gray-background-color: var(--sc-color-grey-50-dark);
+    --sc-file-input-drop-zone-placeholder-color: var(--sc-color-blue-900-dark);
+    --sc-file-input-drop-zone-placeholder-brw-color: var(--sc-color-blue-500-dark);
+    --sc-file-input-drop-container-error-border-color: var(--sc-color-red-500-dark);
+
+    /* File button */
+    --sc-file-button-accept-text-color: var(--sc-color-grey-400-dark);
+
+    /* List Item */
+    --sc-list-item-title-color: var(--sc-color-blue-700-dark);
+    --sc-list-item-body-color: var(--sc-color-grey-600-dark);
+
+    /* Content Loader */
+    --sc-content-loader-background-linear-stop-color-1: rgba(130, 130, 130, 0.2);
+    --sc-content-loader-background-linear-stop-point-1: 8%;
+    --sc-content-loader-background-linear-stop-color-2: rgba(130, 130, 130, 0.3);
+    --sc-content-loader-background-linear-stop-point-2: 18%;
+    --sc-content-loader-background-linear-stop-color-3: rgba(130, 130, 130, 0.2);
+    --sc-content-loader-background-linear-stop-point-3: 33%;
+
+    /* Box */
+    --sc-box-shadow-color: rgba(var(--sc-color-white-rgb), 0.15);
+    --sc-box-border-color: var(--sc-color-grey-150-dark);
+    --sc-box-background-color: transparent;
+    --sc-box-default-background-color: var(--sc-color-black);
+    --sc-box-info-background-color: var(--sc-color-blue-50-dark);
+    --sc-box-success-background-color: var(--sc-color-green-50-dark);
+    --sc-box-warning-background-color: var(--sc-color-amber-50-dark);
+    --sc-box-error-background-color: var(--sc-color-red-50-dark);
+    --sc-box-disabled-background-color: var(--sc-color-grey-50-dark);
+    --sc-box-text-color: var(--sc-color-blue-900-dark);
+    --sc-box-default-text-color: var(--sc-color-blue-900-dark);
+    --sc-box-info-text-color: var(--sc-color-blue-650-dark);
+    --sc-box-success-text-color: var(--sc-color-green-700-dark);
+    --sc-box-warning-text-color: var(--sc-color-amber-750-dark);
+    --sc-box-error-text-color: var(--sc-color-red-700-dark);
+    --sc-box-disabled-text-color: var(--sc-color-blue-650-dark);
+
+    /* Button group item */
+    --sc-button-group-item-border-color: var(--sc-color-grey-150-dark);
+    --sc-button-group-item-hover-border-color: var(--sc-color-blue-500-dark);
+    --sc-button-group-item-text-color: var(--sc-color-blue-900-dark);
+    --sc-button-group-item-hover-text-color: var(--sc-color-blue-500-dark);
+    --sc-button-group-item-disabled-border-color: var(--sc-color-grey-150-dark);
+    --sc-button-group-item-disabled-background-color: var(--sc-color-grey-50-dark);
+    --sc-button-group-item-disabled-text-color: var(--sc-color-grey-350-dark);
+    --sc-button-group-item-error-border-color: var(--sc-color-red-500-dark);
+    --sc-button-group-item-active-disabled-border-color: var(--sc-color-grey-150-dark);
+    --sc-button-group-item-active-disabled-background-color: var(--sc-color-grey-300-dark);
+    --sc-button-group-item-active-disabled-text-color: var(--sc-color-white);
+    --sc-button-group-item-background-color: var(--sc-color-black);
+
+    /* Snackbar */
+    --sc-snackbar-background-color: var(--sc-color-blue-900-dark);
+    --sc-snackbar-text-color: var(--sc-color-grey-100-dark);
+    --sc-snackbar-error-icon-color: var(--sc-color-red-500-dark);
+    --sc-snackbar-warning-icon-color: var(--sc-color-amber-500-dark);
+    --sc-snackbar-success-icon-color: var(--sc-color-green-500-dark);
+    --sc-snackbar-info-icon-color: var(--sc-color-blue-500-dark);
+    --sc-snackbar-disabled-icon-color: var(--sc-color-grey-500-dark);
+
+    /* Toast */
+    --sc-toast-background-color: var(--sc-color-black);
+    --sc-toast-icon-color: var(--sc-color-white);
+    --sc-toast-error-icon-from-background-color: var(--sc-color--500-dark);
+    --sc-toast-error-icon-to-background-color: var(--sc-color-red-150-dark);
+    --sc-toast-warning-icon-from-background-color: var(--sc-color-amber-500-dark);
+    --sc-toast-warning-icon-to-background-color: var(--sc-color-yellow-150-dark);
+    --sc-toast-success-icon-from-background-color: var(--sc-color-green-500-dark);
+    --sc-toast-success-icon-to-background-color: var(--sc-color-green-150-dark);
+    --sc-toast-info-icon-from-background-color: var(--sc-color-blue-500-dark);
+    --sc-toast-info-icon-to-background-color: var(--sc-color-blue-150-dark);
+    --sc-toast-disabled-icon-from-background-color: var(--sc-color-grey-500-dark);
+    --sc-toast-disabled-icon-to-background-color: var(--sc-color-grey-150-dark);
+
+    --sc-toast-text-color: var(--sc-color-blue-900-dark);
+    --sc-toast-title-color: var(--sc-color-blue-900-dark);
+    --sc-toast-description-color: var(--sc-color-grey-650-dark);
+
+    /* Navbar item */
+    --sc-navbar-item-text-color: var(--sc-color-grey-650-dark);
+    --sc-navbar-item-active-text-color: var(--sc-color-blue-500-dark);
+
+    /* Layout */
+    --sc-layout-background-color: var(--sc-color-grey-100-dark);
+    --sc-column-layout-sheet-background-color: var(--sc-color-grey-100-dark);
+    --sc-layout-text-color: var(--sc-color-blue-900-dark);
+    --sc-layout-header-bar-background-color: var(--sc-color-black);
+    --sc-layout-border-bottom-color: var(--sc-color-grey-150-dark);
+
+    /* Column layout */
+    --sc-column-layout-collapse-background-color: rgba(0, 0, 0, 0.8);
+    --sc-column-layout-collapse-text-color: var(--sc-color-white);
+
+    /* Menu item */
+    --sc-menu-background-color: var(--sc-color-black);
+    --sc-menu-label-color: var(--sc-color-grey-400-dark);
+    --sc-menu-item-hover-background-color: var(--sc-color-grey-100-dark);
+    --sc-menu-item-hover-color: var(--sc-color-blue-500-dark);
+    --sc-menu-item-color: var(--sc-color-blue-900-dark);
+
+    /* Banner item */
+    --sc-banner-light-blue-background-color: var(--sc-color-blue-150-dark);
+    --sc-banner-light-blue-text-color: var(--sc-color-blue-900-dark);
+    --sc-banner-light-grey-background-color: var(--sc-color-grey-100-dark);
+    --sc-banner-light-grey-text-color: var(--sc-color-blue-900-dark);
+    --sc-banner-prosper-blue-background-color: var(--sc-color-prosper-blue);
+    --sc-banner-prosper-blue-text-color: var(--sc-color-white);
+    --sc-banner-alt-blue-background-color: var(--sc-color-blue-650-dark);
+    --sc-banner-alt-blue-text-color: var(--sc-color-white);
+    --sc-banner-white-background-color: var(--sc-color-grey-100-dark);
+    --sc-banner-white-text-color: var(--sc-color-blue-900-dark);
+    --sc-banner-border-color: var(--sc-color-grey-150-dark);
+
+    /* Data view */
+    --sc-data-view-field-background-color: var(--sc-color-grey-50-dark);
+    --sc-data-view-border-color: var(--sc-color-grey-100-dark);
+    --sc-data-view-view-mode-field-color: var(--sc-color-blue-900-dark);
+
+    /* Date picker */
+    --sc-date-picker-surface: var(--sc-color-grey-150-dark);
+    --sc-date-picker-color: var(--sc-color-blue-900-dark);
+    --sc-date-picker-border-color: var(--sc-color-grey-150-dark);
+    --sc-date-picker-header-divider-border-color: var(--sc-color-grey-150-dark);
+    --sc-date-picker-selected-range: var(--sc-color-blue-200-dark);
+    --sc-date-picker-on-disabled: var(--sc-color-grey-400-dark);
+    --sc-date-picker-on-weekday: var(--sc-color-blue-900-dark);
+    --sc-date-picker-selected-background-color: var(--sc-color-blue-650-dark);
+    --sc-date-picker-action-bar-color: var(--sc-color-grey-400-dark);
+    --sc-date-picker-quick-selector-header-color: var(--sc-color-grey-700-dark);
+    --sc-date-picker-quick-selector-item-color: var(--sc-color-grey-800-dark);
+    --sc-date-picker-quick-selector-item-hover-color: var(--sc-color-blue-350-dark);
+    --sc-date-picker-quick-selector-item-hover-background-color: var(--sc-color-blue-900-dark);
+    --sc-date-picker-header-divider-border-color: var(--sc-color-grey-400-dark);
+
+    --sc-date-range-border-color: var(--sc-color-grey-150-dark);
+    --sc-date-range-box-shadow-color: rgba(89, 89, 89, 0.20);
+
+    /* Month calendar */
+    --sc-month-calendar-grabbed-color: var(--sc-color-grey-700);
+
+    /* label */
+    --sc-label-color: var(--sc-color-grey-650-dark);
+    --sc-label-optional-box-color: var(--sc-color-grey-400-dark);
+    --sc-label-icon-color: var(--sc-color-blue-850-dark);
+    --sc-label-trust-point-suffix-color: var(--sc-color-green-500-dark);
+    --sc-label-trust-point-prefix-color: var(--sc-color-blue-500-dark);
+
+    /* text input */
+    --sc-text-input-error-color: var(--sc-color-red-500-dark);
+    --sc-text-input-suffix-icon-color: var(--sc-color-blue-850-dark);
+    --sc-text-input-prefix-icon-color: var(--sc-color-grey-600-dark);
+    
+    /* rich text editor */
+    --sc-rich-text-editor-main-border-color: var(--sc-color-grey-400-dark);
+    --sc-rich-text-editor-main-bg-color: var(--sc-color-grey-150-dark);
+    --sc-rich-text-editor-main-color: var(--sc-color-white);
+    --sc-rich-text-editor-main-focus-border-color: var(--sc-color-blue-500-dark);
+    --sc-rich-text-editor-icon-color: var(--sc-color-blue-800-dark);
+    --sc-rich-text-editor-icon-color-active: var(--sc-color-blue-950-dark);
+    --sc-rich-text-editor-icon-hover-color: var(--sc-color-blue-600-dark);
+    --sc-rich-text-editor-bg-color: transparent;
+    --sc-rich-text-editor-active-bg-color: var(--sc-color-blue-100-dark);
+    --sc-rich-text-editor-count-color: var(--sc-color-grey-650-dark);
+    --sc-rich-text-editor-count-error-color: var(--sc-color-red-500-dark);
+    --sc-rich-text-editor-separate-color: var(--sc-color-grey-200-dark);
+    --sc-rich-text-editor-table-cell-border-color: var(--sc-color-grey-150-dark);
+    --sc-rich-text-editor-table-cell-bg-color: var(--sc-color-grey-100-dark);
+    --sc-rich-text-editor-table-cell-hover-border-color: var(--sc-color-blue-100-dark);
+    --sc-rich-text-editor-table-cell-hover-bg-color: var(--sc-color-blue-100-dark);
+    
+    /* Timer */
+    --sc-timer-label-description-color: var(--sc-color-blue-900-dark);
+    --sc-timer-default-background-color: var(--sc-color-blue-100-dark);
+    --sc-timer-default-text-color: var(--sc-color-blue-400-dark);
+    --sc-timer-warning-background-color: var(--sc-color-amber-100-dark);
+    --sc-timer-warning-text-color: var(--sc-color-amber-400-dark);
+    --sc-timer-alert-background-color: var(--sc-color-red-100-dark);
+    --sc-timer-alert-text-color: var(--sc-color-red-400-dark);
+
+    
+    /* === Data Grid beginning === */
+    --sc-data-grid-body-vertical-border-color: var(--sc-color-grey-400-dark);
+    --sc-data-grid-body-horizontal-border-color: var(--sc-color-grey-400-dark);
+    --sc-data-grid-outline-color: var(--sc-color-grey-400-dark);
+    
+    --sc-data-grid-body-cell-text-color: var(--sc-color-grey-800-dark);
+    --sc-data-grid-header-cell-text-color: var(--sc-color-grey-700-dark);
+
+    --sc-data-grid-basic-bg-color: var(--sc-color-grey-150-dark);
+    --sc-data-grid-basic-text-color: var(--sc-color-grey-700-dark);
+    --sc-data-grid-basic-icon-color: var(--sc-color-blue-800-dark);
+
+    /* header bg color */
+    --sc-data-grid-header-cell-bg-color: var(--sc-color-grey-50-dark);
+
+    /* body bg color */
+    --sc-data-grid-body-cell-default-bg-color: var(--sc-color-grey-150-dark);
+    --sc-data-grid-body-cell-hover-bg-color: var(--sc-color-blue-200-dark);
+    --sc-data-grid-body-cell-pressed-bg-color: var(--sc-color-blue-100-dark);
+    --sc-data-grid-body-cell-selected-bg-color: var(--sc-color-blue-100-dark);
+    --sc-data-grid-body-cell-readonly-bg-color: var(--sc-color-grey-150-dark);
+
+    --sc-data-grid-body-cell-zebra-default-bg-color: var(--sc-color-grey-975);
+    --sc-data-grid-body-cell-zebra-hover-bg-color: var(--sc-color-blue-200-dark);
+    --sc-data-grid-body-cell-zebra-pressed-bg-color: var(--sc-color-blue-100-dark);
+    --sc-data-grid-body-cell-zebra-selected-bg-color: var(--sc-color-blue-100-dark);
+    --sc-data-grid-body-cell-zebra-readonly-bg-color: var(--sc-color-grey-50-dark);
+
+    --sc-data-grid-scrollbar-color: var(--sc-color-grey-500);
+    --sc-data-grid-popup-window-bg-color: var(--sc-color-grey-150-dark);
+    
+    --sc-data-grid-draggable-icon-color: var(--sc-color-grey-400-dark);
+    --sc-data-grid-draggable-divider-color: var(--sc-color-blue-450-dark);
+    /* === Data Grid ending === */
+    
+    /* Slider */
+    --sc-slider-rail-color: var(--sc-color-grey-400-dark);
+    --sc-slider-track-color: var(--sc-color-blue-500-dark);
+    --sc-slider-tooltip-background-color: var(--sc-color-blue-500-dark);
+    --sc-slider-tooltip-color: var(--sc-color-black);
+    --sc-slider-background-color: var(--sc-color-grey-150-dark);
+    --sc-slider-border-color: var(--sc-color-grey-400-dark);
+    --sc-slider-shadow-color: var(--sc-color-grey-100-dark);
+    --sc-slider-hover-background-color: var(--sc-color-blue-200-dark);
+    --sc-slider-hover-border-color: var(--sc-color-blue-450-dark);
+    --sc-slider-pressed-background-color: var(--sc-color-grey-100-dark);
+    --sc-slider-pressed-border-color: var(--sc-color-blue-600-dark);
+    --sc-slider-disabled-background-color: var(--sc-color-grey-50-dark);
+    --sc-slider-disabled-border-color: var(--sc-color-grey-400-dark);
+    --sc-slider-focus-color: var(--sc-color-blue-600-dark);
+    --sc-slider-slot-color: var(--sc-color-grey-400-dark);
+    --sc-slider-error-track-color: var(--sc-color-red-350-dark);
+    --sc-slider-error-tooltip-background-color: var(--sc-color-red-600-dark);
+    --sc-slider-error-tooltip-color: var(--sc-color-black);
+    --sc-slider-error-background-color: var(--sc-color-red-50-dark);
+    --sc-slider-error-border-color: var(--sc-color-red-550-dark);
+    --sc-slider-error-hover-background-color: var(--sc-color-red-200-dark);
+    --sc-slider-error-hover-border-color: var(--sc-color-red-600-dark);
+    --sc-slider-error-pressed-background-color: var(--sc-color-grey-100-dark);
+    --sc-slider-error-pressed-border-color: var(--sc-color-red-650-dark);
+
+    /* --- Status Filter: Component Base --- */
+    --sc-status-filter-bg: var(--sc-color-grey-150-dark);
+    --sc-status-filter-border: var(--sc-color-grey-450-dark);
+    --sc-status-filter-text: var(--sc-color-grey-700-dark);
+    --sc-status-filter-focus-ring: var(--sc-color-blue-600-dark);
+    --sc-status-filter-disabled-bg: var(--sc-color-grey-100);
+
+    /* --- Status Filter: Neutral Palette (Grey) --- */
+    /* Types: locked, on-hold, archived, draft, missing-type */
+    --sc-status-neutral-icon-light: var(--sc-color-grey-350-dark);
+    --sc-status-neutral-icon: var(--sc-color-grey-500-dark);
+    --sc-status-neutral-icon-dark: var(--sc-color-grey-550-dark);
+    --sc-status-neutral-count: var(--sc-color-grey-650-dark);
+    --sc-status-neutral-hover-bg: var(--sc-color-blue-200-dark);
+    --sc-status-neutral-pressed-bg: var(--sc-color-blue-100-dark);
+    --sc-status-neutral-selected-bg: var(--sc-color-grey-550-dark);
+    --sc-status-neutral-selected-icon: var(--sc-color-grey-100-dark);
+    --sc-status-neutral-selected-text: var(--sc-color-black);
+    --sc-status-neutral-selected-count: var(--sc-color-white);
+
+    /* --- Status Filter: Info Palette (Blue) --- */
+    /* Types: information, in-progress, complete */
+    --sc-status-info-icon: var(--sc-color-blue-500-dark);
+    --sc-status-info-icon-medium: var(--sc-color-blue-550-dark);
+    --sc-status-info-icon-dark: var(--sc-color-blue-600-dark);
+    --sc-status-info-count: var(--sc-color-blue-600-dark);
+    --sc-status-info-count-dark: var(--sc-color-blue-600-dark);
+    --sc-status-info-hover-bg: var(--sc-color-blue-200-dark);
+    --sc-status-info-pressed-bg: var(--sc-color-blue-100-dark);
+    --sc-status-info-selected-bg: var(--sc-color-blue-500-dark);
+    --sc-status-info-selected-icon: var(--sc-color-blue-100-dark);
+    --sc-status-info-selected-icon-alt: var(--sc-color-grey-100-dark);
+    --sc-status-info-selected-text: var(--sc-color-black);
+    --sc-status-info-selected-count: var(--sc-color-white);
+
+    /* --- Status Filter: Success Palette (Green) --- */
+    /* Types: success */
+    --sc-status-success-icon: var(--sc-color-green-700-dark);
+    --sc-status-success-count: var(--sc-color-green-700-dark);
+    --sc-status-success-hover-bg: var(--sc-color-green-200-dark);
+    --sc-status-success-pressed-bg: var(--sc-color-green-100-dark);
+    --sc-status-success-selected-bg: var(--sc-color-green-300-dark);
+    --sc-status-success-selected-icon: var(--sc-color-green-100-dark);
+    --sc-status-success-selected-text: var(--sc-color-black);
+    --sc-status-success-selected-count: var(--sc-color-white);
+
+    /* --- Status Filter: Warning Palette (Amber) --- */
+    /* Types: warning, pending-type */
+    --sc-status-warning-icon: var(--sc-color-amber-450-dark);
+    --sc-status-warning-count: var(--sc-color-amber-750-dark);
+    --sc-status-warning-hover-bg: var(--sc-color-amber-200-dark);
+    --sc-status-warning-pressed-bg: var(--sc-color-amber-100-dark);
+    --sc-status-warning-selected-bg: var(--sc-color-amber-350-dark);
+    --sc-status-warning-selected-icon: var(--sc-color-amber-100-dark);
+    --sc-status-warning-selected-text: var(--sc-color-black);
+    --sc-status-warning-selected-count: var(--sc-color-black);
+
+    /* --- Status Filter: Danger Palette (Red) --- */
+    /* Types: error, rejected */
+    --sc-status-danger-icon: var(--sc-color-red-550-dark);
+    --sc-status-danger-count: var(--sc-color-red-550-dark);
+    --sc-status-danger-hover-bg: var(--sc-color-red-200-dark);
+    --sc-status-danger-pressed-bg: var(--sc-color-red-100-dark);
+    --sc-status-danger-selected-bg: var(--sc-color-red-450-dark);
+    --sc-status-danger-selected-icon: var(--sc-color-red-100-dark);
+    --sc-status-danger-selected-text: var(--sc-color-black);
+    --sc-status-danger-selected-count: var(--sc-color-white);
+
+    /* --- Status Filter: Caution Palette (Orange) --- */
+    /* Types: minor-error */
+    --sc-status-caution-icon: var(--sc-color-orange-400);
+    --sc-status-caution-count: var(--sc-color-orange-650);
+    --sc-status-caution-hover-bg: var(--sc-color-orange-950);
+    --sc-status-caution-pressed-bg: var(--sc-color-red-100-dark);
+    --sc-status-caution-selected-bg: var(--sc-color-orange-350);
+    --sc-status-caution-selected-icon: var(--sc-color-orange-900);
+    --sc-status-caution-selected-text: var(--sc-color-black);
+    --sc-status-caution-selected-count: var(--sc-color-white);
+
+    /* --- Status Filter: Critical Palette (White in dark mode) --- */
+    /* Types: critical */
+    --sc-status-critical-icon: var(--sc-color-white);
+    --sc-status-critical-count: var(--sc-color-white);
+    --sc-status-critical-hover-bg: var(--sc-color-grey-150-dark);
+    --sc-status-critical-pressed-bg: var(--sc-color-grey-250-dark);
+    --sc-status-critical-selected-bg: var(--sc-color-white);
+    --sc-status-critical-selected-icon: var(--sc-color-grey-50-dark);
+    --sc-status-critical-selected-text: var(--sc-color-black);
+    --sc-status-critical-selected-count: var(--sc-color-black);
+  }
+
+  .sc-mode-dark {
+    color: var(--sc-color-grey-50);
+  }

@@ -4,7 +4,6 @@ import { describe, expect, it } from 'vitest';
 import * as publicApi from '../src';
 import {
   DesignSystemProvider,
-  createRatanTheme,
   type DesignAppearance,
 } from '../src/provider';
 
@@ -59,21 +58,23 @@ describe('production design provider', () => {
     );
   });
 
-  it('adapts semantic appearance into MUI theme values', () => {
-    const compactTheme = createRatanTheme(darkCompact);
-    const comfortableTheme = createRatanTheme({ ...darkCompact, density: 'comfortable', direction: 'rtl' });
-    expect(compactTheme.palette.mode).toBe('dark');
-    expect(compactTheme.palette.primary.main).toBe('#5eead4');
-    expect(compactTheme.direction).toBe('ltr');
-    expect(compactTheme.components?.MuiButton?.defaultProps).toMatchObject({ size: 'small' });
-    expect(comfortableTheme.direction).toBe('rtl');
-    expect(comfortableTheme.components?.MuiButton?.defaultProps).toMatchObject({ size: 'medium' });
+  it('exposes appearance as a local CSS and direction contract', () => {
+    render(
+      <DesignSystemProvider appearance={darkCompact} scope="standalone">
+        <span>Content</span>
+      </DesignSystemProvider>,
+    );
+    const root = document.querySelector('[data-ratan-scope="standalone"]');
+    expect(root).toHaveClass('ratan-design-root');
+    expect(root).toHaveAttribute('data-ratan-theme', 'dark');
+    expect(root).toHaveAttribute('data-ratan-density', 'compact');
+    expect(root).toHaveAttribute('dir', 'ltr');
   });
 
-  it('does not expose raw MUI or legacy experimental components', () => {
+  it('does not expose raw implementation or legacy experimental components', () => {
     expect(publicApi).not.toHaveProperty('MuiButton');
     expect(publicApi).not.toHaveProperty('ThemeProvider');
-    expect(publicApi).not.toHaveProperty('Card');
+    expect(publicApi).not.toHaveProperty('AriaButton');
     expect(publicApi).not.toHaveProperty('Input');
     expect(publicApi).not.toHaveProperty('cleanUnusedCss');
   });
