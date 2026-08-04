@@ -1,7 +1,7 @@
 # Cashflow CN to Portal Host migration runbook
 
 Status: active runbook, updated 3 August 2026. The shared UI boundary is now
-`@fm/ratan-design-webkit`; remaining Cashflow CN compatibility debt is tracked
+`@scdevkit/webkit`; remaining Cashflow CN compatibility debt is tracked
 below and in [`CURRENT_STATE.md`](./CURRENT_STATE.md).
 
 ## Scope and status
@@ -71,7 +71,7 @@ React DOM client/runtime modules as well as the package root.
 The Ratan container is not a runtime layer in this topology. Portal Host does
 not register its manifest, the browser acceptance stack does not start port
 `9205`, and Cashflow declares no Module Federation `remotes`. Reusable Ratan UI
-comes from `@fm/ratan-design-webkit`, `@fm/ratan-data-grid`, and temporarily bundled
+comes from `@scdevkit/webkit`, `@fm/ratan-data-grid`, and temporarily bundled
 migration adapters while the remaining legacy Ratan surface is extracted.
 
 ## Implementation steps

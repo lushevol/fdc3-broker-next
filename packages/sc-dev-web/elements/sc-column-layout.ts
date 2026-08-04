@@ -1,10 +1,11 @@
-import { ScColumnLayout } from '../src/components/ScLayout/ScColumnLayout.js';
-export * from '../src/components/ScLayout/ScColumnLayout.js';
+import { defineElement } from "./define-element.js";
+import { ScColumnLayout } from "../src/components/ScLayout/ScColumnLayout.js";
+export * from "../src/components/ScLayout/ScColumnLayout.js";
 
-window.customElements.define('sc-column-layout', ScColumnLayout);
+defineElement("sc-column-layout", ScColumnLayout);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-column-layout': ScColumnLayout,
+    "sc-column-layout": ScColumnLayout;
   }
 }

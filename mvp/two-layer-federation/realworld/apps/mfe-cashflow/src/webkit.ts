@@ -1,4 +1,4 @@
-import { createComponent } from '@fm/ratan-design-webkit/react';
+import { createComponent } from '@scdevkit/webkit/react';
 import type { ComponentType } from 'react';
 
 type WebKitReactComponent = ComponentType<Record<string, unknown>>;

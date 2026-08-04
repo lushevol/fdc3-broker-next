@@ -1,9 +1,10 @@
-import { ScInputGroup } from '../src/components/ScInputGroup/ScInputGroup.js';
-export * from '../src/components/ScInputGroup/ScInputGroup.js';
+import { defineElement } from "./define-element.js";
+import { ScInputGroup } from "../src/components/ScInputGroup/ScInputGroup.js";
+export * from "../src/components/ScInputGroup/ScInputGroup.js";
 
-window.customElements.define('sc-input-group', ScInputGroup);
+defineElement("sc-input-group", ScInputGroup);
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-input-group': ScInputGroup,
+    "sc-input-group": ScInputGroup;
   }
 }

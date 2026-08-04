@@ -1,9 +1,10 @@
-import { ScBadge } from '../src/components/ScBadge/ScBadge.js';
-export * from '../src/components/ScBadge/ScBadge.js';
+import { defineElement } from "./define-element.js";
+import { ScBadge } from "../src/components/ScBadge/ScBadge.js";
+export * from "../src/components/ScBadge/ScBadge.js";
 
-window.customElements.define('sc-badge', ScBadge);
+defineElement("sc-badge", ScBadge);
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-badge': ScBadge
+    "sc-badge": ScBadge;
   }
 }

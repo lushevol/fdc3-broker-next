@@ -1,10 +1,11 @@
-import { ScNumberInput } from '../src/components/ScFormInput/ScNumberInput.js';
-export * from '../src/components/ScFormInput/ScNumberInput.js';
+import { defineElement } from "./define-element.js";
+import { ScNumberInput } from "../src/components/ScFormInput/ScNumberInput.js";
+export * from "../src/components/ScFormInput/ScNumberInput.js";
 
-window.customElements.define('sc-number-input', ScNumberInput);
+defineElement("sc-number-input", ScNumberInput);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-number-input': ScNumberInput,
+    "sc-number-input": ScNumberInput;
   }
 }

@@ -1,10 +1,11 @@
-import { ScFileInput } from '../src/components/ScFileList/ScFileInput.js';
-export * from '../src/components/ScFileList/ScFileInput.js';
+import { defineElement } from "./define-element.js";
+import { ScFileInput } from "../src/components/ScFileList/ScFileInput.js";
+export * from "../src/components/ScFileList/ScFileInput.js";
 
-window.customElements.define('sc-file-input', ScFileInput);
+defineElement("sc-file-input", ScFileInput);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-file-input': ScFileInput
+    "sc-file-input": ScFileInput;
   }
 }

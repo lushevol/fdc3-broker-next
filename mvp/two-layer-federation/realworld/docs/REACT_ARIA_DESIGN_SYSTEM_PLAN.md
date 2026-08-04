@@ -1,7 +1,7 @@
 # React Aria Ratan Design System and Verification Tiles Plan
 
 > Historical plan, superseded on 3 August 2026 for active Portal Host UI by
-> `@fm/ratan-design-webkit`. Keep this document as design and coverage history;
+> `@scdevkit/webkit`. Keep this document as design and coverage history;
 > use [`CURRENT_STATE.md`](./CURRENT_STATE.md),
 > [`ARCHITECTURE.md`](./ARCHITECTURE.md), and the WebKit package README for
 > current implementation rules.

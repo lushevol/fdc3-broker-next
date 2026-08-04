@@ -1,10 +1,11 @@
-import { ScAlert } from '../src/components/ScAlert/ScAlert.js';
-export * from '../src/components/ScAlert/ScAlert.js';
+import { defineElement } from "./define-element.js";
+import { ScAlert } from "../src/components/ScAlert/ScAlert.js";
+export * from "../src/components/ScAlert/ScAlert.js";
 
-window.customElements.define('sc-alert', ScAlert);
+defineElement("sc-alert", ScAlert);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-alert': ScAlert
+    "sc-alert": ScAlert;
   }
 }

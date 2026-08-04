@@ -1,14 +1,15 @@
 /* eslint-disable indent */
-import { html, css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import { classMap } from 'lit/directives/class-map.js';
-import ScElement from '../../shared/sc-element.js';
-import { ToolMixin } from '../../mixins/tool-mixin.js';
-import { map } from 'lit/directives/map.js';
-import { range } from 'lit/directives/range.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { html, css } from "lit";
+import { property, state } from "lit/decorators.js";
+import { customElement } from "../../shared/custom-element.js";
+import { classMap } from "lit/directives/class-map.js";
+import ScElement from "../../shared/sc-element.js";
+import { ToolMixin } from "../../mixins/tool-mixin.js";
+import { map } from "lit/directives/map.js";
+import { range } from "lit/directives/range.js";
+import { styleMap } from "lit/directives/style-map.js";
 
-@customElement('sc-rte-action-table')
+@customElement("sc-rte-action-table")
 export class RTEActionTable extends ToolMixin(ScElement) {
   static styles = css`
     :host {
@@ -52,15 +53,15 @@ export class RTEActionTable extends ToolMixin(ScElement) {
   @state() rowCount = this.minRowCount;
   @state() colCount = this.minColCount;
   @state() coordinate = [-1, -1];
-  
+
   @property({ type: Boolean })
   disable = false;
 
   @property({ type: String })
-  icon = '';
+  icon = "";
 
   @property({ type: String })
-  size = '';
+  size = "";
 
   onLeaveCell() {
     this.coordinate = [0, 0];
@@ -68,13 +69,13 @@ export class RTEActionTable extends ToolMixin(ScElement) {
   onHoverCell(e: MouseEvent) {
     const target = e.target as HTMLDivElement;
     const coordinate = target.dataset.coordinate as string;
-    const [x, y] = coordinate.split(',').map(Number);
+    const [x, y] = coordinate.split(",").map(Number);
     this.coordinate = [x, y];
     this.rowCount = this.clamp(x + 2, this.minRowCount, this.maxRowCount);
     this.colCount = this.clamp(y + 2, this.minColCount, this.maxColCount);
   }
   isActive(coordinate: string) {
-    const cellCoordinate = coordinate.split(',');
+    const cellCoordinate = coordinate.split(",");
     const cellX = +cellCoordinate[0];
     const cellY = +cellCoordinate[1];
     const x = this.coordinate[0];
@@ -83,7 +84,7 @@ export class RTEActionTable extends ToolMixin(ScElement) {
   }
   onCellClick() {
     const [rowCount, colCount] = this.coordinate;
-    this.emit('sc-select', {
+    this.emit("sc-select", {
       detail: {
         rowCount: rowCount + 1,
         colCount: colCount + 1,
@@ -97,7 +98,7 @@ export class RTEActionTable extends ToolMixin(ScElement) {
       @mouseover=${this.onHoverCell}
       class=${classMap({
         cell: true,
-        'active-cell': this.isActive(coordinate),
+        "active-cell": this.isActive(coordinate),
       })}
       data-coordinate=${coordinate}
       data-index=${colIndex}
@@ -107,7 +108,7 @@ export class RTEActionTable extends ToolMixin(ScElement) {
   renderRow(rowIndex: number) {
     return html`<div data-index=${rowIndex} class="row">
       ${map(range(this.colCount), (v, colIndex) =>
-        this.renderCell(rowIndex, colIndex)
+        this.renderCell(rowIndex, colIndex),
       )}
     </div>`;
   }
@@ -117,21 +118,23 @@ export class RTEActionTable extends ToolMixin(ScElement) {
       placement="top"
       distance="10"
       mode="light"
-      .contentMaxWidth=${'1000px'}
+      .contentMaxWidth=${"1000px"}
       .open=${false}
       ?disabled=${this.disable}
     >
       <sc-icon
         style=${styleMap({
-          cursor: this.disable ? 'not-allowed' : 'pointer',
+          cursor: this.disable ? "not-allowed" : "pointer",
         })}
         .size=${this.size}
-        .name=${this.icon} 
+        .name=${this.icon}
       >
       </sc-icon>
       <div slot="content">
         <div class="box" @mouseleave=${this.onLeaveCell}>
-          ${map(range(this.rowCount), (v, rowIndex) => this.renderRow(rowIndex))}
+          ${map(range(this.rowCount), (v, rowIndex) =>
+            this.renderRow(rowIndex),
+          )}
         </div>
         <div class="selection-hint">
           ${rowCount + 1}&nbsp;x&nbsp;${colCount + 1}

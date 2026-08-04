@@ -1,9 +1,10 @@
-import { ScIconCard } from '../src/components/ScCard/ScIconCard.js';
-export * from '../src/components/ScCard/ScIconCard.js';
+import { defineElement } from "./define-element.js";
+import { ScIconCard } from "../src/components/ScCard/ScIconCard.js";
+export * from "../src/components/ScCard/ScIconCard.js";
 
-window.customElements.define('sc-icon-card', ScIconCard);
+defineElement("sc-icon-card", ScIconCard);
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-icon-card': ScIconCard,
+    "sc-icon-card": ScIconCard;
   }
 }

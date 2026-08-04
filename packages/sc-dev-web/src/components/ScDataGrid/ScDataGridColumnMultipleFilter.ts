@@ -1,26 +1,25 @@
-import { Column, Table } from '@tanstack/lit-table';
-import { css, html, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
-import '../../../elements/sc-radio-group.js';
-import '../../../elements/sc-radio.js';
-import ScElement from '../../shared/sc-element.js';
-import { isNotEmptyish } from '../../shared/util.js';
-import { watch } from '../../shared/watch.js';
-import ScTheme from '../../styles/ScTheme.js';
+import { Column, Table } from "@tanstack/lit-table";
+import { css, html, nothing } from "lit";
+import { property } from "lit/decorators.js";
+import { customElement } from "../../shared/custom-element.js";
+import { repeat } from "lit/directives/repeat.js";
+import "../../../elements/sc-radio-group.js";
+import "../../../elements/sc-radio.js";
+import ScElement from "../../shared/sc-element.js";
+import { isNotEmptyish } from "../../shared/util.js";
+import { watch } from "../../shared/watch.js";
+import ScTheme from "../../styles/ScTheme.js";
 import {
   AnyFilterData,
   BindFilterValue,
   FilterDef,
   MultiFilterData,
   MultiFilters,
-} from './types/features/ColumnFilterDef.js';
-import { E_CELL_DATA_TYPE } from './widgets/CellDataType.js';
-import { getFilterFn, getFilterWidget } from './widgets/FilterModes.js';
+} from "./types/features/ColumnFilterDef.js";
+import { E_CELL_DATA_TYPE } from "./widgets/CellDataType.js";
+import { getFilterFn, getFilterWidget } from "./widgets/FilterModes.js";
 
-
-
-@customElement('sc-data-grid-column-multiple-filter')
+@customElement("sc-data-grid-column-multiple-filter")
 export class ScDataGridColumnMultiFilter extends ScElement {
   static styles = ScTheme.getStyles().concat([
     css`
@@ -69,18 +68,18 @@ export class ScDataGridColumnMultiFilter extends ScElement {
       E_CELL_DATA_TYPE.number,
       E_CELL_DATA_TYPE.date,
     ].includes(this.columnType)
-      ? [{ filter: this.columnType }, { filter: 'setFilter' }]
-      : [{ filter: 'setFilter' }];
+      ? [{ filter: this.columnType }, { filter: "setFilter" }]
+      : [{ filter: "setFilter" }];
     return this._subFiltersDefs;
   }
 
   get _staticDataGetter() {
     const rows = this.column.getFacetedRowModel().rows;
-    const fn = getFilterFn('multiple', this.columnType);
+    const fn = getFilterFn("multiple", this.columnType);
 
     // exclude setFilter data
     const data = this._filterData.filter(
-      v => !Array.isArray(v) && isNotEmptyish(v)
+      v => !Array.isArray(v) && isNotEmptyish(v),
     );
     const values = (
       data.length && fn
@@ -88,12 +87,12 @@ export class ScDataGridColumnMultiFilter extends ScElement {
         : rows
     ).map(row => row.getValue(this.column.id));
     const results = this.column.convertSetFilterData(
-      values.filter((v, i) => values.indexOf(v) === i)
+      values.filter((v, i) => values.indexOf(v) === i),
     );
     return () => results;
   }
 
-  @watch('data')
+  @watch("data")
   onDataChange() {
     this._filterData = this.data?.concat() ?? [];
   }
@@ -114,17 +113,19 @@ export class ScDataGridColumnMultiFilter extends ScElement {
       if (!data.mode || !data.value) {
         if (!data.secondary) this._filterData[index] = undefined;
       }
-      if (data.secondary && !data.logic) data.logic = 'and';
+      if (data.secondary && !data.logic) data.logic = "and";
     }
-    if (filterName !== 'setFilter') {
+    if (filterName !== "setFilter") {
       this._iterations++; // force rerender setFilter
       // this fixes exception thrown from sc-dropdown-input
-      requestIdleCallback(() =>this.requestUpdate());
+      requestIdleCallback(() => this.requestUpdate());
     }
 
-    this.bindFilterValue(this._filterData.filter(v => isNotEmptyish(v)).length > 0
+    this.bindFilterValue(
+      this._filterData.filter(v => isNotEmptyish(v)).length > 0
         ? this._filterData.concat()
-        : undefined);
+        : undefined,
+    );
   }
 
   render() {
@@ -132,7 +133,7 @@ export class ScDataGridColumnMultiFilter extends ScElement {
       ${repeat(
         this.columnFilters,
         (filterDef, i) =>
-          filterDef.filter === 'setFilter'
+          filterDef.filter === "setFilter"
             ? `${i}setFilter${this._iterations}`
             : i,
         (filterDef, index) => {
@@ -150,8 +151,8 @@ export class ScDataGridColumnMultiFilter extends ScElement {
           const filterWidget = filterDef.filter
             ? getFilterWidget(filterDef.filter)
             : undefined;
-          if (filterDef.filter === 'setFilter' || !filterWidget) {
-            filterDef.filter = 'setFilter';
+          if (filterDef.filter === "setFilter" || !filterWidget) {
+            filterDef.filter = "setFilter";
             return html`<div class="section">
               <sc-data-grid-column-set-filter
                 .column=${this.column}
@@ -184,8 +185,8 @@ export class ScDataGridColumnMultiFilter extends ScElement {
             ${data && !Array.isArray(data) && (data.value || data.secondary)
               ? html`<div class="radio-wrap">
                     <sc-radio-group
-                      .value=${data.logic ?? 'and'}
-                      @sc-change=${(e: CustomEvent<{ value: 'or' | 'and' }>) =>
+                      .value=${data.logic ?? "and"}
+                      @sc-change=${(e: CustomEvent<{ value: "or" | "and" }>) =>
                         this._processData(index, {
                           ...data,
                           logic: e.detail.value,
@@ -205,7 +206,7 @@ export class ScDataGridColumnMultiFilter extends ScElement {
                   })}`
               : nothing}
           </div>`;
-        }
+        },
       )}
     </div>`;
   }

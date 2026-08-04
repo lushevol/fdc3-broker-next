@@ -1,10 +1,11 @@
-import { ScRating } from '../src/components/ScRating.js';
-export * from '../src/components/ScRating.js';
+import { defineElement } from "./define-element.js";
+import { ScRating } from "../src/components/ScRating.js";
+export * from "../src/components/ScRating.js";
 
-window.customElements.define('sc-rating', ScRating);
+defineElement("sc-rating", ScRating);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-rating': ScRating,
+    "sc-rating": ScRating;
   }
 }

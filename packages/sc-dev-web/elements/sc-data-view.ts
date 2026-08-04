@@ -1,10 +1,11 @@
-import { ScDataView } from '../src/components/ScDataView/ScDataView.js';
-export * from '../src/components/ScDataView/ScDataView.js';
+import { defineElement } from "./define-element.js";
+import { ScDataView } from "../src/components/ScDataView/ScDataView.js";
+export * from "../src/components/ScDataView/ScDataView.js";
 
-window.customElements.define('sc-data-view', ScDataView);
+defineElement("sc-data-view", ScDataView);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-data-view': ScDataView
+    "sc-data-view": ScDataView;
   }
 }

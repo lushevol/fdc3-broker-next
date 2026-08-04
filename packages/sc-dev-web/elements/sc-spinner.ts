@@ -1,10 +1,11 @@
-import { ScSpinner } from '../src/components/ScSpinner/ScSpinner.js';
-export * from '../src/components/ScSpinner/ScSpinner.js';
+import { defineElement } from "./define-element.js";
+import { ScSpinner } from "../src/components/ScSpinner/ScSpinner.js";
+export * from "../src/components/ScSpinner/ScSpinner.js";
 
-window.customElements.define('sc-spinner', ScSpinner);
+defineElement("sc-spinner", ScSpinner);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-spinner': ScSpinner,
+    "sc-spinner": ScSpinner;
   }
 }

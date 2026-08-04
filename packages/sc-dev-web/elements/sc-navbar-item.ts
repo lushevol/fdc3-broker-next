@@ -1,10 +1,11 @@
-import { ScNavbarItem } from '../src/components/ScNavbar/ScNavbarItem.js';
-export * from '../src/components/ScNavbar/ScNavbarItem.js';
+import { defineElement } from "./define-element.js";
+import { ScNavbarItem } from "../src/components/ScNavbar/ScNavbarItem.js";
+export * from "../src/components/ScNavbar/ScNavbarItem.js";
 
-window.customElements.define('sc-navbar-item', ScNavbarItem);
+defineElement("sc-navbar-item", ScNavbarItem);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-navbar-item': ScNavbarItem
+    "sc-navbar-item": ScNavbarItem;
   }
 }

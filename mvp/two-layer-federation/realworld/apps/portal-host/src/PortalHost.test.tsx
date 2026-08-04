@@ -57,7 +57,7 @@ function searchTiles(value: string) {
 
 function selectMenuItem(value: string) {
   fireEvent(
-    document.querySelector('sc-menu')!,
+    document.querySelector('sc-menu') as unknown as Element,
     new CustomEvent('sc-select', { detail: { item: { value } } }),
   );
 }
@@ -75,7 +75,10 @@ describe('production PortalHost', () => {
     expect(await screen.findByText(/Remote cashflow-1/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Notify' }));
     expect(screen.getByRole('status')).toHaveTextContent('Cashflow ready');
-    fireEvent(document.querySelector('sc-toast') as Element, new CustomEvent('sc-hide'));
+    fireEvent(
+      document.querySelector('sc-toast') as unknown as Element,
+      new CustomEvent('sc-hide'),
+    );
     const info = jest.spyOn(console, 'info').mockImplementation(() => undefined);
     fireEvent.click(screen.getByRole('button', { name: 'Track' }));
     expect(info).toHaveBeenCalledWith('platform-event', expect.objectContaining({ event: 'test' }));
@@ -135,11 +138,17 @@ describe('production PortalHost', () => {
     expect(screen.getByText('Platform')).toBeInTheDocument();
     searchTiles('unknown');
     expect(screen.getByText('No matching tiles')).toBeInTheDocument();
-    fireEvent(document.querySelector('sc-dialog') as Element, new CustomEvent('sc-hide'));
+    fireEvent(
+      document.querySelector('sc-dialog') as unknown as Element,
+      new CustomEvent('sc-hide'),
+    );
     expect(document.querySelector('sc-dialog')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Notifications' }));
     expect(screen.getByRole('status')).toHaveTextContent('No new notifications.');
-    fireEvent(document.querySelector('sc-toast') as Element, new CustomEvent('sc-hide'));
+    fireEvent(
+      document.querySelector('sc-toast') as unknown as Element,
+      new CustomEvent('sc-hide'),
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Open user menu' }));
     selectMenuItem('profile');
     expect(screen.getByRole('status')).toHaveTextContent('Profile is not available in this pilot.');
@@ -154,7 +163,7 @@ describe('production PortalHost', () => {
     expect(screen.getByRole('tab', { name: 'Cashflow 1' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Cashflow 2' })).toBeInTheDocument();
     fireEvent(
-      document.querySelector('sc-tab-group')!,
+      document.querySelector('sc-tab-group') as unknown as Element,
       new CustomEvent('sc-tab-select', { detail: { name: 'cashflow-1' } }),
     );
     expect(screen.getByText(/Remote cashflow-1/)).toBeVisible();

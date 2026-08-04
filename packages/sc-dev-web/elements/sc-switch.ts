@@ -1,10 +1,11 @@
-import { ScSwitch } from '../src/components/ScSwitch/ScSwitch.js';
-export * from '../src/components/ScSwitch/ScSwitch.js';
+import { defineElement } from "./define-element.js";
+import { ScSwitch } from "../src/components/ScSwitch/ScSwitch.js";
+export * from "../src/components/ScSwitch/ScSwitch.js";
 
-window.customElements.define('sc-switch', ScSwitch);
+defineElement("sc-switch", ScSwitch);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-switch': ScSwitch,
+    "sc-switch": ScSwitch;
   }
 }

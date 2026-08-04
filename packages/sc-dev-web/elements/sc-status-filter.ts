@@ -1,10 +1,11 @@
-import { ScStatusFilter } from '../src/components/ScStatusFilter/ScStatusFilter.js';
-export * from '../src/components/ScStatusFilter/ScStatusFilter.js';
+import { defineElement } from "./define-element.js";
+import { ScStatusFilter } from "../src/components/ScStatusFilter/ScStatusFilter.js";
+export * from "../src/components/ScStatusFilter/ScStatusFilter.js";
 
-window.customElements.define('sc-status-filter', ScStatusFilter);
+defineElement("sc-status-filter", ScStatusFilter);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-status-filter': ScStatusFilter
+    "sc-status-filter": ScStatusFilter;
   }
 }

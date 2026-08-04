@@ -9,7 +9,7 @@ export default {
     '^react/(.*)$': '<rootDir>/../../../../../node_modules/react/$1',
     '^react-dom$': '<rootDir>/../../../../../node_modules/react-dom',
     '^react-dom/(.*)$': '<rootDir>/../../../../../node_modules/react-dom/$1',
-    '^@fm/ratan-design-webkit/react$': '<rootDir>/src/test/webkit-react-stub.tsx',
+    '^@scdevkit/webkit/react$': '<rootDir>/src/test/webkit-react-stub.tsx',
     '\\.(css)$': 'identity-obj-proxy',
   },
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/index.tsx', '!src/test-setup.ts', '!src/test/**', '!src/webkit.ts'],

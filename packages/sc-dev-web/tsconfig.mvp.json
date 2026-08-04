@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "elements/**/*.ts",
+    "env/**/*.ts",
+    "locale-module/**/*.ts",
+    "locales/**/*.ts",
+    "mixins/**/*.ts",
+    "src/**/*.ts",
+    "src/**/*.svg"
+  ],
+  "exclude": ["dist", "e2e", "scripts", "stories", "test"]
+}

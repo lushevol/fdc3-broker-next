@@ -1,10 +1,11 @@
-import { ScSpacer } from '../src/components/ScSpacer/ScSpacer.js';
-export * from '../src/components/ScSpacer/ScSpacer.js';
+import { defineElement } from "./define-element.js";
+import { ScSpacer } from "../src/components/ScSpacer/ScSpacer.js";
+export * from "../src/components/ScSpacer/ScSpacer.js";
 
-window.customElements.define('sc-spacer', ScSpacer);
+defineElement("sc-spacer", ScSpacer);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-spacer': ScSpacer,
+    "sc-spacer": ScSpacer;
   }
 }

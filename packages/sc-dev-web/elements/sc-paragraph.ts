@@ -1,10 +1,11 @@
-import { ScParagraph } from '../src/components/ScTypography/ScParagraph.js';
-export * from '../src/components/ScTypography/ScParagraph.js';
+import { defineElement } from "./define-element.js";
+import { ScParagraph } from "../src/components/ScTypography/ScParagraph.js";
+export * from "../src/components/ScTypography/ScParagraph.js";
 
-window.customElements.define('sc-paragraph', ScParagraph);
+defineElement("sc-paragraph", ScParagraph);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-paragraph': ScParagraph
+    "sc-paragraph": ScParagraph;
   }
 }

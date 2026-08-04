@@ -1,10 +1,11 @@
-import { ScRepeater } from '../src/components/ScRepeater/ScRepeater.js';
-export * from '../src/components/ScRepeater/ScRepeater.js';
+import { defineElement } from "./define-element.js";
+import { ScRepeater } from "../src/components/ScRepeater/ScRepeater.js";
+export * from "../src/components/ScRepeater/ScRepeater.js";
 
-window.customElements.define('sc-repeater', ScRepeater);
+defineElement("sc-repeater", ScRepeater);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-repeater': ScRepeater
+    "sc-repeater": ScRepeater;
   }
 }

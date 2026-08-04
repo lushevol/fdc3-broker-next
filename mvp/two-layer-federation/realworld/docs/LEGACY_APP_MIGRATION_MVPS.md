@@ -14,7 +14,7 @@ preserving their Single-SPA/SystemJS runtime relationship.
 ```text
 portal-host
 └── mfe-cashflow-blotter-mvp
-    ├── @fm/ratan-design-webkit
+    ├── @scdevkit/webkit
     └── @fm/ratan-data-grid
 ```
 

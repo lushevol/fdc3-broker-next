@@ -1,10 +1,11 @@
-import { ScActionBar } from '../src/components/ScActionBar/ScActionBar.js';
-export * from '../src/components/ScActionBar/ScActionBar.js';
+import { defineElement } from "./define-element.js";
+import { ScActionBar } from "../src/components/ScActionBar/ScActionBar.js";
+export * from "../src/components/ScActionBar/ScActionBar.js";
 
-window.customElements.define('sc-action-bar', ScActionBar);
+defineElement("sc-action-bar", ScActionBar);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-action-bar': ScActionBar
+    "sc-action-bar": ScActionBar;
   }
 }

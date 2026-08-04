@@ -13,11 +13,11 @@ export default defineConfig({
     // verification exercises the portal's production React 19 runtime.
     dedupe: ['react', 'react-dom'],
     alias: {
-      '@fm/ratan-design-webkit/react': fileURLToPath(
-        new URL('../../packages/ratan-design-webkit/src/wrapper/ReactWrapper.ts', import.meta.url),
+      '@scdevkit/webkit/react': fileURLToPath(
+        new URL('../../../../../packages/sc-dev-web/src/wrapper/ReactWrapper.ts', import.meta.url),
       ),
-      '@fm/ratan-design-webkit/elements': fileURLToPath(
-        new URL('../../packages/ratan-design-webkit/elements/index.ts', import.meta.url),
+      '@scdevkit/webkit/elements': fileURLToPath(
+        new URL('../../../../../packages/sc-dev-web/elements/index.ts', import.meta.url),
       ),
       'react-dom': `${rootNodeModules}react-dom`,
       react: `${rootNodeModules}react`,

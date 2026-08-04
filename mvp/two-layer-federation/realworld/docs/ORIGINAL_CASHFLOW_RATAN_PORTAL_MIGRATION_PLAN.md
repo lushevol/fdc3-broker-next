@@ -42,7 +42,7 @@ The governing OpenSpec change is
    appearance, navigation, notifications, telemetry, workspace lifecycle, and
    failure containment.
 4. Reusable Ratan UI is consumed through versioned build-time packages:
-   `@fm/ratan-design-webkit` and `@fm/ratan-data-grid`.
+   `@scdevkit/webkit` and `@fm/ratan-data-grid`.
 5. Cashflow must continue to load and complete its primary workflow when port
    `9205` and the Ratan container manifest are unavailable.
 6. The built runtime must not request Single-SPA, SystemJS, an import map,
@@ -92,7 +92,7 @@ must never become a Cashflow prerequisite.
 
 | Original responsibility                           | Target owner                                        | Examples                                                                                    |
 | ------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| tokens and domain-neutral controls                | `@fm/ratan-design-webkit`                           | registered custom elements, React wrappers, dialogs, fields, status and feedback primitives |
+| tokens and domain-neutral controls                | `@scdevkit/webkit`                           | registered custom elements, React wrappers, dialogs, fields, status and feedback primitives |
 | AG Grid integration                               | `@fm/ratan-data-grid`                               | grid wrapper, column behavior, reusable grid cells                                          |
 | shell identity/navigation/notifications/telemetry | Portal Host capabilities through `@fm/platform-sdk` | no copied shell store or hook-backed globals                                                |
 | Cashflow-specific builders and selectors          | Cashflow remote or Cashflow-owned package           | filter selector, view selector, Cashflow query composition                                  |
@@ -159,7 +159,7 @@ state tests execute the copied application rather than a substitute screen.
 Migrate one transitive cohort at a time:
 
 1. Start with leaf modules that have no Cashflow state or service imports.
-2. Move visual primitives and tokens into `@fm/ratan-design-webkit`.
+2. Move visual primitives and tokens into `@scdevkit/webkit`.
 3. Move AG Grid abstractions into `@fm/ratan-data-grid`.
 4. Move host concerns to platform contracts and SDK adapters.
 5. Move Cashflow-aware selectors, builders, dialogs, and workflow components

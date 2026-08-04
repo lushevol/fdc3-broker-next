@@ -1,28 +1,29 @@
-import { css, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import '../../../elements/sc-date-picker.js';
-import '../../../elements/sc-dropdown-input.js';
-import '../../../elements/sc-number-input.js';
-import '../../../elements/sc-text-input.js';
-import { debounce } from '../../shared/debounce.js';
-import ScElement from '../../shared/sc-element.js';
-import { isEmptyish, isNotEmptyish } from '../../shared/util.js';
-import { watch } from '../../shared/watch.js';
-import ScTheme from '../../styles/ScTheme.js';
+import { css, html, nothing } from "lit";
+import { property, state } from "lit/decorators.js";
+import { customElement } from "../../shared/custom-element.js";
+import "../../../elements/sc-date-picker.js";
+import "../../../elements/sc-dropdown-input.js";
+import "../../../elements/sc-number-input.js";
+import "../../../elements/sc-text-input.js";
+import { debounce } from "../../shared/debounce.js";
+import ScElement from "../../shared/sc-element.js";
+import { isEmptyish, isNotEmptyish } from "../../shared/util.js";
+import { watch } from "../../shared/watch.js";
+import ScTheme from "../../styles/ScTheme.js";
 import {
   AnyFilterMode,
   BindFilterValue,
   FilterDef,
   IFilterModeBetweenValue,
   TypedFilterData,
-} from './types/features/ColumnFilterDef.js';
-import { E_CELL_DATA_TYPE } from './widgets/CellDataType.js';
-import { getFilterModes } from './widgets/FilterModes.js';
+} from "./types/features/ColumnFilterDef.js";
+import { E_CELL_DATA_TYPE } from "./widgets/CellDataType.js";
+import { getFilterModes } from "./widgets/FilterModes.js";
 
-@customElement('sc-data-grid-column-typed-filter')
+@customElement("sc-data-grid-column-typed-filter")
 export class ScDataGridColumnTypedFilter<
   K extends string & keyof T,
-  T extends AnyFilterMode = AnyFilterMode
+  T extends AnyFilterMode = AnyFilterMode,
 > extends ScElement {
   static styles = ScTheme.getStyles().concat([
     css`
@@ -54,7 +55,7 @@ export class ScDataGridColumnTypedFilter<
   @state() _modes: { label: string; value: string; displayValue: string }[] =
     [];
 
-  @watch('data')
+  @watch("data")
   handleFilterChange() {
     if (this.data?.mode && !isEmptyish(this.data.value)) {
       this._tmpMode = this.data.mode;
@@ -64,7 +65,7 @@ export class ScDataGridColumnTypedFilter<
     }
   }
 
-  @watch('columnType')
+  @watch("columnType")
   handleColumnTypeChange() {
     const userModes = this.filterDef?.filterParams?.modes ?? [];
     const allModes = getFilterModes(this.filterDef?.filter ?? this.columnType);
@@ -93,7 +94,7 @@ export class ScDataGridColumnTypedFilter<
       if (
         this._tmpMode &&
         this._tmpMode !== mode &&
-        ['between', 'empty', 'notEmpty'].includes(this._tmpMode)
+        ["between", "empty", "notEmpty"].includes(this._tmpMode)
       )
         value = undefined;
 
@@ -113,7 +114,7 @@ export class ScDataGridColumnTypedFilter<
   _renderInputType<R = unknown>(
     value: R | undefined,
     placeholder: string | null,
-    onChange: (value: R | undefined) => void
+    onChange: (value: R | undefined) => void,
   ) {
     switch (this.filterDef?.filter ?? this.columnType) {
       case E_CELL_DATA_TYPE.number: {
@@ -122,12 +123,12 @@ export class ScDataGridColumnTypedFilter<
             onChange(
               isNotEmptyish(e.detail.value)
                 ? (Number(e.detail.value) as R)
-                : undefined
+                : undefined,
             ),
-          300
+          300,
         );
         return html`<sc-number-input
-          placeholder=${placeholder ?? 'Filter...'}
+          placeholder=${placeholder ?? "Filter..."}
           .value=${value ?? null}
           clearable
           @sc-input=${(e: CustomEvent) => {
@@ -140,7 +141,7 @@ export class ScDataGridColumnTypedFilter<
       }
       case E_CELL_DATA_TYPE.date:
         return html`<sc-date-input
-          placeholder=${placeholder ?? 'Filter...'}
+          placeholder=${placeholder ?? "Filter..."}
           .value=${value ?? null}
           clearable
           @sc-change=${(e: CustomEvent) => {
@@ -153,8 +154,8 @@ export class ScDataGridColumnTypedFilter<
       default: {
         const cb = debounce((e: CustomEvent) => onChange(e.detail.value), 300);
         return html`<sc-text-input
-          placeholder=${placeholder ?? 'Filter...'}
-          .value=${value ?? ''}
+          placeholder=${placeholder ?? "Filter..."}
+          .value=${value ?? ""}
           clearable
           @sc-input=${(e: CustomEvent) => {
             e.stopImmediatePropagation();
@@ -168,7 +169,7 @@ export class ScDataGridColumnTypedFilter<
   }
 
   _renderBetween<R extends IFilterModeBetweenValue<number | string | Date>>(
-    onChange: (value: R | undefined) => void
+    onChange: (value: R | undefined) => void,
   ) {
     const filterValue = (this._tmpValue ?? {}) as R;
     if (this.columnType === E_CELL_DATA_TYPE.date) {
@@ -184,31 +185,31 @@ export class ScDataGridColumnTypedFilter<
         @sc-clear=${() => onChange(undefined)}
         border-type="box"
         size="md"
-        .startConfig=${{ placeholder: 'From' }}
-        .endConfig=${{ placeholder: 'To' }}
+        .startConfig=${{ placeholder: "From" }}
+        .endConfig=${{ placeholder: "To" }}
       ></sc-date-range-input>`;
     }
     return html`<div class="between-wrap">
-      ${this._renderInputType(filterValue?.start, 'From', start =>
-        onChange({ ...filterValue, start })
+      ${this._renderInputType(filterValue?.start, "From", start =>
+        onChange({ ...filterValue, start }),
       )}
-      ${this._renderInputType(filterValue?.end, 'To', end =>
-        onChange({ ...filterValue, end })
+      ${this._renderInputType(filterValue?.end, "To", end =>
+        onChange({ ...filterValue, end }),
       )}
     </div>`;
   }
 
   _renderInputs(onChange: (value: unknown) => void) {
-    if (this._tmpMode === 'between') {
+    if (this._tmpMode === "between") {
       return this._renderBetween(value =>
-        onChange(value?.start || value?.end ? value : undefined)
+        onChange(value?.start || value?.end ? value : undefined),
       );
-    } else if (this._tmpMode === 'empty' || this._tmpMode === 'notEmpty') {
+    } else if (this._tmpMode === "empty" || this._tmpMode === "notEmpty") {
       this.updateComplete.then(() => onChange(true as T[K]));
       return nothing;
     }
     return this._renderInputType(this._tmpValue, null, value =>
-      onChange(value)
+      onChange(value),
     );
   }
 
@@ -224,7 +225,7 @@ export class ScDataGridColumnTypedFilter<
         @sc-clear=${() => this._changeFilter(undefined, undefined)}
       ></sc-dropdown-input>
       ${this._renderInputs(value =>
-        this._changeFilter(this._tmpMode, value as T[K])
+        this._changeFilter(this._tmpMode, value as T[K]),
       )}
     </div>`;
   }

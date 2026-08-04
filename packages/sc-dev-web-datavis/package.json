@@ -32,7 +32,7 @@
     "test:unit:watch": "npm run test:unit -- --watch"
   },
   "dependencies": {
-    "@scdevkit/webkit": "latest",
+    "@scdevkit/webkit": "*",
     "chart.js": "^4.4.3",
     "chartjs-plugin-datalabels": "^2.2.0",
     "lit": "^3.1.2"
@@ -70,7 +70,7 @@
     "prettier": "^2.4.1",
     "ts-jest": "^29.1.1",
     "tslib": "^2.3.1",
-    "typescript": "^4.5.2"
+    "typescript": "^5.9.3"
   },
   "customElements": "custom-elements.json",
   "husky": {

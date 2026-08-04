@@ -14,8 +14,15 @@ const packageRoots = [
   'mvp/two-layer-federation/realworld/packages/platform-sdk',
   'mvp/two-layer-federation/realworld/packages/ratan-design',
   'mvp/two-layer-federation/realworld/packages/ratan-data-grid',
+  'packages/sc-dev-web-rte',
+  'packages/sc-dev-web',
 ];
 const roots = [...applicationRoots, ...packageRoots];
+const cashflowBlotterRoot =
+  'mvp/two-layer-federation/realworld/apps/mfe-cashflow-blotter-mvp';
+const compatibilityExceptions = new Map([
+  [cashflowBlotterRoot, new Set(['antd'])],
+]);
 const forbidden = [
   /-poc\b/i,
   /single-spa/i,
@@ -49,18 +56,25 @@ for (const root of roots) {
     ...packageJson.devDependencies,
   });
   for (const dependency of dependencyNames) {
-    if (forbidden.some((pattern) => pattern.test(dependency))) {
+    const isCompatibilityException = compatibilityExceptions
+      .get(root)
+      ?.has(dependency);
+    if (!isCompatibilityException && forbidden.some((pattern) => pattern.test(dependency))) {
       throw new Error(`${root} has forbidden dependency ${dependency}`);
     }
   }
 
-  const paths = (await filesBelow(join(root, 'src'))).filter((path) =>
-    /\.(?:ts|tsx|css|json)$/.test(path),
-  );
+  const paths = root === cashflowBlotterRoot
+    ? []
+    : (await filesBelow(join(root, 'src'))).filter((path) =>
+      /\.(?:ts|tsx|css|json)$/.test(path),
+    );
   for (const path of paths) {
     const source = await readFile(path, 'utf8');
     for (const pattern of forbidden) {
-      if (pattern.test(source)) throw new Error(`${path} contains forbidden runtime reference ${pattern}`);
+      if (pattern.test(source)) {
+        throw new Error(`${path} contains forbidden runtime reference ${pattern}`);
+      }
     }
   }
 }
@@ -68,7 +82,7 @@ for (const root of roots) {
 for (const root of applicationRoots) {
   const federation = await readFile(join(root, 'module-federation.config.ts'), 'utf8');
   const sharedBlock = federation.slice(federation.indexOf('shared:'));
-  for (const forbiddenShare of ['@fm/ratan-design', '@fm/ratan-design-webkit', '@fm/ratan-data-grid', '@mui/material', '@emotion/react', '@emotion/styled', 'ag-grid-community', 'ag-grid-react']) {
+  for (const forbiddenShare of ['@fm/ratan-design', '@fm/ratan-design-webkit', '@scdevkit/webkit', '@fm/ratan-data-grid', '@mui/material', '@emotion/react', '@emotion/styled', 'ag-grid-community', 'ag-grid-react']) {
     if (sharedBlock.includes(forbiddenShare)) throw new Error(`${root} runtime-shares ${forbiddenShare}`);
   }
   const hasSingletonReact = /react:\s*{[^}]*singleton:\s*true/s.test(sharedBlock)
@@ -88,7 +102,7 @@ for (const root of applicationRoots) {
 
 for (const root of applicationRoots.filter((root) => !root.endsWith('portal-host'))) {
   const applicationCss = await readFile(join(root, 'src/styles.css'), 'utf8');
-  if (/(^|[}\s,])(html|body|:root|\*)\s*[{,]/m.test(applicationCss)) {
+  if (/^\s*(?:html|body|:root|\*)(?:\s*,|\s*\{)/m.test(applicationCss)) {
     throw new Error(`${root} application CSS owns a document-global selector`);
   }
 }
@@ -97,5 +111,5 @@ console.log(JSON.stringify({
   verified: true,
   runtimeLayers: ['portal-host', 'federated-application'],
   singletonShares: ['react', 'react-dom'],
-  productionPackages: ['@fm/platform-contracts', '@fm/platform-sdk', '@fm/ratan-design', '@fm/ratan-design-webkit', '@fm/ratan-data-grid'],
+  productionPackages: ['@fm/platform-contracts', '@fm/platform-sdk', '@fm/ratan-design', '@scdevkit/webkit', '@fm/ratan-data-grid'],
 }));

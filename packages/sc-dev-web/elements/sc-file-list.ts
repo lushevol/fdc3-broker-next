@@ -1,9 +1,10 @@
-import { ScFileList } from '../src/components/ScFileList/ScFileList.js';
-export * from '../src/components/ScFileList/ScFileList.js';
+import { defineElement } from "./define-element.js";
+import { ScFileList } from "../src/components/ScFileList/ScFileList.js";
+export * from "../src/components/ScFileList/ScFileList.js";
 
-window.customElements.define('sc-file-list', ScFileList);
+defineElement("sc-file-list", ScFileList);
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-file-list': ScFileList,
+    "sc-file-list": ScFileList;
   }
 }

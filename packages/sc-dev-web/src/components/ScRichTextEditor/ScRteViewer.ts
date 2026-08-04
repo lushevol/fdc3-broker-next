@@ -1,28 +1,29 @@
 /* eslint-disable indent */
-import { html, css, nothing } from 'lit';
-import { html as sHtml, unsafeStatic } from 'lit/static-html.js';
-import { property, query, customElement, state } from 'lit/decorators.js';
-import { editorCommand } from './core/utils.js';
-import { classMap } from 'lit/directives/class-map.js';
-import '../../../elements/sc-table.js';
-import '../../../elements/sc-icon.js';
-import { PopupMixin } from '../../mixins/popup-mixin.js';
-import { map } from 'lit/directives/map.js';
-import { when } from 'lit/directives/when.js';
-import { ToolMixin } from '../../mixins/tool-mixin.js';
-import type { ScTooltip } from '../ScTooltip/ScTooltip.js';
-import { E_OPERATORS } from './constant.js';
-import ScElement from '../../shared/sc-element.js';
-import { RangeMixin } from '../../mixins/range-mixin.js';
-import { ObserverMxin } from '../../mixins/observer-mixin.js';
-import { watch } from '../../shared/watch.js';
-import { RteViewMixin } from './mixins/rte-view-mixin.js';
-import { INTERNAL_EVENTS } from '../../shared/sc-custom-events.js';
-import { sanitizeHTML, trustHTML } from '../../shared/trusted-types-policy.js';
+import { html, css, nothing } from "lit";
+import { html as sHtml, unsafeStatic } from "lit/static-html.js";
+import { property, query, state } from "lit/decorators.js";
+import { customElement } from "../../shared/custom-element.js";
+import { editorCommand } from "./core/utils.js";
+import { classMap } from "lit/directives/class-map.js";
+import "../../../elements/sc-table.js";
+import "../../../elements/sc-icon.js";
+import { PopupMixin } from "../../mixins/popup-mixin.js";
+import { map } from "lit/directives/map.js";
+import { when } from "lit/directives/when.js";
+import { ToolMixin } from "../../mixins/tool-mixin.js";
+import type { ScTooltip } from "../ScTooltip/ScTooltip.js";
+import { E_OPERATORS } from "./constant.js";
+import ScElement from "../../shared/sc-element.js";
+import { RangeMixin } from "../../mixins/range-mixin.js";
+import { ObserverMxin } from "../../mixins/observer-mixin.js";
+import { watch } from "../../shared/watch.js";
+import { RteViewMixin } from "./mixins/rte-view-mixin.js";
+import { INTERNAL_EVENTS } from "../../shared/sc-custom-events.js";
+import { sanitizeHTML, trustHTML } from "../../shared/trusted-types-policy.js";
 
-@customElement('sc-rte-viewer')
+@customElement("sc-rte-viewer")
 export class RTEViewer extends ObserverMxin(
-  RteViewMixin(ToolMixin(PopupMixin(RangeMixin(ScElement))))
+  RteViewMixin(ToolMixin(PopupMixin(RangeMixin(ScElement)))),
 ) {
   static styles = css`
     :host {
@@ -40,7 +41,7 @@ export class RTEViewer extends ObserverMxin(
     .article {
       background: var(--sc-rte-bg-color);
     }
-    .article[contenteditable='true'] {
+    .article[contenteditable="true"] {
       border: 1px solid var(--sc-rte-border-color);
       outline: none;
     }
@@ -57,7 +58,11 @@ export class RTEViewer extends ObserverMxin(
     pre {
       font-family: var(--sc-font-family);
     }
-    .article h1,.article h2,.article h3,.article h4,.article h5{
+    .article h1,
+    .article h2,
+    .article h3,
+    .article h4,
+    .article h5 {
       font-weight: 600;
     }
     .article h1 {
@@ -80,12 +85,12 @@ export class RTEViewer extends ObserverMxin(
       font-size: 1.13rem;
       line-height: 2.13rem;
     }
-    
+
     .article h6,
     .article div,
     .article p,
     .article aside,
-    .article section{
+    .article section {
       font-weight: 400;
       margin-block-start: 1em;
       margin-block-end: 1em;
@@ -112,18 +117,18 @@ export class RTEViewer extends ObserverMxin(
       font-size: 0.63rem;
       line-height: 1.13rem;
     }
-    .article[contenteditable='true']:focus {
+    .article[contenteditable="true"]:focus {
       outline: 2px solid var(--sc-rte-focus-border-color);
     }
-    .article[contenteditable='true']:focus-visible {
+    .article[contenteditable="true"]:focus-visible {
       outline: 2px solid var(--sc-rte-focus-border-color);
     }
-    .article[contenteditable='true'] blockquote:not(blockquote[style]) {
+    .article[contenteditable="true"] blockquote:not(blockquote[style]) {
       padding-left: 20px;
       position: relative;
     }
-    .article[contenteditable='true'] blockquote:not(blockquote[style]):before {
-      content: '';
+    .article[contenteditable="true"] blockquote:not(blockquote[style]):before {
+      content: "";
       position: absolute;
       width: 5px;
       height: 100%;
@@ -155,11 +160,11 @@ export class RTEViewer extends ObserverMxin(
     }
   `;
 
-  @query('#content') content!: HTMLDivElement;
+  @query("#content") content!: HTMLDivElement;
   @property({ type: Boolean }) readonly = false;
   @property({ type: Boolean }) showCount = false;
   @property({ type: Number }) maxLength = Infinity;
-  @property({ type: Boolean, attribute: 'pre-tag' }) preTag = false;
+  @property({ type: Boolean, attribute: "pre-tag" }) preTag = false;
   /**
    * content length
    */
@@ -186,9 +191,9 @@ export class RTEViewer extends ObserverMxin(
       }
     }, 0);
   }
-  @watch('focusedElement')
+  @watch("focusedElement")
   onFocusedElChange() {
-    this.emit('sc-focus', {
+    this.emit("sc-focus", {
       detail: {
         target: this.focusedElement,
       },
@@ -215,10 +220,10 @@ export class RTEViewer extends ObserverMxin(
       clientX: number;
       clientY: number;
       cell: HTMLTableCellElement;
-    }>
+    }>,
   ) {
     this.activeCell = e.detail.cell;
-    if (this.activeCell.tagName.toLowerCase() === 'th') {
+    if (this.activeCell.tagName.toLowerCase() === "th") {
       this.hidePopup();
       return;
     }
@@ -228,7 +233,7 @@ export class RTEViewer extends ObserverMxin(
         getBoundingClientRect: () => {
           return new DOMRect(e.detail.clientX, e.detail.clientY, 100, 100);
         },
-      })
+      }),
     );
   }
   showPopup() {
@@ -253,7 +258,7 @@ export class RTEViewer extends ObserverMxin(
       : nothing}`;
   }
   renderSubOperators(
-    data: { icon: string; desc: string; action: () => void }[]
+    data: { icon: string; desc: string; action: () => void }[],
   ) {
     return html` <div class="panel">
       ${map(data, v => {
@@ -265,35 +270,35 @@ export class RTEViewer extends ObserverMxin(
     </div>`;
   }
   hideTooltips() {
-    Array.from(this.renderRoot.querySelectorAll('sc-tooltip')).forEach(
+    Array.from(this.renderRoot.querySelectorAll("sc-tooltip")).forEach(
       tooltip => {
         tooltip.hide();
-      }
+      },
     );
   }
   onTooltipClick(e: Event) {
     const target = this.seekParentElement<ScTooltip>(
       e.target as Element,
-      'sc-tooltip'
+      "sc-tooltip",
     );
     this.hideTooltips();
     target && target.show();
   }
   operatorAction(command: E_OPERATORS) {
-    if (command === E_OPERATORS['toggle-header']) {
+    if (command === E_OPERATORS["toggle-header"]) {
       this.toggleHeader();
     } else if (
-      [E_OPERATORS['delete-column'], E_OPERATORS['delete-row']].includes(
-        command
+      [E_OPERATORS["delete-column"], E_OPERATORS["delete-row"]].includes(
+        command,
       )
     ) {
       this.deleteTable(command);
     } else if (
       [
-        E_OPERATORS['insert-column-left'],
-        E_OPERATORS['insert-column-right'],
-        E_OPERATORS['insert-row-above'],
-        E_OPERATORS['insert-row-below'],
+        E_OPERATORS["insert-column-left"],
+        E_OPERATORS["insert-column-right"],
+        E_OPERATORS["insert-row-above"],
+        E_OPERATORS["insert-row-below"],
       ].includes(command)
     ) {
       this.insertToTable(command);
@@ -303,20 +308,20 @@ export class RTEViewer extends ObserverMxin(
     this.hidePopup();
   }
   changeCellSize(command: E_OPERATORS) {
-    this.invoke('viewer.changeCellSize', command);
+    this.invoke("viewer.changeCellSize", command);
   }
   toggleHeader() {
     this.focusedElement.hideHeader = !this.focusedElement.hideHeader;
   }
   insertToTable(command: E_OPERATORS) {
-    this.invoke('viewer.insertToTable', command);
+    this.invoke("viewer.insertToTable", command);
   }
   deleteTable(command: E_OPERATORS) {
-    this.invoke('viewer.deleteTable', command);
+    this.invoke("viewer.deleteTable", command);
   }
 
   invoke(namespace: string, ...args: any) {
-    this.emit(INTERNAL_EVENTS['sc-context-trigger'] as any, {
+    this.emit(INTERNAL_EVENTS["sc-context-trigger"] as any, {
       bubbles: true,
       composed: true,
       detail: {
@@ -344,7 +349,7 @@ export class RTEViewer extends ObserverMxin(
           },
           () => {
             return html`<sc-tooltip
-              .contentMaxWidth=${'unset'}
+              .contentMaxWidth=${"unset"}
               placement="bottom"
               mode="light"
               distance="10"
@@ -353,11 +358,13 @@ export class RTEViewer extends ObserverMxin(
               @click=${this.onTooltipClick}
             >
               <sc-icon size="md" name=${v.icon}> </sc-icon>
-              <div slot="content">${
-                this.renderSubOperators(v.operators!) // eslint-disable-line
-              }</div>
+              <div slot="content">
+                ${
+                  this.renderSubOperators(v.operators!) // eslint-disable-line
+                }
+              </div>
             </sc-tooltip>`;
-          }
+          },
         )}
       </div>`;
     })}
@@ -379,15 +386,15 @@ export class RTEViewer extends ObserverMxin(
         part="sc-rich-text-editor-area"
         class=article
         id="content"
-        contenteditable=${readonly ? 'false' : 'true'}
+        contenteditable=${readonly ? "false" : "true"}
         @input=${() => {
           this.updateSelection();
           this.onChange();
         }}
         @focus=${this.onTextboxFocus}
-        @${unsafeStatic(INTERNAL_EVENTS['sc-table-focus'])}=${this.onTableFocus}
-        @${unsafeStatic(INTERNAL_EVENTS['sc-table-blur'])}=${this.onTableBlur}
-        @${unsafeStatic(INTERNAL_EVENTS['sc-table-click'])}=${this.onTableClick}
+        @${unsafeStatic(INTERNAL_EVENTS["sc-table-focus"])}=${this.onTableFocus}
+        @${unsafeStatic(INTERNAL_EVENTS["sc-table-blur"])}=${this.onTableBlur}
+        @${unsafeStatic(INTERNAL_EVENTS["sc-table-click"])}=${this.onTableClick}
       ><p><br /></p></pre>
       ${this.renderCount()} ${this.renderTableOperators()}`;
     }
@@ -396,21 +403,21 @@ export class RTEViewer extends ObserverMxin(
         part="sc-rich-text-editor-area"
         class=article
         id="content"
-        contenteditable=${readonly ? 'false' : 'true'}
+        contenteditable=${readonly ? "false" : "true"}
         @input=${() => {
           this.updateSelection();
           this.onChange();
         }}
         @focus=${this.onTextboxFocus}
-        @${unsafeStatic(INTERNAL_EVENTS['sc-table-focus'])}=${this.onTableFocus}
-        @${unsafeStatic(INTERNAL_EVENTS['sc-table-blur'])}=${this.onTableBlur}
-        @${unsafeStatic(INTERNAL_EVENTS['sc-table-click'])}=${this.onTableClick}
+        @${unsafeStatic(INTERNAL_EVENTS["sc-table-focus"])}=${this.onTableFocus}
+        @${unsafeStatic(INTERNAL_EVENTS["sc-table-blur"])}=${this.onTableBlur}
+        @${unsafeStatic(INTERNAL_EVENTS["sc-table-click"])}=${this.onTableClick}
       ><p><br /></p></article>
       ${this.renderCount()} ${this.renderTableOperators()} `;
   }
 
   getSemanticHtml() {
-    return this.content.innerHTML.replace(/^\<\!--\?lit[^-]+--\>/, '');
+    return this.content.innerHTML.replace(/^\<\!--\?lit[^-]+--\>/, "");
   }
   async setContent(str: string) {
     await this.updateComplete;
@@ -424,18 +431,18 @@ export class RTEViewer extends ObserverMxin(
 
   updateSelection() {
     this.dispatchEvent(
-      new CustomEvent(INTERNAL_EVENTS['sc-range'], {
+      new CustomEvent(INTERNAL_EVENTS["sc-range"], {
         detail: this.range,
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
   get extraLength() {
     let len = 0;
-    const blockquote = this.content.querySelectorAll('blockquote');
-    const scTable = this.content.querySelectorAll('sc-table');
+    const blockquote = this.content.querySelectorAll("blockquote");
+    const scTable = this.content.querySelectorAll("sc-table");
     if (blockquote.length) {
       len += 1;
     }
@@ -453,8 +460,8 @@ export class RTEViewer extends ObserverMxin(
   }
 
   resetEditor() {
-    if (this.content.innerHTML.trim() === '') {
-      this.content.innerHTML = trustHTML('<p><br /></p>');
+    if (this.content.innerHTML.trim() === "") {
+      this.content.innerHTML = trustHTML("<p><br /></p>");
     }
   }
 
@@ -463,29 +470,29 @@ export class RTEViewer extends ObserverMxin(
     this.updateCount();
 
     this.dispatchEvent(
-      new CustomEvent('sc-change', {
+      new CustomEvent("sc-change", {
         detail: {
           text: this.getSemanticHtml(),
         },
         bubbles: true,
         composed: true,
-      })
+      }),
     );
   }
 
   connectedCallback(): void {
     super.connectedCallback();
-    editorCommand('defaultParagraphSeparator', 'p');
-    document.addEventListener('selectionchange', this.updateSelection);
-    window.addEventListener('selectionchange', this.updateSelection);
-    document.addEventListener('keydown', this.updateSelection);
-    document.addEventListener('click', this.onClickDoc);
+    editorCommand("defaultParagraphSeparator", "p");
+    document.addEventListener("selectionchange", this.updateSelection);
+    window.addEventListener("selectionchange", this.updateSelection);
+    document.addEventListener("keydown", this.updateSelection);
+    document.addEventListener("click", this.onClickDoc);
   }
   disconnectedCallback(): void {
     super.disconnectedCallback();
-    document.removeEventListener('selectionchange', this.updateSelection);
-    window.removeEventListener('selectionchange', this.updateSelection);
-    document.removeEventListener('keydown', this.updateSelection);
-    document.removeEventListener('click', this.onClickDoc);
+    document.removeEventListener("selectionchange", this.updateSelection);
+    window.removeEventListener("selectionchange", this.updateSelection);
+    document.removeEventListener("keydown", this.updateSelection);
+    document.removeEventListener("click", this.onClickDoc);
   }
 }

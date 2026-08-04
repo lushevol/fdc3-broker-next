@@ -1,10 +1,11 @@
-import { ScTextInput } from '../src/components/ScFormInput/ScTextInput.js';
-export * from '../src/components/ScFormInput/ScTextInput.js';
+import { defineElement } from "./define-element.js";
+import { ScTextInput } from "../src/components/ScFormInput/ScTextInput.js";
+export * from "../src/components/ScFormInput/ScTextInput.js";
 
-window.customElements.define('sc-text-input', ScTextInput);
+defineElement("sc-text-input", ScTextInput);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-text-input': ScTextInput,
+    "sc-text-input": ScTextInput;
   }
 }

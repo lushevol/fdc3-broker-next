@@ -2,7 +2,7 @@
 
 Status: retained for legacy-package releases. WebKit has an independent public
 boundary and verification lifecycle; see
-[`../../ratan-design-webkit/README.md`](../../ratan-design-webkit/README.md).
+[`../../../../../packages/sc-dev-web/README.md`](../../../../../packages/sc-dev-web/README.md).
 
 ## Version axes
 

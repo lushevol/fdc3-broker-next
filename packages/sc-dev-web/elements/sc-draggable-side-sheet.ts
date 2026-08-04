@@ -1,10 +1,11 @@
-import { ScDraggableSideSheet } from '../src/components/ScSheet/ScDraggableSideSheet.js';
-export * from '../src/components/ScSheet/ScDraggableSideSheet.js';
+import { defineElement } from "./define-element.js";
+import { ScDraggableSideSheet } from "../src/components/ScSheet/ScDraggableSideSheet.js";
+export * from "../src/components/ScSheet/ScDraggableSideSheet.js";
 
-window.customElements.define('sc-draggable-side-sheet', ScDraggableSideSheet);
+defineElement("sc-draggable-side-sheet", ScDraggableSideSheet);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-draggable-side-sheet': ScDraggableSideSheet,
+    "sc-draggable-side-sheet": ScDraggableSideSheet;
   }
 }

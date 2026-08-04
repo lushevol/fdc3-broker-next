@@ -1,10 +1,11 @@
-import { ScFileButton } from '../src/components/ScFileList/ScFileButton.js';
-export * from '../src/components/ScFileList/ScFileButton.js';
+import { defineElement } from "./define-element.js";
+import { ScFileButton } from "../src/components/ScFileList/ScFileButton.js";
+export * from "../src/components/ScFileList/ScFileButton.js";
 
-window.customElements.define('sc-file-button', ScFileButton);
+defineElement("sc-file-button", ScFileButton);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-file-button': ScFileButton
+    "sc-file-button": ScFileButton;
   }
 }

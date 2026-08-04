@@ -13,13 +13,15 @@
  *  </WrapperButton>
  * )
  */
-import React from 'react';
-import { createComponent as createComponentByLit } from '@lit/react';
-import * as WebComponents from '../index.js';
-import { CUSTOM_EVENTS } from '../shared/sc-custom-events.js';
-import '../../elements/index.js';
+import React from "react";
+import { createComponent as createComponentByLit } from "@lit/react";
+import * as WebComponents from "../index.js";
+import { CUSTOM_EVENTS } from "../shared/sc-custom-events.js";
+import "../../elements/index.js";
 
-export const createComponent = (WC: string) => {
+export const createComponent = (
+  WC: string,
+): React.ComponentType<Record<string, unknown>> => {
   const reg = /(-[a-z])/g;
   const str = WC.replace(reg, function (a, b) {
     return `${b[1].toUpperCase()}`;
@@ -32,9 +34,12 @@ export const createComponent = (WC: string) => {
     });
     events[`on${name[0].toUpperCase()}${name.substr(1)}`] = event;
   });
-  const elementClass = (WebComponents as any)[componentName] || window.customElements.get(WC);
+  const elementClass =
+    window.customElements.get(WC) || (WebComponents as any)[componentName];
   if (!elementClass) {
-    throw new Error(`Web Component ${WC} is not defined. Make sure it is imported.`);
+    throw new Error(
+      `Web Component ${WC} is not defined. Make sure it is imported.`,
+    );
   }
 
   return createComponentByLit({
@@ -42,5 +47,5 @@ export const createComponent = (WC: string) => {
     elementClass,
     react: React,
     events,
-  });
+  }) as unknown as React.ComponentType<Record<string, unknown>>;
 };

@@ -37,7 +37,7 @@ The duplicated deployable-local MUI/Emotion cost is accepted for the first pilot
 - Application: Cashflow records, filters, selection, detail composition, local state, local `DesignSystemProvider`, and standalone behavior.
 - Packages at the time: versioned contracts, capability client, semantic
   tokens, MUI adapter, and bounded primitives. Current active UI composition is
-  provided by `@fm/ratan-design-webkit`.
+  provided by `@scdevkit/webkit`.
 - Not runtime layers: `root-config`, `base`, `mfe-ratan-container`, Ratan component/function packages, MUI, and Emotion.
 
 ## First legacy domain/grid cohort

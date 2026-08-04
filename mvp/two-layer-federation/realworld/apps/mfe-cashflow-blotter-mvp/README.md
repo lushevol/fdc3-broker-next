@@ -1,7 +1,7 @@
 # Cashflow CN source migration
 
 Status: active migration slice. Shared UI now resolves through
-`@fm/ratan-design-webkit`; the remaining debt below belongs to the copied
+`@scdevkit/webkit`; the remaining debt below belongs to the copied
 Cashflow CN compatibility surface. Last reviewed 3 August 2026. See the
 [current-state record](../../docs/CURRENT_STATE.md).
 

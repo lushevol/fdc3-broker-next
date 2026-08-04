@@ -1,9 +1,10 @@
-import { ScDotStatus } from '../src/components/ScDotStatus/ScDotStatus.js';
-export * from '../src/components/ScDotStatus/ScDotStatus.js';
+import { defineElement } from "./define-element.js";
+import { ScDotStatus } from "../src/components/ScDotStatus/ScDotStatus.js";
+export * from "../src/components/ScDotStatus/ScDotStatus.js";
 
-window.customElements.define('sc-dot-status', ScDotStatus);
+defineElement("sc-dot-status", ScDotStatus);
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-dot-status': ScDotStatus
+    "sc-dot-status": ScDotStatus;
   }
 }

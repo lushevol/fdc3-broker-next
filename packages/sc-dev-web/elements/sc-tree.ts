@@ -1,10 +1,11 @@
-import { ScTree } from '../src/components/ScTree/ScTree.js';
-export * from '../src/components/ScTree/ScTree.js';
+import { defineElement } from "./define-element.js";
+import { ScTree } from "../src/components/ScTree/ScTree.js";
+export * from "../src/components/ScTree/ScTree.js";
 
-window.customElements.define('sc-tree', ScTree);
+defineElement("sc-tree", ScTree);
 
 declare global {
   interface HTMLElementTagNameMap {
-    'sc-tree': ScTree,
+    "sc-tree": ScTree;
   }
 }
