@@ -1,0 +1,117 @@
+{
+  "extends": [
+    "@open-wc/eslint-config",
+    "eslint-config-prettier"
+  ],
+  "parserOptions": {
+    "requireConfigFile": false,
+    "babelOptions": {
+      "plugins": [
+        "@babel/plugin-syntax-import-assertions",
+        [
+          "@babel/plugin-syntax-decorators",
+          {
+            "version": "legacy"
+          }
+        ]
+      ]
+    }
+  },
+  "rules": {
+    "no-undef": "off",
+    "lines-between-class-members": "off",
+    "import/no-unresolved": "off",
+    "getter-return": "off",
+    "no-case-declarations": "off",
+    "class-methods-use-this": "off",
+    "import/newline-after-import": "off",
+    "prefer-exponentiation-operator": "off",
+    "no-restricted-properties": "off",
+    "no-param-reassign": "off",
+    "import/order": "off",
+    "arrow-body-style": "off",
+    "no-use-before-define": "off",
+    "no-else-return": "off",
+    "import/prefer-default-export": "off",
+    "func-names": "off",
+    "no-plusplus": "off",
+    "no-shadow": "off",
+    "default-case": "off",
+    "one-var": "off",
+    "new-cap": "off",
+    "import/extensions": "off",
+    "no-restricted-globals": "off",
+    "no-undef-init": "off",
+    "consistent-return": "off",
+    "no-unreachable": "off",
+    "spaced-comment": "off",
+    "@typescript-eslint/no-this-alias": "off",
+    "no-unused-vars": "warn",
+    "wc/guard-super-call": "off",
+    "import/no-duplicates": "off",
+    "radix": "off",
+    "no-bitwise": "off",
+    "no-multi-assign": "off",
+    "no-void": "off",
+    "lit-a11y/click-events-have-key-events": "off",
+    "no-unused-expressions": "off",
+    "no-console": "off",
+    "no-continue": "off",
+    "prefer-arrow-callback": "off",
+    "operator-assignment": "off",
+    "no-return-assign": "off",
+    "no-useless-constructor": "off",
+    "no-empty": "off",
+    "no-nested-ternary": "off",
+    "dot-notation": "off",
+    "object-shorthand": "off",
+    "camelcase": "off",
+    "array-callback-return": "off",
+    "prefer-destructuring": "off",
+    "no-constructor-return": "off",
+    "no-lonely-if": "off",
+    "no-return-await": "off",
+    "no-useless-escape": "off",
+    "max-classes-per-file": "off",
+    "default-param-last": "off",
+    "no-unsafe-optional-chaining": "off",
+    "no-unneeded-ternary": "off",
+    "no-await-in-loop": "off",
+    "import/no-extraneous-dependencies": "off",
+    "wc/require-listener-teardown": "off",
+    "no-useless-concat": "off",
+    "no-useless-computed-key": "off",
+    "no-restricted-syntax": "off",
+    "no-irregular-whitespace": "off",
+    "no-dupe-else-if": "off",
+    "lit/no-useless-template-literals": "off",
+    "lit/binding-positions": "off",
+    "lit/no-value-attribute": "off",
+    "lit/no-native-attributes": "off",
+    "lit/no-template-bind": "off",
+    "lit/no-duplicate-template-bindings": "off",
+    "lit/attribute-value-entities": "off",
+    "lit-a11y/no-autofocus": "off",
+    "lit-a11y/anchor-is-valid": "off",
+    "lit-a11y/anchor-has-content": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "test/**/*.ts",
+        "demo/**/*.ts",
+        "stories/**/*.ts"
+      ],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "no-console": "off",
+        "max-classes-per-file": "off"
+      }
+    }
+  ],
+  "plugins": [
+    "@typescript-eslint"
+  ]
+}

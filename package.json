@@ -94,7 +94,9 @@
     "mvp/two-layer-federation/realworld/apps/*",
     "mvp/two-layer-federation/realworld/packages/*",
     "services/*",
-    "proxy/*"
+    "proxy/*",
+    "sc-dev-web/*",
+    "ratan-design/*"
   ],
   "dependenciesMeta": {
     "@swc/core": {

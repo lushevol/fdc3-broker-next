@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../src/index.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,kBAAkB,EAAE,MAAM,mCAAmC,CAAC;AACvE,OAAO,EAAE,eAAe,EAAE,MAAM,gCAAgC,CAAC","sourcesContent":["export { CountryIconLibrary } from './libraries/CountryIconLibrary.js';\nexport { MainIconLibrary } from './libraries/MainIconLibrary.js';"]}

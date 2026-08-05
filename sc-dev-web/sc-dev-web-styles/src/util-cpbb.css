@@ -1,0 +1,6 @@
+@import './util.css';
+
+:root {
+  /*Color definition*/
+  --sc-color-blue: blue;
+}
