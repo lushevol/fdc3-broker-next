@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "rsbuild build && npm run typecheck:shell",
+    "build": "rsbuild build && npm run typecheck:shell && npm run typecheck:application",
     "typecheck:shell": "tsc --noEmit -p tsconfig.shell.json",
+    "typecheck:application": "tsc --noEmit -p tsconfig.application.json",
     "test": "cross-env BABEL_ENV=test jest --coverage --ci",
     "check:boundaries": "node scripts/check-boundaries.mjs",
     "lint": "eslint src/application.tsx src/application.test.tsx src/compat src/index.tsx src/migrated-entry.tsx src/standalone.ts *.ts",

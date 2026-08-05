@@ -1,0 +1,30 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "paths": {
+      "react": ["node_modules/@types/react/index.d.ts"],
+      "react/jsx-runtime": ["node_modules/@types/react/jsx-runtime.d.ts"],
+      "@migrated-cashflow-cn": ["src/Cashflow_CN/index.tsx"],
+      "@legacy-ratan/*": ["../../../../../apps/mfe-ratan-container/src/*"],
+      "@fm/base": ["src/compat/base.tsx"],
+      "@fm/ratan_container": ["src/types/ratan-container.d.ts"],
+      "stompjs": ["src/compat/stomp.ts"],
+      "stompjs-browser": ["../../../../../node_modules/stompjs/lib/stomp.js"],
+      "Import/*": ["src/Root/import/*"],
+      "src/*": ["src/*"]
+    }
+  },
+  "files": [
+    "src/Cashflow_CN/index.tsx",
+    "src/types/migrated-cashflow-cn.d.ts",
+    "src/types/ratan-container.d.ts",
+    "src/types/react-legacy-jsx.d.ts",
+    "src/@types/index.d.ts",
+    "src/declarations.d.ts"
+  ],
+  "include": []
+}

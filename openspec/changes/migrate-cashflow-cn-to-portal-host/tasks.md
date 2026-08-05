@@ -8,7 +8,7 @@
 
 - [x] 2.1 Wire the realworld remote to compile the actual legacy Cashflow CN entry as a temporary migration source
 - [x] 2.2 Declare the Cashflow CN runtime/build dependencies without Single-SPA or SystemJS
-- [ ] 2.3 Resolve TypeScript, asset, CSS, generated-type, and global declaration failures for the actual component tree
+- [x] 2.3 Resolve TypeScript, asset, CSS, generated-type, and global declaration failures for the actual component tree
 
 ## 3. Replace Legacy Boundaries
 

@@ -85,7 +85,10 @@ export function useSplittingAmountHandler() {
   const validateAmountInput = (value: number, rowIndex: number) => {
     const otherUnableSplitSum = amountAPlusBNumber(
       newCashflows?.filter(
-        (cur) => !canAmendSplittingState.includes(cur.Cashflow?.Cashflow_State)
+        (cur) =>
+          !canAmendSplittingState.includes(
+            cur.Cashflow?.Cashflow_State as SplitCashflowState
+          )
       ),
       (item) => item?.Cashflow?.Payment_Amount,
       sourcePrecision

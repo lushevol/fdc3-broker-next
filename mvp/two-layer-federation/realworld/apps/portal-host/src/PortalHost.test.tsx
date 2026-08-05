@@ -167,10 +167,17 @@ describe('production PortalHost', () => {
       new CustomEvent('sc-tab-select', { detail: { name: 'cashflow-1' } }),
     );
     expect(screen.getByText(/Remote cashflow-1/)).toBeVisible();
+    const tabGroup = document.querySelector('sc-tab-group') as unknown as Element;
+    const leakedClose = jest.fn();
+    tabGroup.addEventListener('sc-close', leakedClose);
     fireEvent(
       screen.getByRole('tab', { name: 'Cashflow 1' }),
-      new CustomEvent('sc-close'),
+      new CustomEvent('sc-close', {
+        bubbles: true,
+        detail: { name: 'cashflow-1' },
+      }),
     );
+    expect(leakedClose).not.toHaveBeenCalled();
     expect(screen.getByText(/Remote cashflow-2/)).toBeVisible();
     expect(screen.queryByRole('tab', { name: 'Cashflow 1' })).not.toBeInTheDocument();
   });

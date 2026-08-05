@@ -17,6 +17,7 @@ import {
   DialogTitle,
   IconButton,
   type DialogProps as MuiDialogProps,
+  type ButtonProps as MuiButtonProps,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { createTheme } from '@mui/material/styles';
@@ -125,6 +126,7 @@ function useDispatcher() {
     dispatchApiStatusList: (_items: readonly string[]) => undefined,
     dispatchVersionState: (_version: Readonly<Record<string, unknown>>) => undefined,
     dispatchSelectedMenu: (_menu: unknown) => undefined,
+    dispacthLoading: (_loading: boolean) => undefined,
   };
 }
 
@@ -202,10 +204,49 @@ export const ThemeUtil = {
   }),
 };
 export const Time = {
-  Time: ({ value }: { readonly value?: unknown }) => <>{String(value ?? '')}</>,
+  Time: ({ value }: {
+    readonly value?: unknown;
+    readonly field?: string;
+    readonly isAccurateToDay?: boolean;
+  }) => <>{String(value ?? '')}</>,
 };
-export const Button = { default: MuiButton };
-export const LoadingButton = { default: MuiButton };
+interface CompatibilityButtonProps extends Omit<MuiButtonProps, 'type'> {
+  readonly type?: MuiButtonProps['type'] | 'primary';
+}
+
+function CompatibilityButton({ type, ...props }: CompatibilityButtonProps) {
+  return <MuiButton {...props} type={type === 'primary' ? 'button' : type} />;
+}
+
+export const Button = { default: CompatibilityButton };
+
+interface CompatibilityLoadingButtonProps extends CompatibilityButtonProps {
+  readonly loading?: boolean;
+  readonly loadingSize?: number;
+}
+
+function CompatibilityLoadingButton({
+  children,
+  disabled,
+  loading = false,
+  loadingSize = 16,
+  startIcon,
+  type,
+  ...props
+}: CompatibilityLoadingButtonProps) {
+  return (
+    <MuiButton
+      {...props}
+      disabled={disabled || loading}
+      startIcon={loading ? <CircularProgress size={loadingSize} /> : startIcon}
+      type={type === 'primary' ? 'button' : type}
+    >
+      {children}
+    </MuiButton>
+  );
+}
+
+export const LoadingButton = { default: CompatibilityLoadingButton };
 export const ExtendService = { extendToken: (_url?: string) => undefined };
 export const Analytics = { default: () => undefined };
 export const FDC3Agent = {

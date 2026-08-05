@@ -148,14 +148,17 @@ From `apps/mfe-cashflow-blotter-mvp`:
 npm test -- --runInBand
 npm run lint
 npm run typecheck:shell
+npm run typecheck:application
 npm run build
 npm run check:boundaries
 ```
 
-The shell typecheck and lint target migration-owned federation and compatibility
-code. The copied legacy tree is deliberately not represented as debt-free:
-full-tree checking still reports pre-existing errors and remains an OpenSpec
-task.
+The shell typecheck targets migration-owned federation and compatibility code.
+The application typecheck follows the actual `Cashflow_CN` entry graph, owns
+its ambient declarations locally, and checks it against the declared Ratan
+facade. The build runs both checks after compiling assets and CSS. Restoring
+strict-null checking, widening legacy lint coverage, and replacing the
+temporary Ratan facade remain explicit follow-up cohorts.
 
 Portal Host verification:
 
@@ -186,8 +189,10 @@ do not contain a fixture middleware path.
 2. Exercise grid paging, notifications, export,
    and at least one entitled maker/checker workflow in Portal Host.
 3. Extract every Cashflow-used Ratan module into realworld packages; remove the
-   temporary `@legacy-ratan` source alias.
-4. Resolve full migrated-tree TypeScript/lint failures.
+   temporary `@legacy-ratan` source alias. The identity/permission,
+   feature-enable, and logging cohort is already Cashflow-owned and covered by
+   compatibility tests.
+4. Restore strict-null checking and widen lint coverage across inherited code.
 5. Reduce the approximately 8.5 MB production bundle.
 6. Validate identity, authorization, FDC3, STOMP, GraphQL, REST, and environment
    contracts against the production platform.
