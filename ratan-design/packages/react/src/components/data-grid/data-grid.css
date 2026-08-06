@@ -1,0 +1,64 @@
+@layer ratan.components {
+  .ratan-data-grid {
+    border: 1px solid var(--sc-table-divider-color);
+    color: var(--sc-table-td-color);
+    height: var(--ratan-data-grid-height);
+    overflow: auto;
+    position: relative;
+  }
+
+  .ratan-data-grid__status {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .ratan-data-grid__header,
+  .ratan-data-grid__row {
+    display: grid;
+  }
+
+  .ratan-data-grid__header {
+    background: var(--sc-table-th-background);
+    color: var(--sc-table-th-color);
+    inset-block-start: 0;
+    min-height: 2.5rem;
+    position: sticky;
+    z-index: 1;
+  }
+
+  .ratan-data-grid__header > *,
+  .ratan-data-grid__row > * {
+    align-items: center;
+    border-inline-end: 1px solid var(--sc-table-divider-color);
+    display: flex;
+    padding-inline: var(--sc-spacing-8);
+  }
+
+  .ratan-data-grid__header button,
+  .ratan-data-grid__row button {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .ratan-data-grid__header button[data-focus-visible],
+  .ratan-data-grid__row button[data-focus-visible] {
+    outline: 2px solid var(--sc-tab-focus-outline-color);
+  }
+
+  .ratan-data-grid__viewport { position: relative; }
+  .ratan-data-grid__row {
+    background: var(--sc-table-td-background);
+    border-block-start: 1px solid var(--sc-table-td-border-top);
+    inset-inline: 0;
+    position: absolute;
+  }
+  .ratan-data-grid__row:hover { background: var(--sc-table-tr-hover-background-color); }
+}

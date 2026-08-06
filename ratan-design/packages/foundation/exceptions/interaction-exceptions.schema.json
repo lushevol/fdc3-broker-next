@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schemaVersion", "exceptions"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "exceptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "file", "capability", "rationale", "approvedBy", "tests", "adr"],
+        "properties": {
+          "id": { "type": "string" },
+          "file": { "type": "string" },
+          "capability": { "type": "string" },
+          "rationale": { "type": "string" },
+          "approvedBy": { "type": "string" },
+          "tests": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "adr": { "type": "string" }
+        }
+      }
+    }
+  }
+}

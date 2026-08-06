@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>sc-status-filter WebKit parity fixture</title>
+  </head>
+  <body class="sc-mode-light" data-ratan-parity-fixture="sc-status-filter">
+    <main style="box-sizing:border-box;padding:24px;width:640px"><sc-status-filter></sc-status-filter></main>
+    <script id="ratan-fixture-contract" type="application/json">{"id":"sc-status-filter","classification":"included","legacyTag":"sc-status-filter","reactComponent":"StatusFilter","reactSubpath":"./status-filter","runtimeFixture":"runtime/sc-status-filter.html","reactFixture":"react/sc-status-filter.tsx","states":["default","disabled","hover","focus-visible"],"variants":[],"tones":[],"sizes":[],"defaults":{"multiple":"false","value":"''","disabled":"false","size":"'md'","rowMaxColumns":"6"},"properties":[{"legacyProperty":"multiple","legacyAttribute":"multiple","type":"boolean","default":"false","description":"Enable multiple selection mode"},{"legacyProperty":"value","legacyAttribute":"value","type":"string","default":"''","description":"Currently selected value (single mode) or values (multiple mode)"},{"legacyProperty":"disabled","legacyAttribute":"disabled","type":"boolean","default":"false","description":"Disabled state for entire filter group"},{"legacyProperty":"size","legacyAttribute":"size","type":"StatusFilterSize","default":"'md'","description":"Size variant for all items in the group"},{"legacyProperty":"rowMaxColumns","legacyAttribute":"row-max-columns","type":"number","default":"6","description":"Maximum columns per row (default: 6, max: 6)"},{"legacyProperty":"dir","legacyAttribute":"dir","type":"string","inheritedFrom":{"name":"ScElement","module":"src/shared/sc-element.ts"}},{"legacyProperty":"lang","legacyAttribute":"lang","type":"string","inheritedFrom":{"name":"ScElement","module":"src/shared/sc-element.ts"}}],"events":[{"legacyEvent":"sc-locale-status"},{"legacyEvent":"sc-select"}],"slots":[{"legacySlot":"default","description":"Default slot for sc-status-filter-item elements"}],"methods":[],"interactions":["pointer","keyboard","programmatic"]}</script>
+  </body>
+</html>

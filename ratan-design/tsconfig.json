@@ -1,0 +1,19 @@
+{
+  "files": [],
+  "references": [
+    { "path": "apps/docs" },
+    { "path": "apps/playground" },
+    { "path": "packages/components" },
+    { "path": "packages/data-grid" },
+    { "path": "packages/foundation" },
+    { "path": "packages/icons" },
+    { "path": "packages/patterns" },
+    { "path": "packages/react/tsconfig.reference.json" },
+    { "path": "packages/standard" },
+    { "path": "packages/storybook" },
+    { "path": "packages/styles" },
+    { "path": "packages/testing" },
+    { "path": "packages/tokens" },
+    { "path": "packages/vitest" }
+  ]
+}

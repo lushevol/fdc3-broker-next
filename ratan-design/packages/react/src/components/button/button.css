@@ -1,0 +1,177 @@
+@layer ratan-components {
+  [data-ratan-component='Button'] {
+    --_default-background: var(--sc-button-primary-background-color);
+    --_default-border: var(--sc-button-primary-border-color);
+    --_default-text: var(--sc-button-primary-text-color);
+    --_hover-background: var(--sc-button-primary-hover-background-color);
+    --_hover-border: var(--sc-button-primary-hover-border-color);
+    --_hover-text: var(--sc-button-primary-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-primary-press-background-color);
+    --_press-border: var(--sc-button-primary-press-border-color);
+    --_press-text: var(--sc-button-primary-press-text-color);
+    --_select-background: var(--sc-button-primary-select-background-color);
+    --_select-border: var(--sc-button-primary-select-border-color);
+    --_select-text: var(--sc-button-primary-select-text-color);
+    appearance: none;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sc-button-icon-gap, 0.5rem);
+    width: var(--sc-button-width, auto);
+    margin-inline: var(--sc-button-margin-left, 0) var(--sc-button-margin-right, 0);
+    border-color: var(--_default-border);
+    border-style: solid;
+    border-width: var(--sc-button-border-width, 1px);
+    border-radius: var(--sc-button-rounded-border-radius, 0.38rem);
+    background: var(--_default-background);
+    color: var(--_default-text);
+    font: inherit;
+    font-family: var(--sc-font-family, inherit);
+    font-weight: var(--sc-button-font-weight, 500);
+    cursor: pointer;
+    transition:
+      background-color 250ms ease-in-out,
+      border-color 250ms ease-in-out,
+      color 250ms ease-in-out,
+      box-shadow 250ms ease-in-out;
+  }
+
+  [data-ratan-component='Button'][data-pill='true'] {
+    border-radius: var(--sc-button-pill-border-radius, 6.25rem);
+  }
+
+  [data-ratan-component='Button'][data-border='false'] {
+    border-width: 0;
+  }
+
+  [data-ratan-component='Button'][data-hovered]:not([data-disabled]):not([data-pending]) {
+    border-color: var(--_hover-border);
+    background: var(--_hover-background);
+    color: var(--_hover-text);
+    box-shadow: var(--sc-button-hover-shadow, 0 1px 3px 1px rgb(26 26 26 / 15%));
+  }
+
+  [data-ratan-component='Button'][data-focus-visible] {
+    position: relative;
+    z-index: 1;
+    outline: 2px solid var(--sc-button-focus-outline-color, var(--sc-color-blue-250));
+    outline-offset: 2px;
+  }
+
+  [data-ratan-component='Button'][data-pressed],
+  [data-ratan-component='Button'][data-pending] {
+    border-color: var(--_press-border);
+    background: var(--_press-background);
+    color: var(--_press-text);
+    box-shadow: none;
+    transition: none;
+  }
+
+  [data-ratan-component='Button'][data-selected='true'] {
+    border-color: var(--_select-border);
+    background: var(--_select-background);
+    color: var(--_select-text);
+    box-shadow: none;
+  }
+
+  [data-ratan-component='Button'][data-disabled] {
+    cursor: not-allowed;
+  }
+
+  [data-ratan-component='Button'][data-pending] {
+    cursor: progress;
+  }
+
+  [data-ratan-component='Button'][data-size='lg'] {
+    height: var(--sc-button-height-lg, 3rem);
+    padding: var(--sc-button-padding-lg, 0.5rem 1rem);
+    font-size: var(--sc-button-font-size-lg, 1rem);
+  }
+
+  [data-ratan-component='Button'][data-size='md'] {
+    height: var(--sc-button-height-md, 2.5rem);
+    padding: var(--sc-button-padding-md, 0.25rem 1rem);
+    font-size: var(--sc-button-font-size-md, 1rem);
+  }
+
+  [data-ratan-component='Button'][data-size='sm'] {
+    height: var(--sc-button-height-sm, 2rem);
+    padding: var(--sc-button-padding-sm, 0.25rem 1rem);
+    font-size: var(--sc-button-font-size-sm, 0.875rem);
+  }
+
+  [data-ratan-component='Button'][data-size='xs'] {
+    height: var(--sc-button-height-xs, 1.75rem);
+    padding: var(--sc-button-padding-xs, 0.25rem 0.5rem);
+    font-size: var(--sc-button-font-size-xs, 0.75rem);
+  }
+
+  [data-ratan-component='Button'][data-size='xxs'] {
+    height: var(--sc-button-height-xxs, 1.5rem);
+    padding: var(--sc-button-padding-xxs, 0.25rem 0.5rem);
+    font-size: var(--sc-button-font-size-xxs, 0.75rem);
+  }
+
+  [data-ratan-component='Button'][data-compact='true'] {
+    padding-inline: 0;
+  }
+
+  [data-ratan-component='Button'][data-truncate='true'] {
+    max-width: 100%;
+  }
+
+  [data-ratan-component='Button'][data-truncate='true'] .ratan-button__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  [data-ratan-component='Button'][data-snack='true'] {
+    height: 100%;
+  }
+
+  .ratan-button__start-icon,
+  .ratan-button__end-icon,
+  .ratan-button__spinner {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ratan-button__spinner {
+    width: 1em;
+    height: 1em;
+    border: 0.125em solid currentcolor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: ratan-button-spin 700ms linear infinite;
+  }
+
+  .ratan-button__loading-announcement {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-ratan-component='Button'],
+    .ratan-button__spinner {
+      transition-duration: 0ms;
+      animation-duration: 0ms;
+    }
+  }
+}
+
+@keyframes ratan-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

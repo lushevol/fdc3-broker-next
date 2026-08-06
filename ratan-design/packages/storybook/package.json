@@ -1,0 +1,22 @@
+{
+  "name": "@fm/ratan-design-storybook",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "storybook build --output-dir dist",
+    "storybook": "storybook dev -p 6006",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint src stories .storybook --max-warnings=0"
+  },
+  "dependencies": {
+    "@fm/ratan-design": "2.0.0-alpha.0",
+    "@storybook/addon-a11y": "^10.5.6",
+    "@storybook/addon-docs": "^10.5.6",
+    "@storybook/react-webpack5": "^10.5.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "storybook": "^10.5.6"
+  }
+}

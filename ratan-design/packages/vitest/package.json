@@ -1,0 +1,28 @@
+{
+  "name": "@fm/ratan-design-vitest",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": {
+      "types": "./config.d.mts",
+      "import": "./config.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint src test vitest.config.ts --max-warnings=0 && node --check config.mjs"
+  },
+  "dependencies": {
+    "axe-core": "^4.11.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "jsdom": "^27.4.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}

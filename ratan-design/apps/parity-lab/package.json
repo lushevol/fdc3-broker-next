@@ -1,0 +1,24 @@
+{
+  "name": "@fm/ratan-design-parity-lab",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node scripts/generate-baseline.mjs",
+    "capture": "node scripts/capture-runtime.mjs",
+    "capture:proof": "node scripts/capture-proof-fixtures.mjs",
+    "measure:proof": "node scripts/measure-proof-performance.mjs",
+    "verify:proof": "node scripts/verify-proof-evidence.mjs",
+    "check:drift": "node scripts/check-baseline-drift.mjs",
+    "test": "node --test test/*.test.mjs && node scripts/check-baseline-drift.mjs && node scripts/validate-baseline.mjs",
+    "build": "npm run generate && npm run test",
+    "lint": "node --check scripts/baseline-config.mjs && node --check scripts/capture-proof-fixtures.mjs && node --check scripts/capture-runtime.mjs && node --check scripts/check-baseline-drift.mjs && node --check scripts/generate-baseline.mjs && node --check scripts/measure-proof-performance.mjs && node --check scripts/schema-validator.mjs && node --check scripts/validate-baseline.mjs && node --check scripts/verify-proof-evidence.mjs"
+  },
+  "devDependencies": {
+    "axe-core": "^4.11.1",
+    "esbuild": "^0.27.3",
+    "pixelmatch": "^5.3.0",
+    "playwright": "^1.62.1",
+    "pngjs": "^7.0.0"
+  }
+}

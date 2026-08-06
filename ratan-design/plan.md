@@ -1,72 +1,139 @@
-# Portal Design System — Final Architecture and Implementation Proposal
+# Ratan Design v2 — React Parity Architecture and Implementation Plan
 
-**Status:** Proposed for architecture validation  
-**Target platform:** Portal shell and independently deployed React micro-frontends  
-**Package namespace:** `@portal-ui/*`  
-**Primary consumers:** Portal platform team and tenant application teams  
-**Design inspiration:** HeroUI developer experience with an original portal visual language  
-**Behavior foundation:** Base UI, subject to validation against React Aria Components  
-**Styling:** CSS Modules, CSS variables and cascade layers  
-**Runtime model:** Provider-less, automatically bound to the portal shell  
-**Telemetry model:** Semantic component events captured centrally from the DOM
+**Status:** Final reconciliation draft for owner steering; component expansion is paused pending approval
+**Target platform:** Portal shell and independently deployed React micro-frontends
+**Public package:** `@fm/ratan-design`
+**Release line:** `2.0.0-alpha.*` → `2.0.0`
+**Frozen design authority:** `@scdevkit/webkit@2.0.5` at repository commit `a8398ea6df30e4843e22fcb5a1d3343107463c60`
+**Interaction foundation:** React Aria Components and hooks
+**Data-grid foundation:** TanStack Table plus TanStack Virtual
+**Styling:** Static CSS, CSS Modules, exact `--sc-*` variables, and cascade layers
+**Runtime model:** No required provider and no shared design-system runtime
+**Telemetry:** Deferred optional extension; not a v2 delivery dependency
 
 ---
 
+# 0. Governing revision decisions
+
+This revision preserves the original plan's useful accessibility, component API, forms, overlays, internationalization, security, documentation, governance, and delivery guidance while changing its design authority and delivery architecture.
+
+If a later section conflicts with this section, these decisions take precedence:
+
+1. Ratan is a from-scratch React implementation of the frozen SC WebKit design, not an original HeroUI-inspired visual language.
+2. Existing `--sc-*` names and resolved values are the permanent public token contract. Ratan does not introduce replacement `--pui-*` or `--ratan-*` tokens.
+3. The in-scope contract is the WebKit UI catalogue, built-in icon libraries, Table, DataView, and DataGrid. DashboardViewer, Tour, legacy RichTextEditor, DocumentImageViewer, and all sibling WebKit packages are excluded.
+4. React APIs are idiomatic but every observed Web Component property, default, variant, state, event, slot, and method must be mapped or explicitly waived.
+5. Runtime observation at the frozen baseline outranks tests/source, application usage, Storybook, and written documentation when those sources disagree.
+6. Known accessibility, performance, security, and interaction defects are corrected and recorded rather than reproduced.
+7. The baseline is a one-time snapshot. Ratan does not continuously mirror later WebKit changes.
+8. Ratan is one public npm package with tree-shakable subpaths. Heavy DataGrid code is isolated behind `@fm/ratan-design/data-grid`.
+9. Components require no provider. Theme and font modes are document-global, direction inherits from `dir`, browser locale is the default, and overlays portal to `document.body`.
+10. The legacy `@fm/ratan-design@1.1.0` workspace is removed after its consumers migrate. Prereleases use `2.0.0-alpha.*`; stable release is `2.0.0`.
+11. The Portal Host is the representative WebKit-to-Ratan pilot. Other WebKit consumers may coexist during migration because both systems use the same token contract.
+12. Mandatory telemetry, a shell singleton, analytics schemas, authorization, workflow state, and business logic are outside the core v2 package. The retained telemetry design is a future optional extension only.
+
+## 0.1 Item-by-item reconciliation with the original plan
+
+The following ledger accounts for every numbered section in the original plan. `Keep` means the original direction remains normative; `Adapt` preserves the intent but changes its mechanism; `Replace` records an approved conflicting decision; `Expand` strengthens the original scope; and `Defer` keeps the idea visible without making it a v2 dependency.
+
+| # | Original plan item | Decision | Final treatment |
+|---:|---|---|---|
+| 1 | Executive summary | Adapt | Retain the multi-team portal purpose; make frozen WebKit parity the design authority and one public Ratan package the delivery unit. |
+| 2 | Problem statement | Keep | Preserve the original MFE consistency, isolation, accessibility, upgrade, overlay and product-usage visibility problems; telemetry remediation is deferred. |
+| 3 | Vision | Replace | Replace the HeroUI-inspired/new visual direction with a React expression of the frozen SC WebKit look and feel. |
+| 4 | Goals and non-goals | Expand | Preserve platform goals and add complete catalogue parity, migration, DataGrid, bundle and interaction gates. |
+| 5 | Design principles | Adapt | Keep accessibility, progressive disclosure, mature APIs, isolation and offline assets; replace mandatory runtime, telemetry and invented density assumptions. |
+| 6 | High-level architecture | Adapt | Keep the shell/MFE development model and restore docs, Storybook and playground; use one public package with private workbench apps. |
+| 7 | Package architecture | Adapt | Consolidate the proposed `@portal-ui/*` public packages into internal modules and tree-shakable subpaths of `@fm/ratan-design`; keep clear internal boundaries. |
+| 8 | Component foundation | Replace | React Aria Components/hooks are selected, not merely provisional; TanStack Table/Virtual are selected for DataGrid. |
+| 9 | MFE runtime contract | Adapt | Keep independent application delivery and React peers; remove the provider/shared Ratan runtime and runtime component substitution. |
+| 10 | Styling architecture | Adapt | Keep static isolated CSS and cascade layers; replace new visual CSS with exact `--sc-*` artifacts and parity-scoped component styles. |
+| 11 | Token architecture | Adapt | Keep primitive/semantic/component organization internally while preserving exact public `--sc-*` names and resolved values. |
+| 12 | Theme and density | Replace | Preserve WebKit light, dark, CPBB and font modes; map density only from observed sizes/compact behavior instead of inventing a new scale. |
+| 13 | Component API standards | Expand | Keep mature React conventions and add exhaustive mappings from attributes, properties, events, slots, methods and defaults. |
+| 14 | Customization policy | Keep | Preserve props → composition → tokens → reviewed exceptions; internal DOM/classes remain private. |
+| 15 | Internationalization | Adapt | Keep locale, RTL and formatting requirements without a provider; browser/`dir` defaults plus relevant component props. |
+| 16 | Motion | Adapt | Keep reduced-motion rules while matching frozen WebKit timings unless an approved defect correction applies. |
+| 17 | Form integration | Expand | Keep native form participation and add WebKit contract parity, controlled/uncontrolled behavior, reset and validation gates. |
+| 18 | Overlay architecture | Replace | Keep accessible focus/dismissal/z-index behavior; use `document.body` portals and document-global themes instead of a runtime overlay root. |
+| 19 | Telemetry architecture | Defer | Retain as optional post-v2 design material; core components expose React/native callbacks and never require telemetry. |
+| 20 | Telemetry schema | Defer | Preserve for a separately approved, independently versioned extension. |
+| 21 | Telemetry value rules | Defer | Preserve privacy-aware guidance; it is not a component parity or release gate. |
+| 22 | Telemetry DOM contract | Defer | Stable `data-*` state remains available for styling/testing, but no telemetry DOM contract is required in v2. |
+| 23 | Telemetry loading/disabled behavior | Adapt | Loading and disabled semantics remain normative component behavior; telemetry emission is deferred. |
+| 24 | Telemetry component API | Defer | No telemetry props in the core v2 API; revisit only through a separate proposal. |
+| 25 | Telemetry lifecycle | Defer | Not part of core component lifecycle or stable-release scope. |
+| 26 | Telemetry privacy/trust | Keep as future guardrail | Any future adapter must retain the original prohibited-data and trust-boundary rules. |
+| 27 | Telemetry performance/reliability | Keep as future guardrail | Any future adapter must be optional, failure-isolated and outside synchronous interaction work. |
+| 28 | Telemetry diagnostics | Defer | Diagnostics belong to a future adapter or development tooling, not production components. |
+| 29 | Button API | Expand | Preserve the detailed API exercise, but derive exact variants/defaults/states from the manifest and implement interaction through React Aria; restore the `loadingLabel` announcement contract. |
+| 30 | Select API | Expand | Preserve compound and convenience APIs, forms and overlays; map the complete WebKit select/dropdown surface using React Aria collections. |
+| 31 | DataTable strategy | Expand | Replace the limited initial DataTable scope with Table, DataView and complete DataGrid parity behind a dedicated subpath; retain the loading/refreshing distinction and manifest-gated exclusions. |
+| 32 | Initial component roadmap | Adapt | Preserve cohorts and enterprise patterns; sequence them by manifest coverage and Portal Host migration needs. |
+| 33 | Repository structure | Restore and adapt | Restore `apps`, `packages` and `tooling`; adopt HeroUI-like docs/React/styles/Storybook/standards boundaries while publishing only `packages/react` as `@fm/ratan-design`. |
+| 34 | Package/build requirements | Expand | Keep ESM/types/tree shaking and add CSS side effects, subpath, manifest drift, packed-consumer and prohibited-dependency checks. |
+| 35 | Versioning/compatibility | Adapt | Preserve SemVer/deprecation matrices; use the existing package identity and the `2.0.0-alpha.*` → `2.0.0` release line. |
+| 36 | Documentation | Expand | Restore a dedicated docs app and require WebKit mappings, deviations, migration guidance and compilable examples. |
+| 37 | AI-ready support | Expand | Keep machine-readable guidance and add parity/migration manifests as authoritative inputs; restore MUI and Ant Design migration mappings for legacy consumers. |
+| 38 | Accessibility gates | Expand | Keep the original gates and add parity fixtures, native forms, zoom, high contrast and manual DataGrid review. |
+| 39 | Performance | Expand | Keep budgets and add WebKit comparison, subpath budgets, bounded DOM, 55 FPS DataGrid and cleanup checks. |
+| 40 | Security/supply chain | Keep | Preserve dependency, CSP, asset, vulnerability, license and SBOM governance. |
+| 41 | Browser/environment support | Adapt | Test supported portal browsers in managed Chrome and Edge across React 18.2–19 and representative MFE mounts. |
+| 42 | Governance | Expand | Keep ownership/review rules and add parity-manifest/deviation approval and workbench ownership. |
+| 43 | Delivery roadmap | Restore and expand | Restore foundation surfaces in Phase 1—docs, Storybook and playground—then require them in every component cohort; restore the tenant migration playbook deliverable. |
+| 44 | Adoption | Expand | Keep gradual adoption; add manifest-driven codemods, Portal Host pilot and legacy Ratan consumer migration; restore the approved-plan guardrail for indefinite mixed-library usage. |
+| 45 | Risks | Expand | Keep original risks and add parity evidence, React Aria gaps, DataGrid schedule and legacy-removal timing. |
+| 46 | Acceptance criteria | Expand | Preserve quality gates and require workbench completeness, 100% manifest completion and migrated consumer flows; restore the pilot-tenant-without-source-modification gate. |
+| 47 | Architectural decisions | Adapt | Publish a single final decision table that includes both original platform intent and approved parity decisions. |
+| 48 | Recommendation | Adapt | Approve the reconciled direction and workbench structure before further component expansion. |
+
+Nothing from the original plan is silently removed. Conflicting ideas remain traceable here, and deferred telemetry material remains in sections 19–28 so it can be revisited without confusing it with the v2 release contract.
+
+## 0.2 Directional decisions requiring owner approval
+
+This document recommends the following steering decisions. Implementation does not scale beyond the proof cohort until they are approved:
+
+1. SC WebKit `2.0.5` at the pinned commit is the frozen visual and behavioral authority.
+2. React Aria is mandatory for interactive behavior whenever it provides the relevant component or hook; hand-rolled interaction primitives require a written exception.
+3. `@fm/ratan-design` is the only public npm package, while docs, Storybook, playground and parity lab remain private workspaces.
+4. The target repository structure is the `apps/`, `packages/` and `tooling/` structure in section 33.
+5. Exact `--sc-*` tokens are public; no replacement token namespace is introduced.
+6. There is no required provider, shared Ratan runtime or mandatory telemetry in v2.
+7. Table, DataView and complete DataGrid parity are required for stable `2.0.0`; explicitly excluded viewers/editors remain out of scope.
+8. Every component must be complete across manifest contract, Storybook, docs, playground where applicable, parity lab, accessibility, tests and performance before its cohort is promoted.
+
 # 1. Executive summary
 
-The portal requires a shared design system that provides a consistent, accessible, observable and supportable user experience across independently developed micro-frontends.
+Ratan Design v2 provides the React-native successor to SC WebKit for independently deployed portal applications. It must deliver the same design tokens, component variants, visual states, themes, typography modes, and intended interaction behavior while removing Web Components, Lit, Shoelace, and untyped React wrappers from the consumer experience.
 
-The proposed Portal Design System will provide:
+The programme will deliver:
 
-- A portal-owned visual language
-- Accessible and composable React components
-- Compact, data-dense interaction patterns for trading and operations workflows
-- Strong CSS isolation for applications sharing the same browser document
-- Controlled tenant customization
-- Provider-less runtime integration
-- Portal-wide theme, locale, density, overlay, toast and telemetry coordination
-- Standard enterprise patterns such as filters, forms, data tables, status indicators and details panels
-- Built-in interaction telemetry with a single shell-level subscription point
-- Versioning, documentation, testing, migration and dependency governance
-- Machine-readable guidance for coding agents and automated review tools
+- A frozen, machine-readable parity manifest covering every public WebKit export and registered element.
+- Exact snapshots of the GDS, styleguide, light/dark, CPBB, Inter, Roboto Mono, Dyslexic, typography, and component token assets.
+- Accessible, typed React components built on React Aria behind Ratan-owned APIs.
+- A full DataGrid replacement built on TanStack Table and TanStack Virtual without exposing their internal state types as the permanent public contract.
+- Static, isolated component CSS that consumes the existing `--sc-*` variables.
+- Root and per-component imports from one tree-shakable `@fm/ratan-design` package.
+- Manifest-driven migration metadata and codemods for properties, events, slots, and imports.
+- A parity lab rendering WebKit and Ratan fixtures under identical conditions.
+- Incremental alpha cohorts, migration of remaining legacy Ratan consumers, and a Portal Host pilot before stable release.
 
-The intended developer experience is similar to HeroUI:
-
-- Simple APIs for common cases
-- Compound APIs for advanced composition
-- Accessible headless behavior
-- CSS-variable theming
-- Granular package imports
-- Strong TypeScript typing
-- Minimal application setup
-- No required React provider
-- Consistent telemetry without tenant-side analytics integration
-
-Example tenant usage:
+Example React usage:
 
 ```tsx
-import { Button } from "@portal-ui/react";
+import { Button } from "@fm/ratan-design/button";
+import "@fm/ratan-design/styles.css";
 
 export function SettlementActions() {
   return (
-    <Button
-      variant="primary"
-      telemetry={{
-        id: "confirm-settlement",
-        label: "Confirm settlement",
-      }}
-    >
+    <Button variant="primary" tone="default" size="sm">
       Confirm
     </Button>
   );
 }
 ```
 
-No `PortalUIProvider`, theme provider or tenant telemetry client is required.
-
-The system will not fork HeroUI or inherit its visual identity. It will adopt the strongest architectural principles from mature component systems while remaining optimized for the portal’s banking, micro-frontend and operational requirements.
-
----
+No design-system provider, shell runtime, or telemetry client is required. Applications own business state and policy; Ratan owns presentation, accessible interaction behavior, and the frozen design contract.
 
 # 2. Problem statement
 
@@ -83,7 +150,7 @@ Without a governed design system, the platform faces:
 - Difficult upgrades across independently deployed applications
 - Limited control over component security and quality
 - Increasing maintenance and support costs
-- Inconsistent telemetry and incomplete product-usage visibility
+- Inconsistent telemetry and incomplete product-usage visibility; this remains a platform problem, but its solution is explicitly deferred from the core v2 component release.
 - Poor compatibility between AI-generated code and portal standards
 - Uncontrolled component overrides
 - Overlay, focus and z-index conflicts between micro-frontends
@@ -100,65 +167,48 @@ The design system must address these problems without becoming:
 
 # 3. Vision
 
-> The Portal Design System is the standard UI contract for portal applications. It provides accessible components, enterprise interaction patterns, design tokens, telemetry instrumentation and safe coexistence within the shared portal canvas.
+> Ratan Design is the React expression of the proven SC WebKit visual system. A migrated screen should look and feel familiar to users, while its implementation becomes more accessible, typed, performant, testable and natural for React teams.
 
-The design system should feel:
+Ratan should feel:
 
-- Professional
-- Precise
-- Compact
-- Calm
-- Operationally efficient
-- Suitable for long-running, data-heavy workflows
-- Consistent without eliminating legitimate domain flexibility
+- Visually indistinguishable from the approved WebKit baseline, except for documented defect corrections.
+- Professional, precise, compact and operationally efficient.
+- Predictable across independently mounted React roots.
+- Native to React rather than a wrapper around Custom Elements.
+- Faster to load and interact with, especially for common portal routes and large grids.
 
-It should not resemble a generic consumer website or marketing-oriented component library.
-
----
+Design evolution beyond the frozen baseline begins only after the parity programme reaches stable release.
 
 # 4. Goals and non-goals
 
 ## 4.1 Primary goals
 
-The design system will:
+Ratan Design v2 will:
 
-1. Standardize portal UI behavior and appearance.
-2. Prevent CSS leakage between micro-frontends.
-3. Support compact and comfortable information density.
-4. Provide accessible behavior by default.
-5. Reduce duplicated implementation across tenant teams.
-6. Enable predictable upgrades through semantic versioning.
-7. Provide controlled extension points.
-8. Coordinate theme, locale, density, overlays, notifications and telemetry.
-9. Work across independently mounted React roots.
-10. Require no tenant-side provider setup.
-11. Provide built-in semantic telemetry.
-12. Allow one central shell listener to receive all design-system events.
-13. Make correct usage straightforward for developers and coding agents.
-14. Support gradual migration from existing UI libraries.
-15. Remain compatible with strict internal-network and dependency controls.
+1. Preserve every in-scope WebKit token, visual variant, state, size and intended interaction.
+2. Replace untyped Custom Element wrappers with strict, discoverable React APIs.
+3. Improve keyboard, screen-reader, focus, form, high-contrast, zoom and reduced-motion behavior.
+4. Eliminate Lit, Shoelace and WebKit from the new package's production dependency graph.
+5. Support React 18.2 through React 19 with React and ReactDOM as peers.
+6. Isolate styles across micro-frontends without Shadow DOM.
+7. Provide root and per-component imports with heavy features isolated in subpaths.
+8. Reproduce the full approved DataGrid feature surface with bounded rendering.
+9. Enable incremental coexistence and manifest-driven migration.
+10. Improve bundle size, interaction latency, unmount cleanup and development ergonomics.
+11. Retain the original plan's accessibility, internationalization, forms, overlays, security, documentation and governance standards where compatible with parity.
 
 ## 4.2 Non-goals
 
-The design system will not own:
+The v2 parity programme will not:
 
-- Tenant business logic
-- Tenant API clients
-- Authentication implementation
-- Authorization policy evaluation
-- FDC3 routing
-- OpenFin integration
-- Workflow orchestration
-- Application state management
-- Tenant data models
-- Tenant-specific branding
-- Runtime calls to external services
-- Application analytics pipelines
-- Raw business-data collection
-
-Portal platform capabilities outside presentation should remain in separate SDK packages.
-
----
+- Create a new visual language or reinterpret SC styling.
+- Continuously synchronize future WebKit changes.
+- Implement excluded viewers, editors, tours, charts, forms tooling or sibling packages.
+- Preserve known legacy defects when the intended behavior is clear.
+- Require a React provider, shell singleton, global event bus or component implementation singleton.
+- Make telemetry mandatory or collect business data.
+- Own tenant business logic, authentication, authorization, FDC3 routing, OpenFin integration, workflow orchestration, API clients or application state.
+- Expose React Aria, TanStack, CSS Module class names or internal DOM structure as public contracts.
 
 # 5. Design principles
 
@@ -224,59 +274,31 @@ The public API should adopt proven patterns:
 
 The API must not blindly reproduce the implementation APIs of Base UI, React Aria or any other underlying library.
 
-## 5.4 Provider-less integration
+## 5.4 Provider-free integration
 
-Tenant applications must not be required to mount:
+Tenant applications import components and the required global style entry point; no provider is mounted.
 
-```tsx
-<PortalUIProvider>
-```
+Components resolve configuration through platform standards:
 
-Runtime capabilities are resolved automatically from:
+- Theme and component values inherit from document-global `--sc-*` variables.
+- Light, dark, CPBB and font-mode selectors match the frozen WebKit CSS contract.
+- Direction inherits from the nearest `dir` attribute.
+- Locale defaults to the browser and may be overridden on components that format locale-sensitive values.
+- Overlay content portals to `document.body` and therefore uses the document-global theme.
 
-- The shared `@portal-ui/runtime` singleton
-- A shell-injected global bridge
-- Shell-owned DOM attributes
-- The shared overlay root
-- Runtime-managed event targets
+Per-subtree overlay themes and local portal containers are intentionally unsupported in v2 because they require a provider or runtime contract.
 
-This reduces tenant setup, prevents inconsistent configuration and allows components to work immediately after import.
+## 5.5 Telemetry is deferred and optional
 
-## 5.5 Telemetry as a first-class capability
+Telemetry is not part of the core component contract and must not block parity delivery. Core components emit ordinary React callbacks and native semantic events only.
 
-Telemetry is part of the component contract rather than an optional tenant implementation.
+Sections 19–28 retain the original telemetry proposal as design material for a future opt-in adapter. Any later telemetry package must remain vendor-neutral, privacy-controlled, failure-isolated and unable to change component interaction behavior.
 
-Components emit semantic events containing:
+## 5.6 Density and compact variants follow the baseline
 
-- Action
-- Safe component value
-- State
-- Loading status
-- Disabled status
-- Logical hierarchy
-- Application and page context
-- Interaction trigger
-- Outcome and performance where applicable
+Ratan does not invent a new global density scale during parity. It preserves WebKit's observed component sizes, compact flags, row heights, spacing and control dimensions exactly.
 
-Telemetry must be:
-
-- Centrally subscribable
-- Vendor-neutral
-- Schema-versioned
-- Privacy-controlled
-- Non-blocking
-- Failure-isolated
-
-## 5.6 Density as a system capability
-
-Initial density modes:
-
-```text
-comfortable
-compact
-```
-
-Density affects spacing, control height, row height and layout rhythm. It must not be implemented through browser zoom or indiscriminate font reduction.
+After parity, a global density abstraction may be proposed only if every mapping to existing variants is explicit and produces no unexplained visual change.
 
 ## 5.7 Isolation before global convenience
 
@@ -310,628 +332,271 @@ The design system must not require:
 # 6. High-level architecture
 
 ```text
-┌──────────────────────────────────────────────────────────────┐
-│                         Portal Shell                         │
-│                                                              │
-│  @portal-ui/runtime                                          │
-│  ├─ Theme and density state                                  │
-│  ├─ Locale and time-zone state                               │
-│  ├─ Overlay registration                                     │
-│  ├─ Toast coordination                                       │
-│  ├─ Telemetry event target and queue                         │
-│  ├─ Runtime compatibility reporting                          │
-│  └─ Diagnostics                                              │
-│                                                              │
-│  Global tokens and base styles                               │
-│  Shared overlay root                                         │
-│  Central telemetry listener                                  │
-└──────────────────────────────────────────────────────────────┘
-                    │ automatic runtime binding
-        ┌───────────┴───────────────────────────┐
-        │                                       │
-┌────────────────────────┐            ┌────────────────────────┐
-│ Tenant micro-frontend A│            │ Tenant micro-frontend B│
-│                        │            │                        │
-│ @portal-ui/react       │            │ @portal-ui/react       │
-│ Local component CSS    │            │ Local component CSS    │
-│ Tenant features        │            │ Tenant features        │
-│ No provider            │            │ No provider            │
-└────────────────────────┘            └────────────────────────┘
+Ratan Design workspace
+│
+├─ Public delivery
+│  └─ @fm/ratan-design (application-bundled, tree-shakable)
+│     ├─ typed React APIs backed by React Aria
+│     ├─ exact frozen --sc-* token and theme assets
+│     ├─ static isolated component CSS and built-in icons
+│     ├─ patterns, testing helpers and migration metadata
+│     └─ data-grid subpath backed by TanStack Table + Virtual
+│
+├─ Product and developer workbench (private)
+│  ├─ Docs: durable guidance, API, tokens, migration and deviations
+│  ├─ Storybook: exhaustive component variants, states and interactions
+│  ├─ Playground: realistic React/MFE integration and package-consumer flows
+│  └─ Parity lab: frozen WebKit-versus-Ratan evidence and benchmarks
+│
+└─ Tooling (private)
+   ├─ baseline/manifest generators
+   ├─ codemods and migration checks
+   ├─ visual/accessibility/performance runners
+   └─ package-boundary and release validation
+
+Portal shell / independently deployed React application
+├─ React + ReactDOM peers
+├─ document-global SC theme and font-mode CSS
+└─ a pinned @fm/ratan-design application dependency
 ```
 
----
+Ratan is bundled with each application. Only React and ReactDOM remain shared federation singletons. Ratan components, React Aria and TanStack dependencies are not substituted by the shell at runtime.
 
 # 7. Package architecture
 
-## 7.1 `@portal-ui/runtime`
+## 7.1 One public package
 
-A small, stable, shared runtime.
+`@fm/ratan-design` contains all public APIs and is released as one semantic-versioned unit from `packages/react`. Private workspace packages provide strong source, test and build boundaries, but they are not separately published, independently versioned or required as runtime dependencies by consumers. The public build bundles or copies their approved outputs into `@fm/ratan-design`.
 
-Responsibilities:
-
-- Theme configuration
-- Density configuration
-- Locale configuration
-- Time-zone configuration
-- Overlay-root registration
-- Toast and notification coordination
-- Telemetry dispatch and subscription
-- Telemetry batching and sampling
-- Z-index coordination
-- Runtime compatibility reporting
-- Runtime diagnostics
-- Portal context resolution
-
-It must not contain ordinary visual component implementations.
-
-## 7.2 `@portal-ui/telemetry-schema`
-
-A framework-independent telemetry contract containing:
-
-- TypeScript event types
-- JSON Schema definitions
-- Runtime validators
-- Schema-version constants
-- Sanitization metadata
-- Field classifications
-- Event examples
-
-This package should be usable by:
-
-- React components
-- The portal shell
-- Telemetry processors
-- Automated tests
-- Backend validation services
-- Documentation generators
-
-## 7.3 `@portal-ui/tokens`
-
-Framework-independent tokens.
-
-Outputs:
+Required exports:
 
 ```text
-tokens.css
-tokens.json
-tokens.d.ts
+@fm/ratan-design
+@fm/ratan-design/button
+@fm/ratan-design/text-input
+@fm/ratan-design/date-picker
+@fm/ratan-design/dialog
+@fm/ratan-design/tabs
+@fm/ratan-design/data-grid
+@fm/ratan-design/icons
+@fm/ratan-design/tokens
+@fm/ratan-design/testing
+@fm/ratan-design/styles.css
+@fm/ratan-design/themes/light.css
+@fm/ratan-design/themes/dark.css
+@fm/ratan-design/themes/cpbb.css
+@fm/ratan-design/modes/inter.css
+@fm/ratan-design/modes/roboto-mono.css
+@fm/ratan-design/modes/dyslexic.css
+@fm/ratan-design/parity-manifest.json
+@fm/ratan-design/migration-map.json
 ```
 
-Categories:
+Common components may be imported from the root. Per-component subpaths must avoid loading unrelated component code or CSS. DataGrid and other expensive capabilities are never re-exported from the root barrel.
 
-- Color
-- Typography
-- Spacing
-- Sizing
-- Radius
-- Border
-- Elevation
-- Motion
-- Breakpoints
-- Z-index
-- Density
-- Component sizing
+The original multi-package responsibilities are preserved as boundaries without multiplying public release units:
 
-## 7.4 `@portal-ui/styles`
+| Original responsibility | Final home | Treatment |
+|---|---|---|
+| `@portal-ui/runtime` | None in v2 | Replaced by document-global CSS and explicit component props; no singleton runtime. |
+| `@portal-ui/telemetry-schema` | Deferred proposal under `tooling/` or a future package | Not a v2 production dependency. |
+| `@portal-ui/tokens` | Private `packages/tokens` → `@fm/ratan-design/tokens` | Exact public `--sc-*` contract and generated metadata. |
+| `@portal-ui/styles` | Private `packages/styles` → CSS/theme/mode subpaths | Static scoped CSS with accurate side effects. |
+| `@portal-ui/react` | Public `packages/react` facade over private component workspaces | Main typed React catalogue and only published release unit. |
+| `@portal-ui/icons` | Private `packages/icons` → `@fm/ratan-design/icons` | Frozen built-in WebKit icon libraries. |
+| `@portal-ui/patterns` | Private `packages/patterns` → root/subpath exports | Shared compositions that are in the manifest or approved after parity. |
+| `@portal-ui/data-table` | Private `packages/data-grid` → `/table`, `/data-view` and `/data-grid` | Expanded to full frozen catalogue parity; expensive code stays isolated. |
+| `@portal-ui/testing` | Private `packages/testing` → `@fm/ratan-design/testing` | Consumer-facing helpers only; internal runners live in workbench/tooling. |
+| `@portal-ui/eslint-plugin` | Private `packages/standard` and boundary tooling | Publish separately only if external consumers demonstrate a need. |
+| Optional framework adapters | Migration tooling or future separate packages | React v2 does not bundle framework adapters. |
 
-Contains:
+## 7.2 Private workbench applications and packages
 
-- Cascade-layer declarations
-- Scoped reset
-- Themes
-- Typography foundations
-- Reduced-motion defaults
-- Approved utilities
-- Optional complete component CSS bundle
+The original plan's development surfaces remain first-class workspaces:
 
-## 7.5 `@portal-ui/react`
+- **Docs** owns durable product guidance, API reference, token reference, accessibility, migration and approved deviations.
+- **Storybook package** owns shared configuration and exhaustive isolated examples for every component variant, state, size, theme, font mode and supported interaction.
+- **Playground** owns realistic React 18/19, form, overlay, navigation, MFE mount/unmount, mixed WebKit/Ratan and packed-package consumer scenarios.
+- **Parity lab** owns frozen WebKit/Ratan fixture pairs, computed-style capture, screenshots, accessibility comparison and performance benchmarks.
 
-Primary React components.
+These workspaces are private and are never bundled into `@fm/ratan-design`. Storybook is an implementation workbench, not the design authority; observed frozen WebKit runtime behavior remains authoritative when evidence conflicts.
 
-```tsx
-import {
-  Button,
-  Card,
-  Dialog,
-  Field,
-  Select,
-} from "@portal-ui/react";
-```
+## 7.3 Private tooling
 
-Subpath imports:
+Generators, codemods, fixture builders, visual-test runners and release checks live outside the public package. Tooling may depend on the frozen WebKit baseline; production package code may not.
 
-```tsx
-import { Button } from "@portal-ui/react/button";
-import { Dialog } from "@portal-ui/react/dialog";
-```
+## 7.4 Frozen metadata
 
-Only documented exports are public.
+The checked-in parity manifest records, for every WebKit public export and registered tag:
 
-## 7.6 `@portal-ui/icons`
+- classification: included, excluded or supporting-only;
+- source class and tag names;
+- React component/subpath mapping;
+- properties, attributes, defaults, variants and states;
+- events, slots, methods and imperative handles;
+- token and mode dependencies;
+- runtime, story and migration fixtures;
+- documented deviations and their approvals.
 
-An approved internal SVG icon collection.
+The migration map is generated from the same source and drives codemods, documentation and completeness tests.
 
-Requirements:
+## 7.5 Testing and enforcement
 
-- Tree-shakable
-- No network loading
-- Consistent dimensions
-- Accessible title support
-- No external font dependency
-- Controlled naming and deprecation
-
-## 7.7 `@portal-ui/patterns`
-
-Higher-level enterprise patterns:
-
-- `ApplicationPage`
-- `PageHeader`
-- `FilterBar`
-- `SearchPanel`
-- `DetailsPanel`
-- `FormSection`
-- `PermissionState`
-- `ExceptionBanner`
-- `StatusSummary`
-- `AuditTimeline`
-- `ColumnManager`
-- `BulkActionBar`
-
-Patterns must remain free of tenant business logic.
-
-## 7.8 `@portal-ui/data-table`
-
-A separately governed table subsystem, likely based internally on:
-
-```text
-TanStack Table
-+
-optional TanStack Virtual
-+
-Portal UI markup, accessibility and styling
-```
-
-The public API must not expose TanStack-specific state objects unnecessarily.
-
-## 7.9 `@portal-ui/testing`
-
-Shared helpers:
-
-```tsx
-renderWithPortalRuntime()
-configureTestRuntime()
-openDialog()
-selectOption()
-expectAccessible()
-captureTelemetry()
-```
-
-## 7.10 `@portal-ui/eslint-plugin`
-
-Potential rules:
-
-- Prohibit internal imports
-- Detect prohibited UI libraries
-- Detect unsupported raw controls
-- Detect inaccessible icon-only actions
-- Detect global overrides of design-system internals
-- Detect deprecated APIs
-- Require telemetry identifiers for important business actions
-- Detect unsafe telemetry values
-
-## 7.11 Optional adapters
-
-Optional packages may include:
-
-```text
-@portal-ui/react-hook-form
-@portal-ui/tanstack-query
-```
-
-They should only be introduced when repeated integration code justifies them.
-
----
+Testing helpers expose fixture rendering, keyboard sequences, overlay access, token inspection and parity assertions. Lint rules and dependency-boundary tests prohibit internal imports, Lit/Shoelace/WebKit dependencies, undefined tokens, unsupported raw controls, and inaccessible icon-only actions.
 
 # 8. Component foundation
 
-## 8.1 Provisional selection
+## 8.1 React Aria
 
-Base UI is the provisional behavior foundation because it provides:
+React Aria Components and hooks are the standard private behavior foundation because the catalogue requires collection navigation, selection, date and range controls, locale-aware behavior, overlays, form semantics, keyboard interaction, focus management and screen-reader support.
 
-- Unstyled React primitives
-- Compound component structure
-- Accessible interaction behavior
-- State exposed through data attributes
-- Styling independence
-- Direct DOM control
-- Compatibility with CSS Modules
+Ratan owns all public names, props, markup expectations, styles and state semantics. React Aria classes, types and composition rules do not leak through the API.
 
-## 8.2 Fallback
+Native HTML remains the rendered semantic foundation, but Ratan does not recreate interaction systems already supplied by React Aria. An interactive component must use the corresponding React Aria Component or hook when one exists. Direct native implementation is limited to non-interactive presentation or behavior for which React Aria has no applicable primitive. Any interactive exception requires an ADR entry, manifest rationale, keyboard/focus tests and owner approval.
 
-React Aria Components is the fallback where Base UI does not meet requirements around:
+Ratan CSS may style React Aria-rendered semantics and stable Ratan `data-*` states, but React Aria types, class names, DOM shape and state naming remain private. A package-boundary check rejects hand-written press, focus, collection, selection, overlay, date or keyboard-navigation infrastructure unless the component is listed in the approved exception manifest.
 
-- Collection behavior
-- Internationalization
-- Keyboard interaction
-- Form semantics
-- Focus management
-- Screen-reader consistency
+## 8.2 DataGrid
 
-## 8.3 Validation spike
+TanStack Table provides private row/column state and TanStack Virtual provides bounded row and column rendering. Ratan owns the public column, filtering, sorting, selection, editing, grouping, pinning, sizing, spanning, export and event contracts.
 
-The spike must cover:
+The initial architecture spike must prove Button, TextInput, Dialog, DatePicker, Tabs and a representative DataGrid slice against WebKit before cohort implementation scales.
 
-- Button
-- Field
-- Checkbox
-- RadioGroup
-- Dialog
-- AlertDialog
-- Tooltip
-- Popover
-- Menu
-- Select
-- Combobox
-- Nested overlays
-- Form submission and reset
-- Controlled and uncontrolled state
-- Keyboard-only usage
-- Screen-reader behavior
-- Shared overlay-root integration
-- Provider-less runtime access
-- Telemetry emission
-- CSP compatibility
-- Compact-density styling
-- React Hook Form compatibility
-- Tile unmount cleanup
-- Bundle size and rendering cost
+## 8.3 Foundation gate
 
-## 8.4 Selection gate
+The foundation is accepted only when the spike proves:
 
-Base UI will be selected unless material problems are found in:
-
-- Focus restoration
-- Internationalized input
-- Nested overlay behavior
-- Form participation
-- Collection navigation
-- Screen-reader output
-- Required custom interaction code
-- Bundle size
-- Runtime stability
-
-Base UI and React Aria should not be mixed component-by-component without architectural approval.
-
----
+- visual parity in every baseline theme/mode and state;
+- keyboard, focus, form, locale and screen-reader behavior;
+- document-body overlay behavior and cleanup;
+- controlled and uncontrolled React APIs;
+- strict ref and callback typing;
+- CSP compatibility and no external runtime asset requirement;
+- per-component tree shaking;
+- lower common-route bundle cost and p95 interaction work below 10 ms;
+- bounded DataGrid DOM and stable scrolling.
 
 # 9. Micro-frontend runtime contract
 
-## 9.1 Shared singleton dependencies
+## 9.1 Shared dependencies
 
-The portal should share:
+Only `react` and `react-dom` are shared federation singletons. Ratan is compiled into each independently deployed application so one application's upgrade cannot replace another application's component implementation.
 
-```text
-react
-react-dom
-@portal-ui/runtime
-```
-
-Example Module Federation configuration:
-
-```ts
-shared: {
-  react: {
-    singleton: true,
-    requiredVersion: "^18.2.0 || ^19.0.0",
-  },
-  "react-dom": {
-    singleton: true,
-    requiredVersion: "^18.2.0 || ^19.0.0",
-  },
-  "@portal-ui/runtime": {
-    singleton: true,
-    requiredVersion: "^1.0.0",
-  },
-}
-```
-
-## 9.2 Dependencies not shared by default
-
-Normally local to each tenant bundle:
+Supported peers:
 
 ```text
-@portal-ui/react
-@base-ui/react
-component CSS Modules
+react >=18.2.0 <20
+react-dom >=18.2.0 <20
 ```
 
-This avoids:
+## 9.2 No design runtime
 
-- Unexpected runtime substitution
-- Shell-driven component behavior changes
-- Cross-tenant release coupling
-- Difficult rollback
-- Private dependency conflicts
+There is no `@fm/ratan-design/runtime`, global bridge, runtime symbol, provider, event bus, toast singleton or compatibility negotiation service in v2.
 
-## 9.3 Provider-less runtime resolution
+Applications load the frozen global token/mode CSS once and import component CSS through component subpaths. Storybook and tests use the same CSS entry points.
 
-Components resolve the runtime through a stable function:
+## 9.3 Coexistence
 
-```ts
-const runtime = getPortalUIRuntime();
-```
+WebKit and Ratan may render in the same document during migration. They share the `--sc-*` token contract but not implementation classes or state. Component CSS is scoped so neither implementation overrides the other's internals.
 
-Resolution order:
-
-```text
-1. Shared @portal-ui/runtime singleton
-2. Shell-injected global runtime bridge
-3. DOM-bound portal runtime metadata
-4. Safe local fallback for development and tests
-```
-
-The global bridge should use a versioned symbol rather than an arbitrary global name:
-
-```ts
-const runtimeKey = Symbol.for("@portal-ui/runtime");
-```
-
-The shell registers:
-
-```ts
-globalThis[runtimeKey] = portalUIRuntime;
-```
-
-The runtime must validate compatibility before accepting a registration.
-
-## 9.4 Tenant usage
-
-No setup is required:
-
-```tsx
-createRoot(container).render(<Application />);
-```
-
-No theme provider, locale provider, overlay provider or telemetry provider is required.
-
-## 9.5 Runtime fallback behavior
-
-Outside the portal, such as Storybook or unit tests, components may use a safe local runtime providing:
-
-- Default light theme
-- Comfortable density
-- Browser locale
-- `body` overlay container
-- In-memory telemetry sink
-- Development diagnostics
-
-Production portal usage must use the shell runtime.
-
-## 9.6 Compatibility validation
-
-Before mounting a tile, validate:
-
-- React version
-- React DOM version
-- Runtime major version
-- Supported component major versions
-- Required portal capabilities
-- Telemetry schema compatibility
-
-A compatibility failure must produce a clear diagnostic rather than silently selecting an arbitrary version.
-
----
+Compatibility failures are detected at build/test time through peer ranges, package-boundary checks, manifest completeness and packed-consumer tests rather than through runtime substitution.
 
 # 10. Styling architecture
 
 ## 10.1 Technology decision
 
 ```text
-CSS variables
-+
-CSS Modules
-+
-CSS cascade layers
-+
-stable data attributes
+exact --sc-* CSS variables
++ static CSS Modules
++ cascade layers
++ stable data attributes
++ component subpath CSS
 ```
 
-Not required:
+No CSS-in-JS, Emotion, Styled Components, Tailwind runtime or dynamic style engine is used.
 
-- CSS-in-JS
-- Styled Components
-- Emotion
-- Tailwind CSS
-- Runtime style injection
+## 10.2 Isolation
 
-## 10.2 Component output
+React cannot rely on WebKit's Shadow DOM boundary. Every component rule is anchored to a Ratan-owned root class or data attribute, internal classes are locally scoped, and resets apply only to Ratan component roots. Global selectors are limited to the frozen theme/mode token definitions.
+
+Example output:
 
 ```html
 <button
-  class="pui_Button_root_a7f3"
-  data-pui-component="Button"
-  data-pui-telemetry-id="confirm-settlement"
-  data-pui-variant="primary"
-  data-pui-loading="false"
-  data-pui-disabled="false"
+  class="Button_root__hash"
+  data-ratan-component="Button"
+  data-variant="primary"
+  data-tone="default"
+  data-size="sm"
+  data-loading="false"
+  data-disabled="false"
 >
   Confirm
 </button>
 ```
 
-Internal classes are private and hashed.
-
-## 10.3 Cascade-layer order
-
-The shell declares:
+## 10.3 Cascade order
 
 ```css
-@layer reset, portal-theme, portal-components, tenant-components, utilities;
+@layer ratan-reset, sc-theme, ratan-components, application-components, utilities;
 ```
 
-This declaration must load before tenant component CSS.
+The layer declaration loads before component and application CSS. The standard `styles.css` entry point includes layer order, frozen token foundations and minimal scoped resets. Theme/mode subpaths remain explicit and side-effectful.
 
-## 10.4 Shell-loaded styles
+## 10.4 Build behavior
 
-```css
-@import "@portal-ui/styles/layers.css";
-@import "@portal-ui/styles/tokens.css";
-@import "@portal-ui/styles/base.css";
-@import "@portal-ui/styles/themes/default.css";
-```
-
-## 10.5 Component-loaded styles
-
-```tsx
-import styles from "./button.module.css";
-```
-
-Styles load with component chunks.
-
-## 10.6 Optional complete bundle
-
-```css
-@import "@portal-ui/styles/all.css";
-```
-
-Intended for:
-
-- Documentation
-- Prototypes
-- Visual testing
-- Non-bundled consumers
-
-It is not the normal portal production path.
-
-## 10.7 Reset scope
-
-Avoid an uncontrolled global reset.
-
-Prefer:
-
-```css
-[data-portal-ui-root] {
-  box-sizing: border-box;
-  font-family: var(--pui-font-family-body);
-}
-```
-
----
+Root imports do not load DataGrid or unrelated component CSS. Every subpath declares its own static CSS side effect. A complete CSS bundle is permitted only for Storybook, parity lab and non-code-split prototypes.
 
 # 11. Token architecture
 
-## 11.1 Hierarchy
+## 11.1 Authority
 
-```text
-Primitive tokens
-       ↓
-Semantic tokens
-       ↓
-Component tokens
-       ↓
-Component implementation
-```
+The frozen WebKit CSS assets are copied into Ratan and hashed in the parity manifest. Existing `--sc-*` names and values are authoritative; they are not renamed, normalized or reduced during parity.
 
-## 11.2 Primitive tokens
+Included token assets cover:
 
-```css
---pui-blue-600
---pui-neutral-100
---pui-space-4
---pui-radius-2
---pui-font-size-14
-```
+- GDS primitives and component variables;
+- styleguide and typography foundations;
+- light and dark component mappings;
+- CPBB overrides;
+- Inter, Roboto Mono and Dyslexic font modes;
+- grid, follow-system and supported utility foundations;
+- every component-state variable referenced by included source styles.
 
-Tenant applications should not normally override them.
+## 11.2 Typed metadata
 
-## 11.3 Semantic tokens
+`@fm/ratan-design/tokens` exports immutable metadata describing each custom property, source asset, category, supported modes and consumers. The JavaScript metadata never replaces CSS as the rendering authority.
 
-```css
---pui-color-background
---pui-color-surface
---pui-color-surface-raised
---pui-color-text
---pui-color-text-muted
---pui-color-border
---pui-color-accent
---pui-color-critical
---pui-color-warning
---pui-color-success
-```
+## 11.3 Drift and completeness
 
-Approved theming occurs primarily at this layer.
+Generation tests verify source hashes, duplicate/conflicting definitions, undefined component variables and parity-manifest coverage. Because the baseline is a one-time snapshot, tests compare against checked-in hashes rather than the live WebKit workspace after the snapshot is approved.
 
-## 11.4 Component tokens
+## 11.4 Customization
 
-Use only where a stable component-specific contract is required:
+Consumers may override documented semantic and component `--sc-*` variables. Primitive variables and undocumented implementation variables remain unsupported. Ratan documentation identifies which existing variables are stable customization contracts without changing their names.
 
-```css
---pui-control-height-md
---pui-table-row-height
---pui-dialog-max-width
-```
+# 12. Theme, typography mode and compact behavior
 
-## 11.5 Naming requirements
+## 12.1 Document-global themes
 
-Tokens must:
-
-- Describe purpose, not temporary appearance
-- Avoid tenant-specific terminology
-- Remain stable across themes
-- Distinguish foreground, background and border roles
-- Support light, dark and high-contrast modes
-
----
-
-# 12. Theme and density
-
-## 12.1 Theme
-
-Initial themes:
+Ratan reproduces the frozen selectors and resolved values for:
 
 ```text
 light
 dark
+CPBB overrides
+follow-system where supported
 ```
 
-Applied by the shell:
+Theme classes and variables are applied to `html` or `body`. Because overlays portal to `document.body` and no provider exists, per-subtree overlay themes are not supported.
 
-```html
-<html
-  data-portal-ui-root
-  data-theme="light"
-  data-density="compact"
->
-```
+## 12.2 Typography modes
 
-Per-tenant visual themes are not supported by default.
+Inter, Roboto Mono and Dyslexic mode assets preserve their WebKit font stacks and custom properties. Fonts are packaged or resolved from approved local/system sources; Ratan performs no public-CDN font requests.
 
-## 12.2 Density
+## 12.3 Sizes and compact variants
 
-```css
-[data-density="comfortable"] {
-  --pui-control-height-sm: 28px;
-  --pui-control-height-md: 36px;
-  --pui-table-row-height: 40px;
-}
-
-[data-density="compact"] {
-  --pui-control-height-sm: 24px;
-  --pui-control-height-md: 28px;
-  --pui-table-row-height: 32px;
-}
-```
-
-Density may affect:
-
-- Control height
-- Component padding
-- Row height
-- Toolbar spacing
-- Section spacing
-- Icon gaps
-
----
+Every observed WebKit size, padding, control height, row height and component-level compact option is preserved. Ratan does not add comfortable/compact global density modes until after parity. Any later density proposal requires an explicit mapping to the frozen variants and independent design approval.
 
 # 13. Component API standards
 
@@ -950,7 +615,6 @@ expanded
 size
 variant
 tone
-density
 ```
 
 Avoid parallel naming such as `isDisabled` or `hasError`.
@@ -960,7 +624,10 @@ Avoid parallel naming such as `isDisabled` or `hasError`.
 - `variant`: visual hierarchy
 - `tone`: semantic status
 - `size`: physical size
-- `density`: information density
+
+Component-specific names such as `compact`, `multiple`, `pill` and `border`
+are retained when they are part of the frozen WebKit contract. Ratan does not
+normalize distinct legacy capabilities into a new global density prop.
 
 ## 13.3 Controlled and uncontrolled state
 
@@ -1014,7 +681,7 @@ Prefer semantic components:
 <IconButton />
 ```
 
-An `asChild` model may be considered only if it preserves semantics, typing, disabled behavior and telemetry.
+An `asChild` model may be considered only after parity and only if it preserves semantics, typing and disabled behavior.
 
 ---
 
@@ -1047,8 +714,8 @@ An `asChild` model may be considered only if it preserves semantics, typing, dis
 - Pattern-level visual changes
 - New token categories
 - Reusable tenant wrappers
-- Data-table behaviors likely to become standard
-- Exceptions to density rules
+- DataGrid behaviors likely to become standard
+- Changes to frozen size or compact behavior
 
 ## 14.4 Prohibited
 
@@ -1064,29 +731,26 @@ An `asChild` model may be considered only if it preserves semantics, typing, dis
 
 # 15. Internationalization
 
-The runtime exposes:
+Ratan has no locale provider or shared locale runtime. Locale-sensitive
+components default to the browser locale and inherited direction, and expose
+typed props for an application to override locale, time zone, formatting and
+generic accessibility messages where the frozen component requires them.
 
-```ts
-interface PortalUILocaleConfig {
-  locale: string;
-  timeZone: string;
-  messages: PortalUIMessageCatalog;
-  numberFormat?: Intl.NumberFormatOptions;
-  dateFormat?: Intl.DateTimeFormatOptions;
-}
-```
+The exact per-component props are recorded in the parity manifest. Ratan may
+share private formatting/message utilities, but applications do not configure a
+global Ratan singleton.
 
 Responsibility split:
 
 | Concern | Owner |
 |---|---|
-| Date and number formatting | Portal runtime and native `Intl` |
+| Date and number formatting | Component props and native `Intl` |
 | Accessibility messages | Design system |
 | Generic component labels | Design system catalog |
 | Application content | Tenant |
 | Business validation messages | Tenant |
-| Time zone | Portal shell |
-| Locale selection | Portal shell or user preference |
+| Time zone | Browser default or component prop |
+| Locale selection | Browser default, component prop or application preference |
 
 Components must not hardcode strings such as:
 
@@ -1102,14 +766,16 @@ Components must not hardcode strings such as:
 
 # 16. Motion and reduced motion
 
-Use intent-based tokens:
+Preserve the motion properties present in the frozen token inventory. The
+following illustrates intent-based naming only; it must not create variables
+that are absent from the baseline:
 
 ```css
---pui-motion-duration-feedback
---pui-motion-duration-overlay
---pui-motion-duration-navigation
---pui-motion-easing-enter
---pui-motion-easing-exit
+--sc-motion-duration-feedback
+--sc-motion-duration-overlay
+--sc-motion-duration-navigation
+--sc-motion-easing-enter
+--sc-motion-easing-exit
 ```
 
 Respect:
@@ -1117,9 +783,9 @@ Respect:
 ```css
 @media (prefers-reduced-motion: reduce) {
   :root {
-    --pui-motion-duration-feedback: 0ms;
-    --pui-motion-duration-overlay: 0ms;
-    --pui-motion-duration-navigation: 0ms;
+    --sc-motion-duration-feedback: 0ms;
+    --sc-motion-duration-overlay: 0ms;
+    --sc-motion-duration-navigation: 0ms;
   }
 }
 ```
@@ -1171,27 +837,19 @@ React Hook Form must not be a core dependency.
 
 # 18. Overlay architecture
 
-## 18.1 Shared overlay root
+## 18.1 Document-body portal contract
 
-```html
-<div id="portal-overlay-root">
-  <div data-overlay-layer="popover"></div>
-  <div data-overlay-layer="modal"></div>
-  <div data-overlay-layer="toast"></div>
-</div>
-```
+Dialogs, menus, popovers, tooltips and other portalled surfaces render into
+`document.body`. No shell registration, provider or shared overlay root is
+required. The implementation creates and removes only the minimal nodes it
+owns, remains safe across multiple independent React roots and cleans up after
+component unmount.
 
-## 18.2 Runtime registration
+Because theme and font modes are document-global, portalled content resolves
+the same `--sc-*` variables as its trigger. Per-subtree overlay theming and a
+consumer-selected portal container are intentionally unsupported for v2.
 
-```ts
-configurePortalUIRuntime({
-  overlayRoot: document.getElementById("portal-overlay-root"),
-});
-```
-
-This occurs in the shell, not tenant applications.
-
-## 18.3 Overlay contract
+## 18.2 Overlay contract
 
 Define:
 
@@ -1209,33 +867,31 @@ Define:
 - Tile-unmount cleanup
 - Nested overlays
 
-## 18.4 Theme and density inheritance
+## 18.3 Layering and coexistence
 
-Portalled content must receive current theme and density:
+The frozen WebKit z-index values and overlay geometry are parity inputs. Ratan
+uses those values through `--sc-*` variables and scoped styles. Overlay stacks
+from separate React roots must not share mutable design-system state; native DOM
+order plus the documented layer contract determines stacking.
 
-```tsx
-<Dialog.Portal container={runtime.overlay.modal}>
-  <div
-    data-theme={runtime.theme}
-    data-density={runtime.density}
-  >
-    <Dialog.Backdrop />
-    <Dialog.Popup />
-  </div>
-</Dialog.Portal>
-```
+## 18.4 Accessibility and lifecycle
 
-## 18.5 Logical hierarchy preservation
-
-Because a portalled overlay is physically outside its trigger hierarchy, the runtime must preserve the trigger’s logical telemetry hierarchy and attach it to overlay events.
+Focus trapping, initial focus, focus restoration, escape handling, outside
+press, scroll locking, nested overlays and cleanup follow React Aria behavior
+unless the manifest records a stricter legacy requirement. Every intentional
+correction is captured as a tested deviation.
 
 ---
 
-# 19. Telemetry architecture
+# 19. Deferred optional telemetry architecture
 
-## 19.1 Objective
+> **Post-v2 design material:** Sections 19–28 are retained from the original plan so the privacy, hierarchy, schema and reliability thinking is not lost. They are non-normative for Ratan Design v2. Core components do not extend telemetry props, dispatch telemetry events, or require telemetry identifiers. A future adapter must be separately proposed and may only observe public callbacks/native events without changing component behavior.
 
-Portal UI telemetry provides a standardized understanding of how users interact with components across micro-frontends.
+## 19.1 Original objective
+
+
+
+Ratan Design telemetry provides a standardized understanding of how users interact with components across micro-frontends.
 
 Focus areas:
 
@@ -1253,7 +909,7 @@ Focus areas:
 ```text
 User interaction
        ↓
-Portal UI component
+Ratan Design component
        ↓
 Semantic CustomEvent
        ↓
@@ -1703,29 +1359,29 @@ Raw row data and row identifiers are not collected by default.
 ## 22.1 Stable attributes
 
 ```text
-data-pui-component
-data-pui-slot
-data-pui-telemetry-id
-data-pui-telemetry-name
-data-pui-loading
-data-pui-disabled
-data-pui-state
+data-ratan-component
+data-ratan-slot
+data-ratan-telemetry-id
+data-ratan-telemetry-name
+data-ratan-loading
+data-ratan-disabled
+data-ratan-state
 ```
 
 Example:
 
 ```html
 <section
-  data-pui-component="ApplicationPage"
-  data-pui-telemetry-id="trade-search"
+  data-ratan-component="ApplicationPage"
+  data-ratan-telemetry-id="trade-search"
 >
   <div
-    data-pui-component="FilterBar"
-    data-pui-telemetry-id="primary-filters"
+    data-ratan-component="FilterBar"
+    data-ratan-telemetry-id="primary-filters"
   >
     <button
-      data-pui-component="Select"
-      data-pui-telemetry-id="currency-select"
+      data-ratan-component="Select"
+      data-ratan-telemetry-id="currency-select"
     >
       USD
     </button>
@@ -1873,7 +1529,7 @@ Do not make every disabled control artificially clickable.
 All interactive components support:
 
 ```ts
-interface PortalUITelemetryProps {
+interface RatanTelemetryProps {
   telemetry?: {
     id?: string;
     name?: string;
@@ -2056,119 +1712,52 @@ Production access must be restricted.
 
 # 29. Button API
 
-## 29.1 API
+Button demonstrates how idiomatic React names preserve the complete observed WebKit contract.
 
 ```ts
-type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "tertiary"
-  | "ghost";
-
-type ButtonTone =
-  | "neutral"
-  | "accent"
-  | "critical";
+type ButtonVariant = "primary" | "secondary" | "text" | "link";
+type ButtonTone = "default" | "error" | "alert" | "success";
+type ButtonSize = "xxs" | "xs" | "sm" | "md" | "lg";
 
 interface ButtonProps
-  extends Omit<
-      React.ButtonHTMLAttributes<HTMLButtonElement>,
-      "color"
-    >,
-    PortalUITelemetryProps {
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "color"> {
   variant?: ButtonVariant;
   tone?: ButtonTone;
-
-  size?: "sm" | "md" | "lg";
-  density?: "inherit" | "comfortable" | "compact";
-
-  loading?: boolean;
-  loadingLabel?: string;
-
+  size?: ButtonSize;
+  width?: React.CSSProperties["width"];
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
-
-  fullWidth?: boolean;
-
-  children: React.ReactNode;
+  pill?: boolean;
+  border?: boolean;
+  compact?: boolean;
+  snack?: boolean;
+  truncate?: boolean;
+  loading?: boolean;
+  loadingLabel?: string;
+  readOnly?: boolean;
+  selectable?: boolean | "toggle";
+  selected?: boolean;
+  defaultSelected?: boolean;
+  onSelectedChange?: (selected: boolean) => void;
 }
 ```
 
-Defaults:
+Defaults come from observed WebKit runtime behavior: `variant="primary"`, `tone="default"`, `size="sm"`, pill and border enabled, and native `type="button"` for React form safety.
 
-```ts
-{
-  variant: "secondary",
-  tone: "neutral",
-  size: "md",
-  density: "inherit",
-  loading: false,
-  fullWidth: false,
-  type: "button"
-}
-```
+Migration mapping:
 
-`type` defaults to `button` to prevent accidental form submission.
+| WebKit | Ratan React |
+|---|---|
+| `type` | `variant` |
+| `state` | `tone` |
+| `left-icon` / `right-icon` | `startIcon` / `endIcon` |
+| `no-pill` | `pill={false}` |
+| `no-border` | `border={false}` |
+| `selected` | `selected` / `defaultSelected` |
 
-## 29.2 Usage
+The observed but undocumented `type="tertiary"` usage is recorded as a conflict: WebKit's converter renders it as primary, so the codemod emits `variant="primary"` rather than inventing a fifth style.
 
-```tsx
-<Button variant="primary">
-  Confirm
-</Button>
-```
-
-```tsx
-<Button
-  variant="primary"
-  tone="critical"
->
-  Delete
-</Button>
-```
-
-```tsx
-<Button
-  variant="primary"
-  loading={isSubmitting}
-  loadingLabel="Confirming settlement"
-  telemetry={{
-    id: "confirm-settlement",
-    label: "Confirm settlement",
-    loadingReason: "settlement-submission",
-  }}
->
-  Confirm
-</Button>
-```
-
-## 29.3 Loading behavior
-
-When loading:
-
-- Keep the button mounted.
-- Preserve layout width.
-- Prevent repeated activation.
-- Use `aria-disabled`.
-- Retain focus where possible.
-- Show a progress indicator.
-- Announce the loading label.
-- Emit loading transition telemetry.
-
-## 29.4 Icon-only actions
-
-Use:
-
-```tsx
-<IconButton
-  aria-label="Refresh results"
-  icon={<RefreshIcon />}
-/>
-```
-
-Do not use an empty `Button`.
-
----
+When loading, the button stays mounted, preserves layout width, prevents repeated activation, uses `aria-disabled`, retains focus where possible, shows a progress indicator and announces `loadingLabel` (defaulting to a catalog-provided message) through an `aria-live` region. It also respects the matching frozen pressed/loading styles. Icon-only actions use the dedicated IconButton API and require an accessible name.
 
 # 30. Select API
 
@@ -2231,8 +1820,7 @@ The compound API remains canonical.
 ## 30.4 Root API
 
 ```ts
-interface SelectRootProps<TValue extends string>
-  extends PortalUITelemetryProps {
+interface SelectRootProps<TValue extends string> {
   name?: string;
 
   value?: TValue | TValue[];
@@ -2286,15 +1874,10 @@ interface SelectItemProps<TValue extends string> {
   disabled?: boolean;
   textValue?: string;
   children: React.ReactNode;
-
-  telemetry?: {
-    label?: string;
-    classification?: "safe" | "restricted";
-  };
 }
 ```
 
-`textValue` is used for typeahead and accessibility. It is not automatically collected as telemetry.
+`textValue` is used for typeahead and accessibility.
 
 ## 30.6 Form behavior
 
@@ -2312,49 +1895,19 @@ A hidden form control may be used where required.
 
 ## 30.7 Overlay behavior
 
-`Select.Portal` defaults to the shell-owned overlay root.
+`Select.Portal` defaults to `document.body`.
 
 It must preserve:
 
 - Theme
-- Density
 - Locale
-- Source hierarchy
-- Application context
 - Z-index layer
 
-## 30.8 Telemetry
+## 30.8 Callback details
 
-Selection event:
-
-```json
-{
-  "eventName": "ui.action",
-  "action": {
-    "type": "selection-change",
-    "trigger": "pointer"
-  },
-  "component": {
-    "type": "Select",
-    "id": "currency-select",
-    "name": "currency"
-  },
-  "value": {
-    "type": "selection",
-    "optionValue": "USD",
-    "selectedValues": ["USD"],
-    "previousValues": ["HKD"],
-    "selectedCount": 1
-  },
-  "state": {
-    "disabled": false,
-    "loading": false,
-    "readOnly": false,
-    "invalid": false,
-    "expanded": true
-  }
-}
-```
+Selection and open-state callbacks expose Ratan-owned reason details for
+application logic and testing. They are ordinary React callbacks and do not
+dispatch analytics events.
 
 Close reasons may include:
 
@@ -2368,441 +1921,222 @@ programmatic
 
 ---
 
-# 31. DataTable API and strategy
+# 31. DataGrid API and strategy
 
-## 31.1 Objectives
+DataGrid is an in-scope parity subsystem exported from `@fm/ratan-design/data-grid`. It is not reduced to the original plan's first-release table subset.
 
-`DataTable` must support:
+## 31.1 Public contract
 
-- Typed columns
-- Client-side and server-side modes
-- Sorting
-- Filtering
-- Pagination
-- Row selection
-- Loading, refreshing, empty and error states
-- Custom cells
-- Compact density
-- Sticky headers
-- Column resizing
-- Incremental refresh
-- Safe telemetry
+Ratan owns typed row, column and change-detail types. TanStack objects do not appear in public props or callbacks.
 
-It must not expose the internal table-engine API as its permanent public contract.
+The contract includes:
 
-## 31.2 Root API
+- typed accessors and custom cells;
+- client and server sorting, filtering and pagination;
+- single/multiple selection and selection strategies;
+- column ordering, visibility, sizing, pinning and spanning;
+- row pinning, spanning, grouping, tree grouping, expansion and dragging;
+- editing and validation hooks;
+- keyboard navigation and focus behavior;
+- simple and advanced filters with custom filter widgets;
+- master/detail and overlapping views;
+- CSV and Excel export hooks;
+- column manager and action slots;
+- loading, refreshing, empty and error presentation;
+- bounded row/column virtualization for large data.
 
-```ts
-interface DataTableProps<
-  TRow,
-  TRowId extends string = string,
-> extends PortalUITelemetryProps {
-  data: readonly TRow[];
-  columns: readonly DataTableColumn<TRow>[];
+## 31.2 Controlled state
 
-  getRowId: (row: TRow) => TRowId;
+Each stateful feature supports controlled and uncontrolled forms with feature-specific callbacks carrying Ratan-owned reason/trigger details. Server modes never apply client transformations implicitly.
 
-  loading?: boolean;
-  refreshing?: boolean;
-  error?: DataTableError;
+## 31.3 Accessibility
 
-  emptyState?: React.ReactNode;
-  errorState?: React.ReactNode;
-  loadingState?: React.ReactNode;
+The rendered semantic model, keyboard grid behavior, focus persistence, selection announcements, editing transitions and virtualized off-screen behavior require dedicated manual review in addition to automated tests.
 
-  sorting?: DataTableSortingState;
-  defaultSorting?: DataTableSortingState;
-  onSortingChange?: (
-    sorting: DataTableSortingState,
-    details: DataTableSortingChangeDetails,
-  ) => void;
+## 31.4 Performance
 
-  filters?: DataTableFilterState;
-  defaultFilters?: DataTableFilterState;
-  onFiltersChange?: (
-    filters: DataTableFilterState,
-    details: DataTableFilterChangeDetails,
-  ) => void;
+The agreed large-data fixture must use bounded DOM rendering, sustain at least 55 FPS during scripted scrolling, keep p95 synchronous interaction work below 10 ms and release observers/listeners after unmount. Root package imports must never pull DataGrid code.
 
-  pagination?: DataTablePaginationState;
-  defaultPagination?: DataTablePaginationState;
-  onPaginationChange?: (
-    pagination: DataTablePaginationState,
-    details: DataTablePaginationChangeDetails,
-  ) => void;
-
-  rowSelection?: DataTableRowSelectionState<TRowId>;
-  defaultRowSelection?: DataTableRowSelectionState<TRowId>;
-  onRowSelectionChange?: (
-    selection: DataTableRowSelectionState<TRowId>,
-    details: DataTableSelectionChangeDetails<TRowId>,
-  ) => void;
-
-  totalRowCount?: number;
-
-  operationMode?: {
-    sorting?: "client" | "server";
-    filtering?: "client" | "server";
-    pagination?: "client" | "server";
-  };
-
-  stickyHeader?: boolean;
-  resizableColumns?: boolean;
-  selectableRows?: boolean;
-
-  onRowAction?: (
-    row: TRow,
-    details: DataTableRowActionDetails<TRowId>,
-  ) => void;
-}
-```
-
-## 31.3 Column API
-
-```ts
-interface DataTableColumn<TRow> {
-  id: string;
-  header: React.ReactNode;
-
-  accessor?: keyof TRow | ((row: TRow) => unknown);
-
-  cell?: (
-    context: DataTableCellContext<TRow>,
-  ) => React.ReactNode;
-
-  width?: number;
-  minWidth?: number;
-  maxWidth?: number;
-
-  align?: "start" | "center" | "end";
-
-  sortable?: boolean;
-  filterable?: boolean;
-  resizable?: boolean;
-
-  pinned?: "start" | "end" | false;
-
-  visibility?: {
-    defaultVisible?: boolean;
-    hideable?: boolean;
-  };
-
-  telemetry?: {
-    id?: string;
-    classification?: "safe" | "restricted";
-  };
-}
-```
-
-## 31.4 Sorting
-
-```ts
-interface DataTableSort {
-  columnId: string;
-  direction: "ascending" | "descending";
-}
-
-type DataTableSortingState =
-  readonly DataTableSort[];
-```
-
-Telemetry records the column ID and direction, not cell contents.
-
-## 31.5 Filtering
-
-```ts
-interface DataTableFilter {
-  id: string;
-  operator: string;
-  value: unknown;
-}
-```
-
-Application callbacks receive raw values. Telemetry receives classifications:
-
-```text
-empty
-single-value
-multiple-values
-date-range
-numeric-range
-free-text-present
-```
-
-Raw filter values are not emitted.
-
-## 31.6 Selection
-
-```ts
-type DataTableRowSelectionState<
-  TRowId extends string,
-> = ReadonlySet<TRowId> | "all";
-```
-
-Telemetry records counts, not row IDs.
-
-## 31.7 Loading versus refreshing
+## 31.5 Loading versus refreshing
 
 - `loading`: no usable primary result is available.
 - `refreshing`: existing data remains visible while an update runs.
 
-These states must be visually and semantically distinct.
+These states must be visually and semantically distinct. The root API exposes `loadingState`, `errorState` and `emptyState` ReactNode props so applications can customize these surfaces, and `refreshing` marks the table `aria-busy` while keeping prior data visible.
 
-## 31.8 Row actions
+## 31.6 Default out-of-scope
 
-Row activation must be explicit:
+The following are not built during parity unless the frozen WebKit manifest demonstrably records them as supported behavior:
 
-```tsx
-<DataTable
-  onRowAction={(row) => {
-    openTradeDetails(row.id);
-  }}
-/>
-```
+- spreadsheet-style editing and formula support
+- arbitrary merged cells beyond manifest-recorded spanning
+- pivot tables
+- full grid personalization
+- complex cross-row validation
 
-Do not infer actions from every row click.
+Anything absent from the frozen manifest is out of scope by definition.
 
-## 31.9 Initial scope
+# 32. Component parity roadmap
 
-First stable release:
+The generated manifest, not a hand-maintained shortlist, defines completeness. Delivery is organized into cohorts without changing the stable-release boundary.
 
-- Typed columns
-- Sorting
-- Filtering hooks
-- Pagination
-- Loading
-- Refreshing
-- Empty state
-- Error state
-- Row selection
-- Custom cells
-- Compact density
-- Sticky header
-- Basic resizing
-- Server-side operation modes
-
-## 31.10 Later scope
-
-Potential later capabilities:
-
-- Virtualized rows
-- Virtualized columns
-- Pinning
-- Grouping
-- Saved views
-- Column manager
-- Keyboard cell navigation
-- Copy to clipboard
-- Bulk actions
-- Export hooks
-- Permission-aware columns
-- Row expansion
-- Tree structures
-
-## 31.11 Excluded from first release
-
-- Spreadsheet editing
-- Formula support
-- Arbitrary merged cells
-- Pivot tables
-- Full grid personalization
-- Complex cross-row validation
-
----
-
-# 32. Initial component roadmap
-
-## 32.1 Foundation
+## 32.1 Proof cohort
 
 ```text
 Button
-IconButton
-Link
-Text
-Heading
-Divider
-Badge
-Avatar
-Spinner
-Skeleton
-Tooltip
-```
-
-## 32.2 Forms
-
-```text
-Field
-Input
-TextArea
-Checkbox
-RadioGroup
-Switch
-Select
-Combobox
-FormMessage
-```
-
-## 32.3 Overlays
-
-```text
+TextInput
 Dialog
-AlertDialog
-Drawer
-Popover
-Menu
-ContextMenu
-Toast
-```
-
-## 32.4 Application components
-
-```text
-Card
+DatePicker
 Tabs
-Breadcrumbs
-Pagination
-Toolbar
-Accordion
-EmptyState
-ErrorState
-Result
+representative DataGrid slice
 ```
 
-## 32.5 Enterprise patterns
+## 32.2 Actions, display and feedback
 
-```text
-ApplicationPage
-PageHeader
-FilterBar
-DetailsPanel
-FormSection
-StatusIndicator
-ExceptionSummary
-PermissionState
-AuditTimeline
-BulkActionBar
-```
+Buttons, icons, typography, links, labels, badges, tags, avatars, cards, boxes, dividers, spacing, loaders, progress, alerts, banners, snackbar/toast and related supporting parts.
 
-## 32.6 Flagship capabilities
+## 32.3 Forms, selection and date/time
 
-Highest-impact components:
+Text/password/number/formatted/card inputs, search, checkbox/radio groups, switch/toggle, dropdown and multi-select, date/range pickers, time input, rating, slider, input groups and validation presentation.
 
-1. `ApplicationPage`
-2. `Field`
-3. `Button`
-4. `Dialog`
-5. `Select`
-6. `FilterBar`
-7. `DataTable`
-8. `DetailsPanel`
-9. `StatusIndicator`
-10. `EmptyState`
-11. `ErrorState`
-12. `PermissionState`
+## 32.4 Navigation, overlays and layout
 
----
+Tabs, breadcrumbs, menus, pagination, accordion, stepper, carousel, navigation, dialog/modal/sheets, tooltip, grids, column/search/landing layouts, sticky/draggable surfaces and scroll helpers.
+
+## 32.5 Files, lists and data display
+
+File controls, lists, repeater, tree, table, DataView, status filters, action bars and remaining included composite components.
+
+## 32.6 Full DataGrid
+
+All manifest-recorded DataGrid features and supporting elements are completed before stable release.
+
+Excluded components remain visible in the manifest with rationale so catalogue totals cannot be manipulated by omission.
 
 # 33. Repository structure
 
+The hierarchy keeps the original plan's `apps`, `packages` and `tooling` separation and adapts the verified [HeroUI v3 repository hierarchy](https://github.com/heroui-inc/heroui/tree/v3): runnable documentation is an app; React distribution, styles, Storybook and shared standards are explicit package workspaces; React source separates components, hooks and utilities; and the root owns orchestration. Ratan intentionally differs from HeroUI by publishing only one npm package.
+
 ```text
-portal-design-system/
+ratan-design/
+├── plan.md
+├── package.json                # private workspace orchestration and scripts
+├── tsconfig.json               # root project references
+├── turbo.json                  # build/test/lint/docs dependency graph
 ├── apps/
-│   ├── docs/
-│   ├── storybook/
-│   └── playground/
-│
+│   ├── docs/                   # durable documentation product
+│   │   ├── content/
+│   │   ├── public/
+│   │   ├── scripts/
+│   │   └── src/
+│   ├── playground/             # packed-package React/MFE consumer sandbox
+│   │   ├── src/scenarios/
+│   │   └── tests/
+│   └── parity-lab/             # frozen WebKit/Ratan comparison harness
+│       ├── fixtures/
+│       ├── benchmarks/
+│       └── tests/
 ├── packages/
-│   ├── runtime/
-│   ├── telemetry-schema/
-│   ├── tokens/
-│   ├── styles/
-│   ├── react/
-│   ├── icons/
-│   ├── patterns/
-│   ├── data-table/
-│   ├── testing/
-│   └── eslint-plugin/
-│
-├── tooling/
-│   ├── build/
+│   ├── react/                  # ONLY PUBLIC PACKAGE: @fm/ratan-design
+│   │   ├── src/
+│   │   │   ├── entries/        # root and generated subpath facades
+│   │   │   ├── hooks/          # approved public-hook facades
+│   │   │   ├── version.ts
+│   │   │   └── index.ts
+│   │   ├── scripts/            # export and package assembly
+│   │   ├── tests/              # package/consumer contract tests
+│   │   └── package.json
+│   ├── foundation/             # private React Aria adapters and utilities
+│   ├── components/             # private component implementations
+│   │   └── src/                # one directory per public component
+│   ├── tokens/                 # private frozen token sources + metadata
+│   ├── styles/                 # private reset/layers/themes/modes/foundations
+│   ├── icons/                  # private icon sources and generators
+│   ├── patterns/               # private shared compositions
+│   ├── data-grid/              # private heavy subsystem implementation
+│   ├── testing/                # private source for public testing helpers
+│   ├── storybook/              # private catalogue, stories and interactions
+│   │   ├── .storybook/
+│   │   ├── stories/
+│   │   └── tests/
+│   ├── standard/               # private ESLint/Prettier/TS/boundary standards
+│   └── vitest/                 # private shared test configuration
+├── migration/
+│   ├── mappings/
+│   │   ├── webkit/
+│   │   ├── legacy-ratan/
+│   │   ├── mui/
+│   │   └── ant-design/
 │   ├── codemods/
-│   ├── generators/
-│   └── scripts/
-│
-├── pnpm-workspace.yaml
-├── turbo.json
-└── package.json
+│   └── playbook/
+├── manifests/
+│   ├── parity-manifest.json
+│   ├── migration-map.json
+│   └── deviations.json
+└── tooling/
+    ├── baseline/               # frozen inventory and token extraction
+    ├── generators/             # manifests, exports, docs and story scaffolds
+    ├── visual-tests/           # screenshot/computed-style orchestration
+    ├── adoption-dashboard/     # manifest/app migration coverage reports
+    └── release/                # boundary, bundle, SBOM and pack checks
 ```
 
-Component structure:
+## 33.1 Hierarchy rules
+
+- `apps/` contains runnable products that validate or explain the library; apps are never imported by packages.
+- `packages/` contains buildable library/configuration boundaries. Only `packages/react` is published.
+- Private implementation packages use `private: true`, have no independent SemVer and cannot appear as unresolved dependencies in the packed public package.
+- `packages/foundation` wraps React Aria and depends only on approved third-party primitives and low-level token/style contracts.
+- `packages/components` depends on foundation, tokens, styles and icons; `patterns` and `data-grid` may depend on components, never on the public facade.
+- `packages/react` is the top-level public facade. It assembles explicit root and subpath exports from private workspaces without flattening ownership or pulling DataGrid into common imports.
+- `migration/` owns source-library-specific mappings, codemods and operational rollout guidance; migration logic does not enter component runtime code.
+- `manifests/` is the checked-in contract shared by builds, docs, Storybook, parity tests and the adoption dashboard.
+- `tooling/` may depend on WebKit and repository internals; production packages may not.
+- Dependency direction is enforced: `apps/storybook → react facade → patterns/data-grid/components/testing → foundation/styles/icons/tokens`; no reverse imports and no cycles.
+
+The repository uses its existing npm workspaces and Turborepo pipeline. It does not introduce a nested pnpm workspace. HeroUI informs the separation of docs, React, styles, Storybook and shared standards; its Tailwind choice, multi-public-package release model and component visuals are not adopted.
+
+The current bootstrap `package/` and `parity-lab/` folders are temporary. Before the foundation phase exits, they move without API changes to `packages/react/` and `apps/parity-lab/`; the private foundation packages, docs, Storybook and playground workspaces must exist and run in CI. This structural move is not authorization to delete the legacy Realworld package; that remains gated on consumer migration.
+
+Typical component structure:
 
 ```text
-packages/react/src/button/
+packages/components/src/button/
 ├── button.tsx
 ├── button.types.ts
 ├── button.module.css
-├── button.test.tsx
+├── button.contract.test.tsx
 ├── button.a11y.test.tsx
-├── button.telemetry.test.tsx
-├── button.stories.tsx
-├── button.examples.tsx
+├── button.parity.test.tsx
 └── index.ts
+
+packages/storybook/stories/button/
+├── button.stories.tsx
+└── button.interactions.ts
+
+apps/parity-lab/fixtures/button/
+├── webkit.fixture.ts
+└── ratan.fixture.tsx
 ```
-
-Recommended tooling:
-
-```text
-pnpm workspace
-Turborepo
-TypeScript
-Storybook
-Vitest or Jest
-React Testing Library
-Playwright
-Axe
-Changesets
-ESLint
-Stylelint
-```
-
----
 
 # 34. Package and build requirements
 
-Every package must:
+The public package must:
 
-- Produce ESM output
-- Publish TypeScript declarations
-- Declare explicit exports
-- Support tree shaking
-- Avoid unintended side effects
-- Mark required CSS side effects correctly
-- Publish through the internal npm registry
-- Expose package-version metadata
-- Avoid public runtime assets
-- Avoid external telemetry SDK dependencies
-- Produce an SBOM
-- Pass license and vulnerability checks
+- produce ESM and TypeScript declarations;
+- expose explicit root and subpath exports;
+- support tree shaking and mark CSS side effects accurately;
+- keep React and ReactDOM external peers;
+- prevent root imports from including DataGrid;
+- bundle or copy every required private-workspace artifact so the packed tarball has no unresolved private workspace dependency;
+- contain no Lit, Shoelace, WebKit, Emotion, MUI, Ant Design or federation runtime dependency;
+- copy frozen styles and icons into the published package with checked hashes;
+- publish package, manifest and migration-map version metadata;
+- use only local/package assets by default;
+- pass packed-consumer, license, vulnerability and dependency-boundary checks;
+- produce an SBOM for promotion.
 
-Example exports:
-
-```json
-{
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./button": {
-      "types": "./dist/button/index.d.ts",
-      "import": "./dist/button/index.js"
-    },
-    "./styles.css": "./dist/styles.css"
-  }
-}
-```
-
----
+The build fails when generated manifests drift, tokens are undefined, a public export lacks a parity classification, an excluded dependency enters the graph, or a documented subpath cannot be imported independently.
 
 # 35. Versioning and compatibility
 
@@ -2830,11 +2164,13 @@ Example exports:
 - Breaking DOM contracts
 - Required token changes
 - Major behavior changes
-- Runtime-contract changes
+- Changes to the frozen parity scope or package contract
 
-## 35.2 Telemetry schema versioning
+## 35.2 Optional telemetry extension versioning
 
-Telemetry schema changes follow semantic versioning.
+If the deferred telemetry proposal is later approved, its schema and adapter
+must be versioned independently from the core component package. It must never
+become a prerequisite for importing or rendering Ratan components.
 
 ### Patch
 
@@ -2872,16 +2208,20 @@ Publish:
 
 ```text
 Portal shell version
-@portal-ui/runtime version
-Telemetry schema versions
-Supported @portal-ui/react versions
+Supported @fm/ratan-design versions
 Supported React versions
 Supported browser versions
+Frozen WebKit baseline identifier
+Parity-manifest schema version
 ```
 
 ---
 
 # 36. Documentation requirements
+
+Documentation is a product surface, not a generated afterthought. The private docs app, Storybook, playground and parity lab have distinct responsibilities and all are required in CI.
+
+## 36.1 Docs application
 
 Every component page must include:
 
@@ -2891,7 +2231,7 @@ Every component page must include:
 4. Anatomy
 5. Variants
 6. States
-7. Density behavior
+7. Size and compact behavior
 8. Keyboard behavior
 9. Accessibility
 10. Internationalization
@@ -2900,11 +2240,10 @@ Every component page must include:
 13. Examples
 14. API
 15. Tokens
-16. Telemetry events
-17. Telemetry values
-18. Privacy behavior
-19. Migration notes
-20. Known limitations
+16. WebKit-to-React mapping
+17. Intentional deviations
+18. Migration notes
+19. Known limitations
 
 Documentation should use real portal scenarios:
 
@@ -2917,6 +2256,46 @@ Documentation should use real portal scenarios:
 - Audit-history viewing
 - Long-running processes
 
+Docs examples are compiled against the packed public package. API tables, token dependencies, WebKit mappings and deviations are generated from checked-in metadata, while narrative usage guidance remains reviewed source.
+
+## 36.2 Storybook
+
+Every included component must have stories covering all manifest-recorded:
+
+- variants, tones, sizes, defaults and states;
+- light, dark and CPBB themes;
+- Inter, Roboto Mono and Dyslexic font modes where supported;
+- loading, disabled, read-only, invalid, empty and long-content cases;
+- controlled/uncontrolled behavior and relevant form participation;
+- keyboard, focus, pointer and overlay interactions;
+- RTL, locale-sensitive and reduced-motion behavior where applicable.
+
+Storybook runs accessibility and interaction tests and provides the human review catalogue. A story is not parity evidence by itself and may not redefine behavior that differs from the frozen runtime.
+
+## 36.3 Playground
+
+The playground validates Ratan as a real consumer rather than an in-repository source import. It must install or consume a packed build and provide routes for:
+
+- React 18.2 and React 19 compatibility;
+- forms, validation, reset and submission;
+- nested overlays, menus, dialogs and focus restoration;
+- navigation, tabs, file/list/table flows and a large DataGrid;
+- all document-global themes and font modes, RTL and locale overrides;
+- repeated MFE mount/unmount and listener/observer cleanup;
+- mixed WebKit/Ratan coexistence during migration;
+- root versus subpath imports, CSS loading and bundle inspection;
+- realistic Portal Host and enterprise workflow compositions.
+
+Playground scenarios may become E2E fixtures, but it is not a replacement for the Portal Host migration verification.
+
+## 36.4 Parity lab
+
+For every visual/interactive manifest fixture, the parity lab renders frozen WebKit and Ratan under identical font, viewport, DPR, theme, mode and browser conditions. It owns screenshots, computed styles, token-resolution capture, accessibility results and performance traces. Approved differences link directly to deviation records.
+
+## 36.5 Workbench completeness rule
+
+A component cannot be marked complete in the parity manifest until its contract tests, relevant Storybook stories, docs page, playground scenario when integration behavior matters, parity fixtures, accessibility evidence and performance checks are present. Supporting-only items may satisfy this through the parent component that consumes them.
+
 ---
 
 # 37. AI-ready development support
@@ -2928,10 +2307,13 @@ llms.txt
 components.json
 tokens.json
 examples.json
-telemetry-schema.json
-telemetry-events.json
 deprecated-apis.json
-migration-mappings.json
+parity-manifest.json
+migration-map.json
+migration-mappings/webkit.json
+migration-mappings/legacy-ratan.json
+migration-mappings/mui.json
+migration-mappings/ant-design.json
 ```
 
 Internal coding guidance should explain:
@@ -2943,10 +2325,12 @@ Internal coding guidance should explain:
 - Layout conventions
 - Token usage
 - Prohibited overrides
-- Telemetry identifiers
-- Prohibited telemetry values
+- WebKit attribute/event/slot mappings
+- Legacy Ratan migration mappings
 - MUI migration mappings
 - Ant Design migration mappings
+
+MUI and Ant Design mappings cover existing portal applications (including legacy `@fm/ratan-design@1.1.0` consumers built on Ant Design) so their component names, props and form patterns map onto the Ratan catalogue during migration, not only WebKit surfaces.
 
 Generated code remains subject to normal linting, testing and review.
 
@@ -2966,11 +2350,11 @@ Applicable components must pass:
 - Reduced-motion tests
 - Light-theme tests
 - Dark-theme tests
-- Compact-density tests
+- Every frozen size and compact-mode test
 - Overlay nesting tests
 - Native form tests
 
-Dialog, Select, Combobox and DataTable require manual accessibility review before stable release.
+Dialog, Menu, Select, Combobox, date controls, Tabs and DataGrid require manual accessibility review before stable release.
 
 ---
 
@@ -2985,10 +2369,8 @@ Measure:
 - Overlay opening latency
 - Interaction latency
 - Large-list behavior
-- Data-table scrolling
+- DataGrid scrolling and bounded DOM rendering
 - Memory cleanup after tile unmount
-- Telemetry dispatch overhead
-- Telemetry queue behavior
 - Style recalculation with multiple MFEs
 
 Indicative budgets:
@@ -3001,8 +2383,9 @@ Combobox implementation:     below 25 KB gzip
 Global base styles:          below 20 KB gzip
 Runtime style engine:        prohibited
 External runtime requests:   zero
-Typical telemetry event:     below 2 KB
-Telemetry dispatch:          non-blocking
+Common pilot route:          >=20% smaller than WebKit
+P95 synchronous interaction: below 10 ms
+Large DataGrid scrolling:    >=55 FPS in agreed fixture
 ```
 
 Budget increases require explicit justification.
@@ -3023,11 +2406,9 @@ Required controls:
 - CSP compatibility
 - No external fonts
 - No external icon loading
-- No external telemetry destination
 - No public CDN dependency
 - No direct external services
-- No unauthorized telemetry extensions
-- Privacy review for new telemetry fields
+- No undeclared analytics or data collection
 
 Dependencies should remain minimal because each dependency expands the platform’s maintenance and vulnerability surface.
 
@@ -3048,8 +2429,8 @@ Define and test:
 - Portal CSP restrictions
 - Module Federation runtime
 - Independent React roots
-- Shared overlay root
-- Open Shadow DOM where applicable
+- Multiple document-body portal stacks
+- WebKit/Ratan coexistence in one document
 
 Unsupported behavior must be documented.
 
@@ -3064,9 +2445,6 @@ The platform team owns:
 - Architecture
 - Tokens
 - Component APIs
-- Runtime
-- Telemetry schema
-- Privacy rules
 - Accessibility
 - Package releases
 - Documentation
@@ -3074,7 +2452,7 @@ The platform team owns:
 - Compatibility policy
 - Deprecation
 - Overlay architecture
-- Telemetry sinks and batching
+- Parity and deviation approval
 
 ## 42.2 Tenant-team ownership
 
@@ -3084,10 +2462,8 @@ Tenant teams own:
 - Business composition
 - Application content
 - Application-level accessibility
-- Safe telemetry identifiers
 - Migration within the supported window
 - Reporting missing patterns and defects
-- Avoiding restricted telemetry data
 
 ## 42.3 Contribution requirements
 
@@ -3099,8 +2475,7 @@ A proposed shared component must include:
 - Accessibility behavior
 - Token requirements
 - Customization model
-- Telemetry behavior
-- Privacy classification
+- Legacy parity classification or explicit post-parity rationale
 - Test plan
 - Documentation
 - Maintenance owner
@@ -3114,9 +2489,7 @@ Review is required for changes affecting:
 - Public API
 - Tokens
 - Accessibility
-- Runtime contract
-- Telemetry schema
-- Telemetry privacy
+- Parity manifest or approved deviations
 - Overlay behavior
 - CSS layering
 - Dependencies
@@ -3126,268 +2499,214 @@ Review is required for changes affecting:
 
 # 43. Delivery roadmap
 
-## Phase 0 — Architecture validation
+## Phase 0 — Direction approval, specification and frozen baseline
 
-Deliver:
+- Approve the eight steering decisions in section 0.2 before expanding implementation.
+- Generate the complete component/export inventory.
+- Capture runtime properties, defaults, variants, events, slots, methods and story/application conflicts.
+- Copy and hash approved token, theme, mode and typography assets.
+- Check in parity and migration manifests with zero unresolved entries.
+- Establish Chrome and Edge parity fixtures and benchmark scenarios.
+- Record the current proof code as provisional until it conforms to the approved structure and gates.
 
-- Base UI versus React Aria comparison
-- Module Federation runtime proof
-- Provider-less runtime proof
-- Global runtime bridge
-- Shared overlay-root proof
-- CSS isolation proof
-- Density proof
-- Form integration proof
-- Telemetry event schema
-- Central root listener
-- Hierarchy resolution
-- Portalled hierarchy preservation
-- Privacy sanitizer
-- Telemetry performance measurements
-- Runtime diagnostics
-- Button, Input, Select, Dialog and DataTable prototypes
+## Phase 1 — Workspace foundation and proof cohort
 
-Exit criteria:
+- Establish `apps/docs`, `apps/playground`, `apps/parity-lab`, `packages/react`, the private foundation packages (including `packages/storybook`), `migration`, `manifests` and `tooling` in the existing npm/Turbo workspace.
+- Scaffold `@fm/ratan-design@2.0.0-alpha.0` as the only public package.
+- Implement static styles, token metadata, icons, React Aria adapters and testing helpers.
+- Implement Button, TextInput, Dialog, DatePicker, Tabs and a representative DataGrid slice through SDD/TDD.
+- Deliver the complete docs, Storybook, playground and parity-lab evidence for the proof cohort.
+- Prove React 18.2/19, visual, behavior, accessibility, tree-shaking, packed-consumer and performance gates before expanding.
 
-- Foundation selected
-- Provider-less model proven
-- Runtime compatibility model proven
-- No critical accessibility issue
-- No critical CSS leakage issue
-- Central telemetry receives events from every test MFE
-- Restricted data is rejected or redacted
-- Telemetry overhead is acceptable
+## Phase 2 — Common catalogue and Portal Host pilot
 
-## Phase 1 — Foundation
+- Deliver actions, display, feedback, form basics, tabs, menus and overlays required by Portal Host.
+- Add each component to the docs, Storybook, playground where relevant and parity lab in the same change cohort.
+- Generate codemods from the migration map.
+- Migrate Portal Host and verify login, navigation, application selection, dialogs, notifications, workspace tabs and tile removal.
 
-Packages:
+## Phase 3 — Remaining UI catalogue
 
-```text
-@portal-ui/runtime
-@portal-ui/telemetry-schema
-@portal-ui/tokens
-@portal-ui/styles
-@portal-ui/react
-@portal-ui/icons
-@portal-ui/testing
-```
+- Complete selection, date/time, navigation, layout, file, list, table, DataView and composite cohorts.
+- Require workbench completeness and manifest closure for each cohort before alpha promotion.
+- Migrate the two remaining legacy `@fm/ratan-design` consumers as their required components become stable.
 
-Components:
+## Phase 4 — Full DataGrid
 
-```text
-Button
-IconButton
-Text
-Heading
-Badge
-Spinner
-Skeleton
-Field
-Input
-Checkbox
-Tooltip
-Dialog
-Card
-```
+- Complete every manifest-recorded feature, accessibility scenario and performance benchmark.
+- Exercise small and large datasets, client/server modes, editing, grouping, export and MFE cleanup in the playground and parity lab.
 
-Also deliver:
+## Phase 5 — Migration, enforcement, retirement and stable release
 
-- Documentation site
-- Storybook
-- Release pipeline
-- Compatibility diagnostics
-- Telemetry inspector
+- Confirm every in-scope manifest entry passes contract, visual, behavior and accessibility gates.
+- Complete WebKit, legacy Ratan, MUI and Ant Design mappings and their applicable codemods.
+- Publish the tenant migration playbook covering sequencing, coexistence, rollback, deprecation windows and per-library mappings before final enforcement.
+- Publish the manifest-driven adoption dashboard and deprecated-library policy; enforcement may tighten only after the mapped replacement surface is available.
+- Remove the legacy Realworld package, obsolete provider APIs, old scripts and stale dependency references.
+- Verify packed consumers and mixed WebKit/Ratan operation.
+- Publish the versioned docs and Storybook catalogue for the stable candidate.
+- Publish `2.0.0` only after the complete gate passes.
 
-## Phase 2 — Forms and navigation
+## 43.1 Per-component definition of done
 
-```text
-TextArea
-RadioGroup
-Switch
-Select
-Combobox
-FormMessage
-Tabs
-Breadcrumbs
-Pagination
-Menu
-Popover
-Toast
-Drawer
-```
+No component is complete because its source renders. The component must have:
 
-## Phase 3 — Enterprise patterns
+1. A manifest contract with no unresolved attributes, properties, defaults, variants, events, slots or methods.
+2. Failing contract/accessibility tests written before implementation and final line/branch coverage above 90%.
+3. React Aria usage for every applicable interaction primitive, or an approved exception record.
+4. Exact token dependency and theme/mode coverage with no unexplained computed-style differences.
+5. Storybook stories for its full fixture matrix and passing interaction/Axe checks.
+6. A docs page with compilable packed-package examples, API, mapping, tokens and deviations.
+7. A playground scenario when forms, overlays, routing, MFE lifecycle, performance or multi-component composition matters.
+8. WebKit/Ratan parity fixtures in managed Chrome and Edge with any accepted difference recorded.
+9. Strict TypeScript, zero lint warnings, independent subpath import and bundle-budget compliance.
+10. Migration-map and codemod coverage for every legacy surface it replaces.
 
-```text
-ApplicationPage
-PageHeader
-FilterBar
-DetailsPanel
-FormSection
-StatusIndicator
-EmptyState
-ErrorState
-PermissionState
-ExceptionSummary
-```
+## 43.2 Grill QA promotion gate
 
-## Phase 4 — Data table
+At every cohort review, the owner and maintainers answer these questions from evidence rather than intent:
 
-Deliver the separately governed table subsystem.
+| Gate question | Required evidence |
+|---|---|
+| Did we reproduce the frozen contract, including obscure defaults and variants? | Manifest completeness and contract tests |
+| Did we use React Aria instead of rebuilding interaction behavior? | Dependency/boundary report or approved exception |
+| Does it look the same in every supported theme, mode and state? | Computed styles and Chrome/Edge parity diffs |
+| Can a developer discover and exercise the full surface? | Storybook matrix and interaction results |
+| Can a consumer understand and migrate to it? | Docs page, migration map and compilable examples |
+| Does it work outside the source workspace? | Packed-package playground/consumer tests |
+| Does it behave correctly in forms, overlays and MFE lifecycle? | Playground/E2E flows and cleanup assertions |
+| Is it accessible beyond Axe? | Keyboard/focus tests plus required manual review |
+| Is it measurably smaller and faster? | Bundle and synchronous-interaction reports |
+| Can the cohort be removed without breaking earlier consumers? | Subpath boundaries, SemVer/deprecation and pilot results |
 
-## Phase 5 — Migration and enforcement
-
-Deliver:
-
-- MUI migration mappings
-- Ant Design migration mappings
-- Codemods
-- ESLint enforcement
-- Adoption dashboard
-- Deprecated-library policy
-- Tenant migration playbook
-- Telemetry-compliance validation
-
----
+A failed or missing answer blocks cohort promotion. Schedule pressure does not convert missing evidence into an approved deviation.
 
 # 44. Adoption strategy
 
-1. New portal applications use the design system.
-2. Existing applications adopt tokens and global foundations.
-3. Shared states and overlays migrate.
-4. Common controls migrate incrementally.
-5. Enterprise patterns replace repeated implementations.
-6. Telemetry becomes automatic as components migrate.
-7. Legacy UI libraries are removed when no longer required.
-8. Enforcement becomes stricter after migration tooling exists.
+1. Keep WebKit operational while Ratan alpha cohorts are incomplete.
+2. Migrate imports, properties, custom events and slot composition through generated mappings rather than manual guesswork.
+3. Pilot Portal Host because it exercises the broadest common-control and overlay surface.
+4. Migrate the remaining legacy Ratan consumers to the new APIs before deleting the old workspace.
+5. Allow other applications to migrate component-by-component while both systems share global `--sc-*` tokens.
+6. Do not enforce Ratan-only usage until equivalent in-scope components and codemods exist.
+7. Record every application-discovered contract gap back into the frozen manifest and resolve it before stable release.
+8. Indefinite mixed-library usage requires an approved migration plan with a committed endpoint; component-by-component coexistence without a plan is not a resting state.
 
-Indefinite mixed-library usage requires an approved migration plan.
+## 44.1 Tenant migration playbook
 
----
+The playbook is an operational release artifact, not merely component documentation. For WebKit, legacy Ratan, MUI and Ant Design consumers it defines:
+
+1. Inventory and classify current imports, global CSS, providers, portals, forms, icons and theme overrides.
+2. Select a component cohort whose Ratan parity and migration tooling are already promoted.
+3. Establish token/style coexistence and prevent duplicate resets or conflicting overlay layers.
+4. Apply mapping-driven codemods, then resolve documented semantic differences manually.
+5. Verify the tenant in the packed-package playground and its own unit/E2E suite.
+6. Roll out behind an application-owned release/rollback mechanism; Ratan does not own business feature flags.
+7. Measure visual, accessibility, bundle and interaction results against the pre-migration baseline.
+8. Remove obsolete library code only after rollback criteria and an agreed observation window pass.
+9. Record the remaining component inventory, owner, target cohort and committed completion date.
+
+The playbook includes rollback triggers, supported coexistence combinations, escalation paths, deprecation windows and examples for incremental versus route-level migration. Design-system maintainers may improve Ratan, mappings or codemods; they must not patch tenant business source as a hidden migration step.
+
+## 44.2 Adoption dashboard
+
+Private tooling generates a CI dashboard from manifests, repository dependency scans and approved tenant declarations. It reports, without collecting end-user interaction data:
+
+- parity completion by component/cohort;
+- Storybook/docs/playground/parity evidence completeness;
+- WebKit, legacy Ratan, MUI and Ant Design imports by application;
+- codemod/mapping coverage and unresolved manual migrations;
+- coexistence-plan owner, endpoint and deprecation deadline;
+- pilot and tenant verification status;
+- blockers to legacy package or library retirement.
+
+Dashboard data is build and migration metadata, not the deferred product telemetry system.
 
 # 45. Key risks and mitigations
 
 | Risk | Mitigation |
 |---|---|
-| Base UI lacks required behavior | Complete the foundation spike and retain React Aria as fallback |
-| Provider-less runtime is difficult to debug | Versioned global bridge, strict diagnostics and safe fallback |
-| Component package becomes a singleton accidentally | Share only React, React DOM and runtime |
+| React Aria cannot reproduce an observed behavior | Prove representative controls first; implement a scoped Ratan adapter or native behavior and record the deviation |
+| Runtime/source/stories disagree | Apply the fixed evidence precedence and store the resolution in the manifest |
+| Provider-free configuration becomes ambiguous | Limit global configuration to frozen document-level CSS; expose explicit locale-sensitive props |
+| Component package becomes a singleton accidentally | Share only React and ReactDOM; enforce federation and packed-consumer checks |
 | Design system becomes a dumping ground | Enforce package boundaries and contribution criteria |
-| Runtime version conflicts | Compatibility matrix and pre-mount validation |
+| Package-version conflicts | Publish peer/support matrices and test independent application bundles |
 | CSS leakage | CSS Modules, scoped reset and cascade layers |
 | Tenant overrides fragment the UI | Controlled props, tokens, slots and review |
-| Overlay conflicts | Shell-owned overlay root and runtime coordination |
-| Portalled events lose hierarchy | Capture and preserve logical source hierarchy |
-| Telemetry overload | Batching, sampling, limits and event governance |
-| Telemetry impacts UI latency | Asynchronous local queue and no synchronous network calls |
-| Sensitive data is collected | Safe defaults, schema validation and sanitization |
-| Invalid tenant telemetry breaks processing | Treat tenant fields as untrusted |
-| Data table delays the program | Deliver it as a separate subsystem |
+| Overlay conflicts | Frozen z-index contract, document-body portals, nested-overlay tests and deterministic cleanup |
+| Visual parity hides accessibility defects | Record approved deviations and test corrected behavior separately |
+| DataGrid delays the programme | Isolate it behind a subpath, deliver feature cohorts and keep stable gated on the complete matrix |
+| Legacy package is removed too early | Delete only after both consumers pass migration and packed-consumer tests |
 | Accessibility regressions | Automated and manual quality gates |
 | Package growth affects performance | Bundle budgets and dependency governance |
-| Shell upgrades break tenants | Version compatibility and controlled contracts |
-| Documentation becomes stale | Generate API, token and telemetry docs during releases |
+| Shell upgrades break applications | Keep Ratan application-bundled and use React peers only |
+| Documentation becomes stale | Generate API, token, parity and migration documentation during releases |
 
 ---
 
 # 46. Final acceptance criteria
 
-The first production-ready release is accepted when:
+Ratan Design v2 is production-ready when:
 
-1. Two independently deployed tenant applications can use different compatible `@portal-ui/react` versions on one page.
-2. React, React DOM and `@portal-ui/runtime` resolve as shared singletons.
-3. No tenant application requires a provider.
-4. Components automatically resolve shell theme, locale, density and overlays.
-5. Theme and density remain consistent across independent React roots.
-6. Dialogs, popovers, selects and toasts use the shared overlay architecture.
-7. Portalled telemetry retains its logical trigger hierarchy.
-8. Component CSS does not leak into tenant content.
-9. Tenant CSS cannot unintentionally override internal classes.
-10. Components work in compact and comfortable density.
-11. Foundation components pass accessibility gates.
-12. React Hook Form integration works without a core dependency.
-13. Global styles load once and component styles remain chunkable.
-14. Root and subpath imports work.
-15. No runtime request targets an external asset or service.
-16. Version compatibility is validated before tile mounting.
-17. The shell receives telemetry from all tenant React roots through one central listener.
-18. Button telemetry contains a safe action label.
-19. Select telemetry contains the option value and selected values.
-20. Input telemetry does not expose raw input.
-21. Data-table telemetry does not expose rows or restricted cell content.
-22. Loading-start and loading-end events can be correlated.
-23. Disabled state and categorical reason are available where configured.
-24. Native disabled accessibility is not weakened.
-25. Invalid telemetry cannot break UI execution.
-26. Restricted telemetry data is rejected or redacted.
-27. Telemetry processing is asynchronous and non-blocking.
-28. Telemetry schema and component APIs are documented and versioned.
-29. Runtime diagnostics expose compatibility and telemetry status.
-30. A pilot tenant adopts the system without design-system-team modifications to tenant source.
-
----
+1. Every WebKit public export and registered element is classified with zero unresolved entries.
+2. Every included property, default, variant, state, event, slot and method has a React mapping or approved deviation.
+3. Frozen token assets retain exact `--sc-*` names and values and pass hash/completeness tests.
+4. WebKit and Ratan can coexist without CSS leakage or internal-class collisions.
+5. React and ReactDOM are the only shared federation singletons; Ratan is application-bundled.
+6. Root and component subpath imports work and root imports exclude DataGrid.
+7. No provider, runtime singleton or telemetry client is required.
+8. Automated fixture screenshots remain below 0.1% changed pixels under matched Chrome/Edge conditions; every accepted difference is documented.
+9. Computed geometry, typography, colour, spacing and focus values have no unexplained differences.
+10. Pointer, keyboard, form, focus restoration, controlled/uncontrolled, disabled/read-only/loading, reduced-motion, high-contrast, RTL and 200% zoom scenarios pass.
+11. Applicable fixtures pass Axe; overlays, collections, date controls, tabs and DataGrid pass manual accessibility review.
+12. Coverage exceeds 90% for lines and branches, strict TypeScript passes and lint reports zero warnings.
+13. Common Portal Host design-system JavaScript and CSS is at least 20% smaller than WebKit, excluding React peers.
+14. P95 synchronous interaction work remains below 10 ms.
+15. DataGrid uses bounded DOM rendering, sustains at least 55 FPS in the agreed large-data fixture and cleans up after unmount.
+16. Portal Host login, navigation, application/tile opening, overlay interactions and workspace removal pass after migration.
+17. The remaining legacy Ratan consumers run on the new package and provider-free theme contract.
+18. The old package workspace and obsolete dependency references are removed.
+19. No excluded viewer/editor/sibling package or prohibited runtime dependency enters the public package.
+20. `2.0.0` is not published until 100% of the approved in-scope manifest is complete.
+21. Docs, Storybook, playground and parity lab are live CI workspaces, and every included component satisfies the workbench completeness rule.
+22. Every applicable interactive component is React Aria-based or has an approved, tested exception.
+23. A pilot tenant adopts the system without design-system-team modifications to tenant source; every required change flows through documented props, tokens, slots and codemods.
+24. The adoption dashboard accounts for every in-repository WebKit, legacy Ratan, MUI and Ant Design consumer and shows an owner and endpoint for every approved coexistence plan.
+25. The tenant migration playbook has been exercised in the pilot, including a successful rollback rehearsal or equivalent non-production proof.
 
 # 47. Final architectural decisions
 
 | Area | Decision |
 |---|---|
-| Design inspiration | HeroUI-like developer experience with original portal styling |
-| Behavior foundation | Base UI, subject to validation |
-| Fallback foundation | React Aria Components |
-| API model | Simple APIs plus compound components |
-| Provider | Not required |
-| Runtime binding | Automatic through shared runtime, global bridge and DOM metadata |
-| Shared singletons | React, React DOM and `@portal-ui/runtime` |
-| Component package singleton | No |
-| Base UI singleton | No |
-| Styling | CSS Modules, CSS variables and cascade layers |
-| CSS-in-JS | Not used |
-| Tailwind dependency | Not required |
-| Theme | Shell-owned semantic CSS variables |
-| Density | Comfortable and compact |
-| Customization | Props, semantic tokens and documented slots |
-| Overlay | Shell-owned shared overlay root |
-| Forms | Form-library-neutral |
-| Internationalization | Runtime locale and message contract |
-| Data table | Separate TanStack-based subsystem |
-| Telemetry | First-class semantic component capability |
-| Central subscription | Root DOM listener in capture mode |
-| Telemetry transport | Bubbling and composed `CustomEvent` plus runtime reliability channel |
-| Button telemetry value | Safe action label |
-| Select telemetry value | Option value and current selected values |
-| Input telemetry value | Redacted by default |
-| Table telemetry value | Column IDs, operation metadata and counts only |
-| Loading and disabled state | Included in structured state snapshots |
-| Hierarchy | DOM-derived logical hierarchy with portal preservation |
-| Telemetry schema | Versioned independent package |
-| Repository | pnpm workspace and Turborepo |
-| Documentation | Storybook and dedicated docs application |
-| Governance | Semver, compatibility matrix, deprecation and codemods |
-| Security | Internal registry, SBOM, license, CVE and privacy governance |
-| AI support | Machine-readable components, tokens, examples and telemetry contracts |
-
----
+| Design authority | Frozen `@scdevkit/webkit@2.0.5` runtime and source contract |
+| Baseline synchronization | One-time snapshot |
+| Conflict precedence | Runtime → tests/source → usage → Storybook → docs |
+| Public package | Single `@fm/ratan-design` package with subpaths |
+| Stable version | `2.0.0` after full parity; alpha cohorts before it |
+| React support | React/ReactDOM 18.2–19 peers |
+| Interaction foundation | React Aria Components/hooks, private |
+| DataGrid foundation | TanStack Table + TanStack Virtual, private |
+| Styling | Static CSS Modules, cascade layers and stable data attributes |
+| Tokens | Exact existing `--sc-*` names and values |
+| Themes/modes | Light, dark, CPBB, Inter, Roboto Mono, Dyslexic and approved follow-system behavior |
+| Provider/runtime | None |
+| Overlay container | `document.body` |
+| API model | Idiomatic React APIs with complete legacy mappings |
+| Defect policy | Preserve intent; document and test corrections |
+| In scope | UI catalogue, icons, Table, DataView and full DataGrid |
+| Excluded | DashboardViewer, Tour, legacy RTE, DocumentImageViewer and sibling packages |
+| Telemetry | Deferred optional adapter; not core v2 |
+| Migration pilot | Portal Host |
+| Legacy package | Remove after its consumers migrate |
+| Repository tooling | Existing npm workspaces and Turborepo |
+| Repository shape | Private docs, Storybook, playground and parity-lab apps; one public package; separate private tooling |
+| Component workbench | Storybook is mandatory for exhaustive isolated coverage |
+| Consumer validation | Packed-package playground is mandatory for realistic React/MFE scenarios |
+| Quality gate | SDD/TDD, >90% coverage, parity lab, accessibility and performance budgets |
 
 # 48. Recommendation
 
-Proceed with Phase 0 architecture validation before broad component implementation.
+Approve the reconciled direction and target repository structure before broad component coding resumes. The first implementation milestone is accepted only when the inventory contains no unresolved public exports, copied styles have verified hashes, the docs, Storybook, playground and parity-lab workspaces run in CI, and Button, TextInput, Dialog, DatePicker, Tabs and a representative DataGrid slice prove the selected architecture end to end.
 
-The validation must prove:
-
-1. Base UI or React Aria foundation suitability
-2. Provider-less runtime resolution
-3. Module Federation singleton behavior
-4. Independent React-root compatibility
-5. Shared overlay hosting
-6. Logical overlay hierarchy
-7. CSS isolation and cascade-layer ordering
-8. Compact-density behavior
-9. Form-library compatibility
-10. Accessibility behavior
-11. Central telemetry capture
-12. Safe button, select, input and data-table values
-13. Loading and disabled-state telemetry
-14. Privacy enforcement
-15. Acceptable bundle and interaction performance
-
-The target outcome is not merely an npm component package. It is a governed portal UI platform that provides consistent behavior, visual language, accessibility, observability, isolation and long-term upgradeability across all tenant applications.
+The programme then proceeds through alpha cohorts while retaining WebKit for incomplete surfaces. Stable release and legacy-package deletion occur only after the complete in-scope catalogue, Portal Host pilot, remaining legacy consumers, accessibility gates and performance budgets pass.

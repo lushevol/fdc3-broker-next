@@ -1,0 +1,30 @@
+{
+  "name": "@fm/ratan-design-playground",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rsbuild build && node scripts/verify-packed-consumption.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src tests rsbuild.config.ts vitest.config.ts --max-warnings=0"
+  },
+  "dependencies": {
+    "@fm/ratan-design": "2.0.0-alpha.0",
+    "@scdevkit/webkit": "2.0.5"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "^1.7.2",
+    "@rsbuild/plugin-react": "^1.4.6",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "jsdom": "^27.4.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}

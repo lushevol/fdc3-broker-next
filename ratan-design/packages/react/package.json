@@ -1,0 +1,115 @@
+{
+  "name": "@fm/ratan-design",
+  "version": "2.0.0-alpha.0",
+  "description": "React parity implementation of the frozen SC WebKit design system",
+  "license": "UNLICENSED",
+  "keywords": ["design-system", "react", "accessibility", "web-components-migration"],
+  "engines": { "node": ">=20" },
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist",
+    "LICENSE",
+    "deviation-manifest.json",
+    "migration-map.json",
+    "package-integrity.json",
+    "parity-manifest.json",
+    "sbom.cdx.json",
+    "tokens.json",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index-with-style.js"
+    },
+    "./button": {
+      "types": "./dist/button.d.ts",
+      "import": "./dist/button-with-style.js"
+    },
+    "./dialog": {
+      "types": "./dist/dialog.d.ts",
+      "import": "./dist/dialog-with-style.js"
+    },
+    "./date-picker": {
+      "types": "./dist/date-picker.d.ts",
+      "import": "./dist/date-picker-with-style.js"
+    },
+    "./data-grid": {
+      "types": "./dist/data-grid.d.ts",
+      "import": "./dist/data-grid-with-style.js"
+    },
+    "./tabs": {
+      "types": "./dist/tabs.d.ts",
+      "import": "./dist/tabs-with-style.js"
+    },
+    "./text-input": {
+      "types": "./dist/text-input.d.ts",
+      "import": "./dist/text-input-with-style.js"
+    },
+    "./tokens": {
+      "types": "./dist/tokens.d.ts",
+      "import": "./dist/tokens.js"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "import": "./dist/testing.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./themes/light.css": "./dist/themes/light.css",
+    "./themes/dark.css": "./dist/themes/dark.css",
+    "./themes/cpbb.css": "./dist/themes/cpbb.css",
+    "./modes/inter.css": "./dist/modes/inter.css",
+    "./modes/roboto-mono.css": "./dist/modes/roboto-mono.css",
+    "./modes/dyslexic.css": "./dist/modes/dyslexic.css",
+    "./parity-manifest.json": "./parity-manifest.json",
+    "./migration-map.json": "./migration-map.json"
+  },
+  "scripts": {
+    "generate": "npm --workspace @fm/ratan-design-parity-lab run generate && node scripts/generate-button-state-css.mjs",
+    "build": "npm run generate && tsup && node scripts/copy-static.mjs && npm run sbom && npm run integrity && npm run verify",
+    "sbom": "node scripts/generate-sbom.mjs",
+    "integrity": "node scripts/generate-integrity.mjs",
+    "test": "vitest run --coverage",
+    "lint": "eslint src tests vitest.config.ts && node --check scripts/copy-static.mjs && node --check scripts/generate-button-state-css.mjs && node --check scripts/generate-integrity.mjs && node --check scripts/generate-sbom.mjs && node --check scripts/verify-package.mjs",
+    "typecheck": "tsc --noEmit",
+    "verify": "node scripts/verify-package.mjs"
+  },
+  "peerDependencies": {
+    "@testing-library/react": ">=14 <17",
+    "@testing-library/user-event": ">=14 <15",
+    "react": ">=18.2.0 <20",
+    "react-dom": ">=18.2.0 <20"
+  },
+  "peerDependenciesMeta": {
+    "@testing-library/react": { "optional": true },
+    "@testing-library/user-event": { "optional": true }
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@fm/ratan-design-data-grid": "0.0.0",
+    "@fm/ratan-design-foundation": "0.0.0",
+    "@fm/ratan-design-testing": "0.0.0",
+    "@fm/ratan-design-vitest": "0.0.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "@vitest/coverage-v8": "^4.0.18",
+    "eslint": "^9.39.2",
+    "jsdom": "^27.4.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "tag": "next"
+  }
+}

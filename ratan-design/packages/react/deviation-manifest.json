@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "baseline": {
+    "package": "@scdevkit/webkit",
+    "packageVersion": "2.0.5",
+    "repositoryCommit": "a8398ea6df30e4843e22fcb5a1d3343107463c60"
+  },
+  "deviations": [
+    {
+      "id": "button-loading-announcement",
+      "legacyTag": "sc-button",
+      "category": "accessibility",
+      "rationale": "The frozen button exposes loading visually but does not provide a localized live-region announcement. Ratan adds a caller-localizable loadingLabel while preserving the button accessible name, focus, and geometry.",
+      "approvedBy": "Ratan Design foundation approval",
+      "tests": [
+        "packages/react/tests/button.contract.test.tsx#announces-a-localized-loading-label",
+        "packages/react/tests/button.contract.test.tsx#passes-automated-accessibility-checks"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "capturedAt": "2026-08-06T09:09:46.666Z",
+  "browser": {
+    "id": "chrome",
+    "version": "150.0.7871.187"
+  },
+  "iterations": 25,
+  "bundle": {
+    "common": {
+      "files": [
+        {
+          "name": "button-with-style.js",
+          "bytes": 52,
+          "gzipBytes": 57
+        },
+        {
+          "name": "button.css",
+          "bytes": 23396,
+          "gzipBytes": 2340
+        },
+        {
+          "name": "button.js",
+          "bytes": 220,
+          "gzipBytes": 153
+        },
+        {
+          "name": "chunk-7D4SUZUM.js",
+          "bytes": 1815,
+          "gzipBytes": 841
+        },
+        {
+          "name": "chunk-LPQR6JOB.js",
+          "bytes": 10288,
+          "gzipBytes": 2799
+        },
+        {
+          "name": "chunk-PDOPH323.js",
+          "bytes": 3456,
+          "gzipBytes": 1206
+        },
+        {
+          "name": "chunk-TZZNKWYH.js",
+          "bytes": 4052,
+          "gzipBytes": 1267
+        },
+        {
+          "name": "chunk-WMSWTACL.js",
+          "bytes": 6251,
+          "gzipBytes": 1927
+        },
+        {
+          "name": "chunk-X4E3ZG6K.js",
+          "bytes": 5241,
+          "gzipBytes": 1583
+        },
+        {
+          "name": "chunk-YVD3BKAX.js",
+          "bytes": 722494,
+          "gzipBytes": 149934
+        },
+        {
+          "name": "date-picker-with-style.js",
+          "bytes": 62,
+          "gzipBytes": 63
+        },
+        {
+          "name": "date-picker.css",
+          "bytes": 3535,
+          "gzipBytes": 932
+        },
+        {
+          "name": "date-picker.js",
+          "bytes": 189,
+          "gzipBytes": 134
+        },
+        {
+          "name": "dialog-with-style.js",
+          "bytes": 52,
+          "gzipBytes": 57
+        },
+        {
+          "name": "dialog.css",
+          "bytes": 2413,
+          "gzipBytes": 775
+        },
+        {
+          "name": "dialog.js",
+          "bytes": 175,
+          "gzipBytes": 125
+        },
+        {
+          "name": "index-with-style.js",
+          "bytes": 50,
+          "gzipBytes": 56
+        },
+        {
+          "name": "index.css",
+          "bytes": 40161,
+          "gzipBytes": 4830
+        },
+        {
+          "name": "index.js",
+          "bytes": 580,
+          "gzipBytes": 307
+        },
+        {
+          "name": "styles.css",
+          "bytes": 500,
+          "gzipBytes": 189
+        },
+        {
+          "name": "tabs-with-style.js",
+          "bytes": 48,
+          "gzipBytes": 55
+        },
+        {
+          "name": "tabs.css",
+          "bytes": 3626,
+          "gzipBytes": 878
+        },
+        {
+          "name": "tabs.js",
+          "bytes": 219,
+          "gzipBytes": 161
+        },
+        {
+          "name": "text-input-with-style.js",
+          "bytes": 60,
+          "gzipBytes": 62
+        },
+        {
+          "name": "text-input.css",
+          "bytes": 7347,
+          "gzipBytes": 1517
+        },
+        {
+          "name": "text-input.js",
+          "bytes": 309,
+          "gzipBytes": 197
+        }
+      ],
+      "bytes": 836591,
+      "gzipBytes": 172445
+    },
+    "dataGridSubpath": {
+      "files": [
+        {
+          "name": "data-grid.css",
+          "bytes": 1689,
+          "gzipBytes": 567
+        },
+        {
+          "name": "data-grid.js",
+          "bytes": 174292,
+          "gzipBytes": 34644
+        }
+      ],
+      "bytes": 175981,
+      "gzipBytes": 35211
+    }
+  },
+  "synchronousMilliseconds": {
+    "mountP95": 0.19999998807907104,
+    "overlayOpenP95": 0.4000000059604645,
+    "unmountP95": 2,
+    "budgetP95": 10
+  },
+  "cleanup": {
+    "baseline": {
+      "windowDocumentListeners": 23,
+      "resizeObservers": 0,
+      "mutationObservers": 1
+    },
+    "after": {
+      "windowDocumentListeners": 23,
+      "resizeObservers": 0,
+      "mutationObservers": 1
+    },
+    "remainingOverlays": 0,
+    "passed": true
+  }
+}

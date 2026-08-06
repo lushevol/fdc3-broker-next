@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schemaVersion", "baseline", "deviations"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "baseline": { "type": "object", "required": ["package", "packageVersion", "repositoryCommit"] },
+    "deviations": { "type": "array", "items": { "type": "object", "required": ["id", "legacyTag", "category", "rationale", "approvedBy", "tests"] } }
+  }
+}

@@ -1,0 +1,1307 @@
+{
+  "capturedAt": "2026-08-06T09:05:56.482Z",
+  "viewport": {
+    "width": 640,
+    "height": 480
+  },
+  "deviceScaleFactor": 1,
+  "browsers": [
+    {
+      "id": "chrome",
+      "version": "150.0.7871.187",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+      "fixtures": [
+        {
+          "id": "sc-button",
+          "webkitScreenshot": "evidence/proof-cohort/chrome/sc-button-webkit.png",
+          "ratanScreenshot": "evidence/proof-cohort/chrome/sc-button-ratan.png",
+          "diffScreenshot": "evidence/proof-cohort/chrome/sc-button-diff.png",
+          "screenshot": {
+            "changedPixels": 71,
+            "totalPixels": 311040,
+            "changedPercent": 0.02282664609053498,
+            "thresholdPercent": 0.1,
+            "passed": true
+          },
+          "approvedDeviations": [],
+          "computedStyle": {
+            "webkit": {
+              "selector": "sc-button",
+              "tag": "sc-button",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 32
+              },
+              "styles": {
+                "display": "inline",
+                "position": "static",
+                "box-sizing": "content-box",
+                "width": "auto",
+                "height": "auto",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            },
+            "ratan": {
+              "selector": "[data-ratan-component]",
+              "tag": "button",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 32
+              },
+              "styles": {
+                "display": "inline-flex",
+                "position": "static",
+                "box-sizing": "border-box",
+                "width": "592px",
+                "height": "32px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "14px",
+                "font-weight": "500",
+                "line-height": "normal",
+                "color": "rgb(255, 255, 255)",
+                "background-color": "rgb(4, 115, 234)",
+                "border-top-color": "rgb(4, 115, 234)",
+                "border-top-style": "solid",
+                "border-top-width": "1px",
+                "border-radius": "100px",
+                "padding-top": "4px",
+                "padding-right": "16px",
+                "padding-bottom": "4px",
+                "padding-left": "16px",
+                "gap": "8px",
+                "opacity": "1",
+                "outline-color": "rgb(255, 255, 255)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            }
+          },
+          "accessibility": {
+            "webkit": {
+              "violations": [],
+              "incomplete": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "help": "Elements must meet minimum color contrast ratio thresholds",
+                  "targets": [
+                    [
+                      [
+                        "sc-button",
+                        "sl-button",
+                        "button"
+                      ]
+                    ]
+                  ]
+                }
+              ]
+            },
+            "ratan": {
+              "violations": [],
+              "incomplete": []
+            }
+          }
+        },
+        {
+          "id": "sc-text-input",
+          "webkitScreenshot": "evidence/proof-cohort/chrome/sc-text-input-webkit.png",
+          "ratanScreenshot": "evidence/proof-cohort/chrome/sc-text-input-ratan.png",
+          "diffScreenshot": "evidence/proof-cohort/chrome/sc-text-input-diff.png",
+          "screenshot": {
+            "changedPixels": 1848,
+            "totalPixels": 311040,
+            "changedPercent": 0.5941358024691358,
+            "thresholdPercent": 0.1,
+            "passed": false
+          },
+          "approvedDeviations": [],
+          "computedStyle": {
+            "webkit": {
+              "selector": "sc-text-input",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 60
+              },
+              "styles": {
+                "display": "block",
+                "position": "relative",
+                "box-sizing": "content-box",
+                "width": "592px",
+                "height": "60px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            },
+            "ratan": {
+              "selector": "[data-ratan-component]",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 56
+              },
+              "styles": {
+                "display": "block",
+                "position": "relative",
+                "box-sizing": "content-box",
+                "width": "592px",
+                "height": "56px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            }
+          },
+          "accessibility": {
+            "webkit": {
+              "violations": [],
+              "incomplete": [
+                {
+                  "id": "aria-prohibited-attr",
+                  "impact": "serious",
+                  "help": "Elements must only use permitted ARIA attributes",
+                  "targets": [
+                    [
+                      [
+                        "sc-text-input",
+                        ".sc-form-group"
+                      ]
+                    ]
+                  ]
+                }
+              ]
+            },
+            "ratan": {
+              "violations": [],
+              "incomplete": []
+            }
+          }
+        },
+        {
+          "id": "sc-dialog",
+          "webkitScreenshot": "evidence/proof-cohort/chrome/sc-dialog-webkit.png",
+          "ratanScreenshot": "evidence/proof-cohort/chrome/sc-dialog-ratan.png",
+          "diffScreenshot": "evidence/proof-cohort/chrome/sc-dialog-diff.png",
+          "screenshot": {
+            "changedPixels": 243374,
+            "totalPixels": 311040,
+            "changedPercent": 78.24524176954732,
+            "thresholdPercent": 0.1,
+            "passed": false
+          },
+          "approvedDeviations": [],
+          "computedStyle": {
+            "webkit": {
+              "selector": "sc-dialog",
+              "tag": "sc-dialog",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 0,
+                "height": 0
+              },
+              "styles": {
+                "display": "inline",
+                "position": "static",
+                "box-sizing": "content-box",
+                "width": "auto",
+                "height": "auto",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            },
+            "ratan": {
+              "selector": "[data-ratan-component]",
+              "tag": "div",
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 640,
+                "height": 480
+              },
+              "styles": {
+                "display": "flex",
+                "position": "fixed",
+                "box-sizing": "content-box",
+                "width": "608px",
+                "height": "448px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 23, 46, 0.55)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "16px",
+                "padding-right": "16px",
+                "padding-bottom": "16px",
+                "padding-left": "16px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            }
+          },
+          "accessibility": {
+            "webkit": {
+              "violations": [],
+              "incomplete": []
+            },
+            "ratan": {
+              "violations": [],
+              "incomplete": []
+            }
+          }
+        },
+        {
+          "id": "sc-date-picker",
+          "webkitScreenshot": "evidence/proof-cohort/chrome/sc-date-picker-webkit.png",
+          "ratanScreenshot": "evidence/proof-cohort/chrome/sc-date-picker-ratan.png",
+          "diffScreenshot": "evidence/proof-cohort/chrome/sc-date-picker-diff.png",
+          "screenshot": {
+            "changedPixels": 9667,
+            "totalPixels": 311040,
+            "changedPercent": 3.107960390946502,
+            "thresholdPercent": 0.1,
+            "passed": false
+          },
+          "approvedDeviations": [],
+          "computedStyle": {
+            "webkit": {
+              "selector": "sc-date-picker",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 256,
+                "height": 284
+              },
+              "styles": {
+                "display": "flex",
+                "position": "static",
+                "box-sizing": "border-box",
+                "width": "256px",
+                "height": "284px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(1, 34, 70)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(1, 34, 70)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(1, 34, 70)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            },
+            "ratan": {
+              "selector": "[data-ratan-component]",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 194,
+                "height": 58
+              },
+              "styles": {
+                "display": "inline-flex",
+                "position": "static",
+                "box-sizing": "content-box",
+                "width": "194px",
+                "height": "58px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "4px",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            }
+          },
+          "accessibility": {
+            "webkit": {
+              "violations": [],
+              "incomplete": []
+            },
+            "ratan": {
+              "violations": [],
+              "incomplete": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "help": "Elements must meet minimum color contrast ratio thresholds",
+                  "targets": [
+                    [
+                      "#react-aria363056950-\\:r0\\: > span[aria-hidden=\"true\"]"
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "sc-tab-group",
+          "webkitScreenshot": "evidence/proof-cohort/chrome/sc-tab-group-webkit.png",
+          "ratanScreenshot": "evidence/proof-cohort/chrome/sc-tab-group-ratan.png",
+          "diffScreenshot": "evidence/proof-cohort/chrome/sc-tab-group-diff.png",
+          "screenshot": {
+            "changedPixels": 6559,
+            "totalPixels": 311040,
+            "changedPercent": 2.108731995884774,
+            "thresholdPercent": 0.1,
+            "passed": false
+          },
+          "approvedDeviations": [],
+          "computedStyle": {
+            "webkit": {
+              "selector": "sc-tab-group",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 102.78125
+              },
+              "styles": {
+                "display": "flex",
+                "position": "static",
+                "box-sizing": "content-box",
+                "width": "592px",
+                "height": "102.781px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            },
+            "ratan": {
+              "selector": "[data-ratan-component]",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 100
+              },
+              "styles": {
+                "display": "block",
+                "position": "static",
+                "box-sizing": "content-box",
+                "width": "592px",
+                "height": "100px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(89, 89, 89)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(89, 89, 89)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(89, 89, 89)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            }
+          },
+          "accessibility": {
+            "webkit": {
+              "violations": [],
+              "incomplete": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "help": "Elements must meet minimum color contrast ratio thresholds",
+                  "targets": [
+                    [
+                      "#sc-tab-panel-1"
+                    ]
+                  ]
+                }
+              ]
+            },
+            "ratan": {
+              "violations": [],
+              "incomplete": []
+            }
+          }
+        },
+        {
+          "id": "sc-data-grid",
+          "webkitScreenshot": "evidence/proof-cohort/chrome/sc-data-grid-webkit.png",
+          "ratanScreenshot": "evidence/proof-cohort/chrome/sc-data-grid-ratan.png",
+          "diffScreenshot": "evidence/proof-cohort/chrome/sc-data-grid-diff.png",
+          "screenshot": {
+            "changedPixels": 231675,
+            "totalPixels": 311040,
+            "changedPercent": 74.48398919753086,
+            "thresholdPercent": 0.1,
+            "passed": false
+          },
+          "approvedDeviations": [],
+          "computedStyle": {
+            "webkit": {
+              "selector": "sc-data-grid",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 320
+              },
+              "styles": {
+                "display": "block",
+                "position": "relative",
+                "box-sizing": "border-box",
+                "width": "592px",
+                "height": "320px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            },
+            "ratan": {
+              "selector": "[data-ratan-component]",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 322
+              },
+              "styles": {
+                "display": "block",
+                "position": "relative",
+                "box-sizing": "content-box",
+                "width": "590px",
+                "height": "320px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(217, 217, 217)",
+                "border-top-style": "solid",
+                "border-top-width": "1px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            }
+          },
+          "accessibility": {
+            "webkit": {
+              "violations": [],
+              "incomplete": []
+            },
+            "ratan": {
+              "violations": [],
+              "incomplete": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "edge",
+      "version": "151.0.4129.59",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36 Edg/151.0.0.0",
+      "fixtures": [
+        {
+          "id": "sc-button",
+          "webkitScreenshot": "evidence/proof-cohort/edge/sc-button-webkit.png",
+          "ratanScreenshot": "evidence/proof-cohort/edge/sc-button-ratan.png",
+          "diffScreenshot": "evidence/proof-cohort/edge/sc-button-diff.png",
+          "screenshot": {
+            "changedPixels": 71,
+            "totalPixels": 311040,
+            "changedPercent": 0.02282664609053498,
+            "thresholdPercent": 0.1,
+            "passed": true
+          },
+          "approvedDeviations": [],
+          "computedStyle": {
+            "webkit": {
+              "selector": "sc-button",
+              "tag": "sc-button",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 32
+              },
+              "styles": {
+                "display": "inline",
+                "position": "static",
+                "box-sizing": "content-box",
+                "width": "auto",
+                "height": "auto",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            },
+            "ratan": {
+              "selector": "[data-ratan-component]",
+              "tag": "button",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 32
+              },
+              "styles": {
+                "display": "inline-flex",
+                "position": "static",
+                "box-sizing": "border-box",
+                "width": "592px",
+                "height": "32px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "14px",
+                "font-weight": "500",
+                "line-height": "normal",
+                "color": "rgb(255, 255, 255)",
+                "background-color": "rgb(4, 115, 234)",
+                "border-top-color": "rgb(4, 115, 234)",
+                "border-top-style": "solid",
+                "border-top-width": "1px",
+                "border-radius": "100px",
+                "padding-top": "4px",
+                "padding-right": "16px",
+                "padding-bottom": "4px",
+                "padding-left": "16px",
+                "gap": "8px",
+                "opacity": "1",
+                "outline-color": "rgb(255, 255, 255)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            }
+          },
+          "accessibility": {
+            "webkit": {
+              "violations": [],
+              "incomplete": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "help": "Elements must meet minimum color contrast ratio thresholds",
+                  "targets": [
+                    [
+                      [
+                        "sc-button",
+                        "sl-button",
+                        "button"
+                      ]
+                    ]
+                  ]
+                }
+              ]
+            },
+            "ratan": {
+              "violations": [],
+              "incomplete": []
+            }
+          }
+        },
+        {
+          "id": "sc-text-input",
+          "webkitScreenshot": "evidence/proof-cohort/edge/sc-text-input-webkit.png",
+          "ratanScreenshot": "evidence/proof-cohort/edge/sc-text-input-ratan.png",
+          "diffScreenshot": "evidence/proof-cohort/edge/sc-text-input-diff.png",
+          "screenshot": {
+            "changedPixels": 1848,
+            "totalPixels": 311040,
+            "changedPercent": 0.5941358024691358,
+            "thresholdPercent": 0.1,
+            "passed": false
+          },
+          "approvedDeviations": [],
+          "computedStyle": {
+            "webkit": {
+              "selector": "sc-text-input",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 60
+              },
+              "styles": {
+                "display": "block",
+                "position": "relative",
+                "box-sizing": "content-box",
+                "width": "592px",
+                "height": "60px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            },
+            "ratan": {
+              "selector": "[data-ratan-component]",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 56
+              },
+              "styles": {
+                "display": "block",
+                "position": "relative",
+                "box-sizing": "content-box",
+                "width": "592px",
+                "height": "56px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            }
+          },
+          "accessibility": {
+            "webkit": {
+              "violations": [],
+              "incomplete": [
+                {
+                  "id": "aria-prohibited-attr",
+                  "impact": "serious",
+                  "help": "Elements must only use permitted ARIA attributes",
+                  "targets": [
+                    [
+                      [
+                        "sc-text-input",
+                        ".sc-form-group"
+                      ]
+                    ]
+                  ]
+                }
+              ]
+            },
+            "ratan": {
+              "violations": [],
+              "incomplete": []
+            }
+          }
+        },
+        {
+          "id": "sc-dialog",
+          "webkitScreenshot": "evidence/proof-cohort/edge/sc-dialog-webkit.png",
+          "ratanScreenshot": "evidence/proof-cohort/edge/sc-dialog-ratan.png",
+          "diffScreenshot": "evidence/proof-cohort/edge/sc-dialog-diff.png",
+          "screenshot": {
+            "changedPixels": 242915,
+            "totalPixels": 311040,
+            "changedPercent": 78.09767232510289,
+            "thresholdPercent": 0.1,
+            "passed": false
+          },
+          "approvedDeviations": [],
+          "computedStyle": {
+            "webkit": {
+              "selector": "sc-dialog",
+              "tag": "sc-dialog",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 0,
+                "height": 0
+              },
+              "styles": {
+                "display": "inline",
+                "position": "static",
+                "box-sizing": "content-box",
+                "width": "auto",
+                "height": "auto",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            },
+            "ratan": {
+              "selector": "[data-ratan-component]",
+              "tag": "div",
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 640,
+                "height": 480
+              },
+              "styles": {
+                "display": "flex",
+                "position": "fixed",
+                "box-sizing": "content-box",
+                "width": "608px",
+                "height": "448px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 23, 46, 0.55)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "16px",
+                "padding-right": "16px",
+                "padding-bottom": "16px",
+                "padding-left": "16px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            }
+          },
+          "accessibility": {
+            "webkit": {
+              "violations": [],
+              "incomplete": []
+            },
+            "ratan": {
+              "violations": [],
+              "incomplete": []
+            }
+          }
+        },
+        {
+          "id": "sc-date-picker",
+          "webkitScreenshot": "evidence/proof-cohort/edge/sc-date-picker-webkit.png",
+          "ratanScreenshot": "evidence/proof-cohort/edge/sc-date-picker-ratan.png",
+          "diffScreenshot": "evidence/proof-cohort/edge/sc-date-picker-diff.png",
+          "screenshot": {
+            "changedPixels": 9665,
+            "totalPixels": 311040,
+            "changedPercent": 3.1073173868312756,
+            "thresholdPercent": 0.1,
+            "passed": false
+          },
+          "approvedDeviations": [],
+          "computedStyle": {
+            "webkit": {
+              "selector": "sc-date-picker",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 256,
+                "height": 284
+              },
+              "styles": {
+                "display": "flex",
+                "position": "static",
+                "box-sizing": "border-box",
+                "width": "256px",
+                "height": "284px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(1, 34, 70)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(1, 34, 70)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(1, 34, 70)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            },
+            "ratan": {
+              "selector": "[data-ratan-component]",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 194,
+                "height": 58
+              },
+              "styles": {
+                "display": "inline-flex",
+                "position": "static",
+                "box-sizing": "content-box",
+                "width": "194px",
+                "height": "58px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "4px",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            }
+          },
+          "accessibility": {
+            "webkit": {
+              "violations": [],
+              "incomplete": []
+            },
+            "ratan": {
+              "violations": [],
+              "incomplete": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "help": "Elements must meet minimum color contrast ratio thresholds",
+                  "targets": [
+                    [
+                      "#react-aria4830071355-\\:r0\\: > span[aria-hidden=\"true\"]"
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "sc-tab-group",
+          "webkitScreenshot": "evidence/proof-cohort/edge/sc-tab-group-webkit.png",
+          "ratanScreenshot": "evidence/proof-cohort/edge/sc-tab-group-ratan.png",
+          "diffScreenshot": "evidence/proof-cohort/edge/sc-tab-group-diff.png",
+          "screenshot": {
+            "changedPixels": 235045,
+            "totalPixels": 311040,
+            "changedPercent": 75.56745113168725,
+            "thresholdPercent": 0.1,
+            "passed": false
+          },
+          "approvedDeviations": [],
+          "computedStyle": {
+            "webkit": {
+              "selector": "sc-tab-group",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 102.78125
+              },
+              "styles": {
+                "display": "flex",
+                "position": "static",
+                "box-sizing": "content-box",
+                "width": "592px",
+                "height": "102.781px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            },
+            "ratan": {
+              "selector": "[data-ratan-component]",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 100
+              },
+              "styles": {
+                "display": "block",
+                "position": "static",
+                "box-sizing": "content-box",
+                "width": "592px",
+                "height": "100px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(89, 89, 89)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(89, 89, 89)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(89, 89, 89)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            }
+          },
+          "accessibility": {
+            "webkit": {
+              "violations": [],
+              "incomplete": [
+                {
+                  "id": "color-contrast",
+                  "impact": "serious",
+                  "help": "Elements must meet minimum color contrast ratio thresholds",
+                  "targets": [
+                    [
+                      "#sc-tab-panel-1"
+                    ]
+                  ]
+                }
+              ]
+            },
+            "ratan": {
+              "violations": [],
+              "incomplete": []
+            }
+          }
+        },
+        {
+          "id": "sc-data-grid",
+          "webkitScreenshot": "evidence/proof-cohort/edge/sc-data-grid-webkit.png",
+          "ratanScreenshot": "evidence/proof-cohort/edge/sc-data-grid-ratan.png",
+          "diffScreenshot": "evidence/proof-cohort/edge/sc-data-grid-diff.png",
+          "screenshot": {
+            "changedPixels": 231658,
+            "totalPixels": 311040,
+            "changedPercent": 74.47852366255144,
+            "thresholdPercent": 0.1,
+            "passed": false
+          },
+          "approvedDeviations": [],
+          "computedStyle": {
+            "webkit": {
+              "selector": "sc-data-grid",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 320
+              },
+              "styles": {
+                "display": "block",
+                "position": "relative",
+                "box-sizing": "border-box",
+                "width": "592px",
+                "height": "320px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(0, 23, 46)",
+                "border-top-style": "none",
+                "border-top-width": "0px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            },
+            "ratan": {
+              "selector": "[data-ratan-component]",
+              "tag": "div",
+              "geometry": {
+                "x": 32,
+                "y": 32,
+                "width": 592,
+                "height": 322
+              },
+              "styles": {
+                "display": "block",
+                "position": "relative",
+                "box-sizing": "content-box",
+                "width": "590px",
+                "height": "320px",
+                "font-family": "\"SC Prosper Sans\", -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
+                "font-size": "16px",
+                "font-weight": "400",
+                "line-height": "normal",
+                "color": "rgb(0, 23, 46)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border-top-color": "rgb(217, 217, 217)",
+                "border-top-style": "solid",
+                "border-top-width": "1px",
+                "border-radius": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "gap": "normal",
+                "opacity": "1",
+                "outline-color": "rgb(0, 23, 46)",
+                "outline-style": "none",
+                "outline-width": "3px"
+              }
+            }
+          },
+          "accessibility": {
+            "webkit": {
+              "violations": [],
+              "incomplete": []
+            },
+            "ratan": {
+              "violations": [],
+              "incomplete": []
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "fixtures": 12,
+    "unexplainedScreenshotFailures": 10,
+    "ratanAccessibilityViolations": 0
+  }
+}
