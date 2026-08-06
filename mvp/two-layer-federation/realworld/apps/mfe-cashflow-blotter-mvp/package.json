@@ -17,7 +17,7 @@
     "@fm/platform-contracts": "^1.1.0",
     "@fm/platform-sdk": "^1.1.0",
     "@fm/ratan-data-grid": "1.0.0",
-    "@fm/ratan-design": "^1.1.0",
+    "@fm/ratan-design-legacy": "1.1.0",
     "@apollo/client": "^3.13.4",
     "@emotion/css": "^11.11.2",
     "@emotion/react": "^11.11.1",

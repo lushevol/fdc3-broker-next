@@ -1,5 +1,5 @@
 {
-  "name": "@fm/ratan-design",
+  "name": "@fm/ratan-design-legacy",
   "version": "1.1.0",
   "description": "Production design foundation for independently deployed FM applications",
   "private": true,

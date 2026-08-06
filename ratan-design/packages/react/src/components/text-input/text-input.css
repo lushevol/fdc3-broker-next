@@ -28,10 +28,13 @@
   }
 
   .ratan-text-input__label {
-    color: inherit;
+    color: var(--sc-label-color, var(--sc-color-grey-650));
     display: flex;
-    font: inherit;
+    font-family: inherit;
+    font-size: var(--sc-label-font-size, 0.75rem);
+    font-weight: 500;
     line-height: 1.25rem;
+    margin-bottom: var(--sc-label-margin-bottom, 0.25rem);
     min-width: 0;
   }
 

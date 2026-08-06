@@ -1,9 +1,13 @@
 @layer ratan.components {
   .ratan-data-grid {
-    border: 1px solid var(--sc-table-divider-color);
-    color: var(--sc-table-td-color);
+    background: var(--sc-data-grid-basic-bg-color);
+    border: 0;
+    border-radius: 6px;
+    box-sizing: border-box;
+    color: var(--sc-data-grid-body-cell-text-color);
     height: var(--ratan-data-grid-height);
     overflow: auto;
+    outline: 1px solid var(--sc-data-grid-outline-color);
     position: relative;
   }
 
@@ -23,10 +27,13 @@
   }
 
   .ratan-data-grid__header {
-    background: var(--sc-table-th-background);
-    color: var(--sc-table-th-color);
+    background: var(--sc-data-grid-header-cell-bg-color);
+    color: var(--sc-data-grid-header-cell-text-color);
+    font-size: 0.875rem;
+    font-weight: 700;
     inset-block-start: 0;
-    min-height: 2.5rem;
+    line-height: 1rem;
+    min-height: 2.75rem;
     position: sticky;
     z-index: 1;
   }
@@ -34,9 +41,9 @@
   .ratan-data-grid__header > *,
   .ratan-data-grid__row > * {
     align-items: center;
-    border-inline-end: 1px solid var(--sc-table-divider-color);
+    box-shadow: inset -1px 0 0 var(--sc-data-grid-body-vertical-border-color);
     display: flex;
-    padding-inline: var(--sc-spacing-8);
+    padding-inline: 0.5rem;
   }
 
   .ratan-data-grid__header button,
@@ -55,10 +62,15 @@
 
   .ratan-data-grid__viewport { position: relative; }
   .ratan-data-grid__row {
-    background: var(--sc-table-td-background);
-    border-block-start: 1px solid var(--sc-table-td-border-top);
+    background: var(--sc-data-grid-body-cell-default-bg-color);
+    color: var(--sc-data-grid-body-cell-text-color);
+    font-size: 0.875rem;
+    line-height: 1rem;
     inset-inline: 0;
     position: absolute;
   }
-  .ratan-data-grid__row:hover { background: var(--sc-table-tr-hover-background-color); }
+  .ratan-data-grid__row > * {
+    box-shadow: inset -1px 0 0 var(--sc-data-grid-body-vertical-border-color), inset 0 -1px 0 var(--sc-data-grid-body-horizontal-border-color);
+  }
+  .ratan-data-grid__row:hover { background: var(--sc-data-grid-body-cell-hover-bg-color); }
 }

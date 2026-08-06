@@ -1,13 +1,15 @@
 @layer ratan.components {
   [data-ratan-component='Tabs'] {
-    color: var(--sc-tab-color);
+    color: inherit;
+    display: flex;
+    flex-direction: column;
     font: inherit;
   }
 
   .ratan-tabs__list {
     align-items: stretch;
     display: flex;
-    gap: var(--sc-spacing-8);
+    gap: 0;
     justify-content: flex-start;
     overflow-x: auto;
   }
@@ -35,12 +37,19 @@
     color: var(--sc-tab-color);
     cursor: pointer;
     display: inline-flex;
-    gap: var(--sc-spacing-4);
-    min-block-size: 2.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    gap: 0.75rem;
+    line-height: 1.375rem;
+    margin-block-start: 2px;
     outline: none;
-    padding: var(--sc-spacing-8) var(--sc-spacing-12);
+    padding: 0.9rem 0.5rem;
     position: relative;
   }
+
+  .ratan-tabs__tab:not(:last-child) { margin-inline-end: var(--sc-tab-margin, 2rem); }
+  .ratan-tabs__tab:first-child { margin-inline-start: 2px; }
+  .ratan-tabs__tab:last-child { margin-inline-end: 2px; }
 
   .ratan-tabs__tab[data-hovered] { color: var(--sc-tab-hover-color); }
   .ratan-tabs__tab[data-focus-visible] { outline: 2px solid var(--sc-tab-focus-outline-color); outline-offset: -2px; }
@@ -52,7 +61,7 @@
   .ratan-tabs__tab[data-selected]:not([data-no-active-bottom-line='true'])::after,
   .ratan-tabs__tab[data-active='true']:not([data-no-active-bottom-line='true'])::after {
     background: currentColor;
-    block-size: 2px;
+    block-size: 0.25rem;
     content: '';
     inset-block-end: 0;
     inset-inline: 0;
@@ -78,7 +87,7 @@
   .ratan-tabs__tab[data-error='true'] .ratan-tabs__counter { background: var(--sc-tab-error-counter-background-color); border-color: var(--sc-tab-error-counter-border-color); }
   .ratan-tabs__close { background: transparent; border: 0; color: inherit; cursor: pointer; padding: 0.125rem; }
   .ratan-tabs__close[data-focus-visible] { outline: 2px solid var(--sc-tab-focus-outline-color); }
-  .ratan-tabs__panel { outline: none; padding-block: var(--sc-spacing-12); }
+  .ratan-tabs__panel { outline: none; padding-block: var(--sc-tab-panel-spacing, 1rem); }
   .ratan-tabs__panel[data-focus-visible] { outline: 2px solid var(--sc-tab-focus-outline-color); }
   .ratan-tabs__divider { align-self: stretch; background: var(--sc-tab-divider-color); inline-size: 1px; }
 }

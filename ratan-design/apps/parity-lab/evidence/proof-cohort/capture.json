@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-08-06T09:05:56.482Z",
+  "capturedAt": "2026-08-06T09:29:01.130Z",
   "viewport": {
     "width": 640,
     "height": 480
@@ -130,9 +130,9 @@
           "ratanScreenshot": "evidence/proof-cohort/chrome/sc-text-input-ratan.png",
           "diffScreenshot": "evidence/proof-cohort/chrome/sc-text-input-diff.png",
           "screenshot": {
-            "changedPixels": 1848,
+            "changedPixels": 2986,
             "totalPixels": 311040,
-            "changedPercent": 0.5941358024691358,
+            "changedPercent": 0.9600051440329218,
             "thresholdPercent": 0.1,
             "passed": false
           },
@@ -340,9 +340,9 @@
           "ratanScreenshot": "evidence/proof-cohort/chrome/sc-date-picker-ratan.png",
           "diffScreenshot": "evidence/proof-cohort/chrome/sc-date-picker-diff.png",
           "screenshot": {
-            "changedPixels": 9667,
+            "changedPixels": 4582,
             "totalPixels": 311040,
-            "changedPercent": 3.107960390946502,
+            "changedPercent": 1.473122427983539,
             "thresholdPercent": 0.1,
             "passed": false
           },
@@ -435,7 +435,7 @@
                   "help": "Elements must meet minimum color contrast ratio thresholds",
                   "targets": [
                     [
-                      "#react-aria363056950-\\:r0\\: > span[aria-hidden=\"true\"]"
+                      "#react-aria8945192413-\\:r0\\: > span[aria-hidden=\"true\"]"
                     ]
                   ]
                 }
@@ -449,9 +449,9 @@
           "ratanScreenshot": "evidence/proof-cohort/chrome/sc-tab-group-ratan.png",
           "diffScreenshot": "evidence/proof-cohort/chrome/sc-tab-group-diff.png",
           "screenshot": {
-            "changedPixels": 6559,
+            "changedPixels": 1470,
             "totalPixels": 311040,
-            "changedPercent": 2.108731995884774,
+            "changedPercent": 0.47260802469135804,
             "thresholdPercent": 0.1,
             "passed": false
           },
@@ -558,9 +558,9 @@
           "ratanScreenshot": "evidence/proof-cohort/chrome/sc-data-grid-ratan.png",
           "diffScreenshot": "evidence/proof-cohort/chrome/sc-data-grid-diff.png",
           "screenshot": {
-            "changedPixels": 231675,
+            "changedPixels": 6694,
             "totalPixels": 311040,
-            "changedPercent": 74.48398919753086,
+            "changedPercent": 2.1521347736625516,
             "thresholdPercent": 0.1,
             "passed": false
           },
@@ -776,9 +776,9 @@
           "ratanScreenshot": "evidence/proof-cohort/edge/sc-text-input-ratan.png",
           "diffScreenshot": "evidence/proof-cohort/edge/sc-text-input-diff.png",
           "screenshot": {
-            "changedPixels": 1848,
+            "changedPixels": 2986,
             "totalPixels": 311040,
-            "changedPercent": 0.5941358024691358,
+            "changedPercent": 0.9600051440329218,
             "thresholdPercent": 0.1,
             "passed": false
           },
@@ -986,9 +986,9 @@
           "ratanScreenshot": "evidence/proof-cohort/edge/sc-date-picker-ratan.png",
           "diffScreenshot": "evidence/proof-cohort/edge/sc-date-picker-diff.png",
           "screenshot": {
-            "changedPixels": 9665,
+            "changedPixels": 4582,
             "totalPixels": 311040,
-            "changedPercent": 3.1073173868312756,
+            "changedPercent": 1.473122427983539,
             "thresholdPercent": 0.1,
             "passed": false
           },
@@ -1081,7 +1081,7 @@
                   "help": "Elements must meet minimum color contrast ratio thresholds",
                   "targets": [
                     [
-                      "#react-aria4830071355-\\:r0\\: > span[aria-hidden=\"true\"]"
+                      "#react-aria4749352843-\\:r0\\: > span[aria-hidden=\"true\"]"
                     ]
                   ]
                 }
@@ -1095,9 +1095,9 @@
           "ratanScreenshot": "evidence/proof-cohort/edge/sc-tab-group-ratan.png",
           "diffScreenshot": "evidence/proof-cohort/edge/sc-tab-group-diff.png",
           "screenshot": {
-            "changedPixels": 235045,
+            "changedPixels": 1470,
             "totalPixels": 311040,
-            "changedPercent": 75.56745113168725,
+            "changedPercent": 0.47260802469135804,
             "thresholdPercent": 0.1,
             "passed": false
           },
@@ -1204,9 +1204,9 @@
           "ratanScreenshot": "evidence/proof-cohort/edge/sc-data-grid-ratan.png",
           "diffScreenshot": "evidence/proof-cohort/edge/sc-data-grid-diff.png",
           "screenshot": {
-            "changedPixels": 231658,
+            "changedPixels": 6694,
             "totalPixels": 311040,
-            "changedPercent": 74.47852366255144,
+            "changedPercent": 2.1521347736625516,
             "thresholdPercent": 0.1,
             "passed": false
           },

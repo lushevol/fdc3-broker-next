@@ -99,7 +99,7 @@ export async function buildProofFixtureBundles() {
         const columns=[{id:'symbol',header:'Symbol',accessor:'symbol'},{id:'quantity',header:'Quantity',accessor:'quantity'}];
         const fixtures={
           'sc-button': <Button variant="primary" tone="default" size="sm">Action</Button>,
-          'sc-text-input': <TextInput label="Account name" value="Ratan" readOnly />,
+          'sc-text-input': <TextInput label="Account name" value="Ratan" />,
           'sc-dialog': <Dialog open label="Confirm action">Review the order.</Dialog>,
           'sc-date-picker': <DatePicker label="Settlement date" value="2026-08-06" />,
           'sc-tab-group': <Tabs defaultSelectedKey="positions" aria-label="Workspace"><TabList><Tab id="positions">Positions</Tab><Tab id="orders">Orders</Tab></TabList><TabPanel id="positions">Position content</TabPanel><TabPanel id="orders">Order content</TabPanel></Tabs>,
@@ -156,6 +156,15 @@ async function identifyBrowser(page, expected) {
     assert.doesNotMatch(userAgent, /Edg\//, 'Chrome fixture may not use Microsoft Edge.');
   }
   return userAgent;
+}
+
+async function createCapturePage(context, browserId) {
+  const page = await context.newPage();
+  page.on('pageerror', (error) => process.stderr.write(`[${browserId}] page error: ${error.stack ?? error}\n`));
+  page.on('console', (message) => {
+    if (message.type() === 'error') process.stderr.write(`[${browserId}] console error: ${message.text()}\n`);
+  });
+  return page;
 }
 
 export async function captureComputedStyle(page, selector, shadow = false) {
@@ -222,37 +231,38 @@ export async function captureProofParityFixtures() {
     const browser = await chromium.launch({ executablePath: browserConfig.executablePath, headless: true });
     try {
       const context = await browser.newContext({ viewport: evidence.viewport, deviceScaleFactor: evidence.deviceScaleFactor, locale: 'en-SG', colorScheme: 'light', reducedMotion: 'no-preference' });
-      const page = await context.newPage();
-      page.on('pageerror', (error) => process.stderr.write(`[${browserConfig.id}] page error: ${error.stack ?? error}\n`));
-      page.on('console', (message) => {
-        if (message.type() === 'error') process.stderr.write(`[${browserConfig.id}] console error: ${message.text()}\n`);
-      });
-      const userAgent = await identifyBrowser(page, browserConfig.id);
+      const identityPage = await createCapturePage(context, browserConfig.id);
+      const userAgent = await identifyBrowser(identityPage, browserConfig.id);
+      await identityPage.close();
       const browserEvidence = { id: browserConfig.id, version: browser.version(), userAgent, fixtures: [] };
       const outputDirectory = path.join(evidenceRoot, browserConfig.id);
       await mkdir(outputDirectory, { recursive: true });
 
       for (const fixtureId of PROOF_FIXTURE_IDS) {
         const runtimeHtml = await readFile(path.join(fixturesRoot, 'runtime', `${fixtureId}.html`), 'utf8');
-        await page.setContent(`<!doctype html><html class="sc-mode-light" lang="en-SG"><head><meta charset="utf-8"></head><body data-fixture="${fixtureId}"><main style="box-sizing:border-box;padding:24px;width:640px">${fixtureMain(runtimeHtml)}</main></body></html>`);
-        await page.addStyleTag({ content: foundationCss });
-        await page.addScriptTag({ content: bundles.legacyJavaScript });
-        await page.evaluate((tag) => customElements.whenDefined(tag), fixtureId);
-        await settle(page, fixtureId);
-        const webkitComputedStyle = await captureComputedStyle(page, fixtureId, true);
-        const webkitAccessibility = await captureAccessibility(page);
+        const webkitPage = await createCapturePage(context, browserConfig.id);
+        await webkitPage.setContent(`<!doctype html><html class="sc-mode-light" lang="en-SG"><head><meta charset="utf-8"></head><body data-fixture="${fixtureId}"><main style="box-sizing:border-box;padding:24px;width:640px">${fixtureMain(runtimeHtml)}</main></body></html>`);
+        await webkitPage.addStyleTag({ content: foundationCss });
+        await webkitPage.addScriptTag({ content: bundles.legacyJavaScript });
+        await webkitPage.evaluate((tag) => customElements.whenDefined(tag), fixtureId);
+        await settle(webkitPage, fixtureId);
+        const webkitComputedStyle = await captureComputedStyle(webkitPage, fixtureId, true);
+        const webkitAccessibility = await captureAccessibility(webkitPage);
         const webkitPath = path.join(outputDirectory, `${fixtureId}-webkit.png`);
-        await page.screenshot({ path: webkitPath, fullPage: true });
+        await webkitPage.screenshot({ path: webkitPath, fullPage: true });
+        await webkitPage.close();
 
-        await page.setContent(`<!doctype html><html class="sc-mode-light" lang="en-SG"><head><meta charset="utf-8"></head><body data-fixture="${fixtureId}"><main id="root" style="box-sizing:border-box;padding:24px;width:640px"></main></body></html>`);
-        await page.addStyleTag({ content: `${foundationCss}\n${bundles.reactCss}` });
-        await page.addScriptTag({ content: bundles.reactJavaScript });
-        await page.waitForFunction(() => document.body.dataset.fixtureReady === 'true');
-        await settle(page, '[data-ratan-component]');
-        const ratanComputedStyle = await captureComputedStyle(page, '[data-ratan-component]');
-        const ratanAccessibility = await captureAccessibility(page);
+        const ratanPage = await createCapturePage(context, browserConfig.id);
+        await ratanPage.setContent(`<!doctype html><html class="sc-mode-light" lang="en-SG"><head><meta charset="utf-8"></head><body data-fixture="${fixtureId}"><main id="root" style="box-sizing:border-box;padding:24px;width:640px"></main></body></html>`);
+        await ratanPage.addStyleTag({ content: `${foundationCss}\n${bundles.reactCss}` });
+        await ratanPage.addScriptTag({ content: bundles.reactJavaScript });
+        await ratanPage.waitForFunction(() => document.body.dataset.fixtureReady === 'true');
+        await settle(ratanPage, '[data-ratan-component]');
+        const ratanComputedStyle = await captureComputedStyle(ratanPage, '[data-ratan-component]');
+        const ratanAccessibility = await captureAccessibility(ratanPage);
         const ratanPath = path.join(outputDirectory, `${fixtureId}-ratan.png`);
-        await page.screenshot({ path: ratanPath, fullPage: true });
+        await ratanPage.screenshot({ path: ratanPath, fullPage: true });
+        await ratanPage.close();
         const diffPath = path.join(outputDirectory, `${fixtureId}-diff.png`);
         const screenshot = await compareFixtureScreenshots(webkitPath, ratanPath, diffPath);
         const approvedDeviations = deviationManifest.deviations

@@ -99,7 +99,7 @@ export function DataGrid<Row>({
   errorState = <span role="alert">Unable to load data</span>,
   emptyState = <span>No data</span>,
   height = 320,
-  rowHeight = 40,
+  rowHeight = 44,
   overscan = 4,
   className,
   dir,
@@ -175,7 +175,7 @@ export function DataGrid<Row>({
       end: (index + 1) * rowHeight,
       lane: 0,
     }));
-  const gridTemplateColumns = `${selectionMode === 'none' ? '' : '2.5rem '}${table.getVisibleLeafColumns().map((column) => `${column.getSize()}px`).join(' ')}`;
+  const gridTemplateColumns = `${selectionMode === 'none' ? '' : '2.5rem '}${columns.map((column) => column.width === undefined ? 'minmax(0, 1fr)' : `${column.width}px`).join(' ')}`;
 
   const toggleSelection = (rowId: string) => {
     const selected = resolvedSelection.includes(rowId);
