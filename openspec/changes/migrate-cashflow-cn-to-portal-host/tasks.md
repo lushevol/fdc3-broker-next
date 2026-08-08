@@ -14,16 +14,16 @@
 
 - [x] 3.1 Implement Cashflow-owned shell adapters for error boundary, router, controls, identity, configuration, transport, telemetry, and FDC3
 - [x] 3.2 Implement analysis, feature-flag, field/query, RTK Query, notification-center, and theme adapters
-- [ ] 3.3 Extract the transitive Cashflow-used Ratan components and utilities into build-time realworld ownership
+- [x] 3.3 Extract the transitive Cashflow-used Ratan components and utilities into build-time realworld ownership
 - [x] 3.4 Replace trade/cashflow `System.import` calls with typed local or host action adapters
 - [x] 3.5 Add adapter contract tests for production and local fixture modes
 
 ## 4. Move and Preserve Cashflow CN
 
 - [x] 4.1 Move the proven Cashflow CN source and Cashflow-owned support modules into the realworld application/package boundary
-- [ ] 4.2 Preserve Redux state, list/detail GraphQL, REST workflows, field configuration, permissions, notifications, export, and error/loading behavior
+- [x] 4.2 Preserve Redux state, list/detail GraphQL, REST workflows, field configuration, permissions, notifications, export, and error/loading behavior
 - [x] 4.3 Remove the fixture-backed facsimile domain, repository, UI, and tests
-- [ ] 4.4 Add parity tests for quick search, filters, grid/paging, details, notifications, and a representative entitled workflow
+- [x] 4.4 Add parity tests for quick search, filters, grid/paging, details, notifications, and a representative entitled workflow
 
 ## 5. Federation and Boundaries
 
@@ -35,5 +35,5 @@
 
 - [x] 6.1 Run unit/integration tests with at least 90 percent coverage of new migration adapters
 - [x] 6.2 Run lint, TypeScript, production builds, OpenSpec validation, and GitNexus impact review
-- [ ] 6.3 Complete hosted browser acceptance for quick search, selection, details, and one entitled action
+- [x] 6.3 Complete hosted browser acceptance for quick search, selection, details, and one entitled action
 - [x] 6.4 Update the runbook with the actual source mapping, adapter contracts, build steps, cutover, and rollback

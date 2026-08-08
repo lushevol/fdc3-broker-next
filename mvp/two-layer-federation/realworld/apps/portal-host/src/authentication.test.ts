@@ -1,8 +1,5 @@
 import { IDENTITY_CONTRACT_VERSION } from '@fm/platform-contracts';
-import {
-  createIdentityCapability,
-  DEMO_AUTHENTICATION_ADAPTER,
-} from './authentication';
+import { createIdentityCapability, DEMO_AUTHENTICATION_ADAPTER } from './authentication';
 
 describe('deterministic POC authentication', () => {
   it('creates an immutable identity capability around a snapshot', () => {
@@ -31,6 +28,8 @@ describe('deterministic POC authentication', () => {
         'portal:access',
         'RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Custom_Query_Builder',
         'RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Custom_View_Builder_Private',
+        'RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Hold',
+        'RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Export_Data',
       ]),
     });
     expect(DEMO_AUTHENTICATION_ADAPTER.ssoHref).toBe('/auth/sso');
@@ -44,5 +43,4 @@ describe('deterministic POC authentication', () => {
       }),
     ).rejects.toThrow('The username or password is incorrect.');
   });
-
 });

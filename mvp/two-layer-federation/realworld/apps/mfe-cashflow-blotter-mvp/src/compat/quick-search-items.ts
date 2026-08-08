@@ -1,7 +1,7 @@
 import {
   queryCounterpartyDynamicList,
   queryFetchPortfolio,
-} from '@legacy-ratan/ratanutils/http/graphql';
+} from '@cashflow-ratan/ratanutils/http/graphql';
 
 interface MessageApi {
   info(message: string): void;
@@ -19,9 +19,8 @@ interface ReferenceRecord {
 
 function options(records: readonly ReferenceRecord[], fieldName: string) {
   return records.map((record) => {
-    const value = fieldName === 'lmp_long_name'
-      ? record.lmp_long_name
-      : record.fm_profile_sys_gen_id;
+    const value =
+      fieldName === 'lmp_long_name' ? record.lmp_long_name : record.fm_profile_sys_gen_id;
     return { label: String(value ?? ''), value: String(value ?? '') };
   });
 }
@@ -38,7 +37,7 @@ export function debounceFindConterparty(
       const records = response.referenceData ?? [];
       const result = records.map((record) => ({
         label: `${record.fmId ?? ''} | ${record.counterpartyLongName ?? ''}`,
-        value: String(fieldName === 'fmId' ? record.fmId ?? '' : record[fieldName] ?? ''),
+        value: String(fieldName === 'fmId' ? (record.fmId ?? '') : (record[fieldName] ?? '')),
       }));
       if (result.length === 0) messageApi?.info(`[${label}] No data found`);
       callback(result);

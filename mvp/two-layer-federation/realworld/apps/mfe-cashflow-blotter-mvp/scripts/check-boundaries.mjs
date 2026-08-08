@@ -10,9 +10,7 @@ async function filesAt(path) {
   const details = await stat(path);
   if (details.isFile()) return [path];
   const entries = await readdir(path, { withFileTypes: true });
-  return (
-    await Promise.all(entries.map((entry) => filesAt(join(path, entry.name))))
-  ).flat();
+  return (await Promise.all(entries.map((entry) => filesAt(join(path, entry.name))))).flat();
 }
 
 const sourceFiles = (await filesAt(sourceRoot)).filter((file) =>
@@ -56,14 +54,38 @@ for (const file of builtFiles) {
 }
 
 const rsbuildConfig = await readFile(join(root, 'rsbuild.config.ts'), 'utf8');
+const ownershipFiles = [
+  'rsbuild.config.ts',
+  'tsconfig.json',
+  'tsconfig.application.json',
+  'src/compat/ratan-container.ts',
+  'src/compat/quick-search-items.ts',
+];
+
+for (const file of ownershipFiles) {
+  const source = await readFile(join(root, file), 'utf8');
+  if (source.includes('apps/mfe-ratan-container')) {
+    violations.push(`${file}: external legacy Ratan source dependency`);
+  }
+  if (source.includes('@legacy-ratan')) {
+    violations.push(`${file}: temporary legacy Ratan alias`);
+  }
+}
+
+if (
+  !rsbuildConfig.includes("'@cashflow-ratan'") ||
+  !rsbuildConfig.includes("'src/cashflow-ratan'")
+) {
+  violations.push('rsbuild.config.ts: missing Cashflow-owned Ratan source alias');
+}
+
 for (const [legacyName, adapterPath] of [
   ['@fm/base', 'src/compat/base.tsx'],
   ['@fm/ratan_container', 'src/compat/ratan-container.ts'],
   ['stompjs', 'src/compat/stomp.ts'],
 ]) {
   const hasAlias =
-    rsbuildConfig.includes(`'${legacyName}'`) ||
-    rsbuildConfig.includes(`${legacyName}:`);
+    rsbuildConfig.includes(`'${legacyName}'`) || rsbuildConfig.includes(`${legacyName}:`);
   if (!hasAlias || !rsbuildConfig.includes(adapterPath)) {
     violations.push(`rsbuild.config.ts: missing compile-time adapter for ${legacyName}`);
   }

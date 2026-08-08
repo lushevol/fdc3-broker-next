@@ -39,6 +39,9 @@ describe('Cashflow CN local transport contracts', () => {
       data: {
         cashflowUltraQuery: {
           totalResult: 2,
+          pageIndex: 0,
+          itemsPerPage: 1000,
+          lastPage: true,
           results: [
             expect.objectContaining({
               Cashflow: expect.objectContaining({ Cashflow_Id: 'CF-CN-24001' }),
@@ -81,9 +84,7 @@ describe('Cashflow CN local transport contracts', () => {
       pathname: '/api/ratan/v3/customview/views/view-operations',
     });
 
-    expect(filters?.body).toEqual([
-      expect.objectContaining({ name: 'USD pending verification' }),
-    ]);
+    expect(filters?.body).toEqual([expect.objectContaining({ name: 'USD pending verification' })]);
     expect(filter?.body).toMatchObject({ rowKey: 'filter-usd-pending' });
     const filterBody = JSON.parse(
       String((filter?.body as { body?: string } | undefined)?.body),
@@ -96,9 +97,7 @@ describe('Cashflow CN local transport contracts', () => {
         'Cashflow.Payment_Currency',
       ]),
     );
-    expect(views?.body).toEqual([
-      expect.objectContaining({ name: 'Operations essentials' }),
-    ]);
+    expect(views?.body).toEqual([expect.objectContaining({ name: 'Operations essentials' })]);
     expect(view?.body).toMatchObject({ rowKey: 'view-operations' });
   });
 
@@ -142,6 +141,45 @@ describe('Cashflow CN local transport contracts', () => {
     });
   });
 
+  it('applies Cashflow ID quick-search values to the unchanged list GraphQL contract', () => {
+    const response = resolveCashflowDevResponse({
+      method: 'POST',
+      pathname: '/api/ratan/stmcn/v1/cashflows',
+      body: {
+        operationName: CASHFLOW_LIST_OPERATION,
+        variables: {
+          payload: {
+            filters: {
+              combinator: 'and',
+              rules: [
+                {
+                  field: 'Cashflow.Cashflow_Id',
+                  operator: 'in',
+                  value: ['CF-CN-24001'],
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+
+    expect(response?.body).toMatchObject({
+      data: {
+        cashflowUltraQuery: {
+          totalResult: 1,
+          results: [
+            expect.objectContaining({
+              Cashflow: expect.objectContaining({
+                Cashflow_Id: 'CF-CN-24001',
+              }),
+            }),
+          ],
+        },
+      },
+    });
+  });
+
   it('provides notification and representative action contracts but ignores unknown routes', () => {
     expect(
       resolveCashflowDevResponse({
@@ -154,7 +192,7 @@ describe('Cashflow CN local transport contracts', () => {
         method: 'POST',
         pathname: '/api/ratan/v1/ratan/lifecycle/hold',
       })?.body,
-    ).toMatchObject({ success: true, status: 'HOLD' });
+    ).toMatchObject({ success: true, status: 200, state: 'HOLD' });
     expect(
       resolveCashflowDevResponse({
         method: 'GET',
@@ -229,13 +267,11 @@ describe('Cashflow CN local transport contracts', () => {
     let middleware: Middleware | undefined;
     const plugin = cashflowDevApiPlugin();
     expect(plugin.apply).toBe('serve');
-    const configureServer = plugin.configureServer as unknown as (
-      server: {
-        middlewares: {
-          use: (handler: Middleware) => void;
-        };
-      },
-    ) => void;
+    const configureServer = plugin.configureServer as unknown as (server: {
+      middlewares: {
+        use: (handler: Middleware) => void;
+      };
+    }) => void;
     configureServer({
       middlewares: {
         use: (handler) => {
@@ -258,13 +294,8 @@ describe('Cashflow CN local transport contracts', () => {
     };
     await middleware?.(getRequest, response, next);
     expect(response.statusCode).toBe(200);
-    expect(response.setHeader).toHaveBeenCalledWith(
-      'Content-Type',
-      'application/json',
-    );
-    expect(response.end).toHaveBeenCalledWith(
-      expect.stringContaining('Cashflow.Cashflow_Id'),
-    );
+    expect(response.setHeader).toHaveBeenCalledWith('Content-Type', 'application/json');
+    expect(response.end).toHaveBeenCalledWith(expect.stringContaining('Cashflow.Cashflow_Id'));
     expect(next).not.toHaveBeenCalled();
 
     const postResponse = {
@@ -276,15 +307,11 @@ describe('Cashflow CN local transport contracts', () => {
       method: 'POST',
       url: '/api/ratan/stmcn/v1/cashflows',
       async *[Symbol.asyncIterator]() {
-        yield Buffer.from(
-          JSON.stringify({ operationName: CASHFLOW_LIST_OPERATION }),
-        );
+        yield Buffer.from(JSON.stringify({ operationName: CASHFLOW_LIST_OPERATION }));
       },
     };
     await middleware?.(postRequest, postResponse, next);
-    expect(postResponse.end).toHaveBeenCalledWith(
-      expect.stringContaining('CF-CN-24001'),
-    );
+    expect(postResponse.end).toHaveBeenCalledWith(expect.stringContaining('CF-CN-24001'));
 
     const unknownResponse = {
       statusCode: 0,

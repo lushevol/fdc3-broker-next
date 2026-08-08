@@ -186,12 +186,14 @@ do not contain a fixture middleware path.
 
 1. Approve the sanitized local contracts against captured integration-service
    responses and connect the production service.
-2. Exercise grid paging, notifications, export,
-   and at least one entitled maker/checker workflow in Portal Host.
-3. Extract every Cashflow-used Ratan module into realworld packages; remove the
-   temporary `@legacy-ratan` source alias. The identity/permission,
-   feature-enable, and logging cohort is already Cashflow-owned and covered by
-   compatibility tests.
+2. Repeat grid paging, notifications, export, and entitled maker/checker
+   workflows against production-backed services. Local Portal Host acceptance
+   now covers paging metadata, notification startup, export entitlement, and a
+   Hold submission.
+3. Replace the Cashflow-owned `src/cashflow-ratan` compatibility modules with
+   versioned realworld packages cohort by cohort. The external
+   `apps/mfe-ratan-container` source dependency and temporary `@legacy-ratan`
+   alias have been removed.
 4. Restore strict-null checking and widen lint coverage across inherited code.
 5. Reduce the approximately 8.5 MB production bundle.
 6. Validate identity, authorization, FDC3, STOMP, GraphQL, REST, and environment

@@ -47,16 +47,14 @@ const CASHFLOW_FIELDS = [
   ['Instrument_Common.ISDA_Taxonomy', 'Product Taxonomy', 'String'],
 ] as const;
 
-const businessFields = CASHFLOW_FIELDS.map(
-  ([indexedTerm, businessTerm, dataType]) => ({
-    indexedTerm,
-    businessTerm,
-    dataType,
-    context: ['CASHFLOW_DATA'],
-    blotterContext: ['CASHFLOW_DATA'],
-    scope: JSON.stringify({ disabledBlotter: [] }),
-  }),
-);
+const businessFields = CASHFLOW_FIELDS.map(([indexedTerm, businessTerm, dataType]) => ({
+  indexedTerm,
+  businessTerm,
+  dataType,
+  context: ['CASHFLOW_DATA'],
+  blotterContext: ['CASHFLOW_DATA'],
+  scope: JSON.stringify({ disabledBlotter: [] }),
+}));
 
 const cashflowRows = [
   {
@@ -228,16 +226,19 @@ function graphqlResponse(body: GraphqlRequest | undefined): CashflowDevResponse 
   const operationName = body?.operationName ?? '';
   const query = body?.query ?? '';
 
-  if (
-    operationName === CASHFLOW_LIST_OPERATION
-    || query.includes('cashflowUltraQuery')
-  ) {
+  if (operationName === CASHFLOW_LIST_OPERATION || query.includes('cashflowUltraQuery')) {
     const requestText = JSON.stringify(body);
-    const results = requestText.includes('"USD"')
-      ? cashflowRows.filter(
-          ({ Cashflow }) => Cashflow.Payment_Currency === 'USD',
-        )
+    let results = requestText.includes('"USD"')
+      ? cashflowRows.filter(({ Cashflow }) => Cashflow.Payment_Currency === 'USD')
       : cashflowRows;
+    const requestedCashflowIds = cashflowRows
+      .map(({ Cashflow }) => Cashflow.Cashflow_Id)
+      .filter((cashflowId) => requestText.includes(JSON.stringify(cashflowId)));
+    if (requestedCashflowIds.length > 0) {
+      results = results.filter(({ Cashflow }) =>
+        requestedCashflowIds.includes(Cashflow.Cashflow_Id),
+      );
+    }
     return {
       status: 200,
       body: {
@@ -317,27 +318,21 @@ export function resolveCashflowDevResponse({
   if (method === 'POST' && pathname === '/api/ratan/da/graphql') {
     return { status: 200, body: { data: { fmEntity: null } } };
   }
-  if (
-    method === 'GET'
-    && /^\/api\/ratan\/v[23]\/customview\/filters$/.test(pathname)
-  ) {
+  if (method === 'GET' && /^\/api\/ratan\/v[23]\/customview\/filters$/.test(pathname)) {
     return { status: 200, body: [savedFilter] };
   }
   if (
-    method === 'GET'
-    && /^\/api\/ratan\/v[23]\/customview\/filters\/filter-usd-pending$/.test(pathname)
+    method === 'GET' &&
+    /^\/api\/ratan\/v[23]\/customview\/filters\/filter-usd-pending$/.test(pathname)
   ) {
     return { status: 200, body: savedFilter };
   }
-  if (
-    method === 'GET'
-    && /^\/api\/ratan\/v[23]\/customview\/views$/.test(pathname)
-  ) {
+  if (method === 'GET' && /^\/api\/ratan\/v[23]\/customview\/views$/.test(pathname)) {
     return { status: 200, body: [savedView] };
   }
   if (
-    method === 'GET'
-    && /^\/api\/ratan\/v[23]\/customview\/views\/view-operations$/.test(pathname)
+    method === 'GET' &&
+    /^\/api\/ratan\/v[23]\/customview\/views\/view-operations$/.test(pathname)
   ) {
     return { status: 200, body: savedView };
   }
@@ -349,15 +344,13 @@ export function resolveCashflowDevResponse({
       status: 200,
       body: {
         success: true,
-        status: 'HOLD',
+        status: 200,
+        state: 'HOLD',
         cashflowIds: ['CF-CN-24001'],
       },
     };
   }
-  if (
-    method === 'POST'
-    && pathname === '/api/ratan/v1/cashflow/country/countryInfo'
-  ) {
+  if (method === 'POST' && pathname === '/api/ratan/v1/cashflow/country/countryInfo') {
     return { status: 200, body: { countryInfoList: [] } };
   }
   return undefined;
@@ -390,10 +383,7 @@ export function cashflowDevApiPlugin(): Plugin {
     apply: 'serve',
     configureServer(server) {
       server.middlewares.use(async (request, response, next) => {
-        const pathname = new URL(
-          request.url ?? '/',
-          'http://127.0.0.1',
-        ).pathname;
+        const pathname = new URL(request.url ?? '/', 'http://127.0.0.1').pathname;
         const body =
           request.method === 'POST' || request.method === 'PUT'
             ? await readJsonBody(request)

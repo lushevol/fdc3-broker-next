@@ -23,7 +23,7 @@ it('uses the origin WebKit public boundary for every host UI import', () => {
 });
 
 it('registers origin WebKit elements idempotently across federated bundles', () => {
-  const elementsDirectory = resolve(process.cwd(), '../../../../../packages/sc-dev-web/elements');
+  const elementsDirectory = resolve(process.cwd(), '../../../../../sc-dev-web/sc-dev-web/elements');
   const registrationSources = readdirSync(elementsDirectory)
     .filter((file) => file.endsWith('.ts') && file !== 'define-element.ts')
     .map((file) => readFileSync(resolve(elementsDirectory, file), 'utf8'))

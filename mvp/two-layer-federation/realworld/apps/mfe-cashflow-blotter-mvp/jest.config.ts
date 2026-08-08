@@ -17,6 +17,7 @@ export default {
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/compat/**',
+    '!src/cashflow-ratan/**',
     '!src/test/**',
     '!src/types/**',
     '!src/migrated-entry.tsx',
