@@ -1,0 +1,47 @@
+trigger: none
+
+parameters:
+  - name: releaseId
+    type: string
+    displayName: Release WorkItem ID
+    default: 0
+
+  - name: rollbackAppVersion
+    type: string
+    displayName: Rollback App Version
+    default: 0
+
+  - name: rollbackBuildNumber
+    type: string
+    displayName: Rollback Build Number
+    default: 0
+
+  - name: deployEnv
+    type: string
+    displayName: Deploy to VM or AWS (only for develop branch)
+    default: vm
+    values:
+      - vm
+      - aws
+
+variables:
+  - name: APP_NAME
+    value: ${{ replace(variables['Build.Repository.Name'], '51358-', '') }}
+
+resources:
+  repositories:
+    - repository: templates
+      ref: main
+      name: FMQPR/51358-ratanone-ado-templates
+      type: git
+
+extends:
+  template: nodejs-mfe.yml@templates
+  parameters:
+    releaseId: ${{ parameters.releaseId }}
+    packageVersion: 2.1.3
+    deployStack: ansible
+    deployEnv: ${{ parameters.deployEnv }}
+    rollbackAppVersion: ${{ parameters.rollbackAppVersion }}
+    rollbackBuildNumber: ${{ parameters.rollbackBuildNumber }}
+    featureRelease: true
