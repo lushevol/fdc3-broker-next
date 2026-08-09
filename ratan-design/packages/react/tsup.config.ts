@@ -19,6 +19,7 @@ export default defineConfig({
     '@testing-library/user-event',
     'react',
     'react-dom',
+    'use-sync-external-store',
   ],
   format: ['esm'],
   minify: false,

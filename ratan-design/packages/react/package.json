@@ -7,7 +7,8 @@
   "engines": { "node": ">=20" },
   "type": "module",
   "sideEffects": [
-    "**/*.css"
+    "**/*.css",
+    "**/*-with-style.js"
   ],
   "files": [
     "dist",

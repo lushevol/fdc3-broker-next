@@ -20,6 +20,6 @@
     "skipLibCheck": true,
     "allowJs": true
   },
-  "include": ["src/**/*.ts", "src/**/*.svg", "src/styles/*.js", "src/styles/mode/*.css"],
+  "include": ["src/**/*.ts", "src/**/*.svg", "src/styles/*.js", "src/styles/mode/*.css", "elements/**/*.ts"],
   "exclude": ["./scripts", "./dist", "./src/test"]
 }
