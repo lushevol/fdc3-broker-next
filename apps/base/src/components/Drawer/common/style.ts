@@ -19,6 +19,12 @@ export const DrawerClass = css`
     background-color: rgba(0, 0, 0, 0.02);
   }
 `;
+export const NewDrawerClass = css`
+  & .MuiPaper-root {
+    height: calc(100vh - 96px);
+    top: 96px;
+  }
+`;
 
 const Root = styled('section')(({ theme }) => ({
   backgroundColor: theme.theme['DrawerComponent']['backgroundColor'],

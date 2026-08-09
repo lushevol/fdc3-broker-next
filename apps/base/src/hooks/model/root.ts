@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { getLocalStorage } from '../../utils/common';
 import { ActionType } from '../reducer/util/ActionType';
 import { firstWorkspace, type Workspace } from './workspaces';
@@ -151,4 +152,11 @@ export const initialData: RootModel = {
   isOnLogout: false,
   drawers: [],
   rootVersion: '',
+};
+
+export const useIsNewLayout = () => {
+  return useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('new-layout') === 'true';
+  }, []);
 };

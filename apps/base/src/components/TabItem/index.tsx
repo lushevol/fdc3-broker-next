@@ -1,3 +1,4 @@
+import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -7,6 +8,7 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import React, { type ReactElement } from 'react';
+import { useIsNewLayout } from '../../hooks/model/root';
 import type { TabProps } from './common/interface';
 import Root, { classes, PREFIX } from './common/style';
 
@@ -24,6 +26,9 @@ const TabItem: React.FC<TabProps> = (props: TabProps): ReactElement => {
   } = props;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
+  // when we change to new design, we need to delete the import and isNewLayout variable
+  // And do some changes based on isNewLayout is true
+  const isNewLayout = useIsNewLayout();
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
@@ -42,8 +47,15 @@ const TabItem: React.FC<TabProps> = (props: TabProps): ReactElement => {
 
   return (
     <Tooltip title={item.label} placement="top-start">
-      <Root data-testid={`${PREFIX}`} onContextMenu={handleContextMenu}>
-        <div className={classes.textBoxOutter}>
+      <Root
+        data-testid={`${PREFIX}`}
+        onContextMenu={handleContextMenu}
+        className={isNewLayout ? 'tab-item-wrapper' : undefined}
+      >
+        <div
+          className={classes.textBoxOutter}
+          style={isNewLayout ? { display: 'flex', alignItems: 'center', gap: '4px' } : {}}
+        >
           <TextField
             id={`edit-${item.id}`}
             data-testid={`edit-${item.id}`}
@@ -89,7 +101,7 @@ const TabItem: React.FC<TabProps> = (props: TabProps): ReactElement => {
             onClick={remove(item)}
             className={classes.button}
           >
-            <DeleteIcon fontSize="small" />
+            {isNewLayout ? <CloseIcon fontSize="small" /> : <DeleteIcon fontSize="small" />}
           </IconButton>
         )}
         <Menu

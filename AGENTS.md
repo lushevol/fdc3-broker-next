@@ -133,6 +133,11 @@ Root `eslint.config.mjs` applies to `**/*.{ts,tsx}` across workspaces. Rules:
 
 Currently **disabled** (commented out in `.husky/`). Lint-staged config exists in root `package.json` but is not invoked.
 
+### Agent commit workflow
+
+- When a task stage is complete and its changes have been verified, always make a best-effort commit for that completed stage.
+- Keep each commit limited to the completed stage. Never include unrelated user changes; if the stage cannot be isolated safely, report the blocker instead of committing unrelated work.
+
 ### Testing
 
 - Apps use **Jest** with `babel-jest` transform, `@testing-library/react`, `jest-environment-jsdom`
