@@ -47,6 +47,40 @@ export async function assertSecretFreeTree(root) {
   }
 }
 
+export function createReleaseMetadata({
+  applicationId,
+  packageName,
+  version,
+  releaseId,
+  digest,
+  sourceRevision,
+  buildId,
+  artifactPath,
+  createdAt,
+  contract,
+  capabilities,
+  sharedRuntimeRanges,
+}) {
+  return {
+    schemaVersion: 2,
+    applicationId,
+    packageName,
+    version,
+    releaseId,
+    digestAlgorithm: 'sha256',
+    digest,
+    sourceRevision,
+    buildId,
+    artifactPath,
+    createdAt,
+    contract,
+    capabilities: [...capabilities].sort(),
+    sharedRuntimeRanges: Object.fromEntries(
+      Object.entries(sharedRuntimeRanges).sort(([left], [right]) => left.localeCompare(right)),
+    ),
+  };
+}
+
 export function cachePolicyForPath(requestPath) {
   if (requestPath.startsWith('/artifacts/') || requestPath.startsWith('/registries/revisions/'))
     return 'immutable';

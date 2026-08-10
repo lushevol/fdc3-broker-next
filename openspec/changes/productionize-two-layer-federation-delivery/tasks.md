@@ -8,7 +8,7 @@
 
 ## 2. Immutable artifact foundation
 
-- [ ] 2.1 Add tested release-metadata generation for application name/version, commit, build ID, digest, contract, capabilities, and shared runtime ranges
+- [x] 2.1 Add tested release-metadata generation for application name/version, commit, build ID, digest, contract, capabilities, and shared runtime ranges
 - [x] 2.2 Add a reproducible production packaging command for the portal host and Cashflow remote that excludes environment secrets
 - [x] 2.3 Implement immutable version-path publication to the selected static/OCI artifact store and reject overwrite attempts
 - [x] 2.4 Implement post-publication digest verification and an artifact-catalog record linking source, output, and evidence

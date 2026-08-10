@@ -8,6 +8,7 @@ import {
   assertSecretFreeTree,
   buildRuntimeRegistry,
   cachePolicyForPath,
+  createReleaseMetadata,
   digestDirectory,
   validateRuntimeRegistry,
 } from '../scripts/production-deployment-lib.mjs';
@@ -28,6 +29,54 @@ test('artifact digest is deterministic and changes with published bytes', async 
 
   await writeFile(path.join(root, 'index.html'), '<main>changed</main>');
   assert.notEqual(await digestDirectory(root), first);
+});
+
+test('release metadata records artifact identity and compatibility requirements', () => {
+  const metadata = createReleaseMetadata({
+    applicationId: 'cashflow',
+    packageName: '@fm/mfe-cashflow',
+    version: '1.2.3',
+    releaseId: '1.2.3-sha256-deadbeef',
+    digest: 'deadbeef',
+    sourceRevision: 'abc123',
+    buildId: 'build-42',
+    artifactPath: 'artifacts/cashflow/1.2.3-sha256-deadbeef',
+    createdAt: '2026-08-10T00:00:00.000Z',
+    contract: {
+      application: '1.0.0',
+      appearance: '1.0.0',
+      identity: '1.0.0',
+    },
+    capabilities: ['workspace', 'navigation'],
+    sharedRuntimeRanges: {
+      react: '^18.3.1',
+      'react-dom': '^18.3.1',
+    },
+  });
+
+  assert.deepEqual(metadata, {
+    schemaVersion: 2,
+    applicationId: 'cashflow',
+    packageName: '@fm/mfe-cashflow',
+    version: '1.2.3',
+    releaseId: '1.2.3-sha256-deadbeef',
+    digestAlgorithm: 'sha256',
+    digest: 'deadbeef',
+    sourceRevision: 'abc123',
+    buildId: 'build-42',
+    artifactPath: 'artifacts/cashflow/1.2.3-sha256-deadbeef',
+    createdAt: '2026-08-10T00:00:00.000Z',
+    contract: {
+      application: '1.0.0',
+      appearance: '1.0.0',
+      identity: '1.0.0',
+    },
+    capabilities: ['navigation', 'workspace'],
+    sharedRuntimeRanges: {
+      react: '^18.3.1',
+      'react-dom': '^18.3.1',
+    },
+  });
 });
 
 test('runtime registry uses same-origin immutable release paths', () => {
