@@ -1,0 +1,793 @@
+info:
+  build:
+    artifactId: "@project.artifactId@"
+    name: "@project.name@"
+    description: "@project.description@"
+    version: "@project.version@"
+  applicationName: ${spring.application.name}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+        exclude: "beans"
+ado:
+  ratanone: ratanone
+  EDMI_CLUSTER: ENC(xZZ+XEdOi/TK0Qy4MtrBUGnidmS4VrqE)
+  EDMI_STANDALONE: ENC(v0On8I/I/3SH+167oiU4Cs36aaDLVluK)
+  RATANONE_QA_BASIC: ENC(d0JJe2QzcuPEq4JvNK6wEqqrFk7HEtjy)
+  RATANONE_AUDIT_BASIC: ENC(5yipEZeioyrv+2X3DEO4K0PNMto1t0DMJBVEtCPi+ro=)
+  RATANONE_RUNDECK: ENC(u5dv6XqWb8CyZPOVKC2WzTpeXKwrCG2teerAgO4kNEU=)
+  RATANONE_CONTROL_M: ENC(J9cPrX9s9zusOTeh2yF/KAv0sEB+PlIN8TDOBxLjScA=)
+  SOLACE_AUTH: ENC(sb27ezvaPcwmLYQ4hjUod25FrGQMUrdV)
+
+server:
+  max-http-header-size: 256KB
+  max-http-request-header-size: 256KB
+  max-http-response-header-size: 256KB
+  tomcat:
+    max-http-response-header-size: 256KB
+  ssl:
+    enabled-protocols: TLSv1.2
+ELASTIC_HOST: http://10.4.197.146:9200
+# disable actuator heapdump
+management:
+  endpoints:
+    web:
+      exposure:
+        exclude: heapdump
+
+# Ratan Cipher Key
+RATAN_CIPHER_KEY: T3FxMUiMhvxJVCKxQ2jB6ho2IyVPqR
+
+# Redis
+REDIS_CLUSTER_NODES: 10.4.194.78:6379,10.4.194.179:6379,10.4.194.79:6379,10.4.194.180:6379,10.4.197.46:6379,10.4.197.146:6379
+REDIS_JANUS: RatanOne
+
+# Kafka
+KAFKA_CLUSTER_BROKERS: 10.4.194.78:9092,10.4.194.179:9092,10.4.194.79:9092,10.4.194.180:9092,10.4.197.46:9092,10.4.197.146:9092
+KAFKA_SECURITY_PROTOCOL: PLAINTEXT
+KAFKA_NON_TLS_CLUSTER_BROKERS: 10.4.194.78:9092,10.4.194.179:9092,10.4.194.79:9092,10.4.194.180:9092,10.4.197.46:9092,10.4.197.146:9092
+KAFKA_TLS_CLUSTER_BROKERS: uklvapapp590.gdc.standardchartered.com:9093,uklvapapp591.gdc.standardchartered.com:9093,uklvapapp676.gdc.standardchartered.com:9093,uklvasapp590.gdc.standardchartered.com:9093,uklvasapp591.gdc.standardchartered.com:9093,uklvasapp676.gdc.standardchartered.com:9093
+KAFKA_KEY_STORE_LOCATION: /apps/ratanrt/ssl/java/ratan_keystore_prod.jks
+KAFKA_KEY_STORE_JANUS_KEY: ratanone
+
+# HBase
+HBASE_URL: jdbc:phoenix:uklvapapp077.gdc.standardchartered.com,uklvasapp077.gdc.standardchartered.com,uklvasapp078.gdc.standardchartered.com,uklvapapp078.gdc.standardchartered.com,uklvapapp146p.gdc.standardchartered.com:2181:/hadoop/hbase-unsecure
+HBASE_USERNAME: g.ratan.one.001
+HBASE_JANUS:
+HBASE_CIPHER_KEY: 12345678
+HBASE_HADOOP_USERNAME: g.ratan.one.001
+
+# Relational Database
+RDB_URL: jdbc:oracle:thin:@(DESCRIPTION_LIST=(LOAD_BALANCE=off)(FAILOVER=on)(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=uklpdpfmsa-scan.gdc.standardchartered.com)(PORT=1622)))(CONNECT_DATA=(SERVICE_NAME=MXBOW_PROD.uk.standardchartered.com)))(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=uklpdpfmsb-scan.gdc.standardchartered.com)(PORT=1622)))(CONNECT_DATA=(SERVICE_NAME=MXBOW_PROD.uk.standardchartered.com))))
+RDB_USERNAME: RATAN_PROD
+RDB_JANUS: ENC(bi+72Nczt9jiPqZeGDjgOmyvj7S6HY/Y)
+RDB_CIPHER_KEY: ${RATAN_CIPHER_KEY}
+RDB_DRIVER: oracle.jdbc.OracleDriver
+
+# Relational Database for PGSL
+PGSL_RDB_URL: jdbc:postgresql://uklvapdbs047.gdc.standardchartered.com:6524,uklvasdbs047.gdc.standardchartered.com:6524/ratanone?currentSchema=${PGSL_RDB_SCHEMA:ratanone}&ssl=true&sslmode=require&targetServerType=primary&loginTimeout=10&connectTimeout=10
+PGSL_RDB_QUERY_URL: jdbc:postgresql://uklvapdbs047.gdc.standardchartered.com:6524,uklvasdbs047.gdc.standardchartered.com:6524/ratanone?currentSchema=ratanone_query&ssl=true&sslmode=require&targetServerType=primary&loginTimeout=10&connectTimeout=10
+PGSL_RDB_USERNAME: ratanprd_001
+PGSL_RDB_JANUS: ENC(vbvG7cwysITjGu7sfZq9VobyxWThaaR+)
+PGSL_RDB_USERNAME_NEW: ${PGSL_RDB_USERNAME}
+PGSL_RDB_JANUS_NEW: ${PGSL_RDB_JANUS}
+PGSL_RDB_USERNAME_HASHICORP: ${PGSL_RDB_USERNAME}
+PGSL_RDB_JANUS_HASHICORP: ${PGSL_RDB_JANUS}
+PGSL_RDB_CIPHER_KEY: ${RATAN_CIPHER_KEY}
+PGSL_RDB_DRIVER: org.postgresql.Driver
+PGSL_RDB_BATCH_URL: jdbc:postgresql://uklvapdbs047.gdc.standardchartered.com:6524,uklvasdbs047.gdc.standardchartered.com:6524/ratanone?currentSchema=ratan_batch_job&ssl=true&sslmode=require&targetServerType=primary&loginTimeout=10&connectTimeout=10
+
+# API_GATEWAY
+API_GATEWAY_URL: https://fmo-shell.gdc.standardchartered.com:8453/api
+RATANONE_API_GATEWAY_URL: ${API_GATEWAY_URL}
+API_GATEWAY_TOKEN: 5626WKYrzVSIknVa&R$3nz12
+
+API_WHITELIST: 10.4.194.78,10.4.194.179,10.4.194.79,10.4.194.180,10.4.197.46,10.4.197.146,10.4.137.143,10.4.138.143,10.4.137.144,10.5.139.139,10.5.139.140,10.5.139.141
+
+DQSL_HOST: api-dqslrt.gdc.standardchartered.com
+DQSL_USERNAME: svc.ratanone.001
+DQSL_JANUS: ENC(cnaJSlaQ16g5kJFvWqywTjbp5uVy4uke)
+DQSL_CIPHER_KEY: ${RATAN_CIPHER_KEY}
+DQSL_JKS: dqsldev.jks
+DQSL_JKS_JANUS: ratanone
+
+FMAA_HOST: https://fmaaprod.gdc.standardchartered.com/v1/fmaa/oauth2
+FMAA_CERT_PATH:
+FMAA_ACCOUNT: RATAN_PROD
+FMAA_JANUS: ENC(oswEYSNiFj8VvximTnWaQBYVv1wM+m0J)
+STELLA_ENV: prod
+STELLA_ACCOUNT: RATAN_PROD
+STELLA_JANUS: ENC(gUqggX7ub29xR0w2GAqkQFAJPV/NkUbZ)
+STELLA_SSL_ENABLED: true
+STELLA_KEY_JANUS: stellakeypass
+STELLA_KEYSTORE_LOCATION: /apps/ratanrt/ssl/java/ratan_stella_keystore_prod.jks
+STELLA_KEYSTORE_JANUS: stellakeypass
+STELLA_TRUSTSTORE_LOCATION: /apps/ratanrt/ssl/java/ratan_truststore_prod.jks
+STELLA_TRUSTSTORE_JANUS: ratanone
+
+ES_NODES: 10.4.194.78:9200,10.4.194.179:9200,10.4.194.79:9200,10.4.194.180:9200,10.4.197.46:9200,10.4.197.146:9200
+
+TDS3_ENV: tlprod
+TDS3_ACCOUNT: ${FMAA_ACCOUNT}
+TDS3_PWD: ${FMAA_JANUS}
+TDS3_TRADE_INDEX: tl_prod_btedge_trades
+TDS3_CASHFLOW_INDEX: tl_prod_cashflows
+TDS3_FIXING_INDEX: tl_prod_fixings
+
+# OUD
+OUD_URL: ldaps://scboud2.uk.standardchartered.com:1636
+OUD_SERVICE_ACCOUNT: cn=srv.ratan.001,ou=ratan,ou=apps,o=standardchartered
+OUD_SERVICE_ACCOUNT_JANUS: ENC(x/UdJPWzROb2AK+9DQNpicTZcsexNZjkrOI3QrZMfdQ=)
+OUD_SERVICE_ACCOUNT_CIPHER_KEY: T3FxMUiMhvxJVCKxQ2jB6ho2IyVPqR
+
+#EMS2_HOST: http://sabre-prod-ems2.gdc.standardchartered.com:16080
+EMS2_HOST: https://sabre-prod-ems2.gdc.standardchartered.com:16443
+EMS2_HTTPS_HOST: https://sabre-prod-ems2.gdc.standardchartered.com:16443
+EMS3_HOST: https://fmcesprod.gdc.standardchartered.com
+EMS3_APP_ID: 51358
+EMS3_APP_NAME: RATAN_ENTITLEMENT_RULE
+#FMSRE
+FMSRE_SWIFT_MESSAGE_HOST: https://fmsre.global.standardchartered.com:6675
+FMSRE_SWIFT_MESSAGE_AUTHORIZATION: Bearer 1d2315f554674f2ab92ec5d4b9c77e58
+
+SOLACE_ENABLED: true
+SOLACE_HOST: smfs://ukxpipsol12av1.uk.standardchartered.com:55443,smfs://ukxpipsol12bv1.uk.standardchartered.com:55443
+SOLACE_VPN: FMEDMI2_GDCW_PROD
+SOLACE_PWD: ${ado.SOLACE_AUTH}
+SOLACE_CERT_FILE: /apps/ratanrt/ssl/java/ratan_truststore_prod.jks
+SOLACE_CERT_FILE_PWD: ${ado.ratanone}
+
+ENTERPRISE_SOLACE_ENABLED: true
+ENTERPRISE_SOLACE_HOST: smfs://vpn-rd-data-p1-0-a-prd.51080.app.standardchartered.com:55443,smfs://vpn-rd-data-p1-0-b-prd.51080.app.standardchartered.com:55443
+ENTERPRISE_SOLACE_VPN: vpn-rd-data-p1
+ENTERPRISE_SOLACE_USERNAME: 51358-ratan
+ENTERPRISE_SOLACE_KEYSTORE_FILE: /apps/ratanrt/ssl/java/solace_ratan_keystore_prod.jks
+ENTERPRISE_SOLACE_KEYSTORE_PWD: ${ado.ratanone}
+ENTERPRISE_SOLACE_TRUSTSTORE_FILE: /apps/ratanrt/ssl/java/solace_ratan_truststore_prod.jks
+ENTERPRISE_SOLACE_TRUSTSTORE_PWD: ${ado.ratanone}
+
+ENTERPRISE_SOLACE_FILE_IT_ENABLED: true
+ENTERPRISE_SOLACE_FILE_IT_HOST: smfs://vpn-fs-imft-p1-1-a-prd.51080.app.standardchartered.com:55443,smfs://vpn-fs-imft-p1-1-b-prd.51080.app.standardchartered.com:55443
+ENTERPRISE_SOLACE_FILE_IT_VPN: vpn-fs-imft-p1
+ENTERPRISE_SOLACE_FILE_IT_USERNAME: 51358-ratan
+ENTERPRISE_SOLACE_FILE_IT_KEYSTORE_FILE: /apps/ratanrt/ssl/java/solace_ratan_keystore_prod.jks
+ENTERPRISE_SOLACE_FILE_IT_KEYSTORE_PWD: ${ado.ratanone}
+ENTERPRISE_SOLACE_FILE_IT_TRUSTSTORE_FILE: /apps/ratanrt/ssl/java/solace_ratan_truststore_prod.jks
+ENTERPRISE_SOLACE_FILE_IT_TRUSTSTORE_PWD: ${ado.ratanone}
+
+ENTERPRISE_SOLACE_EBBS_ENABLED: true
+ENTERPRISE_SOLACE_EBBS_HOST: smfs://vpn-cb-transactions-p1-1-a-prd.51080.app.standardchartered.com:55443,smfs://vpn-cb-transactions-p1-1-b-prd.51080.app.standardchartered.com:55443
+ENTERPRISE_SOLACE_EBBS_VPN: vpn-cb-transactions-p1
+ENTERPRISE_SOLACE_EBBS_USERNAME: 51358-ratan
+ENTERPRISE_SOLACE_EBBS_KEYSTORE_FILE: /apps/ratanrt/ssl/java/solace_ratan_keystore_prod.jks
+ENTERPRISE_SOLACE_EBBS_KEYSTORE_PWD: ${ado.ratanone}
+ENTERPRISE_SOLACE_EBBS_TRUSTSTORE_FILE: /apps/ratanrt/ssl/java/solace_ratan_truststore_prod.jks
+ENTERPRISE_SOLACE_EBBS_TRUSTSTORE_PWD: ${ado.ratanone}
+
+# KEYSTONE
+ENTERPRISE_SOLACE_ATLAS_ENABLED: true
+ENTERPRISE_SOLACE_ATLAS_VPN: vpn-cb-transactions-hk-p1
+ENTERPRISE_SOLACE_ATLAS_HOST: smfs://vpn-cb-transactions-hk-p1-0-a-9.51080.app.standardchartered.com:55443,smfs://vpn-cb-transactions-hk-p1-0-b-9.51080.app.standardchartered.com:55443
+ENTERPRISE_SOLACE_ATLAS_USERNAME: ${ENTERPRISE_SOLACE_EBBS_USERNAME}
+ENTERPRISE_SOLACE_ATLAS_KEYSTORE_FILE: ${ENTERPRISE_SOLACE_EBBS_KEYSTORE_FILE}
+ENTERPRISE_SOLACE_ATLAS_KEYSTORE_PWD: ${ENTERPRISE_SOLACE_EBBS_KEYSTORE_PWD}
+ENTERPRISE_SOLACE_ATLAS_TRUSTSTORE_FILE: ${ENTERPRISE_SOLACE_EBBS_TRUSTSTORE_FILE}
+ENTERPRISE_SOLACE_ATLAS_TRUSTSTORE_PWD: ${ENTERPRISE_SOLACE_EBBS_TRUSTSTORE_PWD}
+
+EDMI_CLUSTER_ENABLED: false
+EDMI_CLUSTER_HOST: wmjmsnaming://scbFMJNDIBroker@uklvadapp183.uk.standardchartered.com:6859
+EDMI_CLUSTER_CLIENT_ID: RatanRT_Message_Bridge_ClientId
+EDMI_CLUSTER_CERT_FILE: /apps/ratanrt/ssl/java/fmEdmiBrokerSha2_TrustStore_prod.jks
+EDMI_CLUSTER_PWD: ${ado.EDMI_CLUSTER}
+
+EDMI_STANDALONE_ENABLED: false
+EDMI_STANDALONE_HOST: wmjmsnaming://EDMiBroker@fmedmibroker01.gdc.standardchartered.com:6859
+EDMI_STANDALONE_CLIENT_ID: RatanRT_Message_Bridge_ClientId
+EDMI_STANDALONE_CERT_FILE: /apps/ratanrt/ssl/java/fmEdmiBrokerSha2_TrustStore_prod.jks
+EDMI_STANDALONE_PWD: ${ado.EDMI_STANDALONE}
+
+KR_SFTP_ENABLED: true
+KR_SFTP_TARGET_HOST: 10.61.128.71
+KR_SFTP_TARGET_PORT: 22
+KR_SFTP_USER_NAME: ratanuser
+KR_SFTP_PRIVATE_KEY_FILE: /apps/ratanrt/iso_ssh_keys/id_rsa_iso_prod
+
+PHOENIX_DATASOURCE_ENABLED: false
+
+
+# AUTH SERVER
+RATANONE_QA_BASIC_PWD: ${ado.RATANONE_QA_BASIC}
+RATANONE_AUDIT_BASIC_PWD: ${ado.RATANONE_AUDIT_BASIC}
+RATANONE_RUNDECK_PWD: ${ado.RATANONE_RUNDECK}
+RATANONE_CONTROL_M_PWD: ${ado.RATANONE_CONTROL_M}
+
+# QUALITY ASSURANCE
+RATANONE_QA_ARTIFACTORY: https://artifactory.global.standardchartered.com/artifactory/generic-release/com/scb/ratan/testCases/
+RATANONE_QA_TRACE_HORIZON_ENABLE: false
+
+FMRP_LEGAL_ENTITY_FMID: 401036553
+EG_LEGAL_ENTITY_FMID: 401036553
+EG_TBFX_CPTY_FMID: 401039206
+BCS_LEGAL_ENTITY_FMID: [10075222,2,400451508,400452428,400910415]
+
+# MFA
+MFA_CERT: MIIJUTCCCDmgAwIBAgITVgAAZZ5YXPxhu8LCVQAAAABlnjANBgkqhkiG9w0BAQsFADB0MRMwEQYKCZImiZPyLGQBGRYDbmV0MRMwEQYKCZImiZPyLGQBGRYDc2NiMRUwEwYKCZImiZPyLGQBGRYFem9uZTExMTAvBgNVBAMTKFN0YW5kYXJkIENoYXJ0ZXJlZCBJbnRlcm5hbCBJc3N1aW5nIENBMDIwHhcNMjQxMTAxMDgxNzM5WhcNMjYxMTAxMDgxNzM5WjCBkzELMAkGA1UEBhMCVUsxEzARBgNVBAgTClNvbWUtU3RhdGUxDzANBgNVBAcTBkxvbmRvbjEgMB4GA1UEChMXU3RhbmRhcmQgQ2hhcnRlcmVkIEJhbmsxDjAMBgNVBAsTBVJhdGFuMSwwKgYDVQQDEyNmbW8tc2hlbGwuZ2RjLnN0YW5kYXJkY2hhcnRlcmVkLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMuUiia3sNd7XDxxGCdGSGbhDkWMmsoBSobqOOaZdQ9fESUdJHgyZjLN2RuvC+C22XM+C6J4wM7KoInUD7F0CQsdLm00wbRPcrsMYdotJe1n8awcnLvhRh5qZgvt0Sfu3X3kGHIlMjFd8zMRga1C/Mnz1juCaM4MHqF/NaDsY1somyo870ZlcGbrxYS+l8VAQgd2r5/a+h7Whjh80GzDQLI8e5Uxn5Yh6ZuDBLkbjomuPkF1rHVUETCy9YN9wp5c4K/+jflcw3T8opfr/VUK9GGMw0ST8bWby0lL9J5vix43qfp8K7c/k+/28osNriTNesqqyY3cMLskiygOipaUty8CAwEAAaOCBbowggW2MIIDxgYDVR0RBIIDvTCCA7mCI2Ztby1zaGVsbC5nZGMuc3RhbmRhcmRjaGFydGVyZWQuY29tgiVyYXRhbi10cmFkZS5nZGMuc3RhbmRhcmRjaGFydGVyZWQuY29tgihyYXRhbi1jYXNoZmxvdy5nZGMuc3RhbmRhcmRjaGFydGVyZWQuY29tgipyYXRhbi1leGNlcHRpb25zLmdkYy5zdGFuZGFyZGNoYXJ0ZXJlZC5jb22CJXJhdGFuLXJ1bGVzLmdkYy5zdGFuZGFyZGNoYXJ0ZXJlZC5jb22CI3JhdGFuLWFwaS5nZGMuc3RhbmRhcmRjaGFydGVyZWQuY29tgiZyYXRhbi1raWJhbmEuZ2RjLnN0YW5kYXJkY2hhcnRlcmVkLmNvbYIjcmF0YW4tc2JhLmdkYy5zdGFuZGFyZGNoYXJ0ZXJlZC5jb22CJnJhdGFuLWV1cmVrYS5nZGMuc3RhbmRhcmRjaGFydGVyZWQuY29tgiZyYXRhbi1jb25zdWwuZ2RjLnN0YW5kYXJkY2hhcnRlcmVkLmNvbYIjcmF0YW4tb3BzLmdkYy5zdGFuZGFyZGNoYXJ0ZXJlZC5jb22CJnVrbHZhcGFwcDU5MC5nZGMuc3RhbmRhcmRjaGFydGVyZWQuY29tgiZ1a2x2YXNhcHA1OTAuZ2RjLnN0YW5kYXJkY2hhcnRlcmVkLmNvbYImdWtsdmFwYXBwNTkxLmdkYy5zdGFuZGFyZGNoYXJ0ZXJlZC5jb22CJnVrbHZhc2FwcDU5MS5nZGMuc3RhbmRhcmRjaGFydGVyZWQuY29tgiZ1a2x2YXBhcHA2NzYuZ2RjLnN0YW5kYXJkY2hhcnRlcmVkLmNvbYImdWtsdmFzYXBwNjc2LmdkYy5zdGFuZGFyZGNoYXJ0ZXJlZC5jb22CIWZtby1tZmUuZ2RjLnN0YW5kYXJkY2hhcnRlcmVkLmNvbYIndWtsdmFwcmF0MDAwMWEucGkuc3RhbmRhcmRjaGFydGVyZWQuY29tgid1a2x2YXByYXQwMDAyYS5waS5zdGFuZGFyZGNoYXJ0ZXJlZC5jb22CJ3VrbHZhcHJhdDAwMDNhLnBpLnN0YW5kYXJkY2hhcnRlcmVkLmNvbYIndWtsdmFwcmF0MDAwMWIucGkuc3RhbmRhcmRjaGFydGVyZWQuY29tgid1a2x2YXByYXQwMDAyYi5waS5zdGFuZGFyZGNoYXJ0ZXJlZC5jb22CJ3VrbHZhcHJhdDAwMDNiLnBpLnN0YW5kYXJkY2hhcnRlcmVkLmNvbTAdBgNVHQ4EFgQUYCR18drI8Kno9zkQOG5t+h1cPDwwHwYDVR0jBBgwFoAUU6ssViVr1HED86LUND/vrp4Q8h0wcQYDVR0fBGowaDBmoGSgYoZgaHR0cDovL3BraS5nbG9iYWwuc3RhbmRhcmRjaGFydGVyZWQuY29tL3BraS9TdGFuZGFyZCUyMENoYXJ0ZXJlZCUyMEludGVybmFsJTIwSXNzdWluZyUyMENBMDIuY3JsMIG4BggrBgEFBQcBAQSBqzCBqDBsBggrBgEFBQcwAoZgaHR0cDovL3BraS5nbG9iYWwuc3RhbmRhcmRjaGFydGVyZWQuY29tL3BraS9TdGFuZGFyZCUyMENoYXJ0ZXJlZCUyMEludGVybmFsJTIwSXNzdWluZyUyMENBMDIuY3J0MDgGCCsGAQUFBzABhixodHRwOi8vcGtpLmdsb2JhbC5zdGFuZGFyZGNoYXJ0ZXJlZC5jb20vb2NzcDALBgNVHQ8EBAMCBaAwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhabrGoaI4g+DlYUshLOWBIWUyEdxgfqdO4XFiVcCAWQCAQowEwYDVR0lBAwwCgYIKwYBBQUHAwEwGwYJKwYBBAGCNxUKBA4wDDAKBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAORF/5Rb1pV7cCbNE2sU0k4W2+zDaTUaHOEiD5jDS6JKhKoos/4094NyKm7klf3u9FoCEnUq89LX12RGVr0smm6C5KyEPCl/1kXRfqtTZgttw+GXRhbjgdwY/CAQ1LT/ejB0sol61uD3CO3xVMrV6ixnkuVrNjM4ebul79SvRRDjeAsqH+ERyR3/xTf6ukPamy6eFHw3gUXyaZKF8l7ZsaOO+OJxF0iZwvnP53Rk0tEc1k0+qHPRFYxFWcmWMeX+r32vI4j0ulbbypsfC4rs9xfZSwscIZb37lMTt4G0K6VCVDfV2YH7fTYRgClic/uggjskichfORDmDKVRFo7BPow==
+MFA_REDIRECT_URI: https://fmo-mfe.gdc.standardchartered.com:8453/mfa/callback
+
+# SSI+
+SSIPLUS_HOST: 10.193.230.157:9200,10.193.230.158:9200
+SSIPLUS_INDEX: index-ssi-goldensource-prod
+SSIPLUS_CLUSTER: scanner-prod-cluster
+SSIPLUS_NODE: scanner-prod
+
+CHECK_POINT_DATE: 1900-11-05
+COUNTERPARTY_QUERY_TYPE: DA
+
+# IBM MQ
+IBMMQ_ENABLED: true
+IBMMQ_HOST: 10.4.195.209
+IBMMQ_PORT: 8210
+IBMMQ_CHANNEL: UKRATANCLNTP1
+IBMMQ_MANAGER: UKFM02P1
+IBMMQ_CCS_ID: 819
+IBMMQ_QUEUE: CF.MXG.RATAN.RQSTIN
+IBMMQ_USERNAME: ratanmq
+IBMMQ_PASSWORD:
+IBMMQ_CLIENT_ID: MXG2_RATAN_CASHFLOW_PROD
+SSL_RESET_COUNT: 0
+SSL_CIPHER_SUITE: TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+SSL_ENABLE: true
+SSL_PEERNAME: CN=*ukfm02p1
+SSL_TRUST_FILE: /apps/ratanrt/ssl/java/ratan_truststore_prod.jks
+KEY_STORE_PASSWORD: ${ado.ratanone}
+SSL_KEY_STORE_FILE: /apps/ratanrt/ssl/java/ratan_keystore_prod.jks
+TRUST_STORE_PASSWORD: ${ado.ratanone}
+
+#SPOT RATE
+SPOT_RATE_URL: https://sabre-prod-cloud-global.gdc.standardchartered.com/fmrp-fx-fxcs/prod/rate/{date}/OFFICIAL_EOD/USD
+
+
+TDSX_QUERY: https://sabre-prod-cloud-global.gdc.standardchartered.com/fmrp-tdsx-service/prod/auth/TDSXQuery
+TDSX_USER_ID: RATAN_PROD
+
+TDSX_GRPC_URL: sabre-prod-cloud-global.gdc.standardchartered.com
+TDSX_GRPC_PORT: 31050
+
+MDS_HOST: https://mds-api.gdc.standardchartered.com
+MDS_PORT: 443
+
+ROSETTA_SERVER: http://uklvapapp418.gdc.standardchartered.com
+ROSETTA_PORT: 8086
+
+FX_LEGAL_ENTITY_LIST: 400001378,10020899,235003861,10078716,10036642,10062461,10032025,400054708,400054737,400054741,400057714,400075752,400085753,400090093,400095464,400130180,400130178,400185419,400193370,400209000,400218197,400220273,400229749,400516443,40051644,400667486,400677737,400683682,400798477,400899993
+
+
+# EDMI OUD ou=edmi
+EDMI_OUD: RATAN_EDMI_PROD
+EDMI_OUD_PWD:
+
+#KONG GATEWAY
+KONG_IAM_URL: https://identity-hk.api.sc.net
+KONG_TOKEN_ENDPOINT: ${KONG_IAM_URL}/oauth2/token
+KONG_CLIENT_ENDPOINT: ${KONG_IAM_URL}/api/identity/oauth2/dcr/v1.0/register?client_name=EDMILDAP_RATAN_EDMI_PROD_Ratanone-PCT2
+KONG_CLIENT_ID:
+KONG_CLIENT_SEC:
+KONG_GATEWAY: https://gateway-hk.api.sc.net
+KONG_APPLICATION_NAME: Ratanone-PCT2
+
+#PCT2
+PCT2_ENDPOINT: ${KONG_GATEWAY}/rdm_api/service/pct2/v3/portfolioData
+
+#JKS Certification
+JKS_KEYSTORE_FILE: /apps/ratanrt/ssl/java/solace_ratan_keystore_prod.jks
+JKS_KEYSTORE_PWD: ${ado.ratanone}
+JKS_TRUSTSTORE_FILE: /apps/ratanrt/ssl/java/solace_ratan_truststore_prod.jks
+JKS_TRUSTSTORE_PWD: ${ado.ratanone}
+
+# HASHICORP
+HASHICORP_SWITCH_ON: true
+HASHICORP_CONFIG_INFO: |
+  {
+    "keyStoreFile": "/apps/ratanrt/ssl/java/solace_ratan_keystore_prod.jks",
+    "keyStoreSecret": "ratanone",
+    "trustStoreFile": "/apps/ratanrt/ssl/java/solace_ratan_truststore_prod.jks",
+    "trustStoreSecret": "ratanone",
+    "tokenUrl": "https://vault.global.standardchartered.com:8200/v1/ccib/auth/cert/login",
+    "tokenParamMap": {"name":"51358_ratanone_app_role"},
+    "connectTimeOut": 10000,
+    "readTimeOut": 10000,
+    "maxRetries": 3,
+    "backoffInterval": 1000,
+    "maxBackoffInterval": 4000,
+    "hashICorpSecretRedisKey": "ALL:HASHICORP:SECRET",
+    "redisClusterNodes": "REDIS_CLUSTER_NODES",
+    "redisJanus": "REDIS_JANUS",
+    "urlConfigs": [
+      {
+        "url": "https://vault.global.standardchartered.com:8200/v1/ccib/uklvapdbs047.gdc.standardchartered.com/static-creds/ratanone_ratanprd_001",
+        "accountName": "DB-ratanprd_001",
+        "secretKeys": [
+          "PGSL_RDB_JANUS_HASHICORP"
+        ]
+      },
+      {
+        "url": "https://vault.global.standardchartered.com:8200/v1/ccib/ad/zone1/static-cred/svc.ratanone.001",
+        "accountName": "AD-svc.ratanone.001",
+        "secretKeys": [
+          "DQSL_JANUS",
+          "BATCH_PWD"
+        ]
+      },
+      {
+        "url": "https://vault.global.standardchartered.com:8200/v1/ccib/oud/static-cred/srv.51358.ratanone.001",
+        "accountName": "OUD-srv.51358.ratanone.001",
+        "secretKeys": [
+          "SOLACE_PWD"
+        ]
+      },
+      {
+        "url": "https://vault.global.standardchartered.com:8200/v1/ccib/oud/static-cred/ratan_prod",
+        "accountName": "OUD-ratan_prod",
+        "secretKeys": [
+          "FMAA_JANUS"
+        ]
+      },
+      {
+        "url": "https://vault.global.standardchartered.com:8200/v1/ccib/oud/static-cred/ratan_edmi_prod",
+        "accountName": "OUD-ratan_edmi_prod",
+        "secretKeys": [
+          "EDMI_OUD_PWD"
+        ]
+      }
+    ],
+    "accountMatchInfos": [
+      {
+        "newAccountConfig": "PGSL_RDB_USERNAME_HASHICORP",
+        "oldAccountConfig": "PGSL_RDB_USERNAME"
+      },
+      {
+        "newAccountConfig": "PGSL_RDB_JANUS_HASHICORP",
+        "oldAccountConfig": "PGSL_RDB_JANUS"
+      }
+    ]
+
+  }
+
+FM_LIST:
+STRATEGIC_FM_LIST: 401036553|400991880|400910415|400007847|400018439|5|8|10036428|7|10036382|400032489|400045551|300089409|6|2|10038345|300011345|300075472|10075222|400041070|400906330|300036368|3|400452428|400451508|9|400093619|4|400960089|400001378|400054741|400220273|400899993|400075752|400095464|400209000|400677737|400229749|400054708|400130178|400085753|400683682|400218197|400667486|400090093|400130180|10020899|400057714|10036642|400054737|400798477|10032025|235003861|400516443|400185419|400193370|10062461|10078716|400516442|401053411
+CPT_ENTITY_LIST:
+ORIGINAL_SYSTEM_TAG: LOANIQ
+CPT_PAIRS: USD^1|XAU^1
+CPT_END_DATE: 2020-01-01
+TRADE_MIGRATION_DATE: 1900-01-01
+
+ZIPKIN_SERVER_ENDPOINT: https://zipkin/api/v2/spans
+TRACING_SAMPLING_PROBABILITY: 0.3
+
+# This path is for PROD
+ASPIRE_ACCOUNTING_FILEIT_SOURCE_PATH: /share/imft054/ratanone/aspire/
+ASPIRE_ACCOUNTING_FILEIT_TARGET_PATH: /share/imft157/ASPIRE/RATAN/<countryCode>/data/incoming/
+
+# C&A serivce ovv api url
+OVV_DATA_API: https://uklvapapp290p.gdc.standardchartered.com:8888/api/eod/data?page=%s&size=5000&timeout=120
+
+# smtp config
+EMAIL_TIMEOUT: 15000
+EMAIL_CONNECTION_TIMEOUT: 10000
+EMAIL_WRITE_TIMEOUT: 15000
+
+#OPEN_SEARCH_AGENT (GRPC-SERVER)
+OPENSEARCH_CLUSTER_ENDPOINT: 10.4.194.240:9201,10.4.194.241:9201,10.4.197.240:9201
+OPENSEARCH_USER: ENC(klvbM8cMnsplAy8GrZuRlw==)
+OPENSEARCH_CIPHER_KEY: ENC(sIs9ZS8VlGwbXEt01SBIkIEfxoeh2FXq)
+OPENSEARCH_FOLLOW_CLUSTER_ENDPOINT: uklvasapp590.gdc.standardchartered.com:9201,uklvasapp591.gdc.standardchartered.com:9201,uklvasapp676.gdc.standardchartered.com:9201
+OPENSEARCH_FOLLOW_USER: ENC(klvbM8cMnsplAy8GrZuRlw==)
+OPENSEARCH_FOLLOW_CIPHER_KEY: ENC(sIs9ZS8VlGwbXEt01SBIkIEfxoeh2FXq)
+ENABLE_OPEN_SEARCH_SSL: true
+OPENSEARCH_GRPC_SERVER_CERT_CHAIN_PATH: file:/apps/ratanrt/ssl/pk12/ssl_certificate_prod.crt
+OPENSEARCH_GRPC_SERVER_PRIVATE_KEY_PATH: file:/apps/ratanrt/ssl/pk12/ssl_certificate_prod.key
+OPENSEARCH_MAX_RESULT_SIZE_PER_REQUEST: 1000000  # only applicable for external query
+OPENSEARCH_MAX_PAGINATION_SIZE: 10000            # only applicable for external query
+grpc.client.grpc-server.security.authorityOverride: fmo-shell.gdc.standardchartered.com
+
+PGSL_RDB_SCHEMA: post_trade_portal_service
+
+jasypt:
+  encryptor:
+    password: ${RATAN_CIPHER_KEY}
+
+spring:
+  ldap:
+    urls: ${OUD_URL}
+  datasource:
+    url: ${PGSL_RDB_URL}
+    username: ${PGSL_RDB_USERNAME_HASHICORP}
+    password: ${PGSL_RDB_JANUS_HASHICORP}
+    driverClassName: ${PGSL_RDB_DRIVER}
+  flyway:
+    enabled: true
+    url: ${PGSL_RDB_URL}
+    user: ${PGSL_RDB_USERNAME_HASHICORP}
+    password: ${PGSL_RDB_JANUS_HASHICORP}
+    baseline-on-migrate: true
+    baseline-version: 0
+    placeholder-replacement: false
+    table: post_trade_portal_service_schema_history
+
+jwt:
+  token-expiration: 15 #minutes
+  re-token-expiration: 225 #minutes
+  absolute-expiration: 60 #minutes
+  prv: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDHn+TKWeKzANZP
+      aYAywxFuXX5S7MpDVfiSswKTYtKw13kgY8l83WzqFHNY3Wa2tDI955DOOeYR/FzC
+      jlUwicY9z6QRRjcYXZ8Mb8J5iJ+xetBXdHky2Yg1uHxxv4Z2P2B6OLwydyLk5ne5
+      LM3ov5WGoGES8YAnT7h33zhqmNrF08CScdeFVlXevyQegq7P1/zJV+PPunq/y4Gl
+      oeIg/gwDABJe/XQRlemj5FAQynAXMfMF4G9pJhKLlKHOKq6V/cibV8YEU3wloHDB
+      erNV07mxiKbP3uG4z8F6kTfSmp7hgOl3yiiU+TfKEUjaSpCSpPZxIzO1+2mzQpMn
+      hQnc5WMXAgMBAAECggEAc7qkvxMBNFll5T/6jHM+ZcdZ9uVEFWl/5DxXX+7IyrEA
+      jeCL7RHJlKMqg/hHFeC9x9m5v3UdhovRkxFFHhChlzALo+AbDMsp6+HW0vJ78j6L
+      Dkh+AxbNuqcrrh4k6+SuH+1IXdFnr2BVREtPTIHVQ+kynfLYIvI6tXP5lwLqwgiL
+      hkFxPvn+e9NXYuqSe1ZbEM803DUkjX4AreSIZ69gd2l4y78zMnL9b1wedxaMC9q1
+      +kI8+ZCYzbQBUVY60xSu1zTKp3xV9yZjHxBbRT/HW69N3Q1tJOHDzmkYmwJAv5h5
+      hrnvnNMfY6uECaljUWNrB91WTWupC0ZnawHUtb+RsQKBgQD6Ek9j9smPUKZr6HO6
+      CvSs4lpt0RZgqDeK+6RawnFnJkJAGwmfA5Qi19RIqFvEQWS0XjL64aTEakbXDsS8
+      0jYe0L4CQllHsHt9q5QW7OS57Fmgp/sPFbV+W+bStOepsWgSyaqfY/OLgfMHEy5O
+      f6Uh/gjjME42Z2wUSm0JwnJOIwKBgQDMW2uB0yyCDwjIcqHp9kxQHC1iFNXuK48S
+      Foej78QmXAjQFm5jbdUJooGXPZlvkZGPvvLmthEhS0aMcJ8l67m+Rn/ut3yL8i8b
+      xdFNr9YUByuXO+gDMDqIOPpQLIREBbv7kaAerG2+x1ZU7rTIwn1ofHq/DyTBMLOI
+      3d3vXoOUfQKBgGVy5ig8pvpwEoO2UrSH20kDrwHcEAL4W0gT3FJBjbX17GyLS3Tq
+      A7+65VDwlAHjMZKGoJHs1mYkY0a9pAyiDvijYGIUPpn5u6942uQOCKBwhM/LNeuh
+      t/ZiHBsg7taFtR3iGEj/SH8xIcGeA2wvFnPa1gosv54MiOkWZHPQIYUXAoGBAIPk
+      tRxTaTR/85E7uxi/qD1EEl5tSC2x22M3O1ApXZXMbLuw3oo5xvey9KTiUvdZInN+
+      MFOLSr8MUHov7eeRno4Z/lPaBP5lztXD9PSI+khu4El5lqMIK57j91prgOpOMSeK
+      s6dYbnRlP2kNr4yrSjl3rdlGMtilUBqT57uoapAZAoGBAIFSWPFd5u6kWuxmwZZU
+      vIq/MK40uUoJ6AH03MgDI8NtqAgiEnyLwABu7ZQ9n9JuyJyNgm2kLwXOrc5ZD4jG
+      a0QsTWB4DR47v8AJxSNFI+zxA67rSgIrLm9SWfa8+hQK6gthZ7uTO9/tT8UnQ2Th
+      fskgrmLH/JOQ+yx3p0SwQC2o
+  pub: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAx5/kylniswDWT2mAMsMR
+      bl1+UuzKQ1X4krMCk2LSsNd5IGPJfN1s6hRzWN1mtrQyPeeQzjnmEfxcwo5VMInG
+      Pc+kEUY3GF2fDG/CeYifsXrQV3R5MtmINbh8cb+Gdj9geji8Mnci5OZ3uSzN6L+V
+      hqBhEvGAJ0+4d984apjaxdPAknHXhVZV3r8kHoKuz9f8yVfjz7p6v8uBpaHiIP4M
+      AwASXv10EZXpo+RQEMpwFzHzBeBvaSYSi5Shziqulf3Im1fGBFN8JaBwwXqzVdO5
+      sYimz97huM/BepE30pqe4YDpd8oolPk3yhFI2kqQkqT2cSMztftps0KTJ4UJ3OVj
+      FwIDAQAB
+
+server:
+  max-http-header-size: 256KB
+  max-http-request-header-size: 256KB
+  max-http-response-header-size: 256KB
+  tomcat:
+    max-http-response-header-size: 256KB
+
+auth:
+  logout:
+    logoutList:
+  elastic:
+    host: ${ELASTIC_HOST}
+    key: ${ELASTIC_API_KEY}
+    value: ${ELASTIC_API_VALUE}
+  whitelisted:
+    idList:
+      - 1490627
+      - 1632320
+      - 1171559
+      - 1159352
+      - 1243644
+      - 1412661
+      - 1171316
+      - 2001208
+      - 1239303
+      - 1257298
+      - 1662738
+      - 1630936
+      - 1503188
+      - 1518813
+      - 1511897
+      - 1376592
+      - 1516140
+      - 1610204
+      - 1633500
+      - 1641336
+      - 1657661
+      - 1639416
+      - 1623210
+      - 1432612
+      - 1570622
+      - 1603659
+      - 1518604
+      - 1423303
+      - 1353536
+      - 1595890
+      - 1230260
+      - 1289935
+      - 1639796
+      - 1301135
+      - 1129381
+      - 1223671
+      - 1481696
+      - 1633330
+      - 1423303
+      - 1321191
+      - 1492285
+      - 1434424
+      - 1622463
+      - 1632737
+      - 1445298
+      - 1641460
+      - 1603886
+      - 1470797
+      - 1626429
+      - 1580901
+      - 1622345
+      - 1664200
+      - 1651430
+      - 1526441
+      - 1652382
+      - 1551697
+      - 1290461
+      - 1404876
+      - 1226803
+      - 1223671
+      - 1593571
+      - 1554948
+      - 1407006
+      - 1159157
+      - 1653379
+      - 1641378
+      - 1614732
+      - 1616989
+      - 1605811
+      - 1610528
+      - 1231063
+      - 1165417
+      - 1614455
+      - 2005746
+      - 2007245
+      - 1641132
+      - 1626126
+      - 1606194
+      - 1665629
+      - 1660788
+      - 1619163
+      - 8191879
+      - 2014769
+      - 1655218
+      - 1522516
+      - 8194744
+      - 1615390
+      - 1340366
+      - 1531346
+      - 1493132
+      - 1171316
+      - 1171559
+      - 1159352
+      - 2018468
+      - 1328902
+      - 1561807
+      - FSSPTUSER01
+      - FSSPTUSER03
+      - FSSPTUSER04
+      - FSSPTUSER06
+      - FSSPTUSER07
+      - FSSPTUSER09
+    envList:
+      - localhost
+      - 10.198.199.160 #dev
+      - uklvadapp1341.uk.dev.net #uat
+      - uklvadapp1342.uk.dev.net #uat
+      - uklvadapp1343.uk.dev.net #uat
+      - uklvadapp1344.uk.dev.net #uat
+      - uklvadapp1345.uk.dev.net #uat
+      - uklvadapp1346.uk.dev.net #uat
+      - uklvadrtn002a.pi.dev.net #staging
+      - uklvadrtn003a.pi.dev.net #staging
+      - uklvadrtn004a.pi.dev.net #staging
+      - uklvadrtn005a.pi.dev.net #staging
+      - uklvadrtn006a.pi.dev.net #staging
+      - uklvadrtn007a.pi.dev.net #staging
+    attrList:
+      - uid
+      - cn
+      - givenName
+      - fullName
+      - sn
+      - mail
+      - preferredLocale
+      - co
+      - title
+      - description
+      - psEmplStatus
+
+scb:
+  fmaa:
+    host: ${FMAA_HOST}
+    verificationPath: ${scb.fmaa.host}/introspect?app_id=FMO_PORTAL&access_token=%s
+    connectTimeout: 5000 #ms
+    readTimeout: 5000 #ms
+    creationEnabled: false
+  ems2:
+    cachingEnabled: true
+    newApiEnabled: false
+    expiryTime: 60 #seconds
+    host: ${EMS2_HTTPS_HOST}
+    userRoles: ${scb.ems2.host}/ems2/rest/account/%s
+    newUserAuthorizationOnEntity: ${scb.ems2.host}/ems2/rest/entitlements/entitlementList
+    adminModuleEntity: FMO PORTAL ADMIN
+  mfa:
+    headers:
+      X-Cert: ${MFA_CERT}
+    accessToken: /access_token
+    connectTimeout: 10 #seconds
+    readTimeout: 30 #seconds
+    redirectUri: ${MFA_REDIRECT_URI}
+    grantType: authorization_code
+  entra:
+    tenant_id: b44900f1-2def-4c3b-9ec6-9020d604e19e
+    client_id: fd99d1e8-e543-4345-b5f0-208c94ffd39a
+    scope: openid
+    client_assertion_type: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+    grant_type: authorization_code
+    redirect_uri: https://fmo-mfe.gdc.standardchartered.com:8453/mfa/callback
+    entra_token_endpoint: https://login.microsoftonline.com/${scb.entra.tenant_id}/oauth2/v2.0/token
+    client_cert_path: file:/apps/ratanrt/ssl/pk12/ssl_certificate_prod.crt
+    client_key_path: file:/apps/ratanrt/ssl/pk12/ssl_certificate_prod.key
+    connectTimeout: 10 #seconds
+    readTimeout: 30 #seconds
+    proxyHost: gateway.zscloud.net
+    proxyPort: 443
+
+ratanone:
+  security:
+    auth-service: lb://SINGLE-UI-BFF
+    token-header-name: x-token
+  open-apis:
+    auto-startup: true
+    api-gateway-url: ${API_GATEWAY_URL}
+    api-gateway-token: ${API_GATEWAY_TOKEN}
+    apis:
+      - name: single-ui-bff@extend
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v2/sso/extend
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v2/sso/extend
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: Extend
+      - name: single-ui-bff@refreshtoken
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v2/sso/refreshtoken
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v2/sso/refreshtoken
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: RefreshToken
+      - name: single-ui-bff@v2login
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v2/sso/login
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v2/sso/login
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V2Login
+      - name: single-ui-bff@v3login
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v3/sso/login
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v3/sso/login
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V3Login
+      - name: single-ui-bff@v2relogin
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v2/sso/relogin
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v2/sso/relogin
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V2Relogin
+      - name: single-ui-bff@v2validate
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v2/sso/validate
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v2/sso/validate
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V2Validate
+      - name: single-ui-bff@v2logout
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v2/sso/logout
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v2/sso/logout
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V2Logout
+      - name: single-ui-bff@v1AnalyticsPrint
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/print
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/print
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1AnalyticsPrint
+      - name: single-ui-bff@v1Analytics
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/analytics
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/analytics
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1Analytics
+      - name: single-ui-bff@v1ImportMapActive
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: GET
+          path: /v1/fmo/admin/importmap/active
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/importmap/active
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1ImportMapActive
+      - name: single-ui-bff@v1ConfigUpload
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/config/upload
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/config/upload
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: v1ConfigUpload

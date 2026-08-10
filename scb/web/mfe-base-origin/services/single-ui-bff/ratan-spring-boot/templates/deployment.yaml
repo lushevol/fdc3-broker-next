@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "ratan-spring-boot.name" . }}
+    app_name: {{ .Release.Name }}
+    app_version: {{ .Values.appVersion }}
+    chart: {{ template "ratan-spring-boot.chart" . }}
+    chart_version: {{ .Chart.Version }}
+    component: backend-service
+    environment: {{ .Values.environment }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ template "ratan-spring-boot.name" . }}
+      app_name: {{ .Release.Name }}
+      chart: {{ template "ratan-spring-boot.chart" . }}
+      component: backend-service
+      environment: {{ .Values.environment }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "ratan-spring-boot.name" . }}
+        app_name: {{ .Release.Name }}
+        app_version: {{ .Values.appVersion }}
+        chart: {{ template "ratan-spring-boot.chart" . }}
+        chart_version: {{ .Chart.Version }}
+        component: backend-service
+        environment: {{ .Values.environment }}
+      annotations:
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      terminationGracePeriodSeconds: 30
+      serviceAccountName: "{{ .Release.Name }}-account"
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: "ratan_apps"
+      {{- if .Values.hostAliases }}
+      hostAliases:
+        {{- toYaml .Values.hostAliases | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- if .Values.bootstrapEnabled }}
+        - name: config
+          configMap:
+            name: {{ .Release.Name }}-{{ .Values.environment }}-config
+        {{- else }}
+        - name: config
+          configMap:
+            name: backend-app-config
+        {{- end }}
+        - name: ratan-ssl-secret
+          secret:
+            secretName: ratan-ssl-secret
+      containers:
+        - name: {{ .Release.Name }}
+          image: artifactory.global.standardchartered.com/ratan/{{ .Release.Name }}:{{ .Values.appVersion }}
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: RATAN_ENV
+              value: "{{ .Values.environment }}"
+            - name: CONSUL_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: CONSUL_PORT
+              value: "8500"
+            - name: CONSUL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: ratan-consul-application-token
+                  key: application_token
+            - name: RATAN_TRUST_STORE
+              value: "{{ tpl .Values.ratanTrustStore . }}"
+            - name: RATAN_TRUST_STORE_PASSWORD
+              value: "{{ .Values.ratanTrustStoreJanus }}"
+            - name: JAVA_OPTS
+              value: "{{ .Values.defaultJavaOpts }} {{ .Values.javaOpts }}"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "{{ .Values.environment }},kubernetes"
+            - name: SERVER_PORT
+              value: "8080"
+            - name: SPRING_MAIN_BANNER_MODE
+              value: "off"
+            - name: SPRING_CLOUD_CONFIG_DISCOVERY_ENABLED
+              value: "false"
+            - name: SPRING_ZIPKIN_ENABLED
+              value: "false"
+          {{- range .Values.env }}
+            - name: {{ .name }}
+              value: {{ .value }}
+          {{- end }}
+          {{- if .Values.javaArgs }}
+          args: {{ .Values.javaArgs }}
+          {{- end }}
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          volumeMounts:
+            {{- if .Values.bootstrapEnabled }}
+            - name: config
+              mountPath: "/apps/ratanrt/config"
+              readOnly: true
+            {{- else }}
+            - name: config
+              mountPath: "/etc/config"
+              readOnly: true
+            {{- end }}
+            - name: ratan-ssl-secret
+              mountPath: "/apps/ratanrt/ssl/java"
+              readOnly: true

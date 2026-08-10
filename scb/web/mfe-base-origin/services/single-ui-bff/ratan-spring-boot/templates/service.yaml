@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "ratan-spring-boot.name" . }}
+    app_name: {{ .Release.Name }}
+    app_version: {{ .Values.appVersion }}
+    chart: {{ template "ratan-spring-boot.chart" . }}
+    chart_version: {{ .Chart.Version }}
+    component: backend-service
+    environment: {{ .Values.environment }}
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "80"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: /actuator/health/liveness
+spec:
+  selector:
+    app: {{ template "ratan-spring-boot.name" . }}
+    app_name: {{ .Release.Name }}
+    app_version: {{ .Values.appVersion }}
+    chart: {{ template "ratan-spring-boot.chart" . }}
+    chart_version: {{ .Chart.Version }}
+    component: backend-service
+    environment: {{ .Values.environment }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+  {{- if .Values.service.type }}
+  type: {{ .Values.service.type }}
+  {{- end }}

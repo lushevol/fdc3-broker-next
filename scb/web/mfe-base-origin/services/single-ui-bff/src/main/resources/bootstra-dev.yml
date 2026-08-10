@@ -1,0 +1,13 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: single-ui-bff-lushuai
+
+ratanone:
+  logging:
+    level: info
+    folder: ${LOG_DIR:/Users/1639796/code/scb/BE/logs}
+    logstash:
+      destinations: ${LOGSTASH_URL:10.198.199.160:5000}

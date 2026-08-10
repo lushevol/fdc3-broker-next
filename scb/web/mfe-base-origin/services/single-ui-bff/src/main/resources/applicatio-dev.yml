@@ -1,0 +1,713 @@
+info:
+  build:
+    artifactId: "@project.artifactId@"
+    name: "@project.name@"
+    description: "@project.description@"
+    version: "@project.version@"
+  applicationName: ${spring.application.name}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+        exclude: "beans"
+
+# copy from ratan-properties
+
+# application-dev
+
+# FMAA
+FMAA_HOST: https://fmaauat.gdc.standardchartered.com/v1/fmaa/oauth2
+FMAA_CERT_PATH:
+FMAA_ACCOUNT: RATAN_PROD
+FMAA_JANUS: ENC(8gPk/IoB4olhiRYsGcOgr0qdDNEMiMiCgEY9JVHFSNcDLzWjZDiL0Q==)
+
+# OUD
+OUD_URL: ldaps://ukouddev.uk.standardchartered.com:1636
+OUD_SERVICE_ACCOUNT: cn=srv.ratan.001,ou=ratan,ou=apps,o=standardchartered
+OUD_SERVICE_ACCOUNT_JANUS: ENC(PfIG+DzIpfdWstV5nzxYQZ1euh41F/49eYPTQtoGNixyg3+kBTqXGQ==)
+OUD_SERVICE_ACCOUNT_CIPHER_KEY: T3FxMUiMhvxJVCKxQ2jB6ho2IyVPqR
+
+EMS2_HOST: https://uklvauems01a.uk.standardchartered.com:16443
+EMS2_HTTPS_HOST: https://uklvauems01a.uk.standardchartered.com:16443
+EMS3_HOST: https://fmcesuat.gdc.standardchartered.com
+EMS3_APP_ID: 51358
+EMS3_APP_NAME: RATAN_ENTITLEMENT_RULE
+
+# Relational Database for PGSL
+PGSL_RDB_URL: jdbc:postgresql://uklvaddbs097.uk.dev.net:6524/RATANONE?currentSchema=${PGSL_RDB_SCHEMA:ratanone}
+PGSL_RDB_QUERY_URL: jdbc:postgresql://uklvaddbs097.uk.dev.net:6524/RATANONE?currentSchema=ratanone_query
+PGSL_RDB_YANGJIAN_URL: jdbc:postgresql://uklvaddbs097.uk.dev.net:6524/RATANONE?currentSchema=ratanone_yangjian
+PGSL_RDB_SSI_STAMPING_URL: jdbc:postgresql://uklvaddbs097.uk.dev.net:6524/RATANONE?currentSchema=ssi_stapming_service
+PGSL_RDB_RULE_URL: jdbc:postgresql://uklvaddbs097.uk.dev.net:6524/RATANONE?currentSchema=ratan_rule_service
+PGSL_RDB_REP_URL: jdbc:postgresql://uklvaddbs097.uk.dev.net:6524/RATANONE?currentSchema=ratan_exception_platform
+PGSL_RDB_BATCH_URL: jdbc:postgresql://uklvaddbs097.uk.dev.net:6524/RATANONE?currentSchema=ratan_batch_job
+
+PGSL_RDB_USERNAME: ratanone
+PGSL_RDB_JANUS: ENC(xXNwyCDF6ZdZvG30n4dhD6t34wmKNSBUhcOWYGuC6T9SENAe+W8ChA==)
+PGSL_RDB_USERNAME_HASHICORP: ${PGSL_RDB_USERNAME}
+PGSL_RDB_JANUS_HASHICORP: ${PGSL_RDB_JANUS}
+PGSL_RDB_CIPHER_KEY: ${RATAN_CIPHER_KEY}
+PGSL_RDB_DRIVER: org.postgresql.Driver
+
+# single-ui-bff
+
+PGSL_RDB_SCHEMA: post_trade_portal_service
+
+jasypt:
+  encryptor:
+    password: ${RATAN_CIPHER_KEY}
+
+spring:
+  ldap:
+    urls: ${OUD_URL}
+  datasource:
+    url: ${PGSL_RDB_URL}
+    username: ${PGSL_RDB_USERNAME_HASHICORP}
+    password: ${PGSL_RDB_JANUS_HASHICORP}
+    driverClassName: ${PGSL_RDB_DRIVER}
+  flyway:
+    enabled: true
+    url: ${PGSL_RDB_URL}
+    user: ${PGSL_RDB_USERNAME_HASHICORP}
+    password: ${PGSL_RDB_JANUS_HASHICORP}
+    baseline-on-migrate: true
+    baseline-version: 0
+    placeholder-replacement: false
+    table: post_trade_portal_service_schema_history
+jwt:
+  token-expiration: 15 #minutes
+  re-token-expiration: 225 #minutes
+  absolute-expiration: 60 #minutes
+  prv: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDHn+TKWeKzANZP
+      aYAywxFuXX5S7MpDVfiSswKTYtKw13kgY8l83WzqFHNY3Wa2tDI955DOOeYR/FzC
+      jlUwicY9z6QRRjcYXZ8Mb8J5iJ+xetBXdHky2Yg1uHxxv4Z2P2B6OLwydyLk5ne5
+      LM3ov5WGoGES8YAnT7h33zhqmNrF08CScdeFVlXevyQegq7P1/zJV+PPunq/y4Gl
+      oeIg/gwDABJe/XQRlemj5FAQynAXMfMF4G9pJhKLlKHOKq6V/cibV8YEU3wloHDB
+      erNV07mxiKbP3uG4z8F6kTfSmp7hgOl3yiiU+TfKEUjaSpCSpPZxIzO1+2mzQpMn
+      hQnc5WMXAgMBAAECggEAc7qkvxMBNFll5T/6jHM+ZcdZ9uVEFWl/5DxXX+7IyrEA
+      jeCL7RHJlKMqg/hHFeC9x9m5v3UdhovRkxFFHhChlzALo+AbDMsp6+HW0vJ78j6L
+      Dkh+AxbNuqcrrh4k6+SuH+1IXdFnr2BVREtPTIHVQ+kynfLYIvI6tXP5lwLqwgiL
+      hkFxPvn+e9NXYuqSe1ZbEM803DUkjX4AreSIZ69gd2l4y78zMnL9b1wedxaMC9q1
+      +kI8+ZCYzbQBUVY60xSu1zTKp3xV9yZjHxBbRT/HW69N3Q1tJOHDzmkYmwJAv5h5
+      hrnvnNMfY6uECaljUWNrB91WTWupC0ZnawHUtb+RsQKBgQD6Ek9j9smPUKZr6HO6
+      CvSs4lpt0RZgqDeK+6RawnFnJkJAGwmfA5Qi19RIqFvEQWS0XjL64aTEakbXDsS8
+      0jYe0L4CQllHsHt9q5QW7OS57Fmgp/sPFbV+W+bStOepsWgSyaqfY/OLgfMHEy5O
+      f6Uh/gjjME42Z2wUSm0JwnJOIwKBgQDMW2uB0yyCDwjIcqHp9kxQHC1iFNXuK48S
+      Foej78QmXAjQFm5jbdUJooGXPZlvkZGPvvLmthEhS0aMcJ8l67m+Rn/ut3yL8i8b
+      xdFNr9YUByuXO+gDMDqIOPpQLIREBbv7kaAerG2+x1ZU7rTIwn1ofHq/DyTBMLOI
+      3d3vXoOUfQKBgGVy5ig8pvpwEoO2UrSH20kDrwHcEAL4W0gT3FJBjbX17GyLS3Tq
+      A7+65VDwlAHjMZKGoJHs1mYkY0a9pAyiDvijYGIUPpn5u6942uQOCKBwhM/LNeuh
+      t/ZiHBsg7taFtR3iGEj/SH8xIcGeA2wvFnPa1gosv54MiOkWZHPQIYUXAoGBAIPk
+      tRxTaTR/85E7uxi/qD1EEl5tSC2x22M3O1ApXZXMbLuw3oo5xvey9KTiUvdZInN+
+      MFOLSr8MUHov7eeRno4Z/lPaBP5lztXD9PSI+khu4El5lqMIK57j91prgOpOMSeK
+      s6dYbnRlP2kNr4yrSjl3rdlGMtilUBqT57uoapAZAoGBAIFSWPFd5u6kWuxmwZZU
+      vIq/MK40uUoJ6AH03MgDI8NtqAgiEnyLwABu7ZQ9n9JuyJyNgm2kLwXOrc5ZD4jG
+      a0QsTWB4DR47v8AJxSNFI+zxA67rSgIrLm9SWfa8+hQK6gthZ7uTO9/tT8UnQ2Th
+      fskgrmLH/JOQ+yx3p0SwQC2o
+  pub: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAx5/kylniswDWT2mAMsMR
+      bl1+UuzKQ1X4krMCk2LSsNd5IGPJfN1s6hRzWN1mtrQyPeeQzjnmEfxcwo5VMInG
+      Pc+kEUY3GF2fDG/CeYifsXrQV3R5MtmINbh8cb+Gdj9geji8Mnci5OZ3uSzN6L+V
+      hqBhEvGAJ0+4d984apjaxdPAknHXhVZV3r8kHoKuz9f8yVfjz7p6v8uBpaHiIP4M
+      AwASXv10EZXpo+RQEMpwFzHzBeBvaSYSi5Shziqulf3Im1fGBFN8JaBwwXqzVdO5
+      sYimz97huM/BepE30pqe4YDpd8oolPk3yhFI2kqQkqT2cSMztftps0KTJ4UJ3OVj
+      FwIDAQAB
+
+server:
+  max-http-header-size: 256KB
+  max-http-request-header-size: 256KB
+  max-http-response-header-size: 256KB
+  tomcat:
+    max-http-response-header-size: 256KB
+
+auth:
+  oud:
+    un: 2001208
+    pw: ENC(0TzRja9OT9gtQ9HnffVZ7cJBKteniWuy)
+    id: ENC(X7pLvR9X7JJTx4CAOBLBKchVHiM+AvBS1UzjaTsKRGo=)
+  elastic:
+    host: ${ELASTIC_HOST}
+    key: ${ELASTIC_API_KEY}
+    value: ${ELASTIC_API_VALUE}
+    connectTimeout: 1000 #ms
+    readTimeout: 1000 #ms
+  whitelisted:
+    idList:
+      - 1490627
+      - 1632320
+      - 1171559
+      - 1159352
+      - 1243644
+      - 1412661
+      - 1171316
+      - 2001208
+      - 1239303
+      - 1257298
+      - 1662738
+      - 1630936
+      - 1503188
+      - 1518813
+      - 1511897
+      - 1376592
+      - 1516140
+      - 1610204
+      - 1633500
+      - 1641336
+      - 1657661
+      - 1639416
+      - 1623210
+      - 1432612
+      - 1570622
+      - 1603659
+      - 1518604
+      - 1423303
+      - 1353536
+      - 1595890
+      - 1230260
+      - 1289935
+      - 1639796
+      - 1301135
+      - 1129381
+      - 1223671
+      - 1481696
+      - 1633330
+      - 1321191
+      - 1604896
+      - 1492285
+      - 1434424
+      - 1622463
+      - 1632737
+      - 1445298
+      - 1641460
+      - 1603886
+      - 1470797
+      - 1632093
+      - 1159157
+      - 1404876
+      - 1226803
+      - 1653379
+      - 1641378
+      - 1614732
+      - 1616989
+      - 1605811
+      - 1610528
+      - 1231063
+      - 1165417
+      - 1614455
+      - 2005746
+      - 2007245
+      - 1641132
+      - 1626126
+      - 1606194
+      - 1665629
+      - 1660788
+      - 1619163
+      - 8191879
+      - 2014769
+      - 1655218
+      - 1522516
+      - 8194744
+      - 1615390
+      - 1611336
+      - 1580907
+      - 1340366
+      - 1531346
+      - 1493132
+      - 2018468
+      - 1328902
+      - 1561807
+      - srv.fmaa.FSSPTUSER01
+      - FSSPTUSER01
+      - FSSPTUSER03
+      - FSSPTUSER04
+      - FSSPTUSER06
+      - FSSPTUSER07
+      - FSSPTUSER09
+      - 1159528
+      - 1617147
+      - 1623488
+      - 2006395
+      - 1200318
+      - 1649696
+      - 1540890
+      - 8189311
+      - 2020867
+      - 2010165
+      - 2013330
+      - 2013156
+      - 2013278
+      - 2013307
+      - 2013246
+      - 2013279
+      - 2013034
+      - 2017468
+      - 2012741
+      - 2013467
+      - 2000115
+      - 1613070
+      - 2003821
+      - 1003281
+      - 1355485
+      - 2002366
+      - 1606368
+      - 1459550
+      - 2026705
+      - 8192550
+      - 1581803
+      - 1609000
+      - 1484015
+      - 1589184
+      - 2013618
+      - 1412399
+      - 2015143
+      - 1663157
+      - 2012770
+      - 1604901
+      - 1603674
+      - 8198883
+      - 1492167
+      - 1635108
+      - 2031461
+      - 2013618
+      - 1412399
+      - 2015143
+      - 1663157
+      - 2012770
+      - 2015399
+      - 1630171
+      - 1568888
+      - 1663415
+      - 1238557
+      - 1292501
+      - 1600765
+      - 1619882
+      - 1523669
+      - 1256362
+      - 1523737
+      - 1525964
+      - 2000795
+      - 2000844
+      - 2030675
+      - 2006232
+      - 2024988
+      - 2008702
+      - 1611126
+      - 1234150
+      - 1634826
+      - 1605878
+      - 1505819
+      - 2009413
+      - 2030676
+      - 1523811
+      - 2022625
+      - 2001822
+      - 1587809
+      - 1207709 
+      - 1612311
+      - 8224435
+      - 8225427
+      - 1617135
+      - 1629007
+      - 1570845
+      - 2008827
+      - 8224552
+      - 1544444
+      - 1607911
+      - 2006877
+      - 1497542
+      - 1620967
+      - 1615009
+      - 2005923
+      - 1661722
+      - 1613931
+      - 1360218
+      - 1620800
+      - 2001961
+      - 1614655
+      - 1632610
+      - 1635972
+      - 1536354
+      - 1659636
+      - 1652606
+    envList:
+      - localhost
+      - 10.198.199.160 #dev
+      - fmo-mfe-dev.uk.dev.net #dev
+      - uklvadapp1341.uk.dev.net #uat
+      - uklvadapp1342.uk.dev.net #uat
+      - uklvadapp1343.uk.dev.net #uat
+      - uklvadapp1344.uk.dev.net #uat
+      - uklvadapp1345.uk.dev.net #uat
+      - uklvadapp1346.uk.dev.net #uat
+    attrList:
+      - uid
+      - cn
+      - givenName
+      - fullName
+      - sn
+      - mail
+      - preferredLocale
+      - co
+      - title
+      - description
+      - psEmplStatus
+
+scb:
+  fmaa:
+    host: ${FMAA_HOST}
+    verificationPath: ${scb.fmaa.host}/introspect?app_id=FMO_PORTAL&access_token=%s
+    connectTimeout: 5000 #ms
+    readTimeout: 5000 #ms
+    creationEnabled: true
+  ems2:
+    connectTimeout: 5000 #ms
+    readTimeout: 5000 #ms
+    host: ${EMS2_HTTPS_HOST}
+    userRoles: ${scb.ems2.host}/ems2/rest/account/%s
+    newUserAuthorizationOnEntity: ${scb.ems2.host}/ems2/rest/entitlements/entitlementList
+    adminModuleEntity: FMO PORTAL ADMIN
+  mfa:
+    headers:
+      X-Cert: ${MFA_CERT}
+    accessToken: /access_token
+    connectTimeout: 10 #seconds
+    readTimeout: 30 #seconds
+    redirectUri: ${MFA_REDIRECT_URI}
+    grantType: authorization_code
+  entra:
+    tenant_id: cd823f6b-31c5-4241-b504-3707cbc03fb7
+    client_id: 80c8b904-1b64-443b-a651-7548764d534d
+    scope: openid
+    client_assertion_type: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+    grant_type: authorization_code
+    redirect_uri: https://fmo-mfe.uk.dev.net:8453/mfa/callback
+    entra_token_endpoint: https://login.microsoftonline.com/${scb.entra.tenant_id}/oauth2/v2.0/token
+    client_cert_path: file:/Users/1639796/code/scb/BE/51358-single-ui-bff/src/main/resources/certs/ssl_certificate_dev.crt
+    client_key_path: file:/Users/1639796/code/scb/BE/51358-single-ui-bff/src/main/resources/certs/ssl_certificate_dev.key
+    connectTimeout: 10 #seconds
+    readTimeout: 30 #seconds
+    proxyHost: gateway.zscloud.net
+    proxyPort: 443
+
+ratanone:
+  security:
+    auth-service: lb://SINGLE-UI-BFF
+    token-header-name: x-token
+  open-apis:
+    auto-startup: true
+    api-gateway-url: ${API_GATEWAY_URL}
+    api-gateway-token: ${API_GATEWAY_TOKEN}
+    apis:
+      - name: single-ui-bff@extend
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v2/sso/extend
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v2/sso/extend
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: Extend
+      - name: single-ui-bff@refreshtoken
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v2/sso/refreshtoken
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v2/sso/refreshtoken
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: RefreshToken
+      - name: single-ui-bff@v2login
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v2/sso/login
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v2/sso/login
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V2Login
+      - name: single-ui-bff@v2relogin
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v2/sso/relogin
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v2/sso/relogin
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V2Relogin
+      - name: single-ui-bff@v2validate
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v2/sso/validate
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v2/sso/validate
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V2Validate
+      - name: single-ui-bff@v2logout
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v2/sso/logout
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v2/sso/logout
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V2Logout
+      - name: single-ui-bff@v1AnalyticsPrint
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/print
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/print
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1AnalyticsPrint
+      - name: single-ui-bff@v1Analytics
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/analytics
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/analytics
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1Analytics
+      - name: single-ui-bff@v1CategoryActive
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: GET
+          path: /v1/fmo/admin/category/active
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/category/active
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1CategoryActive
+      - name: single-ui-bff@v1CategoryUpdate
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/category/update
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/category/update
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1CategoryUpdate
+      - name: single-ui-bff@v1CategoryCreate
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/category/create
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/category/create
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1CategoryCreate
+      - name: single-ui-bff@v1CategoryGet
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/category/data
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/category/data
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1CategoryGet
+      - name: single-ui-bff@v1CategoryGetAudit
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/category/audit
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/category/audit
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1CategoryGetAudit
+      - name: single-ui-bff@v1TileActive
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: GET
+          path: /v1/fmo/admin/tile/active
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/tile/active
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1TileActive
+      - name: single-ui-bff@v1TileUpdate
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/tile/update
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/tile/update
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1TileUpdate
+      - name: single-ui-bff@v1TileCreate
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/tile/create
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/tile/create
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1TileCreate
+      - name: single-ui-bff@v1TileGet
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/tile/data
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/tile/data
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1TileGet
+      - name: single-ui-bff@v1TileGetAudit
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/tile/audit
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/tile/audit
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1TileGetAudit
+      - name: single-ui-bff@v1ImportMapActive
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: GET
+          path: /v1/fmo/admin/importmap/active
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/importmap/active
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1ImportMapActive
+      - name: single-ui-bff@v1ImportMapUpdate
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/importmap/update
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/importmap/update
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: v1ImportMapUpdate
+      - name: single-ui-bff@v1ImportMapCreate
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/importmap/create
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/importmap/create
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: v1ImportMapCreate
+      - name: single-ui-bff@v1ImportMapGet
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/importmap/data
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/importmap/data
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: v1ImportMapGet
+      - name: single-ui-bff@v1ImportMapGetAudit
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/importmap/audit
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/importmap/audit
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: V1ImportMapGetAudit
+      - name: single-ui-bff@v1ConfigUpload
+        skipApiDefinitionValidation: true
+        entrypoint:
+          method: POST
+          path: /v1/fmo/admin/config/upload
+        endpoint:
+          service: lb://SINGLE-UI-BFF
+          path: /v1/fmo/admin/config/upload
+        auth:
+          required: false
+        audit:
+          type: Access
+          action: v1ConfigUpload

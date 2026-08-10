@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.environment }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "ratan-spring-boot.name" . }}
+    chart: {{ template "ratan-spring-boot.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    environment: {{ .Values.environment }}
+data:
+  bootstrap-{{ .Values.environment }}.yaml: |-
+    spring:
+      application:
+        name: {{ .Release.Name }}
+      cloud:
+        discovery:
+          enabled: false
+        service-registry:
+          auto-registration:
+            enabled: false
+        consul:
+          discovery:
+            enabled: false
+            register: false
+          config:
+            enabled: true
+            format: YAML
+            acl-token: ${CONSUL_TOKEN}
+            prefix: ratan-backend-config/${RATAN_ENV}
+            watch:
+              enabled: false
+          host: ${CONSUL_HOST}
+          port: ${CONSUL_PORT}
+        config:
+          discovery:
+            enabled: false
+    eureka:
+      client:
+        enabled: false
+        serviceUrl:
+          registerWithEureka: false
+    LOGSTASH_URL: ''
