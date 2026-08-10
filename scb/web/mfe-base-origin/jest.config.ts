@@ -8,6 +8,12 @@ export default {
   rootDir: ".",
   coverageDirectory: "./coverage",
   coverageReporters: ["text", "lcov", "cobertura"],
+  coverageThreshold: {
+    global: {
+      branches: 90,
+      lines: 90,
+    },
+  },
   moduleFileExtensions: ["js", "ts", "tsx"],
   moduleNameMapper: {
     "\\.(css)$": "identity-obj-proxy",
