@@ -47,7 +47,7 @@ management:
         exclude: heapdump
 
 ELASTIC_HOST: https://uklvadrat0008a.pi.dev.net:9200
-ELASTIC_API_KEY: ApiKey
+# ELASTIC_API_KEY is supplied by the deployment secret store.
 ELASTIC_API_VALUE: MkM3emZaVUJVZDlwSFRjVndVSUg6WHdaR0huN3hSckdJOGFiUUpyMWptQQ==
 
 # Ratan Cipher Key
@@ -55,7 +55,7 @@ RATAN_CIPHER_KEY: T3FxMUiMhvxJVCKxQ2jB6ho2IyVPqR
 
 # Redis
 REDIS_CLUSTER_NODES: 10.198.24.247:6379,10.198.24.247:6380,10.198.24.249:6379,10.198.24.249:6380,10.198.24.251:6379,10.198.24.251:6380
-REDIS_JANUS: RatanOne
+# REDIS_JANUS is supplied by the deployment secret store.
 
 # Kafka
 KAFKA_CLUSTER_BROKERS: 10.198.24.247:9092,10.198.24.249:9092,10.198.24.251:9092
@@ -94,7 +94,7 @@ PGSL_RDB_BATCH_URL: jdbc:postgresql://uklvaddbs097.uk.dev.net:6524/ratanone_fmrp
 # API_GATEWAY
 API_GATEWAY_URL: https://uklvadrat0008a.pi.dev.net:8868
 RATANONE_API_GATEWAY_URL: ${API_GATEWAY_URL}
-API_GATEWAY_TOKEN: 26WKYrzVSIknVa&R$3nz
+# API_GATEWAY_TOKEN is supplied by the deployment secret store.
 
 API_WHITELIST: 10.9.161.118,10.198.24.59,10.198.24.247,10.198.24.248,10.198.24.249,10.198.24.250,10.198.24.251
 
@@ -103,23 +103,23 @@ DQSL_USERNAME: svc.ratanone.dev
 DQSL_JANUS: ENC(SXL7Hpi/fFmYClDRYs2sK2j4Z2EHWEjwcuaD2Ukw2XzQxWjQWmCe1Q==)
 DQSL_CIPHER_KEY: ${RATAN_CIPHER_KEY}
 DQSL_JKS: dqsldev.jks
-DQSL_JKS_JANUS: ratanone
+# DQSL_JKS_JANUS is supplied by the deployment secret store.
 
 #Comment since stella api dev is available for uat testing, 6/8/2021
 # stella ambassador
 FMAA_HOST: https://fmaauat.gdc.standardchartered.com/v1/fmaa/oauth2
 FMAA_CERT_PATH:
 FMAA_ACCOUNT: RATAN_PROD
-FMAA_JANUS: dX7BN*qnEV9LAAh62Q4hFNm1x
+# FMAA_JANUS is supplied by the deployment secret store.
 STELLA_ENV: dev-6
 STELLA_ACCOUNT: RTN_SBR_DEV
 STELLA_JANUS: ENC(mGA2479WP4n4EISraz252fUsDUM+3ErX)
 STELLA_SSL_ENABLED: true
-STELLA_KEY_JANUS: stellakeypass
+# STELLA_KEY_JANUS is supplied by the deployment secret store.
 STELLA_KEYSTORE_LOCATION: /apps/ratanrt/ssl/java/ratan_stella_keystore_uat.jks
-STELLA_KEYSTORE_JANUS: stellakeypass
+# STELLA_KEYSTORE_JANUS is supplied by the deployment secret store.
 STELLA_TRUSTSTORE_LOCATION: /apps/ratanrt/ssl/java/ratan_truststore_fmrp2.jks
-STELLA_TRUSTSTORE_JANUS: ratanone
+# STELLA_TRUSTSTORE_JANUS is supplied by the deployment secret store.
 
 TDSX_QUERY: https://sabre-dev-cloud-global.uk.standardchartered.com/fmrp-tdsx-service/stage/auth/TDSXQuery
 TDSX_USER_ID: RATAN_PROD
@@ -130,17 +130,17 @@ TDSX_GRPC_PORT: 31075
 #STELLA_ACCOUNT: RTN_SBR_DEV
 #STELLA_JANUS: ENC(mGA2479WP4n4EISraz252fUsDUM+3ErX)
 #STELLA_SSL_ENABLED: true
-#STELLA_KEY_JANUS: stellakeypass
+# STELLA_KEY_JANUS is supplied by the deployment secret store.
 #STELLA_KEYSTORE_LOCATION: /apps/ratanrt/ssl/java/ratan_stella_keystore_uat.jks
-#STELLA_KEYSTORE_JANUS: stellakeypass
+# STELLA_KEYSTORE_JANUS is supplied by the deployment secret store.
 #STELLA_TRUSTSTORE_LOCATION: /apps/ratanrt/ssl/java/ratan_truststore_dev.jks
-#STELLA_TRUSTSTORE_JANUS: sabrertfdev
+# STELLA_TRUSTSTORE_JANUS is supplied by the deployment secret store.
 
 ES_NODES: 10.198.24.247:9200,10.198.24.249:9200,10.198.24.251:9200
 
 TDS3_ENV: tlclus3
 TDS3_ACCOUNT: ${FMAA_ACCOUNT}
-TDS3_PWD: ${FMAA_JANUS} #Standard@123
+TDS3_PWD: ${FMAA_JANUS}
 TDS3_TRADE_INDEX: tl_stellachina_trades
 TDS3_CASHFLOW_INDEX: tl_stellachina_cashflows
 TDS3_FIXING_INDEX: tl_stellachina_fixings
@@ -315,9 +315,9 @@ HASHICORP_SWITCH_ON: true
 HASHICORP_CONFIG_INFO: |
   {
     "keyStoreFile": "/apps/ratanrt/ssl/java/solace_ratan_keystore_fmrp2.jks",
-    "keyStoreSecret": "ratanone",
+    "keyStoreSecret": "${HASHICORP_KEY_STORE_SECRET}",
     "trustStoreFile": "/apps/ratanrt/ssl/java/solace_ratan_truststore_fmrp2.jks",
-    "trustStoreSecret": "ratanone",
+    "trustStoreSecret": "${HASHICORP_TRUST_STORE_SECRET}",
     "tokenUrl": "https://vault-dev.sc.net:8200/v1/ccib/auth/cert/login",
     "tokenParamMap": {"name":"51358_global_app_role"},
     "connectTimeOut": 10000,

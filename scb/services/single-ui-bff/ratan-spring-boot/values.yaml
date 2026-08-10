@@ -42,7 +42,7 @@ hostAliases:
       - "uklvadapp192.uk"
 
 ratanTrustStore: /apps/ratanrt/ssl/java/ratan_truststore_eks.jks
-ratanTrustStoreJanus: ratanone
+ratanTrustStoreJanus: ""
 
 defaultJavaOpts: -Djava.security.egd=file:/dev/./urandom -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/apps/ratanrt -XX:+UseContainerSupport -Djavax.net.ssl.trustStore=$(RATAN_TRUST_STORE) -Djavax.net.ssl.trustStorePassword=$(RATAN_TRUST_STORE_PASSWORD)
 javaOpts: -server -Xms256M -Xmx512M -XX:MaxMetaspaceSize=256M -Dreactor.netty.http.server.accessLogEnabled=true

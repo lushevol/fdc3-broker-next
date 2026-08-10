@@ -21,7 +21,7 @@ management:
 FMAA_HOST: https://fmaauat.gdc.standardchartered.com/v1/fmaa/oauth2
 FMAA_CERT_PATH:
 FMAA_ACCOUNT: RATAN_PROD
-FMAA_JANUS: dX7BN*qnEV9LAAh62Q4hFNm1x
+# FMAA_JANUS is supplied by the deployment secret store.
 # OUD
 OUD_URL: ldaps://ukouddev.uk.standardchartered.com:1636
 OUD_SERVICE_ACCOUNT: cn=srv.ratan.001,ou=ratan,ou=apps,o=standardchartered

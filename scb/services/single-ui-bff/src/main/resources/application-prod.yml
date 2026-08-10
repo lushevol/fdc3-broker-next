@@ -43,7 +43,7 @@ RATAN_CIPHER_KEY: T3FxMUiMhvxJVCKxQ2jB6ho2IyVPqR
 
 # Redis
 REDIS_CLUSTER_NODES: 10.4.194.78:6379,10.4.194.179:6379,10.4.194.79:6379,10.4.194.180:6379,10.4.197.46:6379,10.4.197.146:6379
-REDIS_JANUS: RatanOne
+# REDIS_JANUS is supplied by the deployment secret store.
 
 # Kafka
 KAFKA_CLUSTER_BROKERS: 10.4.194.78:9092,10.4.194.179:9092,10.4.194.79:9092,10.4.194.180:9092,10.4.197.46:9092,10.4.197.146:9092
@@ -83,7 +83,7 @@ PGSL_RDB_BATCH_URL: jdbc:postgresql://uklvapdbs047.gdc.standardchartered.com:652
 # API_GATEWAY
 API_GATEWAY_URL: https://fmo-shell.gdc.standardchartered.com:8453/api
 RATANONE_API_GATEWAY_URL: ${API_GATEWAY_URL}
-API_GATEWAY_TOKEN: 5626WKYrzVSIknVa&R$3nz12
+# API_GATEWAY_TOKEN is supplied by the deployment secret store.
 
 API_WHITELIST: 10.4.194.78,10.4.194.179,10.4.194.79,10.4.194.180,10.4.197.46,10.4.197.146,10.4.137.143,10.4.138.143,10.4.137.144,10.5.139.139,10.5.139.140,10.5.139.141
 
@@ -92,7 +92,7 @@ DQSL_USERNAME: svc.ratanone.001
 DQSL_JANUS: ENC(cnaJSlaQ16g5kJFvWqywTjbp5uVy4uke)
 DQSL_CIPHER_KEY: ${RATAN_CIPHER_KEY}
 DQSL_JKS: dqsldev.jks
-DQSL_JKS_JANUS: ratanone
+# DQSL_JKS_JANUS is supplied by the deployment secret store.
 
 FMAA_HOST: https://fmaaprod.gdc.standardchartered.com/v1/fmaa/oauth2
 FMAA_CERT_PATH:
@@ -102,11 +102,11 @@ STELLA_ENV: prod
 STELLA_ACCOUNT: RATAN_PROD
 STELLA_JANUS: ENC(gUqggX7ub29xR0w2GAqkQFAJPV/NkUbZ)
 STELLA_SSL_ENABLED: true
-STELLA_KEY_JANUS: stellakeypass
+# STELLA_KEY_JANUS is supplied by the deployment secret store.
 STELLA_KEYSTORE_LOCATION: /apps/ratanrt/ssl/java/ratan_stella_keystore_prod.jks
-STELLA_KEYSTORE_JANUS: stellakeypass
+# STELLA_KEYSTORE_JANUS is supplied by the deployment secret store.
 STELLA_TRUSTSTORE_LOCATION: /apps/ratanrt/ssl/java/ratan_truststore_prod.jks
-STELLA_TRUSTSTORE_JANUS: ratanone
+# STELLA_TRUSTSTORE_JANUS is supplied by the deployment secret store.
 
 ES_NODES: 10.4.194.78:9200,10.4.194.179:9200,10.4.194.79:9200,10.4.194.180:9200,10.4.197.46:9200,10.4.197.146:9200
 
@@ -292,9 +292,9 @@ HASHICORP_SWITCH_ON: true
 HASHICORP_CONFIG_INFO: |
   {
     "keyStoreFile": "/apps/ratanrt/ssl/java/solace_ratan_keystore_prod.jks",
-    "keyStoreSecret": "ratanone",
+    "keyStoreSecret": "${HASHICORP_KEY_STORE_SECRET}",
     "trustStoreFile": "/apps/ratanrt/ssl/java/solace_ratan_truststore_prod.jks",
-    "trustStoreSecret": "ratanone",
+    "trustStoreSecret": "${HASHICORP_TRUST_STORE_SECRET}",
     "tokenUrl": "https://vault.global.standardchartered.com:8200/v1/ccib/auth/cert/login",
     "tokenParamMap": {"name":"51358_ratanone_app_role"},
     "connectTimeOut": 10000,
