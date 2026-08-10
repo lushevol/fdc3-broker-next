@@ -148,6 +148,59 @@ export function buildRuntimeRegistry({ entries, releases, origin }) {
   return validateRuntimeRegistry({ applications }, { trustedOrigins: [publicOrigin] });
 }
 
+export function buildProductionRegistryRevision({
+  revisionId,
+  environment,
+  createdAt,
+  sourceRevision,
+  runtimeRegistry,
+  releases,
+  ownershipRecords,
+}) {
+  const applications = runtimeRegistry.applications.map((entry) => {
+    const release = releases[entry.id];
+    if (!release) throw new Error(`Missing release metadata for ${entry.id}`);
+    const ownership = ownershipRecords[entry.id];
+    if (!ownership) throw new Error(`Missing ownership record for ${entry.id}`);
+    const protocolMajor = Number(entry.contractVersion.split('.')[0]);
+    if (!Number.isInteger(protocolMajor) || protocolMajor < 1) {
+      throw new Error(`Invalid application contract version for ${entry.id}`);
+    }
+    const immutableUrl = new URL(entry.manifestUrl);
+    return {
+      id: entry.id,
+      artifact: {
+        version: release.version,
+        releaseId: release.releaseId,
+        digestAlgorithm: release.digestAlgorithm,
+        digest: release.digest,
+        immutableUrl: immutableUrl.href,
+      },
+      protocolRange: { minimumMajor: protocolMajor, maximumMajor: protocolMajor },
+      capabilities: [...entry.capabilities].sort(),
+      ownership,
+      releaseEvidence: {
+        catalogUrl: `${immutableUrl.origin}/catalog/${entry.id}/${release.releaseId}.json`,
+      },
+    };
+  });
+  return {
+    schemaVersion: 1,
+    revisionId,
+    environment,
+    createdAt,
+    sourceRevision,
+    releases: Object.fromEntries(
+      applications.map(({ id, artifact }) => [
+        id,
+        { releaseId: artifact.releaseId, digest: artifact.digest },
+      ]),
+    ),
+    applications,
+    registry: runtimeRegistry,
+  };
+}
+
 export function createReleaseId(version, digest) {
   if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version))
     throw new Error(`Invalid semantic version: ${version}`);

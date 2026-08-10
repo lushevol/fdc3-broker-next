@@ -18,7 +18,7 @@
 
 ## 3. Registry control plane
 
-- [ ] 3.1 Define and test the production registry schema with artifact version/digest, immutable URL, protocol range, capabilities, ownership, and release evidence
+- [x] 3.1 Define and test the production registry schema with artifact version/digest, immutable URL, protocol range, capabilities, ownership, and release evidence
 - [x] 3.2 Create immutable registry-revision storage and a separate environment active-pointer model
 - [ ] 3.3 Implement candidate validation for schema, duplicate routes/IDs, trusted origins, artifact reachability/digest, contracts, capabilities, and signatures
 - [ ] 3.4 Implement separate authorization for artifact publication, promotion request, approval, activation, and rollback

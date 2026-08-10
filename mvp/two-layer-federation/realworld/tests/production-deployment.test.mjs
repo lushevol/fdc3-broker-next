@@ -6,6 +6,7 @@ import test from 'node:test';
 
 import {
   assertSecretFreeTree,
+  buildProductionRegistryRevision,
   buildRuntimeRegistry,
   cachePolicyForPath,
   createReleaseMetadata,
@@ -104,6 +105,114 @@ test('runtime registry uses same-origin immutable release paths', () => {
   );
   assert.doesNotThrow(() =>
     validateRuntimeRegistry(registry, { trustedOrigins: ['https://portal.example'] }),
+  );
+});
+
+test('production registry revision binds artifacts, compatibility, ownership, and evidence', () => {
+  const runtimeRegistry = buildRuntimeRegistry({
+    entries: [
+      {
+        id: 'cashflow',
+        displayName: 'Cashflow',
+        remoteName: 'mfe_cashflow',
+        exposedModule: './application',
+        basePath: '/cashflow',
+        contractVersion: '1.0.0',
+        appearanceContractVersion: '1.0.0',
+        identityContractVersion: '1.0.0',
+        capabilities: ['workspace', 'navigation'],
+      },
+    ],
+    releases: { cashflow: { releaseId: '1.2.3-sha256-deadbeef', digest: 'deadbeef' } },
+    origin: 'https://portal.example',
+  });
+  const ownership = {
+    applicationId: 'cashflow',
+    accountableTeam: 'Cashflow team',
+    supportRota: 'Cashflow on-call',
+    criticality: 'tier-2',
+    dataClassification: 'internal',
+    slo: { availabilityPercent: 99.9, activationP95Ms: 3000 },
+    releaseApprover: 'Cashflow release owner',
+    rollbackContact: 'Platform on-call',
+  };
+
+  const revision = buildProductionRegistryRevision({
+    revisionId: 'dev-42',
+    environment: 'dev',
+    createdAt: '2026-08-11T00:00:00.000Z',
+    sourceRevision: 'abc123',
+    runtimeRegistry,
+    releases: {
+      cashflow: {
+        version: '1.2.3',
+        releaseId: '1.2.3-sha256-deadbeef',
+        digestAlgorithm: 'sha256',
+        digest: 'deadbeef',
+      },
+    },
+    ownershipRecords: { cashflow: ownership },
+  });
+
+  assert.deepEqual(revision.applications, [
+    {
+      id: 'cashflow',
+      artifact: {
+        version: '1.2.3',
+        releaseId: '1.2.3-sha256-deadbeef',
+        digestAlgorithm: 'sha256',
+        digest: 'deadbeef',
+        immutableUrl:
+          'https://portal.example/artifacts/cashflow/1.2.3-sha256-deadbeef/mf-manifest.json',
+      },
+      protocolRange: { minimumMajor: 1, maximumMajor: 1 },
+      capabilities: ['navigation', 'workspace'],
+      ownership,
+      releaseEvidence: {
+        catalogUrl: 'https://portal.example/catalog/cashflow/1.2.3-sha256-deadbeef.json',
+      },
+    },
+  ]);
+  assert.equal(revision.registry, runtimeRegistry);
+});
+
+test('production registry revision rejects an application without ownership', () => {
+  const runtimeRegistry = buildRuntimeRegistry({
+    entries: [
+      {
+        id: 'cashflow',
+        displayName: 'Cashflow',
+        remoteName: 'mfe_cashflow',
+        exposedModule: './application',
+        basePath: '/cashflow',
+        contractVersion: '1.0.0',
+        appearanceContractVersion: '1.0.0',
+        capabilities: [],
+      },
+    ],
+    releases: { cashflow: { releaseId: '1.2.3-sha256-deadbeef', digest: 'deadbeef' } },
+    origin: 'https://portal.example',
+  });
+
+  assert.throws(
+    () =>
+      buildProductionRegistryRevision({
+        revisionId: 'dev-42',
+        environment: 'dev',
+        createdAt: '2026-08-11T00:00:00.000Z',
+        sourceRevision: 'abc123',
+        runtimeRegistry,
+        releases: {
+          cashflow: {
+            version: '1.2.3',
+            releaseId: '1.2.3-sha256-deadbeef',
+            digestAlgorithm: 'sha256',
+            digest: 'deadbeef',
+          },
+        },
+        ownershipRecords: {},
+      }),
+    /missing ownership record/i,
   );
 });
 

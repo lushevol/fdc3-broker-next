@@ -51,6 +51,7 @@ Generated release bytes, registry revisions, catalog records, and certificates a
 - `scripts/package-production-deployment.mjs` scans browser output for credential-shaped content, computes a deterministic SHA-256 tree digest, and publishes without overwriting an existing release path.
 - Release paths are `artifacts/<application>/<semver>-sha256-<digest-prefix>/`.
 - Each catalog record carries the application/package identity, semantic version, source revision, build ID, full artifact digest, contract metadata, capabilities, and declared shared-runtime ranges.
+- `devops/registry/production-registry-revision.schema.json` defines the immutable promotion record: selected artifact identity and URL, protocol range, capabilities, embedded ownership, and release-evidence links. The browser continues to receive only the nested lean runtime registry.
 - `registries/revisions/<revision>.json` is immutable evidence; `registries/active/<environment>.json` is the small revalidating client pointer.
 - `environments/<environment>/host` is an atomic symlink to one immutable host release.
 - DEV and test registries select identical remote URLs and digests. Public endpoints and other non-secret environment values belong in registry/capability configuration, not rebuilt JavaScript.

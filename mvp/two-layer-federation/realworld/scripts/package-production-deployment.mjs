@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   assertSecretFreeTree,
+  buildProductionRegistryRevision,
   buildRuntimeRegistry,
   createReleaseMetadata,
   createReleaseId,
@@ -135,6 +136,12 @@ const releasePolicy = await readJson(
 );
 const cashflowRegistryEntry = sourceRegistry.applications.find(({ id }) => id === 'cashflow');
 if (!cashflowRegistryEntry) throw new Error('Missing Cashflow production registry entry');
+const ownershipRecords = {};
+for (const { id } of sourceRegistry.applications) {
+  ownershipRecords[id] = await readJson(
+    path.join(realworldRoot, 'devops', 'policy', `${id}.ownership.json`),
+  );
+}
 const hostCapabilities = [
   ...new Set(sourceRegistry.applications.flatMap(({ capabilities }) => capabilities)),
 ];
@@ -182,15 +189,15 @@ for (const environment of environments) {
     origin: publicOrigin,
   });
   const revisionId = `${environment}-${String(buildId).replace(/[^0-9A-Za-z.-]/g, '-')}`;
-  const revision = {
-    schemaVersion: 1,
+  const revision = buildProductionRegistryRevision({
     revisionId,
     environment,
     createdAt,
     sourceRevision,
-    releases: Object.fromEntries(Object.entries(releases).filter(([id]) => id !== 'portal-host')),
-    registry,
-  };
+    runtimeRegistry: registry,
+    releases: published,
+    ownershipRecords,
+  });
   await writeJsonAtomic(
     path.join(runtimeRoot, 'registries', 'revisions', `${revisionId}.json`),
     revision,
