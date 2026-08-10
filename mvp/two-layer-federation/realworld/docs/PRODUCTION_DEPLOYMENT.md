@@ -52,12 +52,14 @@ Generated release bytes, registry revisions, catalog records, and certificates a
 - Release paths are `artifacts/<application>/<semver>-sha256-<digest-prefix>/`.
 - Each catalog record carries the application/package identity, semantic version, source revision, build ID, full artifact digest, contract metadata, capabilities, and declared shared-runtime ranges.
 - `devops/registry/production-registry-revision.schema.json` defines the immutable promotion record: selected artifact identity and URL, protocol range, capabilities, embedded ownership, and release-evidence links. The browser continues to receive only the nested lean runtime registry.
-- Production candidates are validated before promotion for schema shape, duplicate IDs/routes, trusted origins, release selection, artifact reachability and digest, protocol support, required capabilities, and signature evidence. Artifact resolution and signature verification are injected so the policy remains fail-closed while enterprise services are selected.
-- `registries/revisions/<revision>.json` is immutable evidence; `registries/active/<environment>.json` is the small revalidating client pointer.
+- The candidate validator fails closed for schema shape, duplicate IDs/routes, trusted origins, release selection, artifact reachability and digest, protocol support, required capabilities, and signature evidence. Artifact resolution and signature verification are injected while enterprise services are selected. Enforcing that validator, authorization, and audit recording in the Azure DevOps promotion path remains open in tasks 3.3–3.5.
+- `registries/revisions/<revision>.json` is immutable evidence; `registries/active/<environment>.pointer.json` is the single small revalidating client pointer. The browser dereferences its immutable `revisionUrl` and validates the nested lean runtime registry, so one atomic rename changes the complete selected application set.
 - `environments/<environment>/host` is an atomic symlink to one immutable host release.
 - DEV and test registries select identical remote URLs and digests. Public endpoints and other non-secret environment values belong in registry/capability configuration, not rebuilt JavaScript.
 - `assetPrefix: 'auto'` makes remote chunks resolve from the immutable manifest location instead of localhost.
 - `devops/registry/applications.json` is the production allowlist. Verification-only and legacy-migration MVPs are intentionally excluded until they pass their own production conformance gates.
+
+The packaging command bootstraps DEV/test pointers for the local Wave 0 deployment only. It is not the production promotion path and must not be granted production registry credentials.
 
 ## Approved delivery topology
 
@@ -95,7 +97,7 @@ Rollback does not rebuild or overwrite assets:
 
 1. Select the previous known-good revision from `registries/revisions/`.
 2. Validate its application URLs and catalog digests.
-3. Atomically replace only the environment active registry file/pointer.
+3. Atomically replace only the environment active pointer.
 4. Reload no application assets; new page loads select the previous revision.
 5. Notify already-active sessions and request a controlled refresh for a critical incident. Never hot-replace a loaded Module Federation share scope.
 

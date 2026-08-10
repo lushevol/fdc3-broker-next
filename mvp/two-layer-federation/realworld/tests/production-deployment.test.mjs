@@ -13,9 +13,11 @@ import {
   authorizeReleaseOperation,
   buildProductionRegistryRevision,
   buildRuntimeRegistry,
+  cacheControlForPath,
   cachePolicyForPath,
   createPromotionAuditEvent,
   createReleaseMetadata,
+  createReleaseId,
   digestDirectory,
   recordPromotionAuditEvent,
   validateProductionRegistryCandidate,
@@ -167,7 +169,55 @@ test('runtime registry uses same-origin immutable release paths', () => {
   );
 });
 
+test('runtime registry validation rejects malformed entries and missing releases', () => {
+  const entry = {
+    id: 'cashflow',
+    basePath: '/cashflow',
+    manifestUrl: 'https://portal.example/artifacts/cashflow/1.0.0/mf-manifest.json',
+  };
+  assert.throws(() => validateRuntimeRegistry(), /at least one application/i);
+  assert.throws(
+    () => validateRuntimeRegistry({ applications: [entry, { ...entry }] }),
+    /duplicate application id/i,
+  );
+  assert.throws(
+    () => validateRuntimeRegistry({ applications: [{ ...entry, manifestUrl: 'relative.json' }] }),
+    /absolute same-origin/i,
+  );
+  assert.throws(
+    () =>
+      validateRuntimeRegistry({
+        applications: [
+          {
+            ...entry,
+            manifestUrl: 'http://portal.example/artifacts/cashflow/1.0.0/mf-manifest.json',
+          },
+        ],
+      }),
+    /absolute same-origin/i,
+  );
+  assert.throws(
+    () =>
+      validateRuntimeRegistry({
+        applications: [
+          {
+            ...entry,
+            manifestUrl: 'https://portal.example/artifacts/cashflow/1.0.0/remoteEntry.js',
+          },
+        ],
+      }),
+    /select mf-manifest/i,
+  );
+  assert.throws(
+    () =>
+      buildRuntimeRegistry({ entries: [entry], releases: {}, origin: 'https://portal.example' }),
+    /missing release identity/i,
+  );
+});
+
 test('production registry revision binds artifacts, compatibility, ownership, and evidence', () => {
+  const digest = 'd'.repeat(64);
+  const releaseId = '1.2.3-sha256-dddddddddddddddd';
   const runtimeRegistry = buildRuntimeRegistry({
     entries: [
       {
@@ -182,7 +232,7 @@ test('production registry revision binds artifacts, compatibility, ownership, an
         capabilities: ['workspace', 'navigation'],
       },
     ],
-    releases: { cashflow: { releaseId: '1.2.3-sha256-deadbeef', digest: 'deadbeef' } },
+    releases: { cashflow: { releaseId, digest } },
     origin: 'https://portal.example',
   });
   const ownership = {
@@ -205,9 +255,9 @@ test('production registry revision binds artifacts, compatibility, ownership, an
     releases: {
       cashflow: {
         version: '1.2.3',
-        releaseId: '1.2.3-sha256-deadbeef',
+        releaseId,
         digestAlgorithm: 'sha256',
-        digest: 'deadbeef',
+        digest,
       },
     },
     ownershipRecords: { cashflow: ownership },
@@ -218,17 +268,16 @@ test('production registry revision binds artifacts, compatibility, ownership, an
       id: 'cashflow',
       artifact: {
         version: '1.2.3',
-        releaseId: '1.2.3-sha256-deadbeef',
+        releaseId,
         digestAlgorithm: 'sha256',
-        digest: 'deadbeef',
-        immutableUrl:
-          'https://portal.example/artifacts/cashflow/1.2.3-sha256-deadbeef/mf-manifest.json',
+        digest,
+        immutableUrl: `https://portal.example/artifacts/cashflow/${releaseId}/mf-manifest.json`,
       },
       protocolRange: { minimumMajor: 1, maximumMajor: 1 },
       capabilities: ['navigation', 'workspace'],
       ownership,
       releaseEvidence: {
-        catalogUrl: 'https://portal.example/catalog/cashflow/1.2.3-sha256-deadbeef.json',
+        catalogUrl: `https://portal.example/catalog/cashflow/${releaseId}.json`,
       },
     },
   ]);
@@ -294,8 +343,87 @@ test('production candidate validation enforces every promotion gate', async (con
     delete candidate.applications[0].artifact.version;
     await assert.rejects(
       () => validateProductionRegistryCandidate(candidate, options(digest)),
-      /schema.*artifact version/i,
+      /schema.*artifact/i,
     );
+  });
+
+  await context.test('rejects all schema-invalid production fields', async () => {
+    const cases = [
+      ['top-level fields', (candidate) => (candidate.unexpected = true)],
+      ['schema version', (candidate) => (candidate.schemaVersion = 2)],
+      ['revision id', (candidate) => (candidate.revisionId = '')],
+      ['environment', (candidate) => (candidate.environment = 'DEV')],
+      ['timestamp', (candidate) => (candidate.createdAt = 'not-a-date')],
+      ['source revision', (candidate) => (candidate.sourceRevision = '')],
+      ['release selections', (candidate) => (candidate.releases = {})],
+      ['release selection fields', (candidate) => (candidate.releases.cashflow.extra = true)],
+      ['release id', (candidate) => (candidate.releases.cashflow.releaseId = '')],
+      ['release digest', (candidate) => (candidate.releases.cashflow.digest = 'bad')],
+      ['applications', (candidate) => (candidate.applications = [])],
+      ['runtime registry object', (candidate) => (candidate.registry = null)],
+      ['runtime registry fields', (candidate) => (candidate.registry.extra = true)],
+      ['runtime registry applications', (candidate) => (candidate.registry.applications = [])],
+      ['application fields', (candidate) => (candidate.applications[0].extra = true)],
+      ['application id', (candidate) => (candidate.applications[0].id = 'Cashflow')],
+      ['artifact fields', (candidate) => (candidate.applications[0].artifact.extra = true)],
+      ['artifact version', (candidate) => (candidate.applications[0].artifact.version = 'v1')],
+      ['artifact release id', (candidate) => (candidate.applications[0].artifact.releaseId = '')],
+      [
+        'artifact digest',
+        (candidate) => (candidate.applications[0].artifact.digestAlgorithm = 'sha1'),
+      ],
+      [
+        'artifact URL',
+        (candidate) =>
+          (candidate.applications[0].artifact.immutableUrl = 'http://portal.example/file'),
+      ],
+      ['protocol fields', (candidate) => (candidate.applications[0].protocolRange.extra = true)],
+      ['protocol range', (candidate) => (candidate.applications[0].protocolRange.minimumMajor = 0)],
+      ['capabilities type', (candidate) => (candidate.applications[0].capabilities = null)],
+      [
+        'capabilities values',
+        (candidate) => (candidate.applications[0].capabilities = ['navigation', 'navigation']),
+      ],
+      ['ownership presence', (candidate) => (candidate.applications[0].ownership = null)],
+      ['ownership fields', (candidate) => (candidate.applications[0].ownership.extra = true)],
+      [
+        'ownership values',
+        (candidate) => (candidate.applications[0].ownership.accountableTeam = ''),
+      ],
+      ['criticality', (candidate) => (candidate.applications[0].ownership.criticality = 'tier-0')],
+      [
+        'classification',
+        (candidate) => (candidate.applications[0].ownership.dataClassification = 'secret'),
+      ],
+      ['SLO fields', (candidate) => (candidate.applications[0].ownership.slo.extra = true)],
+      [
+        'SLO values',
+        (candidate) => (candidate.applications[0].ownership.slo.availabilityPercent = 101),
+      ],
+      ['evidence presence', (candidate) => (candidate.applications[0].releaseEvidence = null)],
+      ['evidence fields', (candidate) => (candidate.applications[0].releaseEvidence.extra = true)],
+      [
+        'catalog URL',
+        (candidate) =>
+          (candidate.applications[0].releaseEvidence.catalogUrl = 'http://portal.example/catalog'),
+      ],
+      [
+        'signature URL',
+        (candidate) =>
+          (candidate.applications[0].releaseEvidence.signatureUrl =
+            'http://portal.example/signature'),
+      ],
+    ];
+
+    for (const [label, mutate] of cases) {
+      const { candidate, digest } = candidateFixture();
+      mutate(candidate);
+      await assert.rejects(
+        () => validateProductionRegistryCandidate(candidate, options(digest)),
+        /production registry schema/i,
+        label,
+      );
+    }
   });
 
   await context.test('rejects duplicate routes or identities', async () => {
@@ -308,6 +436,58 @@ test('production candidate validation enforces every promotion gate', async (con
       () => validateProductionRegistryCandidate(candidate, options(digest)),
       /duplicate basePath/i,
     );
+  });
+
+  await context.test('rejects inconsistent candidate and runtime selections', async () => {
+    {
+      const { candidate, digest } = candidateFixture();
+      candidate.applications.push(structuredClone(candidate.applications[0]));
+      await assert.rejects(
+        () => validateProductionRegistryCandidate(candidate, options(digest)),
+        /duplicate production application id/i,
+      );
+    }
+    {
+      const { candidate, digest } = candidateFixture();
+      candidate.applications[0].id = 'other';
+      candidate.applications[0].ownership.applicationId = 'other';
+      candidate.releases.other = candidate.releases.cashflow;
+      delete candidate.releases.cashflow;
+      await assert.rejects(
+        () => validateProductionRegistryCandidate(candidate, options(digest)),
+        /missing runtime registry entry/i,
+      );
+    }
+    {
+      const { candidate, digest } = candidateFixture();
+      candidate.applications[0].artifact.immutableUrl =
+        'https://portal.example/artifacts/cashflow/other/mf-manifest.json';
+      await assert.rejects(
+        () => validateProductionRegistryCandidate(candidate, options(digest)),
+        /artifact URL mismatch/i,
+      );
+    }
+    {
+      const { candidate, digest } = candidateFixture();
+      candidate.releases.cashflow.digest = 'e'.repeat(64);
+      await assert.rejects(
+        () => validateProductionRegistryCandidate(candidate, options(digest)),
+        /release selection mismatch/i,
+      );
+    }
+    {
+      const { candidate, digest } = candidateFixture();
+      candidate.registry.applications.push({
+        ...candidate.registry.applications[0],
+        id: 'other',
+        basePath: '/other',
+        manifestUrl: 'https://portal.example/artifacts/other/1.0.0/mf-manifest.json',
+      });
+      await assert.rejects(
+        () => validateProductionRegistryCandidate(candidate, options(digest)),
+        /application sets differ/i,
+      );
+    }
   });
 
   await context.test('rejects an untrusted artifact origin', async () => {
@@ -383,7 +563,36 @@ test('production candidate validation enforces every promotion gate', async (con
         }),
       /invalid signature/i,
     );
+    candidate.applications[0].releaseEvidence.signatureUrl =
+      'https://untrusted.example/signature.sigstore.json';
+    await assert.rejects(
+      () => validateProductionRegistryCandidate(candidate, options(digest)),
+      /signature uses an untrusted origin/i,
+    );
   });
+
+  await context.test(
+    'fails closed when digest and signature services are unavailable',
+    async () => {
+      const { candidate, digest } = candidateFixture();
+      await assert.rejects(
+        () =>
+          validateProductionRegistryCandidate(candidate, {
+            ...options(digest),
+            resolveArtifactDigest: undefined,
+          }),
+        /digest resolver is not configured/i,
+      );
+      await assert.rejects(
+        () =>
+          validateProductionRegistryCandidate(candidate, {
+            ...options(digest),
+            verifySignature: undefined,
+          }),
+        /signature verifier is not configured/i,
+      );
+    },
+  );
 });
 
 test('release authorization separates publication, promotion, activation, and rollback', async () => {
@@ -436,6 +645,15 @@ test('release authorization separates publication, promotion, activation, and ro
       ),
     /separation of duties/i,
   );
+  assert.throws(
+    () =>
+      authorizeReleaseOperation({ operation: 'unknown', principal: principals.activation }, policy),
+    /unknown release operation/i,
+  );
+  assert.throws(
+    () => authorizeReleaseOperation({ operation: 'activation', principal: null }, policy),
+    /authenticated principal/i,
+  );
 });
 
 test('promotion audit records complete append-only release evidence', async () => {
@@ -487,6 +705,48 @@ test('promotion audit records complete append-only release evidence', async () =
   });
 });
 
+test('promotion audit validation fails closed before persistence', async () => {
+  const valid = {
+    eventId: 'promotion-dev-42',
+    environment: 'dev',
+    requester: { id: 'requester' },
+    approver: { id: 'approver' },
+    sourceRevision: 'dev-41',
+    targetRevision: 'dev-42',
+    selectedArtifacts: [
+      {
+        applicationId: 'cashflow',
+        version: '1.2.3',
+        digest: 'd'.repeat(64),
+        evidence: { catalogUrl: 'https://portal.example/catalog/cashflow/1.2.3.json' },
+      },
+    ],
+    timestamps: {
+      requestedAt: '2026-08-11T00:00:00.000Z',
+      approvedAt: '2026-08-11T00:01:00.000Z',
+      completedAt: '2026-08-11T00:02:00.000Z',
+    },
+    outcome: { status: 'succeeded' },
+  };
+  const cases = [
+    ['identifiers', (event) => delete event.eventId],
+    ['identities', (event) => delete event.requester],
+    ['different identities', (event) => (event.approver.id = event.requester.id)],
+    ['revisions', (event) => delete event.targetRevision],
+    ['selected artifacts', (event) => (event.selectedArtifacts = [])],
+    ['artifact evidence', (event) => (event.selectedArtifacts[0].digest = 'bad')],
+    ['timestamps', (event) => delete event.timestamps.completedAt],
+    ['outcome', (event) => (event.outcome.status = 'unknown')],
+  ];
+  for (const [label, mutate] of cases) {
+    const event = structuredClone(valid);
+    mutate(event);
+    assert.throws(() => createPromotionAuditEvent(event), undefined, label);
+  }
+  const auditPath = path.join(await mkdtemp(path.join(tmpdir(), 'invalid-audit-')), 'audit.jsonl');
+  await assert.rejects(() => recordPromotionAuditEvent(auditPath, { eventId: 'incomplete' }));
+});
+
 test('registry activation is atomic and rollback restores the previous revision', async () => {
   const runtimeRoot = await mkdtemp(path.join(tmpdir(), 'realworld-registry-'));
   const revisionRoot = path.join(runtimeRoot, 'registries', 'revisions');
@@ -516,9 +776,7 @@ test('registry activation is atomic and rollback restores the previous revision'
   await activateRegistryRevision({ runtimeRoot, environment: 'dev', revisionId: 'dev-1' });
   await activateRegistryRevision({ runtimeRoot, environment: 'dev', revisionId: 'dev-2' });
 
-  const activePath = path.join(runtimeRoot, 'registries', 'active', 'dev.json');
   const pointerPath = path.join(runtimeRoot, 'registries', 'active', 'dev.pointer.json');
-  assert.equal(JSON.parse(await readFile(activePath, 'utf8')).applications[0].id, 'cashflow-v2');
   assert.deepEqual(JSON.parse(await readFile(pointerPath, 'utf8')), {
     schemaVersion: 1,
     environment: 'dev',
@@ -536,10 +794,9 @@ test('registry activation is atomic and rollback restores the previous revision'
       }),
     /missing registry revision/i,
   );
-  assert.equal(JSON.parse(await readFile(activePath, 'utf8')).applications[0].id, 'cashflow-v2');
+  assert.equal(JSON.parse(await readFile(pointerPath, 'utf8')).revisionId, 'dev-2');
 
   await rollbackRegistryRevision({ runtimeRoot, environment: 'dev' });
-  assert.equal(JSON.parse(await readFile(activePath, 'utf8')).applications[0].id, 'cashflow-v1');
   assert.deepEqual(JSON.parse(await readFile(pointerPath, 'utf8')), {
     schemaVersion: 1,
     environment: 'dev',
@@ -547,6 +804,41 @@ test('registry activation is atomic and rollback restores the previous revision'
     revisionUrl: '/registries/revisions/dev-1.json',
     previousRevisionId: 'dev-2',
   });
+});
+
+test('registry activation rejects invalid targets and missing rollback state', async () => {
+  const runtimeRoot = await mkdtemp(path.join(tmpdir(), 'realworld-registry-invalid-'));
+  const revisionRoot = path.join(runtimeRoot, 'registries', 'revisions');
+  await mkdir(revisionRoot, { recursive: true });
+  await writeFile(
+    path.join(revisionRoot, 'test-1.json'),
+    JSON.stringify({ revisionId: 'test-1', environment: 'test', registry: { applications: [] } }),
+  );
+  await writeFile(
+    path.join(revisionRoot, 'dev-broken.json'),
+    JSON.stringify({ revisionId: 'dev-broken', environment: 'dev' }),
+  );
+  await assert.rejects(
+    () => activateRegistryRevision({ runtimeRoot, environment: 'dev', revisionId: 'test-1' }),
+    /does not belong/i,
+  );
+  await assert.rejects(
+    () => activateRegistryRevision({ runtimeRoot, environment: 'dev', revisionId: 'dev-broken' }),
+    /no complete runtime registry/i,
+  );
+  await assert.rejects(
+    () => rollbackRegistryRevision({ runtimeRoot, environment: 'dev' }),
+    /missing active registry/i,
+  );
+  await mkdir(path.join(runtimeRoot, 'registries', 'active'), { recursive: true });
+  await writeFile(
+    path.join(runtimeRoot, 'registries', 'active', 'dev.pointer.json'),
+    JSON.stringify({ revisionId: 'dev-1' }),
+  );
+  await assert.rejects(
+    () => rollbackRegistryRevision({ runtimeRoot, environment: 'dev' }),
+    /no previous known-good/i,
+  );
 });
 
 test('registry validation rejects duplicate routes and mutable or external URLs', () => {
@@ -600,6 +892,18 @@ test('cache policy separates immutable bytes from active control-plane pointers'
   assert.equal(cachePolicyForPath('/registries/revisions/dev-001.json'), 'immutable');
   assert.equal(cachePolicyForPath('/registry.json'), 'revalidate');
   assert.equal(cachePolicyForPath('/index.html'), 'revalidate');
+  assert.equal(
+    cacheControlForPath('/artifacts/cashflow/1.0.0/app.js'),
+    'public, max-age=31536000, immutable',
+  );
+  assert.equal(cacheControlForPath('/registry.json'), 'no-store, max-age=0');
+});
+
+test('release identity rejects invalid versions and digests', () => {
+  const digest = 'd'.repeat(64);
+  assert.equal(createReleaseId('1.2.3', digest), '1.2.3-sha256-dddddddddddddddd');
+  assert.throws(() => createReleaseId('v1', digest), /invalid semantic version/i);
+  assert.throws(() => createReleaseId('1.2.3', 'bad'), /SHA-256/i);
 });
 
 test('secret scan rejects credential-shaped browser output', async () => {

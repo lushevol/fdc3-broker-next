@@ -37,7 +37,7 @@
     "realworld:deploy:build": "npm run realworld:build:packages && npm --workspace @fm/mfe-cashflow run build && npm --workspace @fm/portal-host run build && node mvp/two-layer-federation/realworld/scripts/generate-local-production-certificate.mjs && npm run realworld:deploy:package && npm run realworld:deploy:verify",
     "realworld:deploy:up": "npm run realworld:deploy:build && docker-compose -f mvp/two-layer-federation/realworld/devops/docker-compose.production.yml up --build -d",
     "realworld:deploy:down": "docker-compose -f mvp/two-layer-federation/realworld/devops/docker-compose.production.yml down",
-    "realworld:deploy:verify": "node --test mvp/two-layer-federation/realworld/tests/production-deployment.test.mjs && node mvp/two-layer-federation/realworld/scripts/verify-production-deployment.mjs",
+    "realworld:deploy:verify": "node --experimental-test-coverage --test-coverage-lines=90 --test-coverage-branches=90 --test mvp/two-layer-federation/realworld/tests/production-deployment.test.mjs && node mvp/two-layer-federation/realworld/scripts/verify-production-deployment.mjs",
     "realworld:deploy:verify:live": "npm run realworld:deploy:verify && node mvp/two-layer-federation/realworld/scripts/verify-production-deployment.mjs --url=https://localhost:9443 --url=https://localhost:9543",
     "realworld:deploy:test:e2e": "playwright test --config=mvp/two-layer-federation/realworld/playwright.production.config.ts",
     "realworld:check": "npm run realworld:verify:boundaries && npm run realworld:lint && npm run realworld:test && npm run realworld:verify:packages && npm run realworld:build",

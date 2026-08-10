@@ -39,7 +39,6 @@ export async function activateRegistryRevision({ runtimeRoot, environment, revis
   const activeRoot = path.join(runtimeRoot, 'registries', 'active');
   const pointerPath = path.join(activeRoot, `${environment}.pointer.json`);
   const previousPointer = await readJsonIfPresent(pointerPath);
-  await writeJsonAtomic(path.join(activeRoot, `${environment}.json`), revision.registry);
   await writeJsonAtomic(pointerPath, {
     schemaVersion: 1,
     environment,
