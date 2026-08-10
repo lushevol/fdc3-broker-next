@@ -117,6 +117,12 @@ approval, activation, and rollback. Authorization fails closed for missing
 roles, prohibits a requester from approving the same promotion, and prevents
 an artifact publisher from activating its own release.
 
+Promotion pipelines write append-only JSONL audit events containing requester,
+approver, environment, source and target revisions, selected application
+versions and digests, evidence URLs, request/approval/completion timestamps, and
+the final outcome. Incomplete or self-approved events are rejected before they
+can be recorded.
+
 ## Decision gates not simulated as complete
 
 The local POC chooses nginx static delivery and self-signed TLS only to prove the deployable contract. CDN-backed object storage with a single trusted HTTPS origin is approved for production browser delivery, with OCI retained as optional transport. Before production traffic, owners must still approve: enterprise PKI, workload identity, signing/attestation service, SBOM format/tool, vulnerability and license thresholds, audit store/retention, production source-map access, regional replication, RPO/RTO, monitoring backend, and cohort gateway. Azure DevOps publication and activation pipelines must use separate identities and approvals.

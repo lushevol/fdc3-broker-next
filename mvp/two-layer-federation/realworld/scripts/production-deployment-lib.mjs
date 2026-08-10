@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readdir, readFile } from 'node:fs/promises';
+import { appendFile, mkdir, readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
@@ -340,6 +340,50 @@ export function authorizeReleaseOperation(
     }
   }
   return principal;
+}
+
+export function createPromotionAuditEvent(input) {
+  if (!input.eventId || !input.environment) {
+    throw new Error('Promotion audit requires event and environment identifiers');
+  }
+  if (!input.requester?.id || !input.approver?.id) {
+    throw new Error('Promotion audit requires requester and approver identities');
+  }
+  if (input.requester.id === input.approver.id) {
+    throw new Error('Promotion audit requester and approver must be different identities');
+  }
+  if (!input.sourceRevision || !input.targetRevision) {
+    throw new Error('Promotion audit requires source and target revisions');
+  }
+  if (!Array.isArray(input.selectedArtifacts) || input.selectedArtifacts.length === 0) {
+    throw new Error('Promotion audit requires selected artifacts');
+  }
+  for (const artifact of input.selectedArtifacts) {
+    if (
+      !artifact.applicationId ||
+      !artifact.version ||
+      !/^[a-f0-9]{64}$/.test(artifact.digest ?? '') ||
+      !artifact.evidence?.catalogUrl
+    ) {
+      throw new Error('Promotion audit selected artifact evidence is incomplete');
+    }
+  }
+  if (
+    !input.timestamps?.requestedAt ||
+    !input.timestamps?.approvedAt ||
+    !input.timestamps?.completedAt
+  ) {
+    throw new Error('Promotion audit requires request, approval, and completion timestamps');
+  }
+  if (!['succeeded', 'failed', 'rejected', 'rolled-back'].includes(input.outcome?.status)) {
+    throw new Error('Promotion audit requires a recognized outcome');
+  }
+  return { schemaVersion: 1, operation: 'promotion', ...input };
+}
+
+export async function recordPromotionAuditEvent(filePath, event) {
+  await mkdir(path.dirname(filePath), { recursive: true });
+  await appendFile(filePath, `${JSON.stringify(event)}\n`, { flag: 'a' });
 }
 
 export function createReleaseId(version, digest) {

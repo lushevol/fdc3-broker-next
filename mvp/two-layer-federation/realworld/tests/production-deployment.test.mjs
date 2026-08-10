@@ -10,8 +10,10 @@ import {
   buildProductionRegistryRevision,
   buildRuntimeRegistry,
   cachePolicyForPath,
+  createPromotionAuditEvent,
   createReleaseMetadata,
   digestDirectory,
+  recordPromotionAuditEvent,
   validateProductionRegistryCandidate,
   validateRuntimeRegistry,
 } from '../scripts/production-deployment-lib.mjs';
@@ -430,6 +432,55 @@ test('release authorization separates publication, promotion, activation, and ro
       ),
     /separation of duties/i,
   );
+});
+
+test('promotion audit records complete append-only release evidence', async () => {
+  const auditRoot = await mkdtemp(path.join(tmpdir(), 'realworld-audit-'));
+  const auditPath = path.join(auditRoot, 'promotions.jsonl');
+  const input = {
+    eventId: 'promotion-dev-42',
+    environment: 'dev',
+    requester: { id: 'release-requester' },
+    approver: { id: 'release-approver' },
+    sourceRevision: 'dev-41',
+    targetRevision: 'dev-42',
+    selectedArtifacts: [
+      {
+        applicationId: 'cashflow',
+        version: '1.2.3',
+        digest: 'd'.repeat(64),
+        evidence: {
+          catalogUrl: 'https://portal.example/catalog/cashflow/1.2.3.json',
+          signatureUrl: 'https://portal.example/evidence/cashflow/1.2.3.sigstore.json',
+        },
+      },
+    ],
+    timestamps: {
+      requestedAt: '2026-08-11T00:00:00.000Z',
+      approvedAt: '2026-08-11T00:01:00.000Z',
+      completedAt: '2026-08-11T00:02:00.000Z',
+    },
+    outcome: { status: 'succeeded' },
+  };
+  const event = createPromotionAuditEvent(input);
+
+  await recordPromotionAuditEvent(auditPath, event);
+  await recordPromotionAuditEvent(auditPath, {
+    ...event,
+    eventId: 'promotion-dev-43',
+    outcome: { status: 'failed', reason: 'synthetic verification failed' },
+  });
+
+  const records = (await readFile(auditPath, 'utf8'))
+    .trim()
+    .split('\n')
+    .map((line) => JSON.parse(line));
+  assert.deepEqual(records[0], { schemaVersion: 1, operation: 'promotion', ...input });
+  assert.equal(records[1].eventId, 'promotion-dev-43');
+  assert.deepEqual(records[1].outcome, {
+    status: 'failed',
+    reason: 'synthetic verification failed',
+  });
 });
 
 test('registry validation rejects duplicate routes and mutable or external URLs', () => {
