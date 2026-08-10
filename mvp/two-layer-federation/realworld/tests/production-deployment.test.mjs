@@ -11,6 +11,7 @@ import {
   cachePolicyForPath,
   createReleaseMetadata,
   digestDirectory,
+  validateProductionRegistryCandidate,
   validateRuntimeRegistry,
 } from '../scripts/production-deployment-lib.mjs';
 
@@ -20,6 +21,57 @@ async function fixtureTree() {
   await writeFile(path.join(root, 'index.html'), '<main>release</main>');
   await writeFile(path.join(root, 'static', 'js', 'app.abc123.js'), 'export const release = 1;');
   return root;
+}
+
+function candidateFixture() {
+  const digest = 'd'.repeat(64);
+  const releaseId = '1.2.3-sha256-dddddddddddddddd';
+  const runtimeRegistry = buildRuntimeRegistry({
+    entries: [
+      {
+        id: 'cashflow',
+        displayName: 'Cashflow',
+        remoteName: 'mfe_cashflow',
+        exposedModule: './application',
+        basePath: '/cashflow',
+        contractVersion: '1.0.0',
+        appearanceContractVersion: '1.0.0',
+        identityContractVersion: '1.0.0',
+        capabilities: ['workspace', 'navigation'],
+      },
+    ],
+    releases: { cashflow: { releaseId, digest } },
+    origin: 'https://portal.example',
+  });
+  const candidate = buildProductionRegistryRevision({
+    revisionId: 'dev-42',
+    environment: 'dev',
+    createdAt: '2026-08-11T00:00:00.000Z',
+    sourceRevision: 'abc123',
+    runtimeRegistry,
+    releases: {
+      cashflow: {
+        version: '1.2.3',
+        releaseId,
+        digestAlgorithm: 'sha256',
+        digest,
+      },
+    },
+    ownershipRecords: {
+      cashflow: {
+        applicationId: 'cashflow',
+        accountableTeam: 'Cashflow team',
+        supportRota: 'Cashflow on-call',
+        criticality: 'tier-2',
+        dataClassification: 'internal',
+        slo: { availabilityPercent: 99.9, activationP95Ms: 3000 },
+        releaseApprover: 'Cashflow release owner',
+        rollbackContact: 'Platform on-call',
+      },
+    },
+  });
+  candidate.applications[0].releaseEvidence.signatureUrl = `https://portal.example/evidence/cashflow/${releaseId}.sigstore.json`;
+  return { candidate, digest };
 }
 
 test('artifact digest is deterministic and changes with published bytes', async () => {
@@ -214,6 +266,117 @@ test('production registry revision rejects an application without ownership', ()
       }),
     /missing ownership record/i,
   );
+});
+
+test('production candidate validation enforces every promotion gate', async (context) => {
+  const options = (digest) => ({
+    trustedOrigins: ['https://portal.example'],
+    supportedProtocolMajors: [1],
+    availableCapabilities: ['navigation', 'workspace'],
+    resolveArtifactDigest: async () => digest,
+    verifySignature: async () => true,
+  });
+
+  await context.test('accepts a complete reachable and signed candidate', async () => {
+    const { candidate, digest } = candidateFixture();
+    assert.equal(await validateProductionRegistryCandidate(candidate, options(digest)), candidate);
+  });
+
+  await context.test('rejects an invalid schema shape', async () => {
+    const { candidate, digest } = candidateFixture();
+    delete candidate.applications[0].artifact.version;
+    await assert.rejects(
+      () => validateProductionRegistryCandidate(candidate, options(digest)),
+      /schema.*artifact version/i,
+    );
+  });
+
+  await context.test('rejects duplicate routes or identities', async () => {
+    const { candidate, digest } = candidateFixture();
+    candidate.registry.applications.push({
+      ...candidate.registry.applications[0],
+      id: 'other',
+    });
+    await assert.rejects(
+      () => validateProductionRegistryCandidate(candidate, options(digest)),
+      /duplicate basePath/i,
+    );
+  });
+
+  await context.test('rejects an untrusted artifact origin', async () => {
+    const { candidate, digest } = candidateFixture();
+    candidate.applications[0].artifact.immutableUrl =
+      candidate.registry.applications[0].manifestUrl =
+        candidate.applications[0].artifact.immutableUrl.replace(
+          'portal.example',
+          'untrusted.example',
+        );
+    await assert.rejects(
+      () => validateProductionRegistryCandidate(candidate, options(digest)),
+      /untrusted origin/i,
+    );
+  });
+
+  await context.test('rejects unreachable or digest-mismatched artifacts', async () => {
+    const { candidate, digest } = candidateFixture();
+    await assert.rejects(
+      () =>
+        validateProductionRegistryCandidate(candidate, {
+          ...options(digest),
+          resolveArtifactDigest: async () => '0'.repeat(64),
+        }),
+      /digest mismatch/i,
+    );
+    await assert.rejects(
+      () =>
+        validateProductionRegistryCandidate(candidate, {
+          ...options(digest),
+          resolveArtifactDigest: async () => {
+            throw new Error('artifact unreachable');
+          },
+        }),
+      /artifact unreachable/i,
+    );
+  });
+
+  await context.test('rejects unsupported contracts or capabilities', async () => {
+    const { candidate, digest } = candidateFixture();
+    await assert.rejects(
+      () =>
+        validateProductionRegistryCandidate(candidate, {
+          ...options(digest),
+          supportedProtocolMajors: [2],
+        }),
+      /unsupported protocol range/i,
+    );
+    await assert.rejects(
+      () =>
+        validateProductionRegistryCandidate(candidate, {
+          ...options(digest),
+          availableCapabilities: ['navigation'],
+        }),
+      /unavailable capability: workspace/i,
+    );
+  });
+
+  await context.test('rejects missing or invalid signatures', async () => {
+    const { candidate, digest } = candidateFixture();
+    delete candidate.applications[0].releaseEvidence.signatureUrl;
+    await assert.rejects(
+      () => validateProductionRegistryCandidate(candidate, options(digest)),
+      /missing signature evidence/i,
+    );
+    candidate.applications[0].releaseEvidence.signatureUrl =
+      'https://portal.example/evidence/cashflow/signature.sigstore.json';
+    await assert.rejects(
+      () =>
+        validateProductionRegistryCandidate(candidate, {
+          ...options(digest),
+          verifySignature: async () => false,
+        }),
+      /invalid signature/i,
+    );
+  });
 });
 
 test('registry validation rejects duplicate routes and mutable or external URLs', () => {

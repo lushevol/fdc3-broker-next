@@ -52,6 +52,7 @@ Generated release bytes, registry revisions, catalog records, and certificates a
 - Release paths are `artifacts/<application>/<semver>-sha256-<digest-prefix>/`.
 - Each catalog record carries the application/package identity, semantic version, source revision, build ID, full artifact digest, contract metadata, capabilities, and declared shared-runtime ranges.
 - `devops/registry/production-registry-revision.schema.json` defines the immutable promotion record: selected artifact identity and URL, protocol range, capabilities, embedded ownership, and release-evidence links. The browser continues to receive only the nested lean runtime registry.
+- Production candidates are validated before promotion for schema shape, duplicate IDs/routes, trusted origins, release selection, artifact reachability and digest, protocol support, required capabilities, and signature evidence. Artifact resolution and signature verification are injected so the policy remains fail-closed while enterprise services are selected.
 - `registries/revisions/<revision>.json` is immutable evidence; `registries/active/<environment>.json` is the small revalidating client pointer.
 - `environments/<environment>/host` is an atomic symlink to one immutable host release.
 - DEV and test registries select identical remote URLs and digests. Public endpoints and other non-secret environment values belong in registry/capability configuration, not rebuilt JavaScript.

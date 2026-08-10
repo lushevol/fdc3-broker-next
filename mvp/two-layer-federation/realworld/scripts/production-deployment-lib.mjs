@@ -201,6 +201,121 @@ export function buildProductionRegistryRevision({
   };
 }
 
+function assertProductionCandidateShape(candidate) {
+  if (!candidate || !Array.isArray(candidate.applications) || candidate.applications.length === 0) {
+    throw new Error('Production registry schema requires at least one application');
+  }
+  if (!candidate.registry || !Array.isArray(candidate.registry.applications)) {
+    throw new Error('Production registry schema requires a runtime registry');
+  }
+  for (const application of candidate.applications) {
+    if (!application?.id) throw new Error('Production registry schema requires an application id');
+    if (!application.artifact?.version) {
+      throw new Error('Production registry schema requires an artifact version');
+    }
+    if (
+      application.artifact.digestAlgorithm !== 'sha256' ||
+      !/^[a-f0-9]{64}$/.test(application.artifact.digest ?? '')
+    ) {
+      throw new Error(`Production registry schema requires a SHA-256 digest for ${application.id}`);
+    }
+    if (!application.artifact.immutableUrl) {
+      throw new Error(`Production registry schema requires an immutable URL for ${application.id}`);
+    }
+    if (
+      !Number.isInteger(application.protocolRange?.minimumMajor) ||
+      !Number.isInteger(application.protocolRange?.maximumMajor) ||
+      application.protocolRange.minimumMajor > application.protocolRange.maximumMajor
+    ) {
+      throw new Error(
+        `Production registry schema requires a valid protocol range for ${application.id}`,
+      );
+    }
+    if (!Array.isArray(application.capabilities)) {
+      throw new Error(`Production registry schema requires capabilities for ${application.id}`);
+    }
+    if (!application.ownership || application.ownership.applicationId !== application.id) {
+      throw new Error(
+        `Production registry schema requires matching ownership for ${application.id}`,
+      );
+    }
+    if (!application.releaseEvidence?.catalogUrl) {
+      throw new Error(`Production registry schema requires release evidence for ${application.id}`);
+    }
+  }
+}
+
+export async function validateProductionRegistryCandidate(
+  candidate,
+  {
+    trustedOrigins = [],
+    supportedProtocolMajors = [],
+    availableCapabilities = [],
+    resolveArtifactDigest,
+    verifySignature,
+  } = {},
+) {
+  assertProductionCandidateShape(candidate);
+  const runtimeRegistry = validateRuntimeRegistry(candidate.registry, { trustedOrigins });
+  const runtimeEntries = new Map(runtimeRegistry.applications.map((entry) => [entry.id, entry]));
+  const candidateIds = new Set();
+  const capabilitySet = new Set(availableCapabilities);
+
+  for (const application of candidate.applications) {
+    if (candidateIds.has(application.id)) {
+      throw new Error(`Duplicate production application id: ${application.id}`);
+    }
+    candidateIds.add(application.id);
+    const runtimeEntry = runtimeEntries.get(application.id);
+    if (!runtimeEntry) throw new Error(`Missing runtime registry entry for ${application.id}`);
+    if (runtimeEntry.manifestUrl !== application.artifact.immutableUrl) {
+      throw new Error(`Artifact URL mismatch for ${application.id}`);
+    }
+    const selectedRelease = candidate.releases?.[application.id];
+    if (
+      selectedRelease?.releaseId !== application.artifact.releaseId ||
+      selectedRelease?.digest !== application.artifact.digest
+    ) {
+      throw new Error(`Release selection mismatch for ${application.id}`);
+    }
+    const protocolSupported = supportedProtocolMajors.some(
+      (major) =>
+        major >= application.protocolRange.minimumMajor &&
+        major <= application.protocolRange.maximumMajor,
+    );
+    if (!protocolSupported) throw new Error(`Unsupported protocol range for ${application.id}`);
+    for (const capability of application.capabilities) {
+      if (!capabilitySet.has(capability)) {
+        throw new Error(`Unavailable capability: ${capability}`);
+      }
+    }
+    const signatureUrl = application.releaseEvidence.signatureUrl;
+    if (!signatureUrl) throw new Error(`Missing signature evidence for ${application.id}`);
+    const signatureOrigin = new URL(signatureUrl).origin;
+    if (trustedOrigins.length > 0 && !trustedOrigins.includes(signatureOrigin)) {
+      throw new Error(`${application.id} signature uses an untrusted origin`);
+    }
+    if (typeof resolveArtifactDigest !== 'function') {
+      throw new Error('Artifact digest resolver is not configured');
+    }
+    const resolvedDigest = await resolveArtifactDigest(application.artifact.immutableUrl);
+    if (resolvedDigest !== application.artifact.digest) {
+      throw new Error(`Artifact digest mismatch for ${application.id}`);
+    }
+    if (typeof verifySignature !== 'function') {
+      throw new Error('Signature verifier is not configured');
+    }
+    if (!(await verifySignature(application))) {
+      throw new Error(`Invalid signature for ${application.id}`);
+    }
+  }
+
+  if (candidateIds.size !== runtimeEntries.size) {
+    throw new Error('Production and runtime registry application sets differ');
+  }
+  return candidate;
+}
+
 export function createReleaseId(version, digest) {
   if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version))
     throw new Error(`Invalid semantic version: ${version}`);
