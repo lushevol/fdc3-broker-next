@@ -7,16 +7,9 @@ import { findTile } from "../utils/drawer";
 
 const useServices = () => {
   const [store, dispacth] = useContext();
-  const login = async (data) => {
-    try {
-      await postService("/auth/v2/sso/login", { ...data });
-    } catch (e) {}
-  };
-  const loginEntra = async (data) => {
-    try {
-      await postService("/auth/v3/sso/login", { ...data });
-    } catch (e) {}
-  };
+  const login = (data) => postService("/auth/v2/sso/login", { ...data });
+  const loginEntra = (data) =>
+    postService("/auth/v3/sso/login", { ...data });
   const logout = () => {
     const arr = [
       postService("/auth/v2/sso/logout", {
