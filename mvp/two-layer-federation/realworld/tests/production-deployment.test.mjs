@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, mkdir } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
 import {
   assertSecretFreeTree,
+  authorizeReleaseOperation,
   buildProductionRegistryRevision,
   buildRuntimeRegistry,
   cachePolicyForPath,
@@ -377,6 +378,58 @@ test('production candidate validation enforces every promotion gate', async (con
       /invalid signature/i,
     );
   });
+});
+
+test('release authorization separates publication, promotion, activation, and rollback', async () => {
+  const policy = JSON.parse(
+    await readFile(new URL('../devops/policy/release-authorization.json', import.meta.url), 'utf8'),
+  );
+  const principals = {
+    'artifact-publication': { id: 'application-pipeline', roles: ['application-publisher'] },
+    'promotion-request': { id: 'release-requester', roles: ['release-requester'] },
+    'promotion-approval': { id: 'release-approver', roles: ['release-approver'] },
+    activation: { id: 'registry-activation', roles: ['registry-activator'] },
+    rollback: { id: 'release-operator', roles: ['release-operator'] },
+  };
+
+  for (const [operation, principal] of Object.entries(principals)) {
+    assert.equal(authorizeReleaseOperation({ operation, principal }, policy), principal);
+  }
+  assert.throws(
+    () =>
+      authorizeReleaseOperation(
+        {
+          operation: 'activation',
+          principal: { id: 'requester', roles: ['release-requester'] },
+        },
+        policy,
+      ),
+    /requires role registry-activator/i,
+  );
+  assert.throws(
+    () =>
+      authorizeReleaseOperation(
+        {
+          operation: 'promotion-approval',
+          principal: { id: 'same-person', roles: ['release-approver'] },
+          actors: { 'promotion-request': 'same-person' },
+        },
+        policy,
+      ),
+    /separation of duties/i,
+  );
+  assert.throws(
+    () =>
+      authorizeReleaseOperation(
+        {
+          operation: 'activation',
+          principal: { id: 'same-pipeline', roles: ['registry-activator'] },
+          actors: { 'artifact-publication': 'same-pipeline' },
+        },
+        policy,
+      ),
+    /separation of duties/i,
+  );
 });
 
 test('registry validation rejects duplicate routes and mutable or external URLs', () => {

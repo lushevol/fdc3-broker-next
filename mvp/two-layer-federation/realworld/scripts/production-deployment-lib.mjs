@@ -316,6 +316,32 @@ export async function validateProductionRegistryCandidate(
   return candidate;
 }
 
+export function authorizeReleaseOperation(
+  { operation, principal, actors = {} },
+  authorizationPolicy,
+) {
+  const operationPolicy = authorizationPolicy.operations?.[operation];
+  if (!operationPolicy) throw new Error(`Unknown release operation: ${operation}`);
+  if (!principal?.id || !Array.isArray(principal.roles)) {
+    throw new Error(`Release operation ${operation} requires an authenticated principal`);
+  }
+  if (!principal.roles.includes(operationPolicy.requiredRole)) {
+    throw new Error(`Release operation ${operation} requires role ${operationPolicy.requiredRole}`);
+  }
+  for (const rule of authorizationPolicy.separationOfDuties ?? []) {
+    if (!rule.operations.includes(operation)) continue;
+    const conflictingOperation = rule.operations.find(
+      (candidateOperation) => candidateOperation !== operation,
+    );
+    if (conflictingOperation && actors[conflictingOperation] === principal.id) {
+      throw new Error(
+        `Separation of duties prohibits ${principal.id} from performing both ${conflictingOperation} and ${operation}`,
+      );
+    }
+  }
+  return principal;
+}
+
 export function createReleaseId(version, digest) {
   if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version))
     throw new Error(`Invalid semantic version: ${version}`);

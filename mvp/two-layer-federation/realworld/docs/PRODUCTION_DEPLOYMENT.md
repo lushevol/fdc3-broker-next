@@ -111,6 +111,12 @@ If the static origin is lost, restore `artifacts/`, `catalog/`, and `registries/
 | Scanner/signing policy and trusted identities         | Security                  |
 | Promotion approval, canary stop, rollback decision    | Release owner             |
 
+`devops/policy/release-authorization.json` maps Azure DevOps workload identities
+to separate roles for artifact publication, promotion request, promotion
+approval, activation, and rollback. Authorization fails closed for missing
+roles, prohibits a requester from approving the same promotion, and prevents
+an artifact publisher from activating its own release.
+
 ## Decision gates not simulated as complete
 
 The local POC chooses nginx static delivery and self-signed TLS only to prove the deployable contract. CDN-backed object storage with a single trusted HTTPS origin is approved for production browser delivery, with OCI retained as optional transport. Before production traffic, owners must still approve: enterprise PKI, workload identity, signing/attestation service, SBOM format/tool, vulnerability and license thresholds, audit store/retention, production source-map access, regional replication, RPO/RTO, monitoring backend, and cohort gateway. Azure DevOps publication and activation pipelines must use separate identities and approvals.
