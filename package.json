@@ -103,6 +103,7 @@
     "proxy/*",
     "sc-dev-web/*",
     "scb/web/*",
+    "scb/services/*",
     "ratan-design/apps/*",
     "ratan-design/packages/*"
   ],
