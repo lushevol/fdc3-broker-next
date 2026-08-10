@@ -383,8 +383,8 @@ scb:
     grant_type: authorization_code
     redirect_uri: https://fmo-mfe.uk.dev.net:8453/mfa/callback
     entra_token_endpoint: https://login.microsoftonline.com/${scb.entra.tenant_id}/oauth2/v2.0/token
-    client_cert_path: file:/Users/1639796/code/scb/BE/51358-single-ui-bff/src/main/resources/certs/ssl_certificate_dev.crt
-    client_key_path: file:/Users/1639796/code/scb/BE/51358-single-ui-bff/src/main/resources/certs/ssl_certificate_dev.key
+    client_cert_path: ${SSL_CERTIFICATE_DEV_CRT_PATH}
+    client_key_path: ${SSL_CERTIFICATE_DEV_KEY_PATH}
     connectTimeout: 10 #seconds
     readTimeout: 30 #seconds
     proxyHost: gateway.zscloud.net
