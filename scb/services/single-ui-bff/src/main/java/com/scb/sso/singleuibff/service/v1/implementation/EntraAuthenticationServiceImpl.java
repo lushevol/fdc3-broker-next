@@ -58,18 +58,16 @@ public class EntraAuthenticationServiceImpl implements EntraAuthenticationServic
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 ResponseEntra responseEntra = objectMapper.readValue(response.getBody(), ResponseEntra.class);
-                log.info("Entra response body : {}", responseEntra);
-
                 DecodedJWT decode = JWT.decode(responseEntra.getIdToken());
                 authenticationRequest.setUsername(Objects.isNull(decode.getClaim("userId")) ? null : decode.getClaim("userId").asString());
                 return initPayloadMFA(decode);
             } else {
-                log.error("Entra authenticate failed, response body {} ", response);
+                log.error("Entra authenticate failed, status: {}", response.getStatusCode());
                 throw AuthenticationException.builder().code(ENTRA_RELATED_CODE)
                     .message("Entra authenticate failed.").build();
             }
         } catch (Exception e) {
-            log.error("Error while getting response from Entra, request body {} ", entraRequestBody, e);
+            log.error("Error while getting response from Entra at endpoint {}", url, e);
             throw AuthenticationException.builder().code(ENTRA_RELATED_CODE).message("Entra authenticate failed.").build();
 
         }

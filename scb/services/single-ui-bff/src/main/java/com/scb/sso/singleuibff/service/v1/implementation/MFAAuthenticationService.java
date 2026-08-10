@@ -54,18 +54,16 @@ public class MFAAuthenticationService {
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 ResponseMFA responseMFA = objectMapper.readValue(response.getBody(), ResponseMFA.class);
-                log.info("MFA response body : {}", responseMFA);
-
                 DecodedJWT decode = JWT.decode(responseMFA.getIdToken());
                 authenticationRequest.setUsername(Objects.isNull(decode.getClaim("name")) ? null : decode.getClaim("name").asString());
                 return initPayloadMFA(decode);
             } else {
-                log.error("MFA authenticate failed, response body {} ", response);
+                log.error("MFA authenticate failed, status: {}", response.getStatusCode());
                 throw AuthenticationException.builder().code(MFA_RELATED_CODE)
                     .message("MFA authenticate failed.").build();
             }
         } catch (Exception e) {
-            log.error("Error while getting response from MFA, request body {}, e:", authenticationRequest, e);
+            log.error("Error while getting response from MFA at endpoint {}", url, e);
             throw AuthenticationException.builder().code(MFA_RELATED_CODE).message("MFA authenticate failed.").build();
 
         }
