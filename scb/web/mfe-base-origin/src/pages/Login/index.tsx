@@ -95,7 +95,7 @@ const Login: React.FC = (): ReactElement => {
                           ),
                         }}
                         onChange={(e) => {
-                          setPassword(`${e.target.value}`.trim());
+                          setPassword(e.target.value);
                         }}
                         onKeyUp={onKeyUpPassword}
                         value={password}

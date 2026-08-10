@@ -2,6 +2,7 @@ import React from "react";
 import useServices from "../../../services";
 import useDispatcher from "../../../hooks/dispathcer";
 import { getEnv } from "../../../utils/common";
+import { validateLoginRequest } from "../../../auth/validation";
 
 const useController = () => {
   const { dispacthLoading, dispacthErrorMessage } = useDispatcher();
@@ -35,8 +36,14 @@ const useController = () => {
     }
   }, [code, iss, client_id]);
 
-  const onLogin = async (data) => {
+  const onLogin = async (input: unknown) => {
     dispacthErrorMessage(undefined);
+    const validation = validateLoginRequest(input);
+    if (!validation.success) {
+      dispacthErrorMessage("Enter valid login credentials.");
+      return;
+    }
+    const data = validation.data;
     setLoading(true);
     try {
       // if only code exist, consider it as entra sso login, otherwise use normal login,
@@ -55,9 +62,7 @@ const useController = () => {
     }
   };
   const onLoginUserNamePassword = () => {
-    if (username && password) {
-      onLogin({ username: username.trim(), password: password.trim() });
-    }
+    onLogin({ username: username ?? "", password: password ?? "" });
   };
   const onKeyUp = (e) => {
     if (e.code === "Enter") {
@@ -67,8 +72,6 @@ const useController = () => {
   const onKeyUpPassword = (e) => {
     if (e.code === "Enter") {
       onLoginUserNamePassword();
-    } else {
-      setPassword(`${e.target.value}`.trim());
     }
   };
   const showNormalLogin = React.useMemo(() => {

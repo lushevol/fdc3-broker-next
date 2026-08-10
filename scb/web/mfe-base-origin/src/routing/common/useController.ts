@@ -10,6 +10,7 @@ import {
 } from "../../utils/common";
 import useServices from "../../services";
 import { SnackbarCloseReason } from "@mui/material";
+import { validateOpenFinToken } from "../../auth/validation";
 
 const useController = () => {
   const [store, dispatch] = useContext();
@@ -46,9 +47,11 @@ const useController = () => {
     setIsReady(true);
   };
   const openfinCheckSession = async () => {
-    const params: any = new URLSearchParams(window.location.search);
-    const token = params?.get("openfintoken");
-    if (token) {
+    const params = new URLSearchParams(window.location.search);
+    const rawToken = params.get("openfintoken");
+    const validation = validateOpenFinToken(rawToken);
+    if (validation.success) {
+      const token = validation.data;
       storeData(ActionType.SET_TOKEN, token);
       await waitFor(1000);
       window.location.href = window.location.href.replace(
@@ -56,6 +59,9 @@ const useController = () => {
         ""
       );
     } else {
+      if (rawToken !== null) {
+        dispacthErrorMessage("Invalid authentication token.");
+      }
       checkSession();
     }
   };
