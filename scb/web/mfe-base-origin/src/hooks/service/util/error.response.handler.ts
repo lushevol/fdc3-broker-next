@@ -31,7 +31,6 @@ export const errorHandler = (error: AxiosError): unknown => {
       msg = "Expired Session, please login again.";
     }
     if (msg?.includes("AuthenticationException")) {
-      console.info(error?.config);
       msg =
         "Invalid username and password combination or SSO service is unavailable.";
     }

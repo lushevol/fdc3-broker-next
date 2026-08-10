@@ -95,7 +95,10 @@ describe("error.response.handler", () => {
       expect(e.message).toBe("");
     }
   });
-  it("should be true", async () => {
+  it("does not log authentication request configuration", async () => {
+    const consoleInfo = jest
+      .spyOn(console, "info")
+      .mockImplementation(() => undefined);
     const error: AxiosError = {
       response: {
         data: {
@@ -112,7 +115,10 @@ describe("error.response.handler", () => {
       toJSON: () => JSON.parse("{}"),
       name: "",
       message: "",
-      config: config as InternalAxiosRequestConfig,
+      config: {
+        ...config,
+        data: JSON.stringify({ username: "user", password: "secret" }),
+      } as InternalAxiosRequestConfig,
       code: "ERROR",
     }
     try {
@@ -120,6 +126,8 @@ describe("error.response.handler", () => {
     } catch (e) {
       expect(e.response.data.message).toBe("AuthenticationException");
     }
+    expect(consoleInfo).not.toHaveBeenCalledWith(error.config);
+    consoleInfo.mockRestore();
   });
   it("should be true", async () => {
     const error: AxiosError = {
