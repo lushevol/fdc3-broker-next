@@ -1,4 +1,5 @@
 import { styled } from "@mui/material/styles";
+import { LoginPageTokens } from "../../../theme/config/common";
 import svg1 from "./svg1.svg";
 export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_login`;
 export const classes = {
@@ -14,124 +15,127 @@ export const classes = {
   divider: `${PREFIX}-divider`,
 };
 
-const Root = styled("section")(({ theme }) => ({
-  [`&.${classes.root}`]: {},
-  [`& .${classes.gridleft}`]: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#040404",
-  },
-  [`& .${classes.left}`]: {
-    width: "306px",
-    textAlign: "left",
-    "& h3": {
-      color: "#BDBDBD !important",
-      fontSize: "2rem",
-      fontStyle: "normal",
-      fontWeight: 500,
-      marginBottom: "2.5rem",
-      marginTop: "0px",
-      lineHeight: "48px",
-      textTransform: "capitalize",
+const Root = styled("section")(({ theme }) => {
+  const login = (theme.theme as { LoginPage: LoginPageTokens }).LoginPage;
+
+  return {
+    [`&.${classes.root}`]: {},
+    [`& .${classes.gridleft}`]: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: login.leftBackground,
     },
-  },
-  [`& .${classes.formControl}`]: {
-    width: "100%",
-    marginBottom: "2rem",
-    marginTop: "0px",
-    "& .MuiFormLabel-root": {
-      transform: "none",
-      position: "unset",
-      fontSize: "0.875rem",
-      color: "#BDBDBD !important",
-      fontWeight: 400,
-      lineHeight: "21px",
+    [`& .${classes.left}`]: {
+      width: login.contentWidth,
+      textAlign: "left",
+      "& h3": {
+        color: `${login.mutedText} !important`,
+        fontSize: login.headingFontSize,
+        fontStyle: "normal",
+        fontWeight: login.headingFontWeight,
+        marginBottom: login.headingMarginBottom,
+        marginTop: 0,
+        lineHeight: login.headingLineHeight,
+        textTransform: "capitalize",
+      },
     },
-    "& .MuiTextField-root": {
+    [`& .${classes.formControl}`]: {
+      width: "100%",
+      marginBottom: login.formMarginBottom,
+      marginTop: 0,
+      "& .MuiFormLabel-root": {
+        transform: "none",
+        position: "unset",
+        fontSize: login.labelFontSize,
+        color: `${login.mutedText} !important`,
+        fontWeight: login.labelFontWeight,
+        lineHeight: login.labelLineHeight,
+      },
+      "& .MuiTextField-root": {
+        borderRadius: theme.shape.borderRadius,
+        display: "block",
+        transform: "none",
+        boxShadow: login.inputShadow,
+        marginBottom: 0,
+        color: `${login.inputText} !important`,
+        "& input": {
+          color: `${login.inputText} !important`,
+        },
+        "& input::placeholder": {
+          color: `${login.inputText} !important`,
+          fontSize: login.placeholderFontSize,
+          lineHeight: login.placeholderLineHeight,
+          fontWeight: login.labelFontWeight,
+        },
+      },
+      "& svg": {
+        color: `${login.mutedText} !important`,
+      },
+    },
+    [`& .${classes.button}`]: {
+      height: login.buttonHeight,
+      fontSize: login.buttonFontSize,
+      lineHeight: login.buttonLineHeight,
+      fontWeight: login.buttonFontWeight,
       borderRadius: theme.shape.borderRadius,
-      display: "block",
-      transform: "none",
-      boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-      marginBottom: "0px",
-      color: "#CBCBCB !important",
-      "& input": {
-        color: "#CBCBCB !important",
+      marginTop: login.buttonMarginTop,
+    },
+    [`& .${classes.gridright}`]: {
+      background: login.heroBackground,
+    },
+    [`& .${classes.right}`]: {
+      backgroundImage: `url(${svg1})`,
+      mixBlendMode: "luminosity",
+      backgroundSize: "contain",
+      backgroundRepeat: "no-repeat",
+      backgroundPosition: "bottom right",
+      height: login.heroHeight,
+      "& h2": {
+        color: `${login.mutedText} !important`,
+        fontSize: login.heroTitleFontSize,
+        fontStyle: "normal",
+        fontWeight: login.heroTitleFontWeight,
+        lineHeight: login.heroTitleLineHeight,
+        width: login.heroTitleWidth,
+        marginTop: login.heroTitleMarginTop,
+        marginLeft: login.heroContentMarginLeft,
+        marginBottom: login.heroTitleMarginBottom,
       },
-      "& input::placeholder": {
-        color: "#CBCBCB !important",
-        fontSize: "0.75rem",
-        lineHeight: "18px",
-        fontWeight: 400,
+      [`& .${classes.description}`]: {
+        color: `${login.mutedText} !important`,
+        fontSize: login.descriptionFontSize,
+        fontStyle: "normal",
+        fontWeight: login.descriptionFontWeight,
+        lineHeight: login.descriptionLineHeight,
+        marginLeft: login.heroContentMarginLeft,
+        textDecoration: "none !important",
+        width: login.descriptionWidth,
       },
     },
-    "& svg": {
-      color: "#BDBDBD !important",
+    [`& .${classes.box}`]: {
+      position: "fixed",
+      bottom: login.tabsBottom,
+      right: login.tabsRight,
+      "& .MuiTab-root": {
+        borderTop: `${login.tabIndicatorHeight} solid ${login.tabBorder} !important`,
+      },
+      "& .MuiSvgIcon-root": {
+        fontSize: login.headingFontSize,
+        color: login.tabActive,
+      },
+      "& .MuiTabs-indicator": {
+        bottom: undefined,
+        top: 0,
+        backgroundColor: login.tabActive,
+        height: login.tabIndicatorHeight,
+      },
     },
-  },
-  [`& .${classes.button}`]: {
-    height: "44px",
-    fontSize: "0.75rem",
-    lineHeight: "18px",
-    fontWeight: 600,
-    borderRadius: theme.shape.borderRadius,
-    marginTop: "1.25rem",
-  },
-  [`& .${classes.gridright}`]: {
-    background: "linear-gradient(135.03deg, #7A7979 -11.69%, #111112 51.68%)",
-  },
-  [`& .${classes.right}`]: {
-    backgroundImage: `url(${svg1})`,
-    mixBlendMode: "luminosity",
-    backgroundSize: "contain",
-    backgroundRepeat: "no-repeat",
-    backgroundPosition: "bottom right",
-    height: "100vh",
-    "& h2": {
-      color: "#BDBDBD !important",
-      fontSize: "1.125rem",
-      fontStyle: "normal",
-      fontWeight: 600,
-      lineHeight: "32px",
-      width: "333px",
-      marginTop: "220px",
-      marginLeft: "80px",
-      marginBottom: "24px",
+    [`& .${classes.divider}`]: {
+      marginTop: login.buttonMarginTop,
+      borderColor: login.divider,
     },
-    [`& .${classes.description}`]: {
-      color: "#BDBDBD !important",
-      fontSize: "0.875rem",
-      fontStyle: "normal",
-      fontWeight: 400,
-      lineHeight: "21px",
-      marginLeft: "80px",
-      textDecoration: "none !important",
-      // textTransform: "capitalize",
-      width: "45%",
-    },
-  },
-  [`& .${classes.box}`]: {
-    position: "fixed",
-    bottom: "52px",
-    right: "72px",
-    "& .MuiTab-root": {
-      borderTop: "3px solid #606060!important",
-    },
-    "& .MuiSvgIcon-root": {
-      fontSize: "2rem",
-      color: "#FFFFFF",
-    },
-    "& .MuiTabs-indicator": {
-      bottom: undefined,
-      top: 0,
-      backgroundColor: "#FFFFFF",
-      height: "3px",
-    },
-  },
-  [`& .${classes.divider}`]: {
-    marginTop: "1.25rem",
-    borderColor: "rgba(65, 73, 85, 1)",
-  },
-}));
+  };
+});
 
 export default Root;

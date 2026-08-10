@@ -33,10 +33,7 @@ const getDarkTheme = (isNewLayout = false) => ({
           ${colordark}
           //overide after this line
           --theme-color-modal-header: ${custom.color["mirage-52"]};
-          --theme-color-modal-header-border: ${darken(
-            custom.color["mirage-52"],
-            0.3
-          )};
+          --theme-color-modal-header-border: ${darken(custom.color["mirage-52"], 0.3)};
           --ag-header-background-color: ${custom.color["mirage-52"]};
           --ag-border-color: ${darken(custom.color["mirage-52"], 0.3)};
         `,
@@ -66,6 +63,7 @@ const getDarkTheme = (isNewLayout = false) => ({
     },
   },
   LoginPage: {
+    ...custom.loginPage,
     main: {
       background: `linear-gradient(to right bottom, rgb(26, 32, 40) 0%, rgba(26, 32, 40, 0) 50%, rgb(26, 32, 40) 100%) padding-box, 
     linear-gradient(to right bottom, rgb(65, 73, 85), rgba(44, 50, 59, 0)) border-box `,

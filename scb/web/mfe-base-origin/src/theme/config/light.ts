@@ -66,6 +66,7 @@ const getLightTheme = (isNewLayout = false) => ({
     },
   },
   LoginPage: {
+    ...custom.loginPage,
     main: {
       background: `linear-gradient(to right bottom, rgb(220,230,233) 0%,rgb(253,253,253)50%,rgb(220,230,233) 100%) padding-box padding-box, 
     linear-gradient(to right bottom, rgb(65, 73, 85), rgba(44, 50, 59, 0)) border-box border-box`,
