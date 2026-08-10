@@ -1,6 +1,6 @@
 {
   "name": "@fm/ratan_cashflow_blotter",
-  "version": "PACKAGE_VERSION",
+  "version": "0.0.0",
   "scripts": {
     "-preinstall": "npx npm-force-resolutions",
     "start": "env-cmd -f .env.local rsbuild dev",

@@ -1,6 +1,6 @@
 {
   "name": "@fm/template",
-  "version": "PACKAGE_VERSION",
+  "version": "0.0.0",
   "scripts": {
     "start": "env-cmd -f .env.local rsbuild dev",
     "dev": "env-cmd -f .env.local rsbuild dev",

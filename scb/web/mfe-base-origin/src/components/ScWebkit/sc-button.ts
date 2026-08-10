@@ -1,1 +1,1 @@
-import "@sctoolkit/webkit/elements/sc-button";
+import "@scdevkit/webkit/elements/sc-button";

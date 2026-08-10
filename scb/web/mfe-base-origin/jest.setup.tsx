@@ -25,14 +25,14 @@ global.System = {
   import: jest.fn(mockImport),
 };
 // @ts-ignore
-jest.mock("@sctoolkit/webkit/elements/sc-button", () => {
+jest.mock("@scdevkit/webkit/elements/sc-button", () => {
   return {
     __esModule: true,
     default: (_props) => {},
   };
 });
 // @ts-ignore
-jest.mock("@sctoolkit/webkit/elements/sc-icon-card", () => {
+jest.mock("@scdevkit/webkit/elements/sc-icon-card", () => {
   return {
     __esModule: true,
     default: (_props) => {},

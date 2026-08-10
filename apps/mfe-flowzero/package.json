@@ -1,6 +1,6 @@
 {
   "name": "@fm/flowzero",
-  "version": "PACKAGE_VERSION",
+  "version": "0.0.0",
   "scripts": {
     "-preinstall": "npx npm-force-resolutions",
     "start": "npm run dev:webpack",

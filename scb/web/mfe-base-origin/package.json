@@ -1,6 +1,6 @@
 {
   "name": "@fm/base",
-  "version": "PACKAGE_VERSION",
+  "version": "0.0.0",
   "scripts": {
     "preinstall": "npx npm-force-resolutions",
     "start": "env-cmd -f .env.local webpack serve",
@@ -18,7 +18,7 @@
     "test": "cross-env BABEL_ENV=test jest --coverage --ci",
     "test:maxworker": "cross-env BABEL_ENV=test jest --coverage --ci --maxWorkers=4",
     "watch-tests": "cross-env BABEL_ENV=test jest --watch",
-    "prepare": "husky install",
+    "_prepare": "husky install",
     "coverage": "cross-env BABEL_ENV=test jest --coverage",
     "pre-commit": "prettier --write ./src",
     "post-commit": "pretty-quick --staged",
@@ -107,7 +107,7 @@
     "@mui/x-data-grid": "^6.18.7",
     "@mui/x-date-pickers-pro": "^6.18.7",
     "@openfin/core": "^35.79.5",
-    "@sctoolkit/webkit": "^0.0.7",
+    "@scdevkit/webkit": "*",
     "axios": "^1.8.2",
     "buffer": "^6.0.3",
     "clsx": "^2.0.0",

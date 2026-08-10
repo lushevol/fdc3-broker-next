@@ -1,1 +1,1 @@
-import "@sctoolkit/webkit/elements/sc-icon-card";
+import "@scdevkit/webkit/elements/sc-icon-card";
