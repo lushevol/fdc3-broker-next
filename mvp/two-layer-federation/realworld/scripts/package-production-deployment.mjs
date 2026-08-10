@@ -11,6 +11,7 @@ import {
   createReleaseId,
   digestDirectory,
 } from './production-deployment-lib.mjs';
+import { activateRegistryRevision } from './registry-activation.mjs';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const realworldRoot = path.resolve(scriptDirectory, '..');
@@ -202,19 +203,7 @@ for (const environment of environments) {
     path.join(runtimeRoot, 'registries', 'revisions', `${revisionId}.json`),
     revision,
   );
-  await writeJsonAtomic(
-    path.join(runtimeRoot, 'registries', 'active', `${environment}.json`),
-    registry,
-  );
-  await writeJsonAtomic(
-    path.join(runtimeRoot, 'registries', 'active', `${environment}.pointer.json`),
-    {
-      schemaVersion: 1,
-      environment,
-      revisionId,
-      revisionUrl: `/registries/revisions/${revisionId}.json`,
-    },
-  );
+  await activateRegistryRevision({ runtimeRoot, environment, revisionId });
   await activateHost(environment, published['portal-host'].releaseId);
 }
 

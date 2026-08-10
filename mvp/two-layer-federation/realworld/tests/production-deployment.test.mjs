@@ -5,6 +5,10 @@ import path from 'node:path';
 import test from 'node:test';
 
 import {
+  activateRegistryRevision,
+  rollbackRegistryRevision,
+} from '../scripts/registry-activation.mjs';
+import {
   assertSecretFreeTree,
   authorizeReleaseOperation,
   buildProductionRegistryRevision,
@@ -480,6 +484,68 @@ test('promotion audit records complete append-only release evidence', async () =
   assert.deepEqual(records[1].outcome, {
     status: 'failed',
     reason: 'synthetic verification failed',
+  });
+});
+
+test('registry activation is atomic and rollback restores the previous revision', async () => {
+  const runtimeRoot = await mkdtemp(path.join(tmpdir(), 'realworld-registry-'));
+  const revisionRoot = path.join(runtimeRoot, 'registries', 'revisions');
+  await mkdir(revisionRoot, { recursive: true });
+  const revision = (revisionId, applicationId) => ({
+    schemaVersion: 1,
+    revisionId,
+    environment: 'dev',
+    registry: {
+      applications: [
+        {
+          id: applicationId,
+          manifestUrl: `https://portal.example/artifacts/${applicationId}/1.0.0/mf-manifest.json`,
+        },
+      ],
+    },
+  });
+  await writeFile(
+    path.join(revisionRoot, 'dev-1.json'),
+    JSON.stringify(revision('dev-1', 'cashflow-v1')),
+  );
+  await writeFile(
+    path.join(revisionRoot, 'dev-2.json'),
+    JSON.stringify(revision('dev-2', 'cashflow-v2')),
+  );
+
+  await activateRegistryRevision({ runtimeRoot, environment: 'dev', revisionId: 'dev-1' });
+  await activateRegistryRevision({ runtimeRoot, environment: 'dev', revisionId: 'dev-2' });
+
+  const activePath = path.join(runtimeRoot, 'registries', 'active', 'dev.json');
+  const pointerPath = path.join(runtimeRoot, 'registries', 'active', 'dev.pointer.json');
+  assert.equal(JSON.parse(await readFile(activePath, 'utf8')).applications[0].id, 'cashflow-v2');
+  assert.deepEqual(JSON.parse(await readFile(pointerPath, 'utf8')), {
+    schemaVersion: 1,
+    environment: 'dev',
+    revisionId: 'dev-2',
+    revisionUrl: '/registries/revisions/dev-2.json',
+    previousRevisionId: 'dev-1',
+  });
+
+  await assert.rejects(
+    () =>
+      activateRegistryRevision({
+        runtimeRoot,
+        environment: 'dev',
+        revisionId: 'missing',
+      }),
+    /missing registry revision/i,
+  );
+  assert.equal(JSON.parse(await readFile(activePath, 'utf8')).applications[0].id, 'cashflow-v2');
+
+  await rollbackRegistryRevision({ runtimeRoot, environment: 'dev' });
+  assert.equal(JSON.parse(await readFile(activePath, 'utf8')).applications[0].id, 'cashflow-v1');
+  assert.deepEqual(JSON.parse(await readFile(pointerPath, 'utf8')), {
+    schemaVersion: 1,
+    environment: 'dev',
+    revisionId: 'dev-1',
+    revisionUrl: '/registries/revisions/dev-1.json',
+    previousRevisionId: 'dev-2',
   });
 });
 

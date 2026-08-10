@@ -23,7 +23,7 @@
 - [x] 3.3 Implement candidate validation for schema, duplicate routes/IDs, trusted origins, artifact reachability/digest, contracts, capabilities, and signatures
 - [x] 3.4 Implement separate authorization for artifact publication, promotion request, approval, activation, and rollback
 - [x] 3.5 Record complete promotion audit events with requester, approver, revisions, selected digests, evidence, timestamps, and outcomes
-- [ ] 3.6 Implement atomic candidate activation and previous-known-good revision rollback
+- [x] 3.6 Implement atomic candidate activation and previous-known-good revision rollback
 - [ ] 3.7 Add registry backup/replication and a tested known-good recovery procedure matching agreed RPO/RTO
 
 ## 4. CI/CD and supply-chain assurance

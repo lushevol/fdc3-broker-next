@@ -101,6 +101,12 @@ Rollback does not rebuild or overwrite assets:
 
 If the static origin is lost, restore `artifacts/`, `catalog/`, and `registries/revisions/` from replicated immutable storage, recreate the active pointer from the last known-good revision, then run deployed verification before reopening traffic.
 
+Activation reads a complete immutable revision and replaces the browser-facing
+registry through an atomic same-filesystem rename. The active pointer records
+the previous revision ID. Rollback activates that previous known-good revision
+through the same primitive; a missing or incomplete target leaves the current
+browser registry unchanged.
+
 ## Responsibilities for Wave 0
 
 | Responsibility                                        | Accountable role          |
