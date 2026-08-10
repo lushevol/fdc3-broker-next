@@ -56,11 +56,26 @@ Generated release bytes, registry revisions, catalog records, and certificates a
 - `assetPrefix: 'auto'` makes remote chunks resolve from the immutable manifest location instead of localhost.
 - `devops/registry/applications.json` is the production allowlist. Verification-only and legacy-migration MVPs are intentionally excluded until they pass their own production conformance gates.
 
+## Approved delivery topology
+
+The approved production browser-delivery substrate is immutable object storage
+fronted by a CDN. The portal host, active registry pointer, immutable registry
+revisions, and remote application assets are exposed through one approved HTTPS
+origin behind the existing ingress. Candidate registry entries outside that
+origin are rejected by default.
+
+OCI remains an optional transport and retention format; it is not a mandatory
+browser runtime or EKS deployment requirement. If a later change introduces a
+cross-origin CDN or mandatory OCI/EKS serving, it requires a separately approved
+topology decision plus explicit CSP, CORS, signing, and deployed-verification
+updates. The local read-only nginx image continues to emulate the static-origin
+contract and is not the approved production storage substrate.
+
 ## Cache and browser security contract
 
 Immutable artifacts and registry revisions receive `public, max-age=31536000, immutable`. Host HTML and active registry pointers receive `no-store`. The static origin enforces TLS 1.2/1.3, HSTS, a same-origin CSP, no MIME sniffing, same-origin framing, explicit permissions policy, a 1 MiB request limit, structured access logs, a read-only filesystem, and `no-new-privileges`.
 
-Production certificates and keys must be mounted by the approved secret mechanism; never copy them into an image. If a cross-origin CDN is selected, replace the same-origin CSP/CORS rules with an explicit allowlist and validate candidate registry origins before activation.
+Production certificates and keys must be mounted by the approved secret mechanism; never copy them into an image. The approved same-origin topology keeps the default CSP/CORS policy narrow. Any later cross-origin CDN decision must add an explicit allowlist and validate candidate registry origins before activation.
 
 ## Existing nginx integration
 
@@ -95,6 +110,6 @@ If the static origin is lost, restore `artifacts/`, `catalog/`, and `registries/
 
 ## Decision gates not simulated as complete
 
-The local POC chooses nginx static delivery and self-signed TLS only to prove the deployable contract. Before production traffic, owners must approve: CDN/object storage versus mandatory OCI/EKS, enterprise PKI, workload identity, signing/attestation service, SBOM format/tool, vulnerability and license thresholds, audit store/retention, production source-map access, regional replication, RPO/RTO, monitoring backend, and cohort gateway. Azure DevOps publication and activation pipelines must use separate identities and approvals.
+The local POC chooses nginx static delivery and self-signed TLS only to prove the deployable contract. CDN-backed object storage with a single trusted HTTPS origin is approved for production browser delivery, with OCI retained as optional transport. Before production traffic, owners must still approve: enterprise PKI, workload identity, signing/attestation service, SBOM format/tool, vulnerability and license thresholds, audit store/retention, production source-map access, regional replication, RPO/RTO, monitoring backend, and cohort gateway. Azure DevOps publication and activation pipelines must use separate identities and approvals.
 
 The release policy baseline is versioned in `devops/policy/release-policy.json`; the ownership schema and Cashflow example sit beside it.

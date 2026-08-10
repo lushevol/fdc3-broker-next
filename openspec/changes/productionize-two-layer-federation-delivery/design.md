@@ -36,7 +36,7 @@ Alternative: build environment-specific bundles. Rejected because it makes test 
 
 ### Use CDN/object storage for browser delivery and OCI optionally for transport
 
-Object storage plus CDN is the preferred runtime. OCI artifacts or minimal non-root static-server images may be used when enterprise retention, signing, or EKS policy requires them. An OCI transport must still result in exact immutable browser assets.
+Approved for this change: immutable object storage plus CDN is the production browser runtime. The portal host, registry, and remotes use a single trusted HTTPS origin behind the existing ingress. OCI artifacts or minimal non-root static-server images remain optional transport or retention mechanisms; they are not a mandatory runtime or EKS requirement. An OCI transport must still result in exact immutable browser assets. A later cross-origin or mandatory OCI/EKS topology requires a separate approved change.
 
 Alternative: a Node server per remote. Rejected because static Module Federation assets do not require an application runtime and runtime dependency installation expands the attack surface.
 
@@ -120,11 +120,9 @@ At every wave, rollback consists of reactivating a known-good registry revision 
 
 ## Open Questions
 
-- Does enterprise policy permit object storage/CDN delivery, or must all artifacts run through EKS?
 - Which signing, SBOM, provenance, vulnerability, and license-policy services are approved?
 - What host/application protocol-major support window is sustainable?
 - Are separate canary registry URLs sufficient for the first production slice?
-- Will host and remotes share one origin, or which cross-origin/CSP policy is approved?
 - What are the production source-map access and retention requirements?
 - Which Cashflow vertical slice and user cohort migrate first?
 - In what order must authentication, entitlement, telemetry, FDC3, workspace, and chatbot capabilities reach production readiness?

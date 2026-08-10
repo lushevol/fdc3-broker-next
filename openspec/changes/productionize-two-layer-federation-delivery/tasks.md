@@ -1,6 +1,6 @@
 ## 1. Delivery decisions and ownership
 
-- [ ] 1.1 Record the approved runtime delivery substrate (CDN/object storage or mandatory OCI/EKS) and trusted host/remote origin topology
+- [x] 1.1 Record the approved runtime delivery substrate (CDN/object storage or mandatory OCI/EKS) and trusted host/remote origin topology
 - [ ] 1.2 Record approved signing, SBOM, provenance, vulnerability, license, and workload-identity services
 - [x] 1.3 Define application artifact identity, protocol-major support window, retention policy, RPO/RTO, source-map policy, and initial canary mechanism
 - [x] 1.4 Create the application ownership record schema covering team, support rota, criticality, data classification, SLO, approver, and rollback contact
