@@ -23,22 +23,26 @@ const useController = (props: TimeoutProps) => {
   };
 
   React.useEffect(() => {
-    if (store.refreshToken) {
-      ModalEvent("open", { name: "session control", ...analyticsData });
-      const payload = getJWTPayload(store.refreshToken);
-      if (payload != "" && typeof payload.exp !== "undefined") {
-        const diff = 1000 * payload.exp - new Date().getTime() - 2000;
-        timerPopup.current = setTimeout(() => {
-          continuLogout();
-        }, diff);
-      }
-    } else {
-      continuLogout();
+    ModalEvent("open", { name: "session control", ...analyticsData });
+  }, []);
+
+  React.useEffect(() => {
+    if (!store.refreshToken) {
+      return;
     }
+
+    const payload = getJWTPayload(store.refreshToken);
+    if (payload != "" && typeof payload.exp !== "undefined") {
+      const diff = 1000 * payload.exp - new Date().getTime() - 2000;
+      timerPopup.current = setTimeout(() => {
+        continuLogout();
+      }, diff);
+    }
+
     return () => {
       clearAllTimeout();
     };
-  }, []);
+  }, [store.refreshToken]);
 
   const continuLogout = async () => {
     dispacthIsOnLogout(true);
