@@ -44,10 +44,16 @@ for (const metadata of Object.values(build.releases)) {
 const registries = {};
 for (const environment of ['dev', 'test']) {
   const publicOrigin = new URL(environmentConfiguration[environment].publicOrigin).origin;
-  registries[environment] = validateRuntimeRegistry(
-    await readJson(path.join(runtimeRoot, 'registries', 'active', `${environment}.json`)),
-    { trustedOrigins: [publicOrigin] },
+  const pointer = await readJson(
+    path.join(runtimeRoot, 'registries', 'active', `${environment}.pointer.json`),
   );
+  const revision = await readJson(path.join(runtimeRoot, pointer.revisionUrl.replace(/^\//, '')));
+  if (revision.revisionId !== pointer.revisionId) {
+    throw new Error(`${environment} registry pointer does not match its immutable revision`);
+  }
+  registries[environment] = validateRuntimeRegistry(revision.registry, {
+    trustedOrigins: [publicOrigin],
+  });
   const hostLink = await lstat(path.join(runtimeRoot, 'environments', environment, 'host'));
   if (!hostLink.isSymbolicLink())
     throw new Error(`${environment} host activation is not an atomic symlink`);
@@ -75,7 +81,19 @@ for (const baseUrl of urls) {
     throw new Error(`${baseUrl} active registry is cacheable`);
   }
   const trustedOrigin = new URL(baseUrl).origin;
-  const registry = validateRuntimeRegistry(JSON.parse(registryResponse.body), {
+  const pointer = JSON.parse(registryResponse.body);
+  const revisionResponse = await request(`${baseUrl}${pointer.revisionUrl}`);
+  if (revisionResponse.status !== 200) {
+    throw new Error(`${baseUrl} registry revision returned ${revisionResponse.status}`);
+  }
+  if (!String(revisionResponse.headers['cache-control']).includes('immutable')) {
+    throw new Error(`${baseUrl} registry revision lacks immutable cache policy`);
+  }
+  const revision = JSON.parse(revisionResponse.body);
+  if (revision.revisionId !== pointer.revisionId) {
+    throw new Error(`${baseUrl} registry pointer does not match its immutable revision`);
+  }
+  const registry = validateRuntimeRegistry(revision.registry, {
     trustedOrigins: [trustedOrigin],
   });
   const manifestResponse = await request(registry.applications[0].manifestUrl);

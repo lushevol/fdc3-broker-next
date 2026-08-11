@@ -16,7 +16,7 @@ verification status.
 - `apps/mfe-cashflow-blotter-mvp` — independently deployed Cashflow Blotter migration slice on port 9206.
 - `packages/platform-contracts` — versioned application, appearance, and identity contracts.
 - `packages/platform-sdk` — typed application client for host capabilities.
-- `packages/ratan-design-webkit` — active Lit/custom-element component catalog
+- `packages/sc-dev-web` — active Lit/custom-element component catalog
   and React wrapper used by Portal Host and the migrated applications.
 - `packages/ratan-design` — legacy compatibility and reference package retained
   while remaining cohorts are retired; it is not the active UI source for the

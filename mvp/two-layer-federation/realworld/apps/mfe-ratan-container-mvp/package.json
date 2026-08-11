@@ -13,7 +13,7 @@
   "dependencies": {
     "@fm/platform-contracts": "^1.1.0",
     "@fm/platform-sdk": "^1.1.0",
-    "@fm/ratan-design": "^1.1.0",
+    "@fm/ratan-design-legacy": "1.1.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },

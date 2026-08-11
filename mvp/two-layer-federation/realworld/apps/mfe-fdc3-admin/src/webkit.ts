@@ -1,4 +1,4 @@
-import { createComponent } from '@fm/ratan-design-webkit/react';
+import { createComponent } from '@scdevkit/webkit/react';
 
 export const ScAlert = createComponent('sc-alert');
 export const ScBadge = createComponent('sc-badge');

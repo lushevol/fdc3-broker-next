@@ -1,7 +1,7 @@
 # @fm/ratan-design — Project Overview
 
 Status: legacy compatibility/reference workspace. New active Portal Host UI
-belongs to `@fm/ratan-design-webkit`. See
+belongs to `@scdevkit/webkit`. See
 [`../../../docs/CURRENT_STATE.md`](../../../docs/CURRENT_STATE.md).
 
 > Parent: [Monorepo AGENTS.md](../../../../../../AGENTS.md)

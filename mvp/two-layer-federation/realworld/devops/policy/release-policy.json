@@ -1,5 +1,11 @@
 {
   "schemaVersion": 1,
+  "delivery": {
+    "browserRuntime": "cdn-object-storage",
+    "originTopology": "same-origin",
+    "ociTransport": "optional",
+    "trustedOriginPolicy": "single-approved-https-origin"
+  },
   "artifactIdentity": "applicationId + semanticVersion + sourceRevision + buildId + sha256",
   "supportedProtocolMajors": [1],
   "retentionDays": {

@@ -7,7 +7,7 @@ export default {
   transformIgnorePatterns: ['node_modules/(?!(@fm)/)'],
   moduleNameMapper: {
     '^@migrated-cashflow-cn$': '<rootDir>/src/test/legacy-cashflow-cn-stub.tsx',
-    '^@fm/ratan-design-webkit$': '<rootDir>/src/test/ratan-webkit-stub.tsx',
+    '^@fm/ratan-design-legacy$': '<rootDir>/src/test/ratan-webkit-stub.tsx',
     '^react$': '<rootDir>/node_modules/react',
     '^react/(.*)$': '<rootDir>/node_modules/react/$1',
     '^react-dom$': '<rootDir>/node_modules/react-dom',
@@ -17,6 +17,7 @@ export default {
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/compat/**',
+    '!src/cashflow-ratan/**',
     '!src/test/**',
     '!src/types/**',
     '!src/migrated-entry.tsx',

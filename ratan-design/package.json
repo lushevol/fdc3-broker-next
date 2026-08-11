@@ -1,0 +1,19 @@
+{
+  "name": "@fm/ratan-design-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "docs": "turbo run docs",
+    "verify:boundaries": "node tooling/release/verify-workspace-boundaries.mjs",
+    "verify:interactions": "node tooling/release/verify-interaction-foundation.mjs",
+    "verify:foundation": "npm run verify:boundaries && npm run verify:interactions && npm --workspace @fm/ratan-design run test && npm --workspace @fm/ratan-design-data-grid run test && npm --workspace @fm/ratan-design-docs run build && npm --workspace @fm/ratan-design-storybook run build && npm --workspace @fm/ratan-design-playground run build && npm --workspace @fm/ratan-design-parity-lab run test && npm --workspace @fm/ratan-design-parity-lab run verify:proof"
+  }
+}

@@ -36,6 +36,54 @@ const Root = styled('section')(({ theme }) => ({
     fontSize: '1rem',
     fontWeight: theme.theme['NewTileComponent']['fontWeight'],
   },
+  // when we change to new design, we apply the style into the same selector, and thenremove these two style definition.
+  [`&.new-tile-icon-wrapper .${classes.box}`]: {
+    backgroundColor: 'unset',
+    marginRight: '0 !important',
+    width: '36px',
+    height: '36px',
+  },
+  [`&.new-tile-icon-wrapper.${classes.root}`]: {
+    marginRight: '0 !important',
+    padding: '0px',
+  },
+  [`&.new-tile-icon-wrapper .${classes.box}`]: {
+    marginRight: '0 !important',
+    width: '36px',
+    height: '36px',
+    borderRadius: '50%',
+    padding: '8px',
+    boxSizing: 'border-box',
+  },
+  [`.light &.new-tile-icon-wrapper .${classes.box}`]: {
+    background: 'rgba(255, 255, 255, 0.2)',
+  },
+  [`.dark &.new-tile-icon-wrapper .${classes.box}`]: {
+    background: 'rgba(26, 26, 26, 0.2)',
+  },
+  [`&.new-tile-icon-wrapper .${classes.box} .new-tile-icon-hover, &.new-tile-icon-wrapper .${classes.box} .new-tile-icon-selected`]:
+    {
+      display: 'none',
+    },
+  [`&.new-tile-icon-wrapper .${classes.box}:hover .new-tile-icon, &.new-tile-icon-wrapper .${classes.box}:hover .new-tile-icon-selected`]:
+    {
+      display: 'none',
+    },
+  [`&.new-tile-icon-wrapper .${classes.box}:hover .new-tile-icon-hover`]: {
+    display: 'block',
+  },
+  [`&.new-tile-icon-wrapper .${classes.box}.selected .new-tile-icon,
+    &.new-tile-icon-wrapper .${classes.box}.selected .new-tile-icon-hover`]: {
+    display: 'none !important',
+  },
+  [`&.new-tile-icon-wrapper .${classes.box}.selected .new-tile-icon-selected`]: {
+    display: 'block !important',
+  },
+  [`& button.${classes.box}`]: {
+    border: 'none',
+    outline: 'none',
+    appearance: 'none',
+  },
 }));
 
 export default Root;

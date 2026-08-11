@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "outDir": ".tsbuild"
+  },
+  "include": ["src", "tokens.json"],
+  "references": [
+    { "path": "../data-grid" },
+    { "path": "../foundation" },
+    { "path": "../testing" },
+    { "path": "../vitest" }
+  ]
+}

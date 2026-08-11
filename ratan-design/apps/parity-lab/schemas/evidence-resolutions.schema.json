@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schemaVersion", "precedence", "resolutions"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "precedence": { "type": "array", "minItems": 5, "items": { "type": "string" } },
+    "resolutions": { "type": "array", "items": { "type": "object", "required": ["id", "subject", "selectedEvidence", "rationale", "sources"] } }
+  }
+}

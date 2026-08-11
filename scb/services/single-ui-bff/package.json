@@ -1,0 +1,9 @@
+{
+  "name": "single-ui-bff",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "../../../scripts/mvn-build.sh",
+    "test": "mvn test"
+  }
+}

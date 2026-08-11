@@ -1,0 +1,61 @@
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import useServices from './useServices';
+import Provider from '../../../hooks/provider';
+import ThemeProvider from '../../../theme';
+afterAll(() => {
+  jest.clearAllMocks();
+});
+
+jest.mock('../../../hooks/service', () => {
+  return {
+    putService: async () => {
+      return Promise.reject({});
+    },
+    postService: async () => {
+      return Promise.reject({});
+    },
+    getService: async () => {
+      return Promise.reject({});
+    },
+  };
+});
+
+const Comp = () => {
+  const {
+    getTile,
+    updateTile,
+    verifyTile,
+    createTile,
+    deactivateTile,
+    getTileAudit,
+    getCategory,
+    getImportMap,
+  } = useServices();
+  React.useEffect(() => {
+    void Promise.allSettled([
+      getCategory('123'),
+      getTile('123', { x: 'x', c: 'c' }),
+      updateTile('123', { x: 'x', c: 'c' }),
+      verifyTile('123', { x: 'x', c: 'c' }),
+      createTile('123', { x: 'x', c: 'c' }),
+      deactivateTile('123', { x: 'x', c: 'c' }),
+      getTileAudit('123', { x: 'x', c: 'c' }),
+      getImportMap('123'),
+    ]);
+  }, []);
+  return <div />;
+};
+
+describe('Tile useServices component', () => {
+  it('should be in the document', () => {
+    render(
+      <Provider>
+        <ThemeProvider>
+          <Comp />
+        </ThemeProvider>
+      </Provider>,
+    );
+    expect(screen).toBeDefined();
+  });
+});

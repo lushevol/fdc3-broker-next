@@ -60,7 +60,7 @@ Object.assign(globalThis, {
   IntersectionObserver: TestIntersectionObserver,
 });
 
-await import('@fm/ratan-design-webkit/elements');
+await import('@scdevkit/webkit/elements');
 
 // Existing test helpers use the Jest-compatible spy surface. Keep the test
 // vocabulary stable while Vitest is the runner and assertion engine.

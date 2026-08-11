@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "identityProvider": "azure-devops-workload-identity-federation",
+  "operations": {
+    "artifact-publication": { "requiredRole": "application-publisher" },
+    "promotion-request": { "requiredRole": "release-requester" },
+    "promotion-approval": { "requiredRole": "release-approver" },
+    "activation": { "requiredRole": "registry-activator" },
+    "rollback": { "requiredRole": "release-operator" }
+  },
+  "separationOfDuties": [
+    { "operations": ["promotion-request", "promotion-approval"] },
+    { "operations": ["artifact-publication", "activation"] }
+  ]
+}

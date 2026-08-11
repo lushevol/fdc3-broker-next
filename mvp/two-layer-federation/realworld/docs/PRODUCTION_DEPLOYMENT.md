@@ -50,17 +50,37 @@ Generated release bytes, registry revisions, catalog records, and certificates a
 
 - `scripts/package-production-deployment.mjs` scans browser output for credential-shaped content, computes a deterministic SHA-256 tree digest, and publishes without overwriting an existing release path.
 - Release paths are `artifacts/<application>/<semver>-sha256-<digest-prefix>/`.
-- `registries/revisions/<revision>.json` is immutable evidence; `registries/active/<environment>.json` is the small revalidating client pointer.
+- Each catalog record carries the application/package identity, semantic version, source revision, build ID, full artifact digest, contract metadata, capabilities, and declared shared-runtime ranges.
+- `devops/registry/production-registry-revision.schema.json` defines the immutable promotion record: selected artifact identity and URL, protocol range, capabilities, embedded ownership, and release-evidence links. The browser continues to receive only the nested lean runtime registry.
+- The candidate validator fails closed for schema shape, duplicate IDs/routes, trusted origins, release selection, artifact reachability and digest, protocol support, required capabilities, and signature evidence. Artifact resolution and signature verification are injected while enterprise services are selected. Enforcing that validator, authorization, and audit recording in the Azure DevOps promotion path remains open in tasks 3.3–3.5.
+- `registries/revisions/<revision>.json` is immutable evidence; `registries/active/<environment>.pointer.json` is the single small revalidating client pointer. The browser dereferences its immutable `revisionUrl` and validates the nested lean runtime registry, so one atomic rename changes the complete selected application set.
 - `environments/<environment>/host` is an atomic symlink to one immutable host release.
 - DEV and test registries select identical remote URLs and digests. Public endpoints and other non-secret environment values belong in registry/capability configuration, not rebuilt JavaScript.
 - `assetPrefix: 'auto'` makes remote chunks resolve from the immutable manifest location instead of localhost.
 - `devops/registry/applications.json` is the production allowlist. Verification-only and legacy-migration MVPs are intentionally excluded until they pass their own production conformance gates.
 
+The packaging command bootstraps DEV/test pointers for the local Wave 0 deployment only. It is not the production promotion path and must not be granted production registry credentials.
+
+## Approved delivery topology
+
+The approved production browser-delivery substrate is immutable object storage
+fronted by a CDN. The portal host, active registry pointer, immutable registry
+revisions, and remote application assets are exposed through one approved HTTPS
+origin behind the existing ingress. Candidate registry entries outside that
+origin are rejected by default.
+
+OCI remains an optional transport and retention format; it is not a mandatory
+browser runtime or EKS deployment requirement. If a later change introduces a
+cross-origin CDN or mandatory OCI/EKS serving, it requires a separately approved
+topology decision plus explicit CSP, CORS, signing, and deployed-verification
+updates. The local read-only nginx image continues to emulate the static-origin
+contract and is not the approved production storage substrate.
+
 ## Cache and browser security contract
 
 Immutable artifacts and registry revisions receive `public, max-age=31536000, immutable`. Host HTML and active registry pointers receive `no-store`. The static origin enforces TLS 1.2/1.3, HSTS, a same-origin CSP, no MIME sniffing, same-origin framing, explicit permissions policy, a 1 MiB request limit, structured access logs, a read-only filesystem, and `no-new-privileges`.
 
-Production certificates and keys must be mounted by the approved secret mechanism; never copy them into an image. If a cross-origin CDN is selected, replace the same-origin CSP/CORS rules with an explicit allowlist and validate candidate registry origins before activation.
+Production certificates and keys must be mounted by the approved secret mechanism; never copy them into an image. The approved same-origin topology keeps the default CSP/CORS policy narrow. Any later cross-origin CDN decision must add an explicit allowlist and validate candidate registry origins before activation.
 
 ## Existing nginx integration
 
@@ -77,11 +97,17 @@ Rollback does not rebuild or overwrite assets:
 
 1. Select the previous known-good revision from `registries/revisions/`.
 2. Validate its application URLs and catalog digests.
-3. Atomically replace only the environment active registry file/pointer.
+3. Atomically replace only the environment active pointer.
 4. Reload no application assets; new page loads select the previous revision.
 5. Notify already-active sessions and request a controlled refresh for a critical incident. Never hot-replace a loaded Module Federation share scope.
 
 If the static origin is lost, restore `artifacts/`, `catalog/`, and `registries/revisions/` from replicated immutable storage, recreate the active pointer from the last known-good revision, then run deployed verification before reopening traffic.
+
+Activation reads a complete immutable revision and replaces the browser-facing
+registry through an atomic same-filesystem rename. The active pointer records
+the previous revision ID. Rollback activates that previous known-good revision
+through the same primitive; a missing or incomplete target leaves the current
+browser registry unchanged.
 
 ## Responsibilities for Wave 0
 
@@ -93,8 +119,20 @@ If the static origin is lost, restore `artifacts/`, `catalog/`, and `registries/
 | Scanner/signing policy and trusted identities         | Security                  |
 | Promotion approval, canary stop, rollback decision    | Release owner             |
 
+`devops/policy/release-authorization.json` maps Azure DevOps workload identities
+to separate roles for artifact publication, promotion request, promotion
+approval, activation, and rollback. Authorization fails closed for missing
+roles, prohibits a requester from approving the same promotion, and prevents
+an artifact publisher from activating its own release.
+
+Promotion pipelines write append-only JSONL audit events containing requester,
+approver, environment, source and target revisions, selected application
+versions and digests, evidence URLs, request/approval/completion timestamps, and
+the final outcome. Incomplete or self-approved events are rejected before they
+can be recorded.
+
 ## Decision gates not simulated as complete
 
-The local POC chooses nginx static delivery and self-signed TLS only to prove the deployable contract. Before production traffic, owners must approve: CDN/object storage versus mandatory OCI/EKS, enterprise PKI, workload identity, signing/attestation service, SBOM format/tool, vulnerability and license thresholds, audit store/retention, production source-map access, regional replication, RPO/RTO, monitoring backend, and cohort gateway. Azure DevOps publication and activation pipelines must use separate identities and approvals.
+The local POC chooses nginx static delivery and self-signed TLS only to prove the deployable contract. CDN-backed object storage with a single trusted HTTPS origin is approved for production browser delivery, with OCI retained as optional transport. Before production traffic, owners must still approve: enterprise PKI, workload identity, signing/attestation service, SBOM format/tool, vulnerability and license thresholds, audit store/retention, production source-map access, regional replication, RPO/RTO, monitoring backend, and cohort gateway. Azure DevOps publication and activation pipelines must use separate identities and approvals.
 
 The release policy baseline is versioned in `devops/policy/release-policy.json`; the ownership schema and Cashflow example sit beside it.

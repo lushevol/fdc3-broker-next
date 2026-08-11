@@ -1,6 +1,6 @@
 ## 1. Delivery decisions and ownership
 
-- [ ] 1.1 Record the approved runtime delivery substrate (CDN/object storage or mandatory OCI/EKS) and trusted host/remote origin topology
+- [x] 1.1 Record the approved runtime delivery substrate (CDN/object storage or mandatory OCI/EKS) and trusted host/remote origin topology
 - [ ] 1.2 Record approved signing, SBOM, provenance, vulnerability, license, and workload-identity services
 - [x] 1.3 Define application artifact identity, protocol-major support window, retention policy, RPO/RTO, source-map policy, and initial canary mechanism
 - [x] 1.4 Create the application ownership record schema covering team, support rota, criticality, data classification, SLO, approver, and rollback contact
@@ -8,7 +8,7 @@
 
 ## 2. Immutable artifact foundation
 
-- [ ] 2.1 Add tested release-metadata generation for application name/version, commit, build ID, digest, contract, capabilities, and shared runtime ranges
+- [x] 2.1 Add tested release-metadata generation for application name/version, commit, build ID, digest, contract, capabilities, and shared runtime ranges
 - [x] 2.2 Add a reproducible production packaging command for the portal host and Cashflow remote that excludes environment secrets
 - [x] 2.3 Implement immutable version-path publication to the selected static/OCI artifact store and reject overwrite attempts
 - [x] 2.4 Implement post-publication digest verification and an artifact-catalog record linking source, output, and evidence
@@ -18,12 +18,12 @@
 
 ## 3. Registry control plane
 
-- [ ] 3.1 Define and test the production registry schema with artifact version/digest, immutable URL, protocol range, capabilities, ownership, and release evidence
+- [x] 3.1 Define and test the production registry schema with artifact version/digest, immutable URL, protocol range, capabilities, ownership, and release evidence
 - [x] 3.2 Create immutable registry-revision storage and a separate environment active-pointer model
 - [ ] 3.3 Implement candidate validation for schema, duplicate routes/IDs, trusted origins, artifact reachability/digest, contracts, capabilities, and signatures
 - [ ] 3.4 Implement separate authorization for artifact publication, promotion request, approval, activation, and rollback
 - [ ] 3.5 Record complete promotion audit events with requester, approver, revisions, selected digests, evidence, timestamps, and outcomes
-- [ ] 3.6 Implement atomic candidate activation and previous-known-good revision rollback
+- [x] 3.6 Implement atomic candidate activation and previous-known-good revision rollback
 - [ ] 3.7 Add registry backup/replication and a tested known-good recovery procedure matching agreed RPO/RTO
 
 ## 4. CI/CD and supply-chain assurance

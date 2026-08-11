@@ -1,0 +1,118 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:00000000-0000-5000-8000-40666d2f7261",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "library",
+      "name": "@fm/ratan-design",
+      "version": "2.0.0-alpha.0",
+      "purl": "pkg:npm/%40fm%2Fratan-design@2.0.0-alpha.0"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "@internationalized/date",
+      "version": "3.12.2",
+      "purl": "pkg:npm/%40internationalized%2Fdate@3.12.2"
+    },
+    {
+      "type": "library",
+      "name": "@internationalized/number",
+      "version": "3.6.7",
+      "purl": "pkg:npm/%40internationalized%2Fnumber@3.6.7"
+    },
+    {
+      "type": "library",
+      "name": "@internationalized/string",
+      "version": "3.2.9",
+      "purl": "pkg:npm/%40internationalized%2Fstring@3.2.9"
+    },
+    {
+      "type": "library",
+      "name": "@react-types/shared",
+      "version": "3.36.0",
+      "purl": "pkg:npm/%40react-types%2Fshared@3.36.0"
+    },
+    {
+      "type": "library",
+      "name": "@swc/helpers",
+      "version": "0.5.21",
+      "purl": "pkg:npm/%40swc%2Fhelpers@0.5.21"
+    },
+    {
+      "type": "library",
+      "name": "@tanstack/react-table",
+      "version": "8.21.3",
+      "purl": "pkg:npm/%40tanstack%2Freact-table@8.21.3"
+    },
+    {
+      "type": "library",
+      "name": "@tanstack/react-virtual",
+      "version": "3.14.9",
+      "purl": "pkg:npm/%40tanstack%2Freact-virtual@3.14.9"
+    },
+    {
+      "type": "library",
+      "name": "@tanstack/table-core",
+      "version": "8.21.3",
+      "purl": "pkg:npm/%40tanstack%2Ftable-core@8.21.3"
+    },
+    {
+      "type": "library",
+      "name": "@tanstack/virtual-core",
+      "version": "3.17.7",
+      "purl": "pkg:npm/%40tanstack%2Fvirtual-core@3.17.7"
+    },
+    {
+      "type": "library",
+      "name": "aria-hidden",
+      "version": "1.2.6",
+      "purl": "pkg:npm/aria-hidden@1.2.6"
+    },
+    {
+      "type": "library",
+      "name": "client-only",
+      "version": "0.0.1",
+      "purl": "pkg:npm/client-only@0.0.1"
+    },
+    {
+      "type": "library",
+      "name": "clsx",
+      "version": "2.1.1",
+      "purl": "pkg:npm/clsx@2.1.1"
+    },
+    {
+      "type": "library",
+      "name": "react-aria",
+      "version": "3.50.0",
+      "purl": "pkg:npm/react-aria@3.50.0"
+    },
+    {
+      "type": "library",
+      "name": "react-aria-components",
+      "version": "1.19.0",
+      "purl": "pkg:npm/react-aria-components@1.19.0"
+    },
+    {
+      "type": "library",
+      "name": "react-stately",
+      "version": "3.48.0",
+      "purl": "pkg:npm/react-stately@3.48.0"
+    },
+    {
+      "type": "library",
+      "name": "tslib",
+      "version": "2.8.1",
+      "purl": "pkg:npm/tslib@2.8.1"
+    },
+    {
+      "type": "library",
+      "name": "use-sync-external-store",
+      "version": "1.6.0",
+      "purl": "pkg:npm/use-sync-external-store@1.6.0"
+    }
+  ]
+}

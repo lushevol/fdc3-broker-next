@@ -706,8 +706,10 @@ export const updateCashflowsByNetid = (nettingId: string | string[]) => {
     const netPreviewColumns = previewApi?.getAllDisplayedColumns();
 
     const mergedColumnDef = _uniqBy(
-      _concat(mainTableColumns ?? [], netPreviewColumns ?? []),
-      (item) => item.colDef.field
+      _concat(mainTableColumns ?? [], netPreviewColumns ?? []).map((column) =>
+        column.getColDef()
+      ),
+      (item) => item.field
     );
 
     const isMultiNettingId = nettingId instanceof Array;
@@ -744,8 +746,10 @@ export const updateCashflowsInNetpreview = (cashflowId: string | string[]) => {
     const netPreviewColumns = previewApi?.getAllDisplayedColumns() ?? [];
 
     const mergedColumnDef = _uniqBy(
-      _concat(mainTableColumns, netPreviewColumns),
-      (item) => item.colDef.field
+      _concat(mainTableColumns, netPreviewColumns).map((column) =>
+        column.getColDef()
+      ),
+      (item) => item.field
     );
 
     const isMultiId = cashflowId instanceof Array;

@@ -41,7 +41,7 @@ server {
   }
 
   location = /registry.json {
-    alias /srv/realworld/registries/active/${DEPLOYMENT_ENV}.json;
+    alias /srv/realworld/registries/active/${DEPLOYMENT_ENV}.pointer.json;
     default_type application/json;
     add_header Cache-Control "no-store, max-age=0" always;
     add_header Pragma "no-cache" always;

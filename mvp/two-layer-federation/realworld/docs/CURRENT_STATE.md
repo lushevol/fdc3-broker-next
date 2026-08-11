@@ -38,17 +38,17 @@ component remote.
 
 ## UI package status
 
-Portal Host, Cashflow, Identity/Profile, FDC3 Admin, and Cashflow Blotter MVP
-consume `@fm/ratan-design-webkit`. React applications use the package's existing
-`@fm/ratan-design-webkit/react` wrapper; reusable implementations remain under
-the WebKit `src/components` tree.
+Portal Host, Cashflow, Identity/Profile, and FDC3 Admin consume the root origin
+package `@scdevkit/webkit`. React applications use its existing
+`@scdevkit/webkit/react` wrapper; reusable implementations remain under
+`packages/sc-dev-web/src/components`.
 
-The WebKit package is native-custom-element based. Registration modules are
+The origin WebKit package is native-custom-element based. Registration modules are
 idempotent, nested Shoelace dependencies are registered by the React boundary,
 and applications do not install or import a scoped-custom-element-registry
-polyfill. The package has no dependency on `@fm/ratan-design` and contains no
-root-level React component implementations, provider, dialog, divider, or
-status-badge replacement.
+polyfill. The package has no dependency on `@fm/ratan-design`. Cashflow Blotter
+continues to use the latter's appearance provider until that compatibility
+cohort is explicitly migrated; it does not depend on a copied WebKit package.
 
 `@fm/ratan-design` remains in the Realworld workspace only as a legacy
 compatibility and reference package while remaining migration cohorts are
@@ -75,7 +75,7 @@ dialog overlays, and direct loading of all four active remotes.
 
 | Workspace                  |     Tests | Build  | Lint                                     |
 | -------------------------- | --------: | ------ | ---------------------------------------- |
-| `@fm/ratan-design-webkit`  | 10 passed | passed | passed with four existing `any` warnings |
+| `@scdevkit/webkit`  | 10 passed | passed | passed with four existing `any` warnings |
 | `@fm/portal-host`          | 46 passed | passed | passed                                   |
 | `@fm/mfe-cashflow`         | 84 passed | passed | passed                                   |
 | `@fm/mfe-fdc3-admin`       |  6 passed | passed | passed                                   |

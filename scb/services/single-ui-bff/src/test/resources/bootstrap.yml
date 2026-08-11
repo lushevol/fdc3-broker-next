@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: single-ui-bff
+  profiles:
+    active: test
+
+logging:
+  level:
+    com.scb.ratan: DEBUG
+
+ratanone:
+  logging:
+    level: info
+    folder: ${LOG_DIR:./logs}

@@ -5,7 +5,7 @@ Status: inventory-only application. Last reviewed 3 August 2026. See the
 
 This workspace is a migration inventory for `apps/mfe-ratan-container`. It is a
 directly hosted diagnostic application, not a replacement shared runtime.
-Reusable components belong in `@fm/ratan-design-webkit` or
+Reusable components belong in `@scdevkit/webkit` or
 `@fm/ratan-data-grid`; shell concerns arrive through `@fm/platform-sdk`.
 
 ```bash

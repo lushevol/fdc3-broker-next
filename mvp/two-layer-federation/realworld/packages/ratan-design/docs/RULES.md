@@ -2,7 +2,7 @@
 
 Status: rules for the legacy compatibility package only. Active WebKit rules
 are documented in
-[`../../ratan-design-webkit/README.md`](../../ratan-design-webkit/README.md).
+[`../../../../../packages/sc-dev-web/README.md`](../../../../../packages/sc-dev-web/README.md).
 
 ## Public API
 

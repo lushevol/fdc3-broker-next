@@ -6,8 +6,14 @@ import {
   type ApplicationProps,
 } from '@fm/platform-contracts';
 import { createPlatformClient } from '@fm/platform-sdk';
-import { Button, Card, DesignSystemProvider, StatusBadge, type StatusTone } from '@fm/ratan-design';
-import '@fm/ratan-design/styles.css';
+import {
+  Button,
+  Card,
+  DesignSystemProvider,
+  StatusBadge,
+  type StatusTone,
+} from '@fm/ratan-design-legacy';
+import '@fm/ratan-design-legacy/styles.css';
 import { useMemo, useSyncExternalStore } from 'react';
 import './styles.css';
 

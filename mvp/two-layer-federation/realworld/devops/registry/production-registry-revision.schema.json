@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fm.example/schemas/production-registry-revision.schema.json",
+  "title": "Production federated registry revision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "revisionId",
+    "environment",
+    "createdAt",
+    "sourceRevision",
+    "releases",
+    "applications",
+    "registry"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "revisionId": { "type": "string", "minLength": 1 },
+    "environment": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "sourceRevision": { "type": "string", "minLength": 1 },
+    "releases": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/releaseSelection" }
+    },
+    "applications": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/application" }
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applications"],
+      "properties": {
+        "applications": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "object" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "releaseSelection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["releaseId", "digest"],
+      "properties": {
+        "releaseId": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "artifact",
+        "protocolRange",
+        "capabilities",
+        "ownership",
+        "releaseEvidence"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "artifact": { "$ref": "#/$defs/artifact" },
+        "protocolRange": { "$ref": "#/$defs/protocolRange" },
+        "capabilities": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "ownership": { "$ref": "#/$defs/ownership" },
+        "releaseEvidence": { "$ref": "#/$defs/releaseEvidence" }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "releaseId", "digestAlgorithm", "digest", "immutableUrl"],
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+        },
+        "releaseId": { "type": "string", "minLength": 1 },
+        "digestAlgorithm": { "const": "sha256" },
+        "digest": { "$ref": "#/$defs/sha256" },
+        "immutableUrl": { "type": "string", "format": "uri", "pattern": "^https://" }
+      }
+    },
+    "protocolRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimumMajor", "maximumMajor"],
+      "properties": {
+        "minimumMajor": { "type": "integer", "minimum": 1 },
+        "maximumMajor": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "ownership": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applicationId",
+        "accountableTeam",
+        "supportRota",
+        "criticality",
+        "dataClassification",
+        "slo",
+        "releaseApprover",
+        "rollbackContact"
+      ],
+      "properties": {
+        "applicationId": { "type": "string", "minLength": 1 },
+        "accountableTeam": { "type": "string", "minLength": 1 },
+        "supportRota": { "type": "string", "minLength": 1 },
+        "criticality": { "enum": ["tier-1", "tier-2", "tier-3"] },
+        "dataClassification": {
+          "enum": ["public", "internal", "confidential", "restricted"]
+        },
+        "slo": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["availabilityPercent", "activationP95Ms"],
+          "properties": {
+            "availabilityPercent": { "type": "number", "minimum": 0, "maximum": 100 },
+            "activationP95Ms": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "releaseApprover": { "type": "string", "minLength": 1 },
+        "rollbackContact": { "type": "string", "minLength": 1 }
+      }
+    },
+    "releaseEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["catalogUrl"],
+      "properties": {
+        "catalogUrl": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "sbomUrl": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "provenanceUrl": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "signatureUrl": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "policyResultsUrl": { "type": "string", "format": "uri", "pattern": "^https://" }
+      }
+    },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

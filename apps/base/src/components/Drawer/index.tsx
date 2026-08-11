@@ -15,8 +15,9 @@
 import MuiDrawer from '@mui/material/Drawer';
 import React, { type ReactElement } from 'react';
 import ErrorBoundry from '../../components/ErrorBoundry';
+import { useIsNewLayout } from '../../hooks/model/root';
 import type { DrawerProps } from './common/interface';
-import Root, { classes, DrawerClass, PREFIX } from './common/style';
+import Root, { classes, DrawerClass, NewDrawerClass, PREFIX } from './common/style';
 import Tile from './common/Tile';
 import Menu from './Menu';
 
@@ -39,13 +40,14 @@ import Menu from './Menu';
  * />
  */
 const Drawer: React.FC<DrawerProps> = (props: DrawerProps): ReactElement => {
+  const isNewLayout = useIsNewLayout();
   return (
     <ErrorBoundry>
       <MuiDrawer
         anchor="right"
         open={props.anchor}
         onClose={props.toggleDrawer(false)}
-        className={DrawerClass}
+        className={isNewLayout ? `${DrawerClass} ${NewDrawerClass}` : DrawerClass}
       >
         <Root className={classes.root} data-testid={`${PREFIX}`}>
           <div className={classes.content}>

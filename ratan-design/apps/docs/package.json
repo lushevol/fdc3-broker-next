@@ -1,0 +1,18 @@
+{
+  "name": "@fm/ratan-design-docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/verify-docs.mjs",
+    "docs": "npm run build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint src --max-warnings=0 && node --check scripts/verify-docs.mjs"
+  },
+  "dependencies": {
+    "@fm/ratan-design": "2.0.0-alpha.0",
+    "react": "18.3.1"
+  },
+  "devDependencies": { "@types/react": "18.3.31" }
+}

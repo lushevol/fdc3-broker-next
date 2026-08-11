@@ -6,7 +6,7 @@ Realworld [current-state record](../../../docs/CURRENT_STATE.md).
 ## Principle
 
 All reusable Portal Host controls come from the public
-`@fm/ratan-design-webkit` API. Host code may compose semantic landmarks,
+`@scdevkit/webkit` API. Host code may compose semantic landmarks,
 responsive layout, authentication state, registry state, and remote mount
 boundaries, but it must not create local visual or interactive replacements for
 WebKit primitives.
@@ -14,7 +14,7 @@ WebKit primitives.
 ## Public boundary
 
 Portal Host imports React adapters from its local `src/webkit.ts` boundary.
-Those adapters are created by `@fm/ratan-design-webkit/react` and wrap the
+Those adapters are created by `@scdevkit/webkit/react` and wrap the
 catalog's registered `sc-*` elements. Component implementation remains under
 the WebKit package's `src/components` directory.
 

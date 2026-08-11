@@ -2,7 +2,7 @@
 
 Status: legacy package architecture. Active Portal Host UI architecture is
 documented in [`../../../docs/ARCHITECTURE.md`](../../../docs/ARCHITECTURE.md)
-and implemented by `@fm/ratan-design-webkit`.
+and implemented by `@scdevkit/webkit`.
 
 ## Runtime position
 

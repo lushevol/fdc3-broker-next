@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>sc-date WebKit parity fixture</title>
+  </head>
+  <body class="sc-mode-light" data-ratan-parity-fixture="sc-date">
+    <main style="box-sizing:border-box;padding:24px;width:640px"><sc-date></sc-date></main>
+    <script id="ratan-fixture-contract" type="application/json">{"id":"sc-date","classification":"included","legacyTag":"sc-date","reactComponent":"Date","reactSubpath":"./date","runtimeFixture":"runtime/sc-date.html","reactFixture":"react/sc-date.tsx","states":["default","hover","focus-visible"],"variants":[],"tones":[],"sizes":[],"defaults":{"date":"new Date()","offsetNum":"null","dateType":"'full-date'","showTime":"false","timeOnly":"false","hideSeconds":"false","showTimeZone":"false"},"properties":[{"legacyProperty":"date","legacyAttribute":"date","type":"Timer","default":"new Date()"},{"legacyProperty":"offsetNum","legacyAttribute":"offset-num","type":"null | 0 | 8 | '0' | '8'","default":"null"},{"legacyProperty":"dateType","legacyAttribute":"date-type","type":"'full-date' | 'short-date'","default":"'full-date'"},{"legacyProperty":"size","legacyAttribute":"size","type":"`${COMPACT_SIZE}`"},{"legacyProperty":"showTime","legacyAttribute":"show-time","type":"boolean | undefined","default":"false"},{"legacyProperty":"timeOnly","legacyAttribute":"time-only","type":"boolean | undefined","default":"false"},{"legacyProperty":"hideSeconds","legacyAttribute":"hide-seconds","type":"boolean | undefined","default":"false"},{"legacyProperty":"showTimeZone","legacyAttribute":"show-time-zone","type":"boolean | undefined","default":"false"},{"legacyProperty":"dir","legacyAttribute":"dir","type":"string","inheritedFrom":{"name":"ScElement","module":"src/shared/sc-element.ts"}},{"legacyProperty":"lang","legacyAttribute":"lang","type":"string","inheritedFrom":{"name":"ScElement","module":"src/shared/sc-element.ts"}}],"events":[{"legacyEvent":"sc-locale-status"}],"slots":[],"methods":[{"legacyMethod":"isValidDate","parameters":[{"name":"dateInput","type":{"text":"Timer"}}]}],"interactions":["pointer","keyboard","programmatic"]}</script>
+  </body>
+</html>

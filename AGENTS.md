@@ -133,6 +133,11 @@ Root `eslint.config.mjs` applies to `**/*.{ts,tsx}` across workspaces. Rules:
 
 Currently **disabled** (commented out in `.husky/`). Lint-staged config exists in root `package.json` but is not invoked.
 
+### Agent commit workflow
+
+- When a task stage is complete and its changes have been verified, always make a best-effort commit for that completed stage.
+- Keep each commit limited to the completed stage. Never include unrelated user changes; if the stage cannot be isolated safely, report the blocker instead of committing unrelated work.
+
 ### Testing
 
 - Apps use **Jest** with `babel-jest` transform, `@testing-library/react`, `jest-environment-jsdom`
@@ -241,7 +246,7 @@ Each `docs/` directory follows the same structure:
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **fdc3-broker-next** (55989 symbols, 121136 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **fdc3-broker-next** (76634 symbols, 167208 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > Index stale? Run `node .gitnexus/run.cjs analyze` from the project root — it auto-selects an available runner. No `.gitnexus/run.cjs` yet? `npx gitnexus analyze` (npm 11 crash → `npm i -g gitnexus`; #1939).
 

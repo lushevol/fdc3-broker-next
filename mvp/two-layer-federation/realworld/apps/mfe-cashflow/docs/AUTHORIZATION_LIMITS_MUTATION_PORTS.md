@@ -60,7 +60,7 @@ Before create/edit/status UI is enabled:
 1. Approve the identity/entitlement capability and concrete service transport.
 2. Verify backend request/response fixtures for every operation and version conflict.
 3. Inject the principal and service at the Cashflow application boundary; do not use module globals.
-4. Compose `@fm/ratan-design-webkit` interactions through the existing React
+4. Compose `@scdevkit/webkit` interactions through the existing React
    wrapper with application-owned request state. Create/edit and all record
    transitions satisfy this behind the explicit mutation capability.
 5. Test loading repeat prevention, local error feedback, refresh/reconciliation, self-verification, and every action matrix row.

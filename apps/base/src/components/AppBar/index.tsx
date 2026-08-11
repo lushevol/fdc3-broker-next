@@ -3,7 +3,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import type React from 'react';
 import type { ReactElement } from 'react';
-import type { Tiles } from '../../hooks/model/root';
+import { type Tiles, useIsNewLayout } from '../../hooks/model/root';
 import Avatar from '../Avatar';
 import Drawer from '../Drawer';
 import NewTile from '../NewTile';
@@ -25,20 +25,28 @@ const AppBarWindow: React.FC = (): ReactElement => {
     openLogoutModal,
     setOpenLogoutModal,
   } = useController();
+  // when we change to new design, we need to delete the import and isNewLayout variable
+  // And do some changes based on isNewLayout is true
+  const isNewLayout = useIsNewLayout();
   return (
     <>
-      <Root className={classes.root} data-testid={`${PREFIX}`}>
+      <Root
+        className={isNewLayout ? `${classes.root} app-bar-wrapper` : classes.root}
+        data-testid={`${PREFIX}`}
+      >
         <AppBar position="fixed">
           <Toolbar className={classes.toolbar}>
-            <Typography component="div" sx={{ flexGrow: 1 }} className={classes.title}>
-              {window.document.title}
-            </Typography>
+            {!isNewLayout && (
+              <Typography component="div" sx={{ flexGrow: 1 }} className={classes.title}>
+                {window.document.title}
+              </Typography>
+            )}
             <section className={classes.right}>
               <NewTile toggleDrawer={toggleDrawer} />
               <Switch />
               <SwitchTime />
               <Avatar setOpen={setOpenLogoutModal} />
-              <SurveyButton openPopUp={openPopUp} />
+              {!isNewLayout && <SurveyButton openPopUp={openPopUp} />}
             </section>
           </Toolbar>
         </AppBar>
@@ -52,7 +60,7 @@ const AppBarWindow: React.FC = (): ReactElement => {
       {openLogoutModal && (
         <Survey surveyLink={surveyLink} openPopUp={openPopUp} setOpen={setOpenLogoutModal} />
       )}
-      <div style={{ height: '48px', width: '100%' }}></div>
+      {!isNewLayout && <div style={{ height: '48px', width: '100%' }}></div>}
     </>
   );
 };

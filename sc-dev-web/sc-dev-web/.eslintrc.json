@@ -1,0 +1,140 @@
+{
+  "extends": [
+    "@open-wc/eslint-config",
+    "eslint-config-prettier"
+  ],
+  "parserOptions": {
+    "requireConfigFile": false,
+    "babelOptions": {
+      "plugins": [
+        "@babel/plugin-syntax-import-assertions",
+        [
+          "@babel/plugin-syntax-decorators",
+          {
+            "version": "legacy"
+          }
+        ]
+      ]
+    }
+  },
+  "rules": {
+    "no-undef": "off",
+    "lines-between-class-members": "off",
+    "import/no-unresolved": "off",
+    "getter-return": "off",
+    "no-case-declarations": "off",
+    "class-methods-use-this": "off",
+    "import/newline-after-import": "off",
+    "prefer-exponentiation-operator": "off",
+    "no-restricted-properties": "off",
+    "no-param-reassign": "off",
+    "import/order": "off",
+    "arrow-body-style": "off",
+    "no-use-before-define": "off",
+    "no-else-return": "off",
+    "import/prefer-default-export": "off",
+    "func-names": "off",
+    "no-plusplus": "off",
+    "no-shadow": "off",
+    "default-case": "off",
+    "one-var": "off",
+    "new-cap": "off",
+    "import/extensions": "off",
+    "no-restricted-globals": "off",
+    "no-undef-init": "off",
+    "consistent-return": "off",
+    "no-unreachable": "off",
+    "spaced-comment": "off",
+    "@typescript-eslint/no-this-alias": "off",
+    "no-unused-vars": "warn",
+    "wc/guard-super-call": "off",
+    "import/no-duplicates": "off",
+    "radix": "off",
+    "no-bitwise": "off",
+    "no-multi-assign": "off",
+    "no-void": "off",
+    "lit-a11y/click-events-have-key-events": "off",
+    "no-unused-expressions": "off",
+    "no-console": "off",
+    "no-continue": "off",
+    "prefer-arrow-callback": "off",
+    "operator-assignment": "off",
+    "no-return-assign": "off",
+    "no-useless-constructor": "off",
+    "no-empty": "off",
+    "import/named": "off",
+    "import/no-cycle": "off",
+    "import/default": "off",
+    "import/namespace": "off",
+    "dot-notation": "off",
+    "no-nested-ternary": "off",
+    "prefer-destructuring": "off",
+    "camelcase": "off",
+    "import/no-extraneous-dependencies": "off",
+    "no-useless-escape": "off",
+    "no-useless-computed-key": "off",
+    "no-promise-executor-return": "off",
+    "lit/no-native-attributes": "off",
+    "no-await-in-loop": "off",
+    "no-lonely-if": "off",
+    "array-callback-return": "off",
+    "no-unneeded-ternary": "off",
+    "no-restricted-syntax": "off",
+    "no-labels": "off",
+    "no-template-curly-in-string": "off",
+    "lit/no-template-bind": "off",
+    "guard-for-in": "off",
+    "lit/no-invalid-html": "off",
+    "lit-a11y/alt-text": "off",
+    "no-prototype-builtins": "off",
+    "no-extra-label": "off",
+    "wc/require-listener-teardown": "off",
+    "no-extra-boolean-cast": "off",
+    "no-empty-pattern": "off",
+    "no-cond-assign": "off",
+    "symbol-description": "off",
+    "lit/binding-positions": "off",
+    "lit-a11y/mouse-events-have-key-events": "off",
+    "lit-a11y/anchor-is-valid": "off",
+    "default-param-last": "off",
+    "no-useless-return": "off",
+    "no-script-url": "off",
+    "no-inner-declarations": "off",
+    "prefer-regex-literals": "off",
+    "prefer-promise-reject-errors": "off",
+    "no-unsafe-optional-chaining": "off",
+    "no-eval": "off",
+    "lit-a11y/aria-role": "off",
+    "import/no-named-default": "off",
+    "global-require": "off",
+    "object-shorthand": "off",
+    "no-return-await": "off",
+    "no-new": "off",
+    "no-empty-function": "off",
+    "no-async-promise-executor": "off",
+    "lit/no-value-attribute": "off",
+    "lit/no-duplicate-template-bindings": "off",
+    "lit-a11y/tabindex-no-positive": "off",
+    "lit/attribute-value-entities": "off",
+    "import/no-useless-path-segments": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "test/**/*.ts",
+        "demo/**/*.ts",
+        "stories/**/*.ts"
+      ],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "no-console": "off",
+        "max-classes-per-file": "off"
+      }
+    }
+  ],
+  "plugins": [
+    "@typescript-eslint"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schemaVersion", "baseline", "environment", "fixtures"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "baseline": { "type": "object", "required": ["package", "packageVersion", "repositoryCommit"] },
+    "environment": { "type": "object", "required": ["themes", "fontModes", "directions", "reducedMotion"] },
+    "fixtures": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["id", "classification", "legacyTag", "reactComponent", "reactSubpath", "runtimeFixture", "reactFixture", "states", "variants", "tones", "sizes", "defaults", "properties", "events", "slots", "methods", "interactions"] } }
+  }
+}

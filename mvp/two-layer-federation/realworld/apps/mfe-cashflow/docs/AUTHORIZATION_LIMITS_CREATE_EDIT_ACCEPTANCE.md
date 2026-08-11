@@ -30,7 +30,7 @@ Principal and service are one coherent capability; partial configuration is not 
 
 The current composition uses `ScDialog`, `ScTextInput`, `ScButton`,
 `ScIconButton`, and `ScAlert` through the local
-`@fm/ratan-design-webkit/react` boundary. Dialogs are portalled to
+`@scdevkit/webkit/react` boundary. Dialogs are portalled to
 `document.body` so overlays are not clipped by the remote mount. Form state,
 validation, service invocation, reconciliation, and feedback decisions stay
 inside Cashflow.

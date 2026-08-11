@@ -20,8 +20,9 @@ deployables.
 
 ## UI composition
 
-The active host and applications consume `@fm/ratan-design-webkit`. React
-consumers create adapters through `@fm/ratan-design-webkit/react`; the adapters
+The active host and applications consume the origin `@scdevkit/webkit` workspace
+from the repository root. React consumers create adapters through
+`@scdevkit/webkit/react`; the adapters
 wrap registered `sc-*` custom elements and do not implement parallel visual
 components.
 
@@ -36,15 +37,15 @@ ported to `document.body` while retaining the WebKit `ScDialog` implementation.
 
 ## Package boundary
 
-All production-identity packages for this migration live under
-`realworld/packages`. They are isolated from general repository packages so the
-migration can be built, reviewed, released, or removed as one explicit program
-boundary. Package names remain stable and use normal semantic versioning;
-physical relocation does not change their public identities.
+Realworld-specific platform and grid packages live under `realworld/packages`.
+The SC WebKit implementation is owned once under the repository-root
+`packages/sc-dev-web*` workspaces and is consumed directly by the MVP; the MVP
+must not maintain a copied WebKit implementation.
 
-`@fm/ratan-design-webkit` is the active UI package. `@fm/ratan-design` remains a
-legacy compatibility/reference workspace until its remaining consumers are
-explicitly migrated; WebKit must never import it.
+`@scdevkit/webkit` is the active custom-element UI package. `@fm/ratan-design`
+remains a legacy compatibility/reference workspace for the Cashflow Blotter
+appearance provider and other explicitly tracked cohorts; WebKit must never
+import it.
 
 ## Prohibited dependencies
 

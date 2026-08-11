@@ -1,7 +1,7 @@
 # Cashflow CN source migration
 
 Status: active migration slice. Shared UI now resolves through
-`@fm/ratan-design-webkit`; the remaining debt below belongs to the copied
+`@scdevkit/webkit`; the remaining debt below belongs to the copied
 Cashflow CN compatibility surface. Last reviewed 3 August 2026. See the
 [current-state record](../../docs/CURRENT_STATE.md).
 
@@ -34,18 +34,21 @@ The remaining material debt is explicit:
 - the copied Cashflow domain tree still contains Ant Design and compatibility
   adapters; shared Ratan component imports resolve to the WebKit boundary, but
   domain-specific compatibility code still requires cohort-by-cohort removal;
-- some Cashflow-used Ratan implementation is still compiled from
-  `apps/mfe-ratan-container` through `@legacy-ratan`; it must be extracted into
-  realworld ownership;
+- the complete Cashflow-used Ratan module closure is owned under
+  `src/cashflow-ratan`; identity/permission, feature-enable, and logging
+  utilities are Cashflow-owned and parity-tested, while the remaining local
+  compatibility surface still needs cohort-by-cohort replacement;
 - local Portal Host development supplies production-shaped contracts on the
   unchanged legacy routes, so the real UI renders two grid rows, a saved
   filter, a saved view, and Cashflow details without a backend;
-- the copied legacy tree still has pre-existing full-project TypeScript and
-  lint debt; migration-owned shell/adapters are checked separately;
-- the production bundle is about 8.5 MB because the temporary Ratan source
-  boundary prevents effective pruning;
+- the reachable Cashflow application graph and migration-owned shell/adapters
+  now have separate passing typechecks; inherited strict-null/lint cleanup and
+  the Ratan facade implementation remain separate migration cohorts;
+- the production bundle is about 8.5 MB because the broad compatibility facade
+  still prevents effective pruning;
 - the local contract responses still require approval against the integration
-  service, and notification/export/entitled-action parity remain outstanding.
+  service; local acceptance now covers notification startup, export
+  entitlement, and an entitled Hold submission.
 
 ## Run and verify
 

@@ -5,10 +5,13 @@ import { fileURLToPath } from 'node:url';
 
 import {
   assertSecretFreeTree,
+  buildProductionRegistryRevision,
   buildRuntimeRegistry,
+  createReleaseMetadata,
   createReleaseId,
   digestDirectory,
 } from './production-deployment-lib.mjs';
+import { activateRegistryRevision } from './registry-activation.mjs';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const realworldRoot = path.resolve(scriptDirectory, '..');
@@ -16,7 +19,12 @@ const repositoryRoot = path.resolve(realworldRoot, '../../..');
 const runtimeRoot = path.join(realworldRoot, 'devops', 'runtime');
 const environments = ['dev', 'test'];
 const deployables = [
-  { id: 'portal-host', workspace: 'portal-host', host: true },
+  {
+    id: 'portal-host',
+    workspace: 'portal-host',
+    host: true,
+    sharedRuntimePackages: ['react', 'react-dom'],
+  },
   { id: 'cashflow', workspace: 'mfe-cashflow' },
 ];
 
@@ -64,7 +72,7 @@ async function activateHost(environment, releaseId) {
   await rename(temporaryPath, linkPath);
 }
 
-async function publishDeployable(deployable, releaseContext) {
+async function publishDeployable(deployable, releaseContext, releaseDefinition) {
   const workspaceRoot = path.join(realworldRoot, 'apps', deployable.workspace);
   const source = path.join(workspaceRoot, 'dist');
   if (!(await pathExists(source))) throw new Error(`Missing production build: ${source}`);
@@ -86,8 +94,16 @@ async function publishDeployable(deployable, releaseContext) {
     await rename(staging, destination);
   }
 
-  const metadata = {
-    schemaVersion: 1,
+  const sharedRuntimeRanges = Object.fromEntries(
+    (deployable.sharedRuntimePackages ?? []).map((packageName) => {
+      const requiredVersion = packageJson.dependencies?.[packageName];
+      if (!requiredVersion) {
+        throw new Error(`${deployable.id} is missing shared runtime dependency ${packageName}`);
+      }
+      return [packageName, requiredVersion];
+    }),
+  );
+  const metadata = createReleaseMetadata({
     applicationId: deployable.id,
     packageName: packageJson.name,
     version: packageJson.version,
@@ -98,7 +114,10 @@ async function publishDeployable(deployable, releaseContext) {
     buildId: releaseContext.buildId,
     artifactPath: `artifacts/${deployable.id}/${releaseId}`,
     createdAt: releaseContext.createdAt,
-  };
+    contract: releaseDefinition.contract,
+    capabilities: releaseDefinition.capabilities,
+    sharedRuntimeRanges,
+  });
   await writeJsonAtomic(
     path.join(runtimeRoot, 'catalog', deployable.id, `${releaseId}.json`),
     metadata,
@@ -110,15 +129,49 @@ const sourceRevision = process.env.BUILD_SOURCEVERSION ?? gitValue(['rev-parse',
 const buildId = process.env.BUILD_BUILDID ?? `local-${sourceRevision.slice(0, 12)}`;
 const createdAt = process.env.BUILD_TIMESTAMP ?? new Date().toISOString();
 const releaseContext = { sourceRevision, buildId, createdAt };
-const published = {};
-
-for (const deployable of deployables) {
-  published[deployable.id] = await publishDeployable(deployable, releaseContext);
-}
-
 const sourceRegistry = await readJson(
   path.join(realworldRoot, 'devops', 'registry', 'applications.json'),
 );
+const releasePolicy = await readJson(
+  path.join(realworldRoot, 'devops', 'policy', 'release-policy.json'),
+);
+const cashflowRegistryEntry = sourceRegistry.applications.find(({ id }) => id === 'cashflow');
+if (!cashflowRegistryEntry) throw new Error('Missing Cashflow production registry entry');
+const ownershipRecords = {};
+for (const { id } of sourceRegistry.applications) {
+  ownershipRecords[id] = await readJson(
+    path.join(realworldRoot, 'devops', 'policy', `${id}.ownership.json`),
+  );
+}
+const hostCapabilities = [
+  ...new Set(sourceRegistry.applications.flatMap(({ capabilities }) => capabilities)),
+];
+const releaseDefinitions = {
+  'portal-host': {
+    contract: {
+      supportedApplicationProtocolMajors: releasePolicy.supportedProtocolMajors,
+    },
+    capabilities: hostCapabilities,
+  },
+  cashflow: {
+    contract: {
+      application: cashflowRegistryEntry.contractVersion,
+      appearance: cashflowRegistryEntry.appearanceContractVersion,
+      identity: cashflowRegistryEntry.identityContractVersion,
+    },
+    capabilities: cashflowRegistryEntry.capabilities,
+  },
+};
+const published = {};
+
+for (const deployable of deployables) {
+  published[deployable.id] = await publishDeployable(
+    deployable,
+    releaseContext,
+    releaseDefinitions[deployable.id],
+  );
+}
+
 const environmentConfiguration = await readJson(
   path.join(realworldRoot, 'devops', 'registry', 'environments.json'),
 );
@@ -137,32 +190,20 @@ for (const environment of environments) {
     origin: publicOrigin,
   });
   const revisionId = `${environment}-${String(buildId).replace(/[^0-9A-Za-z.-]/g, '-')}`;
-  const revision = {
-    schemaVersion: 1,
+  const revision = buildProductionRegistryRevision({
     revisionId,
     environment,
     createdAt,
     sourceRevision,
-    releases: Object.fromEntries(Object.entries(releases).filter(([id]) => id !== 'portal-host')),
-    registry,
-  };
+    runtimeRegistry: registry,
+    releases: published,
+    ownershipRecords,
+  });
   await writeJsonAtomic(
     path.join(runtimeRoot, 'registries', 'revisions', `${revisionId}.json`),
     revision,
   );
-  await writeJsonAtomic(
-    path.join(runtimeRoot, 'registries', 'active', `${environment}.json`),
-    registry,
-  );
-  await writeJsonAtomic(
-    path.join(runtimeRoot, 'registries', 'active', `${environment}.pointer.json`),
-    {
-      schemaVersion: 1,
-      environment,
-      revisionId,
-      revisionUrl: `/registries/revisions/${revisionId}.json`,
-    },
-  );
+  await activateRegistryRevision({ runtimeRoot, environment, revisionId });
   await activateHost(environment, published['portal-host'].releaseId);
 }
 

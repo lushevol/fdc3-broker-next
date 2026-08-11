@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "composite": true,
+    "jsx": "react-jsx",
+    "outDir": "dist",
+    "paths": { "@fm/ratan-design-foundation": ["../foundation/src/index.ts"] },
+    "rootDir": "src"
+  },
+  "include": ["src"],
+  "references": [{ "path": "../foundation" }]
+}

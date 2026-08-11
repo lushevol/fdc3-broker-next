@@ -1,7 +1,7 @@
 # Interaction foundation ownership
 
 Status: historical `@fm/ratan-design@1.1.0` acceptance record. Active shared UI
-now uses `@fm/ratan-design-webkit`; domain-ownership principles below remain
+now uses `@scdevkit/webkit`; domain-ownership principles below remain
 applicable.
 
 `@fm/ratan-design@1.1.0` adds the smallest shared interaction layer needed before a production mutation cohort. It standardizes accessible presentation without moving application policy into the design system.

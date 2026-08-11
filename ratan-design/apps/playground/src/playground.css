@@ -1,0 +1,8 @@
+body { margin: 0; background: var(--sc-color-background-neutral, #f7f7f7); color: var(--sc-color-text-primary, #111); }
+.playground-shell { min-height: 100vh; font-family: var(--sc-font-family, sans-serif); }
+.playground-shell > header, .playground-shell > nav, .playground-shell > main { padding: 1rem 2rem; }
+.playground-shell > nav { display: flex; flex-wrap: wrap; gap: 1rem; border-block: 1px solid var(--sc-color-border, #ccc); }
+.playground-shell > nav a[aria-current='page'] { font-weight: 700; }
+.playground-shell > main { max-width: 70rem; }
+.playground-actions, .playground-controls, .playground-preview { display: flex; flex-wrap: wrap; align-items: end; gap: 1rem; margin-block: 1rem; }
+.playground-controls label { display: grid; gap: 0.25rem; }

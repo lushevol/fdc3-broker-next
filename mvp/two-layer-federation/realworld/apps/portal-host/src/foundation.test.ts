@@ -11,6 +11,9 @@ import { entry } from './test-fixtures';
 describe('production host foundation', () => {
   it('loads and validates the registry and rejects transport failure', async () => {
     await expect(loadApplicationRegistry(async () => ({ ok: true, status: 200, json: async () => ({ applications: [entry] }) }))).resolves.toEqual({ applications: [entry] });
+    await expect(loadApplicationRegistry(async (input) => input === '/registry.json'
+      ? { ok: true, status: 200, json: async () => ({ revisionId: 'dev-42', revisionUrl: '/registries/revisions/dev-42.json' }) }
+      : { ok: true, status: 200, json: async () => ({ revisionId: 'dev-42', registry: { applications: [entry] } }) })).resolves.toEqual({ applications: [entry] });
     await expect(loadApplicationRegistry(async () => ({ ok: false, status: 503, json: async () => ({}) }))).rejects.toThrow('status 503');
     await expect(loadApplicationRegistry(async () => ({ ok: true, status: 200, json: async () => ({ applications: [] }) }))).rejects.toThrow();
   });

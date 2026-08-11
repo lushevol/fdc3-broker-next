@@ -1,0 +1,37 @@
+{
+  "extends": "ts-config-single-spa",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationDir": "dist",
+    "removeComments": true,
+    "declarationMap": false,
+    "sourceMap": false,
+    "incremental": true,
+    "allowJs": false,
+    "checkJs": false,
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "allowSyntheticDefaultImports": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@scdevkit/webkit/elements/*": [
+        "../../../sc-dev-web/sc-dev-web/dist/elements/*.d.ts"
+      ]
+    }
+  },
+  "files": ["src/root.tsx"],
+  "include": ["src/**/*"],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
+  ]
+}

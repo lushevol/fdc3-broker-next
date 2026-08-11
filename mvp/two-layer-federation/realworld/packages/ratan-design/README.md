@@ -2,7 +2,7 @@
 
 > Legacy compatibility and reference package for the Realworld migration.
 > Portal Host, Cashflow, Identity/Profile, FDC3 Admin, and Cashflow Blotter MVP
-> use `@fm/ratan-design-webkit` for active shared UI. Do not add new active-host
+> use `@scdevkit/webkit` for active shared UI. Do not add new active-host
 > UI here. Last reviewed 3 August 2026; see
 > [`../../docs/CURRENT_STATE.md`](../../docs/CURRENT_STATE.md).
 

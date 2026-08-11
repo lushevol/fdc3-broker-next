@@ -1,6 +1,6 @@
 {
-  "name": "@fm/base",
-  "version": "PACKAGE_VERSION",
+  "name": "@fm/base-origin",
+  "version": "0.0.0",
   "scripts": {
     "start": "env-cmd -f .env.local rsbuild dev",
     "dev": "cross-env FEDERATION_DEBUG=true env-cmd -f .env.local rsbuild dev",

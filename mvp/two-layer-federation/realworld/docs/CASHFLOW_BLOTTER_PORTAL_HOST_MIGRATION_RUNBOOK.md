@@ -1,7 +1,7 @@
 # Cashflow CN to Portal Host migration runbook
 
 Status: active runbook, updated 3 August 2026. The shared UI boundary is now
-`@fm/ratan-design-webkit`; remaining Cashflow CN compatibility debt is tracked
+`@scdevkit/webkit`; remaining Cashflow CN compatibility debt is tracked
 below and in [`CURRENT_STATE.md`](./CURRENT_STATE.md).
 
 ## Scope and status
@@ -71,7 +71,7 @@ React DOM client/runtime modules as well as the package root.
 The Ratan container is not a runtime layer in this topology. Portal Host does
 not register its manifest, the browser acceptance stack does not start port
 `9205`, and Cashflow declares no Module Federation `remotes`. Reusable Ratan UI
-comes from `@fm/ratan-design-webkit`, `@fm/ratan-data-grid`, and temporarily bundled
+comes from `@scdevkit/webkit`, `@fm/ratan-data-grid`, and temporarily bundled
 migration adapters while the remaining legacy Ratan surface is extracted.
 
 ## Implementation steps
@@ -148,14 +148,17 @@ From `apps/mfe-cashflow-blotter-mvp`:
 npm test -- --runInBand
 npm run lint
 npm run typecheck:shell
+npm run typecheck:application
 npm run build
 npm run check:boundaries
 ```
 
-The shell typecheck and lint target migration-owned federation and compatibility
-code. The copied legacy tree is deliberately not represented as debt-free:
-full-tree checking still reports pre-existing errors and remains an OpenSpec
-task.
+The shell typecheck targets migration-owned federation and compatibility code.
+The application typecheck follows the actual `Cashflow_CN` entry graph, owns
+its ambient declarations locally, and checks it against the declared Ratan
+facade. The build runs both checks after compiling assets and CSS. Restoring
+strict-null checking, widening legacy lint coverage, and replacing the
+temporary Ratan facade remain explicit follow-up cohorts.
 
 Portal Host verification:
 
@@ -183,11 +186,15 @@ do not contain a fixture middleware path.
 
 1. Approve the sanitized local contracts against captured integration-service
    responses and connect the production service.
-2. Exercise grid paging, notifications, export,
-   and at least one entitled maker/checker workflow in Portal Host.
-3. Extract every Cashflow-used Ratan module into realworld packages; remove the
-   temporary `@legacy-ratan` source alias.
-4. Resolve full migrated-tree TypeScript/lint failures.
+2. Repeat grid paging, notifications, export, and entitled maker/checker
+   workflows against production-backed services. Local Portal Host acceptance
+   now covers paging metadata, notification startup, export entitlement, and a
+   Hold submission.
+3. Replace the Cashflow-owned `src/cashflow-ratan` compatibility modules with
+   versioned realworld packages cohort by cohort. The external
+   `apps/mfe-ratan-container` source dependency and temporary `@legacy-ratan`
+   alias have been removed.
+4. Restore strict-null checking and widen lint coverage across inherited code.
 5. Reduce the approximately 8.5 MB production bundle.
 6. Validate identity, authorization, FDC3, STOMP, GraphQL, REST, and environment
    contracts against the production platform.

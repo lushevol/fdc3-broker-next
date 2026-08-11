@@ -28,6 +28,34 @@ const Root = styled('section')(({ theme }) => ({
     margin: 0,
     ...theme.theme['TabItem']['Button'],
   },
+  [`.light &.tab-item-wrapper`]: {
+    background: 'transparent',
+  },
+  [`.light &.tab-item-wrapper svg`]: {
+    color: '#0473EA',
+  },
+  [`.light &.tab-item-wrapper .MuiInput-input`]: {
+    color: '#B3D5F8',
+  },
+  [`&.tab-item-wrapper:hover .MuiInput-input`]: {
+    color: '#4F9DF0 !important',
+  },
+  [`.dark &.tab-item-wrapper:hover svg`]: {
+    color: '#9AC7F6 !important',
+  },
+  [`.light [aria-selected='true'] &.tab-item-wrapper svg`]: {
+    color: '#0250A3',
+  },
+  [`.light [aria-selected='true'] &.tab-item-wrapper .MuiInput-input`]: {
+    color: '#0473EA !important',
+  },
+  [`.dark &.tab-item-wrapper svg, .dark &.tab-item-wrapper .MuiInput-input`]: {
+    color: '#012246',
+  },
+  [`.dark [aria-selected='true'] &.tab-item-wrapper svg, .dark [aria-selected='true'] &.tab-item-wrapper .MuiInput-input`]:
+    {
+      color: '#E5F1FC !important',
+    },
 }));
 
 export default Root;

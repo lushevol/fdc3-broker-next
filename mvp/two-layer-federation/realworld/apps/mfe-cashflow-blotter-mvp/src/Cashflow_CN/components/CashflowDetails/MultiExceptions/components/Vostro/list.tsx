@@ -75,7 +75,9 @@ const List: FC<VostroListProps> = ({ data, onSelectRow }) => {
       }}
       onRow={(record) => ({ onClick: () => handleTableClick(record) })}
       rowClassName={(record) =>
-        record.SSI_Id === selectedRow?.SSI_Id ? classes.rowSelected : ""
+        (record as VostroListDataType).SSI_Id === selectedRow?.SSI_Id
+          ? classes.rowSelected
+          : ""
       }
     />
   );

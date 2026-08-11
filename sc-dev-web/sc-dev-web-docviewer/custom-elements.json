@@ -1,0 +1,6363 @@
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "elements/index.ts",
+      "declarations": [],
+      "exports": []
+    },
+    {
+      "kind": "javascript-module",
+      "path": "elements/sc-doc-viewer.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "*",
+          "declaration": {
+            "name": "*",
+            "package": "../src/components/ScDocViewer.js"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "sc-doc-viewer",
+          "declaration": {
+            "name": "ScDocViewer",
+            "module": "/src/components/ScDocViewer.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "elements/sc-pdf-viewer.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "*",
+          "declaration": {
+            "name": "*",
+            "package": "../src/components/ScPDFViewer.js"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "sc-pdf-viewer",
+          "declaration": {
+            "name": "ScPDFViewer",
+            "module": "/src/components/ScPDFViewer.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/index.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "ScDocViewer",
+          "declaration": {
+            "name": "ScDocViewer",
+            "module": "./components/ScDocViewer.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ScPDFViewer",
+          "declaration": {
+            "name": "ScPDFViewer",
+            "module": "./components/ScPDFViewer.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/skipsonar/README.md",
+      "declarations": [],
+      "exports": []
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/BaseToolbar.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "BaseToolbar",
+          "members": [
+            {
+              "kind": "field",
+              "name": "tools",
+              "type": {
+                "text": "HTMLElement[]"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "toolbar",
+              "type": {
+                "text": "HTMLDivElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "moreTool",
+              "type": {
+                "text": "HTMLElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "moreToolbar",
+              "type": {
+                "text": "HTMLDivElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_placeholderTools",
+              "default": "new WeakMap<HTMLElement, HTMLElement>()"
+            },
+            {
+              "kind": "field",
+              "name": "_lastWidth"
+            },
+            {
+              "kind": "field",
+              "name": "_resizeObserver",
+              "default": "new ResizeObserver(this.handleResize.bind(this))"
+            },
+            {
+              "kind": "method",
+              "name": "handleResize",
+              "privacy": "protected"
+            },
+            {
+              "kind": "method",
+              "name": "renderMoreTool",
+              "privacy": "protected"
+            },
+            {
+              "kind": "method",
+              "name": "emit",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "options",
+                  "optional": true,
+                  "type": {
+                    "text": "Record<string, any>"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "ScElement",
+                "module": "src/utils/ScElement.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "ScElement",
+            "module": "/src/utils/ScElement.js"
+          }
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "BaseToolbar",
+          "declaration": {
+            "name": "BaseToolbar",
+            "module": "src/components/BaseToolbar.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScDocViewer.style.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "module": "src/components/ScDocViewer.style.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScDocViewer.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "ScDocViewer",
+          "members": [
+            {
+              "kind": "field",
+              "name": "viewerContainer",
+              "type": {
+                "text": "HTMLDivElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "realDimensionBox",
+              "type": {
+                "text": "HTMLDialogElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "pdfViewer",
+              "type": {
+                "text": "ScPDFViewer"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "viewerRoot",
+              "type": {
+                "text": "HTMLDivElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "viewerBox",
+              "type": {
+                "text": "HTMLDivElement"
+              },
+              "description": "#viewer element"
+            },
+            {
+              "kind": "field",
+              "name": "rotationBox",
+              "type": {
+                "text": "HTMLDivElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "ScScriber",
+              "type": {
+                "text": "ScScriber"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "fileTool",
+              "type": {
+                "text": "ScFileTool"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#fileToolProvider",
+              "privacy": "private",
+              "default": "new ContextProvider(this, {\n    context: fileToolContext,\n    initialValue: undefined,\n  })"
+            },
+            {
+              "kind": "field",
+              "name": "file",
+              "type": {
+                "text": "any"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "dataSource",
+              "type": {
+                "text": "ScribbleDataSource[]"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "pageNumber",
+              "type": {
+                "text": "number"
+              },
+              "default": "1"
+            },
+            {
+              "kind": "field",
+              "name": "toolConfig",
+              "type": {
+                "text": "ToolConfig"
+              },
+              "default": "defaultToolConfig"
+            },
+            {
+              "kind": "field",
+              "name": "previousRenderFile",
+              "type": {
+                "text": "any"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "activeFileType",
+              "type": {
+                "text": "string | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "loadingFile",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "excelPage",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "originalDimension",
+              "type": {
+                "text": "object"
+              },
+              "default": "{ width: 0, height: 0 }",
+              "description": "#viewer real size"
+            },
+            {
+              "kind": "field",
+              "name": "messageHandler",
+              "default": "new MessageHandler()"
+            },
+            {
+              "kind": "method",
+              "name": "handleFileChange"
+            },
+            {
+              "kind": "field",
+              "name": "getScribbleDataSource",
+              "privacy": "public",
+              "default": "async () => {\n    const scribers = [];\n    if (pdfTypes.includes(this.activeFileType ?? '')) {\n      const pdfViewer = await this.pdfViewer;\n      const pages = pdfViewer?.getPageInfo() ?? [];\n      pages.forEach(page => {\n        scribers.push(page.scriber);\n      });\n    } else {\n      const ScScriber = await this.ScScriber;\n      scribers.push(ScScriber);\n    }\n\n    return scribers.map(scriber => {\n      return {\n        history: scriber.history,\n        textHistory: scriber.textHistory,\n      };\n    });\n  }"
+            },
+            {
+              "kind": "method",
+              "name": "updateHistoryFor",
+              "parameters": [
+                {
+                  "name": "scriber",
+                  "type": {
+                    "text": "ScScriber"
+                  }
+                },
+                {
+                  "name": "dataSource",
+                  "type": {
+                    "text": "ScribbleDataSource"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "setScribbleDataSource",
+              "privacy": "public",
+              "default": "async (dataSource: ScribbleDataSource[]) => {\n    const scribers = [];\n    const isScribble = scriberAvailableTypes.includes(\n      this.activeFileType ?? ''\n    );\n    if (!isScribble) {\n      return;\n    }\n\n    if (pdfTypes.includes(this.activeFileType ?? '')) {\n      const pdfViewer = await this.pdfViewer;\n      const pages = pdfViewer?.getPageInfo() ?? [];\n      pages.forEach((page, index) => {\n        this.updateHistoryFor(page.scriber, dataSource[index]);\n        scribers.push(page.scriber);\n      });\n    } else {\n      const ScScriber = await this.ScScriber;\n      this.updateHistoryFor(ScScriber, dataSource[0]);\n      scribers.push(ScScriber);\n    }\n    scribers.forEach(scriber => {\n      scriber.refreshCanvas();\n    });\n  }"
+            },
+            {
+              "kind": "method",
+              "name": "updateOriginalDimension",
+              "parameters": [
+                {
+                  "name": "width",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "height",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "force",
+                  "default": "false"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "updateScriberScaleDimension",
+              "parameters": [
+                {
+                  "name": "ScScriber",
+                  "type": {
+                    "text": "ScScriber"
+                  }
+                },
+                {
+                  "name": "width",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "height",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "isPdf",
+                  "default": "false"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "updateScriberScale",
+              "parameters": [
+                {
+                  "name": "ScScriber",
+                  "type": {
+                    "text": "ScScriber"
+                  }
+                },
+                {
+                  "name": "scale",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "updateScriberRotate",
+              "parameters": [
+                {
+                  "name": "rotate",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "showScriber",
+              "parameters": [
+                {
+                  "name": "ScScriber",
+                  "type": {
+                    "text": "ScScriber"
+                  }
+                },
+                {
+                  "name": "isActive",
+                  "type": {
+                    "text": "boolean"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "getSizeAdaptor"
+            },
+            {
+              "kind": "method",
+              "name": "afterRender"
+            },
+            {
+              "kind": "method",
+              "name": "updateDimensionOfPdf"
+            },
+            {
+              "kind": "method",
+              "name": "clamp",
+              "parameters": [
+                {
+                  "name": "v",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "min",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "max",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "dimension"
+            },
+            {
+              "kind": "method",
+              "name": "renderFallback",
+              "parameters": [
+                {
+                  "name": "viewer",
+                  "type": {
+                    "text": "HTMLDivElement"
+                  }
+                },
+                {
+                  "name": "content",
+                  "type": {
+                    "text": "TemplateResult<1> | string"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "initBaseLayout"
+            },
+            {
+              "kind": "method",
+              "name": "handlePageChangeByProp"
+            },
+            {
+              "kind": "method",
+              "name": "previewFile",
+              "parameters": [
+                {
+                  "name": "file",
+                  "type": {
+                    "text": "File"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "showMessage",
+              "parameters": [
+                {
+                  "name": "msgInfo",
+                  "type": {
+                    "text": "any"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "renderAttachments",
+              "parameters": [
+                {
+                  "name": "msgInfo",
+                  "type": {
+                    "text": "any"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "handleMouseEnter"
+            },
+            {
+              "kind": "method",
+              "name": "handleMouseLeaev"
+            },
+            {
+              "kind": "method",
+              "name": "renderFallbackWhenNoFile"
+            },
+            {
+              "kind": "field",
+              "name": "handleHistoryChange"
+            },
+            {
+              "kind": "method",
+              "name": "handleScriberToolbarChange",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "CustomEvent"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "handleFileToolStateChange",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "CustomEvent<{ name: keyof ToolState; value: any }>"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "applyRotation",
+              "parameters": [
+                {
+                  "name": "rotation",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "applyZoom",
+              "parameters": [
+                {
+                  "name": "zoomValue",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "renderLoading"
+            },
+            {
+              "kind": "field",
+              "name": "handleFullscreen",
+              "default": "() => {\n    if (document.fullscreen) {\n      if (imgTypes.includes(this.activeFileType ?? '')) {\n        this.viewerRoot.classList.add('fullscreen-mode-img-center');\n      }\n      if (videoTypes.includes(this.activeFileType ?? '')) {\n        this.viewerRoot.classList.add('fullscreen-mode-video-center');\n      }\n      this.viewerRoot.classList.add('fullscreen-mode');\n    } else {\n      this.viewerRoot.classList.remove('fullscreen-mode');\n      this.viewerRoot.classList.remove('fullscreen-mode-img-center');\n      this.viewerRoot.classList.remove('fullscreen-mode-video-center');\n    }\n  }"
+            },
+            {
+              "kind": "method",
+              "name": "toggleFullscreen"
+            },
+            {
+              "kind": "method",
+              "name": "handleDownload"
+            },
+            {
+              "kind": "field",
+              "name": "wheelStep",
+              "type": {
+                "text": "number"
+              },
+              "default": "1"
+            },
+            {
+              "kind": "method",
+              "name": "handleWheel",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "WheelEvent"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "emit",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "options",
+                  "optional": true,
+                  "type": {
+                    "text": "Record<string, any>"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "ScElement",
+                "module": "src/utils/ScElement.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "ScElement",
+            "module": "/src/utils/ScElement.js"
+          },
+          "tagName": "sc-doc-viewer",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "ScDocViewer",
+          "declaration": {
+            "name": "ScDocViewer",
+            "module": "src/components/ScDocViewer.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScExcelViewer.style.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "module": "src/components/ScExcelViewer.style.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScExcelViewer.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "ScExcelViewer",
+          "members": [
+            {
+              "kind": "field",
+              "name": "file",
+              "type": {
+                "text": "File"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "excelData",
+              "type": {
+                "text": "ExcelData | null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "currentSheetIndex",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "isLoading",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "loadingProgress",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "errorMessage",
+              "type": {
+                "text": "string"
+              },
+              "default": "''"
+            },
+            {
+              "kind": "method",
+              "name": "handleFileUpdate"
+            },
+            {
+              "kind": "method",
+              "name": "readFileInChunks",
+              "return": {
+                "type": {
+                  "text": "Promise<ArrayBuffer>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "file",
+                  "type": {
+                    "text": "File"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "parseExcelBuffer",
+              "parameters": [
+                {
+                  "name": "arrayBuffer",
+                  "type": {
+                    "text": "ArrayBuffer"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "renderSheet",
+              "parameters": [
+                {
+                  "name": "sheet",
+                  "type": {
+                    "text": "any"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "excelModelStyleToCss",
+              "parameters": [
+                {
+                  "name": "modelStyle",
+                  "type": {
+                    "text": "any"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "styleToString",
+              "parameters": [
+                {
+                  "name": "style",
+                  "type": {
+                    "text": "any"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "emit",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "options",
+                  "optional": true,
+                  "type": {
+                    "text": "Record<string, any>"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "ScElement",
+                "module": "src/utils/ScElement.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "ScElement",
+            "module": "/src/utils/ScElement.js"
+          }
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "ScExcelViewer",
+          "declaration": {
+            "name": "ScExcelViewer",
+            "module": "src/components/ScExcelViewer.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScExcelViewer.type.ts",
+      "declarations": [],
+      "exports": []
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScFileTool.style.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "module": "src/components/ScFileTool.style.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScFileTool.ts",
+      "declarations": [
+        {
+          "kind": "variable",
+          "name": "defaultToolConfig",
+          "type": {
+            "text": "{\n  inputDelay: 300,\n  blurAction: 'set',\n  strictLimits: true,\n  rotateScope: 'all',\n}"
+          },
+          "default": "{\n  inputDelay: 300,\n  blurAction: 'set',\n  strictLimits: true,\n  rotateScope: 'all',\n}"
+        },
+        {
+          "kind": "class",
+          "description": "",
+          "name": "ScFileTool",
+          "members": [
+            {
+              "kind": "field",
+              "name": "filename",
+              "type": {
+                "text": "string"
+              },
+              "default": "''"
+            },
+            {
+              "kind": "field",
+              "name": "dataSource",
+              "type": {
+                "text": "ScribbleDataSource[]"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "initialZoom",
+              "type": {
+                "text": "string"
+              },
+              "default": "'auto'"
+            },
+            {
+              "kind": "field",
+              "name": "minZoom",
+              "type": {
+                "text": "number"
+              },
+              "default": "10"
+            },
+            {
+              "kind": "field",
+              "name": "maxZoom",
+              "type": {
+                "text": "number"
+              },
+              "default": "200"
+            },
+            {
+              "kind": "field",
+              "name": "config",
+              "type": {
+                "text": "ToolConfig"
+              },
+              "default": "{\n  inputDelay: 300,\n  blurAction: 'set',\n  strictLimits: true,\n  rotateScope: 'all',\n}"
+            },
+            {
+              "kind": "field",
+              "name": "pages",
+              "type": {
+                "text": "ScPDFPage[]"
+              },
+              "default": "[]"
+            },
+            {
+              "kind": "field",
+              "name": "isSheetOpen",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "zoomRatio",
+              "type": {
+                "text": "number"
+              },
+              "default": "100"
+            },
+            {
+              "kind": "field",
+              "name": "currentPage",
+              "type": {
+                "text": "number"
+              },
+              "default": "1"
+            },
+            {
+              "kind": "field",
+              "name": "rotation",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "activeFileType",
+              "type": {
+                "text": "string | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "isScriberToolActive",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "totalPage",
+              "type": {
+                "text": "number"
+              },
+              "default": "1"
+            },
+            {
+              "kind": "field",
+              "name": "tocThumbnails",
+              "type": {
+                "text": "HTMLDivElement[]"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "pageInput",
+              "type": {
+                "text": "HTMLElement & { value: number }"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "zoomInput",
+              "type": {
+                "text": "HTMLElement & { value: number }"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "resConfig",
+              "type": {
+                "text": "Required<ToolConfig>"
+              },
+              "default": "{ ...defaultToolConfig }"
+            },
+            {
+              "kind": "field",
+              "name": "defaultFullWidthZoom",
+              "type": {
+                "text": "number"
+              },
+              "default": "100"
+            },
+            {
+              "kind": "field",
+              "name": "zoomMode"
+            },
+            {
+              "kind": "field",
+              "name": "_tocIntersectionObserver",
+              "type": {
+                "text": "IntersectionObserver | undefined"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "handleConfigChange"
+            },
+            {
+              "kind": "method",
+              "name": "reset"
+            },
+            {
+              "kind": "method",
+              "name": "setPage",
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "opts",
+                  "default": "{}",
+                  "type": {
+                    "text": "SetOptions"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "setPageDebounced"
+            },
+            {
+              "kind": "method",
+              "name": "setZoom",
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "opts",
+                  "default": "{}",
+                  "type": {
+                    "text": "SetOptions & { asDefault?: 'width' }"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "setZoomDebounced"
+            },
+            {
+              "kind": "method",
+              "name": "setRotation",
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "toggleState",
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "keyof PickByType<ToolState, boolean>"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "setTotalPage",
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "updateCurrentPageViaToc",
+              "parameters": [
+                {
+                  "name": "pageNumber",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "renderSheetOfTOC"
+            },
+            {
+              "kind": "method",
+              "name": "emitStateChange",
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "keyof ToolState"
+                  }
+                },
+                {
+                  "name": "expectedValue",
+                  "optional": true,
+                  "type": {
+                    "text": "any"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "getTool",
+              "return": {
+                "type": {
+                  "text": "ReturnType<typeof html> | typeof nothing"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "type",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "renderDocTitle"
+            },
+            {
+              "kind": "method",
+              "name": "renderToolbar"
+            },
+            {
+              "kind": "field",
+              "name": "tools",
+              "type": {
+                "text": "HTMLElement[]"
+              },
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "toolbar",
+              "type": {
+                "text": "HTMLDivElement"
+              },
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "moreTool",
+              "type": {
+                "text": "HTMLElement"
+              },
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "moreToolbar",
+              "type": {
+                "text": "HTMLDivElement"
+              },
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_placeholderTools",
+              "default": "new WeakMap<HTMLElement, HTMLElement>()",
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_lastWidth",
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_resizeObserver",
+              "default": "new ResizeObserver(this.handleResize.bind(this))",
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "handleResize",
+              "privacy": "protected",
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "renderMoreTool",
+              "privacy": "protected",
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "emit",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "options",
+                  "optional": true,
+                  "type": {
+                    "text": "Record<string, any>"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "ScElement",
+                "module": "src/utils/ScElement.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "BaseToolbar",
+            "module": "/src/components/BaseToolbar.js"
+          }
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "defaultToolConfig",
+          "declaration": {
+            "name": "defaultToolConfig",
+            "module": "src/components/ScFileTool.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ScFileTool",
+          "declaration": {
+            "name": "ScFileTool",
+            "module": "src/components/ScFileTool.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScFileToolIcon.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "ScFileToolIcon",
+          "members": [
+            {
+              "kind": "field",
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''"
+            },
+            {
+              "kind": "field",
+              "name": "icon",
+              "type": {
+                "text": "string"
+              },
+              "default": "''"
+            },
+            {
+              "kind": "field",
+              "name": "clicked",
+              "type": {
+                "text": "(e:Event) => void | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "active",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "method",
+              "name": "emit",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "options",
+                  "optional": true,
+                  "type": {
+                    "text": "Record<string, any>"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "ScElement",
+                "module": "src/utils/ScElement.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "ScElement",
+            "module": "/src/utils/ScElement.js"
+          }
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "ScFileToolIcon",
+          "declaration": {
+            "name": "ScFileToolIcon",
+            "module": "src/components/ScFileToolIcon.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScPDFPage.style.ts",
+      "declarations": [
+        {
+          "kind": "variable",
+          "name": "scriberLayerCss",
+          "default": "css`\n  .scriber-layer {\n    position: absolute;\n    top: 0;\n    left: 0;\n    pointer-events: none;\n    transform-origin: 0 0;\n\n    &.rotate-90 {\n      transform: rotate(90deg) translateY(-100%);\n    }\n    &.rotate-180 {\n      transform: rotate(180deg) translateX(-100%) translateY(-100%);\n    }\n    &.rotate-270 {\n      transform: rotate(270deg) translateX(-100%);\n    }\n\n    &.highlights {\n      mix-blend-mode: multiply;\n      z-index: 5;\n    }\n    svg {\n      max-width: 100%;\n      max-height: 100%;\n      min-width: 100%;\n      min-height: 100%;\n    }\n  }\n`"
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "scriberLayerCss",
+          "declaration": {
+            "name": "scriberLayerCss",
+            "module": "src/components/ScPDFPage.style.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "module": "src/components/ScPDFPage.style.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScPDFPage.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "ScPDFPage",
+          "members": [
+            {
+              "kind": "field",
+              "name": "debug",
+              "type": {
+                "text": "boolean"
+              },
+              "static": true,
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "pageNumber",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "containerWidth",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "pdfContext",
+              "type": {
+                "text": "TPdfContext"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "renderComplete",
+              "type": {
+                "text": "(\n    args: TRenderCompleteArgs\n  ) => void"
+              },
+              "default": "() => {}"
+            },
+            {
+              "kind": "field",
+              "name": "rotation",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "scale",
+              "type": {
+                "text": "number"
+              },
+              "default": "1"
+            },
+            {
+              "kind": "field",
+              "name": "pdfPage",
+              "type": {
+                "text": "pdfJS.PDFPageProxy"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "container",
+              "type": {
+                "text": "HTMLDivElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "textLayer",
+              "type": {
+                "text": "HTMLDivElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "annotationLayer",
+              "type": {
+                "text": "HTMLDivElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "scriber",
+              "type": {
+                "text": "ScScriber"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "previousPdf",
+              "type": {
+                "text": "pdfJS.PDFDocumentProxy | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "scaleRatio",
+              "type": {
+                "text": "number"
+              },
+              "default": "1"
+            },
+            {
+              "kind": "field",
+              "name": "startTime",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "pageView",
+              "type": {
+                "text": "pdfjsViewer.PDFPageView | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "isSleeping",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "true"
+            },
+            {
+              "kind": "field",
+              "name": "width",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "height",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "_xdirty",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "_drawStart",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "_drawCancelled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "offsetScale",
+              "description": "The actual rendered scale, including pixel conversions"
+            },
+            {
+              "kind": "field",
+              "name": "_initPageView",
+              "privacy": "private",
+              "default": "async () => {\n    if (this.pageView) return;\n    const defaultViewport = this.pdfPage.getViewport({ scale: 1 });\n\n    const pageView = (this.pageView = new pdfjsViewer.PDFPageView({\n      container: this.container,\n      id: this.pageNumber,\n      scale: defaultViewport.scale,\n      defaultViewport,\n      eventBus: new pdfjsViewer.EventBus(),\n      layerProperties: {\n        linkService: this.pdfContext.linkService,\n        annotationStorage: this.pdfContext.pdf.annotationStorage,\n      },\n      enableDetailCanvas: true,\n      enableOptimizedPartialRendering: true,\n    }));\n    if (pageView.pdfPage !== this.pdfPage) {\n      this.pdfPage.cleanup();\n      pageView.setPdfPage(this.pdfPage);\n    }\n    const { scale, rotation } = this;\n    pageView.update({ scale, rotation });\n\n    this.resize();\n    await queueTask(this, this._draw);\n    this.scriber.active = true;\n  }"
+            },
+            {
+              "kind": "field",
+              "name": "_draw",
+              "privacy": "private",
+              "default": "async () => {\n    ScPDFPage.debug && (this._drawStart = performance.now());\n    if (this.pageView?.renderingState === RenderingStates.INITIAL) {\n      Object.assign(this.pageView?.draw, { pageNumber: this.pageNumber });\n      await this.pageView?.draw();\n    }\n    if (this.pageView?.renderingState !== RenderingStates.FINISHED) {\n      ScPDFPage.debug && console.log('cancelled page ', this.pageNumber, `${performance.now() - this._drawStart  }ms`);\n      return;\n    }\n    ScPDFPage.debug && console.log('done page ', this.pageNumber, `${performance.now() - this._drawStart  }ms`);\n    if (this.scriber.dirty) {\n      this.scriber.isSleeping = false;\n      this.scriber.sync();\n    }\n    this.emit('sc-page-drawn', {\n      detail: { pageNumber: this.pageNumber },\n    });\n  }"
+            },
+            {
+              "kind": "method",
+              "name": "wakeup"
+            },
+            {
+              "kind": "method",
+              "name": "sleep"
+            },
+            {
+              "kind": "method",
+              "name": "getThumbnail"
+            },
+            {
+              "kind": "method",
+              "name": "handleScaleChange",
+              "parameters": [
+                {
+                  "name": "oldValue",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "handleRotationChange",
+              "parameters": [
+                {
+                  "name": "oldValue",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "handleTransform"
+            },
+            {
+              "kind": "method",
+              "name": "_transform",
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "resize"
+            },
+            {
+              "kind": "method",
+              "name": "renderScriber"
+            },
+            {
+              "kind": "method",
+              "name": "emit",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "options",
+                  "optional": true,
+                  "type": {
+                    "text": "Record<string, any>"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "ScElement",
+                "module": "src/utils/ScElement.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "ScElement",
+            "module": "/src/utils/ScElement.js"
+          }
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "ScPDFPage",
+          "declaration": {
+            "name": "ScPDFPage",
+            "module": "src/components/ScPDFPage.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScPDFViewer.style.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "module": "src/components/ScPDFViewer.style.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScPDFViewer.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "ScPDFViewer",
+          "members": [
+            {
+              "kind": "field",
+              "name": "file",
+              "type": {
+                "text": "File"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "containerWidth",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "rotation",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "scale",
+              "type": {
+                "text": "number"
+              },
+              "default": "1"
+            },
+            {
+              "kind": "field",
+              "name": "renderCompleteCb",
+              "type": {
+                "text": "(\n    pageInfo: Map<number, string | undefined>\n  ) => void"
+              },
+              "default": "() => {}"
+            },
+            {
+              "kind": "field",
+              "name": "pdfContext",
+              "type": {
+                "text": "TPdfContext | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "viewmode",
+              "type": {
+                "text": "TViewmode"
+              },
+              "default": "'all'"
+            },
+            {
+              "kind": "field",
+              "name": "fileTool",
+              "type": {
+                "text": "ScFileTool | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "pages",
+              "type": {
+                "text": "NodeListOf<ScPDFPage>"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_lastFile",
+              "type": {
+                "text": "File | null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "_renderObserver",
+              "type": {
+                "text": "IntersectionObserver"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_pageObserver",
+              "type": {
+                "text": "IntersectionObserver"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_scrollParent",
+              "type": {
+                "text": "Element | null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "_pagesInView",
+              "type": {
+                "text": "Set<number>"
+              },
+              "default": "new Set()"
+            },
+            {
+              "kind": "field",
+              "name": "scrollParent"
+            },
+            {
+              "kind": "method",
+              "name": "handleFileChange"
+            },
+            {
+              "kind": "method",
+              "name": "_loadPdf"
+            },
+            {
+              "kind": "method",
+              "name": "_initialZoom",
+              "privacy": "private"
+            },
+            {
+              "kind": "method",
+              "name": "handleTransform"
+            },
+            {
+              "kind": "method",
+              "name": "handleScaleChange",
+              "parameters": [
+                {
+                  "name": "oldValue",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "handleToolInit",
+              "parameters": [
+                {
+                  "name": "old",
+                  "optional": true,
+                  "type": {
+                    "text": "ScFileTool"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "handleToolStateChange",
+              "default": "(e: Event) => {\n    const { name, value } = (\n      e as CustomEvent<{\n        name: keyof ToolState;\n        value: any;\n      }>\n    ).detail;\n    switch (name) {\n      case 'currentPage':\n        this.scrollToPage(value);\n        break;\n      case 'zoomRatio':\n        this.scale = value / 100;\n        break;\n      case 'rotation':\n        if (this.fileTool?.resConfig.rotateScope === 'page') {\n          const page = this.pages.item(this.fileTool.currentPage - 1);\n          if (page)\n            page.rotation =\n              (page.rotation + (value - this.rotation) + 360) % 360;\n        } else {\n          this.pages.forEach(page => (page.rotation = value));\n        }\n        this.rotation = value;\n        break;\n      default:\n        break;\n    }\n  }"
+            },
+            {
+              "kind": "field",
+              "name": "handleThumbnailRequest",
+              "default": "async (e: Event) => {\n    if (e.defaultPrevented) return;\n    e.preventDefault();\n    const { detail } = e as CustomEvent<{\n      pageNumber: number;\n      provide: (canvas: HTMLCanvasElement) => void;\n    }>;\n\n    await this.updateComplete;\n\n    const page = this.shadowRoot?.querySelector<ScPDFPage>(\n      `sc-pdf-page[data-page=\"${detail.pageNumber}\"]`\n    );\n    page?.getThumbnail().then(detail.provide);\n  }"
+            },
+            {
+              "kind": "method",
+              "name": "scrollToPage",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "_getPagePos",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "{ top: number; left: number }"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "pageNum",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "getPageInfo"
+            },
+            {
+              "kind": "field",
+              "name": "handlePageDrawn"
+            },
+            {
+              "kind": "field",
+              "name": "handlePageIntersection",
+              "default": "(entries: IntersectionObserverEntry[]) => {\n    entries.forEach(entry => {\n      const page = entry.target;\n      if (!(page instanceof ScPDFPage)) return;\n      if (entry.isIntersecting) {\n        this._pagesInView.add(page.pageNumber);\n      } else {\n        this._pagesInView.delete(page.pageNumber);\n      }\n    });\n    if (this._pagesInView.size) {\n      const pageNumber = Math.min(...this._pagesInView);\n      this.fileTool?.setPage(pageNumber, { emit: false });\n      this.emit('sc-page-visible', {\n        detail: { pageNumber },\n        bubbles: true,\n        composed: true,\n      });\n    }\n  }"
+            },
+            {
+              "kind": "method",
+              "name": "emit",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "options",
+                  "optional": true,
+                  "type": {
+                    "text": "Record<string, any>"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "ScElement",
+                "module": "src/utils/ScElement.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "ScElement",
+            "module": "/src/utils/ScElement.js"
+          },
+          "tagName": "sc-pdf-viewer",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "ScPDFViewer",
+          "declaration": {
+            "name": "ScPDFViewer",
+            "module": "src/components/ScPDFViewer.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScScriber.style.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "module": "src/components/ScScriber.style.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScScriber.toolbar.util.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "StyleBase",
+          "members": [
+            {
+              "kind": "field",
+              "name": "changeCallback",
+              "type": {
+                "text": "(value: StyleBase<Entity>) => void"
+              },
+              "default": "changeCallback"
+            },
+            {
+              "kind": "field",
+              "name": "tools",
+              "type": {
+                "text": "ETools[]"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "default",
+              "type": {
+                "text": "Entity"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getDefaultValue",
+              "return": {
+                "type": {
+                  "text": "Entity"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "configurations",
+              "type": {
+                "text": "Map<ETools | undefined, Entity>"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "reset",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "setup",
+              "return": {
+                "type": {
+                  "text": "TemplateResult<1>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "isActive",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "activeTool",
+                  "optional": true,
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "isActive",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "activeTool",
+                  "optional": true,
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "setConfiguration",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                },
+                {
+                  "name": "source",
+                  "type": {
+                    "text": "Entity"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "setConfiguration",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                },
+                {
+                  "name": "source",
+                  "type": {
+                    "text": "Entity"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "class",
+          "description": "",
+          "name": "Color",
+          "members": [
+            {
+              "kind": "field",
+              "name": "tools",
+              "type": {
+                "text": "ETools[]"
+              },
+              "default": "[\n    ETools.arrow,\n    ETools.circle,\n    ETools.line,\n    ETools.pen,\n    ETools.highlightRect,\n    ETools.rectangle,\n    ETools.text,\n  ]",
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "configurations",
+              "type": {
+                "text": "Map<ETools | undefined, Entity>"
+              },
+              "default": "new Map<ETools, string>()",
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "default",
+              "type": {
+                "text": "Entity"
+              },
+              "default": "'#000000'",
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getDefaultValue",
+              "return": {
+                "type": {
+                  "text": "Entity"
+                }
+              },
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "reset",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "handleValueChange",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "Event"
+                  }
+                },
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "setup",
+              "return": {
+                "type": {
+                  "text": "TemplateResult<1>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "changeCallback",
+              "type": {
+                "text": "(value: StyleBase<Entity>) => void"
+              },
+              "default": "changeCallback",
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "isActive",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "activeTool",
+                  "optional": true,
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "setConfiguration",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                },
+                {
+                  "name": "source",
+                  "type": {
+                    "text": "Entity"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "StyleBase",
+            "module": "src/components/ScScriber.toolbar.util.ts"
+          }
+        },
+        {
+          "kind": "class",
+          "description": "",
+          "name": "Thickness",
+          "members": [
+            {
+              "kind": "field",
+              "name": "tools",
+              "type": {
+                "text": "ETools[]"
+              },
+              "default": "[\n    ETools.arrow,\n    ETools.eraser,\n    ETools.circle,\n    ETools.line,\n    ETools.pen,\n    ETools.highlightRect,\n    ETools.rectangle,\n    ETools.text,\n  ]",
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "thicknessOptions",
+              "type": {
+                "text": "array"
+              },
+              "default": "[1, 3, 5, 7]"
+            },
+            {
+              "kind": "field",
+              "name": "default",
+              "type": {
+                "text": "Entity"
+              },
+              "default": "1",
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getDefaultValue",
+              "return": {
+                "type": {
+                  "text": "Entity"
+                }
+              },
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "configurations",
+              "type": {
+                "text": "Map<ETools | undefined, Entity>"
+              },
+              "default": "new Map<ETools, number>()",
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "reset",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "handleValueChange",
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "setup",
+              "return": {
+                "type": {
+                  "text": "TemplateResult<1>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "changeCallback",
+              "type": {
+                "text": "(value: StyleBase<Entity>) => void"
+              },
+              "default": "changeCallback",
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "isActive",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "activeTool",
+                  "optional": true,
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "setConfiguration",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                },
+                {
+                  "name": "source",
+                  "type": {
+                    "text": "Entity"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "StyleBase",
+            "module": "src/components/ScScriber.toolbar.util.ts"
+          }
+        },
+        {
+          "kind": "class",
+          "description": "",
+          "name": "Size",
+          "members": [
+            {
+              "kind": "field",
+              "name": "tools",
+              "type": {
+                "text": "ETools[]"
+              },
+              "default": "[\n    ETools.arrow,\n    ETools.eraser,\n    ETools.circle,\n    ETools.line,\n    ETools.pen,\n    ETools.highlightRect,\n    ETools.rectangle,\n    ETools.text,\n  ]",
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "default",
+              "type": {
+                "text": "Entity"
+              },
+              "default": "20",
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getDefaultValue",
+              "return": {
+                "type": {
+                  "text": "Entity"
+                }
+              },
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "configurations",
+              "type": {
+                "text": "Map<ETools | undefined, Entity>"
+              },
+              "default": "new Map<ETools, number>()",
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "reset",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "handleValueChange",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "CustomEvent"
+                  }
+                },
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "setup",
+              "return": {
+                "type": {
+                  "text": "TemplateResult<1>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "changeCallback",
+              "type": {
+                "text": "(value: StyleBase<Entity>) => void"
+              },
+              "default": "changeCallback",
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "isActive",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "activeTool",
+                  "optional": true,
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "setConfiguration",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                },
+                {
+                  "name": "source",
+                  "type": {
+                    "text": "Entity"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "StyleBase",
+                "module": "src/components/ScScriber.toolbar.util.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "StyleBase",
+            "module": "src/components/ScScriber.toolbar.util.ts"
+          }
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "StyleBase",
+          "declaration": {
+            "name": "StyleBase",
+            "module": "src/components/ScScriber.toolbar.util.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "Color",
+          "declaration": {
+            "name": "Color",
+            "module": "src/components/ScScriber.toolbar.util.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "Thickness",
+          "declaration": {
+            "name": "Thickness",
+            "module": "src/components/ScScriber.toolbar.util.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "Size",
+          "declaration": {
+            "name": "Size",
+            "module": "src/components/ScScriber.toolbar.util.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScScriber.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "ScScriber",
+          "members": [
+            {
+              "kind": "field",
+              "name": "scale",
+              "type": {
+                "text": "number"
+              },
+              "default": "1"
+            },
+            {
+              "kind": "field",
+              "name": "rotation",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "active",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "pallete",
+              "type": {
+                "text": "HTMLDivElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "eraser",
+              "type": {
+                "text": "HTMLDivElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "textMaker",
+              "type": {
+                "text": "HTMLDivElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "textMakerInput",
+              "type": {
+                "text": "ScTextInput"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "editor",
+              "type": {
+                "text": "ScRichTextEditorV2 | null | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "canvasWrap",
+              "type": {
+                "text": "HTMLElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "scriberRoot",
+              "type": {
+                "text": "HTMLDivElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "layers",
+              "type": {
+                "text": "Partial<Record<ETools, Context>>"
+              },
+              "default": "{}"
+            },
+            {
+              "kind": "field",
+              "name": "activeTool",
+              "type": {
+                "text": "ETools | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "toolbarStyles",
+              "type": {
+                "text": "Set<StyleBase<any>>"
+              },
+              "default": "new Set()"
+            },
+            {
+              "kind": "field",
+              "name": "textValue",
+              "type": {
+                "text": "string"
+              },
+              "default": "''"
+            },
+            {
+              "kind": "field",
+              "name": "isExistedTextActived",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "ctx",
+              "default": "new Context({ width: 1, height: 1 })"
+            },
+            {
+              "kind": "field",
+              "name": "width",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "height",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "isMoveingText",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "isDrawing",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "startX",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1"
+            },
+            {
+              "kind": "field",
+              "name": "startY",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1"
+            },
+            {
+              "kind": "field",
+              "name": "lastX",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "lastY",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "_lastSvgGrp",
+              "type": {
+                "text": "SVGElement | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "history",
+              "type": {
+                "text": "Drawing[]"
+              },
+              "default": "[]"
+            },
+            {
+              "kind": "field",
+              "name": "textHistory",
+              "type": {
+                "text": "DrawText[]"
+              },
+              "default": "[]"
+            },
+            {
+              "kind": "field",
+              "name": "activeDrawing",
+              "type": {
+                "text": "Drawing | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "activeDrawingText",
+              "type": {
+                "text": "DrawText | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "initTextMode",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Temp work around for rte perf issue. Does not render rte & other elements when sleeping"
+            },
+            {
+              "kind": "field",
+              "name": "isSleeping",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "true when not in viewport"
+            },
+            {
+              "kind": "field",
+              "name": "dirty",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "true when the sizes needs to be synchronized"
+            },
+            {
+              "kind": "method",
+              "name": "handleSleepChange"
+            },
+            {
+              "kind": "method",
+              "name": "handleRotationChange"
+            },
+            {
+              "kind": "method",
+              "name": "addSvgLayer",
+              "parameters": [
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                },
+                {
+                  "name": "container",
+                  "type": {
+                    "text": "HTMLElement"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "resize",
+              "parameters": [
+                {
+                  "name": "width",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "height",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "left",
+                  "default": "0"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "sync"
+            },
+            {
+              "kind": "method",
+              "name": "resetCanvas"
+            },
+            {
+              "kind": "method",
+              "name": "setTool",
+              "privacy": "public",
+              "parameters": [
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "setToolStyle",
+              "privacy": "public",
+              "parameters": [
+                {
+                  "name": "toolStyle",
+                  "type": {
+                    "text": "StyleBase<any>"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "handleHistoryChange"
+            },
+            {
+              "kind": "method",
+              "name": "handleToolbarStylesChange"
+            },
+            {
+              "kind": "method",
+              "name": "getCtxFor",
+              "parameters": [
+                {
+                  "name": "tool",
+                  "optional": true,
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "drawArrow",
+              "parameters": [
+                {
+                  "name": "fromX",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "fromY",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "toX",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "toY",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "handleDragStart",
+              "default": "() => false"
+            },
+            {
+              "kind": "field",
+              "name": "handlePointerDown",
+              "default": "(e: PointerEvent) => {\n    const s = this.scale;\n    e.preventDefault();\n\n    this.isDrawing = true;\n    this.startX = e.offsetX;\n    this.startY = e.offsetY;\n    // pen\n    this.lastX = e.offsetX;\n    this.lastY = e.offsetY;\n    \n    const ctx = this.getCtxFor(this.activeTool);\n\n    if (\n      this.activeTool &&\n      [ETools.line, ETools.rectangle, ETools.circle, ETools.arrow].includes(\n        this.activeTool\n      )\n    ) {\n      // this.snapshot = this.ctx.getSvg().querySelector('g')?.cloneNode(true) as SVGElement;\n      // this.snapshot = this.ctx.getImageData(\n      //   0,\n      //   0,\n      //   this.canvas.width,\n      //   this.canvas.height\n      // );\n    }\n    if (ETools.pen === this.activeTool) {\n      ctx.beginPath();\n      ctx.moveTo(this.lastX, this.lastY);\n      this.activeDrawing = new Drawing(ctx, this.activeTool, {\n        color: ctx.strokeStyle,\n        size: ctx.lineWidth,\n        points: [{ x: this.lastX / s, y: this.lastY / s }],\n      });\n      this.activeDrawing.prepare();\n    }\n    if (ETools.eraser === this.activeTool) {\n      this.eraseAtPosition(this.lastX, this.lastY);\n    }\n    if (ETools.text === this.activeTool) {\n      if (this.isExistedTextActived) {\n        this.makeTextInputBlur();\n        this.isExistedTextActived = false;\n      }\n      const clickedText = this.textHistory.find(text =>\n        text.contains(this.startX / s, this.startY / s)\n      );\n      if (clickedText) {\n        this.textMaker.style.setProperty('display', 'block');\n        const x =\n          clickedText.x + this.textMaker.offsetWidth / 2 - 10;\n        const y = clickedText.y + 3;\n        this.isExistedTextActived = true;\n        this.textMaker.style.setProperty('left', `${x}px`);\n        this.textMaker.style.setProperty('top', `${y}px`);\n\n        this.makeTextInputFocus();\n        this.textValue = clickedText.content;\n        this.activeDrawingText = clickedText;\n        return;\n      }\n\n      if (!this.getIsDrawingTextReady()) {\n        this.textMaker.style.setProperty('display', 'block');\n        const x =\n          this.startX + this.textMaker.offsetWidth / 2 - 10;\n        const y = this.startY + 3;\n        this.textMaker.style.setProperty('left', `${x}px`);\n        this.textMaker.style.setProperty('top', `${y}px`);\n\n        this.makeTextInputFocus();\n        this.isDrawing = false;\n        this.activeDrawingText = new DrawText(\n          this.ctx,\n          this.startX / s,\n          this.startY / s,\n          '',\n          this.ctx.strokeStyle as string,\n          // this.ctx.lineWidth\n          4\n        );\n      } else {\n        this.makeTextInputBlur();\n      }\n    }\n  }"
+            },
+            {
+              "kind": "method",
+              "name": "handleTextBoxBlur"
+            },
+            {
+              "kind": "method",
+              "name": "makeTextInputBlur"
+            },
+            {
+              "kind": "method",
+              "name": "makeTextInputFocus"
+            },
+            {
+              "kind": "method",
+              "name": "getIsDrawingTextReady"
+            },
+            {
+              "kind": "method",
+              "name": "hideTextMaker"
+            },
+            {
+              "kind": "method",
+              "name": "resetDrawingTextState"
+            },
+            {
+              "kind": "field",
+              "name": "handleTextBlur",
+              "default": "() => {\n    if (this.activeDrawingText && this.textValue.trim()) {\n      this.activeDrawingText.content = this.textValue;\n      if (!this.textHistory.includes(this.activeDrawingText)) {\n        this.textHistory = [...this.textHistory, this.activeDrawingText];\n\n        const textDrawing = new Drawing(this.ctx, ETools.text, {\n          color: this.activeDrawingText.color,\n          size: this.activeDrawingText.size,\n          content: this.activeDrawingText.content,\n          x: this.activeDrawingText.x,\n          y: this.activeDrawingText.y,\n        });\n        textDrawing.id = this.activeDrawingText.id;\n        this.history = [...this.history, textDrawing];\n      }\n      this.refreshCanvas();\n    }\n    if (this.isExistedTextActived) {\n    } else {\n      this.hideTextMaker();\n      this.resetDrawingTextState();\n    }\n  }"
+            },
+            {
+              "kind": "method",
+              "name": "refreshCanvas"
+            },
+            {
+              "kind": "method",
+              "name": "eraseAtPosition",
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "eraseAlongPath",
+              "parameters": [
+                {
+                  "name": "startX",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "startY",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "endX",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "endY",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "handlePointerMove",
+              "default": "(e: PointerEvent) => {\n    const s = this.scale;\n    const currentX = e.offsetX;\n    const currentY = e.offsetY;\n    this.updateEraser(e.offsetX, e.offsetY);\n    if (!this.isDrawing) {\n      return;\n    }\n    const ctx = this.getCtxFor(this.activeTool);\n    switch (this.activeTool) {\n      case ETools.pen:\n      case ETools.highlightRect:\n        ctx.lineTo(currentX, currentY);\n        ctx.stroke();\n        if (this.activeDrawing) {\n          this.activeDrawing.data.points.push({ x: currentX / s, y: currentY / s });\n        }\n        break;\n      case ETools.eraser:\n        this.eraseAlongPath(this.lastX / s, this.lastY / s, currentX / s, currentY / s);\n        this.lastX = currentX;\n        this.lastY = currentY;\n        break;\n      case ETools.line:\n      case ETools.rectangle:\n      case ETools.circle:\n      case ETools.arrow:\n        if (this._lastSvgGrp) {\n          this._lastSvgGrp.remove();\n          this._lastSvgGrp = undefined;\n          // ctx.getSvg().replaceChildren(this.snapshot);\n          // ctx.__groupStack = [this.snapshot as SVGGElement];\n          // ctx.__currentElement = this.snapshot as SVGElement;\n        }\n        ctx.save();\n        // ctx.putImageData?.(this.snapshot, 0, 0);\n        ctx.beginPath();\n        if (this.activeTool === ETools.line) {\n          ctx.moveTo(this.startX, this.startY);\n          ctx.lineTo(currentX, currentY);\n          ctx.stroke();\n          this.activeDrawing = new Drawing(ctx, ETools.line, {\n            color: ctx.strokeStyle,\n            size: ctx.lineWidth,\n            startX: this.startX / s,\n            startY: this.startY / s,\n            endX: currentX / s,\n            endY: currentY / s,\n          });\n        }\n        if (this.activeTool === ETools.rectangle) {\n          const width = Math.abs(currentX - this.startX);\n          const height = Math.abs(currentY - this.startY);\n          ctx.strokeRect(\n            Math.min(this.startX, currentX),\n            Math.min(this.startY, currentY),\n            width,\n            height\n          );\n          this.activeDrawing = new Drawing(ctx, ETools.rectangle, {\n            color: ctx.strokeStyle,\n            size: ctx.lineWidth,\n            startX: Math.min(this.startX, currentX) / s,\n            startY: Math.min(this.startY, currentY) / s,\n            endX: Math.max(this.startX, currentX) / s,\n            endY: Math.max(this.startY, currentY) / s,\n          });\n        }\n        if (this.activeTool === ETools.arrow) {\n          this.drawArrow(this.startX, this.startY, currentX, currentY);\n          this.activeDrawing = new Drawing(ctx, ETools.arrow, {\n            color: ctx.strokeStyle,\n            size: ctx.lineWidth,\n            startX: this.startX / s,\n            startY: this.startY / s,\n            endX: currentX / s,\n            endY: currentY / s,\n          });\n        }\n        if (this.activeTool === ETools.circle) {\n          const radius = Math.sqrt(\n            Math.pow(currentX - this.startX, 2) +\n              Math.pow(currentY - this.startY, 2)\n          );\n          ctx.arc(this.startX, this.startY, radius, 0, Math.PI * 2);\n          ctx.stroke();\n          this.activeDrawing = new Drawing(ctx, ETools.circle, {\n            color: ctx.strokeStyle,\n            size: ctx.lineWidth,\n            startX: this.startX / s,\n            startY: this.startY / s,\n            endX: currentX / s,\n            endY: currentY / s,\n          });\n        }\n        ctx.closePath();\n        const g = (ctx as any).__closestGroupOrSvg() as SVGElement;\n        if (g?.tagName === 'g') this._lastSvgGrp = g;\n        ctx.restore();\n        break;\n    }\n  }"
+            },
+            {
+              "kind": "field",
+              "name": "handlePointerup",
+              "default": "() => {\n    this.isDrawing = false;\n    const ctx = this.getCtxFor(this.activeTool);\n    if (ETools.pen === this.activeTool) {\n      ctx.closePath();\n      if (this.activeDrawing && this.activeDrawing.data.points.length > 1) {\n        this.history = [...this.history, this.activeDrawing];\n      }\n      this.activeDrawing?.postCleanup?.();\n      this.activeDrawing = undefined;\n    }\n    if (\n      this.activeTool &&\n      [ETools.arrow, ETools.circle, ETools.line, ETools.rectangle].includes(\n        this.activeTool\n      )\n    ) {\n      if (this.activeDrawing) {\n        this.history = [...this.history, this.activeDrawing];\n      }\n      this.activeDrawing?.postCleanup?.();\n      this.activeDrawing = undefined;\n    }\n    this._lastSvgGrp = undefined;\n  }"
+            },
+            {
+              "kind": "method",
+              "name": "getEraserSize"
+            },
+            {
+              "kind": "method",
+              "name": "updateEraser",
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "handleInput",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "CustomEvent"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "handleDeleteText"
+            },
+            {
+              "kind": "method",
+              "name": "handleTextDown",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "PointerEvent"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "handleTextMove",
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "PointerEvent"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "handleTextup"
+            },
+            {
+              "kind": "method",
+              "name": "emit",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "options",
+                  "optional": true,
+                  "type": {
+                    "text": "Record<string, any>"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "ScElement",
+                "module": "src/utils/ScElement.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "ScElement",
+            "module": "/src/utils/ScElement.js"
+          }
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "ScScriber",
+          "declaration": {
+            "name": "ScScriber",
+            "module": "src/components/ScScriber.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScScriberToolbar.style.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "module": "src/components/ScScriberToolbar.style.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ScScriberToolbar.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "ScScriberToolbar",
+          "members": [
+            {
+              "kind": "field",
+              "name": "toolbarStyles",
+              "type": {
+                "text": "StyleBase<any>[]"
+              },
+              "default": "[thickness, color, size]"
+            },
+            {
+              "kind": "field",
+              "name": "dataSource",
+              "type": {
+                "text": "ScribbleDataSource[]"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "showColorSetting",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "showThicknessSetting",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "showShapeSetting",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "showSizeSetting",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "activeTool",
+              "type": {
+                "text": "ETools | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "lastActiveShapeTool",
+              "type": {
+                "text": "ETools"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "activeToolForToolbarStyles",
+              "type": {
+                "text": "ETools"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "activeColor",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "activeThickness",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "activeSize",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "highlightIndex",
+              "type": {
+                "text": "number"
+              },
+              "default": "-1"
+            },
+            {
+              "kind": "field",
+              "name": "highlights",
+              "type": {
+                "text": "{ x: number; y: number; page: number }[]"
+              },
+              "default": "[]"
+            },
+            {
+              "kind": "method",
+              "name": "toggleState",
+              "parameters": [
+                {
+                  "name": "state",
+                  "type": {
+                    "text": "| 'showColorSetting'\n      | 'showThicknessSetting'\n      | 'showShapeSetting'\n      | 'showSizeSetting'"
+                  }
+                },
+                {
+                  "name": "value",
+                  "optional": true,
+                  "type": {
+                    "text": "boolean"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "switchTool",
+              "parameters": [
+                {
+                  "name": "tool",
+                  "type": {
+                    "text": "ETools"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "handleDataSourceChange"
+            },
+            {
+              "kind": "method",
+              "name": "handleNextClick"
+            },
+            {
+              "kind": "method",
+              "name": "handlePreviousClick"
+            },
+            {
+              "kind": "field",
+              "name": "handleToolbarStyleChange",
+              "default": "(value: StyleBase<any>) => {\n    this.emit('scriber-toolbar', {\n      detail: {\n        type: 'tool-style-change',\n        info: {\n          value,\n        },\n      },\n    });\n\n    if (value instanceof Color) {\n      this.activeColor =\n        value.configurations.get(ETools.pen) ?? value.getDefaultValue();\n    }\n    if (value instanceof Thickness) {\n      this.activeThickness =\n        value.configurations.get(ETools.pen) ?? value.getDefaultValue();\n    }\n    if (value instanceof Size) {\n      this.activeSize =\n        value.configurations.get(ETools.pen) ?? value.getDefaultValue();\n    }\n  }"
+            },
+            {
+              "kind": "field",
+              "name": "closeColorSetting",
+              "default": "(e: Event) => {\n    const paths = e.composedPath() as HTMLElement[];\n    const hasColorTooltip = paths.some(path => {\n      return path.id === SETTING_IDS.color;\n    });\n    const hasThicknessTooltip = paths.some(path => {\n      return path.id === SETTING_IDS.thickness;\n    });\n    const hasShapeTooltip = paths.some(path => {\n      return path.id === SETTING_IDS.shape;\n    });\n    const hasSizeTooltip = paths.some(path => {\n      return path.id === SETTING_IDS.size;\n    });\n    if (!hasColorTooltip) {\n      this.toggleState('showColorSetting', false);\n    }\n    if (!hasShapeTooltip) {\n      this.toggleState('showShapeSetting', false);\n    }\n    if (!hasThicknessTooltip) {\n      this.toggleState('showThicknessSetting', false);\n    }\n    if (!hasSizeTooltip) {\n      this.toggleState('showSizeSetting', false);\n    }\n  }"
+            },
+            {
+              "kind": "field",
+              "name": "tools",
+              "type": {
+                "text": "HTMLElement[]"
+              },
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "toolbar",
+              "type": {
+                "text": "HTMLDivElement"
+              },
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "moreTool",
+              "type": {
+                "text": "HTMLElement"
+              },
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "moreToolbar",
+              "type": {
+                "text": "HTMLDivElement"
+              },
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_placeholderTools",
+              "default": "new WeakMap<HTMLElement, HTMLElement>()",
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_lastWidth",
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "_resizeObserver",
+              "default": "new ResizeObserver(this.handleResize.bind(this))",
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "handleResize",
+              "privacy": "protected",
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "renderMoreTool",
+              "privacy": "protected",
+              "inheritedFrom": {
+                "name": "BaseToolbar",
+                "module": "src/components/BaseToolbar.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "emit",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "options",
+                  "optional": true,
+                  "type": {
+                    "text": "Record<string, any>"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "ScElement",
+                "module": "src/utils/ScElement.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "BaseToolbar",
+            "module": "/src/components/BaseToolbar.js"
+          }
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "ScScriberToolbar",
+          "declaration": {
+            "name": "ScScriberToolbar",
+            "module": "src/components/ScScriberToolbar.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/types/svgcanvas.d.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "Canvas-like drawing context that generates SVG",
+          "name": "Context",
+          "members": [
+            {
+              "kind": "method",
+              "name": "getSerializedSvg",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getSvg",
+              "return": {
+                "type": {
+                  "text": "SVGSVGElement"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "__history",
+              "type": {
+                "text": "any[] | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "debug",
+              "type": {
+                "text": "boolean | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "canvas",
+              "type": {
+                "text": "HTMLCanvasElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "fillStyle",
+              "type": {
+                "text": "string | CanvasGradient | CanvasPattern"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "strokeStyle",
+              "type": {
+                "text": "string | CanvasGradient | CanvasPattern"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "globalAlpha",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "lineWidth",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "lineCap",
+              "type": {
+                "text": "CanvasLineCap"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "lineJoin",
+              "type": {
+                "text": "CanvasLineJoin"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "miterLimit",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "font",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "textAlign",
+              "type": {
+                "text": "CanvasTextAlign"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "textBaseline",
+              "type": {
+                "text": "CanvasTextBaseline"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "imageSmoothingEnabled",
+              "type": {
+                "text": "boolean"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "save",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "restore",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "scale",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "rotate",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "angle",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "translate",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "transform",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "a",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "b",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "c",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "d",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "f",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "setTransform",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "a",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "b",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "c",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "d",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "f",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "resetTransform",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "beginPath",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "closePath",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "moveTo",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "lineTo",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "bezierCurveTo",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "cp1x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "cp1y",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "cp2x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "cp2y",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "quadraticCurveTo",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "cpx",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "cpy",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "arcTo",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x1",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y1",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "x2",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y2",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "radius",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "arc",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "r",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "startAngle",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "endAngle",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "anticlockwise",
+                  "optional": true,
+                  "type": {
+                    "text": "boolean"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "rect",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "w",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "h",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "fillRect",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "w",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "h",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "strokeRect",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "w",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "h",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "clearRect",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "w",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "h",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "fill",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "fillRule",
+                  "optional": true,
+                  "type": {
+                    "text": "CanvasFillRule"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "stroke",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "clip",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "fillRule",
+                  "optional": true,
+                  "type": {
+                    "text": "CanvasFillRule"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "fillText",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "text",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "maxWidth",
+                  "optional": true,
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "strokeText",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "text",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "maxWidth",
+                  "optional": true,
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "measureText",
+              "return": {
+                "type": {
+                  "text": "TextMetrics"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "text",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "createLinearGradient",
+              "return": {
+                "type": {
+                  "text": "CanvasGradient"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x0",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y0",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "x1",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y1",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "createRadialGradient",
+              "return": {
+                "type": {
+                  "text": "CanvasGradient"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x0",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y0",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "r0",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "x1",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y1",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "r1",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "createPattern",
+              "return": {
+                "type": {
+                  "text": "CanvasPattern | null"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "image",
+                  "type": {
+                    "text": "CanvasImageSource"
+                  }
+                },
+                {
+                  "name": "repetition",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "drawImage",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "image",
+                  "type": {
+                    "text": "CanvasImageSource"
+                  }
+                },
+                {
+                  "name": "dx",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "dy",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "drawImage",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "image",
+                  "type": {
+                    "text": "CanvasImageSource"
+                  }
+                },
+                {
+                  "name": "dx",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "dy",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "dw",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "dh",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "drawImage",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "image",
+                  "type": {
+                    "text": "CanvasImageSource"
+                  }
+                },
+                {
+                  "name": "sx",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "sy",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "sw",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "sh",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "dx",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "dy",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "dw",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "dh",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "__clearCanvas",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "__currentElement",
+              "type": {
+                "text": "SVGElement | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "__groupStack",
+              "type": {
+                "text": "SVGGElement[]"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "width",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "height",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "putImageData",
+              "type": {
+                "text": "(imagedata: ImageData, dx: number, dy: number) => void | undefined"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "class",
+          "description": "Mock DOM element representing a canvas with SVG output",
+          "name": "Element",
+          "members": [
+            {
+              "kind": "field",
+              "name": "ctx",
+              "type": {
+                "text": "Context"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "wrapper",
+              "type": {
+                "text": "HTMLElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "svg",
+              "type": {
+                "text": "SVGSVGElement"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "width",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "height",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "style",
+              "type": {
+                "text": "CSSStyleDeclaration"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "className",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "id",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getContext",
+              "return": {
+                "type": {
+                  "text": "Context | null"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "kind",
+                  "type": {
+                    "text": "'2d'"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "getBoundingClientRect",
+              "return": {
+                "type": {
+                  "text": "DOMRect"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "toDataURL",
+              "return": {
+                "type": {
+                  "text": "string | void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "type",
+                  "optional": true,
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "callback",
+                  "optional": true,
+                  "type": {
+                    "text": "(err: Error|null, data: string) => void"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "toObjectURL",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "Context",
+          "declaration": {
+            "name": "Context",
+            "module": "src/types/svgcanvas.d.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "Element",
+          "declaration": {
+            "name": "Element",
+            "module": "src/types/svgcanvas.d.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/ScElement.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "ScElement",
+          "members": [
+            {
+              "kind": "method",
+              "name": "emit",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "options",
+                  "optional": true,
+                  "type": {
+                    "text": "Record<string, any>"
+                  }
+                }
+              ]
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "name": "ScElement",
+            "module": "src/utils/ScElement.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/ancestor.ts",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "getAncestorsOf",
+          "return": {
+            "type": {
+              "text": "Generator<Element>"
+            }
+          },
+          "parameters": [
+            {
+              "name": "element",
+              "type": {
+                "text": "Element"
+              },
+              "description": "The element for which to find ancestors."
+            }
+          ],
+          "description": "Retrieves all parent elements including shadowDom (open) hosts and assigned slots."
+        },
+        {
+          "kind": "function",
+          "name": "findAncestor",
+          "return": {
+            "type": {
+              "text": ""
+            }
+          },
+          "parameters": [
+            {
+              "name": "element",
+              "type": {
+                "text": "Element"
+              },
+              "description": "The element for which to find an ancestor."
+            },
+            {
+              "name": "predicate",
+              "type": {
+                "text": "(el: Element) => boolean"
+              },
+              "description": "A function that takes an element."
+            }
+          ],
+          "description": "Finds the first ancestor of an element that matches a given predicate."
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "getAncestorsOf",
+          "declaration": {
+            "name": "getAncestorsOf",
+            "module": "src/utils/ancestor.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "findAncestor",
+          "declaration": {
+            "name": "findAncestor",
+            "module": "src/utils/ancestor.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/colors.ts",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "parseColor",
+          "return": {
+            "type": {
+              "text": "RGBA | null"
+            }
+          },
+          "parameters": [
+            {
+              "name": "color",
+              "type": {
+                "text": "string"
+              }
+            }
+          ],
+          "description": "Parses a CSS color string into an RGBA object.\nSupports: #RGB, #RGBA, #RRGGBB, #RRGGBBAA, rgb(...), rgba(...)\nReturns null if the format is unrecognised."
+        },
+        {
+          "kind": "function",
+          "name": "composeAlpha",
+          "return": {
+            "type": {
+              "text": "string | null"
+            }
+          },
+          "parameters": [
+            {
+              "name": "color",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "targetAlpha",
+              "default": "0.4"
+            }
+          ],
+          "description": "Returns an `rgba(...)` color with alpha = 0.4 that is visually\nidentical to the original color composited over a white (#fff) background.\n\nMath:\n  visual  = a_src * C + (1 - a_src) * 255        (composite over white)\n  visual  = 0.75  * C' + 0.25       * 255        (target composite)\n  C'      = (visual - 63.75) / 0.75               (solve for new channel)\n\nChannel values are clamped to [0, 255]."
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "parseColor",
+          "declaration": {
+            "name": "parseColor",
+            "module": "src/utils/colors.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "composeAlpha",
+          "declaration": {
+            "name": "composeAlpha",
+            "module": "src/utils/colors.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/debounce.ts",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "debounce",
+          "return": {
+            "type": {
+              "text": ""
+            }
+          },
+          "parameters": [
+            {
+              "name": "func",
+              "type": {
+                "text": "F"
+              },
+              "description": "The function to debounce."
+            },
+            {
+              "name": "debounceMs",
+              "type": {
+                "text": "number"
+              },
+              "description": "The number of milliseconds to delay."
+            },
+            {
+              "name": "{ signal, edges }",
+              "default": "{}",
+              "type": {
+                "text": "DebounceOptions"
+              }
+            },
+            {
+              "description": "The options object",
+              "name": "options",
+              "type": {
+                "text": "DebounceOptions"
+              }
+            },
+            {
+              "description": "An optional AbortSignal to cancel the debounced function.",
+              "name": "options.signal",
+              "type": {
+                "text": "AbortSignal"
+              }
+            }
+          ],
+          "description": "Creates a debounced function that delays invoking the provided function until after `debounceMs` milliseconds\nhave elapsed since the last time the debounced function was invoked. The debounced function also has a `cancel`\nmethod to cancel any pending execution."
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "debounce",
+          "declaration": {
+            "name": "debounce",
+            "module": "src/utils/debounce.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/drawText.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "DrawText",
+          "members": [
+            {
+              "kind": "field",
+              "name": "x",
+              "type": {
+                "text": "number"
+              },
+              "default": "x"
+            },
+            {
+              "kind": "field",
+              "name": "y",
+              "type": {
+                "text": "number"
+              },
+              "default": "y"
+            },
+            {
+              "kind": "field",
+              "name": "content",
+              "type": {
+                "text": "string"
+              },
+              "default": "content"
+            },
+            {
+              "kind": "field",
+              "name": "color",
+              "type": {
+                "text": "string"
+              },
+              "default": "color"
+            },
+            {
+              "kind": "field",
+              "name": "size",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "height",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "width",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "field",
+              "name": "id",
+              "type": {
+                "text": "string"
+              },
+              "default": "`${Date.now().toString(36)}-${Math.random()\n      .toString(36)\n      .substr(2)}`"
+            },
+            {
+              "kind": "field",
+              "name": "ctx",
+              "type": {
+                "text": "CanvasRenderingContext2D | Context"
+              },
+              "default": "ctx"
+            },
+            {
+              "kind": "method",
+              "name": "draw"
+            },
+            {
+              "kind": "method",
+              "name": "contains",
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "DrawText",
+          "declaration": {
+            "name": "DrawText",
+            "module": "src/utils/drawText.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/drawing.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "Drawing",
+          "members": [
+            {
+              "kind": "field",
+              "name": "type",
+              "type": {
+                "text": "ETools"
+              },
+              "default": "type"
+            },
+            {
+              "kind": "field",
+              "name": "data",
+              "type": {
+                "text": "any"
+              },
+              "default": "data"
+            },
+            {
+              "kind": "field",
+              "name": "id",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "ctx",
+              "type": {
+                "text": "CanvasRenderingContext2D | Context"
+              },
+              "default": "ctx"
+            },
+            {
+              "kind": "field",
+              "name": "postCleanup",
+              "type": {
+                "text": "() => void | undefined"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "prepare"
+            },
+            {
+              "kind": "method",
+              "name": "updateBrushStyle"
+            },
+            {
+              "kind": "method",
+              "name": "drawArrow",
+              "parameters": [
+                {
+                  "name": "fromX",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "fromY",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "toX",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "toY",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "draw"
+            },
+            {
+              "kind": "method",
+              "name": "isErased",
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "size",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "Drawing",
+          "declaration": {
+            "name": "Drawing",
+            "module": "src/utils/drawing.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/filetypes.ts",
+      "declarations": [
+        {
+          "kind": "variable",
+          "name": "docxTypes",
+          "type": {
+            "text": "array"
+          },
+          "default": "[\n  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',\n]"
+        },
+        {
+          "kind": "variable",
+          "name": "pptxTypes",
+          "type": {
+            "text": "array"
+          },
+          "default": "[\n  'application/vnd.ms-powerpoint',\n  'application/vnd.openxmlformats-officedocument.presentationml.presentation',\n]"
+        },
+        {
+          "kind": "variable",
+          "name": "excelTypes",
+          "type": {
+            "text": "array"
+          },
+          "default": "[\n  'application/vnd.ms-excel',\n  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',\n]"
+        },
+        {
+          "kind": "variable",
+          "name": "pdfTypes",
+          "type": {
+            "text": "array"
+          },
+          "default": "['application/pdf']"
+        },
+        {
+          "kind": "variable",
+          "name": "msgTypes",
+          "type": {
+            "text": "array"
+          },
+          "default": "['msg']"
+        },
+        {
+          "kind": "variable",
+          "name": "imgTypes",
+          "type": {
+            "text": "array"
+          },
+          "default": "[\n  'image/png',\n  'image/svg+xml',\n  'image/jpg',\n  'image/jpeg',\n]"
+        },
+        {
+          "kind": "variable",
+          "name": "videoTypes",
+          "type": {
+            "text": "array"
+          },
+          "default": "['video/mp4', 'video/webm', 'webm']"
+        },
+        {
+          "kind": "variable",
+          "name": "textTypes",
+          "type": {
+            "text": "array"
+          },
+          "default": "[\n  'text/plain',\n  'text/css',\n  'md',\n  'toml',\n  'yml',\n  'yaml',\n  'application/json',\n  'go',\n  'java',\n  'py',\n  'text/javascript',\n  'text/html',\n]"
+        },
+        {
+          "kind": "variable",
+          "name": "textLanguages",
+          "type": {
+            "text": "Record<string, string>"
+          },
+          "default": "{\n  'text/plain': 'text',\n  'text/css': 'css',\n  md: 'markdown',\n  toml: 'toml',\n  yml: 'yml',\n  yaml: 'yaml',\n  'application/json': 'json',\n  go: 'go',\n  java: 'java',\n  py: 'python',\n  'text/javascript': 'js',\n  'text/html': 'html',\n}"
+        },
+        {
+          "kind": "variable",
+          "name": "zoomAvailableTypes",
+          "type": {
+            "text": "array"
+          },
+          "default": "[\n  ...docxTypes,\n  ...pdfTypes,\n  ...pptxTypes,\n  ...imgTypes,\n  ...msgTypes,\n]"
+        },
+        {
+          "kind": "variable",
+          "name": "rotationAvailableTypes",
+          "type": {
+            "text": "array"
+          },
+          "default": "[...imgTypes, ...pdfTypes]"
+        },
+        {
+          "kind": "variable",
+          "name": "navigationAvailableTypes",
+          "type": {
+            "text": "array"
+          },
+          "default": "[...pdfTypes]"
+        },
+        {
+          "kind": "variable",
+          "name": "scriberAvailableTypes",
+          "type": {
+            "text": "array"
+          },
+          "default": "[\n  ...docxTypes,\n  ...pptxTypes,\n  ...pdfTypes,\n  ...msgTypes,\n]"
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "docxTypes",
+          "declaration": {
+            "name": "docxTypes",
+            "module": "src/utils/filetypes.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "pptxTypes",
+          "declaration": {
+            "name": "pptxTypes",
+            "module": "src/utils/filetypes.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "excelTypes",
+          "declaration": {
+            "name": "excelTypes",
+            "module": "src/utils/filetypes.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "pdfTypes",
+          "declaration": {
+            "name": "pdfTypes",
+            "module": "src/utils/filetypes.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "msgTypes",
+          "declaration": {
+            "name": "msgTypes",
+            "module": "src/utils/filetypes.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "imgTypes",
+          "declaration": {
+            "name": "imgTypes",
+            "module": "src/utils/filetypes.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "videoTypes",
+          "declaration": {
+            "name": "videoTypes",
+            "module": "src/utils/filetypes.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "textTypes",
+          "declaration": {
+            "name": "textTypes",
+            "module": "src/utils/filetypes.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "textLanguages",
+          "declaration": {
+            "name": "textLanguages",
+            "module": "src/utils/filetypes.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "zoomAvailableTypes",
+          "declaration": {
+            "name": "zoomAvailableTypes",
+            "module": "src/utils/filetypes.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "rotationAvailableTypes",
+          "declaration": {
+            "name": "rotationAvailableTypes",
+            "module": "src/utils/filetypes.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "navigationAvailableTypes",
+          "declaration": {
+            "name": "navigationAvailableTypes",
+            "module": "src/utils/filetypes.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "scriberAvailableTypes",
+          "declaration": {
+            "name": "scriberAvailableTypes",
+            "module": "src/utils/filetypes.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/highlight.dark.style.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "module": "src/utils/highlight.dark.style.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/highlight.style.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "module": "src/utils/highlight.style.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/link.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "LinkService",
+          "members": [
+            {
+              "kind": "field",
+              "name": "externalLinkEnabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "true"
+            },
+            {
+              "kind": "field",
+              "name": "externalLinkRel",
+              "type": {
+                "text": "ExternalLinkRel | undefined"
+              },
+              "default": "undefined"
+            },
+            {
+              "kind": "field",
+              "name": "externalLinkTarget",
+              "type": {
+                "text": "ExternalLinkTarget | undefined"
+              },
+              "default": "undefined"
+            },
+            {
+              "kind": "field",
+              "name": "isInPresentationMode",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "pdfDocument",
+              "type": {
+                "text": "PDFDocumentProxy | null | undefined"
+              },
+              "default": "undefined"
+            },
+            {
+              "kind": "field",
+              "name": "pdfViewer",
+              "type": {
+                "text": "PDFViewer | null | undefined"
+              },
+              "default": "undefined"
+            },
+            {
+              "kind": "method",
+              "name": "setDocument",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "pdfDocument",
+                  "type": {
+                    "text": "PDFDocumentProxy"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "setViewer",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "pdfViewer",
+                  "type": {
+                    "text": "PDFViewer"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "setExternalLinkRel",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "externalLinkRel",
+                  "optional": true,
+                  "type": {
+                    "text": "ExternalLinkRel"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "setExternalLinkTarget",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "externalLinkTarget",
+                  "optional": true,
+                  "type": {
+                    "text": "ExternalLinkTarget"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "setHistory",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "pagesCount",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "page",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "rotation",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "goToDestination",
+              "return": {
+                "type": {
+                  "text": "Promise<void>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "dest",
+                  "type": {
+                    "text": "Dest"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "navigateTo",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "dest",
+                  "type": {
+                    "text": "Dest"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "goToXY"
+            },
+            {
+              "kind": "method",
+              "name": "goToPage",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "pageNumber",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "addLinkAttributes",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "link",
+                  "type": {
+                    "text": "HTMLAnchorElement"
+                  }
+                },
+                {
+                  "name": "url",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "newWindow",
+                  "type": {
+                    "text": "boolean"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "getDestinationHash",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getAnchorUrl",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "setHash",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "executeNamedAction",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "cachePageRef",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "isPageVisible",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "isPageCached",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "executeSetOCGState",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "name": "LinkService",
+            "module": "src/utils/link.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/pdf.type.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "PasswordResponses",
+          "declaration": {
+            "name": "PasswordResponses",
+            "module": "src/utils/pdf.type.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "StructTreeNode",
+          "declaration": {
+            "name": "StructTreeNode",
+            "module": "src/utils/pdf.type.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TextContent",
+          "declaration": {
+            "name": "TextContent",
+            "module": "src/utils/pdf.type.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TextItem",
+          "declaration": {
+            "name": "TextItem",
+            "module": "src/utils/pdf.type.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TextMarkedContent",
+          "declaration": {
+            "name": "TextMarkedContent",
+            "module": "src/utils/pdf.type.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/watch.ts",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "watch",
+          "parameters": [
+            {
+              "name": "propertyName",
+              "type": {
+                "text": "string | string[]"
+              }
+            },
+            {
+              "name": "options",
+              "optional": true,
+              "type": {
+                "text": "WatchOptions"
+              }
+            }
+          ],
+          "description": "Runs when observed properties change, e.g. @property or @state, but before the component updates. To wait for an\nupdate to complete after a change occurs, use `await this.updateComplete` in the handler. To start watching after the\ninitial update/render, use `{ waitUntilFirstUpdate: true }` or `this.hasUpdated` in the handler.\n\nUsage:"
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "watch",
+          "declaration": {
+            "name": "watch",
+            "module": "src/utils/watch.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/worker.ts",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "setWorker",
+          "parameters": [
+            {
+              "name": "GlobalWorkerOptions",
+              "type": {
+                "text": "any"
+              }
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "setWorker",
+          "declaration": {
+            "name": "setWorker",
+            "module": "src/utils/worker.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/xDataSpreadsheet.style.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "default",
+          "declaration": {
+            "module": "src/utils/xDataSpreadsheet.style.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/contexts/file-tool-context.ts",
+      "declarations": [
+        {
+          "kind": "variable",
+          "name": "fileToolContext"
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "ScFileTool",
+          "declaration": {
+            "name": "ScFileTool",
+            "module": "../ScFileTool.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ToolState",
+          "declaration": {
+            "name": "ToolState",
+            "module": "../ScFileTool.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "fileToolContext",
+          "declaration": {
+            "name": "fileToolContext",
+            "module": "src/components/contexts/file-tool-context.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/msg/MessageHandler.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "MessageHandler",
+          "members": [
+            {
+              "kind": "method",
+              "name": "addMessage",
+              "parameters": [
+                {
+                  "name": "msgInfo"
+                },
+                {
+                  "name": "fileName"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "sortMessages"
+            },
+            {
+              "kind": "method",
+              "name": "setCurrentMessage",
+              "parameters": [
+                {
+                  "name": "message"
+                }
+              ]
+            },
+            {
+              "kind": "field",
+              "name": "messages",
+              "type": {
+                "text": "array"
+              },
+              "default": "[]"
+            },
+            {
+              "kind": "field",
+              "name": "currentMessage",
+              "type": {
+                "text": "null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "pinnedMessages",
+              "default": "new Set(\n      JSON.parse(localStorage.getItem('pinnedMessages') || '[]')\n    )"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "MessageHandler",
+          "declaration": {
+            "name": "MessageHandler",
+            "module": "src/utils/msg/MessageHandler.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/msg/lodash.ts",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "throttle",
+          "parameters": [
+            {
+              "name": "fn",
+              "type": {
+                "text": "(...args: any) => any"
+              }
+            },
+            {
+              "name": "context",
+              "type": {
+                "text": "any"
+              }
+            },
+            {
+              "name": "wait",
+              "type": {
+                "text": "number"
+              }
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "throttle",
+          "declaration": {
+            "name": "throttle",
+            "module": "src/utils/msg/lodash.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/utils/msg/utils.ts",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "extractMsg",
+          "parameters": [
+            {
+              "name": "fileBuffer"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "extractMsg",
+          "declaration": {
+            "name": "extractMsg",
+            "module": "src/utils/msg/utils.ts"
+          }
+        }
+      ]
+    }
+  ]
+}

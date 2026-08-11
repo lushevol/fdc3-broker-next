@@ -1,0 +1,76 @@
+@layer ratan.components {
+  .ratan-data-grid {
+    background: var(--sc-data-grid-basic-bg-color);
+    border: 0;
+    border-radius: 6px;
+    box-sizing: border-box;
+    color: var(--sc-data-grid-body-cell-text-color);
+    height: var(--ratan-data-grid-height);
+    overflow: auto;
+    outline: 1px solid var(--sc-data-grid-outline-color);
+    position: relative;
+  }
+
+  .ratan-data-grid__status {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .ratan-data-grid__header,
+  .ratan-data-grid__row {
+    display: grid;
+  }
+
+  .ratan-data-grid__header {
+    background: var(--sc-data-grid-header-cell-bg-color);
+    color: var(--sc-data-grid-header-cell-text-color);
+    font-size: 0.875rem;
+    font-weight: 700;
+    inset-block-start: 0;
+    line-height: 1rem;
+    min-height: 2.75rem;
+    position: sticky;
+    z-index: 1;
+  }
+
+  .ratan-data-grid__header > *,
+  .ratan-data-grid__row > * {
+    align-items: center;
+    box-shadow: inset -1px 0 0 var(--sc-data-grid-body-vertical-border-color);
+    display: flex;
+    padding-inline: 0.5rem;
+  }
+
+  .ratan-data-grid__header button,
+  .ratan-data-grid__row button {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .ratan-data-grid__header button[data-focus-visible],
+  .ratan-data-grid__row button[data-focus-visible] {
+    outline: 2px solid var(--sc-tab-focus-outline-color);
+  }
+
+  .ratan-data-grid__viewport { position: relative; }
+  .ratan-data-grid__row {
+    background: var(--sc-data-grid-body-cell-default-bg-color);
+    color: var(--sc-data-grid-body-cell-text-color);
+    font-size: 0.875rem;
+    line-height: 1rem;
+    inset-inline: 0;
+    position: absolute;
+  }
+  .ratan-data-grid__row > * {
+    box-shadow: inset -1px 0 0 var(--sc-data-grid-body-vertical-border-color), inset 0 -1px 0 var(--sc-data-grid-body-horizontal-border-color);
+  }
+  .ratan-data-grid__row:hover { background: var(--sc-data-grid-body-cell-hover-bg-color); }
+}

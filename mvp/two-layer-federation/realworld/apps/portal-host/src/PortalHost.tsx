@@ -300,7 +300,10 @@ export function PortalHost({
                     closable
                     aria-label={`${tab.entry.displayName} ${ordinal}`}
                     title={`Close ${tab.entry.displayName}${tab.instanceId.endsWith('-1') ? '' : ` ${ordinal}`}`}
-                    onScClose={() => close(tab.instanceId)}
+                    onScClose={(event: CustomEvent) => {
+                      event.stopPropagation();
+                      close(tab.instanceId);
+                    }}
                   >
                     {tab.entry.displayName} {ordinal}
                   </ScTab>

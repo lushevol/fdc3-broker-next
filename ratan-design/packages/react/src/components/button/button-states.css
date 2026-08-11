@@ -1,0 +1,291 @@
+/* Generated from the frozen Button state naming contract. */
+@layer ratan-components {
+  [data-ratan-component='Button'][data-variant='primary'][data-tone='default'] {
+    --_default-background: var(--sc-button-primary-background-color);
+    --_default-border: var(--sc-button-primary-border-color);
+    --_default-text: var(--sc-button-primary-text-color);
+    --_hover-background: var(--sc-button-primary-hover-background-color);
+    --_hover-border: var(--sc-button-primary-hover-border-color);
+    --_hover-text: var(--sc-button-primary-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-primary-press-background-color);
+    --_press-border: var(--sc-button-primary-press-border-color);
+    --_press-text: var(--sc-button-primary-press-text-color);
+    --_select-background: var(--sc-button-primary-select-background-color);
+    --_select-border: var(--sc-button-primary-select-border-color);
+    --_select-text: var(--sc-button-primary-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='primary'][data-tone='error'] {
+    --_default-background: var(--sc-button-primary-error-background-color);
+    --_default-border: var(--sc-button-primary-error-border-color);
+    --_default-text: var(--sc-button-primary-error-text-color);
+    --_hover-background: var(--sc-button-primary-error-hover-background-color);
+    --_hover-border: var(--sc-button-primary-error-hover-border-color);
+    --_hover-text: var(--sc-button-primary-error-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-primary-error-press-background-color);
+    --_press-border: var(--sc-button-primary-error-press-border-color);
+    --_press-text: var(--sc-button-primary-error-press-text-color);
+    --_select-background: var(--sc-button-primary-error-select-background-color);
+    --_select-border: var(--sc-button-primary-error-select-border-color);
+    --_select-text: var(--sc-button-primary-error-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='primary'][data-tone='alert'] {
+    --_default-background: var(--sc-button-primary-alert-background-color);
+    --_default-border: var(--sc-button-primary-alert-border-color);
+    --_default-text: var(--sc-button-primary-alert-text-color);
+    --_hover-background: var(--sc-button-primary-alert-hover-background-color);
+    --_hover-border: var(--sc-button-primary-alert-hover-border-color);
+    --_hover-text: var(--sc-button-primary-alert-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-primary-alert-press-background-color);
+    --_press-border: var(--sc-button-primary-alert-press-border-color);
+    --_press-text: var(--sc-button-primary-alert-press-text-color);
+    --_select-background: var(--sc-button-primary-alert-select-background-color);
+    --_select-border: var(--sc-button-primary-alert-select-border-color);
+    --_select-text: var(--sc-button-primary-alert-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='primary'][data-tone='success'] {
+    --_default-background: var(--sc-button-primary-success-background-color);
+    --_default-border: var(--sc-button-primary-success-border-color);
+    --_default-text: var(--sc-button-primary-success-text-color);
+    --_hover-background: var(--sc-button-primary-success-hover-background-color);
+    --_hover-border: var(--sc-button-primary-success-hover-border-color);
+    --_hover-text: var(--sc-button-primary-success-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-primary-success-press-background-color);
+    --_press-border: var(--sc-button-primary-success-press-border-color);
+    --_press-text: var(--sc-button-primary-success-press-text-color);
+    --_select-background: var(--sc-button-primary-success-select-background-color);
+    --_select-border: var(--sc-button-primary-success-select-border-color);
+    --_select-text: var(--sc-button-primary-success-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='primary']:disabled {
+    --_default-background: var(--sc-button-primary-disabled-background-color);
+    --_default-border: var(--sc-button-primary-disabled-border-color);
+    --_default-text: var(--sc-button-primary-disabled-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='secondary'][data-tone='default'] {
+    --_default-background: var(--sc-button-secondary-background-color);
+    --_default-border: var(--sc-button-secondary-border-color);
+    --_default-text: var(--sc-button-secondary-text-color);
+    --_hover-background: var(--sc-button-secondary-hover-background-color);
+    --_hover-border: var(--sc-button-secondary-hover-border-color);
+    --_hover-text: var(--sc-button-secondary-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-secondary-press-background-color);
+    --_press-border: var(--sc-button-secondary-press-border-color);
+    --_press-text: var(--sc-button-secondary-press-text-color);
+    --_select-background: var(--sc-button-secondary-select-background-color);
+    --_select-border: var(--sc-button-secondary-select-border-color);
+    --_select-text: var(--sc-button-secondary-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='secondary'][data-tone='error'] {
+    --_default-background: var(--sc-button-secondary-error-background-color);
+    --_default-border: var(--sc-button-secondary-error-border-color);
+    --_default-text: var(--sc-button-secondary-error-text-color);
+    --_hover-background: var(--sc-button-secondary-error-hover-background-color);
+    --_hover-border: var(--sc-button-secondary-error-hover-border-color);
+    --_hover-text: var(--sc-button-secondary-error-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-secondary-error-press-background-color);
+    --_press-border: var(--sc-button-secondary-error-press-border-color);
+    --_press-text: var(--sc-button-secondary-error-press-text-color);
+    --_select-background: var(--sc-button-secondary-error-select-background-color);
+    --_select-border: var(--sc-button-secondary-error-select-border-color);
+    --_select-text: var(--sc-button-secondary-error-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='secondary'][data-tone='alert'] {
+    --_default-background: var(--sc-button-secondary-alert-background-color);
+    --_default-border: var(--sc-button-secondary-alert-border-color);
+    --_default-text: var(--sc-button-secondary-alert-text-color);
+    --_hover-background: var(--sc-button-secondary-alert-hover-background-color);
+    --_hover-border: var(--sc-button-secondary-alert-hover-border-color);
+    --_hover-text: var(--sc-button-secondary-alert-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-secondary-alert-press-background-color);
+    --_press-border: var(--sc-button-secondary-alert-press-border-color);
+    --_press-text: var(--sc-button-secondary-alert-press-text-color);
+    --_select-background: var(--sc-button-secondary-alert-select-background-color);
+    --_select-border: var(--sc-button-secondary-alert-select-border-color);
+    --_select-text: var(--sc-button-secondary-alert-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='secondary'][data-tone='success'] {
+    --_default-background: var(--sc-button-secondary-success-background-color);
+    --_default-border: var(--sc-button-secondary-success-border-color);
+    --_default-text: var(--sc-button-secondary-success-text-color);
+    --_hover-background: var(--sc-button-secondary-success-hover-background-color);
+    --_hover-border: var(--sc-button-secondary-success-hover-border-color);
+    --_hover-text: var(--sc-button-secondary-success-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-secondary-success-press-background-color);
+    --_press-border: var(--sc-button-secondary-success-press-border-color);
+    --_press-text: var(--sc-button-secondary-success-press-text-color);
+    --_select-background: var(--sc-button-secondary-success-select-background-color);
+    --_select-border: var(--sc-button-secondary-success-select-border-color);
+    --_select-text: var(--sc-button-secondary-success-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='secondary']:disabled {
+    --_default-background: var(--sc-button-secondary-disabled-background-color);
+    --_default-border: var(--sc-button-secondary-disabled-border-color);
+    --_default-text: var(--sc-button-secondary-disabled-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='text'][data-tone='default'] {
+    --_default-background: var(--sc-button-text-background-color);
+    --_default-border: var(--sc-button-text-border-color);
+    --_default-text: var(--sc-button-text-text-color);
+    --_hover-background: var(--sc-button-text-hover-background-color);
+    --_hover-border: var(--sc-button-text-hover-border-color);
+    --_hover-text: var(--sc-button-text-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-text-press-background-color);
+    --_press-border: var(--sc-button-text-press-border-color);
+    --_press-text: var(--sc-button-text-press-text-color);
+    --_select-background: var(--sc-button-text-select-background-color);
+    --_select-border: var(--sc-button-text-select-border-color);
+    --_select-text: var(--sc-button-text-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='text'][data-tone='error'] {
+    --_default-background: var(--sc-button-text-error-background-color);
+    --_default-border: var(--sc-button-text-error-border-color);
+    --_default-text: var(--sc-button-text-error-text-color);
+    --_hover-background: var(--sc-button-text-error-hover-background-color);
+    --_hover-border: var(--sc-button-text-error-hover-border-color);
+    --_hover-text: var(--sc-button-text-error-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-text-error-press-background-color);
+    --_press-border: var(--sc-button-text-error-press-border-color);
+    --_press-text: var(--sc-button-text-error-press-text-color);
+    --_select-background: var(--sc-button-text-error-select-background-color);
+    --_select-border: var(--sc-button-text-error-select-border-color);
+    --_select-text: var(--sc-button-text-error-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='text'][data-tone='alert'] {
+    --_default-background: var(--sc-button-text-alert-background-color);
+    --_default-border: var(--sc-button-text-alert-border-color);
+    --_default-text: var(--sc-button-text-alert-text-color);
+    --_hover-background: var(--sc-button-text-alert-hover-background-color);
+    --_hover-border: var(--sc-button-text-alert-hover-border-color);
+    --_hover-text: var(--sc-button-text-alert-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-text-alert-press-background-color);
+    --_press-border: var(--sc-button-text-alert-press-border-color);
+    --_press-text: var(--sc-button-text-alert-press-text-color);
+    --_select-background: var(--sc-button-text-alert-select-background-color);
+    --_select-border: var(--sc-button-text-alert-select-border-color);
+    --_select-text: var(--sc-button-text-alert-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='text'][data-tone='success'] {
+    --_default-background: var(--sc-button-text-success-background-color);
+    --_default-border: var(--sc-button-text-success-border-color);
+    --_default-text: var(--sc-button-text-success-text-color);
+    --_hover-background: var(--sc-button-text-success-hover-background-color);
+    --_hover-border: var(--sc-button-text-success-hover-border-color);
+    --_hover-text: var(--sc-button-text-success-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-text-success-press-background-color);
+    --_press-border: var(--sc-button-text-success-press-border-color);
+    --_press-text: var(--sc-button-text-success-press-text-color);
+    --_select-background: var(--sc-button-text-success-select-background-color);
+    --_select-border: var(--sc-button-text-success-select-border-color);
+    --_select-text: var(--sc-button-text-success-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='text']:disabled {
+    --_default-background: var(--sc-button-text-disabled-background-color);
+    --_default-border: var(--sc-button-text-disabled-border-color);
+    --_default-text: var(--sc-button-text-disabled-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='link'][data-tone='default'] {
+    --_default-background: var(--sc-button-link-background-color);
+    --_default-border: var(--sc-button-link-border-color);
+    --_default-text: var(--sc-button-link-text-color);
+    --_hover-background: var(--sc-button-link-hover-background-color);
+    --_hover-border: var(--sc-button-link-hover-border-color);
+    --_hover-text: var(--sc-button-link-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-link-press-background-color);
+    --_press-border: var(--sc-button-link-press-border-color);
+    --_press-text: var(--sc-button-link-press-text-color);
+    --_select-background: var(--sc-button-link-select-background-color);
+    --_select-border: var(--sc-button-link-select-border-color);
+    --_select-text: var(--sc-button-link-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='link'][data-tone='error'] {
+    --_default-background: var(--sc-button-link-error-background-color);
+    --_default-border: var(--sc-button-link-error-border-color);
+    --_default-text: var(--sc-button-link-error-text-color);
+    --_hover-background: var(--sc-button-link-error-hover-background-color);
+    --_hover-border: var(--sc-button-link-error-hover-border-color);
+    --_hover-text: var(--sc-button-link-error-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-link-error-press-background-color);
+    --_press-border: var(--sc-button-link-error-press-border-color);
+    --_press-text: var(--sc-button-link-error-press-text-color);
+    --_select-background: var(--sc-button-link-error-select-background-color);
+    --_select-border: var(--sc-button-link-error-select-border-color);
+    --_select-text: var(--sc-button-link-error-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='link'][data-tone='alert'] {
+    --_default-background: var(--sc-button-link-alert-background-color);
+    --_default-border: var(--sc-button-link-alert-border-color);
+    --_default-text: var(--sc-button-link-alert-text-color);
+    --_hover-background: var(--sc-button-link-alert-hover-background-color);
+    --_hover-border: var(--sc-button-link-alert-hover-border-color);
+    --_hover-text: var(--sc-button-link-alert-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-link-alert-press-background-color);
+    --_press-border: var(--sc-button-link-alert-press-border-color);
+    --_press-text: var(--sc-button-link-alert-press-text-color);
+    --_select-background: var(--sc-button-link-alert-select-background-color);
+    --_select-border: var(--sc-button-link-alert-select-border-color);
+    --_select-text: var(--sc-button-link-alert-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='link'][data-tone='success'] {
+    --_default-background: var(--sc-button-link-success-background-color);
+    --_default-border: var(--sc-button-link-success-border-color);
+    --_default-text: var(--sc-button-link-success-text-color);
+    --_hover-background: var(--sc-button-link-success-hover-background-color);
+    --_hover-border: var(--sc-button-link-success-hover-border-color);
+    --_hover-text: var(--sc-button-link-success-hover-text-color, var(--_default-text));
+    --_press-background: var(--sc-button-link-success-press-background-color);
+    --_press-border: var(--sc-button-link-success-press-border-color);
+    --_press-text: var(--sc-button-link-success-press-text-color);
+    --_select-background: var(--sc-button-link-success-select-background-color);
+    --_select-border: var(--sc-button-link-success-select-border-color);
+    --_select-text: var(--sc-button-link-success-select-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='link']:disabled {
+    --_default-background: var(--sc-button-link-disabled-background-color);
+    --_default-border: var(--sc-button-link-disabled-border-color);
+    --_default-text: var(--sc-button-link-disabled-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='primary'][data-tone='default'][data-inverse='true'] {
+    --_default-background: var(--sc-button-primary-inverse-background-color);
+    --_default-border: var(--sc-button-primary-inverse-border-color);
+    --_default-text: var(--sc-button-primary-inverse-text-color);
+    --_hover-background: var(--sc-button-primary-inverse-hover-background-color);
+    --_hover-border: var(--sc-button-primary-inverse-hover-border-color);
+    --_hover-text: var(--sc-button-primary-inverse-hover-text-color);
+    --_press-background: var(--sc-button-primary-inverse-press-background-color);
+    --_press-border: var(--sc-button-primary-inverse-press-border-color);
+    --_press-text: var(--sc-button-primary-inverse-press-text-color);
+  }
+
+  [data-ratan-component='Button'][data-variant='secondary'][data-tone='default'][data-inverse='true'] {
+    --_default-background: var(--sc-button-secondary-inverse-background-color);
+    --_default-border: var(--sc-button-secondary-inverse-border-color);
+    --_default-text: var(--sc-button-secondary-inverse-text-color);
+    --_hover-background: var(--sc-button-secondary-inverse-hover-background-color);
+    --_hover-border: var(--sc-button-secondary-inverse-hover-border-color);
+    --_hover-text: var(--sc-button-secondary-inverse-hover-text-color);
+    --_press-background: var(--sc-button-secondary-inverse-press-background-color);
+    --_press-border: var(--sc-button-secondary-inverse-press-border-color);
+    --_press-text: var(--sc-button-secondary-inverse-press-text-color);
+  }
+
+}

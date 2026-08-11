@@ -13,11 +13,14 @@ export default defineConfig({
     // verification exercises the portal's production React 19 runtime.
     dedupe: ['react', 'react-dom'],
     alias: {
-      '@fm/ratan-design-webkit/react': fileURLToPath(
-        new URL('../../packages/ratan-design-webkit/src/wrapper/ReactWrapper.ts', import.meta.url),
+      '@scdevkit/webkit/react': fileURLToPath(
+        new URL(
+          '../../../../../sc-dev-web/sc-dev-web/src/wrapper/ReactWrapper.ts',
+          import.meta.url,
+        ),
       ),
-      '@fm/ratan-design-webkit/elements': fileURLToPath(
-        new URL('../../packages/ratan-design-webkit/elements/index.ts', import.meta.url),
+      '@scdevkit/webkit/elements': fileURLToPath(
+        new URL('../../../../../sc-dev-web/sc-dev-web/elements/index.ts', import.meta.url),
       ),
       'react-dom': `${rootNodeModules}react-dom`,
       react: `${rootNodeModules}react`,
@@ -26,6 +29,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    maxWorkers: 1,
     setupFiles: ['./src/vitest.setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
@@ -34,7 +38,13 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}'],
       // Federation's browser-only runtime initialization is exercised by the
       // Playwright portal suite; its contract helpers remain unit tested.
-      exclude: ['src/index.tsx', 'src/bootstrap.tsx', 'src/test-setup.ts', 'src/test-fixtures.ts', 'src/remote.ts'],
+      exclude: [
+        'src/index.tsx',
+        'src/bootstrap.tsx',
+        'src/test-setup.ts',
+        'src/test-fixtures.ts',
+        'src/remote.ts',
+      ],
       thresholds: { lines: 90, branches: 80, functions: 90, statements: 90 },
     },
   },
