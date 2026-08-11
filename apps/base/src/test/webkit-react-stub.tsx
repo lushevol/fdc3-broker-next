@@ -15,7 +15,13 @@ function createComponent(tagName: string): React.ComponentType<WebKitProps> {
       {
         ...rest,
         ref,
-        role: rest.role ?? (tagName === 'sc-button' ? 'button' : undefined),
+        role:
+          rest.role ??
+          (tagName === 'sc-button'
+            ? 'button'
+            : tagName === 'sc-modal'
+              ? 'dialog'
+              : undefined),
         onInput: onScInput
           ? (event: React.FormEvent<HTMLInputElement>) =>
               onScInput(new CustomEvent('sc-input', { detail: { value: event.currentTarget.value } }))

@@ -10,15 +10,15 @@ type SearchableTile = Tiles['tiles'][number] & { description?: string };
 const Menu: React.FC<DrawerProps> = (props: DrawerProps): ReactElement => {
   const isNewLayout = useIsNewLayout();
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('All applications');
+  const [category, setCategory] = useState('All');
   const categories = useMemo(
-    () => ['All applications', ...(props.drawers ?? []).map((drawer) => drawer.label)],
+    () => ['All', ...(props.drawers ?? []).map((drawer) => drawer.label)],
     [props.drawers],
   );
   const filteredDrawers = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase();
     return (props.drawers ?? [])
-      .filter((drawer) => category === 'All applications' || drawer.label === category)
+      .filter((drawer) => category === 'All' || drawer.label === category)
       .map((drawer) => ({
         ...drawer,
         tiles: drawer.tiles.filter((tile) => {
@@ -64,31 +64,44 @@ const Menu: React.FC<DrawerProps> = (props: DrawerProps): ReactElement => {
   return (
     <ErrorBoundry>
       <div className="tile-library" data-testid="tile-library">
-        <div className="tile-library-toolbar">
+        <div className="tile-library-header">
           <div>
-            <ScTitle level={2}>Add an application</ScTitle>
-            <ScParagraph>Find a tile by title or description, then add it to this workspace.</ScParagraph>
+            <ScTitle level={2}>Tile Library</ScTitle>
+            <ScParagraph>Open an application in a new tab</ScParagraph>
           </div>
+          <ScButton
+            type="text"
+            role="button"
+            aria-label="Close Tile Library"
+            title="Close Tile Library"
+            className="tile-library-close"
+            onClick={() => props.toggleDrawer(false)()}
+          >
+            <span className="tile-library-close-icon" aria-hidden="true" />
+          </ScButton>
+        </div>
+        <div className="tile-library-toolbar">
           <ScTextInput
             label="Search tiles"
             aria-label="Search tiles"
-            placeholder="Search by title or description"
+            placeholder="Search tiles..."
             value={search}
             onScInput={(event: CustomEvent<{ value?: string }>) => setSearch(event.detail.value ?? '')}
           />
-        </div>
-        <div className="tile-library-categories" aria-label="Tile categories">
-          {categories.map((item) => (
-            <ScButton
-              key={item}
-              type={category === item ? 'primary' : 'text'}
-              selectable="toggle"
-              selected={category === item}
-              onClick={() => setCategory(item)}
-            >
-              {item}
-            </ScButton>
-          ))}
+          <div className="tile-library-categories" aria-label="Tile categories">
+            {categories.map((item) => (
+              <ScButton
+                key={item}
+                type={category === item ? 'primary' : 'text'}
+                role="button"
+                selectable="toggle"
+                selected={category === item}
+                onClick={() => setCategory(item)}
+              >
+                {item}
+              </ScButton>
+            ))}
+          </div>
         </div>
         <div className="tile-library-results">
           {filteredDrawers.length ? (

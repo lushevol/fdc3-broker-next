@@ -30,8 +30,8 @@ export const Item = ({ tile, ...props }: MenuItemProps & { tile: TileProps }) =>
         {tile.disabled ? (
           <ScBadge type="text" color="grey" label="Unavailable" />
         ) : (
-          <ScButton type="secondary" onClick={onClick} aria-label={`Add ${tile.title}`}>
-            Add
+          <ScButton type="secondary" role="button" onClick={onClick} aria-label={`Open ${tile.title}`}>
+            Open
           </ScButton>
         )}
       </div>

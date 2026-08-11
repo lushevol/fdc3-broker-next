@@ -3,7 +3,7 @@ import ErrorBoundry from '../../components/ErrorBoundry';
 import { useIsNewLayout } from '../../hooks/model/root';
 import type { DrawerProps } from './common/interface';
 import Menu from './Menu';
-import { ScDialog } from '../webkit';
+import { ScModal } from '../webkit';
 
 /**
  * Drawer Component
@@ -37,15 +37,16 @@ const Drawer: React.FC<DrawerProps> = (props: DrawerProps): ReactElement => {
   return (
     <ErrorBoundry>
       <div className="base-webkit-scope">
-        <ScDialog
+        <ScModal
           open={props.anchor}
-          label="Tile Library"
-          role="dialog"
+          size="lg"
+          no-header
+          no-padding
           aria-label="Tile Library"
           onScHide={() => props.toggleDrawer(false)()}
         >
           <Menu {...props} />
-        </ScDialog>
+        </ScModal>
       </div>
     </ErrorBoundry>
   );

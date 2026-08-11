@@ -69,7 +69,7 @@ describe('Base WebKit portal surfaces', () => {
     );
 
     expect(screen.getByRole('complementary', { name: 'Tile Options' })).toBeInTheDocument();
-    expect(document.querySelector('sc-dialog')).not.toBeInTheDocument();
+    expect(document.querySelector('sc-modal')).not.toBeInTheDocument();
   });
 
   it('opens the Tile Library and adds a matching application', () => {
@@ -85,7 +85,7 @@ describe('Base WebKit portal surfaces', () => {
 
     expect(screen.getByRole('dialog', { name: 'Tile Library' })).toBeInTheDocument();
     expect(screen.getByText('Monitor intraday liquidity and funding exposure.')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Add Cashflow' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
     expect(addTile).toHaveBeenCalledWith(expect.objectContaining({ title: 'Cashflow Liquidity' }));
   });
 

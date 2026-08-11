@@ -2,7 +2,7 @@ import React, { type ReactElement } from 'react';
 import json from '../../../package.json';
 import Profile from '../Profile';
 import { useIsNewLayout } from '../../hooks/model/root';
-import { ScAvatar, ScDivider, ScMenu, ScMenuItem, ScParagraph } from '../webkit';
+import { ScAvatar } from '../webkit';
 import type { AvatarProps } from './common/interface';
 import { classes, PREFIX } from './common/style';
 import useController from './common/useController';
@@ -13,7 +13,6 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
     anchorElUser,
     openProfile,
     handleOpenUserMenu,
-    handleCloseUserMenu,
     onBeforeLogout,
     handleOpenUserProfile,
     handleCloseUserProfile,
@@ -59,41 +58,17 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
     <div className="base-webkit-scope avatar-menu" data-testid={`${PREFIX}`}>
       <ScAvatar
         id={displayName}
-        size="sm"
+        size="md"
+        src={`https://leap.standardchartered.com/tsp-profile/pics/${store?.user?.userId}/photo_lg.jpg`}
         clickable
         role="button"
-        aria-label="Open user menu"
-        aria-expanded={Boolean(anchorElUser)}
+        aria-label="Open user profile"
+        title="Open user profile"
         className={classes.root}
-        onClick={handleOpenUserMenu}
+        onClick={handleOpenUserProfile}
       >
         {initials}
       </ScAvatar>
-      {anchorElUser ? (
-        <ScMenu
-          aria-label="User actions"
-          onScSelect={(event: CustomEvent<{ item: { value: string } }>) => {
-            const action = event.detail.item.value;
-            if (action === 'profile') handleOpenUserProfile();
-            if (action === 'logout') onBeforeLogout();
-          }}
-          onBlur={handleCloseUserMenu}
-        >
-          <ScMenuItem value="profile" role="menuitem" data-testid={`${PREFIX}_Profile`}>
-            Profile
-            <span slot="description">View account details and permissions</span>
-          </ScMenuItem>
-          <ScMenuItem value="logout" role="menuitem" data-testid={`${PREFIX}_Logout`}>
-            Logout
-          </ScMenuItem>
-          <ScDivider />
-          <ScMenuItem value="version" role="menuitem" disabled data-testid={`${PREFIX}_Version`}>
-            <ScParagraph>
-              Root Config {store.rootVersion ?? '—'} · Base {json.version}
-            </ScParagraph>
-          </ScMenuItem>
-        </ScMenu>
-      ) : null}
       {openProfile && <Profile open={openProfile} onClose={handleCloseUserProfile} />}
     </div>
   );

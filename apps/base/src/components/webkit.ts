@@ -8,6 +8,7 @@ export const ScButton = createComponent('sc-button');
 export const ScCard = createComponent('sc-card');
 export const ScDialog = createComponent('sc-dialog');
 export const ScDivider = createComponent('sc-divider');
+export const ScModal = createComponent('sc-modal');
 export const ScMenu = createComponent('sc-menu');
 export const ScMenuItem = createComponent('sc-menu-item');
 export const ScParagraph = createComponent('sc-paragraph');

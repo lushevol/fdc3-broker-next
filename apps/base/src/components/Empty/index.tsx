@@ -42,7 +42,7 @@ const Empty: React.FC = (): ReactElement => {
       </span>
       <ScTitle level={2}>Your workspace is empty</ScTitle>
       <ScParagraph>Browse the Tile Library to add an application to this workspace.</ScParagraph>
-      <ScButton type="primary" onClick={onClick} data-testid="empty_Find_tile">
+      <ScButton type="primary" role="button" onClick={onClick} data-testid="empty_Find_tile">
         Browse Tile Library
       </ScButton>
     </section>

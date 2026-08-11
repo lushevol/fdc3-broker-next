@@ -5,7 +5,7 @@ import { useContext } from '../../hooks/provider';
 import { useIsNewLayout } from '../../hooks/model/root';
 import useDispatcher from '../../hooks/dispathcer';
 import { DateTimeFormat } from '../../utils/locale';
-import { ScBadge, ScButton, ScCard, ScDialog, ScDivider, ScParagraph, ScTitle } from '../webkit';
+import { ScAvatar, ScBadge, ScButton, ScCard, ScDivider, ScModal, ScParagraph, ScTitle } from '../webkit';
 import type { ProfileProps } from './common/interface';
 import { PREFIX } from './common/style';
 
@@ -57,22 +57,39 @@ const Profile: FC<ProfileProps> = ({ open, onClose }) => {
 
   return (
     <div className="base-webkit-scope">
-      <ScDialog
+      <ScModal
         open={open}
-        label="User profile"
-        role="dialog"
+        size="sm"
+        no-header
+        no-padding
         aria-label="User profile"
         onScHide={onClose}
       >
         <div className="profile-modal" data-testid={`${PREFIX}`}>
+          <ScButton
+            type="text"
+            role="button"
+            aria-label="Close User Profile"
+            title="Close User Profile"
+            className="profile-modal-close"
+            onClick={onClose}
+          >
+            <span className="profile-close-icon" aria-hidden="true" />
+          </ScButton>
           <div className="profile-header">
             <div className="profile-identity">
-              <span className="profile-avatar" aria-hidden="true">
+              <ScAvatar
+                id={fullName}
+                size="lg"
+                src={`https://leap.standardchartered.com/tsp-profile/pics/${user?.userId}/photo_lg.jpg`}
+                aria-label={fullName}
+                className="profile-avatar"
+              >
                 {fullName.slice(0, 1).toUpperCase()}
-              </span>
+              </ScAvatar>
               <div>
                 <ScTitle level={2}>{fullName}</ScTitle>
-                <ScParagraph>Account details and access for this session</ScParagraph>
+                <ScParagraph>{user?.oud?.title ?? 'Account details and access for this session'}</ScParagraph>
               </div>
             </div>
           </div>
@@ -109,6 +126,7 @@ const Profile: FC<ProfileProps> = ({ open, onClose }) => {
                 <ScButton
                   key={option}
                   type={timeType === option ? 'primary' : 'text'}
+                  role="button"
                   selectable="toggle"
                   selected={timeType === option}
                   onClick={() => selectTimeType(option)}
@@ -133,7 +151,7 @@ const Profile: FC<ProfileProps> = ({ open, onClose }) => {
             </div>
           </ScCard>
         </div>
-      </ScDialog>
+      </ScModal>
     </div>
   );
 };
