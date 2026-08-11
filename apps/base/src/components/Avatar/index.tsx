@@ -6,6 +6,7 @@ import { ScAvatar } from '../webkit';
 import type { AvatarProps } from './common/interface';
 import { classes, PREFIX } from './common/style';
 import useController from './common/useController';
+import prototypeAvatar from '../Profile/assets/prototype-avatar.png';
 
 const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
   const {
@@ -59,7 +60,7 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
       <ScAvatar
         id={displayName}
         size="md"
-        src={`https://leap.standardchartered.com/tsp-profile/pics/${store?.user?.userId}/photo_lg.jpg`}
+        src={prototypeAvatar}
         clickable
         role="button"
         aria-label="Open user profile"
@@ -69,7 +70,16 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
       >
         {initials}
       </ScAvatar>
-      {openProfile && <Profile open={openProfile} onClose={handleCloseUserProfile} />}
+      {openProfile && (
+        <Profile
+          open={openProfile}
+          onClose={handleCloseUserProfile}
+          onLogout={() => {
+            handleCloseUserProfile();
+            onBeforeLogout();
+          }}
+        />
+      )}
     </div>
   );
 };

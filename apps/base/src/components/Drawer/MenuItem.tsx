@@ -2,7 +2,7 @@ import React, { type ReactElement } from 'react';
 import type { MenuItemProps, Tile as TileProps } from './common/interface';
 import { useIsNewLayout } from '../../hooks/model/root';
 import useController from './common/MenuItem.useController';
-import { ScBadge, ScButton, ScCard, ScParagraph, ScTitle } from '../webkit';
+import { ScBadge, ScButton } from '../webkit';
 
 const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_menuItem`;
 
@@ -13,29 +13,30 @@ export const Item = ({ tile, ...props }: MenuItemProps & { tile: TileProps }) =>
   const libraryTile = tile as LibraryTile;
   const icon = libraryTile.imageLightTheme ?? libraryTile.imageDarkTheme;
   return (
-    <ScCard key={tile.tile ? tile.tile : tile.title} className="tile-library-card">
+    <article key={tile.tile ? tile.tile : tile.title} className="tile-library-card">
       <div className="tile-library-card-content">
-        {icon ? (
-          <img src={icon} alt="" className="tile-library-icon" />
-        ) : (
+        <div className="tile-library-card-heading">
           <span className="tile-library-icon" aria-hidden="true">
-            {tile.title.slice(0, 1).toUpperCase()}
+            <span>{tile.title.slice(0, 1).toUpperCase()}</span>
+            {icon && <img src={icon} alt="" onError={(event) => { event.currentTarget.hidden = true; }} />}
           </span>
-        )}
-        <ScTitle level={3}>{tile.title}</ScTitle>
-        {tile.subtitle && <ScParagraph>{tile.subtitle}</ScParagraph>}
-        <ScParagraph>
+          <div className="tile-library-card-title">
+            <h3>{tile.title}</h3>
+            {tile.subtitle && <p>{tile.subtitle}</p>}
+          </div>
+        </div>
+        <p className="tile-library-card-description">
           {libraryTile.description ?? `Open ${tile.title} in the current workspace.`}
-        </ScParagraph>
+        </p>
         {tile.disabled ? (
           <ScBadge type="text" color="grey" label="Unavailable" />
         ) : (
-          <ScButton type="secondary" role="button" onClick={onClick} aria-label={`Open ${tile.title}`}>
+          <ScButton type="primary" size="xs" noPill width="100%" role="button" onClick={onClick} aria-label={`Open ${tile.title}`}>
             Open
           </ScButton>
         )}
       </div>
-    </ScCard>
+    </article>
   );
 };
 
@@ -57,9 +58,9 @@ const MenuItem: React.FC<MenuItemProps> = (props: MenuItemProps): ReactElement =
 
   return (
     <section data-testid={`${PREFIX}`} className="tile-library-category" aria-labelledby={`tile-category-${props.menuItems.label}`}>
-      <ScTitle level={2} id={`tile-category-${props.menuItems.label}`}>
+      <h2 id={`tile-category-${props.menuItems.label}`}>
         {props.menuItems.label}
-      </ScTitle>
+      </h2>
       <div className="tile-library-grid">
         {props.menuItems.tiles.map((item) => (
           <Item key={item.tile || item.title} tile={item} {...props} />

@@ -1,9 +1,9 @@
-import React, { type ReactElement } from 'react';
+import React, { type ReactElement, useEffect, useRef } from 'react';
 import ErrorBoundry from '../../components/ErrorBoundry';
 import { useIsNewLayout } from '../../hooks/model/root';
 import type { DrawerProps } from './common/interface';
 import Menu from './Menu';
-import { ScModal } from '../webkit';
+import { ScModal, setScModalWidth } from '../webkit';
 
 /**
  * Drawer Component
@@ -24,6 +24,11 @@ import { ScModal } from '../webkit';
  */
 const Drawer: React.FC<DrawerProps> = (props: DrawerProps): ReactElement => {
   const isNewLayout = useIsNewLayout();
+  const modalRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (isNewLayout && props.anchor) setScModalWidth(modalRef.current, '64rem');
+  }, [isNewLayout, props.anchor]);
 
   if (!isNewLayout) {
     return props.anchor ? (
@@ -38,6 +43,7 @@ const Drawer: React.FC<DrawerProps> = (props: DrawerProps): ReactElement => {
     <ErrorBoundry>
       <div className="base-webkit-scope">
         <ScModal
+          ref={modalRef}
           open={props.anchor}
           size="lg"
           no-header

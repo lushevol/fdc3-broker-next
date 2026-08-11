@@ -2,7 +2,7 @@ import React, { type ReactElement, useMemo, useState } from 'react';
 import ErrorBoundry from '../ErrorBoundry';
 import { propsAddTile, type DrawerProps, type Tiles } from './common/interface';
 import { useIsNewLayout } from '../../hooks/model/root';
-import { ScButton, ScParagraph, ScTextInput, ScTitle } from '../webkit';
+import { ScButton, ScTextInput } from '../webkit';
 import MenuItem from './MenuItem';
 
 type SearchableTile = Tiles['tiles'][number] & { description?: string };
@@ -66,25 +66,29 @@ const Menu: React.FC<DrawerProps> = (props: DrawerProps): ReactElement => {
       <div className="tile-library" data-testid="tile-library">
         <div className="tile-library-header">
           <div>
-            <ScTitle level={2}>Tile Library</ScTitle>
-            <ScParagraph>Open an application in a new tab</ScParagraph>
+            <h2>Tile Library</h2>
+            <p>Open an application in a new tab</p>
           </div>
           <ScButton
             type="text"
+            size="xs"
             role="button"
             aria-label="Close Tile Library"
             title="Close Tile Library"
             className="tile-library-close"
             onClick={() => props.toggleDrawer(false)()}
           >
-            <span className="tile-library-close-icon" aria-hidden="true" />
+            <span className="webkit-close-glyph" aria-hidden="true">x</span>
           </ScButton>
         </div>
         <div className="tile-library-toolbar">
           <ScTextInput
-            label="Search tiles"
+            label=""
+            size="sm"
+            prefixIcon="search"
+            className="tile-library-search"
             aria-label="Search tiles"
-            placeholder="Search tiles..."
+            placeholder="Search tiles…"
             value={search}
             onScInput={(event: CustomEvent<{ value?: string }>) => setSearch(event.detail.value ?? '')}
           />
@@ -110,8 +114,8 @@ const Menu: React.FC<DrawerProps> = (props: DrawerProps): ReactElement => {
             ))
           ) : (
             <div className="tile-library-empty" role="status">
-              <ScTitle level={3}>No applications found</ScTitle>
-              <ScParagraph>Try a different search or category.</ScParagraph>
+              <h3>No applications found</h3>
+              <p>Try a different search or category.</p>
             </div>
           )}
         </div>

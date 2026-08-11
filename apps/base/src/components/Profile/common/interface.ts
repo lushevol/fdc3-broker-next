@@ -3,6 +3,7 @@ import type { Entity, Subject } from '../../../hooks/model/root';
 export interface ProfileProps {
   open: boolean;
   onClose: () => void;
+  onLogout?: () => void;
 }
 
 export interface RoleProps {

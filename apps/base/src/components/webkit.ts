@@ -15,3 +15,12 @@ export const ScParagraph = createComponent('sc-paragraph');
 export const ScSpinner = createComponent('sc-spinner');
 export const ScTextInput = createComponent('sc-text-input');
 export const ScTitle = createComponent('sc-title');
+
+/** ScModal exposes preset widths only; override its nested Shoelace panel for prototype-matched surfaces. */
+export const setScModalWidth = (modal: HTMLElement | null, width: string) => {
+  if (!modal) return;
+  void customElements.whenDefined('sc-modal').then(() => {
+    const dialog = modal.shadowRoot?.querySelector<HTMLElement>('sl-dialog');
+    dialog?.style.setProperty('--width', width, 'important');
+  });
+};

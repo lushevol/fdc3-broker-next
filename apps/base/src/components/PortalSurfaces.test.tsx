@@ -96,8 +96,10 @@ describe('Base WebKit portal surfaces', () => {
     expect(screen.getByText('BANK001')).toBeInTheDocument();
     expect(screen.getByText('ada@example.com')).toBeInTheDocument();
     expect(document.querySelector('sc-badge[label="Trader"]')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Local time' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Local' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'UTC' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Logout' })).toBeInTheDocument();
+    expect(screen.queryByText('Signed in')).not.toBeInTheDocument();
   });
 
   it('provides actionable empty and loading workspace states', () => {
