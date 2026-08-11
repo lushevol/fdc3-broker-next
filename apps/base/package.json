@@ -119,6 +119,7 @@
     "@mui/x-date-pickers": "^6.18.7",
     "@mui/x-date-pickers-pro": "^6.18.7",
     "@openfin/core": "^35.79.5",
+    "@scdevkit/webkit": "2.0.5",
     "ai": "^4.0.0",
     "axios": "^1.8.2",
     "buffer": "^6.0.3",

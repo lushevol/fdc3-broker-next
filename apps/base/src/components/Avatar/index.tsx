@@ -1,14 +1,10 @@
-import AvatarMui from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import MenuItem from '@mui/material/MenuItem';
-import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
-import React, { type ReactElement, useState, useCallback } from 'react';
+import React, { type ReactElement } from 'react';
 import json from '../../../package.json';
 import Profile from '../Profile';
+import { useIsNewLayout } from '../../hooks/model/root';
+import { ScAvatar, ScDivider, ScMenu, ScMenuItem, ScParagraph } from '../webkit';
 import type { AvatarProps } from './common/interface';
-import Root, { classes, MenuStyled, PREFIX } from './common/style';
+import { classes, PREFIX } from './common/style';
 import useController from './common/useController';
 
 const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
@@ -22,89 +18,84 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
     handleOpenUserProfile,
     handleCloseUserProfile,
   } = useController(props);
+  const isNewLayout = useIsNewLayout();
+  const displayName = store?.user?.fullName ?? store?.user?.userId ?? 'User';
+  const initials = displayName
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
-  // Track image loading error to prevent console errors
-  const [imageError, setImageError] = useState(false);
-
-  // Get user initials for fallback avatar
-  const userInitials = store?.user?.fullName
-    ? store.user.fullName
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
-    : store?.user?.userId?.slice(0, 2).toUpperCase() || '?';
-
-  const handleImageError = useCallback(() => {
-    setImageError(true);
-  }, []);
+  if (!isNewLayout) {
+    return (
+      <div data-testid={`${PREFIX}`}>
+        <button
+          type="button"
+          data-testid={`${PREFIX}_IconButton`}
+          aria-label="Open user menu"
+          aria-expanded={Boolean(anchorElUser)}
+          onClick={handleOpenUserMenu}
+        >
+          {initials}
+        </button>
+        {anchorElUser && (
+          <div role="menu" aria-label="User actions">
+            <button type="button" data-testid={`${PREFIX}_Profile`} onClick={handleOpenUserProfile}>
+              Profile
+            </button>
+            <button type="button" data-testid={`${PREFIX}_Logout`} onClick={onBeforeLogout}>
+              Logout
+            </button>
+            <span data-testid={`${PREFIX}_Version`}>Base {json.version}</span>
+          </div>
+        )}
+        {openProfile && <Profile open={openProfile} onClose={handleCloseUserProfile} />}
+      </div>
+    );
+  }
 
   return (
-    <>
-      <Root className={classes.root} data-testid={`${PREFIX}`}>
-        <Tooltip title="User Profiles">
-          <IconButton
-            onClick={handleOpenUserMenu}
-            sx={{ p: 0 }}
-            data-testid={`${PREFIX}_IconButton`}
-          >
-            <AvatarMui
-              className={classes.img}
-              alt={store?.user?.fullName ?? store?.user?.userId ?? 'User'}
-              onError={handleImageError}
-            >
-              {store?.user?.userId ?? <></>}
-            </AvatarMui>
-          </IconButton>
-        </Tooltip>
-        <MenuStyled
-          sx={{ mt: '35px' }}
-          id="menu-appbar-avatar"
-          anchorEl={anchorElUser}
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
+    <div className="base-webkit-scope avatar-menu" data-testid={`${PREFIX}`}>
+      <ScAvatar
+        id={displayName}
+        size="sm"
+        clickable
+        role="button"
+        aria-label="Open user menu"
+        aria-expanded={Boolean(anchorElUser)}
+        className={classes.root}
+        onClick={handleOpenUserMenu}
+      >
+        {initials}
+      </ScAvatar>
+      {anchorElUser ? (
+        <ScMenu
+          aria-label="User actions"
+          onScSelect={(event: CustomEvent<{ item: { value: string } }>) => {
+            const action = event.detail.item.value;
+            if (action === 'profile') handleOpenUserProfile();
+            if (action === 'logout') onBeforeLogout();
           }}
-          keepMounted
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          open={Boolean(anchorElUser)}
-          onClose={handleCloseUserMenu}
+          onBlur={handleCloseUserMenu}
         >
-          <MenuItem
-            data-testid={`${PREFIX}_Profile`}
-            onClick={handleOpenUserProfile}
-            sx={{ flexDirection: 'column', alignItems: 'start' }}
-          >
-            <Typography display="block">{store?.user?.fullName ?? store?.user?.userId}</Typography>
-            <Typography variant="caption" display="block" color="InactiveCaptionText">
-              Click to view user profile details
-            </Typography>
-          </MenuItem>
-          <Divider />
-          <MenuItem onClick={onBeforeLogout} data-testid={`${PREFIX}_Logout`}>
-            <Typography display="block">Logout</Typography>
-          </MenuItem>
-          <Divider />
-          <MenuItem
-            data-testid={`${PREFIX}_Version`}
-            className={classes.disable}
-            sx={{ flexDirection: 'column', alignItems: 'start' }}
-          >
-            <Typography variant="caption" display="block" color="InactiveCaptionText">
-              Root Config Version: {store.rootVersion}
-            </Typography>
-            <Typography variant="caption" display="block" color="InactiveCaptionText">
-              Base Container Version: {json.version}
-            </Typography>
-          </MenuItem>
-        </MenuStyled>
-      </Root>
+          <ScMenuItem value="profile" role="menuitem" data-testid={`${PREFIX}_Profile`}>
+            Profile
+            <span slot="description">View account details and permissions</span>
+          </ScMenuItem>
+          <ScMenuItem value="logout" role="menuitem" data-testid={`${PREFIX}_Logout`}>
+            Logout
+          </ScMenuItem>
+          <ScDivider />
+          <ScMenuItem value="version" role="menuitem" disabled data-testid={`${PREFIX}_Version`}>
+            <ScParagraph>
+              Root Config {store.rootVersion ?? '—'} · Base {json.version}
+            </ScParagraph>
+          </ScMenuItem>
+        </ScMenu>
+      ) : null}
       {openProfile && <Profile open={openProfile} onClose={handleCloseUserProfile} />}
-    </>
+    </div>
   );
 };
 

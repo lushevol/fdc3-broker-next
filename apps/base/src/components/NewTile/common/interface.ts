@@ -1,3 +1,3 @@
 export interface NewTileProps {
-  toggleDrawer: Function;
+  toggleDrawer: (open: boolean) => () => void;
 }

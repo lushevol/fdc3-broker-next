@@ -1,0 +1,208 @@
+.base-webkit-scope {
+  --base-space-1: 0.25rem;
+  --base-space-2: 0.5rem;
+  --base-space-3: 0.75rem;
+  --base-space-4: 1rem;
+  --base-space-6: 1.5rem;
+  --base-border: color-mix(in srgb, currentColor 16%, transparent);
+  --base-muted: color-mix(in srgb, currentColor 66%, transparent);
+  color: inherit;
+}
+
+.base-webkit-scope sc-dialog {
+  --width: min(64rem, calc(100vw - 2rem));
+}
+
+.base-webkit-scope .tile-library {
+  display: grid;
+  gap: var(--base-space-4);
+  min-width: min(100%, 52rem);
+  padding: var(--base-space-2) 0 var(--base-space-4);
+}
+
+.base-webkit-scope .tile-library-toolbar,
+.base-webkit-scope .profile-header,
+.base-webkit-scope .profile-preference {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--base-space-3);
+  flex-wrap: wrap;
+}
+
+.base-webkit-scope .tile-library-toolbar sc-text-input {
+  flex: 1 1 18rem;
+}
+
+.base-webkit-scope .tile-library-categories {
+  display: flex;
+  gap: var(--base-space-2);
+  overflow-x: auto;
+  padding-block: var(--base-space-1);
+}
+
+.base-webkit-scope .tile-library-results {
+  display: grid;
+  gap: var(--base-space-6);
+  max-height: min(62vh, 40rem);
+  overflow-y: auto;
+  padding-right: var(--base-space-2);
+}
+
+.base-webkit-scope .tile-library-category {
+  display: grid;
+  gap: var(--base-space-3);
+}
+
+.base-webkit-scope .tile-library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--base-space-3);
+}
+
+.base-webkit-scope .tile-library-card {
+  min-width: 0;
+}
+
+.base-webkit-scope .tile-library-card-content {
+  display: grid;
+  gap: var(--base-space-2);
+  padding: var(--base-space-4);
+}
+
+.base-webkit-scope .tile-library-card-content sc-title,
+.base-webkit-scope .tile-library-card-content sc-paragraph,
+.base-webkit-scope .profile-card sc-title,
+.base-webkit-scope .profile-card sc-paragraph {
+  margin: 0;
+}
+
+.base-webkit-scope .tile-library-icon,
+.base-webkit-scope .profile-avatar {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.base-webkit-scope .tile-library-empty,
+.base-webkit-scope .empty-workspace,
+.base-webkit-scope .splash-surface {
+  display: grid;
+  justify-items: center;
+  gap: var(--base-space-3);
+  text-align: center;
+}
+
+.base-webkit-scope .tile-library-empty {
+  padding: var(--base-space-6);
+}
+
+.base-webkit-scope .profile-modal {
+  display: grid;
+  gap: var(--base-space-4);
+  min-width: min(100%, 40rem);
+  max-height: min(70vh, 48rem);
+  overflow-y: auto;
+}
+
+.base-webkit-scope .profile-header {
+  align-items: flex-start;
+}
+
+.base-webkit-scope .profile-identity {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--base-space-3);
+  align-items: center;
+}
+
+.base-webkit-scope .profile-avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+}
+
+.base-webkit-scope .profile-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--base-space-3) var(--base-space-6);
+  margin: 0;
+}
+
+.base-webkit-scope .profile-details div {
+  display: grid;
+  gap: var(--base-space-1);
+  min-width: 0;
+}
+
+.base-webkit-scope .profile-details dt {
+  color: var(--base-muted);
+  font-size: 0.75rem;
+}
+
+.base-webkit-scope .profile-details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.base-webkit-scope .profile-roles {
+  display: flex;
+  gap: var(--base-space-2);
+  flex-wrap: wrap;
+}
+
+.base-webkit-scope .avatar-menu {
+  position: relative;
+}
+
+.base-webkit-scope .avatar-menu sc-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + var(--base-space-2));
+  right: 0;
+  min-width: 14rem;
+  padding: var(--base-space-1);
+  background: var(--sc-color-surface-raised, Canvas);
+  border: 1px solid var(--base-border);
+}
+
+.base-webkit-scope .empty-workspace {
+  align-content: center;
+  min-height: min(60vh, 32rem);
+  padding: var(--base-space-6);
+}
+
+.base-webkit-scope .empty-workspace-mark {
+  display: grid;
+  width: 4rem;
+  height: 4rem;
+  place-items: center;
+  border: 1px solid var(--base-border);
+  border-radius: 1rem;
+  color: currentColor;
+  font-size: 2rem;
+}
+
+.base-webkit-scope .splash-surface {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  align-content: center;
+  background: color-mix(in srgb, Canvas 88%, transparent);
+  backdrop-filter: blur(0.25rem);
+}
+
+@media (max-width: 48rem) {
+  .base-webkit-scope .profile-details {
+    grid-template-columns: 1fr;
+  }
+
+  .base-webkit-scope .tile-library {
+    min-width: 0;
+  }
+}

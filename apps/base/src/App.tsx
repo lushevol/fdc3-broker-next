@@ -13,6 +13,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs';
 import type React from 'react';
 import type { ReactElement } from 'react';
 import { FDC3Integration } from './fdc3/FDC3Integration';
+import './components/webkit.css';
 import Provider from './hooks/provider';
 import Routing from './routing';
 import ThemeProvider from './theme';

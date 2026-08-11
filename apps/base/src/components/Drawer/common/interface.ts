@@ -5,7 +5,7 @@ export type { Tile, Tiles } from '../../../hooks/model/root';
 
 export interface DrawerProps {
   anchor: boolean;
-  toggleDrawer: Function;
+  toggleDrawer: (open: boolean) => () => void;
   addTile: (item: Container) => void;
   drawers: Tiles[] | [];
 }
@@ -29,5 +29,5 @@ export interface MenuItemProps {
 export interface RatanFilterItem {
   field: string;
   operator: string;
-  values: any;
+  values: unknown;
 }

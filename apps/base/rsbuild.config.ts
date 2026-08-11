@@ -110,6 +110,7 @@ export default defineConfig({
         library: {
           type: 'system',
         },
+        publicPath: envMode === 'development' ? `http://localhost:${port}/` : 'auto',
         chunkFilename: '[chunkhash].[name].base.js',
       },
     },

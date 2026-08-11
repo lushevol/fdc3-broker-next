@@ -1,20 +1,21 @@
-import CallMadeIcon from '@mui/icons-material/CallMade';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 import React, { type ReactElement } from 'react';
 import useAnalytics from '../../analytics';
 import type { AnalyticsData } from '../../analytics/model';
 import useDispatcher from '../../hooks/dispathcer';
-import Root, { classes, PREFIX } from './common/style';
+import { useIsNewLayout } from '../../hooks/model/root';
+import { ScButton, ScParagraph, ScTitle } from '../webkit';
 
 const analyticsData: AnalyticsData = { container: 'Base', tile: 'home' };
 
 const Empty: React.FC = (): ReactElement => {
   const { dispacthDrawer, dispacthLoading } = useDispatcher();
   const { ButtonEvent } = useAnalytics();
+  const isNewLayout = useIsNewLayout();
+
   React.useEffect(() => {
     dispacthLoading(false);
-  }, []);
+  }, [dispacthLoading]);
+
   const onClick = () => {
     dispacthDrawer(true);
     ButtonEvent('click', {
@@ -23,30 +24,28 @@ const Empty: React.FC = (): ReactElement => {
       ...analyticsData,
     });
   };
+
+  if (!isNewLayout) {
+    return (
+      <section data-testid="empty">
+        <p>Start customizing your workspace</p>
+        <p>Find out what workspace preference options you have and how those options work.</p>
+        <button type="button" onClick={onClick} data-testid="empty_Find_tile">Find tile</button>
+      </section>
+    );
+  }
+
   return (
-    <Root data-testid={`${PREFIX}`}>
-      <div className={classes.div}>
-        <section className={classes.content}>
-          <div className={classes.bg} />
-          <Typography variant="body1" gutterBottom>
-            Start customizing your workspace
-          </Typography>
-          <Typography variant="body2" gutterBottom>
-            find out what workspace preference options you have and how those options work.
-          </Typography>
-          <Button
-            variant="outlined"
-            endIcon={<CallMadeIcon />}
-            className={classes.button}
-            onClick={onClick}
-            size="large"
-            data-testid={`${PREFIX}_Find_tile`}
-          >
-            Find tile
-          </Button>
-        </section>
-      </div>
-    </Root>
+    <section className="base-webkit-scope empty-workspace" data-testid="empty">
+      <span className="empty-workspace-mark" aria-hidden="true">
+        +
+      </span>
+      <ScTitle level={2}>Your workspace is empty</ScTitle>
+      <ScParagraph>Browse the Tile Library to add an application to this workspace.</ScParagraph>
+      <ScButton type="primary" onClick={onClick} data-testid="empty_Find_tile">
+        Browse Tile Library
+      </ScButton>
+    </section>
   );
 };
 

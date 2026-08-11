@@ -1,4 +1,3 @@
-import React from 'react';
 import { propsAddTile, type Tile as TileProps } from './interface';
 
 const useController = (props, tile: TileProps) => {

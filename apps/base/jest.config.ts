@@ -17,6 +17,7 @@ export default {
     'single-spa-react/parcel': 'single-spa-react/lib/cjs/parcel.cjs',
     '^@/(.*)$': '<rootDir>/src/next-packages/$1',
     '^@assistant-ui/react$': '<rootDir>/__mocks__/@assistant-ui/react.tsx',
+    '^@scdevkit/webkit/react$': '<rootDir>/src/test/webkit-react-stub.tsx',
   },
   setupFilesAfterEnv: ['@testing-library/jest-dom', './jest.setup.tsx'],
   testEnvironment: 'jsdom',
