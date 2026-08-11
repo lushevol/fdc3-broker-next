@@ -3,7 +3,13 @@ import IconButton from "@mui/material/IconButton";
 import ErrorBoundry from "../../../components/ErrorBoundry";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 
-const CopyText = (props): ReactElement => {
+interface CopyTextProps {
+  value: string;
+  onClickCopy: (value: string) => () => void;
+  dataTestid?: string;
+}
+
+const CopyText = (props: CopyTextProps): ReactElement => {
   const { value, onClickCopy, dataTestid } = props;
   return (
     <ErrorBoundry>

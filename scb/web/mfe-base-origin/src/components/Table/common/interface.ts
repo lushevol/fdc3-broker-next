@@ -1,11 +1,12 @@
-import { GridColDef } from "@mui/x-data-grid";
+import { AdminRecord } from "../../../admin/common/interface";
+import { TableColumn } from "../../TableDetail/common/interface";
 
 export interface TableProps {
-  columns: GridColDef[];
-  rows: any[];
+  columns: TableColumn[];
+  rows: AdminRecord[];
   openDetail: boolean;
-  record: any;
-  onChange: (value: any, field: string) => void;
+  record?: AdminRecord;
+  onChange: (value: unknown, field: string) => void;
   onUpdate: () => void;
   onVerify: () => void;
   onDeactivate: () => void;
@@ -14,5 +15,5 @@ export interface TableProps {
   onClose: () => void;
   resetId: number;
   isLoading: boolean;
-  columnVisibilityModel?: any;
+  columnVisibilityModel?: Record<string, boolean>;
 }

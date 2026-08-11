@@ -1,8 +1,15 @@
-import { createTheme, responsiveFontSizes } from "@mui/material/styles";
+import {
+  createTheme,
+  responsiveFontSizes,
+  ThemeOptions,
+} from "@mui/material/styles";
 import custom from "./config/common";
 import type {} from "@mui/x-data-grid/themeAugmentation";
+import type { getTheme } from "./config/utils";
 
-export const Config = (props) => {
+type ThemeConfig = ReturnType<typeof getTheme>;
+
+export const Config = (props: ThemeConfig) => {
   let config = createTheme({
     theme: { ...props },
     customColor: custom.color,
@@ -219,7 +226,7 @@ export const Config = (props) => {
         },
       },
     },
-  });
+  } as ThemeOptions);
   config = responsiveFontSizes(config);
   return { config };
 };

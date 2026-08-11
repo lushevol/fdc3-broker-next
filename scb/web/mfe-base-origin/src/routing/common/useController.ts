@@ -26,9 +26,9 @@ const useController = () => {
     }
     dispacthErrorMessage(undefined);
   };
-  const storageHandler = function (r) {
-    if (r.key === ActionType.SET_THEME) {
-      dispacthTheme(r.newValue);
+  const storageHandler = function (event: StorageEvent) {
+    if (event.key === ActionType.SET_THEME && event.newValue) {
+      dispacthTheme(event.newValue);
     }
   };
   React.useEffect(() => {

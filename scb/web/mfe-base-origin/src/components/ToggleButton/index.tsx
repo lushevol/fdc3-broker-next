@@ -1,11 +1,12 @@
 import Button, {
   ToggleButtonProps as MuiToggleButtonProps,
 } from "@mui/material/ToggleButton";
-import { styled, darken } from "@mui/material/styles";
+import { styled, darken, Theme } from "@mui/material/styles";
+import { PaletteMode } from "@mui/material";
 
 export interface ToggleButtonProps extends MuiToggleButtonProps {}
 
-const defStyle = (theme) => ({
+const defStyle = (theme: Theme) => ({
   minWidth: "100px",
   padding: "4px 16px",
   fontWeight: 600,
@@ -22,7 +23,7 @@ const defSelectedStyle = {
   zIndex: 1,
 };
 
-export const modeStyle = (theme, mode) => {
+export const modeStyle = (theme: Theme, mode: PaletteMode) => {
   if (mode === "dark") {
     return {
       color: "rgba(141, 141, 141, 1)",

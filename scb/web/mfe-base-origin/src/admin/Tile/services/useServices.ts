@@ -1,9 +1,10 @@
 import React from 'react';
 import { getHooksBase } from '../../../hooks/HooksBase';
 import { ActionType } from '../../../hooks/reducer/util/ActionType';
+import { AdminRecord } from '../../common/interface';
 import useAdminRequest from '../../common/services/useAdminRequest';
 
-type AdminPayload = Record<string, unknown>;
+type AdminPayload = AdminRecord;
 
 const useServices = () => {
   const { baseDispatch } = getHooksBase();
@@ -16,8 +17,8 @@ const useServices = () => {
   const request = useAdminRequest(clearErrorMessage);
 
   const getCategory = React.useCallback(
-    (entitlementsToken: string) =>
-      request<unknown[]>(
+    (entitlementsToken: string | undefined) =>
+      request<AdminRecord[]>(
         'getCategory',
         '/auth/v1/fmo/admin/category/data',
         { entitlementsToken },
@@ -26,8 +27,8 @@ const useServices = () => {
     [request],
   );
   const getTile = React.useCallback(
-    (entitlementsToken: string, data: AdminPayload) =>
-      request<unknown[]>(
+    (entitlementsToken: string | undefined, data: AdminPayload) =>
+      request<AdminRecord[]>(
         'getTile',
         '/auth/v1/fmo/admin/tile/data',
         { entitlementsToken, ...data },
@@ -36,8 +37,8 @@ const useServices = () => {
     [request],
   );
   const getTileAudit = React.useCallback(
-    (entitlementsToken: string, data: AdminPayload) =>
-      request<unknown[]>(
+    (entitlementsToken: string | undefined, data: AdminPayload) =>
+      request<AdminRecord[]>(
         'getTileAudit',
         '/auth/v1/fmo/admin/tile/audit',
         { entitlementsToken, ...data },
@@ -46,7 +47,7 @@ const useServices = () => {
     [request],
   );
   const updateTile = React.useCallback(
-    (entitlementsToken: string, data: AdminPayload) =>
+    (entitlementsToken: string | undefined, data: AdminPayload) =>
       request<AdminPayload>(
         'updateTile',
         '/auth/v1/fmo/admin/tile/update',
@@ -56,7 +57,7 @@ const useServices = () => {
     [request],
   );
   const verifyTile = React.useCallback(
-    (entitlementsToken: string, data: AdminPayload) =>
+    (entitlementsToken: string | undefined, data: AdminPayload) =>
       request<AdminPayload>(
         'verifyTile',
         '/auth/v1/fmo/admin/tile/update',
@@ -66,7 +67,7 @@ const useServices = () => {
     [request],
   );
   const deactivateTile = React.useCallback(
-    (entitlementsToken: string, data: AdminPayload) =>
+    (entitlementsToken: string | undefined, data: AdminPayload) =>
       request<AdminPayload>(
         'deactivateTile',
         '/auth/v1/fmo/admin/tile/update',
@@ -76,7 +77,7 @@ const useServices = () => {
     [request],
   );
   const createTile = React.useCallback(
-    (entitlementsToken: string, data: AdminPayload) =>
+    (entitlementsToken: string | undefined, data: AdminPayload) =>
       request<AdminPayload>(
         'createTile',
         '/auth/v1/fmo/admin/tile/create',
@@ -86,8 +87,8 @@ const useServices = () => {
     [request],
   );
   const getImportMap = React.useCallback(
-    (entitlementsToken: string) =>
-      request<unknown[]>(
+    (entitlementsToken: string | undefined) =>
+      request<AdminRecord[]>(
         'getImportMap',
         '/auth/v1/fmo/admin/importmap/data',
         { entitlementsToken },

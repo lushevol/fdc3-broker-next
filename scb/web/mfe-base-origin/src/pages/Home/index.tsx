@@ -22,7 +22,11 @@ import pattern from "../../theme/config/pattern.png";
 import portalTextLight from "../../theme/config/portal-text-light.png";
 import portalTextDark from "../../theme/config/portal-text-dark.png";
 
-export const ContainerComponent = (validation: boolean, item, i) =>
+export const ContainerComponent = (
+  validation: boolean,
+  item: Workspace,
+  i: number
+) =>
   validation ? (
     <Container
       {...item.containers[0]}
@@ -103,7 +107,9 @@ const Home: React.FC = (): ReactElement => {
             const showRefresh: boolean = !!(
               item.id === store?.currentWorkspace?.id &&
               store?.refreshTab &&
-              store?.refreshTab[item.id]
+              (store?.refreshTab as Record<string, () => void> | undefined)?.[
+                item.id
+              ]
             );
             return (
               <Tab

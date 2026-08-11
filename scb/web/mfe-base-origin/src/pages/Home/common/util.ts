@@ -1,4 +1,15 @@
-export const setDetail = (workspace, title, container, tile) => {
+import { Tile } from "../../../components/Drawer/common/interface";
+import { Workspace } from "../../../hooks/model/workspaces";
+import { AnalyticsData } from "../../../analytics/model";
+
+type ButtonEvent = (event: "click", data: AnalyticsData) => void;
+
+export const setDetail = (
+  workspace: Workspace | undefined,
+  title: string,
+  container: string,
+  tile: string
+) => {
   if (workspace?.containers?.length) {
     title = workspace.containers[0].title;
     container = workspace.containers[0].module.replace("/", "");
@@ -8,20 +19,21 @@ export const setDetail = (workspace, title, container, tile) => {
 };
 
 export const refreshTabUtil = (
-  refreshTab,
-  _workspaces,
-  itemId,
-  setDetail,
-  ButtonEvent
+  refreshTab: Record<string, () => void> | undefined,
+  _workspaces: Workspace[] | undefined,
+  itemId: string,
+  setDetailFn: typeof setDetail,
+  ButtonEvent: ButtonEvent
 ) => {
-  if (refreshTab && refreshTab[itemId]) {
+  if (refreshTab?.[itemId] && _workspaces) {
     const workspaces = [..._workspaces];
     const index = workspaces.findIndex((w) => w.id === itemId);
     const workspace = workspaces[index];
+    if (!workspace) return;
     let container = "base";
     let tile = "home";
     let title = workspace.label;
-    setDetail(workspace, title, container, tile);
+    setDetailFn(workspace, title, container, tile);
     ButtonEvent("click", {
       name: "refresh workspace",
       value: title,
@@ -32,26 +44,37 @@ export const refreshTabUtil = (
   }
 };
 
-export const fdc3InitUtil = (windowFin, fdc3, openFinFdc3, env, fdc3Init) => {
+export const fdc3InitUtil = (
+  windowFin: unknown,
+  fdc3: unknown,
+  openFinFdc3: unknown,
+  _env: string,
+  fdc3Init: () => void
+) => {
   if (windowFin && fdc3 && openFinFdc3) {
     fdc3Init();
   }
 };
 
-export const broadcastUtil = async (windowFin, channel, env, payload) => {
+export const broadcastUtil = async (
+  windowFin: unknown,
+  channel: { broadcast: (payload: unknown) => Promise<unknown> } | undefined,
+  env: string,
+  payload: unknown
+) => {
   if (windowFin && channel && ["LOCAL", "DEV"].includes(env)) {
     await channel.broadcast(payload);
   }
 };
 
 export const openTileUtil = (
-  isTemplate,
-  validTile,
-  setParamsAndAddTile,
-  tile,
-  parameters
+  isTemplate: boolean | undefined,
+  validTile: boolean,
+  setParamsAndAddTile: (tile: Tile, parameters?: string) => void,
+  tile: Tile | undefined,
+  parameters?: string
 ) => {
-  if (isTemplate || validTile) {
+  if (tile && (isTemplate || validTile)) {
     setParamsAndAddTile(tile, parameters);
   }
 };

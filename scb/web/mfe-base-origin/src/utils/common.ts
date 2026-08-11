@@ -7,9 +7,11 @@ import utc from "dayjs/plugin/utc";
 import duration from "dayjs/plugin/duration";
 import { Entity } from "../hooks/model/root";
 import { Workspace, firstWorkspace } from "../hooks/model/workspaces";
-import { Tile } from "../components/Drawer/common/interface";
+import { Tile, Tiles } from "../components/Drawer/common/interface";
 import { findTile } from "./drawer";
 import { featureScopedEnabled } from "./featureFlagController";
+import type { Dispatch } from "react";
+import type { Dayjs } from "dayjs";
 dayjs.extend(utc);
 dayjs.extend(duration);
 
@@ -49,7 +51,7 @@ export const storeData = (key: string, data: string): void => {
 };
 
 export const clearLocalStorage = (
-  dispacth?,
+  dispacth?: Dispatch<IAction>,
   actionTypes?: ActionType[]
 ): void => {
   if (actionTypes && actionTypes.length > 0) {
@@ -253,7 +255,8 @@ export const isEmpty = (value: any) => {
   );
 };
 
-export const getDate = (date) => (date ? date.format("YYYY MMM DD") : "");
+export const getDate = (date?: Dayjs | null) =>
+  date ? date.format("YYYY MMM DD") : "";
 
 export const validateTile = (
   entities: Entity[] | [] | undefined,
@@ -288,12 +291,16 @@ export const validateTile = (
   return false;
 };
 
-export const validateWorkspace = (workspaces, entities, drawers) => {
-  let newWorkspaces = workspaces.reduce((result: any, workspace: Workspace) => {
+export const validateWorkspace = (
+  workspaces: Workspace[],
+  entities: Entity[] | undefined,
+  drawers: Tiles[] | undefined
+) => {
+  let newWorkspaces = workspaces.reduce((result: Workspace[], workspace) => {
     if (workspace.containers.length === 0) {
       result.push(workspace);
     } else {
-      const tile: Tile = findTile(drawers, workspace);
+      const tile = findTile(drawers, workspace);
       if (
         tile?.isTemplate ||
         validateTile(entities, tile?.entity, tile?.subject)

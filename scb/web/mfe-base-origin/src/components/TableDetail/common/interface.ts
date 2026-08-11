@@ -1,3 +1,14 @@
+import { GridColDef } from "@mui/x-data-grid";
+import { AdminRecord } from "../../../admin/common/interface";
+
+export type TableColumn = GridColDef & {
+  hiddenImage?: boolean;
+  multiline?: boolean;
+  placeholder?: string;
+  readOnly?: boolean;
+  valueOptions?: string[];
+};
+
 export interface ModalProps {
   title?: React.ReactNode;
   defaultWidth?: number;
@@ -5,17 +16,17 @@ export interface ModalProps {
   isDraggable?: boolean;
   isResizeble?: boolean;
   isLoading?: boolean;
-  actionComponents: any;
-  columns: any[];
-  record: any;
-  onChange: (value: any, field: string) => void;
+  actionComponents: React.ReactNode;
+  columns: TableColumn[];
+  record: AdminRecord;
+  onChange: (value: unknown, field: string) => void;
   resetId: number;
 }
 
 export interface FieldProps {
-  column: any;
+  column: TableColumn;
   columnId: number;
-  record: any;
-  onChange: (value: any, field: string) => void;
+  record: AdminRecord;
+  onChange: (value: unknown, field: string) => void;
   resetId: number;
 }

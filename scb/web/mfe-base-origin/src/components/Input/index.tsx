@@ -1,5 +1,5 @@
 import * as React from "react";
-import { styled } from "@mui/material/styles";
+import { styled, Theme } from "@mui/material/styles";
 import MuiTextField, {
   TextFieldProps,
   TextFieldVariants,
@@ -11,8 +11,8 @@ const classes = {
 };
 
 export const InputStyled =
-  (c) =>
-  ({ theme }) => ({
+  (c: typeof classes) =>
+  ({ theme }: { theme: Theme }) => ({
     margin: 0,
     width: "auto",
     [`&.${c.left}`]: {

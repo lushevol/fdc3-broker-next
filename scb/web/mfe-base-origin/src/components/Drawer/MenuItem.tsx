@@ -5,7 +5,7 @@ import { MenuItemProps, Tile as TileProps } from "./common/interface";
 import Tile from "../Tile";
 import useController from "./common/MenuItem.useController";
 
-export const Item = (props, tile: TileProps) => {
+export const Item = (props: MenuItemProps, tile: TileProps) => {
   const { onClick } = useController(props, tile);
   return (
     <Grid item xs={3} key={tile.tile ? tile.tile : tile.title}>

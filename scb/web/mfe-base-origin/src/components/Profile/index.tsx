@@ -126,7 +126,11 @@ const EntityComp = ({ entity, expanded, handleChange }: RoleProps) => {
   );
 };
 
-export const RoleComp = (roleArray, expanded, handleChange) => {
+export const RoleComp = (
+  roleArray: Entity[] | undefined,
+  expanded: string | false,
+  handleChange: RoleProps["handleChange"]
+) => {
   return roleArray?.map((entity: Entity) => {
     return (
       <EntityComp
@@ -162,14 +166,14 @@ const Profile: FC<ProfileProps> = ({ open, onClose }) => {
 
   useEffect(() => {
     setTimeout(() => {
-      const array1: any = store?.entities?.filter(
+      const array1 = store?.entities?.filter(
         (entity: Entity) => entity?.name !== "RATAN_DATA_ENTITLEMENT"
       );
-      const array2: any = store?.entities?.filter(
+      const array2 = store?.entities?.filter(
         (entity: Entity) => entity?.name === "RATAN_DATA_ENTITLEMENT"
       );
-      setFunctionalProfileArray(array1);
-      setEntitlementProfileArray(array2);
+      setFunctionalProfileArray(array1 ?? []);
+      setEntitlementProfileArray(array2 ?? []);
     }, 500);
   }, []);
 

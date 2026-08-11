@@ -8,7 +8,12 @@ import { storeData, uuidv4 } from "../../utils/common";
 import { Container, Workspace } from "../model/workspaces";
 import { useContext } from "../provider";
 import { ActionType } from "../reducer/util/ActionType";
-import { Entity } from "../model/root";
+import { Entity, User } from "../model/root";
+
+interface TokenTiming {
+  exp: number;
+  iat: number;
+}
 
 const useDispatcher = () => {
   const [store, dispacth] = useContext();
@@ -25,7 +30,7 @@ const useDispatcher = () => {
       data: { isLoading },
     });
   };
-  const dispacthTheme = (theme) => {
+  const dispacthTheme = (theme: string) => {
     dispacth({
       type: ActionType.SET_THEME,
       data: { theme },
@@ -33,48 +38,48 @@ const useDispatcher = () => {
     storeData(ActionType.SET_THEME, theme);
   };
 
-  const dispacthToken = (token) => {
+  const dispacthToken = (token: string | undefined) => {
     dispacth({
       type: ActionType.SET_TOKEN,
       data: { token },
     });
   };
 
-  const dispacthUser = (user) => {
+  const dispacthUser = (user: User | undefined) => {
     dispacth({
       type: ActionType.SET_USER,
       data: { user },
     });
   };
 
-  const dispacthClientBus = (clientBus) => {
+  const dispacthClientBus = (clientBus: unknown) => {
     dispacth({
       type: ActionType.SET_CLIENT_BUS,
       data: { clientBus },
     });
   };
 
-  const dispacthIsOpenFin = (isOpenFin) => {
+  const dispacthIsOpenFin = (isOpenFin: boolean) => {
     dispacth({
       type: ActionType.SET_IS_OPENFIN,
       data: { isOpenFin },
     });
   };
 
-  const dispacthErrorMessage = (errorMsg) => {
+  const dispacthErrorMessage = (errorMsg: string | undefined) => {
     dispacth({
       type: ActionType.SET_ERRORMSG,
       data: { errorMsg },
     });
   };
 
-  const dispacthWorkspaces = (workspaces) => {
+  const dispacthWorkspaces = (workspaces: Workspace[]) => {
     dispacth({
       type: ActionType.SET_WORKSPACES,
       data: { workspaces },
     });
   };
-  const dispacthCurrentWorkspace = (currentWorkspace) => {
+  const dispacthCurrentWorkspace = (currentWorkspace: Workspace) => {
     dispacth({
       type: ActionType.SET_CURRENT_WORKSPACES,
       data: { currentWorkspace },
@@ -105,7 +110,7 @@ const useDispatcher = () => {
     };
     dispacth({ type: ActionType.ADD_WORKSPACE, data: { workspace } });
   };
-  const dispacthUserLoginTime = (payload) => {
+  const dispacthUserLoginTime = (payload: TokenTiming) => {
     dispacth({
       type: ActionType.SET_EXPIRED_TOKEN,
       data: {
@@ -115,8 +120,12 @@ const useDispatcher = () => {
       },
     });
   };
-  const OpenCashflow = (drawers, querys: string | RatanFilterItem[], type) => {
-    const index = drawers?.findIndex((drawer) => drawer.label === "Settlement");
+  const OpenCashflow = (
+    drawers: Tiles[],
+    querys: string | RatanFilterItem[],
+    type: string
+  ) => {
+    const index = drawers.findIndex((drawer) => drawer.label === "Settlement");
     if (index >= 0) {
       const tile = drawers[index].tiles.filter((item: Tile) => {
         return item.tile === type;
@@ -138,9 +147,16 @@ const useDispatcher = () => {
         default:
           break;
       }
-      const container: any = {
-        ...tile[0],
-        id: uuidv4(),
+      const selectedTile = tile[0];
+      if (!selectedTile) {
+        return;
+      }
+      const id = uuidv4();
+      const container: Container = {
+        ...selectedTile,
+        id,
+        panelId: id,
+        tabId: id,
         parameters: props,
       };
       if (container.subtitle && container.subtitle != "") {
@@ -149,7 +165,7 @@ const useDispatcher = () => {
       addWorkspace(container);
     }
   };
-  const dispatchOpenTile = (parameters: unknown, tile: string) => {
+  const dispatchOpenTile = (parameters: object, tile: string) => {
     const drawers = [...(store.drawers as Tiles[])];
     const tiles = drawers
       .map((category) => {
@@ -164,9 +180,13 @@ const useDispatcher = () => {
       dispacthError(`Tile ${tile} is unauthorized or does not exist`);
       return;
     }
-    const container: any = {
-      ...tiles[0],
-      id: uuidv4(),
+    const selectedTile = tiles[0];
+    const id = uuidv4();
+    const container: Container = {
+      ...selectedTile,
+      id,
+      panelId: id,
+      tabId: id,
       parameters,
     };
     if (container.subtitle && container.subtitle != "") {
@@ -208,11 +228,14 @@ const useDispatcher = () => {
   ) => {
     return dispatchOpenTile(parameters, "trade");
   };
-  const dispacthOpenCashflow = (querys: string | RatanFilterItem[], type) => {
-    const drawers = [...(store.drawers as Tile[])];
+  const dispacthOpenCashflow = (
+    querys: string | RatanFilterItem[],
+    type: string
+  ) => {
+    const drawers = [...(store.drawers as Tiles[])];
     OpenCashflow(drawers, querys, type);
   };
-  const dispacthTimeType = (timeType) => {
+  const dispacthTimeType = (timeType: string) => {
     dispacth({
       type: ActionType.SET_TIME_TYPE,
       data: { timeType },
@@ -240,7 +263,7 @@ const useDispatcher = () => {
     });
   };
 
-  const dispacthDrawers = (drawers) => {
+  const dispacthDrawers = (drawers: Tiles[]) => {
     dispacth({
       type: ActionType.SET_DRAWERS,
       data: { drawers },
@@ -249,7 +272,7 @@ const useDispatcher = () => {
   const subscribe = (_tabId: string, _callback: () => void) => {
     console.info("subscribe", _tabId, _callback);
   };
-  const dispacthSsePayload = (_payload) => {
+  const dispacthSsePayload = (_payload: unknown) => {
     console.info("dispacthSsePayload", _payload);
   };
   return {

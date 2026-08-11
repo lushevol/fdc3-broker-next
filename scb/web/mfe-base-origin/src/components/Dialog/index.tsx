@@ -9,9 +9,12 @@ import Draggable from "./common/Draggable";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import IconButton from "@mui/material/IconButton";
 import clsx from "clsx";
+import { PaperProps } from "./common/types";
 
-const getDraggable = (isDraggable, idTitle) =>
-  isDraggable ? (p) => <Draggable idTitle={idTitle} {...p} /> : undefined;
+const getDraggable = (isDraggable: boolean | undefined, idTitle: string) =>
+  isDraggable
+    ? (props: PaperProps) => <Draggable idTitle={idTitle} {...props} />
+    : undefined;
 const Dialog = (props: DialogProps) => {
   const {
     disablePortal,

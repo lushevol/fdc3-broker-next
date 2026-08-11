@@ -7,6 +7,7 @@ import useDispatcher from "../../../hooks/dispathcer";
 import useAnalytics from "../../../analytics";
 import { getHooksBase } from "../../../hooks/HooksBase";
 import { openTileUtil } from "./util";
+import { Tile } from "../../../components/Drawer/common/interface";
 const Module_PREFIX = `@${process.env.orgName}`;
 
 const useParameters = () => {
@@ -47,18 +48,24 @@ const useParameters = () => {
     [store?.workspaces, store?.currentWorkspace]
   );
   const setParamsAndAddTile = React.useCallback(
-    (tile, parameters_?: string) => {
+    (tile: Tile, parameters_?: string) => {
+      const id = uuidv4();
+      const container: Container = {
+        ...tile,
+        id,
+        panelId: id,
+        tabId: id,
+      };
       try {
-        tile.parameters = JSON.parse(parameters_ ?? "{}");
+        container.parameters = JSON.parse(parameters_ ?? "{}") as object;
       } catch (e) {
         console.error(e);
       }
-      addTile(tile);
+      addTile(container);
       setTimeout(() => {
         const { store: _store } = getHooksBase();
-        dispacthCurrentWorkspace(
-          (_store?.workspaces as [])[(_store?.workspaces as [])?.length - 1]
-        );
+        const workspaces = _store?.workspaces ?? [];
+        dispacthCurrentWorkspace(workspaces[workspaces.length - 1]);
       }, 1000);
     },
     [store?.workspaces, store.entities, addTile]
@@ -87,17 +94,16 @@ const useParameters = () => {
     [store?.workspaces, store.entities, addTile, store.drawers]
   );
   React.useEffect(() => {
-    const params: any = new URLSearchParams(window.location.search);
-    if (
-      params?.get("container") &&
-      params?.get("module") &&
-      params?.get("tile")
-    ) {
+    const params = new URLSearchParams(window.location.search);
+    const container = params.get("container");
+    const module = params.get("module");
+    const tile = params.get("tile");
+    if (container && module && tile) {
       openTile(
-        params?.get("container"),
-        params?.get("module"),
-        params?.get("tile"),
-        params?.get("parameters")
+        container,
+        module,
+        tile,
+        params.get("parameters") ?? undefined
       );
       const { history } = window;
       history.replaceState(null, "", "/");

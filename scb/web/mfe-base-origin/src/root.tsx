@@ -15,16 +15,18 @@ const lifecycles = singleSpaReact({
 
 export const { bootstrap, unmount } = lifecycles;
 const rootElement = window.single_spa_container_id;
-export const render = (rootComp, props) => {
+type RootProps = Record<string, unknown>;
+
+export const render = (rootComp: Element, props: RootProps) => {
   const root = ReactDOMClient.createRoot(rootComp);
   root.render(<App {...props} />);
 };
-export const check = (rootComp, props) => {
+export const check = (rootComp: Element | undefined, props: RootProps) => {
   if (rootComp) {
     render(rootComp, props);
   }
 };
-export function MountComponent(props) {
+export function MountComponent(props: RootProps) {
   return Promise.resolve().then(() => {
     check(rootElement, props);
   });

@@ -64,8 +64,8 @@ const useController = () => {
     }
     dispacthDrawer(false);
   };
-  const win = React.useRef<any>();
-  const winFocusEvent = (_e?) => {
+  const win = React.useRef<Window | null>();
+  const winFocusEvent = (_e?: Event) => {
     win?.current?.focus();
     window.blur();
   };
@@ -98,7 +98,7 @@ const useController = () => {
     );
     winFocusEvent();
   };
-  const beforeunloadEvent = (e) => {
+  const beforeunloadEvent = (e: BeforeUnloadEvent) => {
     e.preventDefault();
     const confirmationMessage = "Leave?";
     e.returnValue = confirmationMessage;

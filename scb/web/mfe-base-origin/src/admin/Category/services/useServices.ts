@@ -1,14 +1,15 @@
 import React from 'react';
+import { AdminRecord } from '../../common/interface';
 import useAdminRequest from '../../common/services/useAdminRequest';
 
-type AdminPayload = Record<string, unknown>;
+type AdminPayload = AdminRecord;
 
 const useServices = () => {
   const request = useAdminRequest();
 
   const getCategory = React.useCallback(
-    (entitlementsToken: string) =>
-      request<unknown[]>(
+    (entitlementsToken: string | undefined) =>
+      request<AdminRecord[]>(
         'getCategory',
         '/auth/v1/fmo/admin/category/data',
         { entitlementsToken },
@@ -17,8 +18,8 @@ const useServices = () => {
     [request],
   );
   const getCategoryAudit = React.useCallback(
-    (entitlementsToken: string, data: AdminPayload) =>
-      request<unknown[]>(
+    (entitlementsToken: string | undefined, data: AdminPayload) =>
+      request<AdminRecord[]>(
         'getCategoryAudit',
         '/auth/v1/fmo/admin/category/audit',
         { entitlementsToken, ...data },
@@ -27,7 +28,7 @@ const useServices = () => {
     [request],
   );
   const updateCategory = React.useCallback(
-    (entitlementsToken: string, data: AdminPayload) =>
+    (entitlementsToken: string | undefined, data: AdminPayload) =>
       request<AdminPayload>(
         'updateCategory',
         '/auth/v1/fmo/admin/category/update',
@@ -37,7 +38,7 @@ const useServices = () => {
     [request],
   );
   const verifyCategory = React.useCallback(
-    (entitlementsToken: string, data: AdminPayload) =>
+    (entitlementsToken: string | undefined, data: AdminPayload) =>
       request<AdminPayload>(
         'verifyCategory',
         '/auth/v1/fmo/admin/category/update',
@@ -47,7 +48,7 @@ const useServices = () => {
     [request],
   );
   const deactivateCategory = React.useCallback(
-    (entitlementsToken: string, data: AdminPayload) =>
+    (entitlementsToken: string | undefined, data: AdminPayload) =>
       request<AdminPayload>(
         'deactivateCategory',
         '/auth/v1/fmo/admin/category/update',
@@ -57,7 +58,7 @@ const useServices = () => {
     [request],
   );
   const createCategory = React.useCallback(
-    (entitlementsToken: string, data: AdminPayload) =>
+    (entitlementsToken: string | undefined, data: AdminPayload) =>
       request<AdminPayload>(
         'createCategory',
         '/auth/v1/fmo/admin/category/create',

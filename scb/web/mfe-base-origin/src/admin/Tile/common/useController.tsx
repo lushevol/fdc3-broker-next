@@ -1,7 +1,6 @@
 import React from "react";
 import { useContext } from "../../../hooks/provider";
 import { TileProps } from "./interface";
-import { GridColDef } from "@mui/x-data-grid";
 import useServices from "../services/useServices";
 import useTableDetail from "./useTableDetail";
 import Status from "../../common/Status";
@@ -10,11 +9,15 @@ import useAudit from "./useAudit";
 import { getAdminModuleEms2Role } from "../../common/utils";
 import { Entity } from "../../../hooks/model/root";
 import DateTime from "../../common/DateTime";
+import { AdminRecord } from "../../common/interface";
+import { TableColumn } from "../../../components/TableDetail/common/interface";
 
 const useController = (_props: TileProps) => {
   const [store] = useContext();
-  const [importMap, setImportMap] = React.useState<any>([]);
-  const [originalCategories, setOriginalCategories] = React.useState<any>([]);
+  const [importMap, setImportMap] = React.useState<AdminRecord[]>([]);
+  const [originalCategories, setOriginalCategories] = React.useState<
+    AdminRecord[]
+  >([]);
   const {
     onClose,
     onOpen,
@@ -44,11 +47,11 @@ const useController = (_props: TileProps) => {
     getAuditData,
   } = useAudit();
   const { getTile, getCategory, getImportMap } = useServices();
-  const [category, setCategory] = React.useState<any>();
-  const [categories, setCategories] = React.useState<any>([]);
+  const [category, setCategory] = React.useState<AdminRecord>();
+  const [categories, setCategories] = React.useState<AdminRecord[]>([]);
   const [inputValue, setInputValue] = React.useState("");
   const setCategoryData = React.useCallback(
-    (_data) => {
+    (_data: AdminRecord[]) => {
       _data = _data.map((item) => {
         item.id = item.applicationCategoryId;
         return item;
@@ -78,8 +81,8 @@ const useController = (_props: TileProps) => {
     }
   }, [store.entitlementsToken]);
   const getCategoryData = React.useCallback(
-    (_category) => {
-      let filter = {};
+    (_category: AdminRecord | undefined) => {
+      let filter: AdminRecord = {};
       if (_category?.id !== -1) {
         filter = { applicationCategory: _category };
       }
@@ -119,7 +122,7 @@ const useController = (_props: TileProps) => {
     return copied;
   }, [data]);
 
-  const columns: GridColDef[] = React.useMemo(
+  const columns = React.useMemo<TableColumn[]>(
     () =>
       [
         {
@@ -135,7 +138,9 @@ const useController = (_props: TileProps) => {
           width: 250,
           type: "autoComplete",
           hiddenImage: true,
-          valueOptions: [...originalCategories.map((e) => e.label)],
+          valueOptions: originalCategories
+            .map((item) => item.label)
+            .filter((label): label is string => typeof label === "string"),
           renderCell: (props) => props?.row?.applicationCategory?.label,
           valueGetter: (props) => props?.row?.applicationCategory?.label,
         },
@@ -214,7 +219,9 @@ const useController = (_props: TileProps) => {
           headerName: "Container",
           width: 250,
           type: "autoComplete",
-          valueOptions: [...importMap.map((e) => e.keyName)],
+          valueOptions: importMap
+            .map((item) => item.keyName)
+            .filter((keyName): keyName is string => typeof keyName === "string"),
           renderCell: (props) => props?.row?.importMap?.keyName,
           valueGetter: (props) => props?.row?.importMap?.keyName,
           hiddenImage: true,
@@ -325,11 +332,11 @@ const useController = (_props: TileProps) => {
           width: 100,
           type: "number",
         },
-      ] as GridColDef[],
+      ],
     [store?.timeType, importMap, originalCategories]
   );
   const onCreateNew = React.useCallback(() => {
-    const temp: any = columns.reduce((aggr, item) => {
+    const temp = columns.reduce<AdminRecord>((aggr, item) => {
       if (item.type !== "actions") {
         aggr[item.field] = "";
       }

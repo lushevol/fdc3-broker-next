@@ -24,8 +24,8 @@ const useController = (props: DialogProps) => {
   const [title, setTitle] = useState("dialog");
   const dialogRef = useRef<HTMLDivElement>(null);
   const dialogContentRef = useRef<HTMLDivElement>(null);
-  const width = useRef<undefined | number>(defaultWidth);
-  const height = useRef<undefined | number>(defaultHeight);
+  const width = useRef<number>(defaultWidth);
+  const height = useRef<number>(defaultHeight);
   const startX = useRef<number>(0);
   const startY = useRef<number>(0);
   const endWidth = useRef<number>(defaultWidth);
@@ -52,7 +52,7 @@ const useController = (props: DialogProps) => {
     }
   };
 
-  const initDrag = (e) => {
+  const initDrag = (e: React.MouseEvent) => {
     const dialogPaper = dialogRef?.current?.getElementsByClassName(
       "MuiPaper-root"
     )[0] as HTMLElement | null;
@@ -66,7 +66,7 @@ const useController = (props: DialogProps) => {
     ButtonEvent("click", { name: "modal drag", container, tile });
   };
 
-  function doDrag(e) {
+  function doDrag(e: React.MouseEvent) {
     if (isResizeble && startResize.current) {
       const w = width.current + e.clientX - startX.current;
       const h = height.current + e.clientY - startY.current;
@@ -88,7 +88,7 @@ const useController = (props: DialogProps) => {
     height.current = endHeight.current;
   }
 
-  const hideOverflow = (parent, hideScroll: boolean) => {
+  const hideOverflow = (parent: HTMLElement | null, hideScroll: boolean) => {
     parent?.setAttribute(
       "style",
       hideScroll
@@ -96,7 +96,7 @@ const useController = (props: DialogProps) => {
         : "position: relative;"
     );
   };
-  const hide = (parent, open: boolean, max: boolean) => {
+  const hide = (parent: HTMLElement | null, open: boolean, max: boolean) => {
     if (open && max) {
       hideOverflow(parent, true);
     }
@@ -110,12 +110,15 @@ const useController = (props: DialogProps) => {
       hideOverflow(parent, false);
     };
   }, [props.open, isMax]);
-  const setheight = (parent, MuiBackdrop) => {
+  const setheight = (
+    parent: HTMLElement | null,
+    MuiBackdrop: HTMLElement | null
+  ) => {
     if (parent && MuiBackdrop) {
       MuiBackdrop?.setAttribute("style", `height: ${parent.scrollHeight}px`);
     }
   };
-  const handleModalEvent = (workspaces, tabid) => {
+  const handleModalEvent = (workspaces: Workspace[], tabid: string) => {
     let conatiner_ = "base";
     let tile_ = "home";
     let title_ = "modal";
@@ -137,7 +140,7 @@ const useController = (props: DialogProps) => {
       });
     }
   };
-  const handleModalOpen = (parent) => {
+  const handleModalOpen = (parent: HTMLElement | null) => {
     if (parent && store.workspaces) {
       const tabid = parent.getAttribute("tabid");
       if (tabid) {
@@ -158,7 +161,10 @@ const useController = (props: DialogProps) => {
       handleModalOpen(parent);
     }
   }, [props.open]);
-  const getPosition = (width_, height_) => {
+  const getPosition = (
+    width_: React.MutableRefObject<number>,
+    height_: React.MutableRefObject<number>
+  ) => {
     const { body } = document;
     if (props.open) {
       const top_ = (body.clientHeight - height_.current - 114) / 2;
@@ -172,7 +178,7 @@ const useController = (props: DialogProps) => {
     () => getPosition(width, height),
     [props.open]
   );
-  const setZIndex = (modal, id) => {
+  const setZIndex = (modal: HTMLElement, id: string) => {
     if (modal.id === id) {
       modal.setAttribute("style", "z-index:1200;");
     } else {
@@ -181,8 +187,10 @@ const useController = (props: DialogProps) => {
   };
   const onMouseDown = () => {
     if (hideBackdrop) {
-      const modals: any = document.getElementsByClassName(classes.hideBackdrop);
-      for (let element of modals) {
+      const modals = document.getElementsByClassName(
+        classes.hideBackdrop
+      ) as HTMLCollectionOf<HTMLElement>;
+      for (const element of Array.from(modals)) {
         setZIndex(element, idModal);
       }
       ButtonEvent("click", { name: "modal focus", container, tile });

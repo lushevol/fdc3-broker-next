@@ -32,11 +32,11 @@ const Field: React.FC<FieldProps> = (props: FieldProps): React.ReactElement => {
             data-testid={`ModalInput-${column.field}-${columnId}`}
             disableClearable
             disabled={column.readOnly ?? record.readOnly}
-            options={column?.valueOptions}
+            options={column.valueOptions ?? []}
             inputValue={inputValue}
             onInputChange={onInputChange}
             autoHighlight
-            getOptionLabel={(option: any) => option}
+            getOptionLabel={(option: string) => option}
             popupIcon={<KeyboardArrowDownIcon />}
             value={fieldValue}
             onChange={onChangeAutoComplete}
@@ -69,15 +69,15 @@ const Field: React.FC<FieldProps> = (props: FieldProps): React.ReactElement => {
             labelPosition="left"
             value={`${fieldValue}`}
             onChange={(e) => {
-              let __value: any = e.target.value;
-              if (["true", "false"].includes(__value)) {
-                __value = __value === "true";
+              let value: string | boolean = String(e.target.value);
+              if (["true", "false"].includes(value)) {
+                value = value === "true";
               }
-              setFieldValue(__value);
+              setFieldValue(value);
             }}
             disabled={column.readOnly ?? record.readOnly}
           >
-            {column?.valueOptions?.map((item) => {
+            {column?.valueOptions?.map((item: string) => {
               return (
                 <MenuItem value={item} key={`${column.field}-${item}`}>
                   {item}

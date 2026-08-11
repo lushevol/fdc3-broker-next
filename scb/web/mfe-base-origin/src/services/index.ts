@@ -4,11 +4,17 @@ import { clearStorageWhenLogout, getEnv } from "../utils/common";
 import { useContext } from "../hooks/provider";
 import { Workspace } from "../hooks/model/workspaces";
 import { findTile } from "../utils/drawer";
+import { LoginRequest } from "../auth/validation";
+
+interface ValidationResponse {
+  result?: boolean;
+}
 
 const useServices = () => {
   const [store, dispacth] = useContext();
-  const login = (data) => postService("/auth/v2/sso/login", { ...data });
-  const loginEntra = (data) =>
+  const login = (data: LoginRequest) =>
+    postService("/auth/v2/sso/login", { ...data });
+  const loginEntra = (data: LoginRequest) =>
     postService("/auth/v3/sso/login", { ...data });
   const logout = () => {
     const arr = [
@@ -24,16 +30,19 @@ const useServices = () => {
   };
   const validate = async () => {
     try {
-      const { data } = await postService("/auth/v2/sso/validate", {
+      const { data } = await postService<ValidationResponse>(
+        "/auth/v2/sso/validate",
+        {
         singleUIAuthorization: store.token,
-      });
+        }
+      );
       if (data?.result) {
         return data?.result;
       }
     } catch (e) {}
     return false;
   };
-  const ssePublish = async (tabId, _payload) => {
+  const ssePublish = async (tabId: string, _payload: unknown) => {
     try {
       if (["LOCAL"].includes(getEnv())) {
         const workspaces = [...(store?.workspaces as Workspace[])];

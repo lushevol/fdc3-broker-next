@@ -1,5 +1,6 @@
 import React from "react";
 import Box from "@mui/material/Box";
+import { GridValueGetterParams } from "@mui/x-data-grid";
 import { FieldProps } from "./interface";
 
 const useController = (props: FieldProps) => {
@@ -7,15 +8,18 @@ const useController = (props: FieldProps) => {
   const value = React.useMemo(
     () =>
       column.valueGetter
-        ? column.valueGetter({ row: record })
+        ? column.valueGetter({ row: record } as GridValueGetterParams)
         : record[column.field],
     [record, column.valueGetter, column.field]
   );
   const [fieldValue, setFieldValue] = React.useState(value);
   const [inputValue, setInputValue] = React.useState("");
-  const onInputChange = React.useCallback((_event: any, newInputValue: any) => {
-    setInputValue(newInputValue);
-  }, []);
+  const onInputChange = React.useCallback(
+    (_event: React.SyntheticEvent, newInputValue: string) => {
+      setInputValue(newInputValue);
+    },
+    []
+  );
   React.useEffect(() => {
     setTimeout(() => {
       onChange(fieldValue, column.field);
@@ -23,7 +27,7 @@ const useController = (props: FieldProps) => {
   }, [fieldValue]);
   React.useEffect(() => {
     const _value = column.valueGetter
-      ? column.valueGetter({ row: record })
+      ? column.valueGetter({ row: record } as GridValueGetterParams)
       : record[column.field];
     setFieldValue(_value);
   }, [resetId]);
@@ -33,13 +37,16 @@ const useController = (props: FieldProps) => {
   );
 
   const onChangeAutoComplete = React.useCallback(
-    (_event: any, newValue: any) => {
+    (_event: React.SyntheticEvent, newValue: unknown) => {
       setFieldValue(newValue);
     },
     []
   );
 
-  const RenderOptions = (props, option: any) => {
+  const RenderOptions = (
+    props: React.HTMLAttributes<HTMLLIElement>,
+    option: string
+  ) => {
     return (
       <Box
         component="li"

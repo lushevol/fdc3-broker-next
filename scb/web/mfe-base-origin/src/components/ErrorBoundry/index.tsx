@@ -6,14 +6,14 @@ import {
 } from "../../hooks/model/root";
 import Fallback from "../FallbackError";
 
-class ErrorBoundary extends Component<ComponentPropsDefault, ErrorState> {
+class ErrorBoundary extends Component<ErrorProps, ErrorState> {
   state: ErrorState = {
     hasError: false,
     error: undefined,
     emailSupport: undefined,
   };
 
-  constructor(props) {
+  constructor(props: ErrorProps) {
     super(props);
     this.state = {
       hasError: false,

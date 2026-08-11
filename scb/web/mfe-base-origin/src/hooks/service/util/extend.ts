@@ -3,9 +3,13 @@ import service from "../config";
 import { getEndPoint } from "./getEndpoint";
 
 export const signal = {
-  extendToken: undefined as any,
+  extendToken: undefined as AbortController | undefined,
 };
-export const extend = async (expiredIn, isOnLogout, token) => {
+export const extend = async (
+  expiredIn: number | undefined,
+  isOnLogout: boolean | undefined,
+  token: string | undefined
+) => {
   if (signal?.extendToken) {
     signal?.extendToken?.abort();
   }

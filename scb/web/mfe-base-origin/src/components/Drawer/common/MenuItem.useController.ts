@@ -1,8 +1,12 @@
 import React from "react";
-import { propsAddTile, Tile as TileProps } from "./interface";
+import {
+  MenuItemProps,
+  propsAddTile,
+  Tile as TileProps,
+} from "./interface";
 
-const useController = (props, tile: TileProps) => {
-  const getParamter = (parameters) =>
+const useController = (props: MenuItemProps, tile: TileProps) => {
+  const getParamter = (parameters: object | undefined) =>
     parameters ? { ...parameters } : undefined;
   const onClick = () => {
     props.addTile({

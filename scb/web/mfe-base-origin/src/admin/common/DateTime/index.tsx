@@ -3,7 +3,11 @@ import ErrorBoundry from "../../../components/ErrorBoundry";
 import { useContext } from "../../../hooks/provider";
 import { DateTimeFormat } from "../../../utils/locale";
 
-const DateTime = (props): ReactElement => {
+interface DateTimeProps {
+  value?: string;
+}
+
+const DateTime = (props: DateTimeProps): ReactElement => {
   const { value } = props;
   const [store] = useContext();
   const date = React.useMemo(() => {

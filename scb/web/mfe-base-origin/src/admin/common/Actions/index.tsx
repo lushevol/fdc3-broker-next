@@ -5,8 +5,18 @@ import UnpublishedIcon from "@mui/icons-material/Unpublished";
 import HistoryIcon from "@mui/icons-material/History";
 import Tooltip from "@mui/material/Tooltip";
 import { GridActionsCellItem } from "@mui/x-data-grid/components/cell/GridActionsCellItem";
+import { AdminRecord } from "../interface";
 
-const Actions = (props) => {
+interface ActionsProps {
+  value: { row: AdminRecord };
+  onOpen: (row: AdminRecord, mode: string) => () => void;
+  onOpenAudit: (row: AdminRecord) => () => void;
+  hideEdit?: string;
+  hideVerify?: string;
+  hideAudit?: string;
+}
+
+const Actions = (props: ActionsProps) => {
   const { value, onOpen, onOpenAudit, hideEdit, hideVerify, hideAudit } = props;
   return [
     <GridActionsCellItem

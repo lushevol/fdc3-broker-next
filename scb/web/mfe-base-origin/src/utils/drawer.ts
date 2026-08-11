@@ -1,18 +1,31 @@
 import { Tile, Tiles } from "../components/Drawer/common/interface";
 import { getHooksBase } from "../hooks/HooksBase";
+import { Entity, Subject } from "../hooks/model/root";
+import { Workspace } from "../hooks/model/workspaces";
+import type { Dispatch, SetStateAction } from "react";
 
-export const findTile = (drawers, workspace) => {
+export const findTile = (
+  drawers: Tiles[] | undefined,
+  workspace: Workspace
+): Tile | undefined => {
+  const container = workspace.containers[0];
+  if (!container) return undefined;
   return findTileConfig(
     drawers,
-    workspace.containers[0].container,
-    workspace.containers[0].module,
-    workspace.containers[0].tile
+    container.container,
+    container.module,
+    container.tile
   );
 };
 
-export const findTileConfig = (drawers, _container, _module, _tile) => {
-  let aggr: any = undefined;
-  drawers?.every((category: Tiles) => {
+export const findTileConfig = (
+  drawers: Tiles[] | undefined,
+  _container: string,
+  _module: string,
+  _tile: string
+): Tile | undefined => {
+  let aggr: Tile | undefined;
+  drawers?.every((category) => {
     category.tiles?.every((tile: Tile) => {
       if (
         tile.container === _container &&
@@ -28,10 +41,13 @@ export const findTileConfig = (drawers, _container, _module, _tile) => {
   return aggr;
 };
 
-export const getSubject = (entities, tile) => {
-  let aggr: any = undefined;
+export const getSubject = (
+  entities: Entity[],
+  tile: Tile
+): Subject | undefined => {
+  let aggr: Subject | undefined;
   entities.every((entity) => {
-    if (entity.name === tile.entity || tile.entity?.includes(entity.name)) {
+    if (tile.entity?.includes(entity.name)) {
       entity.subjects.every((subject) => {
         if (subject.name === tile.subject) {
           aggr = subject;
@@ -45,12 +61,12 @@ export const getSubject = (entities, tile) => {
 };
 
 export const setTabPanel = (
-  value,
-  index,
-  setIsHidden,
-  setIsHidden2,
-  isTabPanelLoaded,
-  setIsTabPanelLoaded
+  value: number,
+  index: number,
+  setIsHidden: Dispatch<SetStateAction<boolean>>,
+  setIsHidden2: Dispatch<SetStateAction<boolean>>,
+  isTabPanelLoaded: boolean,
+  setIsTabPanelLoaded: Dispatch<SetStateAction<boolean>>
 ) => {
   if (value === index) {
     setIsHidden(false);
@@ -67,7 +83,7 @@ export const setTabPanel = (
   }
 };
 
-export const getTile = (workspaces, tabId) => {
+export const getTile = (workspaces: Workspace[], tabId: string) => {
   const { store } = getHooksBase();
   const index = workspaces.findIndex((workspace) => workspace.id === tabId);
   if (index < 0) return undefined;

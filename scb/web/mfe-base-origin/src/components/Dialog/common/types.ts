@@ -11,13 +11,13 @@ export interface DialogTitleProps extends MuiDialogTitleProps {
   isResizeble?: boolean;
   isMax?: boolean;
   disabledClose?: boolean;
-  onClose: (...args) => void;
-  onResize?: (...args) => void;
+  onClose: (...args: unknown[]) => void;
+  onResize?: (...args: unknown[]) => void;
 }
 
 export interface DialogProps extends MuiDialogProps {
   disablePortal?: boolean;
-  onClose?: (...args) => void;
+  onClose?: (...args: unknown[]) => void;
   dividers?: boolean;
   titleComponents?: React.ReactNode;
   actionComponents?: React.ReactNode;

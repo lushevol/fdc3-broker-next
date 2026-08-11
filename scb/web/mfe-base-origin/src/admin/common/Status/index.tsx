@@ -4,7 +4,11 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import DangerousIcon from "@mui/icons-material/Dangerous";
 import Tooltip from "@mui/material/Tooltip";
 
-const Status = (props): ReactElement => {
+interface StatusProps {
+  value?: boolean;
+}
+
+const Status = (props: StatusProps): ReactElement => {
   const { value } = props;
   return (
     <ErrorBoundry>

@@ -31,7 +31,7 @@ export interface User {
   name?: string;
   userId?: string;
   emailId?: string;
-  entitlements?: object;
+  entitlements?: Record<string, Record<string, string[]>>;
   firstName?: string;
   lastName?: string;
   country?: string;

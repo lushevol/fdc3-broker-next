@@ -15,14 +15,23 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": false,
-    "noImplicitAny": false,
+    "strict": true,
     "strictNullChecks": true,
     "allowSyntheticDefaultImports": true,
     "noFallthroughCasesInSwitch": true,
-    "typeRoots": ["./src/@types", "./node_modules/@types"]
+    "baseUrl": ".",
+    "paths": {
+      "@scdevkit/webkit/elements/*": [
+        "../../../sc-dev-web/sc-dev-web/dist/elements/*.d.ts"
+      ]
+    }
   },
   "files": ["src/root.tsx"],
   "include": ["src/**/*"],
-  "exclude": ["*.ts", "*.tsx", "*.json", "*.js", ".jsx"]
+  "exclude": [
+    "dist",
+    "node_modules",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
+  ]
 }

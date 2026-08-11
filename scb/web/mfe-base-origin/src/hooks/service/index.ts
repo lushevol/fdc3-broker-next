@@ -1,4 +1,4 @@
-import { AxiosRequestConfig, AxiosResponse } from "axios";
+import { AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
 import { getHooksBase } from "../HooksBase";
 import service from "./config";
 import { getEndPoint } from "./util/getEndpoint";
@@ -50,37 +50,45 @@ export const relogin = () => {
     });
 };
 
-const putService = <T = any, R = AxiosResponse<T>, D = any>(
+const putService = <T = unknown, D = unknown>(
   path: string,
   data: D,
   config?: AxiosRequestConfig<D>
-) => {
-  return service.put<T, R, D>(getEndPoint(path), data, config);
+): AxiosPromise<T, D> => {
+  return service.put<T, AxiosResponse<T, D>, D>(getEndPoint(path), data, config);
 };
 
-const postService = <T = any, R = AxiosResponse<T>, D = any>(
+const postService = <T = unknown, D = unknown>(
   path: string,
   data: D,
   config?: AxiosRequestConfig<D>
-) => {
-  return service.post<T, R, D>(getEndPoint(path), data, config);
+): AxiosPromise<T, D> => {
+  return service.post<T, AxiosResponse<T, D>, D>(
+    getEndPoint(path),
+    data,
+    config
+  );
 };
 
-const getService = <T = any, R = AxiosResponse<T>, D = any>(
+const getService = <T = unknown, D = unknown>(
   path: string,
   config?: AxiosRequestConfig<D>
-) => {
-  return service.get<T, R, D>(getEndPoint(path), config);
+): AxiosPromise<T, D> => {
+  return service.get<T, AxiosResponse<T, D>, D>(getEndPoint(path), config);
 };
 
-const deleteService = <T = any, R = AxiosResponse<T>, D = any>(
+const deleteService = <T = unknown, D = unknown>(
   path: string,
   config?: AxiosRequestConfig<D>
-) => {
-  return service.delete<T, R, D>(getEndPoint(path), config);
+): AxiosPromise<T, D> => {
+  return service.delete<T, AxiosResponse<T, D>, D>(getEndPoint(path), config);
 };
 
-const patchService = (path, data, config?: ConfigProps) => {
+const patchService = <T = unknown, D = unknown>(
+  path: string,
+  data: D,
+  config?: ConfigProps
+): AxiosPromise<T, D> => {
   return service.patch(getEndPoint(path), data, config);
 };
 

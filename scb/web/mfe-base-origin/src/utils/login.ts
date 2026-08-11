@@ -1,7 +1,7 @@
 import { AxiosResponse } from "axios";
 import { getHooksBase } from "../hooks/HooksBase";
 import { User } from "../hooks/model/root";
-import { ActionType } from "../hooks/reducer/util/ActionType";
+import { ActionType, IAction } from "../hooks/reducer/util/ActionType";
 import {
   clearStorageWhenLogout,
   getJWTPayload,
@@ -9,8 +9,10 @@ import {
   storeData,
 } from "./common";
 import { getEntities } from "./entities";
+import type { Dispatch } from "react";
+import { Entity, Tiles } from "../hooks/model/root";
 
-export const setAuthorization = (token) => {
+export const setAuthorization = (token: string) => {
   const { baseDispatch } = getHooksBase();
   baseDispatch({
     type: ActionType.SET_TOKEN,
@@ -106,7 +108,7 @@ export const handleDrawers = (response: AxiosResponse) => {
   }
 };
 
-export const setRefreshToken = (refreshToken) => {
+export const setRefreshToken = (refreshToken: string) => {
   const { baseDispatch } = getHooksBase();
   baseDispatch({
     type: ActionType.SET_REFRESH_TOKEN,
@@ -138,10 +140,14 @@ export const handleEntitlementsToken = (response: AxiosResponse) => {
   }
 };
 
-export const handleLoginEntities = (entities_, dispatch, drawers) => {
+export const handleLoginEntities = (
+  entities_: Entity[] | undefined,
+  dispatch: Dispatch<IAction>,
+  drawers: Tiles[] | undefined
+) => {
   let isValid = false;
   const entities = Object.keys(getEntities(drawers));
-  entities_?.every((curr) => {
+  entities_?.every((curr: Entity) => {
     if (entities.includes(curr.name)) {
       isValid = true;
     }

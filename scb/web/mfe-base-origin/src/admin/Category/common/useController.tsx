@@ -1,7 +1,6 @@
 import React from "react";
 import { useContext } from "../../../hooks/provider";
 import { CategoryProps } from "./interface";
-import { GridColDef } from "@mui/x-data-grid";
 import useServices from "../services/useServices";
 import useTableDetail from "./useTableDetail";
 import Status from "../../common/Status";
@@ -11,6 +10,8 @@ import useDispatcher from "../../../hooks/dispathcer";
 import { getAdminModuleEms2Role } from "../../common/utils";
 import { Entity } from "../../../hooks/model/root";
 import DateTime from "../../common/DateTime";
+import { AdminRecord } from "../../common/interface";
+import { TableColumn } from "../../../components/TableDetail/common/interface";
 
 const useController = (props: CategoryProps) => {
   const [store] = useContext();
@@ -65,7 +66,7 @@ const useController = (props: CategoryProps) => {
     const copied = JSON.parse(JSON.stringify(data));
     return copied;
   }, [data]);
-  const columns: GridColDef[] = React.useMemo(
+  const columns = React.useMemo<TableColumn[]>(
     () =>
       [
         {
@@ -136,11 +137,11 @@ const useController = (props: CategoryProps) => {
           width: 100,
           type: "number",
         },
-      ] as GridColDef[],
+      ],
     [store?.timeType, ems2Role]
   );
   const onCreateNew = React.useCallback(() => {
-    const temp: any = columns.reduce((aggr, item) => {
+    const temp = columns.reduce<AdminRecord>((aggr, item) => {
       if (item.type !== "actions") {
         aggr[item.field] = "";
       }

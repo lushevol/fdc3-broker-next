@@ -1,7 +1,11 @@
 import React from "react";
 import ReactWrapper from "../../utils/ReactWrapper";
 
-const ScWebkit = (props) => {
+interface ScWebkitProps extends React.HTMLAttributes<HTMLElement> {
+  component: string;
+}
+
+const ScWebkit = (props: ScWebkitProps) => {
   const { component, ...rest } = props;
   const ImportedComponent = React.useMemo(() => {
     const registry = customElements.get(component);

@@ -333,6 +333,7 @@ const getLightTheme = (isNewLayout = false) => ({
   MuiPaper: {},
   borderColor: "rgba(224, 224, 224, 1)",
   backgroundColorOddRow: "rgba(49, 95, 99, 0.05)",
+  backgroundColorEvenRow: "transparent",
   backgroundColorSelectedRow: "rgba(49, 95, 99, 0.15)",
 });
 

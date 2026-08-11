@@ -64,7 +64,7 @@ const Table: React.FC<TableProps> = (props: TableProps): ReactElement => {
             toolbar: CustomToolbar,
           }}
         />
-        {!!openDetail && (
+        {!!openDetail && record && (
           <TableDetail
             title={`${record.mode} ID: ${record.id}`}
             resetId={resetId}

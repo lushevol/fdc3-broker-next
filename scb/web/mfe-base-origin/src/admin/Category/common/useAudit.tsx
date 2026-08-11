@@ -4,22 +4,23 @@ import { GridColDef } from "@mui/x-data-grid";
 import useServices from "../services/useServices";
 import { DateTimeFormat } from "../../../utils/locale";
 import Status from "../../common/Status";
+import { AdminRecord } from "../../common/interface";
 
 const useAudit = () => {
   const [store] = useContext();
   const { getCategoryAudit } = useServices();
-  const [category, setCategory] = React.useState();
-  const [data, setData] = React.useState<any[]>([]);
+  const [category, setCategory] = React.useState<AdminRecord>();
+  const [data, setData] = React.useState<AdminRecord[]>([]);
   const [openAudit, setOpenAudit] = React.useState<boolean>(true);
   const onOpenAudit = React.useCallback(
-    (row) => () => {
-      const temp = JSON.parse(JSON.stringify(row));
+    (row: AdminRecord) => () => {
+      const temp = JSON.parse(JSON.stringify(row)) as AdminRecord;
       setCategory(temp);
     },
     []
   );
   const getAuditData = React.useCallback(
-    (_category) => {
+    (_category: AdminRecord | undefined) => {
       if (_category && store.entitlementsToken) {
         getCategoryAudit(store.entitlementsToken, _category).then((_data) => {
           _data = _data.map((item) => {
@@ -37,7 +38,7 @@ const useAudit = () => {
     getAuditData(category);
   }, [category]);
   const auditRows = React.useMemo(() => {
-    const copied = JSON.parse(JSON.stringify(data));
+    const copied = JSON.parse(JSON.stringify(data)) as AdminRecord[];
     return copied;
   }, [data]);
   const auditColumns: GridColDef[] = React.useMemo(

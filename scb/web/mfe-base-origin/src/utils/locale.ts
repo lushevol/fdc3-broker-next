@@ -1,6 +1,6 @@
 export const DateTimeFormat = (
-  timeType,
-  value,
+  timeType: string | undefined,
+  value: Date | number,
   locale = "en",
   dateStyle: "medium" | "long" | "full" | "short" | undefined = "medium",
   timeStyle: "medium" | "long" | "full" | "short" | undefined = "full"
@@ -13,8 +13,8 @@ export const DateTimeFormat = (
 };
 
 export const DateFormat = (
-  timeType,
-  value,
+  timeType: string | undefined,
+  value: Date | number,
   locale = "en",
   dateStyle: "medium" | "long" | "full" | "short" | undefined = "medium"
 ) => {

@@ -27,7 +27,7 @@ const useController = () => {
       clearInterval(interval);
     };
   }, []);
-  const sliceTime = (input) => ("0" + input).slice(-2);
+  const sliceTime = (input: number) => ("0" + input).slice(-2);
 
   const getTime = () => {
     if (store.timeType?.toUpperCase() === "UTC") {

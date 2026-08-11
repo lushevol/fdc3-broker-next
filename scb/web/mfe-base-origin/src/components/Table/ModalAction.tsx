@@ -1,7 +1,17 @@
 import React, { ReactElement } from "react";
 import LoadingButton from "../LoadingButton";
+import { AdminRecord } from "../../admin/common/interface";
 
-const ModalAction = (props): ReactElement => {
+interface ModalActionProps {
+  isLoading?: boolean;
+  record: AdminRecord;
+  onSave: () => void;
+  onUpdate: () => void;
+  onVerify: () => void;
+  onDeactivate: () => void;
+}
+
+const ModalAction = (props: ModalActionProps): ReactElement => {
   const { isLoading, record, onSave, onUpdate, onVerify, onDeactivate } = props;
 
   switch (record.mode) {

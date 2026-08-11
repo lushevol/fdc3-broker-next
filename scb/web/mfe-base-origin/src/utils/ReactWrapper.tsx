@@ -1,5 +1,36 @@
-import { createElement, forwardRef, createRef, useEffect } from "react";
-export const setAttribute = (ref, attr, value) => {
+import {
+  createElement,
+  forwardRef,
+  createRef,
+  useEffect,
+  CSSProperties,
+  ElementType,
+  ReactNode,
+  Ref,
+  RefObject,
+} from "react";
+
+type ElementRef = RefObject<HTMLElement>;
+type EventHandlerEntry = [event: string, handler: EventListener];
+
+type WebComponentType = string | ElementType;
+
+interface WrappedProps {
+  children?: ReactNode;
+  style?: CSSProperties;
+  [key: string]: unknown;
+}
+
+interface WrapperProps extends WrappedProps {
+  WC: WebComponentType;
+  innerRef?: Ref<HTMLElement>;
+}
+
+export const setAttribute = (
+  ref: ElementRef | undefined,
+  attr: string,
+  value: string | number | boolean
+) => {
   if (ref?.current) {
     if (value === false) {
       ref.current.removeAttribute(attr);
@@ -8,13 +39,21 @@ export const setAttribute = (ref, attr, value) => {
     ref.current.setAttribute(attr, value.toString());
   }
 };
-export const setEvent = (ref, eventHandlers, event, value) => {
+export const setEvent = (
+  ref: ElementRef | undefined,
+  eventHandlers: EventHandlerEntry[],
+  event: string,
+  value: EventListener
+) => {
   eventHandlers.push([event, value]);
   if (ref?.current) {
     ref.current.addEventListener(event, value);
   }
 };
-export const clearEventHandlers = (ref, eventHandlers) => {
+export const clearEventHandlers = (
+  ref: ElementRef | undefined,
+  eventHandlers: EventHandlerEntry[]
+) => {
   eventHandlers.forEach(([event, handler]) => {
     if (ref?.current) {
       ref.current.removeEventListener(event, handler);
@@ -23,8 +62,8 @@ export const clearEventHandlers = (ref, eventHandlers) => {
   eventHandlers = [];
   return eventHandlers;
 };
-const WrapperComp = (props, ref) => {
-  let eventHandlers: any[] = [];
+const WrapperComp = (props: WrapperProps, ref: ElementRef) => {
+  let eventHandlers: EventHandlerEntry[] = [];
   useEffect(() => {
     update();
     return () => {
@@ -39,7 +78,7 @@ const WrapperComp = (props, ref) => {
         return undefined;
       }
       if (prop.toLowerCase() === "classname" && ref?.current) {
-        return (ref.current.className = val);
+        return (ref.current.className = String(val));
       }
       if (
         typeof val === "string" ||
@@ -55,24 +94,39 @@ const WrapperComp = (props, ref) => {
           const str = prop.replace(reg, function (a, b) {
             return `-${b.toLowerCase()}`;
           });
-          return setEvent(ref, eventHandlers, str.substring(3), val);
+          return setEvent(
+            ref,
+            eventHandlers,
+            str.substring(3),
+            val as EventListener
+          );
         }
         if (prop.match(/^on-[a-z]/)) {
-          return setEvent(ref, eventHandlers, prop.substring(3), val);
+          return setEvent(
+            ref,
+            eventHandlers,
+            prop.substring(3),
+            val as EventListener
+          );
         }
       }
     });
   };
   return createElement(props.WC, { ref, style: props.style }, props.children);
 };
-export const Wrapper = (props) => {
-  const ref = props.innerRef ?? createRef();
+export const Wrapper = (props: WrapperProps) => {
+  const ref = props.innerRef ?? createRef<HTMLElement>();
   if (typeof ref === "function" || ref === null) return null;
   return WrapperComp(props, ref);
 };
-const ReactWrapper = (WC) => {
-  return forwardRef((props: any, ref) =>
-    createElement(Wrapper, { WC, innerRef: ref, ...props }, props.children)
+const ReactWrapper = (WC: WebComponentType) => {
+  return forwardRef<HTMLElement, WrappedProps>(
+    (props, ref) =>
+    createElement(
+      Wrapper,
+      { WC, innerRef: ref, ...props },
+      props.children as ReactNode
+    )
   );
 };
 

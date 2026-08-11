@@ -29,14 +29,16 @@ const useController = () => {
   const [ready, setReady] = React.useState(false);
   const [validateWorkspaceReady, setValidateWorkspaceReady] =
     React.useState(false);
-  const handleChange = (event, newValue: number) => {
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    const target = event.target as HTMLElement;
     if (
-      !event.target?.parentElement?.parentElement?.id?.includes(
+      !target.parentElement?.parentElement?.id?.includes(
         "deleteWorkspace-"
       )
     ) {
       const workspaces = [...(store?.workspaces as Workspace[])];
       const workspace = workspaces[newValue - 1];
+      if (!workspace) return;
       let container = "base";
       let tile = "home";
       let title = workspace.label;
@@ -119,18 +121,25 @@ const useController = () => {
     dispacthErrorMessage(undefined);
   };
 
-  const edit = (item: Workspace) => (event) => {
+  const edit = (item: Workspace) => (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const workspaces = [...(store?.workspaces as Workspace[])];
     const index = workspaces.findIndex((w) => w.id === item.id);
     workspaces[index].label = event.target.value;
     dispacthWorkspaces(workspaces);
   };
 
-  const updateValue = (workspaces, index_, value_) => {
+  const updateValue = (
+    workspaces: Workspace[],
+    index_: number,
+    value_: number
+  ) => {
     if (index_ + 1 < value_) {
       setValue((v) => v - 1);
     } else if (index_ + 1 === value_) {
-      dispacthCurrentWorkspace(workspaces[index_ - 1]);
+      const nextWorkspace = workspaces[index_ - 1] ?? workspaces[index_ + 1];
+      if (nextWorkspace) dispacthCurrentWorkspace(nextWorkspace);
     }
   };
   const remove = (item: Workspace) => (event: React.MouseEvent) => {
@@ -159,15 +168,15 @@ const useController = () => {
   const refreshTab = (item: Workspace) => (event: React.MouseEvent) => {
     event.stopPropagation();
     refreshTabUtil(
-      store?.refreshTab,
-      store?.workspaces,
+      store?.refreshTab as Record<string, () => void> | undefined,
+      store?.workspaces as Workspace[] | undefined,
       item.id,
       setDetail,
       ButtonEvent
     );
   };
 
-  const focus = (id) => () => {
+  const focus = (id: number) => () => {
     const workspaces = [...(store?.workspaces as Workspace[])];
     const workspace = workspaces[id - 1];
     let container = "base";
@@ -192,7 +201,9 @@ const useController = () => {
           store.drawers
         );
         dispacthWorkspaces(validWorkspaces);
-        dispacthCurrentWorkspace(validWorkspaces[0]);
+        if (validWorkspaces[0]) {
+          dispacthCurrentWorkspace(validWorkspaces[0]);
+        }
       }
       setValidateWorkspaceReady(true);
     }
