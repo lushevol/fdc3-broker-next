@@ -5,6 +5,7 @@ import { renderWithProviders, userEvent } from "src/test/test-utils";
 import ThemeProvider from "../../../Root/common/component/MfeThemeProvider";
 import NettingPreviewDialog from "./NetCashflowDialog";
 import { mockRequestParams } from "./NetCashflowDialog.test";
+import * as netCashflowDialogUtils from "./NetCashflowDialogUtils";
 
 vi.mock("Import/ratancomponents", () => {
     const mockComponent = ({
@@ -28,7 +29,7 @@ vi.mock("Import/ratancomponents", () => {
     }
 })
 
-vi.spyOn(require("./NetCashflowDialogUtils"), "getNettingPreviewApi").mockImplementation(() => {
+vi.spyOn(netCashflowDialogUtils, "getNettingPreviewApi").mockImplementation(() => {
     return vi.fn().mockImplementation(() => {
         return Promise.resolve({
             status: 200,
@@ -85,7 +86,7 @@ describe("NettingPreviewDialog", () => {
       userEvent.click(rootClose!);
     });
     it("query2", () => {
-        vi.spyOn(require("./NetCashflowDialogUtils"), "getNettingPreviewApi").mockImplementation(() => {
+        vi.spyOn(netCashflowDialogUtils, "getNettingPreviewApi").mockImplementation(() => {
             return vi.fn().mockImplementation(() => {
                 return Promise.resolve({
                     status: 500,
@@ -124,7 +125,7 @@ describe("NettingPreviewDialog", () => {
     });
     
     it("query3", () => {
-        vi.spyOn(require("./NetCashflowDialogUtils"), "getNettingPreviewApi").mockImplementation(() => {
+        vi.spyOn(netCashflowDialogUtils, "getNettingPreviewApi").mockImplementation(() => {
             return vi.fn().mockImplementation(() => {
                 return Promise.resolve({
                     status: 200,
@@ -167,7 +168,7 @@ describe("NettingPreviewDialog", () => {
     });
     
     it("query4", () => {
-        vi.spyOn(require("./NetCashflowDialogUtils"), "getNettingPreviewApi").mockImplementation(() => {
+        vi.spyOn(netCashflowDialogUtils, "getNettingPreviewApi").mockImplementation(() => {
             return vi.fn().mockImplementation(() => {
                 return Promise.resolve({
                     status: 200,
@@ -213,7 +214,7 @@ describe("NettingPreviewDialog", () => {
     });
     
     it("query failed", () => {
-        vi.spyOn(require("./NetCashflowDialogUtils"), "getNettingPreviewApi").mockImplementation(() => {
+        vi.spyOn(netCashflowDialogUtils, "getNettingPreviewApi").mockImplementation(() => {
             return vi.fn().mockImplementation(() => {
               return Promise.reject(new Error("mock getting netting preview api failed"))
             });

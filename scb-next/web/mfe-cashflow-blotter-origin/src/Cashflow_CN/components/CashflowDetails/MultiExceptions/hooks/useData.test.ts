@@ -8,10 +8,9 @@ import { featureScopedEnabled } from "src/Root/common/utils/featureFlagControlle
 import { generateEmptyVostro } from "../common/utils";
 import { HistoryDataType } from "../components/ActionHistory/interface";
 import useData, { ActionHistoryKeyActions, findMakerFromHistory, Halt_States, handleMissMatchedException, histroyDataHandling, histroyDataHandlingByPesetAction } from "./useData";
+import cashflowDetailsData from "../data/cashflowDetails.json";
 
 vi.mock("src/Root/common/utils/featureFlagController");
-
-const cashflowDetailsData = require("../data/cashflowDetails.json");
 
 beforeEach(() => {
   // @ts-ignore

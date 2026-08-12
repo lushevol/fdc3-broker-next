@@ -4,7 +4,7 @@ import {
 } from "@testing-library/react";
 import cloneDeep from "lodash/cloneDeep";
 import _merge from "lodash/merge";
-import { ForwardedRef } from "react";
+import React, { ForwardedRef } from "react";
 import { useDispatch } from "react-redux";
 import { renderWithProviders, userEvent } from "src/test/test-utils";
 
@@ -45,7 +45,6 @@ vi.mock("src/Cashflow_CN/components/CommonCommentAction", async () => {
 });
 
 vi.mock("src/Cashflow_CN/components/CashflowDetails/MultiExceptions/components/Affirmation", async () => {
-  const React = require("react");
   const mockComponent = React.forwardRef((_, ref: ForwardedRef<any>) => {
     if (ref && typeof ref === "object" && "current" in ref) {
       ref.current = {

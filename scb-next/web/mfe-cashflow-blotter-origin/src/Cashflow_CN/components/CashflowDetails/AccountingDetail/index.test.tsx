@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 
 import { AccountingDetail } from "./index";
-const rowDetails = require('../data/cashflows.json');
+import rowDetails from '../data/cashflows.json';
 
 afterAll(() => {
   vi.clearAllMocks();

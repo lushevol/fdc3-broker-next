@@ -96,7 +96,7 @@ describe("CashflowDataGrid component", () => {
       return <section data-testid="advanced-search">{props.children}</section>;
     });
 
-            vi.spyOn(require("src/Root/import/ratancomponents"), "hydrate").mockReturnValue({
+    vi.mocked(hydrate).mockReturnValue({
         rules: [
           {
             field: "Country",
@@ -147,7 +147,7 @@ describe("CashflowDataGrid component", () => {
     });
     let SelectCalled = 0;
 
-        vi.spyOn(require("src/Root/import/ratancomponents"), "hydrate").mockReturnValue({
+    vi.mocked(hydrate).mockReturnValue({
       rules: [
         { field: "Cashflow.Payment_Date", value: "20250202", operator: "=" },
         { field: "Entity.Booking_Entity_SCI_FMID", value: "test2", operator: "=" },

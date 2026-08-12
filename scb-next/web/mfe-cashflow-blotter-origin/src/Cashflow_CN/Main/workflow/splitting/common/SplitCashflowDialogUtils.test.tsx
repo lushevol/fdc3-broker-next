@@ -2,6 +2,9 @@ import { act, renderHook } from "@testing-library/react";
 import { message } from "antd";
 import { MessageInstance } from "antd/es/message/interface";
 import { mockCashflow1 } from "src/Cashflow_CN/test/mockData/cashflow";
+import * as cashflowServices from "../../../../services";
+import * as graphqlServices from "src/Cashflow_CN/services/graphql";
+import * as splitUtils from "./utils";
 
 import { InputStatusType, SplitActionType, SplitCashflowState, SplitValidationArrItem } from "./interface";
 import {
@@ -78,7 +81,7 @@ describe("handlePreCheckAmount", () => {
 
 
   it("should pass if for complex amount split", () => {
-    vi.spyOn(require("./utils"), "isAmountAEqualB").mockImplementationOnce(() => true);
+    vi.spyOn(splitUtils, "isAmountAEqualB").mockImplementationOnce(() => true);
 
     const result = handlePreCheckAmount(
       [
@@ -455,11 +458,11 @@ describe("useQuerySplitting", () => {
 
     const promise1 = Promise.resolve({ precision: 2, type: "ROUNDING_OFF" });
     jest
-      .spyOn(require("../../../../services"), "getCurrencyRounding")
+      .spyOn(cashflowServices, "getCurrencyRounding")
       .mockResolvedValue(promise1);
     const promise2 = Promise.resolve({ cashflowUltraQuery: { results: [mockCashflow1] } });
     jest
-      .spyOn(require("src/Cashflow_CN/services/graphql"), "queryCashflow")
+      .spyOn(graphqlServices, "queryCashflow")
       .mockResolvedValue(promise2);
 
     const { result } = renderHook(() => useQuerySplitting({ messageApi: mockMessageApi }));
@@ -488,11 +491,11 @@ describe("useQuerySplitting", () => {
 
     const promise1 = Promise.resolve({ precision: 2, type: "ROUNDING_OFF" });
     jest
-      .spyOn(require("../../../../services"), "getCurrencyRounding")
+      .spyOn(cashflowServices, "getCurrencyRounding")
       .mockResolvedValue(promise1);
     const promise2 = Promise.resolve({ cashflowUltraQuery: { results: [mockCashflow1] } });
     jest
-      .spyOn(require("src/Cashflow_CN/services/graphql"), "queryCashflow")
+      .spyOn(graphqlServices, "queryCashflow")
       .mockResolvedValue(promise2);
 
     const { result } = renderHook(() => useQuerySplitting({ messageApi: mockMessageApi }));
@@ -529,12 +532,12 @@ describe("useQuerySplitting", () => {
 
     const promise1 = Promise.resolve({ precision: 2, type: "ROUNDING_OFF" });
     jest
-      .spyOn(require("../../../../services"), "getCurrencyRounding")
+      .spyOn(cashflowServices, "getCurrencyRounding")
       .mockResolvedValue(promise1);
 
     const promise2 = Promise.resolve({ cashflowUltraQuery: { results: [] } });
     jest
-      .spyOn(require("src/Cashflow_CN/services/graphql"), "queryCashflow")
+      .spyOn(graphqlServices, "queryCashflow")
       .mockResolvedValue(promise2);
 
 
@@ -560,11 +563,11 @@ describe("useQuerySplitting", () => {
 
     const promise1 = Promise.resolve(null);
     jest
-      .spyOn(require("../../../../services"), "getCurrencyRounding")
+      .spyOn(cashflowServices, "getCurrencyRounding")
       .mockResolvedValue(promise1);
     const promise2 = Promise.resolve({ cashflowUltraQuery: { results: [mockCashflow1] } });
     jest
-      .spyOn(require("src/Cashflow_CN/services/graphql"), "queryCashflow")
+      .spyOn(graphqlServices, "queryCashflow")
       .mockResolvedValue(promise2);
 
     const { result } = renderHook(() => useQuerySplitting({ messageApi: mockMessageApi }));
@@ -591,11 +594,11 @@ describe("useQuerySplitting", () => {
 
     const promise1 = Promise.resolve({ precision: 2, type: "ROUNDING_OFF" });
     jest
-      .spyOn(require("../../../../services"), "getCurrencyRounding")
+      .spyOn(cashflowServices, "getCurrencyRounding")
       .mockResolvedValue(promise1);
     // const promise2 = Promise.reject(new Error("fetch error"))
     jest
-      .spyOn(require("src/Cashflow_CN/services/graphql"), "queryCashflow")
+      .spyOn(graphqlServices, "queryCashflow")
       .mockRejectedValue(new Error("fetch error"));
 
     const { result } = renderHook(() => useQuerySplitting({ messageApi: mockMessageApi }));
@@ -742,4 +745,3 @@ describe("tryAddManualSplitRow", () => {
   });
 
 });
-

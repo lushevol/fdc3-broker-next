@@ -3,11 +3,12 @@ import { ReduxProviderWrapper, renderHook } from "@Test/test-utils";
 import cloneDeep from "lodash/cloneDeep";
 import React from "react";
 import { act } from "react-dom/test-utils";
+import * as commonUtils from "../common/utils";
+import * as cashflowServices from "../../../../services/index";
+import cashflowDetailsData from "../data/cashflowDetails.json";
 
 import { ExceptionCategory } from "../common/interface";
 import useData from "./useData";
-
-const cashflowDetailsData = require("../data/cashflowDetails.json") as GraphqlCashflowDetails;
 
 afterEach(() => {
   vi.clearAllMocks();
@@ -316,7 +317,7 @@ describe("hasHighRiskExceptionsButNoPermission", () => {
         Status: "PENDING_VERIFICATION",
       },
     ];
-    vi.spyOn(require("../common/utils"), "hasHighRiskExceptionPermission").mockReturnValue(false);
+    vi.spyOn(commonUtils, "hasHighRiskExceptionPermission").mockReturnValue(false);
 
     const store = configureStore({
       reducer: {
@@ -355,7 +356,7 @@ describe("hasHighRiskExceptionsButNoPermission", () => {
         Status: "PENDING_VERIFICATION",
       },
     ];
-    vi.spyOn(require("../common/utils"), "hasHighRiskExceptionPermission").mockReturnValue(true);
+    vi.spyOn(commonUtils, "hasHighRiskExceptionPermission").mockReturnValue(true);
 
     const store = configureStore({
       reducer: {
@@ -394,7 +395,7 @@ describe("hasHighRiskExceptionsButNoPermission", () => {
         Status: "PENDING_VERIFICATION",
       },
     ];
-    vi.spyOn(require("../common/utils"), "hasHighRiskExceptionPermission").mockReturnValue(false);
+    vi.spyOn(commonUtils, "hasHighRiskExceptionPermission").mockReturnValue(false);
 
     const store = configureStore({
       reducer: {
@@ -758,7 +759,7 @@ describe("handleSelectVostroRecord", () => {
     };
 
     const mockRevertSSI = vi.fn().mockReturnValue(mockRecord);
-    vi.spyOn(require("../common/utils"), "revertSSI").mockImplementation(mockRevertSSI);
+    vi.spyOn(commonUtils, "revertSSI").mockImplementation(mockRevertSSI);
     const store = configureStore({
       reducer: {
         splittingWorkflow: createReducer({
@@ -805,7 +806,7 @@ describe("handleSelectVostroRecord", () => {
     };
 
     const mockRevertSSI = vi.fn().mockReturnValue(mockRecord);
-    vi.spyOn(require("../common/utils"), "revertSSI").mockImplementation(mockRevertSSI);
+    vi.spyOn(commonUtils, "revertSSI").mockImplementation(mockRevertSSI);
 
 
     const store = configureStore({
@@ -845,7 +846,7 @@ describe("handleSelectVostroRecord", () => {
     const mockRecord = {};
 
     const mockRevertSSI = vi.fn().mockReturnValue({ vostro: {} });
-    vi.spyOn(require("../common/utils"), "revertSSI").mockImplementation(mockRevertSSI);
+    vi.spyOn(commonUtils, "revertSSI").mockImplementation(mockRevertSSI);
 
 
     const store = configureStore({
@@ -892,7 +893,7 @@ describe("handleSelectVostroRecord", () => {
     const mockRevertSSI = vi.fn().mockImplementation(() => {
       throw new Error("Error in revertSSI");
     });
-    vi.spyOn(require("../common/utils"), "revertSSI").mockImplementation(mockRevertSSI);
+    vi.spyOn(commonUtils, "revertSSI").mockImplementation(mockRevertSSI);
 
     const store = configureStore({
       reducer: {
@@ -935,7 +936,7 @@ describe("handleSelectNostroRecord", () => {
     };
 
     const mockRevertSSI = vi.fn().mockReturnValue(mockRecord);
-    vi.spyOn(require("../common/utils"), "revertSSI").mockImplementation(mockRevertSSI);
+    vi.spyOn(commonUtils, "revertSSI").mockImplementation(mockRevertSSI);
 
 
     const store = configureStore({
@@ -980,7 +981,7 @@ describe("handleSelectNostroRecord", () => {
     };
 
     const mockRevertSSI = vi.fn().mockReturnValue(mockRecord);
-    vi.spyOn(require("../common/utils"), "revertSSI").mockImplementation(mockRevertSSI);
+    vi.spyOn(commonUtils, "revertSSI").mockImplementation(mockRevertSSI);
 
     const store = configureStore({
       reducer: {
@@ -1018,7 +1019,7 @@ describe("handleSelectNostroRecord", () => {
     const mockRecord = {};
 
     const mockRevertSSI = vi.fn().mockReturnValue({ nostro: {} });
-    vi.spyOn(require("../common/utils"), "revertSSI").mockImplementation(mockRevertSSI);
+    vi.spyOn(commonUtils, "revertSSI").mockImplementation(mockRevertSSI);
 
     const store = configureStore({
       reducer: {
@@ -1054,7 +1055,7 @@ describe("handleSelectNostroRecord", () => {
 
   it("should handle a null record gracefully", () => {
     const mockRevertSSI = vi.fn().mockReturnValue({ nostro: null });
-    vi.spyOn(require("../common/utils"), "revertSSI").mockImplementation(mockRevertSSI);
+    vi.spyOn(commonUtils, "revertSSI").mockImplementation(mockRevertSSI);
 
     const store = configureStore({
       reducer: {
@@ -1094,7 +1095,7 @@ describe("handleSelectNostroRecord", () => {
     const mockRevertSSI = vi.fn().mockImplementation(() => {
       throw new Error("Error in revertSSI");
     });
-    vi.spyOn(require("../common/utils"), "revertSSI").mockImplementation(mockRevertSSI);
+    vi.spyOn(commonUtils, "revertSSI").mockImplementation(mockRevertSSI);
 
     const store = configureStore({
       reducer: {
@@ -1179,7 +1180,7 @@ describe("hasAuthLimit", () => {
       },
     } as any;
 
-    vi.spyOn(require("../../../../services/index"), "checkAuthLimit").mockResolvedValue({ success: true });
+    vi.spyOn(cashflowServices, "checkAuthLimit").mockResolvedValue({ success: true });
 
     const store = configureStore({
       reducer: {
@@ -1222,7 +1223,7 @@ describe("hasAuthLimit", () => {
       },
     } as any;
 
-    vi.spyOn(require("../../../../services/index"), "checkAuthLimit").mockResolvedValue({ success: false });
+    vi.spyOn(cashflowServices, "checkAuthLimit").mockResolvedValue({ success: false });
 
     const store = configureStore({
       reducer: {
@@ -1265,7 +1266,7 @@ describe("hasAuthLimit", () => {
       },
     } as any;
 
-    vi.spyOn(require("../../../../services/index"), "checkAuthLimit").mockRejectedValue(new Error("Network error"));
+    vi.spyOn(cashflowServices, "checkAuthLimit").mockRejectedValue(new Error("Network error"));
 
     const store = configureStore({
       reducer: {
@@ -1306,7 +1307,7 @@ describe("hasAuthLimit", () => {
       },
     } as any;
 
-    vi.spyOn(require("../../../../services/index"), "checkAuthLimit").mockResolvedValue({ success: true });
+    vi.spyOn(cashflowServices, "checkAuthLimit").mockResolvedValue({ success: true });
 
     const store = configureStore({
       reducer: {
@@ -1752,7 +1753,7 @@ describe("initSIData", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(require("../common/utils"), "revertSSI").mockReturnValue({
+    vi.spyOn(commonUtils, "revertSSI").mockReturnValue({
       vostro: mockStampedVostro,
       nostro: mockStampedNostro,
     });
@@ -2343,7 +2344,7 @@ describe("initSIData", () => {
   });
 
   it("should handle mismatched exceptions for visitor role", () => {
-    vi.spyOn(require("../common/utils"), "getUserProfile").mockReturnValue("NonePermission");
+    vi.spyOn(commonUtils, "getUserProfile").mockReturnValue("NonePermission");
     const cashflowDetails = {
       ...mockCashflowDetails,
       ratanException: [
@@ -2403,7 +2404,7 @@ describe("initSIData", () => {
   });
 
   it("should handle missing vostro exceptions for visitor role", () => {
-    vi.spyOn(require("../common/utils"), "getUserProfile").mockReturnValue("NonePermission");
+    vi.spyOn(commonUtils, "getUserProfile").mockReturnValue("NonePermission");
     const cashflowDetails = {
       ...mockCashflowDetails,
       ratanException: [
@@ -2463,7 +2464,7 @@ describe("initSIData", () => {
   });
 
   it("should handle other exceptions for visitor role", () => {
-    vi.spyOn(require("../common/utils"), "getUserProfile").mockReturnValue("NonePermission");
+    vi.spyOn(commonUtils, "getUserProfile").mockReturnValue("NonePermission");
     const cashflowDetails = {
       ...mockCashflowDetails,
       ratanException: [

@@ -4,6 +4,7 @@ import {
     useAppDispatch,
     useAppSelector,
 } from "src/Cashflow_Splitting_Static/store";
+import * as splittingStore from "src/Cashflow_Splitting_Static/store";
 
 import { useAuditDataGrid } from "./useAuditDataGrid";
 
@@ -122,7 +123,7 @@ describe("useAuditDataGrid", () => {
     });
     it("should update paginationPageSizeSelector when size changes", () => {
         // mock selector with different size
-        vi.mocked(require("src/Cashflow_Splitting_Static/store").useAppSelector).mockImplementation(
+        vi.mocked(splittingStore.useAppSelector).mockImplementation(
             fn => fn({ auditTablePagination: { size: 100 } })
         );
         const { result } = renderHook(() => useAuditDataGrid("test-id"));

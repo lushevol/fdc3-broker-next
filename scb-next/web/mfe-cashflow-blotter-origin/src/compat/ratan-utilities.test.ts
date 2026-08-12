@@ -68,9 +68,8 @@ describe('Cashflow-owned Ratan utility compatibility', () => {
 
   it('owns the complete Cashflow Ratan source boundary inside the workspace', () => {
     const workspaceFiles = [
-      'rsbuild.config.ts',
+      'vite.config.ts',
       'tsconfig.json',
-      'tsconfig.application.json',
       'src/compat/ratan-container.ts',
       'src/compat/quick-search-items.ts',
     ].map((file) => readFileSync(resolve(process.cwd(), file), 'utf8'));

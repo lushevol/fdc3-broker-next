@@ -1,22 +1,37 @@
 import { getEmptyRuleGroup } from "src/Cashflow_CN/Main/utils/query-convertor";
+import * as queryConvertor from "src/Cashflow_CN/Main/utils/query-convertor";
+import * as cashflowCountApi from "src/Cashflow_CN/schema/ultra-cashflow-query-count.generated";
+import * as groupCountApi from "src/Cashflow_Group_Management/schema/group-message-query.generated";
 import { generateTemplateFilterRecord } from "src/Root/import/ratancomponents";
 import { act, ReduxProviderWrapper, renderHook } from "src/test/test-utils";
 
 import { store } from "../store-redux";
+import * as dashboardStore from "../store-redux";
 import { useDashboardDataQuery, useDashboardDataQueryAPI } from "./useDashboardDataQuery";
+
+const { mockStatusConfig } = vi.hoisted(() => ({
+  mockStatusConfig: {
+    key: "cashflow1",
+    getfilters: vi.fn().mockReturnValue({}),
+  },
+}));
+
+vi.mock("src/Cashflow_Dashboard/components/StatusIndicator", () => ({
+  StatusList: [mockStatusConfig],
+}));
 
 describe("useDashboardDataQuery", () => {
   it("should combine advancedSearch and quickSearch into globalQuery", () => {
     const mockAdvancedSearch = generateTemplateFilterRecord();
     const mockQuickSearch = {};
 
-    vi.spyOn(require("../store-redux"), "useAppSelector").mockReturnValue({
+    vi.spyOn(dashboardStore, "useAppSelector").mockReturnValue({
       advancedSearch: mockAdvancedSearch,
       quickSearch: mockQuickSearch,
     });
 
     const combineRuleGroupsMock = vi.spyOn(
-      require("src/Cashflow_CN/Main/utils/query-convertor"),
+      queryConvertor,
       "combineRuleGroups"
     );
 
@@ -38,27 +53,19 @@ describe("useDashboardDataQueryAPI", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(require("../store-redux"), "useAppDispatch").mockReturnValue(mockDispatch);
+    vi.spyOn(dashboardStore, "useAppDispatch").mockReturnValue(mockDispatch);
     vi.spyOn(
-      require("src/Cashflow_CN/schema/ultra-cashflow-query-count.generated"),
+      cashflowCountApi,
       "useLazySettlementCashflowDataUltraQueryCountQuery"
     ).mockReturnValue([mockQueryCashflowCount]);
     vi.spyOn(
-      require("src/Cashflow_Group_Management/schema/group-message-query.generated"),
+      groupCountApi,
       "useLazySettlementGroupMessageCountQuery"
     ).mockReturnValue([mockQueryGroupCount]);
   });
 
   it("should dispatch loading and success actions for cashflow queries", async () => {
     const mockGlobalQuery = { combinator: "and", rules: [] };
-    const mockStatusConfig = {
-      key: "cashflow1",
-      getfilters: vi.fn().mockReturnValue({}),
-    };
-
-    vi.mock("src/Cashflow_Dashboard/components/StatusIndicator", () => ({
-      StatusList: [mockStatusConfig],
-    }));
     mockQueryCashflowCount.mockResolvedValue({
       unwrap: vi.fn().mockResolvedValue({
         cashflowUltraQueryCount: { count: 20 },

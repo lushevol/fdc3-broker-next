@@ -1,4 +1,5 @@
 import { InputStatusType, SplitActionType, SplitCashflowState } from "./interface";
+import * as ratanUtils from "Import/ratanutils";
 import { canAmendSplittingState } from "../SplittingCashflowRightMenu";
 import { SplittingTargetCashflowType } from "./interface";
 import {
@@ -221,7 +222,7 @@ describe("amountAMinusBNumber", () => {
   it("should not have JS floating point error", () => {
     const a = 0.3;
     const b = 0.2;
-    const spy = vi.spyOn(require("Import/ratanutils"), "num");
+    const spy = vi.spyOn(ratanUtils, "num");
     amountAMinusBNumber(a, b, 2);
     expect(spy).toHaveBeenCalled();
     // expect(result).toBe(0.10); // JS will get wrong as 0.3-0.2=0.09999999999999998
@@ -251,7 +252,7 @@ describe("amountAPlusBNumber", () => {
       { Cashflow: { Payment_Amount: "30.789" } },
     ];
 
-    const spy = vi.spyOn(require("Import/ratanutils"), "num");
+    const spy = vi.spyOn(ratanUtils, "num");
     amountAPlusBNumber(arr, item => item?.Cashflow?.Payment_Amount, 3);
     expect(spy).toHaveBeenCalled();
     spy.mockRestore();

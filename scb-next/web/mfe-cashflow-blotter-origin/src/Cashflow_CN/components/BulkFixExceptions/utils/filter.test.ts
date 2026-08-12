@@ -3,6 +3,9 @@ import merge from "lodash/merge";
 import { ExceptionBundleActionResult } from "src/Cashflow_CN/services/type";
 import { mockCashflow1 } from "src/Cashflow_CN/test/mockData/cashflow";
 import { mockMultipleGraphqlDetails1, mockSingleCashflowDetails1 } from "src/Cashflow_CN/test/mockData/cashflowDetails";
+import * as multiExceptionUtils from "../../CashflowDetails/MultiExceptions/common/utils";
+import * as cashflowServices from "src/Cashflow_CN/services";
+import * as rightMenuUtils from "./rightmenu";
 
 import { CashflowStateTypes, CashflowSubStateTypes, CashflowSubStateTypeTypes, ExceptionBundleStatusTypes, ExceptionCategory, MultiExceptionsNames, Submiter, Verifier } from "../../CashflowDetails/MultiExceptions/common/interface";
 import { mockCashflowDisplay } from "../test/mockData/cashflows";
@@ -640,7 +643,7 @@ describe("assignNotificationToCashflowDisplay", () => {
     ];
     const userType = BulkUserType.Maker;
 
-    vi.spyOn(require("./rightmenu"), "getUserType").mockReturnValue(BulkUserType.Checker);
+    vi.spyOn(rightMenuUtils, "getUserType").mockReturnValue(BulkUserType.Checker);
 
     const result = assignNotificationToCashflowDisplay(displayCashflows, updatedEligibleCashflows, userType);
 
@@ -667,7 +670,7 @@ describe("assignNotificationToCashflowDisplay", () => {
     ];
     const userType = BulkUserType.Maker;
 
-    vi.spyOn(require("./rightmenu"), "getUserType").mockReturnValue(BulkUserType.Checker);
+    vi.spyOn(rightMenuUtils, "getUserType").mockReturnValue(BulkUserType.Checker);
 
     const result = assignNotificationToCashflowDisplay(displayCashflows, updatedEligibleCashflows, userType);
 
@@ -694,7 +697,7 @@ describe("assignNotificationToCashflowDisplay", () => {
     ];
     const userType = BulkUserType.Maker;
 
-    vi.spyOn(require("./rightmenu"), "getUserType").mockReturnValue(BulkUserType.Maker);
+    vi.spyOn(rightMenuUtils, "getUserType").mockReturnValue(BulkUserType.Maker);
 
     const result = assignNotificationToCashflowDisplay(displayCashflows, updatedEligibleCashflows, userType);
 
@@ -801,7 +804,7 @@ describe("queryAndVerifyAuthLimits", () => {
 
     const mockUserRole = "Checker";
 
-    vi.spyOn(require("src/Cashflow_CN/services"), "checkAuthLimit").mockResolvedValue({
+    vi.spyOn(cashflowServices, "checkAuthLimit").mockResolvedValue({
       success: true,
       reason: "",
     });
@@ -824,7 +827,7 @@ describe("queryAndVerifyAuthLimits", () => {
 
     const mockUserRole = "Checker";
 
-    vi.spyOn(require("src/Cashflow_CN/services"), "checkAuthLimit").mockResolvedValue({
+    vi.spyOn(cashflowServices, "checkAuthLimit").mockResolvedValue({
       success: false,
       reason: "Authorization limit exceeded",
     });
@@ -847,7 +850,7 @@ describe("queryAndVerifyAuthLimits", () => {
 
     const mockUserRole = "Checker";
 
-    vi.spyOn(require("src/Cashflow_CN/services"), "checkAuthLimit").mockRejectedValue(new Error("Network error"));
+    vi.spyOn(cashflowServices, "checkAuthLimit").mockRejectedValue(new Error("Network error"));
 
     const result = await queryAndVerifyAuthLimits(mockCashflowDetails, mockUserRole);
 
@@ -867,7 +870,7 @@ describe("queryAndVerifyAuthLimits", () => {
 
     const mockUserRole = "Checker";
 
-    vi.spyOn(require("src/Cashflow_CN/services"), "checkAuthLimit").mockResolvedValue({
+    vi.spyOn(cashflowServices, "checkAuthLimit").mockResolvedValue({
       success: true,
       reason: "",
     });
@@ -890,7 +893,7 @@ describe("queryAndVerifyAuthLimits", () => {
 
     const mockUserRole = "Checker";
 
-    vi.spyOn(require("src/Cashflow_CN/services"), "checkAuthLimit").mockResolvedValue({
+    vi.spyOn(cashflowServices, "checkAuthLimit").mockResolvedValue({
       success: true,
       reason: "",
     });
@@ -906,7 +909,7 @@ describe("queryAndVerifyAuthLimits", () => {
 
     const mockUserRole = "Checker";
 
-    vi.spyOn(require("src/Cashflow_CN/services"), "checkAuthLimit").mockResolvedValue({
+    vi.spyOn(cashflowServices, "checkAuthLimit").mockResolvedValue({
       success: false,
       reason: "Invalid cashflow details",
     });
@@ -924,7 +927,7 @@ describe("queryAndVerifyAuthLimits", () => {
 
     const mockUserRole = "Checker";
 
-    vi.spyOn(require("src/Cashflow_CN/services"), "checkAuthLimit").mockResolvedValue({
+    vi.spyOn(cashflowServices, "checkAuthLimit").mockResolvedValue({
       success: false,
       reason: "Invalid cashflow details",
     });
@@ -1044,7 +1047,7 @@ describe("hasRebookExceptions", () => {
         Exception_Category: ExceptionCategory.HIGH_RISK_NSTP,
       },
     ];
-    vi.spyOn(require("../../CashflowDetails/MultiExceptions/common/utils"), "isRebookException").mockReturnValue(true);
+    vi.spyOn(multiExceptionUtils, "isRebookException").mockReturnValue(true);
     const result = hasRebookExceptions(mockExceptions);
     expect(result).toBe(true);
   });
@@ -1065,7 +1068,7 @@ describe("hasRebookExceptions", () => {
         Exception_Category: ExceptionCategory.HIGH_RISK_NSTP,
       },
     ];
-    vi.spyOn(require("../../CashflowDetails/MultiExceptions/common/utils"), "isRebookException").mockReturnValue(false);
+    vi.spyOn(multiExceptionUtils, "isRebookException").mockReturnValue(false);
     const result = hasRebookExceptions(mockExceptions);
     expect(result).toBe(false);
   });
@@ -1084,8 +1087,8 @@ describe("hasHighRiskExceptionsButNoPermission", () => {
         Exception_Category: ExceptionCategory.HIGH_RISK_NSTP,
       },
     ];
-    vi.spyOn(require("../../CashflowDetails/MultiExceptions/common/utils"), "isRebookException").mockReturnValue(true);
-    vi.spyOn(require("../../CashflowDetails/MultiExceptions/common/utils"), "hasHighRiskExceptionPermission").mockReturnValue(false);
+    vi.spyOn(multiExceptionUtils, "isRebookException").mockReturnValue(true);
+    vi.spyOn(multiExceptionUtils, "hasHighRiskExceptionPermission").mockReturnValue(false);
     const result = hasHighRiskExceptionsButNoPermission(mockExceptions);
     expect(result).toBe(true);
   });
@@ -1106,8 +1109,8 @@ describe("hasHighRiskExceptionsButNoPermission", () => {
         Exception_Category: ExceptionCategory.HIGH_RISK_NSTP,
       },
     ];
-    vi.spyOn(require("../../CashflowDetails/MultiExceptions/common/utils"), "isRebookException").mockReturnValue(true);
-    vi.spyOn(require("../../CashflowDetails/MultiExceptions/common/utils"), "hasHighRiskExceptionPermission").mockReturnValue(true);
+    vi.spyOn(multiExceptionUtils, "isRebookException").mockReturnValue(true);
+    vi.spyOn(multiExceptionUtils, "hasHighRiskExceptionPermission").mockReturnValue(true);
     const result = hasHighRiskExceptionsButNoPermission(mockExceptions);
     expect(result).toBe(false);
   });
@@ -1118,4 +1121,3 @@ describe("hasHighRiskExceptionsButNoPermission", () => {
     expect(result).toBe(false);
   });
 });
-

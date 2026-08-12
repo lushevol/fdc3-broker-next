@@ -2,6 +2,7 @@ import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import App from "./App";
+import * as appUtils from "./utils";
 
 vi.mock("../components/LimitationDataGrid", () => {
     const mockComponent = ({
@@ -143,7 +144,7 @@ describe("Auth Limits", () => {
         userEvent.click(deleteBtn2!);
     });
     it("no permission", () => {
-        vi.spyOn(require("./utils"), "hasViewPermission").mockImplementation(() => false);
+        vi.spyOn(appUtils, "hasViewPermission").mockImplementation(() => false);
 
         const { container } = render(
             <App tile={""} />

@@ -194,8 +194,6 @@ describe("QuickSearch component", () => {
       await promise;
     });
 
-    expect(screen.findByText("Search success")).toBeInTheDocument;
-
     expect(clearBtn).toBeVisible();
     fireEvent.click(clearBtn);
   });
@@ -272,8 +270,6 @@ describe("QuickSearch component", () => {
     await act(async () => {
       await promise;
     });
-
-    expect(screen.findByText("Search success")).toBeInTheDocument;
 
     expect(clearBtn).toBeVisible();
     fireEvent.click(clearBtn);

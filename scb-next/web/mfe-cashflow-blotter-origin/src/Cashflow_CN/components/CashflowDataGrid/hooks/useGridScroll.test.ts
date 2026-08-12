@@ -17,6 +17,9 @@ vi.mock("src/Cashflow_CN/Main/store/actions", () => {
 });
 
 describe('useGridScroll', () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
     it("default", () => {
         vi.mocked(queryNextPageCashflowList);
         const store = configureStore({

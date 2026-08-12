@@ -13,8 +13,8 @@ Object.assign(vi, {
 });
 
 const nativeGetComputedStyle = window.getComputedStyle.bind(window);
-window.getComputedStyle = ((element: Element, pseudoElement?: string | null) =>
-  nativeGetComputedStyle(element, pseudoElement || undefined)) as typeof window.getComputedStyle;
+window.getComputedStyle = ((element: Element) =>
+  nativeGetComputedStyle(element)) as typeof window.getComputedStyle;
 if (!(vi as typeof vi & { replaceProperty?: unknown }).replaceProperty) {
   Object.assign(vi, {
     replaceProperty: (target: Record<string, unknown>, key: string, value: unknown) => {

@@ -3,6 +3,8 @@ import { ReduxProviderWrapper } from "@Test/test-utils";
 import { act, renderHook } from "@testing-library/react";
 import { FormInstance, message } from "antd";
 import { MessageInstance } from "antd/es/message/interface";
+import * as cashflowServices from "../../../../services";
+import * as dialogUtils from "./SplitCashflowDialogUtils";
 
 import { InputStatusType, RoundingType, SplitActionType } from "./interface";
 import { useSplittingActions } from "./SplitCashflowDialogUtils";
@@ -102,7 +104,7 @@ describe("useSplittingActions", () => {
   });
 
   it("should handle handleAffirmationAction fail", async () => {
-    vi.spyOn(require("../../../../services"), "cashflowManualSplit").mockImplementationOnce(() => Promise.resolve({ status: 500, message: "fail" }));
+    vi.spyOn(cashflowServices, "cashflowManualSplit").mockImplementationOnce(() => Promise.resolve({ status: 500, message: "fail" }));
     const wrapper = ReduxProviderWrapper(store);
 
     const { result } = renderHook(() =>
@@ -138,7 +140,7 @@ describe("useSplittingActions", () => {
     expect(mockSetProceedSplitting).toHaveBeenCalledWith(false);
   });
   it("should handle handleAmendAction success", async () => {
-    vi.spyOn(require("../../../../services"), "cashflowAmendSplit").mockImplementationOnce(() => Promise.resolve({ status: 200, message: "success" }));
+    vi.spyOn(cashflowServices, "cashflowAmendSplit").mockImplementationOnce(() => Promise.resolve({ status: 200, message: "success" }));
 
     const store = configureStore({
       reducer: {
@@ -186,7 +188,7 @@ describe("useSplittingActions", () => {
   });
 
   it("should handle handleAmendAction success", async () => {
-    vi.spyOn(require("../../../../services"), "cashflowAmendSplit").mockImplementationOnce(() => Promise.resolve({ status: 500, message: "data fail" }));
+    vi.spyOn(cashflowServices, "cashflowAmendSplit").mockImplementationOnce(() => Promise.resolve({ status: 500, message: "data fail" }));
 
     const store = configureStore({
       reducer: {
@@ -234,7 +236,7 @@ describe("useSplittingActions", () => {
 
   });
   it("should handle handleUnSplitAction fail", async () => {
-    vi.spyOn(require("../../../../services"), "cashflowUnSplit").mockImplementationOnce(() => Promise.resolve({ status: 500, message: "fail" }));
+    vi.spyOn(cashflowServices, "cashflowUnSplit").mockImplementationOnce(() => Promise.resolve({ status: 500, message: "fail" }));
     const wrapper = ReduxProviderWrapper(store);
 
     const { result } = renderHook(() =>
@@ -252,7 +254,7 @@ describe("useSplittingActions", () => {
     expect(mockSetProceedSplitting).toHaveBeenCalledWith(false);
   });
   it("should handle handleUnSplitAction api fail", async () => {
-    vi.spyOn(require("../../../../services"), "cashflowUnSplit").mockImplementationOnce(() => Promise.reject({ status: 500, message: "fail" }));
+    vi.spyOn(cashflowServices, "cashflowUnSplit").mockImplementationOnce(() => Promise.reject({ status: 500, message: "fail" }));
     const wrapper = ReduxProviderWrapper(store);
 
     const { result } = renderHook(() =>
@@ -270,7 +272,7 @@ describe("useSplittingActions", () => {
     expect(mockSetProceedSplitting).toHaveBeenCalledWith(false);
   });
   it("should handle handleUnSplitAction error", async () => {
-    vi.spyOn(require("../../../../services"), "cashflowUnSplit").mockImplementationOnce(() => Promise.reject({ status: 500, message: "fail" }));
+    vi.spyOn(cashflowServices, "cashflowUnSplit").mockImplementationOnce(() => Promise.reject({ status: 500, message: "fail" }));
     const wrapper = ReduxProviderWrapper(store);
 
     const { result } = renderHook(() =>
@@ -289,7 +291,7 @@ describe("useSplittingActions", () => {
   });
 
   it("should handle handleUnSplitAction error", async () => {
-    vi.spyOn(require("../../../../services"), "cashflowUnSplit").mockImplementationOnce(() => Promise.resolve({ status: 500, message: "fail" }));
+    vi.spyOn(cashflowServices, "cashflowUnSplit").mockImplementationOnce(() => Promise.resolve({ status: 500, message: "fail" }));
     const wrapper = ReduxProviderWrapper(store);
 
     const { result } = renderHook(() =>
@@ -308,7 +310,7 @@ describe("useSplittingActions", () => {
   });
 
   it("should handle handleSplitAction with no targetCashflows", async () => {
-    vi.spyOn(require("../../../../services"), "cashflowManualSplit").mockImplementationOnce(() => Promise.reject({ status: 500, message: "fail" }));
+    vi.spyOn(cashflowServices, "cashflowManualSplit").mockImplementationOnce(() => Promise.reject({ status: 500, message: "fail" }));
     const store = configureStore({
       reducer: {
         splittingWorkflow: createReducer({
@@ -354,7 +356,7 @@ describe("useSplittingActions", () => {
     expect(mockMessageApi.error).toBeCalled();
   });
   it("should not open affirmation dialog if preCheck fails", () => {
-    vi.spyOn(require("./SplitCashflowDialogUtils"), "handlePreCheckAmount").mockReturnValue(false);
+    vi.spyOn(dialogUtils, "handlePreCheckAmount").mockReturnValue(false);
     const store = configureStore({
       reducer: {
         splittingWorkflow: createReducer({
@@ -482,7 +484,7 @@ describe("useSplittingActions", () => {
         setProceedSplitting: mockSetProceedSplitting,
       }), { wrapper }
     );
-    vi.spyOn(require("./SplitCashflowDialogUtils"), "handlePreCheckAmount").mockReturnValue(true);
+    vi.spyOn(dialogUtils, "handlePreCheckAmount").mockReturnValue(true);
 
     // spy handleAmendAction
     const spyAmend = vi.spyOn(result.current, "handleAmendAction").mockImplementation(vi.fn());
@@ -491,7 +493,7 @@ describe("useSplittingActions", () => {
     });
   });
   it("should call handleAmendAction for UN_SPLIT when preCheck passes", async () => {
-    vi.spyOn(require("./SplitCashflowDialogUtils"), "handlePreCheckAmount").mockReturnValue(true);
+    vi.spyOn(dialogUtils, "handlePreCheckAmount").mockReturnValue(true);
     const store = configureStore({
       reducer: {
         splittingWorkflow: createReducer({

@@ -1,5 +1,6 @@
 import { fireEvent,render } from "@testing-library/react";
 import { AUTO_SPLIT_STATIC_BLOTTER_AUDIT_BTN } from "src/Root/analysis/const";
+import * as splittingStore from "src/Cashflow_Splitting_Static/store";
 
 import { AuditEntry } from "./Entry";
 
@@ -20,7 +21,7 @@ describe("AuditEntry", () => {
 
     it("should dispatch openAuditDialog when clicked", () => {
         const mockDispatch = vi.fn();
-        vi.spyOn(require("src/Cashflow_Splitting_Static/store"), "useAppDispatch").mockReturnValue(mockDispatch);
+        vi.spyOn(splittingStore, "useAppDispatch").mockReturnValue(mockDispatch);
 
         const { getByTestId } = render(<AuditEntry />);
         const btn = getByTestId(AUTO_SPLIT_STATIC_BLOTTER_AUDIT_BTN);

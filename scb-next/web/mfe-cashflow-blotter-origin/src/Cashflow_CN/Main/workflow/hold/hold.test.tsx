@@ -2,6 +2,7 @@ import userEvent from "@testing-library/user-event";
 import { GetContextMenuItemsParams, GridApi, IMenuActionParams } from "ag-grid-community";
 import { message, Modal } from "antd";
 import { renderWithProviders } from "src/test/test-utils";
+import * as ratanUtils from "src/Root/import/ratanutils";
 
 import ThemeProvider from "../../../../Root/common/component/MfeThemeProvider";
 import {
@@ -217,7 +218,7 @@ describe("holdRightMenu", () => {
   });
 
   it("should return 'Hold' menu item when all selected rows are in HoldAvailableState and user has hold permission", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockImplementation((permission) => permission === "RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Hold");
+    vi.spyOn(ratanUtils, "hasPermission").mockImplementation((permission) => permission === "RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Hold");
 
     const data = { Cashflow: { Cashflow_State: "QUEUED" } };
     const selectedRows = [{ Cashflow: { Cashflow_State: "READY" } }];
@@ -242,7 +243,7 @@ describe("holdRightMenu", () => {
   });
 
   it("should return 'Unhold' menu item when all selected rows are in 'HOLD' state and user has unhold permission", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockImplementation((permission) => true);
+    vi.spyOn(ratanUtils, "hasPermission").mockImplementation((_permission) => true);
 
     const data = { Cashflow: { Cashflow_State: "HOLD" } };
     const selectedRows = [{ Cashflow: { Cashflow_State: "HOLD" } }];
@@ -269,7 +270,7 @@ describe("holdRightMenu", () => {
   });
 
   it("should return 'Send to WAITING' menu item when all selected rows are in 'HOLD' state and user has unhold permission", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockImplementation((permission) => true);
+    vi.spyOn(ratanUtils, "hasPermission").mockImplementation((_permission) => true);
 
     const data = { Cashflow: { Cashflow_State: "HOLD" } };
     const selectedRows = [{ Cashflow: { Cashflow_State: "HOLD" } }];
@@ -294,8 +295,8 @@ describe("holdRightMenu", () => {
   });
 
   it("should return 'Unhold' menu item with disabled state when cashflows are held by the user", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockImplementation((permission) => true);
-    vi.spyOn(require("src/Root/import/ratanutils"), "getUser").mockReturnValue({ id: "user123" });
+    vi.spyOn(ratanUtils, "hasPermission").mockImplementation((_permission) => true);
+    vi.spyOn(ratanUtils, "getUser").mockReturnValue({ id: "user123" });
 
     const data = { Cashflow: { Cashflow_State: "HOLD", Cashflow_Sub_State_Updater: "user123" } };
     const selectedRows = [data];
@@ -317,7 +318,7 @@ describe("holdRightMenu", () => {
   });
 
   it("should return empty array when user does not have hold or unhold permissions", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(false);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(false);
 
     const data = { Cashflow: { Cashflow_State: "QUEUED" } };
     const params = mockGetContextMenuItemsParams(data);
@@ -328,7 +329,7 @@ describe("holdRightMenu", () => {
   });
 
   it("should return empty array when selected rows are not in HoldAvailableState or 'HOLD' state", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(true);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(true);
 
     const data = { Cashflow: { Cashflow_State: "SETTLED" } };
     const params = mockGetContextMenuItemsParams(data);
@@ -339,7 +340,7 @@ describe("holdRightMenu", () => {
   });
 
   it("should return empty array when param is null", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(true);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(true);
 
     const result = holdRightMenu(null as unknown as GetContextMenuItemsParams, mockOptions);
 
@@ -347,7 +348,7 @@ describe("holdRightMenu", () => {
   });
 
   it("should cover when api is undefined", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(true);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(true);
 
     const data = { Cashflow: { Cashflow_State: "SETTLED" } };
     const params = mockGetContextMenuItemsParams(data);

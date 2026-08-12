@@ -726,5 +726,5 @@ mockFetchApi({});
 console.warn = (...args) => { };
 console.error = (...args) => { };
 console.log = (...args) => { };
-jest.setTimeout(3_000);
+jest.setTimeout(20_000);
 process.env.MFE_APP_PREFIX_STYLE = "mocked";

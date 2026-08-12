@@ -1,6 +1,7 @@
 import { configureStore, createReducer } from "@reduxjs/toolkit";
 import { fireEvent, render } from "@testing-library/react";
 import { RuleStatusType } from "src/Cashflow_BIC_Netting_Static_Table/state/types";
+import * as multiExceptionUtils from "src/Cashflow_CN/components/CashflowDetails/MultiExceptions/common/utils";
 import { ReduxProviderWrapper } from "src/test/test-utils";
 
 import {
@@ -253,7 +254,7 @@ describe("RuleDetail", () => {
     const mockDispatch = vi.fn();
 
     jest
-      .spyOn(require("src/Cashflow_CN/components/CashflowDetails/MultiExceptions/common/utils"), "trimObject").mockImplementation(() => { });
+      .spyOn(multiExceptionUtils, "trimObject").mockImplementation(() => { });
 
     // const promise1 = Promise.resolve({ status: 200, errorCode: "200", errorMessage: "success" });
     // jest

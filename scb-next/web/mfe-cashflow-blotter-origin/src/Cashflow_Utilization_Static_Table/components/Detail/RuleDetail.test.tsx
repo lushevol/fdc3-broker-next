@@ -1,6 +1,8 @@
 import { configureStore, createReducer } from "@reduxjs/toolkit";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { BookingEntityNameIdOptions } from "src/Cashflow_CN/Main/config/ratanConfig/local/BookingEntity";
+import * as multiExceptionUtils from "src/Cashflow_CN/components/CashflowDetails/MultiExceptions/common/utils";
+import * as cashflowGraphql from "src/Cashflow_CN/services/graphql";
 import { ReduxProviderWrapper } from "src/test/test-utils";
 
 import { ActionType } from "../../state/types";
@@ -134,7 +136,7 @@ describe("RuleDetail", () => {
   it("should handle fmAccount as null and show warning", async () => {
     jest
       .spyOn(
-        require("src/Cashflow_CN/services/graphql"),
+        cashflowGraphql,
         "queryCounterPartyDetails_CN"
       )
       .mockResolvedValueOnce({
@@ -159,7 +161,7 @@ describe("RuleDetail", () => {
     const mockDispatch = vi.fn();
     jest
       .spyOn(
-        require("src/Cashflow_CN/components/CashflowDetails/MultiExceptions/common/utils"),
+        multiExceptionUtils,
         "trimObject"
       )
       .mockImplementation(() => {});

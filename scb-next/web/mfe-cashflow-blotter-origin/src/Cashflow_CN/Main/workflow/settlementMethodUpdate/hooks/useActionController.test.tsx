@@ -18,10 +18,9 @@ vi.mock("src/Root/rtk-query/baseGraphQLApi", async () => ({
 }));
 
 vi.mock("src/Cashflow_CN/Main/store/reducers", async () => {
-  const { createReducer: cr } = require("@reduxjs/toolkit");
   return {
     __esModule: true,
-    default: cr({}, () => {}),
+    default: createReducer({}, () => {}),
   };
 });
 

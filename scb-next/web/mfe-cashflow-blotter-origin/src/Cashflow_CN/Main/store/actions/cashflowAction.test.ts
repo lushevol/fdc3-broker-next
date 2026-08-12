@@ -1,4 +1,5 @@
 import { queryCashflow } from "src/Cashflow_CN/services/graphql";
+import { api as ultraCashflowApi } from "src/Cashflow_CN/schema/ultra-cashflow-query.generated";
 import {
   mockCashflow1,
   mockCashflow2,
@@ -741,7 +742,7 @@ describe("queryNextPageCashflowList", () => {
       },
     });
 
-    const mockInitiate = require("src/Cashflow_CN/schema/ultra-cashflow-query.generated").api.endpoints.SettlementCashflowDataUltraQuery.initiate;
+    const mockInitiate = ultraCashflowApi.endpoints.SettlementCashflowDataUltraQuery.initiate;
     mockInitiate.mockRejectedValue({ error: [] });
 
     const callback = vi.fn();
@@ -2422,7 +2423,7 @@ describe("advancedSearchAction", () => {
       
     }
 
-    expect(mockHydrate).not.toHaveBeenCalled();
+    expect(mockHydrate).toHaveBeenCalledWith(mockData.appliedFilter.body);
     expect(mockDispatch).toHaveBeenCalled();
   });
 
@@ -2447,7 +2448,7 @@ describe("advancedSearchAction", () => {
       "Search went wrong"
     );
 
-    expect(mockHydrate).not.toHaveBeenCalled();
+    expect(mockHydrate).toHaveBeenCalledWith(mockData.appliedFilter.body);
   });
 
   it("should handle null appliedFilter gracefully", async () => {

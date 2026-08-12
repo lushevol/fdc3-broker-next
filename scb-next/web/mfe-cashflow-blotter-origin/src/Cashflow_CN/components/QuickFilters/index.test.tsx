@@ -10,6 +10,7 @@ import { getBusinessFieldsFromCache } from "Import/ratanutils";
 import { RuleGroupType } from "react-querybuilder";
 import { Provider } from "react-redux";
 import { CASHFLOW_BLOTTER_QUICK_FILTER_CLEAR_ALL_BTN } from "src/Root/analysis/const";
+import { queryCashflowList } from "../../Main/store/actions";
 
 import QuickFilters, { highlight, setFilterFields } from "./index";
 import { classes } from "./style";
@@ -462,8 +463,7 @@ describe("QuickFilters Component", () => {
   });
   
   it("clear All - case 2", async () => {
-    const { queryCashflowList } = vi.requireMock("../../Main/store/actions");
-    (queryCashflowList as vi.Mock).mockImplementation(mockQueryCashflowListImpl(false));
+    vi.mocked(queryCashflowList).mockImplementation(mockQueryCashflowListImpl(false) as never);
     const promise = Promise.resolve({
       cashflowFields: [],
       cashflowAndTradeFields: [

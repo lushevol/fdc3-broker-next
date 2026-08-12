@@ -2,7 +2,7 @@ import defaultPreloadedState from "src/Cashflow_CN/Main/store/state";
 import { renderWithProviders } from "src/test/test-utils";
 
 import CashflowDetailsDialog from "./index";
-const rowDetails = require("../CashflowDetails/data/cashflows.json");
+import rowDetails from "../CashflowDetails/data/cashflows.json";
 
 afterAll(() => {
   vi.clearAllMocks();

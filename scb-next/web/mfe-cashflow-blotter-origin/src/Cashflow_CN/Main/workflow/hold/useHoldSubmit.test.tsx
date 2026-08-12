@@ -1,5 +1,6 @@
 import { act, renderHook, screen } from "@testing-library/react";
 import { message } from "antd";
+import * as cashflowServices from "src/Cashflow_CN/services";
 import { mockCashflow1 } from "src/Cashflow_CN/test/mockData/cashflow";
 
 import { ResponseCode } from "../earlyMaterialization/interface";
@@ -13,7 +14,7 @@ vi.mock("src/Cashflow_CN/services", () => ({
   cashflowUserStatusUpdate: vi.fn(),
 }));
 
-const { cashflowHold, cashflowUnhold, cashflowUserStatusUpdate } = require("src/Cashflow_CN/services");
+const { cashflowHold, cashflowUnhold, cashflowUserStatusUpdate } = cashflowServices;
 
 describe("useHoldSubmit", () => {
   beforeEach(() => {

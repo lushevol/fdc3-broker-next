@@ -34,6 +34,9 @@ vi.mock("src/Cashflow_CN/Main/store/actions", () => {
 });
 
 describe('useGridReadyEvent', () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
     it("default", () => {
         const store = configureStore({
             reducer: {

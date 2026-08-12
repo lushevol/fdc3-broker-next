@@ -1,4 +1,5 @@
 import { RuleGroupType, RuleType } from "react-querybuilder";
+import * as dashboardUtils from "src/Cashflow_Dashboard/Main/common/utils";
 
 import {
 combineRuleGroups,
@@ -1034,7 +1035,7 @@ describe("transformVariableDate", () => {
     // Mock system time to always return originalDate for deterministic tests
     vi.useFakeTimers().setSystemTime(new Date("2023-01-01T00:00:00.000Z"));
     // Mock getDateByWorkdayOffset
-    spyGetDateByWorkdayOffset = vi.spyOn(require("src/Cashflow_Dashboard/Main/common/utils"), "getDateByWorkdayOffset");
+    spyGetDateByWorkdayOffset = vi.spyOn(dashboardUtils, "getDateByWorkdayOffset");
   });
 
   afterAll(() => {

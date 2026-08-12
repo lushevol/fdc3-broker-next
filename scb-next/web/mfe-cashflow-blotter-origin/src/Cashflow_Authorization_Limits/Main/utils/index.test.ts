@@ -1,9 +1,10 @@
 import { LimitationRecord } from "../common/interface";
+import * as ratanUtils from "src/Root/import/ratanutils";
 import { getUserRole, isSameLimitationRecord } from "./index";
 
 describe('getUserRole', () => {
   it('should return "Checker" when the user has the "F_Input_Delete_Modify_Verify" permission', () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockImplementation((permission) => {
+    vi.spyOn(ratanUtils, "hasPermission").mockImplementation((permission) => {
       return permission === "RATAN_PROFILE_LIMITS:F_Input_Delete_Modify_Verify";
     });
 
@@ -11,7 +12,7 @@ describe('getUserRole', () => {
   });
 
   it('should return "Maker" when the user has the "F_Input_Delete_Modify_Initiate" permission', () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockImplementation((permission) => {
+    vi.spyOn(ratanUtils, "hasPermission").mockImplementation((permission) => {
       return permission === "RATAN_PROFILE_LIMITS:F_Input_Delete_Modify_Initiate";
     });
 
@@ -19,13 +20,13 @@ describe('getUserRole', () => {
   });
 
   it('should return "Visitor" when the user has neither "F_Input_Delete_Modify_Verify" nor "F_Input_Delete_Modify_Initiate" permissions', () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockImplementation(() => false);
+    vi.spyOn(ratanUtils, "hasPermission").mockImplementation(() => false);
 
     expect(getUserRole()).toBe("Visitor");
   });
 
   it('should prioritize "Checker" over "Maker" if both permissions are present', () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockImplementation((permission) => {
+    vi.spyOn(ratanUtils, "hasPermission").mockImplementation((permission) => {
       return permission === "RATAN_PROFILE_LIMITS:F_Input_Delete_Modify_Verify" || 
            permission === "RATAN_PROFILE_LIMITS:F_Input_Delete_Modify_Initiate";
     });

@@ -6,6 +6,10 @@ import { getSwiftMessageByCashflowId } from "src/Cashflow_CN/services";
 import { mockCashflow1 } from "src/Cashflow_CN/test/mockData/cashflow";
 import { CASHFLOW_DETAILS_TABS_CLICK } from "src/Root/analysis/const";
 import { swiftMessageDetails } from "src/Root/import/ratanutils";
+import * as ratanUtils from "src/Root/import/ratanutils";
+import * as graphqlServices from "../../services/graphql";
+import * as cashflowDetailsContext from "src/Cashflow_CN/Main/workflow/viewCashflowDetails/CashflowDetailsContext";
+import rowDetails from "../CashflowDetails/data/cashflows.json";
 import { renderWithProviders } from "src/test/test-utils";
 
 import {
@@ -14,7 +18,7 @@ import {
 } from "../../Main/workflow/splitting/common/interface";
 import { convertCountry,DetailsBody, displaySwiftMessage,EBBS_ACCOUNTING_DETAILS, fetchSwiftMessage, handleTradeVersionsData, hasTradeBlotterPermission, HeaderTabs, shouldShowSwiftMessage, SWIFT_MESSAGE_TAB,TAB_PANES, tradeDetailsHandler } from "./detailsBody";
 import { classes } from "./style";
-const rowDetails = require("../CashflowDetails/data/cashflows.json");
+const mockStartTracking = vi.hoisted(() => vi.fn(() => vi.fn()));
 
 const safeClone = <T,>(value: T): T => {
   if (typeof globalThis.structuredClone === "function") {
@@ -94,6 +98,10 @@ vi.mock("src/Cashflow_CN/Main/workflow/viewCashflowDetails/CashflowDetailsContex
   useCashflowDetailsContext: vi.fn(() => ({ opensearch: false })),
 }));
 
+vi.mock("./MultiExceptions", () => ({
+  default: () => <div data-testid="multi-exceptions" />,
+}));
+
 vi.mock("src/Root/import/ratanutils", () => ({
   hasPermission: vi.fn(() => true),
   getRealIdOfTrade: vi.fn(),
@@ -108,6 +116,22 @@ vi.mock("src/Root/import/ratanutils", () => ({
   getUser: vi.fn(() => ({ id: "test_user_id" })),
 }));
 
+vi.mock("src/Root/analysis", () => ({
+  useBatchCollect: () => ({ startTracking: mockStartTracking }),
+  useIterableCollect: () => ({ startTracking: vi.fn(() => vi.fn()) }),
+  useRTT: () => ({
+    startTracking: vi.fn(() => ({
+      completeTracking: vi.fn(),
+      abortTracking: vi.fn(),
+    })),
+  }),
+  useE2Elatency: () => ({
+    addTrackingPoint: vi.fn(),
+    completeTracking: vi.fn(),
+    abortTracking: vi.fn(),
+  }),
+}));
+
 describe("DetailsBody component", () => {
   beforeEach(() => {
     vi.useRealTimers();
@@ -119,7 +143,7 @@ describe("DetailsBody component", () => {
       Entity: { Counterparty_SCI_FMID: "FMID" },
     };
     const error = new Error("mock error");
-    const { queryCashFlowDetails, queryCounterPartyDetails_CN } = require("../../services/graphql");
+    const { queryCashFlowDetails, queryCounterPartyDetails_CN } = graphqlServices;
     queryCashFlowDetails.mockResolvedValueOnce({
       graphCashFlowDetails: [
         {
@@ -161,7 +185,7 @@ describe("DetailsBody component", () => {
       Entity: {},
     };
     const error = new Error("mock error");
-    const { queryCashFlowDetails } = require("../../services/graphql");
+    const { queryCashFlowDetails } = graphqlServices;
     queryCashFlowDetails.mockImplementation(() => {
       throw error;
     });
@@ -355,13 +379,6 @@ describe("HeaderTabs component", () => {
   });
 
   it.skip("should track tab clicks using startTracking", () => {
-    const mockStartTracking = vi.fn(() => vi.fn());
-    vi.mock("src/Root/analysis", () => ({
-      useBatchCollect: () => ({
-        startTracking: mockStartTracking,
-      }),
-    }));
-
     render(
       <HeaderTabs
         activeKey={TAB_PANES[0].value}
@@ -418,7 +435,7 @@ describe("HeaderTabs component", () => {
 });
 describe("hasTradeBlotterPermission", () => {
   it("should return true when 'RATAN_TRADE_BLOTTER:UI_Read_Access' permission is granted", () => {
-    const { hasPermission } = require("src/Root/import/ratanutils");
+    const { hasPermission } = ratanUtils;
     hasPermission.mockImplementation((permission) =>
       permission === "RATAN_TRADE_BLOTTER:UI_Read_Access"
     );
@@ -426,7 +443,7 @@ describe("hasTradeBlotterPermission", () => {
   });
 
   it("should return true when 'RATAN_TRADE_BLOTTER:ACCESS_FMO_POST_TRADE_PORTAL' permission is granted", () => {
-    const { hasPermission } = require("src/Root/import/ratanutils");
+    const { hasPermission } = ratanUtils;
     hasPermission.mockImplementation((permission) =>
       permission === "RATAN_TRADE_BLOTTER:ACCESS_FMO_POST_TRADE_PORTAL"
     );
@@ -434,7 +451,7 @@ describe("hasTradeBlotterPermission", () => {
   });
 
   it("should return false when neither permission is granted", () => {
-    const { hasPermission } = require("src/Root/import/ratanutils");
+    const { hasPermission } = ratanUtils;
     hasPermission.mockReturnValue(false);
     expect(hasTradeBlotterPermission()).toBe(false);
   });
@@ -595,7 +612,7 @@ describe("historyDataList is empty", () => {
       cashflowAuditTrail: undefined,
     };
 
-    const { queryCashFlowDetails } = require("../../services/graphql");
+    const { queryCashFlowDetails } = graphqlServices;
     queryCashFlowDetails.mockImplementation((...args) => {
       return Promise.resolve({
         graphCashFlowDetails: [graphCashflowDetails],
@@ -603,7 +620,7 @@ describe("historyDataList is empty", () => {
     });
 
     // mock useCashflowDetailsContext
-    const { useCashflowDetailsContext } = require("src/Cashflow_CN/Main/workflow/viewCashflowDetails/CashflowDetailsContext");
+    const { useCashflowDetailsContext } = cashflowDetailsContext;
     useCashflowDetailsContext.mockReturnValue({ opensearch: false });
 
     function Wrapper() {
@@ -712,7 +729,7 @@ describe("tradeDetailsHandler", () => {
   });
   
   it("should return null if tradeIdOrBCS is not defined", async () => {
-    const { getRealIdOfTrade } = require("src/Root/import/ratanutils");
+    const { getRealIdOfTrade } = ratanUtils;
     getRealIdOfTrade.mockReturnValue(null);
     const mockData = { Cashflow: { Cashflow_State: "RELEASED" }, Trade_Version: 1 };
     const result = await tradeDetailsHandler(mockData);
@@ -720,7 +737,7 @@ describe("tradeDetailsHandler", () => {
   });
 
   it("should return null if queryTradeVersionsData throws an error", async () => {
-    const { getRealIdOfTrade, queryTradeVersionsData } = require("src/Root/import/ratanutils");
+    const { getRealIdOfTrade, queryTradeVersionsData } = ratanUtils;
     getRealIdOfTrade.mockReturnValue("test_trade_id");
     queryTradeVersionsData.mockRejectedValue(new Error("Query failed"));
     const mockData = { Cashflow: { Cashflow_State: "RELEASED" }, Trade_Version: 1 };
@@ -729,7 +746,7 @@ describe("tradeDetailsHandler", () => {
   });
 
   it("should return null if queryTradeVersionsData returns no results", async () => {
-    const { getRealIdOfTrade, queryTradeVersionsData } = require("src/Root/import/ratanutils");
+    const { getRealIdOfTrade, queryTradeVersionsData } = ratanUtils;
     getRealIdOfTrade.mockReturnValue("test_trade_id");
     queryTradeVersionsData.mockResolvedValue({ tradeVersions: { results: [] } });
     const mockData = { Cashflow: { Cashflow_State: "RELEASED" }, Trade_Version: 1 };
@@ -738,7 +755,7 @@ describe("tradeDetailsHandler", () => {
   });
 
   it("should return trade details if queryTradeVersionsData succeeds", async () => {
-    const { getRealIdOfTrade, queryTradeVersionsData } = require("src/Root/import/ratanutils");
+    const { getRealIdOfTrade, queryTradeVersionsData } = ratanUtils;
     getRealIdOfTrade.mockReturnValue("test_trade_id");
     queryTradeVersionsData.mockResolvedValue({
       tradeVersions: { results: [{ Trade_Id: "test_trade_id", Version: 1 }] },
@@ -762,7 +779,7 @@ describe("tradeDetailsHandler", () => {
         ],
       },
     };
-    const { getRealIdOfTrade, queryTradeVersionsData } = require("src/Root/import/ratanutils");
+    const { getRealIdOfTrade, queryTradeVersionsData } = ratanUtils;
     getRealIdOfTrade.mockReturnValue("test_trade_id");
     queryTradeVersionsData.mockResolvedValue(mockResponse);
 
@@ -780,7 +797,7 @@ describe("tradeDetailsHandler", () => {
   });
 
   it("should handle edge case where queryTradeVersionsData returns invalid data", async () => {
-    const { getRealIdOfTrade, queryTradeVersionsData } = require("src/Root/import/ratanutils");
+    const { getRealIdOfTrade, queryTradeVersionsData } = ratanUtils;
     getRealIdOfTrade.mockReturnValue("test_trade_id");
     queryTradeVersionsData.mockResolvedValue(null);
     const mockData = { Cashflow: { Cashflow_State: "RELEASED" }, Trade_Version: 1 };
@@ -975,7 +992,7 @@ describe("isShowSwift condition", () => {
       },
     };
 
-    const { queryCashFlowDetails } = require("../../services/graphql");
+    const { queryCashFlowDetails } = graphqlServices;
     queryCashFlowDetails.mockResolvedValue({
       graphCashFlowDetails: [
         {
@@ -1017,7 +1034,7 @@ describe("isShowSwift condition", () => {
       },
     };
 
-    const { queryCashFlowDetails } = require("../../services/graphql");
+    const { queryCashFlowDetails } = graphqlServices;
     queryCashFlowDetails.mockResolvedValue({
       graphCashFlowDetails: [
         {

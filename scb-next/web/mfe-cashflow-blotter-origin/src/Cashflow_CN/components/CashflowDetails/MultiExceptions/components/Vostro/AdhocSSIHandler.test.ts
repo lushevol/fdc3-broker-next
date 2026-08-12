@@ -3,7 +3,8 @@ import { VostroFormDetails } from "./interface";
 import { AdhocSSIHandler, AdhocSSIHandlerFunction, AdhocSSIHandlerProps } from "./AdhocSSIHandler";
 
 describe("AdhocSSIHandler", () => {
-  const context: AdhocSSIHandlerProps<any> = {
+  it("updates eligible form targets and ignores NULL targets", () => {
+    const context: AdhocSSIHandlerProps<any> = {
     layoutTitle: "Test Layout",
     nostroDetailsData: {
       settlementMeans: "Test Means",
@@ -24,15 +25,16 @@ describe("AdhocSSIHandler", () => {
       }
     ]
   };
-  const hdl = new AdhocSSIHandler(context, ["Test"]);
-  const res = hdl.updateFormTargetFields().buildValidateRule().toResult();
-  expect(res.vostorFormValue).toEqual({
-    settlementMeans: "Test Means",
-    settlementAccount: "Test Account"
+    const hdl = new AdhocSSIHandler(context, ["Test"]);
+    const res = hdl.updateFormTargetFields().buildValidateRule().toResult();
+    expect(res.vostorFormValue).toEqual({
+      settlementMeans: "Test Means",
+      settlementAccount: "Test Account"
+    });
+    const hdl2 = new AdhocSSIHandler(context, ["NULL"]);
+    const res2 = hdl2.updateFormTargetFields().buildValidateRule().toResult();
+    expect(res2.vostorFormValue).not.toBeDefined();
   });
-  const hdl2 = new AdhocSSIHandler(context, ["NULL"]);
-  const res2 = hdl2.updateFormTargetFields().buildValidateRule().toResult();
-  expect(res2.vostorFormValue).not.toBeDefined();
 })
 
 describe("AdhocSSIHandler - buildValidateRule", () => {

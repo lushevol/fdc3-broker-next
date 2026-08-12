@@ -55,7 +55,7 @@ describe("validateAdvancedFilter", () => {
     expect(result.warningMsg).toMatch(/Operator for "Payment Date" is invalid/);
   });
   it("should return valid true when param is null", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "isEmpty").mockReturnValue(true);
+    vi.mocked(isEmpty).mockReturnValue(true);
     const result = validateAdvancedFilter(null);
     expect(result.valid).toBe(true);
   })

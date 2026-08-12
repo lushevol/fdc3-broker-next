@@ -2,9 +2,8 @@ import defaultPreloadedState from "src/Cashflow_CN/Main/store/state";
 import { renderWithProviders } from "src/test/test-utils";
 
 import { DetailsBody } from "./detailsBody";
+import rowDetails from "../CashflowDetails/data/cashflows.json";
   
-const rowDetails = require("../CashflowDetails/data/cashflows.json");
-
 // vi.mock("../../services", () => ({
 //   getCountryInfo: vi.fn(async () => ({
 //     countryInfoList: [

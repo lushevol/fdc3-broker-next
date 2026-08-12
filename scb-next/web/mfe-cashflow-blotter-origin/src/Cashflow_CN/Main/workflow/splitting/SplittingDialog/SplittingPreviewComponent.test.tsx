@@ -14,7 +14,8 @@ vi.mock("../common/SplitCashflowDialogUtils", () => ({
   }),
 }));
 
-vi.mock("../../../config/fieldsConfig", () => ({
+vi.mock("../../../config/fieldsConfig", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../config/fieldsConfig")>()),
   splittingCashflowPreviewGrid: vi.fn(() => [{ field: "child" }]),
   splittingCashflowSourceGrid: [{ field: "parent" }],
 }));

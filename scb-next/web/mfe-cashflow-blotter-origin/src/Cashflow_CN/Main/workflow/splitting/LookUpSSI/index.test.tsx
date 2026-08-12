@@ -2,11 +2,16 @@ import { configureStore, createAction, createReducer } from "@reduxjs/toolkit";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { mockCashflow1 } from "src/Cashflow_CN/test/mockData/cashflow";
+import * as lookUpSSIUtils from "./utils";
 
 import {
   SplitActionType,
 } from "../common/interface";
 import { SplitLookUpSSIComp } from "./index";
+
+const { mockForceRefreshValidation } = vi.hoisted(() => ({
+  mockForceRefreshValidation: vi.fn(),
+}));
 
 vi.mock("src/Cashflow_CN/services/graphql", () => {
   return {
@@ -59,7 +64,7 @@ describe("SplitLookUpSSIComp", () => {
     expect(getByText("Nostro SI Information")).toBeInTheDocument();
 
 
-    vi.spyOn(require("./utils"), "validateSplitLookupSubmit").mockReturnValue({ valid: true, newTargetCashflows: mockCashflow1 })
+    vi.spyOn(lookUpSSIUtils, "validateSplitLookupSubmit").mockReturnValue({ valid: true, newTargetCashflows: mockCashflow1 })
 
     const submitBtn = getByText("Submit");
     expect(submitBtn).toBeInTheDocument();
@@ -113,7 +118,6 @@ describe("SplitLookUpSSIComp", () => {
       }),
     }));
 
-    const mockForceRefreshValidation = vi.fn();
     vi.mock(
       "src/Cashflow_CN/components/CashflowDetails/MultiExceptions/hooks/useForm",
       () => ({
@@ -288,7 +292,6 @@ describe("SplitLookUpSSIComp", () => {
         classifiedCommonExceptions: [],
       }),
     }));
-    const mockForceRefreshValidation = vi.fn();
     vi.mock(
       "src/Cashflow_CN/components/CashflowDetails/MultiExceptions/hooks/useForm",
       () => ({

@@ -3,9 +3,9 @@ import { MULTI_EXCEPTION_APPROVE_BTN } from "src/Root/analysis/const";
 
 import { IsPendingRequestContext } from "../detailsBody";
 import MultiException, { getFormConfig } from "./index";
+import cashflowDetailsData from "./data/cashflowDetails.json";
+import counterpartyDetailsV2 from "./data/counterpartyDetailsV2.json";
 
-const cashflowDetailsData = require("./data/cashflowDetails.json");
-const counterpartyDetailsV2 = require("./data/counterpartyDetailsV2.json");
 
 describe("MultiExceptions component", () => {
   it("should render MultiExceptions correctly", async () => {

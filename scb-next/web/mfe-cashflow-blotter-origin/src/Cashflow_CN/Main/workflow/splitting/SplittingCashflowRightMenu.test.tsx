@@ -1,6 +1,7 @@
 import { GetContextMenuItemsParams, IMenuActionParams } from "ag-grid-community";
 import { message, Modal } from "antd";
 import _merge from "lodash/merge";
+import * as ratanUtils from "src/Root/import/ratanutils";
 
 import { WorkflowActionExtraOptions } from "../../common/interface";
 import { SplitActionType, SplitCashflowState } from "./common/interface";
@@ -30,7 +31,7 @@ describe("canBeSplitting", () => {
   });
 
   it("should return false when no permission", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(false);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(false);
     expect(canBeSplitting({ ...baseCashflow })).toBe(false);
   });
 
@@ -56,7 +57,7 @@ describe("canBeUnSplitting", () => {
   });
 
   it("should return false when has permission and Splitting_Id exists", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(true);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(true);
 
     expect(
       canBeUnSplitting({
@@ -66,7 +67,7 @@ describe("canBeUnSplitting", () => {
   });
 
   it("should return true when has permission and Splitting_Id exists and Cashflow_Event_Type is New", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(true);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(true);
 
     expect(
       canBeUnSplitting({
@@ -76,7 +77,7 @@ describe("canBeUnSplitting", () => {
   });
 
   it("should return false when no permission", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(false);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(false);
     expect(
       canBeUnSplitting({
         Cashflow: { Splitting_Id: "SPLIT_ID" },
@@ -92,7 +93,7 @@ describe("canBeUnSplitting", () => {
     ).toBeFalsy();
   });
   it("should return false when Cashflow_State is in blacklist", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(true);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(true);
 
     const cashflow = {
       Cashflow: {
@@ -103,7 +104,7 @@ describe("canBeUnSplitting", () => {
     expect(canBeUnSplitting(cashflow)).toBe(false);
   });
   it("should return false when Cashflow_State is not in blacklist", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(true);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(true);
 
     const cashflow = {
       Cashflow: {
@@ -114,7 +115,7 @@ describe("canBeUnSplitting", () => {
     expect(canBeUnSplitting(cashflow)).toBe(false);
   });
   it("should return true when Cashflow_State is not in blacklist and cashflow event type is new", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(true);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(true);
 
     const cashflow = {
       Cashflow: {
@@ -134,7 +135,7 @@ describe("canBeAmendSplitting", () => {
   });
 
   it("should return false when has permission, state is WAITING, and Splitting_Id exists", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(true);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(true);
 
     expect(
       canBeAmendSplitting({
@@ -147,7 +148,7 @@ describe("canBeAmendSplitting", () => {
   });
 
   it("should return true when has permission, state is WAITING, and Splitting_Id exists and event type is new", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(true);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(true);
 
     expect(
       canBeAmendSplitting({
@@ -161,7 +162,7 @@ describe("canBeAmendSplitting", () => {
   });
 
   it("should return false when no permission", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockReturnValue(false);
+    vi.spyOn(ratanUtils, "hasPermission").mockReturnValue(false);
     expect(
       canBeAmendSplitting({
         Cashflow: {
@@ -202,7 +203,7 @@ describe("splitCashflowRightMenu", () => {
   });
 
   it("should return split menu when all selected rows can be split and user has permission", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockImplementation((permission) => {
+    vi.spyOn(ratanUtils, "hasPermission").mockImplementation((permission) => {
       return permission === "RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Perform_Ad_Hoc_Netting";
     });
     const dispatch = vi.fn();
@@ -272,7 +273,7 @@ describe("splitCashflowRightMenu", () => {
   });
 
   it("should return split menu when all selected rows can be amend split and user has permission", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockImplementation((permission) => {
+    vi.spyOn(ratanUtils, "hasPermission").mockImplementation((permission) => {
       return permission === "RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Perform_Ad_Hoc_Netting";
     });
 
@@ -344,7 +345,7 @@ describe("splitCashflowRightMenu", () => {
 
   });
   it("should return split menu when all selected rows can be un split and user has permission", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockImplementation((permission) => {
+    vi.spyOn(ratanUtils, "hasPermission").mockImplementation((permission) => {
       return permission === "RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Perform_Un_Net_Initiate";
     });
     const dispatch = vi.fn();
@@ -413,7 +414,7 @@ describe("splitCashflowRightMenu", () => {
 
   });
   it("should return split menu when all selected rows can be un split and user has permission", () => {
-    vi.spyOn(require("src/Root/import/ratanutils"), "hasPermission").mockImplementation((permission) => {
+    vi.spyOn(ratanUtils, "hasPermission").mockImplementation((permission) => {
       return permission === "RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Perform_Un_Net_Initiate";
     });
     const dispatch = vi.fn();
