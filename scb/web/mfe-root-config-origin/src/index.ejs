@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <meta name="name" content="Markets Operations One">
+  <meta name="description"
+    content="Markets Operations One Portal (MO1) is a single, evolving workspace for Operations processing, integrating post-trade applications, and progressively delivering a more connected, intelligent, and efficient processing.">
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0250a3">
+  <meta name="mobile-web-app-capable" content="no">
+  <meta name="apple-mobile-web-app-capable" content="no">
+  <link rel="apple-touch-icon" href="/image/fmo-app-portal-splash.png">
+  <title>Markets Operations One</title>
+  </link>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap" />
+  <script>window.__anypass__ = "p" + "a" + "s" + "s" + "w" + "o" + "r" + "d";</script>
+  <script src="<%=publicUrl%>/js/external/runtime.min.js"></script>
+  <meta name="importmap-type" content="systemjs-importmap" />
+  <script type="systemjs-importmap" src="<%=publicUrl%><%=importmap%>"></script>
+  <script src="<%=publicUrl%>/js/external/import-map-overrides.js"></script>
+  <script src="<%=publicUrl%>/js/external/system.min.js"></script>
+  <script src="<%=publicUrl%>/js/external/amd.min.js"></script>
+  <style>
+    body {
+      background-color: #171d24;
+    }
+  </style>
+</head>
+
+<body>
+  <noscript> You need to enable JavaScript to run this app. </noscript>
+  <script>
+    System.import("@fm/root-config");
+  </script>
+</body>
+
+</html>

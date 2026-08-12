@@ -1,0 +1,75 @@
+.custom-form {
+  display: flex;
+  flex-direction: column;
+  .custom-form-line {
+    margin: 5px 0 20px;
+    border-color: var(--theme-color-border-color);
+    &:last-child {
+      display: none;
+    }
+    &.bottom {
+      margin: 5px 0;
+    }
+  }
+  .ant-form-item {
+    width: 50%;
+    text-align: left;
+    justify-content: flex-end;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-bottom: 10px;
+    &.has-btn {
+      .ant-form-item-control {
+        padding-right: 50px;
+      }
+    }
+  }
+  .custom-form-classify {
+    margin-bottom: 5px;
+    width: 100%;
+    text-align: left;
+  }
+  .custom-form-body {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 15px;
+    overflow-y: auto;
+  }
+  .custom-form-bottom {
+    text-align: right;
+  }
+  .custom-reset-btn {
+    margin: 5px 15px 5px 15px;
+    width: 84px;
+  }
+  .custom-next-btn {
+    margin: 5px 15px 5px 15px;
+    width: 84px;
+    border: 1px solid var(--theme-color-btn-submit-border);
+  }
+  .custom-pre-btn {
+    margin: 5px 15px 5px 15px;
+    width: 84px;
+  }
+  .custom-submit-btn {
+    margin: 5px 15px 5px 15px;
+    width: 84px;
+    border: 1px solid var(--theme-color-btn-submit-border);
+  }
+  .custom-reject-btn {
+    margin: 5px 15px 5px 15px;
+    width: 84px;
+    border: 1px solid var(--theme-color-btn-reject-border);
+  }
+  .query-btn {
+    margin-left: -50px;
+    width: 50px;
+  }
+  .ant-picker,
+  .ant-input-number {
+    width: 100%;
+  }
+}

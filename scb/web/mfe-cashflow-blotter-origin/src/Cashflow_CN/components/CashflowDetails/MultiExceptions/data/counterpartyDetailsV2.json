@@ -1,0 +1,112 @@
+{
+  "fmEntity": {
+    "fmSysContact": [
+      {
+        "fmSysContSysGenId": "731905",
+        "mediumCode": "SWIFT",
+        "mediumUsage": "MXR",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "710756",
+        "mediumCode": "FSA",
+        "mediumUsage": "BIC",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "812959",
+        "mediumCode": "EXCHANGE",
+        "mediumUsage": "MKTWIRPB1",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "20923",
+        "mediumCode": "SWIFT",
+        "mediumUsage": "CONF",
+        "addrLine": "SCBLMOMXXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "16667",
+        "mediumCode": "SWIFT",
+        "mediumUsage": "CONF",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "19445",
+        "mediumCode": "SWIFT",
+        "mediumUsage": "CONF",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "16780",
+        "mediumCode": "SWIFT",
+        "mediumUsage": "CONF",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      },
+      {
+        "fmSysContSysGenId": "7522",
+        "mediumCode": "SWIFT",
+        "mediumUsage": "MAIN",
+        "addrLine": "SCBLHKHHXXX",
+        "confirmationText": ""
+      }
+    ],
+    "fmAccount": {
+      "leId": "11153358",
+      "subProfileId": "1",
+      "fmId": "2",
+      "rmfFlag": "",
+      "fmCode": "SCB HONGKON*HKG",
+      "fmProfileShortName": "SNAME 2",
+      "fmProfileStatus": "ACTIVE",
+      "fmLongName": "LNAME 453988",
+      "fmLongName1": "LNAME1 453988",
+      "ultParentFmId": "400035981",
+      "fmLimitType": "GLBLMT",
+      "ccilMemberId": "",
+      "ccilAbbreviatedName": "",
+      "dvpCustInd": "0               ",
+      "equivalentCCILCounterpartyAtlasID": null,
+      "omgAlertId": "",
+      "markitWireId": "",
+      "omgOgdId": "",
+      "iceLinkId": "",
+      "omgCtmId": "",
+      "omgCtmAccount": "",
+      "btsId": "HKSCBLHK",
+      "scbClassCode": "32",
+      "fmType": "INTECOM",
+      "opicsClassCode": "238",
+      "fmClassCode": "IC",
+      "finInstType": "BANK",
+      "InstSector": "320",
+      "clsEigibility": "Y",
+      "clsCustType": "SETTLEM",
+      "clsStartDate": "2017-11-06 00:00:00.0",
+      "brokerId": "",
+      "pbFlag": "N",
+      "rpOverride": "",
+      "valuationStatement": "",
+      "setupToClear": "Y",
+      "nameMaskingRequired": "N",
+      "fundCode": ""
+    },
+    "legalEntity": {
+      "registeredAddress": {
+        "city": "Jrcqftmrx cs Gcbq",
+        "country": "HK",
+        "line1": "z/q Aspu Qrksijgsrj WgoW, uzjtro ui Wnre Auruosn",
+        "line2": "Bcyjevm JcjzfgmcÃŸv 81",
+        "postCode": "05717",
+        "state": "MQ"
+      }
+    }
+  }
+}

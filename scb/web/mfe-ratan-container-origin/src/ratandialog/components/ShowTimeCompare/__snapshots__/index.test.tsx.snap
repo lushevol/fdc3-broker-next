@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ShowTimeCompare 1`] = `
+<DocumentFragment>
+  <section
+    field="Cashflow.Payment_Cutoff_Time"
+    value="xxx"
+  />
+  (UTC)
+</DocumentFragment>
+`;

@@ -1,0 +1,29 @@
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  getByTestId,
+} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { CheckboxItem } from "./CheckboxItem";
+
+describe("CheckboxItem component", () => {
+  it("should render CheckboxItem correctly", async () => {
+    const onChange = jest.fn();
+    await act(() => {
+      render(
+        <CheckboxItem
+          field="checkboxItem"
+          disabled={false}
+          onChange={onChange}
+        />
+      );
+    });
+    const comp = screen.getByTestId("checkboxItem");
+    expect(comp).toBeDefined();
+    expect(onChange).toBeCalledWith("N");
+    userEvent.click(comp);
+    expect(onChange).toBeCalledWith("Y");
+  });
+});

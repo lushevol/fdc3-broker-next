@@ -1,0 +1,22 @@
+type Query {
+  cashflowUltraQueryCount(payload: RatanUltraQueryCount): UltraQueryCountResult!
+}
+
+input RatanUltraQueryCount {
+  filters: LogicFilter!
+  groupBy: GroupByModel
+}
+
+input GroupByModel {
+  field: String!
+}
+
+type UltraQueryCountResult {
+  count: Int!
+  groups: [GroupCount!]
+}
+
+type GroupCount {
+  field: String
+  count: Int
+}

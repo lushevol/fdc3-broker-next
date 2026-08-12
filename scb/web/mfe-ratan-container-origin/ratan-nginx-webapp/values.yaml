@@ -1,0 +1,16 @@
+environment: dev
+
+replicas: 1
+
+service:
+  type: NodePort
+
+appVersion: 1.0.0
+
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "125m"
+  limits:
+    memory: "256Mi"
+    cpu: "250m"

@@ -1,0 +1,30 @@
+.custom-row {
+  display: flex;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--theme-color-row-border);
+  &:nth-child(odd) {
+    background: var(--theme-color-row-bg1);
+  }
+  &:nth-child(even) {
+    background: var(--theme-color-row-bg2);
+  }
+  .label {
+    padding-left: 10px;
+    width: 50%;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    line-height: 1.2;
+  }
+  .value {
+    padding-left: 10px;
+    text-align: left;
+    word-break: break-word;
+    line-height: 1.2;
+  }
+  .colon {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+}

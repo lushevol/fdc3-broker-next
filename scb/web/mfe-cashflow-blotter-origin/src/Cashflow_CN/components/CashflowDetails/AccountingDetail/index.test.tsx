@@ -1,0 +1,22 @@
+import { render, screen } from "@testing-library/react";
+
+import { AccountingDetail } from "./index";
+const rowDetails = require('../data/cashflows.json');
+
+afterAll(() => {
+  jest.clearAllMocks();
+});
+
+jest.mock("../../../services", () => ({
+  getEBBSAcountingDetail: jest.fn(async () => ([{}])),
+}));
+
+describe("AccountingDetail component", () => {
+  it("should be in the document", async () => {
+    const details = JSON.parse(JSON.stringify(rowDetails.data.cashflows.results[0]));
+    render(<AccountingDetail
+      cashflowId={details.Cashflow.Cashflow_Id}
+    />);
+    expect(screen).toBeDefined();
+  });
+});

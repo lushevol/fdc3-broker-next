@@ -1,0 +1,75 @@
+{
+  "devtools_port": 9090,
+  "licenseKey": "openfin-with-singlespa-license-key",
+  "splashScreenImage": "http://localhost:8889/image/fmo-app-portal-splash.png",
+  "runtime": {
+    "arguments": "--v=1 --inspect",
+    "version": "26.102.71.8"
+  },
+  "platform": {
+    "uuid": "openfin-with-singlespa",
+    "icon": "http://localhost:8889/favicon.ico",
+    "autoShow": true,
+    "providerUrl": "http://localhost:8889/provider/",
+    "preventQuitOnLastWindowClosed": true,
+    "permissions": {
+      "ExternalWindow": {
+        "wrap": true
+      },
+      "System": {
+        "getAllExternalWindows": true,
+        "launchExternalProcess": true,
+        "readRegistryValue": true,
+        "terminateExternalProcess": true
+      }
+    },
+    "defaultWindowOptions": {
+      "url": "http://localhost:8889/window/",
+      "contextMenuSettings": {
+        "reload": true,
+        "devtools": true,
+        "enable": true
+      },
+      "defaultWidth": 1200,
+      "defaultHeight": 720,
+      "defaultLeft": 0,
+      "defaultTop": 0,
+      "saveWindowState": true,
+      "backgroundThrottling": true,
+      "minHeight": 445,
+      "minWidth": 640,
+      "experimental": {
+        "analytics": false
+      }
+    },
+    "defaultViewOptions": {
+      "experimental": {
+        "childWindows": true,
+        "analytics": true
+      }
+    },
+    "commands": [
+      {
+        "command": "stack.nextTab",
+        "keys": "Ctrl+Tab"
+      }
+    ]
+  },
+  "snapshot": {
+    "windows": []
+  },
+  "shortcut": {
+    "company": "Me",
+    "description": "openfin-with-singlespa.",
+    "icon": "http://localhost:8889/favicon.ico",
+    "name": "My openfin app",
+    "target": ["desktop", "start-menu"]
+  },
+  "supportInformation": {
+    "company": "My openfin with single spa app",
+    "product": "My openfin with single spa app - Client",
+    "email": "support@openfin.co",
+    "forwardErrorReports": true
+  },
+  "customSettings": {}
+}

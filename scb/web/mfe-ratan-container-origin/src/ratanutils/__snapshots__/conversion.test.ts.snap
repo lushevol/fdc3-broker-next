@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`handleCombineData 1`] = `
+[
+  {
+    "group": "PERSON",
+    "id": "Entity.Person.Trader_PSID",
+    "key": "Trader_PSID",
+    "version": "1596136",
+  },
+]
+`;
+
+exports[`handleCombineData with data not match config combineField 1`] = `
+[
+  {
+    "group": "PERSON",
+    "id": "Entity.Person.Trader_PSID",
+    "key": "Trader_PSID",
+    "version": "1596136",
+  },
+]
+`;
+
+exports[`handleCombineData with data not match config combineField 2`] = `
+[
+  {
+    "group": "PERSON",
+    "id": "Entity.Person.Trader_PSID",
+    "key": "Trader_PSID",
+    "version": "1596136",
+  },
+]
+`;

@@ -1,0 +1,17 @@
+query SettlementCashflowDataUltraQueryCount($payload: RatanUltraQueryCount!) {
+  cashflowUltraQueryCount(payload: $payload) {
+    count
+  }
+}
+
+query SettlementCashflowDataUltraQueryCountGroupBy(
+  $payload: RatanUltraQueryCount!
+) {
+  cashflowUltraQueryCount(payload: $payload) {
+    count
+    groups {
+      field
+      count
+    }
+  }
+}

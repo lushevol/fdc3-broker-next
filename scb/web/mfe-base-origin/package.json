@@ -1,5 +1,5 @@
 {
-  "name": "@fm/base",
+  "name": "@fm/base-origin",
   "version": "0.0.0",
   "scripts": {
     "preinstall": "npx npm-force-resolutions",

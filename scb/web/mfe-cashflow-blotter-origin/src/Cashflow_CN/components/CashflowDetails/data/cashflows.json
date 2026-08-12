@@ -1,0 +1,1580 @@
+{
+  "data": {
+    "cashflows": {
+      "pageInfo": {
+        "totalHits": 150,
+        "pageNo": 1,
+        "pageSize": 50,
+        "lastPage": false
+      },
+      "results": [
+        {
+          "Cashflow": {
+            "Cashflow_Id": "S23002",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "",
+            "Cashflow_State": "QUEUED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-01T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Cashflow_Swift_Message_Standard": "MT",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": null,
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "Is_STP_Ratan": "true",
+            "Is_STP_RATAN": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "",
+            "Adhoc_SSI_Inputer": "",
+            "Payment_Cutoff_Time": "2021-07-28T11:00:00Z",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional",
+            "Netting_Cutoff_Date": "2021-07-21T11:00:00Z"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Trade_Version": "0",
+          "BCS_Trade_Id": "2222",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "VALIDATED",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Operator",
+          "Cashflow_Sub_Status_Updater": "System",
+          "Exception_Code": "Exception_Code_1",
+          "Trade_Date": "2024-06-14",
+          "Confirmation": {
+            "Confirmation_Status": "CONFIRMED"
+          },
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Booking_Entity_SCI_FMCODE": "Booking_Entity_SCI_FMCODE_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "S11104",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Affirmed",
+            "Cashflow_State": "QUEUED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-02-03T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "Is_STP_Ratan": "false",
+            "Is_STP_RATAN": "false",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "Maker Completed",
+            "Adhoc_SSI_Inputer": "8800001",
+            "Payment_Cutoff_Time": "2020-10-28T11:00:00Z",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional",
+            "Status_Event_Type": "",
+            "Netting_Cutoff_Date": "2100-07-21T11:00:00Z",
+            "Cashflow_Swift_Message_Standard": "MX"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Gross",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Operator",
+          "Cashflow_Sub_Status_Type": "NSTP Release",
+          "Cashflow_Sub_Status_Updater": "1243644",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "C5103",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "PROJECTED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-02-01T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Cashflow_Swift_Message_Standard": "",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "Adhoc_SSI_Status_1",
+            "Adhoc_SSI_Inputer": "Adhoc_SSI_Inputer_1",
+            "Payment_Cutoff_Time": "2021-05-10T13:00:00Z",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Verification",
+          "Cashflow_Sub_Status_Type": "Adhoc SSI Amendment",
+          "Cashflow_Sub_Status_Updater": "222222",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_3",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "C5501",
+            "Cashflow_Version": "Cashflow_Version_2",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_2",
+            "Cashflow_State": "SETTLED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_2",
+            "Payment_Date": "2022-01-11T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_2",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_2",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_2",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_2",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_2",
+            "Netting_Id": "Netting_Id_2",
+            "Payment_Amount": "Payment_Amount_2",
+            "Pay_Receive_Indicator": "Pay_Rec_2",
+            "Payer_Name": "Payer_Name_2",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_2",
+            "Adhoc_SSI_Status": "Adhoc_SSI_Status_2",
+            "Adhoc_SSI_Inputer": "Adhoc_SSI_Inputer_2",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_2",
+          "Parent_Trade_Id": "Parent_Trade_Id_2",
+          "Trade_State": "Trade_State_2",
+          "Settlement_Method": "Settlement_Method_2",
+          "Delivery_Method": "Delivery_Method_2",
+          "Position_Id": "Position_Id_2",
+          "Cashflow_Sub_Status": "Pending Operator",
+          "Cashflow_Sub_Status_Type": "NSTP Release",
+          "Cashflow_Sub_Status_Updater": "222222",
+          "Exception_Code": "Exception_Code_2",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_2",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_2",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_2"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_2"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_2",
+            "CFI_Code": "CFI_Code_2"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_2",
+            "Data_Publication_Id": "Data_Publication_Id_2",
+            "Data_Type": "Data_Type_2",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_2",
+            "Data_Sender": "Data_Sender_2",
+            "Data_Source_System": "Data_Source_System_2",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_2"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "P201014011",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "QUEUED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-01T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "Netting_Id_1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "Adhoc_SSI_Status_1",
+            "Adhoc_SSI_Inputer": "Adhoc_SSI_Inputer_1",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Verification",
+          "Cashflow_Sub_Status_Type": "NSTP Release",
+          "Cashflow_Sub_Status_Updater": "222222",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_2"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": {
+            "Sender_To_Receiver_Information_1": null,
+            "Remittance_Information_1": null,
+            "Swift_Payment_Method": "Y",
+            "Swift_Message_Type": "MT103",
+            "Sender_To_Receiver_Information_6": null,
+            "SSI_Unique_Id": "41730141",
+            "Remittance_Information_2": null,
+            "Sender_To_Receiver_Information_5": null,
+            "Sender_To_Receiver_Information_4": null,
+            "Is_Third_Party_Payment": "false",
+            "Remittance_Information_4": null,
+            "SSI_Source": "Interface",
+            "SSI_Priority": "Primary",
+            "Remittance_Information_3": null,
+            "Charge_Bearer": "OUR",
+            "Sender_To_Receiver_Information_3": null,
+            "Sender_To_Receiver_Information_2": null,
+            "Nostro_Swift_Message_Type": null,
+            "Account": {
+              "Intermediary_Account_Number": "HR6823600001900000129",
+              "Beneficiary_Street_Address": "155 BISHOPSGATE LDN",
+              "Beneficiary_Account_Name": "BARING ASSET MANAGEMENT LIMITED",
+              "Beneficiary_Bank_BIC_code": "CNORGB22XXX",
+              "Beneficiary_Bank_Street_Address": null,
+              "Beneficiary_Correspondent_Street_Address": null,
+              "Beneficiary_Account_Number": "BUF01",
+              "Beneficiary_Correspondent_City": null,
+              "Beneficiary_Correspondent_Account_Number": null,
+              "Beneficiary_Bank_Account_Number": "51010602307",
+              "Ordering_Customer_City": "United Kingdom",
+              "Beneficiary_Bank_City": null,
+              "Counterparty_CMS_Account_Number": null,
+              "Beneficiary_Correspondent_Account_Name": "ZAGREBACKA BANKA DD",
+              "Intermediary_Account_Name": null,
+              "Intermediary_BIC_code": "BKAUATWWXXX",
+              "Ordering_Customer_Street_Address": "155 BISHOPSGATE LDN",
+              "Intermediary_City": null,
+              "SCB_Nostro_Account_Number": "HRK MAIN",
+              "Beneficiary_City": "United Kingdom",
+              "Beneficiary_Account_Name_2": "ACTING AS AGENT RE BHYBF89",
+              "Beneficiary_Correspondent_BIC_code": "ZABAHR2XXXX",
+              "Beneficiary_Bank_Account_Name": "NORTHERN TRUST COMPANY THE",
+              "Beneficiary_BIC_code": null,
+              "Ordering_Customer_Account_Number": "400673926",
+              "Ordering_Customer_BIC_Code": "SBOSUS3TBCA",
+              "Ordering_Customer_Account_Name": "BARING ASSET MANAGEMENT LIMITED ACTING AS AGENT RE BHYBF89",
+              "SCB_Nostro_Account_Type": "NOS",
+              "Intermediary_Street_Address": null,
+              "EBBS_Account_Number": "2387251800191710000000",
+              "Booking_Entity_Correspondent_BIC_code": "SCBLGB2LTSY",
+              "Booking_Entity_Correspondent_Account_Name": "STANCHART BK LDN",
+              "Booking_Entity_Correspondent_Account_Number": "5199758001",
+              "Booking_Entity_Correspondent_City": "LONDON EC2V 5DD",
+              "EBBS_Bridge_Account_Number": null,
+              "Booking_Entity_Correspondent_Street_Address": "1 BASINGHALL AVENUE  LONDON"
+            }
+          },
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "C3028",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "QUEUED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-01T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "Adhoc_SSI_Status_1",
+            "Adhoc_SSI_Inputer": "Adhoc_SSI_Inputer_1",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "VALIDATED",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Operator",
+          "Cashflow_Sub_Status_Type": "NSTP Release",
+          "Cashflow_Sub_Status_Updater": "",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "P20210120",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "FAILED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-14T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "party2",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "party1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "",
+            "Adhoc_SSI_Inputer": "",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Operator",
+          "Cashflow_Sub_Status_Type": "NSTP Release",
+          "Cashflow_Sub_Status_Updater": "system",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "P20210121",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "FAILED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-15T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "party2",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "party1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "",
+            "Adhoc_SSI_Inputer": "",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Verification",
+          "Cashflow_Sub_Status_Type": "NSTP Release",
+          "Cashflow_Sub_Status_Updater": "System",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "S11106",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Affirmed",
+            "Cashflow_State": "PROJECTED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-03-15T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "Maker Completed",
+            "Adhoc_SSI_Inputer": "8800001",
+            "Payment_Cutoff_Time": "2021-05-10T11:00:00Z",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Gross",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "",
+          "Cashflow_Sub_Status_Type": "",
+          "Cashflow_Sub_Status_Updater": "1243644",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "P20210122",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "FAILED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-06T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "party2",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "party1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "",
+            "Adhoc_SSI_Inputer": "",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Verification",
+          "Cashflow_Sub_Status_Type": "Adhoc Nostro SSI",
+          "Cashflow_Sub_Status_Updater": "System",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "S12105",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "FAILED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-03T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "party2",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "party1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "Netting_Id_1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "Adhoc_SSI_Status_1",
+            "Adhoc_SSI_Inputer": "Adhoc_SSI_Inputer_1",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Operator",
+          "Cashflow_Sub_Status_Type": "NSTP Release",
+          "Cashflow_Sub_Status_Updater": "222222",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "P201014010",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "CANCELLED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-03T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "Netting_Id_1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "Adhoc_SSI_Status_1",
+            "Adhoc_SSI_Inputer": "Adhoc_SSI_Inputer_1",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Operator",
+          "Cashflow_Sub_Status_Updater": "System",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": {
+            "Sender_To_Receiver_Information_1": null,
+            "Remittance_Information_1": null,
+            "Swift_Payment_Method": "Y",
+            "Swift_Message_Type": "MT103",
+            "Sender_To_Receiver_Information_6": null,
+            "SSI_Unique_Id": "44947801",
+            "Remittance_Information_2": null,
+            "Sender_To_Receiver_Information_5": null,
+            "Sender_To_Receiver_Information_4": null,
+            "Is_Third_Party_Payment": "false",
+            "Remittance_Information_4": null,
+            "SSI_Source": "Interface",
+            "SSI_Priority": "Primary",
+            "Remittance_Information_3": null,
+            "Charge_Bearer": "OUR",
+            "Sender_To_Receiver_Information_3": null,
+            "Sender_To_Receiver_Information_2": null,
+            "Nostro_Swift_Message_Type": null,
+            "Account": {
+              "Intermediary_Account_Number": "51010602307",
+              "Beneficiary_Street_Address": null,
+              "Beneficiary_Account_Name": null,
+              "Beneficiary_Bank_BIC_code": "CNORGB22XXX",
+              "Beneficiary_Bank_Street_Address": "AgentName2Custodian",
+              "Beneficiary_Correspondent_Street_Address": "AgentName2Local",
+              "Beneficiary_Account_Number": "BUF01",
+              "Beneficiary_Correspondent_City": null,
+              "Beneficiary_Correspondent_Account_Number": "SubAccLocal",
+              "Beneficiary_Bank_Account_Number": "HR6823600001900000129",
+              "Ordering_Customer_City": null,
+              "Beneficiary_Bank_City": null,
+              "Counterparty_CMS_Account_Number": null,
+              "Beneficiary_Correspondent_Account_Name": "UNICREDIT BANK AUSTRIA AG",
+              "Intermediary_Account_Name": "UNICREDIT BANK AUSTRIA AG",
+              "Intermediary_BIC_code": "ZABAHR2XXXX",
+              "Ordering_Customer_Street_Address": "155 BISHOPSGATE LDN",
+              "Intermediary_City": null,
+              "SCB_Nostro_Account_Number": "HKD MAIN",
+              "Beneficiary_City": null,
+              "Beneficiary_Account_Name_2": null,
+              "Beneficiary_Correspondent_BIC_code": "BKAUATWWXXX",
+              "Beneficiary_Bank_Account_Name": "NORTHERN TRUST COMPANY THE",
+              "Beneficiary_BIC_code": null,
+              "Ordering_Customer_Account_Number": "400673926",
+              "Ordering_Customer_BIC_Code": null,
+              "Ordering_Customer_Account_Name": "BARING ASSET MANAGEMENT LIMITED ACTING AS AGENT RE BHYBF89",
+              "SCB_Nostro_Account_Type": "NOS",
+              "Intermediary_Street_Address": "AgentName2Local",
+              "EBBS_Account_Number": "2387251800191710000000",
+              "Booking_Entity_Correspondent_BIC_code": "SCBLGB2LTSY",
+              "Booking_Entity_Correspondent_Account_Name": "STANCHART BK LDN",
+              "Booking_Entity_Correspondent_Account_Number": "5199758001",
+              "Booking_Entity_Correspondent_City": "LONDON EC2V 5DD",
+              "EBBS_Bridge_Account_Number": null,
+              "Booking_Entity_Correspondent_Street_Address": "1 BASINGHALL AVENUE  LONDON"
+            }
+          },
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "S15104",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "QUEUED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-20T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "Netting_Id_1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "Adhoc_SSI_Status_1",
+            "Adhoc_SSI_Inputer": "Adhoc_SSI_Inputer_1",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "",
+          "Cashflow_Sub_Status_Updater": "",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "S1X05",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "NETTED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-14T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "Netting_Id_1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "Adhoc_SSI_Status_1",
+            "Adhoc_SSI_Inputer": "Adhoc_SSI_Inputer_1",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "",
+          "Cashflow_Sub_Status_Updater": "",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "S1X06",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "QUEUED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-05-11T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "Netting_Id_1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "Adhoc_SSI_Status_1",
+            "Adhoc_SSI_Inputer": "Adhoc_SSI_Inputer_1",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Operator",
+          "Cashflow_Sub_Status_Type": "",
+          "Cashflow_Sub_Status_Updater": "",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "S1X07",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "QUEUED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-10T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "Netting_Id_1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "Adhoc_SSI_Status_1",
+            "Adhoc_SSI_Inputer": "Adhoc_SSI_Inputer_1",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Verification",
+          "Cashflow_Sub_Status_Type": "Adhoc Suppression",
+          "Cashflow_Sub_Status_Updater": "",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "S1X08",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "SUPPRESSED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-19T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "Netting_Id_1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "Adhoc_SSI_Status_1",
+            "Adhoc_SSI_Inputer": "Adhoc_SSI_Inputer_1",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "",
+          "Cashflow_Sub_Status_Type": "",
+          "Cashflow_Sub_Status_Updater": "",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "P20210123",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "FAILED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-29T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "party1",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "party2",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "",
+            "Adhoc_SSI_Inputer": "",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Verification",
+          "Cashflow_Sub_Status_Type": "NSTP Release",
+          "Cashflow_Sub_Status_Updater": "System",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "P20210124",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "SETTLED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-09T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "1",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "",
+            "Adhoc_SSI_Inputer": "",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Operator",
+          "Cashflow_Sub_Status_Updater": "System",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        },
+        {
+          "Cashflow": {
+            "Cashflow_Id": "C11105",
+            "Cashflow_Version": "Cashflow_Version_1",
+            "Cashflow_Affirmation_Status": "Cashflow_Affirmation_Status_1",
+            "Cashflow_State": "QUEUED",
+            "Enrichment_Event_Type": "Enrichment_Event_Type_1",
+            "Payment_Date": "2022-01-09T00:00:00Z",
+            "Cashflow_Event_Type": "Cashflow_Event_Type_1",
+            "Payment_Receiver_Party_Reference": "Payment_Receiver_Party_Reference_1",
+            "Cashflow_Business_Version": "1",
+            "Payment_Payer_Party_Reference": "Payment_Payer_Party_Reference_1",
+            "Payment_Date_Business_Day_Convention": "Payment_Date_Business_Day_Convention_1",
+            "Payment_Currency": "RUB",
+            "Event_Date": "Event_Date_1",
+            "Netting_Id": "88888",
+            "Payment_Amount": "Payment_Amount_1",
+            "Pay_Receive_Indicator": "Pay_Rec_1",
+            "Payer_Name": "Payer_Name_1",
+            "Is_STP": "true",
+            "NSTP_Reason": "NSTP_Reason_1",
+            "Adhoc_SSI_Status": "Adhoc_SSI_Status_1",
+            "Adhoc_SSI_Inputer": "Adhoc_SSI_Inputer_1",
+            "Payment_Cutoff_Time": "null",
+            "Is_Amended_Post_Settlement": "true",
+            "Payment_Type": "Notional"
+          },
+          "Trade_Id": "Trade_Id_1",
+          "Parent_Trade_Id": "Parent_Trade_Id_1",
+          "Trade_State": "Trade_State_1",
+          "Settlement_Method": "Settlement_Method_1",
+          "Delivery_Method": "Delivery_Method_1",
+          "Position_Id": "Position_Id_1",
+          "Cashflow_Sub_Status": "Pending Verification",
+          "Cashflow_Sub_Status_Type": "Un-Net",
+          "Cashflow_Sub_Status_Updater": "222222",
+          "Exception_Code": "Exception_Code_1",
+          "FMO_Comments": [
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            },
+            {
+              "FMO_Comment_Timestamp": "xxx",
+              "FMO_Comment_Updater": "xxx",
+              "FMO_Comment": "xxx"
+            }
+          ],
+          "Entity": {
+            "Booking_Entity_SCI_FMID": "Booking_Entity_SCI_FMID_1",
+            "Counterparty_SCI_FMCODE": "Counterparty_SCI_FMCODE_1",
+            "Counterparty_SCI_FMID": "Counterparty_SCI_FMID_1"
+          },
+          "Portfolio": {
+            "Booking_Entity_Trade_Portfolio_Name": "Booking_Entity_Trade_Portfolio_Name_1"
+          },
+          "Settlement_Instruction": null,
+          "Instrument_Common": {
+            "ISDA_Taxonomy": "ISDA_Taxonomy_1",
+            "CFI_Code": "CFI_Code_1"
+          },
+          "Data_Flow": {
+            "Data_Source_System_Domain_Name": "Data_Source_System_Domain_Name_1",
+            "Data_Publication_Id": "Data_Publication_Id_1",
+            "Data_Type": "Data_Type_1",
+            "Data_Publication_Date_Time": "Data_Publication_Date_Time_1",
+            "Data_Sender": "Data_Sender_1",
+            "Data_Source_System": "Data_Source_System_1",
+            "Data_Source_System_Country_Code": "Data_Source_System_Country_Code_1"
+          }
+        }
+      ]
+    }
+  }
+}

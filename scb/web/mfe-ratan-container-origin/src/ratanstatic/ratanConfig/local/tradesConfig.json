@@ -1,0 +1,128 @@
+{
+  "tradeMandatoryFields": [
+    "Trade_Id",
+    "Trade_Version",
+    "Data_Flow.Data_Publication_Id",
+    "Data_Flow.Data_Source_System",
+    "Data_Flow.Data_Sender",
+    "Trade_Event.Event_Id",
+    "Tracking_Version",
+    "Trade_Event.Event_Version",
+    "Trade_State",
+    "Entity.Booking_Entity_Name",
+    "Entity.Counterparty_Long_Name",
+    "Entity.Counterparty_SCI_FMID",
+    "Entity.Counterparty_SCI_LEID",
+    "Instrument_Common.Instrument_Description_Of_Underlier",
+    "Settlement_Date",
+    "Settlement_Type",
+    "Trade_Date",
+    "Trade_Event.Business_Event_Type",
+    "Instrument_Common.ISDA_Taxonomy",
+    "Instrument_Common.Source_System_Instrument_Sub_Type",
+    "Instrument_Common.Primary_Asset_Class",
+    "Entity.Booking_Entity_SCI_FMID",
+    "Portfolio.Booking_Entity_Trade_Portfolio_Name",
+    "Validation_Status",
+    "Entity.Booking_Entity_LEI",
+    "Entity.Booking_Entity_SCI_FMCODE"
+  ],
+  "defaultFilter": "\\\"Data_Flow.Data_Source_System\\\" IN ('Blade', 'S2BX', 'CFETS') or (\\\"Data_Flow.Data_Sender\\\" = 'BCSSTELLA' and \\\"Instrument_Common.Source_System_Instrument_Sub_Type\\\" IN ('OTC Option', 'Accumulator Swap', 'Equity Swap'))",
+  "productSource": {
+    "fxSource": {
+      "Data_Flow.Data_Source_System": ["Blade", "S2BX", "CFETS"],
+      "Instrument_Common.ISDA_Taxonomy": [
+        "ForeignExchange:Spot",
+        "ForeignExchange:Forward",
+        "ForeignExchange:Swap",
+        "ForeignExchange:VanillaOption",
+        "ForeignExchange:SimpleExotic:Digital",
+        "ForeignExchange:NDF"
+      ]
+    },
+    "scfSource": {
+      "Data_Flow.Data_Source_System": ["Blade", "S2BX", "CFETS"],
+      "Instrument_Common.Primary_Asset_Class": ["Cash"]
+    },
+    "otherSource": {
+      "Data_Flow.Data_Sender": ["BCSSTELLA"],
+      "Instrument_Common.Source_System_Instrument_Sub_Type": [
+        "OTC Option",
+        "Accumulator Swap",
+        "Equity Swap"
+      ]
+    },
+    "irsSource": {
+      "Data_Flow.Data_Source_System": ["Blade", "S2BX", "CFETS"],
+      "Instrument_Common.ISDA_Taxonomy": [
+        "InterestRate:IRSwap:FixedFloat",
+        "InterestRate:IRSwap:FloatFloat",
+        "InterestRate:IRSwap:OIS",
+        "InterestRate:IRSwap:Basis"
+      ]
+    },
+    "ccsSource": {
+      "Data_Flow.Data_Source_System": ["Blade", "S2BX", "CFETS"],
+      "Instrument_Common.ISDA_Taxonomy": [
+        "InterestRate:CrossCurrency:Basis",
+        "InterestRate:CrossCurrency:FixedFloat",
+        "InterestRate:CrossCurrency:FloatFloat",
+        "InterestRate:CrossCurrency:FixedFixed"
+      ]
+    },
+    "loanSource": {
+      "Data_Flow.Data_Source_System": ["Blade", "S2BX", "CFETS"],
+      "Instrument_Common.ISDA_Taxonomy": ["InterestRate:LoanDeposit"]
+    }
+  },
+  "customSearchFilter": [
+    {
+      "field": "Entity.Person.Trader_PSID",
+      "filterText": "(\\\"Entity.Person.Trader_PSID\\\" = '{value}' and \\\"Data_Flow.Data_Source_System\\\" IN ('Blade', 'S2BX', 'CFETS', 'Murex')) or (\\\"Entity.Person.Trader_Source_System_Person_Id\\\" = '{value}' and \\\"Data_Flow.Data_Source_System\\\" = 'S2BX')",
+      "combineField": "Entity.Person.Trader_Source_System_Person_Id"
+    },
+    {
+      "field": "Entity.Person.Execution_Marketer_PSID",
+      "filterText": "(\\\"Entity.Person.Execution_Marketer_PSID\\\" = '{value}' and \\\"Data_Flow.Data_Source_System\\\" IN ('Blade', 'S2BX', 'CFETS', 'Murex')) or (\\\"Entity.Person.Execution_Marketer_Source_System_Person_Id\\\" = '{value}' and \\\"Data_Flow.Data_Source_System\\\" = 'S2BX')",
+      "combineField": "Entity.Person.Execution_Marketer_Source_System_Person_Id"
+    },
+    {
+      "field": "Entity.Person.Coverage_Marketer_PSID",
+      "filterText": "(\\\"Entity.Person.Coverage_Marketer_PSID\\\" = '{value}' and \\\"Data_Flow.Data_Source_System\\\" IN ('Blade', 'S2BX', 'CFETS', 'Murex')) or (\\\"Entity.Person.Coverage_Marketer_Source_System_Person_Id\\\" = '{value}' and \\\"Data_Flow.Data_Source_System\\\" = 'S2BX')",
+      "combineField": "Entity.Person.Coverage_Marketer_Source_System_Person_Id"
+    },
+    {
+      "field": "Entity.Person.Booking_Marketer_PSID",
+      "filterText": "(\\\"Entity.Person.Booking_Marketer_PSID\\\" = '{value}' and \\\"Data_Flow.Data_Source_System\\\" IN ('Blade', 'S2BX', 'CFETS', 'Murex')) or (\\\"Entity.Person.Booking_Marketer_Source_System_Person_Id\\\" = '{value}' and \\\"Data_Flow.Data_Source_System\\\" = 'S2BX')",
+      "combineField": "Entity.Person.Booking_Marketer_Source_System_Person_Id"
+    }
+  ],
+  "customLocalFilter": [
+    {
+      "field": "Exclude_Validated_Expired_Trade",
+      "label": "Exclued Validated Expired Trade",
+      "filter": [
+        {
+          "conditions": [
+            {
+              "field": "Trade_Event.Business_Event_Type",
+              "regExp": "Expiry"
+            },
+            {
+              "field": "Validation_Status",
+              "regExp": "VALIDATED"
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "field": "Validation_Status",
+              "regExp": "ECONAFFIRMED"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
