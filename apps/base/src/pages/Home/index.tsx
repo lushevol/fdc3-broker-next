@@ -1,7 +1,6 @@
 import AddIcon from '@mui/icons-material/Add';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import { useTheme } from '@mui/material/styles';
 import React, { type ReactElement } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
@@ -13,11 +12,6 @@ import TabItem from '../../components/TabItem';
 import TabPanel from '../../components/TabPanel';
 import Timeout from '../../components/Timeout';
 import type { Workspace } from '../../hooks/model/workspaces';
-import backgroundDark from '../../theme/config/background-dark.png';
-import backgroundLight from '../../theme/config/background-light.png';
-import pattern from '../../theme/config/pattern.png';
-import portalTextDark from '../../theme/config/portal-text-dark.png';
-import portalTextLight from '../../theme/config/portal-text-light.png';
 import Container from './common/Container';
 import Root, { classes, PREFIX } from './common/style';
 import useController from './common/useController';
@@ -26,7 +20,26 @@ import useParameters from './common/useParameters';
 import { ChatbotSidebarV2 } from '../../components/ChatbotSidebarV2/exports';
 import { useFDC3WorkspaceHelper } from '../../fdc3/useFDC3WorkspaceHelper';
 
-export const ContainerComponent = (validation: boolean, item, i) =>
+export interface HomePresentation {
+  AppBarComponent?: React.ComponentType;
+  EmptyComponent?: React.ComponentType;
+  RootComponent?: React.ElementType;
+  TabItemComponent?: React.ComponentType<React.ComponentProps<typeof TabItem>>;
+  headerStyle?: React.CSSProperties;
+  showAddWorkspace?: boolean;
+  tabsInHeader?: boolean;
+}
+
+interface HomeProps {
+  presentation?: HomePresentation;
+}
+
+export const ContainerComponent = (
+  validation: boolean,
+  item,
+  i,
+  EmptyComponent: React.ComponentType = Empty,
+) =>
   validation ? (
     <Container
       {...item.containers[0]}
@@ -36,11 +49,19 @@ export const ContainerComponent = (validation: boolean, item, i) =>
       topPossition={item.containers[0].topPossition}
     />
   ) : (
-    <Empty />
+    <EmptyComponent />
   );
 
-const Home: React.FC = (): ReactElement => {
-  const theme = useTheme();
+const Home: React.FC<HomeProps> = ({ presentation = {} }): ReactElement => {
+  const {
+    AppBarComponent = AppBar,
+    EmptyComponent = Empty,
+    RootComponent = Root,
+    TabItemComponent = TabItem,
+    headerStyle,
+    showAddWorkspace = true,
+    tabsInHeader = false,
+  } = presentation;
   const {
     store,
     value,
@@ -144,28 +165,6 @@ const Home: React.FC = (): ReactElement => {
   if (!validateWorkspaceReady || !ready) {
     return <></>;
   }
-  // when we change to new design, we need to delete the import and isNewLayout variable
-  // And do some changes based on isNewLayout is true
-  const params = new URLSearchParams(window.location.search);
-  const isNewLayout = params.get('new-layout') === 'true';
-
-  const headerStyle: React.CSSProperties | undefined = isNewLayout
-    ? {
-        backgroundImage:
-          theme.palette.mode === 'dark'
-            ? `url(${portalTextDark}), url(${pattern}), url(${pattern}), url(${backgroundDark})`
-            : `url(${portalTextLight}), url(${pattern}), url(${pattern}), url(${backgroundLight})`,
-        backgroundRepeat: 'no-repeat, no-repeat, no-repeat, no-repeat',
-        backgroundSize: 'auto 24px, auto 100%, auto 100%, cover',
-        backgroundPosition: '20px 20%, left center, right center, center',
-        display: 'flex',
-        flexDirection: 'row-reverse',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        height: '96px',
-      }
-    : undefined;
-
   const workspaceTabs = (
     <div className={classes.tabBar} role="tablist" data-testid={`${PREFIX}_workspaces`}>
       <div className={classes.firsttab}></div>
@@ -184,7 +183,7 @@ const Home: React.FC = (): ReactElement => {
               onClick={() => handleChange(item)}
               onDoubleClick={focus(item)}
             >
-              <TabItem
+              <TabItemComponent
                 item={item}
                 edit={edit}
                 remove={remove}
@@ -199,7 +198,7 @@ const Home: React.FC = (): ReactElement => {
           );
         })}
       </SortableContext>
-      {!isNewLayout && (
+      {showAddWorkspace && (
         <div className={classes.lasttab}>
           <Button
             variant="contained"
@@ -217,11 +216,7 @@ const Home: React.FC = (): ReactElement => {
   );
 
   return (
-    <Root
-      data-testid={PREFIX}
-      onMouseMove={mouseMove}
-      className={isNewLayout ? 'home-wrapper' : ''}
-    >
+    <RootComponent data-testid={PREFIX} onMouseMove={mouseMove}>
       <DndContext
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -229,15 +224,15 @@ const Home: React.FC = (): ReactElement => {
         sensors={sensors}
       >
         <header style={headerStyle}>
-          <AppBar />
-          {isNewLayout && workspaceTabs}
+          <AppBarComponent />
+          {tabsInHeader && workspaceTabs}
         </header>
         <main className={classes.main}>
-          {!isNewLayout && workspaceTabs}
+          {!tabsInHeader && workspaceTabs}
           <DragOverlay>
             {draggedItem ? (
               <div className={classes.dragOverlay}>
-                <TabItem
+                <TabItemComponent
                   item={draggedItem}
                   edit={edit}
                   remove={remove}
@@ -269,7 +264,7 @@ const Home: React.FC = (): ReactElement => {
                   className={classes.tabpanel}
                   isActive={item.isActive}
                 >
-                  {ContainerComponent(validation, item, i)}
+                  {ContainerComponent(validation, item, i, EmptyComponent)}
                 </TabPanel>
               );
             })}
@@ -279,7 +274,7 @@ const Home: React.FC = (): ReactElement => {
       {showTimeout && <Timeout setOpen={setShowTimeout} />}
       {channelMessage && <Snackbar message={channelMessage} open={true} onClose={clearMessage} />}
       <ChatbotSidebarV2 toolRegistryConfig={toolRegistryConfig} />
-    </Root>
+    </RootComponent>
   );
 };
 

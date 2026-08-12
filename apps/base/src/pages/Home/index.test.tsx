@@ -91,11 +91,7 @@ jest.mock('../../components/Timeout', () => () => null);
 jest.mock('../../components/TabItem', () => () => <span>Tab Item</span>);
 jest.mock('./common/Container', () => () => <div>Container</div>);
 jest.mock('../../components/ChatbotSidebarV2/exports', () => ({
-  ChatbotSidebarV2: ({
-    toolRegistryConfig,
-  }: {
-    toolRegistryConfig: Record<string, unknown>;
-  }) => {
+  ChatbotSidebarV2: ({ toolRegistryConfig }: { toolRegistryConfig: Record<string, unknown> }) => {
     capturedConfigs.push(toolRegistryConfig);
     return <div>Chatbot Sidebar</div>;
   },
@@ -154,15 +150,5 @@ describe('Home workspace context wiring', () => {
     const workspaceTabs = screen.getByTestId('home-root_workspaces');
 
     expect(header).not.toContainElement(workspaceTabs);
-  });
-
-  it('composes the App Bar and workspace tabs in one header for the new layout', () => {
-    window.history.pushState({}, '', '/?new-layout=true');
-    render(<Home />);
-
-    const header = screen.getByText('AppBar').closest('header');
-    const workspaceTabs = screen.getByTestId('home-root_workspaces');
-
-    expect(header).toContainElement(workspaceTabs);
   });
 });

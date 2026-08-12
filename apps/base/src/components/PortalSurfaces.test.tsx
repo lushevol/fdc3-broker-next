@@ -8,19 +8,40 @@ import getDarkTheme from '../theme/config/dark';
 import NewTile from './NewTile';
 import Switch from './Switch';
 import Drawer from './Drawer';
-import Empty from './Empty';
 import Avatar from './Avatar';
 import Profile from './Profile';
-import Splash from './Splash';
 import NewLayoutAvatar from '../new-layout/components/Avatar';
 import NewLayoutEmpty from '../new-layout/components/Empty';
 import NewLayoutProfile from '../new-layout/components/Profile';
 import NewLayoutSplash from '../new-layout/components/Splash';
+import NewLayoutTileLibrary from '../new-layout/components/TileLibrary';
+import AppBar from './AppBar';
+import NewLayoutAppBar from '../new-layout/components/AppBar';
 
 jest.mock('../hooks/provider', () => ({ useContext: jest.fn() }));
 jest.mock('../hooks/dispathcer', () => ({ __esModule: true, default: jest.fn() }));
-jest.mock('../analytics', () => ({ __esModule: true, default: () => ({ ButtonEvent: jest.fn() }) }));
-jest.mock('./ErrorBoundry', () => ({ __esModule: true, default: ({ children }: { children: React.ReactNode }) => children }));
+jest.mock('../analytics', () => ({
+  __esModule: true,
+  default: () => ({ ButtonEvent: jest.fn() }),
+}));
+jest.mock('./ErrorBoundry', () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => children,
+}));
+jest.mock('./Survey', () => ({ __esModule: true, default: () => null }));
+jest.mock('./AppBar/common/useController', () => ({
+  __esModule: true,
+  default: () => ({
+    store: { drawer: false, drawers: [] },
+    anchor: false,
+    toggleDrawer: jest.fn(() => jest.fn()),
+    addTile: jest.fn(),
+    surveyLink: '',
+    openPopUp: jest.fn(),
+    openLogoutModal: false,
+    setOpenLogoutModal: jest.fn(),
+  }),
+}));
 
 const mockLogout = jest.fn();
 jest.mock('../services', () => ({ __esModule: true, default: () => ({ logout: mockLogout }) }));
@@ -77,9 +98,12 @@ beforeEach(() => {
     jest.fn(),
   ]);
   mockUseDispatcher.mockReturnValue({
+    addWorkspace: jest.fn(),
+    dispacthCurrentWorkspace: jest.fn(),
     dispacthDrawer: jest.fn(),
     dispacthLoading: jest.fn(),
     dispacthTimeType: jest.fn(),
+    dispacthWorkspaces: jest.fn(),
   });
 });
 
@@ -88,6 +112,28 @@ afterEach(() => {
 });
 
 describe('Base WebKit portal surfaces', () => {
+  it('preserves the complete legacy App Bar without the new layout flag', () => {
+    document.title = 'Legacy portal';
+    renderLegacy(<AppBar />);
+
+    expect(screen.getByText('Legacy portal')).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Time Switch' })).toBeInTheDocument();
+    expect(screen.getByTestId(/_survey_button$/)).toBeInTheDocument();
+    expect(screen.getByText('New Tile')).toBeInTheDocument();
+  });
+
+  it('keeps the new App Bar limited to the designed new-layout controls', () => {
+    document.title = 'Legacy portal';
+    renderLegacy(<NewLayoutAppBar />);
+
+    expect(screen.getByRole('button', { name: 'Open Tile Library' })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Theme Switch' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Open user profile' })).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: 'Time Switch' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId(/_survey_button$/)).not.toBeInTheDocument();
+    expect(screen.queryByText('Legacy portal')).not.toBeInTheDocument();
+  });
+
   it('preserves the original MUI avatar and account menu without the new layout flag', () => {
     renderLegacy(<Avatar setOpen={jest.fn()} />);
 
@@ -162,7 +208,7 @@ describe('Base WebKit portal surfaces', () => {
   it('opens the Tile Library and adds a matching application', () => {
     const addTile = jest.fn();
     render(
-      <Drawer
+      <NewLayoutTileLibrary
         anchor
         toggleDrawer={jest.fn(() => jest.fn())}
         addTile={addTile}
@@ -171,7 +217,9 @@ describe('Base WebKit portal surfaces', () => {
     );
 
     expect(screen.getByRole('dialog', { name: 'Tile Library' })).toBeInTheDocument();
-    expect(screen.getByText('Monitor intraday liquidity and funding exposure.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Monitor intraday liquidity and funding exposure.'),
+    ).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Tile categories' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'All' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('tab', { name: 'Favorites' })).toBeInTheDocument();
@@ -183,7 +231,7 @@ describe('Base WebKit portal surfaces', () => {
 
   it('persists favorites and filters the Tile Library views', () => {
     render(
-      <Drawer
+      <NewLayoutTileLibrary
         anchor
         toggleDrawer={jest.fn(() => jest.fn())}
         addTile={jest.fn()}
@@ -204,7 +252,7 @@ describe('Base WebKit portal surfaces', () => {
 
   it('sorts tiles and keeps the All category rail synchronized with content', () => {
     render(
-      <Drawer
+      <NewLayoutTileLibrary
         anchor
         toggleDrawer={jest.fn(() => jest.fn())}
         addTile={jest.fn()}
@@ -222,7 +270,17 @@ describe('Base WebKit portal surfaces', () => {
     const results = screen.getByTestId('tile-library-results');
     Object.defineProperty(researchSection, 'getBoundingClientRect', {
       configurable: true,
-      value: () => ({ top: 1, bottom: 200, left: 0, right: 0, width: 0, height: 199, x: 0, y: 1, toJSON: () => ({}) }),
+      value: () => ({
+        top: 1,
+        bottom: 200,
+        left: 0,
+        right: 0,
+        width: 0,
+        height: 199,
+        x: 0,
+        y: 1,
+        toJSON: () => ({}),
+      }),
     });
     Object.defineProperties(results, {
       scrollTop: { configurable: true, value: 200 },
@@ -230,7 +288,10 @@ describe('Base WebKit portal surfaces', () => {
       scrollHeight: { configurable: true, value: 400 },
     });
     fireEvent.scroll(results);
-    expect(screen.getByRole('button', { name: 'Research category' })).toHaveAttribute('aria-current', 'true');
+    expect(screen.getByRole('button', { name: 'Research category' })).toHaveAttribute(
+      'aria-current',
+      'true',
+    );
   });
 
   it('shows account details and timezone controls in the profile modal', () => {

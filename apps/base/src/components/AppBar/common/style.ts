@@ -48,23 +48,6 @@ const Root = styled('section')(() => ({
   [`& .${classes.hoverRed}`]: {
     '&:hover': {},
   },
-  // when we change to new design, we apply the style into the same selector, and thenremove these two style definition.
-  [`&.app-bar-wrapper.${classes.root}`]: {
-    height: '100%',
-    width: '40%',
-    backgroundColor: 'transparent',
-    minWidth: '360px',
-  },
-  [`&.app-bar-wrapper .MuiAppBar-root`]: {
-    height: '100%',
-    display: 'flex',
-    alignItems: 'flex-end',
-    backgroundColor: 'transparent',
-    border: 'none',
-    boxShadow: 'none',
-    justifyContent: 'center',
-    position: 'static !important',
-  },
 }));
 
 export default Root;

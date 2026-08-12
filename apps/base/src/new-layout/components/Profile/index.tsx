@@ -7,7 +7,7 @@ import type { ProfileProps } from '../../../components/Profile/common/interface'
 import { PREFIX } from '../../../components/Profile/common/style';
 import { DateTimeFormat } from '../../../utils/locale';
 import prototypeAvatar from '../../assets/profile/prototype-avatar.png';
-import { ScBadge, ScButton, ScModal, setScModalWidth } from '../../webkit/components';
+import { configureScModal, ScBadge, ScButton, ScModal } from '../../webkit/components';
 
 const PROFILE_ANALYTICS = { container: 'Base', tile: 'profile' } as const;
 const timestamp = (value?: number) => (value ? value * 1000 : 0);
@@ -35,7 +35,7 @@ const NewLayoutProfile: FC<ProfileProps> = ({ open, onClose, onLogout }) => {
   const expiryTime = DateTimeFormat(timeType, timestamp(store.expiredIn));
 
   useEffect(() => {
-    if (open) setScModalWidth(modalRef.current, '24rem');
+    configureScModal(modalRef.current, { open, width: '24rem' });
   }, [open]);
 
   const selectTimeType = (next: 'LOCAL' | 'UTC') => {

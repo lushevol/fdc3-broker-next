@@ -24,9 +24,6 @@ export const propsAddTile: Container = {
 export interface MenuItemProps {
   addTile: (item: Container) => void;
   menuItems: Tiles;
-  favoriteTileIds?: Set<string>;
-  onToggleFavorite?: (tile: Tile) => void;
-  onOpenTile?: (tile: Tile) => void;
 }
 
 export interface RatanFilterItem {

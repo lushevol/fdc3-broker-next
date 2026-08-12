@@ -29,7 +29,17 @@ describe('new-layout module boundary', () => {
 
   it('keeps SC Dev WebKit imports and opt-in selectors inside new-layout', () => {
     expect(
-      findProductionMatchesOutsideNewLayout(/@scdevkit\/webkit|base-webkit-scope/),
+      findProductionMatchesOutsideNewLayout(
+        /@scdevkit\/webkit|base-webkit-scope|switch-(?:theme|time)-wrapper|custom-switch|app-bar-wrapper|home-wrapper|tab-item-wrapper/,
+      ),
+    ).toEqual([]);
+  });
+
+  it('keeps portal header assets inside new-layout', () => {
+    expect(
+      findProductionMatchesOutsideNewLayout(
+        /(?:background-(?:dark|light)|pattern|portal-text-(?:dark|light))\.png/,
+      ),
     ).toEqual([]);
   });
 });

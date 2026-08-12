@@ -16,11 +16,38 @@ export const ScSpinner = createComponent('sc-spinner');
 export const ScTextInput = createComponent('sc-text-input');
 export const ScTitle = createComponent('sc-title');
 
-/** ScModal exposes preset widths only; override its nested Shoelace panel for prototype-matched surfaces. */
-export const setScModalWidth = (modal: HTMLElement | null, width: string) => {
+interface ScModalElement extends HTMLElement {
+  open: boolean;
+  updateComplete?: Promise<unknown>;
+}
+
+interface ScModalConfiguration {
+  open: boolean;
+  width: string;
+}
+
+/** Keep React 18 state synchronized with the upgraded custom element and its prototype-matched width. */
+export const configureScModal = (
+  modal: HTMLElement | null,
+  { open, width }: ScModalConfiguration,
+) => {
   if (!modal) return;
-  void customElements.whenDefined('sc-modal').then(() => {
-    const dialog = modal.shadowRoot?.querySelector<HTMLElement>('sl-dialog');
-    dialog?.style.setProperty('--width', width, 'important');
-  });
+
+  const applyConfiguration = () => {
+    const scModal = modal as ScModalElement;
+    scModal.open = open;
+
+    const applyWidth = () => {
+      const dialog = modal.shadowRoot?.querySelector<HTMLElement>('sl-dialog');
+      dialog?.style.setProperty('--width', width, 'important');
+    };
+
+    if (scModal.updateComplete) void scModal.updateComplete.then(applyWidth);
+    else applyWidth();
+  };
+
+  applyConfiguration();
+  if (!customElements.get('sc-modal')) {
+    void customElements.whenDefined('sc-modal').then(applyConfiguration);
+  }
 };
