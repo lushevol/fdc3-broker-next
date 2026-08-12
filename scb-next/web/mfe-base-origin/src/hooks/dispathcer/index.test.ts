@@ -1,20 +1,20 @@
 /* eslint-env jest */
-export {};
+import useDispatcher from './index';
+import * as provider from '../provider';
+import * as common from '../../utils/common';
+import { ActionType } from '../reducer/util/ActionType';
+
 vi.mock('../provider', () => ({ useContext: vi.fn() }));
 vi.mock('../../utils/common', () => ({ uuidv4: vi.fn(), storeData: vi.fn() }));
 
-let provider: any;
-let common: any;
-const { ActionType } = require('../reducer/util/ActionType');
+const mockUseContext = vi.mocked(provider.useContext);
+const mockUuidv4 = vi.mocked(common.uuidv4);
 
 describe('dispatchOpenTile and dispatchOpenCDUPSOutboundBlotter', () => {
   let dispatchMock: vi.Mock;
 
   beforeEach(() => {
-    vi.resetModules();
-    // re-require mocked modules after reset
-    provider = require('../provider');
-    common = require('../../utils/common');
+    vi.clearAllMocks();
     dispatchMock = vi.fn();
   });
 
@@ -29,12 +29,11 @@ describe('dispatchOpenTile and dispatchOpenCDUPSOutboundBlotter', () => {
       ],
     } as any;
 
-    provider.useContext.mockReturnValue([store, dispatchMock]);
-    common.uuidv4
+    mockUseContext.mockReturnValue([store, dispatchMock]);
+    mockUuidv4
       .mockImplementationOnce(() => 'container-id')
       .mockImplementationOnce(() => 'workspace-id');
 
-    const useDispatcher = require('./index').default;
     const dispatcher = useDispatcher();
 
     dispatcher.dispatchOpenCDUPSOutboundBlotter({ foo: 'bar' });
@@ -62,12 +61,11 @@ describe('dispatchOpenTile and dispatchOpenCDUPSOutboundBlotter', () => {
       ],
     } as any;
 
-    provider.useContext.mockReturnValue([store, dispatchMock]);
-    common.uuidv4
+    mockUseContext.mockReturnValue([store, dispatchMock]);
+    mockUuidv4
       .mockImplementationOnce(() => 'container-id-2')
       .mockImplementationOnce(() => 'workspace-id-2');
 
-    const useDispatcher = require('./index').default;
     const dispatcher = useDispatcher();
 
     dispatcher.dispatchOpenCDUPSOutboundBlotter({ x: 1 });
@@ -97,9 +95,7 @@ describe('dispatchOpenTile and dispatchOpenCDUPSOutboundBlotter', () => {
       ],
     } as any;
 
-    provider.useContext.mockReturnValue([store, dispatchMock]);
-
-    const useDispatcher = require('./index').default;
+    mockUseContext.mockReturnValue([store, dispatchMock]);
     const dispatcher = useDispatcher();
 
     expect(dispatcher.checkCDUPSOutboundBlotterAccessible()).toBe(true);
@@ -117,9 +113,7 @@ describe('dispatchOpenTile and dispatchOpenCDUPSOutboundBlotter', () => {
       ],
     } as any;
 
-    provider.useContext.mockReturnValue([store, dispatchMock]);
-
-    const useDispatcher = require('./index').default;
+    mockUseContext.mockReturnValue([store, dispatchMock]);
     const dispatcher = useDispatcher();
 
     expect(dispatcher.checkCDUPSOutboundBlotterAccessible()).toBe(false);
@@ -131,9 +125,7 @@ describe('dispatchOpenTile and dispatchOpenCDUPSOutboundBlotter', () => {
       drawers: [],
     } as any;
 
-    provider.useContext.mockReturnValue([store, dispatchMock]);
-
-    const useDispatcher = require('./index').default;
+    mockUseContext.mockReturnValue([store, dispatchMock]);
     const dispatcher = useDispatcher();
 
     expect(dispatcher.checkCDUPSOutboundBlotterAccessible()).toBe(false);
@@ -156,9 +148,7 @@ describe('dispatchOpenTile and dispatchOpenCDUPSOutboundBlotter', () => {
       ],
     } as any;
 
-    provider.useContext.mockReturnValue([store, dispatchMock]);
-
-    const useDispatcher = require('./index').default;
+    mockUseContext.mockReturnValue([store, dispatchMock]);
     const dispatcher = useDispatcher();
 
     expect(dispatcher.checkRatanTradeBlotterAccessible()).toBe(true);
@@ -176,9 +166,7 @@ describe('dispatchOpenTile and dispatchOpenCDUPSOutboundBlotter', () => {
       ],
     } as any;
 
-    provider.useContext.mockReturnValue([store, dispatchMock]);
-
-    const useDispatcher = require('./index').default;
+    mockUseContext.mockReturnValue([store, dispatchMock]);
     const dispatcher = useDispatcher();
 
     expect(dispatcher.checkRatanTradeBlotterAccessible()).toBe(false);
@@ -190,9 +178,7 @@ describe('dispatchOpenTile and dispatchOpenCDUPSOutboundBlotter', () => {
       drawers: [],
     } as any;
 
-    provider.useContext.mockReturnValue([store, dispatchMock]);
-
-    const useDispatcher = require('./index').default;
+    mockUseContext.mockReturnValue([store, dispatchMock]);
     const dispatcher = useDispatcher();
 
     expect(dispatcher.checkRatanTradeBlotterAccessible()).toBe(false);

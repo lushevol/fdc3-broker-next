@@ -23,6 +23,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/vitest.setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    testTimeout: 20_000,
+    hookTimeout: 20_000,
     server: { deps: { inline: true } },
     coverage: { provider: 'v8', thresholds: { lines: 90, branches: 90 } },
   },

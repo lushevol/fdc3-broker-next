@@ -9,7 +9,12 @@ Object.assign(vi, {
   requireActual: (specifier: string) =>
     specifier === "react-router-dom" ? ReactRouterDom : {},
   setTimeout: (timeout: number) => vi.setConfig({ testTimeout: timeout }),
+  dontMock: (specifier: string) => vi.unmock(specifier),
 });
+
+const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+window.getComputedStyle = ((element: Element, pseudoElement?: string | null) =>
+  nativeGetComputedStyle(element, pseudoElement || undefined)) as typeof window.getComputedStyle;
 if (!(vi as typeof vi & { replaceProperty?: unknown }).replaceProperty) {
   Object.assign(vi, {
     replaceProperty: (target: Record<string, unknown>, key: string, value: unknown) => {

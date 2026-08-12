@@ -4,6 +4,10 @@ import userEvent from '@testing-library/user-event';
 import "../../ratanstatic";
 import { DynamicComponent } from "./DynamicComponent";
 import transaction_data from './transaction_data.json';
+
+vi.mock('../../LazyAntd/RangePicker', () => ({
+  default: (props) => <input placeholder="Start date" data-testid="range-picker" />,
+}));
 // import { tradesCustomFields } from "../../ratanutils/config/ratantrades/fieldsConfig";
 
 afterAll(() => {

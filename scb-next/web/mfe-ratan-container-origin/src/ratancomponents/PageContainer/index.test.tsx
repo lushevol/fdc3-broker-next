@@ -4,6 +4,13 @@ import { act } from 'react-dom/test-utils';
 import PageContainer from './index';
 import { ReactRouterDom } from "../../Root/import";
 
+const { providerStore } = vi.hoisted(() => ({
+  providerStore: { refreshState: 0 },
+}));
+vi.mock('../../Root/hooks/provider', () => ({
+  useContext: vi.fn(() => [providerStore, vi.fn()]),
+}));
+
 
 type RootModel = {
     refreshState: number;
@@ -14,6 +21,7 @@ type RootModel = {
   };
 describe('PageContainer', () => {
   it('renders children when not loading', async () => {
+    providerStore.refreshState = 0;
     vi.spyOn(ReactRouterDom, "useResolvedPath").mockImplementation(()=>{
       return {
         pathname: "test"
@@ -22,17 +30,6 @@ describe('PageContainer', () => {
     vi.spyOn(ReactRouterDom, "useNavigate").mockImplementation(()=>{
       return () => {}
     })
-    vi.mock('../../Root/hooks/provider', () => ({
-        useContext: vi.fn(() => [
-          {
-            refreshState: 1,
-          } as RootModel,
-          vi.fn() as React.Dispatch<IAction>,
-        ]),
-      }));
-
-
-
     const children = <div>Mock Children</div>;
     render(<PageContainer>{children}</PageContainer>);
 
@@ -41,18 +38,13 @@ describe('PageContainer', () => {
   });
 
   it('renders Loading component when loading', async () => {
-    vi.mock('../../Root/hooks/provider', () => ({
-      useContext: vi.fn(() => ({
-        refreshState: 0, // 触发 loading 状态
-      })),
-    }));
+    providerStore.refreshState = 1;
 
     const children = <div>Mock Children</div>;
     render(<PageContainer>{children}</PageContainer>);
 
-    await act(async () => {
-    });
-    expect(screen.queryByText('Mock Children')).toBeInTheDocument();
+    expect(screen.queryByText('Mock Children')).not.toBeInTheDocument();
+    expect(screen.getByText('loading...')).toBeInTheDocument();
     expect(screen.queryByText('API Status')).toBeInTheDocument();
 
   });

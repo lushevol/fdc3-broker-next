@@ -31,30 +31,9 @@ describe("MUI Dialog component", () => {
 
     const resizeBtn = screen.getByTestId("dialog-resize");
     resizeBtn.click();
-    fireEvent(
-      resizeBtn,
-      new MouseEvent("mousedown", {
-        bubbles: true,
-        cancelable: true,
-      })
-    );
-    fireEvent(
-      resizeBtn,
-      new MouseEvent("mousemove", {
-        clientX: 150,
-        clientY: 5,
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      })
-    );
-    fireEvent(
-      resizeBtn,
-      new MouseEvent("mouseup", {
-        bubbles: true,
-        cancelable: true,
-      })
-    );
+    fireEvent.mouseDown(resizeBtn);
+    fireEvent.mouseMove(resizeBtn, { clientX: 150, clientY: 5 });
+    fireEvent.mouseUp(resizeBtn);
     vi.advanceTimersByTime(120);
     expect(onResize).toBeCalled();
   });

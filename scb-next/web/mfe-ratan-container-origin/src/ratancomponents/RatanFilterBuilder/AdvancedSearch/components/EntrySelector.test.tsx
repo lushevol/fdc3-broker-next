@@ -2,6 +2,19 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EntrySelector } from "./EntrySelector";
 import { ADVANCED_SEARCH_ENTRY_CLEAR_BTN, ADVANCED_SEARCH_ENTRY_SETTING_BTN } from "../../../../packages/Analysis/const";
+const { mockFilterContext } = vi.hoisted(() => ({ mockFilterContext: {
+  appliedFilter: [],
+  onClearAppliedFilter: vi.fn(),
+  classifiedFilterList: [
+    { key: "public", options: [{ name: "Option 1", rowKey: "1" }, { name: "Option 2", rowKey: "2" }] },
+    { key: "private", options: [{ name: "Option 3", rowKey: "3" }, { name: "Option 4", rowKey: "4" }] },
+  ],
+  onApplyFilterByKey: vi.fn(),
+} }));
+vi.mock('../hooks/useContext', () => ({
+  useFilterList: vi.fn(),
+  useFilterBuilderContext: vi.fn(() => mockFilterContext),
+}));
 afterAll(() => {
   vi.clearAllMocks();
 });
@@ -24,31 +37,6 @@ vi.mock("../../../../LazyAntd/Select", () => {
 
 describe("EntrySelector component", () => {
   it("should be in the document", async () => {
-    vi.mock('../hooks/useContext', () => ({
-      useFilterBuilderContext: vi.fn(() => {
-        return {
-          appliedFilter: [],
-          onClearAppliedFilter: vi.fn(),
-          classifiedFilterList: [
-            {
-              key: "public",
-              options: [
-                { name: "Option 1", rowKey: "1" },
-                { name: "Option 2", rowKey: "2" },
-              ],
-            },
-            {
-              key: "private",
-              options: [
-                { name: "Option 3", rowKey: "3" },
-                { name: "Option 4", rowKey: "4" },
-              ],
-            },
-          ],
-          onApplyFilterByKey: vi.fn(),
-        }
-      }),
-    }));
     const onOpenSetting = vi.fn();
     const { getByTestId } = render(
       <EntrySelector onOpenSetting={onOpenSetting} />

@@ -8,6 +8,10 @@ import {
 import userEvent from "@testing-library/user-event";
 import { InputItem } from "./InputItem";
 
+vi.mock("../../../LazyAntd/Input", () => ({
+  default: (props) => <input {...props} />,
+}));
+
 describe("InputItem component", () => {
   it("should render InputItem correctly", async () => {
     const newConfig = ["newconifg"];

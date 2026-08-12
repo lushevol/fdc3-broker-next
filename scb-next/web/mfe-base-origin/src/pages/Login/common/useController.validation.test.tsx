@@ -5,15 +5,15 @@ const mockDispatchErrorMessage = vi.fn();
 const mockLogin = vi.fn();
 const mockLoginEntra = vi.fn();
 
-vi.mock("../../../hooks/dispathcer", () => () => ({
+vi.mock("../../../hooks/dispathcer", () => ({ default: () => ({
   dispacthErrorMessage: mockDispatchErrorMessage,
   dispacthLoading: vi.fn(),
-}));
+}) }));
 
-vi.mock("../../../services", () => () => ({
+vi.mock("../../../services", () => ({ default: () => ({
   login: mockLogin,
   loginEntra: mockLoginEntra,
-}));
+}) }));
 
 vi.mock("../../../utils/common", () => ({
   getEnv: () => "LOCAL",

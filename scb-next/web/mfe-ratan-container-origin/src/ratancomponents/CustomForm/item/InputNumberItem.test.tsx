@@ -8,6 +8,12 @@ import {
 import userEvent from "@testing-library/user-event";
 import { InputNumberItem } from "./InputNumberItem";
 
+vi.mock("../../../LazyAntd/InputNumber", () => ({
+  default: ({ onChange, ...props }) => (
+    <input {...props} onChange={(event) => onChange(Number(event.target.value))} />
+  ),
+}));
+
 describe("InputNumberItem component", () => {
   it("should render InputNumberItem correctly", async () => {
     const newConfig = ["newconifg"];

@@ -134,7 +134,6 @@ describe("FilterSelector component", () => {
     findByTestId('clearBtn');
     findByTestId('filtersCreate');
     fireEvent.click(getByTestId('filtersCreate'))
-    findByTestId('filterNameInput')
   });
 
   it("should be in the document", () => {

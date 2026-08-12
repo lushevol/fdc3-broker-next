@@ -9,14 +9,14 @@ vi.mock("../../hooks/provider", () => ({
   useContext: () => [{ token: undefined }, vi.fn()],
 }));
 
-vi.mock("../../hooks/dispathcer", () => () => ({
+vi.mock("../../hooks/dispathcer", () => ({ default: () => ({
   dispacthErrorMessage: mockDispatchErrorMessage,
   dispacthTheme: vi.fn(),
-}));
+}) }));
 
-vi.mock("../../services", () => () => ({
+vi.mock("../../services", () => ({ default: () => ({
   validate: mockValidate,
-}));
+}) }));
 
 vi.mock("../../utils/common", () => ({
   clearStorageWhenLogout: vi.fn(),

@@ -116,17 +116,20 @@ const drawers = [
   }
 ]
 vi.mock('../hooks/HooksBase', () => {
-  const hooksBase = {
-    store: { drawers, entities },
-    setStore: function (store) {
-      this.store = store;
-    },
-    baseDispatch: () => { },
-    setBaseDispatch: function (dispatch) {
-      this.baseDispatch = dispatch;
-    },
+  let hooksBase;
+  const getHooksBase = () => {
+    hooksBase ??= {
+      store: { drawers, entities },
+      setStore: function (store) {
+        this.store = store;
+      },
+      baseDispatch: () => { },
+      setBaseDispatch: function (dispatch) {
+        this.baseDispatch = dispatch;
+      },
+    };
+    return hooksBase;
   };
-  const getHooksBase = () => hooksBase;
   return { getHooksBase }
 });
 describe("Channel Util", () => {

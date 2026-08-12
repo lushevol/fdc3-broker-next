@@ -3,6 +3,15 @@ import React from "react";
 import Root from "../components/ScWebkit";
 import { Wrapper, clearEventHandlers, setAttribute, setEvent } from "./ReactWrapper"
 
+beforeAll(() => {
+  if (!customElements.get("sc-button")) {
+    customElements.define("sc-button", class extends HTMLElement {});
+  }
+  if (!customElements.get("sc-icon-card")) {
+    customElements.define("sc-icon-card", class extends HTMLElement {});
+  }
+});
+
 describe("ScWebkit component", () => {
   it("should be in the document", () => {
     const onClick = vi.fn();

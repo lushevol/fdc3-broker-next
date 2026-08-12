@@ -23,6 +23,7 @@ vi.mock("Import/ratancomponents", async () => ({
 }));
 
 vi.mock("./config", async () => ({
+  default: [],
   quickSearchItems: [{ label: "Test", key: "testKey" }],
   quickSearchLabelWidth: 100,
   quickSearchFormWidth: 200,

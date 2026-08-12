@@ -6,12 +6,12 @@ afterAll(() => {
   vi.clearAllMocks();
 });
 vi.mock('../config', () => {
-  return {
+  return { default: {
     put: async () => { return Promise.reject({}) },
     post: async () => { return Promise.reject({}) },
     get: async () => { return Promise.reject({}) },
     "delete": async () => { return Promise.resolve({}) }
-  }
+  } }
 });
 vi.mock('../../../utils/common', () => {
   return {

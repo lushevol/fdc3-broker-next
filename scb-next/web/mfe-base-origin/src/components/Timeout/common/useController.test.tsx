@@ -13,16 +13,16 @@ vi.mock("../../../hooks/provider", () => ({
   useContext: () => [{ refreshToken: mockRefreshToken }, vi.fn()],
 }));
 
-vi.mock("../../../hooks/dispathcer", () => () => ({
+vi.mock("../../../hooks/dispathcer", () => ({ default: () => ({
   dispacthIsOnLogout: mockDispacthIsOnLogout,
-}));
+}) }));
 
-vi.mock("../../../analytics", () => () => ({
+vi.mock("../../../analytics", () => ({ default: () => ({
   ButtonEvent: mockButtonEvent,
   ModalEvent: mockModalEvent,
-}));
+}) }));
 
-vi.mock("../../../services", () => () => ({ logout: mockLogout }));
+vi.mock("../../../services", () => ({ default: () => ({ logout: mockLogout }) }));
 
 vi.mock("../../../hooks/service", () => ({
   relogin: vi.fn(() => Promise.resolve()),

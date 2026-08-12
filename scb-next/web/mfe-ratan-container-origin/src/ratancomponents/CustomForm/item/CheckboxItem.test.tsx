@@ -8,6 +8,12 @@ import {
 import userEvent from "@testing-library/user-event";
 import { CheckboxItem } from "./CheckboxItem";
 
+vi.mock("../../../LazyAntd/Checkbox", () => ({
+  default: ({ onChange, ...props }) => (
+    <input type="checkbox" {...props} onChange={(event) => onChange(event)} />
+  ),
+}));
+
 describe("CheckboxItem component", () => {
   it("should render CheckboxItem correctly", async () => {
     const onChange = vi.fn();

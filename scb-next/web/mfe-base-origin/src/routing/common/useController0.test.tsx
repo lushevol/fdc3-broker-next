@@ -8,10 +8,10 @@ afterAll(() => {
 });
 vi.mock("../../services", () => {
   const validate = () => Promise.resolve(undefined);
-  return () => ({
+  return { default: () => ({
     validate,
     logout: () => { return Promise.resolve({}) },
-  })
+  }) };
 });
 vi.mock('../../utils/common', () => {
   return {

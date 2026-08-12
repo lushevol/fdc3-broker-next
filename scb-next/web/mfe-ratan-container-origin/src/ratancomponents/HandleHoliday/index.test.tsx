@@ -27,8 +27,10 @@ vi.mock("../../ratancomponents/Loading", () => {
 
 vi.mock('../../ratanutils/holidayDB', () => {
   return {
-    add: vi.fn(),
-    get: vi.fn(() => Promise.resolve(undefined)),
+    default: {
+      add: vi.fn(),
+      get: vi.fn(() => Promise.resolve(undefined)),
+    },
   };
 })
 

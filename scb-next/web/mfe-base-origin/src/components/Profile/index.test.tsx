@@ -28,7 +28,7 @@ describe("Profile component", () => {
   });
   it("should trigger close function in the document", async() => {
     vi.mock('../Dialog', () => {
-      return (props:any)=>{
+      return { default: (props:any)=>{
           const { onClose, open, children, rest } = props;
           return (
             <section data-testid="mock-dialog" open={true} onClose={onClose} {...rest}>
@@ -36,7 +36,7 @@ describe("Profile component", () => {
               {children}
             </section>
           );
-        };
+        } };
     });
     render(
       <Provider data={
@@ -121,7 +121,7 @@ describe("Profile component", () => {
     
     fireEvent.click(screen.getByText(/RATAN :: X_RATANONE :: FMO_OPS_SUP/i));
 
-    const closeBtn = screen.getByText("Close");
+    const closeBtn = screen.getByTestId("closeDialog");
     expect(closeBtn).toBeInTheDocument();
     fireEvent.click(closeBtn);
     expect(mockClose).toBeCalled();

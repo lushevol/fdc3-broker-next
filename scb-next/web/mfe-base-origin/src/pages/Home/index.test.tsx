@@ -11,12 +11,12 @@ afterAll(() => {
   vi.clearAllMocks();
 });
 vi.mock('../../hooks/service/config', () => {
-  return {
+  return { default: {
     put: async () => { return Promise.resolve({}) },
     post: async () => { return Promise.resolve({}) },
     get: async () => { return Promise.resolve({}) },
     "delete": async () => { return Promise.resolve({}) }
-  }
+  } }
 });
 vi.mock('openfin-fdc3', () => {
   return {

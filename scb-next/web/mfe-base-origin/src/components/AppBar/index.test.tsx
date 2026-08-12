@@ -166,7 +166,6 @@ describe("Appbar component", () => {
     Logout.click();
   });
   it("should be in the document", () => {
-    global.window = Object.create(window);
     Object.defineProperty(window, 'innerWidth', {
       value: 100,
       writable: true
@@ -199,7 +198,6 @@ describe("Appbar component", () => {
     newTile.click();
   });
   it("should be in the document", () => {
-    global.window = Object.create(window);
     Object.defineProperty(window, 'innerWidth', {
       value: undefined,
       writable: true
@@ -212,12 +210,14 @@ describe("Appbar component", () => {
       value: (f) => { f(); },
       writable: true
     });
-    global.document = Object.create(document);
-    Object.defineProperty(document, 'documentElement', {
-      value: {
-        clientWidth: 100,
-        clientHeight: 100,
-      },
+    Object.defineProperty(document.documentElement, 'clientWidth', {
+      value: 100,
+      configurable: true,
+      writable: true
+    });
+    Object.defineProperty(document.documentElement, 'clientHeight', {
+      value: 100,
+      configurable: true,
       writable: true
     });
     render(<Provider data={{ drawers, user: { id: "123" }, token: "123", theme: "light", workspaces: undefined }}>
@@ -234,7 +234,6 @@ describe("Appbar component", () => {
     newTile.click();
   });
   it("should be in the document", () => {
-    global.window = Object.create(window);
     Object.defineProperty(window, 'innerWidth', {
       value: undefined,
       writable: true
@@ -247,12 +246,14 @@ describe("Appbar component", () => {
       value: (f) => { f(); },
       writable: true
     });
-    global.document = Object.create(document);
-    Object.defineProperty(document, 'documentElement', {
-      value: {
-        clientWidth: undefined,
-        clientHeight: undefined
-      },
+    Object.defineProperty(document.documentElement, 'clientWidth', {
+      value: undefined,
+      configurable: true,
+      writable: true
+    });
+    Object.defineProperty(document.documentElement, 'clientHeight', {
+      value: undefined,
+      configurable: true,
       writable: true
     });
     global.screen = Object.create(screen);

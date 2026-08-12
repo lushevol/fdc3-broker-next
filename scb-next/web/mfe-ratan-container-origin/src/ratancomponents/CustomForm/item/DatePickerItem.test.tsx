@@ -5,6 +5,10 @@ import {
 } from "@testing-library/react";
 import { DatePickerItem } from "./DatePickerItem";
 
+vi.mock("../../../LazyAntd/DatePicker", () => ({
+  default: (props) => <input {...props} />,
+}));
+
 describe("DatePickerItem component", () => {
   it("should render DatePickerItem correctly with value", async () => {
     const onChangeFun = vi.fn();

@@ -5,13 +5,13 @@ afterAll(() => {
   vi.clearAllMocks();
 });
 vi.mock('./config', () => {
-  return {
+  return { default: {
     put: async () => { return Promise.resolve({}) },
     post: async () => { return Promise.resolve({}) },
     get: async () => { return Promise.resolve({}) },
     patch: async () => { return Promise.resolve({}) },
     "delete": async () => { return Promise.resolve({}) }
-  }
+  } }
 });
 vi.mock('../../utils/common', () => {
   return {

@@ -10,10 +10,10 @@ afterAll(() => {
 });
 vi.mock("../services", () => {
   const validate = async () => Promise.resolve({ data: { "result": true, "expiration": "2023-03-16T09:01:45.000+00:00" } });
-  return () => ({
+  return { default: () => ({
     validate,
     logout: () => { return Promise.resolve({}) },
-  })
+  }) };
 });
 vi.mock('../utils/common', () => {
   return {

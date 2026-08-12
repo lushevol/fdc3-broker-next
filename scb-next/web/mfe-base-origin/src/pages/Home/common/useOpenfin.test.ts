@@ -37,9 +37,9 @@ vi.mock("openfin-fdc3", () => ({
 }));
 
 vi.mock("../../../hooks/dispathcer", () => {
-  return vi.fn(() => ({
+  return { default: vi.fn(() => ({
     dispatchOpenTile: mockDispatchOpenTile,
-  }));
+  })) };
 });
 
 vi.mock("./util", () => ({
