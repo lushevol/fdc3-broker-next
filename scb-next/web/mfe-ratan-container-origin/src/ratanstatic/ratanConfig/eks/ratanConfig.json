@@ -1,0 +1,14 @@
+{
+  "REACT_APP_SERVER_ENV": "eks",
+  "REACT_APP_API_URL_MOCK": "http://uklvadapp1340.uk.dev.net:8456",
+  "REACT_APP_SOCKET_URL_TRADES": "ws://eks-ratan-trade.cloud.dev.net",
+  "REACT_APP_SOCKET_URL_EXCEPTIONS": "ws://eks-ratan-exceptions.cloud.dev.net",
+  "REACT_APP_SOCKET_URL_CASHFLOW": "ws://eks-ratan-cashflow.cloud.dev.net",
+  "REACT_APP_SOCKET_URL_SUB_STATUS": "ws://eks-ratan-cashflow.cloud.dev.net",
+  "disabledFeature": [
+    "Fuzzy_Search",
+    "Cashflow_Fuzzy_Search",
+    "Product_Details_Drilldown",
+    "Cashflow_Sub_Status_Subscription"
+  ]
+}

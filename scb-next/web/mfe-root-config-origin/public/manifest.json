@@ -1,0 +1,11 @@
+{
+  "name": "FMO Post Trade Portal",
+  "short_name": "fmo-ptp",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#171d24",
+  "theme_color": "#0250a3",
+  "splashScreenImage": "/image/fmo-app-portal-splash.png",
+  "icons": []
+}

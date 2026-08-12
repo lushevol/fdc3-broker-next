@@ -1,0 +1,1284 @@
+{
+  "cashflow": {
+    "BCS_Parent_Trade_Id": "",
+    "BCS_Trade_Id": null,
+    "Delivery_Method": "",
+    "Parent_Trade_Id": "",
+    "Position_Id": "",
+    "Settlement_Method": "Cash",
+    "Trade_Id": "86519341",
+    "Trade_State": "TOBESENT",
+    "Trade_Version": null,
+    "Cashflow": {
+      "Cashflow_Id": "M62220000004",
+      "Cashflow_Business_Version": 0,
+      "Cashflow_Version": 0,
+      "Cashflow_State": "WAITING",
+      "Cashflow_Affirmation_Status": "Affirmed",
+      "Cashflow_Event_Type": "New",
+      "Cashflow_Minor_Version": 5,
+      "Payment_Currency": "USD",
+      "Payment_Date": "2023-05-05",
+      "Payment_Type": "",
+      "Payment_Cutoff_Time": "2023-05-04T13:30",
+      "Pay_Receive_Indicator": "Pay",
+      "Payment_Amount": "101388.889000",
+      "Netting_Id": null,
+      "Netting_Cuttoff_Date": "null",
+      "Payment_Receiver_Party_Reference": "party2",
+      "Payment_Payer_Party_Reference": "party1",
+      "Cashflow_Sub_State": "Pending Verification",
+      "Cashflow_Sub_State_Type": "Pending Exception",
+      "Cashflow_Sub_State_Updater": "1639796",
+      "Status_Event_Type": "Affirmed",
+      "Event_Date": "2023-06-08"
+    },
+    "FMO_Comments": [
+      {
+        "FMO_Comment": "Affirmed by 1639796",
+        "FMO_Comment_Timestamp": "2023-07-13 00:00:00.0",
+        "FMO_Comment_Updater": "1639796"
+      }
+    ],
+    "Confirmation": {
+      "Confirmation_Status": null
+    },
+    "Entity": {
+      "Booking_Entity_SCI_FMCODE": null,
+      "Booking_Entity_SCI_FMID": "10036642",
+      "Counterparty_SCI_FMID": "400062060",
+      "Counterparty_SCI_FMCODE": "HSBC*SHA",
+      "Counterparty_CIF_Code": null,
+      "Counterparty_Source_System_Entity_Id": "",
+      "General_Ledger_Business_Unit_Name": "FXO - EM East",
+      "Booking_Entity_General_Ledger_Business_Unit_Id": ""
+    },
+    "Instrument_Common": {
+      "CFI_Code": "SRXXXX",
+      "ISDA_Taxonomy": "IRD|IRS",
+      "Source_System_Instrument_Sub_Type": "IRD|IRS|"
+    },
+    "Settlement_Instruction": {
+      "Account": {
+        "SCB_Nostro_Account_Number": "USD MAIN",
+        "SCB_Nostro_Account_Type": "NOS",
+        "Beneficiary_BIC_code": "",
+        "Beneficiary_Account_Name": "",
+        "Beneficiary_Account_Name_2": "",
+        "Beneficiary_Street_Address": "",
+        "Beneficiary_City": "",
+        "Beneficiary_Account_Number": "",
+        "Intermediary_BIC_code": "",
+        "Intermediary_Account_Name": "",
+        "Intermediary_Street_Address": "",
+        "Intermediary_City": "",
+        "Intermediary_Account_Number": "",
+        "Beneficiary_Bank_BIC_code": "",
+        "Beneficiary_Bank_Account_Name": "",
+        "Beneficiary_Bank_Street_Address": "",
+        "Beneficiary_Bank_City": "",
+        "Beneficiary_Bank_Account_Number": "",
+        "Beneficiary_Correspondent_BIC_code": "",
+        "Beneficiary_Correspondent_Account_Name": "",
+        "Beneficiary_Correspondent_Street_Address": "",
+        "Beneficiary_Correspondent_City": "",
+        "Beneficiary_Correspondent_Account_Number": "",
+        "Ordering_Customer_BIC_Code": "",
+        "Ordering_Customer_Account_Name": "",
+        "Ordering_Customer_Street_Address": "",
+        "Ordering_Customer_City": "",
+        "Ordering_Customer_Account_Number": "",
+        "Counterparty_CMS_Account_Number": "100009500058636005",
+        "EBBS_Bridge_Account_Number": "100009500058636005",
+        "EBBS_Account_Number": null,
+        "Booking_Entity_Correspondent_BIC_code": "SCBLUS33XXX",
+        "Booking_Entity_Correspondent_Account_Name": "STANCHART NY",
+        "Booking_Entity_Correspondent_Street_Address": "1095 AVENUE OF THE AMERICAS 10036",
+        "Booking_Entity_Correspondent_City": "NEW YORK",
+        "Booking_Entity_Correspondent_Account_Number": ""
+      },
+      "SSI_Id": null,
+      "SSI_Unique_Id": "",
+      "SSI_Source": "",
+      "SSI_Priority": "",
+      "Swift_Message_Type": "",
+      "CFI_Code": null,
+      "Payment_Currency": null,
+      "Counterparty_SCI_FMID": null,
+      "SCB_Entity_SCI_FMID": null,
+      "Remittance_Information_1": "",
+      "Remittance_Information_2": "",
+      "Remittance_Information_3": "",
+      "Remittance_Information_4": "",
+      "Sender_To_Receiver_Information_1": "",
+      "Sender_To_Receiver_Information_2": "",
+      "Sender_To_Receiver_Information_3": "",
+      "Sender_To_Receiver_Information_4": "",
+      "Sender_To_Receiver_Information_5": "",
+      "Sender_To_Receiver_Information_6": "",
+      "Is_Third_Party_Payment": "",
+      "Swift_Payment_Method": "",
+      "Swift_Payment_Date": null,
+      "Charge_Bearer": "",
+      "Nostro_Swift_Message_Type": ""
+    },
+    "Portfolio": {
+      "Booking_Entity_Trade_Portfolio_Name": "OP_GBL_CNO_HOC"
+    },
+    "Data_Flow": {
+      "Data_Source_System": "MUREX"
+    }
+  },
+  "cashflowAuditTrail": [
+    {
+      "Action_Date_Time": "2023-07-13T03:57:50.318",
+      "User_PSID": "System",
+      "Cashflow": {
+        "Cashflow_Id": "M62220000004",
+        "Cashflow_State": "PROJECTED",
+        "Cashflow_Sub_State_Type": "NA",
+        "Cashflow_Sub_State": "NA",
+        "Cashflow_Business_Version": 0,
+        "Cashflow_Version": 0,
+        "Cashflow_Minor_Version": 0,
+        "Cashflow_Event_Type": "New",
+        "Exception_Reason": null,
+        "NSTP_Reason": ""
+      },
+      "FMO_Comments": [],
+      "Action": "New",
+      "Action_Time": "2023-07-13T03:57:50.318",
+      "Exception_Type": null,
+      "Value_Change": [
+        {
+          "Field_Name": "Cashflow.Cashflow_Affirmation_Status",
+          "Old_Value": "null",
+          "New_Value": "Unaffirmed"
+        },
+        {
+          "Field_Name": "Cashflow.Cashflow_Event_Type",
+          "Old_Value": "null",
+          "New_Value": "New"
+        },
+        {
+          "Field_Name": "Cashflow.Cashflow_Id",
+          "Old_Value": "null",
+          "New_Value": "M62220000004"
+        },
+        {
+          "Field_Name": "Cashflow.Cashflow_State",
+          "Old_Value": "null",
+          "New_Value": "PROJECTED"
+        },
+        {
+          "Field_Name": "Cashflow.Cashflow_Sub_State",
+          "Old_Value": "null",
+          "New_Value": "NA"
+        },
+        {
+          "Field_Name": "Cashflow.Cashflow_Sub_State_Type",
+          "Old_Value": "null",
+          "New_Value": "NA"
+        },
+        {
+          "Field_Name": "Cashflow.Cashflow_Sub_State_Updater",
+          "Old_Value": "null",
+          "New_Value": "System"
+        },
+        {
+          "Field_Name": "Cashflow.Event_Date",
+          "Old_Value": "null",
+          "New_Value": "2023-06-08"
+        },
+        {
+          "Field_Name": "Cashflow.Execution_Date_Time",
+          "Old_Value": "null",
+          "New_Value": "2023-06-08T12:12"
+        },
+        {
+          "Field_Name": "Cashflow.Is_Cashflow_Unnet",
+          "Old_Value": "null",
+          "New_Value": "false"
+        },
+        {
+          "Field_Name": "Cashflow.Is_Payment_Intent_To_Settle",
+          "Old_Value": "null",
+          "New_Value": "false"
+        },
+        {
+          "Field_Name": "Cashflow.Is_Private_Banking_Cashflow",
+          "Old_Value": "null",
+          "New_Value": "false"
+        },
+        {
+          "Field_Name": "Cashflow.Minor_Version_Description",
+          "Old_Value": "null",
+          "New_Value": "0"
+        },
+        {
+          "Field_Name": "Cashflow.Pay_Receive_Indicator",
+          "Old_Value": "null",
+          "New_Value": "Pay"
+        },
+        {
+          "Field_Name": "Cashflow.Payer_Name",
+          "Old_Value": "null",
+          "New_Value": "CHINA HO"
+        },
+        {
+          "Field_Name": "Cashflow.Payment_Amount",
+          "Old_Value": "null",
+          "New_Value": "101388.889000"
+        },
+        {
+          "Field_Name": "Cashflow.Payment_Currency",
+          "Old_Value": "null",
+          "New_Value": "USD"
+        },
+        {
+          "Field_Name": "Cashflow.Payment_Cutoff_Time",
+          "Old_Value": "null",
+          "New_Value": "2023-05-04T13:30"
+        },
+        {
+          "Field_Name": "Cashflow.Payment_Date",
+          "Old_Value": "null",
+          "New_Value": "2023-05-05"
+        },
+        {
+          "Field_Name": "Cashflow.Payment_Date_Business_Day_Convention",
+          "Old_Value": "null",
+          "New_Value": "NONE"
+        },
+        {
+          "Field_Name": "Cashflow.Payment_Payer_Party_Reference",
+          "Old_Value": "null",
+          "New_Value": "party1"
+        },
+        {
+          "Field_Name": "Cashflow.Payment_Receiver_Party_Reference",
+          "Old_Value": "null",
+          "New_Value": "party2"
+        },
+        {
+          "Field_Name": "Cashflow.Status_Event_Type",
+          "Old_Value": "null",
+          "New_Value": "New"
+        },
+        {
+          "Field_Name": "Data_Flow.Data_Publication_Date_Time",
+          "Old_Value": "null",
+          "New_Value": "2023-06-08T12:12:06"
+        },
+        {
+          "Field_Name": "Data_Flow.Data_Publication_Id",
+          "Old_Value": "null",
+          "New_Value": "MUREX-M62220000003--2023-06-08T12:12:06Z"
+        },
+        {
+          "Field_Name": "Data_Flow.Data_Source_System",
+          "Old_Value": "null",
+          "New_Value": "MUREX"
+        },
+        {
+          "Field_Name": "Data_Flow.Data_Source_System_Country_Code",
+          "Old_Value": "null",
+          "New_Value": "ALL"
+        },
+        {
+          "Field_Name": "Data_Flow.Data_Source_System_Domain_Name",
+          "Old_Value": "null",
+          "New_Value": "FM"
+        },
+        {
+          "Field_Name": "Data_Flow.Data_Type",
+          "Old_Value": "null",
+          "New_Value": "CashflowData"
+        },
+        {
+          "Field_Name": "Data_Flow.Unique_Identifier_Message_Id",
+          "Old_Value": "null",
+          "New_Value": "1635fc04-8266-4d4d-a325-M62220000003"
+        },
+        {
+          "Field_Name": "Entity.Booking_Entity_SCI_FMID",
+          "Old_Value": "null",
+          "New_Value": "10036642"
+        },
+        {
+          "Field_Name": "Entity.Counterparty_SCI_FMID",
+          "Old_Value": "null",
+          "New_Value": "400062060"
+        },
+        {
+          "Field_Name": "Entity.General_Ledger_Business_Unit_Name",
+          "Old_Value": "null",
+          "New_Value": "FXO - EM East"
+        },
+        {
+          "Field_Name": "Entity.Person.Event_Coverage_Marketer_PSID",
+          "Old_Value": "null",
+          "New_Value": "BookingMarketer"
+        },
+        {
+          "Field_Name": "Entity.Person.Event_Execution_Marketer_PSID",
+          "Old_Value": "null",
+          "New_Value": "CoverageMarketer"
+        },
+        {
+          "Field_Name": "Entity.Person.Event_Trader_PSID",
+          "Old_Value": "null",
+          "New_Value": "BookingMarketer"
+        },
+        {
+          "Field_Name": "Instrument_Common.CFI_Code",
+          "Old_Value": "null",
+          "New_Value": "SRXXXX"
+        },
+        {
+          "Field_Name": "Instrument_Common.ISDA_Taxonomy",
+          "Old_Value": "null",
+          "New_Value": "IRD|IRS"
+        },
+        {
+          "Field_Name": "Instrument_Common.Source_System_Instrument_Sub_Type",
+          "Old_Value": "null",
+          "New_Value": "IRD|IRS|"
+        },
+        {
+          "Field_Name": "Portfolio.Booking_Entity_Trade_Portfolio_Name",
+          "Old_Value": "null",
+          "New_Value": "OP_GBL_CNO_HOC"
+        },
+        {
+          "Field_Name": "Settlement_Method",
+          "Old_Value": "null",
+          "New_Value": "Cash"
+        },
+        {
+          "Field_Name": "Trade_Id",
+          "Old_Value": "null",
+          "New_Value": "86519341"
+        },
+        {
+          "Field_Name": "Trade_State",
+          "Old_Value": "null",
+          "New_Value": "TOBESENT"
+        }
+      ],
+      "Comments_Change": null
+    },
+    {
+      "Action_Date_Time": "2023-07-13T03:57:50.376",
+      "User_PSID": "System",
+      "Cashflow": {
+        "Cashflow_Id": "M62220000004",
+        "Cashflow_State": "QUEUED",
+        "Cashflow_Sub_State_Type": "NA",
+        "Cashflow_Sub_State": "NA",
+        "Cashflow_Business_Version": 0,
+        "Cashflow_Version": 0,
+        "Cashflow_Minor_Version": 1,
+        "Cashflow_Event_Type": "New",
+        "Exception_Reason": null,
+        "NSTP_Reason": ""
+      },
+      "FMO_Comments": [],
+      "Action": "Materialize",
+      "Action_Time": "2023-07-13T03:57:50.376",
+      "Exception_Type": null,
+      "Value_Change": [
+        {
+          "Field_Name": "Cashflow.Cashflow_State",
+          "Old_Value": "PROJECTED",
+          "New_Value": "QUEUED"
+        },
+        {
+          "Field_Name": "Cashflow.Minor_Version_Description",
+          "Old_Value": "0",
+          "New_Value": ""
+        },
+        {
+          "Field_Name": "Cashflow.Status_Event_Type",
+          "Old_Value": "New",
+          "New_Value": "Materialize"
+        }
+      ],
+      "Comments_Change": null
+    },
+    {
+      "Action_Date_Time": "null",
+      "User_PSID": "System",
+      "Cashflow": {
+        "Cashflow_Id": "M62220000004",
+        "Cashflow_State": "QUEUED",
+        "Cashflow_Sub_State_Type": "NA",
+        "Cashflow_Sub_State": "NA",
+        "Cashflow_Business_Version": 0,
+        "Cashflow_Version": 0,
+        "Cashflow_Minor_Version": 1,
+        "Cashflow_Event_Type": "New",
+        "Exception_Reason": null,
+        "NSTP_Reason": ""
+      },
+      "FMO_Comments": [],
+      "Action": null,
+      "Action_Time": "null",
+      "Exception_Type": null,
+      "Value_Change": [
+        {
+          "Field_Name": "Cashflow.STP_Cutoff_Date_Time",
+          "Old_Value": "null",
+          "New_Value": "2023-05-04T13:30"
+        },
+        {
+          "Field_Name": "Cashflow.Netting_Cuttoff_Date",
+          "Old_Value": "null",
+          "New_Value": "2023-05-04T13:30"
+        }
+      ],
+      "Comments_Change": null
+    },
+    {
+      "Action_Date_Time": "2023-07-13T03:58:04.477",
+      "User_PSID": "System",
+      "Cashflow": {
+        "Cashflow_Id": "M62220000004",
+        "Cashflow_State": "QUEUED",
+        "Cashflow_Sub_State_Type": "NA",
+        "Cashflow_Sub_State": "NA",
+        "Cashflow_Business_Version": 0,
+        "Cashflow_Version": 0,
+        "Cashflow_Minor_Version": 2,
+        "Cashflow_Event_Type": "New",
+        "Exception_Reason": null,
+        "NSTP_Reason": ""
+      },
+      "FMO_Comments": [],
+      "Action": "NostroStamped",
+      "Action_Time": "2023-07-13T03:58:04.477",
+      "Exception_Type": null,
+      "Value_Change": [
+        {
+          "Field_Name": "Cashflow.STP_Cutoff_Date_Time",
+          "Old_Value": "2023-05-04T13:30",
+          "New_Value": "null"
+        },
+        {
+          "Field_Name": "Cashflow.Netting_Cuttoff_Date",
+          "Old_Value": "2023-05-04T13:30",
+          "New_Value": "null"
+        },
+        {
+          "Field_Name": "Cashflow.Status_Event_Type",
+          "Old_Value": "Materialize",
+          "New_Value": "NostroStamped"
+        },
+        {
+          "Field_Name": "Entity.Counterparty_SCI_FMCODE",
+          "Old_Value": "",
+          "New_Value": "HSBC*SHA"
+        },
+        {
+          "Field_Name": "Settlement_Instruction.Account.EBBS_Bridge_Account_Number",
+          "Old_Value": "null",
+          "New_Value": "100009500058636005"
+        },
+        {
+          "Field_Name": "Settlement_Instruction.Account.SCB_Nostro_Account_Number",
+          "Old_Value": "null",
+          "New_Value": "USD MAIN"
+        },
+        {
+          "Field_Name": "Settlement_Instruction.Account.SCB_Nostro_Account_Type",
+          "Old_Value": "null",
+          "New_Value": "NOS"
+        },
+        {
+          "Field_Name": "Settlement_Instruction.Account.Booking_Entity_Correspondent_Account_Name",
+          "Old_Value": "null",
+          "New_Value": "STANCHART NY"
+        },
+        {
+          "Field_Name": "Settlement_Instruction.Account.Booking_Entity_Correspondent_BIC_code",
+          "Old_Value": "null",
+          "New_Value": "SCBLUS33XXX"
+        },
+        {
+          "Field_Name": "Settlement_Instruction.Account.Booking_Entity_Correspondent_City",
+          "Old_Value": "null",
+          "New_Value": "NEW YORK"
+        },
+        {
+          "Field_Name": "Settlement_Instruction.Account.Booking_Entity_Correspondent_Street_Address",
+          "Old_Value": "null",
+          "New_Value": "1095 AVENUE OF THE AMERICAS 10036"
+        },
+        {
+          "Field_Name": "Settlement_Instruction.Account.Counterparty_CMS_Account_Number",
+          "Old_Value": "null",
+          "New_Value": "100009500058636005"
+        }
+      ],
+      "Comments_Change": null
+    },
+    {
+      "Action_Date_Time": "2023-07-13T03:58:05.266",
+      "User_PSID": "System",
+      "Cashflow": {
+        "Cashflow_Id": "M62220000004",
+        "Cashflow_State": "WAITING",
+        "Cashflow_Sub_State_Type": "Pending Exception",
+        "Cashflow_Sub_State": "Pending Operator",
+        "Cashflow_Business_Version": 0,
+        "Cashflow_Version": 0,
+        "Cashflow_Minor_Version": 3,
+        "Cashflow_Event_Type": "New",
+        "Exception_Reason": null,
+        "NSTP_Reason": ""
+      },
+      "FMO_Comments": [],
+      "Action": "IsNstp",
+      "Action_Time": "2023-07-13T03:58:05.266",
+      "Exception_Type": null,
+      "Value_Change": [
+        {
+          "Field_Name": "Cashflow.Cashflow_State",
+          "Old_Value": "QUEUED",
+          "New_Value": "WAITING"
+        },
+        {
+          "Field_Name": "Cashflow.Cashflow_Sub_State",
+          "Old_Value": "NA",
+          "New_Value": "Pending Operator"
+        },
+        {
+          "Field_Name": "Cashflow.Cashflow_Sub_State_Type",
+          "Old_Value": "NA",
+          "New_Value": "Pending Exception"
+        }
+      ],
+      "Comments_Change": null
+    },
+    {
+      "Action_Date_Time": "2023-07-13T04:10:40.550",
+      "User_PSID": "1639796",
+      "Cashflow": {
+        "Cashflow_Id": "M62220000004",
+        "Cashflow_State": "WAITING",
+        "Cashflow_Sub_State_Type": "Pending Exception",
+        "Cashflow_Sub_State": "Pending Operator",
+        "Cashflow_Business_Version": 0,
+        "Cashflow_Version": 0,
+        "Cashflow_Minor_Version": 4,
+        "Cashflow_Event_Type": "New",
+        "Exception_Reason": null,
+        "NSTP_Reason": ""
+      },
+      "FMO_Comments": [
+        {
+          "FMO_Comment": "Affirmed by 1639796",
+          "FMO_Comment_Timestamp": "2023-07-13 00:00:00.0",
+          "FMO_Comment_Updater": "1639796"
+        }
+      ],
+      "Action": "Affirmed",
+      "Action_Time": "2023-07-13T04:10:40.550",
+      "Exception_Type": null,
+      "Value_Change": [
+        {
+          "Field_Name": "FMO_Comments.FMO_Comment",
+          "Old_Value": "null",
+          "New_Value": "Affirmed by 1639796"
+        },
+        {
+          "Field_Name": "FMO_Comments.FMO_Comment_Timestamp",
+          "Old_Value": "null",
+          "New_Value": "Thu Jul 13 04:10:40 GMT 2023"
+        },
+        {
+          "Field_Name": "FMO_Comments.FMO_Comment_Updater",
+          "Old_Value": "null",
+          "New_Value": "1639796"
+        },
+        {
+          "Field_Name": "Cashflow.Cashflow_Affirmation_Status",
+          "Old_Value": "Unaffirmed",
+          "New_Value": "Affirmed"
+        },
+        {
+          "Field_Name": "Cashflow.Cashflow_Sub_State_Updater",
+          "Old_Value": "System",
+          "New_Value": "1639796"
+        },
+        {
+          "Field_Name": "Cashflow.Status_Event_Type",
+          "Old_Value": "NostroStamped",
+          "New_Value": "Affirmed"
+        }
+      ],
+      "Comments_Change": null
+    },
+    {
+      "Action_Date_Time": "2023-07-13T04:10:41.040",
+      "User_PSID": "1639796",
+      "Cashflow": {
+        "Cashflow_Id": "M62220000004",
+        "Cashflow_State": "WAITING",
+        "Cashflow_Sub_State_Type": "Pending Exception",
+        "Cashflow_Sub_State": "Pending Verification",
+        "Cashflow_Business_Version": 0,
+        "Cashflow_Version": 0,
+        "Cashflow_Minor_Version": 5,
+        "Cashflow_Event_Type": "New",
+        "Exception_Reason": null,
+        "NSTP_Reason": ""
+      },
+      "FMO_Comments": [],
+      "Action": "Submit",
+      "Action_Time": "2023-07-13T04:10:41.040",
+      "Exception_Type": null,
+      "Value_Change": [
+        {
+          "Field_Name": "FMO_Comments.FMO_Comment",
+          "Old_Value": "null",
+          "New_Value": "Affirmed by 1639796"
+        },
+        {
+          "Field_Name": "FMO_Comments.FMO_Comment_Timestamp",
+          "Old_Value": "null",
+          "New_Value": "2023-07-13 00:00:00.0"
+        },
+        {
+          "Field_Name": "FMO_Comments.FMO_Comment_Updater",
+          "Old_Value": "null",
+          "New_Value": "1639796"
+        },
+        {
+          "Field_Name": "FMO_Comments.FMO_Comment",
+          "Old_Value": "Affirmed by 1639796",
+          "New_Value": "null"
+        },
+        {
+          "Field_Name": "FMO_Comments.FMO_Comment_Timestamp",
+          "Old_Value": "Thu Jul 13 04:10:40 GMT 2023",
+          "New_Value": "null"
+        },
+        {
+          "Field_Name": "FMO_Comments.FMO_Comment_Updater",
+          "Old_Value": "1639796",
+          "New_Value": "null"
+        },
+        {
+          "Field_Name": "Cashflow.FMO_Comment",
+          "Old_Value": "null",
+          "New_Value": "Affirmed by 1639796"
+        },
+        {
+          "Field_Name": "Cashflow.FMO_Comment_Timestamp",
+          "Old_Value": "null",
+          "New_Value": "2023-07-13 00:00:00.0"
+        },
+        {
+          "Field_Name": "Cashflow.FMO_Comment_Updater",
+          "Old_Value": "null",
+          "New_Value": "1639796"
+        },
+        {
+          "Field_Name": "Cashflow.Cashflow_Sub_State",
+          "Old_Value": "Pending Operator",
+          "New_Value": "Pending Verification"
+        }
+      ],
+      "Comments_Change": null
+    }
+  ],
+  "ratanException": [
+    {
+      "Id": "1679339382269915136",
+      "Original_Exception_Id": "Exception_6ba60bbd-edcb-4962-8ebd-57145a056655",
+      "Exception_Code": "Multi Vostro",
+      "Exception_Category": "SSI",
+      "Exception_Type": "BUSINESS",
+      "Description": "MULTI_VOSTRO_ERROR",
+      "Status": "PENDING_VERIFICATION",
+      "Actions": [
+        {
+          "Api_Url": "https://ratan-cash-settlement-ssi-stamping-service/v1/stamping/exception/Exception_6ba60bbd-edcb-4962-8ebd-57145a056655/approve",
+          "Api_Method": "POST",
+          "Action_Name": "approve",
+          "Action_Type": "REST",
+          "Component_Url": null,
+          "Component_Name": null
+        },
+        {
+          "Api_Url": "https://ratan-cash-settlement-ssi-stamping-service/v1/stamping/exception/Exception_6ba60bbd-edcb-4962-8ebd-57145a056655/reject",
+          "Api_Method": "POST",
+          "Action_Name": "reject",
+          "Action_Type": "REST",
+          "Component_Url": null,
+          "Component_Name": null
+        }
+      ],
+      "Stashing": {
+        "Maker_Request_Body": "{\"Remittance_Information_4\":\"704\",\"Nostro_Swift_Message_Type\":\"N\",\"Account\":{\"SCB_Nostro_Account_Number\":\"USD MAIN\",\"SCB_Nostro_Account_Type\":\"NOS\",\"EBBS_Account_Number\":\"\",\"EBBS_Bridge_Account_Number\":\"\",\"Booking_Entity_Correspondent_BIC_code\":\"SCBLUS33XXX\",\"Booking_Entity_Correspondent_Account_Name\":\"STANCHART NY\",\"Booking_Entity_Correspondent_Street_Address\":\"1095 AVENUE OF THE AMERICAS 10036\",\"Booking_Entity_Correspondent_City\":\"NEW YORK\",\"Booking_Entity_Correspondent_Account_Number\":\"\",\"Beneficiary_Account_Name\":\"HSBC BANK CHINA COMPANY LIMITED\",\"Beneficiary_Account_Name_2\":\"FRHSBC SHANGHAI\",\"Beneficiary_Account_Number\":\"58123456789\",\"Beneficiary_BIC_code\":\"58123456\",\"Beneficiary_Bank_Account_Name\":\"57test value\",\"Beneficiary_Bank_Account_Number\":\"57123456789\",\"Beneficiary_Bank_BIC_code\":\"57123456\",\"Beneficiary_Bank_City\":\"57city\",\"Beneficiary_Bank_Street_Address\":\"57adress\",\"Beneficiary_City\":\"SHA\",\"Beneficiary_Correspondent_Account_Name\":\"54test value\",\"Beneficiary_Correspondent_Account_Number\":\"54123456789\",\"Beneficiary_Correspondent_BIC_code\":\"12345678\",\"Beneficiary_Correspondent_City\":\"54city\",\"Beneficiary_Correspondent_Street_Address\":\"54adress\",\"Beneficiary_Street_Address\":\"5F MARINE TOWER\",\"Counterparty_CMS_Account_Number\":\"54cms\",\"Intermediary_Account_Name\":\"56test value\",\"Intermediary_Account_Number\":\"56123456789\",\"Intermediary_BIC_code\":\"56123456\",\"Intermediary_City\":\"56city\",\"Intermediary_Street_Address\":\"56adress\",\"Ordering_Customer_Account_Name\":\"50test value\",\"Ordering_Customer_Account_Number\":\"50123456789\",\"Ordering_Customer_BIC_Code\":\"50123456\",\"Ordering_Customer_City\":\"50 city\",\"Ordering_Customer_Street_Address\":\"50 address\"},\"Swift_Payment_Method\":\"Y\",\"SCB_Entity_SCI_FMID\":\"\",\"SSI_Id\":\"\",\"Swift_Message_Type\":\"MT103\",\"Sender_To_Receiver_Information_4\":\"724\",\"CFI_Code\":\"\",\"Sender_To_Receiver_Information_3\":\"723\",\"Sender_To_Receiver_Information_2\":\"722\",\"SSI_Source\":null,\"Sender_To_Receiver_Information_1\":\"721\",\"SSI_Priority\":\"Primary\",\"Payment_Currency\":\"\",\"Sender_To_Receiver_Information_6\":\"726\",\"Counterparty_SCI_FMID\":\"\",\"Sender_To_Receiver_Information_5\":\"725\",\"Charge_Bearer\":\"OUR\",\"SSI_Unique_Id\":\"\",\"Is_Third_Party_Payment\":\"Y\",\"Remittance_Information_1\":\"701\",\"Remittance_Information_2\":\"702\",\"Remittance_Information_3\":\"703\"}",
+        "Maker_Id": "1639796",
+        "Checker_Request_Body": "",
+        "Checker_Id": ""
+      }
+    },
+    {
+      "Id": "1679339386932523008",
+      "Original_Exception_Id": "1679339386577477632",
+      "Exception_Code": "Pending Affirmation",
+      "Exception_Category": "AFFIRMATION",
+      "Exception_Type": "BUSINESS",
+      "Description": "Cashflow is not confirmed or affirmed. status is Unaffirmed",
+      "Status": "CLOSED",
+      "Actions": [],
+      "Stashing": {
+        "Maker_Request_Body": null,
+        "Maker_Id": null,
+        "Checker_Request_Body": null,
+        "Checker_Id": null
+      }
+    },
+    {
+      "Id": "1679339386932523009",
+      "Original_Exception_Id": "1679339386577477633",
+      "Exception_Code": "Back Value",
+      "Exception_Category": "BACK_VALUE",
+      "Exception_Type": "BUSINESS",
+      "Description": "",
+      "Status": "PENDING_VERIFICATION",
+      "Actions": [],
+      "Stashing": {
+        "Maker_Request_Body": "",
+        "Maker_Id": "1639796",
+        "Checker_Request_Body": "",
+        "Checker_Id": "123456"
+      }
+    }
+  ],
+  "ratanVostroCandidates": [
+    {
+      "Account": {
+        "SCB_Nostro_Account_Number": "USD MAIN",
+        "SCB_Nostro_Account_Type": "NOS",
+        "Beneficiary_BIC_code": null,
+        "Beneficiary_Account_Name": "HSBC BANK CHINA COMPANY LIMITED",
+        "Beneficiary_Account_Name_2": "FRHSBC SHANGHAI",
+        "Beneficiary_Street_Address": "5F MARINE TOWER",
+        "Beneficiary_City": "SHA",
+        "Beneficiary_Account_Number": null,
+        "Intermediary_BIC_code": null,
+        "Intermediary_Account_Name": null,
+        "Intermediary_Street_Address": null,
+        "Intermediary_City": null,
+        "Intermediary_Account_Number": null,
+        "Beneficiary_Bank_BIC_code": null,
+        "Beneficiary_Bank_Account_Name": null,
+        "Beneficiary_Bank_Street_Address": null,
+        "Beneficiary_Bank_City": null,
+        "Beneficiary_Bank_Account_Number": null,
+        "Beneficiary_Correspondent_BIC_code": null,
+        "Beneficiary_Correspondent_Account_Name": null,
+        "Beneficiary_Correspondent_Street_Address": null,
+        "Beneficiary_Correspondent_City": null,
+        "Beneficiary_Correspondent_Account_Number": null,
+        "Ordering_Customer_BIC_Code": null,
+        "Ordering_Customer_Account_Name": null,
+        "Ordering_Customer_Street_Address": null,
+        "Ordering_Customer_City": null,
+        "Ordering_Customer_Account_Number": null,
+        "Counterparty_CMS_Account_Number": null,
+        "EBBS_Bridge_Account_Number": null,
+        "EBBS_Account_Number": null,
+        "Booking_Entity_Correspondent_BIC_code": null,
+        "Booking_Entity_Correspondent_Account_Name": null,
+        "Booking_Entity_Correspondent_Street_Address": null,
+        "Booking_Entity_Correspondent_City": null,
+        "Booking_Entity_Correspondent_Account_Number": null
+      },
+      "SSI_Id": "47066727",
+      "SSI_Unique_Id": "47066727",
+      "SSI_Source": "Manual",
+      "SSI_Priority": null,
+      "Swift_Message_Type": "MT103",
+      "CFI_Code": "SR****",
+      "Payment_Currency": "USD",
+      "Counterparty_SCI_FMID": "400062060",
+      "SCB_Entity_SCI_FMID": null,
+      "Remittance_Information_1": null,
+      "Remittance_Information_2": null,
+      "Remittance_Information_3": null,
+      "Remittance_Information_4": null,
+      "Sender_To_Receiver_Information_1": null,
+      "Sender_To_Receiver_Information_2": null,
+      "Sender_To_Receiver_Information_3": null,
+      "Sender_To_Receiver_Information_4": null,
+      "Sender_To_Receiver_Information_5": null,
+      "Sender_To_Receiver_Information_6": null,
+      "Is_Third_Party_Payment": "false",
+      "Swift_Payment_Method": null,
+      "Swift_Payment_Date": null,
+      "Charge_Bearer": "OUR",
+      "Nostro_Swift_Message_Type": null
+    },
+    {
+      "Account": {
+        "SCB_Nostro_Account_Number": "USD MAIN",
+        "SCB_Nostro_Account_Type": "NOS",
+        "Beneficiary_BIC_code": null,
+        "Beneficiary_Account_Name": "HSBC BANK CHINA COMPANY LIMITED",
+        "Beneficiary_Account_Name_2": null,
+        "Beneficiary_Street_Address": "FRHSBC SHANGHAI",
+        "Beneficiary_City": null,
+        "Beneficiary_Account_Number": null,
+        "Intermediary_BIC_code": null,
+        "Intermediary_Account_Name": null,
+        "Intermediary_Street_Address": null,
+        "Intermediary_City": null,
+        "Intermediary_Account_Number": null,
+        "Beneficiary_Bank_BIC_code": null,
+        "Beneficiary_Bank_Account_Name": null,
+        "Beneficiary_Bank_Street_Address": null,
+        "Beneficiary_Bank_City": null,
+        "Beneficiary_Bank_Account_Number": null,
+        "Beneficiary_Correspondent_BIC_code": null,
+        "Beneficiary_Correspondent_Account_Name": null,
+        "Beneficiary_Correspondent_Street_Address": null,
+        "Beneficiary_Correspondent_City": null,
+        "Beneficiary_Correspondent_Account_Number": null,
+        "Ordering_Customer_BIC_Code": null,
+        "Ordering_Customer_Account_Name": null,
+        "Ordering_Customer_Street_Address": null,
+        "Ordering_Customer_City": null,
+        "Ordering_Customer_Account_Number": null,
+        "Counterparty_CMS_Account_Number": null,
+        "EBBS_Bridge_Account_Number": null,
+        "EBBS_Account_Number": null,
+        "Booking_Entity_Correspondent_BIC_code": null,
+        "Booking_Entity_Correspondent_Account_Name": null,
+        "Booking_Entity_Correspondent_Street_Address": null,
+        "Booking_Entity_Correspondent_City": null,
+        "Booking_Entity_Correspondent_Account_Number": null
+      },
+      "SSI_Id": "47067801",
+      "SSI_Unique_Id": "47067801",
+      "SSI_Source": "Clone",
+      "SSI_Priority": null,
+      "Swift_Message_Type": "MT202",
+      "CFI_Code": "SR****",
+      "Payment_Currency": "USD",
+      "Counterparty_SCI_FMID": "400062060",
+      "SCB_Entity_SCI_FMID": null,
+      "Remittance_Information_1": null,
+      "Remittance_Information_2": null,
+      "Remittance_Information_3": null,
+      "Remittance_Information_4": null,
+      "Sender_To_Receiver_Information_1": "/BNF/CCS SETTLEMENT",
+      "Sender_To_Receiver_Information_2": null,
+      "Sender_To_Receiver_Information_3": null,
+      "Sender_To_Receiver_Information_4": null,
+      "Sender_To_Receiver_Information_5": null,
+      "Sender_To_Receiver_Information_6": null,
+      "Is_Third_Party_Payment": "false",
+      "Swift_Payment_Method": null,
+      "Swift_Payment_Date": null,
+      "Charge_Bearer": null,
+      "Nostro_Swift_Message_Type": null
+    },
+    {
+      "Account": {
+        "SCB_Nostro_Account_Number": "USD MAIN",
+        "SCB_Nostro_Account_Type": "NOS",
+        "Beneficiary_BIC_code": "HSBCCNSHXXX",
+        "Beneficiary_Account_Name": "HSBC BANK CHINA COMPANY LIMITED",
+        "Beneficiary_Account_Name_2": null,
+        "Beneficiary_Street_Address": "FRHSBC SHANGHAI",
+        "Beneficiary_City": null,
+        "Beneficiary_Account_Number": null,
+        "Intermediary_BIC_code": null,
+        "Intermediary_Account_Name": null,
+        "Intermediary_Street_Address": null,
+        "Intermediary_City": null,
+        "Intermediary_Account_Number": null,
+        "Beneficiary_Bank_BIC_code": null,
+        "Beneficiary_Bank_Account_Name": null,
+        "Beneficiary_Bank_Street_Address": null,
+        "Beneficiary_Bank_City": null,
+        "Beneficiary_Bank_Account_Number": null,
+        "Beneficiary_Correspondent_BIC_code": null,
+        "Beneficiary_Correspondent_Account_Name": null,
+        "Beneficiary_Correspondent_Street_Address": null,
+        "Beneficiary_Correspondent_City": null,
+        "Beneficiary_Correspondent_Account_Number": null,
+        "Ordering_Customer_BIC_Code": null,
+        "Ordering_Customer_Account_Name": null,
+        "Ordering_Customer_Street_Address": null,
+        "Ordering_Customer_City": null,
+        "Ordering_Customer_Account_Number": null,
+        "Counterparty_CMS_Account_Number": null,
+        "EBBS_Bridge_Account_Number": null,
+        "EBBS_Account_Number": null,
+        "Booking_Entity_Correspondent_BIC_code": null,
+        "Booking_Entity_Correspondent_Account_Name": null,
+        "Booking_Entity_Correspondent_Street_Address": null,
+        "Booking_Entity_Correspondent_City": null,
+        "Booking_Entity_Correspondent_Account_Number": null
+      },
+      "SSI_Id": "47066800",
+      "SSI_Unique_Id": "47066800",
+      "SSI_Source": "Import",
+      "SSI_Priority": null,
+      "Swift_Message_Type": "MT202",
+      "CFI_Code": "SR****",
+      "Payment_Currency": "USD",
+      "Counterparty_SCI_FMID": "400062060",
+      "SCB_Entity_SCI_FMID": null,
+      "Remittance_Information_1": null,
+      "Remittance_Information_2": null,
+      "Remittance_Information_3": null,
+      "Remittance_Information_4": null,
+      "Sender_To_Receiver_Information_1": null,
+      "Sender_To_Receiver_Information_2": null,
+      "Sender_To_Receiver_Information_3": null,
+      "Sender_To_Receiver_Information_4": null,
+      "Sender_To_Receiver_Information_5": null,
+      "Sender_To_Receiver_Information_6": null,
+      "Is_Third_Party_Payment": "false",
+      "Swift_Payment_Method": null,
+      "Swift_Payment_Date": null,
+      "Charge_Bearer": null,
+      "Nostro_Swift_Message_Type": null
+    },
+    {
+      "Account": {
+        "SCB_Nostro_Account_Number": "USD MAIN",
+        "SCB_Nostro_Account_Type": "NOS",
+        "Beneficiary_BIC_code": null,
+        "Beneficiary_Account_Name": "HSBC BANK CHINA COMPANY LIMITED",
+        "Beneficiary_Account_Name_2": null,
+        "Beneficiary_Street_Address": "FRHSBC SHANGHAI",
+        "Beneficiary_City": null,
+        "Beneficiary_Account_Number": null,
+        "Intermediary_BIC_code": null,
+        "Intermediary_Account_Name": null,
+        "Intermediary_Street_Address": null,
+        "Intermediary_City": null,
+        "Intermediary_Account_Number": null,
+        "Beneficiary_Bank_BIC_code": null,
+        "Beneficiary_Bank_Account_Name": null,
+        "Beneficiary_Bank_Street_Address": null,
+        "Beneficiary_Bank_City": null,
+        "Beneficiary_Bank_Account_Number": null,
+        "Beneficiary_Correspondent_BIC_code": null,
+        "Beneficiary_Correspondent_Account_Name": null,
+        "Beneficiary_Correspondent_Street_Address": null,
+        "Beneficiary_Correspondent_City": null,
+        "Beneficiary_Correspondent_Account_Number": null,
+        "Ordering_Customer_BIC_Code": null,
+        "Ordering_Customer_Account_Name": null,
+        "Ordering_Customer_Street_Address": null,
+        "Ordering_Customer_City": null,
+        "Ordering_Customer_Account_Number": null,
+        "Counterparty_CMS_Account_Number": null,
+        "EBBS_Bridge_Account_Number": null,
+        "EBBS_Account_Number": null,
+        "Booking_Entity_Correspondent_BIC_code": null,
+        "Booking_Entity_Correspondent_Account_Name": null,
+        "Booking_Entity_Correspondent_Street_Address": null,
+        "Booking_Entity_Correspondent_City": null,
+        "Booking_Entity_Correspondent_Account_Number": null
+      },
+      "SSI_Id": "40201927",
+      "SSI_Unique_Id": "40201927",
+      "SSI_Source": "Manual",
+      "SSI_Priority": null,
+      "Swift_Message_Type": "MT202",
+      "CFI_Code": "SR****",
+      "Payment_Currency": "USD",
+      "Counterparty_SCI_FMID": "400062060",
+      "SCB_Entity_SCI_FMID": null,
+      "Remittance_Information_1": null,
+      "Remittance_Information_2": null,
+      "Remittance_Information_3": null,
+      "Remittance_Information_4": null,
+      "Sender_To_Receiver_Information_1": "/BNF/CCS SETTLEMENT",
+      "Sender_To_Receiver_Information_2": null,
+      "Sender_To_Receiver_Information_3": null,
+      "Sender_To_Receiver_Information_4": null,
+      "Sender_To_Receiver_Information_5": null,
+      "Sender_To_Receiver_Information_6": null,
+      "Is_Third_Party_Payment": "false",
+      "Swift_Payment_Method": null,
+      "Swift_Payment_Date": null,
+      "Charge_Bearer": null,
+      "Nostro_Swift_Message_Type": null
+    }
+  ],
+  "ratanNostroCandidates": [
+    {
+      "Account": {
+        "SCB_Nostro_Account_Number": "USD MAIN",
+        "SCB_Nostro_Account_Type": "NOS",
+        "Beneficiary_BIC_code": null,
+        "Beneficiary_Account_Name": null,
+        "Beneficiary_Account_Name_2": null,
+        "Beneficiary_Street_Address": null,
+        "Beneficiary_City": null,
+        "Beneficiary_Account_Number": null,
+        "Intermediary_BIC_code": null,
+        "Intermediary_Account_Name": null,
+        "Intermediary_Street_Address": null,
+        "Intermediary_City": null,
+        "Intermediary_Account_Number": null,
+        "Beneficiary_Bank_BIC_code": null,
+        "Beneficiary_Bank_Account_Name": null,
+        "Beneficiary_Bank_Street_Address": null,
+        "Beneficiary_Bank_City": null,
+        "Beneficiary_Bank_Account_Number": null,
+        "Beneficiary_Correspondent_BIC_code": null,
+        "Beneficiary_Correspondent_Account_Name": null,
+        "Beneficiary_Correspondent_Street_Address": null,
+        "Beneficiary_Correspondent_City": null,
+        "Beneficiary_Correspondent_Account_Number": null,
+        "Ordering_Customer_BIC_Code": null,
+        "Ordering_Customer_Account_Name": null,
+        "Ordering_Customer_Street_Address": null,
+        "Ordering_Customer_City": null,
+        "Ordering_Customer_Account_Number": null,
+        "Counterparty_CMS_Account_Number": null,
+        "EBBS_Bridge_Account_Number": null,
+        "EBBS_Account_Number": "22222222222",
+        "Booking_Entity_Correspondent_BIC_code": "SCBLUS33XXX",
+        "Booking_Entity_Correspondent_Account_Name": "SCB NEW YORK (NOSTRO)",
+        "Booking_Entity_Correspondent_Street_Address": "STANCHART NY",
+        "Booking_Entity_Correspondent_City": "NEWYORK",
+        "Booking_Entity_Correspondent_Account_Number": "233652626"
+      },
+      "SSI_Id": null,
+      "SSI_Unique_Id": "1234561",
+      "SSI_Source": null,
+      "SSI_Priority": null,
+      "Swift_Message_Type": null,
+      "CFI_Code": null,
+      "Payment_Currency": "USD",
+      "Counterparty_SCI_FMID": null,
+      "SCB_Entity_SCI_FMID": "10036642",
+      "Remittance_Information_1": null,
+      "Remittance_Information_2": null,
+      "Remittance_Information_3": null,
+      "Remittance_Information_4": null,
+      "Sender_To_Receiver_Information_1": null,
+      "Sender_To_Receiver_Information_2": null,
+      "Sender_To_Receiver_Information_3": null,
+      "Sender_To_Receiver_Information_4": null,
+      "Sender_To_Receiver_Information_5": null,
+      "Sender_To_Receiver_Information_6": null,
+      "Is_Third_Party_Payment": null,
+      "Swift_Payment_Method": null,
+      "Swift_Payment_Date": null,
+      "Charge_Bearer": null,
+      "Nostro_Swift_Message_Type": "Y"
+    },
+    {
+      "Account": {
+        "SCB_Nostro_Account_Number": "USD MAIN",
+        "SCB_Nostro_Account_Type": "NOS",
+        "Beneficiary_BIC_code": null,
+        "Beneficiary_Account_Name": null,
+        "Beneficiary_Account_Name_2": null,
+        "Beneficiary_Street_Address": null,
+        "Beneficiary_City": null,
+        "Beneficiary_Account_Number": null,
+        "Intermediary_BIC_code": null,
+        "Intermediary_Account_Name": null,
+        "Intermediary_Street_Address": null,
+        "Intermediary_City": null,
+        "Intermediary_Account_Number": null,
+        "Beneficiary_Bank_BIC_code": null,
+        "Beneficiary_Bank_Account_Name": null,
+        "Beneficiary_Bank_Street_Address": null,
+        "Beneficiary_Bank_City": null,
+        "Beneficiary_Bank_Account_Number": null,
+        "Beneficiary_Correspondent_BIC_code": null,
+        "Beneficiary_Correspondent_Account_Name": null,
+        "Beneficiary_Correspondent_Street_Address": null,
+        "Beneficiary_Correspondent_City": null,
+        "Beneficiary_Correspondent_Account_Number": null,
+        "Ordering_Customer_BIC_Code": null,
+        "Ordering_Customer_Account_Name": null,
+        "Ordering_Customer_Street_Address": null,
+        "Ordering_Customer_City": null,
+        "Ordering_Customer_Account_Number": null,
+        "Counterparty_CMS_Account_Number": null,
+        "EBBS_Bridge_Account_Number": null,
+        "EBBS_Account_Number": "100009500058636005",
+        "Booking_Entity_Correspondent_BIC_code": "SCBLUS33XXX",
+        "Booking_Entity_Correspondent_Account_Name": "STANCHART NY",
+        "Booking_Entity_Correspondent_Street_Address": "1095 AVENUE OF THE AMERICAS 10036",
+        "Booking_Entity_Correspondent_City": "NEW YORK",
+        "Booking_Entity_Correspondent_Account_Number": ""
+      },
+      "SSI_Id": null,
+      "SSI_Unique_Id": "XXX77bb42ab9-d3fc-4968-9ab0-5b49c83408a7",
+      "SSI_Source": null,
+      "SSI_Priority": null,
+      "Swift_Message_Type": null,
+      "CFI_Code": null,
+      "Payment_Currency": "USD",
+      "Counterparty_SCI_FMID": null,
+      "SCB_Entity_SCI_FMID": "10036642",
+      "Remittance_Information_1": null,
+      "Remittance_Information_2": null,
+      "Remittance_Information_3": null,
+      "Remittance_Information_4": null,
+      "Sender_To_Receiver_Information_1": null,
+      "Sender_To_Receiver_Information_2": null,
+      "Sender_To_Receiver_Information_3": null,
+      "Sender_To_Receiver_Information_4": null,
+      "Sender_To_Receiver_Information_5": null,
+      "Sender_To_Receiver_Information_6": null,
+      "Is_Third_Party_Payment": null,
+      "Swift_Payment_Method": null,
+      "Swift_Payment_Date": null,
+      "Charge_Bearer": null,
+      "Nostro_Swift_Message_Type": "Y"
+    },
+    {
+      "Account": {
+        "SCB_Nostro_Account_Number": "USD NO 2",
+        "SCB_Nostro_Account_Type": "Over-Account",
+        "Beneficiary_BIC_code": null,
+        "Beneficiary_Account_Name": null,
+        "Beneficiary_Account_Name_2": null,
+        "Beneficiary_Street_Address": null,
+        "Beneficiary_City": null,
+        "Beneficiary_Account_Number": null,
+        "Intermediary_BIC_code": null,
+        "Intermediary_Account_Name": null,
+        "Intermediary_Street_Address": null,
+        "Intermediary_City": null,
+        "Intermediary_Account_Number": null,
+        "Beneficiary_Bank_BIC_code": null,
+        "Beneficiary_Bank_Account_Name": null,
+        "Beneficiary_Bank_Street_Address": null,
+        "Beneficiary_Bank_City": null,
+        "Beneficiary_Bank_Account_Number": null,
+        "Beneficiary_Correspondent_BIC_code": null,
+        "Beneficiary_Correspondent_Account_Name": null,
+        "Beneficiary_Correspondent_Street_Address": null,
+        "Beneficiary_Correspondent_City": null,
+        "Beneficiary_Correspondent_Account_Number": null,
+        "Ordering_Customer_BIC_Code": null,
+        "Ordering_Customer_Account_Name": null,
+        "Ordering_Customer_Street_Address": null,
+        "Ordering_Customer_City": null,
+        "Ordering_Customer_Account_Number": null,
+        "Counterparty_CMS_Account_Number": null,
+        "EBBS_Bridge_Account_Number": null,
+        "EBBS_Account_Number": "100000000003910205",
+        "Booking_Entity_Correspondent_BIC_code": "SCBLCNSXSHA",
+        "Booking_Entity_Correspondent_Account_Name": "SCB CHINA SHANGHAI SHA",
+        "Booking_Entity_Correspondent_Street_Address": "25 TH FLOOR STAN CHART TOWER 201 CENTURY AVENUE PUDONG 200120",
+        "Booking_Entity_Correspondent_City": "SHANGHAI",
+        "Booking_Entity_Correspondent_Account_Number": ""
+      },
+      "SSI_Id": null,
+      "SSI_Unique_Id": "id-Over-Account19299aa89-27e6-4e2a-b70e-13276b029d06",
+      "SSI_Source": null,
+      "SSI_Priority": null,
+      "Swift_Message_Type": null,
+      "CFI_Code": null,
+      "Payment_Currency": "USD",
+      "Counterparty_SCI_FMID": null,
+      "SCB_Entity_SCI_FMID": "10036642",
+      "Remittance_Information_1": null,
+      "Remittance_Information_2": null,
+      "Remittance_Information_3": null,
+      "Remittance_Information_4": null,
+      "Sender_To_Receiver_Information_1": null,
+      "Sender_To_Receiver_Information_2": null,
+      "Sender_To_Receiver_Information_3": null,
+      "Sender_To_Receiver_Information_4": null,
+      "Sender_To_Receiver_Information_5": null,
+      "Sender_To_Receiver_Information_6": null,
+      "Is_Third_Party_Payment": null,
+      "Swift_Payment_Method": null,
+      "Swift_Payment_Date": null,
+      "Charge_Bearer": null,
+      "Nostro_Swift_Message_Type": "N"
+    },
+    {
+      "Account": {
+        "SCB_Nostro_Account_Number": "FXBRREC",
+        "SCB_Nostro_Account_Type": "FXBRREC",
+        "Beneficiary_BIC_code": null,
+        "Beneficiary_Account_Name": null,
+        "Beneficiary_Account_Name_2": null,
+        "Beneficiary_Street_Address": null,
+        "Beneficiary_City": null,
+        "Beneficiary_Account_Number": null,
+        "Intermediary_BIC_code": null,
+        "Intermediary_Account_Name": null,
+        "Intermediary_Street_Address": null,
+        "Intermediary_City": null,
+        "Intermediary_Account_Number": null,
+        "Beneficiary_Bank_BIC_code": null,
+        "Beneficiary_Bank_Account_Name": null,
+        "Beneficiary_Bank_Street_Address": null,
+        "Beneficiary_Bank_City": null,
+        "Beneficiary_Bank_Account_Number": null,
+        "Beneficiary_Correspondent_BIC_code": null,
+        "Beneficiary_Correspondent_Account_Name": null,
+        "Beneficiary_Correspondent_Street_Address": null,
+        "Beneficiary_Correspondent_City": null,
+        "Beneficiary_Correspondent_Account_Number": null,
+        "Ordering_Customer_BIC_Code": null,
+        "Ordering_Customer_Account_Name": null,
+        "Ordering_Customer_Street_Address": null,
+        "Ordering_Customer_City": null,
+        "Ordering_Customer_Account_Number": null,
+        "Counterparty_CMS_Account_Number": null,
+        "EBBS_Bridge_Account_Number": null,
+        "EBBS_Account_Number": "100008178601602002",
+        "Booking_Entity_Correspondent_BIC_code": "SCBLCNSXSHA",
+        "Booking_Entity_Correspondent_Account_Name": "SCB SHANGHAI",
+        "Booking_Entity_Correspondent_Street_Address": "35/F CHONGQING INTERNATL TRADE CENTER",
+        "Booking_Entity_Correspondent_City": "SHANGHAI CN 200120",
+        "Booking_Entity_Correspondent_Account_Number": ""
+      },
+      "SSI_Id": null,
+      "SSI_Unique_Id": "id-FXBRREC1cefca5db-866e-4fd8-8e3c-e2c20bdfb06b",
+      "SSI_Source": null,
+      "SSI_Priority": null,
+      "Swift_Message_Type": null,
+      "CFI_Code": null,
+      "Payment_Currency": "USD",
+      "Counterparty_SCI_FMID": null,
+      "SCB_Entity_SCI_FMID": "10036642",
+      "Remittance_Information_1": null,
+      "Remittance_Information_2": null,
+      "Remittance_Information_3": null,
+      "Remittance_Information_4": null,
+      "Sender_To_Receiver_Information_1": null,
+      "Sender_To_Receiver_Information_2": null,
+      "Sender_To_Receiver_Information_3": null,
+      "Sender_To_Receiver_Information_4": null,
+      "Sender_To_Receiver_Information_5": null,
+      "Sender_To_Receiver_Information_6": null,
+      "Is_Third_Party_Payment": null,
+      "Swift_Payment_Method": null,
+      "Swift_Payment_Date": null,
+      "Charge_Bearer": null,
+      "Nostro_Swift_Message_Type": "N"
+    }
+  ],
+  "ratanAffirmation": {
+    "Affirmed_By": "1",
+    "Phone_Email": "1",
+    "Affirmed_At": "2023-07-13T12:03:39.000+00:00"
+  }
+}

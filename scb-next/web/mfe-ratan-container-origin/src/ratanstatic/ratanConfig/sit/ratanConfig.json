@@ -1,0 +1,16 @@
+{
+  "REACT_APP_SERVER_ENV": "sit",
+  "REACT_APP_API_URL_MOCK": "http://uklvadapp1340.uk.dev.net:8456",
+  "REACT_APP_SOCKET_URL_TRADES": "ws://ratan-aws-sit-ns4-ratan-trade.ir.standardchartered.com",
+  "REACT_APP_SOCKET_URL_EXCEPTIONS": "ws://ratan-aws-sit-ns4-ratan-exceptions.ir.standardchartered.com",
+  "REACT_APP_SOCKET_URL_CASHFLOW": "ws://ratan-aws-sit-ns4-ratan-cashflow.ir.standardchartered.com",
+  "REACT_APP_SOCKET_URL_SUB_STATUS": "ws://ratan-aws-sit-ns4-ratan-cashflow.ir.standardchartered.com",
+  "disabledFeature": [
+    "Cashflow_Fuzzy_Search",
+    "Product_Details_Drilldown",
+    "Cashflow_Subscription",
+    "Cashflow_Sub_Status_Subscription",
+    "Filter_Builder_POC",
+    "Filter_Builder_Next"
+  ]
+}

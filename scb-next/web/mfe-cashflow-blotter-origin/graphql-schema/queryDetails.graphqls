@@ -1,0 +1,80 @@
+type GraphCashFlowDetails {
+
+    cashflow: ResultNew
+
+    cashflowAuditTrail: [GraphCashFlowHistoryNew]
+
+    ratanException: [RatanException]
+
+    ratanVostroCandidates: [SSI]
+
+    ratanNostroCandidates: [SSI]
+
+    ratanAffirmation: AffirmationInfo
+
+}
+
+type RatanException {
+
+    Id: String
+
+    Original_Exception_Id: String
+
+    Exception_Code: String
+
+    Exception_Category: String
+
+    Exception_Type: String
+
+    Entity_Id: String
+
+    Entity_Version: Int
+
+    Description: String
+
+    Actions : [Action]
+
+    Status: String
+
+    Bulk_Eligible: Boolean
+
+    Stashing: Stashing
+}
+
+type Stashing {
+
+    Maker_Request_Body: String
+
+    Maker_Id: String
+
+    Checker_Request_Body: String
+
+    Checker_Id: String
+
+}
+
+type AffirmationInfo {
+
+    Affirmed_By: String
+
+    Phone_Email: String
+
+    Affirmed_At: String
+}
+
+type Action {
+
+    Api_Url: String
+
+    Api_Method: String
+
+    Action_Name: String
+
+    Action_Type: String
+
+    Component_Url : String
+
+    Component_Name: String
+
+    Request_Body: String
+}

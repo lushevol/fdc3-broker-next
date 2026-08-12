@@ -1,0 +1,25 @@
+import react from "@vitejs/plugin-react";
+import { fileURLToPath, URL } from "node:url";
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@jest/globals": fileURLToPath(
+        new URL("./src/test/vitest-jest-globals.ts", import.meta.url),
+      ),
+      "mfe_ratan_container/application": fileURLToPath(
+        new URL("./src/test/remote-ratan.tsx", import.meta.url),
+      ),
+    },
+  },
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: ["./src/vitest.setup.ts"],
+    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    testTimeout: 20_000,
+    coverage: { provider: "v8", thresholds: { lines: 90, branches: 90 } },
+  },
+});

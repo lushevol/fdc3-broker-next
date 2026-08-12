@@ -1,0 +1,11 @@
+{
+  "REACT_APP_SERVER_ENV": "mock",
+  "REACT_APP_API_URL_MOCK": "http://uklvadapp1340.uk.dev.net:8456",
+  "REACT_APP_SOCKET_URL_TRADES": "ws://uklvadapp1340.uk.dev.net:8458",
+  "REACT_APP_SOCKET_URL_EXCEPTIONS": "ws://uklvadapp1340.uk.dev.net:8460",
+  "REACT_APP_SOCKET_URL_CASHFLOW": "ws://uklvadapp1340.uk.dev.net:8459",
+  "REACT_APP_SOCKET_URL_SUB_STATUS": "ws://uklvadapp1340.uk.dev.net:8461",
+  "REACT_APP_API_HOST": "",
+  "REACT_APP_WS_HOST": "http://uklvadapp1340.uk.dev.net:8501",
+  "disabledFeature": ["Cashflow_Fuzzy_Search"]
+}

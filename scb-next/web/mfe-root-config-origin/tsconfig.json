@@ -1,0 +1,36 @@
+{
+  "extends": "ts-config-single-spa",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationDir": "dist",
+    "removeComments": true,
+    "declarationMap": false,
+    "sourceMap": false,
+    "incremental": true,
+    "allowJs": false,
+    "checkJs": false,
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "allowSyntheticDefaultImports": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "files": ["src/root.ts"],
+  "include": ["src/**/*"],
+  "exclude": [
+    "public",
+    "dist",
+    "*.ts",
+    "*.tsx",
+    "*.json",
+    "*.js",
+    ".jsx",
+    "script"
+  ]
+}

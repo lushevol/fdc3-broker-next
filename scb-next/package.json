@@ -1,0 +1,27 @@
+{
+  "name": "scb-next",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "web/mfe-base-origin",
+    "web/mfe-ratan-container-origin",
+    "web/mfe-cashflow-blotter-origin"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n base,ratan,cashflow -c blue,green,magenta \"npm run dev --workspace @fm/base-origin\" \"npm run dev --workspace @fm/ratan_container-origin\" \"npm run dev --workspace @fm/ratan_cashflow_blotter-origin\"",
+    "build": "npm run build --workspaces --if-present",
+    "test": "vitest run --config vitest.config.ts",
+    "test:unit": "npm run test --workspaces --if-present",
+    "test:e2e": "playwright test",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@vitest/coverage-v8": "^4.1.10",
+    "concurrently": "^10.0.4",
+    "typescript": "^5.9.3",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
+  }
+}

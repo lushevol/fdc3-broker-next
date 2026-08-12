@@ -1,0 +1,1250 @@
+[
+  {
+    "id": 1,
+    "entity": "EXCEPTION_SSI",
+    "field": "accountWithInstitutionBic",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [
+            {
+              "field": "swiftType",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(MT103)|(MT103 SERIAL)$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            }
+          ],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^(([A-Z0-9]{8})|([A-Z0-9]{11}))$",
+        "errorMsg": "Value length must be 8 or 11, and value must be alphanumeric and all be uppercase",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "9999-10-21",
+    "updatedAt": "9999-10-21"
+  },
+  {
+    "id": 4,
+    "entity": "EXCEPTION_SSI",
+    "field": "ssiType",
+    "rules": [
+      {
+        "name": "RegExp",
+        "value": "^(Primary)|(Secondary)$",
+        "errorMsg": "Value must be Primary or Secondary",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 5,
+    "entity": "EXCEPTION_SSI",
+    "field": "charges",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [
+            {
+              "field": "swiftType",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(MT103)|(MT103 SERIAL)$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            }
+          ],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^(OUR)|(SHA)|(BEN)$",
+        "errorMsg": "Value must be OUR or SHA or BEN",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 6,
+    "entity": "EXCEPTION_SSI",
+    "field": "swiftType",
+    "rules": [
+      {
+        "name": "RegExp",
+        "value": "^(MT103)|(MT103 SERIAL)|(MT202)$",
+        "errorMsg": "Value must be MT103 or MT202 or MT103 SERIAL",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 8,
+    "entity": "EXCEPTION_SSI",
+    "field": "receiversCorrespondentBic",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [
+            {
+              "field": "coveredPayment",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(Y)$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            }
+          ],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^(([A-Z0-9]{8})|([A-Z0-9]{11}))$",
+        "errorMsg": "Value length must be 8 or 11, and value must be alphanumeric and all be uppercase",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 9,
+    "entity": "EXCEPTION_SSI",
+    "field": "settlementAccount",
+    "rules": [
+      {
+        "name": "RegExp",
+        "value": "^.{0,20}$",
+        "errorMsg": "Value max length is 20",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 10,
+    "entity": "EXCEPTION_SSI",
+    "field": "beneficiaryBic",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^(([A-Z0-9]{8})|([A-Z0-9]{11}))$",
+        "errorMsg": "Value length must be 8 or 11, and value must be alphanumeric and all be uppercase",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "ValueBind",
+        "value": {
+          "fields": [
+            {
+              "field": "swiftType",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^MT202$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            },
+            {
+              "field": "beneficiaryName",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            }
+          ],
+          "bindValue": "/^(.+)$/"
+        },
+        "errorMsg": "Either bic or full name should not be empty",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 11,
+    "entity": "EXCEPTION_SSI",
+    "field": "beneficiaryName",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "ValueBind",
+        "value": {
+          "fields": [
+            {
+              "field": "swiftType",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^MT202$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            },
+            {
+              "field": "beneficiaryBic",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            }
+          ],
+          "bindValue": "/^(.+)$/"
+        },
+        "errorMsg": "Either bic or full name should not be empty",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 15,
+    "entity": "EXCEPTION_SSI",
+    "field": "beneficiaryAddress",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [
+            {
+              "field": "swiftType",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(MT103)|(MT103 SERIAL)$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            }
+          ],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 12,
+    "entity": "EXCEPTION_SSI",
+    "field": "beneficiaryName",
+    "rules": [
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,35}$",
+        "errorMsg": "Value length must between 0 and 35, and value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 24,
+    "entity": "EXCEPTION_SSI",
+    "field": "receiversCorrespondentName",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[\\w\\s]{0,35}$",
+        "errorMsg": "Value length must between 0 and 35, and value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 27,
+    "entity": "EXCEPTION_SSI",
+    "field": "orderCustomerName",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [
+            {
+              "field": "swiftType",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(MT103)|(MT103 SERIAL)$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            }
+          ],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 29,
+    "entity": "EXCEPTION_SSI",
+    "field": "orderCustomerAddress",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [
+            {
+              "field": "swiftType",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(MT103)|(MT103 SERIAL)$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            }
+          ],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 32,
+    "entity": "EXCEPTION_SSI",
+    "field": "remittanceInformation1",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^.{0,35}$",
+        "errorMsg": "Value length must between 0 and 35",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 33,
+    "entity": "EXCEPTION_SSI",
+    "field": "remittanceInformation2",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^.{0,33}$",
+        "errorMsg": "Value length must between 0 and 33",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 34,
+    "entity": "EXCEPTION_SSI",
+    "field": "remittanceInformation3",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^.{0,33}$",
+        "errorMsg": "Value length must between 0 and 33",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 35,
+    "entity": "EXCEPTION_SSI",
+    "field": "remittanceInformation4",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^.{0,33}$",
+        "errorMsg": "Value length must between 0 and 33",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 36,
+    "entity": "EXCEPTION_SSI",
+    "field": "senderToReceiver1",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^.{0,35}$",
+        "errorMsg": "Value length must between 0 and 35",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 37,
+    "entity": "EXCEPTION_SSI",
+    "field": "senderToReceiver2",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^.{0,33}$",
+        "errorMsg": "Value length must between 0 and 33",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 38,
+    "entity": "EXCEPTION_SSI",
+    "field": "senderToReceiver3",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^.{0,33}$",
+        "errorMsg": "Value length must between 0 and 33",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 39,
+    "entity": "EXCEPTION_SSI",
+    "field": "senderToReceiver4",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^.{0,33}$",
+        "errorMsg": "Value length must between 0 and 33",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 40,
+    "entity": "EXCEPTION_SSI",
+    "field": "senderToReceiver5",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^.{0,33}$",
+        "errorMsg": "Value length must between 0 and 33",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 41,
+    "entity": "EXCEPTION_SSI",
+    "field": "senderToReceiver6",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^.{0,33}$",
+        "errorMsg": "Value length must between 0 and 33",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 13,
+    "entity": "EXCEPTION_SSI",
+    "field": "beneficiaryName2",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,35}$",
+        "errorMsg": "Value length must between 0 and 35, and value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 16,
+    "entity": "EXCEPTION_SSI",
+    "field": "beneficiaryAddress",
+    "rules": [
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,60}$",
+        "errorMsg": "Value length must between 0 and 60, and value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 17,
+    "entity": "EXCEPTION_SSI",
+    "field": "beneficiaryCity",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,}$",
+        "errorMsg": "Value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 14,
+    "entity": "EXCEPTION_SSI",
+    "field": "beneficiaryAccount",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [
+            {
+              "field": "swiftType",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(MT103)|(MT103 SERIAL)$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            }
+          ],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{2,34}$",
+        "errorMsg": "Value length must between 2 and 34, and value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 28,
+    "entity": "EXCEPTION_SSI",
+    "field": "orderCustomerName",
+    "rules": [
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,70}$",
+        "errorMsg": "Value length must between 0 and 70, and value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 30,
+    "entity": "EXCEPTION_SSI",
+    "field": "orderCustomerAddress",
+    "rules": [
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,60}$",
+        "errorMsg": "Value length must between 0 and 60, and value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 31,
+    "entity": "EXCEPTION_SSI",
+    "field": "orderCustomerCity",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,}$",
+        "errorMsg": "Value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 2,
+    "entity": "EXCEPTION_SSI",
+    "field": "accountWithInstitutionAccount",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [
+            {
+              "field": "tradingCurrency",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(RUB)$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            },
+            {
+              "field": "swiftType",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(MT103)|(MT103 SERIAL)$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            }
+          ],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 18,
+    "entity": "EXCEPTION_SSI",
+    "field": "accountWithInstitutionName",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,35}$",
+        "errorMsg": "Value length must between 0 and 35, and value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 19,
+    "entity": "EXCEPTION_SSI",
+    "field": "accountWithInstitutionAddress",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,60}$",
+        "errorMsg": "Value length must between 0 and 60, and value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 20,
+    "entity": "EXCEPTION_SSI",
+    "field": "accountWithInstitutionCity",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,}$",
+        "errorMsg": "Value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 21,
+    "entity": "EXCEPTION_SSI",
+    "field": "intermediaryName",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,35}$",
+        "errorMsg": "Value length must between 0 and 35, and value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 22,
+    "entity": "EXCEPTION_SSI",
+    "field": "intermediaryAddress",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,60}$",
+        "errorMsg": "Value length must between 0 and 60, and value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 23,
+    "entity": "EXCEPTION_SSI",
+    "field": "intermediaryPostcode",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,}$",
+        "errorMsg": "Value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 25,
+    "entity": "EXCEPTION_SSI",
+    "field": "receiversCorrespondentAddress",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,60}$",
+        "errorMsg": "Value length must between 0 and 60, and value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 26,
+    "entity": "EXCEPTION_SSI",
+    "field": "receiversCorrespondentCity",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{0,}$",
+        "errorMsg": "Value must be alphanumeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 42,
+    "entity": "EXCEPTION_SSI",
+    "field": "orderCustomerAccount",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [
+            {
+              "field": "swiftType",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(MT103)|(MT103 SERIAL)$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            }
+          ],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^[A-Za-z0-9\\s]{1,50}$",
+        "errorMsg": "Value length must between 1 and 50, and value must be alpha numeric or space",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 3,
+    "entity": "EXCEPTION_SSI",
+    "field": "settlementMeans",
+    "rules": [
+      {
+        "name": "RegExp",
+        "value": "^(CLG)|(NOX)|(CLS SUSP)|(CPN SUSP)|(FATCASUS)|(FXBRREC)|(GBFXSUS)|(HKCT)|(HKNOTE)|(MMSUS)|(NOSCENT)|(Non-Nostro)|(NOS)|(Over-Account)|(TBFXSUS)|(WMSUS)$",
+        "errorMsg": "Value must be CLG or NOX or CLS SUSP or CPN SUSP or FATCASUS or FXBRREC or GBFXSUS or HKCT or HKNOTE or MMSUS or NOSCENT or Non-Nostro or Nostro or Over-Account or TBFXSUS or WMSUS",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 43,
+    "entity": "EXCEPTION_SSI",
+    "field": "intermediaryBic",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^(([A-Z0-9]{8})|([A-Z0-9]{11}))$",
+        "errorMsg": "Value length must be 8 or 11, and value must be alphanumeric and all be uppercase",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2022-10-21",
+    "updatedAt": "2022-10-21"
+  },
+  {
+    "id": 45,
+    "entity": "EXCEPTION_SSI",
+    "field": "orderCustomerBic",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^(([A-Z0-9]{8})|([A-Z0-9]{11}))$",
+        "errorMsg": "Value length must be 8 or 11, and value must be alphanumeric and all be uppercase",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2023-10-21",
+    "updatedAt": "2023-10-21"
+  },
+  {
+    "id": 45,
+    "entity": "EXCEPTION_SSI",
+    "field": "popDubai",
+    "rules": [
+      {
+        "name": "MandatoryOn",
+        "value": {
+          "fields": [
+            {
+              "field": "swiftType",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(MT103)$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            },
+            {
+              "field": "tradingCurrency",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(?!AED$)",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            },
+            {
+              "field": "entity",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(5)$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            },
+            {
+              "field": "settlementMeans",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(NOS)$",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            },
+            {
+              "field": "settlementAccount",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "MAIN",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            },
+            {
+              "field": "beneficiaryBic",
+              "rules": [
+                {
+                  "name": "RegExp",
+                  "value": "^(?!SUPPRESSXXX$)",
+                  "errorMsg": null,
+                  "label": null
+                }
+              ]
+            }
+          ],
+          "bindValue": null
+        },
+        "errorMsg": "value can not be empty",
+        "label": ["exception_ssi"]
+      },
+      {
+        "name": "RegExp",
+        "value": "^/ORDERRES/AE//(?! ).{1,92}(?<! )$",
+        "errorMsg": "Value should be started with /ORDERRS/AE// and length less than 105",
+        "label": ["exception_ssi"]
+      }
+    ],
+    "status": 1,
+    "createdAt": "2022-10-21",
+    "updatedAt": "2022-10-21"
+  }
+]

@@ -1,0 +1,51 @@
+type Query {
+  cashflowUltraQuery(payload: RatanUltraQuery): UltraQueryResult!
+}
+
+input RatanUltraQuery {
+  filters: LogicFilter!
+  orderArgs: [QueryOrder!]!
+  pagingOption: PagingOption!
+  cursor: String
+  pageIndex: Int!
+  itemsPerPage: Int!
+}
+
+input LogicFilter {
+  and: [LogicFilter!]
+  or: [LogicFilter!]
+  filters: [FilterArg!] 
+} 
+
+input QueryOrder {
+  orderField: String!
+  orderType: QueryOrderType!
+}
+
+enum QueryOrderType {
+  ASC
+  DESC
+}
+
+enum PagingOption {
+  CURSOR
+  PAGE_INDEX
+  NO_PAGINATION
+}
+
+type ResultCursorType {
+  previous: String
+  next: String
+}
+
+type UltraQueryResult {
+  # totalHits
+  totalResult: Int!
+  # pageNo
+  pageIndex: Int
+  # pageSize
+  itemsPerPage: Int!
+  lastPage:Boolean!
+  pagingCursors: ResultCursorType
+  results: [ResultNew!]!
+}

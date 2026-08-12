@@ -1,0 +1,21 @@
+{
+  "imports": {
+    "single-spa": "/js/external/single-spa.dev.js",
+    "react": "/js/external/react.development.js",
+    "react-dom": "/js/external/react-dom.development.js",
+    "@fm/root-config": "/config.js",
+    "@fm/base": "//localhost:8002/base.js",
+    "-@fm/base": "/base/base.js",
+    "@fm/ratan_container": "/ratan_container/ratan_container.js",
+    "@fm/ratan_cashflow": "/ratan_cashflow/ratan_cashflow.js",
+    "@fm/ratan_trades": "/ratan_trade/ratan_trades.js",
+    "@fm/ratan_exception": "/ratan_exception/ratan_exception.js",
+    "@fm/ratan_rules": "/ratan_rules/ratan_rules.js",
+    "@fm/ratan_cashflow_blotter": "//localhost:8015/ratan_cashflow_blotter.js",
+    "-@fm/ratan_cashflow_blotter": "/ratan_cashflow_blotter/ratan_cashflow_blotter.js",
+    "@fm/cdups_container": "//localhost:8090/cdups_container.js",
+    "@fm/cdups_tiles": "//localhost:8083/cdups_ui_service.js",
+    "@fm/template_container": "//localhost:8007/template_container.js",
+    "@fm/template": "//localhost:8006/template.js"
+  }
+}

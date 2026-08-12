@@ -1,0 +1,470 @@
+#http://localhost:5000/graphiql
+
+type Query{
+
+    cashflowAuditTrailNew(cashflowId:String):[GraphCashFlowHistoryNew]!
+    cashflowsNew(filter:[FilterArg],page:Int!,size:Int!):GraphCashFlowNew!
+    graphCashFlowDetails(cashflowIds: [ID]!):[GraphCashFlowDetails]!
+    groupMessages(filter:GroupMsgReq,page:Int!,size:Int!):GroupMessages!
+    componentCashflow(filter:[FilterArg],page:Int!,size:Int!):GraphCashFlowNew!
+    cashflowDashboard(filter:[FilterArg],page:Int!,size:Int!):GraphCashFlowDashBoard!
+}
+
+type GraphCashFlowDashBoard{
+    Status_Num:CashflowStatusNum
+    Failed_Num:CashflowFailedNum
+    Volume_By_VD:VolumeByVD
+    Exception_Num:ExceptionNum
+    Top_Exposure:TopExposure
+}
+
+type TopExposure{
+    Exposure_List:[Exposure]
+}
+
+type Exposure{
+    Amount:String
+    Counter_Party:String
+    Type:String
+}
+type ExceptionNum{
+    VD_Exceptions:[VDException]
+}
+
+type VDException{
+    Exception_Code:String
+    VD_Num:Int
+    VD1_Num:Int
+    VD2_Num:Int
+    VDM_Num:Int
+}
+type VolumeByVD{
+    VD_Num:Int
+    VD1_Num:Int
+    VD2_Num:Int
+    VDM_Num:Int
+}
+type CashflowFailedNum{
+    Total_Num:Int
+    Internal_Total_Num:Int
+    External_Total_Num:Int
+    Total_Today_Num:Int
+    Internal_Today_Num:Int
+    External_Today_Num:Int
+
+
+    Total_Yesterday_Num:Int
+    Internal_Yesterday_Num:Int
+    External_Yesterday_Num:Int
+
+    Total_PriorDates_Num:Int
+    Internal_PriorDates_Num:Int
+    External_PriorDates_Num:Int
+
+}
+type CashflowStatusNum{
+    Wating_Today_Num:Int
+    Error_Num:Int
+    Queued_Num:Int
+    Nack_Num:Int
+    Hold_Num:Int
+    Group_Error_Num:Int
+    Group_Pending_Num:Int
+    Failed_Today_Num:Int
+}
+type GraphCashFlowNew{
+    pageInfo:ResultPageInfo!
+    results:[ResultNew]!
+}
+
+type ResultPageInfo{
+    totalHits:Float!
+    pageNo:Int!
+    pageSize:Int!
+    lastPage:Boolean!
+}
+
+type ResultNew
+{
+    BCS_Parent_Trade_Id:String
+    BCS_Trade_Id:String
+    Delivery_Method:String
+    Parent_Trade_Id:String
+    Position_Id:String
+    Settlement_Method:String
+    Trade_Id:String
+    Linked_Trade_ID:String
+    Trade_State:String
+    Trade_Original_Source_System_Name:String
+    Trade_Version:Int
+
+    Data_Flow:DataFlow
+    FMO_Comments:[FMOComments]
+    Cashflow:CashflowInfoNew
+    Trade:Trade
+    Entity:EntityInfo
+    Portfolio:Portfolio
+    Instrument_Common:InstrumentCommon
+    Settlement_Instruction:SSI
+
+    Cashflow_Sequence:String
+    Effective_Date_Time:String
+    TP_System_Name:String
+    Trade_Purpose:String
+    Trade_Date:String
+}
+
+
+type Trade
+{
+    Event_Physical_Status:String
+    Resultant_Position_Id:String
+    Action_Type:String
+    Trade_Lake_Valid_From_Date_Time:String
+    Trade_Lake_Valid_To_Date_Time:String
+    Trade_Lake_Latest_Event_Date_Time:String
+    Trade_Lake_Raw_Event_Date_Time:String
+    Trade_Lake_Transaction_From_Date_Time:String
+    Trade_Lake_Transaction_To_Date_Time:String
+}
+
+type Portfolio
+{
+    Booking_Entity_Trade_Portfolio_Name:String
+    Booking_Entity_Trade_Portfolio_Unique_Name:String
+}
+
+type GraphCashFlowHistoryNew
+{
+    Action_Date_Time:String
+    User_PSID:String
+    Action:String
+    Action_Time:String
+    Exception_Type:String
+    Data_Flow:DataFlow
+    FMO_Comments:[FMOComments]
+    Cashflow:CashflowInfoNew
+    Entity:EntityInfo
+    Portfolio:Portfolio
+
+    Trade:Trade
+    Instrument_Common:InstrumentCommon
+    Settlement_Instruction:SSI
+
+    Value_Change:[ValueChange]
+    Comments_Change:CommentsChange
+}
+
+type FMOComments
+{
+    FMO_Comment:String
+    FMO_Comment_Updater:String
+    FMO_Comment_Timestamp:String
+}
+
+type ValueChange
+{
+    Field_Name:String
+    Old_Value:String
+    New_Value:String
+}
+
+type CommentsChange
+{
+    Field_Name:String
+    Old_Value:[FMOComments]
+    New_Value:[FMOComments]
+
+}
+
+input FilterArg
+{
+    field: String
+    operator: Operator
+    values: [String]
+}
+
+enum Operator
+{
+    EQ
+    NE
+    IN
+    NOTIN
+    BET
+    GT
+    GTE
+    LT
+    LTE
+    LIKE
+    MATCH
+}
+
+type DataFlow
+{
+    Data_Publication_Date_Time:String
+    Data_Publication_Id:String
+    Data_Sender:String
+    Data_Source_System:String
+    Data_Source_System_Country_Code:String
+    Data_Source_System_Domain_Name:String
+    Data_Type:String
+    Unique_Identifier_Message_Id:String
+}
+
+type EntityInfo
+{
+    Person:Person
+    Booking_Entity_SCI_FMCODE:String
+    Booking_Entity_SCI_FMID:String
+    Counterparty_SCI_FMID:String
+    Counterparty_SCI_FMCODE:String
+    Counterparty_SCI_BIC_Code:String
+    Counterparty_SCI_DOMICILE_COUNTRY:String
+    Counterparty_SCI_BIC_Net_Flag:String
+    Counterparty_CIF_Code:String
+    Counterparty_Source_System_Entity_Id:String
+    Counterparty_Client_Type:String
+    General_Ledger_Business_Unit_Name:String
+    Booking_Entity_General_Ledger_Business_Unit_Id:String
+    Counterparty_Murex_Display_Shortcode:String
+    Counterparty_Is_Internal:Boolean
+    Booking_Entity_Country_ISO_Code:String
+}
+
+type Person
+{
+    Coverage_Marketer_PSID:String
+    Event_Coverage_Marketer_PSID:String
+    Execution_Marketer_PSID:String
+    Event_Execution_Marketer_PSID:String
+    Booking_Marketer_PSID:String
+    Event_Booking_Marketer_PSID:String
+    Trader_PSID:String
+    Event_Trader_PSID:String
+}
+
+type CashflowInfoNew
+{
+    Cashflow_Id:String
+    Cashflow_Version:Int
+    Cashflow_Business_Version:Int
+    Cashflow_State:String
+    Cashflow_Event_Type:String
+    Cashflow_Event_Reason:String
+    Booking_System_Event:String
+    Murex_Structure_Id:String
+    Status_Event_Type:String
+    Event_Date:String
+    Payment_Payer_Party_Reference:String
+    Payment_Receiver_Party_Reference:String
+    Payment_Currency:String
+    Payment_Amount:String
+    Payment_Date:String
+    Payment_Date_Business_Day_Convention:String
+    Netting_Id:String
+    Pay_Receive_Indicator:String
+    Payer_Name:String
+    Is_Private_Banking_Cashflow:Boolean
+    Is_Amended_Post_Settlement:Boolean
+    Payment_Type:String
+    Is_Cashflow_Unnet:Boolean
+    Transaction_Details:String
+    Cashflow_Affirmation_Status:String
+    Is_STP:Boolean
+    Is_STP_RATAN:Boolean
+    NSTP_Reason:String
+    Execution_Date_Time:String
+    Cashflow_Sub_State:String
+    Cashflow_Sub_State_Updater:String
+    Cashflow_Sub_State_Type:String
+    Prev_Cashflow_Id:String
+    Next_Cashflow_Id:String
+    Validation_Status:String
+    Exception_Reason:String
+    FMO_Comment:String
+    FMO_Comment_Updater:String
+    FMO_Comment_Timestamp:String
+    STP_Cutoff_Date_Time:String
+    Netting_Cuttoff_Date:String
+    Booking_Entity_SCI_FMCODE:String
+    Cashflow_Audit_Version:String
+    Payment_Cutoff_Time:String
+    Minor_Version_Description:String
+    Bypass_Workflow_Indicator:Boolean
+    Cashflow_Minor_Version:Int
+    Is_Payment_Intent_To_Settle:Boolean
+    Is_Netting_Required:Boolean
+    General_Ledger_Owner_Id:String
+    Cashflow_Accounting_Status:String
+    Cashflow_Accounting_Reason:String
+    Cashflow_Swift_Status:String
+    Cashflow_Swift_Reason:String
+    Cashflow_Swift_Message_Standard:String
+    Action_Type:String
+    Cashflow_Major_Version:String
+    Cashflow_SubEvent_Type:String
+    Event_Physical_Status:String
+    Position_Id:String
+    Is_Commodity:Boolean
+    Is_Pending_Fixing:Boolean
+    Pending_Fixing_Flag:String
+    Clearing_Alpha:Boolean
+    Duplicate_NDS_FXD: String
+    NSTP_Exception: String
+    ND_Parent_Trade_Id: String
+    ND_Parent_Typology: String
+    Remaining_Amount: String
+}
+
+type InstrumentCommon
+{
+    Source_System_Instrument_Sub_Type:String
+    CFI_Code:String
+    ISDA_Taxonomy:String
+    Equity_Instrument_Reference:String
+    Parent_Trade_Instrument:String
+    Murex_Product_Family:String
+    Murex_Product_Group:String
+    Murex_Product_Type:String
+    Murex_Product_Strategy:String
+    Murex_Product_Typology:String
+    Financial_Instrument_Code:String
+}
+
+type Dedicated
+{
+    Portfolio:String
+}
+
+type SSI
+{
+    Account:Account
+    SSI_Unique_Id:String
+    SSI_Source:String
+    SSI_Priority:String
+    Swift_Message_Type:String
+
+    Remittance_Information_1:String
+    Remittance_Information_2:String
+    Remittance_Information_3:String
+    Remittance_Information_4:String
+    Sender_To_Receiver_Information_1:String
+    Sender_To_Receiver_Information_2:String
+    Sender_To_Receiver_Information_3:String
+    Sender_To_Receiver_Information_4:String
+    Sender_To_Receiver_Information_5:String
+    Sender_To_Receiver_Information_6:String
+
+    Is_Third_Party_Payment:String
+    Swift_Payment_Method:String
+    Swift_Payment_Date: String
+    Charge_Bearer:String
+    Nostro_Swift_Message_Type:String
+
+    Beneficiary_Account_Name:String,
+    Beneficiary_Account_Number:String,
+    Beneficiary_BIC_code:String,
+    Booking_Entity_BIC_Code:String,
+    Booking_Entity_Custodian_Account_Name:String,
+    Booking_Entity_Custodian_Account_Number:String,
+    Booking_Entity_Custodian_BIC_Code:String,
+    CFI_Code:String,
+    BranchId_Murex3Id:String,
+    Cash_SSI_Id:String,
+    Comments:String,
+    Counterparty_Beneficiary_Account_Name:String,
+    Counterparty_Custodian_Account_Name:String,
+    Counterparty_Custodian_Account_Number:String,
+    Counterparty_Custodian_BIC_Code:String,
+    Counterparty_SCI_FMID:String,
+    Debit_Credit:String,
+    Effective_Date:String,
+    Event_Type:String,
+    ISDA_Taxonomy:String,
+    Is_Default_SSI:String,
+    Payment_Currency:String,
+    Primary_Asset_Class:String,
+    SCB_Entity_SCI_FMID:String,
+    SSI_Id:String,
+    SSI_Status:String,
+    Security_Custodian_Account_Name:String,
+    Security_Custodian_Account_Number:String,
+    Security_SSI_Id:String,
+    Settlement_Code:String,
+    Settlement_Flow_Nature:String,
+    Settlement_Location_Country_ISO_Code:String,
+    Settlement_Method:String,
+    Settlement_Type:String,
+    Source_System_Instrument_Id:String,
+    Source_System_Settlement_Location:String,
+    Nostro_Id:String,
+    Nostro_Type:String,
+    Dedicated: Dedicated,
+    Value_Date:String,
+    Value_Date_Business_Day_Convention:String
+}
+
+type Account
+{
+    SCB_Nostro_Account_Number:String
+    SCB_Nostro_Account_Type:String
+    Beneficiary_BIC_code:String
+    Beneficiary_Account_Name:String
+    Beneficiary_Account_Name_2:String
+    Beneficiary_Street_Address:String
+    Beneficiary_City:String
+    Beneficiary_Account_Number:String
+    Intermediary_BIC_code:String
+    Intermediary_Account_Name:String
+    Intermediary_Street_Address:String
+    Intermediary_City:String
+    Intermediary_Account_Number:String
+    Beneficiary_Bank_BIC_code:String
+    Beneficiary_Bank_Account_Name:String
+    Beneficiary_Bank_Street_Address:String
+    Beneficiary_Bank_City:String
+    Beneficiary_Bank_Account_Number:String
+    Beneficiary_Correspondent_BIC_code:String
+    Beneficiary_Correspondent_Account_Name:String
+    Beneficiary_Correspondent_Street_Address:String
+    Beneficiary_Correspondent_City:String
+    Beneficiary_Correspondent_Account_Number:String
+    Ordering_Customer_BIC_Code:String
+    Ordering_Customer_Account_Name:String
+    Ordering_Customer_Street_Address:String
+    Ordering_Customer_City:String
+    Ordering_Customer_Account_Number:String
+    Counterparty_CMS_Account_Number:String
+    EBBS_Bridge_Account_Number:String
+    EBBS_Account_Number:String
+    Booking_Entity_Correspondent_BIC_code:String
+    Booking_Entity_Correspondent_Account_Name:String
+    Booking_Entity_Correspondent_Street_Address:String
+    Booking_Entity_Correspondent_City:String
+    Booking_Entity_Correspondent_Account_Number:String
+
+    Beneficiary_Country_Name:String
+    Cash_Correspondent_Account_Number:String
+    Cash_Correspondent_BIC_code:String
+    Cash_Correspondent_Sub_Account_Number:String
+    Cash_Custodian_Account_Name:String
+    Cash_Custodian_Account_Number:String
+    Cash_Custodian_BIC_code:String
+    Cash_Custodian_City:String
+    Cash_Custodian_Street_Address:String
+    Cash_Local_Agent_Account_Name:String
+    Cash_Local_Agent_Account_Number:String
+    Cash_Local_Agent_BIC_code:String
+    Cash_Local_Agent_City:String
+    Cash_Local_Agent_Street_Address:String
+    Cash_Local_Agent_Sub_Account_Number:String
+    Counterparty_BIC_Code:String
+    Counterparty_Has_CMS_Account:String
+    Has_Beneficiary_Account:String
+    Has_Cash_Correspondent_Account:String
+    Has_Cash_Custodian_Account:String
+    Has_Cash_Local_Agent_Account:String
+    Sender_Correspondent_Account_Number:String
+    Sender_Correspondent_BIC_Code:String
+
+}

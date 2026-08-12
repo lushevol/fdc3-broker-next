@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Info Part should render InfoPart correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="css-3k4v9i"
+  >
+    <div
+      class="undefined_info_pop-part-header"
+    >
+      testLabel: testValue
+    </div>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+            testSubLabel
+          </td>
+          <td>
+            testSubValue
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div
+    class="css-3k4v9i"
+  >
+    <div
+      class="undefined_info_pop-part-header"
+    >
+      testLabel
+    </div>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+            testSubLabel
+          </td>
+          <td>
+            testSubValue
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</DocumentFragment>
+`;
