@@ -44,7 +44,7 @@ const AppBarWindow: React.FC = (): ReactElement => {
             <section className={classes.right}>
               <NewTile toggleDrawer={toggleDrawer} />
               <Switch />
-              <SwitchTime />
+              {!isNewLayout && <SwitchTime />}
               <Avatar setOpen={setOpenLogoutModal} />
               {!isNewLayout && <SurveyButton openPopUp={openPopUp} />}
             </section>
@@ -57,7 +57,7 @@ const AppBarWindow: React.FC = (): ReactElement => {
         addTile={addTile}
         drawers={store.drawers as Tiles[]}
       />
-      {openLogoutModal && (
+      {!isNewLayout && openLogoutModal && (
         <Survey surveyLink={surveyLink} openPopUp={openPopUp} setOpen={setOpenLogoutModal} />
       )}
       {!isNewLayout && <div style={{ height: '48px', width: '100%' }}></div>}

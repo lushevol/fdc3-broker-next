@@ -15,6 +15,7 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
     openProfile,
     handleOpenUserMenu,
     onBeforeLogout,
+    logoutFromProfile,
     handleOpenUserProfile,
     handleCloseUserProfile,
   } = useController(props);
@@ -74,10 +75,7 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
         <Profile
           open={openProfile}
           onClose={handleCloseUserProfile}
-          onLogout={() => {
-            handleCloseUserProfile();
-            onBeforeLogout();
-          }}
+          onLogout={logoutFromProfile}
         />
       )}
     </div>

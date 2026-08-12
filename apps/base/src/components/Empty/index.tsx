@@ -3,7 +3,8 @@ import useAnalytics from '../../analytics';
 import type { AnalyticsData } from '../../analytics/model';
 import useDispatcher from '../../hooks/dispathcer';
 import { useIsNewLayout } from '../../hooks/model/root';
-import { ScButton, ScParagraph, ScTitle } from '../webkit';
+import { ScButton } from '../webkit';
+import { LayoutGrid, Plus } from 'lucide-react';
 
 const analyticsData: AnalyticsData = { container: 'Base', tile: 'home' };
 
@@ -37,14 +38,22 @@ const Empty: React.FC = (): ReactElement => {
 
   return (
     <section className="base-webkit-scope empty-workspace" data-testid="empty">
-      <span className="empty-workspace-mark" aria-hidden="true">
-        +
-      </span>
-      <ScTitle level={2}>Your workspace is empty</ScTitle>
-      <ScParagraph>Browse the Tile Library to add an application to this workspace.</ScParagraph>
-      <ScButton type="primary" role="button" onClick={onClick} data-testid="empty_Find_tile">
-        Browse Tile Library
-      </ScButton>
+      <div className="empty-workspace-status"><span aria-hidden="true" />Workspace ready</div>
+      <div className="empty-workspace-content">
+        <div className="empty-workspace-visual" aria-hidden="true">
+          <LayoutGrid size={42} strokeWidth={1.35} />
+          <span><Plus size={18} /></span>
+        </div>
+        <div className="empty-workspace-copy">
+          <p className="empty-workspace-eyebrow">0 applications</p>
+          <h2>Build your workspace</h2>
+          <p>Choose an application from the Tile Library to begin this workspace.</p>
+          <ScButton type="primary" noPill role="button" onClick={onClick} data-testid="empty_Find_tile">
+            <Plus size={16} aria-hidden="true" />
+            Browse Tile Library
+          </ScButton>
+        </div>
+      </div>
     </section>
   );
 };

@@ -4,6 +4,7 @@ import * as Provider from '../hooks/provider';
 import useDispatcher from '../hooks/dispathcer';
 import Drawer from './Drawer';
 import Empty from './Empty';
+import Avatar from './Avatar';
 import Profile from './Profile';
 import Splash from './Splash';
 
@@ -11,6 +12,9 @@ jest.mock('../hooks/provider', () => ({ useContext: jest.fn() }));
 jest.mock('../hooks/dispathcer', () => ({ __esModule: true, default: jest.fn() }));
 jest.mock('../analytics', () => ({ __esModule: true, default: () => ({ ButtonEvent: jest.fn() }) }));
 jest.mock('./ErrorBoundry', () => ({ __esModule: true, default: ({ children }: { children: React.ReactNode }) => children }));
+
+const mockLogout = jest.fn();
+jest.mock('../services', () => ({ __esModule: true, default: () => ({ logout: mockLogout }) }));
 
 const mockUseContext = Provider.useContext as jest.Mock;
 const mockUseDispatcher = useDispatcher as jest.Mock;
@@ -28,9 +32,19 @@ const tile = {
   emailSupport: 'support@example.com',
 };
 
+const researchTile = {
+  ...tile,
+  title: 'Analytics',
+  subtitle: 'Research',
+  description: 'Explore market signals and research activity.',
+  module: '/Analytics',
+  tile: '/analytics',
+};
+
 beforeEach(() => {
   window.history.pushState({}, '', '/?new-layout=true');
   jest.clearAllMocks();
+  window.localStorage.clear();
   mockUseContext.mockReturnValue([
     {
       user: {
@@ -85,8 +99,65 @@ describe('Base WebKit portal surfaces', () => {
 
     expect(screen.getByRole('dialog', { name: 'Tile Library' })).toBeInTheDocument();
     expect(screen.getByText('Monitor intraday liquidity and funding exposure.')).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'Tile categories' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'All' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: 'Favorites' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Most used' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sort Z to A' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Open Cashflow' }));
     expect(addTile).toHaveBeenCalledWith(expect.objectContaining({ title: 'Cashflow Liquidity' }));
+  });
+
+  it('persists favorites and filters the Tile Library views', () => {
+    render(
+      <Drawer
+        anchor
+        toggleDrawer={jest.fn(() => jest.fn())}
+        addTile={jest.fn()}
+        drawers={[
+          { id: 1, label: 'Operations', tiles: [tile] },
+          { id: 2, label: 'Research', tiles: [researchTile] },
+        ]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add Cashflow to favorites' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Favorites' }));
+
+    expect(screen.getByText('Cashflow')).toBeInTheDocument();
+    expect(screen.queryByText('Analytics')).not.toBeInTheDocument();
+    expect(window.localStorage.getItem('base.tile-library.favorites')).toContain('/cashflow');
+  });
+
+  it('sorts tiles and keeps the All category rail synchronized with content', () => {
+    render(
+      <Drawer
+        anchor
+        toggleDrawer={jest.fn(() => jest.fn())}
+        addTile={jest.fn()}
+        drawers={[
+          { id: 1, label: 'Operations', tiles: [tile] },
+          { id: 2, label: 'Research', tiles: [researchTile] },
+        ]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sort Z to A' }));
+    expect(screen.getByRole('button', { name: 'Sort A to Z' })).toBeInTheDocument();
+
+    const researchSection = screen.getByTestId('tile-category-Research');
+    const results = screen.getByTestId('tile-library-results');
+    Object.defineProperty(researchSection, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({ top: 1, bottom: 200, left: 0, right: 0, width: 0, height: 199, x: 0, y: 1, toJSON: () => ({}) }),
+    });
+    Object.defineProperties(results, {
+      scrollTop: { configurable: true, value: 200 },
+      clientHeight: { configurable: true, value: 200 },
+      scrollHeight: { configurable: true, value: 400 },
+    });
+    fireEvent.scroll(results);
+    expect(screen.getByRole('button', { name: 'Research category' })).toHaveAttribute('aria-current', 'true');
   });
 
   it('shows account details and timezone controls in the profile modal', () => {
@@ -102,9 +173,22 @@ describe('Base WebKit portal surfaces', () => {
     expect(screen.queryByText('Signed in')).not.toBeInTheDocument();
   });
 
+  it('logs out from profile details without opening the legacy confirmation', () => {
+    const setOpen = jest.fn();
+    render(<Avatar setOpen={setOpen} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open user profile' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Logout' }));
+
+    expect(mockLogout).toHaveBeenCalledTimes(1);
+    expect(setOpen).not.toHaveBeenCalled();
+    expect(screen.queryByText('Leave Now?')).not.toBeInTheDocument();
+  });
+
   it('provides actionable empty and loading workspace states', () => {
     render(<Empty />);
-    expect(screen.getByText('Your workspace is empty')).toBeInTheDocument();
+    expect(screen.getByText('Build your workspace')).toBeInTheDocument();
+    expect(screen.getByText('Workspace ready')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Browse Tile Library' }));
     const latestDispatcher = mockUseDispatcher.mock.results.at(-1)?.value;
     expect(latestDispatcher.dispacthDrawer).toHaveBeenCalledWith(true);

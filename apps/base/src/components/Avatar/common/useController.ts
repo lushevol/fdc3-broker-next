@@ -3,11 +3,13 @@ import useAnalytics from '../../../analytics';
 import type { AnalyticsData } from '../../../analytics/model';
 import { useContext } from '../../../hooks/provider';
 import type { AvatarProps } from './interface';
+import useServices from '../../../services';
 
 const analyticsData: AnalyticsData = { container: 'Base', tile: 'home' };
 const useController = (props: AvatarProps) => {
   const [store] = useContext();
   const { ButtonEvent } = useAnalytics();
+  const { logout } = useServices();
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
   const [openProfile, setOpenProfile] = React.useState<boolean>(false);
 
@@ -22,6 +24,11 @@ const useController = (props: AvatarProps) => {
     props.setOpen(true);
     ButtonEvent('click', { name: 'logout confirmation', ...analyticsData });
     handleCloseUserMenu();
+  };
+  const logoutFromProfile = () => {
+    setOpenProfile(false);
+    ButtonEvent('click', { name: 'logout', ...analyticsData });
+    logout();
   };
 
   const handleOpenUserProfile = () => {
@@ -40,6 +47,7 @@ const useController = (props: AvatarProps) => {
     handleOpenUserMenu,
     handleCloseUserMenu,
     onBeforeLogout,
+    logoutFromProfile,
     handleOpenUserProfile,
     handleCloseUserProfile,
   };

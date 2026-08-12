@@ -110,7 +110,10 @@ const Root = styled('section')(({ theme }) => ({
     color: '#4F9DF0 !important',
   },
   [`&.home-wrapper .${classes.main}`]: {
-    marginTop: '18px',
+    marginTop: 0,
+  },
+  [`&.home-wrapper .${classes.tabpanel} .tabmain > .empty-workspace:first-of-type`]: {
+    height: '100% !important',
   },
   [`.light &.home-wrapper .divider`]: {
     background: '#FFFFFF',

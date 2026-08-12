@@ -227,9 +227,6 @@ const Home: React.FC = (): ReactElement => {
               </div>
             )}
           </div>
-          {isNewLayout && (
-            <div className="divider" style={{ flexBasis: '100%', height: '18px' }}></div>
-          )}
         </header>
         <main className={classes.main}>
           <DragOverlay>

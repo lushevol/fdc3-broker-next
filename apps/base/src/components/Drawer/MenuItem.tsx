@@ -3,6 +3,7 @@ import type { MenuItemProps, Tile as TileProps } from './common/interface';
 import { useIsNewLayout } from '../../hooks/model/root';
 import useController from './common/MenuItem.useController';
 import { ScBadge, ScButton } from '../webkit';
+import { Star } from 'lucide-react';
 
 const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_menuItem`;
 
@@ -12,6 +13,12 @@ export const Item = ({ tile, ...props }: MenuItemProps & { tile: TileProps }) =>
   const { onClick } = useController(props, tile);
   const libraryTile = tile as LibraryTile;
   const icon = libraryTile.imageLightTheme ?? libraryTile.imageDarkTheme;
+  const tileId = tile.tile || tile.module || tile.title;
+  const isFavorite = props.favoriteTileIds?.has(tileId) ?? false;
+  const openTile = () => {
+    props.onOpenTile?.(tile);
+    onClick();
+  };
   return (
     <article key={tile.tile ? tile.tile : tile.title} className="tile-library-card">
       <div className="tile-library-card-content">
@@ -24,6 +31,17 @@ export const Item = ({ tile, ...props }: MenuItemProps & { tile: TileProps }) =>
             <h3>{tile.title}</h3>
             {tile.subtitle && <p>{tile.subtitle}</p>}
           </div>
+          <ScButton
+            type="text"
+            size="xs"
+            className="tile-library-favorite"
+            role="button"
+            aria-label={`${isFavorite ? 'Remove' : 'Add'} ${tile.title} ${isFavorite ? 'from' : 'to'} favorites`}
+            aria-pressed={isFavorite}
+            onClick={() => props.onToggleFavorite?.(tile)}
+          >
+            <Star size={15} fill={isFavorite ? 'currentColor' : 'none'} aria-hidden="true" />
+          </ScButton>
         </div>
         <p className="tile-library-card-description">
           {libraryTile.description ?? `Open ${tile.title} in the current workspace.`}
@@ -31,7 +49,7 @@ export const Item = ({ tile, ...props }: MenuItemProps & { tile: TileProps }) =>
         {tile.disabled ? (
           <ScBadge type="text" color="grey" label="Unavailable" />
         ) : (
-          <ScButton type="primary" size="xs" noPill width="100%" role="button" onClick={onClick} aria-label={`Open ${tile.title}`}>
+          <ScButton type="primary" size="xs" noPill width="100%" role="button" onClick={openTile} aria-label={`Open ${tile.title}`}>
             Open
           </ScButton>
         )}
@@ -57,7 +75,12 @@ const MenuItem: React.FC<MenuItemProps> = (props: MenuItemProps): ReactElement =
   }
 
   return (
-    <section data-testid={`${PREFIX}`} className="tile-library-category" aria-labelledby={`tile-category-${props.menuItems.label}`}>
+    <section
+      data-testid={`tile-category-${props.menuItems.label}`}
+      data-category={props.menuItems.label}
+      className="tile-library-category"
+      aria-labelledby={`tile-category-${props.menuItems.label}`}
+    >
       <h2 id={`tile-category-${props.menuItems.label}`}>
         {props.menuItems.label}
       </h2>
