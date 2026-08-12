@@ -4,7 +4,7 @@ import ErrorBoundry from '../../components/ErrorBoundry';
 import { useIsNewLayout } from '../../hooks/model/root';
 import type { DrawerProps } from './common/interface';
 import Menu from './Menu';
-import { ScModal, setScModalWidth } from '../webkit';
+import { ScModal, setScModalWidth } from '../../new-layout/webkit/components';
 import Root, { classes, DrawerClass, PREFIX } from './common/style';
 import Tile from './common/Tile';
 

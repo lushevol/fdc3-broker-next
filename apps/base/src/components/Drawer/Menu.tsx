@@ -4,7 +4,7 @@ import ErrorBoundry from '../ErrorBoundry';
 import Splash from '../Splash';
 import { type DrawerProps, type Tiles } from './common/interface';
 import { useIsNewLayout } from '../../hooks/model/root';
-import { ScButton, ScTextInput } from '../webkit';
+import { ScButton, ScTextInput } from '../../new-layout/webkit/components';
 import MenuItem from './MenuItem';
 import { ArrowDownAZ, ArrowUpZA, Clock3, LayoutGrid, Star } from 'lucide-react';
 

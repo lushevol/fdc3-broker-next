@@ -1,10 +1,8 @@
-import React from 'react';
 import useAnalytics from '../../../analytics';
 import type { AnalyticsData } from '../../../analytics/model';
 import useDispatcher from '../../../hooks/dispathcer';
 import { useContext } from '../../../hooks/provider';
 import { ActionType } from '../../../hooks/reducer/util/ActionType';
-import { getLocalStorage } from '../../../utils/common';
 
 const analyticsData: AnalyticsData = { container: 'Base', tile: 'home' };
 const useController = () => {
@@ -24,8 +22,8 @@ const useController = () => {
     const mode = store.theme === 'light' ? 'dark' : 'light';
     setRootTheme(mode);
     dispacthTheme(mode);
-    getLocalStorage().setItem(ActionType.SET_THEME, mode);
-    getLocalStorage().setItem('theme', mode);
+    window.localStorage.setItem(ActionType.SET_THEME, mode);
+    window.localStorage.setItem('theme', mode);
     SwitchEvent('click', {
       name: 'toggle theme',
       value: mode,

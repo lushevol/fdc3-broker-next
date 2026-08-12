@@ -7,12 +7,9 @@ import Typography from '@mui/material/Typography';
 import React, { type ReactElement } from 'react';
 import json from '../../../package.json';
 import Profile from '../Profile';
-import { useIsNewLayout } from '../../hooks/model/root';
-import { ScAvatar } from '../webkit';
 import type { AvatarProps } from './common/interface';
 import Root, { classes, MenuStyled, PREFIX } from './common/style';
 import useController from './common/useController';
-import prototypeAvatar from '../Profile/assets/prototype-avatar.png';
 
 const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
   const {
@@ -22,22 +19,12 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
     handleOpenUserMenu,
     handleCloseUserMenu,
     onBeforeLogout,
-    logoutFromProfile,
     handleOpenUserProfile,
     handleCloseUserProfile,
   } = useController(props);
-  const isNewLayout = useIsNewLayout();
   const displayName = store?.user?.fullName ?? store?.user?.userId ?? 'User';
-  const initials = displayName
-    .split(/\s+/)
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-
-  if (!isNewLayout) {
-    return (
-      <>
+  return (
+    <>
         <Root className={classes.root} data-testid={`${PREFIX}`}>
           <Tooltip title="User Profiles">
             <IconButton
@@ -90,33 +77,7 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
           </MenuStyled>
         </Root>
         {openProfile && <Profile open={openProfile} onClose={handleCloseUserProfile} />}
-      </>
-    );
-  }
-
-  return (
-    <div className="base-webkit-scope avatar-menu" data-testid={`${PREFIX}`}>
-      <ScAvatar
-        id={displayName}
-        size="md"
-        src={prototypeAvatar}
-        clickable
-        role="button"
-        aria-label="Open user profile"
-        title="Open user profile"
-        className={classes.root}
-        onClick={handleOpenUserProfile}
-      >
-        {initials}
-      </ScAvatar>
-      {openProfile && (
-        <Profile
-          open={openProfile}
-          onClose={handleCloseUserProfile}
-          onLogout={logoutFromProfile}
-        />
-      )}
-    </div>
+    </>
   );
 };
 

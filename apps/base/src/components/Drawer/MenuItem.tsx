@@ -4,7 +4,7 @@ import Tile from '../Tile';
 import type { MenuItemProps, Tile as TileProps } from './common/interface';
 import { useIsNewLayout } from '../../hooks/model/root';
 import useController from './common/MenuItem.useController';
-import { ScBadge, ScButton } from '../webkit';
+import { ScBadge, ScButton } from '../../new-layout/webkit/components';
 import { Star } from 'lucide-react';
 import Root, { classes, PREFIX } from './common/tile.style';
 

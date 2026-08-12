@@ -12,6 +12,10 @@ import Empty from './Empty';
 import Avatar from './Avatar';
 import Profile from './Profile';
 import Splash from './Splash';
+import NewLayoutAvatar from '../new-layout/components/Avatar';
+import NewLayoutEmpty from '../new-layout/components/Empty';
+import NewLayoutProfile from '../new-layout/components/Profile';
+import NewLayoutSplash from '../new-layout/components/Splash';
 
 jest.mock('../hooks/provider', () => ({ useContext: jest.fn() }));
 jest.mock('../hooks/dispathcer', () => ({ __esModule: true, default: jest.fn() }));
@@ -230,7 +234,7 @@ describe('Base WebKit portal surfaces', () => {
   });
 
   it('shows account details and timezone controls in the profile modal', () => {
-    render(<Profile open onClose={jest.fn()} />);
+    render(<NewLayoutProfile open onClose={jest.fn()} />);
 
     expect(screen.getByRole('dialog', { name: 'User profile' })).toBeInTheDocument();
     expect(screen.getByText('BANK001')).toBeInTheDocument();
@@ -244,7 +248,7 @@ describe('Base WebKit portal surfaces', () => {
 
   it('logs out from profile details without opening the legacy confirmation', () => {
     const setOpen = jest.fn();
-    render(<Avatar setOpen={setOpen} />);
+    render(<NewLayoutAvatar setOpen={setOpen} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Open user profile' }));
     fireEvent.click(screen.getByRole('button', { name: 'Logout' }));
@@ -255,14 +259,14 @@ describe('Base WebKit portal surfaces', () => {
   });
 
   it('provides actionable empty and loading workspace states', () => {
-    render(<Empty />);
+    render(<NewLayoutEmpty />);
     expect(screen.getByText('Build your workspace')).toBeInTheDocument();
     expect(screen.getByText('Workspace ready')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Browse Tile Library' }));
     const latestDispatcher = mockUseDispatcher.mock.results.at(-1)?.value;
     expect(latestDispatcher.dispacthDrawer).toHaveBeenCalledWith(true);
 
-    render(<Splash />);
+    render(<NewLayoutSplash />);
     expect(screen.getByRole('status')).toHaveTextContent('Please wait...');
   });
 });
