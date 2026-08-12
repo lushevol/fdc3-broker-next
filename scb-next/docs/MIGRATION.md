@@ -61,12 +61,14 @@ For production-style acceptance, build all three origins and run their `preview`
 | --- | --- |
 | Architecture contract | Passed: 8/8 Vitest assertions |
 | Base, Ratan, Cashflow production builds | Passed; both remote entries emitted |
-| Focused migrated unit suites | Passed for portal App/common controllers, Ratan App/analytics/GraphQL, and Cashflow App/QuickSearch |
+| Base unit suite | Passed: 120/120 files, 332/332 tests |
+| Ratan unit suite | Passed: 161 files and 823 tests; 1 file/test remains intentionally skipped |
+| Cashflow unit suite | Passed: 241/241 files, 1,945 tests; 17 tests remain intentionally skipped; zero unhandled errors |
 | Playwright production acceptance | Passed: 2/2 scenarios |
-| Live Browser: base | Login UI, imagery, typography, and green SSO button rendered with no page error |
+| Live Browser: base | Login UI and heading rendered; SSO button retained `rgb(0, 135, 56)`, white text, 5px radius, and Poppins typography; no new page error |
 | Live Browser: nested federation | Ratan loaded Cashflow from port 8015 and rendered `API Status` / `Refresh Page` with no uncaught browser errors |
 
-The exhaustive inherited test corpus is large and contains Jest-specific CommonJS `require`, hoisted factory, callback, and full-module mock assumptions. Most Ratan coverage now runs under Vitest (the latest broad run executed 524 passing tests with nine legacy compatibility failures before the final focused repairs). Cashflow's latest broad run executed 227 passing tests with remaining failures concentrated in legacy whole-module mocks and CommonJS test-only imports. These are test-harness migration gaps, not production-build or federation acceptance failures; do not describe the complete inherited unit suite as green until those files are converted.
+The inherited frontend corpus now executes under Vitest. The migration replaced executable CommonJS test imports, corrected Vitest mock hoisting and partial-module mocks, made timer ownership explicit, and removed dangling asynchronous DOM queries. The remaining skips are pre-existing intentional skips and are reported separately above.
 
 ## Service constraint
 
@@ -74,7 +76,6 @@ The copied `single-ui-bff` retains its routes and source unchanged. A Maven test
 
 ## Known follow-ups
 
-- Convert the remaining inherited Jest-only test patterns to native Vitest (`vi.hoisted`, ESM namespace imports, partial mocks, promise-based async tests) and enforce the requested coverage gate once the whole corpus collects cleanly.
 - Supply corporate npm/Maven credentials. A clean workspace install is currently blocked by private `@scdevkit/webkit` and private Maven starters; verification used the repository's installed compatible toolchain while manifests record current stable versions.
 - Split the largest Ratan/Cashflow chunks. Vite correctly emits them, but warns about assets above the default 500 kB threshold.
 - Run the backend-connected business-data journey when the private BFF can start. Browser acceptance currently proves composition and preserved styling; the blank blotter data canvas is expected without the BFF.
