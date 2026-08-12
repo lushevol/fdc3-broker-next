@@ -5,10 +5,7 @@ import custom from './common';
 import normalize from './normalize';
 import scroll from './scroll.dark';
 
-// when we change to new design, we need to change the function back to dark variable
-// And do some changes based on isNewLayout is true
-// And need revert the import from getDarkTheme to dark, getLightTheme to light, revert the function call to dark or light virable
-const getDarkTheme = (isNewLayout = false) => ({
+const getDarkTheme = () => ({
   palette: {
     mode: 'dark',
     primary: {
@@ -53,11 +50,10 @@ const getDarkTheme = (isNewLayout = false) => ({
   MuiAppBar: {
     styleOverrides: {
       root: {
-        backdropFilter: !isNewLayout ? 'blur(37.5px)' : undefined,
-        background: !isNewLayout ? '#1A2028' : 'transparent',
-        backgroundImage: !isNewLayout
-          ? 'linear-gradient(90deg, rgba(50,58,66,1) 0%, rgba(23,29,36,1) 20%, rgba(13,32,38,1) 30%, rgba(42,79,90, 0.5) 63%, rgba(13,32,38,1) 70%, rgba(23,29,36,1) 80%, rgba(46,55,69,1) 100%)'
-          : undefined,
+        backdropFilter: 'blur(37.5px)',
+        background: '#1A2028',
+        backgroundImage:
+          'linear-gradient(90deg, rgba(50,58,66,1) 0%, rgba(23,29,36,1) 20%, rgba(13,32,38,1) 30%, rgba(42,79,90, 0.5) 63%, rgba(13,32,38,1) 70%, rgba(23,29,36,1) 80%, rgba(46,55,69,1) 100%)',
         borderBottom: '1px solid rgba(50,58,66,0.5)',
       },
     },
@@ -101,20 +97,16 @@ const getDarkTheme = (isNewLayout = false) => ({
   },
   NewTileComponent: {
     backgroundColor: custom.color['newTileOxford'],
-    boxShadow: isNewLayout ? 'none' : '0px 5px 20px rgba(42, 67, 90, 0.5)',
+    boxShadow: '0px 5px 20px rgba(42, 67, 90, 0.5)',
     fontWeight: 300,
     root: {
       border: '1px solid transparent',
-      background: isNewLayout
-        ? 'unset'
-        : `linear-gradient(to right,rgba(26, 32, 40, 1),rgba(26, 32, 40, 0)) padding-box,
+      background: `linear-gradient(to right,rgba(26, 32, 40, 1),rgba(26, 32, 40, 0)) padding-box,
       linear-gradient(to right, rgba(65, 73, 85, 1), rgba(44, 50, 59, 0)) border-box`,
       borderRadius: '15px',
       padding: '2px 16px 2px 5px',
       '&:hover': {
-        background: isNewLayout
-          ? 'unset'
-          : `linear-gradient(to right,rgba(26, 32, 40, 1),rgba(26, 32, 40, 1)) padding-box,
+        background: `linear-gradient(to right,rgba(26, 32, 40, 1),rgba(26, 32, 40, 1)) padding-box,
       linear-gradient(to right, rgba(65, 73, 85, 1), rgba(44, 50, 59, 0)) border-box`,
       },
     },

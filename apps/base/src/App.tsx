@@ -12,11 +12,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers-pro';
 import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs';
 import type React from 'react';
 import type { ReactElement } from 'react';
-import { FDC3Integration } from './fdc3/FDC3Integration';
-import './components/webkit.css';
 import Provider from './hooks/provider';
-import Routing from './routing';
-import ThemeProvider from './theme';
+import { PortalExperience } from './new-layout';
 
 /**
  * Root Application Component
@@ -39,11 +36,7 @@ import ThemeProvider from './theme';
 const App: React.FC = (props: Record<string, unknown>): ReactElement => (
   <LocalizationProvider dateAdapter={AdapterDayjs}>
     <Provider data={{ rootVersion: props.version as string }}>
-      <ThemeProvider>
-        <FDC3Integration>
-          <Routing {...props} />
-        </FDC3Integration>
-      </ThemeProvider>
+      <PortalExperience {...props} />
     </Provider>
   </LocalizationProvider>
 );

@@ -1,3 +1,6 @@
+jest.mock('../LegacyExperience', () => ({ __esModule: true, default: () => null }));
+jest.mock('./NewLayoutExperience', () => ({ __esModule: true, default: () => null }));
+
 import { isNewLayoutEnabled } from './index';
 
 describe('new-layout feature flag', () => {

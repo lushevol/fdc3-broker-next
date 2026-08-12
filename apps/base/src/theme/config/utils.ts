@@ -8,18 +8,14 @@ export enum THEME {
 }
 
 export const getTheme = (theme: string | undefined) => {
-  // when we change to new design, we need to delete the import and isNewLayout variable
-  // And need revert the import from getDarkTheme to dark, getLightTheme to light, revert the function call to dark or light virable
-  const params = new URLSearchParams(window.location.search);
-  const isNewLayout = params.get('new-layout') === 'true';
   switch (theme) {
     case THEME.DARK:
-      return getDarkTheme(isNewLayout);
+      return getDarkTheme();
     case THEME.LIGHT:
-      return getLightTheme(isNewLayout);
+      return getLightTheme();
     case THEME.GOLD:
-      return getDarkTheme(isNewLayout);
+      return getDarkTheme();
     default:
-      return getLightTheme(isNewLayout);
+      return getLightTheme();
   }
 };

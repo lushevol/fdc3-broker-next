@@ -22,7 +22,9 @@ const findProductionMatchesOutsideNewLayout = (pattern: RegExp): string[] =>
 
 describe('new-layout module boundary', () => {
   it('keeps feature flag reads inside the new-layout gateway', () => {
-    expect(findProductionMatchesOutsideNewLayout(/new-layout|useIsNewLayout/)).toEqual([]);
+    expect(
+      findProductionMatchesOutsideNewLayout(/useIsNewLayout|\bisNewLayout\b|['"]new-layout['"]/),
+    ).toEqual([]);
   });
 
   it('keeps SC Dev WebKit imports and opt-in selectors inside new-layout', () => {
