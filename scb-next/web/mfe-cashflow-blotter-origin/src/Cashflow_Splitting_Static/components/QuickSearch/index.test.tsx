@@ -23,7 +23,15 @@ vi.mock("Import/ratancomponents", async () => ({
 
 // mock config
 vi.mock("src/Cashflow_Splitting_Static/Main/config/ratanConfig", async () => ({
-  default: [],
+  default: {
+    cashflow: {
+      quickSearchItemsSplitting: [
+        { disabled: false, label: "Test", key: "testKey" }
+      ],
+      quickSearchLabelWidth: 100,
+      quickSearchFormWidth: 200,
+    }
+  },
   cashflow: {
     quickSearchItemsSplitting: [
       { disabled: false, label: "Test", key: "testKey" }

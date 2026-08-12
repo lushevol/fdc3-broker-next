@@ -1,4 +1,5 @@
 import { fireEvent, render } from "@testing-library/react";
+import { useMediaQuery } from "@mui/material";
 import {
   UTILIZATION_STATIC_BLOTTER_QUICK_SEARCH_CLEAR_BTN,
   UTILIZATION_STATIC_BLOTTER_QUICK_SEARCH_SEARCH_BTN,
@@ -23,7 +24,11 @@ vi.mock("Import/ratancomponents", async () => ({
 }));
 
 vi.mock("./config", async () => ({
-  default: [],
+  default: {
+    quickSearchItems: [{ label: "Test", key: "testKey" }],
+    quickSearchLabelWidth: 100,
+    quickSearchFormWidth: 200,
+  },
   quickSearchItems: [{ label: "Test", key: "testKey" }],
   quickSearchLabelWidth: 100,
   quickSearchFormWidth: 200,
@@ -51,7 +56,7 @@ describe("QuickSearch", () => {
   });
 
   it("should call dispatch when onQuery is triggered", () => {
-    const useMediaQueryMock = require("@mui/material").useMediaQuery;
+    const useMediaQueryMock = vi.mocked(useMediaQuery);
     useMediaQueryMock.mockReturnValue(true);
 
     const { getByTestId } = render(<QuickSearch />);
@@ -65,7 +70,7 @@ describe("QuickSearch", () => {
   });
 
   it("should handle useMediaQuery returning false", () => {
-    const useMediaQueryMock = require("@mui/material").useMediaQuery;
+    const useMediaQueryMock = vi.mocked(useMediaQuery);
     useMediaQueryMock.mockReturnValue(false);
 
     const { getByTestId } = render(<QuickSearch />);

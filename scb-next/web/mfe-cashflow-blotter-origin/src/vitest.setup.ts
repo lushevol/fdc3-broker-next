@@ -9,7 +9,7 @@ Object.assign(vi, {
   requireActual: (specifier: string) =>
     specifier === "react-router-dom" ? ReactRouterDom : {},
   setTimeout: (timeout: number) => vi.setConfig({ testTimeout: timeout }),
-  dontMock: (specifier: string) => vi.unmock(specifier),
+  dontMock: (_specifier: string) => undefined,
 });
 
 const nativeGetComputedStyle = window.getComputedStyle.bind(window);

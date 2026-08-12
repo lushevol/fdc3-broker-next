@@ -11,16 +11,18 @@ vi.mock("src/Root/import/ratanutils", () => ({
   useParentData: vi.fn(),
 }));
 
-vi.mock("./Main/store", () => vi.fn(() => ({ dispatch: vi.fn(), getState: vi.fn(), subscribe: vi.fn() })));
+vi.mock("./Main/store", () => ({ default: vi.fn(() => ({ dispatch: vi.fn(), getState: vi.fn(), subscribe: vi.fn() })) }));
 
 vi.mock("src/Root/analysis", () => ({
   E2ELatencyStoreWrap: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  useRTT: () => ({ startTracking: vi.fn() }),
+  useBatchCollect: () => ({ startTracking: vi.fn() }),
 }));
 
 vi.mock("src/Cashflow_CN/services/graphql", () => ({
   conversionDQSLRequest: vi.fn(() => ({})), // Mocking conversionDQSLRequest
 }));
-vi.mock("./Main", () => () => <div data-testid="mock-main">Mock Main</div>);
+vi.mock("./Main", () => ({ default: () => <div data-testid="mock-main">Mock Main</div> }));
 
 describe("OpensearchHome Component", () => {
   const mockProps = { tile: "opensearch-home" };
