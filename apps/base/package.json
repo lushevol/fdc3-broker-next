@@ -1,5 +1,5 @@
 {
-  "name": "@fm/base-origin",
+  "name": "@fm/base",
   "version": "0.0.0",
   "scripts": {
     "start": "env-cmd -f .env.local rsbuild dev",
