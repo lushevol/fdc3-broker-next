@@ -1,7 +1,7 @@
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import React, { type ReactElement } from 'react';
 import { useIsNewLayout } from '../../hooks/model/root';
-import dark from './common/images/dark.svg';
 import moon from './common/images/moon.svg';
 import sun from './common/images/sun.svg';
 import Root, { classes, PREFIX, SwitchStyled } from './common/style';
@@ -20,7 +20,7 @@ const Switch: React.FC = (): ReactElement => {
           store.theme === 'light' ? (
             <LightModeIcon />
           ) : (
-            <img src={dark} alt="dark" width="14px" height="14px" />
+            <DarkModeIcon />
           )
         ) : store.theme === 'light' ? (
           <img src={sun} alt="Sun" width="20px" height="20px" />
@@ -32,7 +32,7 @@ const Switch: React.FC = (): ReactElement => {
         <div>
           <span className={classes.label}>{store.theme}</span>
           <SwitchStyled
-            className="custom-switch"
+            className={isNewLayout ? 'custom-switch' : undefined}
             checked={store.theme === 'light'}
             onChange={toggleColorMode}
             data-testid={`${PREFIX}_SwitchStyled`}

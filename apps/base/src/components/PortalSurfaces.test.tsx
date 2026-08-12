@@ -1,7 +1,12 @@
+import { ThemeProvider } from '@mui/material/styles';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import * as Provider from '../hooks/provider';
 import useDispatcher from '../hooks/dispathcer';
+import Config from '../theme/Config';
+import getDarkTheme from '../theme/config/dark';
+import NewTile from './NewTile';
+import Switch from './Switch';
 import Drawer from './Drawer';
 import Empty from './Empty';
 import Avatar from './Avatar';
@@ -18,6 +23,12 @@ jest.mock('../services', () => ({ __esModule: true, default: () => ({ logout: mo
 
 const mockUseContext = Provider.useContext as jest.Mock;
 const mockUseDispatcher = useDispatcher as jest.Mock;
+const legacyTheme = Config(getDarkTheme()).config;
+
+const renderLegacy = (component: React.ReactElement) => {
+  window.history.pushState({}, '', '/');
+  return render(<ThemeProvider theme={legacyTheme}>{component}</ThemeProvider>);
+};
 
 const tile = {
   title: 'Cashflow',
@@ -55,6 +66,8 @@ beforeEach(() => {
       },
       expiredIn: 1_700_003_600,
       timeType: 'utc',
+      theme: 'dark',
+      rootVersion: '1.2.3',
       entities: [{ id: 1, name: 'Operations', roleName: 'Trader', subjects: [] }],
     },
     jest.fn(),
@@ -71,9 +84,38 @@ afterEach(() => {
 });
 
 describe('Base WebKit portal surfaces', () => {
-  it('keeps the legacy tile surface outside the new layout flag', () => {
-    window.history.pushState({}, '', '/');
-    render(
+  it('preserves the original MUI avatar and account menu without the new layout flag', () => {
+    renderLegacy(<Avatar setOpen={jest.fn()} />);
+
+    const avatarButton = screen.getByTestId(/_avatar_IconButton$/);
+    expect(avatarButton.querySelector('.MuiAvatar-root')).toBeInTheDocument();
+    fireEvent.click(avatarButton);
+
+    expect(screen.getByText('Click to view user profile details')).toBeInTheDocument();
+    expect(screen.getByText('Root Config Version: 1.2.3')).toBeInTheDocument();
+    expect(screen.getByText(/Base Container Version:/)).toBeInTheDocument();
+  });
+
+  it('preserves the original New Tile and theme controls without the new layout flag', () => {
+    renderLegacy(
+      <>
+        <NewTile toggleDrawer={jest.fn(() => jest.fn())} />
+        <Switch />
+      </>,
+    );
+
+    const newTile = screen.getByTestId(/_new_tile$/);
+    expect(newTile.tagName).toBe('SECTION');
+    expect(newTile).toHaveTextContent('New Tile');
+    expect(newTile.querySelector('[data-testid="SearchIcon"]')).toBeInTheDocument();
+
+    const themeSwitch = screen.getByTestId(/_switch$/);
+    expect(themeSwitch.querySelector('.MuiSvgIcon-root')).toBeInTheDocument();
+    expect(themeSwitch.querySelector('.custom-switch')).not.toBeInTheDocument();
+  });
+
+  it('preserves the original MUI tile drawer and tile cards without the new layout flag', async () => {
+    renderLegacy(
       <Drawer
         anchor
         toggleDrawer={jest.fn(() => jest.fn())}
@@ -82,7 +124,34 @@ describe('Base WebKit portal surfaces', () => {
       />,
     );
 
-    expect(screen.getByRole('complementary', { name: 'Tile Options' })).toBeInTheDocument();
+    expect(document.querySelector('.MuiDrawer-root')).toBeInTheDocument();
+    expect(screen.getByText('Tile Options')).toBeInTheDocument();
+    expect(await screen.findByTestId(/_menuItem$/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '' })).toBeInTheDocument();
+  });
+
+  it('preserves the original profile dialog without the new layout flag', () => {
+    renderLegacy(<Profile open onClose={jest.fn()} />);
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('User Profile')).toBeInTheDocument();
+    expect(screen.getByText('Login time:')).toBeInTheDocument();
+    expect(screen.getByText('Session Expired time:')).toBeInTheDocument();
+    expect(screen.getByText('Functional User Profile')).toBeInTheDocument();
+  });
+
+  it('keeps the legacy tile surface outside the new layout flag', () => {
+    renderLegacy(
+      <Drawer
+        anchor
+        toggleDrawer={jest.fn(() => jest.fn())}
+        addTile={jest.fn()}
+        drawers={[{ id: 1, label: 'Operations', tiles: [tile] }]}
+      />,
+    );
+
+    expect(document.querySelector('.MuiDrawer-root')).toBeInTheDocument();
+    expect(screen.getByText('Tile Options')).toBeInTheDocument();
     expect(document.querySelector('sc-modal')).not.toBeInTheDocument();
   });
 

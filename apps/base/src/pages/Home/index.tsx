@@ -166,6 +166,56 @@ const Home: React.FC = (): ReactElement => {
       }
     : undefined;
 
+  const workspaceTabs = (
+    <div className={classes.tabBar} role="tablist" data-testid={`${PREFIX}_workspaces`}>
+      <div className={classes.firsttab}></div>
+      <SortableContext items={workspaceIds} strategy={horizontalListSortingStrategy}>
+        {store?.workspaces?.map((item: Workspace) => {
+          const showRefresh: boolean = !!(
+            item.id === store?.currentWorkspace?.id &&
+            store?.refreshTab &&
+            store?.refreshTab[item.id]
+          );
+          return (
+            <SortableTab
+              key={item.id}
+              id={item.id}
+              active={item.id === store?.currentWorkspace?.id}
+              onClick={() => handleChange(item)}
+              onDoubleClick={focus(item)}
+            >
+              <TabItem
+                item={item}
+                edit={edit}
+                remove={remove}
+                refreshTab={refreshTab}
+                showRemove={length > 1}
+                showRefresh={showRefresh}
+                closeOthers={closeOthers}
+                closeAll={closeAll}
+                openInSingleView={openInSingleView}
+              />
+            </SortableTab>
+          );
+        })}
+      </SortableContext>
+      {!isNewLayout && (
+        <div className={classes.lasttab}>
+          <Button
+            variant="contained"
+            className={classes.addtab}
+            onClick={add}
+            data-testid={`${PREFIX}_add_btn`}
+            aria-label="Add Workspace"
+            title="Add Workspace"
+          >
+            <AddIcon />
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <Root
       data-testid={PREFIX}
@@ -180,55 +230,10 @@ const Home: React.FC = (): ReactElement => {
       >
         <header style={headerStyle}>
           <AppBar />
-          <div className={classes.tabBar} role="tablist" data-testid={`${PREFIX}_workspaces`}>
-            <div className={classes.firsttab}></div>
-            <SortableContext items={workspaceIds} strategy={horizontalListSortingStrategy}>
-              {store?.workspaces?.map((item: Workspace) => {
-                const showRefresh: boolean = !!(
-                  item.id === store?.currentWorkspace?.id &&
-                  store?.refreshTab &&
-                  store?.refreshTab[item.id]
-                );
-                return (
-                  <SortableTab
-                    key={item.id}
-                    id={item.id}
-                    active={item.id === store?.currentWorkspace?.id}
-                    onClick={() => handleChange(item)}
-                    onDoubleClick={focus(item)}
-                  >
-                    <TabItem
-                      item={item}
-                      edit={edit}
-                      remove={remove}
-                      refreshTab={refreshTab}
-                      showRemove={length > 1}
-                      showRefresh={showRefresh}
-                      closeOthers={closeOthers}
-                      closeAll={closeAll}
-                      openInSingleView={openInSingleView}
-                    />
-                  </SortableTab>
-                );
-              })}
-            </SortableContext>
-            {!isNewLayout && (
-              <div className={classes.lasttab}>
-                <Button
-                  variant="contained"
-                  className={classes.addtab}
-                  onClick={add}
-                  data-testid={`${PREFIX}_add_btn`}
-                  aria-label="Add Workspace"
-                  title="Add Workspace"
-                >
-                  <AddIcon />
-                </Button>
-              </div>
-            )}
-          </div>
+          {isNewLayout && workspaceTabs}
         </header>
         <main className={classes.main}>
+          {!isNewLayout && workspaceTabs}
           <DragOverlay>
             {draggedItem ? (
               <div className={classes.dragOverlay}>

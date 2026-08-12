@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import Home from './index';
 
 const capturedConfigs: Array<Record<string, unknown>> = [];
@@ -124,6 +124,7 @@ jest.mock('./common/style', () => {
 describe('Home workspace context wiring', () => {
   beforeEach(() => {
     capturedConfigs.length = 0;
+    window.history.pushState({}, '', '/');
   });
 
   it('includes active tile and app identifiers in the chatbot workspace snapshot', () => {
@@ -144,5 +145,24 @@ describe('Home workspace context wiring', () => {
       activeTileId: 'tile-instance-1',
       activeAppId: 'template_tile_fdc3_2',
     });
+  });
+
+  it('keeps workspace tabs outside the App Bar header without the new layout flag', () => {
+    render(<Home />);
+
+    const header = screen.getByText('AppBar').closest('header');
+    const workspaceTabs = screen.getByTestId('home-root_workspaces');
+
+    expect(header).not.toContainElement(workspaceTabs);
+  });
+
+  it('composes the App Bar and workspace tabs in one header for the new layout', () => {
+    window.history.pushState({}, '', '/?new-layout=true');
+    render(<Home />);
+
+    const header = screen.getByText('AppBar').closest('header');
+    const workspaceTabs = screen.getByTestId('home-root_workspaces');
+
+    expect(header).toContainElement(workspaceTabs);
   });
 });

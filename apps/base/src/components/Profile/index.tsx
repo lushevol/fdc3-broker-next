@@ -9,6 +9,9 @@ import { ScBadge, ScButton, ScModal, setScModalWidth } from '../webkit';
 import type { ProfileProps } from './common/interface';
 import { PREFIX } from './common/style';
 import prototypeAvatar from './assets/prototype-avatar.png';
+import LegacyProfile from './LegacyProfile';
+
+export { RoleComp } from './LegacyProfile';
 
 const PROFILE_ANALYTICS = { container: 'Base', tile: 'profile' } as const;
 
@@ -47,24 +50,7 @@ const Profile: FC<ProfileProps> = ({ open, onClose, onLogout }) => {
   };
 
   if (!isNewLayout) {
-    return open ? (
-      <div role="dialog" aria-label="User Profile" data-testid={`${PREFIX}`}>
-        <h2>User Profile</h2>
-        <p>{fullName}</p>
-        <dl>
-          <div><dt>Bank ID</dt><dd>{bankId}</dd></div>
-          <div><dt>Email</dt><dd>{email}</dd></div>
-          <div><dt>Country</dt><dd>{country}</dd></div>
-          <div><dt>Session expiry</dt><dd>{expiryTime}</dd></div>
-        </dl>
-        <p>Time display</p>
-        <button type="button" onClick={() => selectTimeType('LOCAL')}>Local time</button>
-        <button type="button" onClick={() => selectTimeType('UTC')}>UTC</button>
-        <h3>Permissions and roles</h3>
-        {roles.map((entity: Entity) => <span key={entity.id}>{entity.roleName || entity.name}</span>)}
-        <button type="button" onClick={onClose}>Close</button>
-      </div>
-    ) : <></>;
+    return <LegacyProfile open={open} onClose={onClose} />;
   }
 
   return (

@@ -1,16 +1,34 @@
+import Grid from '@mui/material/Grid';
 import React, { type ReactElement } from 'react';
+import Tile from '../Tile';
 import type { MenuItemProps, Tile as TileProps } from './common/interface';
 import { useIsNewLayout } from '../../hooks/model/root';
 import useController from './common/MenuItem.useController';
 import { ScBadge, ScButton } from '../webkit';
 import { Star } from 'lucide-react';
-
-const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_menuItem`;
+import Root, { classes, PREFIX } from './common/tile.style';
 
 type LibraryTile = TileProps & { description?: string };
 
 export const Item = ({ tile, ...props }: MenuItemProps & { tile: TileProps }) => {
   const { onClick } = useController(props, tile);
+  const isNewLayout = useIsNewLayout();
+
+  if (!isNewLayout) {
+    return (
+      <Grid item xs={3} key={tile.tile ? tile.tile : tile.title}>
+        <Tile
+          title={tile.title}
+          subtitle={tile.subtitle ?? ''}
+          onClick={onClick}
+          imageDarkTheme={tile.imageDarkTheme}
+          imageLightTheme={tile.imageLightTheme ?? tile.imageDarkTheme}
+          disabled={tile.disabled}
+        />
+      </Grid>
+    );
+  }
+
   const libraryTile = tile as LibraryTile;
   const icon = libraryTile.imageLightTheme ?? libraryTile.imageDarkTheme;
   const tileId = tile.tile || tile.module || tile.title;
@@ -63,14 +81,14 @@ const MenuItem: React.FC<MenuItemProps> = (props: MenuItemProps): ReactElement =
 
   if (!isNewLayout) {
     return (
-      <section data-testid={`${PREFIX}`} aria-labelledby={`tile-category-${props.menuItems.label}`}>
-        <h3 id={`tile-category-${props.menuItems.label}`}>{props.menuItems.label}</h3>
-        {props.menuItems.tiles.map((item) => (
-          <button key={item.tile || item.title} type="button" onClick={() => props.addTile(item)}>
-            {item.title}
-          </button>
-        ))}
-      </section>
+      <Root data-testid={`${PREFIX}`}>
+        <section className={classes.title}>{props.menuItems.label}</section>
+        <Grid container spacing={2} className={classes.content}>
+          {props.menuItems.tiles.map((item) => (
+            <Item key={item.tile || item.title} tile={item} {...props} />
+          ))}
+        </Grid>
+      </Root>
     );
   }
 

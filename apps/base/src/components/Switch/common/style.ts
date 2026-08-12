@@ -31,6 +31,7 @@ const Root = styled('section')(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    height: '49px',
   },
   [`& .${classes.label}`]: {
     textTransform: 'capitalize',

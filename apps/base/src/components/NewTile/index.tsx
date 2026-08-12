@@ -1,3 +1,4 @@
+import SearchIcon from '@mui/icons-material/Search';
 import React, { type ReactElement, useCallback } from 'react';
 import { useIsNewLayout } from '../../hooks/model/root';
 import { ScButton } from '../webkit';
@@ -6,7 +7,7 @@ import newTileDarkSelected from './common/images/new-tile-dark-selected.svg';
 import newTileDark from './common/images/new-tile-dark.svg';
 import newTileLightSelected from './common/images/new-tile-light-selected.svg';
 import newTileLight from './common/images/new-tile-light.svg';
-import { PREFIX } from './common/style';
+import Root, { classes, PREFIX } from './common/style';
 import useController from './common/useController';
 
 const NewTile: React.FC<NewTileProps> = (props: NewTileProps): ReactElement => {
@@ -22,15 +23,16 @@ const NewTile: React.FC<NewTileProps> = (props: NewTileProps): ReactElement => {
 
   if (!isNewLayout) {
     return (
-      <button
-        type="button"
+      <Root
+        className={classes.root}
         data-testid={`${PREFIX}`}
-        aria-label="Open Tile Library"
-        aria-pressed={isDrawerOpen}
-        onClick={openDrawer}
+        onClick={props.toggleDrawer(true)}
       >
-        New Tile
-      </button>
+        <span className={classes.box}>
+          <SearchIcon />
+        </span>
+        <span className={classes.title}>New Tile</span>
+      </Root>
     );
   }
 

@@ -1,6 +1,8 @@
-import React, { type ReactElement, useCallback, useMemo, useRef, useState } from 'react';
+import Box from '@mui/material/Box';
+import React, { type ReactElement, Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import ErrorBoundry from '../ErrorBoundry';
-import { propsAddTile, type DrawerProps, type Tiles } from './common/interface';
+import Splash from '../Splash';
+import { type DrawerProps, type Tiles } from './common/interface';
 import { useIsNewLayout } from '../../hooks/model/root';
 import { ScButton, ScTextInput } from '../webkit';
 import MenuItem from './MenuItem';
@@ -11,6 +13,7 @@ type LibraryView = 'all' | 'favorites' | 'frequent';
 
 const FAVORITES_STORAGE_KEY = 'base.tile-library.favorites';
 const USAGE_STORAGE_KEY = 'base.tile-library.usage';
+const LegacyMenuItem = React.lazy(() => import('./MenuItem'));
 const tileId = (tile: SearchableTile) => tile.tile || tile.module || tile.title;
 const readStoredValue = <T,>(key: string, fallback: T): T => {
   try {
@@ -115,28 +118,19 @@ const Menu: React.FC<DrawerProps> = (props: DrawerProps): ReactElement => {
 
   if (!isNewLayout) {
     return (
-      <div data-testid="drawer-menu">
-        {(props.drawers ?? []).map((drawer) => (
-          <section key={drawer.label} aria-label={drawer.label}>
-            <h3>{drawer.label}</h3>
-            {drawer.tiles.map((tile) => (
-              <button
-                key={tile.title}
-                type="button"
-                onClick={() =>
-                  props.addTile({
-                    ...propsAddTile,
-                    ...tile,
-                    title: `${tile.title} ${tile.subtitle ?? ''}`.trim(),
-                  })
-                }
-              >
-                {tile.title}
-              </button>
+      <ErrorBoundry>
+        <Box sx={{ width: 883, padding: '36px' }}>
+          <Suspense fallback={<Splash />}>
+            {props.drawers?.map((menuItems: Tiles) => (
+              <LegacyMenuItem
+                key={menuItems.label}
+                addTile={props.addTile}
+                menuItems={menuItems}
+              />
             ))}
-          </section>
-        ))}
-      </div>
+          </Suspense>
+        </Box>
+      </ErrorBoundry>
     );
   }
 
