@@ -48,9 +48,7 @@ const Tile: React.FC<TileProps> = (props: TileProps): ReactElement => {
                 variant="outlined"
                 labelPosition="left"
                 placeholder="Please select application category"
-                InputLabelProps={{
-                  shrink: true,
-                }}
+                slotProps={{ inputLabel: { shrink: true } }}
               />
             )}
           />

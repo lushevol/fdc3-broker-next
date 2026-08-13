@@ -20,7 +20,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
         _value?.length === 2 ? [dayjs(_value[0]), dayjs(_value[1])] : undefined
       }
       slots={{ field: SingleInputDateRangeField }}
-      slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
+      slotProps={{ textField: { slotProps: { inputLabel: { shrink: true } } } }}
       sx={{ ...sx, display: hidden ? "none!important" : undefined }}
       {...rest}
     />

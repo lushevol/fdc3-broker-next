@@ -18,12 +18,12 @@ const Version: React.FC<VersionProps> = (props: VersionProps): ReactElement => {
         <Stack spacing={1} direction="row">
           <Typography
             variant="caption"
-            display="block"
+            sx={{ display: "block" }}
             gutterBottom
           >{`Version: ${props.version}`}</Typography>
           <Typography
             variant="caption"
-            display="block"
+            sx={{ display: "block" }}
             gutterBottom
           >{`Env: ${getEnv()}`}</Typography>
         </Stack>

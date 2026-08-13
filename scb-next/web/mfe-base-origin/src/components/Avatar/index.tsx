@@ -61,12 +61,12 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
             onClick={handleOpenUserProfile}
             sx={{ flexDirection: "column", alignItems: "start" }}
           >
-            <Typography display="block">
+            <Typography sx={{ display: "block" }}>
               {store?.user?.fullName ?? store?.user?.userId}
             </Typography>
             <Typography
               variant="caption"
-              display="block"
+              sx={{ display: "block" }}
               color="InactiveCaptionText"
             >
               Click to view user profile details
@@ -74,7 +74,7 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
           </MenuItem>
           <Divider />
           <MenuItem onClick={onBeforeLogout} data-testid={`${PREFIX}_Logout`}>
-            <Typography display="block">Logout</Typography>
+            <Typography sx={{ display: "block" }}>Logout</Typography>
           </MenuItem>
           <Divider />
           <MenuItem
@@ -84,14 +84,14 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
           >
             <Typography
               variant="caption"
-              display="block"
+              sx={{ display: "block" }}
               color="InactiveCaptionText"
             >
               Root Config Version: {store.rootVersion}
             </Typography>
             <Typography
               variant="caption"
-              display="block"
+              sx={{ display: "block" }}
               color="InactiveCaptionText"
             >
               Base Container Version: {json.version}

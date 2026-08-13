@@ -15,7 +15,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
       className={labelPosition === "left" ? classes.left : undefined}
       data-testid={`${PREFIX}`}
       value={_value ? dayjs(_value) : null}
-      slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
+      slotProps={{ textField: { slotProps: { inputLabel: { shrink: true } } } }}
       sx={{ ...sx, display: hidden ? "none!important" : undefined }}
       {...rest}
     />

@@ -9,13 +9,16 @@ export interface SearchInputProps extends InputProps {
 }
 
 const SearchInput = ({
-  InputProps: _InputProps,
+  slotProps,
   handleClear,
   ...rest
 }: SearchInputProps) => {
   return (
     <Input
-      InputProps={{
+      slotProps={{
+        ...slotProps,
+        input: {
+          ...slotProps?.input,
         startAdornment: (
           <InputAdornment position="start">
             <SearchIcon />
@@ -28,6 +31,7 @@ const SearchInput = ({
             </IconButton>
           </InputAdornment>
         ),
+        },
       }}
       {...rest}
       sx={{

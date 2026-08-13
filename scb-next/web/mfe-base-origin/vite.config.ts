@@ -39,6 +39,6 @@ export default defineConfig(({ mode }) => {
       headers: { "Cache-Control": "no-store" },
     },
     preview: { host: "127.0.0.1", port: 8001 },
-    build: { target: "chrome89" },
+    build: { target: "chrome117" },
   };
 });

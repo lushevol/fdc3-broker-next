@@ -65,7 +65,7 @@ const Dialog = (props: DialogProps) => {
       id={idModal}
       disablePortal={disablePortal}
       hideBackdrop={hideBackdrop}
-      PaperComponent={DraggableComp}
+      slots={{ paper: DraggableComp }}
       aria-labelledby={isDraggable ? idTitle : undefined}
       data-testid={PREFIX}
       scroll="paper"
@@ -76,8 +76,8 @@ const Dialog = (props: DialogProps) => {
       onMouseMove={doDrag}
       onMouseLeave={stopDrag}
       onMouseDown={onMouseDown}
-      PaperProps={{
-        sx: {
+      slotProps={{
+        paper: { sx: {
           width: width?.current,
           height: height?.current,
           borderBottomRightRadius: isResizeble ? 0 : undefined,
@@ -85,7 +85,7 @@ const Dialog = (props: DialogProps) => {
           minWidth: isResizeble ? "400px" : undefined,
           top: hideBackdrop ? defaultY ?? top : undefined,
           left: hideBackdrop ? defaultX ?? left : undefined,
-        },
+        } },
       }}
     >
       {titleComponents && (

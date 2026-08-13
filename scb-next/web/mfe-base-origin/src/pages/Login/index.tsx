@@ -59,13 +59,13 @@ const Login: React.FC = (): ReactElement => {
                         data-testid="Username"
                         variant="outlined"
                         size="medium"
-                        InputProps={{
+                        slotProps={{ input: {
                           startAdornment: (
                             <InputAdornment position="start">
                               <PersonOutlinedIcon />
                             </InputAdornment>
                           ),
-                        }}
+                        } }}
                         onChange={(e) => {
                           setUsername(`${e.target.value}`.trim());
                         }}
@@ -87,13 +87,13 @@ const Login: React.FC = (): ReactElement => {
                         placeholder="Enter Password"
                         variant="outlined"
                         size="medium"
-                        InputProps={{
+                        slotProps={{ input: {
                           startAdornment: (
                             <InputAdornment position="start">
                               <LockOutlinedIcon />
                             </InputAdornment>
                           ),
-                        }}
+                        } }}
                         onChange={(e) => {
                           setPassword(e.target.value);
                         }}

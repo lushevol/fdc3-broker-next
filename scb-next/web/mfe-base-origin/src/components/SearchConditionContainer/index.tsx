@@ -48,7 +48,6 @@ const SearchConditionContainer: React.FC<StackProps> = ({
   spacing: _spacing,
   direction: _direction,
   useFlexGap: _useFlexGap,
-  flexWrap: _flexWrap,
   children,
   ...rest
 }: StackProps): React.ReactElement => {
@@ -59,7 +58,7 @@ const SearchConditionContainer: React.FC<StackProps> = ({
       spacing={1}
       direction="row"
       useFlexGap
-      flexWrap="wrap"
+      sx={{ flexWrap: "wrap" }}
       {...rest}
       style={{ height: expanded ? "auto" : "49px" }}
     >

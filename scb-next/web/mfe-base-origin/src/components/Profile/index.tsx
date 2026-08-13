@@ -44,7 +44,11 @@ const SubjectComp = ({
         <Typography>{name}</Typography>
       </AccordionSummary>
       <AccordionDetails sx={{ ml: 3, p: 0 }}>
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ alignItems: "center", flexWrap: "wrap" }}
+        >
           <Typography
             variant="subtitle1"
             component="div"
@@ -209,8 +213,7 @@ const Profile: FC<ProfileProps> = ({ open, onClose }) => {
               <Stack
                 direction="row"
                 spacing={1}
-                alignItems="center"
-                flexWrap="wrap"
+                sx={{ alignItems: "center", flexWrap: "wrap" }}
               >
                 <Typography
                   variant="subtitle1"
@@ -247,8 +250,7 @@ const Profile: FC<ProfileProps> = ({ open, onClose }) => {
               <Stack
                 direction="row"
                 spacing={1}
-                alignItems="center"
-                flexWrap="wrap"
+                sx={{ alignItems: "center", flexWrap: "wrap" }}
               >
                 <Typography
                   variant="subtitle1"
@@ -268,8 +270,7 @@ const Profile: FC<ProfileProps> = ({ open, onClose }) => {
               <Stack
                 direction="row"
                 spacing={1}
-                alignItems="center"
-                flexWrap="wrap"
+                sx={{ alignItems: "center", flexWrap: "wrap" }}
               >
                 <Typography
                   variant="subtitle1"

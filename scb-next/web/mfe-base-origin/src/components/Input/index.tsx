@@ -60,6 +60,7 @@ export default function Input({
   variant: _variant,
   hidden,
   disabled: _disabled,
+  slotProps,
   ...rest
 }: Readonly<InputProps>) {
   return (
@@ -68,11 +69,10 @@ export default function Input({
       className={
         labelPosition.toLocaleLowerCase() === "left" ? classes.left : undefined
       }
-      InputLabelProps={{
-        shrink: true,
-      }}
-      InputProps={{
-        disabled: _disabled,
+      slotProps={{
+        ...slotProps,
+        inputLabel: { shrink: true, ...slotProps?.inputLabel },
+        input: { disabled: _disabled, ...slotProps?.input },
       }}
       style={{ display: hidden ? "none" : undefined }}
       {...rest}

@@ -59,8 +59,12 @@ const useController = (props: FieldProps) => {
     return (
       <Box
         component="li"
-        height="50px"
-        sx={{ mt: 1, mb: 1, "& > img": { mr: 2, flexShrink: 0 } }}
+        sx={{
+          height: "50px",
+          mt: 1,
+          mb: 1,
+          "& > img": { mr: 2, flexShrink: 0 },
+        }}
         {...props}
       >
         {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}

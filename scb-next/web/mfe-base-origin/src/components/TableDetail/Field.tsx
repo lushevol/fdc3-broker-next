@@ -48,9 +48,7 @@ const Field: React.FC<FieldProps> = (props: FieldProps): React.ReactElement => {
                 variant="outlined"
                 labelPosition="left"
                 placeholder="Please select"
-                InputLabelProps={{
-                  shrink: true,
-                }}
+                slotProps={{ inputLabel: { shrink: true } }}
                 disabled={column.readOnly ?? record.readOnly}
               />
             )}
