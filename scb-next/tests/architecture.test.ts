@@ -63,6 +63,13 @@ describe("SCB Next composition architecture", () => {
     expect(cashflowConfig).toContain("exposes");
   });
 
+  it("fails startup instead of silently moving federation origins to incompatible ports", () => {
+    for (const origin of activeOrigins) {
+      const config = readFileSync(join(workspaceRoot, "web", origin, "vite.config.ts"), "utf8");
+      expect(config).toContain("strictPort: true");
+    }
+  });
+
   it("contains no webpack HMR globals in active cashflow schemas", () => {
     const schemaRoot = join(
       workspaceRoot,

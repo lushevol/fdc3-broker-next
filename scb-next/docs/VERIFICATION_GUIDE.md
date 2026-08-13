@@ -125,6 +125,11 @@ cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
 npm run dev
 ```
 
+The Base Vite origin serves the same deterministic login, field metadata, custom-view, and Cashflow
+fixtures used by the production mock BFF. Open
+`http://127.0.0.1:8001/?show_normal_login=Y&survey=no` and sign in with `mock.cashflow` / `acceptance`;
+no backend process is required for this development acceptance path.
+
 In a second terminal, verify the host and remote manifests:
 
 ```bash
@@ -140,7 +145,7 @@ cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
 npm run test:e2e
 ```
 
-Expected development result: the two development scenarios pass and the production-only scenario is skipped.
+Expected development result: the three development scenarios pass and the production-only scenario is skipped.
 
 Stop the development process with `Ctrl+C` before production verification so it does not obscure port or console evidence.
 

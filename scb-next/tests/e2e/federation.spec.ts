@@ -14,6 +14,22 @@ test('base host preserves the login experience and styling', async ({ page }) =>
   expect(errors).toEqual([]);
 });
 
+test('development origin logs in with fixtures and opens Cashflow Blotter', async ({ page }) => {
+  test.skip(!!process.env.PLAYWRIGHT_PRODUCTION_EDGE, 'development-origin acceptance only');
+
+  await page.goto('/?show_normal_login=Y&survey=no');
+  await page.getByPlaceholder('Enter Username').fill('mock.cashflow');
+  await page.getByPlaceholder('Enter Password').fill('acceptance');
+  await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+  await expect(page.getByText('New Tile', { exact: true })).toBeVisible();
+
+  await page.getByText('New Tile', { exact: true }).click();
+  await page.getByText('Cashflow Blotter', { exact: true }).click();
+
+  await expect(page.getByText('Quick Search', { exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText('CF-ACCEPT-001', { exact: true })).toBeVisible();
+});
+
 test('ratan loads cashflow over the second federation boundary', async ({ page, request }) => {
   test.skip(!!process.env.PLAYWRIGHT_PRODUCTION_EDGE, 'development-origin acceptance only');
   const errors: Error[] = [];
