@@ -32,6 +32,7 @@ Tests exercise these interfaces only. Build-tool internals and private collabora
 - The two remotes publish Module Federation remote entries and share a single compatible React/ReactDOM runtime.
 - Unit tests run with Vitest and maintain at least 90% line and branch coverage for newly introduced migration modules.
 - Existing UI code, CSS/Less, images, and design-system providers remain present and load without visual regressions.
+- Compatibility facades preserve the portal's complete MUI theme contract, including typography and compact component defaults, so nested remotes cannot replace production styles with later-injected Material UI defaults.
 - The BFF compiles and its tests pass without route/schema changes.
 - Playwright exercises the three-origin journey and records screenshots for visual comparison.
 - Live Browser acceptance confirms there are no visible layout breaks or uncaught console errors on the accepted journey.

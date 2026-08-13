@@ -22,7 +22,8 @@ import {
   type ButtonProps as MuiButtonProps,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { createTheme } from '@mui/material/styles';
+import { Config as createPortalTheme } from '../../../mfe-base-origin/src/theme/Config';
+import { getTheme as getPortalTheme } from '../../../mfe-base-origin/src/theme/config/utils';
 
 interface BoundaryState {
   readonly error?: Error;
@@ -229,14 +230,10 @@ export const ChannelUtil = {};
 export const LoginUtil = {};
 export const Dispatcher = { default: useDispatcher };
 export const ThemeConfig = {
-  default: (theme: { readonly palette?: { readonly mode?: 'light' | 'dark' } }) => ({
-    config: createTheme({ palette: { mode: theme.palette?.mode ?? 'light' } }),
-  }),
+  default: createPortalTheme,
 };
 export const ThemeUtil = {
-  getTheme: (theme: string | undefined) => ({
-    palette: { mode: theme === 'dark' ? 'dark' as const : 'light' as const },
-  }),
+  getTheme: getPortalTheme,
 };
 export const Time = {
   Time: ({ value }: {

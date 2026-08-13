@@ -28,6 +28,16 @@ test('development origin logs in with fixtures and opens Cashflow Blotter', asyn
 
   await expect(page.getByText('Quick Search', { exact: true })).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText('CF-ACCEPT-001', { exact: true })).toBeVisible();
+
+  const presetButton = page.getByRole('button', { name: 'Pending Operator' }).first();
+  await expect(presetButton).toHaveCSS('font-family', /Poppins/);
+  await expect(presetButton).toHaveCSS('font-weight', '600');
+  await expect(presetButton).toHaveCSS('text-transform', 'capitalize');
+  const fontSize = Number.parseFloat(await presetButton.evaluate(element =>
+    window.getComputedStyle(element).fontSize,
+  ));
+  expect(fontSize).toBeGreaterThanOrEqual(10);
+  expect(fontSize).toBeLessThanOrEqual(12);
 });
 
 test('ratan loads cashflow over the second federation boundary', async ({ page, request }) => {

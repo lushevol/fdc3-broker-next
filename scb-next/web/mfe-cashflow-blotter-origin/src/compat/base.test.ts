@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { Dialog, Provider } from './base';
+import { Dialog, Provider, ThemeConfig, ThemeUtil } from './base';
 
 describe('base compatibility dialog', () => {
   afterEach(() => {
@@ -69,5 +69,28 @@ describe('base compatibility dialog', () => {
 
     document.documentElement.className = 'light';
     await waitFor(() => expect(screen.getByText('light')).toBeVisible());
+  });
+
+  it('preserves the production MUI theme contract inside the Cashflow remote', () => {
+    const { config } = ThemeConfig.default(ThemeUtil.getTheme('dark'));
+
+    expect(config.typography).toMatchObject({
+      fontFamily: '"Poppins", Helvetica',
+      fontSize: 12,
+      button: { textTransform: 'none' },
+    });
+    expect(config.shape.borderRadius).toBe(5);
+    expect(config.components?.MuiButton).toMatchObject({
+      defaultProps: { size: 'small' },
+      styleOverrides: {
+        root: {
+          textTransform: 'capitalize',
+          fontWeight: 600,
+        },
+      },
+    });
+    expect(config.components?.MuiIconButton?.defaultProps).toMatchObject({
+      size: 'small',
+    });
   });
 });
