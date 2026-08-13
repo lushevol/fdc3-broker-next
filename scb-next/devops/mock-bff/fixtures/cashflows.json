@@ -9,6 +9,17 @@
         {"Cashflow": {"Cashflow_Id": "CF-ACCEPT-001", "Cashflow_State": "WAITING", "Payment_Currency": "USD", "Payment_Date": "2026-08-13", "Payment_Amount": "1250000"}, "Trade_Id": "TRD-001"},
         {"Cashflow": {"Cashflow_Id": "CF-ACCEPT-002", "Cashflow_State": "READY", "Payment_Currency": "SGD", "Payment_Date": "2026-08-14", "Payment_Amount": "980000"}, "Trade_Id": "TRD-002"}
       ]
-    }
+    },
+    "graphCashFlowDetails": [
+      {
+        "cashflow": {
+          "Cashflow": {"Cashflow_Id": "CF-ACCEPT-001", "Cashflow_State": "WAITING", "Cashflow_Version": "1", "Cashflow_Business_Version": "1", "Cashflow_Minor_Version": "0", "Payment_Currency": "USD", "Payment_Date": "2026-08-13", "Payment_Amount": "1250000", "Pay_Receive_Indicator": "PAY"},
+          "Trade_Id": "TRD-001",
+          "Trade_Version": "1",
+          "Entity": {"Booking_Entity_SCI_FMID": "SCB-SG", "Counterparty_SCI_FMID": "CP-ACCEPT"}
+        },
+        "cashflowAuditTrail": []
+      }
+    ]
   }
 }

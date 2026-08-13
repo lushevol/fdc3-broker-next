@@ -246,6 +246,27 @@ For every screen, also verify:
 - ordinary API traffic goes through `/api/`, not directly to a hard-coded backend host;
 - opening and closing tabs does not corrupt the other workspace tabs.
 
+### Cashflow Blotter production-style comparison
+
+Use the supplied production screenshot as the visual baseline at a wide desktop viewport (approximately `2048×1152`). Verify these surfaces individually:
+
+1. **Quick Search** — dark two-column field layout, compact 32 px controls, visible panel border/header, readable labels/placeholders, aligned Clear Filters/Search actions.
+2. **Custom Search** — both `Filters` and its `Create or Modify` action are present. Open the editor and confirm its dialog is dark, viewport-constrained, closable, and has no `Cashflow CN could not be rendered` alert.
+3. **Custom View** — `Views`, selector, Clear, and `Create or Modify` are present. Open View Builder and confirm search/name/role/private controls, Available Fields, Display View, and the close action retain their spacing and contrast.
+4. **Data grid blotter** — the `.ag-theme-alpine-dark` grid uses white text on dark rows, visible row/header borders, compact row height, scroll containment, selection controls, settings/resize/export actions, and both acceptance records.
+5. **Cashflow Details** — double-click `CF-ACCEPT-001`; confirm the dialog is dark and constrained within the viewport, its close control is visible, the Cashflow Detail/History/Accounting Detail tabs are aligned, and the fixture details render without the `Unable to fetch cashflow` fallback.
+
+Failure signatures and their migration checks:
+
+- White Ant/MUI controls inside the dark portal: federation bridge is not inheriting the host `<html>` theme class.
+- Missing Filters panel or only one Create/Modify action: mock/real user lacks `RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Custom_Query_Builder`.
+- Override selectors do not match: Ratan must build with the `MicroWebUI_ratan_container` namespace.
+- Black/transparent grid rows: Cashflow did not bundle the complete local Ratan AG Grid skin; runtime CDN styles are not an acceptable production dependency.
+- Custom Search `forEach is not a function`: filter/view list endpoints must return a JSON array (`[]` when empty), not an object wrapper.
+- Details fetch fallback: the acceptance GraphQL response must include `data.graphCashFlowDetails` for detail queries.
+
+The production Playwright journey encodes these checks in `tests/e2e/federation.spec.ts`; keep the screenshots as human visual evidence alongside its output.
+
 ### Responsive check
 
 Resize Live Browser to `1024×768`, revisit the workspace and at least the Blotter and Authorization Limits screens, and confirm:

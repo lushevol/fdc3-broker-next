@@ -2,6 +2,8 @@ import {
   Component,
   createContext,
   useContext,
+  useEffect,
+  useState,
   type ErrorInfo,
   type PropsWithChildren,
   type ReactNode,
@@ -61,8 +63,13 @@ interface PlatformBridge {
   };
 }
 
+function getHostTheme(): PlatformBridge['theme'] {
+  if (typeof document === 'undefined') return 'light';
+  return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+}
+
 let platformBridge: PlatformBridge = {
-  theme: 'light',
+  theme: getHostTheme(),
   user: {
     id: 'portal-host',
     fullName: 'Portal Host User',
@@ -91,7 +98,22 @@ export function PlatformProvider({ children }: PropsWithChildren) {
 }
 
 function usePlatformContext(): PlatformContextValue {
-  return useContext(PlatformContext);
+  const [bridge, dispatch] = useContext(PlatformContext);
+  const [theme, setTheme] = useState<PlatformBridge['theme']>(getHostTheme);
+
+  useEffect(() => {
+    if (typeof document === 'undefined' || typeof MutationObserver === 'undefined') return;
+    const syncHostTheme = () => setTheme(getHostTheme());
+    syncHostTheme();
+    const observer = new MutationObserver(syncHostTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  return [{ ...bridge, theme }, dispatch];
 }
 
 export function configurePlatformBridge(capabilities: PlatformCapabilities) {

@@ -50,7 +50,29 @@ test('production edge logs in with fixtures and opens Cashflow Blotter', async (
   await page.getByText('Cashflow Blotter', { exact: true }).click();
 
   await expect(page.getByText('Quick Search', { exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText('Custom Search/View', { exact: true })).toBeVisible();
+  await expect(page.getByText('Filters', { exact: true })).toBeVisible();
+  await expect(page.getByText('Views', { exact: true })).toBeVisible();
+  await expect(page.getByRole('treegrid')).toBeVisible();
+  await expect(page.getByText(/Cashflow CN could not be rendered/)).toHaveCount(0);
   await expect(page.getByText('CF-ACCEPT-001', { exact: true })).toBeVisible();
   await expect(page.getByText('CF-ACCEPT-002', { exact: true })).toBeVisible();
+
+  const gridTheme = page.locator('.ag-grid-ratan .ag-theme-alpine-dark');
+  await expect(gridTheme).toHaveCSS('color', 'rgb(255, 255, 255)');
+  await expect(page.getByRole('row', { name: /CF-ACCEPT-001/ })).toHaveCSS(
+    'color',
+    'rgb(255, 255, 255)',
+  );
+
+  const builderButtons = page.getByRole('button', { name: 'Create or Modify' });
+  await expect(builderButtons).toHaveCount(2);
+  await builderButtons.nth(1).click();
+  await expect(page.getByRole('dialog', { name: /View Builder/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Close dialog' }).click();
+
+  await page.getByRole('row', { name: /CF-ACCEPT-001/ }).dblclick();
+  await expect(page.getByRole('dialog', { name: /Cashflow Detail/ })).toBeVisible();
+  await expect(page.getByText(/Unable to fetch cashflow/)).toHaveCount(0);
   expect(errors).toEqual([]);
 });

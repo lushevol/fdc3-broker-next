@@ -114,4 +114,46 @@ describe("SCB Next composition architecture", () => {
     expect(compose).toContain("read_only: true");
     expect(compose).toContain("no-new-privileges:true");
   });
+
+  it("preserves the production Ratan CSS namespace used by Cashflow overrides", () => {
+    const ratanConfig = readFileSync(
+      join(workspaceRoot, "web/mfe-ratan-container-origin/vite.config.ts"),
+      "utf8",
+    );
+    const cashflowLayout = readFileSync(
+      join(workspaceRoot, "web/mfe-cashflow-blotter-origin/src/Cashflow_CN/Main/style.ts"),
+      "utf8",
+    );
+
+    expect(ratanConfig).toContain(
+      '"process.env.MFE_APP_PREFIX_STYLE": JSON.stringify("MicroWebUI_ratan_container")',
+    );
+    expect(cashflowLayout).toContain(
+      'filterCreateOrModifyBtn: "MicroWebUI_ratan_container_filter_selector-view-btn"',
+    );
+    expect(cashflowLayout).toContain(
+      'viewCreateOrModifyBtn: "MicroWebUI_ratan_container_view_selector-view-btn"',
+    );
+    expect(cashflowLayout).not.toContain(
+      "${process.env.MFE_APP_PREFIX_STYLE}_ratan_container",
+    );
+  });
+
+  it("bundles the complete local Ratan grid skin into Cashflow", () => {
+    const cashflowGridStyles = readFileSync(
+      join(
+        workspaceRoot,
+        "web/mfe-cashflow-blotter-origin/src/cashflow-ratan/ratancomponents/DataGrid/styles/aggird.less",
+      ),
+      "utf8",
+    );
+
+    expect(cashflowGridStyles).toContain(
+      "mfe-ratan-container-origin/src/ratancomponents/DataGrid/styles/ag-grid-ratan.css",
+    );
+    expect(cashflowGridStyles).toContain(
+      "mfe-ratan-container-origin/src/ratancomponents/DataGrid/styles/ag-theme-alpine-ratan.css",
+    );
+    expect(cashflowGridStyles).not.toContain("https://");
+  });
 });

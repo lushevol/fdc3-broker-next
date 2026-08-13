@@ -1,8 +1,12 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { Dialog } from './base';
+import { Dialog, Provider } from './base';
 
 describe('base compatibility dialog', () => {
+  afterEach(() => {
+    document.documentElement.className = '';
+  });
+
   it('renders oversized legacy dialogs as closable, viewport-constrained modals', () => {
     const onClose = vi.fn();
 
@@ -43,5 +47,27 @@ describe('base compatibility dialog', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.queryByText('Hidden details')).not.toBeInTheDocument();
+  });
+
+  it('inherits host theme changes across the federation boundary', async () => {
+    document.documentElement.className = 'dark';
+
+    const ThemeProbe = () => {
+      const [store] = Provider.useContext();
+      return React.createElement('span', null, store.theme);
+    };
+
+    render(
+      React.createElement(
+        Provider.default,
+        null,
+        React.createElement(ThemeProbe),
+      ),
+    );
+
+    expect(screen.getByText('dark')).toBeVisible();
+
+    document.documentElement.className = 'light';
+    await waitFor(() => expect(screen.getByText('light')).toBeVisible());
   });
 });

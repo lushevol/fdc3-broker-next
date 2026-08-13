@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
   },
   css: { preprocessorOptions: { less: { javascriptEnabled: true } } },
   define: {
-    "process.env.MFE_APP_PREFIX_STYLE": JSON.stringify("MicroWebUI_ratan"),
+    "process.env.MFE_APP_PREFIX_STYLE": JSON.stringify("MicroWebUI_ratan_container"),
     "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV ?? "development"),
   },
   server: { host: "127.0.0.1", port: 8009, cors: true, headers: { "Cache-Control": "no-store" } },

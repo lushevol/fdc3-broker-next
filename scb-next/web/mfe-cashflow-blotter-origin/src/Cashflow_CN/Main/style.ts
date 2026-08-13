@@ -13,8 +13,8 @@ export const classes = {
   border: `${PREFIX}-search-section-body-border`,
   label: `${PREFIX}-search-section-body-label`,
   customFilterView: `${process.env.MFE_APP_PREFIX_STYLE}_CustomSearchView-selector`,
-  filterCreateOrModifyBtn: `${process.env.MFE_APP_PREFIX_STYLE}_ratan_container_filter_selector-view-btn`,
-  viewCreateOrModifyBtn: `${process.env.MFE_APP_PREFIX_STYLE}_ratan_container_view_selector-view-btn`,
+  filterCreateOrModifyBtn: "MicroWebUI_ratan_container_filter_selector-view-btn",
+  viewCreateOrModifyBtn: "MicroWebUI_ratan_container_view_selector-view-btn",
 };
 
 export const BreakPoint = {

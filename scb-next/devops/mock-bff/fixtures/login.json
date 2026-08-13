@@ -1,6 +1,6 @@
 {
   "result": "success",
-  "userInfo": "{\"sub\":\"mock.cashflow\",\"fullName\":\"Cashflow Acceptance User\",\"entitlement\":{\"role\":\"FMO_OPS_SUP\",\"actions\":[\"RATAN_CASHFLOW_BLOTTER:UI_Read_Access\",\"RATAN_CASHFLOW_BLOTTER:F_Export_Data\",\"RATAN_CASHFLOW_BLOTTER:F_Custom_Query_Builder\",\"RATAN_CASHFLOW_BLOTTER:F_Custom_View_Builder_Private\",\"RATAN_PROFILE_LIMITS:ACCESS_FMO_POST_TRADE_PORTAL\",\"RATAN_PROFILE_LIMITS:F_Input_Delete_Modify_Initiate\"]}}",
+  "userInfo": "{\"sub\":\"mock.cashflow\",\"fullName\":\"Cashflow Acceptance User\",\"entitlement\":{\"role\":\"FMO_OPS_SUP\",\"actions\":[\"RATAN_CASHFLOW_BLOTTER:UI_Read_Access\",\"RATAN_CASHFLOW_BLOTTER:F_Export_Data\",\"RATAN_CASHFLOW_BLOTTER:F_Custom_Query_Builder\",\"RATAN_CASHFLOW_BLOTTER:F_Custom_View_Builder_Private\",\"RATAN_STRATEGIC_CASHFLOW_BLOTTER:UI_Read_Access\",\"RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Export_Data\",\"RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Custom_Query_Builder\",\"RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Custom_View_Builder_Private\",\"RATAN_PROFILE_LIMITS:ACCESS_FMO_POST_TRADE_PORTAL\",\"RATAN_PROFILE_LIMITS:F_Input_Delete_Modify_Initiate\"]}}",
   "entities": [
     {
       "id": 1,
@@ -8,7 +8,7 @@
       "applicationName": "RATAN",
       "roleId": 1,
       "roleName": "FMO_OPS_SUP",
-      "subjects": [{"id": 1, "name": "RATAN_STRATEGIC_CASHFLOW_BLOTTER", "actions": [{"id": 1, "entitlementId": 1, "name": "UI_Read_Access"}, {"id": 2, "entitlementId": 2, "name": "F_Export_Data"}]}]
+      "subjects": [{"id": 1, "name": "RATAN_STRATEGIC_CASHFLOW_BLOTTER", "actions": [{"id": 1, "entitlementId": 1, "name": "UI_Read_Access"}, {"id": 2, "entitlementId": 2, "name": "F_Export_Data"}, {"id": 3, "entitlementId": 3, "name": "F_Custom_Query_Builder"}, {"id": 4, "entitlementId": 4, "name": "F_Custom_View_Builder_Private"}]}]
     }
   ],
   "drawers": [
