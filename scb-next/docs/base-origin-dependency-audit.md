@@ -189,10 +189,21 @@ This is a compatibility boundary, not a discretionary deferral. Do not use
 
 The completed migration passes:
 
-- Base production build.
+- Base production build with the declared Vite 8.2.1 toolchain.
 - Nested server TypeScript build.
 - 120 test files and 332 tests.
 - Storybook static build with 203 indexed entries.
+- Base local startup, mocked local login, New Tile drawer, and Cashflow tile
+  selection.
+
+The final Cashflow remote render is not yet an accepted pass. In the available
+no-lockfile dependency tree, the remotes resolve Base's MUI 9 installation
+instead of their declared MUI 5 line. Cashflow and Ratan still import removed
+MUI 5 icon entry points such as `CheckCircleOutline`, `ErrorOutline`, and
+`DeleteOutline`, so the Cashflow dynamic module fails during development. This
+confirms that the remotes must either receive their own reproducibly nested MUI
+5 dependencies or, preferably, be migrated to MUI 9 before portal-wide
+acceptance. Do not work around this with aliases in Base.
 
 Known baseline diagnostics remain: jsdom XHR `AggregateError` output, negative
 timer warnings, an undefined MUI Select value warning, and a dynamic-import
