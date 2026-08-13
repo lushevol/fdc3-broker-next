@@ -1,12 +1,4 @@
 import React from "react";
-import { TextEncoder, TextDecoder } from "text-encoding";
-// @ts-ignore
-if (typeof global.TextEncoder === "undefined") {
-  // @ts-ignore
-  global.TextEncoder = TextEncoder;
-  // @ts-ignore
-  global.TextDecoder = TextDecoder;
-}
 const mockComponent = (c) => {
   return <section>{c.children}</section>;
 }
