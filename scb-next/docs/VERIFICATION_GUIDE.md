@@ -47,6 +47,8 @@ Review the migration scope and architectural decisions:
 
 The dependency report records the latest versions checked at migration time, retained dependencies, proposed replacements, compatibility risks, and private-package blockers. Major React, UI framework, grid, GraphQL, and Spring upgrades are intentionally separate compatibility stages; they should not be treated as part of the federation cutover unless their complete regression suites are rerun.
 
+When porting a change from `scb/`, follow the source mapping and compatibility-boundary workflow in the migration runbook before using this guide as the release gate. Do not copy legacy build, lifecycle, or generated files into `scb-next`.
+
 ## 3. Verify the architecture
 
 Run the executable architecture assertions:
@@ -56,7 +58,7 @@ cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
 npm test -- --run tests/architecture.test.ts
 ```
 
-Expected result: `10 passed`.
+Expected result: `13 passed`.
 
 These assertions verify:
 
@@ -85,11 +87,7 @@ For a focused Cashflow gate:
 npm run test --workspace @fm/ratan_cashflow_blotter-origin -- --reporter=dot
 ```
 
-Recorded Cashflow baseline:
-
-- 241 test files passed;
-- 1,946 tests passed;
-- 17 tests intentionally skipped.
+Acceptance requires every discovered Cashflow test file to pass and the intentional skip set to remain reviewed and unchanged. Test counts are allowed to increase as regression coverage is added; use the dated production acceptance report for historical counts and retain the current command output with each release candidate.
 
 The workspace's explicit `coverage` command is not the unit-test acceptance gate. Its legacy blanket dependency inlining also transforms Vitest's coverage runtime and exposes pre-existing Ant Design/hoisted-mock behavior. Treat coverage remediation as migration debt and use the deterministic `npm test` result for this cutover.
 
@@ -232,16 +230,16 @@ Use these mock credentials:
 
 Open each drawer entry separately and compare the observed features and styling with this checklist:
 
-| Screen | Required acceptance evidence |
-| --- | --- |
-| Cashflow Blotter | Quick Search, preset counts, custom search/view controls, grid controls, `CF-ACCEPT-001`, `CF-ACCEPT-002`, formatted status/date/currency/amount values, result count `2/2` |
-| Cashflow Open Search | Access/whitelist permission gate renders rather than a blank or broken remote |
-| Cashflow Group Management | Search form, results grid, responsive columns |
-| Cashflow Dashboard | Region/entity filters, status cards, refresh or notification state |
-| BIC Netting Static Table | Filters, Create, Audit, Export, pagination, and grid |
-| Utilization Static Table | Filters, Create, Audit, Export, and results grid |
-| Cashflow Authorization Limits | Create action and Profile, Currency, Limitation, and Actions columns; this also verifies authenticated permission propagation across federation |
-| Cashflow Splitting Static | Filters, Create, Audit, Export, and results grid |
+| Screen                        | Required acceptance evidence                                                                                                                                                |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cashflow Blotter              | Quick Search, preset counts, custom search/view controls, grid controls, `CF-ACCEPT-001`, `CF-ACCEPT-002`, formatted status/date/currency/amount values, result count `2/2` |
+| Cashflow Open Search          | Access/whitelist permission gate renders rather than a blank or broken remote                                                                                               |
+| Cashflow Group Management     | Search form, results grid, responsive columns                                                                                                                               |
+| Cashflow Dashboard            | Region/entity filters, status cards, refresh or notification state                                                                                                          |
+| BIC Netting Static Table      | Filters, Create, Audit, Export, pagination, and grid                                                                                                                        |
+| Utilization Static Table      | Filters, Create, Audit, Export, and results grid                                                                                                                            |
+| Cashflow Authorization Limits | Create action and Profile, Currency, Limitation, and Actions columns; this also verifies authenticated permission propagation across federation                             |
+| Cashflow Splitting Static     | Filters, Create, Audit, Export, and results grid                                                                                                                            |
 
 For every screen, also verify:
 

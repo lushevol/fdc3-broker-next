@@ -6,12 +6,12 @@ Replace the copied SCB web composition runtime with Vite, Vitest, and Module Fed
 
 ## Runtime topology
 
-| Module | Role | Local origin | Federated interface |
-| --- | --- | --- | --- |
-| `mfe-base-origin` | Portal host | `http://127.0.0.1:8001` | Loads the Ratan remote and owns login, navigation, and workspace tabs |
-| `mfe-ratan-container-origin` | Container remote | `http://127.0.0.1:8009` | Exposes the existing Ratan application and loads the Cashflow remote |
-| `mfe-cashflow-blotter-origin` | Business remote | `http://127.0.0.1:8015` | Exposes the existing Cashflow blotter application |
-| `single-ui-bff` | Owned HTTP service | Existing configured port | Keeps existing HTTP request/response interfaces |
+| Module                        | Role               | Local origin             | Federated interface                                                   |
+| ----------------------------- | ------------------ | ------------------------ | --------------------------------------------------------------------- |
+| `mfe-base-origin`             | Portal host        | `http://127.0.0.1:8001`  | Loads the Ratan remote and owns login, navigation, and workspace tabs |
+| `mfe-ratan-container-origin`  | Container remote   | `http://127.0.0.1:8009`  | Exposes the existing Ratan application and loads the Cashflow remote  |
+| `mfe-cashflow-blotter-origin` | Business remote    | `http://127.0.0.1:8015`  | Exposes the existing Cashflow blotter application                     |
+| `single-ui-bff`               | Owned HTTP service | Existing configured port | Keeps existing HTTP request/response interfaces                       |
 
 `mfe-root-config-origin` is retained only as migration history. It is not part of the new runtime because the base origin now owns the host interface.
 
@@ -25,6 +25,16 @@ Replace the copied SCB web composition runtime with Vite, Vitest, and Module Fed
 
 Tests exercise these interfaces only. Build-tool internals and private collaborators are not test seams.
 
+## Source transition contract
+
+- `scb/` is a read-only reference and rollback baseline. `scb-next` must not import, link, or serve files from it at build time or runtime.
+- Port business behavior from the owning legacy workspace into the corresponding `scb-next` workspace. Do not synchronize whole directories or generated output.
+- Preserve component props, routes, permissions, HTTP paths and payloads, GraphQL schemas, style assets, theme behavior, and user-visible error states unless a separate specification changes them.
+- Translate legacy composition dependencies at the boundary: Module Federation replaces active `System.import` calls, while typed compatibility façades replace compile-time Base and Ratan package imports.
+- A new façade capability must be minimal, typed, and covered by a contract test. Compatibility code must not become a second implementation of business logic.
+- The active release scope is Base, Ratan, and the nested Cashflow remote. Copied loaders for unrelated SystemJS applications are migration references, not supported runtime paths.
+- Each port is independently reviewable and traceable to its legacy source revision. Framework major upgrades and broad refactors are separate changes.
+
 ## Functional acceptance criteria
 
 - No runtime or build dependency on `single-spa`, `single-spa-react`, `single-spa-layout`, SystemJS, or import-map overrides remains in the active three-origin runtime.
@@ -36,6 +46,9 @@ Tests exercise these interfaces only. Build-tool internals and private collabora
 - The BFF compiles and its tests pass without route/schema changes.
 - Playwright exercises the three-origin journey and records screenshots for visual comparison.
 - Live Browser acceptance confirms there are no visible layout breaks or uncaught console errors on the accepted journey.
+- Production artifacts contain no references to source files under `scb/`.
+- The host, both remotes, edge configuration, and accepted commit SHA are promoted as one release unit.
+- Backend-connected acceptance passes before production certification; fixture-backed acceptance alone certifies only frontend composition and rendering.
 
 ## Dependency policy
 
@@ -46,4 +59,4 @@ Tests exercise these interfaces only. Build-tool internals and private collabora
 
 ## Rollback
 
-The source `scb/` tree is unchanged. Rollback consists of stopping the `scb-next` origins and returning traffic to the original root-config/import-map deployment.
+The source `scb/` tree is unchanged. Rollback consists of draining `scb-next` traffic and returning users to the recorded original root-config/import-map deployment. Frontend rollback does not reverse data written through the BFF; schema or data changes require an independent backward-compatible rollback plan.

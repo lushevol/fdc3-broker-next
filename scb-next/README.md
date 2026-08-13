@@ -2,7 +2,7 @@
 
 An isolated migration of `scb/web` and `scb/services` from the single-spa/SystemJS composition model to Vite, Vitest, and Module Federation.
 
-See the [complete verification guide](docs/VERIFICATION_GUIDE.md), [migration runbook](docs/MIGRATION.md), [migration specification](docs/MIGRATION_SPEC.md), [dependency research](docs/dependency-research.md), and [production acceptance report](docs/PRODUCTION_ACCEPTANCE.md). The original `scb/` directory remains unchanged and is the rollback source.
+Start with the [migration runbook](docs/MIGRATION.md) when porting legacy changes or planning a cutover. Use the [migration specification](docs/MIGRATION_SPEC.md) for non-negotiable contracts, the [complete verification guide](docs/VERIFICATION_GUIDE.md) for release gates, [dependency research](docs/dependency-research.md) for version decisions, and the [production acceptance report](docs/PRODUCTION_ACCEPTANCE.md) for evidence. The original `scb/` directory remains unchanged and is the rollback source.
 
 ## Quick start
 
