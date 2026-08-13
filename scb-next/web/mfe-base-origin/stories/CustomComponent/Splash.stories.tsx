@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import type { Meta } from "@storybook/react";
+import type { Meta } from "@storybook/react-vite";
 /*
 This is custom component, in your code it should be imported from "src/Root/import"
 import { Splash } from "src/Root/import";

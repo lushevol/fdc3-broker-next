@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta } from "@storybook/react";
+import type { Meta } from "@storybook/react-vite";
 import Typography from '@mui/material/Typography';
 import SearchInput from "../../src/components/SearchInput";
 import MuiButton from '@mui/material/Button';

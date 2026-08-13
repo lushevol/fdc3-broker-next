@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta } from "@storybook/react";
+import type { Meta } from "@storybook/react-vite";
 import Button from '@mui/material/Button';
 import Typography from "@mui/material/Typography";
 import { SnackbarCloseReason } from "@mui/material/Snackbar";

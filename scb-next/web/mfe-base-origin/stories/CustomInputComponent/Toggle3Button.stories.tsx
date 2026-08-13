@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta } from "@storybook/react";
+import type { Meta } from "@storybook/react-vite";
 import { ToggleButtonGroup } from "@mui/material";
 import AdjustIcon from "@mui/icons-material/Adjust";
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';

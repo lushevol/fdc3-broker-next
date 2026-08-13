@@ -1,6 +1,6 @@
 //Please check this page https://mui.com/material-ui/react-text-field/ for detail
 import React from "react";
-import type { Meta } from "@storybook/react"
+import type { Meta } from "@storybook/react-vite"
 import {
   FormControl,
   InputLabel,

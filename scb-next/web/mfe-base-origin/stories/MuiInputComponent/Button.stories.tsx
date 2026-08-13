@@ -1,6 +1,6 @@
 //Please check this page https://mui.com/material-ui/react-button/ for detail
 import React from "react";
-import type { Meta } from "@storybook/react"
+import type { Meta } from "@storybook/react-vite"
 import {
   Button as MuiButton,
   ButtonProps as MuiButtonProps,

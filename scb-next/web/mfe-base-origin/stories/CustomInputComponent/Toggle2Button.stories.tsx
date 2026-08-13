@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta } from "@storybook/react";
+import type { Meta } from "@storybook/react-vite";
 import { ToggleButtonGroup } from "@mui/material";
 /*
 This is custom component, in your code it should be imported from "src/Root/import"

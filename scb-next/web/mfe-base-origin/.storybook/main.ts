@@ -1,56 +1,24 @@
-import type { StorybookConfig } from "@storybook/react-webpack5";
-import path from "path";
-const toPath = filePath => path.join(process.cwd(), filePath);
+import type { StorybookConfig } from "@storybook/react-vite";
 const config: StorybookConfig = {
   stories: [
-    "../stories/Overview.stories.mdx", 
-    "../stories/GettingStarted.stories.mdx", 
-    "../stories/Theme.stories.mdx", 
-    "../stories/Styling.stories.mdx", 
-    "../stories/**/*.stories.@(js|ts|tsx|mdx)",
+    "../stories/*.mdx",
+    "../stories/**/*.stories.@(js|ts|tsx)",
   ],
   addons: [
     "@storybook/addon-links",
-    "@storybook/addon-essentials",
-    "@storybook/addon-interactions",
-    "@storybook/addon-styling",
+    "@storybook/addon-docs",
     "@storybook/addon-a11y",
-    "@storybook/addon-storysource",
   ],
   framework: {
-    name: "@storybook/react-webpack5",
-    options: {}
-  },
-  webpackFinal: async config => {
-    return {
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config?.resolve?.alias,
-          "@emotion/core": toPath("node_modules/@emotion/react"),
-          "emotion-theming": toPath("node_modules/@emotion/react"),
-        }
-      }
-    };
+    name: "@storybook/react-vite",
+    options: {},
   },
   docs: {
     autodocs: "tag",
   },
   typescript: {
     check: false,
-    checkOptions: {},
-    reactDocgen: "react-docgen-typescript",
-    reactDocgenTypescriptOptions: {
-      allowSyntheticDefaultImports: false,
-      esModuleInterop: false,
-      shouldExtractLiteralValuesFromEnum: true,
-      shouldRemoveUndefinedFromOptional: true,
-      propFilter: (prop) =>
-        prop.parent
-          ? !/node_modules\/(?!@mui)/.test(prop.parent.fileName)
-          : true,
-    },
+    reactDocgen: "react-docgen",
   },
 };
 export default config;

@@ -11,22 +11,24 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       devMockApiPlugin(),
-      federation({
-        name: "mfe_base_host",
-        remotes: {
-          mfe_ratan_container: {
-            type: "module",
-            name: "mfe_ratan_container",
-            entry: ratanRemoteUrl,
-            entryGlobalName: "mfe_ratan_container",
-            shareScope: "default",
-          },
-        },
-        shared: {
-          react: { singleton: true, requiredVersion: "^18.2.0" },
-          "react-dom": { singleton: true, requiredVersion: "^18.2.0" },
-        },
-      }),
+      ...(process.env.STORYBOOK
+        ? []
+        : federation({
+            name: "mfe_base_host",
+            remotes: {
+              mfe_ratan_container: {
+                type: "module",
+                name: "mfe_ratan_container",
+                entry: ratanRemoteUrl,
+                entryGlobalName: "mfe_ratan_container",
+                shareScope: "default",
+              },
+            },
+            shared: {
+              react: { singleton: true, requiredVersion: "^18.2.0" },
+              "react-dom": { singleton: true, requiredVersion: "^18.2.0" },
+            },
+          })),
     ],
     define: {
       "process.env.MFE_APP_PREFIX_STYLE": JSON.stringify("MicroWebUI_base"),
