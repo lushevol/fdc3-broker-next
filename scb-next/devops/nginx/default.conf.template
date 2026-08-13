@@ -1,0 +1,60 @@
+server {
+  listen 8080;
+  server_name ${SERVER_NAME};
+  root /srv/scb-next/base;
+  index index.html;
+
+  add_header X-Content-Type-Options nosniff always;
+  add_header X-Frame-Options SAMEORIGIN always;
+  add_header Referrer-Policy same-origin always;
+  add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+  add_header Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' ws: wss:" always;
+
+  location = /healthz {
+    access_log off;
+    default_type application/json;
+    add_header Cache-Control "no-store" always;
+    return 200 '{"status":"ok","composition":"scb-next"}\n';
+  }
+
+  location = /remotes/ratan/remoteEntry.js {
+    alias /srv/scb-next/ratan/remoteEntry.js;
+    add_header Cache-Control "no-store, max-age=0" always;
+  }
+
+  location ^~ /remotes/ratan/ {
+    alias /srv/scb-next/ratan/;
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    try_files $uri =404;
+  }
+
+  location = /remotes/cashflow/remoteEntry.js {
+    alias /srv/scb-next/cashflow/remoteEntry.js;
+    add_header Cache-Control "no-store, max-age=0" always;
+  }
+
+  location ^~ /remotes/cashflow/ {
+    alias /srv/scb-next/cashflow/;
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    try_files $uri =404;
+  }
+
+  location ^~ /api/ {
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_pass ${BFF_ORIGIN};
+  }
+
+  location ~* \.(?:css|js|mjs|woff2?|png|jpg|jpeg|gif|svg|ico)$ {
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    try_files $uri =404;
+  }
+
+  location / {
+    add_header Cache-Control "no-store, max-age=0" always;
+    try_files $uri $uri/ /index.html;
+  }
+}

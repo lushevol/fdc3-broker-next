@@ -1,8 +1,12 @@
 import { federation } from "@module-federation/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const ratanRemoteUrl = env.VITE_RATAN_REMOTE_URL ?? "http://127.0.0.1:8009/remoteEntry.js";
+
+  return {
   plugins: [
     react(),
     federation({
@@ -11,7 +15,7 @@ export default defineConfig({
         mfe_ratan_container: {
           type: "module",
           name: "mfe_ratan_container",
-          entry: "http://127.0.0.1:8009/remoteEntry.js",
+          entry: ratanRemoteUrl,
           entryGlobalName: "mfe_ratan_container",
           shareScope: "default",
         },
@@ -29,4 +33,5 @@ export default defineConfig({
   server: { host: "127.0.0.1", port: 8001, headers: { "Cache-Control": "no-store" } },
   preview: { host: "127.0.0.1", port: 8001 },
   build: { target: "chrome89" },
+  };
 });

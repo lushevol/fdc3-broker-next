@@ -1,0 +1,10 @@
+{
+  "version": {"fieldsConfig": "acceptance-v1", "fields": "acceptance-v1"},
+  "fields": [
+    {"indexedTerm": "Cashflow.Cashflow_Id", "businessTerm": "Cashflow ID", "dataType": "String", "context": ["CASHFLOW_DATA"], "blotterContext": ["CASHFLOW_DATA"], "scope": "{\"disabledBlotter\":[]}"},
+    {"indexedTerm": "Cashflow.Cashflow_State", "businessTerm": "Cashflow State", "dataType": "String", "context": ["CASHFLOW_DATA"], "blotterContext": ["CASHFLOW_DATA"], "scope": "{\"disabledBlotter\":[]}"},
+    {"indexedTerm": "Cashflow.Payment_Currency", "businessTerm": "Payment Currency", "dataType": "String", "context": ["CASHFLOW_DATA"], "blotterContext": ["CASHFLOW_DATA"], "scope": "{\"disabledBlotter\":[]}"},
+    {"indexedTerm": "Cashflow.Payment_Date", "businessTerm": "Payment Date", "dataType": "Date", "context": ["CASHFLOW_DATA"], "blotterContext": ["CASHFLOW_DATA"], "scope": "{\"disabledBlotter\":[]}"},
+    {"indexedTerm": "Cashflow.Payment_Amount", "businessTerm": "Payment Amount", "dataType": "Number", "context": ["CASHFLOW_DATA"], "blotterContext": ["CASHFLOW_DATA"], "scope": "{\"disabledBlotter\":[]}"}
+  ]
+}

@@ -1,9 +1,14 @@
 import { federation } from "@module-federation/vite";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const cashflowRemoteUrl = env.VITE_CASHFLOW_REMOTE_URL ?? "http://127.0.0.1:8015/remoteEntry.js";
+
+  return {
+  base: env.VITE_PUBLIC_BASE ?? "/",
   plugins: [
     react(),
     federation({
@@ -15,7 +20,7 @@ export default defineConfig({
         mfe_cashflow_blotter: {
           type: "module",
           name: "mfe_cashflow_blotter",
-          entry: "http://127.0.0.1:8015/remoteEntry.js",
+          entry: cashflowRemoteUrl,
           entryGlobalName: "mfe_cashflow_blotter",
           shareScope: "default",
         },
@@ -38,4 +43,5 @@ export default defineConfig({
   server: { host: "127.0.0.1", port: 8009, cors: true, headers: { "Cache-Control": "no-store" } },
   preview: { host: "127.0.0.1", port: 8009, cors: true },
   build: { target: "chrome89" },
+  };
 });

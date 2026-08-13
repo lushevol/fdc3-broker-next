@@ -80,4 +80,38 @@ describe("SCB Next composition architecture", () => {
       );
     }
   });
+
+  it("supports same-origin production federation behind the Nginx edge", () => {
+    const baseConfig = readFileSync(
+      join(workspaceRoot, "web/mfe-base-origin/vite.config.ts"),
+      "utf8",
+    );
+    const ratanConfig = readFileSync(
+      join(workspaceRoot, "web/mfe-ratan-container-origin/vite.config.ts"),
+      "utf8",
+    );
+    const cashflowConfig = readFileSync(
+      join(workspaceRoot, "web/mfe-cashflow-blotter-origin/vite.config.ts"),
+      "utf8",
+    );
+
+    expect(baseConfig).toContain("VITE_RATAN_REMOTE_URL");
+    expect(ratanConfig).toContain("VITE_CASHFLOW_REMOTE_URL");
+    expect(ratanConfig).toContain("VITE_PUBLIC_BASE");
+    expect(cashflowConfig).toContain("VITE_PUBLIC_BASE");
+  });
+
+  it("packages an immutable, health-checked Nginx production edge", () => {
+    const nginxRoot = join(workspaceRoot, "devops/nginx");
+    const config = readFileSync(join(nginxRoot, "default.conf.template"), "utf8");
+    const compose = readFileSync(join(workspaceRoot, "devops/docker-compose.production.yml"), "utf8");
+
+    expect(config).toContain("location = /healthz");
+    expect(config).toContain("location ^~ /remotes/ratan/");
+    expect(config).toContain("location ^~ /remotes/cashflow/");
+    expect(config).toContain("proxy_pass ${BFF_ORIGIN}");
+    expect(config).toContain("Content-Security-Policy");
+    expect(compose).toContain("read_only: true");
+    expect(compose).toContain("no-new-privileges:true");
+  });
 });

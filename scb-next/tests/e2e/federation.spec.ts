@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('base host preserves the login experience and styling', async ({ page }) => {
+  test.skip(!!process.env.PLAYWRIGHT_PRODUCTION_EDGE, 'development-origin acceptance only');
   const errors: Error[] = [];
   page.on('pageerror', error => errors.push(error));
 
@@ -14,6 +15,7 @@ test('base host preserves the login experience and styling', async ({ page }) =>
 });
 
 test('ratan loads cashflow over the second federation boundary', async ({ page, request }) => {
+  test.skip(!!process.env.PLAYWRIGHT_PRODUCTION_EDGE, 'development-origin acceptance only');
   const errors: Error[] = [];
   page.on('pageerror', error => errors.push(error));
 
@@ -29,5 +31,26 @@ test('ratan loads cashflow over the second federation boundary', async ({ page, 
     timeout: 20_000,
   });
   await expect(page.getByRole('button', { name: 'Refresh Page' })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('production edge logs in with fixtures and opens Cashflow Blotter', async ({ page }) => {
+  test.skip(!process.env.PLAYWRIGHT_PRODUCTION_EDGE, 'production-edge acceptance only');
+  const errors: Error[] = [];
+  page.on('pageerror', error => errors.push(error));
+
+  await page.goto('/?show_normal_login=Y&survey=no');
+  await page.getByPlaceholder('Enter Username').fill('mock.cashflow');
+  await page.getByPlaceholder('Enter Password').fill('acceptance');
+  await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+  await expect(page.getByText('New Tile', { exact: true })).toBeVisible();
+
+  await page.getByText('New Tile', { exact: true }).click();
+  await expect(page.getByText('Cashflow Blotter', { exact: true })).toBeVisible();
+  await page.getByText('Cashflow Blotter', { exact: true }).click();
+
+  await expect(page.getByText('Quick Search', { exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText('CF-ACCEPT-001', { exact: true })).toBeVisible();
+  await expect(page.getByText('CF-ACCEPT-002', { exact: true })).toBeVisible();
   expect(errors).toEqual([]);
 });

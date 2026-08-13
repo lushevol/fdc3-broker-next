@@ -1,0 +1,25 @@
+services:
+  mock-bff:
+    image: nginx:1.28.0-alpine3.21
+    command: ["nginx", "-g", "daemon off;", "-c", "/etc/nginx/mock/nginx.conf"]
+    read_only: true
+    tmpfs: [/var/cache/nginx, /var/run, /tmp]
+    volumes:
+      - ./mock-bff/nginx.conf:/etc/nginx/mock/nginx.conf:ro
+      - ./mock-bff/fixtures:/etc/nginx/mock/fixtures:ro
+    security_opt: [no-new-privileges:true]
+
+  scb-next-edge:
+    build:
+      context: ..
+      dockerfile: devops/nginx/Dockerfile
+    image: scb-next-edge:${IMAGE_TAG:-local}
+    environment:
+      SERVER_NAME: localhost
+      BFF_ORIGIN: http://mock-bff:8081
+    ports: ["9081:8080"]
+    read_only: true
+    tmpfs: [/var/cache/nginx, /var/run, /tmp, /etc/nginx/conf.d]
+    security_opt: [no-new-privileges:true]
+    depends_on: [mock-bff]
+    restart: unless-stopped

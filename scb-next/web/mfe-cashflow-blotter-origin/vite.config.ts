@@ -1,9 +1,13 @@
 import { federation } from '@module-federation/vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+
+  return {
+  base: env.VITE_PUBLIC_BASE ?? '/',
   plugins: [
     react(),
     federation({
@@ -44,4 +48,5 @@ export default defineConfig({
   server: { host: '127.0.0.1', port: 8015, cors: true, headers: { 'Cache-Control': 'no-store' } },
   preview: { host: '127.0.0.1', port: 8015, cors: true },
   build: { target: 'chrome89' },
+  };
 });

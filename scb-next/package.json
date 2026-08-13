@@ -11,6 +11,9 @@
   "scripts": {
     "dev": "concurrently -k -n base,ratan,cashflow -c blue,green,magenta \"npm run dev --workspace @fm/base-origin\" \"npm run dev --workspace @fm/ratan_container-origin\" \"npm run dev --workspace @fm/ratan_cashflow_blotter-origin\"",
     "build": "npm run build --workspaces --if-present",
+    "build:production": "sh ./devops/scripts/build-production.sh",
+    "serve:production": "sh ./devops/scripts/serve-production.sh",
+    "stop:production": "sh ./devops/scripts/stop-production.sh",
     "test": "vitest run --config vitest.config.ts",
     "test:unit": "npm run test --workspaces --if-present",
     "test:e2e": "playwright test",

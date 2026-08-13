@@ -1,0 +1,14 @@
+{
+  "data": {
+    "cashflowUltraQuery": {
+      "totalResult": 2,
+      "pageIndex": 0,
+      "itemsPerPage": 100,
+      "lastPage": true,
+      "results": [
+        {"Cashflow": {"Cashflow_Id": "CF-ACCEPT-001", "Cashflow_State": "WAITING", "Payment_Currency": "USD", "Payment_Date": "2026-08-13", "Payment_Amount": "1250000"}, "Trade_Id": "TRD-001"},
+        {"Cashflow": {"Cashflow_Id": "CF-ACCEPT-002", "Cashflow_State": "READY", "Payment_Currency": "SGD", "Payment_Date": "2026-08-14", "Payment_Amount": "980000"}, "Trade_Id": "TRD-002"}
+      ]
+    }
+  }
+}

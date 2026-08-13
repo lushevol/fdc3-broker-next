@@ -38,6 +38,25 @@ describe('Cashflow-owned Ratan utility compatibility', () => {
     expect(hasPermission('RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Release')).toBe(false);
   });
 
+  it('inherits the authenticated portal user across the federation boundary', () => {
+    localStorage.setItem('SET_USER', JSON.stringify({
+      id: 'mock.cashflow',
+      fullName: 'Cashflow Acceptance User',
+      entitlement: {
+        role: 'FMO_OPS_SUP',
+        actions: ['RATAN_PROFILE_LIMITS:ACCESS_FMO_POST_TRADE_PORTAL'],
+      },
+    }));
+
+    expect(getUser()).toMatchObject({
+      id: 'mock.cashflow',
+      name: 'Cashflow Acceptance User',
+      role: 'FMO_OPS_SUP',
+    });
+    expect(hasPermission('RATAN_PROFILE_LIMITS:ACCESS_FMO_POST_TRADE_PORTAL')).toBe(true);
+    localStorage.removeItem('SET_USER');
+  });
+
   it('preserves disabled-feature user overrides', () => {
     vi.spyOn(Hooks, 'getHooks').mockReturnValue({
       store: {

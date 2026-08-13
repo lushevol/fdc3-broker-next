@@ -168,7 +168,20 @@ export const Service = {
   },
 };
 export const Hooks = {
-  getHooks: () => ({ store: platformBridge }),
+  getHooks: () => {
+    const serializedUser = window.localStorage?.getItem('SET_USER');
+    if (!serializedUser) return { store: platformBridge };
+    try {
+      return {
+        store: {
+          ...platformBridge,
+          user: JSON.parse(serializedUser),
+        },
+      };
+    } catch {
+      return { store: platformBridge };
+    }
+  },
 };
 export const CommonUtil = {
   getEnv: () => 'portal-host',
