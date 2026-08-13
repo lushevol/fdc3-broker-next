@@ -1,6 +1,5 @@
 import React from "react";
 import Box from "@mui/material/Box";
-import { GridValueGetterParams } from "@mui/x-data-grid";
 import { FieldProps } from "./interface";
 
 const useController = (props: FieldProps) => {
@@ -8,7 +7,12 @@ const useController = (props: FieldProps) => {
   const value = React.useMemo(
     () =>
       column.valueGetter
-        ? column.valueGetter({ row: record } as GridValueGetterParams)
+        ? column.valueGetter(
+            record[column.field] as never,
+            record,
+            column,
+            undefined as never
+          )
         : record[column.field],
     [record, column.valueGetter, column.field]
   );
@@ -27,7 +31,12 @@ const useController = (props: FieldProps) => {
   }, [fieldValue]);
   React.useEffect(() => {
     const _value = column.valueGetter
-      ? column.valueGetter({ row: record } as GridValueGetterParams)
+      ? column.valueGetter(
+          record[column.field] as never,
+          record,
+          column,
+          undefined as never
+        )
       : record[column.field];
     setFieldValue(_value);
   }, [resetId]);

@@ -69,10 +69,10 @@ const Comp = ({ openAuditPopup, auditRows }) => {
                     headerName: "Created At",
                     width: 200,
                     readOnly: true,
-                    valueGetter: (value) => {
+                    valueGetter: (_value, row) => {
                         let date = new Date();
-                        if (value.row?.updatedAt?.length) {
-                            date = new Date(value.row.createdAt);
+                        if (row?.updatedAt?.length) {
+                            date = new Date(row.createdAt);
                         }
                         return date;
                     },
@@ -88,10 +88,10 @@ const Comp = ({ openAuditPopup, auditRows }) => {
                     headerName: "Updated At",
                     width: 200,
                     readOnly: true,
-                    valueGetter: (value) => {
+                    valueGetter: (_value, row) => {
                         let date = new Date();
-                        if (value.row?.updatedAt?.length) {
-                            date = new Date(value.row.updatedAt);
+                        if (row?.updatedAt?.length) {
+                            date = new Date(row.updatedAt);
                         }
                         return date;
                     },
@@ -193,10 +193,10 @@ const Comp = ({ openAuditPopup, auditRows }) => {
                     headerName: "Created At",
                     width: 200,
                     readOnly: true,
-                    valueGetter: (value) => {
+                    valueGetter: (_value, row) => {
                         let date = new Date();
-                        if (value.row?.updatedAt?.length) {
-                            date = new Date(value.row.createdAt);
+                        if (row?.updatedAt?.length) {
+                            date = new Date(row.createdAt);
                         }
                         return date;
                     },
@@ -212,10 +212,10 @@ const Comp = ({ openAuditPopup, auditRows }) => {
                     headerName: "Updated At",
                     width: 200,
                     readOnly: true,
-                    valueGetter: (value) => {
+                    valueGetter: (_value, row) => {
                         let date = new Date();
-                        if (value.row?.updatedAt?.length) {
-                            date = new Date(value.row.updatedAt);
+                        if (row?.updatedAt?.length) {
+                            date = new Date(row.updatedAt);
                         }
                         return date;
                     },

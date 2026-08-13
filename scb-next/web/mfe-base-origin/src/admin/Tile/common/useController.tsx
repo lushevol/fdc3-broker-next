@@ -136,13 +136,14 @@ const useController = (_props: TileProps) => {
           field: "applicationCategory",
           headerName: "Aplication Category",
           width: 250,
-          type: "autoComplete",
+          type: "singleSelect",
+          editorType: "autoComplete",
           hiddenImage: true,
           valueOptions: originalCategories
             .map((item) => item.label)
             .filter((label): label is string => typeof label === "string"),
           renderCell: (props) => props?.row?.applicationCategory?.label,
-          valueGetter: (props) => props?.row?.applicationCategory?.label,
+          valueGetter: (_value, row) => row?.applicationCategory?.label,
         },
         {
           field: "title",
@@ -158,7 +159,8 @@ const useController = (_props: TileProps) => {
           field: "imageDarkTheme",
           headerName: "Image URL for Dark Theme",
           width: 300,
-          type: "autoComplete",
+          type: "singleSelect",
+          editorType: "autoComplete",
           valueOptions: [
             "darkIcons/cashflow.dark.svg",
             "darkIcons/cn.settlement.dark.svg",
@@ -188,7 +190,8 @@ const useController = (_props: TileProps) => {
           field: "imageLightTheme",
           headerName: "Image URL for Light Theme",
           width: 300,
-          type: "autoComplete",
+          type: "singleSelect",
+          editorType: "autoComplete",
           valueOptions: [
             "lightIcons/cashflow.light.svg",
             "lightIcons/cn.settlement.light.svg",
@@ -218,12 +221,13 @@ const useController = (_props: TileProps) => {
           field: "importMap",
           headerName: "Container",
           width: 250,
-          type: "autoComplete",
+          type: "singleSelect",
+          editorType: "autoComplete",
           valueOptions: importMap
             .map((item) => item.keyName)
             .filter((keyName): keyName is string => typeof keyName === "string"),
           renderCell: (props) => props?.row?.importMap?.keyName,
-          valueGetter: (props) => props?.row?.importMap?.keyName,
+          valueGetter: (_value, row) => row?.importMap?.keyName,
           hiddenImage: true,
         },
         {
@@ -313,8 +317,8 @@ const useController = (_props: TileProps) => {
           readOnly: true,
           renderCell: (props) =>
             props?.row?.applicationCategory?.applicationCategoryId,
-          valueGetter: (props) =>
-            props?.row?.applicationCategory?.applicationCategoryId,
+          valueGetter: (_value, row) =>
+            row?.applicationCategory?.applicationCategoryId,
           placeholder: "<<will be auto generated>>",
         },
         {
@@ -323,7 +327,7 @@ const useController = (_props: TileProps) => {
           width: 150,
           readOnly: true,
           renderCell: (props) => props?.row?.importMap?.importMapId,
-          valueGetter: (props) => props?.row?.importMap?.importMapId,
+          valueGetter: (_value, row) => row?.importMap?.importMapId,
           placeholder: "<<will be auto generated>>",
         },
         {

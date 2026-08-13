@@ -20,7 +20,7 @@ const Field: React.FC<FieldProps> = (props: FieldProps): React.ReactElement => {
     RenderOptions,
   } = useController(props);
   let element;
-  switch (column?.type) {
+  switch (column.editorType ?? column.type) {
     case "actions":
       element = <></>;
       break;

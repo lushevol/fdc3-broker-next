@@ -88,13 +88,14 @@ const Comp = () => {
             description: 'This column has a value getter and is not sortable.',
             sortable: false,
             width: 160,
-            valueGetter: (value: any) => `${value?.row?.firstName || ''} ${value?.row?.lastName || ''}`,
+            valueGetter: (_value, row) => `${row?.firstName || ''} ${row?.lastName || ''}`,
         },
         {
             field: "imageLightTheme",
             headerName: "Image URL for Light Theme",
             width: 300,
-            type: "autoComplete",
+            type: "singleSelect",
+            editorType: "autoComplete",
             valueOptions: [
                 "lightIcons/cashflow.light.svg",
                 "lightIcons/cn.settlement.light.svg",
@@ -173,7 +174,8 @@ const Comp = () => {
                 field: "imageLightTheme",
                 headerName: "Image URL for Light Theme",
                 width: 300,
-                type: "autoComplete",
+                type: "singleSelect",
+                editorType: "autoComplete",
                 valueOptions: [
                     "lightIcons/cashflow.light.svg",
                     "lightIcons/cn.settlement.light.svg",

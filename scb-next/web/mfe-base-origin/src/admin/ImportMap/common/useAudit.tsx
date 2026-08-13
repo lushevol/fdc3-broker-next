@@ -88,10 +88,10 @@ const useAudit = () => {
           headerName: "Created At",
           width: 200,
           readOnly: true,
-          valueGetter: (value) => {
+          valueGetter: (_value, row) => {
             let date = new Date();
-            if (value.row?.updatedAt?.length) {
-              date = new Date(value.row.createdAt);
+            if (row?.updatedAt?.length) {
+              date = new Date(row.createdAt);
             }
             return DateTimeFormat(
               store?.timeType?.toUpperCase(),
@@ -113,10 +113,10 @@ const useAudit = () => {
           headerName: "Updated At",
           width: 200,
           readOnly: true,
-          valueGetter: (value) => {
+          valueGetter: (_value, row) => {
             let date = new Date();
-            if (value.row?.updatedAt?.length) {
-              date = new Date(value.row.updatedAt);
+            if (row?.updatedAt?.length) {
+              date = new Date(row.updatedAt);
             }
             return DateTimeFormat(
               store?.timeType?.toUpperCase(),

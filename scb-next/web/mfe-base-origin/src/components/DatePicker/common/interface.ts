@@ -1,6 +1,7 @@
 import { DatePickerProps as MuiDatePickerProps } from "@mui/x-date-pickers/DatePicker";
-type TDate = /*unresolved*/ any;
-export interface DatePickerProps extends MuiDatePickerProps<TDate> {
+import type { Dayjs } from "dayjs";
+
+export interface DatePickerProps extends MuiDatePickerProps<Dayjs, boolean> {
   labelPosition?: "top" | "left";
   hidden?: boolean;
 }
