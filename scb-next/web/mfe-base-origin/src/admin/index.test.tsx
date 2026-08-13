@@ -3,8 +3,10 @@ import Index from "./";
 import Provider from "../hooks/provider";
 import ThemeProvider from "../theme";
 
-vi.mock("@mui/x-data-grid/components/cell/GridActionsCellItem", () => {
+vi.mock("@mui/x-data-grid", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@mui/x-data-grid")>();
   return {
+    ...actual,
     __esModule: true,
     default: () => {
       return {

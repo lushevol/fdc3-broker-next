@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import useController from "./common/useController";
 import Root, { classes, PREFIX } from "./common/style";
 import InputLabel from "@mui/material/InputLabel";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import InputAdornment from "@mui/material/InputAdornment";
 import FormControl from "@mui/material/FormControl";
@@ -38,7 +38,7 @@ const Login: React.FC = (): ReactElement => {
     <ErrorBoundry>
       <Root className={classes.root} data-testid={`${PREFIX}`}>
         <Grid container spacing={0}>
-          <Grid item xs={4} className={classes.gridleft}>
+          <Grid size={4} className={classes.gridleft}>
             <main className={classes.left}>
               {showNormalLogin ? (
                 <>
@@ -62,7 +62,7 @@ const Login: React.FC = (): ReactElement => {
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
-                              <PersonOutlineIcon />
+                              <PersonOutlinedIcon />
                             </InputAdornment>
                           ),
                         }}
@@ -134,7 +134,7 @@ const Login: React.FC = (): ReactElement => {
               </section>
             </main>
           </Grid>
-          <Grid item xs={8} className={classes.gridright}>
+          <Grid size={8} className={classes.gridright}>
             <main className={classes.right}>
               <TabPanel value={value} index={0}>
                 <Typography variant="h2" gutterBottom>

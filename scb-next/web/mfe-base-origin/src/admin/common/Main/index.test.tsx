@@ -6,8 +6,10 @@ import Actions from "../Actions";
 import Status from "../Status";
 
 
-vi.mock("@mui/x-data-grid/components/cell/GridActionsCellItem", () => {
+vi.mock("@mui/x-data-grid", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("@mui/x-data-grid")>();
     return {
+        ...actual,
         __esModule: true,
         default: () => {
             return {

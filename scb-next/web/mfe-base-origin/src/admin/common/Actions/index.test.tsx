@@ -2,14 +2,10 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import Actions from "./index";
 
-vi.mock("@mui/x-data-grid/components/cell/GridActionsCellItem", () => {
+vi.mock("@mui/x-data-grid", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@mui/x-data-grid")>();
   return {
-    __esModule: true,
-    default: () => {
-      return {
-        GridActionsCellItem: (props) => { return (<div>{props.children}</div>) },
-      };
-    },
+    ...actual,
     GridActionsCellItem: (props) => { return (<div>{props.children}</div>) },
   };
 });
