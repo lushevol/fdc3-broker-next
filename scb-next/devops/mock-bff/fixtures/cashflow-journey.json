@@ -1,0 +1,79 @@
+{
+  "metric": {
+    "data": {
+      "cashflowUltraQuery": {
+        "totalResult": 10,
+        "pageIndex": 0,
+        "itemsPerPage": 1000,
+        "lastPage": true,
+        "results": [
+          { "Cashflow": { "Cashflow_Id": "0AP58899062" } },
+          { "Cashflow": { "Cashflow_Id": "M0P56753524" } },
+          { "Cashflow": { "Cashflow_Id": "0AP58899056" } }
+        ]
+      }
+    }
+  },
+  "emptyMetric": {
+    "data": { "cashflowUltraQuery": { "totalResult": 0, "pageIndex": 0, "itemsPerPage": 1000, "lastPage": true, "results": [] } }
+  },
+  "search": {
+    "data": {
+      "cashflowUltraQuery": {
+        "totalResult": 1,
+        "pageIndex": 0,
+        "itemsPerPage": 1000,
+        "lastPage": true,
+        "results": [
+          {
+            "BCS_Trade_Id": null,
+            "Trade_Id": "56753524",
+            "Trade_State": "CONFIRMED",
+            "Cashflow": {
+              "Cashflow_Id": "M0P56753524",
+              "Cashflow_State": "WAITING",
+              "Cashflow_Affirmation_Status": "Unaffirmed",
+              "Cashflow_Event_Type": "New",
+              "Cashflow_Minor_Version": 6,
+              "Payment_Currency": "USD",
+              "Payment_Date": "2026-08-14",
+              "Payment_Amount": "11.10",
+              "Pay_Receive_Indicator": "Pay",
+              "Cashflow_Sub_State": "Pending Operator"
+            },
+            "Entity": { "Booking_Entity_SCI_FMID": "2", "Counterparty_SCI_FMID": "401016497" },
+            "Data_Flow": { "Data_Source_System": "MUREX" }
+          }
+        ]
+      }
+    }
+  },
+  "details": {
+    "data": {
+      "graphCashFlowDetails": [
+        {
+          "cashflow": {
+            "Cashflow": {
+              "Cashflow_Id": "M0P56753524",
+              "Cashflow_State": "WAITING",
+              "Cashflow_Affirmation_Status": "Unaffirmed",
+              "Payment_Currency": "USD",
+              "Payment_Date": "2026-08-14",
+              "Payment_Amount": "11.10",
+              "Cashflow_Sub_State": "Pending Operator"
+            },
+            "Trade_Id": "56753524",
+            "Trade_State": "CONFIRMED",
+            "Entity": { "Booking_Entity_SCI_FMID": "2", "Counterparty_SCI_FMID": "401016497" },
+            "Data_Flow": { "Data_Source_System": "MUREX" }
+          },
+          "cashflowAuditTrail": [],
+          "ratanException": []
+        }
+      ]
+    }
+  },
+  "holiday": [{ "currencyCode": "USD", "eventDate": "2026-08-14", "cashflowId": "0AP58899052", "isHoliday": false, "eventName": null }],
+  "filters": [{ "id": "mock-filter-1", "name": "Pending operator cashflows", "type": "STRATEGIC_CASHFLOW_FILTER_BUILDER" }],
+  "views": [{ "id": "mock-view-1", "name": "Cashflow operations", "type": "CASHFLOW_CN_VIEW_BUILDER" }]
+}

@@ -13,7 +13,7 @@ export type DevMockApiMiddleware = (
   request: IncomingMessage,
   response: ServerResponse,
   next: Next,
-) => void;
+) => void | Promise<void>;
 
 function sendFixture(response: ServerResponse, fixtureName: string): void {
   response.statusCode = 200;
@@ -28,8 +28,21 @@ function sendJson(response: ServerResponse, body: unknown): void {
   response.end(JSON.stringify(body));
 }
 
+function journeyFixture<T = unknown>(selector: string): T {
+  const fixture = JSON.parse(readFileSync(join(FIXTURES_ROOT, "cashflow-journey.json"), "utf8")) as Record<string, T>;
+  return fixture[selector] as T;
+}
+
+async function readBody(request: IncomingMessage): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of request) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
+
 export function createDevMockApiMiddleware(): DevMockApiMiddleware {
-  return (request, response, next) => {
+  return async (request, response, next) => {
     const pathname = new URL(request.url ?? "/", "http://127.0.0.1").pathname;
 
     if (request.method === "POST" && pathname === "/api/auth/v2/sso/login") {
@@ -55,12 +68,44 @@ export function createDevMockApiMiddleware(): DevMockApiMiddleware {
       return;
     }
 
-    if (/^\/api\/ratan\/v[23]\/customview\/(filters|views)/.test(pathname)) {
+    if (/^\/api\/ratan\/v[23]\/customview\/filters/.test(pathname)) {
+      sendJson(response, journeyFixture("filters"));
+      return;
+    }
+
+    if (/^\/api\/ratan\/v[23]\/customview\/views/.test(pathname)) {
+      sendJson(response, journeyFixture("views"));
+      return;
+    }
+
+    if (pathname === "/api/ratan/v1/accounting/fetch/M0P56753524") {
       sendJson(response, []);
       return;
     }
 
+    if (pathname === "/api/ratan/v1/cashflow/currency/holiday") {
+      sendJson(response, journeyFixture("holiday"));
+      return;
+    }
+
     if (/^\/api\/ratan\/.*cashflows/.test(pathname)) {
+      const body = request.method === "POST" ? await readBody(request) : "";
+      if (body.includes("graphCashFlowDetails") && body.includes("M0P56753524")) {
+        sendJson(response, journeyFixture("details"));
+        return;
+      }
+      if (body.includes("RatanUltraQuery") && body.includes("M0P56753524")) {
+        sendJson(response, journeyFixture("search"));
+        return;
+      }
+      if (body.includes("Pending Verification")) {
+        sendJson(response, journeyFixture("emptyMetric"));
+        return;
+      }
+      if (body.includes("Pending Operator")) {
+        sendJson(response, journeyFixture("metric"));
+        return;
+      }
       sendFixture(response, "cashflows.json");
       return;
     }
