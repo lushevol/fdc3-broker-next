@@ -21,7 +21,7 @@ Base Origin now builds on the current frontend architecture:
 | ESLint | 7.32, legacy config | 9.39.5, flat config | Complete; ESLint 10 blocked |
 | Module Federation | 1.20.6 | 1.20.7 | Complete |
 | React Router | 6.4.4 | 6.30.4 | Complete; v7 deferred |
-| React | 18.2 | 18.2 with latest React 18 types | React 19 requires a coordinated workspace migration |
+| React | 18.2 | 18.2 with latest React 18 types | Intentionally unchanged |
 | TypeScript | 5.9.3 | 5.9.3 | Current supported line; TypeScript 7 blocked |
 
 The active runtime updates also include Axios 1.19.0, clsx 2.1.1, Day.js
@@ -103,7 +103,9 @@ Likewise, the Prettier check reports existing formatting drift.
 
 ### MUI and browser support
 
-MUI 9 and MUI X 9 are now the supported Base versions. Direct use of
+MUI 9 and MUI X 9 are now the supported Base versions. Ratan Container and
+Cashflow remain on their existing MUI 5 package lines; upgrading those remotes
+is outside this migration. Direct use of
 `@mui/x-date-pickers` is declared explicitly instead of relying on the Pro
 package's transitive dependencies. Material, icons, system, types, Data Grid,
 and Date Pickers must remain on compatible majors.
@@ -111,8 +113,8 @@ and Date Pickers must remain on compatible majors.
 MUI 9 raises its browser floor to Chrome 117, Edge 121, Firefox 121, and Safari
 17. Base's Vite build target was therefore raised from `chrome89` to
 `chrome117`. Deployment and OpenFin runtime certification must preserve at
-least that floor. The Ratan and Cashflow remotes still target Chrome 89; align
-their targets before treating the complete federated portal as MUI 9-ready.
+least that floor. This does not change the independently built Ratan and
+Cashflow targets or their package versions.
 
 ### Federation
 
@@ -122,54 +124,30 @@ application dependencies. Base currently shares React 18.2 with Ratan and
 Cashflow. Ratan and Cashflow additionally share React Router; removing that
 legacy share is a separate federation-contract change.
 
-## React 19 release gate
+### Workspace dependency isolation
 
-React 19.2.8 is the desired version, but upgrading only Base would be unsafe.
-Base, Ratan, and Cashflow execute in one Module Federation share scope and all
-declare React and ReactDOM as singletons. The two remotes still contain React
-19 blockers:
+The workspace root sets npm's `install-strategy=nested`. This is required by
+the Base-only migration: Base must resolve MUI 9 from its own workspace while
+Ratan and Cashflow each resolve their declared MUI 5 dependencies locally.
+Without this policy, npm may hoist Base's MUI 9 tree to `scb-next/node_modules`,
+where unchanged remotes can resolve it and fail on MUI 5 entry points that no
+longer exist.
 
-- Ratan uses `react-beautiful-dnd@13.1.1`, Material UI 5, and
-  `react-redux@7.2.2`.
-- Cashflow uses `react-beautiful-dnd@13.1.1`, Material UI 5, and
-  `react-redux@8.0.5`.
-- `react-beautiful-dnd` is deprecated and its peer range does not support
-  React 19.
+Run `npm run verify:dependency-isolation` after every root install. It must
+report Base on MUI 9 and both remotes on MUI 5. Do not add Base aliases or
+change remote manifests to compensate for a hoisted install.
 
-Treat React 19 as one SCB Next workspace migration:
+### React boundary
 
-1. Replace `react-beautiful-dnd` in both remotes and upgrade each remote's MUI
-   and React Redux dependencies to React 19-compatible releases.
-2. Move Base, Ratan, and Cashflow through React 18.3 to surface deprecation
-   warnings before installing React 19.
-3. Set exact `react` and `react-dom` version `19.2.8` in all three workspace
-   manifests. Align `@types/react` and `@types/react-dom` in the same change.
-4. Set exact federation `requiredVersion: "19.2.8"` with `singleton: true` in
-   all three Vite configs. Add `resolve.dedupe: ["react", "react-dom"]`, as
-   demonstrated by MVP Real World Portal Host.
-5. Fix React 19 type changes, including the argument-less `useRef` in
-   `src/components/AppBar/common/useController.ts`.
-6. Install once from the `scb-next` workspace root, deduplicate, and confirm a
-   single physical runtime:
-
-   ```bash
-   cd scb-next
-   npm dedupe
-   npm ls react react-dom --all
-   ```
-
-7. Build and run all three applications together. Reject the migration if the
-   browser reports an invalid hook call, an unsatisfied share version, or more
-   than one React runtime.
-
-This is a compatibility boundary, not a discretionary deferral. Do not use
-`--force` or `--legacy-peer-deps` to put React 19 into Base alone.
+React and ReactDOM remain on 18.2 across the federated applications. React 19
+is not part of this migration. Because React is a federation singleton, a
+future React major upgrade must be planned and accepted across Base, Ratan,
+and Cashflow together; Base must not introduce it independently.
 
 ## Other deliberate deferrals
 
-- `react-draggable@4.7.1` publishes declarations generated against React 19
-  that fail this React 18 typecheck. Base remains on 4.4.5 until the coordinated
-  React migration.
+- `react-draggable@4.7.1` publishes declarations that fail this React 18
+  typecheck. Base remains on 4.4.5.
 - TypeScript 7 is outside `typescript-eslint@8.67.0`'s supported `<6.1.0`
   range. TypeScript 5.9.3 remains the current supported compiler.
 - React Router 7, Zod 4, and UUID 14 are behavioral or ESM major migrations;
@@ -178,7 +156,7 @@ This is a compatibility boundary, not a discretionary deferral. Do not use
 - `@openfin/core`, FINOS FDC3, and `openfin-fdc3` require deployed OpenFin
   runtime certification before changing versions.
 - `@scdevkit/webkit` is private and still declared as `"*"`. Its latest version
-  and React 19 compatibility cannot be established from the public registry.
+  cannot be established from the public registry.
   Replace the wildcard with an internally approved exact version when private
   registry access is available.
 - The nested server remains CommonJS on Express 4, TypeScript 4.9, and ts-node.
@@ -193,17 +171,18 @@ The completed migration passes:
 - Nested server TypeScript build.
 - 120 test files and 332 tests.
 - Storybook static build with 203 indexed entries.
-- Base local startup, mocked local login, New Tile drawer, and Cashflow tile
-  selection.
+- Integrated Base startup, mocked local login, New Tile drawer, Ratan and
+  Cashflow loading, Quick Search and Data Grid rendering, representative
+  Cashflow controls, and workspace removal.
 
-The final Cashflow remote render is not yet an accepted pass. In the available
-no-lockfile dependency tree, the remotes resolve Base's MUI 9 installation
-instead of their declared MUI 5 line. Cashflow and Ratan still import removed
-MUI 5 icon entry points such as `CheckCircleOutline`, `ErrorOutline`, and
-`DeleteOutline`, so the Cashflow dynamic module fails during development. This
-confirms that the remotes must either receive their own reproducibly nested MUI
-5 dependencies or, preferably, be migrated to MUI 9 before portal-wide
-acceptance. Do not work around this with aliases in Base.
+The original integrated failure was caused by dependency placement, not by a
+required remote migration. In the available no-lockfile tree, Ratan and
+Cashflow resolved Base's hoisted MUI 9 installation instead of their declared
+MUI 5 line. Cashflow and Ratan import MUI 5 icon entry points such as
+`CheckCircleOutline`, `ErrorOutline`, and `DeleteOutline`; those imports fail
+when incorrectly resolved against MUI 9. A nested-install probe and local
+integrated run confirmed that workspace-local MUI 5 resolution restores those
+modules while Base continues to use MUI 9.
 
 Known baseline diagnostics remain: jsdom XHR `AggregateError` output, negative
 timer warnings, an undefined MUI Select value warning, and a dynamic-import
@@ -221,6 +200,7 @@ deployment:
 ```bash
 cd scb-next
 npm install
+npm run verify:dependency-isolation
 npm ls --all
 npm run build --workspace @fm/base-origin
 npm run build:server --workspace @fm/base-origin
@@ -250,7 +230,6 @@ React singleton mismatch in a remote.
 
 - [MVP Real World Portal Host](../../mvp/two-layer-federation/realworld/apps/portal-host/package.json)
 - [MVP Real World current state](../../mvp/two-layer-federation/realworld/docs/CURRENT_STATE.md)
-- [React 19 upgrade guide](https://react.dev/blog/2024/04/25/react-19-upgrade-guide)
 - [Storybook migration guide](https://storybook.js.org/docs/releases/migration-guide)
 - [ESLint 10 migration guide](https://eslint.org/docs/latest/use/migrate-to-10.0.0)
 - [Material UI v9 migration guide](https://mui.com/material-ui/migration/upgrade-to-v9/)
