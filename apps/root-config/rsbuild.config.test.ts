@@ -387,4 +387,46 @@ describe('captured app api mock matching', () => {
     expect(next).toHaveBeenCalledTimes(1);
     expect(res.end).not.toHaveBeenCalled();
   });
+
+  it('replays the PROD Cashflow journey requests', async () => {
+    const { findCapturedApiFixture } = await import('./captured-api-mocks');
+    const { fixtures } = await import('./mock/cashflow-journey.mock.json');
+
+    const metric = findCapturedApiFixture(
+      fixtures,
+      'POST',
+      '/api/ratan/stmcn/v1/cashflows',
+      {
+        operationName: 'SettlementCashflowDataUltraQuery',
+        query:
+          'Cashflow.Cashflow_Sub_State Pending Operator Cashflow.Payment_Date 2026-08-14',
+      },
+    );
+    const searchedRow = findCapturedApiFixture(
+      fixtures,
+      'POST',
+      '/api/ratan/stmcn/v1/cashflows',
+      {
+        query:
+          'RatanUltraQuery BCS_Trade_Id Cashflow.Cashflow_Id M0P56753524',
+      },
+    );
+    const details = findCapturedApiFixture(
+      fixtures,
+      'POST',
+      '/api/ratan/stmcn/v1/cashflows',
+      'graphCashFlowDetails M0P56753524',
+    );
+    const accounting = findCapturedApiFixture(
+      fixtures,
+      'GET',
+      '/api/ratan/v1/accounting/fetch/M0P56753524',
+      '',
+    );
+
+    expect(metric?.name).toBe('cashflow-pending-operator-today');
+    expect(searchedRow?.name).toBe('cashflow-search-M0P56753524');
+    expect(details?.name).toBe('cashflow-detail-M0P56753524');
+    expect(accounting?.response.body).toEqual([]);
+  });
 });

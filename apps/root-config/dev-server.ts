@@ -68,6 +68,10 @@ const { generateJWT } = require('./scripts/jwt') as {
 const capturedApiMocks = require('./mock/captured-api-fixtures.mock.json') as {
   fixtures?: CapturedApiFixture[];
 };
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const cashflowJourneyMocks = require('./mock/cashflow-journey.mock.json') as {
+  fixtures?: CapturedApiFixture[];
+};
 
 function createMiddleware(path: string, handler: RequestHandler): MockMiddleware {
   const middleware = ((req, res, next) => {
@@ -353,9 +357,10 @@ export const rootConfigDevSetup: SetupMiddlewaresFn = (middlewares) => {
   const useBackendAuth = process.env.useBackendAuth?.toLowerCase() === 'true';
   const token = createAuthToken();
   const fdc3Store = createFdc3Store();
-  const capturedApiFixtures = (capturedApiMocks.fixtures ?? []).filter(
-    (fixture) => !isFlowzeroWorkflowServiceFixture(fixture),
-  );
+  const capturedApiFixtures = [
+    ...(capturedApiMocks.fixtures ?? []),
+    ...(cashflowJourneyMocks.fixtures ?? []),
+  ].filter((fixture) => !isFlowzeroWorkflowServiceFixture(fixture));
 
   if (!useBackendAuth) {
     middlewares.unshift(

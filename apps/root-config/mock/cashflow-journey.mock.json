@@ -1,0 +1,300 @@
+{
+  "fixtures": [
+    {
+      "app": "mfe-cashflow-blotter",
+      "name": "cashflow-pending-operator-today",
+      "request": {
+        "method": "POST",
+        "pathname": "/api/ratan/stmcn/v1/cashflows",
+        "bodyIncludes": [
+          "Cashflow.Cashflow_Sub_State",
+          "Pending Operator",
+          "Cashflow.Payment_Date",
+          "2026-08-14"
+        ]
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "cashflowUltraQuery": {
+              "totalResult": 10,
+              "pageIndex": 0,
+              "itemsPerPage": 1000,
+              "lastPage": true,
+              "results": [
+                { "Cashflow": { "Cashflow_Id": "0AP58899062" } },
+                { "Cashflow": { "Cashflow_Id": "M0P56753524" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899056" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899055" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899058" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899051" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899054" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899050" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899053" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899052" } }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "app": "mfe-cashflow-blotter",
+      "name": "cashflow-pending-verification-today",
+      "request": {
+        "method": "POST",
+        "pathname": "/api/ratan/stmcn/v1/cashflows",
+        "bodyIncludes": [
+          "Cashflow.Cashflow_Sub_State",
+          "Pending Verification",
+          "Cashflow.Payment_Date",
+          "2026-08-14"
+        ]
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "cashflowUltraQuery": {
+              "totalResult": 0,
+              "pageIndex": 0,
+              "itemsPerPage": 1000,
+              "lastPage": true,
+              "results": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "app": "mfe-cashflow-blotter",
+      "name": "cashflow-pending-operator-through-monday",
+      "request": {
+        "method": "POST",
+        "pathname": "/api/ratan/stmcn/v1/cashflows",
+        "bodyIncludes": [
+          "Cashflow.Cashflow_Sub_State",
+          "Pending Operator",
+          "Cashflow.Payment_Date",
+          "2026-08-14",
+          "2026-08-17"
+        ]
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "cashflowUltraQuery": {
+              "totalResult": 10,
+              "pageIndex": 0,
+              "itemsPerPage": 1000,
+              "lastPage": true,
+              "results": [
+                { "Cashflow": { "Cashflow_Id": "0AP58899062" } },
+                { "Cashflow": { "Cashflow_Id": "M0P56753524" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899056" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899055" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899058" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899051" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899054" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899050" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899053" } },
+                { "Cashflow": { "Cashflow_Id": "0AP58899052" } }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "app": "mfe-cashflow-blotter",
+      "name": "cashflow-pending-verification-through-monday",
+      "request": {
+        "method": "POST",
+        "pathname": "/api/ratan/stmcn/v1/cashflows",
+        "bodyIncludes": [
+          "Cashflow.Cashflow_Sub_State",
+          "Pending Verification",
+          "Cashflow.Payment_Date",
+          "2026-08-14",
+          "2026-08-17"
+        ]
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "cashflowUltraQuery": {
+              "totalResult": 0,
+              "pageIndex": 0,
+              "itemsPerPage": 1000,
+              "lastPage": true,
+              "results": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "app": "mfe-cashflow-blotter",
+      "name": "cashflow-search-M0P56753524",
+      "request": {
+        "method": "POST",
+        "pathname": "/api/ratan/stmcn/v1/cashflows",
+        "bodyIncludes": ["RatanUltraQuery", "BCS_Trade_Id", "Cashflow.Cashflow_Id", "M0P56753524"]
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "cashflowUltraQuery": {
+              "totalResult": 1,
+              "pageIndex": 0,
+              "itemsPerPage": 1000,
+              "lastPage": true,
+              "results": [
+                {
+                  "BCS_Trade_Id": null,
+                  "BCS_Parent_Trade_Id": "56753524",
+                  "FMO_Comments": [],
+                  "Cashflow": {
+                    "Cashflow_Id": "M0P56753524",
+                    "Cashflow_Business_Version": 0,
+                    "Cashflow_Version": 0,
+                    "Cashflow_State": "WAITING",
+                    "Cashflow_Affirmation_Status": "Unaffirmed",
+                    "Cashflow_Event_Type": "New",
+                    "Cashflow_Minor_Version": 6,
+                    "Payment_Currency": "USD",
+                    "Payment_Date": "2026-08-14",
+                    "Payment_Type": "",
+                    "Payment_Cutoff_Time": "2026-08-14T11:00Z",
+                    "Pay_Receive_Indicator": "Pay",
+                    "Payment_Amount": "11.10",
+                    "Netting_Id": "",
+                    "Splitting_Id": null,
+                    "Netting_Cuttoff_Date": null,
+                    "Payment_Receiver_Party_Reference": "party2",
+                    "Payment_Payer_Party_Reference": "party1",
+                    "Cashflow_Sub_State": "Pending Operator",
+                    "Cashflow_Sub_State_Type": "Pending Exception",
+                    "Cashflow_Sub_State_Updater": "System",
+                    "Status_Event_Type": "IsNstp",
+                    "Cashflow_Swift_Message_Standard": null,
+                    "Event_Date": "2024-06-27",
+                    "Cashflow_Event_Reason": ""
+                  },
+                  "Delivery_Method": "",
+                  "Settlement_Method": "Gross",
+                  "Trade_Id": "56753524",
+                  "Trade_Version": null,
+                  "Entity": {
+                    "Booking_Entity_SCI_FMID": "2",
+                    "Booking_Entity_SCI_FMCODE": "SCB HONGKON*HKG",
+                    "Counterparty_SCI_FMID": "401016497",
+                    "Counterparty_SCI_FMCODE": "DAVIDKE ROB4FDAC*DOD",
+                    "Counterparty_SCI_BIC_Net_Flag": "N"
+                  },
+                  "Instrument_Common": {
+                    "ISDA_Taxonomy": "CURR|OPT|SMP",
+                    "Source_System_Instrument_Sub_Type": "CURR|OPT|SMP",
+                    "Murex_Product_Strategy": ""
+                  },
+                  "Trade_Original_Source_System_Name": "",
+                  "Data_Flow": { "Data_Source_System": "MUREX" },
+                  "Trade_State": "CONFIRMED",
+                  "Parent_Trade_Id": "0",
+                  "Portfolio": { "Booking_Entity_Trade_Portfolio_Name": "IR_SWAP_SLA_BTB" }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "app": "mfe-cashflow-blotter",
+      "name": "cashflow-detail-M0P56753524",
+      "request": {
+        "method": "POST",
+        "pathname": "/api/ratan/stmcn/v1/cashflows",
+        "bodyIncludes": ["graphCashFlowDetails", "M0P56753524"]
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "data": {
+            "graphCashFlowDetails": [
+              {
+                "cashflow": {
+                  "Cashflow": {
+                    "Cashflow_Id": "M0P56753524",
+                    "Cashflow_State": "WAITING",
+                    "Cashflow_Affirmation_Status": "Unaffirmed",
+                    "Cashflow_Event_Type": "New",
+                    "Cashflow_Minor_Version": 6,
+                    "Payment_Currency": "USD",
+                    "Payment_Date": "2026-08-14",
+                    "Payment_Amount": "11.10",
+                    "Pay_Receive_Indicator": "Pay",
+                    "Cashflow_Sub_State": "Pending Operator",
+                    "Cashflow_Sub_State_Type": "Pending Exception",
+                    "Status_Event_Type": "IsNstp"
+                  },
+                  "Trade_Id": "56753524",
+                  "Settlement_Method": "Gross",
+                  "Trade_State": "CONFIRMED",
+                  "Entity": {
+                    "Booking_Entity_SCI_FMID": "2",
+                    "Booking_Entity_SCI_FMCODE": "SCB HONGKON*HKG",
+                    "Counterparty_SCI_FMID": "401016497",
+                    "Counterparty_SCI_FMCODE": "DAVIDKE ROB4FDAC*DOD"
+                  },
+                  "Data_Flow": { "Data_Source_System": "MUREX" },
+                  "Portfolio": { "Booking_Entity_Trade_Portfolio_Name": "IR_SWAP_SLA_BTB" },
+                  "FMO_Comments": []
+                },
+                "cashflowAuditTrail": [],
+                "ratanException": [],
+                "ratanVostroCandidates": [],
+                "ratanNostroCandidates": [],
+                "ratanAffirmation": null
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "app": "mfe-cashflow-blotter",
+      "name": "cashflow-accounting-detail-M0P56753524",
+      "request": {
+        "method": "GET",
+        "pathname": "/api/ratan/v1/accounting/fetch/M0P56753524"
+      },
+      "response": { "status": 200, "body": [] }
+    },
+    {
+      "app": "mfe-cashflow-blotter",
+      "name": "cashflow-currency-holiday-0AP58899052",
+      "request": {
+        "method": "POST",
+        "pathname": "/api/ratan/v1/cashflow/currency/holiday",
+        "bodyIncludes": ["0AP58899052"]
+      },
+      "response": {
+        "status": 200,
+        "body": [
+          {
+            "currencyCode": "USD",
+            "eventDate": "2026-08-14",
+            "cashflowId": "0AP58899052",
+            "isHoliday": false,
+            "eventName": null
+          }
+        ]
+      }
+    }
+  ]
+}
