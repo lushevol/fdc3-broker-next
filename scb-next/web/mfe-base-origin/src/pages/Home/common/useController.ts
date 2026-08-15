@@ -21,9 +21,9 @@ const useController = () => {
     addWorkspace,
     dispacthErrorMessage,
   } = useDispatcher();
-  const timerPopup = React.useRef<any>(0);
-  const timerMouseMove = React.useRef<any>(0);
-  const timerRefreshToken = React.useRef<any>(0);
+  const timerPopup = React.useRef<ReturnType<typeof setTimeout> | 0>(0);
+  const timerMouseMove = React.useRef<ReturnType<typeof setTimeout> | 0>(0);
+  const timerRefreshToken = React.useRef<ReturnType<typeof setTimeout> | 0>(0);
   const [showTimeout, setShowTimeout] = React.useState(false);
   const [value, setValue] = React.useState(1);
   const [ready, setReady] = React.useState(false);
@@ -32,9 +32,7 @@ const useController = () => {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     const target = event.target as HTMLElement;
     if (
-      !target.parentElement?.parentElement?.id?.includes(
-        "deleteWorkspace-"
-      )
+      !target.parentElement?.parentElement?.id?.includes("deleteWorkspace-")
     ) {
       const workspaces = [...(store?.workspaces as Workspace[])];
       const workspace = workspaces[newValue - 1];
@@ -75,7 +73,7 @@ const useController = () => {
   };
 
   React.useEffect(() => {
-    const params: any = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location.search);
     if (params?.get("code")) {
       handleLoginEntities(store.entities, dispatch, store.drawers);
     }
@@ -121,14 +119,14 @@ const useController = () => {
     dispacthErrorMessage(undefined);
   };
 
-  const edit = (item: Workspace) => (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const workspaces = [...(store?.workspaces as Workspace[])];
-    const index = workspaces.findIndex((w) => w.id === item.id);
-    workspaces[index].label = event.target.value;
-    dispacthWorkspaces(workspaces);
-  };
+  const edit =
+    (item: Workspace) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const workspaces = [...(store?.workspaces as Workspace[])];
+      const index = workspaces.findIndex((w) => w.id === item.id);
+      workspaces[index].label = event.target.value;
+      dispacthWorkspaces(workspaces);
+    };
 
   const updateValue = (
     workspaces: Workspace[],

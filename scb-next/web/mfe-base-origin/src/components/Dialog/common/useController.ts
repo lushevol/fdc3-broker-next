@@ -55,8 +55,7 @@ const useController = (props: DialogProps) => {
     const dialogPaper = dialogRef?.current?.getElementsByClassName(
       "MuiPaper-root"
     )[0] as HTMLElement | null;
-    //@ts-ignore
-    const a = document.defaultView.getComputedStyle(dialogPaper);
+    const a = document.defaultView!.getComputedStyle(dialogPaper!);
     width.current = parseInt(a?.width, 10);
     height.current = parseInt(a?.height, 10);
     startX.current = e.clientX;
@@ -72,10 +71,8 @@ const useController = (props: DialogProps) => {
       const dialogPaper = dialogRef?.current?.getElementsByClassName(
         "MuiPaper-root"
       )[0] as HTMLElement | null;
-      //@ts-ignore
-      dialogPaper.style.width = `${w}px`;
-      //@ts-ignore
-      dialogPaper.style.height = `${h}px`;
+      dialogPaper!.style.width = `${w}px`;
+      dialogPaper!.style.height = `${h}px`;
       endWidth.current = w;
       endHeight.current = h;
     }

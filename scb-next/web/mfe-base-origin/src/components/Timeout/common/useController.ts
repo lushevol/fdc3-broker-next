@@ -15,7 +15,7 @@ const useController = (props: TimeoutProps) => {
   const [loading, setLoading] = React.useState(false);
   const { ButtonEvent, ModalEvent } = useAnalytics();
   const { logout } = useServices();
-  const timerPopup = React.useRef<any>(0);
+  const timerPopup = React.useRef<ReturnType<typeof setTimeout> | 0>(0);
   const clearAllTimeout = () => {
     if (timerPopup.current) {
       clearTimeout(timerPopup.current);

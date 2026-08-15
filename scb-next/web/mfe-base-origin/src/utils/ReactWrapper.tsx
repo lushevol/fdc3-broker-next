@@ -91,9 +91,12 @@ const WrapperComp = (props: WrapperProps, ref: ElementRef) => {
       if (typeof val === "function") {
         const reg = /([A-Z])/g;
         if (prop.match(/^on[A-Z]/)) {
-          const str = prop.replace(reg, function (a, b) {
-            return `-${b.toLowerCase()}`;
-          });
+          const str = prop.replace(
+            reg,
+            function (_match: string, letter: string) {
+              return `-${letter.toLowerCase()}`;
+            }
+          );
           return setEvent(
             ref,
             eventHandlers,
@@ -120,8 +123,7 @@ export const Wrapper = (props: WrapperProps) => {
   return WrapperComp(props, ref);
 };
 const ReactWrapper = (WC: WebComponentType) => {
-  return forwardRef<HTMLElement, WrappedProps>(
-    (props, ref) =>
+  return forwardRef<HTMLElement, WrappedProps>((props, ref) =>
     createElement(
       Wrapper,
       { WC, innerRef: ref, ...props },

@@ -47,7 +47,7 @@ const useController = (_props: TileProps) => {
     getAuditData,
   } = useAudit();
   const { getTile, getCategory, getImportMap } = useServices();
-  const [category, setCategory] = React.useState<AdminRecord>();
+  const [category, setCategory] = React.useState<AdminRecord | null>();
   const [categories, setCategories] = React.useState<AdminRecord[]>([]);
   const [inputValue, setInputValue] = React.useState("");
   const setCategoryData = React.useCallback(
@@ -81,7 +81,7 @@ const useController = (_props: TileProps) => {
     }
   }, [store.entitlementsToken]);
   const getCategoryData = React.useCallback(
-    (_category: AdminRecord | undefined) => {
+    (_category: AdminRecord | null | undefined) => {
       let filter: AdminRecord = {};
       if (_category?.id !== -1) {
         filter = { applicationCategory: _category };
@@ -103,22 +103,28 @@ const useController = (_props: TileProps) => {
     () => getAdminModuleEms2Role(store.entities as Entity[]),
     [store.entities]
   );
-  const onCategoryChange = React.useCallback((_event: any, newValue: any) => {
-    setCategory(newValue);
-  }, []);
+  const onCategoryChange = React.useCallback(
+    (_event: React.SyntheticEvent, newValue: AdminRecord | null) => {
+      setCategory(newValue);
+    },
+    []
+  );
   const refresh = React.useCallback(() => {
     initData();
     getCategoryData(category);
   }, [category]);
-  const onInputChange = React.useCallback((_event: any, newInputValue: any) => {
-    if (newInputValue === "") {
-      setCategory(undefined);
-      setData([]);
-    }
-    setInputValue(newInputValue);
-  }, []);
+  const onInputChange = React.useCallback(
+    (_event: React.SyntheticEvent, newInputValue: string) => {
+      if (newInputValue === "") {
+        setCategory(undefined);
+        setData([]);
+      }
+      setInputValue(newInputValue);
+    },
+    []
+  );
   const rows = React.useMemo(() => {
-    const copied = JSON.parse(JSON.stringify(data));
+    const copied = JSON.parse(JSON.stringify(data)) as AdminRecord[];
     return copied;
   }, [data]);
 

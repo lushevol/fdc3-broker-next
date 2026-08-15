@@ -7,7 +7,7 @@ export interface Container {
   tile: string;
   title: string;
   subtitle?: string;
-  parameters?: Object;
+  parameters?: Record<string, unknown>;
   emailSupport: string;
   panelId: string;
   tabId: string;

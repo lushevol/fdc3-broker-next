@@ -6,7 +6,7 @@ import {
 } from "./interface";
 
 const useController = (props: MenuItemProps, tile: TileProps) => {
-  const getParamter = (parameters: object | undefined) =>
+  const getParamter = (parameters: Record<string, unknown> | undefined) =>
     parameters ? { ...parameters } : undefined;
   const onClick = () => {
     props.addTile({

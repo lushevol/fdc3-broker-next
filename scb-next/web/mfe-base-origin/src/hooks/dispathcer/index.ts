@@ -165,7 +165,10 @@ const useDispatcher = () => {
       addWorkspace(container);
     }
   };
-  const dispatchOpenTile = (parameters: object, tile: string) => {
+  const dispatchOpenTile = (
+    parameters: Record<string, unknown>,
+    tile: string
+  ) => {
     const drawers = [...(store.drawers as Tiles[])];
     const tiles = drawers
       .map((category) => {

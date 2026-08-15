@@ -43,11 +43,11 @@ export const backgroundCss = (props: TileProps, theme?: string) => {
   `;
 };
 
-const Root = styled("section")((props: any) => ({
+const Root = styled("section")(({ theme }) => ({
   width: "100%",
-  background: props.theme.theme["TileComponent"]["background"],
-  boxShadow: props.theme.theme["TileComponent"]["boxShadow"],
-  border: props.theme.theme["TileComponent"]["border"],
+  background: theme.theme["TileComponent"]["background"],
+  boxShadow: theme.theme["TileComponent"]["boxShadow"],
+  border: theme.theme["TileComponent"]["border"],
   [`& .${classes.content}`]: {
     height: "34px",
     display: "flex",
@@ -56,8 +56,8 @@ const Root = styled("section")((props: any) => ({
       borderRadius: "10px",
       minWidth: "auto",
       width: "auto",
-      padding: props.theme.shape.borderRadius,
-      ...props.theme.theme["TileComponent"]["button"],
+      padding: theme.shape.borderRadius,
+      ...theme.theme["TileComponent"]["button"],
     },
     "& .Mui-disabled": {
       color: "rgb(115 121 126)",
@@ -66,10 +66,10 @@ const Root = styled("section")((props: any) => ({
   [`& .${classes.title}`]: {
     height: "75px",
     fontSize: "0.875rem",
-    fontWeight: props.theme.theme["TileComponent"]["title"]["fontWeight"],
+    fontWeight: theme.theme["TileComponent"]["title"]["fontWeight"],
     whiteSpace: "nowrap",
     overflow: "hidden",
-    color: props.theme.theme["TileComponent"]["title"]["color"],
+    color: theme.theme["TileComponent"]["title"]["color"],
     p: {
       margin: 0,
       fontSize: "12px",

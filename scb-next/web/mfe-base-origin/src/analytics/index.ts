@@ -12,7 +12,9 @@ import {
 const useAnalytics = () => {
   const [store] = useContext();
   const post = (data: AnalyticsType) => {
-    postService("/analytics/v1/fmo/print", data).catch((e) => console.error(e));
+    postService("/analytics/v1/fmo/print", data).catch((e: unknown) =>
+      console.error(e)
+    );
   };
   const singleUIAuthorization = store.refreshToken ?? store.token;
   const TileEvent = (

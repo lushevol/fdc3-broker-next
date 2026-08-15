@@ -6,13 +6,14 @@ import Grid from "@mui/material/Grid";
 import AspectRatioOutlinedIcon from "@mui/icons-material/AspectRatioOutlined";
 import ToggleButton from "@mui/material/ToggleButton";
 import { PREFIX } from "./style";
+import type { Theme } from "@mui/material/styles";
 
 export const darkBg =
   "linear-gradient(to right, rgb(17, 23, 29), rgb(17, 23, 29)) padding-box padding-box, linear-gradient(to right, rgb(65, 73, 85), rgb(29, 31, 34)) border-box border-box";
 export const lightBg =
   "linear-gradient(to right, rgb(245, 245, 245), rgb(245, 245, 245)) padding-box padding-box, linear-gradient(to right, rgb(186, 186, 186), rgb(245, 245, 245)) border-box border-box";
 
-export const setBg = (theme: any) =>
+export const setBg = (theme: Theme) =>
   theme.palette.mode === "dark" ? darkBg : lightBg;
 
 export default function DialogTitle(props: Readonly<DialogTitleProps>) {
@@ -35,9 +36,7 @@ export default function DialogTitle(props: Readonly<DialogTitleProps>) {
       {...other}
     >
       <Grid container sx={{ flexWrap: "nowrap" }}>
-        <Grid size={8}>
-          {children}
-        </Grid>
+        <Grid size={8}>{children}</Grid>
         <Grid size={4} sx={{ textAlign: "right", minWidth: "fit-content" }}>
           {isResizeble && onResize ? (
             <ToggleButton

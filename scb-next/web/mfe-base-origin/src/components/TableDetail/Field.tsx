@@ -19,7 +19,7 @@ const Field: React.FC<FieldProps> = (props: FieldProps): React.ReactElement => {
     setFieldValue,
     RenderOptions,
   } = useController(props);
-  let element;
+  let element: React.ReactElement;
   switch (column.editorType ?? column.type) {
     case "actions":
       element = <></>;
@@ -38,7 +38,7 @@ const Field: React.FC<FieldProps> = (props: FieldProps): React.ReactElement => {
             autoHighlight
             getOptionLabel={(option: string) => option}
             popupIcon={<KeyboardArrowDownIcon />}
-            value={fieldValue}
+            value={fieldValue as string}
             onChange={onChangeAutoComplete}
             renderOption={RenderOptions}
             renderInput={(params) => (

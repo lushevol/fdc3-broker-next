@@ -4,7 +4,7 @@ export interface AdminModuleProps {
   tile: string;
   panelId: string;
   tabId: string;
-  parameters?: any;
+  parameters?: Record<string, unknown>;
 }
 
 export interface AdminRecord extends Record<string, unknown> {
@@ -18,9 +18,13 @@ export interface AdminRecord extends Record<string, unknown> {
   importMapAuditId?: string | number;
   label?: string;
   keyName?: string;
+  applicationCategory?: AdminRecord | null;
+  importMap?: AdminRecord | null;
   mode?: "new" | "verify" | "edit" | "deactivate" | string;
   readOnly?: boolean;
   active?: boolean;
+  createdAt?: string | number | Date;
+  updatedAt?: string | number | Date;
   createdBy?: string;
   updatedBy?: string;
 }

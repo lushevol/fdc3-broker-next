@@ -1,7 +1,7 @@
 import { GridColDef } from "@mui/x-data-grid";
 import { AdminRecord } from "../../../admin/common/interface";
 
-export type TableColumn = GridColDef & {
+export type TableColumn = GridColDef<AdminRecord> & {
   editorType?: "autoComplete";
   hiddenImage?: boolean;
   multiline?: boolean;

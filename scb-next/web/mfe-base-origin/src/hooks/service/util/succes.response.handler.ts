@@ -8,10 +8,13 @@ import {
   handleRefreshToken,
   handleEntities,
   handleEntitlementsToken,
+  type AuthResponseData,
 } from "../../../utils/login";
 import { handleStandardResponse } from "../../../utils/ratan";
 
-export const successHandler = (response: AxiosResponse): any => {
+export const successHandler = (
+  response: AxiosResponse<AuthResponseData>
+): AxiosResponse<AuthResponseData> | Promise<AuthResponseData> => {
   if (
     response?.config?.url?.includes("/api/auth/v2/sso/login") ||
     response?.config?.url?.includes("/api/auth/v3/sso/login") ||

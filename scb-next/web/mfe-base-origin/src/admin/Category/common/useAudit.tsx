@@ -41,7 +41,7 @@ const useAudit = () => {
     const copied = JSON.parse(JSON.stringify(data)) as AdminRecord[];
     return copied;
   }, [data]);
-  const auditColumns: GridColDef[] = React.useMemo(
+  const auditColumns: GridColDef<AdminRecord>[] = React.useMemo(
     () =>
       [
         {
@@ -85,8 +85,8 @@ const useAudit = () => {
           readOnly: true,
           valueGetter: (_value, row) => {
             let date = new Date();
-            if (row?.updatedAt?.length) {
-              date = new Date(row.createdAt);
+            if ((row?.updatedAt as string | undefined)?.length) {
+              date = new Date(row.createdAt as string | number | Date);
             }
             return DateTimeFormat(
               store?.timeType?.toUpperCase(),
@@ -110,8 +110,8 @@ const useAudit = () => {
           readOnly: true,
           valueGetter: (_value, row) => {
             let date = new Date();
-            if (row?.updatedAt?.length) {
-              date = new Date(row.updatedAt);
+            if ((row?.updatedAt as string | undefined)?.length) {
+              date = new Date(row.updatedAt as string | number | Date);
             }
             return DateTimeFormat(
               store?.timeType?.toUpperCase(),
@@ -141,7 +141,7 @@ const useAudit = () => {
           hideable: false,
           readOnly: true,
         },
-      ] as GridColDef[],
+      ] as GridColDef<AdminRecord>[],
     [store?.timeType]
   );
   const onCloseAudit = React.useCallback(() => {

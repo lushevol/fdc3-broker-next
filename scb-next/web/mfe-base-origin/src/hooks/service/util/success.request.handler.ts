@@ -1,7 +1,8 @@
+import type { InternalAxiosRequestConfig } from "axios";
 import { getHooksBase } from "../../HooksBase";
 import { ActionType } from "../../reducer/util/ActionType";
 
-export const requestHandler = (request: any) => {
+export const requestHandler = (request: InternalAxiosRequestConfig) => {
   const { store, baseDispatch } = getHooksBase();
   /**
    * Prevent showing loading when request is sent

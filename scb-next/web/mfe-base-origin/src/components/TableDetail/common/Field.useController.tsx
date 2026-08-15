@@ -4,7 +4,7 @@ import { FieldProps } from "./interface";
 
 const useController = (props: FieldProps) => {
   const { record, column, onChange, resetId } = props;
-  const value = React.useMemo(
+  const value = React.useMemo<unknown>(
     () =>
       column.valueGetter
         ? column.valueGetter(
@@ -16,7 +16,7 @@ const useController = (props: FieldProps) => {
         : record[column.field],
     [record, column.valueGetter, column.field]
   );
-  const [fieldValue, setFieldValue] = React.useState(value);
+  const [fieldValue, setFieldValue] = React.useState<unknown>(value);
   const [inputValue, setInputValue] = React.useState("");
   const onInputChange = React.useCallback(
     (_event: React.SyntheticEvent, newInputValue: string) => {
@@ -30,7 +30,7 @@ const useController = (props: FieldProps) => {
     }, 300);
   }, [fieldValue]);
   React.useEffect(() => {
-    const _value = column.valueGetter
+    const _value: unknown = column.valueGetter
       ? column.valueGetter(
           record[column.field] as never,
           record,
@@ -67,7 +67,6 @@ const useController = (props: FieldProps) => {
         }}
         {...props}
       >
-        {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
         <img
           loading="lazy"
           width="50px"

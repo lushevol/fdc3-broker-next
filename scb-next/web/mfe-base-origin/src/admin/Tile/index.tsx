@@ -36,7 +36,7 @@ const Tile: React.FC<TileProps> = (props: TileProps): ReactElement => {
             disablePortal
             value={category}
             onChange={onCategoryChange}
-            options={categories as []}
+            options={categories}
             inputValue={inputValue}
             onInputChange={onInputChange}
             popupIcon={<KeyboardArrowDownIcon />}

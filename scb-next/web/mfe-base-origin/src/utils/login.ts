@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
 import { getHooksBase } from "../hooks/HooksBase";
-import { User } from "../hooks/model/root";
+import { Entity, OUD, Tiles, User } from "../hooks/model/root";
 import { ActionType, IAction } from "../hooks/reducer/util/ActionType";
 import {
   clearStorageWhenLogout,
@@ -10,7 +10,17 @@ import {
 } from "./common";
 import { getEntities } from "./entities";
 import type { Dispatch } from "react";
-import { Entity, Tiles } from "../hooks/model/root";
+
+export interface AuthResponseData {
+  userInfo?: string;
+  entitlementsToken?: string;
+  entities?: Entity[];
+  drawers?: Tiles[];
+}
+
+type SerializedUser = Omit<User, "oud"> & {
+  oud?: OUD | string;
+};
 
 export const setAuthorization = (token: string) => {
   const { baseDispatch } = getHooksBase();
@@ -50,7 +60,7 @@ const setUser = (user: User) => {
   storeData(ActionType.SET_USER, JSON.stringify(user));
 };
 
-export const handleLogin = (response: AxiosResponse) => {
+export const handleLogin = (response: AxiosResponse<AuthResponseData>) => {
   if (
     response?.headers &&
     (response?.headers["Single-UI-Authorization"] ||
@@ -64,13 +74,15 @@ export const handleLogin = (response: AxiosResponse) => {
   }
 };
 
-export const handleUser = (response: AxiosResponse) => {
+export const handleUser = (response: AxiosResponse<AuthResponseData>) => {
   if (response?.data?.userInfo) {
-    const userInfo = JSON.parse(response?.data?.userInfo);
+    const userInfo = JSON.parse(response?.data?.userInfo) as SerializedUser;
     if (response?.data?.entitlementsToken) {
       const payload = getJWTPayload("B " + response?.data?.entitlementsToken);
       if (payload != "" && payload.entitlements != null) {
-        userInfo.entitlements = JSON.parse(payload.entitlements);
+        userInfo.entitlements = JSON.parse(
+          payload.entitlements
+        ) as User["entitlements"];
       }
     }
     userInfo.entities = response?.data?.entities ?? [];
@@ -79,14 +91,14 @@ export const handleUser = (response: AxiosResponse) => {
     userInfo.name = userInfo.sub;
     userInfo.userId = userInfo.sub;
     if (userInfo.oud) {
-      userInfo.oud = JSON.parse(userInfo.oud);
+      userInfo.oud = JSON.parse(userInfo.oud as string) as OUD;
       userInfo.fullName = userInfo.oud.fullName;
     }
-    setUser(userInfo);
+    setUser(userInfo as User);
   }
 };
 
-export const handleEntities = (response: AxiosResponse) => {
+export const handleEntities = (response: AxiosResponse<AuthResponseData>) => {
   if (response?.data?.entities) {
     const entities = response?.data?.entities;
     const { baseDispatch } = getHooksBase();
@@ -97,7 +109,7 @@ export const handleEntities = (response: AxiosResponse) => {
   }
 };
 
-export const handleDrawers = (response: AxiosResponse) => {
+export const handleDrawers = (response: AxiosResponse<AuthResponseData>) => {
   if (response?.data?.drawers?.length) {
     const drawers = response?.data?.drawers;
     const { baseDispatch } = getHooksBase();
@@ -116,7 +128,9 @@ export const setRefreshToken = (refreshToken: string) => {
   });
 };
 
-export const handleRefreshToken = (response: AxiosResponse) => {
+export const handleRefreshToken = (
+  response: AxiosResponse<AuthResponseData>
+) => {
   if (
     response?.headers &&
     (response?.headers["Single-UI-Refresh"] ||
@@ -130,7 +144,9 @@ export const handleRefreshToken = (response: AxiosResponse) => {
   }
 };
 
-export const handleEntitlementsToken = (response: AxiosResponse) => {
+export const handleEntitlementsToken = (
+  response: AxiosResponse<AuthResponseData>
+) => {
   if (response?.data?.entitlementsToken) {
     const { baseDispatch } = getHooksBase();
     baseDispatch({

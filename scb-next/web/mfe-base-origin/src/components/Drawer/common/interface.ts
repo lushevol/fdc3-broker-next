@@ -2,9 +2,11 @@ import { Tiles } from "../../../hooks/model/root";
 import { Container } from "../../../hooks/model/workspaces";
 export type { Tiles, Tile } from "../../../hooks/model/root";
 
+export type ToggleDrawer = (value: boolean) => (event?: unknown) => void;
+
 export interface DrawerProps {
   anchor: boolean;
-  toggleDrawer: Function;
+  toggleDrawer: ToggleDrawer;
   addTile: (item: Container) => void;
   drawers: Tiles[] | [];
 }
@@ -28,5 +30,5 @@ export interface MenuItemProps {
 export interface RatanFilterItem {
   field: string;
   operator: string;
-  values: any;
+  values: unknown;
 }

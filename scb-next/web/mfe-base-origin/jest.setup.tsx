@@ -1,9 +1,15 @@
-import React from "react";
-const mockComponent = (c) => {
-  return <section>{c.children}</section>;
+import React, { type ReactNode } from "react";
+import type { VitestUtils } from "vitest";
+
+interface MockComponentProps {
+  children?: ReactNode;
 }
-// Mock SystemJS
-async function mockImport(name) {
+
+const mockComponent = ({ children }: MockComponentProps) => {
+  return <section>{children}</section>;
+};
+
+async function mockImport(name: string) {
   return Promise.resolve({
     __esModule: true,
     default: mockComponent,
@@ -11,28 +17,24 @@ async function mockImport(name) {
     getRoot: mockComponent,
   });
 }
-// @ts-ignore
-global.System = {
-  // @ts-ignore
-  import: jest.fn(mockImport),
-};
-// @ts-ignore
-jest.mock("@scdevkit/webkit/elements/sc-button", () => {
-  return {
-    __esModule: true,
-    default: (_props) => {},
-  };
-});
-// @ts-ignore
-jest.mock("@scdevkit/webkit/elements/sc-icon-card", () => {
-  return {
-    __esModule: true,
-    default: (_props) => {},
-  };
-});
 
-console.error = (...args) => { };
-console.log = (...args) => { };
-console.info = (...args) => { };
-// @ts-ignore
-jest.setTimeout(60000);
+export default function setupLegacyTestEnvironment(testApi: VitestUtils) {
+  Object.assign(globalThis, {
+    System: {
+      import: testApi.fn(mockImport),
+    },
+  });
+  testApi.mock("@scdevkit/webkit/elements/sc-button", () => ({
+    __esModule: true,
+    default: (_props: unknown) => undefined,
+  }));
+  testApi.mock("@scdevkit/webkit/elements/sc-icon-card", () => ({
+    __esModule: true,
+    default: (_props: unknown) => undefined,
+  }));
+
+  console.error = (..._args: unknown[]) => undefined;
+  console.log = (..._args: unknown[]) => undefined;
+  console.info = (..._args: unknown[]) => undefined;
+  testApi.setConfig({ testTimeout: 60_000 });
+}

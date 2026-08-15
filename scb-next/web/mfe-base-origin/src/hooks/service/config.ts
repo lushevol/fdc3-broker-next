@@ -16,6 +16,9 @@ export const config: AxiosRequestConfig = {
 };
 const service = axios.create(config);
 service.interceptors.request.use(requestHandler);
-service.interceptors.response.use(successHandler, errorHandler);
+service.interceptors.response.use(
+  successHandler as Parameters<typeof service.interceptors.response.use>[0],
+  errorHandler
+);
 
 export default service;

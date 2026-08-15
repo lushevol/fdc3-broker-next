@@ -23,7 +23,7 @@ const useServices = () => {
       }),
       getService("/ssiplus/imeta/logout"),
     ];
-    Promise.all(arr).catch((e) => {
+    Promise.all(arr).catch((e: unknown) => {
       console.error("e", e);
     });
     clearStorageWhenLogout(dispacth);
@@ -33,13 +33,13 @@ const useServices = () => {
       const { data } = await postService<ValidationResponse>(
         "/auth/v2/sso/validate",
         {
-        singleUIAuthorization: store.token,
+          singleUIAuthorization: store.token,
         }
       );
       if (data?.result) {
         return data?.result;
       }
-    } catch (e) {}
+    } catch (_error: unknown) {}
     return false;
   };
   const ssePublish = async (tabId: string, _payload: unknown) => {
@@ -51,7 +51,7 @@ const useServices = () => {
         );
         findTile(store.drawers, workspaces[index]);
       }
-    } catch (e) {}
+    } catch (_error: unknown) {}
   };
   return {
     login,

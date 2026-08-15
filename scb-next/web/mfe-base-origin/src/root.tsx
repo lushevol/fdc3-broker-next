@@ -1,11 +1,12 @@
 import React from "react";
 import ReactDOMClient from "react-dom/client";
-import App from "./App";
-type RootProps = Record<string, unknown>;
+import App, { type AppProps } from "./App";
+type RootProps = AppProps;
 const mountedRoots = new WeakMap<Element, ReactDOMClient.Root>();
 
 export const render = (rootComp: Element, props: RootProps) => {
-  const root = mountedRoots.get(rootComp) ?? ReactDOMClient.createRoot(rootComp);
+  const root =
+    mountedRoots.get(rootComp) ?? ReactDOMClient.createRoot(rootComp);
   mountedRoots.set(rootComp, root);
   root.render(<App {...props} />);
 };

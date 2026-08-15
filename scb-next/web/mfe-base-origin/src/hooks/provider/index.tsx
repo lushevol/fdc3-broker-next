@@ -25,7 +25,10 @@ const Provider: React.FC<ProviderPropsDefault> = (
     hooksBase.setBaseDispatch(dispatch);
     hooksBase.setStore(store);
   }, []);
-  const data: any = React.useMemo(() => [store, dispatch], [store, dispatch]);
+  const data = React.useMemo<[RootModel, React.Dispatch<IAction>]>(
+    () => [store, dispatch],
+    [store, dispatch]
+  );
   return (
     <AppContext.Provider value={data}>{props.children}</AppContext.Provider>
   );

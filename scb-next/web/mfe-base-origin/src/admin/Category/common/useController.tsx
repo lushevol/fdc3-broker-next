@@ -63,7 +63,7 @@ const useController = (props: CategoryProps) => {
     }
   }, [store.entitlementsToken]);
   const rows = React.useMemo(() => {
-    const copied = JSON.parse(JSON.stringify(data));
+    const copied = JSON.parse(JSON.stringify(data)) as AdminRecord[];
     return copied;
   }, [data]);
   const columns = React.useMemo<TableColumn[]>(

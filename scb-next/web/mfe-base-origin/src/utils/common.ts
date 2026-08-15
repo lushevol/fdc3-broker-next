@@ -34,11 +34,13 @@ export interface JWTPayload {
   date?: unknown;
 }
 
+export type DateValue = string | number | null | undefined;
+
 const decodeBase64Url = (value: string): string => {
   const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
   const paddedBase64 = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
   const bytes = Uint8Array.from(atob(paddedBase64), (character) =>
-    character.charCodeAt(0),
+    character.charCodeAt(0)
   );
   return new TextDecoder().decode(bytes);
 };
@@ -47,7 +49,7 @@ export const getJWTPayload = (token: string): JWTPayload | "" => {
   const payload = token.split(" ");
   if (payload && payload[1]) {
     const tokenParts: string[] = payload[1].split(".");
-    return JSON.parse(decodeBase64Url(tokenParts[1]));
+    return JSON.parse(decodeBase64Url(tokenParts[1])) as JWTPayload;
   }
   return "";
 };
@@ -183,33 +185,33 @@ export const getEntraSSOLink = () => {
   return `https://login.microsoftonline.com/${tenant_id}/oauth2/v2.0/authorize?client_id=${client_id}&response_type=code&redirect_uri=${callback}&response_mode=query&scope=openid+profile+offline_access+email`;
 };
 
-export const isNumber = (val: any) => {
+export const isNumber = (val: DateValue) => {
   return (
     val &&
     val !== "" &&
-    !isNaN(val as unknown as number) &&
-    !isNaN(parseFloat(val)) &&
-    isFinite(val)
+    !isNaN(Number(val)) &&
+    !isNaN(parseFloat(String(val))) &&
+    isFinite(Number(val))
   );
 };
 
-export const isDate = (val: any) => {
+export const isDate = (val: DateValue) => {
   if (isEmpty(val) || (isNumber(val) && val.toString().length !== 13)) {
     return false;
   }
 
-  const result = new Date(val);
+  const result = new Date(val as string | number);
   return result instanceof Date && !isNaN(result.valueOf());
 };
 
-export const isValidationToFormateDate = (val: any) => {
-  const result = new Date(val);
+export const isValidationToFormateDate = (val: DateValue) => {
+  const result = new Date(val as string | number);
   const regez = /^\d{4}-\d{2}-\d{2}[T|\s]\d{2}:\d{2}:\d{2}/;
   if (
     !isEmpty(val) &&
     result instanceof Date &&
     !isNaN(result.valueOf()) &&
-    regez.test(val)
+    regez.test(String(val))
   ) {
     return true;
   }
@@ -223,9 +225,9 @@ export const isValidationToFormateDate = (val: any) => {
 //   2. 2020-02-02 (No conversion is required)
 //   3. 2020-06-17T03:04:13Z
 //   4. 2020-06-17 03:04:13
-export const formatDate = (time: any, isAccurateToDay: boolean) => {
+export const formatDate = (time: DateValue, isAccurateToDay: boolean) => {
   if (isValidationToFormateDate(time) || isAccurateToDay) {
-    const realTime = isNumber(time) ? parseInt(time) : time;
+    const realTime = isNumber(time) ? parseInt(String(time)) : time;
     let result = "";
     if (isAccurateToDay) {
       result = dayjs(realTime).format("YYYY MMM DD");
@@ -237,11 +239,11 @@ export const formatDate = (time: any, isAccurateToDay: boolean) => {
   return time;
 };
 
-export const formatDateToISO = (time: any, isAccurateToDay: boolean) => {
+export const formatDateToISO = (time: DateValue, isAccurateToDay: boolean) => {
   if (isValidationToFormateDate(time) || isAccurateToDay) {
-    let newTime = "";
+    let newTime: DateValue = "";
     try {
-      const realTime = isNumber(time) ? parseInt(time) : time;
+      const realTime = isNumber(time) ? parseInt(String(time)) : time;
       if (isAccurateToDay) {
         newTime = dayjs.utc(realTime).format("YYYY MMM DD");
       } else {
@@ -256,7 +258,7 @@ export const formatDateToISO = (time: any, isAccurateToDay: boolean) => {
   return time;
 };
 
-export const isEmpty = (value: any) => {
+export const isEmpty = (value: unknown) => {
   return (
     value === "" || value === null || value === undefined || value === "null"
   );
@@ -272,11 +274,11 @@ export const validateTile = (
 ) => {
   if (entities?.length && entity && subject) {
     const entityIndex = entities.findIndex(
-      (item: any) => item.name === entity || entity?.includes(item.name)
+      (item) => item.name === entity || entity?.includes(item.name)
     );
     if (entityIndex >= 0) {
       const subjectIndex = entities[entityIndex].subjects.findIndex(
-        (item: any) => item.name === subject || item.longName === subject
+        (item) => item.name === subject || item.longName === subject
       );
       if (subjectIndex >= 0) {
         return true;
@@ -288,7 +290,7 @@ export const validateTile = (
      *  */
     if (entity === "X_RATANONE") {
       const entityIndexEqSubject = entities.findIndex(
-        (item: any) => item.name === subject
+        (item) => item.name === subject
       );
       if (entityIndexEqSubject >= 0) {
         return true;
@@ -330,6 +332,6 @@ export const waitFor = (time = 2000) =>
     }, time);
   });
 
-export const aOrb = <T = any, R = any>(a: T, b: R) => {
+export const aOrb = <T = unknown, R = unknown>(a: T, b: R) => {
   return a ?? b;
 };

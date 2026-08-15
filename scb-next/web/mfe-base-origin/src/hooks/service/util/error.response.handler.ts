@@ -3,7 +3,14 @@ import { getHooksBase } from "../../HooksBase";
 import { ActionType } from "../../reducer/util/ActionType";
 import { clearStorageWhenLogout } from "../../../utils/common";
 
-export const errorHandler = (error: AxiosError): unknown => {
+interface ErrorResponseData {
+  message?: string;
+  errorMessage?: string;
+}
+
+export const errorHandler = (
+  error: AxiosError<ErrorResponseData | string>
+): Promise<never> => {
   const { baseDispatch } = getHooksBase();
   if (
     error.code !== "ERR_CANCELED" &&
@@ -17,14 +24,12 @@ export const errorHandler = (error: AxiosError): unknown => {
       error.message === "Network Error" ||
       error.message === "Request failed with status code 401"
     ) {
-      let data: any = error?.response?.data;
+      const data = error?.response?.data;
       msg =
-        data?.message ||
-        data?.errorMessage ||
+        (typeof data === "string"
+          ? data
+          : data?.message || data?.errorMessage) ||
         `Error happened, service is unavailable, pls check with support team: ${error?.config?.url}: API request failed`;
-      if (typeof data === "string") {
-        msg = data;
-      }
     }
     if (msg?.includes("TOKEN_INVALID_EXPIRED")) {
       clearStorageWhenLogout(baseDispatch);

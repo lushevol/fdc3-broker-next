@@ -39,10 +39,7 @@ declare module "*.svg" {
 }
 
 declare interface Window {
-  localStorage: any;
   token: string;
-  ratanConfig: any;
-  single_spa_container_id: any;
+  ratanConfig: unknown;
+  single_spa_container_id: unknown;
 }
-
-declare interface System {}

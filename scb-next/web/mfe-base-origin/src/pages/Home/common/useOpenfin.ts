@@ -4,6 +4,7 @@ import * as openFinFdc3 from "openfin-fdc3";
 import useDispatcher from "../../../hooks/dispathcer";
 import { getEnv, getLocalStorage } from "../../../utils/common";
 import { fdc3InitUtil } from "./util";
+import type { RatanFilterItem } from "../../../components/Drawer/common/interface";
 
 const CASHFLOW_CONTEXT_TYPE = "scb.fmptp.cashflows";
 const TRADE_CONTEXT_TYPE = "scb.fmptp.trade.query";
@@ -13,6 +14,13 @@ const EQUALS_OPERATOR = "EQ";
 const CASHFLOW_TILE_NAME = "cashflow_cn";
 const TRADE_TILE_NAME = "trade";
 const VIEW_LAUNCH_INTENT = "scb.ViewLaunch";
+
+interface ExternalIntentContext extends fdc3.Context {
+  id?: { tradeId?: string };
+  filters?: RatanFilterItem[];
+  parameters: Record<string, unknown>;
+  target: string;
+}
 
 const openfinFdc3 = window.fdc3 || openFinFdc3;
 
@@ -45,50 +53,54 @@ export const waitTillLogin = (): Promise<boolean> =>
 
 const useOpenfin = () => {
   const { dispatchOpenTile } = useDispatcher();
-  const [channelMessage, setChannelMessage] = React.useState<any>();
-  const [intentListener, setIntentListener] = React.useState<any>();
+  const [channelMessage, setChannelMessage] = React.useState<React.ReactNode>();
+  const [intentListener, setIntentListener] = React.useState<fdc3.Listener>();
   const handleExternalIntentListener = React.useCallback(
     (context: fdc3.Context) => {
+      const externalContext = context as ExternalIntentContext;
       waitTillLogin().then((logined) => {
         if (logined) {
-          if (context.type === CASHFLOW_CONTEXT_TYPE) {
+          if (externalContext.type === CASHFLOW_CONTEXT_TYPE) {
             const search: {
-              filters: { field: string; operator: string; values: any }[];
+              filters: RatanFilterItem[];
             } = {
               filters: [],
             };
-            if (context.id?.tradeId) {
+            if (externalContext.id?.tradeId) {
               search.filters.push({
                 field: TRADE_ID_FIELD,
                 operator: EQUALS_OPERATOR,
-                values: context.id.tradeId,
+                values: externalContext.id.tradeId,
               });
-            } else if (context.filters) {
-              search.filters = context.filters;
+            } else if (externalContext.filters) {
+              search.filters = externalContext.filters;
             }
             if (search.filters.length > 0) {
               dispatchOpenTile(search, CASHFLOW_TILE_NAME);
             }
-          } else if (context.type === TRADE_CONTEXT_TYPE) {
-            if (context.id?.tradeId) {
+          } else if (externalContext.type === TRADE_CONTEXT_TYPE) {
+            if (externalContext.id?.tradeId) {
               const search = {
                 intent: "ViewTradeDetails",
                 context: {
-                  tradeId: context.id.tradeId,
+                  tradeId: externalContext.id.tradeId,
                 },
               };
               dispatchOpenTile(search, TRADE_TILE_NAME);
-            } else if (context.filters?.length) {
+            } else if (externalContext.filters?.length) {
               const search = {
                 intent: "SearchTrades",
                 context: {
-                  filters: context.filters,
+                  filters: externalContext.filters,
                 },
               };
               dispatchOpenTile(search, TRADE_TILE_NAME);
             }
-          } else if (context.type === GENERAL_CONTEXT_TYPE) {
-            dispatchOpenTile(context.parameters, context.target);
+          } else if (externalContext.type === GENERAL_CONTEXT_TYPE) {
+            dispatchOpenTile(
+              externalContext.parameters,
+              externalContext.target
+            );
           }
         }
       });

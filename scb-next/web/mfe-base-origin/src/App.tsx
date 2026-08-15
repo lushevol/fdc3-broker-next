@@ -5,7 +5,12 @@ import Routing from "./routing";
 import { LocalizationProvider } from "@mui/x-date-pickers-pro";
 import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
 
-const App: React.FC = (props: any): ReactElement => (
+export interface AppProps {
+  version?: string;
+  [key: string]: unknown;
+}
+
+const App: React.FC<AppProps> = (props): ReactElement => (
   <LocalizationProvider dateAdapter={AdapterDayjs}>
     <Provider data={{ rootVersion: props.version }}>
       <ThemeProvider>

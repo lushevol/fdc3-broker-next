@@ -20,7 +20,7 @@ export const Time: FC<TimeProps> = (props) => {
   } else if (
     nowField &&
     isDate(value) &&
-    (`${value}`.includes("00:00:00") || regez.test(value))
+    (`${value}`.includes("00:00:00") || regez.test(String(value)))
   ) {
     newIsAccurateToDay = true;
   }

@@ -57,7 +57,10 @@ const useParameters = () => {
         tabId: id,
       };
       try {
-        container.parameters = JSON.parse(parameters_ ?? "{}") as object;
+        container.parameters = JSON.parse(parameters_ ?? "{}") as Record<
+          string,
+          unknown
+        >;
       } catch (e) {
         console.error(e);
       }
@@ -99,12 +102,7 @@ const useParameters = () => {
     const module = params.get("module");
     const tile = params.get("tile");
     if (container && module && tile) {
-      openTile(
-        container,
-        module,
-        tile,
-        params.get("parameters") ?? undefined
-      );
+      openTile(container, module, tile, params.get("parameters") ?? undefined);
       const { history } = window;
       history.replaceState(null, "", "/");
     }

@@ -4,13 +4,16 @@ import service from "./config";
 import { getEndPoint } from "./util/getEndpoint";
 
 export interface ConfigProps {
-  signal?: any;
-  headers?: any;
+  signal?: AbortSignal;
+  headers?: AxiosRequestConfig["headers"];
 }
 
-export const signal = {
-  getRefreshToken: undefined as any,
-  relogin: undefined as any,
+export const signal: {
+  getRefreshToken: AbortController | undefined;
+  relogin: AbortController | undefined;
+} = {
+  getRefreshToken: undefined,
+  relogin: undefined,
 };
 
 export const getRefreshToken = () => {
@@ -27,8 +30,8 @@ export const getRefreshToken = () => {
         signal: signal.getRefreshToken.signal,
       }
     )
-    .catch((e) => {
-      console.error("e", e);
+    .catch((error: unknown) => {
+      console.error("e", error);
     });
 };
 
@@ -45,8 +48,8 @@ export const relogin = () => {
         signal: signal.relogin.signal,
       }
     )
-    .catch((e) => {
-      console.error("e", e);
+    .catch((error: unknown) => {
+      console.error("e", error);
     });
 };
 
@@ -55,7 +58,11 @@ const putService = <T = unknown, D = unknown>(
   data: D,
   config?: AxiosRequestConfig<D>
 ): AxiosPromise<T, D> => {
-  return service.put<T, AxiosResponse<T, D>, D>(getEndPoint(path), data, config);
+  return service.put<T, AxiosResponse<T, D>, D>(
+    getEndPoint(path),
+    data,
+    config
+  );
 };
 
 const postService = <T = unknown, D = unknown>(
@@ -87,9 +94,13 @@ const deleteService = <T = unknown, D = unknown>(
 const patchService = <T = unknown, D = unknown>(
   path: string,
   data: D,
-  config?: ConfigProps
+  config?: AxiosRequestConfig<D>
 ): AxiosPromise<T, D> => {
-  return service.patch(getEndPoint(path), data, config);
+  return service.patch<T, AxiosResponse<T, D>, D>(
+    getEndPoint(path),
+    data,
+    config
+  );
 };
 
 export {

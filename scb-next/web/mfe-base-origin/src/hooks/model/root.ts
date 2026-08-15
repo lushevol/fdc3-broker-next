@@ -70,7 +70,7 @@ export interface Tile {
   container: string;
   module: string;
   tile: string;
-  parameters?: Object;
+  parameters?: Record<string, unknown>;
   emailSupport: string;
   entity?: string[];
   subject?: string;
@@ -102,14 +102,14 @@ export interface RootModel {
   expiredIn?: number;
   iat?: number;
   userLoginTime?: Date;
-  clientBus?: any;
+  clientBus?: unknown;
   workspaces?: Workspace[] | [];
   currentWorkspace?: Workspace;
   drawer?: boolean;
   timeType?: string;
   entities?: Entity[] | [];
-  refreshTab?: object;
-  sseCallback?: object;
+  refreshTab?: Record<string, () => void>;
+  sseCallback?: Record<string, unknown>;
   ssePayload?: SsePayload[];
   entitlementsToken?: string;
   workspace?: Workspace;
@@ -122,8 +122,12 @@ export interface ProviderPropsDefault extends ComponentPropsDefault {
   data?: RootModel;
 }
 
-const workspacesDefault = getLocalStorage().getItem(ActionType.SET_WORKSPACES)
-  ? JSON.parse(getLocalStorage().getItem(ActionType.SET_WORKSPACES) ?? "[]")
+const workspacesDefault: Workspace[] = getLocalStorage().getItem(
+  ActionType.SET_WORKSPACES
+)
+  ? (JSON.parse(
+      getLocalStorage().getItem(ActionType.SET_WORKSPACES) ?? "[]"
+    ) as Workspace[])
   : [firstWorkspace()];
 
 const entities: Entity[] = getLocalStorage().getItem(ActionType.SET_ENTITIES)

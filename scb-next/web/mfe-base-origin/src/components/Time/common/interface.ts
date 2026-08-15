@@ -1,5 +1,7 @@
+import type { DateValue } from "../../../utils/common";
+
 export interface TimeProps {
-  value: any;
+  value: DateValue;
   isAccurateToDay?: boolean;
   field?: string | string[];
   colDef?: {

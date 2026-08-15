@@ -3,7 +3,10 @@ import { useContext } from "../../../hooks/provider";
 
 export const excludedList = ["Trade_Id", "Package_Id"];
 
-export const includesArray = (list: any[], data: any) => {
+export const includesArray = (
+  list: readonly string[],
+  data: string | string[] | undefined
+) => {
   if (Array.isArray(data)) {
     let isTrue = false;
     data.forEach((item) => {
@@ -13,7 +16,7 @@ export const includesArray = (list: any[], data: any) => {
     });
     return isTrue;
   }
-  return list.includes(data);
+  return list.includes(data as string);
 };
 
 const useController = () => {

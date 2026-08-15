@@ -26,8 +26,8 @@ export const extend = async (
         signal: signal.extendToken.signal,
       }
     )
-    .catch((e) => {
-      console.error("e", e);
+    .catch((error: unknown) => {
+      console.error("e", error);
     });
 };
 export const extendToken = () => {

@@ -23,15 +23,14 @@ const useController = () => {
     addWorkspace,
   } = useDispatcher();
   const anchor = !!store?.drawer;
-  const toggleDrawer =
-    (val: boolean) => (_event: React.KeyboardEvent | React.MouseEvent) => {
-      dispacthDrawer(val);
-      ButtonEvent("click", {
-        name: "new tile",
-        value: `${val}`,
-        ...analyticsData,
-      });
-    };
+  const toggleDrawer = (val: boolean) => (_event?: unknown) => {
+    dispacthDrawer(val);
+    ButtonEvent("click", {
+      name: "new tile",
+      value: `${val}`,
+      ...analyticsData,
+    });
+  };
 
   const addTile = (inputContainer: Container) => {
     if (store?.workspaces) {
@@ -101,7 +100,8 @@ const useController = () => {
   const beforeunloadEvent = (e: BeforeUnloadEvent) => {
     e.preventDefault();
     const confirmationMessage = "Leave?";
-    e.returnValue = confirmationMessage;
+    const unloadEvent: { returnValue: string } = e;
+    unloadEvent.returnValue = confirmationMessage;
     setTimeout(() => {
       openPopUp();
     }, 500);
@@ -110,7 +110,7 @@ const useController = () => {
   React.useEffect(() => {
     window.addEventListener("click", winFocusEvent, false);
     window.addEventListener("focus", winFocusEvent, false);
-    const params: any = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location.search);
     if (params?.get("survey") === "no") {
       console.info("disable beforeunload");
     } else {
