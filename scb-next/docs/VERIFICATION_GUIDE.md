@@ -1,34 +1,68 @@
-# SCB Next complete verification guide
+# SCB Next verification guide
 
-Use this runbook to independently verify the requested SCB migration, functional parity, visual parity, automated tests, and production-style Nginx deployment.
+This guide is the executable release gate for the migration defined by
+[MIGRATION.md](MIGRATION.md) and [MIGRATION_SPEC.md](MIGRATION_SPEC.md). Run it
+from the checkout being accepted. A dated report, an earlier test count, or a
+successful build from another checkout is context only and MUST NOT replace a
+current command result.
 
-The commands assume the repository is at `/Users/lushevol/code/github/fdc3-broker-next`. If yours is elsewhere, substitute that path.
+The commands assume the repository is at
+`/Users/lushevol/code/github/fdc3-broker-next`. Substitute the actual absolute
+path when another checkout is used.
 
-## 1. Prerequisites
+## Verification rules
 
-Required tooling:
+1. Record the target commit, dirty-worktree state, runtime versions, registry,
+   operating system, and execution date before running a gate.
+2. Preserve the complete command, exit code, and unedited output for every
+   applicable gate.
+3. Mark a gate `pass`, `fail`, `blocked`, or `not applicable`. A blocked gate
+   includes the failing command, exact error, owner, and prerequisite needed to
+   unblock it.
+4. Stop claiming release readiness after any required gate fails. Continue
+   diagnosis only when doing so cannot overwrite acceptance evidence.
+5. Run frontend verification from leaf to host: Cashflow, Ratan, then Base.
+6. Treat fixture-backed browser results as frontend-composition evidence. Only
+   a real-BFF run can certify production business behavior.
+7. Treat [PRODUCTION_ACCEPTANCE.md](PRODUCTION_ACCEPTANCE.md) as a dated
+   historical snapshot and report template, never as current evidence.
 
-- Node.js and npm compatible with Vite 8;
-- Docker with the `docker-compose` command;
-- Chromium installed by Playwright;
-- ports `8001`, `8009`, and `8015` for development verification;
-- port `9081` for production-edge verification.
-
-Vite 8 requires Node.js `20.19+` or `22.12+`; Node 22 LTS is the preferred verification runtime.
-
-If you have access to the corporate npm registry, install from the SCB Next root:
+## 1. Record the candidate
 
 ```bash
-cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
-npm install
-npx playwright install chromium
+cd /Users/lushevol/code/github/fdc3-broker-next
+git rev-parse HEAD
+git status --short
+node --version
+npm --version
+npm config get registry
+uname -a
+date -u
 ```
 
-The clean install can be blocked outside the corporate network by private `@scdevkit/webkit` packages. If dependencies are already installed from the repository's compatible toolchain, do not delete or regenerate them merely to run acceptance. If neither corporate registry access nor the existing installation is available, record frontend dependency installation as blocked rather than claiming a clean-build pass.
+Record the legacy `scb/` source revision separately when it differs from the
+target repository revision. The worktree may contain unrelated user changes,
+but the acceptance record must identify them and the migration commit must not
+include them.
 
-## 2. Verify the copied scope
+Completion criterion: the handoff identifies the legacy source SHA, target
+starting SHA, candidate SHA, environment, and every pre-existing worktree
+change.
 
-Confirm that the isolated migration contains both source areas and that the original `scb` tree still exists as the rollback/reference source:
+## 2. Verify prerequisites and source isolation
+
+Required tools and endpoints:
+
+- Node.js `20.19+` or `22.12+`; Node 22 LTS is preferred for Vite 8;
+- npm with access to the configured corporate registry;
+- Chromium installed for Playwright;
+- Docker and `docker-compose` for the production-edge branch;
+- JDK 17+, Maven, corporate Artifactory, and service credentials for real-BFF
+  certification;
+- development ports `8001`, `8009`, and `8015`;
+- production-edge port `9081`.
+
+Confirm the source and target ownership roots:
 
 ```bash
 cd /Users/lushevol/code/github/fdc3-broker-next
@@ -38,66 +72,123 @@ test -d scb-next/web
 test -d scb-next/services
 ```
 
-Review the migration scope and architectural decisions:
+`scb/` is read-only reference and rollback evidence. The active target must not
+import, link, serve, or build from it.
 
-- [Migration specification](MIGRATION_SPEC.md)
-- [Migration runbook](MIGRATION.md)
-- [Dependency research](dependency-research.md)
-- [Recorded production acceptance](PRODUCTION_ACCEPTANCE.md)
+Completion criterion: all required roots exist, prerequisites are recorded,
+and no migration step has modified `scb/`.
 
-The dependency report records the latest versions checked at migration time, retained dependencies, proposed replacements, compatibility risks, and private-package blockers. Major React, UI framework, grid, GraphQL, and Spring upgrades are intentionally separate compatibility stages; they should not be treated as part of the federation cutover unless their complete regression suites are rerun.
+## 3. Install and prove dependency isolation
 
-When porting a change from `scb/`, follow the source mapping and compatibility-boundary workflow in the migration runbook before using this guide as the release gate. Do not copy legacy build, lifecycle, or generated files into `scb-next`.
-
-## 3. Verify the architecture
-
-Run the executable architecture assertions:
+Install from the SCB Next root. Do not create child lockfiles or flatten Base's
+MUI 9 tree over the unchanged MUI 5 remote trees.
 
 ```bash
 cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
-npm test -- --run tests/architecture.test.ts
+npm install
+npm run verify:dependency-isolation
+npm ls --all
+npx playwright install chromium
 ```
 
-Expected result: `13 passed`.
+The isolation gate must prove all of the following:
 
-These assertions verify:
+- Base resolves its declared MUI 9 and MUI X 9 packages;
+- Ratan resolves its declared MUI 5 packages and icons;
+- Cashflow resolves its declared MUI 5 packages and icons;
+- all active origins remain on compatible React 18 versions;
+- the root lockfile describes the complete workspace installation;
+- no invalid, extraneous, or unresolved dependency affects the active graph.
 
-- all three active origins use Vite and Vitest;
-- no active Single-SPA or Webpack dependency remains in those origins;
-- Base is the host on port `8001`;
-- Ratan is a federated remote on port `8009`;
-- Cashflow is the second-layer remote on port `8015`;
-- React and router sharing is configured across federation boundaries;
-- production remote URLs and public bases are environment-configurable;
-- Nginx packages both remote paths, BFF forwarding, security headers, health checks, and read-only container controls.
+If `npm install` cannot access private packages, record the registry and exact
+package error as a blocker. An existing `node_modules` tree may be used for
+diagnosis, but it is not clean-install evidence.
 
-## 4. Verify unit tests
+Missing paths such as `@mui/icons-material/DeleteOutline` in Ratan or
+`@mui/icons-material/CheckCircleOutline` in Cashflow indicate broken workspace
+isolation. Restore the declared nested MUI 5 installation through the correct
+registry. Do not upgrade Ratan, Cashflow, or React to work around it.
 
-Run the root architecture tests and every workspace unit suite:
+Completion criterion: install, isolation verification, and `npm ls --all` all
+exit successfully from the candidate lockfile.
+
+## 4. Run architecture and development-mock contract tests
 
 ```bash
 cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
+npm test -- tests/architecture.test.ts --run
+npm test -- tests/dev-mock-api.test.ts --run
 npm test
-npm run test:unit
 ```
 
-For a focused Cashflow gate:
+At the time this guide was written, the root suite contains 20 tests, including
+7 focused development-mock tests. Counts may increase. Acceptance depends on
+the current discovered suite passing, not on reproducing those historical
+numbers.
+
+The mock test must cover:
+
+- normal login, token header, entitlements, and drawer entries;
+- metadata and generic fallbacks;
+- all four predefined metric requests;
+- initial Cashflow data;
+- ID search for `M0P56753524`;
+- matching detail, accounting-empty, and currency-holiday responses;
+- saved filter `Pending operator cashflows`;
+- saved view `Cashflow operations`;
+- executable SockJS JSONP open, connected, heartbeat/send behavior.
+
+Completion criterion: focused architecture, focused mock, and complete root
+suites pass from the candidate checkout.
+
+## 5. Verify Cashflow, Ratan, and Base separately
+
+Run tests and builds in dependency order so a leaf failure cannot be hidden by
+a host result.
+
+### Cashflow
 
 ```bash
-npm run test --workspace @fm/ratan_cashflow_blotter-origin -- --reporter=dot
+cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
+npm exec --workspace @fm/ratan_cashflow_blotter-origin -- vitest run --reporter=dot
+npm run build --workspace @fm/ratan_cashflow_blotter-origin
 ```
 
-Acceptance requires every discovered Cashflow test file to pass and the intentional skip set to remain reviewed and unchanged. Test counts are allowed to increase as regression coverage is added; use the dated production acceptance report for historical counts and retain the current command output with each release candidate.
+### Ratan
 
-The workspace's explicit `coverage` command is not the unit-test acceptance gate. Its legacy blanket dependency inlining also transforms Vitest's coverage runtime and exposes pre-existing Ant Design/hoisted-mock behavior. Treat coverage remediation as migration debt and use the deterministic `npm test` result for this cutover.
+```bash
+npm exec --workspace @fm/ratan_container-origin -- vitest run
+npm run build --workspace @fm/ratan_container-origin
+```
 
-The repository-wide `npm run typecheck` likewise still exposes pre-existing Jest setup, legacy prop, and TypeScript compatibility debt. A successful Vite production build is required below, but do not record strict typecheck as passing until that separate debt is resolved.
+### Base
 
-## 5. Verify the copied service
+```bash
+npm exec --workspace @fm/base-origin -- vitest run
+npm run build --workspace @fm/base-origin
+```
 
-The copied backend scope contains `services/single-ui-bff`. It intentionally retains its HTTP contracts while the browser acceptance composition substitutes deterministic Nginx fixtures.
+Run Storybook tests/builds when the changed Base surface has Storybook coverage
+or a workspace script defines that gate. Then run the aggregate build gate:
 
-With JDK 17+, Maven, corporate Artifactory configuration, and credentials available, run:
+```bash
+npm run build
+```
+
+The workspace `npm run test:unit` command invokes Base and Ratan package scripts
+with coverage enabled. That instrumentation currently exposes recorded legacy
+Ant Design and hoisted-mock debt, so it is not a substitute for the functional
+Vitest commands above. Run `npm run test:unit` and `npm run typecheck` when the
+release policy requires those debt gates, preserve their actual results, and
+never report them as passing based on a production build.
+
+Completion criterion: each leaf-to-host test and build is independently green,
+and aggregate commands do not reveal an additional integration failure.
+
+## 6. Verify the copied BFF
+
+The copied service is `services/single-ui-bff`. Its public HTTP, GraphQL,
+authorization, and notification contracts remain unchanged.
 
 ```bash
 cd /Users/lushevol/code/github/fdc3-broker-next/scb-next/services/single-ui-bff
@@ -105,16 +196,18 @@ mvn test
 mvn clean package
 ```
 
-Expected result in a fully provisioned corporate environment: tests pass and Maven produces the deployable service package without route/schema changes.
-
-Outside that environment, Maven cannot resolve private artifacts such as:
+Private artifacts such as the following require the corporate Maven setup:
 
 - `com.scb.ratan:ratanone-service-spring-boot-starter:6.3.1`;
 - `com.scb.ratan:ratanone-hashicorp-integrator-spring-boot-starter:6.3.1`.
 
-An unresolved private artifact is an external release blocker, not a test pass. Capture the Maven error, mark the real-BFF build and backend-connected journey as blocked, and continue only with the explicitly labeled mock-BFF acceptance below.
+An unresolved private artifact is a release blocker. It is not a skipped pass,
+and the frontend fixture layer does not substitute for this gate.
 
-## 6. Verify development federation
+Completion criterion: the BFF tests and package build pass in a provisioned
+environment without route or schema drift.
+
+## 7. Start and probe the development composition
 
 Start all three origins:
 
@@ -123,12 +216,7 @@ cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
 npm run dev
 ```
 
-The Base Vite origin serves the same deterministic login, field metadata, custom-view, and Cashflow
-fixtures used by the production mock BFF. Open
-`http://127.0.0.1:8001/?show_normal_login=Y&survey=no` and sign in with `mock.cashflow` / `acceptance`;
-no backend process is required for this development acceptance path.
-
-In a second terminal, verify the host and remote manifests:
+Keep that process running. In another terminal:
 
 ```bash
 curl -f http://127.0.0.1:8001/
@@ -136,63 +224,143 @@ curl -f http://127.0.0.1:8009/remoteEntry.js
 curl -f http://127.0.0.1:8015/remoteEntry.js
 ```
 
-Run development-origin E2E coverage while those servers remain running:
+The Base development server owns the request-aware cross-MFE mock. No backend
+process is required for this development-only fixture journey.
+
+Run Playwright against the development origins:
 
 ```bash
 cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
 npm run test:e2e
 ```
 
-Expected development result: the three development scenarios pass and the production-only scenario is skipped.
+Current Playwright coverage is a smoke gate, not proof of the full captured
+journey. Complete the following Live Browser gate as well.
 
-Stop the development process with `Ctrl+C` before production verification so it does not obscure port or console evidence.
+Completion criterion: all origins and remote entries respond, development
+Playwright passes, and no origin silently falls back to a stale process.
 
-## 7. Build and start the production Nginx composition
+## 8. Complete the development Live Browser journey
 
-The production layout follows the MVP Real World DevOps rules: one Nginx composition root, immutable hashed assets, non-cached federation manifests, same-origin remote paths, configurable BFF forwarding, health checks, security headers, read-only filesystems, tmpfs runtime paths, and `no-new-privileges`.
+Open
+`http://127.0.0.1:8001/?show_normal_login=Y&survey=no` in Live Browser at a wide
+desktop viewport, approximately `2048x1152`.
 
-Build the three frontend artifacts with production remote URLs:
+Use `mock.cashflow` / `acceptance` and execute this exact journey without
+reloading between steps:
+
+1. Sign in and verify the portal header, theme, UTC control, avatar, workspace
+   tabs, and `New Tile` action.
+2. Select `New Tile`; verify the drawer and open `Cashflow Blotter`.
+3. Verify `Quick Search`, `Custom Search/View`, grid controls, and all four
+   predefined metrics render with production-consistent styling.
+4. Verify the initial grid renders production-shaped records, readable values,
+   selection controls, result count, borders, row/header styles, and contained
+   scrolling.
+5. Search for Cashflow ID `M0P56753524`; verify exactly the captured row and
+   successful result state.
+6. Double-click that row. Verify Cashflow Detail opens and shows the same ID,
+   trade `56753524`, state `WAITING`, currency `USD`, amount `11.10`, payment
+   date `2026-08-14`, and Pending Operator state.
+7. Open `Accounting Detail`; verify its empty response renders as an intentional
+   empty state, not an error or indefinite spinner.
+8. Close the detail dialog. Open Custom Search and verify the dialog is dark,
+   closable, viewport-contained, and shows `Pending operator cashflows`.
+9. Open Custom View and verify the selector shows `Cashflow operations`.
+10. Open View Builder and verify its name, search, role/private controls,
+    Available Fields, Display View, and close action are visible and aligned.
+11. Close the application using its workspace-tab delete action; verify other
+    workspace state remains usable.
+
+Inspect computed presentation and behavior throughout:
+
+- Poppins and compact Base component defaults are present;
+- MUI controls match the accepted Material UI styling and have not been reset
+  by a later Emotion/MUI injection;
+- Ant Design controls and portals retain the dark theme;
+- `.ag-theme-alpine-dark` has readable text, stable row height, and visible
+  borders;
+- dialogs remain within the viewport and above the workspace;
+- fonts, images, icons, CSS, remote chunks, and API calls return successfully;
+- loading, empty, selected, disabled, hover, and close states are coherent;
+- no content overlap or document-level horizontal overflow occurs.
+
+Repeat the workspace, Blotter, details, and builder checks at `1024x768`.
+
+### Console and network gate
+
+Capture the browser console and failed-request list. In development, any
+notification reconnect alert, SockJS/JSONP syntax error, uncaught exception,
+failed remote/chunk request, unexpected HTTP 4xx/5xx, or blank application is a
+failure. The development mock implements SockJS JSONP; these symptoms are not
+accepted legacy warnings.
+
+Apollo `addTypename`, AG Grid v32, React lifecycle, Ant Design, or Redux
+serializability warnings may be inherited debt only when each exact warning is
+recorded and demonstrated not to break the journey. A new warning is a failure
+until classified.
+
+Completion criterion: the uninterrupted journey passes at both viewports with
+screenshots, console export, and network evidence, and with no notification or
+JSONP mock error.
+
+## 9. Inspect target independence and built artifacts
+
+After successful builds, search source and generated artifacts for forbidden
+active dependencies. Review every match rather than trusting a raw count.
+
+```bash
+cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
+rg -n "single-spa|single-spa-react|single-spa-layout|System\.import|importmap" web package.json package-lock.json
+rg -n "(/|\.\./)scb/|fdc3-broker-next/scb/" web devops package.json package-lock.json
+rg -n "single-spa|System\.import|importmap|fdc3-broker-next/scb/" web/*/dist
+```
+
+Source retained only as unreachable migration history must be identified and
+proved absent from the active bundle. Inspect `remoteEntry.js` and its chunks
+to verify remote public bases, a compatible React share scope, and no
+host-relative remote asset URL.
+
+Completion criterion: active source and built artifacts have no runtime/build
+dependency on legacy composition or `scb/`, and every historical-only match is
+documented.
+
+## 10. Build the production edge from leaf to host
+
+Stop the development composition first. Then run the authoritative production
+script, which builds Cashflow, Ratan, and Base in that order:
 
 ```bash
 cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
 SCB_NEXT_EDGE_ORIGIN=http://127.0.0.1:9081 npm run build:production
 ```
 
-Expected result: Base, Ratan, and Cashflow complete `vite build` successfully. Large-chunk and legacy deprecation warnings are documented performance debt, not build failure.
-
-Start the Nginx edge and deterministic mock BFF:
+Start and inspect the edge only after all three builds pass:
 
 ```bash
 npm run serve:production
 docker-compose -f devops/docker-compose.production.yml ps
-```
-
-Expected edge URL: `http://127.0.0.1:9081`.
-
-## 8. Verify Nginx routing and deployment controls
-
-Run these checks while the production composition is running:
-
-```bash
 curl -f -i http://127.0.0.1:9081/healthz
 curl -f -I http://127.0.0.1:9081/remotes/ratan/remoteEntry.js
 curl -f -I http://127.0.0.1:9081/remotes/cashflow/remoteEntry.js
 curl -f http://127.0.0.1:9081/
 ```
 
-Confirm:
+Verify HTTP 200, `no-store` on federation manifests, immutable caching on
+hashed assets, security headers, same-origin remote paths, a healthy edge,
+read-only filesystems, required `tmpfs`, and `no-new-privileges`.
 
-- `/healthz` returns HTTP 200 and `{"status":"ok","composition":"scb-next"}`;
-- both `remoteEntry.js` requests return HTTP 200;
-- federation manifests have `Cache-Control: no-store`;
-- the host page includes security headers such as `Content-Security-Policy`, `X-Content-Type-Options`, and `X-Frame-Options`;
-- hashed JavaScript/CSS assets are served with immutable caching;
-- `docker-compose ... ps` shows the edge healthy;
-- the edge and mock BFF use read-only filesystems and `no-new-privileges` in `devops/docker-compose.production.yml`.
+Completion criterion: all three artifacts build in order and the deployed edge
+serves the expected host, manifests, chunks, headers, and health response.
 
-The acceptance composition routes `/api/` to the mock BFF. For a real environment, set `BFF_ORIGIN` to the real service origin in the edge deployment; frontend artifacts do not need rebuilding.
+## 11. Classify production-mock acceptance honestly
 
-## 9. Run production E2E acceptance
+The current Nginx mock is not equivalent to the Base development mock. It uses
+a generic Cashflow fixture, returns empty custom filter/view lists, and does
+not replay the complete request-aware SockJS journey. Therefore it cannot
+certify the captured production-style Cashflow flow described in section 8.
+
+You may run its existing smoke test for diagnostic evidence:
 
 ```bash
 cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
@@ -201,140 +369,134 @@ PLAYWRIGHT_PRODUCTION_EDGE=1 \
 npm run test:e2e
 ```
 
-Expected production result:
+Report that result as `production-edge smoke`, not `full production-mock
+parity`. Full parity remains blocked until the production mock dispatches by
+request in the same way as the development middleware and passes the section 8
+journey with no notification transport error.
 
-- production fixture login passes;
-- the Base host opens the Ratan container;
-- Ratan loads Cashflow through the second federation boundary;
-- both fixture rows appear;
-- one production test passes and the two development-only tests are skipped.
+Completion criterion: either production-mock parity passes the complete
+captured journey, or the handoff explicitly records it as blocked and makes no
+production-style parity claim.
 
-## 10. Live Browser manual acceptance
+## 12. Verify against the real BFF
 
-Open `http://127.0.0.1:9081/?show_normal_login=Y&survey=no` in Live Browser.
+This gate is mandatory for production certification.
 
-Use these mock credentials:
+1. Start or deploy the packaged `single-ui-bff` with its required database,
+   identity, discovery, secrets, and downstream services.
+2. Set the edge `BFF_ORIGIN` to the real service origin and recreate the edge;
+   do not rebuild the frontend artifacts.
+3. Repeat the routing/header probes, production Playwright, section 8 Live
+   Browser journey, and all eight drawer routes.
+4. Use an approved test identity with the expected Cashflow entitlements.
+5. Verify real search, filtering, pagination, details, create/audit/export,
+   permission gates, errors, and SockJS/STOMP notifications.
+6. Confirm fixture-only IDs and credentials do not appear in real-environment
+   evidence.
 
-- username: `mock.cashflow`
-- password: `acceptance`
+For each drawer route, accept the intended business screen or entitlement gate:
 
-### Login and workspace
+| Route                         | Required surface                                         |
+| ----------------------------- | -------------------------------------------------------- |
+| Cashflow Blotter              | quick/custom search, custom view, metrics, grid, details |
+| Cashflow Open Search          | application or intentional access gate                   |
+| Cashflow Group Management     | search form and responsive results grid                  |
+| Cashflow Dashboard            | region/entity filters, status cards, notifications       |
+| BIC Netting Static Table      | filters, Create, Audit, Export, pagination, grid         |
+| Utilization Static Table      | filters, Create, Audit, Export, results grid             |
+| Cashflow Authorization Limits | permission-aware Create and limits grid                  |
+| Cashflow Splitting Static     | filters, Create, Audit, Export, results grid             |
 
-1. Confirm the login screen shows username, password, SSO, the Markets Operations One hero, and the green Sign In action.
-2. Sign in with the mock credentials.
-3. Confirm the dark portal header, UTC control, avatar, workspace tab area, and `New Tile` action are visible.
-4. Select `New Tile` and confirm the drawer contains all eight Cashflow applications.
-5. Open an application, confirm it creates a workspace tab, then use the tab delete/close action and confirm the application is removed.
+Completion criterion: the real-BFF journey passes with real identity,
+authorization, API, notification, CSP/CORS, license, and telemetry contracts.
 
-### Screen-by-screen checklist
+## 13. Diagnose common failures
 
-Open each drawer entry separately and compare the observed features and styling with this checklist:
+| Symptom                                       | Likely boundary                                         | First required check                                                |
+| --------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------- |
+| `@mui/icons-material/*` cannot resolve        | flattened Base MUI 9 over remote MUI 5                  | rerun install/isolation gate and inspect workspace-local resolution |
+| invalid hook call or `ReactCurrentDispatcher` | duplicate React share                                   | compare all manifests and React 18 singleton declarations           |
+| remote entry loads but a chunk is 404         | wrong `VITE_PUBLIC_BASE`                                | inspect remote entry and failing chunk URL                          |
+| MUI controls lose accepted styling            | Emotion insertion order or incomplete Base theme facade | compare providers and computed styles at the failing control        |
+| Ratan action selectors stop matching          | CSS namespace drift                                     | verify `MicroWebUI_ratan_container` in source and bundle            |
+| grid is unstyled or transparent               | missing/local skin order                                | inspect bundled Ratan grid CSS and computed grid styles             |
+| `process` or `global` is undefined            | untranslated compile-time global                        | inspect Cashflow Vite aliases and `define` values                   |
+| browser requests Node `net` from STOMP        | wrong STOMP entry                                       | verify the browser-compatible alias                                 |
+| JSONP `Unexpected token ':'`                  | generic JSON handled a SockJS script request            | inspect JSONP route order and executable callback body              |
+| drawer is blank after stale login             | fixture identity absent from current state              | log out and complete the documented login flow                      |
+| custom lists are empty                        | wrong endpoint shape or builder `type`                  | inspect request query and array fixture                             |
+| details show fallback                         | list/detail IDs or operation matching diverge           | compare search request, detail request, and fixture IDs             |
+| host builds but integrated screen fails       | provider/federation/CSS boundary                        | return to leaf builds and development browser evidence              |
 
-| Screen                        | Required acceptance evidence                                                                                                                                                |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Cashflow Blotter              | Quick Search, preset counts, custom search/view controls, grid controls, `CF-ACCEPT-001`, `CF-ACCEPT-002`, formatted status/date/currency/amount values, result count `2/2` |
-| Cashflow Open Search          | Access/whitelist permission gate renders rather than a blank or broken remote                                                                                               |
-| Cashflow Group Management     | Search form, results grid, responsive columns                                                                                                                               |
-| Cashflow Dashboard            | Region/entity filters, status cards, refresh or notification state                                                                                                          |
-| BIC Netting Static Table      | Filters, Create, Audit, Export, pagination, and grid                                                                                                                        |
-| Utilization Static Table      | Filters, Create, Audit, Export, and results grid                                                                                                                            |
-| Cashflow Authorization Limits | Create action and Profile, Currency, Limitation, and Actions columns; this also verifies authenticated permission propagation across federation                             |
-| Cashflow Splitting Static     | Filters, Create, Audit, Export, and results grid                                                                                                                            |
+Completion criterion: each failure is traced to an owning boundary and fixed at
+the source or configuration layer; generated `dist/` files are never patched.
 
-For every screen, also verify:
+## 14. Retain a complete evidence manifest
 
-- fonts, colors, spacing, borders, icons, tables, tabs, and buttons match the migrated SCB presentation;
-- there is no blank application body or uncaught page error;
-- the browser network panel shows both federation manifests loaded through `/remotes/`;
-- ordinary API traffic goes through `/api/`, not directly to a hard-coded backend host;
-- opening and closing tabs does not corrupt the other workspace tabs.
+Return this exact record with the migration handoff:
 
-### Cashflow Blotter production-style comparison
+```text
+Verifier and UTC date:
+Environment (OS, Node, npm, registry, browser):
+Legacy source SHA:
+Target starting SHA:
+Target ending SHA:
+Pre-existing worktree changes:
+Scope migrated:
+Files intentionally copied:
+Files intentionally translated:
+Compatibility capabilities added:
+External contracts preserved:
+Dependencies changed (or "none"):
+Mock contracts added/changed:
+Install result:
+npm ls result:
+Focused tests and results:
+Workspace tests and results:
+Dependency isolation result:
+Build results for Cashflow, Ratan, Base:
+Development Playwright result:
+Development Live Browser evidence:
+Production-edge smoke result:
+Production-mock full-parity result:
+Real-BFF result:
+Artifact and remote-entry inspection:
+Console and failed-network evidence:
+Screenshots/traces/log locations:
+Known warnings/debt:
+Blocked gates and exact cause:
+Rollback revision, owner, and routing action:
+Commits created:
+```
 
-Use the supplied production screenshot as the visual baseline at a wide desktop viewport (approximately `2048×1152`). Verify these surfaces individually:
+A field must contain evidence, `not applicable` with a reason, or `blocked`
+with the command and cause. Keep command logs, edge status and headers,
+Playwright output/traces, desktop and `1024x768` screenshots, browser console,
+failed network export, artifact digests, remote URLs, `BFF_ORIGIN`, and the
+accepted lockfile.
 
-1. **Quick Search** — dark two-column field layout, compact 32 px controls, visible panel border/header, readable labels/placeholders, aligned Clear Filters/Search actions.
-2. **Custom Search** — both `Filters` and its `Create or Modify` action are present. Open the editor and confirm its dialog is dark, viewport-constrained, closable, and has no `Cashflow CN could not be rendered` alert.
-3. **Custom View** — `Views`, selector, Clear, and `Create or Modify` are present. Open View Builder and confirm search/name/role/private controls, Available Fields, Display View, and the close action retain their spacing and contrast.
-4. **Data grid blotter** — the `.ag-theme-alpine-dark` grid uses white text on dark rows, visible row/header borders, compact row height, scroll containment, selection controls, settings/resize/export actions, and both acceptance records.
-5. **Cashflow Details** — double-click `CF-ACCEPT-001`; confirm the dialog is dark and constrained within the viewport, its close control is visible, the Cashflow Detail/History/Accounting Detail tabs are aligned, and the fixture details render without the `Unable to fetch cashflow` fallback.
+Completion criterion: another verifier can reproduce every claim from the
+candidate SHA and retained evidence without relying on oral context.
 
-Failure signatures and their migration checks:
-
-- White Ant/MUI controls inside the dark portal: federation bridge is not inheriting the host `<html>` theme class.
-- Missing Filters panel or only one Create/Modify action: mock/real user lacks `RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Custom_Query_Builder`.
-- Override selectors do not match: Ratan must build with the `MicroWebUI_ratan_container` namespace.
-- Black/transparent grid rows: Cashflow did not bundle the complete local Ratan AG Grid skin; runtime CDN styles are not an acceptable production dependency.
-- Custom Search `forEach is not a function`: filter/view list endpoints must return a JSON array (`[]` when empty), not an object wrapper.
-- Details fetch fallback: the acceptance GraphQL response must include `data.graphCashFlowDetails` for detail queries.
-
-The production Playwright journey encodes these checks in `tests/e2e/federation.spec.ts`; keep the screenshots as human visual evidence alongside its output.
-
-### Responsive check
-
-Resize Live Browser to `1024×768`, revisit the workspace and at least the Blotter and Authorization Limits screens, and confirm:
-
-- no document-level horizontal scrollbar appears;
-- navigation and primary actions remain reachable;
-- grids remain contained within their workspace panel.
-
-Expected mock-only console behavior:
-
-- notification-backed screens may report reconnect state because the fixture BFF does not emulate WebSocket/STOMP subscriptions;
-- Apollo may warn about deprecated `addTypename` configuration;
-- AG Grid may warn about deprecated v32 grid/selection options.
-
-Record these as known legacy warnings. Any blank remote, missing action, uncaught page error, failed federation manifest, unexpected HTTP 4xx/5xx, or lost styling is a failed acceptance condition.
-
-## 11. Verify against the real BFF
-
-This stage is mandatory for final production certification, even after all mock acceptance passes.
-
-1. Deploy or start the successfully packaged `single-ui-bff` with its required database, LDAP/authentication, discovery, secrets, and downstream services.
-2. Change the edge container's `BFF_ORIGIN` from `http://mock-bff:8081` to the real BFF origin.
-3. Recreate the edge container; do not rebuild the three frontend artifacts.
-4. Repeat the Nginx HTTP checks, production Playwright journey, and every Live Browser screen check.
-5. Use a permitted test user whose entitlements cover the expected Cashflow actions.
-6. Verify real search, filtering, pagination, create/audit/export actions, permission gates, error states, and WebSocket/STOMP notifications.
-7. Confirm no fixture identifiers such as `CF-ACCEPT-001` remain in the real-environment evidence.
-
-Do not label the complete system production-certified until this backend-connected stage passes. Mock acceptance certifies frontend composition, routing, deterministic rendering, permissions bridging, and styling; it does not certify private infrastructure or real business data.
-
-## 12. Evidence to retain
-
-For a formal sign-off, retain:
-
-- terminal output for architecture and unit tests;
-- terminal output for all three production builds;
-- `docker-compose ... ps` and `/healthz` output;
-- response headers for both federation manifests and one immutable hashed asset;
-- Playwright production result;
-- one screenshot of login, workspace drawer, and each of the eight screens at desktop width;
-- responsive screenshots at `1024×768`;
-- browser console and failed-network-request export;
-- the commit SHA being accepted.
-
-Use [PRODUCTION_ACCEPTANCE.md](PRODUCTION_ACCEPTANCE.md) as the baseline result sheet. Add the verifier, date, environment, commit SHA, and pass/fail evidence to a copy of that report for each release candidate.
-
-## 13. Stop and clean up
+## 15. Stop and clean up
 
 ```bash
 cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
 npm run stop:production
 ```
 
-Confirm the SCB Next edge is no longer listening on port `9081`.
+Stop the development process separately with `Ctrl+C`. Confirm ports `8001`,
+`8009`, `8015`, and `9081` are no longer served by the candidate processes.
 
-## Final acceptance criteria
+## Final acceptance
 
-Approve the migration candidate only when:
+Approve the frontend migration candidate only when install/isolation,
+architecture, mock contracts, leaf-to-host tests/builds, development
+Playwright, the complete Live Browser journey, and artifact inspection all pass
+from the current checkout. Approve the production composition only when the
+edge controls pass and the claimed mock scope is labeled accurately. Approve
+the complete system for production only when the private BFF build and real-BFF
+browser journey also pass.
 
-- architecture assertions pass;
-- deterministic unit and E2E tests pass;
-- the private BFF tests and package build pass in a corporate environment, or are explicitly recorded as a release blocker;
-- all three Vite production builds succeed;
-- Nginx health, caching, security headers, federation routes, and BFF forwarding are correct;
-- mock login succeeds;
-- all eight screens pass the feature/style checklist at desktop and responsive widths;
-- no unexplained browser errors or failed requests remain;
-- known warnings and unresolved private-backend, coverage, and strict-typecheck gates are explicitly recorded rather than reported as complete.
+Any failed or blocked required gate keeps the corresponding acceptance level
+open. Historical reports and fixture-only results cannot close it.

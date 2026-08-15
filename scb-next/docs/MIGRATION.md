@@ -1,186 +1,528 @@
-# SCB Next migration runbook
+# SCB Next AI migration runbook
 
-This document explains how to move changes from the legacy `scb/` sources into the active `scb-next/` architecture and how to cut traffic over without changing business or service contracts. Use [MIGRATION_SPEC.md](MIGRATION_SPEC.md) for acceptance requirements and [VERIFICATION_GUIDE.md](VERIFICATION_GUIDE.md) for the complete verification procedure.
+This is the canonical execution guide for converting behavior from the legacy
+`scb/` project into the active `scb-next/` architecture. It is written for an
+AI coding agent performing the work, not as a historical overview.
+
+Read these documents in this order:
+
+1. this runbook for the ordered migration process;
+2. [MIGRATION_SPEC.md](MIGRATION_SPEC.md) for normative acceptance criteria;
+3. [VERIFICATION_GUIDE.md](VERIFICATION_GUIDE.md) for commands and evidence;
+4. [base-origin-dependency-audit.md](base-origin-dependency-audit.md) when the
+   change affects dependencies, MUI, Storybook, ESLint, React, or installation;
+5. [PRODUCTION_ACCEPTANCE.md](PRODUCTION_ACCEPTANCE.md) only as dated historical
+   evidence, never as proof that the current checkout still passes.
+
+The migration is complete only when the target owns the behavior, every
+preserved contract has evidence, the integrated browser journey passes, and no
+active build or runtime path reaches back into `scb/`.
+
+## AI execution contract
+
+Follow this contract for every migration, including small follow-up ports.
+
+1. Read the repository `AGENTS.md`, `docs/rules.md`, and all target-workspace
+   instructions before editing.
+2. Treat `scb/` as read-only evidence and rollback source. Record its commit
+   SHA and the exact files or diff being migrated.
+3. Inspect both source and target before deciding that a file should be copied.
+   The target intentionally differs in composition, compatibility, tests,
+   dependencies, and deployment.
+4. Define observable parity first. Add or update the specification and a
+   regression test before implementation.
+5. Run GitNexus impact analysis before editing a symbol and warn on HIGH or
+   CRITICAL risk. Run change detection before every commit.
+6. Migrate one coherent stage at a time. Each stage ends with a checkable gate
+   and an isolated commit containing no unrelated changes.
+7. Preserve business behavior and external contracts. Translate only the
+   architecture boundary needed by Vite and Module Federation.
+8. Keep React 18 across all three origins. Upgrade dependencies only in Base
+   when the task explicitly targets the completed Base dependency migration.
+   Ratan and Cashflow remain on their existing dependency lines.
+9. Verify the integrated host after any Base, federation, theme, dependency,
+   routing, API, or compatibility-facade change. A workspace build alone cannot
+   detect singleton, CSS-order, remote-loading, or cross-origin failures.
+10. Report blockers as blockers. Never convert a missing private package,
+    unsupported peer range, real-BFF dependency, or failed build into a claimed
+    pass by weakening a test or changing unrelated business code.
+
+### Stop conditions
+
+Stop the affected stage and report evidence when any of these conditions holds:
+
+- the legacy behavior or response contract cannot be established from source,
+  tests, screenshots, or sanitized captures;
+- a private package or Maven artifact is unavailable and the target cannot be
+  installed or built reproducibly;
+- a proposed change would require a React major change across only one origin;
+- Base resolves Ratan or Cashflow to Base's MUI 9 dependency tree;
+- a compatibility facade would need to duplicate business logic rather than
+  expose a narrow platform capability;
+- a backend schema, entitlement, workflow, or data migration would cease to be
+  backward compatible;
+- the only way to pass is to restore SystemJS, an import map, Single-SPA, or
+  Webpack to the active three-origin path;
+- the target behavior differs from production and the difference has not been
+  explicitly accepted.
+
+For a blocked gate, retain the failing command, exit code, first actionable
+error, environment assumptions, and the last known passing gate.
+
+## Truth hierarchy
+
+Use evidence in this order when sources disagree:
+
+1. current production request/response capture and accepted screenshot;
+2. legacy runtime behavior and tests at the recorded source SHA;
+3. target specifications and contract tests;
+4. target implementation;
+5. historical acceptance reports and prose.
+
+Raw production captures may contain credentials, JWTs, identifiers, and other
+sensitive data. Store only minimal sanitized fixtures. Preserve field names,
+operation names, branching markers, pagination, and relationships required by
+the UI; replace or remove secrets and unrelated personal data.
 
 ## Scope and ownership
 
-`scb-next` began as an isolated copy of `scb/web` and `scb/services`. The legacy tree is intentionally unchanged and remains the rollback baseline; it is not a runtime dependency of `scb-next`.
+`scb-next` began as an isolated copy of the legacy web and service trees. The
+active release is deliberately narrower than the full legacy composition.
 
-| Concern                              | Legacy source                                                                 | Current owner                              | Migration rule                                                                             |
-| ------------------------------------ | ----------------------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| Portal, login, navigation, workspace | `scb/web/mfe-base-origin` plus root-config composition                        | `scb-next/web/mfe-base-origin`             | Preserve portal behavior; compose Ratan directly through Module Federation.                |
-| Ratan routes and shared components   | `scb/web/mfe-ratan-container-origin`                                          | `scb-next/web/mfe-ratan-container-origin`  | Preserve routes and component APIs; expose one federated application module.               |
-| Cashflow applications and styling    | `scb/web/mfe-cashflow-blotter-origin`                                         | `scb-next/web/mfe-cashflow-blotter-origin` | Preserve business behavior, assets, theme contracts, and HTTP requests.                    |
-| Browser composition                  | `scb/web/mfe-root-config-origin`, SystemJS import maps, Single-SPA lifecycles | Base host and the two Vite remotes         | Do not port root-config or import-map behavior into the active Cashflow path.              |
-| Service routes and schemas           | `scb/services/single-ui-bff`                                                  | `scb-next/services/single-ui-bff`          | Keep request and response contracts stable until a separately specified service migration. |
-| Production routing                   | Per-origin legacy packaging                                                   | `scb-next/devops/nginx`                    | Serve the host and remotes through one edge and forward `/api/` to `BFF_ORIGIN`.           |
+| Concern                        | Legacy source                         | Target owner                                           | Required treatment                                                                                                       |
+| ------------------------------ | ------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| Root composition               | `scb/web/mfe-root-config-origin`      | Base Vite host                                         | Replace active import-map and Single-SPA startup; retain legacy root only as migration history.                          |
+| Portal/login/workspaces        | `scb/web/mfe-base-origin`             | `scb-next/web/mfe-base-origin`                         | Preserve login, identity, entitlements, drawer, themes, workspaces, and tab behavior.                                    |
+| Ratan routing/providers        | `scb/web/mfe-ratan-container-origin`  | `scb-next/web/mfe-ratan-container-origin`              | Expose `./application`; preserve Cashflow routing and provider context.                                                  |
+| Cashflow applications          | `scb/web/mfe-cashflow-blotter-origin` | `scb-next/web/mfe-cashflow-blotter-origin`             | Expose `./application`; preserve all eight screens, business logic, styles, GraphQL/REST contracts, and generated types. |
+| Base imports used by remotes   | `@fm/base` runtime/package surface    | Per-remote `src/compat/base.tsx`                       | Implement the smallest typed compatibility capability.                                                                   |
+| Ratan imports used by Cashflow | `@fm/ratan_container`                 | Cashflow `src/compat/` plus `src/cashflow-ratan/`      | Keep Cashflow self-contained at build time while preserving the consumed Ratan contract.                                 |
+| Shared HTTP service            | `scb/services/single-ui-bff`          | `scb-next/services/single-ui-bff`                      | Preserve routes, payloads, auth headers, schemas, and side effects until a separately accepted backend migration.        |
+| Development API replay         | Legacy/production behavior            | Base `dev/mock-api.ts` and `devops/mock-bff/fixtures/` | Provide deterministic, request-aware, sanitized local behavior.                                                          |
+| Production edge                | Legacy per-origin delivery            | `scb-next/devops/nginx`                                | Serve one host and two same-origin remote paths; proxy `/api/` through `BFF_ORIGIN`.                                     |
 
-Generated directories such as `dist/`, `coverage/`, `node_modules/`, `.vite/`, and test results are outputs, not migration sources. Never copy them from `scb/` or commit them as part of a source transition.
+Generated output is never a migration source. Exclude `dist/`, `coverage/`,
+`node_modules/`, `.vite/`, Playwright results, copied lockfiles from child
+workspaces, built assets, logs, and temporary captures.
 
-## Current runtime
+## Target runtime contract
 
 ```text
 Browser
-  -> Base host (:8001, mfe_base_host)
-       -> mfe_ratan_container/application
-          Ratan remote (:8009, mfe_ratan_container)
-            -> mfe_cashflow_blotter/application
-               Cashflow remote (:8015, mfe_cashflow_blotter)
+  -> Base host (:8001, federation name mfe_base_host)
+       -> import("mfe_ratan_container/application")
+          Ratan remote (:8009, name mfe_ratan_container)
+            -> import("mfe_cashflow_blotter/application")
+               Cashflow remote (:8015, name mfe_cashflow_blotter)
   -> /api/*
-       -> BFF origin
+       -> Base development mock, or production edge -> BFF_ORIGIN
 ```
 
-| Origin          | Development URL         | Federation contract                        | Production path      |
-| --------------- | ----------------------- | ------------------------------------------ | -------------------- |
-| Base host       | `http://127.0.0.1:8001` | Consumes `mfe_ratan_container/application` | `/`                  |
-| Ratan remote    | `http://127.0.0.1:8009` | Exposes `./application`; consumes Cashflow | `/remotes/ratan/`    |
-| Cashflow remote | `http://127.0.0.1:8015` | Exposes `./application`                    | `/remotes/cashflow/` |
+| Origin   | Development URL         | Federation contract                        | Production path      | Owner                                               |
+| -------- | ----------------------- | ------------------------------------------ | -------------------- | --------------------------------------------------- |
+| Base     | `http://127.0.0.1:8001` | consumes `mfe_ratan_container/application` | `/`                  | login, navigation, theme, workspace state, mock API |
+| Ratan    | `http://127.0.0.1:8009` | exposes `./application`; consumes Cashflow | `/remotes/ratan/`    | Ratan provider/router and Cashflow routes           |
+| Cashflow | `http://127.0.0.1:8015` | exposes `./application`                    | `/remotes/cashflow/` | Cashflow screens and business state                 |
 
-The base origin owns login, navigation, workspace state, and the top-level theme. Ratan owns Cashflow routing and supplies its provider/router context. Cashflow owns the business screens. `react` and `react-dom` are shared singletons across all three origins; `react-router-dom` is also shared by Ratan and Cashflow because Cashflow consumes Ratan's routing context.
+The three origins share compatible React and ReactDOM 18 singletons. Ratan and
+Cashflow also share React Router because Cashflow consumes Ratan's router
+context. UI libraries are local dependencies, not federation singletons.
 
-`mfe-root-config-origin` is retained only as migration history. It must not be started, packaged, or added back to the active three-origin boot path.
+`scb-next/web/mfe-root-config-origin` is migration history. It is excluded from
+the root npm workspaces, startup commands, build, packaging, and deployment.
 
-## Legacy-to-current replacements
+## Architecture replacements
 
-| Legacy mechanism                              | Current mechanism                                               | Source of truth                                     |
-| --------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------- |
-| Webpack and `webpack-config-single-spa-*`     | Vite                                                            | Each active origin's `vite.config.ts`               |
-| Single-SPA bootstrap/mount lifecycle          | React `createRoot` host and federated React application exports | Each active origin's `src/root.tsx`                 |
-| `System.import("@fm/ratan_container")`        | `import("mfe_ratan_container/application")`                     | Base container loader                               |
-| `System.import("@fm/ratan_cashflow_blotter")` | `import("mfe_cashflow_blotter/application")`                    | `Root/import/CashFlowCN.tsx`                        |
-| Import-map remote addresses                   | Vite build environment variables                                | `VITE_RATAN_REMOTE_URL`, `VITE_CASHFLOW_REMOTE_URL` |
-| Runtime imports from `@fm/base`               | Local ESM compatibility façade                                  | Each consumer's `src/compat/base.*` alias           |
-| Cashflow imports from `@fm/ratan_container`   | Local Cashflow compatibility façade                             | `src/compat/ratan-container.ts`                     |
-| Jest execution                                | Vitest with legacy-test setup                                   | Each origin's `vitest.config.ts`                    |
-| Per-origin public URLs                        | Same-origin Nginx paths                                         | `devops/nginx/default.conf.template`                |
+| Legacy mechanism                                  | Target mechanism                                           | Source of truth                                     |
+| ------------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------- |
+| Webpack and `webpack-config-single-spa-*`         | Vite                                                       | each active origin's `vite.config.ts`               |
+| Single-SPA bootstrap/mount                        | React host plus federated React module                     | `src/bootstrap.tsx` and `src/root.tsx`              |
+| `System.import("@fm/ratan_container")`            | dynamic federation import                                  | Base `pages/Home/common/Container.tsx`              |
+| `System.import("@fm/ratan_cashflow_blotter")`     | nested federation import                                   | Ratan `Root/import/CashFlowCN.tsx`                  |
+| Import-map addresses                              | build environment remote URLs                              | `VITE_RATAN_REMOTE_URL`, `VITE_CASHFLOW_REMOTE_URL` |
+| Runtime `@fm/base` dependency                     | local compatibility alias                                  | Ratan/Cashflow Vite aliases                         |
+| Cashflow runtime `@fm/ratan_container` dependency | local Ratan facade and Cashflow-owned compatibility source | Cashflow Vite aliases and `src/compat/`             |
+| Node-oriented `stompjs` entry                     | browser compatibility entry                                | Cashflow `src/compat/stomp.ts` alias                |
+| Jest/Babel execution                              | Vitest compatibility setup                                 | workspace `vitest.config.ts` and setup files        |
+| Public remote origins                             | same-origin Nginx paths                                    | `devops/nginx/default.conf.template`                |
 
-Only the supported Cashflow path has been converted from `System.import` to the nested Cashflow remote. Copied loaders for unrelated Ratan applications may still contain `System.import`; they are reference code outside the active migration scope. Do not expose those applications in `scb-next` until each one has its own remote contract, tests, deployment path, and cutover plan.
+Copied loaders for unrelated Ratan applications may still contain
+`System.import`. They are dormant reference paths, not supported applications.
+A later migration must give each such application its own remote contract,
+tests, deployment path, and rollback plan before exposing it in the drawer.
+
+## Dependency contract
+
+The dependency graph is part of runtime correctness.
+
+- React and ReactDOM remain `18.2` compatible across Base, Ratan, and Cashflow.
+- Base uses current MUI 9, MUI X 9, Emotion 11, Storybook 10, ESLint 9, Vite 8,
+  and Vitest 4 as recorded in
+  [base-origin-dependency-audit.md](base-origin-dependency-audit.md).
+- Ratan and Cashflow retain MUI 5 and their existing Ant Design, AG Grid,
+  GraphQL, state, and test dependency lines. Their version upgrades are
+  independent migrations.
+- The SCB Next root uses npm's nested install strategy. After every install,
+  run `npm run verify:dependency-isolation` and require Base to resolve MUI 9
+  while both remotes resolve MUI 5 from their own workspaces.
+- One root `scb-next/package-lock.json` must cover all workspaces. Do not create
+  child lockfiles.
+- `@scdevkit/webkit` and SCB Maven starters require corporate registry access.
+  A public-registry-only install is not a reproducible release build.
+- React, router, MUI, Ant Design, AG Grid, GraphQL, and Spring major upgrades
+  each require a separate specification, compatibility matrix, and regression
+  stage.
+
+If a remote build cannot resolve MUI 5 icon modules such as
+`DeleteOutline` or `CheckCircleOutline`, first prove dependency placement with
+`npm run verify:dependency-isolation`. The accepted fix is a correct nested
+install and root lockfile, not rewriting imports for MUI 9 and not upgrading
+the remote.
 
 ## Compatibility boundaries
 
-Compatibility façades are deliberate anti-corruption layers between copied business code and the new runtime. They are temporary only when a replacement contract and consumer migration are both complete.
+Compatibility files are anti-corruption layers, not dumping grounds.
 
-- `mfe-ratan-container-origin/src/compat/base.tsx` supplies the base capabilities Ratan still imports.
-- `mfe-cashflow-blotter-origin/src/compat/base.tsx` supplies portal state, components, dialogs, and the canonical portal MUI theme to Cashflow.
-- `mfe-cashflow-blotter-origin/src/compat/ratan-container.ts` and related utility façades supply the Ratan APIs Cashflow consumes without a compile-time SystemJS dependency.
-- The Cashflow grid skin is bundled locally. A CDN or runtime stylesheet is not an acceptable replacement.
-- The Ratan CSS namespace must remain `MicroWebUI_ratan_container`; Cashflow selectors depend on that exact value.
-- Theme propagation must preserve the host `<html>` theme class, Poppins typography, compact MUI component defaults, Ant Design tokens, and dark grid styles.
+| Boundary                            | Current location                                                  | Responsibilities                                                                                            |
+| ----------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Ratan -> Base                       | `mfe-ratan-container-origin/src/compat/base.tsx`                  | identity, service transport, portal state/components, telemetry, navigation, theme-compatible capabilities  |
+| Cashflow -> Base                    | `mfe-cashflow-blotter-origin/src/compat/base.tsx`                 | identity, service transport, dialogs/components, storage, telemetry, navigation, canonical portal MUI theme |
+| Cashflow -> Ratan                   | `mfe-cashflow-blotter-origin/src/compat/ratan-container.ts`       | stable export namespace expected by Cashflow                                                                |
+| Cashflow-owned Ratan implementation | `mfe-cashflow-blotter-origin/src/cashflow-ratan/`                 | copied Ratan UI/utilities that Cashflow currently requires at build time                                    |
+| Related applications                | `compat/related-applications.tsx`, `compat/quick-search-items.ts` | typed host handoff replacing Cashflow-owned dynamic SystemJS imports                                        |
+| STOMP                               | `compat/stomp.ts`                                                 | force the browser entry and avoid Node `net` resolution                                                     |
 
-When a legacy change imports a new symbol from `@fm/base` or `@fm/ratan_container`, add the smallest typed capability to the relevant façade and test its observable contract. Do not copy an entire legacy package into the façade or recreate business logic there.
+When a copied change introduces a new Base or Ratan import:
 
-## Porting a legacy change
+1. locate every consumer and define the observable capability;
+2. prefer an existing facade export;
+3. add one minimal typed export when no contract exists;
+4. implement platform behavior at the facade boundary, business behavior in
+   the owning business module;
+5. add a contract test that would fail if the facade shape or behavior drifted;
+6. verify no new runtime dependency on a legacy package name appears in built
+   assets.
 
-Use this sequence for every change that exists in `scb/` and must move to `scb-next/`.
+Preserve these style/runtime boundary details:
 
-1. Identify the owning legacy workspace and the user-visible behavior being moved. Record the source commit or diff used for the port.
-2. Confirm the target is inside the active Base, Ratan, Cashflow, or BFF scope. Treat other SystemJS applications as separate migrations.
-3. Add or update the behavioral specification and a regression test in `scb-next` before changing implementation.
-4. Copy only the relevant source, tests, styles, and assets. Exclude build configuration, generated files, dependency directories, and legacy composition glue.
-5. Reconcile imports:
-   - keep local business imports local;
-   - route Base/Ratan dependencies through existing compatibility aliases;
-   - use a declared Module Federation module for a runtime remote;
-   - never add a new `System.import`, import map, Single-SPA lifecycle, or Webpack dependency.
-6. Preserve external contracts: component props, routes, permissions, HTTP paths and payloads, GraphQL schemas, theme behavior, CSS namespaces, and user-visible error states.
-7. Run the focused unit test first, then the owning workspace suite, the architecture test, the production build, and the relevant Playwright journey.
-8. Compare the result against the legacy screen at desktop and responsive widths. Verify behavior as well as appearance.
-9. Commit the port independently. Do not mix it with dependency major upgrades, broad refactors, or unrelated legacy synchronization.
+- Ratan CSS prefix: `MicroWebUI_ratan_container`;
+- Cashflow CSS prefix: `MicroWebUI_cashflow_cn`;
+- host `<html>` theme class and dark/light propagation;
+- Poppins typography and compact MUI defaults;
+- Ant Design provider tokens and portal/z-index behavior;
+- locally bundled Ratan AG Grid skin and `.ag-theme-alpine-dark` behavior;
+- Emotion insertion order so later MUI defaults do not override the portal
+  theme;
+- asset URLs relative to each remote's `VITE_PUBLIC_BASE`.
 
-If both trees remain active during a transition window, apply urgent business fixes to the owning legacy source and port the same behavioral change to `scb-next` as a separate reviewed commit. Never synchronize whole directories: the build, lifecycle, compatibility, test, and deployment files intentionally differ.
+## Ordered migration procedure
 
-## Configuration mapping
+### Phase 0: establish baselines
 
-| Variable                   | Phase            | Purpose                                                                               |
-| -------------------------- | ---------------- | ------------------------------------------------------------------------------------- |
-| `VITE_RATAN_REMOTE_URL`    | Base build/dev   | Full URL of Ratan's `remoteEntry.js`; defaults to port `8009`.                        |
-| `VITE_CASHFLOW_REMOTE_URL` | Ratan build/dev  | Full URL of Cashflow's `remoteEntry.js`; defaults to port `8015`.                     |
-| `VITE_PUBLIC_BASE`         | Remote build     | Public asset base; production uses `/remotes/ratan/` or `/remotes/cashflow/`.         |
-| `SCB_NEXT_EDGE_ORIGIN`     | Production build | Public edge origin embedded in both remote URLs; defaults to `http://127.0.0.1:9081`. |
-| `BFF_ORIGIN`               | Edge runtime     | Upstream for `/api/`; changing it does not require rebuilding frontend artifacts.     |
-| `IMAGE_TAG`                | Container build  | Optional production-edge image tag.                                                   |
+1. Record `git rev-parse HEAD` for the target and the legacy source revision.
+2. Record `git status --short`; preserve unrelated changes.
+3. Run the current focused tests and build commands before editing.
+4. Capture the legacy user journey, screenshots, console, request bodies, and
+   responses required by the change.
+5. Write a short parity statement naming inputs, visible output, service
+   effects, permissions, styles, responsive behavior, and failure states.
 
-Remote URLs and public bases are build-time contracts. `BFF_ORIGIN` is a runtime routing contract. Promote the exact same frontend artifacts between environments when the public edge origin is stable; switch backend environments through edge configuration.
+Completion criterion: every requested behavior has a legacy evidence source,
+and every failing baseline command is recorded before migration work starts.
 
-## Development transition
+### Phase 1: inventory the dependency surface
 
-Prerequisites are Node.js `20.19+` or `22.12+`, npm, and access to the private corporate packages when performing a clean install.
+For every legacy file in scope, classify its transitive dependencies:
 
-```bash
-cd scb-next
-npm install
-npm run dev
+- local business source, styles, assets, tests, generated types;
+- Base platform API;
+- Ratan platform API;
+- remote application/runtime composition;
+- React/provider/router/store context;
+- REST, GraphQL, SockJS/STOMP, export, or notification contract;
+- browser/global/build-time assumption;
+- private package, license, entitlement, or environment dependency.
+
+Produce a source map with one disposition per item: copy, translate, facade,
+regenerate, retain version, exclude, or block. Whole-directory copying is not
+a disposition.
+
+Completion criterion: every changed legacy file and every non-relative import
+reachable from it has an explicit target treatment.
+
+### Phase 2: specify and make the test red
+
+Update [MIGRATION_SPEC.md](MIGRATION_SPEC.md) when the behavior changes. Add the
+smallest test at the real contract seam:
+
+- component/unit test for local behavior;
+- facade contract test for Base/Ratan compatibility;
+- architecture test for composition, aliases, dependency isolation, or CSS
+  namespace;
+- mock middleware test for API request matching and response shape;
+- Playwright test for cross-origin composition or user workflow.
+
+Run the focused command and confirm it fails for the missing behavior, not for
+an unrelated environment problem.
+
+Completion criterion: the new test deterministically distinguishes the old
+target behavior from the required behavior.
+
+### Phase 3: port owned source
+
+Copy only the source, tests, styles, assets, and generated contracts required
+by the inventory. Preserve relative layout when code generation or imports
+depend on it. Apply the smallest runtime translation needed by the target.
+
+Keep target-owned files authoritative, including:
+
+- `package.json`, root lockfile, Vite/Vitest/Playwright configuration;
+- `src/bootstrap.tsx`, `src/root.tsx`, federation declarations;
+- compatibility facades and Cashflow-owned Ratan compatibility tree;
+- Base development mock middleware;
+- Nginx, Docker, build, and deployment scripts.
+
+Completion criterion: the target contains all owned behavior and no imported,
+aliased, linked, or served source path points into `scb/`.
+
+### Phase 4: translate composition and imports
+
+Apply these rules in order:
+
+1. retain relative business imports;
+2. route Base and Ratan package imports through declared aliases;
+3. replace an active application runtime import with a declared federation
+   module;
+4. replace Cashflow-owned cross-application actions with typed host navigation
+   handoffs;
+5. preserve provider nesting and router ownership;
+6. add ambient module declarations for federation modules;
+7. configure React/ReactDOM singleton sharing and React Router sharing where
+   context crosses the boundary;
+8. preserve compile-time globals through Vite `define` only when source still
+   requires them.
+
+Completion criterion: the migrated path runs without a legacy import map,
+Single-SPA lifecycle, `System.import`, Webpack global, duplicate React
+dispatcher, or missing provider/router context.
+
+### Phase 5: preserve styling and assets
+
+Compare the accepted legacy screenshot and target at the same viewport and
+theme. Verify components individually: portal chrome, Quick Search, preset
+metrics, custom selectors/builders, grid, dialogs, details, icons, tooltips,
+loading, empty, error, hover, disabled, and responsive states.
+
+Check computed styles, not only class names. Confirm remote CSS and assets load
+from the correct origin and that later-injected MUI/Emotion styles do not reset
+the portal theme.
+
+Completion criterion: there is no layout overlap, missing asset, unstyled
+Material UI control, Ant Design token regression, grid-skin regression, or
+theme mismatch at the accepted desktop and responsive viewports.
+
+### Phase 6: preserve service contracts and mocks
+
+Keep production REST and GraphQL paths, methods, query parameters, headers,
+request bodies, response envelopes, pagination, errors, and side effects
+unchanged unless a separate service specification changes them.
+
+Development replay belongs in
+`mfe-base-origin/dev/mock-api.ts`; fixture payloads belong in
+`devops/mock-bff/fixtures/`. Match the request by method, pathname, query, and
+the minimal stable body markers needed to distinguish operations. Keep a
+generic fallback only for unrelated calls.
+
+The Cashflow acceptance replay must cover:
+
+| Journey step         | Required mock behavior                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- |
+| login                | sanitized successful identity, entitlements, drawer and eight Cashflow tiles, authorization response header   |
+| initial metadata     | field versions and field definitions for transaction/Cashflow contexts                                        |
+| initial grid         | production-shaped `cashflowUltraQuery` envelope and rows                                                      |
+| preset metrics       | distinguish Pending Operator and Pending Verification requests for both date groups                           |
+| ID search            | match `M0P56753524` request markers and return one complete row                                               |
+| details              | match `graphCashFlowDetails` and return detail composition for the same ID                                    |
+| accounting           | return the captured empty accounting result                                                                   |
+| currency holiday     | return the captured holiday response                                                                          |
+| custom search/view   | return usable saved filter and view arrays with the correct builder types                                     |
+| notification startup | provide valid SockJS JSONP open/connected/heartbeat/send frames so no reconnect alert or syntax error appears |
+
+Fixtures must be internally consistent: IDs used by search must open details;
+dates/currencies/amounts must agree across grid and details; builder types must
+match request types; login entitlements must expose the tested controls.
+
+The Docker/Nginx production mock is a separate implementation. It currently
+serves generic Cashflow data and empty custom views and does not implement the
+complete request-aware journey or SockJS replay. Do not claim production-mock
+parity until it is brought to the same contract and tested through port `9081`.
+
+Completion criterion: the automated mock tests pass and the live browser
+journey completes without fallback alerts, notification errors, unexpected
+empty states, or sensitive captured data in the repository.
+
+### Phase 7: verify from leaf to host
+
+Run focused tests first, then verify in dependency order:
+
+1. Cashflow tests and build;
+2. Ratan tests and build;
+3. Base tests, Storybook where affected, and build;
+4. architecture and dependency-isolation tests;
+5. integrated development Playwright and Live Browser;
+6. production-edge build, routing, Playwright, and Live Browser when the
+   release uses that path;
+7. real-BFF acceptance for production certification.
+
+Use [VERIFICATION_GUIDE.md](VERIFICATION_GUIDE.md) for exact commands and
+evidence. A downstream build failure blocks its consumers even if the Base
+host builds.
+
+Completion criterion: every applicable gate is green or explicitly recorded
+as blocked with no claim of release readiness.
+
+### Phase 8: inspect the built boundary
+
+Inspect generated host and remote artifacts for:
+
+- correct `remoteEntry.js` URLs and public bases;
+- HTTP 200 for every remote entry and referenced chunk;
+- no active references to `scb/`, import maps, or legacy MFE package names;
+- one compatible React share scope;
+- no host-relative remote chunk URLs;
+- `no-store` on federation manifests and immutable caching on hashed assets;
+- `/api/` requests routed through the Base mock in development or edge proxy
+  in production.
+
+Completion criterion: the browser network graph contains the expected host,
+two remote manifests, their chunks, and allowed API origin only.
+
+### Phase 9: review and commit
+
+Run GitNexus change detection and inspect `git diff --check`, the full diff,
+and `git status --short`. Commit only the completed stage. Use a message that
+states the behavior or boundary migrated, not a generic synchronization label.
+
+Completion criterion: the commit is reproducible, contains no unrelated user
+changes, and its message plus verification evidence explains why the stage is
+safe.
+
+### Phase 10: cut over and monitor
+
+Promote the Base host, Ratan remote, Cashflow remote, edge configuration, and
+accepted commit SHA as one release unit. Route a controlled cohort first.
+Monitor login failures, remote/chunk load failures, React share-scope errors,
+API status and latency, SockJS/STOMP reconnects, uncaught browser errors, blank
+workspaces, and user workflow errors before increasing traffic.
+
+Completion criterion: the agreed observation window passes its thresholds and
+the recorded rollback route remains available.
+
+## Configuration contracts
+
+| Variable                   | Phase            | Contract                                                                             |
+| -------------------------- | ---------------- | ------------------------------------------------------------------------------------ |
+| `VITE_RATAN_REMOTE_URL`    | Base build/dev   | full Ratan `remoteEntry.js` URL; local default is port `8009`                        |
+| `VITE_CASHFLOW_REMOTE_URL` | Ratan build/dev  | full Cashflow `remoteEntry.js` URL; local default is port `8015`                     |
+| `VITE_PUBLIC_BASE`         | remote build     | remote asset base; production uses `/remotes/ratan/` or `/remotes/cashflow/`         |
+| `SCB_NEXT_EDGE_ORIGIN`     | production build | public origin embedded in both remote URLs; local default is `http://127.0.0.1:9081` |
+| `BFF_ORIGIN`               | edge runtime     | upstream for `/api/`; changing it does not rebuild frontend artifacts                |
+| `IMAGE_TAG`                | container build  | optional edge image tag                                                              |
+
+Build production artifacts from the leaf toward the host. The authoritative
+script is `devops/scripts/build-production.sh`, whose order is Cashflow,
+Ratan, then Base.
+
+## Failure dictionary
+
+| Symptom                                                       | Likely cause                                                | Required first check                                                         |
+| ------------------------------------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| invalid hook call or `ReactCurrentDispatcher` failure         | duplicate/incompatible React share                          | compare all three manifests and federation singleton configuration           |
+| remote entry loads but chunks 404                             | wrong `VITE_PUBLIC_BASE` or remote URL                      | inspect `remoteEntry.js` and failing chunk URL                               |
+| `@mui/icons-material/*` cannot resolve in a remote            | Base MUI 9 hoisted over remote MUI 5                        | run dependency-isolation verification and inspect workspace-local resolution |
+| Material UI controls lose production styling                  | Emotion/MUI insertion order or incomplete Base theme facade | inspect computed styles and Cashflow Base compatibility theme                |
+| Cashflow selectors lose action styling                        | Ratan CSS prefix drift                                      | verify `MicroWebUI_ratan_container` and architecture test                    |
+| grid renders unstyled                                         | local Ratan grid skin missing or load order changed         | inspect bundled AG Grid CSS and `.ag-theme-alpine-dark` computed styles      |
+| `process` or `global` is undefined                            | legacy compile-time global not translated                   | inspect Cashflow Vite `define` and aliases                                   |
+| Node `net` requested by STOMP                                 | wrong `stompjs` entry                                       | verify browser STOMP alias                                                   |
+| JSONP `Unexpected token ':'` and notification reconnect alert | generic JSON fallback handled SockJS script request         | verify request-aware JSONP transport mock                                    |
+| blank tile drawer after opening a stale session               | login fixture was not loaded into current portal state      | log out and sign in through the local fixture flow                           |
+| custom dialog opens but saved entries are absent              | filters/views fixture returns empty or wrong builder type   | compare request query and fixture `type`                                     |
+| search row opens fallback details                             | list and detail fixture IDs or operation markers disagree   | verify one internally consistent journey ID                                  |
+| build passes but integrated screen fails                      | untested federation/provider/CSS runtime boundary           | run development and production browser gates                                 |
+
+## Current known state
+
+As of 15 August 2026:
+
+- the development three-origin journey is operational through Base port `8001`;
+- the Base development mock replays login, metadata, metrics, initial grid,
+  `M0P56753524` search/details, accounting, holiday, custom filter/view, and
+  SockJS notification startup;
+- `scb-next` root architecture/mock tests pass with 20 tests;
+- the Base production build passes;
+- a full workspace build in the current non-clean installation fails when
+  Ratan and Cashflow resolve missing MUI 5 icon entry points. Complete the
+  documented nested corporate-registry install and dependency-isolation gate;
+  do not upgrade those remotes as a workaround;
+- strict Base typecheck still exposes pre-existing Jest setup, bootstrap prop,
+  and Vitest setup errors;
+- the production Nginx mock is less capable than the Base development mock and
+  is not yet proof of the complete captured journey;
+- inherited React, Ant Design, Apollo, Redux serializability, and AG Grid
+  deprecation warnings remain migration debt. Classify warnings explicitly;
+  never hide new runtime failures among them.
+
+Re-run all gates. This status is context, not acceptance evidence.
+
+## Required handoff record
+
+An AI completing a migration must return this record:
+
+```text
+Legacy source SHA:
+Target starting SHA:
+Target ending SHA:
+Scope migrated:
+Files intentionally copied:
+Files intentionally translated:
+Compatibility capabilities added:
+External contracts preserved:
+Dependencies changed (or "none"):
+Mock contracts added/changed:
+Focused tests and results:
+Workspace tests and results:
+Dependency isolation result:
+Build results for Cashflow, Ratan, Base:
+Development Playwright result:
+Development Live Browser evidence:
+Production-edge result:
+Real-BFF result:
+Known warnings/debt:
+Blocked gates and exact cause:
+Rollback revision and routing action:
+Commits created:
 ```
 
-Development starts Base on `8001`, Ratan on `8009`, and Cashflow on `8015`. Ports are strict: a conflict fails startup instead of silently changing a federation URL.
+A blank field is not evidence. Use `not applicable` with a reason or `blocked`
+with the failing command and cause.
 
-The Base development server provides deterministic login, field metadata, view/filter, and Cashflow fixtures. Open `http://127.0.0.1:8001/?show_normal_login=Y&survey=no` and use the documented acceptance account in [VERIFICATION_GUIDE.md](VERIFICATION_GUIDE.md). This proves frontend composition without requiring the private BFF; it does not certify real backend behavior.
+## Cutover and rollback
 
-Minimum checks while the development servers are running:
+Before cutover, record both legacy and target revisions, the deployed remote
+URLs, `BFF_ORIGIN`, artifact digests, lockfile, test evidence, browser evidence,
+and rollback owner. Mock-backed acceptance certifies frontend composition only;
+real-BFF acceptance is mandatory for production certification.
 
-```bash
-curl -f http://127.0.0.1:8001/
-curl -f http://127.0.0.1:8009/remoteEntry.js
-curl -f http://127.0.0.1:8015/remoteEntry.js
-npm test -- --run tests/architecture.test.ts
-npm run test:e2e
-```
+Rollback is a routing operation:
 
-## Production build and deployment
+1. stop increasing traffic to `scb-next`;
+2. route users to the recorded legacy root-config/import-map deployment;
+3. drain target traffic before stopping the target composition;
+4. retain failed artifacts, logs, traces, and configuration for diagnosis;
+5. fix source in `scb-next` and rebuild; never patch generated `dist/` output;
+6. preserve `scb/` as the unchanged rollback baseline.
 
-Build from the leaf remote toward the host so every consumer is compiled with the final downstream URL:
-
-```bash
-cd scb-next
-SCB_NEXT_EDGE_ORIGIN=https://scb-next.example.internal npm run build:production
-```
-
-The build order is Cashflow, Ratan, then Base. Production Nginx serves both `remoteEntry.js` files with `no-store`, immutable caching for hashed assets, the Base SPA fallback at `/`, and `/api/` forwarding to `BFF_ORIGIN`.
-
-For local production-style acceptance:
-
-```bash
-npm run serve:production
-docker-compose -f devops/docker-compose.production.yml ps
-```
-
-Do not promote a release by rebuilding one remote in isolation. The host, Ratan remote, Cashflow remote, edge configuration, and recorded commit SHA form one release unit even though the applications are federated at runtime.
-
-## Cutover checklist
-
-Before routing users to `scb-next`:
-
-- Freeze or record the legacy source revision used for the candidate.
-- Confirm the original `scb/` deployment remains available and its routing configuration is known.
-- Install from the approved corporate registry and retain the lockfile used to build.
-- Pass architecture tests, focused and workspace unit suites, all three Vite production builds, and the production Playwright journey.
-- Verify both federation manifests and all referenced chunks return HTTP 200 from their production paths.
-- Verify `remoteEntry.js` uses `no-store` while hashed assets use immutable caching.
-- Configure `BFF_ORIGIN` for the real service and complete the backend-connected checks; mock fixtures alone are not production certification.
-- Compare all eight Cashflow screens at desktop and `1024x768`, including login, navigation, permissions, dialogs, MUI/Ant Design styling, grid styling, and tab removal.
-- Capture health, console, failed-request, screenshot, test, build, and commit-SHA evidence.
-- Route a controlled cohort first and monitor authentication, remote-load failures, API errors, and browser errors before full traffic.
-
-The authoritative detailed checklist and evidence requirements are in [VERIFICATION_GUIDE.md](VERIFICATION_GUIDE.md). Record the release result in a copy of [PRODUCTION_ACCEPTANCE.md](PRODUCTION_ACCEPTANCE.md).
-
-## Rollback
-
-Rollback is a routing operation, not a source rewrite:
-
-1. Stop increasing traffic to `scb-next`.
-2. Route users back to the legacy root-config/import-map deployment at the recorded legacy revision.
-3. Keep the failed `scb-next` artifacts, logs, browser traces, and edge configuration for diagnosis.
-4. Stop the `scb-next` composition only after traffic has drained.
-5. Reproduce and fix the issue in `scb-next`; do not patch generated `dist/` output or alter the preserved `scb/` baseline as part of rollback.
-
-Rollback does not revert data written through the BFF. Any change that modifies data or service schemas requires its own backward-compatible data and service rollback plan before cutover.
-
-## Known constraints
-
-- Clean installs require access to private `@scdevkit/webkit` packages.
-- The real BFF build requires private SCB Maven starters and corporate repository credentials.
-- Large Vite chunks, strict TypeScript debt, and coverage-harness debt are tracked separately from the federation cutover.
-- Major React, MUI, Ant Design, AG Grid, GraphQL, and Spring upgrades are separate migrations and must not be folded into a routine legacy-source port.
-- Unrelated Ratan applications that still use `System.import` are not supported by the active three-origin release until migrated explicitly.
-
-A transition is complete only when the current source owns the behavior, no active runtime dependency reaches into `scb/`, the verification gates pass, production evidence is retained, and the legacy route remains recoverable for the agreed rollback window.
+Frontend rollback does not reverse BFF writes. Any data, workflow, entitlement,
+or schema change requires an independently tested backward-compatible rollback
+plan before cutover.

@@ -1,5 +1,11 @@
 # SCB Next production and visual acceptance
 
+> **Historical snapshot:** This report records results observed on 2026-08-13.
+> It is a template and diagnostic reference, not evidence for the current
+> checkout. Re-run every applicable gate in
+> [VERIFICATION_GUIDE.md](VERIFICATION_GUIDE.md). The current dependency-install
+> state and production Nginx mock capabilities differ from this snapshot.
+
 Date: 2026-08-13
 Edge URL: `http://127.0.0.1:9081`
 
@@ -29,18 +35,18 @@ Mock credentials: `mock.cashflow` / `acceptance`.
 
 ## Screen-by-screen result
 
-| Screen | Verified feature/style surface | Result |
-| --- | --- | --- |
-| Login | Username/password, SSO, MO1 hero, green secondary CTA | Pass |
-| Portal workspace | App bar, dark theme, UTC switch, avatar, tabs, New Tile drawer | Pass |
-| Cashflow Blotter | Quick Search, preset counts, custom search/view, grid controls, two formatted mock rows | Pass |
-| Cashflow Open Search | Permission gate is preserved for the non-whitelisted acceptance user | Pass |
-| Cashflow Group Management | Search form, results grid, responsive columns | Pass |
-| Cashflow Dashboard | region/entity filters, status cards, refresh message | Pass |
-| BIC Netting Static Table | filters, Create/Audit/Export actions, pagination/grid | Pass |
-| Utilization Static Table | filters, Create/Audit/Export actions, results grid | Pass |
-| Cashflow Authorization Limits | inherited portal permissions, Create action, profile/currency/limit grid | Pass |
-| Cashflow Splitting Static | filters, Create/Audit/Export actions, results grid | Pass |
+| Screen                        | Verified feature/style surface                                                          | Result |
+| ----------------------------- | --------------------------------------------------------------------------------------- | ------ |
+| Login                         | Username/password, SSO, MO1 hero, green secondary CTA                                   | Pass   |
+| Portal workspace              | App bar, dark theme, UTC switch, avatar, tabs, New Tile drawer                          | Pass   |
+| Cashflow Blotter              | Quick Search, preset counts, custom search/view, grid controls, two formatted mock rows | Pass   |
+| Cashflow Open Search          | Permission gate is preserved for the non-whitelisted acceptance user                    | Pass   |
+| Cashflow Group Management     | Search form, results grid, responsive columns                                           | Pass   |
+| Cashflow Dashboard            | region/entity filters, status cards, refresh message                                    | Pass   |
+| BIC Netting Static Table      | filters, Create/Audit/Export actions, pagination/grid                                   | Pass   |
+| Utilization Static Table      | filters, Create/Audit/Export actions, results grid                                      | Pass   |
+| Cashflow Authorization Limits | inherited portal permissions, Create action, profile/currency/limit grid                | Pass   |
+| Cashflow Splitting Static     | filters, Create/Audit/Export actions, results grid                                      | Pass   |
 
 Live Browser also verified a 1024×768 responsive breakpoint with no document-level horizontal overflow.
 
