@@ -158,4 +158,22 @@ describe("SCB Next development mock API", () => {
     await expect(filters.json()).resolves.toEqual([expect.objectContaining({ name: "Pending operator cashflows" })]);
     await expect(views.json()).resolves.toEqual([expect.objectContaining({ name: "Cashflow operations" })]);
   });
+
+  it("serves valid SockJS JSONP frames for Cashflow notifications", async () => {
+    const origin = await startMockApi();
+    const sessionPath = "/api/ratan/notification/subscriptions/123/mock-session";
+
+    const open = await fetch(`${origin}${sessionPath}/jsonp?c=_jp.mock`);
+    const connected = await fetch(`${origin}${sessionPath}/jsonp?c=_jp.mock`);
+    const sent = await fetch(`${origin}${sessionPath}/jsonp_send`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "d=%5B%22CONNECT%22%5D",
+    });
+
+    expect(open.headers.get("content-type")).toContain("application/javascript");
+    await expect(open.text()).resolves.toBe('_jp.mock("o");\r\n');
+    await expect(connected.text()).resolves.toContain("CONNECTED");
+    await expect(sent.text()).resolves.toBe("ok");
+  });
 });

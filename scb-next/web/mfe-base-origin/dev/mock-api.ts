@@ -28,6 +28,12 @@ function sendJson(response: ServerResponse, body: unknown): void {
   response.end(JSON.stringify(body));
 }
 
+function sendText(response: ServerResponse, body: string, contentType: string): void {
+  response.statusCode = 200;
+  response.setHeader("content-type", contentType);
+  response.end(body);
+}
+
 function journeyFixture<T = unknown>(selector: string): T {
   const fixture = JSON.parse(readFileSync(join(FIXTURES_ROOT, "cashflow-journey.json"), "utf8")) as Record<string, T>;
   return fixture[selector] as T;
@@ -42,8 +48,11 @@ async function readBody(request: IncomingMessage): Promise<string> {
 }
 
 export function createDevMockApiMiddleware(): DevMockApiMiddleware {
+  const notificationSessions = new Map<string, number>();
+
   return async (request, response, next) => {
-    const pathname = new URL(request.url ?? "/", "http://127.0.0.1").pathname;
+    const requestUrl = new URL(request.url ?? "/", "http://127.0.0.1");
+    const { pathname } = requestUrl;
 
     if (request.method === "POST" && pathname === "/api/auth/v2/sso/login") {
       sendFixture(response, "login.json");
@@ -65,6 +74,26 @@ export function createDevMockApiMiddleware(): DevMockApiMiddleware {
 
     if (pathname === "/api/ratan/rule/v1/fields") {
       sendFixture(response, "fields.json");
+      return;
+    }
+
+    const notificationTransport = pathname.match(
+      /^(\/api\/ratan\/notification\/subscriptions\/\d+\/[^/]+)\/(jsonp|jsonp_send)$/,
+    );
+    if (notificationTransport?.[2] === "jsonp_send") {
+      await readBody(request);
+      sendText(response, "ok", "text/plain; charset=UTF-8");
+      return;
+    }
+    if (notificationTransport?.[2] === "jsonp") {
+      const session = notificationTransport[1];
+      const pollCount = notificationSessions.get(session) ?? 0;
+      notificationSessions.set(session, pollCount + 1);
+      const callbackCandidate = requestUrl.searchParams.get("c") ?? "_jp";
+      const callback = /^[A-Za-z_$][\w.$]*$/.test(callbackCandidate) ? callbackCandidate : "_jp";
+      const connectedFrame = "CONNECTED\nversion:1.1\nheart-beat:0,0\n\n\u0000";
+      const frame = pollCount === 0 ? "o" : pollCount === 1 ? `a[${JSON.stringify(connectedFrame)}]` : "h";
+      sendText(response, `${callback}(${JSON.stringify(frame)});\r\n`, "application/javascript; charset=UTF-8");
       return;
     }
 
