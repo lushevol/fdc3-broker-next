@@ -7,7 +7,6 @@ import KeyboardArrowDownOutlinedIcon from "@mui/icons-material/KeyboardArrowDown
 import MuiPopover, { PopoverVirtualElement } from "@mui/material/Popover";
 import MuiTabs from "@mui/material/Tabs";
 import MuiTab from "@mui/material/Tab";
-import { v4 } from "uuid";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -168,7 +167,7 @@ const BuilderButton = ({
   children,
   ...rest
 }: BuilderButtonProps) => {
-  const uniqueid = React.useMemo(() => v4(), []);
+  const uniqueid = React.useMemo(() => crypto.randomUUID(), []);
   const open = Boolean(_anchorEl);
   const id = open ? `${label}-${uniqueid}-popover` : undefined;
   return (

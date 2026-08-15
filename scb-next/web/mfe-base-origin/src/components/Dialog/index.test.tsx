@@ -177,9 +177,11 @@ const DialogComp5 = () => {
 
 describe("DialogComp component", () => {
   it("DialogComp should be in the document", () => {
+    const randomUUID = vi.spyOn(globalThis.crypto, "randomUUID");
     render(<DialogComp />);
     const id = screen.getByTestId(PREFIX);
     expect(id).toBeInTheDocument();
+    expect(randomUUID).toHaveBeenCalled();
 
     const content = screen.getByTestId(`${PREFIX}-content`);
     fireEvent.scroll(content, { currentTarget: { scrollLeft: 10, scrollTop: 10 } })

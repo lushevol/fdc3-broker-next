@@ -2,9 +2,9 @@
 
 Date: 2026-08-15
 
-Scope: `scb-next/web/mfe-base-origin/package.json` only. The separately managed
-`server/package.json` is outside the version table, although the root
-`build:server` script is considered when assessing `env-cmd`.
+Scope: `scb-next/web/mfe-base-origin/package.json` and its separately managed
+`server/package.json`. The frontend version table records the audited baseline;
+the implementation result below also covers the nested server.
 
 ## Executive summary
 
@@ -22,10 +22,11 @@ Scope: `scb-next/web/mfe-base-origin/package.json` only. The separately managed
   cannot be established from source, and a clean install can drift within every
   caret or wildcard range. Adding and committing the workspace lockfile is more
   important than changing already-current lower bounds.
-- High-confidence removals or replacements are `buffer`, `uuid`,
-  `@storybook/addon-links`, `@types/openfin`, and probably the root `env-cmd`.
-  `@emotion/css`, `@mui/types`, `clsx`, and `@types/jest` can also leave the
-  direct manifest after small code/type migrations.
+- The completed low-risk cleanup removed or replaced `buffer`, `uuid`,
+  `@storybook/addon-links`, `@types/openfin`, root `env-cmd`, `@mui/system`,
+  `@mui/types`, `clsx`, `@types/jest`, and type-only `@openfin/core`.
+  `@emotion/css` remains because replacing its active style rules is a broader
+  styling change with little installed-graph benefit.
 - The largest potential reduction is `@scdevkit/webkit`, but it is also the
   highest contract risk. Base only loads two elements and exports the wrapper;
   no in-repository production consumer was found. Confirm external MFE
@@ -35,6 +36,33 @@ Scope: `scb-next/web/mfe-base-origin/package.json` only. The separately managed
   maintainer repository is archived and unchanged since 2020. Migrate the FDC3
   integration to `@finos/fdc3@2.2.3` and `getAgent()` in a separately tested
   stage.
+
+## Implemented result
+
+The frontend manifest was reduced from 51 direct entries (25 runtime and 26
+development) to 41 (19 runtime and 22 development). The implementation:
+
+- uses `atob` plus `TextDecoder` for base64url/UTF-8 JWT payloads instead of the
+  `buffer` browser polyfill;
+- uses `crypto.randomUUID()` instead of `uuid` in the shared helper, dialogs,
+  and builder buttons;
+- replaces the two string-only `clsx` calls with a local class-name joiner;
+- removes unused Storybook links, Jest, and OpenFin ambient type packages;
+- imports MUI types through Material's public exports rather than declaring
+  direct `@mui/system` and `@mui/types` dependencies;
+- declares `Window.fin` as optional `unknown`, removing the type-only
+  `@openfin/core` dependency; and
+- invokes `tsc` directly for `build:server`, removing frontend `env-cmd`.
+
+The nested server manifest was reduced from nine direct entries to six. Unused
+`cookie-parser`, `ts-loader`, and `concurrently` were removed. Compatible
+updates were applied to compression 1.8.1, Express 4.22.2, ts-node 10.9.2, and
+TypeScript 4.9.5. `env-cmd@10` remains a runtime dependency because the Docker
+entrypoint invokes it, and Express 5/env-cmd 11 remain deferred while that image
+targets Node 14. The regenerated server lockfile reports zero vulnerabilities.
+
+`react-draggable` is pinned to exactly 4.4.5: the previously allowed 4.7.1
+release fails this React 18 project's declaration checks.
 
 ## Version status
 
@@ -160,15 +188,15 @@ family rather than blindly selecting npm's generic `latest` tag.
 
 1. Establish reproducibility: pin `@scdevkit/webkit`, document the Node runtime,
    and generate/commit the `scb-next` workspace lockfile.
-2. Low-risk removals: `buffer`, `uuid`, addon-links, `@types/openfin`, root
-   `env-cmd`; then run typecheck, unit tests with coverage, lint, Storybook build,
-   and the Base production build.
-3. Small consolidation: remove direct `@emotion/css`, `@mui/types`, and `clsx`
-   after adapting their few call sites. Treat this primarily as manifest/API
-   cleanup because MUI still installs some of these transitively.
+2. Completed: remove `buffer`, `uuid`, addon-links, `@types/openfin`, root
+   `env-cmd`, direct MUI type packages, `clsx`, `@types/jest`, and type-only
+   `@openfin/core`, with focused compatibility tests.
+3. Optional styling stage: remove direct `@emotion/css` after adapting its
+   active style rules. Emotion React/styled remain required by MUI, so this is
+   primarily manifest/API cleanup rather than an installed-graph reduction.
 4. Retire legacy FDC3/OpenFin bridge: upgrade to FDC3 2.2.3, use `getAgent()`,
    verify listener cleanup and actual desktop runtime behavior, then remove
-   `openfin-fdc3` and potentially `@openfin/core`.
+   `openfin-fdc3`.
 5. Decide the `ScWebkit` export after external consumer inventory. Removing it
    offers the largest dependency reduction but must not silently break runtime
    consumers.

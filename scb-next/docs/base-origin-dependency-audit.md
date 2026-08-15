@@ -24,9 +24,10 @@ Base Origin now builds on the current frontend architecture:
 | React | 18.2 | 18.2 with latest React 18 types | Intentionally unchanged |
 | TypeScript | 5.9.3 | 5.9.3 | Current supported line; TypeScript 7 blocked |
 
-The active runtime updates also include Axios 1.19.0, clsx 2.1.1, Day.js
-1.11.21, DOMPurify 3.4.13, Testing Library React 16.3.2, Testing Library DOM
-10.4.1, and jest-dom 7.0.1.
+The active runtime updates also include Axios 1.19.0, Day.js 1.11.21,
+DOMPurify 3.4.13, Testing Library React 16.3.2, Testing Library DOM 10.4.1, and
+jest-dom 7.0.1. The follow-up minimization reduced the frontend manifest from
+51 to 41 direct entries and the nested server manifest from nine to six.
 
 The work was deliberately split into verified commits:
 
@@ -64,6 +65,16 @@ consumer, as well as packages superseded by the current architecture:
 - The deprecated `text-encoding` shim and stale transitive `resolutions`.
 - Legacy Babel ESLint parsing, package-local shared lint configuration, and
   Prettier-as-an-ESLint-rule packages.
+- `buffer` and `uuid`; browser-native `atob`/`TextDecoder` and
+  `crypto.randomUUID()` now cover their Base use cases.
+- Unused Storybook links and OpenFin ambient types, the Jest type package, and
+  the frontend's unnecessary `env-cmd` build wrapper.
+- Direct `@mui/system` and `@mui/types` declarations; required types are
+  imported through Material's public exports.
+- `clsx`, whose two string-only calls are now handled locally, and type-only
+  `@openfin/core`; Base only checks for an optional `window.fin` value.
+- Nested-server `cookie-parser`, `ts-loader`, and `concurrently`, which had no
+  source or script consumer.
 
 Do not restore these packages to make an old config compile. Migrate the config
 or test to the current Vite/Vitest/flat-config equivalent instead.
@@ -73,7 +84,7 @@ or test to the current Vite/Vitest/flat-config equivalent instead.
 ### Storybook
 
 Storybook uses `@storybook/react-vite`. Retain only addons that are explicitly
-configured: docs, links, and accessibility. Import story types from
+configured: docs and accessibility. Import story types from
 `@storybook/react-vite` and MDX blocks from `@storybook/addon-docs/blocks`.
 Federation is disabled while Storybook builds because stories render local
 components and do not need a host share scope.
@@ -107,8 +118,10 @@ MUI 9 and MUI X 9 are now the supported Base versions. Ratan Container and
 Cashflow remain on their existing MUI 5 package lines; upgrading those remotes
 is outside this migration. Direct use of
 `@mui/x-date-pickers` is declared explicitly instead of relying on the Pro
-package's transitive dependencies. Material, icons, system, types, Data Grid,
-and Date Pickers must remain on compatible majors.
+package's transitive dependencies. Material, icons, Data Grid, and Date Pickers
+must remain on compatible majors. MUI system and type packages are still
+installed transitively by Material but are no longer part of Base's direct
+dependency contract.
 
 MUI 9 raises its browser floor to Chrome 117, Edge 121, Firefox 121, and Safari
 17. Base's Vite build target was therefore raised from `chrome89` to
@@ -150,26 +163,30 @@ and Cashflow together; Base must not introduce it independently.
   typecheck. Base remains on 4.4.5.
 - TypeScript 7 is outside `typescript-eslint@8.67.0`'s supported `<6.1.0`
   range. TypeScript 5.9.3 remains the current supported compiler.
-- React Router 7, Zod 4, and UUID 14 are behavioral or ESM major migrations;
-  handle each with focused tests rather than folding them into dependency
-  housekeeping.
-- `@openfin/core`, FINOS FDC3, and `openfin-fdc3` require deployed OpenFin
-  runtime certification before changing versions.
+- React Router 7 and Zod 4 are behavioral or ESM major migrations; handle each
+  with focused tests rather than folding them into dependency housekeeping.
+- FINOS FDC3 and the archived `openfin-fdc3` bridge require deployed OpenFin
+  runtime certification before changing versions. The unused `@openfin/core`
+  type dependency has already been removed.
 - `@scdevkit/webkit` is private and still declared as `"*"`. Its latest version
   cannot be established from the public registry.
   Replace the wildcard with an internally approved exact version when private
   registry access is available.
-- The nested server remains CommonJS on Express 4, TypeScript 4.9, and ts-node.
-  Modernize it as an isolated server migration; do not couple it to frontend
-  majors.
+- The nested server remains CommonJS on Express 4.22.2, TypeScript 4.9.5, and
+  ts-node 10.9.2 because its Docker image still targets Node 14. Its active
+  dependencies were updated within those compatible lines; modernize the
+  runtime as an isolated server migration.
 
 ## Verification and installation
 
 The completed migration passes:
 
-- Base production build with the declared Vite 8.2.1 toolchain.
+- Base production build in the available workspace install. That install
+  currently resolves hoisted Vite 7.3.3; Storybook verifies the declared Vite
+  8.2.1 line, and a root lockfile/local install is still required for a
+  reproducible direct Base build.
 - Nested server TypeScript build.
-- 120 test files and 332 tests.
+- 121 test files and 334 tests.
 - Storybook static build with 203 indexed entries.
 - Integrated Base startup, mocked local login, New Tile drawer, Ratan and
   Cashflow loading, Quick Search and Data Grid rendering, representative

@@ -1,8 +1,6 @@
-import { Buffer } from "buffer";
 import { ActionType, IAction } from "../hooks/reducer/util/ActionType";
-import { v4 } from "uuid";
 import { getHooksBase } from "../hooks/HooksBase";
-import dayjs from "dayjs";
+import dayjs, { type Dayjs } from "dayjs";
 import utc from "dayjs/plugin/utc";
 import duration from "dayjs/plugin/duration";
 import { Entity } from "../hooks/model/root";
@@ -11,7 +9,6 @@ import { Tile, Tiles } from "../components/Drawer/common/interface";
 import { findTile } from "./drawer";
 import { featureScopedEnabled } from "./featureFlagController";
 import type { Dispatch } from "react";
-import type { Dayjs } from "dayjs";
 dayjs.extend(utc);
 dayjs.extend(duration);
 
@@ -36,11 +33,21 @@ export interface JWTPayload {
   sub?: string;
   date?: unknown;
 }
+
+const decodeBase64Url = (value: string): string => {
+  const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+  const paddedBase64 = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+  const bytes = Uint8Array.from(atob(paddedBase64), (character) =>
+    character.charCodeAt(0),
+  );
+  return new TextDecoder().decode(bytes);
+};
+
 export const getJWTPayload = (token: string): JWTPayload | "" => {
   const payload = token.split(" ");
   if (payload && payload[1]) {
     const tokenParts: string[] = payload[1].split(".");
-    return JSON.parse(Buffer.from(tokenParts[1], "base64").toString("utf8"));
+    return JSON.parse(decodeBase64Url(tokenParts[1]));
   }
   return "";
 };
@@ -80,7 +87,7 @@ export const clearStorageWhenLogout = (dispacth: React.Dispatch<IAction>) => {
 };
 
 export const uuidv4 = () => {
-  return v4();
+  return crypto.randomUUID();
 };
 
 export const showErrorMsg = (errorMsg: string) => {

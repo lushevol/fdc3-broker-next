@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
 
-globalThis.jest = vi as unknown as typeof jest;
+Object.assign(globalThis, { jest: vi });
 window.open = vi.fn();
 window.blur = vi.fn();
 Object.assign(vi, {

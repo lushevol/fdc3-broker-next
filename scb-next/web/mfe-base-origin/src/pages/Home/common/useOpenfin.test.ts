@@ -7,7 +7,7 @@ import {
   it,
   jest,
 } from "@jest/globals";
-import type { MockedFunction } from "jest-mock";
+import type { MockedFunction } from "vitest";
 import React from "react";
 import * as openFinFdc3 from "openfin-fdc3";
 import useOpenfin, { waitTillLogin } from "./useOpenfin";

@@ -1,6 +1,5 @@
 import React, { useRef, useState } from "react";
 import { useContext } from "../../../hooks/provider";
-import { v4 } from "uuid";
 import { DialogProps } from "./types";
 import { classes } from "./style";
 import useAnalytics from "../../../analytics";
@@ -16,8 +15,8 @@ const useController = (props: DialogProps) => {
     onClose,
   } = props;
   const { ButtonEvent, ModalEvent } = useAnalytics();
-  const idTitle = React.useMemo(() => `title-${v4()}`, []);
-  const idModal = React.useMemo(() => `modal-${v4()}`, []);
+  const idTitle = React.useMemo(() => `title-${crypto.randomUUID()}`, []);
+  const idModal = React.useMemo(() => `modal-${crypto.randomUUID()}`, []);
   const [isMax, setIsMax] = useState(false);
   const [container, setContainer] = useState("base");
   const [tile, setTile] = useState("home");

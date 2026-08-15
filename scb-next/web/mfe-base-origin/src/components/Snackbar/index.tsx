@@ -1,14 +1,12 @@
 import React, { ReactElement } from "react";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
-import { OverridableStringUnion } from "@mui/types";
 import {
   SnackbarCloseReason,
   SnackbarProps as MuiSnackbarProps,
 } from "@mui/material/Snackbar";
-import { SxProps } from "@mui/system";
 import SnackbarContent from "@mui/material/SnackbarContent";
 import Root, { PREFIX } from "./common/style";
-import { Theme } from "@mui/material/styles";
+import { SxProps, Theme } from "@mui/material/styles";
 import DOMPurify from "dompurify";
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -19,8 +17,8 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 
 export interface SnackbarProps extends MuiSnackbarProps {
   message?: React.ReactNode;
-  variant?: OverridableStringUnion<"standard" | "filled" | "outlined">;
-  severity?: OverridableStringUnion<"success" | "info" | "warning" | "error">;
+  variant?: AlertProps["variant"];
+  severity?: AlertProps["severity"];
   alertsx?: SxProps<Theme>;
   action?: React.ReactNode;
   onClose?: (

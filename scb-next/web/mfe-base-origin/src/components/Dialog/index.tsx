@@ -1,5 +1,5 @@
 import React from "react";
-import { DialogProps } from "./common/types";
+import { DialogProps, PaperProps } from "./common/types";
 import Root, { PREFIX, classes } from "./common/style";
 import DialogTitle from "./common/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -8,8 +8,9 @@ import useController from "./common/useController";
 import Draggable from "./common/Draggable";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import IconButton from "@mui/material/IconButton";
-import clsx from "clsx";
-import { PaperProps } from "./common/types";
+
+const joinClassNames = (...classNames: Array<string | undefined>) =>
+  classNames.filter(Boolean).join(" ");
 
 const getDraggable = (isDraggable: boolean | undefined, idTitle: string) =>
   isDraggable
@@ -52,13 +53,13 @@ const Dialog = (props: DialogProps) => {
   } = useController(props);
   const maxCalssName = isMax ? classes.max : undefined;
   const maxStaticCalssName = isMax
-    ? clsx(classes.static, classes.max)
+    ? joinClassNames(classes.static, classes.max)
     : classes.static;
   const staticClassName = disablePortal ? maxStaticCalssName : maxCalssName;
   const hideBackdropClassName = hideBackdrop ? classes.hideBackdrop : undefined;
   const DraggableComp = React.useMemo(
     () => getDraggable(isDraggable, idTitle),
-    [isDraggable]
+    [idTitle, isDraggable]
   );
   return (
     <Root
@@ -71,7 +72,7 @@ const Dialog = (props: DialogProps) => {
       scroll="paper"
       ref={dialogRef}
       {...rest}
-      className={clsx(staticClassName, hideBackdropClassName, className)}
+      className={joinClassNames(staticClassName, hideBackdropClassName, className)}
       onMouseUp={stopDrag}
       onMouseMove={doDrag}
       onMouseLeave={stopDrag}
