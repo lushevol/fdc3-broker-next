@@ -1,7 +1,8 @@
-import { createServer } from "node:http";
-import { afterEach, describe, expect, it } from "vitest";
+import { createServer } from 'node:http';
+import { afterEach, describe, expect, it } from 'vitest';
 
-import { createDevMockApiMiddleware } from "../web/mfe-base-origin/dev/mock-api";
+import { createMockApiServer } from '../devops/mock-bff/server.mjs';
+import { createDevMockApiMiddleware } from '../web/mfe-base-origin/dev/mock-api';
 
 const servers: ReturnType<typeof createServer>[] = [];
 
@@ -26,55 +27,109 @@ async function startMockApi(): Promise<string> {
   });
   servers.push(server);
 
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();
-  if (!address || typeof address === "string") {
-    throw new Error("Expected the development mock API to listen on a TCP port");
+  if (!address || typeof address === 'string') {
+    throw new Error('Expected the development mock API to listen on a TCP port');
   }
   return `http://127.0.0.1:${address.port}`;
 }
 
-describe("SCB Next development mock API", () => {
-  it("authenticates the documented mock user through the browser-facing login endpoint", async () => {
+async function startProductionMockApi(): Promise<string> {
+  const server = createMockApiServer();
+  servers.push(server);
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const address = server.address();
+  if (!address || typeof address === 'string') {
+    throw new Error('Expected the production mock API to listen on a TCP port');
+  }
+  return `http://127.0.0.1:${address.port}`;
+}
+
+describe('SCB Next development mock API', () => {
+  it('runs the canonical request-aware handler through the production server', async () => {
+    const origin = await startProductionMockApi();
+    const [health, views] = await Promise.all([
+      fetch(`${origin}/healthz`),
+      fetch(`${origin}/api/ratan/v3/customview/views?type=CASHFLOW_CN_VIEW_BUILDER`),
+    ]);
+
+    await expect(health.json()).resolves.toEqual({
+      status: 'ok',
+      service: 'scb-next-mock-bff',
+    });
+    await expect(views.json()).resolves.toEqual([
+      expect.objectContaining({ name: 'Cashflow operations' }),
+    ]);
+
+    await expect(
+      new Promise<string[]>((resolve, reject) => {
+        const messages: string[] = [];
+        const socket = new WebSocket(
+          `${origin.replace('http', 'ws')}/api/ratan/notification/subscriptions/123/prod-session/websocket`,
+        );
+        const timeout = setTimeout(
+          () => reject(new Error('Timed out waiting for SockJS frames')),
+          2_000,
+        );
+        socket.addEventListener('message', (event) => {
+          messages.push(String(event.data));
+          if (messages.some((message) => message.includes('CONNECTED'))) {
+            clearTimeout(timeout);
+            socket.close();
+            resolve(messages);
+          }
+        });
+        socket.addEventListener('error', () => {
+          clearTimeout(timeout);
+          reject(new Error('SockJS WebSocket handshake failed'));
+        });
+      }),
+    ).resolves.toEqual(['o', expect.stringContaining('CONNECTED')]);
+  });
+
+  it('authenticates the documented mock user through the browser-facing login endpoint', async () => {
     const origin = await startMockApi();
 
     const response = await fetch(`${origin}/api/auth/v2/sso/login`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ username: "mock.cashflow", password: "acceptance" }),
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ username: 'mock.cashflow', password: 'acceptance' }),
     });
 
     expect(response.status).toBe(200);
-    expect(response.headers.get("single-ui-authorization")).toMatch(/^Bearer /);
+    expect(response.headers.get('single-ui-authorization')).toMatch(/^Bearer /);
     await expect(response.json()).resolves.toMatchObject({
-      result: "success",
+      result: 'success',
       drawers: [
-        { tiles: expect.arrayContaining([expect.objectContaining({ title: "Cashflow Blotter" })]) },
+        { tiles: expect.arrayContaining([expect.objectContaining({ title: 'Cashflow Blotter' })]) },
       ],
     });
   });
 
-  it("serves the production Cashflow acceptance fixtures from the development origin", async () => {
+  it('serves the production Cashflow acceptance fixtures from the development origin', async () => {
     const origin = await startMockApi();
 
     const [versions, fields, views, cashflows] = await Promise.all([
       fetch(`${origin}/api/ratan/rule/v1/fields/versions`),
       fetch(`${origin}/api/ratan/rule/v1/fields`),
       fetch(`${origin}/api/ratan/v3/customview/views`),
-      fetch(`${origin}/api/ratan/stmcn/v1/cashflows`, { method: "POST" }),
+      fetch(`${origin}/api/ratan/stmcn/v1/cashflows`, { method: 'POST' }),
     ]);
 
     expect(await versions.json()).toMatchObject({
-      ratan_suppression_fields_config: { activedVersion: "acceptance-v1" },
+      ratan_suppression_fields_config: { activedVersion: 'acceptance-v1' },
     });
     await expect(fields.json()).resolves.toMatchObject({ fields: expect.any(Array) });
-    await expect(views.json()).resolves.toEqual([expect.objectContaining({ name: "Cashflow operations" })]);
+    await expect(views.json()).resolves.toEqual([
+      expect.objectContaining({ name: 'Cashflow operations' }),
+    ]);
     await expect(cashflows.json()).resolves.toMatchObject({
       data: {
         cashflowUltraQuery: {
           results: expect.arrayContaining([
             expect.objectContaining({
-              Cashflow: expect.objectContaining({ Cashflow_Id: "CF-ACCEPT-001" }),
+              Cashflow: expect.objectContaining({ Cashflow_Id: 'CF-ACCEPT-001' }),
             }),
           ]),
         },
@@ -82,11 +137,11 @@ describe("SCB Next development mock API", () => {
     });
   });
 
-  it("matches the production mock BFF validation and generic API fallbacks", async () => {
+  it('matches the production mock BFF validation and generic API fallbacks', async () => {
     const origin = await startMockApi();
 
     const [validation, fallback] = await Promise.all([
-      fetch(`${origin}/api/auth/v2/sso/validate`, { method: "POST" }),
+      fetch(`${origin}/api/auth/v2/sso/validate`, { method: 'POST' }),
       fetch(`${origin}/api/ratan/notifications/unimplemented`),
     ]);
 
@@ -99,17 +154,21 @@ describe("SCB Next development mock API", () => {
     });
   });
 
-  it("replays the predefined Cashflow metrics and ID search", async () => {
+  it('replays the predefined Cashflow metrics and ID search', async () => {
     const origin = await startMockApi();
     const metric = await fetch(`${origin}/api/ratan/stmcn/v1/cashflows`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ filter: "Cashflow.Cashflow_Sub_State Pending Operator Cashflow.Payment_Date 2026-08-14" }),
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        filter: 'Cashflow.Cashflow_Sub_State Pending Operator Cashflow.Payment_Date 2026-08-14',
+      }),
     });
     const search = await fetch(`${origin}/api/ratan/stmcn/v1/cashflows`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ query: "RatanUltraQuery BCS_Trade_Id Cashflow.Cashflow_Id M0P56753524" }),
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        query: 'RatanUltraQuery BCS_Trade_Id Cashflow.Cashflow_Id M0P56753524',
+      }),
     });
 
     await expect(metric.json()).resolves.toMatchObject({
@@ -119,61 +178,79 @@ describe("SCB Next development mock API", () => {
       data: {
         cashflowUltraQuery: {
           totalResult: 1,
-          results: [expect.objectContaining({ Cashflow: expect.objectContaining({ Cashflow_Id: "M0P56753524" }) })],
+          results: [
+            expect.objectContaining({
+              Cashflow: expect.objectContaining({ Cashflow_Id: 'M0P56753524' }),
+            }),
+          ],
         },
       },
     });
   });
 
-  it("replays Cashflow details, accounting, and currency holiday lookups", async () => {
+  it('replays Cashflow details, accounting, and currency holiday lookups', async () => {
     const origin = await startMockApi();
     const [details, accounting, holiday] = await Promise.all([
       fetch(`${origin}/api/ratan/stmcn/v1/cashflows`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ operation: "graphCashFlowDetails M0P56753524" }),
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ operation: 'graphCashFlowDetails M0P56753524' }),
       }),
       fetch(`${origin}/api/ratan/v1/accounting/fetch/M0P56753524`),
       fetch(`${origin}/api/ratan/v1/cashflow/currency/holiday`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ cashflowId: "0AP58899052" }),
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ cashflowId: '0AP58899052' }),
       }),
     ]);
 
     await expect(details.json()).resolves.toMatchObject({
-      data: { graphCashFlowDetails: [expect.objectContaining({ cashflow: expect.objectContaining({ Cashflow: expect.objectContaining({ Cashflow_Id: "M0P56753524" }) }) })] },
+      data: {
+        graphCashFlowDetails: [
+          expect.objectContaining({
+            cashflow: expect.objectContaining({
+              Cashflow: expect.objectContaining({ Cashflow_Id: 'M0P56753524' }),
+            }),
+          }),
+        ],
+      },
     });
     await expect(accounting.json()).resolves.toEqual([]);
-    await expect(holiday.json()).resolves.toMatchObject([{ cashflowId: "0AP58899052", isHoliday: false }]);
+    await expect(holiday.json()).resolves.toMatchObject([
+      { cashflowId: '0AP58899052', isHoliday: false },
+    ]);
   });
 
-  it("provides saved custom filters and views for the Cashflow dialogs", async () => {
+  it('provides saved custom filters and views for the Cashflow dialogs', async () => {
     const origin = await startMockApi();
     const [filters, views] = await Promise.all([
       fetch(`${origin}/api/ratan/v3/customview/filters?type=STRATEGIC_CASHFLOW_FILTER_BUILDER`),
       fetch(`${origin}/api/ratan/v3/customview/views?type=CASHFLOW_CN_VIEW_BUILDER`),
     ]);
 
-    await expect(filters.json()).resolves.toEqual([expect.objectContaining({ name: "Pending operator cashflows" })]);
-    await expect(views.json()).resolves.toEqual([expect.objectContaining({ name: "Cashflow operations" })]);
+    await expect(filters.json()).resolves.toEqual([
+      expect.objectContaining({ name: 'Pending operator cashflows' }),
+    ]);
+    await expect(views.json()).resolves.toEqual([
+      expect.objectContaining({ name: 'Cashflow operations' }),
+    ]);
   });
 
-  it("serves valid SockJS JSONP frames for Cashflow notifications", async () => {
+  it('serves valid SockJS JSONP frames for Cashflow notifications', async () => {
     const origin = await startMockApi();
-    const sessionPath = "/api/ratan/notification/subscriptions/123/mock-session";
+    const sessionPath = '/api/ratan/notification/subscriptions/123/mock-session';
 
     const open = await fetch(`${origin}${sessionPath}/jsonp?c=_jp.mock`);
     const connected = await fetch(`${origin}${sessionPath}/jsonp?c=_jp.mock`);
     const sent = await fetch(`${origin}${sessionPath}/jsonp_send`, {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: "d=%5B%22CONNECT%22%5D",
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: 'd=%5B%22CONNECT%22%5D',
     });
 
-    expect(open.headers.get("content-type")).toContain("application/javascript");
+    expect(open.headers.get('content-type')).toContain('application/javascript');
     await expect(open.text()).resolves.toBe('_jp.mock("o");\r\n');
-    await expect(connected.text()).resolves.toContain("CONNECTED");
-    await expect(sent.text()).resolves.toBe("ok");
+    await expect(connected.text()).resolves.toContain('CONNECTED');
+    await expect(sent.text()).resolves.toBe('ok');
   });
 });

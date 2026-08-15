@@ -208,8 +208,9 @@ login
 ```
 
 The production Nginx mock MUST pass the same journey before it can be used as
-production-style parity evidence. Its current generic implementation does not
-satisfy this invariant.
+production-style parity evidence. It MUST use the same canonical request
+handler as development and support the notification transport selected by the
+browser without generating failed-transport console errors.
 
 ## Functional acceptance criteria
 

@@ -352,10 +352,11 @@ Fixtures must be internally consistent: IDs used by search must open details;
 dates/currencies/amounts must agree across grid and details; builder types must
 match request types; login entitlements must expose the tested controls.
 
-The Docker/Nginx production mock is a separate implementation. It currently
-serves generic Cashflow data and empty custom views and does not implement the
-complete request-aware journey or SockJS replay. Do not claim production-mock
-parity until it is brought to the same contract and tested through port `9081`.
+Development and production fixture paths use the canonical request-aware
+handler in `devops/mock-bff/mock-api.mjs`. The Vite plugin is a typed adapter;
+the production composition runs `devops/mock-bff/server.mjs` behind the Nginx
+edge. The server supports SockJS WebSocket and JSONP transports so production
+acceptance does not depend on a transport error followed by fallback.
 
 Completion criterion: the automated mock tests pass and the live browser
 journey completes without fallback alerts, notification errors, unexpected
@@ -426,6 +427,7 @@ the recorded rollback route remains available.
 | `VITE_CASHFLOW_REMOTE_URL` | Ratan build/dev  | full Cashflow `remoteEntry.js` URL; local default is port `8015`                     |
 | `VITE_PUBLIC_BASE`         | remote build     | remote asset base; production uses `/remotes/ratan/` or `/remotes/cashflow/`         |
 | `SCB_NEXT_EDGE_ORIGIN`     | production build | public origin embedded in both remote URLs; local default is `http://127.0.0.1:9081` |
+| `SCB_NEXT_EDGE_PORT`       | local production | published edge port; defaults to `9081` and derives the origin when it is unset      |
 | `BFF_ORIGIN`               | edge runtime     | upstream for `/api/`; changing it does not rebuild frontend artifacts                |
 | `IMAGE_TAG`                | container build  | optional edge image tag                                                              |
 
@@ -459,16 +461,16 @@ As of 15 August 2026:
 - the Base development mock replays login, metadata, metrics, initial grid,
   `M0P56753524` search/details, accounting, holiday, custom filter/view, and
   SockJS notification startup;
-- `scb-next` root architecture/mock tests pass with 20 tests;
-- the Base production build passes;
-- a full workspace build in the current non-clean installation fails when
-  Ratan and Cashflow resolve missing MUI 5 icon entry points. Complete the
-  documented nested corporate-registry install and dependency-isolation gate;
-  do not upgrade those remotes as a workaround;
+- `scb-next` root architecture/mock tests pass with 21 tests;
+- the complete leaf-to-host production build passes when dependency isolation
+  resolves Base to MUI 9 and both remotes to MUI 5;
+- a clean `scb-next` install remains blocked without corporate-registry access
+  to `@scdevkit/webkit`; do not replace the private package or upgrade remotes
+  as a workaround;
 - strict Base typecheck still exposes pre-existing Jest setup, bootstrap prop,
   and Vitest setup errors;
-- the production Nginx mock is less capable than the Base development mock and
-  is not yet proof of the complete captured journey;
+- the production edge and request-aware mock pass the complete captured
+  Playwright and Live Browser journey, including WebSocket notification startup;
 - inherited React, Ant Design, Apollo, Redux serializability, and AG Grid
   deprecation warnings remain migration debt. Classify warnings explicitly;
   never hide new runtime failures among them.

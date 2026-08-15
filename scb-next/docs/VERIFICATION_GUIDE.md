@@ -121,8 +121,8 @@ npm test -- tests/dev-mock-api.test.ts --run
 npm test
 ```
 
-At the time this guide was written, the root suite contains 20 tests, including
-7 focused development-mock tests. Counts may increase. Acceptance depends on
+At the time this guide was written, the root suite contains 21 tests, including
+8 focused development/production-mock tests. Counts may increase. Acceptance depends on
 the current discovered suite passing, not on reproducing those historical
 numbers.
 
@@ -335,6 +335,15 @@ cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
 SCB_NEXT_EDGE_ORIGIN=http://127.0.0.1:9081 npm run build:production
 ```
 
+When port `9081` is reserved, use one explicit alternative for both the build
+and composition:
+
+```bash
+SCB_NEXT_EDGE_PORT=9082 \
+SCB_NEXT_EDGE_ORIGIN=http://127.0.0.1:9082 \
+npm run serve:production
+```
+
 Start and inspect the edge only after all three builds pass:
 
 ```bash
@@ -353,14 +362,14 @@ read-only filesystems, required `tmpfs`, and `no-new-privileges`.
 Completion criterion: all three artifacts build in order and the deployed edge
 serves the expected host, manifests, chunks, headers, and health response.
 
-## 11. Classify production-mock acceptance honestly
+## 11. Verify production-mock parity
 
-The current Nginx mock is not equivalent to the Base development mock. It uses
-a generic Cashflow fixture, returns empty custom filter/view lists, and does
-not replay the complete request-aware SockJS journey. Therefore it cannot
-certify the captured production-style Cashflow flow described in section 8.
+The Base development adapter and production Node mock use the same canonical
+request-aware handler. Production adds a real SockJS WebSocket upgrade path and
+retains JSONP coverage. Verify the complete captured journey through the edge,
+including an empty console-error list.
 
-You may run its existing smoke test for diagnostic evidence:
+Run the production acceptance test:
 
 ```bash
 cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
@@ -369,14 +378,14 @@ PLAYWRIGHT_PRODUCTION_EDGE=1 \
 npm run test:e2e
 ```
 
-Report that result as `production-edge smoke`, not `full production-mock
-parity`. Full parity remains blocked until the production mock dispatches by
-request in the same way as the development middleware and passes the section 8
-journey with no notification transport error.
+The production scenario must verify login, both federation boundaries, four
+metrics, initial grid, `M0P56753524` search/details, accounting empty state,
+saved custom search, View Builder, styling, and notification startup. The three
+development-only scenarios are expected to be skipped in this mode.
 
-Completion criterion: either production-mock parity passes the complete
-captured journey, or the handoff explicitly records it as blocked and makes no
-production-style parity claim.
+Completion criterion: production Playwright and the section 8 Live Browser
+journey pass with no page error, console error, fallback alert, failed remote,
+or failed notification transport.
 
 ## 12. Verify against the real BFF
 

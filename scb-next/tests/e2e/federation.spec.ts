@@ -1,9 +1,12 @@
 import { expect, test } from '@playwright/test';
 
-test('base host preserves the login experience and styling', async ({ page }) => {
-  test.skip(!!process.env.PLAYWRIGHT_PRODUCTION_EDGE, 'development-origin acceptance only');
+const isProductionEdge = !!process.env.PLAYWRIGHT_PRODUCTION_EDGE;
+const developmentTest = isProductionEdge ? test.skip : test;
+const productionTest = isProductionEdge ? test : test.skip;
+
+developmentTest('base host preserves the login experience and styling', async ({ page }) => {
   const errors: Error[] = [];
-  page.on('pageerror', error => errors.push(error));
+  page.on('pageerror', (error) => errors.push(error));
 
   await page.goto('/');
 
@@ -14,56 +17,63 @@ test('base host preserves the login experience and styling', async ({ page }) =>
   expect(errors).toEqual([]);
 });
 
-test('development origin logs in with fixtures and opens Cashflow Blotter', async ({ page }) => {
-  test.skip(!!process.env.PLAYWRIGHT_PRODUCTION_EDGE, 'development-origin acceptance only');
+developmentTest(
+  'development origin logs in with fixtures and opens Cashflow Blotter',
+  async ({ page }) => {
+    await page.goto('/?show_normal_login=Y&survey=no');
+    await page.getByPlaceholder('Enter Username').fill('mock.cashflow');
+    await page.getByPlaceholder('Enter Password').fill('acceptance');
+    await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+    await expect(page.getByText('New Tile', { exact: true })).toBeVisible();
 
-  await page.goto('/?show_normal_login=Y&survey=no');
-  await page.getByPlaceholder('Enter Username').fill('mock.cashflow');
-  await page.getByPlaceholder('Enter Password').fill('acceptance');
-  await page.getByRole('button', { name: 'Sign In', exact: true }).click();
-  await expect(page.getByText('New Tile', { exact: true })).toBeVisible();
+    await page.getByText('New Tile', { exact: true }).click();
+    await page.getByText('Cashflow Blotter', { exact: true }).click();
 
-  await page.getByText('New Tile', { exact: true }).click();
-  await page.getByText('Cashflow Blotter', { exact: true }).click();
+    await expect(page.getByText('Quick Search', { exact: true })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText('CF-ACCEPT-001', { exact: true })).toBeVisible();
 
-  await expect(page.getByText('Quick Search', { exact: true })).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText('CF-ACCEPT-001', { exact: true })).toBeVisible();
+    const presetButton = page.getByRole('button', { name: 'Pending Operator' }).first();
+    await expect(presetButton).toHaveCSS('font-family', /Poppins/);
+    await expect(presetButton).toHaveCSS('font-weight', '600');
+    await expect(presetButton).toHaveCSS('text-transform', 'capitalize');
+    const fontSize = Number.parseFloat(
+      await presetButton.evaluate((element) => window.getComputedStyle(element).fontSize),
+    );
+    expect(fontSize).toBeGreaterThanOrEqual(10);
+    expect(fontSize).toBeLessThanOrEqual(12);
+  },
+);
 
-  const presetButton = page.getByRole('button', { name: 'Pending Operator' }).first();
-  await expect(presetButton).toHaveCSS('font-family', /Poppins/);
-  await expect(presetButton).toHaveCSS('font-weight', '600');
-  await expect(presetButton).toHaveCSS('text-transform', 'capitalize');
-  const fontSize = Number.parseFloat(await presetButton.evaluate(element =>
-    window.getComputedStyle(element).fontSize,
-  ));
-  expect(fontSize).toBeGreaterThanOrEqual(10);
-  expect(fontSize).toBeLessThanOrEqual(12);
-});
+developmentTest(
+  'ratan loads cashflow over the second federation boundary',
+  async ({ page, request }) => {
+    const errors: Error[] = [];
+    page.on('pageerror', (error) => errors.push(error));
 
-test('ratan loads cashflow over the second federation boundary', async ({ page, request }) => {
-  test.skip(!!process.env.PLAYWRIGHT_PRODUCTION_EDGE, 'development-origin acceptance only');
+    const [ratanEntry, cashflowEntry] = await Promise.all([
+      request.get('http://127.0.0.1:8009/remoteEntry.js'),
+      request.get('http://127.0.0.1:8015/remoteEntry.js'),
+    ]);
+    expect(ratanEntry.ok()).toBe(true);
+    expect(cashflowEntry.ok()).toBe(true);
+
+    await page.goto('http://127.0.0.1:8009/');
+    await expect(page.getByRole('button', { name: 'API Status' })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByRole('button', { name: 'Refresh Page' })).toBeVisible();
+    expect(errors).toEqual([]);
+  },
+);
+
+productionTest('production edge completes the captured Cashflow journey', async ({ page }) => {
+  test.setTimeout(60_000);
   const errors: Error[] = [];
-  page.on('pageerror', error => errors.push(error));
-
-  const [ratanEntry, cashflowEntry] = await Promise.all([
-    request.get('http://127.0.0.1:8009/remoteEntry.js'),
-    request.get('http://127.0.0.1:8015/remoteEntry.js'),
-  ]);
-  expect(ratanEntry.ok()).toBe(true);
-  expect(cashflowEntry.ok()).toBe(true);
-
-  await page.goto('http://127.0.0.1:8009/');
-  await expect(page.getByRole('button', { name: 'API Status' })).toBeVisible({
-    timeout: 20_000,
+  const consoleErrors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error));
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
   });
-  await expect(page.getByRole('button', { name: 'Refresh Page' })).toBeVisible();
-  expect(errors).toEqual([]);
-});
-
-test('production edge logs in with fixtures and opens Cashflow Blotter', async ({ page }) => {
-  test.skip(!process.env.PLAYWRIGHT_PRODUCTION_EDGE, 'production-edge acceptance only');
-  const errors: Error[] = [];
-  page.on('pageerror', error => errors.push(error));
 
   await page.goto('/?show_normal_login=Y&survey=no');
   await page.getByPlaceholder('Enter Username').fill('mock.cashflow');
@@ -83,6 +93,8 @@ test('production edge logs in with fixtures and opens Cashflow Blotter', async (
   await expect(page.getByText(/Cashflow CN could not be rendered/)).toHaveCount(0);
   await expect(page.getByText('CF-ACCEPT-001', { exact: true })).toBeVisible();
   await expect(page.getByText('CF-ACCEPT-002', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Pending Operator' })).toHaveCount(2);
+  await expect(page.getByRole('button', { name: 'Pending Verification' })).toHaveCount(2);
 
   const gridTheme = page.locator('.ag-grid-ratan .ag-theme-alpine-dark');
   await expect(gridTheme).toHaveCSS('color', 'rgb(255, 255, 255)');
@@ -91,14 +103,45 @@ test('production edge logs in with fixtures and opens Cashflow Blotter', async (
     'rgb(255, 255, 255)',
   );
 
-  const builderButtons = page.getByRole('button', { name: 'Create or Modify' });
-  await expect(builderButtons).toHaveCount(2);
-  await builderButtons.nth(1).click();
-  await expect(page.getByRole('dialog', { name: /View Builder/ })).toBeVisible();
+  const cashflowId = page.getByPlaceholder('Multiple searches separated by commas').first();
+  await cashflowId.fill('M0P56753524');
+  await page.getByRole('button', { name: 'Search', exact: true }).click();
+  const searchedRow = page.getByRole('row', { name: /M0P56753524/ });
+  await expect(searchedRow).toBeVisible();
+  await expect(page.getByText('1/1', { exact: true })).toBeVisible();
+  await expect(page.getByText('CF-ACCEPT-001', { exact: true })).toHaveCount(0);
+
+  await searchedRow.dblclick();
+  const detailsDialog = page.getByRole('dialog', { name: /Cashflow Detail/ });
+  await expect(detailsDialog).toBeVisible();
+  await expect(page.getByText(/Unable to fetch cashflow/)).toHaveCount(0);
+  await expect(detailsDialog.getByText('56753524', { exact: true })).toBeVisible();
+  await expect(detailsDialog.getByText('WAITING', { exact: true })).toBeVisible();
+  await expect(detailsDialog.getByText('Pending Operator', { exact: true })).toBeVisible();
+
+  await page.getByRole('tab', { name: 'Accounting Detail', exact: true }).click();
+  await expect(
+    detailsDialog
+      .getByRole('tabpanel', { name: 'Accounting Detail', exact: true })
+      .getByText('No Rows To Show', { exact: true }),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Close dialog' }).click();
 
-  await page.getByRole('row', { name: /CF-ACCEPT-001/ }).dblclick();
-  await expect(page.getByRole('dialog', { name: /Cashflow Detail/ })).toBeVisible();
-  await expect(page.getByText(/Unable to fetch cashflow/)).toHaveCount(0);
+  let builderButtons = page.getByRole('button', { name: 'Create or Modify' });
+  await expect(builderButtons).toHaveCount(2);
+  await builderButtons.first().click();
+  await expect(page.getByRole('dialog', { name: /Custom Search/ })).toBeVisible();
+  await expect(page.getByText('Pending operator cashflows', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Close dialog' }).click();
+
+  builderButtons = page.getByRole('button', { name: 'Create or Modify' });
+  await builderButtons.nth(1).click();
+  await expect(page.getByRole('dialog', { name: /View Builder/ })).toBeVisible();
+  await expect(page.getByText('Available Fields', { exact: true })).toBeVisible();
+  await expect(page.getByText('Display View', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Close dialog' }).click();
+
+  await expect(page.getByText(/cashflow notification has been interrupted/i)).toHaveCount(0);
   expect(errors).toEqual([]);
+  expect(consoleErrors).toEqual([]);
 });

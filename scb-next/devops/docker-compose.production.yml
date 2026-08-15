@@ -1,13 +1,23 @@
 services:
   mock-bff:
-    image: nginx:1.28.0-alpine3.21
-    command: ["nginx", "-g", "daemon off;", "-c", "/etc/nginx/mock/nginx.conf"]
+    image: node:22-alpine
+    command: ['node', '/opt/scb-next/mock-bff/server.mjs']
     read_only: true
-    tmpfs: [/var/cache/nginx, /var/run, /tmp]
+    tmpfs: [/tmp]
     volumes:
-      - ./mock-bff/nginx.conf:/etc/nginx/mock/nginx.conf:ro
-      - ./mock-bff/fixtures:/etc/nginx/mock/fixtures:ro
+      - ./mock-bff:/opt/scb-next/mock-bff:ro
     security_opt: [no-new-privileges:true]
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:8081/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   scb-next-edge:
     build:
@@ -17,9 +27,11 @@ services:
     environment:
       SERVER_NAME: localhost
       BFF_ORIGIN: http://mock-bff:8081
-    ports: ["9081:8080"]
+    ports: ['${SCB_NEXT_EDGE_PORT:-9081}:8080']
     read_only: true
     tmpfs: [/var/cache/nginx, /var/run, /tmp, /etc/nginx/conf.d]
     security_opt: [no-new-privileges:true]
-    depends_on: [mock-bff]
+    depends_on:
+      mock-bff:
+        condition: service_healthy
     restart: unless-stopped
