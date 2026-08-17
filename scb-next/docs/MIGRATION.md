@@ -99,7 +99,7 @@ active release is deliberately narrower than the full legacy composition.
 | Ratan imports used by Cashflow | `@fm/ratan_container`                 | Cashflow `src/compat/` plus `src/cashflow-ratan/`      | Keep Cashflow self-contained at build time while preserving the consumed Ratan contract.                                 |
 | Shared HTTP service            | `scb/services/single-ui-bff`          | `scb-next/services/single-ui-bff`                      | Preserve routes, payloads, auth headers, schemas, and side effects until a separately accepted backend migration.        |
 | Development API replay         | Legacy/production behavior            | Base `dev/mock-api.ts` and `devops/mock-bff/fixtures/` | Provide deterministic, request-aware, sanitized local behavior.                                                          |
-| Production edge                | Legacy per-origin delivery            | `scb-next/devops/nginx`                                | Serve one host and two same-origin remote paths; proxy `/api/` through `BFF_ORIGIN`.                                     |
+| Production edge                | Legacy per-origin delivery            | `scb-next/devops/vm` and `scb-next/devops/kubernetes`  | Route all browser traffic through one platform edge to independently deployed platform and tenant upstreams.             |
 
 Generated output is never a migration source. Exclude `dist/`, `coverage/`,
 `node_modules/`, `.vite/`, Playwright results, copied lockfiles from child
@@ -115,14 +115,16 @@ Browser
             -> import("mfe_cashflow_blotter/application")
                Cashflow remote (:8015, name mfe_cashflow_blotter)
   -> /api/*
-       -> Base development mock, or production edge -> BFF_ORIGIN
+       -> Base development mock
+       -> production edge -> single-ui-bff for platform APIs
+                          -> Ratan-owned BFF/notification/DA/gateway for /api/ratan/*
 ```
 
-| Origin   | Development URL         | Federation contract                        | Production path      | Owner                                               |
-| -------- | ----------------------- | ------------------------------------------ | -------------------- | --------------------------------------------------- |
-| Base     | `http://127.0.0.1:8001` | consumes `mfe_ratan_container/application` | `/`                  | login, navigation, theme, workspace state, mock API |
-| Ratan    | `http://127.0.0.1:8009` | exposes `./application`; consumes Cashflow | `/remotes/ratan/`    | Ratan provider/router and Cashflow routes           |
-| Cashflow | `http://127.0.0.1:8015` | exposes `./application`                    | `/remotes/cashflow/` | Cashflow screens and business state                 |
+| Origin   | Development URL         | Federation contract                        | Production path                                           | Owner                                               |
+| -------- | ----------------------- | ------------------------------------------ | --------------------------------------------------------- | --------------------------------------------------- |
+| Base     | `http://127.0.0.1:8001` | consumes `mfe_ratan_container/application` | `/`                                                       | login, navigation, theme, workspace state, mock API |
+| Ratan    | `http://127.0.0.1:8009` | exposes `./application`; consumes Cashflow | `/static/ratan/container/` with `/remotes/ratan/` alias   | Ratan provider/router and Cashflow routes           |
+| Cashflow | `http://127.0.0.1:8015` | exposes `./application`                    | `/static/ratan/cashflow/` with `/remotes/cashflow/` alias | Cashflow screens and business state                 |
 
 The three origins share compatible React and ReactDOM 18 singletons. Ratan and
 Cashflow also share React Router because Cashflow consumes Ratan's router
@@ -371,9 +373,9 @@ Run focused tests first, then verify in dependency order:
 3. Base tests, Storybook where affected, and build;
 4. architecture and dependency-isolation tests;
 5. integrated development Playwright and Live Browser;
-6. production-edge build, routing, Playwright, and Live Browser when the
-   release uses that path;
-7. real-BFF acceptance for production certification.
+6. VM edge render/routing and rollback checks for the current production path;
+7. Minikube workload, ingress, routing, policy-capable CNI, Playwright, and Live Browser checks for the Kubernetes proof;
+8. real platform and tenant backend acceptance for production certification.
 
 Use [VERIFICATION_GUIDE.md](VERIFICATION_GUIDE.md) for exact commands and
 evidence. A downstream build failure blocks its consumers even if the Base
@@ -392,8 +394,8 @@ Inspect generated host and remote artifacts for:
 - one compatible React share scope;
 - no host-relative remote chunk URLs;
 - `no-store` on federation manifests and immutable caching on hashed assets;
-- `/api/` requests routed through the Base mock in development or edge proxy
-  in production.
+- `/api/` requests routed through the Base mock in development or the owning
+  platform/tenant upstream through the edge in production.
 
 Completion criterion: the browser network graph contains the expected host,
 two remote manifests, their chunks, and allowed API origin only.
@@ -410,8 +412,9 @@ safe.
 
 ### Phase 10: cut over and monitor
 
-Promote the Base host, Ratan remote, Cashflow remote, edge configuration, and
-accepted commit SHA as one release unit. Route a controlled cohort first.
+Record independent Base, Ratan, Cashflow, platform BFF, tenant backend, and edge
+artifact identities. Promote only the selected compatible units, then route a
+controlled cohort through the platform edge first.
 Monitor login failures, remote/chunk load failures, React share-scope errors,
 API status and latency, SockJS/STOMP reconnects, uncaught browser errors, blank
 workspaces, and user workflow errors before increasing traffic.
@@ -421,15 +424,17 @@ the recorded rollback route remains available.
 
 ## Configuration contracts
 
-| Variable                   | Phase            | Contract                                                                             |
-| -------------------------- | ---------------- | ------------------------------------------------------------------------------------ |
-| `VITE_RATAN_REMOTE_URL`    | Base build/dev   | full Ratan `remoteEntry.js` URL; local default is port `8009`                        |
-| `VITE_CASHFLOW_REMOTE_URL` | Ratan build/dev  | full Cashflow `remoteEntry.js` URL; local default is port `8015`                     |
-| `VITE_PUBLIC_BASE`         | remote build     | remote asset base; production uses `/remotes/ratan/` or `/remotes/cashflow/`         |
-| `SCB_NEXT_EDGE_ORIGIN`     | production build | public origin embedded in both remote URLs; local default is `http://127.0.0.1:9081` |
-| `SCB_NEXT_EDGE_PORT`       | local production | published edge port; defaults to `9081` and derives the origin when it is unset      |
-| `BFF_ORIGIN`               | edge runtime     | upstream for `/api/`; changing it does not rebuild frontend artifacts                |
-| `IMAGE_TAG`                | container build  | optional edge image tag                                                              |
+| Variable                   | Phase            | Contract                                                                                                     |
+| -------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| `VITE_RATAN_REMOTE_URL`    | Base build/dev   | full Ratan `remoteEntry.js` URL; local default is port `8009`                                                |
+| `VITE_CASHFLOW_REMOTE_URL` | Ratan build/dev  | full Cashflow `remoteEntry.js` URL; local default is port `8015`                                             |
+| `VITE_PUBLIC_BASE`         | remote build     | remote asset base; canonical production paths are below `/static/ratan/` and `/remotes/*` remains compatible |
+| `SCB_NEXT_EDGE_ORIGIN`     | production build | public origin embedded in both remote URLs; local default is `http://127.0.0.1:9081`                         |
+| `SCB_NEXT_EDGE_PORT`       | local production | published edge port; defaults to `9081` and derives the origin when it is unset                              |
+| `BFF_ORIGIN`               | local Compose    | fixture-backed upstream for the legacy local acceptance topology only                                        |
+| `SINGLE_UI_BFF_UPSTREAM`   | VM edge runtime  | owning upstream for platform `/api/*` routes                                                                 |
+| `RATAN_*_UPSTREAM`         | VM edge runtime  | independently configured Ratan BFF, notification, data-ambassador, and gateway owners                        |
+| `IMAGE_TAG`                | container build  | optional edge image tag                                                                                      |
 
 Build production artifacts from the leaf toward the host. The authoritative
 script is `devops/scripts/build-production.sh`, whose order is Cashflow,
@@ -455,13 +460,13 @@ Ratan, then Base.
 
 ## Current known state
 
-As of 15 August 2026:
+As of 17 August 2026:
 
 - the development three-origin journey is operational through Base port `8001`;
 - the Base development mock replays login, metadata, metrics, initial grid,
   `M0P56753524` search/details, accounting, holiday, custom filter/view, and
   SockJS notification startup;
-- `scb-next` root architecture/mock tests pass with 21 tests;
+- `scb-next` root architecture, mock, deployment, and adapter tests pass with 36 tests;
 - the complete leaf-to-host production build passes when dependency isolation
   resolves Base to MUI 9 and both remotes to MUI 5;
 - a clean `scb-next` install remains blocked without corporate-registry access
@@ -469,8 +474,13 @@ As of 15 August 2026:
   as a workaround;
 - strict Base typecheck still exposes pre-existing Jest setup, bootstrap prop,
   and Vitest setup errors;
-- the production edge and request-aware mock pass the complete captured
-  Playwright and Live Browser journey, including WebSocket notification startup;
+- the Minikube proof deploys six Ready workloads and nine `ClusterIP` Services;
+- edge and ingress routing, canonical and compatibility remotes, cache headers,
+  security contexts, independent Ratan rollout, and WebSocket notification startup pass;
+- the latest strict Playwright run completed the Cashflow journey but failed on
+  an unavailable external `axess.sc.net` profile-photo request;
+- the default Minikube bridge CNI stores but does not enforce NetworkPolicy, so
+  runtime denial remains blocked until rerun with a policy-capable CNI;
 - inherited React, Ant Design, Apollo, Redux serializability, and AG Grid
   deprecation warnings remain migration debt. Classify warnings explicitly;
   never hide new runtime failures among them.
@@ -499,6 +509,9 @@ Build results for Cashflow, Ratan, Base:
 Development Playwright result:
 Development Live Browser evidence:
 Production-edge result:
+VM edge and rollback result:
+Kubernetes workload/route result:
+NetworkPolicy CNI and runtime result:
 Real-BFF result:
 Known warnings/debt:
 Blocked gates and exact cause:
@@ -511,10 +524,11 @@ with the failing command and cause.
 
 ## Cutover and rollback
 
-Before cutover, record both legacy and target revisions, the deployed remote
-URLs, `BFF_ORIGIN`, artifact digests, lockfile, test evidence, browser evidence,
-and rollback owner. Mock-backed acceptance certifies frontend composition only;
-real-BFF acceptance is mandatory for production certification.
+Before cutover, record both legacy and target revisions, canonical and alias
+remote URLs, every platform and tenant upstream, artifact digests, lockfile,
+test evidence, browser evidence, and rollback owner. Mock-backed acceptance
+certifies frontend composition only; real backend acceptance is mandatory for
+production certification.
 
 Rollback is a routing operation:
 

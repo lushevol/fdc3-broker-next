@@ -5,11 +5,16 @@
 > checkout. Re-run every applicable gate in
 > [VERIFICATION_GUIDE.md](VERIFICATION_GUIDE.md). The current dependency-install
 > state and production Nginx mock capabilities differ from this snapshot.
+>
+> The topology below is the legacy local Docker Compose acceptance topology. It
+> is not the current VM/Ansible production topology and is not the Kubernetes
+> proof topology. Current production uses independently deployable platform and
+> tenant units behind the platform-owned edge.
 
 Date: 2026-08-13
 Edge URL: `http://127.0.0.1:9081`
 
-## Production topology
+## Historical local acceptance topology
 
 The deployment follows the MVP Real World DevOps rules:
 
@@ -20,7 +25,7 @@ The deployment follows the MVP Real World DevOps rules:
 - health check, security headers, read-only filesystem, tmpfs runtime paths, and `no-new-privileges`;
 - same-origin remote paths (`/remotes/ratan/` and `/remotes/cashflow/`) avoid CORS and asset-name collisions.
 
-For acceptance, the BFF upstream is a second Nginx container serving deterministic login, field-schema, and GraphQL fixtures. Replace `BFF_ORIGIN` with the real service origin in deployment; no frontend rebuild is needed.
+For this historical acceptance run, the BFF upstream was a second Nginx container serving deterministic login, field-schema, and GraphQL fixtures. Current VM and Kubernetes routing uses separate platform and Ratan upstreams; do not use this `BFF_ORIGIN` topology as a production procedure.
 
 ## Commands
 
@@ -69,3 +74,7 @@ Live Browser also verified a 1024×768 responsive breakpoint with no document-le
 - Repository-wide TypeScript checking still reports pre-existing Jest-global/setup and legacy prop/type debt. Vite production compilation succeeds, but strict typecheck remediation should remain a separate compatibility stage rather than being conflated with this federation/deployment cutover.
 
 These warnings are documented rather than hidden by the fixture layer. The HTTP screen flows, styling, permissions, and two-layer federation are operational.
+
+## Current verification note
+
+The 2026-08-17 Minikube rerun verified workload readiness, edge and ingress routing, federation caching, WebSocket upgrade, security contexts, and independent Ratan rollout. The strict Playwright gate failed because the browser could not load the external corporate profile-photo URL, and runtime NetworkPolicy denial could not be proven with Minikube's bridge CNI. See [the current evidence record](../devops/kubernetes/MINIKUBE_EVIDENCE.md); neither limitation is closed by this older report.

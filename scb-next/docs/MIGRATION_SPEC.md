@@ -19,9 +19,9 @@ The accepted target consists of:
 - Base as the browser host;
 - Ratan as the first federated remote and Cashflow route owner;
 - Cashflow as the second federated remote and business-screen owner;
-- the unchanged BFF HTTP contract behind same-origin `/api/` routing;
+- unchanged platform and tenant backend contracts behind owner-specific same-origin `/api/` routing;
 - deterministic development replay for frontend acceptance;
-- an Nginx edge that packages the host and both remotes as one release unit.
+- one platform-owned Nginx edge routing to independently deployed platform and tenant release units.
 
 ## Non-goals
 
@@ -65,8 +65,9 @@ migration history.
 7. UI libraries MUST remain local to their origin unless a separately tested
    federation contract changes this rule.
 8. Development ports MUST be strict: `8001`, `8009`, and `8015`.
-9. Production remote paths MUST be `/remotes/ratan/` and
-   `/remotes/cashflow/`, with asset URLs derived from `VITE_PUBLIC_BASE`.
+9. Canonical production remote paths MUST be `/static/ratan/container/` and
+   `/static/ratan/cashflow/`. `/remotes/ratan/` and `/remotes/cashflow/` MUST
+   remain compatibility aliases until a separately coordinated removal.
 10. The active Cashflow path MUST NOT require Single-SPA, SystemJS, import-map
     overrides, Webpack runtime globals, or source files under `scb/`.
 
@@ -164,6 +165,11 @@ preserve:
 - SockJS/STOMP endpoint and message semantics;
 - exports, maker/checker actions, and other side effects;
 - timeout, retry, loading, empty, and error behavior visible to users.
+
+The platform edge MUST route non-tenant platform APIs to `single-ui-bff` and
+MUST route specific and fallback `/api/ratan/*` paths to their declared
+tenant-owned upstreams using most-specific-path precedence. All browser traffic
+MUST enter through the edge; application upstreams MUST remain private.
 
 The target BFF MUST compile and pass its tests in a provisioned corporate
 environment. Fixture-backed acceptance MUST be labeled frontend-only.
@@ -275,15 +281,22 @@ acceptance.
 ## Deployment invariants
 
 - Production builds MUST execute Cashflow, then Ratan, then Base.
-- The three artifacts and edge configuration MUST be promoted together with
-  the accepted commit SHA.
+- Edge, Base, `single-ui-bff`, Ratan container, Cashflow, and tenant backend
+  artifacts MUST have independent immutable identities and rollback targets.
+- A release record MUST identify the compatible set and accepted commit SHA
+  without requiring unrelated units to be rebuilt.
 - `remoteEntry.js` MUST use `Cache-Control: no-store`.
 - Hashed assets SHOULD use immutable caching.
 - The Nginx edge MUST expose `/healthz`, security headers, same-origin remote
-  paths, and configurable `/api/` proxying.
+  paths, canonical and compatibility tenant paths, WebSocket forwarding, and
+  independently configurable platform and tenant API upstreams.
 - Containers MUST use read-only filesystems, required `tmpfs` paths, and
   `no-new-privileges` as specified by the deployment configuration.
-- Production certification MUST use the real BFF and production identity,
+- VM/Ansible MUST remain the production method until a separate infrastructure
+  decision approves Kubernetes or another substrate.
+- A Kubernetes deployment MUST expose only the edge through Ingress, keep all
+  upstream Services `ClusterIP`, and verify NetworkPolicy on an enforcing CNI.
+- Production certification MUST use the real platform and tenant BFFs plus production identity,
   authorization, CSP/CORS, browser/OpenFin, license, and telemetry contracts.
 
 ## Rollback invariants
@@ -294,6 +307,8 @@ acceptance.
   rather than modifying the preserved source baseline.
 - Failed target artifacts and evidence MUST be retained for diagnosis.
 - Generated target artifacts MUST NOT be patched in place.
+- Operators MUST be able to roll back one failed platform or tenant unit
+  without rebuilding or reverting unrelated units.
 - Data, workflow, or schema effects MUST have a separate backward-compatible
   rollback plan.
 

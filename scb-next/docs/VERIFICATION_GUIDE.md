@@ -56,11 +56,12 @@ Required tools and endpoints:
 - Node.js `20.19+` or `22.12+`; Node 22 LTS is preferred for Vite 8;
 - npm with access to the configured corporate registry;
 - Chromium installed for Playwright;
-- Docker and `docker-compose` for the production-edge branch;
+- Docker and Compose for optional local fixture acceptance;
+- Minikube and `kubectl` for the portable Kubernetes proof;
 - JDK 17+, Maven, corporate Artifactory, and service credentials for real-BFF
   certification;
 - development ports `8001`, `8009`, and `8015`;
-- production-edge port `9081`.
+- local Compose edge port `9081` and Minikube edge-forward port `9083`.
 
 Confirm the source and target ownership roots:
 
@@ -121,10 +122,10 @@ npm test -- tests/dev-mock-api.test.ts --run
 npm test
 ```
 
-At the time this guide was written, the root suite contains 21 tests, including
-8 focused development/production-mock tests. Counts may increase. Acceptance depends on
-the current discovered suite passing, not on reproducing those historical
-numbers.
+At the time this guide was updated, the root suite contains 36 tests, including
+deployment architecture and Minikube adapter coverage. Counts may increase.
+Acceptance depends on the current discovered suite passing, not on reproducing
+historical numbers.
 
 The mock test must cover:
 
@@ -325,187 +326,441 @@ Completion criterion: active source and built artifacts have no runtime/build
 dependency on legacy composition or `scb/`, and every historical-only match is
 documented.
 
-## 10. Build the production edge from leaf to host
+## 10. Classify the deployment paths
 
-Stop the development composition first. Then run the authoritative production
-script, which builds Cashflow, Ratan, and Base in that order:
+SCB Next has three distinct deployment paths. Do not combine their evidence:
 
-```bash
-cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
-SCB_NEXT_EDGE_ORIGIN=http://127.0.0.1:9081 npm run build:production
-```
+| Path                | Purpose                                   | Acceptance scope                                |
+| ------------------- | ----------------------------------------- | ----------------------------------------------- |
+| VM/Ansible          | current production method                 | real environment and real-BFF certification     |
+| Kubernetes/Minikube | portable deployment proof                 | frontend, routing, workload controls, and mocks |
+| Docker Compose      | local production-style fixture acceptance | bundled local edge and deterministic mock only  |
 
-When port `9081` is reserved, use one explicit alternative for both the build
-and composition:
-
-```bash
-SCB_NEXT_EDGE_PORT=9082 \
-SCB_NEXT_EDGE_ORIGIN=http://127.0.0.1:9082 \
-npm run serve:production
-```
-
-Start and inspect the edge only after all three builds pass:
-
-```bash
-npm run serve:production
-docker-compose -f devops/docker-compose.production.yml ps
-curl -f -i http://127.0.0.1:9081/healthz
-curl -f -I http://127.0.0.1:9081/remotes/ratan/remoteEntry.js
-curl -f -I http://127.0.0.1:9081/remotes/cashflow/remoteEntry.js
-curl -f http://127.0.0.1:9081/
-```
-
-Verify HTTP 200, `no-store` on federation manifests, immutable caching on
-hashed assets, security headers, same-origin remote paths, a healthy edge,
-read-only filesystems, required `tmpfs`, and `no-new-privileges`.
-
-Completion criterion: all three artifacts build in order and the deployed edge
-serves the expected host, manifests, chunks, headers, and health response.
-
-## 11. Verify production-mock parity
-
-The Base development adapter and production Node mock use the same canonical
-request-aware handler. Production adds a real SockJS WebSocket upgrade path and
-retains JSONP coverage. Verify the complete captured journey through the edge,
-including an empty console-error list.
-
-Run the production acceptance test:
+The Compose commands remain useful for regression diagnosis:
 
 ```bash
 cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
+npm run build:production
+npm run serve:production
 PLAYWRIGHT_BASE_URL=http://127.0.0.1:9081 \
 PLAYWRIGHT_PRODUCTION_EDGE=1 \
 npm run test:e2e
-```
-
-The production scenario must verify login, both federation boundaries, four
-metrics, initial grid, `M0P56753524` search/details, accounting empty state,
-saved custom search, View Builder, styling, and notification startup. The three
-development-only scenarios are expected to be skipped in this mode.
-
-Completion criterion: production Playwright and the section 8 Live Browser
-journey pass with no page error, console error, fallback alert, failed remote,
-or failed notification transport.
-
-## 12. Verify against the real BFF
-
-This gate is mandatory for production certification.
-
-1. Start or deploy the packaged `single-ui-bff` with its required database,
-   identity, discovery, secrets, and downstream services.
-2. Set the edge `BFF_ORIGIN` to the real service origin and recreate the edge;
-   do not rebuild the frontend artifacts.
-3. Repeat the routing/header probes, production Playwright, section 8 Live
-   Browser journey, and all eight drawer routes.
-4. Use an approved test identity with the expected Cashflow entitlements.
-5. Verify real search, filtering, pagination, details, create/audit/export,
-   permission gates, errors, and SockJS/STOMP notifications.
-6. Confirm fixture-only IDs and credentials do not appear in real-environment
-   evidence.
-
-For each drawer route, accept the intended business screen or entitlement gate:
-
-| Route                         | Required surface                                         |
-| ----------------------------- | -------------------------------------------------------- |
-| Cashflow Blotter              | quick/custom search, custom view, metrics, grid, details |
-| Cashflow Open Search          | application or intentional access gate                   |
-| Cashflow Group Management     | search form and responsive results grid                  |
-| Cashflow Dashboard            | region/entity filters, status cards, notifications       |
-| BIC Netting Static Table      | filters, Create, Audit, Export, pagination, grid         |
-| Utilization Static Table      | filters, Create, Audit, Export, results grid             |
-| Cashflow Authorization Limits | permission-aware Create and limits grid                  |
-| Cashflow Splitting Static     | filters, Create, Audit, Export, results grid             |
-
-Completion criterion: the real-BFF journey passes with real identity,
-authorization, API, notification, CSP/CORS, license, and telemetry contracts.
-
-## 13. Diagnose common failures
-
-| Symptom                                       | Likely boundary                                         | First required check                                                |
-| --------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------- |
-| `@mui/icons-material/*` cannot resolve        | flattened Base MUI 9 over remote MUI 5                  | rerun install/isolation gate and inspect workspace-local resolution |
-| invalid hook call or `ReactCurrentDispatcher` | duplicate React share                                   | compare all manifests and React 18 singleton declarations           |
-| remote entry loads but a chunk is 404         | wrong `VITE_PUBLIC_BASE`                                | inspect remote entry and failing chunk URL                          |
-| MUI controls lose accepted styling            | Emotion insertion order or incomplete Base theme facade | compare providers and computed styles at the failing control        |
-| Ratan action selectors stop matching          | CSS namespace drift                                     | verify `MicroWebUI_ratan_container` in source and bundle            |
-| grid is unstyled or transparent               | missing/local skin order                                | inspect bundled Ratan grid CSS and computed grid styles             |
-| `process` or `global` is undefined            | untranslated compile-time global                        | inspect Cashflow Vite aliases and `define` values                   |
-| browser requests Node `net` from STOMP        | wrong STOMP entry                                       | verify the browser-compatible alias                                 |
-| JSONP `Unexpected token ':'`                  | generic JSON handled a SockJS script request            | inspect JSONP route order and executable callback body              |
-| drawer is blank after stale login             | fixture identity absent from current state              | log out and complete the documented login flow                      |
-| custom lists are empty                        | wrong endpoint shape or builder `type`                  | inspect request query and array fixture                             |
-| details show fallback                         | list/detail IDs or operation matching diverge           | compare search request, detail request, and fixture IDs             |
-| host builds but integrated screen fails       | provider/federation/CSS boundary                        | return to leaf builds and development browser evidence              |
-
-Completion criterion: each failure is traced to an owning boundary and fixed at
-the source or configuration layer; generated `dist/` files are never patched.
-
-## 14. Retain a complete evidence manifest
-
-Return this exact record with the migration handoff:
-
-```text
-Verifier and UTC date:
-Environment (OS, Node, npm, registry, browser):
-Legacy source SHA:
-Target starting SHA:
-Target ending SHA:
-Pre-existing worktree changes:
-Scope migrated:
-Files intentionally copied:
-Files intentionally translated:
-Compatibility capabilities added:
-External contracts preserved:
-Dependencies changed (or "none"):
-Mock contracts added/changed:
-Install result:
-npm ls result:
-Focused tests and results:
-Workspace tests and results:
-Dependency isolation result:
-Build results for Cashflow, Ratan, Base:
-Development Playwright result:
-Development Live Browser evidence:
-Production-edge smoke result:
-Production-mock full-parity result:
-Real-BFF result:
-Artifact and remote-entry inspection:
-Console and failed-network evidence:
-Screenshots/traces/log locations:
-Known warnings/debt:
-Blocked gates and exact cause:
-Rollback revision, owner, and routing action:
-Commits created:
-```
-
-A field must contain evidence, `not applicable` with a reason, or `blocked`
-with the command and cause. Keep command logs, edge status and headers,
-Playwright output/traces, desktop and `1024x768` screenshots, browser console,
-failed network export, artifact digests, remote URLs, `BFF_ORIGIN`, and the
-accepted lockfile.
-
-Completion criterion: another verifier can reproduce every claim from the
-candidate SHA and retained evidence without relying on oral context.
-
-## 15. Stop and clean up
-
-```bash
-cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
 npm run stop:production
 ```
 
-Stop the development process separately with `Ctrl+C`. Confirm ports `8001`,
-`8009`, `8015`, and `9081` are no longer served by the candidate processes.
+Completion criterion: the evidence labels this path `local fixture-backed
+acceptance`; it never describes the bundled Compose image as production.
+
+## 11. Manually verify the VM edge contract
+
+VM/Ansible is the supported production method. Base, `single-ui-bff`, Ratan
+container, Cashflow, tenant backends, and the platform edge are independently
+versioned release units.
+
+Create a local environment file without committing it:
+
+```bash
+cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
+test -f devops/vm/scb-next.env || \
+  cp devops/vm/scb-next.env.example devops/vm/scb-next.env
+# Replace every *.internal example with the approved environment address.
+SCB_NEXT_VM_ENV_FILE=devops/vm/scb-next.env npm run vm:render-nginx
+! rg -n '\$\{' devops/vm/rendered/scb-next.conf
+```
+
+The rendered config must contain no unresolved `${...}` value, credential,
+private key, or secret. Record the independent image/artifact version, source
+SHA, build ID, and digest for every unit. After Ansible stages the rendered
+file and `proxy-headers.conf` in their target locations, run the estate's
+approved `nginx -t` command before reload.
+
+After Ansible deploys the candidate, run:
+
+```bash
+export SCB_NEXT_EDGE_ORIGIN="https://<approved-host>"
+npm run vm:verify
+curl -f -i "$SCB_NEXT_EDGE_ORIGIN/api/healthz"
+curl -f -i "$SCB_NEXT_EDGE_ORIGIN/api/ratan/healthz"
+curl -f -I "$SCB_NEXT_EDGE_ORIGIN/static/ratan/container/remoteEntry.js"
+curl -f -I "$SCB_NEXT_EDGE_ORIGIN/static/ratan/cashflow/remoteEntry.js"
+curl -f -I "$SCB_NEXT_EDGE_ORIGIN/remotes/ratan/remoteEntry.js"
+curl -f -I "$SCB_NEXT_EDGE_ORIGIN/remotes/cashflow/remoteEntry.js"
+```
+
+Expect HTTP 200, `Cache-Control: no-store` on each federation manifest, the
+approved security headers, and no direct public address for an upstream. Use an
+approved WebSocket client to verify the real notification endpoint returns 101
+and stays connected. Run the section 17 browser journey with an approved user.
+
+Rollback rehearsal must restore only the selected failed unit by its recorded
+version. If the route config fails, restore the previous rendered edge config
+before reloading Nginx. Rerun health, both alias remotes, platform login, Ratan
+API, WebSocket, and Cashflow checks after rollback.
+
+Completion criterion: VM routing and browser gates pass against real services,
+and independent rollback commands plus owners are recorded.
+
+## 12. Prepare an isolated Minikube verification environment
+
+Required commands:
+
+```bash
+docker version
+minikube version
+kubectl version --client
+node --version
+npm --version
+npx playwright --version
+```
+
+When using workspace-local binaries or an isolated profile, configure every
+terminal consistently before running an npm script:
+
+```bash
+cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
+export PATH="/tmp:$PATH" # only when minikube/kubectl are installed in /tmp
+export MINIKUBE_HOME=/tmp/scb-next-minikube-home
+export KUBECONFIG=/tmp/scb-next-kubeconfig
+export SCB_NEXT_MINIKUBE_PROFILE=scb-next
+export SCB_NEXT_KUBECTL_CONTEXT=scb-next
+export SCB_NEXT_MINIKUBE_MEMORY=3500
+```
+
+Run the static gates before creating workloads:
+
+```bash
+npm test
+kubectl kustomize devops/kubernetes/base > /tmp/scb-next-base.yaml
+kubectl kustomize devops/kubernetes/overlays/minikube > /tmp/scb-next-minikube.yaml
+find devops/vm/scripts devops/kubernetes/scripts \
+  -type f -name '*.sh' -exec sh -n {} +
+cd ..
+openspec validate separate-vm-and-k8s-scb-next-delivery --strict
+cd scb-next
+```
+
+Completion criterion: the complete SCB Next test suite passes, both manifests
+render, shell validation is silent, and OpenSpec validation is strict-green.
+
+## 13. Build and deploy the Minikube proof
+
+Run each lifecycle stage separately so its output and exit code are retained:
+
+```bash
+npm run k8s:minikube:start
+npm run k8s:minikube:build
+npm run k8s:minikube:deploy
+```
+
+The build must compile Cashflow, Ratan, then Base; build five images; and load
+all five into the selected profile. Existing large-chunk or legacy framework
+warnings must be recorded, but a compilation error is a failed gate.
+
+Inspect the result:
+
+```bash
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube get deployments,pods,services,ingress,networkpolicies,pdb -o wide
+```
+
+Expected proof inventory:
+
+- six Ready Deployments with zero unexpected restarts;
+- nine Services, all type `ClusterIP`;
+- one Ingress whose only application backend is `scb-next-edge`;
+- four NetworkPolicy objects and one edge PodDisruptionBudget.
+
+The constrained Minikube overlay uses one replica per Deployment. Production
+availability is verified from the base manifest and must be retested on the
+production substrate; one local edge replica cannot demonstrate failover.
+
+Completion criterion: all rollouts complete and inventory matches without a
+`NodePort`, `LoadBalancer`, pending pod, or crash loop.
+
+## 14. Verify ingress, edge routes, caching, and WebSocket
+
+Run the automated route and browser command first:
+
+```bash
+npm run k8s:minikube:verify
+```
+
+It port-forwards the edge to `http://127.0.0.1:9083`, checks platform and tenant
+routes, asserts federation cache headers, and runs Playwright. Preserve the
+full output even when the browser portion fails.
+
+For manual edge probes, keep this running in terminal A:
+
+```bash
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube port-forward service/scb-next-edge 9084:8080
+```
+
+Run in terminal B:
+
+```bash
+curl -f -i http://127.0.0.1:9084/healthz
+curl -f -i http://127.0.0.1:9084/
+curl -f -i http://127.0.0.1:9084/api/healthz
+curl -f -i http://127.0.0.1:9084/api/ratan/bff/healthz
+curl -f -i http://127.0.0.1:9084/api/ratan/notification/healthz
+curl -f -i http://127.0.0.1:9084/api/ratan/da/healthz
+curl -f -i http://127.0.0.1:9084/api/ratan/healthz
+curl -f -I http://127.0.0.1:9084/static/ratan/container/remoteEntry.js
+curl -f -I http://127.0.0.1:9084/static/ratan/cashflow/remoteEntry.js
+curl -f -I http://127.0.0.1:9084/remotes/ratan/remoteEntry.js
+curl -f -I http://127.0.0.1:9084/remotes/cashflow/remoteEntry.js
+```
+
+All must return 200. Federation manifests must include `Cache-Control:
+no-store` plus the edge security headers. Because the Minikube tenant routes
+share one deterministic mock Deployment, runtime responses do not prove real
+backend ownership; the architecture tests prove the Nginx upstream mapping.
+
+Verify the actual SockJS path, not a made-up `/socket/healthz` route:
+
+```bash
+curl --http1.1 -i --max-time 3 \
+  -H 'Connection: Upgrade' \
+  -H 'Upgrade: websocket' \
+  -H 'Sec-WebSocket-Version: 13' \
+  -H 'Sec-WebSocket-Key: SGVsbG9Xb3JsZDEyMzQ1Ng==' \
+  http://127.0.0.1:9084/api/ratan/notification/subscriptions/733/manual/websocket
+```
+
+Expect `101 Switching Protocols` and a STOMP `CONNECTED` frame. Curl timing out
+after the response is expected because the upgraded connection remains open.
+
+To exercise the Ingress without `minikube tunnel`, keep this running in a third
+terminal:
+
+```bash
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n ingress-nginx port-forward service/ingress-nginx-controller 9085:80
+```
+
+Then run:
+
+```bash
+curl -f -i http://127.0.0.1:9085/api/ratan/healthz
+curl -f -I http://127.0.0.1:9085/remotes/ratan/remoteEntry.js
+```
+
+Do not use the ingress controller's own `/healthz` as evidence for the
+application edge.
+
+Completion criterion: ingress and edge paths return the expected owners,
+headers, manifests, and WebSocket upgrade.
+
+## 15. Verify workload security and release independence
+
+Inspect enforceable pod fields:
+
+```bash
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube get deploy -o yaml
+```
+
+For every Deployment verify `runAsNonRoot: true`, `readOnlyRootFilesystem:
+true`, `allowPrivilegeEscalation: false`, dropped `ALL` capabilities,
+`RuntimeDefault` seccomp, `automountServiceAccountToken: false`, readiness and
+liveness probes, and resource requests/limits.
+
+Record pod UIDs, restart only Ratan, and record them again:
+
+```bash
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube get pods -o wide
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube rollout restart deployment/ratan-container
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube rollout status deployment/ratan-container --timeout=180s
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube get pods -o wide
+```
+
+Only the Ratan container pod identity may change. Probe its canonical remote
+again after rollout.
+
+Completion criterion: security fields are present and a tenant rollout does
+not replace platform, edge, Cashflow, or BFF pods.
+
+## 16. Verify NetworkPolicy only with an enforcing CNI
+
+First identify the CNI:
+
+```bash
+minikube -p "$SCB_NEXT_MINIKUBE_PROFILE" ssh -- \
+  'ls -1 /etc/cni/net.d && cat /etc/cni/net.d/*'
+```
+
+If the result is only the basic Minikube bridge plugin, mark runtime
+NetworkPolicy enforcement `blocked`; Kubernetes stores the objects but traffic
+is not denied. Do not report a static manifest pass as runtime isolation.
+
+For a full local policy check, create a separate profile with Calico or use the
+intended enterprise CNI. A separate profile avoids changing the evidence from
+the basic proof:
+
+```bash
+export SCB_NEXT_MINIKUBE_PROFILE=scb-next-policy
+export SCB_NEXT_KUBECTL_CONTEXT=scb-next-policy
+minikube start -p "$SCB_NEXT_MINIKUBE_PROFILE" \
+  --driver=docker --cpus=2 --memory=3500 --cni=calico
+minikube -p "$SCB_NEXT_MINIKUBE_PROFILE" addons enable ingress
+npm run k8s:minikube:build
+npm run k8s:minikube:deploy
+```
+
+Then run:
+
+```bash
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube exec deployment/scb-next-edge -- \
+  wget -q -T 5 -O - http://ratan-container:8080/healthz
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube exec deployment/mfe-base -- \
+  wget -q -T 5 -O - http://ratan-container:8080/healthz
+```
+
+The edge request must succeed. The Base request must time out or be denied. If
+both succeed, NetworkPolicy enforcement failed or is unavailable.
+
+Completion criterion: positive and negative connectivity behave as specified
+on the production-selected CNI.
+
+## 17. Complete automated and manual browser acceptance
+
+The production-edge Playwright scenario must complete login, both federation
+boundaries, metrics, grid, `M0P56753524` search/details, accounting empty state,
+Custom Search, View Builder, styling, and notification startup. Three
+development-only scenarios are expected to be skipped in production-edge mode.
+
+Run the section 8 manual journey at both documented viewports. Additionally,
+inspect the avatar/profile-photo request. The current frontend requests the
+corporate `axess.sc.net` profile-photo endpoint. If it is unreachable and
+Chromium reports `ERR_CONNECTION_CLOSED`, the functional Cashflow journey may
+still complete, but the strict console-clean browser gate is `fail` or
+`blocked`, not pass. Retain:
+
+- `test-results/**/test-failed-1.png`;
+- `test-results/**/error-context.md`;
+- `test-results/**/trace.zip`;
+- the exact external URL and browser error;
+- edge and relevant pod logs.
+
+Do not remove the console assertion or ignore the request merely to obtain a
+green run. An approved test environment may supply a reachable corporate
+endpoint or an explicitly accepted fixture for that external dependency.
+
+Completion criterion: the automated test exits zero and the manual journey has
+no unclassified page error, console error, failed same-origin asset/API, or
+notification failure.
+
+## 18. Verify against real platform and tenant backends
+
+This gate is mandatory for production certification and cannot be completed by
+the Minikube mocks.
+
+1. Deploy `single-ui-bff` with its approved identity, database, secrets,
+   discovery, and platform dependencies.
+2. Deploy or configure the Ratan BFF, notification, data-ambassador, and API
+   gateway owners.
+3. Bind each edge upstream independently; do not collapse all `/api/*` traffic
+   into one BFF.
+4. Repeat sections 11, 14, 16, and 17 with an approved test identity.
+5. Verify real search, filtering, paging, details, writes, maker/checker,
+   export, permission gates, errors, and SockJS/STOMP notifications.
+6. Verify enterprise TLS, WAF/trusted proxy behavior, CSP/CORS, secrets,
+   workload identity, image digests/signatures, logs, metrics, traces, alerts,
+   capacity, availability, backup, and rollback.
+7. Confirm fixture credentials and fixture-only IDs are absent from real
+   environment evidence.
+
+Completion criterion: real platform and tenant integrations plus enterprise
+infrastructure gates pass. Fixture evidence alone never closes this section.
+
+## 19. Diagnose deployment-specific failures
+
+| Symptom                                            | Likely boundary                      | First required check                                              |
+| -------------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------- |
+| remote entry loads but chunk is 404                | `VITE_PUBLIC_BASE` or edge rewrite   | inspect remote entry, request URL, and matching edge location     |
+| platform request reaches tenant mock               | Nginx location precedence            | run architecture tests and inspect rendered edge config           |
+| WebSocket returns 502                              | wrong path/upstream or fixture route | use the documented SockJS path and inspect edge/backend logs      |
+| `ERR_CONNECTION_CLOSED` for `axess.sc.net`         | external profile-photo dependency    | inspect Playwright trace; do not classify as an SCB edge route    |
+| NetworkPolicy objects exist but traffic is allowed | non-enforcing CNI                    | inspect `/etc/cni/net.d` and rerun on Calico/Cilium               |
+| direct node IP times out on macOS                  | Docker Desktop Minikube networking   | verify through ingress-controller port-forward or approved tunnel |
+| pod is Ready but edge returns 502                  | Service selector/port or policy      | inspect endpoints, pod logs, and edge upstream name               |
+| only one edge pod is running                       | Minikube replica patch               | inspect production base replicas/PDB; do not claim local HA       |
+| browser requests Node `net` from STOMP             | wrong browser STOMP entry            | verify the browser-compatible alias                               |
+| JSONP syntax error or reconnect alert              | generic mock handled SockJS script   | inspect mock route precedence and executable frame                |
+
+Completion criterion: each failure is owned and classified; generated `dist/`
+or rendered manifests are never patched in place.
+
+## 20. Retain a complete evidence manifest
+
+Return this record with the handoff:
+
+```text
+Verifier and UTC date:
+Environment (OS, Node, npm, browser, Docker, Minikube, Kubernetes, CNI):
+Candidate SHA and pre-existing worktree changes:
+Artifact/image tags and digests:
+Architecture/OpenSpec/render/shell results:
+Cashflow, Ratan, and Base test/build results:
+VM render and nginx -t result:
+VM deployment and rollback result:
+Kubernetes inventory and rollout result:
+Ingress and edge route results:
+Canonical and compatibility cache headers:
+WebSocket 101/STOMP evidence:
+Pod security evidence:
+Independent tenant rollout evidence:
+NetworkPolicy static result:
+NetworkPolicy runtime result and CNI:
+Automated Playwright result:
+Manual desktop and 1024x768 result:
+Console and failed-network evidence:
+Screenshots/traces/log paths:
+Real platform BFF result:
+Real tenant backend result:
+TLS/WAF/secrets/observability/capacity/DR results:
+Known warnings and failed or blocked gates:
+Rollback revision, owner, and routing action:
+```
+
+Every field contains evidence, `not applicable` with a reason, or `blocked`
+with the command, exact cause, owner, and prerequisite. A previous dated report
+does not replace current output.
+
+## 21. Stop and clean up
+
+Stop local Compose and development processes when used:
+
+```bash
+npm run stop:production
+```
+
+Remove only proof-owned Kubernetes resources:
+
+```bash
+npm run k8s:minikube:cleanup
+```
+
+The command preserves the Minikube profile by default. Confirm namespace
+`scb-next-minikube` no longer exists. Delete the profile only when explicitly
+intended and recorded.
 
 ## Final acceptance
 
-Approve the frontend migration candidate only when install/isolation,
-architecture, mock contracts, leaf-to-host tests/builds, development
-Playwright, the complete Live Browser journey, and artifact inspection all pass
-from the current checkout. Approve the production composition only when the
-edge controls pass and the claimed mock scope is labeled accurately. Approve
-the complete system for production only when the private BFF build and real-BFF
-browser journey also pass.
+Approve frontend composition only when build, architecture, route, federation,
+WebSocket, automated browser, and manual browser gates pass from the candidate
+checkout. Approve Kubernetes workload controls only when the selected CNI,
+availability, security, ingress, observability, and rollback gates pass on the
+target substrate. Approve the complete system for production only when VM or
+approved Kubernetes deployment, real platform and tenant backends, enterprise
+infrastructure, and browser acceptance are all green.
 
-Any failed or blocked required gate keeps the corresponding acceptance level
-open. Historical reports and fixture-only results cannot close it.
+Any failed or blocked required gate keeps that acceptance level open.
+Historical reports and fixture-only results cannot close it.
