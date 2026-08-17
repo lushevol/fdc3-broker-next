@@ -7,7 +7,7 @@ spec:
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
-metadata: { name: allow-ingress-to-edge }
+metadata: { name: allow-ingress-to-platform-edge }
 spec:
   podSelector: { matchLabels: { app.kubernetes.io/name: scb-next-edge } }
   policyTypes: [Ingress]
@@ -16,7 +16,7 @@ spec:
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
-metadata: { name: allow-edge-to-upstreams }
+metadata: { name: allow-platform-edge-egress }
 spec:
   podSelector: { matchLabels: { app.kubernetes.io/name: scb-next-edge } }
   policyTypes: [Egress]
@@ -26,7 +26,7 @@ spec:
             matchExpressions:
               - key: app.kubernetes.io/component
                 operator: In
-                values: [platform-ui, platform-api, tenant-ui, tenant-api]
+                values: [platform-ui, platform-api, tenant-edge]
       ports:
         - { protocol: TCP, port: 8080 }
         - { protocol: TCP, port: 8081 }
@@ -38,17 +38,73 @@ spec:
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
-metadata: { name: allow-edge-ingress-to-upstreams }
+metadata: { name: allow-platform-upstreams-from-platform-edge }
 spec:
   podSelector:
     matchExpressions:
       - key: app.kubernetes.io/component
         operator: In
-        values: [platform-ui, platform-api, tenant-ui, tenant-api]
+        values: [platform-ui, platform-api]
   policyTypes: [Ingress]
   ingress:
     - from:
         - podSelector: { matchLabels: { app.kubernetes.io/name: scb-next-edge } }
+      ports:
+        - { protocol: TCP, port: 8080 }
+        - { protocol: TCP, port: 8081 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: allow-ratan-edge-from-platform-edge }
+spec:
+  podSelector: { matchLabels: { app.kubernetes.io/name: ratan-edge } }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector: { matchLabels: { app.kubernetes.io/name: scb-next-edge } }
+      ports: [{ protocol: TCP, port: 8080 }]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: allow-ratan-edge-egress }
+spec:
+  podSelector: { matchLabels: { app.kubernetes.io/name: ratan-edge } }
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values: [tenant-ui, tenant-api]
+              - key: scb-next.io/tenant
+                operator: In
+                values: [ratan]
+      ports:
+        - { protocol: TCP, port: 8080 }
+        - { protocol: TCP, port: 8081 }
+    - to:
+        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: kube-system } }
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: allow-ratan-upstreams-from-ratan-edge }
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values: [tenant-ui, tenant-api]
+      - key: scb-next.io/tenant
+        operator: In
+        values: [ratan]
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector: { matchLabels: { app.kubernetes.io/name: ratan-edge } }
       ports:
         - { protocol: TCP, port: 8080 }
         - { protocol: TCP, port: 8081 }

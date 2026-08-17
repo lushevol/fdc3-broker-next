@@ -99,7 +99,7 @@ active release is deliberately narrower than the full legacy composition.
 | Ratan imports used by Cashflow | `@fm/ratan_container`                 | Cashflow `src/compat/` plus `src/cashflow-ratan/`      | Keep Cashflow self-contained at build time while preserving the consumed Ratan contract.                                 |
 | Shared HTTP service            | `scb/services/single-ui-bff`          | `scb-next/services/single-ui-bff`                      | Preserve routes, payloads, auth headers, schemas, and side effects until a separately accepted backend migration.        |
 | Development API replay         | Legacy/production behavior            | Base `dev/mock-api.ts` and `devops/mock-bff/fixtures/` | Provide deterministic, request-aware, sanitized local behavior.                                                          |
-| Production edge                | Legacy per-origin delivery            | `scb-next/devops/vm` and `scb-next/devops/kubernetes`  | Route all browser traffic through one platform edge to independently deployed platform and tenant upstreams.             |
+| Production edge                | Legacy per-origin delivery            | `scb-next/devops/vm` and `scb-next/devops/kubernetes`  | Route browser traffic through the platform edge; on Kubernetes delegate tenant path families to team-owned tenant edges. |
 
 Generated output is never a migration source. Exclude `dist/`, `coverage/`,
 `node_modules/`, `.vite/`, Playwright results, copied lockfiles from child
@@ -117,7 +117,8 @@ Browser
   -> /api/*
        -> Base development mock
        -> production edge -> single-ui-bff for platform APIs
-                          -> Ratan-owned BFF/notification/DA/gateway for /api/ratan/*
+                          -> Kubernetes ratan-edge
+                               -> Ratan-owned BFF/notification/DA/gateway for /api/ratan/*
 ```
 
 | Origin   | Development URL         | Federation contract                        | Production path                                           | Owner                                               |
@@ -466,7 +467,7 @@ As of 17 August 2026:
 - the Base development mock replays login, metadata, metrics, initial grid,
   `M0P56753524` search/details, accounting, holiday, custom filter/view, and
   SockJS notification startup;
-- `scb-next` root architecture, mock, deployment, and adapter tests pass with 36 tests;
+- `scb-next` root architecture, mock, deployment, and adapter tests pass with 38 tests;
 - the complete leaf-to-host production build passes when dependency isolation
   resolves Base to MUI 9 and both remotes to MUI 5;
 - a clean `scb-next` install remains blocked without corporate-registry access
@@ -474,11 +475,12 @@ As of 17 August 2026:
   as a workaround;
 - strict Base typecheck still exposes pre-existing Jest setup, bootstrap prop,
   and Vitest setup errors;
-- the Minikube proof deploys six Ready workloads and nine `ClusterIP` Services;
-- edge and ingress routing, canonical and compatibility remotes, cache headers,
-  security contexts, independent Ratan rollout, and WebSocket notification startup pass;
-- the latest strict Playwright run completed the Cashflow journey but failed on
-  an unavailable external `axess.sc.net` profile-photo request;
+- the Minikube proof deploys seven Ready workloads and ten `ClusterIP` Services,
+  including independently owned `scb-next-edge` and `ratan-edge` Deployments;
+- two-edge routing, canonical and compatibility remotes, cache headers, security
+  contexts, Ratan-only outage/recovery, and WebSocket notification startup pass;
+- the latest strict production-edge Playwright run completed the captured
+  Cashflow journey with an empty console-error gate;
 - the default Minikube bridge CNI stores but does not enforce NetworkPolicy, so
   runtime denial remains blocked until rerun with a policy-capable CNI;
 - inherited React, Ant Design, Apollo, Redux serializability, and AG Grid

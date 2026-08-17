@@ -5,6 +5,16 @@ spec: { type: ClusterIP, selector: { app.kubernetes.io/name: scb-next-edge }, po
 ---
 apiVersion: v1
 kind: Service
+metadata:
+  name: ratan-edge
+  labels:
+    app.kubernetes.io/name: ratan-edge
+    scb-next.io/owner: ratan
+    scb-next.io/tenant: ratan
+spec: { type: ClusterIP, selector: { app.kubernetes.io/name: ratan-edge }, ports: [{ name: http, port: 8080, targetPort: http }] }
+---
+apiVersion: v1
+kind: Service
 metadata: { name: mfe-base, labels: { app.kubernetes.io/name: mfe-base, scb-next.io/owner: platform } }
 spec: { type: ClusterIP, selector: { app.kubernetes.io/name: mfe-base }, ports: [{ name: http, port: 8080, targetPort: http }] }
 ---

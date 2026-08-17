@@ -9,11 +9,11 @@ NAMESPACE=scb-next-minikube
 
 kubectl --context "$CONTEXT" apply -k "$OVERLAY"
 
-for deployment in scb-next-edge mfe-base single-ui-bff ratan-container cashflow-blotter ratan-backend-mock; do
+for deployment in scb-next-edge ratan-edge mfe-base single-ui-bff ratan-container cashflow-blotter ratan-backend-mock; do
   kubectl --context "$CONTEXT" -n "$NAMESPACE" rollout restart "deployment/$deployment"
 done
 
-for deployment in scb-next-edge mfe-base single-ui-bff ratan-container cashflow-blotter ratan-backend-mock; do
+for deployment in scb-next-edge ratan-edge mfe-base single-ui-bff ratan-container cashflow-blotter ratan-backend-mock; do
   kubectl --context "$CONTEXT" -n "$NAMESPACE" rollout status "deployment/$deployment" --timeout=180s
 done
 

@@ -38,12 +38,7 @@ spec:
           env:
             - { name: MFE_BASE_UPSTREAM, value: "mfe-base:8080" }
             - { name: SINGLE_UI_BFF_UPSTREAM, value: "single-ui-bff:8080" }
-            - { name: RATAN_CONTAINER_UPSTREAM, value: "ratan-container:8080" }
-            - { name: CASHFLOW_BLOTTER_UPSTREAM, value: "cashflow-blotter:8080" }
-            - { name: RATAN_BFF_UPSTREAM, value: "ratan-bff:8080" }
-            - { name: RATAN_NOTIFICATION_UPSTREAM, value: "ratan-notification:8080" }
-            - { name: RATAN_DATA_AMBASSADOR_UPSTREAM, value: "ratan-data-ambassador:8080" }
-            - { name: RATAN_API_GATEWAY_UPSTREAM, value: "ratan-api-gateway:8080" }
+            - { name: RATAN_EDGE_UPSTREAM, value: "ratan-edge:8080" }
           readinessProbe: &edgeProbe
             httpGet: { path: /healthz, port: http }
             periodSeconds: 5
@@ -67,6 +62,82 @@ spec:
       volumes:
         - name: edge-config
           configMap: { name: scb-next-edge-config }
+        - { name: nginx-conf, emptyDir: {} }
+        - { name: nginx-cache, emptyDir: {} }
+        - { name: nginx-run, emptyDir: {} }
+        - { name: tmp, emptyDir: {} }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ratan-edge
+  labels: &ratanEdgeLabels
+    app.kubernetes.io/name: ratan-edge
+    app.kubernetes.io/component: tenant-edge
+    app.kubernetes.io/part-of: scb-next
+    scb-next.io/owner: ratan
+    scb-next.io/tenant: ratan
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ratan-edge
+  template:
+    metadata:
+      labels: *ratanEdgeLabels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: ratan-edge
+      containers:
+        - name: edge
+          image: registry.example.invalid/scb-next/edge:replace-me
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - { name: RATAN_CONTAINER_UPSTREAM, value: "ratan-container:8080" }
+            - { name: CASHFLOW_BLOTTER_UPSTREAM, value: "cashflow-blotter:8080" }
+            - { name: RATAN_BFF_UPSTREAM, value: "ratan-bff:8080" }
+            - { name: RATAN_NOTIFICATION_UPSTREAM, value: "ratan-notification:8080" }
+            - { name: RATAN_DATA_AMBASSADOR_UPSTREAM, value: "ratan-data-ambassador:8080" }
+            - { name: RATAN_API_GATEWAY_UPSTREAM, value: "ratan-api-gateway:8080" }
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 2
+          resources:
+            requests: { cpu: 50m, memory: 32Mi }
+            limits: { cpu: 250m, memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - { name: edge-config, mountPath: /etc/nginx/templates/default.conf.template, subPath: default.conf.template, readOnly: true }
+            - { name: edge-config, mountPath: /etc/nginx/scb-next/proxy-headers.conf, subPath: proxy-headers.conf, readOnly: true }
+            - { name: nginx-conf, mountPath: /etc/nginx/conf.d }
+            - { name: nginx-cache, mountPath: /var/cache/nginx }
+            - { name: nginx-run, mountPath: /var/run }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: edge-config
+          configMap: { name: ratan-edge-config }
         - { name: nginx-conf, emptyDir: {} }
         - { name: nginx-cache, emptyDir: {} }
         - { name: nginx-run, emptyDir: {} }

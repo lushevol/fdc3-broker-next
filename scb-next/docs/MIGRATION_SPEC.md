@@ -21,7 +21,7 @@ The accepted target consists of:
 - Cashflow as the second federated remote and business-screen owner;
 - unchanged platform and tenant backend contracts behind owner-specific same-origin `/api/` routing;
 - deterministic development replay for frontend acceptance;
-- one platform-owned Nginx edge routing to independently deployed platform and tenant release units.
+- one platform-owned Nginx edge delegating tenant path families to independently operated, tenant-owned Nginx edges.
 
 ## Non-goals
 
@@ -166,10 +166,13 @@ preserve:
 - exports, maker/checker actions, and other side effects;
 - timeout, retry, loading, empty, and error behavior visible to users.
 
-The platform edge MUST route non-tenant platform APIs to `single-ui-bff` and
-MUST route specific and fallback `/api/ratan/*` paths to their declared
-tenant-owned upstreams using most-specific-path precedence. All browser traffic
-MUST enter through the edge; application upstreams MUST remain private.
+The Kubernetes platform edge MUST route non-tenant platform APIs to
+`single-ui-bff` and MUST delegate Ratan API and static path families only to a
+Ratan-owned edge. The platform edge MUST NOT contain or directly reach Ratan
+application upstreams. The Ratan edge MUST own specific and fallback
+`/api/ratan/*` routing, static aliases, rewrites, WebSocket behavior, caching,
+health, and rollout. All browser traffic MUST enter through the platform edge;
+application upstreams and tenant edges MUST remain private.
 
 The target BFF MUST compile and pass its tests in a provisioned corporate
 environment. Fixture-backed acceptance MUST be labeled frontend-only.

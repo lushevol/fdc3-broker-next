@@ -24,12 +24,7 @@ data:
 
     upstream mfe_base { server ${MFE_BASE_UPSTREAM}; }
     upstream single_ui_bff { server ${SINGLE_UI_BFF_UPSTREAM}; }
-    upstream ratan_container { server ${RATAN_CONTAINER_UPSTREAM}; }
-    upstream cashflow_blotter { server ${CASHFLOW_BLOTTER_UPSTREAM}; }
-    upstream ratan_bff { server ${RATAN_BFF_UPSTREAM}; }
-    upstream ratan_notification { server ${RATAN_NOTIFICATION_UPSTREAM}; }
-    upstream ratan_data_ambassador { server ${RATAN_DATA_AMBASSADOR_UPSTREAM}; }
-    upstream ratan_api_gateway { server ${RATAN_API_GATEWAY_UPSTREAM}; }
+    upstream ratan_edge { server ${RATAN_EDGE_UPSTREAM}; }
 
     server {
       listen 8080;
@@ -49,55 +44,26 @@ data:
         return 200 '{"status":"ok","component":"scb-next-edge"}\n';
       }
 
-      location ~ ^/(?:static/ratan/container|remotes/ratan)/remoteEntry\.js$ {
-        rewrite ^/(?:static/ratan/container|remotes/ratan)/remoteEntry\.js$ /remoteEntry.js break;
-        proxy_pass http://ratan_container;
-        add_header Cache-Control "no-store, max-age=0" always;
-      }
-      location ^~ /static/ratan/container/ { proxy_pass http://ratan_container/; }
-      location ^~ /remotes/ratan/ { proxy_pass http://ratan_container/; }
-
-      location ~ ^/(?:static/ratan/cashflow|remotes/cashflow)/remoteEntry\.js$ {
-        rewrite ^/(?:static/ratan/cashflow|remotes/cashflow)/remoteEntry\.js$ /remoteEntry.js break;
-        proxy_pass http://cashflow_blotter;
-        add_header Cache-Control "no-store, max-age=0" always;
-      }
-      location ^~ /static/ratan/cashflow/ { proxy_pass http://cashflow_blotter/; }
-      location ^~ /remotes/cashflow/ { proxy_pass http://cashflow_blotter/; }
-
-      location ^~ /api/ratan/bff/ {
-        rewrite ^/api/ratan/bff/(.*)$ /$1 break;
-        include /etc/nginx/scb-next/proxy-headers.conf;
-        proxy_pass http://ratan_bff;
-      }
-      location ^~ /api/ratan/socket/ {
-        rewrite ^/api/ratan/socket/(.*)$ /$1 break;
+      location ^~ /api/ratan/ {
         include /etc/nginx/scb-next/proxy-headers.conf;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
         proxy_read_timeout 3600s;
         proxy_send_timeout 3600s;
         proxy_buffering off;
-        proxy_pass http://ratan_bff;
+        proxy_pass http://ratan_edge;
       }
-      location ^~ /api/ratan/notification/ {
-        rewrite ^/api/ratan/notification/(.*)$ /$1 break;
+      location ^~ /static/ratan/ {
         include /etc/nginx/scb-next/proxy-headers.conf;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection $connection_upgrade;
-        proxy_read_timeout 3600s;
-        proxy_buffering off;
-        proxy_pass http://ratan_notification;
+        proxy_pass http://ratan_edge;
       }
-      location ^~ /api/ratan/da/ {
-        rewrite ^/api/ratan/da/(.*)$ /$1 break;
+      location ^~ /remotes/ratan/ {
         include /etc/nginx/scb-next/proxy-headers.conf;
-        proxy_pass http://ratan_data_ambassador;
+        proxy_pass http://ratan_edge;
       }
-      location ^~ /api/ratan/ {
-        rewrite ^/api/ratan/(.*)$ /$1 break;
+      location ^~ /remotes/cashflow/ {
         include /etc/nginx/scb-next/proxy-headers.conf;
-        proxy_pass http://ratan_api_gateway;
+        proxy_pass http://ratan_edge;
       }
 
       location /api/auth/ {

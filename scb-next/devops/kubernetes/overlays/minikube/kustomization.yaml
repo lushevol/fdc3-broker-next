@@ -9,6 +9,7 @@ patches:
   - path: single-ui-bff-patch.yaml
 replicas:
   - { name: scb-next-edge, count: 1 }
+  - { name: ratan-edge, count: 1 }
   - { name: mfe-base, count: 1 }
   - { name: single-ui-bff, count: 1 }
   - { name: ratan-container, count: 1 }

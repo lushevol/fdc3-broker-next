@@ -1,14 +1,25 @@
 # SCB Next Kubernetes proof
 
-This proof keeps one platform-owned Nginx edge in front of independently deployed platform and Ratan workloads. The infrastructure Ingress has one catch-all backend, and every application Service is `ClusterIP`.
+This proof uses a platform-owned Nginx edge followed by a separately operated Nginx edge for each tenant. The infrastructure Ingress has one catch-all backend, every application Service is `ClusterIP`, and the platform edge cannot route directly to Ratan workloads.
+
+```text
+Ingress
+  -> scb-next-edge (platform)
+       -> mfe-base / single-ui-bff
+       -> ratan-edge (Ratan)
+            -> ratan-container / cashflow-blotter / Ratan backends
+```
+
+The platform owns only the `/api/ratan/*`, `/static/ratan/*`, `/remotes/ratan/*`, and `/remotes/cashflow/*` delegation contract. The Ratan team owns all route precedence, rewrites, WebSocket handling, caching, upstream names, health, rollout, and availability inside that boundary.
 
 ## What this proof establishes
 
 - production builds for Base, Ratan container, and Cashflow;
-- separate edge, platform, and tenant images and Deployments;
-- Ingress to edge to owning upstream routing;
+- separate platform edge, Ratan edge, platform, and tenant Deployments;
+- Ingress to platform edge to tenant edge to owning upstream routing;
 - platform and tenant HTTP paths, federation assets, cache policy, and WebSocket upgrade;
-- non-root workload controls, probes, resources, disruption configuration, and independent rollout;
+- non-root workload controls, probes, resources, disruption configuration, and independent edge rollouts;
+- Ratan edge outage containment and recovery without a platform edge restart;
 - fixture-backed Cashflow browser composition.
 
 It does not certify real corporate identity, authorization, databases, messaging, notification infrastructure, secrets, external tenant services, TLS/WAF, observability, capacity, or disaster recovery.
@@ -30,7 +41,7 @@ The dedicated profile defaults to 2 CPUs and 3072 MB. Override `SCB_NEXT_MINIKUB
 
 ## NetworkPolicy prerequisite
 
-Kubernetes accepts NetworkPolicy objects even when the CNI does not enforce them. Minikube's default bridge CNI does not prove runtime isolation. Use Calico, Cilium, or the intended enterprise CNI and run the positive edge-to-upstream plus negative non-edge-to-upstream checks in the manual guide before claiming NetworkPolicy enforcement.
+Kubernetes accepts NetworkPolicy objects even when the CNI does not enforce them. Minikube's default bridge CNI does not prove runtime isolation. The rendered policies restrict the platform edge to platform workloads and tenant edges, restrict `ratan-edge` to pods carrying `scb-next.io/tenant: ratan`, and allow Ratan workloads to accept traffic only from `ratan-edge`. Use Calico, Cilium, or the intended enterprise CNI and run the positive and negative checks in the manual guide before claiming runtime enforcement.
 
 ## Cleanup
 
@@ -49,7 +60,7 @@ Before creating a production overlay, approve and record:
 - ingress controller, TLS/certificate ownership, DNS, WAF, and trusted proxy behavior;
 - immutable registry paths, signatures, provenance, SBOM, scanning, and workload identity;
 - secret provider/CSI integration and prohibition of secret values in ConfigMaps;
-- Ratan backend placement, service ownership, prefix-rewrite contracts, and external egress;
+- tenant namespace/RBAC model, team ownership, platform-to-tenant path contracts, Ratan backend placement, prefix rewrites, and external egress;
 - network-policy implementation and DNS/telemetry/database/message-broker allowances;
 - logs, metrics, traces, release dimensions, synthetic journeys, alerting, and audit retention;
 - replica counts, requests/limits, autoscaling, zone spread, disruption budgets, and capacity tests;

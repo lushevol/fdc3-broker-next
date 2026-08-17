@@ -8,6 +8,7 @@ type KubernetesResource = {
   apiVersion?: string;
   kind?: string;
   metadata?: { name?: string; labels?: Record<string, string> };
+  data?: Record<string, string>;
   spec?: Record<string, unknown>;
 };
 
@@ -86,6 +87,7 @@ describe('SCB Next Kubernetes topology', () => {
     const services = resourcesOfKind(resources, 'Service');
     const expectedNames = [
       'scb-next-edge',
+      'ratan-edge',
       'mfe-base',
       'single-ui-bff',
       'ratan-container',
@@ -101,6 +103,46 @@ describe('SCB Next Kubernetes topology', () => {
     for (const service of services) {
       expect(service.spec?.type ?? 'ClusterIP').toBe('ClusterIP');
     }
+  });
+
+  it('keeps tenant routing internals exclusively in the Ratan-owned edge', () => {
+    const resources = renderKustomization(kubernetesBase);
+    const configMaps = resourcesOfKind(resources, 'ConfigMap');
+    const platformConfig = configMaps.find(
+      (resource) => resource.metadata?.name === 'scb-next-edge-config',
+    );
+    const ratanConfig = configMaps.find(
+      (resource) => resource.metadata?.name === 'ratan-edge-config',
+    );
+    const platformTemplate = platformConfig?.data?.['default.conf.template'] ?? '';
+    const ratanTemplate = ratanConfig?.data?.['default.conf.template'] ?? '';
+
+    expect(platformConfig?.metadata?.labels?.['scb-next.io/owner']).toBe('platform');
+    expect(ratanConfig?.metadata?.labels).toMatchObject({
+      'scb-next.io/owner': 'ratan',
+      'scb-next.io/tenant': 'ratan',
+    });
+    expect(platformTemplate).toContain('upstream ratan_edge');
+    expect(platformTemplate).toContain('proxy_pass http://ratan_edge');
+    expect(platformTemplate).toContain('proxy_set_header Upgrade $http_upgrade');
+    expect(platformTemplate).toContain('proxy_set_header Connection $connection_upgrade');
+    for (const path of ['/api/ratan/', '/static/ratan/', '/remotes/ratan/', '/remotes/cashflow/']) {
+      expect(platformTemplate).toContain(path);
+    }
+    for (const tenantInternal of [
+      'ratan_container',
+      'cashflow_blotter',
+      'ratan_bff',
+      'ratan_notification',
+      'ratan_data_ambassador',
+      'ratan_api_gateway',
+    ]) {
+      expect(platformTemplate).not.toContain(tenantInternal);
+      expect(ratanTemplate).toContain(tenantInternal);
+    }
+    expect(ratanTemplate).toContain('location ^~ /api/ratan/socket/');
+    expect(ratanTemplate).toContain('proxy_set_header Upgrade $http_upgrade');
+    expect(ratanTemplate).toMatch(/remoteEntry\.js[\s\S]*no-store/);
   });
 
   it('applies health, resources, and restricted security to every workload', () => {
@@ -151,10 +193,30 @@ describe('SCB Next Kubernetes topology', () => {
     expect(rendered).toContain('name: scb-next-edge');
     expect(rendered).not.toMatch(/type: (NodePort|LoadBalancer)/);
     expect(policies.map((resource) => resource.metadata?.name)).toContain('default-deny');
-    expect(policies.map((resource) => resource.metadata?.name)).toContain(
-      'allow-edge-to-upstreams',
+    expect(policies.map((resource) => resource.metadata?.name)).toEqual(
+      expect.arrayContaining([
+        'default-deny',
+        'allow-ingress-to-platform-edge',
+        'allow-platform-edge-egress',
+        'allow-platform-upstreams-from-platform-edge',
+        'allow-ratan-edge-from-platform-edge',
+        'allow-ratan-edge-egress',
+        'allow-ratan-upstreams-from-ratan-edge',
+      ]),
     );
-    expect(budgets.map((resource) => resource.metadata?.name)).toContain('scb-next-edge');
+    expect(budgets.map((resource) => resource.metadata?.name)).toEqual(
+      expect.arrayContaining(['scb-next-edge', 'ratan-edge']),
+    );
+    const platformEgress = policies.find(
+      (resource) => resource.metadata?.name === 'allow-platform-edge-egress',
+    );
+    expect(JSON.stringify(platformEgress?.spec)).not.toMatch(/tenant-(?:ui|api)/);
+    expect(JSON.stringify(platformEgress?.spec)).toContain('tenant-edge');
+    const ratanEgress = policies.find(
+      (resource) => resource.metadata?.name === 'allow-ratan-edge-egress',
+    );
+    expect(JSON.stringify(ratanEgress?.spec)).toContain('scb-next.io/tenant');
+    expect(JSON.stringify(ratanEgress?.spec)).toContain('ratan');
   });
 
   it('renders a Minikube overlay with local non-production images', () => {
@@ -164,7 +226,7 @@ describe('SCB Next Kubernetes topology', () => {
       encoding: 'utf8',
     });
 
-    expect(deployments).toHaveLength(6);
+    expect(deployments).toHaveLength(7);
     expect(rendered).toContain('scb-next-local/');
     expect(rendered).toContain('scb-next.io/evidence-scope: frontend-routing-only');
   });
@@ -185,5 +247,16 @@ describe('SCB Next deployment commands', () => {
 
     expect(existsSync(script)).toBe(true);
     expect(() => execFileSync('sh', ['-n', script])).not.toThrow();
+  });
+
+  it('verifies that a Ratan edge outage is isolated and self-restoring', () => {
+    const script = read(join(deploymentRoot, 'kubernetes/scripts/minikube-verify.sh'));
+
+    expect(script).toContain('deployment/ratan-edge');
+    expect(script).toContain('scale');
+    expect(script).toContain('--replicas=0');
+    expect(script).toContain('platform traffic remains available');
+    expect(script).toContain('tenant traffic is unavailable');
+    expect(script).toContain('tenant traffic recovers');
   });
 });

@@ -436,6 +436,7 @@ find devops/vm/scripts devops/kubernetes/scripts \
   -type f -name '*.sh' -exec sh -n {} +
 cd ..
 openspec validate separate-vm-and-k8s-scb-next-delivery --strict
+openspec validate isolate-tenant-nginx-edges --strict
 cd scb-next
 ```
 
@@ -465,10 +466,12 @@ kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
 
 Expected proof inventory:
 
-- six Ready Deployments with zero unexpected restarts;
-- nine Services, all type `ClusterIP`;
+- seven Ready Deployments with zero unexpected restarts, including separate
+  `scb-next-edge` and `ratan-edge` workloads;
+- ten Services, all type `ClusterIP`;
 - one Ingress whose only application backend is `scb-next-edge`;
-- four NetworkPolicy objects and one edge PodDisruptionBudget.
+- seven NetworkPolicy objects and two independently owned edge
+  PodDisruptionBudgets.
 
 The constrained Minikube overlay uses one replica per Deployment. Production
 availability is verified from the base manifest and must be retested on the
@@ -485,9 +488,13 @@ Run the automated route and browser command first:
 npm run k8s:minikube:verify
 ```
 
-It port-forwards the edge to `http://127.0.0.1:9083`, checks platform and tenant
-routes, asserts federation cache headers, and runs Playwright. Preserve the
-full output even when the browser portion fails.
+It port-forwards the platform edge to `http://127.0.0.1:9083`, checks platform
+and tenant routes through both Nginx tiers, asserts federation cache headers,
+scales `ratan-edge` to zero, proves platform traffic remains available while
+tenant traffic fails, restores the tenant edge, proves recovery, and runs
+Playwright. Its cleanup trap restores the original tenant replica count after
+an interrupted run. Preserve the full output even when the browser portion
+fails.
 
 For manual edge probes, keep this running in terminal A:
 
@@ -516,6 +523,18 @@ All must return 200. Federation manifests must include `Cache-Control:
 no-store` plus the edge security headers. Because the Minikube tenant routes
 share one deterministic mock Deployment, runtime responses do not prove real
 backend ownership; the architecture tests prove the Nginx upstream mapping.
+
+Confirm the tenant edge has no public Ingress and reports its own health by
+keeping this additional port-forward running in terminal C:
+
+```bash
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube port-forward service/ratan-edge 9086:8080
+curl -f -i http://127.0.0.1:9086/healthz
+```
+
+Expect `{"status":"ok","component":"ratan-edge"}`. Do not expose this
+Service as `NodePort` or `LoadBalancer` to simplify verification.
 
 Verify the actual SockJS path, not a made-up `/socket/healthz` route:
 
@@ -549,8 +568,39 @@ curl -f -I http://127.0.0.1:9085/remotes/ratan/remoteEntry.js
 Do not use the ingress controller's own `/healthz` as evidence for the
 application edge.
 
-Completion criterion: ingress and edge paths return the expected owners,
-headers, manifests, and WebSocket upgrade.
+### Manual failure-containment proof
+
+Keep the platform-edge port-forward running and execute:
+
+```bash
+RATAN_REPLICAS=$(kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube get deployment/ratan-edge -o jsonpath='{.spec.replicas}')
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube scale deployment/ratan-edge --replicas=0
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube wait --for=delete pod \
+  -l app.kubernetes.io/name=ratan-edge --timeout=60s
+
+curl -f http://127.0.0.1:9084/healthz
+curl -f http://127.0.0.1:9084/
+curl -f http://127.0.0.1:9084/api/healthz
+! curl -f --max-time 5 http://127.0.0.1:9084/api/ratan/healthz
+! curl -f --max-time 5 http://127.0.0.1:9084/remotes/ratan/remoteEntry.js
+
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube scale deployment/ratan-edge --replicas="$RATAN_REPLICAS"
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube rollout status deployment/ratan-edge --timeout=180s
+curl --retry 30 --retry-delay 1 --retry-all-errors -f \
+  http://127.0.0.1:9084/api/ratan/healthz
+```
+
+Restore `ratan-edge` even if a probe fails. Confirm the `scb-next-edge` pod UID
+did not change during the test.
+
+Completion criterion: ingress and both edge tiers return the expected owners,
+headers, manifests, and WebSocket upgrade; stopping and restoring `ratan-edge`
+affects only Ratan paths and does not restart the platform edge.
 
 ## 15. Verify workload security and release independence
 
@@ -566,21 +616,23 @@ true`, `allowPrivilegeEscalation: false`, dropped `ALL` capabilities,
 `RuntimeDefault` seccomp, `automountServiceAccountToken: false`, readiness and
 liveness probes, and resource requests/limits.
 
-Record pod UIDs, restart only Ratan, and record them again:
+Record pod UIDs, restart only the Ratan edge, and record them again:
 
 ```bash
 kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
   -n scb-next-minikube get pods -o wide
 kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
-  -n scb-next-minikube rollout restart deployment/ratan-container
+  -n scb-next-minikube rollout restart deployment/ratan-edge
 kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
-  -n scb-next-minikube rollout status deployment/ratan-container --timeout=180s
+  -n scb-next-minikube rollout status deployment/ratan-edge --timeout=180s
 kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
   -n scb-next-minikube get pods -o wide
 ```
 
-Only the Ratan container pod identity may change. Probe its canonical remote
-again after rollout.
+Only the Ratan edge pod identity may change. The platform edge, platform
+workloads, Ratan container, Cashflow, and backend pod identities must remain
+unchanged. Probe the Ratan API, canonical remote, and WebSocket again after the
+rollout.
 
 Completion criterion: security fields are present and a tenant rollout does
 not replace platform, edge, Cashflow, or BFF pods.
@@ -617,14 +669,21 @@ Then run:
 ```bash
 kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
   -n scb-next-minikube exec deployment/scb-next-edge -- \
-  wget -q -T 5 -O - http://ratan-container:8080/healthz
+  wget -q -T 5 -O - http://ratan-edge:8080/healthz
 kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
-  -n scb-next-minikube exec deployment/mfe-base -- \
+  -n scb-next-minikube exec deployment/ratan-edge -- \
   wget -q -T 5 -O - http://ratan-container:8080/healthz
+! kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube exec deployment/scb-next-edge -- \
+  wget -q -T 5 -O - http://ratan-container:8080/healthz
+! kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube exec deployment/mfe-base -- \
+  wget -q -T 5 -O - http://ratan-edge:8080/healthz
 ```
 
-The edge request must succeed. The Base request must time out or be denied. If
-both succeed, NetworkPolicy enforcement failed or is unavailable.
+The first two requests must succeed. The direct platform-edge-to-Ratan-workload
+and Base-to-Ratan-edge requests must time out or be denied. If either negative
+request succeeds, NetworkPolicy enforcement failed or the selectors are wrong.
 
 Completion criterion: positive and negative connectivity behave as specified
 on the production-selected CNI.
@@ -682,18 +741,18 @@ infrastructure gates pass. Fixture evidence alone never closes this section.
 
 ## 19. Diagnose deployment-specific failures
 
-| Symptom                                            | Likely boundary                      | First required check                                              |
-| -------------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------- |
-| remote entry loads but chunk is 404                | `VITE_PUBLIC_BASE` or edge rewrite   | inspect remote entry, request URL, and matching edge location     |
-| platform request reaches tenant mock               | Nginx location precedence            | run architecture tests and inspect rendered edge config           |
-| WebSocket returns 502                              | wrong path/upstream or fixture route | use the documented SockJS path and inspect edge/backend logs      |
-| `ERR_CONNECTION_CLOSED` for `axess.sc.net`         | external profile-photo dependency    | inspect Playwright trace; do not classify as an SCB edge route    |
-| NetworkPolicy objects exist but traffic is allowed | non-enforcing CNI                    | inspect `/etc/cni/net.d` and rerun on Calico/Cilium               |
-| direct node IP times out on macOS                  | Docker Desktop Minikube networking   | verify through ingress-controller port-forward or approved tunnel |
-| pod is Ready but edge returns 502                  | Service selector/port or policy      | inspect endpoints, pod logs, and edge upstream name               |
-| only one edge pod is running                       | Minikube replica patch               | inspect production base replicas/PDB; do not claim local HA       |
-| browser requests Node `net` from STOMP             | wrong browser STOMP entry            | verify the browser-compatible alias                               |
-| JSONP syntax error or reconnect alert              | generic mock handled SockJS script   | inspect mock route precedence and executable frame                |
+| Symptom                                            | Likely boundary                     | First required check                                              |
+| -------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------- |
+| remote entry loads but chunk is 404                | `VITE_PUBLIC_BASE` or edge rewrite  | inspect remote entry, request URL, and matching edge location     |
+| platform request reaches tenant mock               | Nginx location precedence           | run architecture tests and inspect rendered edge config           |
+| WebSocket returns 200 or handshake fails           | missing upgrade on either Nginx hop | inspect `Upgrade`/`Connection` at platform and tenant edges       |
+| `ERR_CONNECTION_CLOSED` for `axess.sc.net`         | external profile-photo dependency   | inspect Playwright trace; do not classify as an SCB edge route    |
+| NetworkPolicy objects exist but traffic is allowed | non-enforcing CNI                   | inspect `/etc/cni/net.d` and rerun on Calico/Cilium               |
+| direct node IP times out on macOS                  | Docker Desktop Minikube networking  | verify through ingress-controller port-forward or approved tunnel |
+| pod is Ready but edge returns 502                  | Service selector/port or policy     | inspect endpoints, pod logs, and edge upstream name               |
+| only one pod per edge is running                   | Minikube replica patch              | inspect production base replicas/PDBs; do not claim local HA      |
+| browser requests Node `net` from STOMP             | wrong browser STOMP entry           | verify the browser-compatible alias                               |
+| JSONP syntax error or reconnect alert              | generic mock handled SockJS script  | inspect mock route precedence and executable frame                |
 
 Completion criterion: each failure is owned and classified; generated `dist/`
 or rendered manifests are never patched in place.
@@ -712,11 +771,11 @@ Cashflow, Ratan, and Base test/build results:
 VM render and nginx -t result:
 VM deployment and rollback result:
 Kubernetes inventory and rollout result:
-Ingress and edge route results:
+Ingress and two-edge route results:
 Canonical and compatibility cache headers:
 WebSocket 101/STOMP evidence:
 Pod security evidence:
-Independent tenant rollout evidence:
+Independent tenant-edge rollout and outage/recovery evidence:
 NetworkPolicy static result:
 NetworkPolicy runtime result and CNI:
 Automated Playwright result:
