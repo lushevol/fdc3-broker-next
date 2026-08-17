@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ratan-backend-mock
+  labels: &labels
+    app.kubernetes.io/name: ratan-backend
+    app.kubernetes.io/component: tenant-api
+    app.kubernetes.io/part-of: scb-next
+    scb-next.io/owner: ratan
+    scb-next.io/tenant: ratan
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: ratan-backend }
+  template:
+    metadata: { labels: *labels }
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: mock-bff
+          image: registry.example.invalid/scb-next/ratan-backend:replace-me
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8081 }]
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 2
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { cpu: 250m, memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: tmp, emptyDir: {} }

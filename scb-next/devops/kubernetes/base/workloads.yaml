@@ -1,0 +1,271 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scb-next-edge
+  labels: &edgeLabels
+    app.kubernetes.io/name: scb-next-edge
+    app.kubernetes.io/component: edge
+    app.kubernetes.io/part-of: scb-next
+    scb-next.io/owner: platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: scb-next-edge
+  template:
+    metadata:
+      labels: *edgeLabels
+    spec:
+      automountServiceAccountToken: false
+      securityContext: &podSecurity
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: scb-next-edge
+      containers:
+        - name: edge
+          image: registry.example.invalid/scb-next/edge:replace-me
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - { name: MFE_BASE_UPSTREAM, value: "mfe-base:8080" }
+            - { name: SINGLE_UI_BFF_UPSTREAM, value: "single-ui-bff:8080" }
+            - { name: RATAN_CONTAINER_UPSTREAM, value: "ratan-container:8080" }
+            - { name: CASHFLOW_BLOTTER_UPSTREAM, value: "cashflow-blotter:8080" }
+            - { name: RATAN_BFF_UPSTREAM, value: "ratan-bff:8080" }
+            - { name: RATAN_NOTIFICATION_UPSTREAM, value: "ratan-notification:8080" }
+            - { name: RATAN_DATA_AMBASSADOR_UPSTREAM, value: "ratan-data-ambassador:8080" }
+            - { name: RATAN_API_GATEWAY_UPSTREAM, value: "ratan-api-gateway:8080" }
+          readinessProbe: &edgeProbe
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe: *edgeProbe
+          resources: &edgeResources
+            requests: { cpu: 50m, memory: 32Mi }
+            limits: { cpu: 250m, memory: 128Mi }
+          securityContext: &containerSecurity
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - { name: edge-config, mountPath: /etc/nginx/templates/default.conf.template, subPath: default.conf.template, readOnly: true }
+            - { name: edge-config, mountPath: /etc/nginx/scb-next/proxy-headers.conf, subPath: proxy-headers.conf, readOnly: true }
+            - { name: nginx-conf, mountPath: /etc/nginx/conf.d }
+            - { name: nginx-cache, mountPath: /var/cache/nginx }
+            - { name: nginx-run, mountPath: /var/run }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: edge-config
+          configMap: { name: scb-next-edge-config }
+        - { name: nginx-conf, emptyDir: {} }
+        - { name: nginx-cache, emptyDir: {} }
+        - { name: nginx-run, emptyDir: {} }
+        - { name: tmp, emptyDir: {} }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mfe-base
+  labels: &baseLabels
+    app.kubernetes.io/name: mfe-base
+    app.kubernetes.io/component: platform-ui
+    app.kubernetes.io/part-of: scb-next
+    scb-next.io/owner: platform
+spec:
+  replicas: 2
+  selector: { matchLabels: { app.kubernetes.io/name: mfe-base } }
+  template:
+    metadata: { labels: *baseLabels }
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mfe-base
+          image: registry.example.invalid/scb-next/mfe-base:replace-me
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 2
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { cpu: 200m, memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - { name: nginx-cache, mountPath: /var/cache/nginx }
+            - { name: nginx-run, mountPath: /var/run }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: nginx-cache, emptyDir: {} }
+        - { name: nginx-run, emptyDir: {} }
+        - { name: tmp, emptyDir: {} }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: single-ui-bff
+  labels: &bffLabels
+    app.kubernetes.io/name: single-ui-bff
+    app.kubernetes.io/component: platform-api
+    app.kubernetes.io/part-of: scb-next
+    scb-next.io/owner: platform
+spec:
+  replicas: 2
+  selector: { matchLabels: { app.kubernetes.io/name: single-ui-bff } }
+  template:
+    metadata: { labels: *bffLabels }
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: single-ui-bff
+          image: registry.example.invalid/scb-next/single-ui-bff:replace-me
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: http }
+            periodSeconds: 20
+            timeoutSeconds: 3
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: "1", memory: 1Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: tmp, emptyDir: {} }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ratan-container
+  labels: &ratanLabels
+    app.kubernetes.io/name: ratan-container
+    app.kubernetes.io/component: tenant-ui
+    app.kubernetes.io/part-of: scb-next
+    scb-next.io/tenant: ratan
+    scb-next.io/owner: ratan
+spec:
+  replicas: 2
+  selector: { matchLabels: { app.kubernetes.io/name: ratan-container } }
+  template:
+    metadata: { labels: *ratanLabels }
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ratan-container
+          image: registry.example.invalid/scb-next/ratan-container:replace-me
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 2
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { cpu: 200m, memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - { name: nginx-cache, mountPath: /var/cache/nginx }
+            - { name: nginx-run, mountPath: /var/run }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: nginx-cache, emptyDir: {} }
+        - { name: nginx-run, emptyDir: {} }
+        - { name: tmp, emptyDir: {} }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cashflow-blotter
+  labels: &cashflowLabels
+    app.kubernetes.io/name: cashflow-blotter
+    app.kubernetes.io/component: tenant-ui
+    app.kubernetes.io/part-of: scb-next
+    scb-next.io/tenant: ratan
+    scb-next.io/owner: ratan
+spec:
+  replicas: 2
+  selector: { matchLabels: { app.kubernetes.io/name: cashflow-blotter } }
+  template:
+    metadata: { labels: *cashflowLabels }
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: cashflow-blotter
+          image: registry.example.invalid/scb-next/cashflow-blotter:replace-me
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 2
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { cpu: 200m, memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - { name: nginx-cache, mountPath: /var/cache/nginx }
+            - { name: nginx-run, mountPath: /var/run }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: nginx-cache, emptyDir: {} }
+        - { name: nginx-run, emptyDir: {} }
+        - { name: tmp, emptyDir: {} }

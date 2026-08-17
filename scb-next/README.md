@@ -12,3 +12,9 @@ npm run dev
 ```
 
 The portal host runs at `http://127.0.0.1:8001`, Ratan at `8009`, and Cashflow at `8015`.
+
+## Deployment
+
+Production currently uses independently deployed VM/Ansible release units behind one platform-owned Nginx edge. See the [VM production runbook](devops/vm/README.md). The `serve:production` Docker Compose command is local, fixture-backed production-style acceptance and is not the production deployment topology.
+
+The portable Kubernetes proof is under `devops/kubernetes`. It preserves the same edge route contract and keeps every platform and tenant upstream private; passing Minikube tests does not replace real-BFF production certification.

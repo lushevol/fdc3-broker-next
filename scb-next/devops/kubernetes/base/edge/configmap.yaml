@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scb-next-edge-config
+  labels:
+    app.kubernetes.io/name: scb-next-edge
+    app.kubernetes.io/part-of: scb-next
+    scb-next.io/owner: platform
+data:
+  proxy-headers.conf: |
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Request-ID $request_id;
+    proxy_set_header X-Original-URI $request_uri;
+  default.conf.template: |
+    map $http_upgrade $connection_upgrade {
+      default upgrade;
+      '' close;
+    }
+
+    upstream mfe_base { server ${MFE_BASE_UPSTREAM}; }
+    upstream single_ui_bff { server ${SINGLE_UI_BFF_UPSTREAM}; }
+    upstream ratan_container { server ${RATAN_CONTAINER_UPSTREAM}; }
+    upstream cashflow_blotter { server ${CASHFLOW_BLOTTER_UPSTREAM}; }
+    upstream ratan_bff { server ${RATAN_BFF_UPSTREAM}; }
+    upstream ratan_notification { server ${RATAN_NOTIFICATION_UPSTREAM}; }
+    upstream ratan_data_ambassador { server ${RATAN_DATA_AMBASSADOR_UPSTREAM}; }
+    upstream ratan_api_gateway { server ${RATAN_API_GATEWAY_UPSTREAM}; }
+
+    server {
+      listen 8080;
+      server_name _;
+      server_tokens off;
+      client_max_body_size 1m;
+
+      add_header X-Content-Type-Options nosniff always;
+      add_header X-Frame-Options SAMEORIGIN always;
+      add_header Referrer-Policy same-origin always;
+      add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+
+      location = /healthz {
+        access_log off;
+        default_type application/json;
+        add_header Cache-Control "no-store" always;
+        return 200 '{"status":"ok","component":"scb-next-edge"}\n';
+      }
+
+      location ~ ^/(?:static/ratan/container|remotes/ratan)/remoteEntry\.js$ {
+        rewrite ^/(?:static/ratan/container|remotes/ratan)/remoteEntry\.js$ /remoteEntry.js break;
+        proxy_pass http://ratan_container;
+        add_header Cache-Control "no-store, max-age=0" always;
+      }
+      location ^~ /static/ratan/container/ { proxy_pass http://ratan_container/; }
+      location ^~ /remotes/ratan/ { proxy_pass http://ratan_container/; }
+
+      location ~ ^/(?:static/ratan/cashflow|remotes/cashflow)/remoteEntry\.js$ {
+        rewrite ^/(?:static/ratan/cashflow|remotes/cashflow)/remoteEntry\.js$ /remoteEntry.js break;
+        proxy_pass http://cashflow_blotter;
+        add_header Cache-Control "no-store, max-age=0" always;
+      }
+      location ^~ /static/ratan/cashflow/ { proxy_pass http://cashflow_blotter/; }
+      location ^~ /remotes/cashflow/ { proxy_pass http://cashflow_blotter/; }
+
+      location ^~ /api/ratan/bff/ {
+        rewrite ^/api/ratan/bff/(.*)$ /$1 break;
+        include /etc/nginx/scb-next/proxy-headers.conf;
+        proxy_pass http://ratan_bff;
+      }
+      location ^~ /api/ratan/socket/ {
+        rewrite ^/api/ratan/socket/(.*)$ /$1 break;
+        include /etc/nginx/scb-next/proxy-headers.conf;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        proxy_buffering off;
+        proxy_pass http://ratan_bff;
+      }
+      location ^~ /api/ratan/notification/ {
+        rewrite ^/api/ratan/notification/(.*)$ /$1 break;
+        include /etc/nginx/scb-next/proxy-headers.conf;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 3600s;
+        proxy_buffering off;
+        proxy_pass http://ratan_notification;
+      }
+      location ^~ /api/ratan/da/ {
+        rewrite ^/api/ratan/da/(.*)$ /$1 break;
+        include /etc/nginx/scb-next/proxy-headers.conf;
+        proxy_pass http://ratan_data_ambassador;
+      }
+      location ^~ /api/ratan/ {
+        rewrite ^/api/ratan/(.*)$ /$1 break;
+        include /etc/nginx/scb-next/proxy-headers.conf;
+        proxy_pass http://ratan_api_gateway;
+      }
+
+      location /api/auth/ {
+        rewrite ^/api/auth/(.*)$ /$1 break;
+        include /etc/nginx/scb-next/proxy-headers.conf;
+        proxy_pass http://single_ui_bff;
+      }
+      location /api/analytics/ {
+        rewrite ^/api/analytics/(.*)$ /$1 break;
+        include /etc/nginx/scb-next/proxy-headers.conf;
+        proxy_pass http://single_ui_bff;
+      }
+      location /api/sso/ {
+        rewrite ^/api/sso/(.*)$ /$1 break;
+        include /etc/nginx/scb-next/proxy-headers.conf;
+        proxy_pass http://single_ui_bff;
+      }
+      location /api/ {
+        rewrite ^/api/(.*)$ /$1 break;
+        include /etc/nginx/scb-next/proxy-headers.conf;
+        proxy_pass http://single_ui_bff;
+      }
+      location / {
+        include /etc/nginx/scb-next/proxy-headers.conf;
+        proxy_pass http://mfe_base;
+      }
+    }

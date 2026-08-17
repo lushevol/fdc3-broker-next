@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: scb-next-minikube
+  labels:
+    app.kubernetes.io/part-of: scb-next
+    scb-next.io/environment: minikube

@@ -1,0 +1,12 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: scb-next-edge
+  labels:
+    app.kubernetes.io/name: scb-next-edge
+    scb-next.io/owner: platform
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: scb-next-edge

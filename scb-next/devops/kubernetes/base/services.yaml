@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata: { name: scb-next-edge, labels: { app.kubernetes.io/name: scb-next-edge, scb-next.io/owner: platform } }
+spec: { type: ClusterIP, selector: { app.kubernetes.io/name: scb-next-edge }, ports: [{ name: http, port: 8080, targetPort: http }] }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: mfe-base, labels: { app.kubernetes.io/name: mfe-base, scb-next.io/owner: platform } }
+spec: { type: ClusterIP, selector: { app.kubernetes.io/name: mfe-base }, ports: [{ name: http, port: 8080, targetPort: http }] }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: single-ui-bff, labels: { app.kubernetes.io/name: single-ui-bff, scb-next.io/owner: platform } }
+spec: { type: ClusterIP, selector: { app.kubernetes.io/name: single-ui-bff }, ports: [{ name: http, port: 8080, targetPort: http }] }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: ratan-container, labels: { app.kubernetes.io/name: ratan-container, scb-next.io/owner: ratan } }
+spec: { type: ClusterIP, selector: { app.kubernetes.io/name: ratan-container }, ports: [{ name: http, port: 8080, targetPort: http }] }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: cashflow-blotter, labels: { app.kubernetes.io/name: cashflow-blotter, scb-next.io/owner: ratan } }
+spec: { type: ClusterIP, selector: { app.kubernetes.io/name: cashflow-blotter }, ports: [{ name: http, port: 8080, targetPort: http }] }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: ratan-bff, labels: { app.kubernetes.io/name: ratan-bff, scb-next.io/owner: ratan } }
+spec: { type: ClusterIP, selector: { app.kubernetes.io/name: ratan-backend }, ports: [{ name: http, port: 8080, targetPort: http }] }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: ratan-notification, labels: { app.kubernetes.io/name: ratan-notification, scb-next.io/owner: ratan } }
+spec: { type: ClusterIP, selector: { app.kubernetes.io/name: ratan-backend }, ports: [{ name: http, port: 8080, targetPort: http }] }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: ratan-data-ambassador, labels: { app.kubernetes.io/name: ratan-data-ambassador, scb-next.io/owner: ratan } }
+spec: { type: ClusterIP, selector: { app.kubernetes.io/name: ratan-backend }, ports: [{ name: http, port: 8080, targetPort: http }] }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: ratan-api-gateway, labels: { app.kubernetes.io/name: ratan-api-gateway, scb-next.io/owner: ratan } }
+spec: { type: ClusterIP, selector: { app.kubernetes.io/name: ratan-backend }, ports: [{ name: http, port: 8080, targetPort: http }] }
