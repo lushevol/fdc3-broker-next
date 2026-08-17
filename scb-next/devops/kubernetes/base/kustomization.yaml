@@ -4,6 +4,7 @@ resources:
   - edge/configmap.yaml
   - ratan-edge/configmap.yaml
   - workloads.yaml
+  - portal-services.yaml
   - services.yaml
   - ingress.yaml
   - pdb.yaml

@@ -1,17 +1,22 @@
 # SCB Next VM production deployment
 
-VM/Ansible is the supported SCB Next production deployment method. The platform edge, Base, `single-ui-bff`, Ratan container, and Cashflow blotter are independent release units. Docker Compose remains local fixture-backed acceptance only.
+VM/Ansible is the supported SCB Next production deployment method. The platform edge, Base, three portal domain services, retained `single-ui-bff` fallback, Ratan container, and Cashflow blotter are independent release units. Docker Compose remains local fixture-backed acceptance only.
 
 ## Ownership
 
-| Unit                   | Owner        | Health path        | Public route through edge                                          |
-| ---------------------- | ------------ | ------------------ | ------------------------------------------------------------------ |
-| Nginx edge             | Platform/SRE | `/healthz`         | all routes                                                         |
-| `mfe-base`             | Platform     | `/health`          | `/`                                                                |
-| `single-ui-bff`        | Platform     | `/actuator/health` | `/api/auth/*`, `/api/analytics/*`, `/api/sso/*`, platform `/api/*` |
-| Ratan container        | Ratan        | `/health`          | `/static/ratan/container/*`, `/remotes/ratan/*`                    |
-| Cashflow blotter       | Ratan        | `/health`          | `/static/ratan/cashflow/*`, `/remotes/cashflow/*`                  |
-| Ratan backend services | Ratan        | service-specific   | `/api/ratan/*`                                                     |
+| Unit                             | Owner        | Health path        | Public route through edge                         |
+| -------------------------------- | ------------ | ------------------ | ------------------------------------------------- |
+| Nginx edge                       | Platform/SRE | `/healthz`         | all routes                                        |
+| `mfe-base`                       | Platform     | `/health`          | `/`                                               |
+| `portal-auth-service`            | Platform     | `/actuator/health` | `/api/auth/*` except admin, plus `/api/sso/*`     |
+| `portal-tile-management-service` | Platform     | `/actuator/health` | `/api/auth/v1/fmo/admin/*`                        |
+| `portal-telemetry-service`       | Platform     | `/actuator/health` | `/api/analytics/*`                                |
+| `single-ui-bff`                  | Platform     | `/actuator/health` | unmatched platform `/api/*` fallback              |
+| Ratan container                  | Ratan        | `/health`          | `/static/ratan/container/*`, `/remotes/ratan/*`   |
+| Cashflow blotter                 | Ratan        | `/health`          | `/static/ratan/cashflow/*`, `/remotes/cashflow/*` |
+| Ratan backend services           | Ratan        | service-specific   | `/api/ratan/*`                                    |
+
+The three portal services are new runtime release units. During this additive stage they may use the same approved Spring artifact as `single-ui-bff`, published under independent image coordinates. This proves independent deployment and failure containment; it is not Spring source or database decomposition.
 
 ## Release procedure
 
@@ -42,15 +47,18 @@ After the edge and upstreams are deployed:
 ```bash
 SCB_NEXT_EDGE_ORIGIN=https://<approved-host> npm run vm:verify
 curl -f -i https://<approved-host>/api/healthz
+curl -f -i https://<approved-host>/api/auth/v2/sso/validate
+curl -f -i https://<approved-host>/api/auth/v1/fmo/admin/importmap/active
+curl -f -i https://<approved-host>/api/analytics/v1/fmo/print
 curl -f -i https://<approved-host>/api/ratan/healthz
 curl -f -I https://<approved-host>/static/ratan/container/remoteEntry.js
 curl -f -I https://<approved-host>/static/ratan/cashflow/remoteEntry.js
 ```
 
-Then complete the authenticated API, SockJS/STOMP, browser, security-header, and real-BFF gates in [the manual verification guide](../../docs/VERIFICATION_GUIDE.md). A rendered config and fixture-backed browser pass are pre-deployment evidence only.
+Supply the environment's approved authorization headers or credentials for protected portal probes and verify their response contracts, not only their status codes. Then complete the authenticated API, SockJS/STOMP, browser, security-header, and real-BFF gates in [the manual verification guide](../../docs/VERIFICATION_GUIDE.md). A rendered config and fixture-backed browser pass are pre-deployment evidence only.
 
 ## Rollback
 
-Rollback uses the existing pipeline `rollbackAppVersion` and `rollbackBuildNumber` for only the failed unit. Restore the previous rendered edge configuration before reloading Nginx if routing caused the failure. Verify `/healthz`, both compatibility remotes, platform login, Ratan APIs, socket upgrade, and the Cashflow journey after rollback.
+Rollback uses the existing pipeline `rollbackAppVersion` and `rollbackBuildNumber` for only the failed unit. For route-level rollback, restore the previous Nginx configuration so the affected path family returns to `single-ui-bff`; keep the three new services deployed until fallback traffic is confirmed. Verify `/healthz`, all four platform route families, both compatibility remotes, platform login, Ratan APIs, socket upgrade, and the Cashflow journey after rollback.
 
 The external Ansible templates and VM inventory are owned by the enterprise pipeline repository and are intentionally not copied here. This directory defines their input and verification contract without production hosts or secrets.

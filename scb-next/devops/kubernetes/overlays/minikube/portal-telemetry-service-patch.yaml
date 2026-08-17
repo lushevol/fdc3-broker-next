@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-telemetry-service
+spec:
+  template:
+    spec:
+      containers:
+        - name: portal-telemetry-service
+          env:
+            - { name: PORT, value: '8080' }
+            - { name: SCB_NEXT_MOCK_SERVICE_NAME, value: 'portal-telemetry-service' }
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 2
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { cpu: 250m, memory: 128Mi }

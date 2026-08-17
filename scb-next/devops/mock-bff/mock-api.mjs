@@ -38,10 +38,12 @@ async function readBody(request) {
   return Buffer.concat(chunks).toString('utf8');
 }
 
-export function createMockApiMiddleware() {
+export function createMockApiMiddleware({ serviceName = 'single-ui-bff' } = {}) {
   const notificationSessions = new Map();
+  const responseServiceName = /^[a-z0-9][a-z0-9-]*$/.test(serviceName) ? serviceName : 'unknown';
 
   return async (request, response, next) => {
+    response.setHeader('x-scb-next-mock-service', responseServiceName);
     const requestUrl = new URL(request.url ?? '/', 'http://127.0.0.1');
     const { pathname } = requestUrl;
 

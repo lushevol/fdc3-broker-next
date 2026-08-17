@@ -7,20 +7,61 @@ resources:
   - ratan-backend-mock.yaml
 patches:
   - path: single-ui-bff-patch.yaml
+  - path: portal-auth-service-patch.yaml
+  - path: portal-tile-management-service-patch.yaml
+  - path: portal-telemetry-service-patch.yaml
 replicas:
   - { name: scb-next-edge, count: 1 }
   - { name: ratan-edge, count: 1 }
   - { name: mfe-base, count: 1 }
   - { name: single-ui-bff, count: 1 }
+  - { name: portal-auth-service, count: 1 }
+  - { name: portal-tile-management-service, count: 1 }
+  - { name: portal-telemetry-service, count: 1 }
   - { name: ratan-container, count: 1 }
   - { name: cashflow-blotter, count: 1 }
 images:
   - { name: registry.example.invalid/scb-next/edge, newName: scb-next-local/edge, newTag: dev }
-  - { name: registry.example.invalid/scb-next/mfe-base, newName: scb-next-local/mfe-base, newTag: dev }
-  - { name: registry.example.invalid/scb-next/single-ui-bff, newName: scb-next-local/mock-bff, newTag: dev }
-  - { name: registry.example.invalid/scb-next/ratan-container, newName: scb-next-local/ratan-container, newTag: dev }
-  - { name: registry.example.invalid/scb-next/cashflow-blotter, newName: scb-next-local/cashflow-blotter, newTag: dev }
-  - { name: registry.example.invalid/scb-next/ratan-backend, newName: scb-next-local/mock-bff, newTag: dev }
+  - {
+      name: registry.example.invalid/scb-next/mfe-base,
+      newName: scb-next-local/mfe-base,
+      newTag: dev,
+    }
+  - {
+      name: registry.example.invalid/scb-next/single-ui-bff,
+      newName: scb-next-local/mock-bff,
+      newTag: dev,
+    }
+  - {
+      name: registry.example.invalid/scb-next/portal-auth-service,
+      newName: scb-next-local/mock-bff,
+      newTag: dev,
+    }
+  - {
+      name: registry.example.invalid/scb-next/portal-tile-management-service,
+      newName: scb-next-local/mock-bff,
+      newTag: dev,
+    }
+  - {
+      name: registry.example.invalid/scb-next/portal-telemetry-service,
+      newName: scb-next-local/mock-bff,
+      newTag: dev,
+    }
+  - {
+      name: registry.example.invalid/scb-next/ratan-container,
+      newName: scb-next-local/ratan-container,
+      newTag: dev,
+    }
+  - {
+      name: registry.example.invalid/scb-next/cashflow-blotter,
+      newName: scb-next-local/cashflow-blotter,
+      newTag: dev,
+    }
+  - {
+      name: registry.example.invalid/scb-next/ratan-backend,
+      newName: scb-next-local/mock-bff,
+      newTag: dev,
+    }
 labels:
   - pairs:
       scb-next.io/evidence-scope: frontend-routing-only

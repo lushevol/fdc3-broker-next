@@ -89,17 +89,17 @@ the UI; replace or remove secrets and unrelated personal data.
 `scb-next` began as an isolated copy of the legacy web and service trees. The
 active release is deliberately narrower than the full legacy composition.
 
-| Concern                        | Legacy source                         | Target owner                                           | Required treatment                                                                                                       |
-| ------------------------------ | ------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| Root composition               | `scb/web/mfe-root-config-origin`      | Base Vite host                                         | Replace active import-map and Single-SPA startup; retain legacy root only as migration history.                          |
-| Portal/login/workspaces        | `scb/web/mfe-base-origin`             | `scb-next/web/mfe-base-origin`                         | Preserve login, identity, entitlements, drawer, themes, workspaces, and tab behavior.                                    |
-| Ratan routing/providers        | `scb/web/mfe-ratan-container-origin`  | `scb-next/web/mfe-ratan-container-origin`              | Expose `./application`; preserve Cashflow routing and provider context.                                                  |
-| Cashflow applications          | `scb/web/mfe-cashflow-blotter-origin` | `scb-next/web/mfe-cashflow-blotter-origin`             | Expose `./application`; preserve all eight screens, business logic, styles, GraphQL/REST contracts, and generated types. |
-| Base imports used by remotes   | `@fm/base` runtime/package surface    | Per-remote `src/compat/base.tsx`                       | Implement the smallest typed compatibility capability.                                                                   |
-| Ratan imports used by Cashflow | `@fm/ratan_container`                 | Cashflow `src/compat/` plus `src/cashflow-ratan/`      | Keep Cashflow self-contained at build time while preserving the consumed Ratan contract.                                 |
-| Shared HTTP service            | `scb/services/single-ui-bff`          | `scb-next/services/single-ui-bff`                      | Preserve routes, payloads, auth headers, schemas, and side effects until a separately accepted backend migration.        |
-| Development API replay         | Legacy/production behavior            | Base `dev/mock-api.ts` and `devops/mock-bff/fixtures/` | Provide deterministic, request-aware, sanitized local behavior.                                                          |
-| Production edge                | Legacy per-origin delivery            | `scb-next/devops/vm` and `scb-next/devops/kubernetes`  | Route browser traffic through the platform edge; on Kubernetes delegate tenant path families to team-owned tenant edges. |
+| Concern                        | Legacy source                         | Target owner                                           | Required treatment                                                                                                           |
+| ------------------------------ | ------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| Root composition               | `scb/web/mfe-root-config-origin`      | Base Vite host                                         | Replace active import-map and Single-SPA startup; retain legacy root only as migration history.                              |
+| Portal/login/workspaces        | `scb/web/mfe-base-origin`             | `scb-next/web/mfe-base-origin`                         | Preserve login, identity, entitlements, drawer, themes, workspaces, and tab behavior.                                        |
+| Ratan routing/providers        | `scb/web/mfe-ratan-container-origin`  | `scb-next/web/mfe-ratan-container-origin`              | Expose `./application`; preserve Cashflow routing and provider context.                                                      |
+| Cashflow applications          | `scb/web/mfe-cashflow-blotter-origin` | `scb-next/web/mfe-cashflow-blotter-origin`             | Expose `./application`; preserve all eight screens, business logic, styles, GraphQL/REST contracts, and generated types.     |
+| Base imports used by remotes   | `@fm/base` runtime/package surface    | Per-remote `src/compat/base.tsx`                       | Implement the smallest typed compatibility capability.                                                                       |
+| Ratan imports used by Cashflow | `@fm/ratan_container`                 | Cashflow `src/compat/` plus `src/cashflow-ratan/`      | Keep Cashflow self-contained at build time while preserving the consumed Ratan contract.                                     |
+| Platform HTTP services         | `scb/services/single-ui-bff`          | three portal runtime services plus retained fallback   | Split deployment ownership by stable path family while preserving routes, payloads, auth headers, schemas, and side effects. |
+| Development API replay         | Legacy/production behavior            | Base `dev/mock-api.ts` and `devops/mock-bff/fixtures/` | Provide deterministic, request-aware, sanitized local behavior.                                                              |
+| Production edge                | Legacy per-origin delivery            | `scb-next/devops/vm` and `scb-next/devops/kubernetes`  | Route browser traffic through the platform edge; on Kubernetes delegate tenant path families to team-owned tenant edges.     |
 
 Generated output is never a migration source. Exclude `dist/`, `coverage/`,
 `node_modules/`, `.vite/`, Playwright results, copied lockfiles from child
@@ -116,7 +116,10 @@ Browser
                Cashflow remote (:8015, name mfe_cashflow_blotter)
   -> /api/*
        -> Base development mock
-       -> production edge -> single-ui-bff for platform APIs
+       -> production edge -> portal-auth-service for auth and SSO
+                          -> portal-tile-management-service for admin
+                          -> portal-telemetry-service for analytics
+                          -> single-ui-bff for unmatched platform APIs
                           -> Kubernetes ratan-edge
                                -> Ratan-owned BFF/notification/DA/gateway for /api/ratan/*
 ```
@@ -413,8 +416,8 @@ safe.
 
 ### Phase 10: cut over and monitor
 
-Record independent Base, Ratan, Cashflow, platform BFF, tenant backend, and edge
-artifact identities. Promote only the selected compatible units, then route a
+Record independent Base, Ratan, Cashflow, portal service, platform fallback,
+tenant backend, and edge artifact identities. Promote only the selected compatible units, then route a
 controlled cohort through the platform edge first.
 Monitor login failures, remote/chunk load failures, React share-scope errors,
 API status and latency, SockJS/STOMP reconnects, uncaught browser errors, blank
@@ -425,17 +428,20 @@ the recorded rollback route remains available.
 
 ## Configuration contracts
 
-| Variable                   | Phase            | Contract                                                                                                     |
-| -------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------ |
-| `VITE_RATAN_REMOTE_URL`    | Base build/dev   | full Ratan `remoteEntry.js` URL; local default is port `8009`                                                |
-| `VITE_CASHFLOW_REMOTE_URL` | Ratan build/dev  | full Cashflow `remoteEntry.js` URL; local default is port `8015`                                             |
-| `VITE_PUBLIC_BASE`         | remote build     | remote asset base; canonical production paths are below `/static/ratan/` and `/remotes/*` remains compatible |
-| `SCB_NEXT_EDGE_ORIGIN`     | production build | public origin embedded in both remote URLs; local default is `http://127.0.0.1:9081`                         |
-| `SCB_NEXT_EDGE_PORT`       | local production | published edge port; defaults to `9081` and derives the origin when it is unset                              |
-| `BFF_ORIGIN`               | local Compose    | fixture-backed upstream for the legacy local acceptance topology only                                        |
-| `SINGLE_UI_BFF_UPSTREAM`   | VM edge runtime  | owning upstream for platform `/api/*` routes                                                                 |
-| `RATAN_*_UPSTREAM`         | VM edge runtime  | independently configured Ratan BFF, notification, data-ambassador, and gateway owners                        |
-| `IMAGE_TAG`                | container build  | optional edge image tag                                                                                      |
+| Variable                                  | Phase            | Contract                                                                                                     |
+| ----------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| `VITE_RATAN_REMOTE_URL`                   | Base build/dev   | full Ratan `remoteEntry.js` URL; local default is port `8009`                                                |
+| `VITE_CASHFLOW_REMOTE_URL`                | Ratan build/dev  | full Cashflow `remoteEntry.js` URL; local default is port `8015`                                             |
+| `VITE_PUBLIC_BASE`                        | remote build     | remote asset base; canonical production paths are below `/static/ratan/` and `/remotes/*` remains compatible |
+| `SCB_NEXT_EDGE_ORIGIN`                    | production build | public origin embedded in both remote URLs; local default is `http://127.0.0.1:9081`                         |
+| `SCB_NEXT_EDGE_PORT`                      | local production | published edge port; defaults to `9081` and derives the origin when it is unset                              |
+| `BFF_ORIGIN`                              | local Compose    | fixture-backed upstream for the legacy local acceptance topology only                                        |
+| `PORTAL_AUTH_SERVICE_UPSTREAM`            | VM edge runtime  | owner for general `/api/auth/*` and `/api/sso/*` routes                                                      |
+| `PORTAL_TILE_MANAGEMENT_SERVICE_UPSTREAM` | VM edge runtime  | owner for the most-specific `/api/auth/v1/fmo/admin/*` route family                                          |
+| `PORTAL_TELEMETRY_SERVICE_UPSTREAM`       | VM edge runtime  | owner for `/api/analytics/*` routes                                                                          |
+| `SINGLE_UI_BFF_UPSTREAM`                  | VM edge runtime  | fallback upstream for unmatched platform `/api/*` routes                                                     |
+| `RATAN_*_UPSTREAM`                        | VM edge runtime  | independently configured Ratan BFF, notification, data-ambassador, and gateway owners                        |
+| `IMAGE_TAG`                               | container build  | optional edge image tag                                                                                      |
 
 Build production artifacts from the leaf toward the host. The authoritative
 script is `devops/scripts/build-production.sh`, whose order is Cashflow,
@@ -461,13 +467,13 @@ Ratan, then Base.
 
 ## Current known state
 
-As of 17 August 2026:
+As of 18 August 2026:
 
 - the development three-origin journey is operational through Base port `8001`;
 - the Base development mock replays login, metadata, metrics, initial grid,
   `M0P56753524` search/details, accounting, holiday, custom filter/view, and
   SockJS notification startup;
-- `scb-next` root architecture, mock, deployment, and adapter tests pass with 38 tests;
+- `scb-next` root architecture, mock, deployment, and adapter tests pass with 44 tests;
 - the complete leaf-to-host production build passes when dependency isolation
   resolves Base to MUI 9 and both remotes to MUI 5;
 - a clean `scb-next` install remains blocked without corporate-registry access
@@ -475,10 +481,17 @@ As of 17 August 2026:
   as a workaround;
 - strict Base typecheck still exposes pre-existing Jest setup, bootstrap prop,
   and Vitest setup errors;
-- the Minikube proof deploys seven Ready workloads and ten `ClusterIP` Services,
-  including independently owned `scb-next-edge` and `ratan-edge` Deployments;
+- the Minikube proof deploys ten Ready workloads and thirteen `ClusterIP`
+  Services, including independently owned `scb-next-edge`, `ratan-edge`, three
+  portal domain services, and retained `single-ui-bff` fallback Deployments;
 - two-edge routing, canonical and compatibility remotes, cache headers, security
   contexts, Ratan-only outage/recovery, and WebSocket notification startup pass;
+- mock response identity proves auth, tile-management, telemetry, and fallback
+  route ownership; stopping each portal service affects only its path family
+  and recovery does not restart unrelated services;
+- the portal split is deployment-first and still uses compatible
+  `single-ui-bff` code; Java source, database, session, and downstream
+  integration separation remain future work;
 - the latest strict production-edge Playwright run completed the captured
   Cashflow journey with an empty console-error gate;
 - the default Minikube bridge CNI stores but does not enforce NetworkPolicy, so

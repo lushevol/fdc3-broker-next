@@ -5,8 +5,8 @@ import { createMockApiServer } from './server.mjs';
 const ORIGINAL_URI_HEADER = 'x-original-uri';
 const SAFE_ORIGINAL_URI = /^\/[^\r\n]*$/;
 
-export function createRoutedMockApiServer() {
-  const server = createMockApiServer();
+export function createRoutedMockApiServer(options = {}) {
+  const server = createMockApiServer(options);
   const requestHandler = server.listeners('request')[0];
   const upgradeHandler = server.listeners('upgrade')[0];
 
@@ -48,7 +48,11 @@ function restoreOriginalUri(request) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const port = Number.parseInt(process.env.PORT ?? '8081', 10);
   const host = process.env.HOST ?? '0.0.0.0';
-  createRoutedMockApiServer().listen(port, host, () => {
-    console.log(`SCB Next routed mock BFF listening on ${host}:${port}`);
-  });
+  createRoutedMockApiServer({ serviceName: process.env.SCB_NEXT_MOCK_SERVICE_NAME }).listen(
+    port,
+    host,
+    () => {
+      console.log(`SCB Next routed mock BFF listening on ${host}:${port}`);
+    },
+  );
 }

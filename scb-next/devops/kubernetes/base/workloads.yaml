@@ -36,9 +36,15 @@ spec:
             - name: http
               containerPort: 8080
           env:
-            - { name: MFE_BASE_UPSTREAM, value: "mfe-base:8080" }
-            - { name: SINGLE_UI_BFF_UPSTREAM, value: "single-ui-bff:8080" }
-            - { name: RATAN_EDGE_UPSTREAM, value: "ratan-edge:8080" }
+            - { name: MFE_BASE_UPSTREAM, value: 'mfe-base:8080' }
+            - { name: SINGLE_UI_BFF_UPSTREAM, value: 'single-ui-bff:8080' }
+            - { name: PORTAL_AUTH_SERVICE_UPSTREAM, value: 'portal-auth-service:8080' }
+            - {
+                name: PORTAL_TILE_MANAGEMENT_SERVICE_UPSTREAM,
+                value: 'portal-tile-management-service:8080',
+              }
+            - { name: PORTAL_TELEMETRY_SERVICE_UPSTREAM, value: 'portal-telemetry-service:8080' }
+            - { name: RATAN_EDGE_UPSTREAM, value: 'ratan-edge:8080' }
           readinessProbe: &edgeProbe
             httpGet: { path: /healthz, port: http }
             periodSeconds: 5
@@ -53,8 +59,18 @@ spec:
             capabilities:
               drop: [ALL]
           volumeMounts:
-            - { name: edge-config, mountPath: /etc/nginx/templates/default.conf.template, subPath: default.conf.template, readOnly: true }
-            - { name: edge-config, mountPath: /etc/nginx/scb-next/proxy-headers.conf, subPath: proxy-headers.conf, readOnly: true }
+            - {
+                name: edge-config,
+                mountPath: /etc/nginx/templates/default.conf.template,
+                subPath: default.conf.template,
+                readOnly: true,
+              }
+            - {
+                name: edge-config,
+                mountPath: /etc/nginx/scb-next/proxy-headers.conf,
+                subPath: proxy-headers.conf,
+                readOnly: true,
+              }
             - { name: nginx-conf, mountPath: /etc/nginx/conf.d }
             - { name: nginx-cache, mountPath: /var/cache/nginx }
             - { name: nginx-run, mountPath: /var/run }
@@ -106,12 +122,12 @@ spec:
             - name: http
               containerPort: 8080
           env:
-            - { name: RATAN_CONTAINER_UPSTREAM, value: "ratan-container:8080" }
-            - { name: CASHFLOW_BLOTTER_UPSTREAM, value: "cashflow-blotter:8080" }
-            - { name: RATAN_BFF_UPSTREAM, value: "ratan-bff:8080" }
-            - { name: RATAN_NOTIFICATION_UPSTREAM, value: "ratan-notification:8080" }
-            - { name: RATAN_DATA_AMBASSADOR_UPSTREAM, value: "ratan-data-ambassador:8080" }
-            - { name: RATAN_API_GATEWAY_UPSTREAM, value: "ratan-api-gateway:8080" }
+            - { name: RATAN_CONTAINER_UPSTREAM, value: 'ratan-container:8080' }
+            - { name: CASHFLOW_BLOTTER_UPSTREAM, value: 'cashflow-blotter:8080' }
+            - { name: RATAN_BFF_UPSTREAM, value: 'ratan-bff:8080' }
+            - { name: RATAN_NOTIFICATION_UPSTREAM, value: 'ratan-notification:8080' }
+            - { name: RATAN_DATA_AMBASSADOR_UPSTREAM, value: 'ratan-data-ambassador:8080' }
+            - { name: RATAN_API_GATEWAY_UPSTREAM, value: 'ratan-api-gateway:8080' }
           readinessProbe:
             httpGet: { path: /healthz, port: http }
             periodSeconds: 5
@@ -129,8 +145,18 @@ spec:
             capabilities:
               drop: [ALL]
           volumeMounts:
-            - { name: edge-config, mountPath: /etc/nginx/templates/default.conf.template, subPath: default.conf.template, readOnly: true }
-            - { name: edge-config, mountPath: /etc/nginx/scb-next/proxy-headers.conf, subPath: proxy-headers.conf, readOnly: true }
+            - {
+                name: edge-config,
+                mountPath: /etc/nginx/templates/default.conf.template,
+                subPath: default.conf.template,
+                readOnly: true,
+              }
+            - {
+                name: edge-config,
+                mountPath: /etc/nginx/scb-next/proxy-headers.conf,
+                subPath: proxy-headers.conf,
+                readOnly: true,
+              }
             - { name: nginx-conf, mountPath: /etc/nginx/conf.d }
             - { name: nginx-cache, mountPath: /var/cache/nginx }
             - { name: nginx-run, mountPath: /var/run }
@@ -228,7 +254,7 @@ spec:
             timeoutSeconds: 3
           resources:
             requests: { cpu: 250m, memory: 512Mi }
-            limits: { cpu: "1", memory: 1Gi }
+            limits: { cpu: '1', memory: 1Gi }
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

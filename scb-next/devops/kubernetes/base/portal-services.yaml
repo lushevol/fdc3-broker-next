@@ -1,0 +1,188 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-auth-service
+  labels: &authLabels
+    app.kubernetes.io/name: portal-auth-service
+    app.kubernetes.io/component: platform-api
+    app.kubernetes.io/part-of: scb-next
+    scb-next.io/domain: authentication
+    scb-next.io/owner: platform
+spec:
+  replicas: 2
+  selector: { matchLabels: { app.kubernetes.io/name: portal-auth-service } }
+  template:
+    metadata: { labels: *authLabels }
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector: { matchLabels: { app.kubernetes.io/name: portal-auth-service } }
+      containers:
+        - name: portal-auth-service
+          image: registry.example.invalid/scb-next/portal-auth-service:replace-me
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: http }
+            periodSeconds: 20
+            timeoutSeconds: 3
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: '1', memory: 1Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts: [{ name: tmp, mountPath: /tmp }]
+      volumes: [{ name: tmp, emptyDir: {} }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portal-auth-service
+  labels:
+    app.kubernetes.io/name: portal-auth-service
+    scb-next.io/domain: authentication
+    scb-next.io/owner: platform
+spec:
+  {
+    type: ClusterIP,
+    selector: { app.kubernetes.io/name: portal-auth-service },
+    ports: [{ name: http, port: 8080, targetPort: http }],
+  }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-tile-management-service
+  labels: &tileLabels
+    app.kubernetes.io/name: portal-tile-management-service
+    app.kubernetes.io/component: platform-api
+    app.kubernetes.io/part-of: scb-next
+    scb-next.io/domain: tile-management
+    scb-next.io/owner: platform
+spec:
+  replicas: 2
+  selector: { matchLabels: { app.kubernetes.io/name: portal-tile-management-service } }
+  template:
+    metadata: { labels: *tileLabels }
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector: { matchLabels: { app.kubernetes.io/name: portal-tile-management-service } }
+      containers:
+        - name: portal-tile-management-service
+          image: registry.example.invalid/scb-next/portal-tile-management-service:replace-me
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: http }
+            periodSeconds: 20
+            timeoutSeconds: 3
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: '1', memory: 1Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts: [{ name: tmp, mountPath: /tmp }]
+      volumes: [{ name: tmp, emptyDir: {} }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portal-tile-management-service
+  labels:
+    app.kubernetes.io/name: portal-tile-management-service
+    scb-next.io/domain: tile-management
+    scb-next.io/owner: platform
+spec:
+  {
+    type: ClusterIP,
+    selector: { app.kubernetes.io/name: portal-tile-management-service },
+    ports: [{ name: http, port: 8080, targetPort: http }],
+  }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-telemetry-service
+  labels: &telemetryLabels
+    app.kubernetes.io/name: portal-telemetry-service
+    app.kubernetes.io/component: platform-api
+    app.kubernetes.io/part-of: scb-next
+    scb-next.io/domain: telemetry
+    scb-next.io/owner: platform
+spec:
+  replicas: 2
+  selector: { matchLabels: { app.kubernetes.io/name: portal-telemetry-service } }
+  template:
+    metadata: { labels: *telemetryLabels }
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector: { matchLabels: { app.kubernetes.io/name: portal-telemetry-service } }
+      containers:
+        - name: portal-telemetry-service
+          image: registry.example.invalid/scb-next/portal-telemetry-service:replace-me
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: http }
+            periodSeconds: 20
+            timeoutSeconds: 3
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: '1', memory: 1Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts: [{ name: tmp, mountPath: /tmp }]
+      volumes: [{ name: tmp, emptyDir: {} }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portal-telemetry-service
+  labels:
+    app.kubernetes.io/name: portal-telemetry-service
+    scb-next.io/domain: telemetry
+    scb-next.io/owner: platform
+spec:
+  {
+    type: ClusterIP,
+    selector: { app.kubernetes.io/name: portal-telemetry-service },
+    ports: [{ name: http, port: 8080, targetPort: http }],
+  }

@@ -122,7 +122,7 @@ npm test -- tests/dev-mock-api.test.ts --run
 npm test
 ```
 
-At the time this guide was updated, the root suite contains 36 tests, including
+At the time this guide was updated, the root suite contains 44 tests, including
 deployment architecture and Minikube adapter coverage. Counts may increase.
 Acceptance depends on the current discovered suite passing, not on reproducing
 historical numbers.
@@ -353,9 +353,9 @@ acceptance`; it never describes the bundled Compose image as production.
 
 ## 11. Manually verify the VM edge contract
 
-VM/Ansible is the supported production method. Base, `single-ui-bff`, Ratan
-container, Cashflow, tenant backends, and the platform edge are independently
-versioned release units.
+VM/Ansible is the supported production method. Base, the three portal domain
+services, retained `single-ui-bff` fallback, Ratan container, Cashflow, tenant
+backends, and the platform edge are independently versioned release units.
 
 Create a local environment file without committing it:
 
@@ -380,6 +380,9 @@ After Ansible deploys the candidate, run:
 export SCB_NEXT_EDGE_ORIGIN="https://<approved-host>"
 npm run vm:verify
 curl -f -i "$SCB_NEXT_EDGE_ORIGIN/api/healthz"
+curl -f -i "$SCB_NEXT_EDGE_ORIGIN/api/auth/v2/sso/validate"
+curl -f -i "$SCB_NEXT_EDGE_ORIGIN/api/auth/v1/fmo/admin/importmap/active"
+curl -f -i "$SCB_NEXT_EDGE_ORIGIN/api/analytics/v1/fmo/print"
 curl -f -i "$SCB_NEXT_EDGE_ORIGIN/api/ratan/healthz"
 curl -f -I "$SCB_NEXT_EDGE_ORIGIN/static/ratan/container/remoteEntry.js"
 curl -f -I "$SCB_NEXT_EDGE_ORIGIN/static/ratan/cashflow/remoteEntry.js"
@@ -387,10 +390,15 @@ curl -f -I "$SCB_NEXT_EDGE_ORIGIN/remotes/ratan/remoteEntry.js"
 curl -f -I "$SCB_NEXT_EDGE_ORIGIN/remotes/cashflow/remoteEntry.js"
 ```
 
-Expect HTTP 200, `Cache-Control: no-store` on each federation manifest, the
-approved security headers, and no direct public address for an upstream. Use an
-approved WebSocket client to verify the real notification endpoint returns 101
-and stays connected. Run the section 17 browser journey with an approved user.
+Use approved credentials or authorization headers for protected portal probes.
+Verify their expected payloads and confirm edge/upstream access logs name the
+route owner: tile administration before general auth, general auth and SSO to
+`portal-auth-service`, analytics to `portal-telemetry-service`, and unmatched
+platform API to `single-ui-bff`. Expect HTTP 200 where the real contract does,
+`Cache-Control: no-store` on each federation manifest, the approved security
+headers, and no direct public address for an upstream. Use an approved
+WebSocket client to verify the real notification endpoint returns 101 and
+stays connected. Run the section 17 browser journey with an approved user.
 
 Rollback rehearsal must restore only the selected failed unit by its recorded
 version. If the route config fails, restore the previous rendered edge config
@@ -437,6 +445,7 @@ find devops/vm/scripts devops/kubernetes/scripts \
 cd ..
 openspec validate separate-vm-and-k8s-scb-next-delivery --strict
 openspec validate isolate-tenant-nginx-edges --strict
+openspec validate split-platform-bff-services --strict
 cd scb-next
 ```
 
@@ -453,9 +462,11 @@ npm run k8s:minikube:build
 npm run k8s:minikube:deploy
 ```
 
-The build must compile Cashflow, Ratan, then Base; build five images; and load
-all five into the selected profile. Existing large-chunk or legacy framework
-warnings must be recorded, but a compilation error is a failed gate.
+The build must compile Cashflow, Ratan, then Base and build five images directly
+inside the selected Minikube profile. Direct profile builds prevent a running
+container from retaining a stale mutable `:dev` tag. Existing large-chunk or
+legacy framework warnings must be recorded, but a compilation error is a
+failed gate.
 
 Inspect the result:
 
@@ -466,12 +477,11 @@ kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
 
 Expected proof inventory:
 
-- seven Ready Deployments with zero unexpected restarts, including separate
-  `scb-next-edge` and `ratan-edge` workloads;
-- ten Services, all type `ClusterIP`;
+- ten Ready Deployments with zero unexpected restarts, including separate
+  `scb-next-edge`, `ratan-edge`, three portal services, and retained fallback;
+- thirteen Services, all type `ClusterIP`;
 - one Ingress whose only application backend is `scb-next-edge`;
-- seven NetworkPolicy objects and two independently owned edge
-  PodDisruptionBudgets.
+- seven NetworkPolicy objects and five PodDisruptionBudgets.
 
 The constrained Minikube overlay uses one replica per Deployment. Production
 availability is verified from the base manifest and must be retested on the
@@ -488,13 +498,14 @@ Run the automated route and browser command first:
 npm run k8s:minikube:verify
 ```
 
-It port-forwards the platform edge to `http://127.0.0.1:9083`, checks platform
-and tenant routes through both Nginx tiers, asserts federation cache headers,
-scales `ratan-edge` to zero, proves platform traffic remains available while
-tenant traffic fails, restores the tenant edge, proves recovery, and runs
-Playwright. Its cleanup trap restores the original tenant replica count after
-an interrupted run. Preserve the full output even when the browser portion
-fails.
+It port-forwards the platform edge to `http://127.0.0.1:9083`, checks expected
+mock-service identity for auth, tile-management, telemetry, and fallback paths,
+checks tenant routes through both Nginx tiers, and asserts federation cache
+headers. It then scales `ratan-edge` and each portal service to zero in turn,
+proves only owned paths fail, restores each Deployment, proves recovery, and
+runs Playwright. Its cleanup trap restores the active Deployment's original
+replica count after an interrupted run. Preserve the full output even when the
+browser portion fails.
 
 For manual edge probes, keep this running in terminal A:
 
@@ -509,6 +520,9 @@ Run in terminal B:
 curl -f -i http://127.0.0.1:9084/healthz
 curl -f -i http://127.0.0.1:9084/
 curl -f -i http://127.0.0.1:9084/api/healthz
+curl -f -D - -o /dev/null http://127.0.0.1:9084/api/auth/v2/sso/validate
+curl -f -D - -o /dev/null http://127.0.0.1:9084/api/auth/v1/fmo/admin/importmap/active
+curl -f -D - -o /dev/null http://127.0.0.1:9084/api/analytics/v1/fmo/print
 curl -f -i http://127.0.0.1:9084/api/ratan/bff/healthz
 curl -f -i http://127.0.0.1:9084/api/ratan/notification/healthz
 curl -f -i http://127.0.0.1:9084/api/ratan/da/healthz
@@ -519,7 +533,9 @@ curl -f -I http://127.0.0.1:9084/remotes/ratan/remoteEntry.js
 curl -f -I http://127.0.0.1:9084/remotes/cashflow/remoteEntry.js
 ```
 
-All must return 200. Federation manifests must include `Cache-Control:
+All must return 200. The four platform API responses must respectively include
+`X-SCB-Next-Mock-Service: single-ui-bff`, `portal-auth-service`,
+`portal-tile-management-service`, and `portal-telemetry-service`. Federation manifests must include `Cache-Control:
 no-store` plus the edge security headers. Because the Minikube tenant routes
 share one deterministic mock Deployment, runtime responses do not prove real
 backend ownership; the architecture tests prove the Nginx upstream mapping.
@@ -568,7 +584,52 @@ curl -f -I http://127.0.0.1:9085/remotes/ratan/remoteEntry.js
 Do not use the ingress controller's own `/healthz` as evidence for the
 application edge.
 
-### Manual failure-containment proof
+### Manual portal-service failure containment
+
+Repeat this block for the three service/path pairs shown below while the
+platform-edge port-forward remains active. The trap restores the selected
+Deployment if a probe or command fails.
+
+```bash
+PORTAL_SERVICE=portal-auth-service
+OWNED_PATH=/api/auth/v2/sso/validate
+# Repeat with portal-tile-management-service and
+# /api/auth/v1/fmo/admin/importmap/active, then portal-telemetry-service and
+# /api/analytics/v1/fmo/print.
+PORTAL_REPLICAS=$(kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" \
+  -n scb-next-minikube get "deployment/$PORTAL_SERVICE" \
+  -o jsonpath='{.spec.replicas}')
+restore_portal() {
+  trap - EXIT INT TERM
+  kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" -n scb-next-minikube \
+    scale "deployment/$PORTAL_SERVICE" --replicas="$PORTAL_REPLICAS"
+  kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" -n scb-next-minikube \
+    rollout status "deployment/$PORTAL_SERVICE" --timeout=180s
+}
+trap restore_portal EXIT INT TERM
+
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" -n scb-next-minikube \
+  scale "deployment/$PORTAL_SERVICE" --replicas=0
+kubectl --context "$SCB_NEXT_KUBECTL_CONTEXT" -n scb-next-minikube \
+  wait --for=delete pod -l "app.kubernetes.io/name=$PORTAL_SERVICE" --timeout=60s
+! curl -f --max-time 5 "http://127.0.0.1:9084$OWNED_PATH"
+curl -f -D - -o /dev/null http://127.0.0.1:9084/api/healthz
+curl -f -D - -o /dev/null http://127.0.0.1:9084/api/auth/v1/fmo/admin/importmap/active
+curl -f -D - -o /dev/null http://127.0.0.1:9084/api/analytics/v1/fmo/print
+curl -f http://127.0.0.1:9084/api/ratan/healthz
+
+restore_portal
+curl --retry 30 --retry-delay 1 --retry-all-errors -f \
+  "http://127.0.0.1:9084$OWNED_PATH"
+```
+
+When the selected service appears among the unaffected example probes, omit
+that probe and instead run the two other portal route probes. Confirm their
+`X-SCB-Next-Mock-Service` identities, the fallback identity, and Ratan remain
+available. Record pod UIDs before and after; only the selected portal pod may
+change.
+
+### Manual tenant-edge failure containment
 
 Keep the platform-edge port-forward running and execute:
 
@@ -599,8 +660,9 @@ Restore `ratan-edge` even if a probe fails. Confirm the `scb-next-edge` pod UID
 did not change during the test.
 
 Completion criterion: ingress and both edge tiers return the expected owners,
-headers, manifests, and WebSocket upgrade; stopping and restoring `ratan-edge`
-affects only Ratan paths and does not restart the platform edge.
+headers, manifests, and WebSocket upgrade; stopping and restoring each portal
+service affects only its path family; stopping and restoring `ratan-edge`
+affects only Ratan paths; no isolation cycle restarts an unrelated service.
 
 ## 15. Verify workload security and release independence
 
@@ -721,8 +783,11 @@ notification failure.
 This gate is mandatory for production certification and cannot be completed by
 the Minikube mocks.
 
-1. Deploy `single-ui-bff` with its approved identity, database, secrets,
-   discovery, and platform dependencies.
+1. Deploy `portal-auth-service`, `portal-tile-management-service`,
+   `portal-telemetry-service`, and retained `single-ui-bff` using approved
+   immutable artifacts, identity, database, secrets, discovery, and platform
+   dependencies. The three new coordinates may initially contain the same
+   compatible artifact, but must remain independent runtime instances.
 2. Deploy or configure the Ratan BFF, notification, data-ambassador, and API
    gateway owners.
 3. Bind each edge upstream independently; do not collapse all `/api/*` traffic
@@ -744,6 +809,8 @@ infrastructure gates pass. Fixture evidence alone never closes this section.
 | Symptom                                            | Likely boundary                     | First required check                                              |
 | -------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------- |
 | remote entry loads but chunk is 404                | `VITE_PUBLIC_BASE` or edge rewrite  | inspect remote entry, request URL, and matching edge location     |
+| tile admin reaches auth service                    | Nginx location precedence           | confirm admin location precedes general auth and inspect identity |
+| portal route returns wrong identity                | stale mutable Minikube image        | use `minikube image build`, restart owner, and inspect image ID   |
 | platform request reaches tenant mock               | Nginx location precedence           | run architecture tests and inspect rendered edge config           |
 | WebSocket returns 200 or handshake fails           | missing upgrade on either Nginx hop | inspect `Upgrade`/`Connection` at platform and tenant edges       |
 | `ERR_CONNECTION_CLOSED` for `axess.sc.net`         | external profile-photo dependency   | inspect Playwright trace; do not classify as an SCB edge route    |
@@ -776,6 +843,7 @@ Canonical and compatibility cache headers:
 WebSocket 101/STOMP evidence:
 Pod security evidence:
 Independent tenant-edge rollout and outage/recovery evidence:
+Independent portal-service identity, rollout, and outage/recovery evidence:
 NetworkPolicy static result:
 NetworkPolicy runtime result and CNI:
 Automated Playwright result:
@@ -783,6 +851,7 @@ Manual desktop and 1024x768 result:
 Console and failed-network evidence:
 Screenshots/traces/log paths:
 Real platform BFF result:
+Real portal auth/tile-management/telemetry result:
 Real tenant backend result:
 TLS/WAF/secrets/observability/capacity/DR results:
 Known warnings and failed or blocked gates:

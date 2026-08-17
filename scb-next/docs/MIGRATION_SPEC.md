@@ -39,12 +39,15 @@ include:
 
 ## Runtime topology
 
-| Module                        | Role               | Local origin            | Required federated interface                                         |
-| ----------------------------- | ------------------ | ----------------------- | -------------------------------------------------------------------- |
-| `mfe-base-origin`             | portal host        | `http://127.0.0.1:8001` | consumes `mfe_ratan_container/application`                           |
-| `mfe-ratan-container-origin`  | container remote   | `http://127.0.0.1:8009` | exposes `./application`; consumes `mfe_cashflow_blotter/application` |
-| `mfe-cashflow-blotter-origin` | business remote    | `http://127.0.0.1:8015` | exposes `./application`                                              |
-| `single-ui-bff`               | owned HTTP service | environment-defined     | retains existing request/response and side-effect contracts          |
+| Module                           | Role                  | Local origin            | Required federated interface                                         |
+| -------------------------------- | --------------------- | ----------------------- | -------------------------------------------------------------------- |
+| `mfe-base-origin`                | portal host           | `http://127.0.0.1:8001` | consumes `mfe_ratan_container/application`                           |
+| `mfe-ratan-container-origin`     | container remote      | `http://127.0.0.1:8009` | exposes `./application`; consumes `mfe_cashflow_blotter/application` |
+| `mfe-cashflow-blotter-origin`    | business remote       | `http://127.0.0.1:8015` | exposes `./application`                                              |
+| `portal-auth-service`            | auth runtime owner    | environment-defined     | owns `/api/auth/*` except admin and `/api/sso/*`                     |
+| `portal-tile-management-service` | tile runtime owner    | environment-defined     | owns `/api/auth/v1/fmo/admin/*`                                      |
+| `portal-telemetry-service`       | telemetry owner       | environment-defined     | owns `/api/analytics/*`                                              |
+| `single-ui-bff`                  | fallback HTTP service | environment-defined     | retains unmatched platform `/api/*` contracts                        |
 
 `mfe-root-config-origin` MUST remain outside the active npm workspaces, startup
 graph, build, packaging, and production deployment. It MAY remain in source as
@@ -166,9 +169,14 @@ preserve:
 - exports, maker/checker actions, and other side effects;
 - timeout, retry, loading, empty, and error behavior visible to users.
 
-The Kubernetes platform edge MUST route non-tenant platform APIs to
-`single-ui-bff` and MUST delegate Ratan API and static path families only to a
-Ratan-owned edge. The platform edge MUST NOT contain or directly reach Ratan
+The platform edge MUST route `/api/auth/v1/fmo/admin/*` to
+`portal-tile-management-service` before routing other `/api/auth/*` and
+`/api/sso/*` paths to `portal-auth-service`. It MUST route `/api/analytics/*`
+to `portal-telemetry-service` and unmatched platform `/api/*` paths to the
+retained `single-ui-bff`. Public paths, rewrites, payloads, and headers MUST
+remain compatible. The Kubernetes platform edge MUST delegate Ratan API and
+static path families only to a Ratan-owned edge. The platform edge MUST NOT
+contain or directly reach Ratan
 application upstreams. The Ratan edge MUST own specific and fallback
 `/api/ratan/*` routing, static aliases, rewrites, WebSocket behavior, caching,
 health, and rollout. All browser traffic MUST enter through the platform edge;
@@ -284,8 +292,9 @@ acceptance.
 ## Deployment invariants
 
 - Production builds MUST execute Cashflow, then Ratan, then Base.
-- Edge, Base, `single-ui-bff`, Ratan container, Cashflow, and tenant backend
-  artifacts MUST have independent immutable identities and rollback targets.
+- Edge, Base, all three portal domain services, retained `single-ui-bff`, Ratan
+  container, Cashflow, and tenant backend artifacts MUST have independent
+  immutable identities and rollback targets.
 - A release record MUST identify the compatible set and accepted commit SHA
   without requiring unrelated units to be rebuilt.
 - `remoteEntry.js` MUST use `Cache-Control: no-store`.
@@ -299,6 +308,11 @@ acceptance.
   decision approves Kubernetes or another substrate.
 - A Kubernetes deployment MUST expose only the edge through Ingress, keep all
   upstream Services `ClusterIP`, and verify NetworkPolicy on an enforcing CNI.
+- Each portal domain service MUST have its own Deployment, ClusterIP Service,
+  probes, resources, restricted security context, replica control, ownership
+  labels, and PodDisruptionBudget. Compatible `single-ui-bff` code MAY be used
+  initially, but runtime isolation MUST NOT be described as source or data
+  isolation.
 - Production certification MUST use the real platform and tenant BFFs plus production identity,
   authorization, CSP/CORS, browser/OpenFin, license, and telemetry contracts.
 

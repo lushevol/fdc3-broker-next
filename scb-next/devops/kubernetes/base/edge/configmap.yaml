@@ -24,6 +24,9 @@ data:
 
     upstream mfe_base { server ${MFE_BASE_UPSTREAM}; }
     upstream single_ui_bff { server ${SINGLE_UI_BFF_UPSTREAM}; }
+    upstream portal_auth_service { server ${PORTAL_AUTH_SERVICE_UPSTREAM}; }
+    upstream portal_tile_management_service { server ${PORTAL_TILE_MANAGEMENT_SERVICE_UPSTREAM}; }
+    upstream portal_telemetry_service { server ${PORTAL_TELEMETRY_SERVICE_UPSTREAM}; }
     upstream ratan_edge { server ${RATAN_EDGE_UPSTREAM}; }
 
     server {
@@ -66,20 +69,25 @@ data:
         proxy_pass http://ratan_edge;
       }
 
-      location /api/auth/ {
+      location ^~ /api/auth/v1/fmo/admin/ {
         rewrite ^/api/auth/(.*)$ /$1 break;
         include /etc/nginx/scb-next/proxy-headers.conf;
-        proxy_pass http://single_ui_bff;
+        proxy_pass http://portal_tile_management_service;
       }
-      location /api/analytics/ {
+      location ^~ /api/auth/ {
+        rewrite ^/api/auth/(.*)$ /$1 break;
+        include /etc/nginx/scb-next/proxy-headers.conf;
+        proxy_pass http://portal_auth_service;
+      }
+      location ^~ /api/analytics/ {
         rewrite ^/api/analytics/(.*)$ /$1 break;
         include /etc/nginx/scb-next/proxy-headers.conf;
-        proxy_pass http://single_ui_bff;
+        proxy_pass http://portal_telemetry_service;
       }
-      location /api/sso/ {
+      location ^~ /api/sso/ {
         rewrite ^/api/sso/(.*)$ /$1 break;
         include /etc/nginx/scb-next/proxy-headers.conf;
-        proxy_pass http://single_ui_bff;
+        proxy_pass http://portal_auth_service;
       }
       location /api/ {
         rewrite ^/api/(.*)$ /$1 break;

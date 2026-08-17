@@ -5,7 +5,9 @@ This proof uses a platform-owned Nginx edge followed by a separately operated Ng
 ```text
 Ingress
   -> scb-next-edge (platform)
-       -> mfe-base / single-ui-bff
+       -> mfe-base
+       -> portal-auth-service / portal-tile-management-service
+       -> portal-telemetry-service / single-ui-bff fallback
        -> ratan-edge (Ratan)
             -> ratan-container / cashflow-blotter / Ratan backends
 ```
@@ -16,13 +18,15 @@ The platform owns only the `/api/ratan/*`, `/static/ratan/*`, `/remotes/ratan/*`
 
 - production builds for Base, Ratan container, and Cashflow;
 - separate platform edge, Ratan edge, platform, and tenant Deployments;
+- three independently deployed portal domain services alongside the retained `single-ui-bff` fallback;
+- route identity and failure containment for auth, tile-management, telemetry, fallback, and tenant paths;
 - Ingress to platform edge to tenant edge to owning upstream routing;
 - platform and tenant HTTP paths, federation assets, cache policy, and WebSocket upgrade;
 - non-root workload controls, probes, resources, disruption configuration, and independent edge rollouts;
 - Ratan edge outage containment and recovery without a platform edge restart;
 - fixture-backed Cashflow browser composition.
 
-It does not certify real corporate identity, authorization, databases, messaging, notification infrastructure, secrets, external tenant services, TLS/WAF, observability, capacity, or disaster recovery.
+The three portal Deployments initially use compatible `single-ui-bff` artifacts under distinct image coordinates. This proves routing and runtime lifecycle isolation, not Java source, session, database, or integration decomposition. The proof does not certify real corporate identity, authorization, databases, messaging, notification infrastructure, secrets, external tenant services, TLS/WAF, observability, capacity, or disaster recovery.
 
 ## Quick verification
 
@@ -35,7 +39,7 @@ npm run k8s:minikube:deploy
 npm run k8s:minikube:verify
 ```
 
-The verify command uses port `9083` by default. A passing run proves the HTTP probes and fixture-backed browser journey. A browser failure caused by an unavailable external URL is still a failed gate: retain the Playwright trace and classify the external dependency instead of suppressing the console error.
+The build command builds images directly in the selected Minikube profile so a mutable local `:dev` tag cannot silently reuse a stale containerd image. The verify command uses port `9083` by default. A passing run proves service identity, per-service outage/recovery, tenant-edge isolation, HTTP probes, and the fixture-backed browser journey. A browser failure caused by an unavailable external URL is still a failed gate: retain the Playwright trace and classify the external dependency instead of suppressing the console error.
 
 The dedicated profile defaults to 2 CPUs and 3072 MB. Override `SCB_NEXT_MINIKUBE_CPUS` or `SCB_NEXT_MINIKUBE_MEMORY` when the workstation has more capacity. Use the isolated `MINIKUBE_HOME` and `KUBECONFIG` procedure in [the manual verification guide](../../docs/VERIFICATION_GUIDE.md) when the tools are not installed globally.
 
@@ -67,4 +71,4 @@ Before creating a production overlay, approve and record:
 - backup, artifact retention, RPO/RTO, regional failover, rollout, and VM fallback procedures;
 - real-BFF authentication, authorization, API, notification, and Cashflow browser certification.
 
-The Kubernetes base contains placeholder image names and no production Secret. Enterprise overlays must replace image tags by immutable digest and attach tenant backend implementations to the declared Services.
+The Kubernetes base contains placeholder image names and no production Secret. Enterprise overlays must replace every image tag by immutable digest, publish the compatible initial artifact under the three portal coordinates, and attach tenant backend implementations to the declared Services. Java code extraction and durable data/session ownership require a later architecture change.

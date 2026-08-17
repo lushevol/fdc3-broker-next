@@ -17,6 +17,17 @@ afterEach(async () => {
 });
 
 describe('Minikube mock route adapter', () => {
+  it('identifies the standalone mock service instance', async () => {
+    const server = createRoutedMockApiServer({ serviceName: 'portal-auth-service' });
+    servers.push(server);
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const port = (server.address() as AddressInfo).port;
+
+    const response = await fetch(`http://127.0.0.1:${port}/healthz`);
+
+    expect(response.headers.get('x-scb-next-mock-service')).toBe('portal-auth-service');
+  });
+
   it('restores a validated original URI before existing mock handlers run', async () => {
     const server = createRoutedMockApiServer();
     servers.push(server);

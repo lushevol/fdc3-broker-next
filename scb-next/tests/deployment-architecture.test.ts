@@ -35,6 +35,24 @@ function resourcesOfKind(resources: KubernetesResource[], kind: string) {
 }
 
 describe('SCB Next edge routing contract', () => {
+  it('routes platform domains to additive services before the legacy fallback', () => {
+    const config = read(vmNginxPath);
+    const tileRoute = config.indexOf('location ^~ /api/auth/v1/fmo/admin/');
+    const authRoute = config.indexOf('location ^~ /api/auth/ {');
+    const fallbackRoute = config.indexOf('location /api/ {');
+
+    expect(config).toContain('upstream portal_auth_service');
+    expect(config).toContain('upstream portal_tile_management_service');
+    expect(config).toContain('upstream portal_telemetry_service');
+    expect(config).toContain('proxy_pass http://portal_auth_service');
+    expect(config).toContain('proxy_pass http://portal_tile_management_service');
+    expect(config).toContain('proxy_pass http://portal_telemetry_service');
+    expect(config).toContain('proxy_pass http://single_ui_bff');
+    expect(tileRoute).toBeGreaterThan(0);
+    expect(authRoute).toBeGreaterThan(tileRoute);
+    expect(fallbackRoute).toBeGreaterThan(authRoute);
+  });
+
   it('routes platform and tenant traffic to independently owned upstreams', () => {
     const config = read(vmNginxPath);
 
@@ -46,7 +64,7 @@ describe('SCB Next edge routing contract', () => {
     expect(config).toContain('location ^~ /static/ratan/cashflow/');
     expect(config).toContain('location ^~ /remotes/ratan/');
     expect(config).toContain('location ^~ /remotes/cashflow/');
-    expect(config).toContain('location /api/auth/');
+    expect(config).toContain('location ^~ /api/auth/');
     expect(config).toContain('proxy_pass http://single_ui_bff');
     expect(config).toContain('proxy_pass http://mfe_base');
   });
@@ -81,6 +99,30 @@ describe('SCB Next edge routing contract', () => {
 });
 
 describe('SCB Next Kubernetes topology', () => {
+  it('routes platform domains through additive Kubernetes services', () => {
+    const configMaps = resourcesOfKind(renderKustomization(kubernetesBase), 'ConfigMap');
+    const platformConfig = configMaps.find(
+      (resource) => resource.metadata?.name === 'scb-next-edge-config',
+    );
+    const template = platformConfig?.data?.['default.conf.template'] ?? '';
+    const tileRoute = template.indexOf('location ^~ /api/auth/v1/fmo/admin/');
+    const authRoute = template.indexOf('location ^~ /api/auth/ {');
+    const fallbackRoute = template.indexOf('location /api/ {');
+
+    for (const upstream of [
+      'portal_auth_service',
+      'portal_tile_management_service',
+      'portal_telemetry_service',
+      'single_ui_bff',
+    ]) {
+      expect(template).toContain(`upstream ${upstream}`);
+      expect(template).toContain(`proxy_pass http://${upstream}`);
+    }
+    expect(tileRoute).toBeGreaterThan(0);
+    expect(authRoute).toBeGreaterThan(tileRoute);
+    expect(fallbackRoute).toBeGreaterThan(authRoute);
+  });
+
   it('renders independent platform and tenant workloads behind ClusterIP services', () => {
     const resources = renderKustomization(kubernetesBase);
     const deployments = resourcesOfKind(resources, 'Deployment');
@@ -90,6 +132,9 @@ describe('SCB Next Kubernetes topology', () => {
       'ratan-edge',
       'mfe-base',
       'single-ui-bff',
+      'portal-auth-service',
+      'portal-tile-management-service',
+      'portal-telemetry-service',
       'ratan-container',
       'cashflow-blotter',
     ];
@@ -205,7 +250,13 @@ describe('SCB Next Kubernetes topology', () => {
       ]),
     );
     expect(budgets.map((resource) => resource.metadata?.name)).toEqual(
-      expect.arrayContaining(['scb-next-edge', 'ratan-edge']),
+      expect.arrayContaining([
+        'scb-next-edge',
+        'ratan-edge',
+        'portal-auth-service',
+        'portal-tile-management-service',
+        'portal-telemetry-service',
+      ]),
     );
     const platformEgress = policies.find(
       (resource) => resource.metadata?.name === 'allow-platform-edge-egress',
@@ -226,8 +277,12 @@ describe('SCB Next Kubernetes topology', () => {
       encoding: 'utf8',
     });
 
-    expect(deployments).toHaveLength(7);
+    expect(deployments).toHaveLength(10);
+    for (const deployment of deployments) {
+      expect(deployment.spec?.replicas).toBe(1);
+    }
     expect(rendered).toContain('scb-next-local/');
+    expect(rendered).not.toContain('registry.example.invalid/scb-next/portal-');
     expect(rendered).toContain('scb-next.io/evidence-scope: frontend-routing-only');
   });
 });
@@ -252,11 +307,49 @@ describe('SCB Next deployment commands', () => {
   it('verifies that a Ratan edge outage is isolated and self-restoring', () => {
     const script = read(join(deploymentRoot, 'kubernetes/scripts/minikube-verify.sh'));
 
-    expect(script).toContain('deployment/ratan-edge');
+    expect(script).toContain('scale_down "ratan-edge"');
     expect(script).toContain('scale');
     expect(script).toContain('--replicas=0');
     expect(script).toContain('platform traffic remains available');
     expect(script).toContain('tenant traffic is unavailable');
     expect(script).toContain('tenant traffic recovers');
+  });
+
+  it('verifies portal service identity, isolated outages, and recovery', () => {
+    const script = read(join(deploymentRoot, 'kubernetes/scripts/minikube-verify.sh'));
+
+    for (const service of [
+      'portal-auth-service',
+      'portal-tile-management-service',
+      'portal-telemetry-service',
+    ]) {
+      expect(script).toContain(service);
+    }
+    expect(script).toContain('deployment/$deployment');
+    expect(script).toContain('x-scb-next-mock-service');
+    expect(script).toContain('portal service is unavailable');
+    expect(script).toContain('unaffected routes remain available');
+    expect(script).toContain('portal service recovers');
+  });
+
+  it('builds images directly into Minikube to replace mutable local tags', () => {
+    const script = read(join(deploymentRoot, 'kubernetes/scripts/minikube-build.sh'));
+
+    expect(script).toContain('minikube -p "$PROFILE" image build');
+    expect(script).not.toContain('minikube -p "$PROFILE" image load');
+  });
+
+  it('smoke checks every portal route family in VM verification', () => {
+    const script = read(join(deploymentRoot, 'vm/scripts/verify.sh'));
+
+    for (const path of [
+      '/api/auth/v2/sso/validate',
+      '/api/auth/v1/fmo/admin/importmap/active',
+      '/api/analytics/v1/fmo/print',
+      '/api/healthz',
+    ]) {
+      expect(script).toContain(path);
+    }
+    expect(script).toContain('2??|3??|4??');
   });
 });

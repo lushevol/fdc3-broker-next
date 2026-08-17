@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 import { createMockApiMiddleware } from './mock-api.mjs';
 
-export function createMockApiServer() {
-  const middleware = createMockApiMiddleware();
+export function createMockApiServer(options = {}) {
+  const middleware = createMockApiMiddleware(options);
   const server = createServer((request, response) => {
     void middleware(request, response, () => {
       response.statusCode = 404;
@@ -84,7 +84,11 @@ function writeWebSocketText(socket, text) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const port = Number.parseInt(process.env.PORT ?? '8081', 10);
   const host = process.env.HOST ?? '0.0.0.0';
-  createMockApiServer().listen(port, host, () => {
-    console.log(`SCB Next mock BFF listening on ${host}:${port}`);
-  });
+  createMockApiServer({ serviceName: process.env.SCB_NEXT_MOCK_SERVICE_NAME }).listen(
+    port,
+    host,
+    () => {
+      console.log(`SCB Next mock BFF listening on ${host}:${port}`);
+    },
+  );
 }

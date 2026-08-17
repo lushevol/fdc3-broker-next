@@ -24,3 +24,39 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: ratan-edge
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: portal-auth-service
+  labels:
+    app.kubernetes.io/name: portal-auth-service
+    scb-next.io/domain: authentication
+    scb-next.io/owner: platform
+spec:
+  minAvailable: 1
+  selector: { matchLabels: { app.kubernetes.io/name: portal-auth-service } }
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: portal-tile-management-service
+  labels:
+    app.kubernetes.io/name: portal-tile-management-service
+    scb-next.io/domain: tile-management
+    scb-next.io/owner: platform
+spec:
+  minAvailable: 1
+  selector: { matchLabels: { app.kubernetes.io/name: portal-tile-management-service } }
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: portal-telemetry-service
+  labels:
+    app.kubernetes.io/name: portal-telemetry-service
+    scb-next.io/domain: telemetry
+    scb-next.io/owner: platform
+spec:
+  minAvailable: 1
+  selector: { matchLabels: { app.kubernetes.io/name: portal-telemetry-service } }
