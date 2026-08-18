@@ -2,6 +2,45 @@
 
 VM/Ansible is the supported SCB Next production deployment method. The platform edge, Base, three portal domain services, retained `single-ui-bff` fallback, Ratan container, and Cashflow blotter are independent release units. Docker Compose remains local fixture-backed acceptance only.
 
+## Architecture
+
+```mermaid
+flowchart LR
+    user["Browser / OpenFin"] --> edge["Platform Nginx<br/>VM deployment"]
+
+    edge -->|"/ and platform static"| base["mfe-base"]
+    edge -->|"/api/auth/* and /api/sso/*"| auth["portal-auth-service"]
+    edge -->|"/api/auth/v1/fmo/admin/*"| tile["portal-tile-management-service"]
+    edge -->|"/api/analytics/*"| telemetry["portal-telemetry-service"]
+    edge -->|"unmatched /api/*"| fallback["single-ui-bff<br/>compatibility fallback"]
+
+    edge -->|"/static/ratan/container/*<br/>/remotes/ratan/*"| ratanUi["ratan-container"]
+    edge -->|"/static/ratan/cashflow/*<br/>/remotes/cashflow/*"| cashflow["mfe-cashflow-blotter"]
+    edge -->|"/api/ratan/bff/*"| ratanBff["Ratan BFF"]
+    edge -->|"/api/ratan/notification/*"| notification["Ratan Notification"]
+    edge -->|"/api/ratan/da/*"| ambassador["Ratan Data Ambassador"]
+    edge -->|"remaining /api/ratan/*"| gateway["Ratan API Gateway"]
+
+    subgraph platform["Platform-owned release units"]
+        base
+        auth
+        tile
+        telemetry
+        fallback
+    end
+
+    subgraph ratan["Ratan-owned release units"]
+        ratanUi
+        cashflow
+        ratanBff
+        notification
+        ambassador
+        gateway
+    end
+```
+
+The VM edge routes directly to both platform and Ratan upstreams. Each upstream remains independently versioned and deployable, but tenant-owned Nginx segregation is introduced only by the Kubernetes topology.
+
 ## Ownership
 
 | Unit                             | Owner        | Health path        | Public route through edge                         |

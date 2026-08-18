@@ -2,14 +2,45 @@
 
 This proof uses a platform-owned Nginx edge followed by a separately operated Nginx edge for each tenant. The infrastructure Ingress has one catch-all backend, every application Service is `ClusterIP`, and the platform edge cannot route directly to Ratan workloads.
 
-```text
-Ingress
-  -> scb-next-edge (platform)
-       -> mfe-base
-       -> portal-auth-service / portal-tile-management-service
-       -> portal-telemetry-service / single-ui-bff fallback
-       -> ratan-edge (Ratan)
-            -> ratan-container / cashflow-blotter / Ratan backends
+## Architecture
+
+```mermaid
+flowchart LR
+    user["Browser / OpenFin"] --> ingress["Infrastructure Ingress<br/>TLS, DNS, and WAF"]
+    ingress --> platformEdge["scb-next-edge<br/>Platform-owned Nginx"]
+
+    platformEdge -->|"/"| base["mfe-base<br/>ClusterIP"]
+    platformEdge -->|"/api/auth/* and /api/sso/*"| auth["portal-auth-service<br/>ClusterIP"]
+    platformEdge -->|"/api/auth/v1/fmo/admin/*"| tile["portal-tile-management-service<br/>ClusterIP"]
+    platformEdge -->|"/api/analytics/*"| telemetry["portal-telemetry-service<br/>ClusterIP"]
+    platformEdge -->|"unmatched /api/*"| fallback["single-ui-bff<br/>ClusterIP fallback"]
+
+    platformEdge -->|"/api/ratan/*<br/>/static/ratan/*<br/>/remotes/ratan/*<br/>/remotes/cashflow/*"| ratanEdge["ratan-edge<br/>Ratan-owned Nginx"]
+    ratanEdge -->|"container static"| ratanUi["ratan-container<br/>ClusterIP"]
+    ratanEdge -->|"cashflow static"| cashflow["mfe-cashflow-blotter<br/>ClusterIP"]
+    ratanEdge -->|"/api/ratan/bff/*"| ratanBff["Ratan BFF<br/>ClusterIP"]
+    ratanEdge -->|"/api/ratan/notification/*"| notification["Ratan Notification<br/>ClusterIP"]
+    ratanEdge -->|"/api/ratan/da/*"| ambassador["Ratan Data Ambassador<br/>ClusterIP"]
+    ratanEdge -->|"remaining /api/ratan/*"| gateway["Ratan API Gateway<br/>ClusterIP"]
+
+    subgraph platform["Platform ownership boundary"]
+        platformEdge
+        base
+        auth
+        tile
+        telemetry
+        fallback
+    end
+
+    subgraph ratan["Ratan team ownership boundary"]
+        ratanEdge
+        ratanUi
+        cashflow
+        ratanBff
+        notification
+        ambassador
+        gateway
+    end
 ```
 
 The platform owns only the `/api/ratan/*`, `/static/ratan/*`, `/remotes/ratan/*`, and `/remotes/cashflow/*` delegation contract. The Ratan team owns all route precedence, rewrites, WebSocket handling, caching, upstream names, health, rollout, and availability inside that boundary.

@@ -124,6 +124,10 @@ Browser
                                -> Ratan-owned BFF/notification/DA/gateway for /api/ratan/*
 ```
 
+The production deployment diagrams are maintained with their operational
+runbooks: [VM/Ansible architecture](../devops/vm/README.md#architecture) and
+[Kubernetes architecture](../devops/kubernetes/README.md#architecture).
+
 | Origin   | Development URL         | Federation contract                        | Production path                                           | Owner                                               |
 | -------- | ----------------------- | ------------------------------------------ | --------------------------------------------------------- | --------------------------------------------------- |
 | Base     | `http://127.0.0.1:8001` | consumes `mfe_ratan_container/application` | `/`                                                       | login, navigation, theme, workspace state, mock API |
