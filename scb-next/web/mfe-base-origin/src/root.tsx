@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOMClient from "react-dom/client";
 import App, { type AppProps } from "./App";
+import "./new-styles/webkit.css";
 type RootProps = AppProps;
 const mountedRoots = new WeakMap<Element, ReactDOMClient.Root>();
 

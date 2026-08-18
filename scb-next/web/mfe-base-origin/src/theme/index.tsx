@@ -5,6 +5,11 @@ import { ComponentPropsDefault } from "../hooks/model/root";
 import { getTheme } from "./config/utils";
 import ThemeProvider from "./Provider";
 
+export const getThemeClassName = (theme: string): string => {
+  const mode = theme === "light" ? "light" : "dark";
+  return `${mode} sc-mode-${mode}`;
+};
+
 const Theme: React.FC<ComponentPropsDefault> = (props): ReactElement => {
   const [store] = useContext();
   const theme = React.useMemo(() => {
@@ -13,7 +18,7 @@ const Theme: React.FC<ComponentPropsDefault> = (props): ReactElement => {
       themeConfig = "dark";
     }
     const { config } = Config(getTheme(themeConfig));
-    document.documentElement.className = themeConfig;
+    document.documentElement.className = getThemeClassName(themeConfig);
     document.body.style.backgroundColor = config.palette.background.default;
     return config;
   }, [store.theme, store.user, store.token]);
