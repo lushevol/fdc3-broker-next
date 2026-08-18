@@ -1,6 +1,8 @@
 import { css, darken, lighten } from "@mui/material/styles";
 import color from "./color";
 import colordark from "./color.dark";
+import legacyColor from "./color.legacy";
+import legacyDark from "./color.dark.legacy";
 import custom from "./common";
 import scroll from "./scroll.dark";
 import normalize from "./normalize";
@@ -8,7 +10,7 @@ import normalize from "./normalize";
 // when we change to new design, we need to change the function back to dark variable
 // And do some changes based on isNewLayout is true
 // And need revert the import from getDarkTheme to dark, getLightTheme to light, revert the function call to dark or light virable
-const getDarkTheme = (isNewLayout = false) => ({
+const getDarkTheme = (isNewLayout = false, newStyles = false) => ({
   palette: {
     mode: "dark",
     primary: {
@@ -29,8 +31,8 @@ const getDarkTheme = (isNewLayout = false) => ({
     styleOverrides: {
       html: {
         ":root": css`
-          ${color}
-          ${colordark}
+          ${newStyles ? color : legacyColor}
+          ${newStyles ? colordark : legacyDark}
           //overide after this line
           --theme-color-modal-header: ${custom.color["mirage-52"]};
           --theme-color-modal-header-border: ${darken(custom.color["mirage-52"], 0.3)};

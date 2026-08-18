@@ -5,9 +5,12 @@ import { ComponentPropsDefault } from "../hooks/model/root";
 import { getTheme } from "./config/utils";
 import ThemeProvider from "./Provider";
 
-export const getThemeClassName = (theme: string): string => {
+export const getThemeClassName = (
+  theme: string,
+  newStyles = false
+): string => {
   const mode = theme === "light" ? "light" : "dark";
-  return `${mode} sc-mode-${mode}`;
+  return newStyles ? `${mode} sc-mode-${mode}` : mode;
 };
 
 const Theme: React.FC<ComponentPropsDefault> = (props): ReactElement => {
@@ -17,11 +20,14 @@ const Theme: React.FC<ComponentPropsDefault> = (props): ReactElement => {
     if (!store?.user?.id || !store.token) {
       themeConfig = "dark";
     }
-    const { config } = Config(getTheme(themeConfig));
-    document.documentElement.className = getThemeClassName(themeConfig);
+    const { config } = Config(getTheme(themeConfig, store.newStyles));
+    document.documentElement.className = getThemeClassName(
+      themeConfig,
+      store.newStyles
+    );
     document.body.style.backgroundColor = config.palette.background.default;
     return config;
-  }, [store.theme, store.user, store.token]);
+  }, [store.theme, store.user, store.token, store.newStyles]);
   return <ThemeProvider theme={theme}>{props.children}</ThemeProvider>;
 };
 

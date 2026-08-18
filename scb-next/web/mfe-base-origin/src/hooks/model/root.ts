@@ -116,6 +116,7 @@ export interface RootModel {
   isOnLogout?: boolean;
   drawers?: Tiles[] | [];
   rootVersion?: string;
+  newStyles?: boolean;
 }
 
 export interface ProviderPropsDefault extends ComponentPropsDefault {
@@ -160,6 +161,7 @@ export const initialData: RootModel = {
   isOnLogout: false,
   drawers: [],
   rootVersion: "",
+  newStyles: false,
 };
 
 export const useIsNewLayout = () => {

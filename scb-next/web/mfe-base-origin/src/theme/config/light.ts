@@ -1,13 +1,15 @@
 import { css, lighten } from "@mui/material/styles";
 import color from "./color";
 import light from "./color.light";
+import legacyColor from "./color.legacy";
+import legacyLight from "./color.light.legacy";
 import custom from "./common";
 import scroll from "./scroll.light";
 import normalize from "./normalize";
 
 // when we change to new design, we need to change the function back to dark variable
 // And do some changes based on isNewLayout is true
-const getLightTheme = (isNewLayout = false) => ({
+const getLightTheme = (isNewLayout = false, newStyles = false) => ({
   palette: {
     mode: "light",
     primary: {
@@ -28,8 +30,8 @@ const getLightTheme = (isNewLayout = false) => ({
     styleOverrides: {
       html: {
         ":root": css`
-          ${color}
-          ${light} //overide after this line
+          ${newStyles ? color : legacyColor}
+          ${newStyles ? light : legacyLight} //overide after this line
         `,
       },
       body: {

@@ -3,6 +3,7 @@ import baseTokens from "./color";
 import darkTokens from "./color.dark";
 import lightTokens from "./color.light";
 import { getThemeClassName } from "../index";
+import { getTheme, THEME } from "./utils";
 
 const declarations = (tokens: string): string[] =>
   tokens
@@ -26,8 +27,18 @@ describe("SC WebKit token migration", () => {
     ).toBe(true);
   });
 
-  it("preserves portal selectors while enabling WebKit modes", () => {
-    expect(getThemeClassName("light")).toBe("light sc-mode-light");
-    expect(getThemeClassName("dark")).toBe("dark sc-mode-dark");
+  it("enables WebKit mode selectors only when new styles are enabled", () => {
+    expect(getThemeClassName("light", false)).toBe("light");
+    expect(getThemeClassName("dark", false)).toBe("dark");
+    expect(getThemeClassName("light", true)).toBe("light sc-mode-light");
+    expect(getThemeClassName("dark", true)).toBe("dark sc-mode-dark");
   });
+
+  it.each([THEME.LIGHT, THEME.DARK])(
+    "selects WebKit token declarations for the %s theme only when enabled",
+    (theme) => {
+      expect(JSON.stringify(getTheme(theme, false))).not.toContain("var(--sc-");
+      expect(JSON.stringify(getTheme(theme, true))).toContain("var(--sc-");
+    },
+  );
 });

@@ -17,6 +17,14 @@ backed by `@scdevkit/webkit` CSS custom properties.
 6. The token surface must be exported by the Base remote for incremental
    consumers.
 
+## Feature flag
+
+Pass `newStyles: true` to the Base `App` or `MountComponent` props to enable
+the WebKit token aliases and mode selectors. The flag defaults to `false`, so
+existing remote hosts retain the legacy token values until they opt in.
+For the standalone portal, use the equivalent `?new-styles=true` query
+parameter.
+
 ## Non-goals
 
 - Replacing MUI or existing Base components.

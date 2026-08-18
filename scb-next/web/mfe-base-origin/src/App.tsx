@@ -7,12 +7,15 @@ import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
 
 export interface AppProps {
   version?: string;
+  newStyles?: boolean;
   [key: string]: unknown;
 }
 
 const App: React.FC<AppProps> = (props): ReactElement => (
   <LocalizationProvider dateAdapter={AdapterDayjs}>
-    <Provider data={{ rootVersion: props.version }}>
+    <Provider
+      data={{ rootVersion: props.version, newStyles: props.newStyles ?? false }}
+    >
       <ThemeProvider>
         <Routing {...props} />
       </ThemeProvider>
