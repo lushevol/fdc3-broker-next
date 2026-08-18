@@ -15,6 +15,7 @@ Run commands from `scb-next`. Generated verification evidence is written under
 | Record candidate and tool versions        | `npm run ops:capture-environment`                             | No                                |
 | Run static local release gates            | `npm run ops:verify-static`                                   | No                                |
 | Probe an already-running edge             | `SCB_NEXT_EDGE_ORIGIN=<url> npm run ops:smoke`                | No                                |
+| Generate a tenant onboarding bundle       | `npm run tenant:onboard`                                      | Local ignored files only          |
 | Check VM tools and environment values     | `npm run vm:preflight`                                        | No                                |
 | Render and validate the VM edge config    | `npm run vm:validate`                                         | Writes ignored rendered config    |
 | Collect VM route timing evidence          | `npm run vm:diagnostics`                                      | No                                |
@@ -25,6 +26,15 @@ Run commands from `scb-next`. Generated verification evidence is written under
 | Collect Kubernetes diagnostics            | `npm run k8s:minikube:diagnostics`                            | No                                |
 | Remove local proof resources              | `npm run k8s:minikube:cleanup`                                | Yes, SCB Next namespace resources |
 | Gate an enterprise production overlay     | `SCB_NEXT_K8S_OVERLAY=<path> npm run k8s:validate:production` | No                                |
+
+## Tenant onboarding
+
+Start with [`../docs/TENANT_ONBOARDING_GUIDE.md`](../docs/TENANT_ONBOARDING_GUIDE.md)
+and run `npm run tenant:onboard`. The processor captures business ownership,
+portal composition, workloads, identity, dependencies, security, and service
+objectives, then generates a descriptor and incomplete evidence checklist. It
+does not provision infrastructure, modify shared routing, or collect raw
+credentials.
 
 ## 1. Local static verification
 

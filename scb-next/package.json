@@ -17,6 +17,7 @@
     "ops:capture-environment": "sh ./devops/scripts/capture-environment.sh",
     "ops:smoke": "sh ./devops/scripts/http-smoke.sh",
     "ops:verify-static": "sh ./devops/scripts/verify-static.sh",
+    "tenant:onboard": "bash ./devops/tenant-onboarding/tenant-onboarding.sh",
     "vm:preflight": "sh ./devops/vm/scripts/preflight.sh",
     "vm:render-nginx": "sh ./devops/vm/scripts/render-nginx.sh",
     "vm:validate": "sh ./devops/vm/scripts/validate-config.sh",

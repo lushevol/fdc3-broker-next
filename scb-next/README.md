@@ -20,3 +20,12 @@ Production currently uses independently deployed VM/Ansible release units behind
 The portable Kubernetes proof is under [devops/kubernetes](devops/kubernetes/README.md). It preserves the same edge route contract and declares every platform and tenant upstream as private `ClusterIP`. Minikube proves build, deployment, routing, federation, mock API, and browser composition behavior only. Runtime NetworkPolicy enforcement requires a policy-capable CNI, and production certification still requires the real BFFs and enterprise infrastructure.
 
 For a reproducible manual check, follow [docs/VERIFICATION_GUIDE.md](docs/VERIFICATION_GUIDE.md) rather than relying on a previous evidence report.
+
+## Tenant onboarding
+
+Use the [tenant onboarding guide](docs/TENANT_ONBOARDING_GUIDE.md) and
+[master checklist](docs/TENANT_ONBOARDING_CHECKLIST.md) when integrating a new
+front-to-back business application into the portal. Run `npm run tenant:onboard`
+for the guided eight-stage intake, or use its non-interactive mode to generate a
+reviewable tenant descriptor and evidence checklist from a public input file.
+The processor never applies Kubernetes resources or accepts raw credentials.
