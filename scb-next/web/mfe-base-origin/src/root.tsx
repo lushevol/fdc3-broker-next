@@ -74,5 +74,6 @@ export * as Select from "./components/Select";
 export * as ResetButton from "./components/ResetButton";
 export * as Services from "./services";
 export * as ScWebkit from "./components/ScWebkit";
+export * as NewStyles from "./new-styles";
 export * as ReactWrapper from "./utils/ReactWrapper";
 export default App;
