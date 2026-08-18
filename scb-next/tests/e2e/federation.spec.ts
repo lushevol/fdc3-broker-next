@@ -66,6 +66,55 @@ developmentTest(
   },
 );
 
+developmentTest(
+  'entitled user completes the Alpha Payments investigation journey',
+  async ({ page }) => {
+    const errors: Error[] = [];
+    const alphaApiRequests: string[] = [];
+    page.on('pageerror', (error) => errors.push(error));
+    page.on('request', (request) => {
+      if (request.url().includes('/api/alpha-payments/')) {
+        alphaApiRequests.push(request.url());
+      }
+    });
+
+    await page.goto('/?show_normal_login=Y&survey=no');
+    await page.getByPlaceholder('Enter Username').fill('mock.cashflow');
+    await page.getByPlaceholder('Enter Password').fill('acceptance');
+    await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+    await expect(page.getByText('New Tile', { exact: true })).toBeVisible();
+
+    await page.getByText('New Tile', { exact: true }).click();
+    const paymentInvestigationTile = page.getByText('Payment Investigation', { exact: false }).first();
+    await expect(paymentInvestigationTile).toBeVisible();
+    await paymentInvestigationTile.click();
+
+    await expect(page.getByRole('heading', { name: 'Payment Investigation' })).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByRole('row', { name: /AP-20481/ })).toContainText('Merlion Bank');
+
+    const search = page.getByRole('searchbox', { name: 'Search cases' });
+    await search.fill('northstar');
+    await expect(page.getByRole('row', { name: /AP-20482/ })).toBeVisible();
+    await expect(page.getByRole('row', { name: /AP-20481/ })).toHaveCount(0);
+    await search.clear();
+
+    await page.getByRole('button', { name: 'Acknowledge AP-20481' }).click();
+    await expect(page.getByRole('row', { name: /AP-20481.*Acknowledged/ })).toBeVisible();
+    await expect(page.getByLabel('Acknowledged cases')).toContainText('2');
+
+    expect(alphaApiRequests.length).toBeGreaterThanOrEqual(2);
+    expect(alphaApiRequests.every((url) => url.startsWith('http://127.0.0.1:8001/'))).toBe(true);
+    expect(errors).toEqual([]);
+
+    await page.getByRole('button', { name: 'Add Workspace' }).click();
+    await expect(page.getByRole('button', { name: 'delete' })).toHaveCount(2);
+    await page.getByRole('button', { name: 'delete' }).first().click();
+    await expect(page.getByRole('heading', { name: 'Payment Investigation' })).toHaveCount(0);
+  },
+);
+
 productionTest('production edge completes the captured Cashflow journey', async ({ page }) => {
   test.setTimeout(60_000);
   const errors: Error[] = [];

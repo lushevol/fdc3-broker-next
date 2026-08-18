@@ -12,6 +12,9 @@ export default defineConfig({
       "mfe_ratan_container/application": fileURLToPath(
         new URL("./src/test/remote-ratan.tsx", import.meta.url),
       ),
+      "mfe_alpha_payments/application": fileURLToPath(
+        new URL("./src/test/remote-alpha-payments.tsx", import.meta.url),
+      ),
     },
   },
   test: {

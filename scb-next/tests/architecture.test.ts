@@ -18,6 +18,35 @@ function packageJson(origin: (typeof activeOrigins)[number]) {
 }
 
 describe('SCB Next composition architecture', () => {
+  it('composes Alpha Payments through the generated tenant paths and workspace processes', () => {
+    const baseConfig = readFileSync(
+      join(workspaceRoot, 'web/mfe-base-origin/vite.config.ts'),
+      'utf8',
+    );
+    const alphaConfig = readFileSync(
+      join(workspaceRoot, 'web/mfe-alpha-payments-origin/vite.config.ts'),
+      'utf8',
+    );
+    const rootManifest = JSON.parse(
+      readFileSync(join(workspaceRoot, 'package.json'), 'utf8'),
+    ) as { workspaces: string[]; scripts: Record<string, string> };
+
+    expect(baseConfig).toContain('VITE_ALPHA_PAYMENTS_REMOTE_URL');
+    expect(baseConfig).toContain('mfe_alpha_payments');
+    expect(baseConfig).toContain('"/api/alpha-payments/"');
+    expect(alphaConfig).toContain('port: 8018');
+    expect(alphaConfig).toContain('VITE_ALPHA_PAYMENTS_API_TARGET');
+    expect(alphaConfig).toContain('"./application"');
+    expect(rootManifest.workspaces).toEqual(
+      expect.arrayContaining([
+        'web/mfe-alpha-payments-origin',
+        'services/alpha-payments-api',
+      ]),
+    );
+    expect(rootManifest.scripts.dev).toContain('@fm/alpha_payments-origin');
+    expect(rootManifest.scripts.dev).toContain('@scb-next/alpha-payments-api');
+  });
+
   it.each(activeOrigins)('uses Vite and Vitest in %s', (origin) => {
     const manifest = packageJson(origin);
 

@@ -4,11 +4,17 @@ import Splash from "../../../components/Splash";
 import ErrorBoundry from "../../../components/ErrorBoundry";
 const AdminModule = React.lazy(() => import("../../../admin"));
 const RatanContainer = React.lazy(() => import("mfe_ratan_container/application"));
+const AlphaPayments = React.lazy(() => import("mfe_alpha_payments/application"));
 
 const Container: React.FC<ContainerProps> = (
   props: ContainerProps
 ): ReactElement => {
-  const Comp = props.container === "@fm/ratan_container" ? RatanContainer : undefined;
+  const Comp =
+    props.container === "@fm/ratan_container"
+      ? RatanContainer
+      : props.container === "@fm/alpha_payments"
+        ? AlphaPayments
+        : undefined;
   return (
     <ErrorBoundry emailSupport={props.emailSupport}>
       <Suspense fallback={<Splash />}>

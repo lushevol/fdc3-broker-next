@@ -47,6 +47,11 @@ export function createMockApiMiddleware({ serviceName = 'single-ui-bff' } = {}) 
     const requestUrl = new URL(request.url ?? '/', 'http://127.0.0.1');
     const { pathname } = requestUrl;
 
+    if (pathname.startsWith('/api/alpha-payments/')) {
+      next();
+      return;
+    }
+
     if (pathname === '/healthz') {
       sendJson(response, { status: 'ok', service: 'scb-next-mock-bff' });
       return;

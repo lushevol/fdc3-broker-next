@@ -6,6 +6,10 @@ import { devMockApiPlugin } from "./dev/mock-api";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const ratanRemoteUrl = env.VITE_RATAN_REMOTE_URL ?? "http://127.0.0.1:8009/remoteEntry.js";
+  const alphaPaymentsRemoteUrl =
+    env.VITE_ALPHA_PAYMENTS_REMOTE_URL ?? "http://127.0.0.1:8018/remoteEntry.js";
+  const alphaPaymentsApiTarget =
+    env.VITE_ALPHA_PAYMENTS_API_TARGET ?? "http://127.0.0.1:8086";
 
   return {
     plugins: [
@@ -21,6 +25,13 @@ export default defineConfig(({ mode }) => {
                 name: "mfe_ratan_container",
                 entry: ratanRemoteUrl,
                 entryGlobalName: "mfe_ratan_container",
+                shareScope: "default",
+              },
+              mfe_alpha_payments: {
+                type: "module",
+                name: "mfe_alpha_payments",
+                entry: alphaPaymentsRemoteUrl,
+                entryGlobalName: "mfe_alpha_payments",
                 shareScope: "default",
               },
             },
@@ -39,6 +50,12 @@ export default defineConfig(({ mode }) => {
       port: 8001,
       strictPort: true,
       headers: { "Cache-Control": "no-store" },
+      proxy: {
+        "/api/alpha-payments/": {
+          target: alphaPaymentsApiTarget,
+          changeOrigin: true,
+        },
+      },
     },
     preview: { host: "127.0.0.1", port: 8001 },
     build: { target: "chrome117" },

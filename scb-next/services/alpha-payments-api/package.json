@@ -1,0 +1,17 @@
+{
+  "name": "@scb-next/alpha-payments-api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.mjs",
+    "start": "node src/index.mjs",
+    "test": "vitest run --coverage",
+    "typecheck": "node --check src/server.mjs && node --check src/index.mjs",
+    "build": "npm run typecheck"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.10",
+    "vitest": "^4.1.10"
+  }
+}

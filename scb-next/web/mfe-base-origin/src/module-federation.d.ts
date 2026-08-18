@@ -3,3 +3,9 @@ declare module "mfe_ratan_container/application" {
   const Application: ComponentType<Record<string, unknown>>;
   export default Application;
 }
+
+declare module "mfe_alpha_payments/application" {
+  import type { ComponentType } from "react";
+  const Application: ComponentType<Record<string, unknown>>;
+  export default Application;
+}

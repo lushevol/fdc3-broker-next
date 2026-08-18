@@ -6,10 +6,12 @@
   "workspaces": [
     "web/mfe-base-origin",
     "web/mfe-ratan-container-origin",
-    "web/mfe-cashflow-blotter-origin"
+    "web/mfe-cashflow-blotter-origin",
+    "web/mfe-alpha-payments-origin",
+    "services/alpha-payments-api"
   ],
   "scripts": {
-    "dev": "concurrently -k -n base,ratan,cashflow -c blue,green,magenta \"npm run dev --workspace @fm/base-origin\" \"npm run dev --workspace @fm/ratan_container-origin\" \"npm run dev --workspace @fm/ratan_cashflow_blotter-origin\"",
+    "dev": "concurrently -k -n base,ratan,cashflow,alpha,alpha-api -c blue,green,magenta,cyan,yellow \"npm run dev --workspace @fm/base-origin\" \"npm run dev --workspace @fm/ratan_container-origin\" \"npm run dev --workspace @fm/ratan_cashflow_blotter-origin\" \"npm run dev --workspace @fm/alpha_payments-origin\" \"npm run dev --workspace @scb-next/alpha-payments-api\"",
     "build": "npm run build --workspaces --if-present",
     "build:production": "sh ./devops/scripts/build-production.sh",
     "serve:production": "sh ./devops/scripts/serve-production.sh",

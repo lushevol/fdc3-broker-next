@@ -47,6 +47,15 @@ async function startProductionMockApi(): Promise<string> {
 }
 
 describe('SCB Next development mock API', () => {
+  it('delegates Alpha Payments API paths to the tenant proxy', async () => {
+    const origin = await startMockApi();
+
+    const response = await fetch(`${origin}/api/alpha-payments/v1/cases`);
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get('x-scb-next-mock-service')).toBe('single-ui-bff');
+  });
+
   it('runs the canonical request-aware handler through the production server', async () => {
     const origin = await startProductionMockApi();
     const [health, views] = await Promise.all([
@@ -102,7 +111,15 @@ describe('SCB Next development mock API', () => {
     await expect(response.json()).resolves.toMatchObject({
       result: 'success',
       drawers: [
-        { tiles: expect.arrayContaining([expect.objectContaining({ title: 'Cashflow Blotter' })]) },
+        {
+          tiles: expect.arrayContaining([
+            expect.objectContaining({ title: 'Cashflow Blotter' }),
+            expect.objectContaining({
+              title: 'Payment Investigation',
+              container: '@fm/alpha_payments',
+            }),
+          ]),
+        },
       ],
     });
   });

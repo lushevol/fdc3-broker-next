@@ -12,6 +12,25 @@ const Comp = (props: ContainerProps) => {
 };
 
 describe("Container component", () => {
+  it("renders the Alpha Payments federated application", async () => {
+    render(<Provider data={{ user: { id: "123" }, token: "123", theme: "dark" }}>
+      <ThemeProvider>
+        <Comp
+          id="alpha-payments"
+          container="@fm/alpha_payments"
+          module="/payment-investigation"
+          tile="/payment-investigation"
+          title="Payment Investigation"
+          emailSupport="alpha-payments-support@example.test"
+          tabId="alpha-tab"
+          panelId="alpha-panel"
+        />
+      </ThemeProvider>
+    </Provider>);
+
+    expect(await screen.findByText("Alpha Payments remote test")).toBeTruthy();
+  });
+
   it("TEMPLATE_CONTAINER should be in the document", () => {
     render(<Provider data={{ user: { id: "123" }, token: "123", theme: "dark" }}>
       <ThemeProvider>
