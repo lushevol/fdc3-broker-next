@@ -75,9 +75,16 @@ cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
 test -f devops/vm/scb-next.env || \
   cp devops/vm/scb-next.env.example devops/vm/scb-next.env
 # Replace every example hostname with the approved environment address.
-npm run vm:render-nginx
+npm run vm:preflight
+npm run vm:validate
 ! rg -n '\$\{' devops/vm/rendered/scb-next.conf
 ```
+
+Set `SCB_NEXT_VM_MODE=production` for the release gate. Production validation
+rejects documentation placeholders and requires
+`SCB_NEXT_NGINX_TEST_COMMAND` to contain the estate-approved `nginx -t`
+invocation. The rendered config path is available to that command as
+`SCB_NEXT_RENDERED_NGINX_CONFIG`.
 
 The `rg` command must return no unresolved template variable. After Ansible stages the rendered file and proxy include in their production locations, run the estate's approved `nginx -t` command before reload. When validating with the supplied non-root container instead, mount the rendered directory at `/etc/nginx/conf.d` and `devops/vm/nginx` at `/etc/nginx/scb-next`. The upstream names must resolve inside the container.
 
@@ -85,6 +92,9 @@ After the edge and upstreams are deployed:
 
 ```bash
 SCB_NEXT_EDGE_ORIGIN=https://<approved-host> npm run vm:verify
+SCB_NEXT_EDGE_ORIGIN=https://<approved-host> \
+  SCB_NEXT_REQUIRE_SECURITY_HEADERS=true npm run ops:smoke
+SCB_NEXT_EDGE_ORIGIN=https://<approved-host> npm run vm:diagnostics
 curl -f -i https://<approved-host>/api/healthz
 curl -f -i https://<approved-host>/api/auth/v2/sso/validate
 curl -f -i https://<approved-host>/api/auth/v1/fmo/admin/importmap/active
@@ -95,6 +105,11 @@ curl -f -I https://<approved-host>/static/ratan/cashflow/remoteEntry.js
 ```
 
 Supply the environment's approved authorization headers or credentials for protected portal probes and verify their response contracts, not only their status codes. Then complete the authenticated API, SockJS/STOMP, browser, security-header, and real-BFF gates in [the manual verification guide](../../docs/VERIFICATION_GUIDE.md). A rendered config and fixture-backed browser pass are pre-deployment evidence only.
+
+Use `SCB_NEXT_CURL_CONFIG` with a protected mode-`0600` curl config outside the
+repository when `ops:smoke` needs headers or mutual-TLS settings. Do not put
+tokens in the command line. `vm:diagnostics` captures route status and timing
+without response bodies or environment variables.
 
 ## Rollback
 

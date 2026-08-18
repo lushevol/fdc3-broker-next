@@ -64,15 +64,30 @@ The three portal Deployments initially use compatible `single-ui-bff` artifacts 
 Prerequisites are Docker, Minikube, `kubectl`, Node/npm dependencies, and the Playwright Chromium browser. Run from `scb-next`:
 
 ```bash
+npm run k8s:validate:local
+npm run k8s:minikube:up
+```
+
+`k8s:minikube:up` runs the complete sequence below. Run the individual stages
+when learning the topology or preserving separate release evidence:
+
+```bash
+npm run k8s:preflight
 npm run k8s:minikube:start
 npm run k8s:minikube:build
 npm run k8s:minikube:deploy
+npm run k8s:minikube:status
 npm run k8s:minikube:verify
 ```
 
 The build command builds images directly in the selected Minikube profile so a mutable local `:dev` tag cannot silently reuse a stale containerd image. The verify command uses port `9083` by default. A passing run proves service identity, per-service outage/recovery, tenant-edge isolation, HTTP probes, and the fixture-backed browser journey. A browser failure caused by an unavailable external URL is still a failed gate: retain the Playwright trace and classify the external dependency instead of suppressing the console error.
 
 The dedicated profile defaults to 2 CPUs and 3072 MB. Override `SCB_NEXT_MINIKUBE_CPUS` or `SCB_NEXT_MINIKUBE_MEMORY` when the workstation has more capacity. Use the isolated `MINIKUBE_HOME` and `KUBECONFIG` procedure in [the manual verification guide](../../docs/VERIFICATION_GUIDE.md) when the tools are not installed globally.
+
+On failure, run `npm run k8s:minikube:diagnostics` before cleanup. Evidence is
+written beneath ignored `artifacts/verification/` and includes inventory, pod
+descriptions, events, rendered manifests, and Minikube logs. Secret values are
+not queried.
 
 ## NetworkPolicy prerequisite
 
@@ -103,3 +118,16 @@ Before creating a production overlay, approve and record:
 - real-BFF authentication, authorization, API, notification, and Cashflow browser certification.
 
 The Kubernetes base contains placeholder image names and no production Secret. Enterprise overlays must replace every image tag by immutable digest, publish the compatible initial artifact under the three portal coordinates, and attach tenant backend implementations to the declared Services. Java code extraction and durable data/session ownership require a later architecture change.
+
+Statically gate an enterprise overlay before any apply:
+
+```bash
+SCB_NEXT_K8S_OVERLAY=/path/to/production/overlay \
+  npm run k8s:validate:production
+```
+
+This fails on mutable or non-digest images, fewer than two replicas, missing
+per-workload disruption budgets, public Services, missing TLS, an Ingress bypass around `scb-next-edge`, missing
+workload hardening, missing default-deny policy, or secret-like ConfigMap keys.
+If `kubeconform` is available it also runs strict schema validation. A pass is a
+manifest gate, not production deployment authorization.

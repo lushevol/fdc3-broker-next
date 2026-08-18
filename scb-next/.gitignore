@@ -3,6 +3,9 @@ dist/
 coverage/
 test-results/
 playwright-report/
+artifacts/verification/
+devops/vm/scb-next.env
+devops/vm/rendered/
 target/
 *.tsbuildinfo
 .DS_Store

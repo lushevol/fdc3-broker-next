@@ -421,6 +421,13 @@ npm --version
 npx playwright --version
 ```
 
+The scripted equivalent records missing prerequisites early:
+
+```bash
+npm run k8s:preflight
+npm run k8s:validate:local
+```
+
 When using workspace-local binaries or an isolated profile, configure every
 terminal consistently before running an npm script:
 
@@ -461,6 +468,12 @@ npm run k8s:minikube:start
 npm run k8s:minikube:build
 npm run k8s:minikube:deploy
 ```
+
+For a workstation learning run, `npm run k8s:minikube:up` executes preflight,
+local manifest policy, start, build, deploy, and the section 14 verification in
+that order. Keep the separate commands for formal evidence. Use
+`SCB_NEXT_MINIKUBE_RUN_VERIFY=false` only when pausing after deployment for
+inspection.
 
 The build must compile Cashflow, Ratan, then Base and build five images directly
 inside the selected Minikube profile. Direct profile builds prevent a running

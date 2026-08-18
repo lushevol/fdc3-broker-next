@@ -15,7 +15,7 @@ The portal host runs at `http://127.0.0.1:8001`, Ratan at `8009`, and Cashflow a
 
 ## Deployment
 
-Production currently uses independently deployed VM/Ansible release units behind one platform-owned Nginx edge. See the [VM production runbook](devops/vm/README.md). The `serve:production` Docker Compose command is local, fixture-backed production-style acceptance and is not the production deployment topology.
+Production currently uses independently deployed VM/Ansible release units behind one platform-owned Nginx edge. Start with the [deployment operator guide](devops/README.md), then use the [VM production runbook](devops/vm/README.md). The `serve:production` Docker Compose command is local, fixture-backed production-style acceptance and is not the production deployment topology.
 
 The portable Kubernetes proof is under [devops/kubernetes](devops/kubernetes/README.md). It preserves the same edge route contract and declares every platform and tenant upstream as private `ClusterIP`. Minikube proves build, deployment, routing, federation, mock API, and browser composition behavior only. Runtime NetworkPolicy enforcement requires a policy-capable CNI, and production certification still requires the real BFFs and enterprise infrastructure.
 
