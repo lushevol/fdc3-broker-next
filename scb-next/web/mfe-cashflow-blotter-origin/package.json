@@ -1,6 +1,6 @@
 {
   "name": "@fm/ratan_cashflow_blotter-origin",
-  "version": "PACKAGE_VERSION",
+  "version": "0.0.0",
   "scripts": {
     "start": "vite --host 127.0.0.1 --port 8015",
     "dev": "vite --host 127.0.0.1 --port 8015",
