@@ -53,5 +53,14 @@
     "typescript": "^5.9.3",
     "vite": "^8.2.1",
     "vitest": "^4.1.10"
+  },
+  "overrides": {
+    "@scdevkit/form": "file:../sc-dev-web/sc-dev-web-form",
+    "@scdevkit/icons": "file:../sc-dev-web/sc-dev-web-icons",
+    "@scdevkit/styles": "file:../sc-dev-web/sc-dev-web-styles",
+    "@scdevkit/webkit": "file:../sc-dev-web/sc-dev-web",
+    "@scdevkit/webkit-datavis": "file:../sc-dev-web/sc-dev-web-datavis",
+    "@scdevkit/webkit-ext": "file:../sc-dev-web/sc-dev-web-ext",
+    "@scdevkit/webkit-rte": "file:../sc-dev-web/sc-dev-web-rte"
   }
 }

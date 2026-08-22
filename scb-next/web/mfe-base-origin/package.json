@@ -53,7 +53,7 @@
     "@mui/x-data-grid": "^9.11.0",
     "@mui/x-date-pickers": "^9.11.0",
     "@mui/x-date-pickers-pro": "^9.11.0",
-    "@scdevkit/webkit": "*",
+    "@scdevkit/webkit": "file:../../../sc-dev-web/sc-dev-web",
     "axios": "^1.19.0",
     "dayjs": "^1.11.21",
     "dompurify": "^3.4.13",
