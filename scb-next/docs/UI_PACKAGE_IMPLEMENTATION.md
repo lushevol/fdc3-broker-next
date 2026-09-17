@@ -41,11 +41,11 @@ support, React 18, and the existing `newStyles=false` default remain intact.
 
 ### Dependency matrix
 
-| Base dependency | Pinned version |
-| --- | --- |
-| Material and icons | 5.18.0 |
-| Data Grid | 6.20.4 |
-| Date pickers and Pro range pickers | 6.20.2 |
+| Base dependency                    | Pinned version |
+| ---------------------------------- | -------------- |
+| Material and icons                 | 5.18.0         |
+| Data Grid                          | 6.20.4         |
+| Date pickers and Pro range pickers | 6.20.2         |
 
 These versions match the installed legacy consumers. Ratan/Cashflow manifests,
 business screens, imports, federation sharing, and appearance defaults are
@@ -193,10 +193,26 @@ production builds prepare the package before applications.
 
 Stages 3-5 remain open: additional reusable patterns, central Ratan/Cashflow
 adapter rewiring and cross-app theme-import removal, catalog adoption, ownership,
-versioned releases and rollback governance. The WebKit generation preserves
-the existing partial semantic-token migration, not a newly branded MUI palette.
-Legacy Poppins remains host-supplied. No performance latency guarantee is claimed.
+versioned releases and rollback governance. Legacy Poppins remains host-supplied.
+No performance latency guarantee is claimed.
 Stage 1's existing lint/mobile-login/console/typecheck limitations remain.
 Production-edge acceptance and a corporate-registry clean install were not run.
 Workspace dependency installation reported 44 audit findings (21 moderate,
 23 high); audit triage is a release prerequisite, not an automatic bulk upgrade.
+
+## Stage 2.1: distinct SC GDS WebKit generation
+
+The first Stage 2 implementation scoped SC WebKit variables but still built the
+MUI theme from the legacy palette and Poppins typography. This made the legacy
+and WebKit controls visually identical. The WebKit theme now maps MUI 5 to the
+SC GDS visual language while the one-argument theme helper and provider default
+remain legacy-compatible.
+
+- WebKit uses SC Prosper Sans and GDS light/dark palettes and surfaces.
+- Contained and outlined buttons consume SC button state variables, use the GDS
+  32px control height, 6px radius and visible focus treatment.
+- Outlined inputs and selects consume SC form background, border, focus, error,
+  disabled, label and placeholder variables at the GDS 32px height.
+- Legacy retains the extracted appearance and existing Base adapter behavior.
+- Unit coverage asserts the generation mapping; the independent browser matrix
+  asserts distinct computed typography, primary color and control dimensions.

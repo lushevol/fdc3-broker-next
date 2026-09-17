@@ -5,14 +5,16 @@ slice contains Button, LoadingButton, Input, Select, explicit theme factories,
 and legacy / SC WebKit tokens. No Base store, auth, router or services are needed.
 
 ```tsx
-import { RatanDesignProvider, Input, Button } from "ratan-design-origin";
-import "ratan-design-origin/styles.css";
+import { RatanDesignProvider, Input, Button } from 'ratan-design-origin';
+import 'ratan-design-origin/styles.css';
 
 export function PaymentForm() {
-  return <RatanDesignProvider mode="light" designGeneration="legacy">
-    <Input variant="outlined" label="Reference" />
-    <Button variant="contained">Submit</Button>
-  </RatanDesignProvider>;
+  return (
+    <RatanDesignProvider mode="light" designGeneration="legacy">
+      <Input variant="outlined" label="Reference" />
+      <Button variant="contained">Submit</Button>
+    </RatanDesignProvider>
+  );
 }
 ```
 
@@ -22,8 +24,9 @@ read storage or choose appearance from application state. Hosts own those
 policies and date localization. Load CSS explicitly for scoped legacy/WebKit
 aliases, canonical WebKit variables and fonts. Keyboard-focused actions show a
 2px brand-color focus ring; Select labels are associated with their combobox.
-The WebKit generation preserves the existing partial token migration; it is
-not a fully rebranded MUI palette. Legacy Poppins remains host-supplied.
+The WebKit generation maps MUI controls to the SC GDS palette, SC Prosper Sans,
+spacing, radii, button states and form-control states. Legacy keeps its existing
+Poppins typography and compact visual baseline during migration.
 
 ## Imports
 
