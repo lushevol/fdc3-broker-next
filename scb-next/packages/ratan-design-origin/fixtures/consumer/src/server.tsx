@@ -2,6 +2,9 @@ import React from "react";
 import { renderToString } from "react-dom/server";
 import {
   Button,
+  Loader,
+  PageLoader,
+  Snackbar,
   Input,
   Select,
   RatanDesignProvider,
@@ -13,6 +16,9 @@ if (typeof window !== "undefined" || typeof document !== "undefined")
   throw new Error("SSR proof must run without a DOM");
 const html = renderToString(
   <RatanDesignProvider>
+    <Loader text="Loading trades" />
+    <PageLoader text="Loading workspace" />
+    <Snackbar open message={<strong>Saved</strong>} />
     <Button>Server action</Button>
     <Input variant="outlined" label="Reference" />
     <Select variant="outlined" label="Currency" value="USD">
@@ -22,6 +28,8 @@ const html = renderToString(
 );
 if (
   !html.includes("Server action") ||
+  !html.includes("Loading trades") ||
+  !html.includes("Saved") ||
   createRatanTheme().ratan.designGeneration !== "legacy"
 )
   throw new Error("SSR contract failed");

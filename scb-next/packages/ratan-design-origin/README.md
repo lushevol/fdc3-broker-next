@@ -2,7 +2,7 @@
 
 Internal standalone React 18 / Material UI 5 design-system candidate. The first
 slice contains Button, LoadingButton, Input, Select, the search controls and
-layouts, ToggleButton, Label, explicit theme factories, and legacy / SC WebKit
+layouts, ToggleButton, Label, Loader, PageLoader, Snackbar, explicit theme factories, and legacy / SC WebKit
 tokens. No Base store, auth, router or services are needed.
 
 ```tsx
@@ -50,6 +50,15 @@ ResetButton, ToggleButton and Label preserve the existing Base contracts while
 their implementations and visual policy are now owned by this package.
 SearchGrid, SearchCondition and SearchConditionContainer provide the composed
 search layout, dismissible criteria and collapsed/expanded criteria region.
+
+Loader announces a loading status (default accessible name: "Loading...") and
+shows visible text only when supplied. `size` accepts a number or CSS dimension;
+the legacy 90px maximum remains. PageLoader centers it in an absolute full-page
+region and accepts `slotProps.loader` for loader-specific attributes.
+Snackbar accepts plain text or React content in `message`, plus `action`,
+`severity`, `variant`, `alertsx`, and MUI Snackbar lifecycle props. Strings are
+never parsed as HTML. Its scrollable message region retains the legacy 50px
+height cap. Base's adapter alone preserves sanitized legacy HTML messages.
 
 React / ReactDOM, Material / icons and Emotion are external peers. The verified
 matrix is React 18.3.1, Material/icons 5.18.0, Emotion 11.14.0 / 11.14.1.

@@ -276,3 +276,66 @@ Storybook catalog compile and render the composed search pattern.
 Remaining Stage 3 work includes feedback controls, date/time entry points and
 the reusable presentation portion of Dialog. Later stages still cover central
 Ratan/Cashflow adapter rewiring, catalog adoption and release governance.
+
+### Stage 3 batch 3 specification: feedback controls
+
+- Move Loader, PageLoader and Snackbar presentation into the package root.
+  Package-owned loader props accept text, numeric/CSS dimensions and native
+  section attributes without importing Base types. Preserve the legacy SVG,
+  90px default/cap, optional visible text and full-page positioning. Expose one
+  accessible loading status with a default label and decorative SVG.
+- Keep Base module paths, prop exports and test identifiers through adapters.
+  Package styles use stable classes; no application environment is read by the
+  package. Legacy colors/layout remain intact; WebKit uses SC semantic roles.
+- Package Snackbar renders its message as React content: strings are plain text
+  and React elements retain interaction. It never interprets HTML. Base alone
+  preserves its existing stringification and DOMPurify HTML sanitization.
+  Retain severity/variant, alert styling, action, close reasons, auto-hide and
+  caller Snackbar props. Retain the 50px scrollable message region.
+- Verify package public imports and Base compatibility exports, including safe
+  content, notification actions, close/timeout callbacks, loader labels/sizing,
+  legacy fallback and both WebKit modes. Include packed declaration/SSR checks
+  and Storybook feedback states, then run Base and host acceptance checks.
+
+### Stage 3 batch 3 delivery and verification (2026-09-18)
+
+Loader, PageLoader and Snackbar presentation now live in `ratan-design-origin`.
+Base retains its default exports, loader prop namespace, notification prop type
+and test identifiers through compatibility adapters. Loader props no longer
+import the Base store model. Loading status is announced even without visible
+text; the SVG is decorative. Stable package classes replace the environment
+prefix in presentation styles, with legacy test identifiers kept in Base.
+
+Package Snackbar renders plain text and React content without HTML parsing.
+Base retains its existing DOMPurify sanitization and message stringification.
+The package preserves notification actions, close/timeout callbacks, severity,
+variant and styling overrides, with a single accessible alert. WebKit loading
+colors and notification radii use SC semantic tokens; legacy layout and color
+values remain intact. Explicit Emotion/MUI types keep emitted declarations free
+of nested installation paths.
+
+- Package: 26 public-interface tests pass, 100% lines and branches; strict
+  typecheck, lint, ESM/declaration build and Storybook build pass.
+- Independent tarball: modern and legacy TypeScript resolution, production
+  build, external-peer/tree-shaking checks and DOM-free SSR pass. SSR now renders
+  all three feedback controls. Used a temporary npm cache after the default
+  cache rejected writes; no user cache ownership changes were made.
+- Base: 126 files / 354 tests pass, 96.89% lines and 93.36% branches. Strict
+  typecheck, production build, Storybook build and changed-file lint pass.
+  The added compatibility test preserves formatted HTML while rejecting script
+  and event-handler injection and exercising notification actions/dismissal.
+- Required host Playwright journey passes: login, New Tile, Cashflow fixture
+  render, add workspace and delete the Cashflow workspace. Chromium required
+  execution outside the macOS sandbox. The initial cold-start attempt timed out
+  waiting for the tile; the warm rerun passed in 6.6 seconds without code changes.
+- Storybook visual check: WebKit dark loading/notification and dismissal pass;
+  WebKit light long-message notification at 390px has no horizontal overflow and
+  retains a scrollable message region. Existing Base console warnings remain.
+- GitNexus FTS repair and index rebuild succeed. The selected feedback symbols
+  and style roots have LOW reported impact with no indexed callers/processes;
+  JSX/import graph limitations are covered by public tests and the host journey.
+
+Remaining work: BuilderButton, dedicated date/time and Pro range entry points,
+Dialog presentation, central Ratan/Cashflow adapter rewiring, catalog completion
+and release governance. The pre-existing `scb-next/package-lock.json` change is
+excluded from this stage.

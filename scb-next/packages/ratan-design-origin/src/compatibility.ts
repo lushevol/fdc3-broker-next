@@ -5,3 +5,5 @@ export { default as lightAliases } from "./tokens/color.light.js";
 export { default as legacyColorAliases } from "./tokens/color.legacy.js";
 export { default as legacyDarkAliases } from "./tokens/color.dark.legacy.js";
 export { default as legacyLightAliases } from "./tokens/color.light.legacy.js";
+export { LoaderRoot, loaderClasses } from "./loader-style.js";
+export { SnackbarRoot } from "./Snackbar.js";

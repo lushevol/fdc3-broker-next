@@ -1,7 +1,12 @@
-import React from "react";
-import type { Theme } from "@mui/material/styles";
+import React from 'react';
+import type { Theme } from '@mui/material/styles';
 import {
   Button,
+  Loader,
+  PageLoader,
+  Snackbar,
+  type LoaderProps,
+  type SnackbarProps,
   Input,
   Select,
   LoadingButton,
@@ -16,21 +21,15 @@ import {
   ToggleButton,
   type InputProps,
   type LoadingButtonProps,
-} from "ratan-design-origin";
-import {
-  createRatanTheme,
-  type DesignGeneration,
-} from "ratan-design-origin/theme";
-import { legacyTokens, newStyleTokens } from "ratan-design-origin/tokens";
-import {
-  InputStyled,
-  legacyColorAliases,
-} from "ratan-design-origin/compatibility";
+} from 'ratan-design-origin';
+import { createRatanTheme, type DesignGeneration } from 'ratan-design-origin/theme';
+import { legacyTokens, newStyleTokens } from 'ratan-design-origin/tokens';
+import { InputStyled, legacyColorAliases } from 'ratan-design-origin/compatibility';
 
 const theme: Theme = createRatanTheme();
 const generation: DesignGeneration = theme.ratan.designGeneration;
 const input: InputProps = {
-  variant: "outlined",
+  variant: 'outlined',
   inputProps: { maxLength: 50 },
   slotProps: { inputLabel: { shrink: false } },
 };
@@ -41,21 +40,13 @@ const rootRef = React.createRef<HTMLDivElement>();
 
 export const capturedContracts = (
   <>
-    <Button
-      ref={buttonRef}
-      sx={(currentTheme) => ({ color: currentTheme.palette.primary.main })}
-    >
+    <Button ref={buttonRef} sx={(currentTheme) => ({ color: currentTheme.palette.primary.main })}>
       Search
     </Button>
     <LoadingButton {...loading} ref={buttonRef}>
       Save
     </LoadingButton>
-    <Input
-      {...input}
-      ref={rootRef}
-      inputRef={inputRef}
-      onChange={(event) => event.target.value}
-    />
+    <Input {...input} ref={rootRef} inputRef={inputRef} onChange={(event) => event.target.value} />
     <Select
       variant="standard"
       value="USD"
@@ -71,11 +62,7 @@ export const capturedContracts = (
       <Input label="Reference" variant="outlined" />
     </SearchGrid>
     <SearchConditionContainer>
-      <SearchCondition
-        label="Status"
-        value="Confirmed"
-        onClose={() => undefined}
-      />
+      <SearchCondition label="Status" value="Confirmed" onClose={() => undefined} />
     </SearchConditionContainer>
     <ToggleButton value="active">Active</ToggleButton>
     <Label label="Status" value="Status">
@@ -90,3 +77,21 @@ export const exportedContracts = {
   InputStyled,
   legacyColorAliases,
 };
+
+const loader: LoaderProps = { text: 'Loading trades', size: '24px', 'aria-label': 'Refreshing' };
+const notification: SnackbarProps = {
+  open: true,
+  severity: 'success',
+  message: <strong>Saved</strong>,
+  alertsx: [(currentTheme) => ({ color: currentTheme.palette.text.primary })],
+  onClose: (_event, reason) => {
+    String(reason);
+  },
+};
+export const feedbackContracts = (
+  <>
+    <Loader {...loader} />
+    <PageLoader {...loader} slotProps={{ loader: { 'data-testid': 'loading' } }} />
+    <Snackbar {...notification} action={<Button>Undo</Button>} />
+  </>
+);

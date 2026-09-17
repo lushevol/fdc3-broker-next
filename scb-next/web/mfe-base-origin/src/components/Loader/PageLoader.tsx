@@ -1,20 +1,12 @@
-import React, { ReactElement } from "react";
-import useController from "./common/useController";
-import Root, { classes, PREFIX } from "./common/style";
-import Loader from "./";
-import { LoaderProps } from "./common/type";
+import React from 'react';
+import { PageLoader as DesignPageLoader, type LoaderProps } from 'ratan-design-origin';
+import { PREFIX } from './common/style';
 
-const PageLoader: React.FC<LoaderProps> = (
-  props: LoaderProps
-): ReactElement => {
-  useController();
-  return (
-    <Root className={classes.root} data-testid={`${PREFIX}_Page`}>
-      <div className={classes.page}>
-        <Loader {...props} />
-      </div>
-    </Root>
-  );
-};
-
+const PageLoader = (props: LoaderProps) => (
+  <DesignPageLoader
+    data-testid={`${PREFIX}_Page`}
+    {...props}
+    slotProps={{ loader: { 'data-testid': PREFIX } }}
+  />
+);
 export default React.memo(PageLoader);
