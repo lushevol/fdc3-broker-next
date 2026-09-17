@@ -1,8 +1,22 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { Button, LoadingButton, Input, Select } from "../src";
+import {
+  Button,
+  Label,
+  LabelMenuItem,
+  LoadingButton,
+  Input,
+  ResetButton,
+  SearchButton,
+  SearchInput,
+  Select,
+  ToggleButton,
+  modeStyle,
+  RatanDesignProvider,
+} from "../src";
 import MenuItem from "@mui/material/MenuItem";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
 describe("standalone controls", () => {
   it("preserves left labels, hidden state and modern slot precedence", () => {
@@ -164,5 +178,73 @@ describe("standalone controls", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(onClick).toHaveBeenCalledOnce();
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  });
+
+  it("provides search input adornments and invokes the clear callback", () => {
+    const clear = vi.fn();
+    render(
+      <SearchInput
+        label="Find trade"
+        variant="outlined"
+        handleClear={clear}
+      />
+    );
+    fireEvent.click(screen.getByRole("button"));
+    expect(clear).toHaveBeenCalledOnce();
+    expect(screen.getByTestId("SearchIcon")).toBeVisible();
+  });
+
+  it("preserves search and reset button behavior in both modes", () => {
+    const click = vi.fn();
+    const { rerender } = render(
+      <RatanDesignProvider mode="light">
+        <SearchButton onClick={click}>Search</SearchButton>
+        <ResetButton onClick={click}>Reset</ResetButton>
+      </RatanDesignProvider>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    fireEvent.click(screen.getByRole("button", { name: "Reset" }));
+    expect(click).toHaveBeenCalledTimes(2);
+
+    rerender(
+      <RatanDesignProvider mode="dark">
+        <SearchButton loading loadingSize={20} onClick={click}>
+          Search
+        </SearchButton>
+        <ResetButton disabled>Reset</ResetButton>
+      </RatanDesignProvider>
+    );
+    expect(screen.getByRole("progressbar")).toHaveStyle({
+      width: "20px",
+      height: "20px",
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    expect(click).toHaveBeenCalledTimes(2);
+  });
+
+  it("supports toggle selection and exposes both appearance calculations", () => {
+    const changed = vi.fn();
+    render(
+      <ToggleButtonGroup exclusive onChange={changed} value="open">
+        <ToggleButton value="open">Open</ToggleButton>
+        <ToggleButton value="closed">Closed</ToggleButton>
+      </ToggleButtonGroup>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Closed" }));
+    expect(changed).toHaveBeenCalled();
+    expect(modeStyle({ shape: { borderRadius: 5 } } as never, "light")).toBeDefined();
+    expect(modeStyle({ shape: { borderRadius: 5 } } as never, "dark")).toBeDefined();
+  });
+
+  it("renders the label selector and reports the selected label", () => {
+    const changed = vi.fn();
+    render(
+      <Label label="Status" value="Status" onChange={changed}>
+        <LabelMenuItem value="Confirmed">Confirmed</LabelMenuItem>
+      </Label>
+    );
+    fireEvent.mouseDown(screen.getByRole("combobox"));
+    fireEvent.click(screen.getByRole("option", { name: "Confirmed" }));
+    expect(changed).toHaveBeenCalled();
   });
 });

@@ -5,6 +5,12 @@ import {
   Input,
   Select,
   LoadingButton,
+  Label,
+  LabelMenuItem,
+  ResetButton,
+  SearchButton,
+  SearchInput,
+  ToggleButton,
   type InputProps,
   type LoadingButtonProps,
 } from "ratan-design-origin";
@@ -55,6 +61,13 @@ export const capturedContracts = (
         React.isValidElement(child);
       }}
     />
+    <SearchInput variant="outlined" handleClear={() => undefined} />
+    <SearchButton loading={false}>Search</SearchButton>
+    <ResetButton>Reset</ResetButton>
+    <ToggleButton value="active">Active</ToggleButton>
+    <Label label="Status" value="Status">
+      <LabelMenuItem value="Confirmed">Confirmed</LabelMenuItem>
+    </Label>
   </>
 );
 export const exportedContracts = {

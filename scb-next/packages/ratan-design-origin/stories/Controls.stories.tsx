@@ -1,7 +1,19 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import MenuItem from "@mui/material/MenuItem";
-import { Button, LoadingButton, Input, Select } from "../src";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import {
+  Button,
+  Label,
+  LabelMenuItem,
+  LoadingButton,
+  Input,
+  ResetButton,
+  SearchButton,
+  SearchInput,
+  Select,
+  ToggleButton,
+} from "../src";
 
 function Controls() {
   const [currency, setCurrency] = React.useState("USD");
@@ -25,10 +37,25 @@ function Controls() {
         <MenuItem value="USD">USD</MenuItem>
         <MenuItem value="SGD">SGD</MenuItem>
       </Select>
+      <SearchInput
+        label="Find trade"
+        variant="outlined"
+        handleClear={() => undefined}
+      />
+      <Label label="Group by" value="Group by">
+        <LabelMenuItem value="Counterparty">Counterparty</LabelMenuItem>
+        <LabelMenuItem value="Status">Status</LabelMenuItem>
+      </Label>
+      <ToggleButtonGroup exclusive value="tracking">
+        <ToggleButton value="tracking">Tracking</ToggleButton>
+        <ToggleButton value="archived">Archived</ToggleButton>
+      </ToggleButtonGroup>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         <Button variant="contained">Submit</Button>
         <Button disabled>Disabled</Button>
         <LoadingButton loading>Saving</LoadingButton>
+        <SearchButton>Search</SearchButton>
+        <ResetButton>Reset</ResetButton>
       </div>
     </div>
   );

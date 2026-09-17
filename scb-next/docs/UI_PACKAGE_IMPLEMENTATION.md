@@ -216,3 +216,17 @@ remain legacy-compatible.
 - Legacy retains the extracted appearance and existing Base adapter behavior.
 - Unit coverage asserts the generation mapping; the independent browser matrix
   asserts distinct computed typography, primary color and control dimensions.
+
+## Stage 3 progress: composed controls batch 1
+
+SearchInput, SearchButton, ResetButton, ToggleButton and Label now live in
+`ratan-design-origin`. Base keeps its existing module paths, default exports,
+named prop types, `modeStyle`, and Label `MenuItem` export through thin adapters,
+so existing screens and stories require no import or prop changes.
+
+The package public suite covers search clearing, loading suppression, reset
+actions, light/dark style branches, toggle selection and label selection. The
+packed-consumer fixture compiles every new public export, and Storybook exposes
+the batch beside the first-slice controls. Remaining Stage 3 work includes the
+search layout patterns, feedback controls, date entry points and the reusable
+presentation portion of Dialog.

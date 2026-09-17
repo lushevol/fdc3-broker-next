@@ -1,8 +1,9 @@
 # Ratan Design Origin
 
 Internal standalone React 18 / Material UI 5 design-system candidate. The first
-slice contains Button, LoadingButton, Input, Select, explicit theme factories,
-and legacy / SC WebKit tokens. No Base store, auth, router or services are needed.
+slice contains Button, LoadingButton, Input, Select, SearchInput, SearchButton,
+ResetButton, ToggleButton, Label, explicit theme factories, and legacy / SC
+WebKit tokens. No Base store, auth, router or services are needed.
 
 ```tsx
 import { RatanDesignProvider, Input, Button } from 'ratan-design-origin';
@@ -44,6 +45,9 @@ to MUI 5, with slots taking precedence over legacy props. Button/LoadingButton
 forward button refs; Input forwards root and native input refs. Select forwards
 its root ref and associates its visible label with the combobox. LoadingButton
 retains the label and disables the action while loading (default spinner 14px).
+SearchInput composes Input with search and clear adornments. SearchButton,
+ResetButton, ToggleButton and Label preserve the existing Base contracts while
+their implementations and visual policy are now owned by this package.
 
 React / ReactDOM, Material / icons and Emotion are external peers. The verified
 matrix is React 18.3.1, Material/icons 5.18.0, Emotion 11.14.0 / 11.14.1.
