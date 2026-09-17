@@ -2,6 +2,7 @@ import React from "react";
 import { renderToString } from "react-dom/server";
 import {
   Button,
+  BuilderButton,
   Loader,
   PageLoader,
   Snackbar,
@@ -20,6 +21,7 @@ const html = renderToString(
     <PageLoader text="Loading workspace" />
     <Snackbar open message={<strong>Saved</strong>} />
     <Button>Server action</Button>
+    <BuilderButton label="Table" anchorEl={null}>Server options</BuilderButton>
     <Input variant="outlined" label="Reference" />
     <Select variant="outlined" label="Currency" value="USD">
       <MenuItem value="USD">USD</MenuItem>

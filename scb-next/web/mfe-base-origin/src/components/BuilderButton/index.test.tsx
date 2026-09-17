@@ -99,7 +99,6 @@ const waitFor = (time = 2000) => new Promise((resolve) => {
 
 describe("BuilderButton component", () => {
   it("light theme should be in the document", async () => {
-    const randomUUID = vi.spyOn(globalThis.crypto, "randomUUID");
     render(<Provider data={{ theme: "light", token: undefined, user: undefined }}>
       <ThemeProvider>
         <Comp />
@@ -108,11 +107,12 @@ describe("BuilderButton component", () => {
     expect(screen).toBeDefined();
     const BuilderButton = screen.getByTestId("BuilderButton")
     expect(BuilderButton).toBeInTheDocument();
-    expect(randomUUID).toHaveBeenCalledOnce();
     BuilderButton.click();
     await waitFor()
     const tabpanel = screen.getByTestId("Builder-tabpanel-1")
     expect(tabpanel).toBeInTheDocument();
+    const popoverId = BuilderButton.getAttribute("aria-describedby");
+    expect(document.getElementById(popoverId!)).toContainElement(tabpanel);
     tabpanel.click();
     const close = screen.getByTestId("popover-close");
     expect(close).toBeInTheDocument();

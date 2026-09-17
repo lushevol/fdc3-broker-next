@@ -2,6 +2,12 @@ import React from 'react';
 import type { Theme } from '@mui/material/styles';
 import {
   Button,
+  BuilderButton,
+  BuilderTab,
+  BuilderTabs,
+  BuilderTabPanel,
+  builderTabProps,
+  type BuilderButtonProps,
   Loader,
   PageLoader,
   Snackbar,
@@ -94,4 +100,15 @@ export const feedbackContracts = (
     <PageLoader {...loader} slotProps={{ loader: { 'data-testid': 'loading' } }} />
     <Snackbar {...notification} action={<Button>Undo</Button>} />
   </>
+);
+
+const builder: BuilderButtonProps = { label: 'Filters', anchorEl: null, popOverWidth: '400px' };
+export const builderContracts = (
+  <BuilderButton {...builder}>
+    <BuilderTabs value={0} ref={rootRef}>
+      <BuilderTab component="button" ref={buttonRef} label="Columns" {...builderTabProps(0)} />
+      <BuilderTab component="a" href="#settings" label="Settings" {...builderTabProps(1)} />
+    </BuilderTabs>
+    <BuilderTabPanel value={0} index={0}>Column settings</BuilderTabPanel>
+  </BuilderButton>
 );

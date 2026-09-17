@@ -1,5 +1,5 @@
 import React from "react";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { KeyboardArrowDown as KeyboardArrowDownIcon } from "@mui/icons-material";
 import MuiMenuItem, { type MenuItemProps } from "@mui/material/MenuItem";
 import MuiSelect, { type SelectProps as MuiSelectProps } from "@mui/material/Select";
 import { styled } from "@mui/material/styles";

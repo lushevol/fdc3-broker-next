@@ -339,3 +339,54 @@ Remaining work: BuilderButton, dedicated date/time and Pro range entry points,
 Dialog presentation, central Ratan/Cashflow adapter rewiring, catalog completion
 and release governance. The pre-existing `scb-next/package-lock.json` change is
 excluded from this stage.
+
+### Stage 3 batch 4 specification: BuilderButton
+
+- Package owns BuilderButton and its tab composition helpers. Base preserves
+  its default export, BuilderButtonProps, TabPanel, a11yTabPanelProps, emptyFunction,
+  Tabs and Tab through a compatibility re-export. Root package names use the
+  Builder prefix for tab exports to avoid future collisions.
+- Keep caller-owned anchorEl/open state, Table/Filters icons, enforced outlined
+  variant/primary color/start icon, caller end-icon precedence, popover dimensions,
+  tab visibility and mounted children. Preserve legacy styling; WebKit uses SC
+  semantic colors/spacing. Scoped provider overlays remain inside their root.
+- Generate the button/popover relationship with React useId for stable SSR and
+  hydration. Do not publish the former randomUUID implementation as a contract.
+- Scope border-box sizing to builder tabs, panels and footer so standalone
+  consumers need no document reset for correct popover content sizing.
+- Verify opening/closing through the caller's state, both labels and tab helpers,
+  keyboard tab navigation, unique popover IDs, dimension overrides, all theme
+  generations/modes, and Base exports. Include Storybook and packed-consumer
+  declarations/SSR plus the full Base suite and host journey.
+
+### Stage 3 batch 4 delivery and verification (2026-09-18)
+
+BuilderButton and its tab composition now live in the package; Base delegates
+through compatible default/named exports. Caller anchor state, labels/icons,
+dimension overrides and inactive mounted panels are preserved. React useId
+provides stable trigger/popover relationships. MUI polymorphic tab contracts and
+refs compile in the independent consumer. Builder tabs/panels/footer explicitly
+use border-box sizing to avoid depending on Base's document reset.
+
+Storybook browser verification exposed MUI 5 CommonJS icon-subpath interop that
+unit tests did not catch. Builder and its existing composed search controls now
+use named MUI icon imports, preserving appearance and behavior while rendering
+correctly in the standalone production catalog.
+
+- Package: 30 tests, 100% lines/branches; typecheck, lint, ESM/declaration build
+  and production Storybook pass.
+- Independent tarball: modern/legacy TypeScript resolution, consumer production
+  build, external peers/tree shaking and DOM-free SSR pass; builder included.
+- Base: 126 files / 354 tests pass, 96.88% lines and 93.34% branches. Strict
+  typecheck, production/Storybook builds and changed-builder lint pass.
+- Host Playwright login, New Tile, Cashflow render, add/delete workspace pass.
+- Production Storybook: builder opens, switches tabs, supports arrow-key focus
+  and closes from Apply; WebKit light desktop and dark 390px screenshots inspected.
+  Footer/input fit; narrow document scroll width equals viewport width (390px).
+- GitNexus FTS repair/index refresh succeeds. Builder and affected search-control
+  imports report LOW impact, no affected runtime processes. Tab helper impacts
+  are confined to stories/test composition and Base exports.
+
+Stage 3 still requires date/time/optional Pro range entry points and Dialog
+presentation. Consumer adapter integration and catalog/release governance remain
+open. The unrelated lockfile modification is excluded from this stage.

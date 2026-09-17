@@ -1,6 +1,8 @@
 import React from "react";
-import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
-import KeyboardDoubleArrowUpIcon from "@mui/icons-material/KeyboardDoubleArrowUp";
+import {
+  KeyboardDoubleArrowDown as KeyboardDoubleArrowDownIcon,
+  KeyboardDoubleArrowUp as KeyboardDoubleArrowUpIcon,
+} from "@mui/icons-material";
 import MuiFab from "@mui/material/Fab";
 import MuiStack, { type StackProps } from "@mui/material/Stack";
 import { darken, styled } from "@mui/material/styles";

@@ -1,6 +1,5 @@
 import React from "react";
-import SearchIcon from "@mui/icons-material/Search";
-import CloseIcon from "@mui/icons-material/Close";
+import { Search as SearchIcon, Close as CloseIcon } from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import { Input, type InputProps } from "./Input.js";

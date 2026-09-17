@@ -50,6 +50,12 @@ ResetButton, ToggleButton and Label preserve the existing Base contracts while
 their implementations and visual policy are now owned by this package.
 SearchGrid, SearchCondition and SearchConditionContainer provide the composed
 search layout, dismissible criteria and collapsed/expanded criteria region.
+BuilderButton composes a Table/Filters trigger with a controlled popover.
+Callers own `anchorEl` and clear it from their actions to close; the legacy
+284x560px popover accepts `popOverWidth`/`popOverHeight` overrides. BuilderTabs,
+BuilderTab, BuilderTabPanel and `builderTabProps` retain MUI tab navigation and
+the existing mounted inactive-panel behavior. A provider scopes the popover
+inside its theme root. Trigger/popover IDs are stable across SSR hydration.
 
 Loader announces a loading status (default accessible name: "Loading...") and
 shows visible text only when supplied. `size` accepts a number or CSS dimension;
