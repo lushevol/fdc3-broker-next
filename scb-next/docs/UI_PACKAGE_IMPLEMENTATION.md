@@ -390,3 +390,54 @@ correctly in the standalone production catalog.
 Stage 3 still requires date/time/optional Pro range entry points and Dialog
 presentation. Consumer adapter integration and catalog/release governance remain
 open. The unrelated lockfile modification is excluded from this stage.
+
+### Stage 3 batch 5 specification: optional date integrations
+
+- `ratan-design-origin/dates` owns DatePicker, DateTimePicker and TimePicker,
+  their Dayjs prop types, LocalizationProvider and AdapterDayjs exports. Hosts
+  choose locale, timezone and localization configuration explicitly.
+- `ratan-design-origin/date-range` owns the Pro single-input range picker.
+  X pickers 6.20.2 and Dayjs are optional peers; core/theme/compatibility must
+  remain usable without date dependencies. Pro licensing belongs to the host.
+- Preserve Dayjs conversion, default top/optional left labels, hidden styles,
+  callback signatures, default shrink and caller slotProps precedence. Range
+  keeps its single-input field and ignores caller slots as Base currently does.
+- Base keeps default exports, prop-type paths and environment test identifiers.
+  The shared package styles must not rely on Base's global CSS or store.
+- Verify the agreed public package and Base compatibility interfaces with real
+  picker controls: values, edits/callbacks, calendar selection, hidden/disabled
+  state, label layout, locale and overrides. Include independent packed consumers
+  with and without optional peers, declarations/SSR, catalog and host checks.
+
+### Stage 3 batch 5 delivery and verification (2026-09-18)
+
+DatePicker, DateTimePicker and TimePicker now live in the `dates` integration;
+DateRangePicker lives in the separate optional Pro `date-range` integration.
+Their identical styles share a package helper. Base retains its default/type
+paths, environment prefix constants, label classes and picker prop precedence.
+Base's existing host dependency deduplication now includes date libraries and
+Dayjs, avoiding a second React/localization context through workspace installs.
+
+- Package: 38 tests pass, 100% lines/branches; strict typecheck, lint, ESM and
+  declaration builds and production Storybook pass.
+- Independent packed consumer: core works without installed date/Pro/Dayjs
+  peers; modern and legacy declarations pass before and after explicit date
+  installation. Core production/SSR/tree shaking and DOM-free date SSR pass.
+  Fixture explicitly includes optional/dev dependencies during installation to
+  prevent npm pruning optional peer types during the second install.
+- Base: 127 test files / 355 tests pass; 96.87% lines and 93.22% branches;
+  typecheck, production/Storybook builds and changed date-source lint pass.
+- Host acceptance login, New Tile, Cashflow render and workspace deletion pass.
+- Catalog screenshots inspected: WebKit light top labels on desktop, WebKit
+  dark left labels at 390px; all fields and the full-width range fit without
+  document overflow. Calendar selection updates the controlled date. Existing
+  legacy appearance is preserved and no global reset is required.
+- GitNexus reports LOW component/style impacts, no runtime processes; prop
+  types affect one or two direct Base/story dependents. JSX graph limitations
+  are covered by compatibility tests and the integrated host journey.
+
+MUI X 6 ignores top-level picker data attributes in both former Base and package
+implementations; supported field identifiers use text-field input slot props.
+No Pro license is bundled or initialized. Existing development license notices
+remain; production licensing and font redistribution still belong to release
+governance. The unrelated lockfile remains byte-for-byte unchanged by this stage.

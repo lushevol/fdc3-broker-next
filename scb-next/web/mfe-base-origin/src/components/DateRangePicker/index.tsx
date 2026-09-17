@@ -1,30 +1,16 @@
 import React from "react";
-import { SingleInputDateRangeField } from "@mui/x-date-pickers-pro/SingleInputDateRangeField";
-import dayjs from "dayjs";
-import Root, { classes, PREFIX } from "./common/style";
-import { DateRangePickerProps } from "./common/interface";
+import {
+  DateRangePicker as PackageDateRangePicker,
+  type DateRangePickerProps
+} from "ratan-design-origin/date-range";
+import { PREFIX, classes } from "./common/style";
 
-const DateRangePicker: React.FC<DateRangePickerProps> = ({
-  labelPosition = "top",
-  slots: _slots,
-  value: _value,
-  hidden,
-  sx,
-  ...rest
-}: DateRangePickerProps): React.ReactElement => {
-  return (
-    <Root
-      className={labelPosition === "left" ? classes.left : undefined}
-      data-testid={`${PREFIX}`}
-      value={
-        _value?.length === 2 ? [dayjs(_value[0]), dayjs(_value[1])] : undefined
-      }
-      slots={{ field: SingleInputDateRangeField }}
-      slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
-      sx={{ ...sx, display: hidden ? "none!important" : undefined }}
-      {...rest}
-    />
-  );
-};
+const DateRangePicker: React.FC<DateRangePickerProps> = (props) => (
+  <PackageDateRangePicker
+    data-testid={PREFIX}
+    className={props.labelPosition === "left" ? classes.left : undefined}
+    {...props}
+  />
+);
 
 export default React.memo(DateRangePicker);

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { cp, mkdtemp, readFile, readdir } from "node:fs/promises";
+import { cp, mkdtemp, readFile, readdir, access } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -12,7 +12,7 @@ const npm = (args, cwd = consumer) =>
   execFileSync("npm", args, {
     cwd,
     encoding: "utf8",
-    stdio: ["ignore", "pipe", "inherit"],
+    stdio: ["ignore", "pipe", "inherit"]
   });
 await cp(join(root, "fixtures/consumer"), consumer, { recursive: true });
 const [packed] = JSON.parse(
@@ -26,15 +26,27 @@ assert.equal(
 npm([
   "install",
   "--ignore-scripts",
+  "--include=dev",
+  "--include=optional",
   "--no-audit",
   "--no-fund",
   "--registry=https://registry.npmjs.org",
   "--cache=/tmp/npm-cache",
-  join(consumer, packed.filename),
+  join(consumer, packed.filename)
 ]);
 console.log(npm(["run", "typecheck"]));
 console.log(npm(["run", "typecheck", "--", "--moduleResolution", "node"]));
 console.log(npm(["run", "build"]));
+for (const peer of [
+  "@mui/x-date-pickers",
+  "@mui/x-date-pickers-pro",
+  "dayjs"
+]) {
+  await assert.rejects(
+    access(join(consumer, "node_modules", peer)),
+    `Core consumer unexpectedly installed optional peer ${peer}`
+  );
+}
 
 const installed = join(consumer, "node_modules/ratan-design-origin");
 const css = postcss.parse(
@@ -72,14 +84,14 @@ const result = await build({
       name: "capture-package-modules",
       generateBundle() {
         modules.push(...this.getModuleIds());
-      },
-    },
+      }
+    }
   ],
   build: {
     write: false,
     lib: { entry: join(consumer, "src/button.ts"), formats: ["es"] },
-    rolldownOptions: { external: peers },
-  },
+    rolldownOptions: { external: peers }
+  }
 });
 const code = (Array.isArray(result) ? result : [result])
   .flatMap((bundle) => bundle.output)
@@ -107,11 +119,53 @@ await build({
   configFile: false,
   logLevel: "warn",
   ssr: { noExternal: true },
-  build: { ssr: "src/server.tsx", outDir: "dist-server" },
+  build: { ssr: "src/server.tsx", outDir: "dist-server" }
 });
 execFileSync(process.execPath, [join(consumer, "dist-server/server.js")], {
   cwd: consumer,
-  stdio: "inherit",
+  stdio: "inherit"
 });
 assert((await readdir(join(installed, "dist/fonts"))).length === 13);
+npm([
+  "install",
+  "--ignore-scripts",
+  "--include=dev",
+  "--include=optional",
+  "--no-audit",
+  "--no-fund",
+  "--registry=https://registry.npmjs.org",
+  "--cache=/tmp/npm-cache",
+  "@mui/x-date-pickers@6.20.2",
+  "@mui/x-date-pickers-pro@6.20.2",
+  "dayjs@1.11.21"
+]);
+console.log(
+  npm(["run", "typecheck", "--", "--project", "tsconfig.dates.json"])
+);
+console.log(
+  npm([
+    "run",
+    "typecheck",
+    "--",
+    "--project",
+    "tsconfig.dates.json",
+    "--moduleResolution",
+    "node"
+  ])
+);
+await build({
+  root: consumer,
+  configFile: false,
+  logLevel: "warn",
+  ssr: { noExternal: true },
+  build: { ssr: "src/server-dates.tsx", outDir: "dist-server-dates" }
+});
+execFileSync(
+  process.execPath,
+  [join(consumer, "dist-server-dates/server-dates.js")],
+  {
+    cwd: consumer,
+    stdio: "inherit"
+  }
+);
 console.log(`Independent tarball consumer verified: ${consumer}`);

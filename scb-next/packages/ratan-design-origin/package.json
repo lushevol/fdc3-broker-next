@@ -24,6 +24,12 @@
       ],
       "compatibility": [
         "dist/compatibility.d.ts"
+      ],
+      "dates": [
+        "dist/dates.d.ts"
+      ],
+      "date-range": [
+        "dist/date-range.d.ts"
       ]
     }
   },
@@ -44,7 +50,15 @@
       "types": "./dist/compatibility.d.ts",
       "import": "./dist/compatibility.js"
     },
-    "./styles.css": "./dist/styles.css"
+    "./styles.css": "./dist/styles.css",
+    "./dates": {
+      "types": "./dist/dates.d.ts",
+      "import": "./dist/dates.js"
+    },
+    "./date-range": {
+      "types": "./dist/date-range.d.ts",
+      "import": "./dist/date-range.js"
+    }
   },
   "scripts": {
     "build": "vite build && tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
@@ -63,9 +77,26 @@
     "@mui/material": "^5.18.0",
     "@mui/icons-material": "^5.18.0",
     "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1"
+    "@emotion/styled": "^11.14.1",
+    "@mui/x-date-pickers": "~6.20.2",
+    "@mui/x-date-pickers-pro": "~6.20.2",
+    "dayjs": "^1.11.21"
+  },
+  "peerDependenciesMeta": {
+    "@mui/x-date-pickers": {
+      "optional": true
+    },
+    "@mui/x-date-pickers-pro": {
+      "optional": true
+    },
+    "dayjs": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@mui/x-date-pickers": "6.20.2",
+    "@mui/x-date-pickers-pro": "6.20.2",
+    "dayjs": "1.11.21",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "@mui/material": "5.18.0",

@@ -39,6 +39,9 @@ Poppins typography and compact visual baseline during migration.
 - `ratan-design-origin/compatibility`: existing CSS alias strings and
   `InputStyled`; retained for Base adapters, not a new customization contract.
 - `ratan-design-origin/styles.css`: scoped canonical WebKit variables and fonts.
+- `ratan-design-origin/dates`: DatePicker, DateTimePicker, TimePicker, their
+  Dayjs prop types, LocalizationProvider and AdapterDayjs.
+- `ratan-design-origin/date-range`: optional Pro single-input DateRangePicker.
 
 Controls accept MUI 5 props. Input also translates Base's modern slot spelling
 to MUI 5, with slots taking precedence over legacy props. Button/LoadingButton
@@ -70,6 +73,17 @@ React / ReactDOM, Material / icons and Emotion are external peers. The verified
 matrix is React 18.3.1, Material/icons 5.18.0, Emotion 11.14.0 / 11.14.1.
 ESM and declarations are shipped; no CommonJS export is promised.
 Core excludes grid/date/Pro integrations and WebKit element registration.
+
+Date integrations require `@mui/x-date-pickers@6.20.2` and `dayjs@1.11.21`.
+Range also requires `@mui/x-date-pickers-pro@6.20.2`; the host owns MUI X Pro
+licensing and license initialization. These peers are optional and never loaded
+by the core entry point. Wrap dates in LocalizationProvider with AdapterDayjs;
+the host chooses `adapterLocale`, timezone, formats and validation policy.
+Controls retain `labelPosition="top" | "left"`, `hidden`, Dayjs values and MUI X
+callbacks. Caller `slotProps` replaces the default shrink text-field props;
+range always uses SingleInputDateRangeField. Field identifiers belong in
+`slotProps.textField.inputProps`; MUI X 6 ignores top-level data attributes.
+The compiled `fixtures/consumer/src/dates.tsx` demonstrates the public imports.
 
 ## Development
 

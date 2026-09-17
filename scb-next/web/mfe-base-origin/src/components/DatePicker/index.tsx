@@ -1,25 +1,16 @@
 import React from "react";
-import dayjs from "dayjs";
-import Root, { classes, PREFIX } from "./common/style";
-import { DatePickerProps } from "./common/interface";
+import {
+  DatePicker as PackageDatePicker,
+  type DatePickerProps
+} from "ratan-design-origin/dates";
+import { PREFIX, classes } from "./common/style";
 
-const DatePicker: React.FC<DatePickerProps> = ({
-  labelPosition = "top",
-  value: _value,
-  hidden,
-  sx,
-  ...rest
-}: DatePickerProps): React.ReactElement => {
-  return (
-    <Root
-      className={labelPosition === "left" ? classes.left : undefined}
-      data-testid={`${PREFIX}`}
-      value={_value ? dayjs(_value) : null}
-      slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
-      sx={{ ...sx, display: hidden ? "none!important" : undefined }}
-      {...rest}
-    />
-  );
-};
+const DatePicker: React.FC<DatePickerProps> = (props) => (
+  <PackageDatePicker
+    data-testid={PREFIX}
+    className={props.labelPosition === "left" ? classes.left : undefined}
+    {...props}
+  />
+);
 
 export default React.memo(DatePicker);

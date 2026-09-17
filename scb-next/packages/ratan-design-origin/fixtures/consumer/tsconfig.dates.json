@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/dates.tsx", "src/server-dates.tsx"],
+  "exclude": []
+}

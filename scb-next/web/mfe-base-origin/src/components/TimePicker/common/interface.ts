@@ -1,6 +1,1 @@
-import type { Dayjs } from "dayjs";
-import { TimePickerProps as MuiTimePickerProps } from "@mui/x-date-pickers/TimePicker";
-export interface TimePickerProps extends MuiTimePickerProps<Dayjs> {
-  labelPosition?: "top" | "left";
-  hidden?: boolean;
-}
+export type { TimePickerProps } from "ratan-design-origin/dates";
