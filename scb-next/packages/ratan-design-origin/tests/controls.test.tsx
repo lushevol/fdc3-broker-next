@@ -9,14 +9,21 @@ import {
   Input,
   ResetButton,
   SearchButton,
+  SearchCondition,
+  SearchConditionContainer,
+  SearchGrid,
   SearchInput,
   Select,
   ToggleButton,
   modeStyle,
+  searchConditionContainerBorderStyle,
+  searchConditionContainerModeStyle,
+  searchConditionModeStyle,
   RatanDesignProvider,
 } from "../src";
 import MenuItem from "@mui/material/MenuItem";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 describe("standalone controls", () => {
   it("preserves left labels, hidden state and modern slot precedence", () => {
@@ -246,5 +253,93 @@ describe("standalone controls", () => {
     fireEvent.mouseDown(screen.getByRole("combobox"));
     fireEvent.click(screen.getByRole("option", { name: "Confirmed" }));
     expect(changed).toHaveBeenCalled();
+  });
+
+  it("composes a search grid and removes a closed condition", () => {
+    const closed = vi.fn();
+    render(
+      <RatanDesignProvider mode="light" designGeneration="legacy">
+        <SearchGrid data-testid="search-grid">
+          <SearchCondition
+            label="Status"
+            value="Confirmed"
+            onClose={closed}
+          />
+        </SearchGrid>
+      </RatanDesignProvider>
+    );
+
+    expect(screen.getByTestId("search-grid")).toHaveTextContent(
+      "StatusConfirmed"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(closed).toHaveBeenCalledOnce();
+    expect(screen.queryByText("Confirmed")).not.toBeInTheDocument();
+    expect(searchConditionModeStyle("dark")).toBe("rgba(203, 203, 203, 1)");
+    expect(searchConditionModeStyle("light")).toBe("rgba(34,34,34, 1)");
+  });
+
+  it("expands and collapses search conditions while enforcing layout defaults", () => {
+    const { rerender } = render(
+      <RatanDesignProvider mode="dark" designGeneration="legacy">
+        <SearchConditionContainer
+          data-testid="conditions"
+          spacing={4}
+          direction="column"
+          useFlexGap={false}
+          style={{ height: "900px" }}
+        >
+          <span>Condition</span>
+        </SearchConditionContainer>
+      </RatanDesignProvider>
+    );
+
+    const container = screen.getByTestId("conditions");
+    expect(container).toHaveStyle({ height: "49px" });
+    fireEvent.click(screen.getByRole("button", { name: "expand" }));
+    expect(container).toHaveStyle({ height: "auto" });
+    fireEvent.click(screen.getByRole("button", { name: "expand" }));
+    expect(container).toHaveStyle({ height: "49px" });
+    expect(searchConditionContainerModeStyle("dark")).toBe(
+      "rgba(0, 0, 0, 1)"
+    );
+    expect(searchConditionContainerModeStyle("light")).toBe(
+      "rgba(243, 243, 243, 1)"
+    );
+    expect(searchConditionContainerBorderStyle("dark")).toBe(
+      "1px solid rgba(44, 63, 94, 1)"
+    );
+    expect(searchConditionContainerBorderStyle("light")).toBe(
+      "1px solid rgba(208, 208, 208, 1)"
+    );
+
+    rerender(
+      <RatanDesignProvider mode="light" designGeneration="webkit">
+        <SearchConditionContainer data-testid="webkit-conditions">
+          <SearchCondition label="Status" value="Open" onClose={vi.fn()} />
+        </SearchConditionContainer>
+      </RatanDesignProvider>
+    );
+    expect(screen.getByTestId("webkit-conditions")).toHaveTextContent(
+      "StatusOpen"
+    );
+  });
+
+  it("treats host themes without generation metadata as legacy", () => {
+    render(
+      <ThemeProvider theme={createTheme()}>
+        <SearchConditionContainer data-testid="host-conditions">
+          <SearchCondition
+            label="Status"
+            value="Pending"
+            onClose={vi.fn()}
+          />
+        </SearchConditionContainer>
+      </ThemeProvider>
+    );
+
+    expect(screen.getByTestId("host-conditions")).toHaveTextContent(
+      "StatusPending"
+    );
   });
 });

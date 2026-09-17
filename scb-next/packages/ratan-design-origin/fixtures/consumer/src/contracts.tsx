@@ -9,6 +9,9 @@ import {
   LabelMenuItem,
   ResetButton,
   SearchButton,
+  SearchCondition,
+  SearchConditionContainer,
+  SearchGrid,
   SearchInput,
   ToggleButton,
   type InputProps,
@@ -64,6 +67,16 @@ export const capturedContracts = (
     <SearchInput variant="outlined" handleClear={() => undefined} />
     <SearchButton loading={false}>Search</SearchButton>
     <ResetButton>Reset</ResetButton>
+    <SearchGrid>
+      <Input label="Reference" variant="outlined" />
+    </SearchGrid>
+    <SearchConditionContainer>
+      <SearchCondition
+        label="Status"
+        value="Confirmed"
+        onClose={() => undefined}
+      />
+    </SearchConditionContainer>
     <ToggleButton value="active">Active</ToggleButton>
     <Label label="Status" value="Status">
       <LabelMenuItem value="Confirmed">Confirmed</LabelMenuItem>

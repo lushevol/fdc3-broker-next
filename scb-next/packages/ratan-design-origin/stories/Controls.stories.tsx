@@ -10,6 +10,9 @@ import {
   Input,
   ResetButton,
   SearchButton,
+  SearchCondition,
+  SearchConditionContainer,
+  SearchGrid,
   SearchInput,
   Select,
   ToggleButton,
@@ -42,6 +45,21 @@ function Controls() {
         variant="outlined"
         handleClear={() => undefined}
       />
+      <SearchGrid>
+        <Input label="Client FMID" variant="outlined" labelPosition="left" />
+      </SearchGrid>
+      <SearchConditionContainer>
+        <SearchCondition
+          label="Status"
+          value="Confirmed"
+          onClose={() => undefined}
+        />
+        <SearchCondition
+          label="Currency"
+          value="USD"
+          onClose={() => undefined}
+        />
+      </SearchConditionContainer>
       <Label label="Group by" value="Group by">
         <LabelMenuItem value="Counterparty">Counterparty</LabelMenuItem>
         <LabelMenuItem value="Status">Status</LabelMenuItem>

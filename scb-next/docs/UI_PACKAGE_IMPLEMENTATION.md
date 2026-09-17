@@ -230,3 +230,49 @@ packed-consumer fixture compiles every new public export, and Storybook exposes
 the batch beside the first-slice controls. Remaining Stage 3 work includes the
 search layout patterns, feedback controls, date entry points and the reusable
 presentation portion of Dialog.
+
+### Stage 3 batch 2 specification: search layout patterns
+
+- Move `SearchGrid`, `SearchCondition` and `SearchConditionContainer` into the
+  standalone package as public components with their MUI 5 prop contracts.
+- Keep Base's default exports and its existing `modeStyle` and
+  `modeBorderStyle` named exports through compatibility adapters. The package
+  uses unambiguous public names for those helpers because `ToggleButton`
+  already exports `modeStyle` from the package root.
+- Preserve the legacy layout, close callback, collapsed 49px container,
+  expand/collapse action and caller prop precedence. WebKit generation colors,
+  borders, spacing and radii consume the package's SC token aliases.
+- Cover close removal, callback forwarding, expand/collapse state, enforced
+  layout defaults, helper outputs and both design generations through package
+  public-interface tests. Compile the new exports in the packed-consumer
+  fixture and expose the composed pattern in Storybook.
+
+### Stage 3 batch 2 delivery and verification (2026-09-18)
+
+`SearchGrid`, `SearchCondition` and `SearchConditionContainer` now live in
+`ratan-design-origin`. Base delegates through thin adapters and retains its
+default exports plus the existing `modeStyle` and `modeBorderStyle` aliases.
+The package root exposes uniquely named style helpers to avoid colliding with
+the existing ToggleButton helper. Legacy host themes without `theme.ratan`
+metadata default safely to the legacy generation.
+
+Legacy dimensions, prop precedence, close behavior and collapse behavior are
+unchanged. WebKit generation surfaces, text, borders, spacing, radii and action
+states use semantic SC token aliases. The packed-consumer contract and
+Storybook catalog compile and render the composed search pattern.
+
+- Package public suite: 21 tests pass with 100% lines and branches.
+- Package strict typecheck, lint, ESM/declaration build and Storybook pass.
+- Independent tarball verification passes modern and legacy TypeScript
+  resolution, consumer build, external-peer bundling and DOM-free SSR.
+- Base strict typecheck, production build and Storybook pass.
+- Base public suite: 125 files / 353 tests pass; 96.91% lines and 93.40%
+  branches. Existing test-runner, mock-network and timer warnings remain.
+- Required host journey passes: login, New Tile, Cashflow render and workspace
+  tab deletion. The combined launcher still hits the existing Alpha API
+  `EMFILE` watcher limit, so the verified journey used the Base, Ratan and
+  Cashflow hosts directly.
+
+Remaining Stage 3 work includes feedback controls, date/time entry points and
+the reusable presentation portion of Dialog. Later stages still cover central
+Ratan/Cashflow adapter rewiring, catalog adoption and release governance.
