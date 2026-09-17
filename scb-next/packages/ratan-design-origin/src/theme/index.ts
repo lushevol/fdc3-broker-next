@@ -43,6 +43,10 @@ export function createRatanTheme({
           defaultProps: { container },
         },
         MuiPopover: { defaultProps: { container } },
+        MuiDialog: {
+          ...options.components?.MuiDialog,
+          defaultProps: { ...options.components?.MuiDialog?.defaultProps, container },
+        },
         MuiModal: { defaultProps: { container } },
         MuiPopper: { defaultProps: { container } },
       },

@@ -6,6 +6,7 @@ import {
   Loader,
   PageLoader,
   Snackbar,
+  Dialog,
   Input,
   Select,
   RatanDesignProvider,
@@ -20,6 +21,7 @@ const html = renderToString(
     <Loader text="Loading trades" />
     <PageLoader text="Loading workspace" />
     <Snackbar open message={<strong>Saved</strong>} />
+    <Dialog open disablePortal titleComponents="Server dialog">Server details</Dialog>
     <Button>Server action</Button>
     <BuilderButton label="Table" anchorEl={null}>Server options</BuilderButton>
     <Input variant="outlined" label="Reference" />
@@ -36,3 +38,6 @@ if (
 )
   throw new Error("SSR contract failed");
 console.log("DOM-free package import and server render passed");
+if (!renderToString(<Dialog open disablePortal titleComponents="Server dialog">Server details</Dialog>).includes("Server details")) {
+  throw new Error("Standalone dialog SSR lost content");
+}

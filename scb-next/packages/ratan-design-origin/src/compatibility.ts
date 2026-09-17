@@ -7,3 +7,5 @@ export { default as legacyDarkAliases } from "./tokens/color.dark.legacy.js";
 export { default as legacyLightAliases } from "./tokens/color.light.legacy.js";
 export { LoaderRoot, loaderClasses } from "./loader-style.js";
 export { SnackbarRoot } from "./Snackbar.js";
+export { default as DialogRoot, classes as dialogClasses } from "./dialog-style.js";
+export { default as DialogTitle, setBg, darkBg, lightBg, type DialogTitleProps } from "./DialogTitle.js";

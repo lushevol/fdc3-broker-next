@@ -8,6 +8,7 @@ export default defineConfig({
       "react",
       "react-dom",
       "@mui/material",
+      "@mui/system",
       "@emotion/react",
       "@emotion/styled",
     ],

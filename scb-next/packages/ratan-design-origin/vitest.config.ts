@@ -8,10 +8,12 @@ export default defineConfig({
       "react",
       "react-dom",
       "@mui/material",
+      "@mui/system",
       "@emotion/react",
       "@emotion/styled",
     ],
   },
+  ssr: { noExternal: [/@mui\//, /@emotion\//] },
   test: {
     environment: "jsdom",
     setupFiles: ["tests/setup.ts"],

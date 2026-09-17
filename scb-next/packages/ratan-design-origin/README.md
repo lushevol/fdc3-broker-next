@@ -69,6 +69,14 @@ Snackbar accepts plain text or React content in `message`, plus `action`,
 never parsed as HTML. Its scrollable message region retains the legacy 50px
 height cap. Base's adapter alone preserves sanitized legacy HTML messages.
 
+Dialog composes a controlled MUI dialog with `titleComponents`, `actionComponents`,
+`onCloseButton`, `disabledClose` and `dividers`. MUI `onClose` retains its reason
+argument; the explicit close-button callback is separate. A provider scopes its
+overlay; an explicit `container` overrides that default. Hosts can replace or
+suppress `header`, supply `contentRef`, title/content/action props, and append
+`surfaceChildren` for interaction adornments. Hosts own sizing, maximize/resize,
+drag integration via PaperComponent, stacking, telemetry and workspace policy.
+
 React / ReactDOM, Material / icons and Emotion are external peers. The verified
 matrix is React 18.3.1, Material/icons 5.18.0, Emotion 11.14.0 / 11.14.1.
 ESM and declarations are shipped; no CommonJS export is promised.

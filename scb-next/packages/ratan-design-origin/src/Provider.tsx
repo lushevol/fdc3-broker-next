@@ -1,6 +1,7 @@
 import React from "react";
 import { styled, ThemeProvider } from "@mui/material/styles";
 import { createRatanTheme, type RatanThemeOptions } from "./theme/index.js";
+export const OverlayContainerContext = /*#__PURE__*/ React.createContext<HTMLElement | null | undefined>(undefined);
 const Root = /*#__PURE__*/ styled("div")(({ theme }) => ({
   color: theme.palette.text.primary,
   backgroundColor: theme.palette.background.default,
@@ -23,20 +24,21 @@ export function RatanDesignProvider({
   className,
   children,
 }: RatanDesignProviderProps) {
-  const root = React.useRef<HTMLDivElement>(null);
+  const [root, setRoot] = React.useState<HTMLDivElement | null>(null);
   const theme = React.useMemo(
     () =>
       createRatanTheme({
         mode,
         designGeneration,
-        container: () => root.current,
+        container: root ?? undefined,
       }),
-    [mode, designGeneration]
+    [mode, designGeneration, root]
   );
   return (
+    <OverlayContainerContext.Provider value={root}>
     <ThemeProvider theme={theme}>
       <Root
-        ref={root}
+        ref={setRoot}
         className={["ratan-design-root", className].filter(Boolean).join(" ")}
         data-mode={mode}
         data-generation={designGeneration}
@@ -44,5 +46,6 @@ export function RatanDesignProvider({
         {children}
       </Root>
     </ThemeProvider>
+    </OverlayContainerContext.Provider>
   );
 }

@@ -441,3 +441,52 @@ implementations; supported field identifiers use text-field input slot props.
 No Pro license is bundled or initialized. Existing development license notices
 remain; production licensing and font redistribution still belong to release
 governance. The unrelated lockfile remains byte-for-byte unchanged by this stage.
+
+### Stage 3 batch 6 specification: Dialog presentation
+
+- Package Dialog composes a controlled MUI surface, title/close action, content
+  and footer. Open/container, sizing, header replacement, refs and interaction
+  handlers are explicit props; it reads no Base state or document policy.
+- Base keeps its existing controller for workspace lookup, telemetry, dragging,
+  resizing/maximize, tab overflow, positioning and modal stacking. Its adapter
+  supplies those inputs to package presentation and retains existing defaults,
+  classes, test identifiers, close semantics and title/action visibility.
+- Package compatibility exports own the legacy Dialog root/title presentation.
+  Preserve legacy appearance; WebKit title actions use semantic tokens. Drag
+  integration remains host-owned through MUI PaperComponent.
+- Verify public package composition, title/content/footer overrides, close and
+  keyboard callbacks, disabled close and controlled maximize/resize actions;
+  verify Base's existing integration suite and independent declarations/SSR.
+
+### Stage 3 batch 6 delivery and verification (2026-09-18)
+
+Package Dialog owns the controlled title/content/footer composition and explicit
+header, surface-adornment, ref and lifecycle inputs. Compatibility exports own
+Base's legacy root/title presentation. Base's controller, drag integration,
+workspace lookup, analytics, resize/positioning and modal stacking remain in
+Base; its adapter supplies those inputs and preserves legacy classes/test IDs.
+WebKit title actions and resize styling use semantic tokens.
+
+An initially open dialog exposed an overlay ordering issue: a ref-backed root
+can still be null when MUI resolves its container. The provider now announces
+its attached root through a presentation-only context and scoped Dialog waits
+for that root before opening. This also prevents stale aria-hidden ancestors
+when a modal moves from the body. Explicit host containers still take precedence.
+Server rendering remains DOM-free; a provider-scoped portal waits for mount,
+while standalone disablePortal rendering retains server content.
+
+- Package: 45 tests, 100% lines/branches; typecheck, lint, ESM/declarations,
+  production catalog and independent packed consumer all pass. Packed proof
+  includes standalone Dialog SSR and unchanged core-without-optional-peers checks.
+- Base: 127 files / 355 tests pass; 96.86% lines and 93.15% branches; strict
+  typecheck, production/Storybook builds and changed Dialog lint pass.
+- Host login, tile creation/render and workspace deletion pass.
+- Catalog screenshots inspected: desktop WebKit light and 390px WebKit dark;
+  dialog width is 326px on mobile with no document overflow. Escape and close
+  controls dismiss; focus returns to the trigger.
+- GitNexus component/title/style/provider/theme impacts are LOW with no runtime
+  processes; local composition helpers have one direct dependent each. Graph
+  limitations are covered by public composition tests and the existing Base suite.
+
+Stage 3 shared-pattern implementation is complete. Stage 4 consumer adapters,
+the remaining inventory classification, and release governance remain open.

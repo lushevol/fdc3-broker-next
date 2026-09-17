@@ -28,6 +28,7 @@ export {
 } from "./Provider.js";
 export { Loader, PageLoader, type LoaderProps, type PageLoaderProps } from "./Loader.js";
 export { Snackbar, type SnackbarProps } from "./Snackbar.js";
+export { Dialog, type DialogProps } from "./Dialog.js";
 export {
   BuilderButton, BuilderTabPanel, BuilderTabs, BuilderTab,
   builderTabProps, builderEmptyStyle,
