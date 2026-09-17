@@ -41,6 +41,6 @@ vi.mock("../../utils/common", () => {
 });
 describe("Channel Util", () => {
   it("should be true", () => {
-    expect(initialData).toEqual({ "clientBus": undefined, "currentWorkspace": undefined, "drawer": false,  "drawers": [], "entities": [], "entitlementsToken": undefined, "errorMsg": undefined, "expiredIn": 0, "iat": 0, "isLoading": true, "isOnLogout": false, "isOpenFin": false, "refreshTab": {}, "refreshToken": undefined, "rootVersion": "", "sseCallback": {}, "ssePayload": [], "theme": "a b", "timeType": "local", "token": "a b", "user": {}, "userLoginTime": undefined, "workspaces": [] });
+    expect(initialData).toEqual({ "newStyles": false, "clientBus": undefined, "currentWorkspace": undefined, "drawer": false,  "drawers": [], "entities": [], "entitlementsToken": undefined, "errorMsg": undefined, "expiredIn": 0, "iat": 0, "isLoading": true, "isOnLogout": false, "isOpenFin": false, "refreshTab": {}, "refreshToken": undefined, "rootVersion": "", "sseCallback": {}, "ssePayload": [], "theme": "a b", "timeType": "local", "token": "a b", "user": {}, "userLoginTime": undefined, "workspaces": [] });
   });
 });

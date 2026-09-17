@@ -56,7 +56,8 @@ Stop the affected stage and report evidence when any of these conditions holds:
 - a private package or Maven artifact is unavailable and the target cannot be
   installed or built reproducibly;
 - a proposed change would require a React major change across only one origin;
-- Base resolves Ratan or Cashflow to Base's MUI 9 dependency tree;
+- Ratan or Cashflow resolves UI dependencies outside its declared workspace
+  installation;
 - a compatibility facade would need to duplicate business logic rather than
   expose a narrow platform capability;
 - a backend schema, entitlement, workflow, or data migration would cease to be
@@ -166,15 +167,15 @@ tests, deployment path, and rollback plan before exposing it in the drawer.
 The dependency graph is part of runtime correctness.
 
 - React and ReactDOM remain `18.2` compatible across Base, Ratan, and Cashflow.
-- Base uses current MUI 9, MUI X 9, Emotion 11, Storybook 10, ESLint 9, Vite 8,
-  and Vitest 4 as recorded in
-  [base-origin-dependency-audit.md](base-origin-dependency-audit.md).
+- Base uses Material/icons 5.18.0, Data Grid 6.20.4, and date pickers 6.20.2
+  as recorded in [UI_PACKAGE_IMPLEMENTATION.md](UI_PACKAGE_IMPLEMENTATION.md).
+  Emotion 11, Storybook 10, ESLint 9, Vite 8, and Vitest 4 remain unchanged.
 - Ratan and Cashflow retain MUI 5 and their existing Ant Design, AG Grid,
   GraphQL, state, and test dependency lines. Their version upgrades are
   independent migrations.
 - The SCB Next root uses npm's nested install strategy. After every install,
-  run `npm run verify:dependency-isolation` and require Base to resolve MUI 9
-  while both remotes resolve MUI 5 from their own workspaces.
+  run `npm run verify:dependency-isolation` and require Base and both remotes
+  to resolve MUI 5 from their own workspaces.
 - One root `scb-next/package-lock.json` must cover all workspaces. Do not create
   child lockfiles.
 - `@scdevkit/webkit` and SCB Maven starters require corporate registry access.

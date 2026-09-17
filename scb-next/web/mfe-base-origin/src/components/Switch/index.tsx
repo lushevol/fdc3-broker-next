@@ -38,7 +38,7 @@ const Switch: React.FC = (): ReactElement => {
             checked={store.theme === "light"}
             onChange={toggleColorMode}
             data-testid={`${PREFIX}_SwitchStyled`}
-            slotProps={{ input: { "aria-label": "Theme Switch" } }}
+            inputProps={{ "aria-label": "Theme Switch" }}
           />
         </div>
       </div>

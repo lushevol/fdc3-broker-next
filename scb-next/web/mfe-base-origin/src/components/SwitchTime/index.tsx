@@ -40,7 +40,7 @@ const SwitchTime: React.FC = (): ReactElement => {
               checked={store.timeType?.toUpperCase() === "UTC"}
               onChange={toggleTimeType}
               data-testid={`${PREFIX}_switchtime`}
-              slotProps={{ input: { "aria-label": "Time Switch" } }}
+              inputProps={{ "aria-label": "Time Switch" }}
             />
           </FormControl>
         </div>
@@ -60,7 +60,7 @@ const SwitchTime: React.FC = (): ReactElement => {
             size="small"
             color="default"
             data-testid={`${PREFIX}_switchtime`}
-            slotProps={{ input: { "aria-label": "Time Switch" } }}
+            inputProps={{ "aria-label": "Time Switch" }}
           />
         </FormControl>
       )}

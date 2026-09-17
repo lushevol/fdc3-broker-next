@@ -99,12 +99,13 @@ supported drawer/routes and are explicitly treated as migration references.
 
 - React and ReactDOM MUST remain on the React 18 line in every active origin.
 - Base MUST use the dependency architecture recorded in
-  [base-origin-dependency-audit.md](base-origin-dependency-audit.md), including
-  MUI 9, MUI X 9, Storybook 10, ESLint 9, Vite 8, and Vitest 4.
+  [UI_PACKAGE_IMPLEMENTATION.md](UI_PACKAGE_IMPLEMENTATION.md): Material/icons
+  5.18.0, Data Grid 6.20.4, and date pickers 6.20.2. Storybook 10, ESLint 9,
+  Vite 8, Vitest 4, and Emotion 11 remain on their audited lines.
 - Ratan and Cashflow MUST retain their MUI 5 and existing application package
   versions unless a separate migration changes them.
 - The npm installation MUST preserve nested workspace dependency isolation.
-- Base MUST resolve its own MUI 9 tree. Ratan and Cashflow MUST each resolve
+- Base MUST resolve its own MUI 5 tree. Ratan and Cashflow MUST each resolve
   their declared MUI 5 tree and icon entry points.
 - A single root lockfile MUST describe all SCB Next workspaces. Child workspace
   lockfiles MUST NOT be introduced.
@@ -139,7 +140,7 @@ the same text.
 
 - The host theme class MUST propagate into nested remotes.
 - Poppins typography and compact control defaults MUST remain visible.
-- Base's MUI 9 theme injection MUST NOT replace the accepted MUI presentation
+- Base's theme injection MUST NOT replace the accepted MUI presentation
   inside unchanged MUI 5 remotes.
 - Ratan's CSS namespace MUST remain `MicroWebUI_ratan_container`.
 - Cashflow's CSS namespace MUST remain `MicroWebUI_cashflow_cn`.

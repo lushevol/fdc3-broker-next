@@ -1,3 +1,4 @@
+import type { Dayjs } from "dayjs";
 import { styled } from "@mui/material/styles";
 import { DateRangePicker as MuiDateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
 export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_DateRangePicker`;
@@ -5,7 +6,7 @@ export const classes = {
   left: `${PREFIX}-left`,
 };
 
-const Root = styled(MuiDateRangePicker)(({ theme }) => ({
+const Root = styled(MuiDateRangePicker<Dayjs>)(({ theme }) => ({
   margin: 0,
   [`&.${classes.left}`]: {
     display: "flex",

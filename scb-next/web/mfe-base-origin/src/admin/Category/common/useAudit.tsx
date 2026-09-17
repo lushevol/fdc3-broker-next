@@ -83,7 +83,7 @@ const useAudit = () => {
           headerName: "Created At",
           width: 200,
           readOnly: true,
-          valueGetter: (_value, row) => {
+          valueGetter: ({ row }) => {
             let date = new Date();
             if ((row?.updatedAt as string | undefined)?.length) {
               date = new Date(row.createdAt as string | number | Date);
@@ -108,7 +108,7 @@ const useAudit = () => {
           headerName: "Updated At",
           width: 200,
           readOnly: true,
-          valueGetter: (_value, row) => {
+          valueGetter: ({ row }) => {
             let date = new Date();
             if ((row?.updatedAt as string | undefined)?.length) {
               date = new Date(row.updatedAt as string | number | Date);

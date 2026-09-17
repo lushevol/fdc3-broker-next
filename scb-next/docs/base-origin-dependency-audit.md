@@ -2,6 +2,12 @@
 
 Audit completed: **14 August 2026**
 
+Current-policy update (17 September 2026): the standalone UI extraction restores
+Base to MUI 5 and MUI X 6. See
+[UI_PACKAGE_IMPLEMENTATION.md](UI_PACKAGE_IMPLEMENTATION.md) for the selected
+matrix and current evidence. MUI 9 references and results below describe the
+historical upgrade; modern tooling and Emotion remain in place.
+
 Scope: `scb-next/web/mfe-base-origin`, its Storybook, and its legacy Node
 server. This document records the implemented dependency migration and the
 remaining release gates. It is also the hand-off procedure for moving other

@@ -27,6 +27,6 @@ vi.mock("../../utils/common", () => {
 });
 describe("Channel Util", () => {
   it("should be true", () => {
-    expect(initialData).toEqual({ "clientBus": undefined, "currentWorkspace": { "containers": [], "id": "id", "isActive": false, "label": "Workspace 1" }, "drawer": false, "drawers": [], "entities": [], "entitlementsToken": undefined, "errorMsg": undefined, "expiredIn": 0, "iat": 0, "isLoading": true, "isOnLogout": false, "isOpenFin": false, "refreshTab": {}, "refreshToken": undefined, "rootVersion": "", "sseCallback": {}, "ssePayload": [], "theme": "dark", "timeType": "utc", "token": undefined, "user": undefined, "userLoginTime": undefined, "workspaces": [{ "containers": [], "id": "id", "isActive": false, "label": "Workspace 1" }] });
+    expect(initialData).toEqual({ "newStyles": false, "clientBus": undefined, "currentWorkspace": { "containers": [], "id": "id", "isActive": false, "label": "Workspace 1" }, "drawer": false, "drawers": [], "entities": [], "entitlementsToken": undefined, "errorMsg": undefined, "expiredIn": 0, "iat": 0, "isLoading": true, "isOnLogout": false, "isOpenFin": false, "refreshTab": {}, "refreshToken": undefined, "rootVersion": "", "sseCallback": {}, "ssePayload": [], "theme": "dark", "timeType": "utc", "token": undefined, "user": undefined, "userLoginTime": undefined, "workspaces": [{ "containers": [], "id": "id", "isActive": false, "label": "Workspace 1" }] });
   });
 });

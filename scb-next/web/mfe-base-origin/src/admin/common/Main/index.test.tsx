@@ -71,7 +71,7 @@ const Comp = ({ openAuditPopup, auditRows }) => {
                     headerName: "Created At",
                     width: 200,
                     readOnly: true,
-                    valueGetter: (_value, row) => {
+                    valueGetter: ({ row }) => {
                         let date = new Date();
                         if (row?.updatedAt?.length) {
                             date = new Date(row.createdAt);
@@ -90,7 +90,7 @@ const Comp = ({ openAuditPopup, auditRows }) => {
                     headerName: "Updated At",
                     width: 200,
                     readOnly: true,
-                    valueGetter: (_value, row) => {
+                    valueGetter: ({ row }) => {
                         let date = new Date();
                         if (row?.updatedAt?.length) {
                             date = new Date(row.updatedAt);
@@ -195,7 +195,7 @@ const Comp = ({ openAuditPopup, auditRows }) => {
                     headerName: "Created At",
                     width: 200,
                     readOnly: true,
-                    valueGetter: (_value, row) => {
+                    valueGetter: ({ row }) => {
                         let date = new Date();
                         if (row?.updatedAt?.length) {
                             date = new Date(row.createdAt);
@@ -214,7 +214,7 @@ const Comp = ({ openAuditPopup, auditRows }) => {
                     headerName: "Updated At",
                     width: 200,
                     readOnly: true,
-                    valueGetter: (_value, row) => {
+                    valueGetter: ({ row }) => {
                         let date = new Date();
                         if (row?.updatedAt?.length) {
                             date = new Date(row.updatedAt);

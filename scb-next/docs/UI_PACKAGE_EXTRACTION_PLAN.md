@@ -1,6 +1,8 @@
 # Standalone SCB UI package: analysis and migration plan
 
-Status: planning only; no application implementation changed.
+Status: Stage 1 MUI 5 restoration implemented; standalone package extraction
+has not started. Current verification and limitations are recorded in
+[UI_PACKAGE_IMPLEMENTATION.md](UI_PACKAGE_IMPLEMENTATION.md).
 
 Source inspected: `scb-next/web/mfe-base-origin`, sibling SCB applications,
 workspace dependency policy, Storybook, and existing theme/token code.
@@ -75,13 +77,15 @@ do not merge these design systems as an incidental part of extraction.
 
 ### Analysis limitations
 
-GitNexus reported a stale index. The required refresh was attempted but failed
+During the documentation-only analysis, GitNexus reported a stale index.
+The required refresh was attempted but failed
 with an inconsistent `const_fts` index; a flow query also failed. Findings above
 are based on direct source and import inspection, not a validated graph blast
 radius. Repair/rebuild the index and run symbol impact analysis before editing
-functions, classes, or methods. No component tests or browser verification were
-run for this documentation-only planning stage. Historical audit test results
-are not treated as current verification.
+functions, classes, or methods. This repair and rebuild subsequently succeeded
+before implementation; see the implementation record for current impact and
+verification evidence. Historical audit test results are not treated as
+current verification.
 
 ## Target design
 

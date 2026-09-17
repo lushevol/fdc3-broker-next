@@ -149,7 +149,7 @@ const useController = (_props: TileProps) => {
             .map((item) => item.label)
             .filter((label): label is string => typeof label === "string"),
           renderCell: (props) => props?.row?.applicationCategory?.label,
-          valueGetter: (_value, row) => row?.applicationCategory?.label,
+          valueGetter: ({ row }) => row?.applicationCategory?.label,
         },
         {
           field: "title",
@@ -233,7 +233,7 @@ const useController = (_props: TileProps) => {
             .map((item) => item.keyName)
             .filter((keyName): keyName is string => typeof keyName === "string"),
           renderCell: (props) => props?.row?.importMap?.keyName,
-          valueGetter: (_value, row) => row?.importMap?.keyName,
+          valueGetter: ({ row }) => row?.importMap?.keyName,
           hiddenImage: true,
         },
         {
@@ -323,7 +323,7 @@ const useController = (_props: TileProps) => {
           readOnly: true,
           renderCell: (props) =>
             props?.row?.applicationCategory?.applicationCategoryId,
-          valueGetter: (_value, row) =>
+          valueGetter: ({ row }) =>
             row?.applicationCategory?.applicationCategoryId,
           placeholder: "<<will be auto generated>>",
         },
@@ -333,7 +333,7 @@ const useController = (_props: TileProps) => {
           width: 150,
           readOnly: true,
           renderCell: (props) => props?.row?.importMap?.importMapId,
-          valueGetter: (_value, row) => row?.importMap?.importMapId,
+          valueGetter: ({ row }) => row?.importMap?.importMapId,
           placeholder: "<<will be auto generated>>",
         },
         {

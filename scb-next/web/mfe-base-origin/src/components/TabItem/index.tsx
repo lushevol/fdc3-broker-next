@@ -39,7 +39,7 @@ const TabItem: React.FC<TabProps> = (props: TabProps): ReactElement => {
             onClick={() => {
               document.getElementById(`edit-${item.id}`)?.blur();
             }}
-            slotProps={{ htmlInput: { "aria-label": "Workspace Name" } }}
+            inputProps={{ "aria-label": "Workspace Name" }}
           />
         </div>
         {showRefresh && (

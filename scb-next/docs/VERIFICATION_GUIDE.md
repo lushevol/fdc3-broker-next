@@ -81,8 +81,8 @@ and no migration step has modified `scb/`.
 
 ## 3. Install and prove dependency isolation
 
-Install from the SCB Next root. Do not create child lockfiles or flatten Base's
-MUI 9 tree over the unchanged MUI 5 remote trees.
+Install from the SCB Next root. Preserve workspace-local UI dependencies;
+the MUI 5 restoration does not change the nested-install policy.
 
 ```bash
 cd /Users/lushevol/code/github/fdc3-broker-next/scb-next
@@ -94,7 +94,7 @@ npx playwright install chromium
 
 The isolation gate must prove all of the following:
 
-- Base resolves its declared MUI 9 and MUI X 9 packages;
+- Base resolves Material/icons 5.18.0, Data Grid 6.20.4, and date pickers 6.20.2;
 - Ratan resolves its declared MUI 5 packages and icons;
 - Cashflow resolves its declared MUI 5 packages and icons;
 - all active origins remain on compatible React 18 versions;

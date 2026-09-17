@@ -38,7 +38,7 @@ const Login: React.FC = (): ReactElement => {
     <ErrorBoundry>
       <Root className={classes.root} data-testid={`${PREFIX}`}>
         <Grid container spacing={0}>
-          <Grid size={4} className={classes.gridleft}>
+          <Grid item xs={4} className={classes.gridleft}>
             <main className={classes.left}>
               {showNormalLogin ? (
                 <>
@@ -59,13 +59,13 @@ const Login: React.FC = (): ReactElement => {
                         data-testid="Username"
                         variant="outlined"
                         size="medium"
-                        slotProps={{ input: {
+                        InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
                               <PersonOutlinedIcon />
                             </InputAdornment>
                           ),
-                        } }}
+                        }}
                         onChange={(e) => {
                           setUsername(`${e.target.value}`.trim());
                         }}
@@ -87,13 +87,13 @@ const Login: React.FC = (): ReactElement => {
                         placeholder="Enter Password"
                         variant="outlined"
                         size="medium"
-                        slotProps={{ input: {
+                        InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
                               <LockOutlinedIcon />
                             </InputAdornment>
                           ),
-                        } }}
+                        }}
                         onChange={(e) => {
                           setPassword(e.target.value);
                         }}
@@ -134,7 +134,7 @@ const Login: React.FC = (): ReactElement => {
               </section>
             </main>
           </Grid>
-          <Grid size={8} className={classes.gridright}>
+          <Grid item xs={8} className={classes.gridright}>
             <main className={classes.right}>
               <TabPanel value={value} index={0}>
                 <Typography variant="h2" gutterBottom>

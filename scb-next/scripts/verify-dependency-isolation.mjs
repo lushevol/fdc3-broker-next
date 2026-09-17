@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const expectations = [
-  ["Base", "web/mfe-base-origin", 9],
+  ["Base", "web/mfe-base-origin", 5],
   ["Ratan", "web/mfe-ratan-container-origin", 5],
   ["Cashflow", "web/mfe-cashflow-blotter-origin", 5],
 ];
@@ -37,5 +37,5 @@ if (failures.length > 0) {
   );
   process.exitCode = 1;
 } else {
-  console.log("Dependency isolation check passed: Base uses MUI 9; Ratan and Cashflow use MUI 5.");
+  console.log("Dependency isolation check passed: Base, Ratan, and Cashflow use MUI 5.");
 }

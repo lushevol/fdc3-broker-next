@@ -36,8 +36,10 @@ export default function DialogTitle(props: Readonly<DialogTitleProps>) {
       {...other}
     >
       <Grid container sx={{ flexWrap: "nowrap" }}>
-        <Grid size={8}>{children}</Grid>
-        <Grid size={4} sx={{ textAlign: "right", minWidth: "fit-content" }}>
+        <Grid item xs={8}>
+          {children}
+        </Grid>
+        <Grid item xs={4} sx={{ textAlign: "right", minWidth: "fit-content" }}>
           {isResizeble && onResize ? (
             <ToggleButton
               value="check"

@@ -53,6 +53,14 @@ export interface InputProps extends Omit<TextFieldProps, "variant"> {
   variant: TextFieldVariants;
   hidden?: boolean;
   disabled?: boolean;
+  /** Accept the Base slot spelling as well as the original MUI 5 props. */
+  slotProps?: {
+    input?: TextFieldProps["InputProps"];
+    inputLabel?: TextFieldProps["InputLabelProps"];
+    htmlInput?: TextFieldProps["inputProps"];
+    formHelperText?: TextFieldProps["FormHelperTextProps"];
+    select?: TextFieldProps["SelectProps"];
+  };
 }
 
 export default function Input({
@@ -61,6 +69,11 @@ export default function Input({
   hidden,
   disabled: _disabled,
   slotProps,
+  InputProps,
+  InputLabelProps,
+  inputProps,
+  FormHelperTextProps,
+  SelectProps,
   ...rest
 }: Readonly<InputProps>) {
   return (
@@ -69,11 +82,18 @@ export default function Input({
       className={
         labelPosition.toLocaleLowerCase() === "left" ? classes.left : undefined
       }
-      slotProps={{
-        ...slotProps,
-        inputLabel: { shrink: true, ...slotProps?.inputLabel },
-        input: { disabled: _disabled, ...slotProps?.input },
+      InputLabelProps={{
+        shrink: true,
+        ...InputLabelProps,
+        ...slotProps?.inputLabel,
       }}
+      InputProps={{ disabled: _disabled, ...InputProps, ...slotProps?.input }}
+      inputProps={{ ...inputProps, ...slotProps?.htmlInput }}
+      FormHelperTextProps={{
+        ...FormHelperTextProps,
+        ...slotProps?.formHelperText,
+      }}
+      SelectProps={{ ...SelectProps, ...slotProps?.select }}
       style={{ display: hidden ? "none" : undefined }}
       {...rest}
     />

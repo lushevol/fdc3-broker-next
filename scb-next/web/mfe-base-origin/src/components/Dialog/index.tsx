@@ -66,27 +66,31 @@ const Dialog = (props: DialogProps) => {
       id={idModal}
       disablePortal={disablePortal}
       hideBackdrop={hideBackdrop}
-      slots={{ paper: DraggableComp }}
+      PaperComponent={DraggableComp}
       aria-labelledby={isDraggable ? idTitle : undefined}
       data-testid={PREFIX}
       scroll="paper"
       ref={dialogRef}
       {...rest}
-      className={joinClassNames(staticClassName, hideBackdropClassName, className)}
+      className={joinClassNames(
+        staticClassName,
+        hideBackdropClassName,
+        className
+      )}
       onMouseUp={stopDrag}
       onMouseMove={doDrag}
       onMouseLeave={stopDrag}
       onMouseDown={onMouseDown}
-      slotProps={{
-        paper: { sx: {
+      PaperProps={{
+        sx: {
           width: width?.current,
           height: height?.current,
           borderBottomRightRadius: isResizeble ? 0 : undefined,
           maxWidth: isResizeble ? "none" : undefined,
           minWidth: isResizeble ? "400px" : undefined,
-          top: hideBackdrop ? defaultY ?? top : undefined,
-          left: hideBackdrop ? defaultX ?? left : undefined,
-        } },
+          top: hideBackdrop ? (defaultY ?? top) : undefined,
+          left: hideBackdrop ? (defaultX ?? left) : undefined,
+        },
       }}
     >
       {titleComponents && (

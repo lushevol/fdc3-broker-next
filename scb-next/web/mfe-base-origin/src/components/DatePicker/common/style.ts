@@ -1,3 +1,4 @@
+import type { Dayjs } from "dayjs";
 import { styled } from "@mui/material/styles";
 import { DatePicker as MuiDatePicker } from "@mui/x-date-pickers/DatePicker";
 
@@ -6,7 +7,7 @@ export const classes = {
   left: `${PREFIX}-left`,
 };
 
-const Root = styled(MuiDatePicker)(({ theme }) => ({
+const Root = styled(MuiDatePicker<Dayjs>)(({ theme }) => ({
   margin: 0,
   [`&.${classes.left}`]: {
     display: "flex",
