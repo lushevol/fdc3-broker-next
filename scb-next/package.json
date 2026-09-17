@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "workspaces": [
+    "packages/ratan-design-origin",
     "web/mfe-base-origin",
     "web/mfe-ratan-container-origin",
     "web/mfe-cashflow-blotter-origin",
@@ -11,8 +12,11 @@
     "services/alpha-payments-api"
   ],
   "scripts": {
+    "predev": "npm run build:packages",
     "dev": "concurrently -k -n base,ratan,cashflow,alpha,alpha-api -c blue,green,magenta,cyan,yellow \"npm run dev --workspace @fm/base-origin\" \"npm run dev --workspace @fm/ratan_container-origin\" \"npm run dev --workspace @fm/ratan_cashflow_blotter-origin\" \"npm run dev --workspace @fm/alpha_payments-origin\" \"npm run dev --workspace @scb-next/alpha-payments-api\"",
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build:packages && npm run build:apps",
+    "build:packages": "npm run build --workspace ratan-design-origin",
+    "build:apps": "npm run build --workspace @fm/base-origin --workspace @fm/ratan_container-origin --workspace @fm/ratan_cashflow_blotter-origin --workspace @fm/alpha_payments-origin --workspace @scb-next/alpha-payments-api --if-present",
     "build:production": "sh ./devops/scripts/build-production.sh",
     "serve:production": "sh ./devops/scripts/serve-production.sh",
     "stop:production": "sh ./devops/scripts/stop-production.sh",

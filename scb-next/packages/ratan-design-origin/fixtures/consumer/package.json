@@ -1,0 +1,25 @@
+{
+  "name": "ratan-design-origin-consumer-proof",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "vite build",
+    "dev": "vite --host 127.0.0.1 --port 8019 --strictPort"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@mui/material": "5.18.0",
+    "@mui/icons-material": "5.18.0",
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "@emotion/sheet": "1.4.0",
+    "typescript": "5.9.3",
+    "vite": "8.2.1"
+  }
+}

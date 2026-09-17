@@ -105,7 +105,98 @@ the full Base suite and integrated flows cover that limitation.
 
 ## Next stage
 
-Stage 2 remains pending: standalone package foundation, explicit theme/token
-inputs, extracted Button/LoadingButton/Input/Select, and clean tarball consumer
-proof. Stage 1 establishes the compatible MUI prerequisite, not completion of
-the standalone-library migration.
+Stage 2 implements the standalone foundation and first controls slice below.
+Stage 1 establishes the compatible MUI prerequisite; neither stage completes
+the remaining shared-pattern, remote-adapter or release-governance work.
+
+## Stage 2 implementation specification
+
+- Publish `ratan-design-origin` from `packages/ratan-design-origin` as ESM with
+  declarations and explicit root, theme, tokens, compatibility, and CSS exports.
+  React 18, Material/icons 5.18, and Emotion 11 are external peers.
+- Root exports Button, LoadingButton, Input, Select, and RatanDesignProvider.
+  Controls preserve Base defaults and accept MUI 5 props. Button and
+  LoadingButton forward button refs; Input forwards root and input refs.
+  Select retains its existing variant/size/callback contract and associates its
+  visible label with the combobox using a generated id when none is supplied.
+- Provider defaults to light/legacy. Mode and designGeneration are explicit
+  inputs; it owns a scoped root and scopes its menus/popovers to that root.
+  It never changes document classes, storage, body scrolling, or user selection.
+  Hosts load `styles.css` explicitly for canonical WebKit variables and fonts.
+  Legacy and WebKit alias declarations also live in that scoped stylesheet;
+  they avoid Emotion's `label:` parsing of CSS variable names.
+- Share existing palette, typography, compact defaults, and input styling.
+  Intentional accessibility corrections: associate Select's visible label and
+  restore a 2px primary-color keyboard focus ring on MUI button actions.
+  Base retains portal extensions, global reset, Data Grid styles, date
+  localization, authenticated appearance policy, and query parsing.
+- Package owns existing semantic WebKit mappings and legacy aliases.
+  Generate a scoped stylesheet from canonical WebKit 2.0.5 CSS with source
+  hashes and packaged WOFF2 fonts; no runtime sibling-source dependency.
+- Existing Base default/namespace exports and InputStyled stay supported via
+  adapters. Consumer business source/manifests and compatibility loading/dialog
+  defaults are unchanged in this stage.
+- Verify public control behavior and >90% line/branch coverage, emitted types
+  in a clean tarball fixture, SSR import without DOM globals, bundle exclusions,
+  all four appearance combinations, scoped overlay inheritance, narrow/wide
+  control layouts, existing Base tests, and the integrated host journey.
+
+### Stage 2 delivered scope
+
+`packages/ratan-design-origin` builds independently as ESM and declarations.
+Base delegates its four controls, compact theme defaults, shared MUI overrides,
+semantic tokens and compatibility aliases to the package. Portal reset, login
+styles/policy, grid styles, date localization, store and services remain local.
+Ratan/Cashflow business source, dependency manifests, compatibility loading and
+dialog defaults, and federation sharing are unchanged.
+
+Scoped stylesheet generation uses PostCSS and TypeScript parsers rather than
+editing the canonical WebKit distribution. The committed assets include source
+hashes and 13 WOFF2 fonts. Ordinary builds and packed consumers need no sibling
+checkout. Corporate font licensing, registry and release owners are pending;
+this is an internal candidate, not a published or publicly redistributable release.
+
+Base's legacy TypeScript resolution is supported through `typesVersions`.
+Its compiler and Vite/Vitest configuration resolve the application-local MUI
+types/runtime consistently across the workspace symlink. This does not change
+cross-application federation sharing. Development startup, ordinary builds and
+production builds prepare the package before applications.
+
+### Stage 2 verification (2026-09-17)
+
+- Package public-interface suite: 13 tests pass; 100% lines and branches.
+- Package strict typecheck, lint, ESM/declaration/asset build and Storybook pass.
+- Independent tarball install from the public npm registry passes strict
+  declaration checks with modern and legacy TypeScript resolution. The fixture
+  explicitly installs `@emotion/sheet` for an upstream Emotion declaration
+  dependency; `skipLibCheck` is false.
+- Packed CSS is root-scoped, contains no sibling stylesheet imports, and all
+  13 font assets are present. DOM-free bundled SSR imports and renders the
+  controls. Button-only external-peer bundle is 679 bytes and excludes provider
+  token CSS, grid/date/Pro/admin code and bundled React.
+- Independent browser suite: 9 tests pass, covering both generations/modes at
+  390px and 1280px, select callbacks/scoped overlays, loaded WebKit fonts,
+  validation/loading/disabled states, no horizontal overflow/control overlap,
+  screenshots, and visible keyboard focus. Desktop/mobile screenshots inspected.
+- Base public suite: 125 files / 353 tests pass; 96.96% lines, 93.28% branches.
+  Base strict typecheck and Storybook pass. Root suite: 60 tests pass.
+- Dependency-isolation check and all SCB workspace production builds pass;
+  the production build entry point includes package-first ordering.
+- Host browser checks pass for login, New Tile, Cashflow rendering/deletion,
+  both legacy/WebKit theme/dialog flows, and the second federation boundary.
+- GitNexus refresh succeeds after FTS repair. Staged scope analysis reports
+  LOW risk, 77 text files, 88 indexed symbols and no affected execution flows.
+  JSX and workspace-import call-graph limits remain; source scope, compiler,
+  public-interface tests and browser journeys were checked independently.
+
+### Remaining work and limits
+
+Stages 3-5 remain open: additional reusable patterns, central Ratan/Cashflow
+adapter rewiring and cross-app theme-import removal, catalog adoption, ownership,
+versioned releases and rollback governance. The WebKit generation preserves
+the existing partial semantic-token migration, not a newly branded MUI palette.
+Legacy Poppins remains host-supplied. No performance latency guarantee is claimed.
+Stage 1's existing lint/mobile-login/console/typecheck limitations remain.
+Production-edge acceptance and a corporate-registry clean install were not run.
+Workspace dependency installation reported 44 audit findings (21 moderate,
+23 high); audit triage is a release prerequisite, not an automatic bulk upgrade.

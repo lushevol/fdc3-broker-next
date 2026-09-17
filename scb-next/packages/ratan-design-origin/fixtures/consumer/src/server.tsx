@@ -1,0 +1,28 @@
+import React from "react";
+import { renderToString } from "react-dom/server";
+import {
+  Button,
+  Input,
+  Select,
+  RatanDesignProvider,
+} from "ratan-design-origin";
+import MenuItem from "@mui/material/MenuItem";
+import { createRatanTheme } from "ratan-design-origin/theme";
+
+if (typeof window !== "undefined" || typeof document !== "undefined")
+  throw new Error("SSR proof must run without a DOM");
+const html = renderToString(
+  <RatanDesignProvider>
+    <Button>Server action</Button>
+    <Input variant="outlined" label="Reference" />
+    <Select variant="outlined" label="Currency" value="USD">
+      <MenuItem value="USD">USD</MenuItem>
+    </Select>
+  </RatanDesignProvider>
+);
+if (
+  !html.includes("Server action") ||
+  createRatanTheme().ratan.designGeneration !== "legacy"
+)
+  throw new Error("SSR contract failed");
+console.log("DOM-free package import and server render passed");

@@ -1,0 +1,24 @@
+{
+  "version": "2.0.5",
+  "sha256": {
+    "ScStyleguide.css": "9df6a5cbb7dc01c6241c16d8499f1ffda0edc7b383329666394980f6225a81a0",
+    "ScGDSStyleGuide.css": "be2068af4e96fa1a60c080edeb29aba04c2ec1c579f30d513b39de36d9be2639",
+    "ScLightMode.css": "c95672e2d87289c0e021c91c8cee3a8a9b5e56fb64c980cb0e1bca0f88045936",
+    "ScDarkMode.css": "5470227793edad200b5facf7561b0f5aff48eb6fbda678116e0481ddaeb43421"
+  },
+  "fonts": [
+    "OpenDyslexic-Bold.woff2",
+    "OpenDyslexic-Regular.woff2",
+    "SCProsperSans-Bold.woff2",
+    "SCProsperSans-Medium.woff2",
+    "SCProsperSans-Regular.woff2",
+    "inter-v18-latin-500.woff2",
+    "inter-v18-latin-600.woff2",
+    "inter-v18-latin-700.woff2",
+    "inter-v18-latin-regular.woff2",
+    "roboto-mono-v23-latin-500.woff2",
+    "roboto-mono-v23-latin-600.woff2",
+    "roboto-mono-v23-latin-700.woff2",
+    "roboto-mono-v23-latin-regular.woff2"
+  ]
+}

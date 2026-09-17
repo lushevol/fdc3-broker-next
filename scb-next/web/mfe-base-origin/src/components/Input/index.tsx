@@ -1,101 +1,25 @@
-import * as React from "react";
-import { styled, Theme } from "@mui/material/styles";
-import MuiTextField, {
-  TextFieldProps,
-  TextFieldVariants,
-} from "@mui/material/TextField";
+import React from "react";
+import { Input as DesignInput, type InputProps } from "ratan-design-origin";
+export { InputStyled } from "ratan-design-origin/compatibility";
+export type { InputProps } from "ratan-design-origin";
 
-const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_CustomInput`;
-const classes = {
-  left: `${PREFIX}-left`,
-};
+const leftClassName = process.env.MFE_APP_PREFIX_STYLE + "_CustomInput-left";
 
-export const InputStyled =
-  (c: typeof classes) =>
-  ({ theme }: { theme: Theme }) => ({
-    margin: 0,
-    width: "auto",
-    [`&.${c.left}`]: {
-      display: "flex",
-      flexDirection: "row",
-      alignItems: "center",
-      "& .MuiFormLabel-root": {
-        marginRight: theme.spacing(1),
-        marginBottom: 0,
-      },
-    },
-    "& .MuiFormControl-root": {
-      margin: 0,
-    },
-    "& .MuiOutlinedInput-root": {
-      margin: 0,
-    },
-    "& .MuiFormLabel-root": {
-      position: "static",
-      fontSize: "inherit",
-      transformOrigin: "center left",
-      textOverflow: "inherit",
-      overflow: "inherit",
-      transform: "none",
-      textTransform: "capitalize",
-      marginRight: 0,
-      marginBottom: theme.spacing(1),
-      backgroundColor: "transparent!important",
-    },
-    "& legend": {
-      display: "none",
-    },
-  });
-const TextField = styled(MuiTextField)(InputStyled(classes));
-
-export interface InputProps extends Omit<TextFieldProps, "variant"> {
-  labelPosition?: "top" | "left";
-  variant: TextFieldVariants;
-  hidden?: boolean;
-  disabled?: boolean;
-  /** Accept the Base slot spelling as well as the original MUI 5 props. */
-  slotProps?: {
-    input?: TextFieldProps["InputProps"];
-    inputLabel?: TextFieldProps["InputLabelProps"];
-    htmlInput?: TextFieldProps["inputProps"];
-    formHelperText?: TextFieldProps["FormHelperTextProps"];
-    select?: TextFieldProps["SelectProps"];
-  };
-}
-
-export default function Input({
-  labelPosition = "top",
-  variant: _variant,
-  hidden,
-  disabled: _disabled,
-  slotProps,
-  InputProps,
-  InputLabelProps,
-  inputProps,
-  FormHelperTextProps,
-  SelectProps,
-  ...rest
-}: Readonly<InputProps>) {
+export default React.forwardRef<HTMLDivElement, InputProps>(function Input(
+  { labelPosition, className, ...props },
+  ref
+) {
   return (
-    <TextField
-      variant={_variant}
-      className={
-        labelPosition.toLocaleLowerCase() === "left" ? classes.left : undefined
-      }
-      InputLabelProps={{
-        shrink: true,
-        ...InputLabelProps,
-        ...slotProps?.inputLabel,
-      }}
-      InputProps={{ disabled: _disabled, ...InputProps, ...slotProps?.input }}
-      inputProps={{ ...inputProps, ...slotProps?.htmlInput }}
-      FormHelperTextProps={{
-        ...FormHelperTextProps,
-        ...slotProps?.formHelperText,
-      }}
-      SelectProps={{ ...SelectProps, ...slotProps?.select }}
-      style={{ display: hidden ? "none" : undefined }}
-      {...rest}
+    <DesignInput
+      {...props}
+      ref={ref}
+      labelPosition={labelPosition}
+      className={[
+        labelPosition?.toLowerCase() === "left" ? leftClassName : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
     />
   );
-}
+});

@@ -1,4 +1,5 @@
-import { css, darken, lighten } from "@mui/material/styles";
+import { getControlTheme } from "ratan-design-origin/theme";
+import { css, darken } from "@mui/material/styles";
 import color from "./color";
 import colordark from "./color.dark";
 import legacyColor from "./color.legacy";
@@ -11,22 +12,7 @@ import normalize from "./normalize";
 // And do some changes based on isNewLayout is true
 // And need revert the import from getDarkTheme to dark, getLightTheme to light, revert the function call to dark or light virable
 const getDarkTheme = (isNewLayout = false, newStyles = false) => ({
-  palette: {
-    mode: "dark",
-    primary: {
-      main: `${custom.color["blue"]}`,
-    },
-    secondary: {
-      main: "#008738",
-    },
-    // text: {
-    //   primary: `${props.fontColor} !important`,
-    // },
-    background: {
-      default: `${custom.color["mirage-52"]}`,
-      paper: "rgba(27, 39, 58, 1)",
-    },
-  },
+  ...getControlTheme("dark"),
   MuiCssBaseline: {
     styleOverrides: {
       html: {
@@ -35,7 +21,10 @@ const getDarkTheme = (isNewLayout = false, newStyles = false) => ({
           ${newStyles ? colordark : legacyDark}
           //overide after this line
           --theme-color-modal-header: ${custom.color["mirage-52"]};
-          --theme-color-modal-header-border: ${darken(custom.color["mirage-52"], 0.3)};
+          --theme-color-modal-header-border: ${darken(
+            custom.color["mirage-52"],
+            0.3
+          )};
           --ag-header-background-color: ${custom.color["mirage-52"]};
           --ag-border-color: ${darken(custom.color["mirage-52"], 0.3)};
         `,
@@ -196,175 +185,6 @@ const getDarkTheme = (isNewLayout = false, newStyles = false) => ({
   MenuItem: {
     Title: {
       color: custom.color["silver"],
-    },
-  },
-  MuiDialog: {
-    styleOverrides: {
-      paper: {
-        "& .MuiDialogTitle-root": {
-          backgroundColor: `${custom.color["mirage-52"]}`,
-        },
-        "& .MuiDialogContent-root": {
-          backgroundColor: `${custom.color["mirage-52"]}`,
-        },
-        "& .MuiDialogActions-root": {
-          backgroundColor: `${custom.color["mirage-52"]}`,
-        },
-        border: `1px solid rgba(42,42,42,1)`,
-      },
-    },
-  },
-  MuiChip: {
-    styleOverrides: {
-      outlined: {
-        backgroundColor: "rgba(17, 23, 29, 1)",
-        border: "1px solid transparent !important",
-        background: `linear-gradient(to right,rgba(17, 23, 29, 1),rgba(17, 23, 29, 1)) padding-box,
-                     linear-gradient(to right, rgba(65, 73, 85, 1),rgba(29, 31, 34, 1)) border-box`,
-      },
-    },
-  },
-  MuiInputBase: {
-    defaultProps: {
-      margin: "dense",
-    },
-    styleOverrides: {
-      input: {
-        "&:focus": {
-          backgroundColor: "transparent",
-        },
-        "&.Mui-disabled": {
-          "-webkit-text-fill-color": "rgba(255, 255, 255, 0.7)",
-        },
-        "&::placeholder": {
-          color: "rgba(255, 255, 255, 0.9)",
-          opacity: 1,
-        },
-      },
-    },
-  },
-  MuiInput: {
-    defaultProps: {
-      margin: "dense",
-    },
-    styleOverrides: {
-      root: {
-        transition: "none",
-        "&:hover": {
-          ":not(.Mui-disabled, .Mui-error)": {
-            "&:before": {
-              borderBottom: "2px solid",
-              borderColor: lighten("rgba(65, 73, 85, 1)", 0.1),
-            },
-          },
-        },
-        "&:before": {
-          borderBottom: "2px solid rgba(65, 73, 85, 1)",
-        },
-        "& .MuiSvgIcon-root": {
-          color: "rgba(141, 141, 141, 1)",
-        },
-      },
-      input: {
-        "&:focus": {
-          backgroundColor: "transparent",
-        },
-      },
-    },
-  },
-  MuiFilledInput: {
-    defaultProps: {
-      margin: "dense",
-    },
-    styleOverrides: {
-      root: {
-        backgroundColor: "rgba(17, 23, 29, 1)",
-        transition: "none",
-        "&:hover": {
-          backgroundColor: lighten("rgba(17, 23, 29, 1)", 0.01),
-          ":not(.Mui-disabled, .Mui-error)": {
-            "&:before": {
-              borderBottom: "2px solid",
-              borderColor: lighten("rgba(65, 73, 85, 1)", 0.1),
-            },
-          },
-        },
-        "&:before": {
-          borderBottom: "2px solid rgba(65, 73, 85, 1)",
-        },
-        "& .MuiSvgIcon-root": {
-          color: "rgba(141, 141, 141, 1)",
-        },
-      },
-      input: {
-        "&:focus": {
-          backgroundColor: "rgba(17, 23, 29, 1)",
-        },
-      },
-      sizeSmall: {
-        "& .MuiFilledInput-input": {
-          marginBottom: "4px",
-        },
-      },
-    },
-  },
-  MuiOutlinedInput: {
-    defaultProps: {
-      margin: "dense",
-    },
-    styleOverrides: {
-      root: {
-        backgroundColor: "rgba(17, 23, 29, 1)",
-        border: "1px solid transparent !important",
-        background: `linear-gradient(to right,rgba(17, 23, 29, 1),rgba(17, 23, 29, 1)) padding-box,
-                     linear-gradient(to right, rgba(65, 73, 85, 1),rgba(29, 31, 34, 1)) border-box`,
-        "&.Mui-error": {
-          background: `linear-gradient(to right,rgba(17, 23, 29, 1),rgba(17, 23, 29, 1)) padding-box,
-                         linear-gradient(to right, rgba(244, 67, 54, 1),rgba(28, 1, 1, 1)) border-box`,
-        },
-        "& input": {
-          border: 0,
-          zIndex: 1,
-        },
-        "& svg": {
-          zIndex: 1,
-        },
-        "& .MuiSelect-outlined": {
-          zIndex: 1,
-        },
-        "& textarea": {
-          border: 0,
-          zIndex: 1,
-        },
-        "& .MuiSvgIcon-root": {
-          color: "rgba(141, 141, 141, 1)",
-        },
-        "& .MuiSelect-select": {
-          zIndex: 1,
-        },
-      },
-      notchedOutline: {
-        display: "none",
-      },
-    },
-  },
-  MuiInputLabel: {
-    defaultProps: {
-      margin: "dense",
-    },
-    styleOverrides: {
-      outlined: {
-        "&.MuiInputLabel-shrink": {
-          backgroundColor: "rgba(17, 23, 29, 1)",
-        },
-      },
-    },
-  },
-  MuiPaper: {
-    styleOverrides: {
-      root: {
-        backgroundImage: "none",
-      },
     },
   },
   borderColor: "rgba(81, 81, 81, 1)",

@@ -1,7 +1,8 @@
 # Standalone SCB UI package: analysis and migration plan
 
-Status: Stage 1 MUI 5 restoration implemented; standalone package extraction
-has not started. Current verification and limitations are recorded in
+Status: Stage 1 MUI 5 restoration and Stage 2 package foundation / first
+vertical slice implemented. Shared patterns, remote-adapter integration and
+release governance remain pending. Current verification and limitations are recorded in
 [UI_PACKAGE_IMPLEMENTATION.md](UI_PACKAGE_IMPLEMENTATION.md).
 
 Source inspected: `scb-next/web/mfe-base-origin`, sibling SCB applications,

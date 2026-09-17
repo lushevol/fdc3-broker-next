@@ -1,0 +1,94 @@
+{
+  "name": "ratan-design-origin",
+  "version": "0.1.0",
+  "description": "Standalone React 18 and MUI 5 controls and SCB design tokens",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "NOTICE.md"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "theme": [
+        "dist/theme/index.d.ts"
+      ],
+      "tokens": [
+        "dist/tokens/index.d.ts"
+      ],
+      "compatibility": [
+        "dist/compatibility.d.ts"
+      ]
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./theme": {
+      "types": "./dist/theme/index.d.ts",
+      "import": "./dist/theme.js"
+    },
+    "./tokens": {
+      "types": "./dist/tokens/index.d.ts",
+      "import": "./dist/tokens.js"
+    },
+    "./compatibility": {
+      "types": "./dist/compatibility.d.ts",
+      "import": "./dist/compatibility.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "lint": "eslint src tests stories",
+    "storybook": "storybook dev -p 6019",
+    "build:storybook": "storybook build -o storybook-static",
+    "tokens:generate": "node scripts/generate-webkit-assets.mjs",
+    "verify:package": "node scripts/verify-package.mjs"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@mui/material": "^5.18.0",
+    "@mui/icons-material": "^5.18.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1"
+  },
+  "devDependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@mui/material": "5.18.0",
+    "@mui/icons-material": "5.18.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@types/node": "^24.13.3",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@vitejs/plugin-react": "^6.0.5",
+    "@vitest/coverage-v8": "^4.1.10",
+    "@typescript-eslint/parser": "^8.67.0",
+    "eslint": "^9.39.5",
+    "jsdom": "^30.0.1",
+    "postcss": "^8.5.15",
+    "typescript": "^5.9.3",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10",
+    "storybook": "^10.5.8",
+    "@storybook/react-vite": "^10.5.8",
+    "@storybook/addon-docs": "^10.5.8",
+    "@storybook/addon-a11y": "^10.5.8"
+  }
+}

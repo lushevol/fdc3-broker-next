@@ -1,42 +1,24 @@
-import * as React from "react";
-import { styled } from "@mui/material/styles";
-import {
-  FormControl,
-  InputLabel,
-  Select as MuiSelect,
-  SelectProps as MuiSelectProps,
-} from "@mui/material";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { InputStyled } from "../Input";
+import React from "react";
+import { Select as DesignSelect, type SelectProps } from "ratan-design-origin";
+export type { SelectProps } from "ratan-design-origin";
 
-const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_CustomSelect`;
-const classes = {
-  left: `${PREFIX}-left`,
-};
+const leftClassName = process.env.MFE_APP_PREFIX_STYLE + "_CustomSelect-left";
 
-const SelectFormControl = styled(FormControl)(InputStyled(classes));
-
-export interface SelectProps extends Omit<MuiSelectProps, "variant"> {
-  labelPosition?: "top" | "left";
-  variant: "standard" | "outlined" | "filled" | undefined;
-}
-
-export default function Select({
-  labelPosition = "top",
-  label,
-  variant: _variant,
-  size: _size,
-  ...rest
-}: Readonly<SelectProps>) {
+export default React.forwardRef<HTMLDivElement, SelectProps>(function Select(
+  { labelPosition, formControlClassName, ...props },
+  ref
+) {
   return (
-    <SelectFormControl
-      fullWidth
-      size={_size ?? "small"}
-      variant={_variant}
-      className={labelPosition === "left" ? classes.left : undefined}
-    >
-      <InputLabel>{label}</InputLabel>
-      <MuiSelect IconComponent={KeyboardArrowDownIcon} {...rest} />
-    </SelectFormControl>
+    <DesignSelect
+      {...props}
+      ref={ref}
+      labelPosition={labelPosition}
+      formControlClassName={[
+        labelPosition === "left" ? leftClassName : "",
+        formControlClassName,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    />
   );
-}
+});

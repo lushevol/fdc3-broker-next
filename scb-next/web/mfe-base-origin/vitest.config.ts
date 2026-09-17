@@ -5,18 +5,28 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [react()],
   resolve: {
+    dedupe: [
+      "react",
+      "react-dom",
+      "@mui/material",
+      "@mui/icons-material",
+      "@mui/system",
+      "@emotion/react",
+      "@emotion/styled",
+    ],
     alias: {
       "@jest/globals": fileURLToPath(
-        new URL("./src/test/vitest-jest-globals.ts", import.meta.url),
+        new URL("./src/test/vitest-jest-globals.ts", import.meta.url)
       ),
       "mfe_ratan_container/application": fileURLToPath(
-        new URL("./src/test/remote-ratan.tsx", import.meta.url),
+        new URL("./src/test/remote-ratan.tsx", import.meta.url)
       ),
       "mfe_alpha_payments/application": fileURLToPath(
-        new URL("./src/test/remote-alpha-payments.tsx", import.meta.url),
+        new URL("./src/test/remote-alpha-payments.tsx", import.meta.url)
       ),
     },
   },
+  ssr: { noExternal: ["ratan-design-origin", /@mui\//, /@emotion\//] },
   test: {
     globals: true,
     environment: "jsdom",

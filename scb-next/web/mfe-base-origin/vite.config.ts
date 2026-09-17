@@ -5,13 +5,26 @@ import { devMockApiPlugin } from "./dev/mock-api";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const ratanRemoteUrl = env.VITE_RATAN_REMOTE_URL ?? "http://127.0.0.1:8009/remoteEntry.js";
+  const ratanRemoteUrl =
+    env.VITE_RATAN_REMOTE_URL ?? "http://127.0.0.1:8009/remoteEntry.js";
   const alphaPaymentsRemoteUrl =
-    env.VITE_ALPHA_PAYMENTS_REMOTE_URL ?? "http://127.0.0.1:8018/remoteEntry.js";
+    env.VITE_ALPHA_PAYMENTS_REMOTE_URL ??
+    "http://127.0.0.1:8018/remoteEntry.js";
   const alphaPaymentsApiTarget =
     env.VITE_ALPHA_PAYMENTS_API_TARGET ?? "http://127.0.0.1:8086";
 
   return {
+    resolve: {
+      dedupe: [
+        "react",
+        "react-dom",
+        "@mui/material",
+        "@mui/icons-material",
+        "@mui/system",
+        "@emotion/react",
+        "@emotion/styled",
+      ],
+    },
     plugins: [
       react(),
       devMockApiPlugin(),
@@ -43,7 +56,9 @@ export default defineConfig(({ mode }) => {
     ],
     define: {
       "process.env.MFE_APP_PREFIX_STYLE": JSON.stringify("MicroWebUI_base"),
-      "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV ?? "development"),
+      "process.env.NODE_ENV": JSON.stringify(
+        process.env.NODE_ENV ?? "development"
+      ),
     },
     server: {
       host: "127.0.0.1",
