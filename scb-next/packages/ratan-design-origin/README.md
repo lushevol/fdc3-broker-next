@@ -1,7 +1,7 @@
 # Ratan Design Origin
 
-Internal standalone React 18 / Material UI 5 design-system candidate. The first
-slice contains Button, LoadingButton, Input, Select, the search controls and
+Internal standalone React 18 / Material UI 5 design-system candidate. It
+contains Button, LoadingButton, Input, Select, the search controls and
 layouts, ToggleButton, Label, Loader, PageLoader, Snackbar, explicit theme factories, and legacy / SC WebKit
 tokens. No Base store, auth, router or services are needed.
 
@@ -36,18 +36,24 @@ Poppins typography and compact visual baseline during migration.
   compact defaults; emitted `Theme.ratan.designGeneration` augmentation.
 - `ratan-design-origin/tokens`: framework-independent `legacyTokens` and
   `newStyleTokens` semantic references.
-- `ratan-design-origin/compatibility`: existing CSS alias strings and
-  `InputStyled`; retained for Base adapters, not a new customization contract.
+- `ratan-design-origin/compatibility`: existing CSS alias strings,
+  `InputStyled`, `DialogTitle`, `DialogRoot` and `dialogClasses`; retained
+  for Base adapters, not a new customization contract.
 - `ratan-design-origin/styles.css`: scoped canonical WebKit variables and fonts.
 - `ratan-design-origin/dates`: DatePicker, DateTimePicker, TimePicker, their
   Dayjs prop types, LocalizationProvider and AdapterDayjs.
 - `ratan-design-origin/date-range`: optional Pro single-input DateRangePicker.
+- `ratan-design-origin/portal-theme`: opt-in historical portal theme factory,
+  extensions, document reset and grid override policy for existing hosts.
 
 Controls accept MUI 5 props. Input also translates Base's modern slot spelling
 to MUI 5, with slots taking precedence over legacy props. Button/LoadingButton
 forward button refs; Input forwards root and native input refs. Select forwards
 its root ref and associates its visible label with the combobox. LoadingButton
 retains the label and disables the action while loading (default spinner 14px).
+`loadingPosition="startIcon"` replaces the caller's start icon while loading
+and restores it when idle; consumer adapters retain their 16px default.
+`Spinner`/`SpinnerProps` expose the existing MUI circular progress primitive.
 SearchInput composes Input with search and clear adornments. SearchButton,
 ResetButton, ToggleButton and Label preserve the existing Base contracts while
 their implementations and visual policy are now owned by this package.
@@ -77,6 +83,13 @@ suppress `header`, supply `contentRef`, title/content/action props, and append
 `surfaceChildren` for interaction adornments. Hosts own sizing, maximize/resize,
 drag integration via PaperComponent, stacking, telemetry and workspace policy.
 
+EmptyState accepts host-supplied `title`, `description`, `illustration` and
+`action`, plus wrapper/content Box props. ErrorFallback composes a title and
+optional description/action in a padded section. LoadingOverlay receives
+controlled `open` and status content, with explicit backdrop props. These
+surfaces do not catch errors, dispatch loading, select support addresses or
+open navigation. Hosts own those decisions.
+
 React / ReactDOM, Material / icons and Emotion are external peers. The verified
 matrix is React 18.3.1, Material/icons 5.18.0, Emotion 11.14.0 / 11.14.1.
 ESM and declarations are shipped; no CommonJS export is promised.
@@ -93,6 +106,17 @@ range always uses SingleInputDateRangeField. Field identifiers belong in
 `slotProps.textField.inputProps`; MUI X 6 ignores top-level data attributes.
 The compiled `fixtures/consumer/src/dates.tsx` demonstrates the public imports.
 
+Existing portal hosts can use `Config(getPortalTheme(mode, newStyles, isNewLayout))`
+from `portal-theme`. Defaults remain legacy and the original layout. Gold
+maps to dark; unknown/undefined modes map to light. URL parsing and application
+appearance stay outside the factory. Applying its CssBaseline is an explicit
+document-wide opt-in, including scrolling/selection restrictions. Standalone
+apps should normally use createRatanTheme/RatanDesignProvider.
+The portal declarations require optional `@mui/x-data-grid@6.20.4` and
+`@mui/base@5.0.0-beta.70` (an upstream grid declaration dependency that Material
+5.18 no longer installs). Core consumers need neither. See the compiled
+`fixtures/consumer/src/server-portal.tsx` for extension/declaration/SSR usage.
+
 ## Development
 
 Run `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`, and
@@ -105,5 +129,7 @@ Use `npm run storybook` for appearance controls and component states on 6019.
 hashes are in `assets/webkit-sources.json`. Ordinary builds need no sibling
 checkout. See NOTICE.md for asset licensing restrictions. Registry, release
 owners and redistribution approval must be confirmed before publishing.
-Remaining catalog, remote-adapter integration and release governance are later
-stages of `../../docs/UI_PACKAGE_EXTRACTION_PLAN.md`.
+Base, Ratan and Cashflow use package presentation behind their existing exports.
+See [the inventory](../../docs/UI_PACKAGE_INVENTORY.md) for deliberate portal
+boundaries and [release/rollback](../../docs/UI_PACKAGE_RELEASE.md) for versioning,
+review responsibilities, adoption and publication gates.

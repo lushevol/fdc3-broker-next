@@ -89,6 +89,7 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
+    "ratan-design-origin": "file:../../packages/ratan-design-origin",
     "@apollo/client": "^3.3.6",
     "@emotion/css": "^11.11.2",
     "@emotion/react": "^11.11.1",

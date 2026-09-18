@@ -6,6 +6,7 @@
   "files": [
     "dist",
     "README.md",
+    "CHANGELOG.md",
     "NOTICE.md"
   ],
   "sideEffects": [
@@ -30,6 +31,9 @@
       ],
       "date-range": [
         "dist/date-range.d.ts"
+      ],
+      "portal-theme": [
+        "dist/portal-theme.d.ts"
       ]
     }
   },
@@ -58,6 +62,10 @@
     "./date-range": {
       "types": "./dist/date-range.d.ts",
       "import": "./dist/date-range.js"
+    },
+    "./portal-theme": {
+      "types": "./dist/portal-theme.d.ts",
+      "import": "./dist/portal-theme.js"
     }
   },
   "scripts": {
@@ -80,6 +88,8 @@
     "@emotion/styled": "^11.14.1",
     "@mui/x-date-pickers": "~6.20.2",
     "@mui/x-date-pickers-pro": "~6.20.2",
+    "@mui/x-data-grid": "~6.20.4",
+    "@mui/base": "5.0.0-beta.70",
     "dayjs": "^1.11.21"
   },
   "peerDependenciesMeta": {
@@ -89,6 +99,8 @@
     "@mui/x-date-pickers-pro": {
       "optional": true
     },
+    "@mui/x-data-grid": { "optional": true },
+    "@mui/base": { "optional": true },
     "dayjs": {
       "optional": true
     }
@@ -96,6 +108,8 @@
   "devDependencies": {
     "@mui/x-date-pickers": "6.20.2",
     "@mui/x-date-pickers-pro": "6.20.2",
+    "@mui/x-data-grid": "6.20.4",
+    "@mui/base": "5.0.0-beta.70",
     "dayjs": "1.11.21",
     "react": "18.3.1",
     "react-dom": "18.3.1",

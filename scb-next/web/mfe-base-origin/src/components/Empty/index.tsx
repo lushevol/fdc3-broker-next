@@ -1,6 +1,5 @@
 import React, { ReactElement } from "react";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
+import { EmptyState, Button } from "ratan-design-origin";
 import CallMadeIcon from "@mui/icons-material/CallMade";
 import Root, { classes, PREFIX } from "./common/style";
 import useDispatcher from "../../hooks/dispathcer";
@@ -23,18 +22,13 @@ const Empty: React.FC = (): ReactElement => {
     });
   };
   return (
-    <Root data-testid={`${PREFIX}`}>
-      <div className={classes.div}>
-        <section className={classes.content}>
-          <div className={classes.bg} />
-          <Typography variant="body1" gutterBottom>
-            Start customizing your workspace
-          </Typography>
-          <Typography variant="body2" gutterBottom>
-            find out what workspace preference options you have and how those
-            options work.
-          </Typography>
-          <Button
+    <EmptyState component={Root} data-testid={`${PREFIX}`}
+      wrapperProps={{ className: classes.div }}
+      contentProps={{ className: classes.content }}
+      illustration={<div className={classes.bg} />}
+      title="Start customizing your workspace"
+      description="find out what workspace preference options you have and how those options work."
+      action={<Button
             variant="outlined"
             endIcon={<CallMadeIcon />}
             className={classes.button}
@@ -43,10 +37,8 @@ const Empty: React.FC = (): ReactElement => {
             data-testid={`${PREFIX}_Find_tile`}
           >
             Find tile
-          </Button>
-        </section>
-      </div>
-    </Root>
+          </Button>}
+    />
   );
 };
 

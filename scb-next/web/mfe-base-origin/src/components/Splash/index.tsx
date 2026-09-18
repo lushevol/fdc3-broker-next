@@ -1,19 +1,15 @@
 import React, { ReactElement } from "react";
 import Root, { classes, PREFIX } from "./common/style";
-import Backdrop from "@mui/material/Backdrop";
+import { LoadingOverlay } from "ratan-design-origin";
 import ErrorBoundry from "../../components/ErrorBoundry";
 
 const Splash: React.FC = (): ReactElement => {
   return (
     <ErrorBoundry>
-      <Root className={classes.root} data-testid={`${PREFIX}`}>
-        <Backdrop
-          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={true}
-        >
+      <LoadingOverlay open component={Root} sx={{ height: "100vh" }}
+        className={classes.root} data-testid={`${PREFIX}`}>
           <div className={classes.splash}>Please wait...</div>
-        </Backdrop>
-      </Root>
+      </LoadingOverlay>
     </ErrorBoundry>
   );
 };

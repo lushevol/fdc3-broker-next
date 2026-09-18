@@ -9,7 +9,7 @@ import postcss from "postcss";
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const consumer = await mkdtemp(join(tmpdir(), "ratan-design-origin-consumer-"));
 const npm = (args, cwd = consumer) =>
-  execFileSync("npm", args, {
+  execFileSync("npm", ["--cache=/tmp/npm-cache", ...args], {
     cwd,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "inherit"]
@@ -40,6 +40,8 @@ console.log(npm(["run", "build"]));
 for (const peer of [
   "@mui/x-date-pickers",
   "@mui/x-date-pickers-pro",
+  "@mui/x-data-grid",
+  "@mui/base",
   "dayjs"
 ]) {
   await assert.rejects(
@@ -137,7 +139,9 @@ npm([
   "--cache=/tmp/npm-cache",
   "@mui/x-date-pickers@6.20.2",
   "@mui/x-date-pickers-pro@6.20.2",
-  "dayjs@1.11.21"
+  "dayjs@1.11.21",
+  "@mui/x-data-grid@6.20.4",
+  "@mui/base@5.0.0-beta.70"
 ]);
 console.log(
   npm(["run", "typecheck", "--", "--project", "tsconfig.dates.json"])
@@ -168,4 +172,19 @@ execFileSync(
     stdio: "inherit"
   }
 );
+for (const resolution of ["bundler", "node"]) {
+  console.log(npm(["run", "typecheck", "--", "--project", "tsconfig.portal.json",
+    "--moduleResolution", resolution]));
+}
+await build({
+  root: consumer,
+  configFile: false,
+  logLevel: "warn",
+  ssr: { noExternal: true },
+  build: { ssr: "src/server-portal.tsx", outDir: "dist-server-portal" }
+});
+execFileSync(process.execPath, [join(consumer, "dist-server-portal/server-portal.js")], {
+  cwd: consumer,
+  stdio: "inherit"
+});
 console.log(`Independent tarball consumer verified: ${consumer}`);

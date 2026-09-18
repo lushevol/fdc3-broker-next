@@ -30,6 +30,12 @@ export { Loader, PageLoader, type LoaderProps, type PageLoaderProps } from "./Lo
 export { Snackbar, type SnackbarProps } from "./Snackbar.js";
 export { Dialog, type DialogProps } from "./Dialog.js";
 export {
+  EmptyState, ErrorFallback, LoadingOverlay,
+  type EmptyStateProps, type ErrorFallbackProps, type LoadingOverlayProps,
+} from "./StatePresentation.js";
+export { CircularProgress as Spinner } from "@mui/material";
+export type { CircularProgressProps as SpinnerProps } from "@mui/material/CircularProgress";
+export {
   BuilderButton, BuilderTabPanel, BuilderTabs, BuilderTab,
   builderTabProps, builderEmptyStyle,
   type BuilderButtonProps, type BuilderTabPanelProps,

@@ -1,0 +1,62 @@
+import React from "react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { Button, LoadingButton, Loader, Dialog, ThemeConfig, ThemeUtil } from "@fm/base";
+
+describe("unchanged consumer control exports", () => {
+  it("retains legacy portal extensions and host URL layout selection", () => {
+    const original = window.location.href;
+    window.history.replaceState({}, "", "?new-layout=true");
+    try {
+      const props = ThemeUtil.getTheme("gold", true);
+      const { config } = ThemeConfig.default(props);
+      expect(config.palette.mode).toBe("dark");
+      expect(config.theme.LoginPage.contentWidth).toBe("306px");
+      expect(props.NewTileComponent.boxShadow).toBe("none");
+      expect(config.components?.MuiDataGrid?.styleOverrides?.root).toMatchObject({ borderWidth: 0 });
+    } finally {
+      window.history.replaceState({}, "", original);
+    }
+  });
+  it("preserves primary type, caller icons and the 16px start-icon loading pattern", () => {
+    const click = vi.fn();
+    const { rerender } = render(<>
+      <Button.default type="primary" onClick={click}>Open trade</Button.default>
+      <LoadingButton.default loading startIcon={<span>Host icon</span>}>Save trade</LoadingButton.default>
+    </>);
+    expect(screen.getByRole("button", { name: "Open trade" })).toHaveAttribute("type", "button");
+    fireEvent.click(screen.getByRole("button", { name: "Open trade" }));
+    expect(click).toHaveBeenCalledOnce();
+    expect(screen.getByRole("button", { name: "Save trade" })).toBeDisabled();
+    expect(screen.getByRole("progressbar")).toHaveStyle({ width: "16px", height: "16px" });
+    expect(screen.queryByText("Host icon")).not.toBeInTheDocument();
+    rerender(<LoadingButton.default startIcon={<span>Host icon</span>}>Save trade</LoadingButton.default>);
+    expect(screen.getByRole("button", { name: "Host icon Save trade" })).toBeEnabled();
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  });
+
+  it("keeps the circular loading primitive and its accessible name", () => {
+    render(<Loader.default />);
+    expect(screen.getByRole("progressbar", { name: "Loading" })).toBeInTheDocument();
+  });
+
+  it("defaults dialogs open, forces a portal and retains close and Paper overrides", () => {
+    const close = vi.fn();
+    render(<div data-testid="consumer-root">
+      <Dialog.default titleComponents="Trade details" onClose={close} disablePortal
+        defaultWidth={720} defaultHeight="auto" className="consumer-dialog"
+        PaperProps={{ style: { color: "red" } }} actionComponents={<button>Approve trade</button>}>
+        Details ABC123
+      </Dialog.default>
+    </div>);
+    const dialog = screen.getByRole("dialog");
+    expect(screen.getByTestId("consumer-root")).not.toContainElement(dialog);
+    expect(dialog).toHaveStyle({ color: "red", width: "min(720px, calc(100vw - 32px))", height: "auto" });
+    expect(dialog.closest(".consumer-dialog")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Approve trade" })).toBeInTheDocument();
+    fireEvent.keyDown(dialog, { key: "Escape", code: "Escape" });
+    expect(close).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole("button", { name: "Close dialog" }));
+    expect(close).toHaveBeenCalledTimes(2);
+  });
+});

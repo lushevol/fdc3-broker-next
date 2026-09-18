@@ -22,6 +22,7 @@ export default defineConfig({
         compatibility: "src/compatibility.ts",
         dates: "src/dates.tsx",
         "date-range": "src/date-range.tsx",
+        "portal-theme": "src/portal-theme.ts",
       },
       formats: ["es"],
       fileName: (_format, name) => `${name}.js`,

@@ -11,17 +11,15 @@ import {
 import type { PlatformCapabilities } from '@fm/platform-contracts';
 import * as ReactRouterDomModule from 'react-router-dom';
 import {
-  Button as MuiButton,
-  CircularProgress,
-  Dialog as MuiDialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
   type DialogProps as MuiDialogProps,
   type ButtonProps as MuiButtonProps,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import {
+  Button as DesignButton,
+  LoadingButton as DesignLoadingButton,
+  Dialog as DesignDialog,
+  Spinner,
+} from 'ratan-design-origin';
 import { createTheme } from '@mui/material/styles';
 
 interface BoundaryState {
@@ -175,7 +173,7 @@ const storage = (kind: 'local' | 'session') =>
 
 export const ErrorBoundry = { default: PlatformErrorBoundary };
 export const Splash = { default: () => <div role="status">Loading Cashflow CN…</div> };
-export const Loader = { default: () => <CircularProgress aria-label="Loading" /> };
+export const Loader = { default: () => <Spinner aria-label="Loading" /> };
 export const Provider = {
   default: PlatformProvider,
   useContext: usePlatformContext,
@@ -237,7 +235,7 @@ interface CompatibilityButtonProps extends Omit<MuiButtonProps, 'type'> {
 }
 
 function CompatibilityButton({ type, ...props }: CompatibilityButtonProps) {
-  return <MuiButton {...props} type={type === 'primary' ? 'button' : type} />;
+  return <DesignButton {...props} type={type === 'primary' ? 'button' : type} />;
 }
 
 export const Button = { default: CompatibilityButton };
@@ -257,14 +255,17 @@ function CompatibilityLoadingButton({
   ...props
 }: CompatibilityLoadingButtonProps) {
   return (
-    <MuiButton
+    <DesignLoadingButton
       {...props}
-      disabled={disabled || loading}
-      startIcon={loading ? <CircularProgress size={loadingSize} /> : startIcon}
+      disabled={disabled}
+      loading={loading}
+      loadingPosition="startIcon"
+      loadingSize={loadingSize}
+      startIcon={startIcon}
       type={type === 'primary' ? 'button' : type}
     >
       {children}
-    </MuiButton>
+    </DesignLoadingButton>
   );
 }
 
@@ -321,10 +322,9 @@ function CompatibilityDialog({
 }: CompatibilityDialogProps) {
   const requestedWidth = cssSize(defaultWidth, 'auto');
   const requestedHeight = cssSize(defaultHeight, 'auto');
-  const hasTitle = titleComponents !== undefined && titleComponents !== null;
 
   return (
-    <MuiDialog
+    <DesignDialog
       open={open}
       onClose={() => onClose?.()}
       disablePortal={false}
@@ -335,6 +335,22 @@ function CompatibilityDialog({
       className={className}
       data-testid={testId}
       maxWidth={false}
+      titleComponents={titleComponents}
+      actionComponents={actionComponents}
+      onCloseButton={onClose}
+      titleProps={{ sx: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        minHeight: 48,
+        padding: '4px 8px 4px 16px',
+      } }}
+      dividers={dividers}
+      contentProps={{ sx: {
+        minHeight: 0,
+        overflow: 'auto',
+        padding: dividers ? undefined : 0,
+      } }}
       PaperProps={{
         ...PaperProps,
         style: {
@@ -353,39 +369,8 @@ function CompatibilityDialog({
         },
       }}
     >
-      {(hasTitle || onClose !== undefined) ? (
-        <DialogTitle
-          component="div"
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            minHeight: 48,
-            padding: '4px 8px 4px 16px',
-          }}
-        >
-          <div style={{ flex: 1, minWidth: 0 }}>
-            {titleComponents as MuiDialogProps['children']}
-          </div>
-          {onClose && (
-            <IconButton aria-label="Close dialog" onClick={onClose} size="small">
-              <CloseIcon />
-            </IconButton>
-          )}
-        </DialogTitle>
-      ) : null}
-      <DialogContent
-        dividers={dividers}
-        sx={{ minHeight: 0, overflow: 'auto', padding: dividers ? undefined : 0 }}
-      >
-        {children as MuiDialogProps['children']}
-      </DialogContent>
-      {actionComponents !== undefined && actionComponents !== null ? (
-        <DialogActions>
-          {actionComponents as MuiDialogProps['children']}
-        </DialogActions>
-      ) : null}
-    </MuiDialog>
+      {children}
+    </DesignDialog>
   );
 }
 

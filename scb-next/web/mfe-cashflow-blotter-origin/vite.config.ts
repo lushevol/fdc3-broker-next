@@ -23,6 +23,7 @@ export default defineConfig(({ mode }) => {
       }),
     ],
     resolve: {
+      dedupe: ['react', 'react-dom', '@mui/material', '@mui/icons-material', '@mui/system', '@emotion/react', '@emotion/styled'],
       alias: {
         src: fileURLToPath(new URL('./src', import.meta.url)),
         Import: fileURLToPath(new URL('./src/Root/import', import.meta.url)),

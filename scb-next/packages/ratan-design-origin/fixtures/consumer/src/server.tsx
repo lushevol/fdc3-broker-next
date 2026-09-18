@@ -7,6 +7,9 @@ import {
   PageLoader,
   Snackbar,
   Dialog,
+  EmptyState,
+  ErrorFallback,
+  LoadingOverlay,
   Input,
   Select,
   RatanDesignProvider,
@@ -19,6 +22,9 @@ if (typeof window !== "undefined" || typeof document !== "undefined")
 const html = renderToString(
   <RatanDesignProvider>
     <Loader text="Loading trades" />
+    <EmptyState title="No server payments" description="No records" />
+    <ErrorFallback title="Server error" action={<Button>Retry</Button>} />
+    <LoadingOverlay open>Server processing</LoadingOverlay>
     <PageLoader text="Loading workspace" />
     <Snackbar open message={<strong>Saved</strong>} />
     <Dialog open disablePortal titleComponents="Server dialog">Server details</Dialog>
@@ -34,6 +40,9 @@ if (
   !html.includes("Server action") ||
   !html.includes("Loading trades") ||
   !html.includes("Saved") ||
+  !html.includes("No server payments") ||
+  !html.includes("Server error") ||
+  !html.includes("Server processing") ||
   createRatanTheme().ratan.designGeneration !== "legacy"
 )
   throw new Error("SSR contract failed");

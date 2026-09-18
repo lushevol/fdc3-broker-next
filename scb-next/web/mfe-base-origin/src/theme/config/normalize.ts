@@ -1,8 +1,1 @@
-export default {
-  h3: {
-    margin: 0,
-  },
-  li: {
-    listStyle: "none",
-  },
-};
+export { normalize as default } from "ratan-design-origin/portal-theme";

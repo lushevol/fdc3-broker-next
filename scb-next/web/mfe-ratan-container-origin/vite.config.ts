@@ -33,6 +33,7 @@ export default defineConfig(({ mode }) => {
       }),
     ],
     resolve: {
+      dedupe: ['react', 'react-dom', '@mui/material', '@mui/icons-material', '@mui/system', '@emotion/react', '@emotion/styled'],
       alias: { "@fm/base": fileURLToPath(new URL("./src/compat/base.tsx", import.meta.url)) },
     },
     css: { preprocessorOptions: { less: { javascriptEnabled: true } } },

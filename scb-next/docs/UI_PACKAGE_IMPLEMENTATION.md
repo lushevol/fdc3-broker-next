@@ -490,3 +490,89 @@ while standalone disablePortal rendering retains server content.
 
 Stage 3 shared-pattern implementation is complete. Stage 4 consumer adapters,
 the remaining inventory classification, and release governance remain open.
+
+### Stage 4 specification: central consumer adoption
+
+- Ratan/Cashflow keep existing namespace/default compatibility exports and
+  business screen imports. Button preserves `type="primary"` translation.
+  LoadingButton preserves its 16px start-icon spinner and caller startIcon in
+  the idle state; package adds explicit startIcon presentation to own this
+  reusable pattern without changing Base's inline loading default.
+- Consumer Loader preserves its MUI circular progress presentation through a
+  package Spinner primitive. Portal splash/error orchestration remains local.
+- Consumer Dialog delegates title/content/footer composition to package Dialog
+  and keeps open=true, forced portal, viewport size constraints, PaperProps and
+  Escape/close behavior in its adapter. Do not impose Base's drag or 400px defaults.
+- Cashflow's full legacy theme and Base's matching factory/styles move to an
+  opt-in `portal-theme` entry point, retaining extensions, resets and grid
+  overrides for existing hosts. It accepts explicit appearance/layout flags
+  and performs no URL/storage/DOM reads. Core remains free of those policies.
+  Base/Cashflow adapters retain URL parsing; Ratan preserves its simpler theme.
+- Verify unchanged compatibility exports and public packed package interfaces,
+  existing consumer tests/builds, Base regression suite, isolation audit and
+  standalone/federated browser workflows. No business-screen changes are allowed.
+
+### Final inventory specification: presentation and portal boundaries
+
+- Promote EmptyState, ErrorFallback and LoadingOverlay as controlled, content-
+  driven presentation. Hosts supply illustrations, copy, actions and visibility.
+  Base retains drawer/loading dispatch, telemetry, support-address selection,
+  mailto construction and its error boundary. Preserve existing markup/classes,
+  default copy and visual layout through explicit slot props and host wrappers.
+- EmptyState composes illustration, title, description and action with explicit
+  content/wrapper slots. ErrorFallback composes a title and optional detail/action
+  in a padded section. LoadingOverlay renders a controlled backdrop; it performs
+  no navigation or loading orchestration and announces supplied status content.
+- Keep ErrorBoundry's class-based capture mechanism local: it owns portal error
+  state/support routing and is not a reusable function component. Its fallback
+  presentation becomes package-owned. Consumer-specific error/splash copy stays
+  in existing adapters.
+- Keep TabItem/TabPanel in Base. TabItem accepts Workspace records and curried
+  portal edit/delete/refresh callbacks, reads layout policy and intentionally
+  blurs the workspace name. TabPanel calls setTabPanel to schedule mounting,
+  visibility and activation across cached remote applications. These contracts
+  describe workspace lifecycle, not generic tabs. Package BuilderTabs/BuilderTab/
+  BuilderTabPanel already provide independently usable tab presentation; extracting
+  another workspace API would move domain coupling into the library.
+- Optional ScWebkit/ReactWrapper registration, admin tables/editors and the
+  inventory's portal-specific controls remain intentionally outside core.
+  Record these dispositions explicitly in the final inventory and catalog.
+
+### Stage 4 and final inventory delivery (2026-09-18)
+
+Ratan and Cashflow compatibility adapters now consume the package Button,
+LoadingButton, Dialog and Spinner contracts while preserving their existing
+imports, defaults, callback behavior, test identifiers and business screens.
+Cashflow opts into the package `portal-theme` entry after keeping URL parsing
+and `new-layout` selection in its adapter; Ratan retains its palette-only theme
+policy. React, MUI and Emotion peer declarations plus workspace deduplication
+keep one runtime context per host.
+
+EmptyState, ErrorFallback and LoadingOverlay are package-owned controlled
+presentation. Base retains dispatch, telemetry, support routing, error capture,
+mailto construction and splash/error orchestration. The final inventory and
+release record classify workspace lifecycle controls, WebKit registration,
+admin editors and other portal-specific features as intentionally host-owned.
+
+- Package: 57 tests pass with 100% lines and branches; strict typecheck, lint,
+  production build, Storybook build and packed consumer verification pass.
+  Packed proof covers core consumption without optional date/Pro peers,
+  explicit date installation, portal-theme declarations/SSR, CSS scoping,
+  tree shaking and DOM-free imports.
+- Base: 127 files / 355 tests pass; 96.85% lines and 94.13% branches; strict
+  typecheck and production build pass. The integrated host journey passes
+  login, New Tile, Cashflow render, workspace creation and deletion.
+- Ratan and Cashflow focused adapter suites pass (four tests each). Running a
+  single Ratan file through the package's coverage-enforcing script reports the
+  expected global-threshold failure; the same tests pass with coverage disabled.
+  The broad legacy Ratan/Cashflow suites retain their pre-migration duplicate
+  React hook failures, reproduced against the baseline adapters, so they are
+  recorded as an existing workspace test-environment limitation rather than a
+  migration regression.
+- `npm run verify:dependency-isolation` passes. GitNexus impact checks for the
+  edited component, adapter and theme symbols report LOW risk; JSX/import graph
+  gaps are covered by public compatibility tests and the browser journey.
+
+No package publication, registry release, external ownership assignment, font
+redistribution approval or production MUI X Pro licensing decision is included.
+Those release-governance decisions remain documented in `UI_PACKAGE_RELEASE.md`.

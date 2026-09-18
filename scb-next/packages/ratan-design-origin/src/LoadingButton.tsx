@@ -5,6 +5,7 @@ import { Button, type ButtonProps } from "./Button.js";
 export interface LoadingButtonProps extends ButtonProps {
   loading?: boolean;
   loadingSize?: number;
+  loadingPosition?: "inline" | "startIcon";
 }
 
 const DEFAULT_LOADING_SIZE = 14;
@@ -13,9 +14,15 @@ export const LoadingButton = /*#__PURE__*/ React.forwardRef<
   HTMLButtonElement,
   LoadingButtonProps
 >(function LoadingButton(
-  { loading, children, loadingSize = DEFAULT_LOADING_SIZE, ...props },
+  { loading, children, loadingSize = DEFAULT_LOADING_SIZE, loadingPosition = "inline", ...props },
   ref
 ) {
+  if (loadingPosition === "startIcon") {
+    return <Button {...props} ref={ref} disabled={props.disabled || loading}
+      startIcon={loading ? <CircularProgress size={loadingSize} /> : props.startIcon}>
+      {children}
+    </Button>;
+  }
   return loading ? (
     <Button {...props} ref={ref} disabled aria-busy>
       <CircularProgress

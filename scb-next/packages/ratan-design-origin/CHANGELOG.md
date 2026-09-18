@@ -1,0 +1,15 @@
+# Changelog
+
+## 0.1.0 - Local Release Candidate
+
+- Standalone ESM/TypeScript React 18 and MUI 5 controls with explicit scoped
+  legacy/WebKit themes, semantic tokens and packaged WebKit 2.0.5 assets.
+- Button/input/select, composed search layouts, Builder pattern, feedback,
+  controlled Dialog, EmptyState/ErrorFallback/LoadingOverlay and Spinner.
+- Optional dates, Pro date-range and historical portal-theme integrations.
+- Base and Ratan/Cashflow adoption behind their existing compatible exports,
+  defaults, callbacks and selectors; portal policy remains with applications.
+- Verified public interfaces, independent tarball consumption, SSR/tree shaking,
+  catalog states and integrated workspace journeys. See implementation evidence.
+- Internal candidate only. Publication owners, registry and asset/Pro licensing
+  decisions remain external release gates.

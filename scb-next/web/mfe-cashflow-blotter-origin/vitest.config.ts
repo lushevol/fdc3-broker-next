@@ -4,6 +4,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   plugins: [react()],
   resolve: {
+    dedupe: ['react', 'react-dom', '@mui/material', '@mui/icons-material', '@mui/system', '@emotion/react', '@emotion/styled'],
     alias: [
       { find: /^antd$/, replacement: fileURLToPath(new URL('../../../node_modules/antd/lib/index.js', import.meta.url)) },
       { find: /^antd\/es\/(.*)$/, replacement: fileURLToPath(new URL('../../../node_modules/antd/lib/$1', import.meta.url)) },
@@ -18,6 +19,7 @@ export default defineConfig({
       { find: 'stompjs-browser', replacement: fileURLToPath(new URL('../../../node_modules/stompjs/lib/stomp.js', import.meta.url)) },
     ],
   },
+  ssr: { noExternal: ['ratan-design-origin', /@mui\//, /@emotion\//] },
   test: {
     globals: true,
     environment: 'jsdom',
