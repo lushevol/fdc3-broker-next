@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ratan Design Adoption"
+  short_description: "Migrate shared UI without downstream API changes"
+  default_prompt: "Use $ratan-design-adoption to migrate this UI surface into ratan-design-origin while preserving existing consumer contracts."
