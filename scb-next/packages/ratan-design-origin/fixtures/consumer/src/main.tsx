@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import MenuItem from "@mui/material/MenuItem";
 import {
   Button,
+  LoadingOverlay,
   LoadingButton,
   Input,
   Select,
@@ -20,6 +21,8 @@ function App() {
   const [currency, setCurrency] = React.useState("USD");
   const [loading, setLoading] = React.useState(false);
   const [reference, setReference] = React.useState("");
+  const [overlayOpen, setOverlayOpen] = React.useState(false);
+  const [overlayActionCount, setOverlayActionCount] = React.useState(0);
   return (
     <RatanDesignProvider mode={mode} designGeneration={generation}>
       <main>
@@ -95,6 +98,28 @@ function App() {
           </div>
         </form>
         <output aria-label="Selected currency">{currency}</output>
+        <section className="overlay-demo" aria-labelledby="overlay-demo-title">
+          <h2 id="overlay-demo-title">Loading overlay behavior</h2>
+          <Button onClick={() => setOverlayOpen(true)}>Start loading overlay</Button>
+          <div className="overlay-target">
+            <Button onClick={() => setOverlayActionCount((count) => count + 1)}>
+              Underlying overlay action
+            </Button>
+            <output aria-label="Underlying overlay action count">
+              {overlayActionCount}
+            </output>
+            <LoadingOverlay
+              open={overlayOpen}
+              data-testid="consumer-loading-overlay"
+              backdropProps={{ sx: { position: "absolute" } }}
+            >
+              <div className="overlay-status">
+                <span>Processing overlay demo</span>
+                <Button onClick={() => setOverlayOpen(false)}>Finish loading</Button>
+              </div>
+            </LoadingOverlay>
+          </div>
+        </section>
         {generation === "webkit" && (
           <div
             className="token-surface"

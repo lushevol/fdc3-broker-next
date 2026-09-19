@@ -2,10 +2,9 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 0/30 DONE. Next: RD-001.** All items start as TODO; this document
-records planned work, not fixes already made. The clinic contains the review
-evidence and its limits. Reproduce each finding against the checkout used for
-implementation before changing behavior.
+**Progress: 1/30 DONE. Next: RD-002.** The clinic contains the review evidence
+and its limits. Reproduce each finding against the checkout used for implementation
+before changing behavior, then record current verification evidence here.
 
 ## Status and priority
 
@@ -26,7 +25,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 
 | ID | Item | Priority | Phase | Status |
 | --- | --- | --- | --- | --- |
-| [RD-001](#rd-001) | Closed loading overlay hit testing | P1 | 1 | TODO |
+| [RD-001](#rd-001) | Closed loading overlay hit testing | P1 | 1 | DONE |
 | [RD-002](#rd-002) | Empty and partial range values | P1 | 1 | TODO |
 | [RD-003](#rd-003) | Uncontrolled date values | P1 | 1 | TODO |
 | [RD-004](#rd-004) | Search clear name and disabled state | P1 | 1 | TODO |
@@ -123,16 +122,45 @@ whenever status changes.
 
 ### RD-001
 
-**Closed LoadingOverlay must not intercept input.** P1 · Confirmed · TODO.
+**Closed LoadingOverlay must not intercept input.** P1 · Confirmed · DONE.
 Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-001).
 
-- [ ] Specify inactive, opening, active and closing hit-testing behavior without
+- [x] Specify inactive, opening, active and closing hit-testing behavior without
   changing host portal/container policy.
-- [ ] Remove inactive hit testing or unmount after the exit transition; preserve
+- [x] Remove inactive hit testing or unmount after the exit transition; preserve
   the intended blocking behavior while loading.
-- [ ] A browser regression opens and closes the overlay, then clicks and
+- [x] A browser regression opens and closes the overlay, then clicks and
   keyboard-activates the underlying control successfully. Verify visible loading
   status as well as underlying interaction; absence of status alone is insufficient.
+
+```text
+Status: DONE
+Completed: 2026-09-20
+Owner: Codex
+Commit(s): fix(ratan-design): release closed loading overlays (this stage)
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-001 contract;
+  presentation.test.tsx public contract regression; design-origin.spec.ts packed-
+  consumer pointer and keyboard regression.
+GitNexus impact and staged detect_changes: LoadingOverlay upstream impact LOW;
+  one direct test caller, no affected processes/modules. Staged scope audit is
+  recorded in the stage commit evidence.
+Commands (working directory scb-next): package test, typecheck, lint and build;
+  Storybook build; verify:package; verify:dependency-isolation; consumer and host
+  Playwright suites.
+Outcomes: 10 test files/57 package tests passed with 100% line/branch coverage;
+  packed tarball typechecked under bundler and node resolution and passed build/
+  SSR checks; Storybook built; dependency isolation passed; consumer browser
+  matrix passed 10/10 at 390px and 1280px in legacy/WebKit and light/dark;
+  overlay regression passed at the default 1280x720 viewport on
+  http://127.0.0.1:8019; host journey passed 1/1 at 1280x720 on
+  http://127.0.0.1:8001.
+Compatibility review and rollback target: closed roots now use pointer-events:none;
+  open caller pointer policy, root sizing/styles, portal ownership and Base Splash's
+  permanently-open use remain unchanged. Roll back this stage commit if a host
+  depends on a closed overlay intercepting input.
+Limitations / pre-existing failures / follow-up IDs: none for RD-001. Registry,
+  asset and Pro-license ownership remain tracked by RD-028.
+```
 
 ### RD-002
 
@@ -502,9 +530,10 @@ Dependencies: RD-021, RD-023; baseline measurements may begin earlier.
 
 ## Activity log
 
-No implementation activity recorded yet. Add entries as work starts or status
-changes; link the item completion record or committed evidence.
+Record implementation starts and completions here; link the item completion record
+or committed evidence.
 
 | Date | Item | Status change | Commit / evidence | Notes / next action |
 | --- | --- | --- | --- | --- |
-| | | | | |
+| 2026-09-20 | RD-001 | TODO → IN PROGRESS | GitNexus LOW risk: one direct test caller, no processes/modules | Specification added; write failing public contract test next |
+| 2026-09-20 | RD-001 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Storybook, browser and host gates | Next: RD-002 |

@@ -49,11 +49,20 @@ export interface LoadingOverlayProps extends BoxProps {
   backdropProps?: Omit<BackdropProps, "open" | "children">;
 }
 
-export function LoadingOverlay({ open, children, backdropProps, ...rootProps }: LoadingOverlayProps) {
+export function LoadingOverlay({
+  open,
+  children,
+  backdropProps,
+  style,
+  ...rootProps
+}: LoadingOverlayProps) {
   return <Box component="section" sx={{
     position: "absolute", inset: 0, width: "100%", height: "100%",
     display: "flex", alignItems: "center", justifyContent: "center",
-  }} {...rootProps}>
+  }} {...rootProps} style={{
+    ...style,
+    pointerEvents: open ? style?.pointerEvents : "none",
+  }}>
     <Backdrop aria-hidden={!open} sx={{ color: "common.white", zIndex: (theme) => theme.zIndex.drawer + 1 }}
       {...backdropProps} open={open}>
       {open && <div role="status">{children}</div>}

@@ -90,3 +90,33 @@ test('keyboard users can see the focused action', async ({ page }) => {
   await expect(button).toHaveCSS('outline-style', 'solid');
   await expect(button).toHaveCSS('outline-width', '2px');
 });
+
+test('closed loading overlay releases its underlying action', async ({ page }) => {
+  await page.goto(consumerUrl!);
+  const target = page.getByRole('button', { name: 'Underlying overlay action' });
+  const count = page.getByLabel('Underlying overlay action count');
+  const overlay = page.getByTestId('consumer-loading-overlay');
+
+  await expect(overlay).toHaveCSS('pointer-events', 'none');
+  await page.getByRole('button', { name: 'Start loading overlay' }).click();
+  await expect(overlay.getByRole('status')).toHaveText(/Processing overlay demo/);
+  await expect(overlay).toHaveCSS('pointer-events', 'auto');
+  expect(
+    await target.evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      return document.elementFromPoint(
+        bounds.left + bounds.width / 2,
+        bounds.top + bounds.height / 2,
+      ) === element;
+    }),
+  ).toBe(false);
+
+  await page.getByRole('button', { name: 'Finish loading' }).click();
+  await expect(overlay.getByRole('status')).toHaveCount(0);
+  await expect(overlay).toHaveCSS('pointer-events', 'none');
+  await target.click();
+  await expect(count).toHaveText('1');
+  await target.focus();
+  await page.keyboard.press('Enter');
+  await expect(count).toHaveText('2');
+});

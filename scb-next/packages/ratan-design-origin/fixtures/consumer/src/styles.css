@@ -48,6 +48,24 @@ output {
   margin-top: 12px;
   font-family: var(--sc-font-family);
 }
+.overlay-demo {
+  margin-top: 24px;
+}
+.overlay-demo h2 {
+  font-size: 16px;
+}
+.overlay-target {
+  position: relative;
+  min-height: 96px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid currentColor;
+}
+.overlay-status {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
 @media (max-width: 480px) {
   main {
     padding: 16px;

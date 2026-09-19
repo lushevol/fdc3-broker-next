@@ -6,6 +6,8 @@
   legacy/WebKit themes, semantic tokens and packaged WebKit 2.0.5 assets.
 - Button/input/select, composed search layouts, Builder pattern, feedback,
   controlled Dialog, EmptyState/ErrorFallback/LoadingOverlay and Spinner.
+- Closed LoadingOverlay roots release pointer hit testing immediately while exit
+  transitions finish, preserving input access to the underlying interface.
 - Optional dates, Pro date-range and historical portal-theme integrations.
 - Base and Ratan/Cashflow adoption behind their existing compatible exports,
   defaults, callbacks and selectors; portal policy remains with applications.

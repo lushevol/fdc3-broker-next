@@ -38,11 +38,13 @@ describe("host-independent state presentation", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
-  it("controls overlay visibility and retains supplied content and root attributes", () => {
+  it("blocks its region only while loading is open", () => {
     const { rerender } = render(<LoadingOverlay open data-testid="busy"><span>Processing payment</span></LoadingOverlay>);
     expect(screen.getByRole("status")).toHaveTextContent("Processing payment");
     expect(screen.getByTestId("busy").querySelector(".MuiBackdrop-root")).toHaveClass("MuiBackdrop-root");
-    rerender(<LoadingOverlay open={false}>Processing payment</LoadingOverlay>);
+    expect(screen.getByTestId("busy")).not.toHaveStyle({ pointerEvents: "none" });
+    rerender(<LoadingOverlay open={false} data-testid="busy">Processing payment</LoadingOverlay>);
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByTestId("busy")).toHaveStyle({ pointerEvents: "none" });
   });
 });

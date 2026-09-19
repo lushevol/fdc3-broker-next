@@ -538,6 +538,24 @@ the remaining inventory classification, and release governance remain open.
   inventory's portal-specific controls remain intentionally outside core.
   Record these dispositions explicitly in the final inventory and catalog.
 
+### RD-001 specification: LoadingOverlay hit testing
+
+- LoadingOverlay remains a controlled presentation surface. While `open` is
+  true, its full host-supplied region blocks pointer interaction and announces
+  the supplied status content. This applies while the backdrop is entering and
+  fully visible.
+- When `open` becomes false, the overlay root no longer participates in pointer
+  hit testing, including while the backdrop exit transition is finishing. The
+  underlying interface is immediately available to pointer and keyboard input,
+  and the loading status is absent.
+- Root element selection, sizing, custom styles, backdrop options and host
+  portal/container policy remain caller-owned. In particular, Base's Splash
+  continues to render LoadingOverlay permanently open inside its existing
+  error boundary and full-viewport root.
+- Verify the public package contract for open/closed status and root hit-testing,
+  then verify through the packed consumer that an underlying action cannot be
+  activated while open and can be clicked and keyboard-activated after close.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,
