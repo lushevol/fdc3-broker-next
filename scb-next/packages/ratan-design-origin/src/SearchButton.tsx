@@ -32,8 +32,9 @@ export const SearchButton = /*#__PURE__*/ React.forwardRef<
   ref
 ) {
   return loading ? (
-    <SearchButtonRoot {...props} ref={ref} disabled>
+    <SearchButtonRoot {...props} ref={ref} disabled aria-busy>
       <CircularProgress
+        aria-hidden="true"
         color="inherit"
         size={loadingSize}
         style={{ marginRight: loadingSize }}

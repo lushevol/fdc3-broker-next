@@ -150,13 +150,19 @@ describe("standalone controls", () => {
         Save
       </LoadingButton>
     );
-    expect(screen.getByRole("progressbar")).toHaveStyle({
+    const loadingButton = screen.getByRole("button", { name: "Save" });
+    expect(screen.getByRole("progressbar", { hidden: true })).toHaveStyle({
       width: "20px",
       height: "20px",
     });
-    expect(screen.getByRole("button")).toHaveAttribute("aria-busy", "true");
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+    expect(loadingButton).toBeDisabled();
+    expect(loadingButton).toHaveAttribute("aria-busy", "true");
     rerender(<LoadingButton disabled>Save</LoadingButton>);
-    expect(screen.getByRole("button")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save" })).not.toHaveAttribute(
+      "aria-busy"
+    );
   });
   it("labels an input, forwards both refs, and preserves the change event", () => {
     const ref = React.createRef<HTMLDivElement>();
@@ -217,8 +223,14 @@ describe("standalone controls", () => {
         Save
       </LoadingButton>
     );
-    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
-    expect(screen.getByRole("progressbar")).toBeVisible();
+    const loadingButton = screen.getByRole("button", { name: "Save" });
+    expect(loadingButton).toBeDisabled();
+    expect(loadingButton).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByRole("progressbar", { hidden: true })).toHaveAttribute(
+      "aria-hidden",
+      "true"
+    );
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
     fireEvent.click(ref.current!);
     expect(onClick).not.toHaveBeenCalled();
     rerender(
@@ -228,6 +240,9 @@ describe("standalone controls", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(onClick).toHaveBeenCalledOnce();
+    expect(screen.getByRole("button", { name: "Save" })).not.toHaveAttribute(
+      "aria-busy"
+    );
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
   });
 
@@ -337,11 +352,15 @@ describe("standalone controls", () => {
         <ResetButton disabled>Reset</ResetButton>
       </RatanDesignProvider>
     );
-    expect(screen.getByRole("progressbar")).toHaveStyle({
+    const search = screen.getByRole("button", { name: "Search" });
+    expect(screen.getByRole("progressbar", { hidden: true })).toHaveStyle({
       width: "20px",
       height: "20px",
     });
-    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+    expect(search).toBeDisabled();
+    expect(search).toHaveAttribute("aria-busy", "true");
+    fireEvent.click(search);
     expect(click).toHaveBeenCalledTimes(2);
   });
 

@@ -62,6 +62,10 @@ their implementations and visual policy are now owned by this package.
 Label uses a string or numeric `label` as the compact selector's accessible name;
 callers can override it through `aria-label`, `aria-labelledby`, or the matching
 `SelectDisplayProps` fields.
+LoadingButton and SearchButton keep their action name, disable activation and
+expose `aria-busy="true"` while loading. Their embedded progress indicators are
+visual decoration so assistive technology receives one busy announcement from
+the named action instead of a duplicate progressbar.
 The SearchInput clear button is named `Clear search` by default; set
 `clearButtonLabel` for localized or field-specific text. The clear action is
 disabled when the effective input is disabled or read-only, including through

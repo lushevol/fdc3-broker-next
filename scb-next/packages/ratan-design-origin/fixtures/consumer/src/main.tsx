@@ -8,6 +8,7 @@ import {
   Input,
   Label,
   LabelMenuItem,
+  SearchButton,
   SearchInput,
   Select,
   RatanDesignProvider,
@@ -145,6 +146,10 @@ function App() {
             <LoadingButton type="submit" variant="contained" loading={loading}>
               Submit
             </LoadingButton>
+            <LoadingButton loading loadingPosition="startIcon">
+              Import trades
+            </LoadingButton>
+            <SearchButton loading>Search trades</SearchButton>
             <Button onClick={() => setLoading(false)}>Cancel</Button>
             <Button disabled>Approve</Button>
           </div>

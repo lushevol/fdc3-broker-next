@@ -17,6 +17,8 @@
   disabled or read-only fields across legacy and modern input prop spellings.
 - Select now generates and connects stable control/label IDs for custom and native
   modes, while Label exposes its compact combobox name and honors ARIA overrides.
+- LoadingButton and SearchButton retain their action names, expose button-level
+  busy state and hide their decorative progress indicators from assistive technology.
 - Base and Ratan/Cashflow adoption behind their existing compatible exports,
   defaults, callbacks and selectors; portal policy remains with applications.
 - Verified public interfaces, independent tarball consumption, SSR/tree shaking,

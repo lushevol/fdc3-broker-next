@@ -26,9 +26,10 @@ for (const width of [390, 1280]) {
           'true',
         );
         await expect(page.getByRole('textbox', { name: 'Approved by' })).toBeDisabled();
-        await page.getByRole('button', { name: 'Submit' }).click();
-        await expect(page.getByRole('button', { name: 'Submit' })).toBeDisabled();
-        await expect(page.getByRole('progressbar')).toBeVisible();
+        const submit = page.getByRole('button', { name: 'Submit', exact: true });
+        await submit.click();
+        await expect(submit).toBeDisabled();
+        await expect(submit.locator('[role="progressbar"][aria-hidden="true"]')).toBeVisible();
         await page.getByRole('button', { name: 'Cancel' }).click();
         await expect(page.getByRole('button', { name: 'Submit' })).toBeEnabled();
         if (generation === 'webkit') {
@@ -161,6 +162,28 @@ test('label and native selects expose stable accessible names', async ({ page })
       }).length,
     ),
   ).toBe(0);
+});
+
+test('loading actions expose one consistent busy announcement', async ({ page }) => {
+  await page.goto(consumerUrl!);
+  const inline = page.getByRole('button', { name: 'Submit', exact: true });
+  const startIcon = page.getByRole('button', { name: 'Import trades' });
+  const search = page.getByRole('button', { name: 'Search trades' });
+
+  await expect(inline).not.toHaveAttribute('aria-busy');
+  await inline.click();
+  await expect(inline).toBeDisabled();
+  await expect(inline).toHaveAttribute('aria-busy', 'true');
+  await expect(startIcon).toBeDisabled();
+  await expect(startIcon).toHaveAttribute('aria-busy', 'true');
+  await expect(search).toBeDisabled();
+  await expect(search).toHaveAttribute('aria-busy', 'true');
+  await expect(page.getByRole('progressbar')).toHaveCount(0);
+  await expect(page.locator('form [role="progressbar"][aria-hidden="true"]')).toHaveCount(3);
+
+  await page.getByRole('button', { name: 'Cancel' }).click();
+  await expect(inline).toBeEnabled();
+  await expect(inline).not.toHaveAttribute('aria-busy');
 });
 
 test('closed loading overlay releases its underlying action', async ({ page }) => {

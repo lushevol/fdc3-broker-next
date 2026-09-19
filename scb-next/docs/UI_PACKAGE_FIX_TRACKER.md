@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 5/30 DONE. Next: RD-006.** The clinic contains the review evidence
+**Progress: 6/30 DONE. Next: RD-007.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -30,7 +30,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-003](#rd-003) | Uncontrolled date values | P1 | 1 | DONE |
 | [RD-004](#rd-004) | Search clear name and disabled state | P1 | 1 | DONE |
 | [RD-005](#rd-005) | Label and native Select names | P1 | 1 | DONE |
-| [RD-006](#rd-006) | Loading announcements | P1 | 1 | TODO |
+| [RD-006](#rd-006) | Loading announcements | P1 | 1 | DONE |
 | [RD-007](#rd-007) | Collapsed criteria keyboard behavior | P1 | 1 | TODO |
 | [RD-008](#rd-008) | Dialog title relationships | P1 | 1 | TODO |
 | [RD-009](#rd-009) | Builder instance IDs | P1 | 1 | TODO |
@@ -346,14 +346,47 @@ Limitations / pre-existing failures / follow-up IDs: packed builds retain MUI
 
 ### RD-006
 
-**Make loading announcements consistent.** P1 · Confirmed · TODO.
+**Make loading announcements consistent.** P1 · Confirmed · DONE.
 Dependencies: none; coordinate with RD-012. [Clinic](UI_PACKAGE_CLINIC.md#rd-006).
 
-- [ ] Specify busy semantics and accessible names for every supported loading
+- [x] Specify busy semantics and accessible names for every supported loading
   position; choose when the spinner is named versus decorative.
-- [ ] Verify loading start/end, button naming, disabled behavior and announced
+- [x] Verify loading start/end, button naming, disabled behavior and announced
   status without duplicate announcements.
-- [ ] Cover each position in component tests and browser accessibility checks.
+- [x] Cover each position in component tests and browser accessibility checks.
+
+```text
+Status: DONE
+Completed: 2026-09-20
+Owner: Codex
+Commit(s): fix(ratan-design): announce loading actions consistently (this stage)
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-006 contract;
+  controls.test.tsx and loading-compatibility.test.tsx cover inline/start-icon and
+  SearchButton semantics; design-origin.spec.ts verifies the packed-browser
+  accessibility tree and loading transition.
+GitNexus impact and staged detect_changes: LoadingButton LOW with two direct
+  dependants; LoadingButtonProps LOW with three direct dependants; SearchButton
+  LOW with one direct dependant; SearchButtonProps LOW with two direct dependants;
+  no affected processes. Staged scope audit is recorded in this stage commit.
+Commands (working directory scb-next): focused and full package tests with
+  coverage; package typecheck/lint/build and Storybook build; verify:package;
+  verify:dependency-isolation; packed focused/full Playwright; Base focused tests,
+  typecheck/build; host Playwright journey.
+Outcomes: 10 files/73 package tests passed; coverage 100% statements/functions/
+  lines and 99.4% branches; packed consumer passed 13/13 at 390px and 1280px in
+  legacy/WebKit and light/dark, including focused loading regression 1/1 on
+  http://127.0.0.1:8019; Base passed 2 files/4 tests plus typecheck/build; host
+  login, New Tile, Cashflow render and tab removal passed 1/1 at 1280x720 on
+  http://127.0.0.1:8001; remaining package and release gates passed.
+Compatibility review and rollback target: button names, spinner sizing, disabled
+  behavior, caller start icons and Base's 16px adapter default are preserved.
+  Roll back this stage if a consumer relies on the nested progressbar being
+  separately announced. SearchButton loadingPosition remains owned by RD-012.
+Limitations / pre-existing failures / follow-up IDs: the dev stack retained its
+  known Alpha API EMFILE watcher failure plus existing Vite config-loader,
+  federation version, kebab-case CSS, login ownership and nested-button warnings.
+  None prevented the required host journey. RD-012 remains open.
+```
 
 ### RD-007
 
@@ -680,3 +713,5 @@ or committed evidence.
 | 2026-09-20 | RD-004 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-005 |
 | 2026-09-20 | RD-005 | TODO → IN PROGRESS | GitNexus LOW risk for concrete Label/Select render functions; SelectProps name graph is CRITICAL but unchanged | Specify field IDs/names and caller precedence; add failing public regressions |
 | 2026-09-20 | RD-005 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-006 |
+| 2026-09-20 | RD-006 | TODO → IN PROGRESS | GitNexus LOW risk: LoadingButton two direct callers, SearchButton one, no processes/modules | Specify one-source busy announcements; add failing position regressions |
+| 2026-09-20 | RD-006 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-007 |

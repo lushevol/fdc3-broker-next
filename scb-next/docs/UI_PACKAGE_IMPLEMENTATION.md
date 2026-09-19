@@ -623,6 +623,22 @@ the remaining inventory classification, and release governance remain open.
   Storybook `Group by` Label pattern, Base's existing adapters, packed-consumer
   browser roles and the absence of unnamed comboboxes.
 
+### RD-006 specification: loading announcements
+
+- `LoadingButton` keeps the action name supplied by its children or explicit ARIA
+  props. While `loading` is true, both inline and start-icon positions disable the
+  action and expose `aria-busy="true"`; when loading ends, the busy state is absent
+  and the caller's explicit disabled state and start icon remain authoritative.
+- `SearchButton` follows the same named-button busy contract for its current inline
+  loading presentation. RD-012 separately owns its advertised `loadingPosition`
+  behavior and DOM prop leak; this stage must preserve that follow-up's scope.
+- Circular progress indicators inside these named buttons are visual decoration:
+  they remain rendered and sized but use `aria-hidden="true"`, so the button's busy
+  state is the only announcement and no unnamed or duplicate progressbar is exposed.
+- Verify loading start/end, action names, disabled/click behavior, both
+  LoadingButton positions, SearchButton, Base's direct adapters and packed-browser
+  accessibility trees.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,
