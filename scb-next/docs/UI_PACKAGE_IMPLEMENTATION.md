@@ -556,6 +556,24 @@ the remaining inventory classification, and release governance remain open.
   then verify through the packed consumer that an underlying action cannot be
   activated while open and can be clicked and keyboard-activated after close.
 
+### RD-002 specification: DateRangePicker endpoint values
+
+- `DateRangePicker` remains a controlled optional-Pro integration whose value is
+  a two-element Dayjs range. Each endpoint independently accepts `Dayjs | null`:
+  `[null, null]`, `[Dayjs, null]`, `[null, Dayjs]` and a complete Dayjs range are
+  valid public values.
+- Preserve each `null` endpoint when forwarding the value to MUI X. Never pass a
+  `dayjs(null)` invalid date in its place. Continue normalizing non-null endpoints
+  with Dayjs for compatibility with Base callers that historically supplied
+  parseable date-like values despite the narrower public TypeScript contract.
+- Clearing through the public single-input field reports `[null, null]` through
+  `onChange`. Empty and partial values must not report `invalidDate` for their
+  null endpoints through `onError`; non-null endpoint validation remains MUI X
+  and host policy.
+- The single-input field, label/layout behavior, callback signatures, caller
+  localization, optional peer boundary and host-owned Pro licensing remain
+  unchanged. Verify the public component and the packed optional-peer consumer.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

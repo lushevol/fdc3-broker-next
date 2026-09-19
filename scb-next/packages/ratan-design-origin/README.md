@@ -102,7 +102,8 @@ by the core entry point. Wrap dates in LocalizationProvider with AdapterDayjs;
 the host chooses `adapterLocale`, timezone, formats and validation policy.
 Controls retain `labelPosition="top" | "left"`, `hidden`, Dayjs values and MUI X
 callbacks. Caller `slotProps` replaces the default shrink text-field props;
-range always uses SingleInputDateRangeField. Field identifiers belong in
+range always uses SingleInputDateRangeField and preserves null endpoints in empty
+and partial controlled values. Field identifiers belong in
 `slotProps.textField.inputProps`; MUI X 6 ignores top-level data attributes.
 The compiled `fixtures/consumer/src/dates.tsx` demonstrates the public imports.
 

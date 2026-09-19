@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 1/30 DONE. Next: RD-002.** The clinic contains the review evidence
+**Progress: 2/30 DONE. Next: RD-003.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -26,7 +26,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | ID | Item | Priority | Phase | Status |
 | --- | --- | --- | --- | --- |
 | [RD-001](#rd-001) | Closed loading overlay hit testing | P1 | 1 | DONE |
-| [RD-002](#rd-002) | Empty and partial range values | P1 | 1 | TODO |
+| [RD-002](#rd-002) | Empty and partial range values | P1 | 1 | DONE |
 | [RD-003](#rd-003) | Uncontrolled date values | P1 | 1 | TODO |
 | [RD-004](#rd-004) | Search clear name and disabled state | P1 | 1 | TODO |
 | [RD-005](#rd-005) | Label and native Select names | P1 | 1 | TODO |
@@ -164,15 +164,44 @@ Limitations / pre-existing failures / follow-up IDs: none for RD-001. Registry,
 
 ### RD-002
 
-**Preserve empty and partial range endpoints.** P1 · Confirmed · TODO.
+**Preserve empty and partial range endpoints.** P1 · Confirmed · DONE.
 Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-002).
 
-- [ ] Specify null, partial and complete Dayjs range values; avoid coercing valid
+- [x] Specify null, partial and complete Dayjs range values; avoid coercing valid
   null endpoints into invalid dates.
-- [ ] Test `[null, null]`, both partial forms, a selected range and clearing through
+- [x] Test `[null, null]`, both partial forms, a selected range and clearing through
   the public range entry. Assert values and validation callbacks.
-- [ ] Verify packed range declarations/runtime with optional peers installed;
+- [x] Verify packed range declarations/runtime with optional peers installed;
   preserve explicit host localization and Pro licensing responsibilities.
+
+```text
+Status: DONE
+Completed: 2026-09-20
+Owner: Codex
+Commit(s): fix(ratan-design): preserve partial date ranges (this stage)
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-002 contract;
+  date-range.test.tsx public value/validation regressions; packed dates fixture
+  rejects invalid empty or partial range SSR.
+GitNexus impact and staged detect_changes: DateRangePicker upstream impact LOW;
+  three direct dependants, one affected module and no processes. Staged scope
+  audit is recorded in the stage commit evidence.
+Commands (working directory scb-next): package test, typecheck, lint and build;
+  Storybook build; verify:package; verify:dependency-isolation; Base focused range
+  test, typecheck and build; host Playwright suite.
+Outcomes: 10 test files/61 package tests passed with 100% line/branch coverage;
+  `[null,null]`, both partial forms, complete/edit and clearing callbacks pass;
+  packed tarball declarations/build and null-endpoint SSR pass with optional peers;
+  Base range adapter passed 3/3 and Base typecheck/build passed; host journey passed
+  1/1 at 1280x720 on http://127.0.0.1:8001.
+Compatibility review and rollback target: null endpoints remain null while non-null
+  endpoints retain Dayjs normalization; the single field, caller localization,
+  callback signatures, optional entry and host-owned Pro licensing are unchanged.
+  Roll back this stage commit if an undocumented consumer relies on invalid Dayjs
+  instances for null range endpoints.
+Limitations / pre-existing failures / follow-up IDs: MUI/Vite builds retain their
+  existing module-directive and future config-loader warnings. RD-003 separately
+  covers uncontrolled community date values; RD-028 owns release/licensing gates.
+```
 
 ### RD-003
 
@@ -537,3 +566,5 @@ or committed evidence.
 | --- | --- | --- | --- | --- |
 | 2026-09-20 | RD-001 | TODO → IN PROGRESS | GitNexus LOW risk: one direct test caller, no processes/modules | Specification added; write failing public contract test next |
 | 2026-09-20 | RD-001 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Storybook, browser and host gates | Next: RD-002 |
+| 2026-09-20 | RD-002 | TODO → IN PROGRESS | GitNexus LOW risk: three direct dependants, one module, no processes | Specify null/partial range values; add failing public contract regression |
+| 2026-09-20 | RD-002 | IN PROGRESS → DONE | Item completion record and passing package, packed optional-peer, Base and host gates | Next: RD-003 |

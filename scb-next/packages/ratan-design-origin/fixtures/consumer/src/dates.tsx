@@ -27,7 +27,16 @@ export function Dates() {
       <DatePicker {...dateProps} label="Settlement" />
       <DateTimePicker label="Execution" />
       <TimePicker label="Cutoff" />
-      <DateRangePicker {...rangeProps} label="Period" />
+      <DateRangePicker {...rangeProps} label="Complete period" />
+      <DateRangePicker value={[null, null]} label="Empty period" />
+      <DateRangePicker
+        value={[dayjs("2026-09-18"), null]}
+        label="Open-ended period"
+      />
+      <DateRangePicker
+        value={[null, dayjs("2026-09-21")]}
+        label="Open-start period"
+      />
     </LocalizationProvider>
   );
 }

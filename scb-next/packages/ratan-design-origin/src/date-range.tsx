@@ -36,7 +36,12 @@ export const DateRangePicker = /*#__PURE__*/ React.memo(
           .filter(Boolean)
           .join(" ")}
         value={
-          value?.length === 2 ? [dayjs(value[0]), dayjs(value[1])] : undefined
+          value?.length === 2
+            ? [
+                value[0] === null ? null : dayjs(value[0]),
+                value[1] === null ? null : dayjs(value[1])
+              ]
+            : undefined
         }
         slots={{ field: SingleInputDateRangeField }}
         slotProps={{ textField: { InputLabelProps: { shrink: true } } }}

@@ -9,6 +9,8 @@
 - Closed LoadingOverlay roots release pointer hit testing immediately while exit
   transitions finish, preserving input access to the underlying interface.
 - Optional dates, Pro date-range and historical portal-theme integrations.
+- Pro date ranges preserve empty and partial null endpoints instead of converting
+  them into invalid Dayjs values.
 - Base and Ratan/Cashflow adoption behind their existing compatible exports,
   defaults, callbacks and selectors; portal policy remains with applications.
 - Verified public interfaces, independent tarball consumption, SSR/tree shaking,

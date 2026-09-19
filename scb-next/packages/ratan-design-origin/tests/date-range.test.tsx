@@ -39,6 +39,86 @@ describe("public Pro date range integration", () => {
     });
     expect(screen.getByText("Inclusive dates")).toBeInTheDocument();
   });
+  it("preserves an empty controlled range without invalid-date errors", () => {
+    const error = vi.fn();
+    render(
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DateRangePicker
+          label="Period"
+          value={[null, null]}
+          onError={error}
+        />
+      </LocalizationProvider>
+    );
+    expect(screen.getByRole("textbox", { name: "Period" })).toHaveValue("");
+    expect(screen.getByRole("textbox", { name: "Period" })).not.toHaveAttribute(
+      "aria-invalid",
+      "true"
+    );
+    expect(error).not.toHaveBeenCalled();
+  });
+  it.each([
+    {
+      name: "an empty end",
+      value: [dayjs("2026-09-18"), null] as [
+        dayjs.Dayjs | null,
+        dayjs.Dayjs | null
+      ],
+      displayed: "2026-09-18 – YYYY-MM-DD"
+    },
+    {
+      name: "an empty start",
+      value: [null, dayjs("2026-09-21")] as [
+        dayjs.Dayjs | null,
+        dayjs.Dayjs | null
+      ],
+      displayed: "YYYY-MM-DD – 2026-09-21"
+    }
+  ])("preserves a partial range with $name", ({ value, displayed }) => {
+    const error = vi.fn();
+    render(
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DateRangePicker
+          label="Period"
+          value={value}
+          format="YYYY-MM-DD"
+          onError={error}
+        />
+      </LocalizationProvider>
+    );
+    const field = screen.getByRole("textbox", { name: "Period" });
+    expect(field).toHaveValue(displayed);
+    expect(field).not.toHaveAttribute("aria-invalid", "true");
+    expect(error).not.toHaveBeenCalledWith(
+      expect.arrayContaining(["invalidDate"]),
+      expect.anything()
+    );
+  });
+  it("reports an empty tuple when the public range field is cleared", () => {
+    const change = vi.fn();
+    const error = vi.fn();
+    render(
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DateRangePicker
+          label="Period"
+          value={[dayjs("2026-09-18"), dayjs("2026-09-21")]}
+          format="YYYY-MM-DD"
+          onChange={change}
+          onError={error}
+        />
+      </LocalizationProvider>
+    );
+    fireEvent.change(screen.getByRole("textbox", { name: "Period" }), {
+      target: { value: "" }
+    });
+    expect(change).toHaveBeenLastCalledWith([null, null], {
+      validationError: [null, null]
+    });
+    expect(error).not.toHaveBeenCalledWith(
+      expect.arrayContaining(["invalidDate"]),
+      expect.anything()
+    );
+  });
   it("renders one range field and reports both dates on edits", () => {
     const change = vi.fn();
     render(
