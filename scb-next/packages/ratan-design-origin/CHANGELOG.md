@@ -19,6 +19,8 @@
   modes, while Label exposes its compact combobox name and honors ARIA overrides.
 - LoadingButton and SearchButton retain their action names, expose button-level
   busy state and hide their decorative progress indicators from assistive technology.
+- Collapsed search criteria keep the visible row interactive while clipped rows
+  leave keyboard navigation; the toggle now exposes its state and controlled region.
 - Base and Ratan/Cashflow adoption behind their existing compatible exports,
   defaults, callbacks and selectors; portal policy remains with applications.
 - Verified public interfaces, independent tarball consumption, SSR/tree shaking,

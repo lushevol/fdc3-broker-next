@@ -48,9 +48,11 @@ output {
   margin-top: 12px;
   font-family: var(--sc-font-family);
 }
+.criteria-demo,
 .overlay-demo {
   margin-top: 24px;
 }
+.criteria-demo h2,
 .overlay-demo h2 {
   font-size: 16px;
 }

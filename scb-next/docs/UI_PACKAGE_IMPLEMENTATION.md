@@ -639,6 +639,24 @@ the remaining inventory classification, and release governance remain open.
   LoadingButton positions, SearchButton, Base's direct adapters and packed-browser
   accessibility trees.
 
+### RD-007 specification: collapsed search criteria
+
+- `SearchConditionContainer` keeps every criterion mounted so caller and child
+  state survives expansion changes. While collapsed, criteria that fit completely
+  in the first visible row remain exposed and interactive; criteria in clipped
+  rows are `aria-hidden` and inert, so pointer and sequential keyboard navigation
+  cannot activate invisible actions.
+- The toggle has the state-specific accessible name `Expand search criteria` or
+  `Collapse search criteria`, exposes `aria-expanded`, and controls the effective
+  container ID. A caller-supplied `id` remains authoritative; otherwise the
+  component generates a stable, hydration-safe ID.
+- Collapsing from the toggle retains focus there. If a viewport/zoom/layout change
+  hides the currently focused criterion, focus moves to the toggle before that
+  criterion becomes inert. Expanding restores interaction without remounting.
+- Verify first-row and clipped-row behavior with real layout at 390px and 1280px,
+  including Tab/Shift+Tab, edit/close behavior, expand/collapse and retained child
+  state. Preserve the 49px legacy collapsed height and host theme policy.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

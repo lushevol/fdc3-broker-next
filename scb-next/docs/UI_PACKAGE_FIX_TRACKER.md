@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 6/30 DONE. Next: RD-007.** The clinic contains the review evidence
+**Progress: 7/30 DONE. Next: RD-008.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -31,7 +31,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-004](#rd-004) | Search clear name and disabled state | P1 | 1 | DONE |
 | [RD-005](#rd-005) | Label and native Select names | P1 | 1 | DONE |
 | [RD-006](#rd-006) | Loading announcements | P1 | 1 | DONE |
-| [RD-007](#rd-007) | Collapsed criteria keyboard behavior | P1 | 1 | TODO |
+| [RD-007](#rd-007) | Collapsed criteria keyboard behavior | P1 | 1 | DONE |
 | [RD-008](#rd-008) | Dialog title relationships | P1 | 1 | TODO |
 | [RD-009](#rd-009) | Builder instance IDs | P1 | 1 | TODO |
 | [RD-010](#rd-010) | Shared field state | P1 | 1 | TODO |
@@ -390,15 +390,48 @@ Limitations / pre-existing failures / follow-up IDs: the dev stack retained its
 
 ### RD-007
 
-**Keep collapsed criteria out of hidden keyboard navigation.** P1 · Confirmed · TODO.
+**Keep collapsed criteria out of hidden keyboard navigation.** P1 · Confirmed · DONE.
 Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-007).
 
-- [ ] Specify which criteria remain visible and interactive when collapsed;
+- [x] Specify which criteria remain visible and interactive when collapsed;
   preserve entered state and define focus handling when collapsing.
-- [ ] Add correct `aria-expanded`, `aria-controls` and expand/collapse names;
+- [x] Add correct `aria-expanded`, `aria-controls` and expand/collapse names;
   hidden criteria must not remain keyboard-activatable.
-- [ ] Verify Tab/Shift+Tab, expand, edit and collapse in a browser at desktop and
+- [x] Verify Tab/Shift+Tab, expand, edit and collapse in a browser at desktop and
   mobile widths. Confirm visible criteria still work.
+
+```text
+Status: DONE
+Completed: 2026-09-20
+Owner: Codex
+Commit(s): fix(ratan-design): remove clipped criteria from navigation (this stage)
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-007 contract;
+  controls.test.tsx covers stable/effective IDs, toggle semantics, measured-row
+  inertness, focus recovery and expansion; design-origin.spec.ts covers real
+  Tab/Shift+Tab, activation, collapse and retained state at both target widths.
+GitNexus impact and staged detect_changes: SearchConditionContainer LOW with one
+  direct test dependant and no affected processes/modules; packed fixture App is
+  absent from the index. Staged scope audit is recorded in this stage commit.
+Commands (working directory scb-next): focused/full package tests, typecheck,
+  lint/build and Storybook build; verify:package; verify:dependency-isolation;
+  focused/full packed Playwright; Base focused adapter tests, typecheck/build;
+  host Playwright journey.
+Outcomes: 10 files/74 package tests passed with 97.96% lines and 96.60% branches;
+  independent tarball declarations/build/SSR passed; packed browser passed focused
+  2/2 and full 15/15 at 390px and 1280px across legacy/WebKit and light/dark on
+  http://127.0.0.1:8019; Base passed 1 file/2 tests plus typecheck/build; host
+  login, New Tile, Cashflow render and tab removal passed 1/1 at 1280x720 on
+  http://127.0.0.1:8001; Storybook and dependency isolation passed.
+Compatibility review and rollback target: the 49px collapsed height, first-row
+  actions, all mounted child state, caller IDs, style precedence, themes and Base
+  re-export remain intact. Managed inert/ARIA attributes restore caller values.
+  Roll back this stage if a host intentionally tabs into visually clipped rows.
+Limitations / pre-existing failures / follow-up IDs: package builds retain MUI
+  module-directive warnings. The dev stack retained Alpha API EMFILE plus existing
+  Vite config-loader, federation version, kebab-case CSS, login ownership and
+  nested-button warnings; none prevented the required journey. RD-029 owns the
+  broader host-warning baseline.
+```
 
 ### RD-008
 
@@ -715,3 +748,5 @@ or committed evidence.
 | 2026-09-20 | RD-005 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-006 |
 | 2026-09-20 | RD-006 | TODO → IN PROGRESS | GitNexus LOW risk: LoadingButton two direct callers, SearchButton one, no processes/modules | Specify one-source busy announcements; add failing position regressions |
 | 2026-09-20 | RD-006 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-007 |
+| 2026-09-20 | RD-007 | TODO → IN PROGRESS | GitNexus LOW risk: one direct test dependant, no processes/modules | Specify first-row/inert behavior and add keyboard regressions |
+| 2026-09-20 | RD-007 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-008 |

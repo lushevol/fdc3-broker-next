@@ -9,6 +9,7 @@ import {
   Label,
   LabelMenuItem,
   SearchButton,
+  SearchConditionContainer,
   SearchInput,
   Select,
   RatanDesignProvider,
@@ -28,6 +29,8 @@ function App() {
   const [tradeSearch, setTradeSearch] = React.useState("");
   const [overlayOpen, setOverlayOpen] = React.useState(false);
   const [overlayActionCount, setOverlayActionCount] = React.useState(0);
+  const [criterionActionCount, setCriterionActionCount] = React.useState(0);
+  const [criterionNote, setCriterionNote] = React.useState("");
   return (
     <RatanDesignProvider mode={mode} designGeneration={generation}>
       <main>
@@ -155,6 +158,36 @@ function App() {
           </div>
         </form>
         <output aria-label="Selected currency">{currency}</output>
+        <section className="criteria-demo" aria-labelledby="criteria-demo-title">
+          <h2 id="criteria-demo-title">Search criteria behavior</h2>
+          <SearchConditionContainer id="consumer-search-criteria">
+            {[
+              "Status confirmed",
+              "Currency USD",
+              "Market Singapore",
+              "Desk Treasury",
+              "Product FX forward",
+            ].map((criterion) => (
+              <Button
+                key={criterion}
+                data-criterion={criterion}
+                onClick={() => setCriterionActionCount((count) => count + 1)}
+                sx={{ minWidth: 176 }}
+              >
+                {criterion}
+              </Button>
+            ))}
+            <Input
+              data-criterion="note"
+              label="Criterion note"
+              variant="outlined"
+              value={criterionNote}
+              onChange={(event) => setCriterionNote(event.target.value)}
+              sx={{ minWidth: 176 }}
+            />
+          </SearchConditionContainer>
+          <output aria-label="Criterion action count">{criterionActionCount}</output>
+        </section>
         <section className="overlay-demo" aria-labelledby="overlay-demo-title">
           <h2 id="overlay-demo-title">Loading overlay behavior</h2>
           <Button onClick={() => setOverlayOpen(true)}>Start loading overlay</Button>

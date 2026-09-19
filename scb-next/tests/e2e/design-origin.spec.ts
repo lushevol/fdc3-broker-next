@@ -186,6 +186,48 @@ test('loading actions expose one consistent busy announcement', async ({ page })
   await expect(inline).not.toHaveAttribute('aria-busy');
 });
 
+for (const width of [390, 1280]) {
+  test(`collapsed criteria skip clipped rows at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto(consumerUrl!);
+    const region = page.locator('#consumer-search-criteria');
+    const expand = page.getByRole('button', { name: 'Expand search criteria' });
+    const visible = region.locator(':scope > [data-criterion]:not([inert])');
+    const hidden = region.locator(':scope > [data-criterion][inert]');
+
+    await expect(expand).toHaveAttribute('aria-controls', 'consumer-search-criteria');
+    await expect(expand).toHaveAttribute('aria-expanded', 'false');
+    expect(await visible.count()).toBeGreaterThan(0);
+    expect(await hidden.count()).toBeGreaterThan(0);
+    await expect(hidden.first()).toHaveAttribute('aria-hidden', 'true');
+
+    await visible.last().focus();
+    await page.keyboard.press('Tab');
+    await expect(expand).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(visible.last()).toBeFocused();
+
+    await expand.focus();
+    await page.keyboard.press('Enter');
+    const collapse = page.getByRole('button', { name: 'Collapse search criteria' });
+    await expect(collapse).toBeFocused();
+    await expect(collapse).toHaveAttribute('aria-expanded', 'true');
+    await expect(hidden).toHaveCount(0);
+    await page.getByRole('textbox', { name: 'Criterion note' }).fill('Retained note');
+    await page.getByRole('button', { name: 'Product FX forward' }).click();
+    await expect(page.getByLabel('Criterion action count')).toHaveText('1');
+
+    await collapse.click();
+    await expect(expand).toBeFocused();
+    await expect(expand).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.getByLabel('Criterion action count')).toHaveText('1');
+    await expand.click();
+    await expect(page.getByRole('textbox', { name: 'Criterion note' })).toHaveValue(
+      'Retained note',
+    );
+  });
+}
+
 test('closed loading overlay releases its underlying action', async ({ page }) => {
   await page.goto(consumerUrl!);
   const target = page.getByRole('button', { name: 'Underlying overlay action' });

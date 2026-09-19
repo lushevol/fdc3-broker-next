@@ -71,7 +71,10 @@ The SearchInput clear button is named `Clear search` by default; set
 disabled when the effective input is disabled or read-only, including through
 legacy `InputProps`/`inputProps` and modern `slotProps` spellings.
 SearchGrid, SearchCondition and SearchConditionContainer provide the composed
-search layout, dismissible criteria and collapsed/expanded criteria region.
+search layout, dismissible criteria and collapsed/expanded criteria region. The
+collapsed region keeps its first visible row interactive while clipped rows are
+inert and hidden from assistive technology. Its state-named toggle exposes
+`aria-expanded` and `aria-controls`; children remain mounted across transitions.
 BuilderButton composes a Table/Filters trigger with a controlled popover.
 Callers own `anchorEl` and clear it from their actions to close; the legacy
 284x560px popover accepts `popOverWidth`/`popOverHeight` overrides. BuilderTabs,

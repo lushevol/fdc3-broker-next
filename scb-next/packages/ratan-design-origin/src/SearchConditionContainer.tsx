@@ -12,6 +12,9 @@ const COLLAPSED_HEIGHT = "49px";
 const LEGACY_ACTION_OFFSET = "8px";
 const LEGACY_ACTION_SIZE = "30px";
 const LEGACY_END_PADDING = "56px";
+const CLIP_TOLERANCE = 0.5;
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;
 
 export const searchConditionContainerModeStyle = (mode: string) =>
   mode === "dark" ? "rgba(0, 0, 0, 1)" : "rgba(243, 243, 243, 1)";
@@ -79,6 +82,7 @@ export const SearchConditionContainer = /*#__PURE__*/ React.forwardRef<
   StackProps
 >(function SearchConditionContainer(
   {
+    id,
     spacing: _spacing,
     direction: _direction,
     useFlexGap: _useFlexGap,
@@ -88,11 +92,114 @@ export const SearchConditionContainer = /*#__PURE__*/ React.forwardRef<
   ref
 ) {
   const [expanded, setExpanded] = React.useState(false);
-  const handleFab = () => setExpanded((current) => !current);
+  const generatedId = React.useId();
+  const containerId = id ?? `ratan-search-conditions-${generatedId}`;
+  const rootRef = React.useRef<HTMLDivElement | null>(null);
+  const actionRef = React.useRef<HTMLButtonElement | null>(null);
+  const managedItems = React.useRef(
+    new Map<HTMLElement, { ariaHidden: string | null; inert: string | null }>()
+  );
+
+  React.useImperativeHandle(ref, () => rootRef.current as HTMLDivElement);
+
+  const restoreItem = React.useCallback((item: HTMLElement) => {
+    const previous = managedItems.current.get(item);
+    if (!previous) return;
+
+    if (previous.ariaHidden === null) item.removeAttribute("aria-hidden");
+    else item.setAttribute("aria-hidden", previous.ariaHidden);
+    if (previous.inert === null) item.removeAttribute("inert");
+    else item.setAttribute("inert", previous.inert);
+    managedItems.current.delete(item);
+  }, []);
+
+  const syncCollapsedItems = React.useCallback(() => {
+    const root = rootRef.current;
+    const action = actionRef.current;
+    if (!root || !action) return;
+
+    const items = Array.from(root.children).filter(
+      (element): element is HTMLElement =>
+        element !== action && element instanceof HTMLElement
+    );
+    const itemSet = new Set(items);
+    for (const managed of managedItems.current.keys()) {
+      if (!itemSet.has(managed)) restoreItem(managed);
+    }
+
+    const rootBounds = root.getBoundingClientRect();
+    for (const item of items) {
+      const itemBounds = item.getBoundingClientRect();
+      const clipped =
+        !expanded &&
+        (itemBounds.top < rootBounds.top - CLIP_TOLERANCE ||
+          itemBounds.bottom > rootBounds.bottom + CLIP_TOLERANCE);
+
+      if (!clipped) {
+        restoreItem(item);
+        continue;
+      }
+
+      if (item.contains(document.activeElement)) action.focus();
+      if (!managedItems.current.has(item)) {
+        managedItems.current.set(item, {
+          ariaHidden: item.getAttribute("aria-hidden"),
+          inert: item.getAttribute("inert"),
+        });
+      }
+      item.setAttribute("aria-hidden", "true");
+      item.setAttribute("inert", "");
+    }
+  }, [expanded, restoreItem]);
+
+  useIsomorphicLayoutEffect(() => {
+    syncCollapsedItems();
+    const root = rootRef.current;
+    const observer =
+      root && typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(syncCollapsedItems)
+        : undefined;
+    if (root && observer) {
+      observer.observe(root);
+      for (const item of Array.from(root.children)) observer.observe(item);
+    }
+    const mutationObserver =
+      root && typeof MutationObserver !== "undefined"
+        ? new MutationObserver(() => {
+            if (observer) {
+              for (const item of Array.from(root.children)) observer.observe(item);
+            }
+            syncCollapsedItems();
+          })
+        : undefined;
+    if (root && mutationObserver) {
+      mutationObserver.observe(root, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+    }
+    window.addEventListener("resize", syncCollapsedItems);
+
+    return () => {
+      observer?.disconnect();
+      mutationObserver?.disconnect();
+      window.removeEventListener("resize", syncCollapsedItems);
+      for (const item of Array.from(managedItems.current.keys())) {
+        restoreItem(item);
+      }
+    };
+  }, [children, restoreItem, syncCollapsedItems]);
+
+  const handleFab = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.currentTarget.focus();
+    setExpanded((current) => !current);
+  };
 
   return (
     <SearchConditionContainerRoot
-      ref={ref}
+      id={containerId}
+      ref={rootRef}
       spacing={1}
       direction="row"
       useFlexGap
@@ -102,8 +209,11 @@ export const SearchConditionContainer = /*#__PURE__*/ React.forwardRef<
     >
       {children}
       <MuiFab
+        ref={actionRef}
         color="primary"
-        aria-label="expand"
+        aria-label={expanded ? "Collapse search criteria" : "Expand search criteria"}
+        aria-controls={containerId}
+        aria-expanded={expanded}
         size="small"
         onClick={handleFab}
         data-testid="SearchConditionContainer-fab"

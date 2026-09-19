@@ -454,10 +454,22 @@ describe("standalone controls", () => {
     );
 
     const container = screen.getByTestId("conditions");
+    const generatedId = container.id;
     expect(container).toHaveStyle({ height: "49px" });
-    fireEvent.click(screen.getByRole("button", { name: "expand" }));
+    const expand = screen.getByRole("button", {
+      name: "Expand search criteria",
+    });
+    expect(generatedId).not.toBe("");
+    expect(expand).toHaveAttribute("aria-controls", generatedId);
+    expect(expand).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(expand);
     expect(container).toHaveStyle({ height: "auto" });
-    fireEvent.click(screen.getByRole("button", { name: "expand" }));
+    const collapse = screen.getByRole("button", {
+      name: "Collapse search criteria",
+    });
+    expect(collapse).toHaveAttribute("aria-controls", generatedId);
+    expect(collapse).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(collapse);
     expect(container).toHaveStyle({ height: "49px" });
     expect(searchConditionContainerModeStyle("dark")).toBe(
       "rgba(0, 0, 0, 1)"
@@ -482,6 +494,80 @@ describe("standalone controls", () => {
     expect(screen.getByTestId("webkit-conditions")).toHaveTextContent(
       "StatusOpen"
     );
+  });
+
+  it("keeps the visible criteria interactive and removes clipped rows from navigation", () => {
+    let secondTop = 57;
+    const bounds = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: HTMLElement) {
+        const testId = this.getAttribute("data-testid");
+        const top = testId === "second-condition" ? secondTop : 8;
+        const height = testId === "conditions" ? 49 : 32;
+        return {
+          x: 0,
+          y: top,
+          top,
+          right: 300,
+          bottom: top + height,
+          left: 0,
+          width: 300,
+          height,
+          toJSON: () => ({}),
+        };
+      });
+
+    try {
+      const firstClick = vi.fn();
+      const secondClick = vi.fn();
+      render(
+        <SearchConditionContainer id="trade-criteria" data-testid="conditions">
+          <button data-testid="first-condition" onClick={firstClick}>
+            First criterion
+          </button>
+          <button data-testid="second-condition" onClick={secondClick}>
+            Second criterion
+          </button>
+        </SearchConditionContainer>
+      );
+
+      const first = screen.getByTestId("first-condition");
+      const second = screen.getByTestId("second-condition");
+      const expand = screen.getByRole("button", {
+        name: "Expand search criteria",
+      });
+      expect(expand).toHaveAttribute("aria-controls", "trade-criteria");
+      expect(expand).toHaveAttribute("aria-expanded", "false");
+      expect(first).not.toHaveAttribute("inert");
+      expect(first).not.toHaveAttribute("aria-hidden");
+      expect(second).toHaveAttribute("inert");
+      expect(second).toHaveAttribute("aria-hidden", "true");
+      fireEvent.click(first);
+      expect(firstClick).toHaveBeenCalledOnce();
+
+      fireEvent.click(expand);
+      const collapse = screen.getByRole("button", {
+        name: "Collapse search criteria",
+      });
+      expect(collapse).toHaveAttribute("aria-expanded", "true");
+      expect(second).not.toHaveAttribute("inert");
+      expect(second).not.toHaveAttribute("aria-hidden");
+      fireEvent.click(second);
+      expect(secondClick).toHaveBeenCalledOnce();
+
+      fireEvent.click(collapse);
+      expect(expand).toHaveFocus();
+      secondTop = 8;
+      fireEvent(window, new Event("resize"));
+      expect(second).not.toHaveAttribute("inert");
+      second.focus();
+      secondTop = 57;
+      fireEvent(window, new Event("resize"));
+      expect(expand).toHaveFocus();
+      expect(second).toHaveAttribute("inert");
+    } finally {
+      bounds.mockRestore();
+    }
   });
 
   it("treats host themes without generation metadata as legacy", () => {
