@@ -127,6 +127,42 @@ test('search clear action is named and follows editable field state', async ({ p
   ).toBe(0);
 });
 
+test('label and native selects expose stable accessible names', async ({ page }) => {
+  await page.goto(consumerUrl!);
+
+  await expect(page.getByRole('combobox', { name: 'Group by' })).toBeVisible();
+  const generated = page.getByRole('combobox', { name: 'Settlement status', exact: true });
+  await expect(generated).toHaveAttribute('id', /.+/);
+  await generated.selectOption('Confirmed');
+  await expect(generated).toHaveValue('Confirmed');
+
+  const explicit = page.getByRole('combobox', {
+    name: 'Explicit settlement status',
+    exact: true,
+  });
+  await expect(explicit).toHaveAttribute('id', 'explicit-settlement-status');
+  await expect(page.locator('label[for="explicit-settlement-status"]')).toHaveAttribute(
+    'id',
+    'explicit-settlement-status-label',
+  );
+  expect(
+    await page.locator('[role="combobox"], select').evaluateAll((comboboxes) =>
+      comboboxes.filter((combobox) => {
+        if (
+          combobox.getAttribute('aria-label')?.trim() ||
+          combobox.getAttribute('aria-labelledby')?.trim()
+        ) {
+          return false;
+        }
+        return !(
+          combobox instanceof HTMLSelectElement &&
+          Array.from(combobox.labels ?? []).some((label) => label.textContent?.trim())
+        );
+      }).length,
+    ),
+  ).toBe(0);
+});
+
 test('closed loading overlay releases its underlying action', async ({ page }) => {
   await page.goto(consumerUrl!);
   const target = page.getByRole('button', { name: 'Underlying overlay action' });

@@ -101,6 +101,49 @@ describe("standalone controls", () => {
     );
   });
 
+  it("generates unique label relationships for custom and native selects", () => {
+    render(
+      <>
+        <Select label="Desk" variant="outlined" value="Singapore">
+          <MenuItem value="Singapore">Singapore</MenuItem>
+        </Select>
+        <Select native label="Settlement status" variant="outlined" defaultValue="Pending">
+          <option value="Pending">Pending</option>
+        </Select>
+        <Select native label="Settlement status" variant="outlined" defaultValue="Confirmed">
+          <option value="Confirmed">Confirmed</option>
+        </Select>
+        <Select
+          native
+          id="explicit-status"
+          labelId="explicit-status-label"
+          label="Explicit settlement status"
+          variant="outlined"
+          defaultValue="Settled"
+        >
+          <option value="Settled">Settled</option>
+        </Select>
+      </>
+    );
+
+    const custom = screen.getByRole("combobox", { name: "Desk" });
+    const generatedNative = screen.getAllByRole("combobox", {
+      name: "Settlement status",
+    });
+    const explicitNative = screen.getByRole("combobox", {
+      name: "Explicit settlement status",
+    });
+    expect(custom.id).not.toBe("");
+    expect(generatedNative[0].id).not.toBe("");
+    expect(generatedNative[1].id).not.toBe("");
+    expect(generatedNative[0].id).not.toBe(generatedNative[1].id);
+    expect(explicitNative).toHaveAttribute("id", "explicit-status");
+    expect(document.querySelector('label[for="explicit-status"]')).toHaveAttribute(
+      "id",
+      "explicit-status-label"
+    );
+  });
+
   it("keeps explicit disabled state and supports a custom loading indicator size", () => {
     const { rerender } = render(
       <LoadingButton loading loadingSize={20}>
@@ -323,9 +366,33 @@ describe("standalone controls", () => {
         <LabelMenuItem value="Confirmed">Confirmed</LabelMenuItem>
       </Label>
     );
-    fireEvent.mouseDown(screen.getByRole("combobox"));
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Status" }));
     fireEvent.click(screen.getByRole("option", { name: "Confirmed" }));
     expect(changed).toHaveBeenCalled();
+  });
+
+  it("lets callers override the label selector accessible name", () => {
+    render(
+      <>
+        <Label label="Group by" value="Group by" aria-label="Group trades by">
+          <LabelMenuItem value="Counterparty">Counterparty</LabelMenuItem>
+        </Label>
+        <span id="portfolio-group-label">Portfolio grouping</span>
+        <Label
+          label="Group by"
+          value="Group by"
+          aria-labelledby="portfolio-group-label"
+        >
+          <LabelMenuItem value="Status">Status</LabelMenuItem>
+        </Label>
+      </>
+    );
+    expect(
+      screen.getByRole("combobox", { name: "Group trades by" })
+    ).toBeVisible();
+    expect(
+      screen.getByRole("combobox", { name: "Portfolio grouping" })
+    ).toBeVisible();
   });
 
   it("composes a search grid and removes a closed condition", () => {

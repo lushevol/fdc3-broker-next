@@ -15,6 +15,8 @@
   when callers omit `value`.
 - SearchInput exposes a localizable clear-action name and disables clearing for
   disabled or read-only fields across legacy and modern input prop spellings.
+- Select now generates and connects stable control/label IDs for custom and native
+  modes, while Label exposes its compact combobox name and honors ARIA overrides.
 - Base and Ratan/Cashflow adoption behind their existing compatible exports,
   defaults, callbacks and selectors; portal policy remains with applications.
 - Verified public interfaces, independent tarball consumption, SSR/tree shaking,

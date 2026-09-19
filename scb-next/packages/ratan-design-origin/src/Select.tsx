@@ -36,7 +36,8 @@ export const Select = /*#__PURE__*/ React.forwardRef<
   ref
 ) {
   const generatedId = React.useId();
-  const resolvedLabelId = labelId ?? `${generatedId}-label`;
+  const resolvedId = id ?? generatedId;
+  const resolvedLabelId = labelId ?? `${resolvedId}-label`;
   return (
     <SelectFormControl
       fullWidth
@@ -49,13 +50,13 @@ export const Select = /*#__PURE__*/ React.forwardRef<
         .filter(Boolean)
         .join(" ")}
     >
-      <InputLabel id={resolvedLabelId} htmlFor={id}>
+      <InputLabel id={resolvedLabelId} htmlFor={resolvedId}>
         {label}
       </InputLabel>
       <MuiSelect
         {...props}
         ref={ref}
-        id={id}
+        id={resolvedId}
         labelId={resolvedLabelId}
         IconComponent={props.IconComponent ?? KeyboardArrowDownIcon}
       />

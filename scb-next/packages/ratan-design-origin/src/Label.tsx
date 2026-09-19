@@ -44,13 +44,30 @@ export function Label({
   IconComponent: _IconComponent,
   label,
   children,
+  SelectDisplayProps,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
   ...rest
 }: LabelProps) {
+  const displayLabelledBy =
+    SelectDisplayProps?.["aria-labelledby"] ?? ariaLabelledBy;
+  const defaultLabel =
+    typeof label === "string" || typeof label === "number"
+      ? String(label)
+      : undefined;
   return (
     <Root
       variant="standard"
       IconComponent={KeyboardArrowDownIcon}
       defaultValue={label}
+      SelectDisplayProps={{
+        ...SelectDisplayProps,
+        "aria-label":
+          SelectDisplayProps?.["aria-label"] ??
+          ariaLabel ??
+          (displayLabelledBy ? undefined : defaultLabel),
+        "aria-labelledby": displayLabelledBy,
+      }}
       {...rest}
     >
       <LabelMenuItem disabled>{label}</LabelMenuItem>

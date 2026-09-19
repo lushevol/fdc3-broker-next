@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 4/30 DONE. Next: RD-005.** The clinic contains the review evidence
+**Progress: 5/30 DONE. Next: RD-006.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -29,7 +29,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-002](#rd-002) | Empty and partial range values | P1 | 1 | DONE |
 | [RD-003](#rd-003) | Uncontrolled date values | P1 | 1 | DONE |
 | [RD-004](#rd-004) | Search clear name and disabled state | P1 | 1 | DONE |
-| [RD-005](#rd-005) | Label and native Select names | P1 | 1 | TODO |
+| [RD-005](#rd-005) | Label and native Select names | P1 | 1 | DONE |
 | [RD-006](#rd-006) | Loading announcements | P1 | 1 | TODO |
 | [RD-007](#rd-007) | Collapsed criteria keyboard behavior | P1 | 1 | TODO |
 | [RD-008](#rd-008) | Dialog title relationships | P1 | 1 | TODO |
@@ -296,15 +296,53 @@ Limitations / pre-existing failures / follow-up IDs: Base's aggregate build rema
 
 ### RD-005
 
-**Connect labels to custom and native Select controls.** P1 · Confirmed · TODO.
+**Connect labels to custom and native Select controls.** P1 · Confirmed · DONE.
 Dependencies: none; coordinate with RD-010. [Clinic](UI_PACKAGE_CLINIC.md#rd-005).
 
-- [ ] Define how Label, generated control IDs and explicit IDs establish each
+- [x] Define how Label, generated control IDs and explicit IDs establish each
   control's accessible name.
-- [ ] Verify native Select with no supplied ID, explicit IDs, repeated instances
+- [x] Verify native Select with no supplied ID, explicit IDs, repeated instances
   and the existing “Group by” example are named correctly.
-- [ ] Run component assertions and a browser accessibility scan; preserve
+- [x] Run component assertions and a browser accessibility scan; preserve
   compatible host labels and the supported control variants.
+
+```text
+Status: DONE
+Completed: 2026-09-20
+Owner: Codex
+Commit(s): fix(ratan-design): connect select accessible names (this stage)
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-005 contract;
+  controls.test.tsx reproduces and verifies generated custom/native IDs, repeated
+  native instances, explicit IDs, Label defaults and ARIA overrides; the existing
+  Storybook Group by state exercises the repaired Label; design-origin.spec.ts
+  verifies names, native interaction, relationships and an unnamed-combobox scan.
+GitNexus impact and staged detect_changes: exact Label and Select render-function
+  impact LOW, with one and two direct test dependants respectively, no processes
+  or modules. The name-only SelectProps graph reports CRITICAL/316 dependants, so
+  its public interface was deliberately left unchanged. Packed App is not indexed.
+  The staged scope audit is recorded in the stage commit evidence.
+Commands (working directory scb-next): package test/coverage, typecheck, lint,
+  build and Storybook build; verify:package; verify:dependency-isolation; Base
+  focused Label/Select tests, typecheck and build; packed-consumer and host
+  Playwright suites.
+Outcomes: 10 files/73 package tests passed with 100% statements/functions/lines
+  and 99.4% branch coverage; package build, Storybook, tarball verification and
+  dependency isolation passed; Base adapters passed 2 files/5 tests, typecheck
+  and production build; packed-consumer matrix passed 12/12 at 390px and 1280px
+  in legacy/WebKit and light/dark, including the focused naming scan at 1280x720
+  on http://127.0.0.1:8019; host journey passed 1/1 at 1280x720 on
+  http://127.0.0.1:8001 with no uncaught page errors.
+Compatibility review and rollback target: generated IDs fill only omitted IDs;
+  explicit id/labelId, values, callbacks, refs, variants and label layout remain
+  unchanged. Label retains its hidden default menu item and selection behavior;
+  explicit ARIA naming remains authoritative. Roll back this stage commit if an
+  undocumented consumer depends on a Select without an ID or an unnamed Label.
+Limitations / pre-existing failures / follow-up IDs: packed builds retain MUI
+  module-directive and local Pro-license warnings. The host repeats alpha API
+  EMFILE, login ownership, kebab-case CSS, federation version and nested-button
+  warnings outside these controls. RD-029 owns broader host-failure reproduction;
+  RD-028 owns release/licensing gates.
+```
 
 ### RD-006
 
@@ -640,3 +678,5 @@ or committed evidence.
 | 2026-09-20 | RD-003 | IN PROGRESS → DONE | Item completion record and passing package, packed optional-peer, Base and host gates | Next: RD-004 |
 | 2026-09-20 | RD-004 | TODO → IN PROGRESS | GitNexus LOW risk: three rendered and 17 type-level dependants, one module, no processes | Specify clear action name/state; add failing public contract regression |
 | 2026-09-20 | RD-004 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-005 |
+| 2026-09-20 | RD-005 | TODO → IN PROGRESS | GitNexus LOW risk for concrete Label/Select render functions; SelectProps name graph is CRITICAL but unchanged | Specify field IDs/names and caller precedence; add failing public regressions |
+| 2026-09-20 | RD-005 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-006 |

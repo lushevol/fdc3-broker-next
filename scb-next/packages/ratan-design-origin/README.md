@@ -49,7 +49,9 @@ Poppins typography and compact visual baseline during migration.
 Controls accept MUI 5 props. Input also translates Base's modern slot spelling
 to MUI 5, with slots taking precedence over legacy props. Button/LoadingButton
 forward button refs; Input forwards root and native input refs. Select forwards
-its root ref and associates its visible label with the combobox. LoadingButton
+its root ref, generates a stable control ID when one is omitted, and associates
+its visible label with custom and native comboboxes; explicit `id` and `labelId`
+remain authoritative. LoadingButton
 retains the label and disables the action while loading (default spinner 14px).
 `loadingPosition="startIcon"` replaces the caller's start icon while loading
 and restores it when idle; consumer adapters retain their 16px default.
@@ -57,6 +59,9 @@ and restores it when idle; consumer adapters retain their 16px default.
 SearchInput composes Input with search and clear adornments. SearchButton,
 ResetButton, ToggleButton and Label preserve the existing Base contracts while
 their implementations and visual policy are now owned by this package.
+Label uses a string or numeric `label` as the compact selector's accessible name;
+callers can override it through `aria-label`, `aria-labelledby`, or the matching
+`SelectDisplayProps` fields.
 The SearchInput clear button is named `Clear search` by default; set
 `clearButtonLabel` for localized or field-specific text. The clear action is
 disabled when the effective input is disabled or read-only, including through

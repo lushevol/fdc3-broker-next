@@ -606,6 +606,23 @@ the remaining inventory classification, and release governance remain open.
 - Verify the public component, generated declarations, Base's direct re-export,
   packed-consumer pointer/keyboard behavior and an accessible-name browser check.
 
+### RD-005 specification: Label and Select accessible names
+
+- `Select` owns a stable control ID when callers omit `id`. Its visible
+  `InputLabel` references that control through `htmlFor`; the MUI custom select
+  also references the label through `labelId`. Caller-supplied `id` and `labelId`
+  remain authoritative, and repeated instances receive distinct generated IDs.
+- The same relationship names native and custom selects. Native mode must not
+  depend on MUI's custom-select `labelId` behavior, and adding the generated ID
+  must not change values, callbacks, variants, refs or label positioning.
+- `Label` uses a string or numeric `label` as its default accessible name while
+  retaining the label value and hidden-menu-item behavior. Caller-supplied
+  `aria-label` or `aria-labelledby` remains authoritative; non-text labels require
+  one of those explicit naming props.
+- Verify unnamed/generated, explicit-ID and repeated Select instances, the
+  Storybook `Group by` Label pattern, Base's existing adapters, packed-consumer
+  browser roles and the absence of unnamed comboboxes.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

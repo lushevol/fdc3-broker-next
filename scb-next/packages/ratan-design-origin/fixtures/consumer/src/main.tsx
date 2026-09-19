@@ -6,6 +6,8 @@ import {
   LoadingOverlay,
   LoadingButton,
   Input,
+  Label,
+  LabelMenuItem,
   SearchInput,
   Select,
   RatanDesignProvider,
@@ -102,6 +104,30 @@ function App() {
           >
             <MenuItem value="USD">USD</MenuItem>
             <MenuItem value="SGD">SGD</MenuItem>
+          </Select>
+          <Label label="Group by" value="Group by">
+            <LabelMenuItem value="Counterparty">Counterparty</LabelMenuItem>
+            <LabelMenuItem value="Status">Status</LabelMenuItem>
+          </Label>
+          <Select
+            native
+            variant="outlined"
+            label="Settlement status"
+            defaultValue="Pending"
+          >
+            <option value="Pending">Pending</option>
+            <option value="Confirmed">Confirmed</option>
+          </Select>
+          <Select
+            native
+            id="explicit-settlement-status"
+            labelId="explicit-settlement-status-label"
+            variant="outlined"
+            label="Explicit settlement status"
+            defaultValue="Settled"
+          >
+            <option value="Settled">Settled</option>
+            <option value="Failed">Failed</option>
           </Select>
           <Input
             variant="outlined"
