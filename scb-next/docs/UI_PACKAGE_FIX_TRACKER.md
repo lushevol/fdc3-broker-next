@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 2/30 DONE. Next: RD-003.** The clinic contains the review evidence
+**Progress: 3/30 DONE. Next: RD-004.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -27,7 +27,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | --- | --- | --- | --- | --- |
 | [RD-001](#rd-001) | Closed loading overlay hit testing | P1 | 1 | DONE |
 | [RD-002](#rd-002) | Empty and partial range values | P1 | 1 | DONE |
-| [RD-003](#rd-003) | Uncontrolled date values | P1 | 1 | TODO |
+| [RD-003](#rd-003) | Uncontrolled date values | P1 | 1 | DONE |
 | [RD-004](#rd-004) | Search clear name and disabled state | P1 | 1 | TODO |
 | [RD-005](#rd-005) | Label and native Select names | P1 | 1 | TODO |
 | [RD-006](#rd-006) | Loading announcements | P1 | 1 | TODO |
@@ -205,15 +205,46 @@ Limitations / pre-existing failures / follow-up IDs: MUI/Vite builds retain thei
 
 ### RD-003
 
-**Preserve uncontrolled date defaults.** P1 · Confirmed · TODO.
+**Preserve uncontrolled date defaults.** P1 · Confirmed · DONE.
 Dependencies: none; coordinate with RD-002. [Clinic](UI_PACKAGE_CLINIC.md#rd-003).
 
-- [ ] Specify the distinction between omitted `value`, explicit `null` and a
+- [x] Specify the distinction between omitted `value`, explicit `null` and a
   selected value for every community date wrapper.
-- [ ] Verify default-value-only controls render their defaults, accept edits and
+- [x] Verify default-value-only controls render their defaults, accept edits and
   clear correctly; controlled controls continue following their supplied value.
-- [ ] Cover public type/runtime contracts without uncontrolled/controlled React
+- [x] Cover public type/runtime contracts without uncontrolled/controlled React
   warnings; run affected date and packed-consumer checks.
+
+```text
+Status: DONE
+Completed: 2026-09-20
+Owner: Codex
+Commit(s): fix(ratan-design): preserve uncontrolled date defaults (this stage)
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-003 contract;
+  dates.test.tsx public field/change and warning regressions for DatePicker,
+  DateTimePicker and TimePicker; packed dates fixture renders deterministic
+  default values for all three wrappers.
+GitNexus impact and staged detect_changes: each wrapper has LOW upstream impact,
+  three direct dependants, one affected module and no processes. Staged scope
+  audit is recorded in the stage commit evidence.
+Commands (working directory scb-next): package test, typecheck, lint and build;
+  Storybook build; verify:package; verify:dependency-isolation; four Base date
+  adapter test files, Base typecheck/build; host Playwright suite.
+Outcomes: 10 test files/64 package tests passed with 100% line/branch coverage;
+  each default-value-only wrapper rendered its default, accepted an edit, cleared
+  to null and emitted no ownership warning; packed declarations/build and SSR
+  passed with optional peers; Base passed 4 files/10 tests plus typecheck/build;
+  host journey passed 1/1 at 1280x720 on http://127.0.0.1:8001.
+Compatibility review and rollback target: omitted values now remain uncontrolled;
+  explicit null and selected values remain controlled, with non-null Dayjs
+  normalization intact. Localization, formats, callbacks, layout and optional-peer
+  ownership are unchanged. Roll back this stage commit if a host intentionally
+  relied on omitted values suppressing MUI X defaultValue.
+Limitations / pre-existing failures / follow-up IDs: the focused development stack
+  emitted an alpha API EMFILE watcher failure plus login-input ownership and nested-
+  button console warnings outside the date wrappers; the required UI journey still
+  passed. RD-029 owns broader host-failure reproduction.
+```
 
 ### RD-004
 
@@ -568,3 +599,5 @@ or committed evidence.
 | 2026-09-20 | RD-001 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Storybook, browser and host gates | Next: RD-002 |
 | 2026-09-20 | RD-002 | TODO → IN PROGRESS | GitNexus LOW risk: three direct dependants, one module, no processes | Specify null/partial range values; add failing public contract regression |
 | 2026-09-20 | RD-002 | IN PROGRESS → DONE | Item completion record and passing package, packed optional-peer, Base and host gates | Next: RD-003 |
+| 2026-09-20 | RD-003 | TODO → IN PROGRESS | GitNexus LOW risk per wrapper: three direct dependants, one module, no processes | Specify controlled/uncontrolled semantics; add failing default-value regression |
+| 2026-09-20 | RD-003 | IN PROGRESS → DONE | Item completion record and passing package, packed optional-peer, Base and host gates | Next: RD-004 |

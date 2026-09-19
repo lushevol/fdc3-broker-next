@@ -10,6 +10,9 @@ if (
   !html.includes("Open-ended period") ||
   !html.includes("Open-start period") ||
   !html.includes("09/18/2026") ||
+  !html.includes("2026-10-02") ||
+  !html.includes("2026-10-03 11:45") ||
+  !html.includes("18:20") ||
   html.includes('aria-invalid="true"')
 ) {
   throw new Error(

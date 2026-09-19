@@ -50,6 +50,65 @@ describe("public date integration", () => {
     }
   );
 
+  it.each([
+    {
+      Picker: DatePicker,
+      label: "Trade date",
+      format: "YYYY-MM-DD",
+      initial: "2026-09-18",
+      edited: "2026-09-21"
+    },
+    {
+      Picker: DateTimePicker,
+      label: "Execution time",
+      format: "YYYY-MM-DD HH:mm",
+      initial: "2026-09-18 15:30",
+      edited: "2026-09-21 09:45"
+    },
+    {
+      Picker: TimePicker,
+      label: "Cutoff time",
+      format: "HH:mm",
+      initial: "15:30",
+      edited: "09:45"
+    }
+  ])(
+    "$label preserves its uncontrolled default, edits and clearing",
+    ({ Picker, label, format, initial, edited }) => {
+      const change = vi.fn();
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
+      try {
+        render(
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Picker
+              label={label}
+              defaultValue={dayjs("2026-09-18T15:30")}
+              format={format}
+              onChange={change}
+            />
+          </LocalizationProvider>
+        );
+        const field = screen.getByRole("textbox", { name: label });
+        expect(field).toHaveValue(initial);
+
+        fireEvent.change(field, { target: { value: edited } });
+        expect(change.mock.calls.at(-1)?.[0].format(format)).toBe(edited);
+        expect(field).toHaveValue(edited);
+
+        fireEvent.change(field, { target: { value: "" } });
+        expect(change.mock.calls.at(-1)?.[0]).toBeNull();
+        expect(field).toHaveValue("");
+        expect(consoleError.mock.calls.flat().join(" ")).not.toMatch(
+          /uncontrolled.*controlled|controlled.*uncontrolled/i
+        );
+      } finally {
+        consoleError.mockRestore();
+      }
+    }
+  );
+
   it("uses host locale and publishes calendar selection within the provider", async () => {
     const change = vi.fn();
     render(

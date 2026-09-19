@@ -45,7 +45,7 @@ export const DatePicker = /*#__PURE__*/ React.memo(function DatePicker({
       ]
         .filter(Boolean)
         .join(" ")}
-      value={value ? dayjs(value) : null}
+      value={value === undefined ? undefined : value === null ? null : dayjs(value)}
       slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
       sx={{ ...sx, display: hidden ? "none!important" : undefined }}
       {...rest}
@@ -78,7 +78,7 @@ export const DateTimePicker = /*#__PURE__*/ React.memo(function DateTimePicker({
       ]
         .filter(Boolean)
         .join(" ")}
-      value={value ? dayjs(value) : null}
+      value={value === undefined ? undefined : value === null ? null : dayjs(value)}
       slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
       sx={{ ...sx, display: hidden ? "none!important" : undefined }}
       {...rest}
@@ -111,7 +111,7 @@ export const TimePicker = /*#__PURE__*/ React.memo(function TimePicker({
       ]
         .filter(Boolean)
         .join(" ")}
-      value={value ? dayjs(value) : null}
+      value={value === undefined ? undefined : value === null ? null : dayjs(value)}
       slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
       sx={{ ...sx, display: hidden ? "none!important" : undefined }}
       {...rest}

@@ -11,6 +11,8 @@
 - Optional dates, Pro date-range and historical portal-theme integrations.
 - Pro date ranges preserve empty and partial null endpoints instead of converting
   them into invalid Dayjs values.
+- Community date controls preserve MUI X uncontrolled `defaultValue` behavior
+  when callers omit `value`.
 - Base and Ratan/Cashflow adoption behind their existing compatible exports,
   defaults, callbacks and selectors; portal policy remains with applications.
 - Verified public interfaces, independent tarball consumption, SSR/tree shaking,

@@ -25,8 +25,21 @@ export function Dates() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DatePicker {...dateProps} label="Settlement" />
-      <DateTimePicker label="Execution" />
-      <TimePicker label="Cutoff" />
+      <DatePicker
+        label="Default settlement"
+        defaultValue={dayjs("2026-10-02")}
+        format="YYYY-MM-DD"
+      />
+      <DateTimePicker
+        label="Execution"
+        defaultValue={dayjs("2026-10-03T11:45")}
+        format="YYYY-MM-DD HH:mm"
+      />
+      <TimePicker
+        label="Cutoff"
+        defaultValue={dayjs("2026-10-03T18:20")}
+        format="HH:mm"
+      />
       <DateRangePicker {...rangeProps} label="Complete period" />
       <DateRangePicker value={[null, null]} label="Empty period" />
       <DateRangePicker

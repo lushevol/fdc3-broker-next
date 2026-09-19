@@ -574,6 +574,22 @@ the remaining inventory classification, and release governance remain open.
   localization, optional peer boundary and host-owned Pro licensing remain
   unchanged. Verify the public component and the packed optional-peer consumer.
 
+### RD-003 specification: community date control ownership
+
+- `DatePicker`, `DateTimePicker` and `TimePicker` preserve MUI X's value ownership
+  contract. Omitting `value` forwards `undefined`, leaving the picker uncontrolled
+  so `defaultValue` initializes its field and subsequent edits update internal
+  state. An explicit `value={null}` remains a controlled empty field. A non-null
+  Dayjs `value` remains controlled and follows caller updates.
+- Uncontrolled default-value fields publish edited Dayjs values and publish
+  `null` when cleared. The wrapper must not switch their ownership mode during
+  their lifetime or emit controlled/uncontrolled warnings.
+- Continue normalizing non-null controlled values with Dayjs for Base compatibility.
+  Caller-provided `defaultValue`, localization, timezone, formats, validation,
+  callbacks, label/layout and hidden styles remain MUI X or host-owned behavior.
+- Verify all three public wrappers, their packed optional-peer declarations and
+  SSR runtime, matching Base adapters, and the integrated host journey.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

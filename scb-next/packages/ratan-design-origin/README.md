@@ -101,7 +101,9 @@ licensing and license initialization. These peers are optional and never loaded
 by the core entry point. Wrap dates in LocalizationProvider with AdapterDayjs;
 the host chooses `adapterLocale`, timezone, formats and validation policy.
 Controls retain `labelPosition="top" | "left"`, `hidden`, Dayjs values and MUI X
-callbacks. Caller `slotProps` replaces the default shrink text-field props;
+callbacks. Community date controls preserve omitted `value` as uncontrolled so
+`defaultValue` works, while explicit `null` remains controlled-empty. Caller
+`slotProps` replaces the default shrink text-field props;
 range always uses SingleInputDateRangeField and preserves null endpoints in empty
 and partial controlled values. Field identifiers belong in
 `slotProps.textField.inputProps`; MUI X 6 ignores top-level data attributes.
