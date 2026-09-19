@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 3/30 DONE. Next: RD-004.** The clinic contains the review evidence
+**Progress: 4/30 DONE. Next: RD-005.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -28,7 +28,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-001](#rd-001) | Closed loading overlay hit testing | P1 | 1 | DONE |
 | [RD-002](#rd-002) | Empty and partial range values | P1 | 1 | DONE |
 | [RD-003](#rd-003) | Uncontrolled date values | P1 | 1 | DONE |
-| [RD-004](#rd-004) | Search clear name and disabled state | P1 | 1 | TODO |
+| [RD-004](#rd-004) | Search clear name and disabled state | P1 | 1 | DONE |
 | [RD-005](#rd-005) | Label and native Select names | P1 | 1 | TODO |
 | [RD-006](#rd-006) | Loading announcements | P1 | 1 | TODO |
 | [RD-007](#rd-007) | Collapsed criteria keyboard behavior | P1 | 1 | TODO |
@@ -248,14 +248,51 @@ Limitations / pre-existing failures / follow-up IDs: the focused development sta
 
 ### RD-004
 
-**Make search clearing accessible and honor field state.** P1 · Confirmed · TODO.
+**Make search clearing accessible and honor field state.** P1 · Confirmed · DONE.
 Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-004).
 
-- [ ] Supply a documented, localizable accessible name for the clear action.
-- [ ] Specify and test disabled/read-only behavior; clearing must not mutate a
+- [x] Supply a documented, localizable accessible name for the clear action.
+- [x] Specify and test disabled/read-only behavior; clearing must not mutate a
   field when that action is unavailable.
-- [ ] Exercise pointer and keyboard clearing, focus handling and callback
+- [x] Exercise pointer and keyboard clearing, focus handling and callback
   behavior; verify the button name with an accessibility scan.
+
+```text
+Status: DONE
+Completed: 2026-09-20
+Owner: Codex
+Commit(s): fix(ratan-design): make search clearing accessible (this stage)
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-004 contract;
+  controls.test.tsx covers default/localized names, effective disabled/read-only
+  state, legacy/modern precedence and callback suppression; design-origin.spec.ts
+  covers packed-consumer pointer and keyboard clearing, focus retention and names.
+GitNexus impact and staged detect_changes: SearchInput and SearchInputProps upstream
+  impact LOW; three rendered and 17 type-level dependants, one module and no
+  processes. The packed fixture App is absent from the index. Staged scope audit
+  is recorded in the stage commit evidence.
+Commands (working directory scb-next): package test/coverage, typecheck, lint,
+  build and Storybook build; verify:package; verify:dependency-isolation; Base
+  focused SearchInput/Builder tests and typecheck; packed-consumer and host
+  Playwright suites; Base aggregate build.
+Outcomes: 10 files/71 package tests and 100% statement/branch/function/line
+  coverage passed; declarations, package build, Storybook, tarball verification
+  and dependency isolation passed; Base focused tests passed 2 files/4 tests and
+  typecheck passed; packed-consumer matrix passed 11/11 at 390px and 1280px in
+  legacy/WebKit and light/dark, with the focused clear regression passing at
+  1280x720 on http://127.0.0.1:8019; host journey passed 1/1 at 1280x720 on
+  http://127.0.0.1:8001 with no uncaught page errors. Base webpack also passed.
+Compatibility review and rollback target: handleClear remains caller-owned and is
+  called once for enabled pointer/keyboard activation; the package adds only a
+  default/localizable name and mirrors effective field availability. Modern slots
+  retain precedence over matching legacy props. Roll back this stage commit if an
+  undocumented host depends on clearing a disabled or read-only SearchInput.
+Limitations / pre-existing failures / follow-up IDs: Base's aggregate build remains
+  nonzero because server/tsconfig.json uses removed importsNotUsedAsValues and the
+  installed Storybook builder module is missing; Base typecheck and webpack pass.
+  The host stack also repeats alpha API EMFILE, login ownership, kebab-case CSS,
+  federation version and nested-button warnings outside SearchInput. RD-029 owns
+  broader host-failure reproduction; RD-028 owns release/licensing gates.
+```
 
 ### RD-005
 
@@ -601,3 +638,5 @@ or committed evidence.
 | 2026-09-20 | RD-002 | IN PROGRESS → DONE | Item completion record and passing package, packed optional-peer, Base and host gates | Next: RD-003 |
 | 2026-09-20 | RD-003 | TODO → IN PROGRESS | GitNexus LOW risk per wrapper: three direct dependants, one module, no processes | Specify controlled/uncontrolled semantics; add failing default-value regression |
 | 2026-09-20 | RD-003 | IN PROGRESS → DONE | Item completion record and passing package, packed optional-peer, Base and host gates | Next: RD-004 |
+| 2026-09-20 | RD-004 | TODO → IN PROGRESS | GitNexus LOW risk: three rendered and 17 type-level dependants, one module, no processes | Specify clear action name/state; add failing public contract regression |
+| 2026-09-20 | RD-004 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-005 |

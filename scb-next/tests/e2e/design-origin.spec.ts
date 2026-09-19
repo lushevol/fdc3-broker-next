@@ -91,6 +91,42 @@ test('keyboard users can see the focused action', async ({ page }) => {
   await expect(button).toHaveCSS('outline-width', '2px');
 });
 
+test('search clear action is named and follows editable field state', async ({ page }) => {
+  await page.goto(consumerUrl!);
+  const field = page.getByRole('textbox', { name: 'Trade search', exact: true });
+  const clear = page.getByRole('button', { name: 'Clear trade search' });
+
+  await field.fill('cashflow');
+  await clear.click();
+  await expect(field).toHaveValue('');
+
+  await field.fill('settlement');
+  await clear.focus();
+  await page.keyboard.press('Enter');
+  await expect(field).toHaveValue('');
+  await expect(clear).toBeFocused();
+
+  await expect(
+    page.getByRole('button', { name: 'Clear disabled trade search' }),
+  ).toBeDisabled();
+  await expect(
+    page.getByRole('button', { name: 'Clear read-only trade search' }),
+  ).toBeDisabled();
+  await expect(page.getByRole('textbox', { name: 'Disabled trade search' })).toHaveValue('Locked');
+  await expect(page.getByRole('textbox', { name: 'Read-only trade search' })).toHaveValue('Retained');
+
+  expect(
+    await page.locator('button').evaluateAll((buttons) =>
+      buttons.filter(
+        (button) =>
+          !button.getAttribute('aria-label') &&
+          !button.getAttribute('aria-labelledby') &&
+          !button.textContent?.trim(),
+      ).length,
+    ),
+  ).toBe(0);
+});
+
 test('closed loading overlay releases its underlying action', async ({ page }) => {
   await page.goto(consumerUrl!);
   const target = page.getByRole('button', { name: 'Underlying overlay action' });

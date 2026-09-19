@@ -590,6 +590,22 @@ the remaining inventory classification, and release governance remain open.
 - Verify all three public wrappers, their packed optional-peer declarations and
   SSR runtime, matching Base adapters, and the integrated host journey.
 
+### RD-004 specification: SearchInput clear action
+
+- `SearchInput` exposes its clear control as a named button. Its default accessible
+  name is `Clear search`; callers localize or add field context through the public
+  `clearButtonLabel` prop without replacing the icon or clear callback contract.
+- The clear action is enabled only while the effective input is editable. A
+  top-level disabled field, a read-only MUI input slot, or a read-only native input
+  slot disables the clear button and prevents pointer or keyboard activation from
+  calling `handleClear`. Existing legacy `InputProps`/`inputProps` spellings and
+  modern `slotProps` spellings follow the Input component's precedence.
+- An enabled clear action invokes `handleClear` once per pointer click or keyboard
+  activation and retains normal button focus behavior. The caller continues to own
+  the field value; SearchInput does not mutate it internally.
+- Verify the public component, generated declarations, Base's direct re-export,
+  packed-consumer pointer/keyboard behavior and an accessible-name browser check.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

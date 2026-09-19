@@ -13,6 +13,7 @@ import {
   SearchConditionContainer,
   SearchGrid,
   SearchInput,
+  type SearchInputProps,
   Select,
   ToggleButton,
   modeStyle,
@@ -187,19 +188,91 @@ describe("standalone controls", () => {
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
   });
 
-  it("provides search input adornments and invokes the clear callback", () => {
+  it("names the search clear action and supports localized action text", () => {
     const clear = vi.fn();
-    render(
+    const { rerender } = render(
       <SearchInput
         label="Find trade"
         variant="outlined"
         handleClear={clear}
       />
     );
-    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
     expect(clear).toHaveBeenCalledOnce();
     expect(screen.getByTestId("SearchIcon")).toBeVisible();
+    rerender(
+      <SearchInput
+        label="Find trade"
+        variant="outlined"
+        clearButtonLabel="Clear trade search"
+        handleClear={clear}
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: "Clear trade search" })
+    ).toBeEnabled();
   });
+
+  it.each<{
+    name: string;
+    props: Partial<SearchInputProps>;
+    unavailable: boolean;
+  }>([
+    { name: "disabled", props: { disabled: true }, unavailable: true },
+    {
+      name: "legacy input read-only",
+      props: { InputProps: { readOnly: true } },
+      unavailable: true,
+    },
+    {
+      name: "modern input read-only",
+      props: { slotProps: { input: { readOnly: true } } },
+      unavailable: true,
+    },
+    {
+      name: "legacy native read-only",
+      props: { inputProps: { readOnly: true } },
+      unavailable: true,
+    },
+    {
+      name: "modern native read-only",
+      props: { slotProps: { htmlInput: { readOnly: true } } },
+      unavailable: true,
+    },
+    {
+      name: "modern input override",
+      props: {
+        InputProps: { readOnly: true },
+        slotProps: { input: { readOnly: false } },
+      },
+      unavailable: false,
+    },
+    {
+      name: "modern native override",
+      props: {
+        inputProps: { readOnly: true },
+        slotProps: { htmlInput: { readOnly: false } },
+      },
+      unavailable: false,
+    },
+  ])(
+    "keeps the clear action consistent with $name field state",
+    ({ props, unavailable }) => {
+      const clear = vi.fn();
+      render(
+        <SearchInput
+          {...props}
+          label="Find trade"
+          variant="outlined"
+          handleClear={clear}
+        />
+      );
+      const button = screen.getByRole("button", { name: "Clear search" });
+      expect(button).toHaveProperty("disabled", unavailable);
+      fireEvent.click(button);
+      expect(clear).toHaveBeenCalledTimes(unavailable ? 0 : 1);
+    }
+  );
 
   it("preserves search and reset button behavior in both modes", () => {
     const click = vi.fn();

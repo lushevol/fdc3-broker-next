@@ -6,6 +6,7 @@ import {
   LoadingOverlay,
   LoadingButton,
   Input,
+  SearchInput,
   Select,
   RatanDesignProvider,
 } from "ratan-design-origin";
@@ -21,6 +22,7 @@ function App() {
   const [currency, setCurrency] = React.useState("USD");
   const [loading, setLoading] = React.useState(false);
   const [reference, setReference] = React.useState("");
+  const [tradeSearch, setTradeSearch] = React.useState("");
   const [overlayOpen, setOverlayOpen] = React.useState(false);
   const [overlayActionCount, setOverlayActionCount] = React.useState(0);
   return (
@@ -68,6 +70,30 @@ function App() {
             onChange={(event) => setReference(event.target.value)}
           />
           <Input variant="outlined" label="Account" labelPosition="left" />
+          <SearchInput
+            variant="outlined"
+            label="Trade search"
+            value={tradeSearch}
+            onChange={(event) => setTradeSearch(event.target.value)}
+            handleClear={() => setTradeSearch("")}
+            clearButtonLabel="Clear trade search"
+          />
+          <SearchInput
+            variant="outlined"
+            label="Disabled trade search"
+            value="Locked"
+            disabled
+            handleClear={() => undefined}
+            clearButtonLabel="Clear disabled trade search"
+          />
+          <SearchInput
+            variant="outlined"
+            label="Read-only trade search"
+            value="Retained"
+            slotProps={{ input: { readOnly: true } }}
+            handleClear={() => undefined}
+            clearButtonLabel="Clear read-only trade search"
+          />
           <Select
             variant="outlined"
             label="Currency"

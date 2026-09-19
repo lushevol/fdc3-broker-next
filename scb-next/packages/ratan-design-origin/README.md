@@ -57,6 +57,10 @@ and restores it when idle; consumer adapters retain their 16px default.
 SearchInput composes Input with search and clear adornments. SearchButton,
 ResetButton, ToggleButton and Label preserve the existing Base contracts while
 their implementations and visual policy are now owned by this package.
+The SearchInput clear button is named `Clear search` by default; set
+`clearButtonLabel` for localized or field-specific text. The clear action is
+disabled when the effective input is disabled or read-only, including through
+legacy `InputProps`/`inputProps` and modern `slotProps` spellings.
 SearchGrid, SearchCondition and SearchConditionContainer provide the composed
 search layout, dismissible criteria and collapsed/expanded criteria region.
 BuilderButton composes a Table/Filters trigger with a controlled popover.
