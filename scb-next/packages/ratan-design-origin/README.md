@@ -133,3 +133,8 @@ Base, Ratan and Cashflow use package presentation behind their existing exports.
 See [the inventory](../../docs/UI_PACKAGE_INVENTORY.md) for deliberate portal
 boundaries and [release/rollback](../../docs/UI_PACKAGE_RELEASE.md) for versioning,
 review responsibilities, adoption and publication gates.
+
+The [2026-09-19 clinic](../../docs/UI_PACKAGE_CLINIC.md) records the package's
+behavior, accessibility, token, distribution, and adoption review. Use the
+[fix tracker](../../docs/UI_PACKAGE_FIX_TRACKER.md) for the ordered remediation
+backlog, acceptance criteria, and completion evidence.

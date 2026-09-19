@@ -1,0 +1,510 @@
+# Ratan Design Origin Fix Tracker
+
+Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
+
+**Progress: 0/30 DONE. Next: RD-001.** All items start as TODO; this document
+records planned work, not fixes already made. The clinic contains the review
+evidence and its limits. Reproduce each finding against the checkout used for
+implementation before changing behavior.
+
+## Status and priority
+
+- **TODO**: not started; **IN PROGRESS**: active; **BLOCKED**: record the concrete
+  dependency and owner; **DONE**: acceptance criteria and completion evidence met.
+- **P1**: broken interaction, public contract, accessibility or token correctness.
+- **P2**: consistency, distribution quality, maintainability or release readiness.
+- **P3**: adoption experiment or performance work requiring measurements first.
+- **Confirmed** means the clinic reported a runtime/browser reproduction.
+  **Static finding** means source/tooling inspection identified the issue or gap.
+  **Enhancement** is proposed behavior or infrastructure, not a reproduced defect.
+  **Historical baseline** must be reproduced; it is not a newly observed failure.
+
+Work one item at a time by default. Small related items may share a stage when the
+acceptance evidence identifies each item separately. The suggested sequence is
+phase 1 interaction contracts, phase 2 design consistency, phase 3 distribution
+quality, then phase 4 adoption. Dependencies take precedence over ID order.
+
+| ID | Item | Priority | Phase | Status |
+| --- | --- | --- | --- | --- |
+| [RD-001](#rd-001) | Closed loading overlay hit testing | P1 | 1 | TODO |
+| [RD-002](#rd-002) | Empty and partial range values | P1 | 1 | TODO |
+| [RD-003](#rd-003) | Uncontrolled date values | P1 | 1 | TODO |
+| [RD-004](#rd-004) | Search clear name and disabled state | P1 | 1 | TODO |
+| [RD-005](#rd-005) | Label and native Select names | P1 | 1 | TODO |
+| [RD-006](#rd-006) | Loading announcements | P1 | 1 | TODO |
+| [RD-007](#rd-007) | Collapsed criteria keyboard behavior | P1 | 1 | TODO |
+| [RD-008](#rd-008) | Dialog title relationships | P1 | 1 | TODO |
+| [RD-009](#rd-009) | Builder instance IDs | P1 | 1 | TODO |
+| [RD-010](#rd-010) | Shared field state | P1 | 1 | TODO |
+| [RD-011](#rd-011) | Supported sx composition | P1 | 1 | TODO |
+| [RD-012](#rd-012) | SearchButton loadingPosition | P1 | 1 | TODO |
+| [RD-013](#rd-013) | Builder close requests | P2 | 1 | TODO |
+| [RD-014](#rd-014) | Responsive token conditions | P1 | 2 | TODO |
+| [RD-015](#rd-015) | Unresolved font-size token | P1 | 2 | TODO |
+| [RD-016](#rd-016) | Canonical token source | P2 | 2 | TODO |
+| [RD-017](#rd-017) | WebKit action states | P2 | 2 | TODO |
+| [RD-018](#rd-018) | Contrast and focus cues | P1 | 2 | TODO |
+| [RD-019](#rd-019) | Reduced motion | P2 | 2 | TODO |
+| [RD-020](#rd-020) | Public contracts and font ownership | P2 | 2 | TODO |
+| [RD-021](#rd-021) | Tree shaking and package byte budget | P2 | 3 | TODO |
+| [RD-022](#rd-022) | Browser accessibility and visual gates | P2 | 3 | TODO |
+| [RD-023](#rd-023) | Dependency resolution verification | P2 | 3 | TODO |
+| [RD-024](#rd-024) | Lint and aggregate verification | P2 | 3 | TODO |
+| [RD-025](#rd-025) | Shared pure host adapters | P2 | 4 | TODO |
+| [RD-026](#rd-026) | Explicit host appearance contract | P2 | 4 | TODO |
+| [RD-027](#rd-027) | Alpha direct-adoption pilot | P3 | 4 | TODO |
+| [RD-028](#rd-028) | Release ownership and decisions | P2 | 4 | TODO |
+| [RD-029](#rd-029) | Reproduce historical host test failures | P2 | 1 preflight | TODO |
+| [RD-030](#rd-030) | Real host performance budgets | P3 | 3 measurement | TODO |
+
+## Compatibility boundaries
+
+Each fix must account for [release and rollback policy](UI_PACKAGE_RELEASE.md)
+and the [existing implementation contracts](UI_PACKAGE_IMPLEMENTATION.md).
+
+- Preserve legacy defaults and existing Base imports, including compatibility
+  aliases, unless a deliberate migration changes them.
+- Existing hosts retain their forced portal/container behavior and theme policy.
+  Do not silently substitute package defaults for host decisions.
+- Inactive Builder panels remain mounted where that preserves existing state.
+  Fix their accessibility relationships without changing that lifecycle by accident.
+- Core, dates, Pro range, compatibility and portal-theme remain separate entries.
+  Core consumers must not acquire optional peers or Pro licensing requirements.
+- Hosts continue to own routing, authentication, storage, FDC3, localization,
+  workspace policy and production Pro license initialization.
+- Style and visual fixes require review in legacy/WebKit and light/dark modes,
+  including mobile layouts and relevant host overlays.
+
+## Definition of done and evidence
+
+For each implementation item:
+
+1. Update the behavior specification first. For a defect, add a regression that
+   fails for the reported public behavior before implementing the fix. For a
+   documentation-only item, verify links and accuracy instead of adding artificial
+   tests. Follow [engineering standards](../../docs/rules.md).
+2. Before editing a function, class or method, run GitNexus upstream impact for
+   the symbol. Record direct callers, affected processes and risk; surface HIGH
+   or CRITICAL risk before editing. Documentation-only changes do not edit symbols.
+3. Satisfy the item-specific acceptance criteria below and run focused checks
+   appropriate to the scope. Maintain package line and branch coverage above 90%.
+4. At the completed stage, run the applicable package, packed-consumer, catalog,
+   host and release checks in [Contribution Checks](UI_PACKAGE_RELEASE.md#contribution-checks).
+   For UI changes, verify the required host login → New Tile → render → remove
+   journey and record the actual URL, viewport and appearance configuration.
+5. Run staged `detect_changes()` before an isolated commit; confirm that changed
+   symbols and execution flows match the intended stage. Make a best-effort
+   focused commit, excluding unrelated work, and record any commit blocker.
+6. Record evidence, update the progress table and mark DONE only when all
+   acceptance criteria are met. Record pre-existing failures explicitly; a failed
+   broad suite is not a passing result.
+
+Use this completion record under the item or link to a committed evidence file:
+
+```text
+Status: DONE
+Completed: YYYY-MM-DD
+Owner:
+Commit(s):
+Specification/regression:
+GitNexus impact and staged detect_changes:
+Commands (include working directory):
+Outcomes (counts, sizes, modes/viewports, relevant logs/artifacts):
+Compatibility review and rollback target:
+Limitations / pre-existing failures / follow-up IDs:
+```
+
+Do not treat historical benchmark numbers as current results. If a finding no
+longer reproduces, record the current evidence and resolving commit before
+closing it; do not silently remove the item. Update the total and next-item marker
+whenever status changes.
+
+## Phase 1: Interaction contracts
+
+### RD-001
+
+**Closed LoadingOverlay must not intercept input.** P1 · Confirmed · TODO.
+Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-001).
+
+- [ ] Specify inactive, opening, active and closing hit-testing behavior without
+  changing host portal/container policy.
+- [ ] Remove inactive hit testing or unmount after the exit transition; preserve
+  the intended blocking behavior while loading.
+- [ ] A browser regression opens and closes the overlay, then clicks and
+  keyboard-activates the underlying control successfully. Verify visible loading
+  status as well as underlying interaction; absence of status alone is insufficient.
+
+### RD-002
+
+**Preserve empty and partial range endpoints.** P1 · Confirmed · TODO.
+Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-002).
+
+- [ ] Specify null, partial and complete Dayjs range values; avoid coercing valid
+  null endpoints into invalid dates.
+- [ ] Test `[null, null]`, both partial forms, a selected range and clearing through
+  the public range entry. Assert values and validation callbacks.
+- [ ] Verify packed range declarations/runtime with optional peers installed;
+  preserve explicit host localization and Pro licensing responsibilities.
+
+### RD-003
+
+**Preserve uncontrolled date defaults.** P1 · Confirmed · TODO.
+Dependencies: none; coordinate with RD-002. [Clinic](UI_PACKAGE_CLINIC.md#rd-003).
+
+- [ ] Specify the distinction between omitted `value`, explicit `null` and a
+  selected value for every community date wrapper.
+- [ ] Verify default-value-only controls render their defaults, accept edits and
+  clear correctly; controlled controls continue following their supplied value.
+- [ ] Cover public type/runtime contracts without uncontrolled/controlled React
+  warnings; run affected date and packed-consumer checks.
+
+### RD-004
+
+**Make search clearing accessible and honor field state.** P1 · Confirmed · TODO.
+Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-004).
+
+- [ ] Supply a documented, localizable accessible name for the clear action.
+- [ ] Specify and test disabled/read-only behavior; clearing must not mutate a
+  field when that action is unavailable.
+- [ ] Exercise pointer and keyboard clearing, focus handling and callback
+  behavior; verify the button name with an accessibility scan.
+
+### RD-005
+
+**Connect labels to custom and native Select controls.** P1 · Confirmed · TODO.
+Dependencies: none; coordinate with RD-010. [Clinic](UI_PACKAGE_CLINIC.md#rd-005).
+
+- [ ] Define how Label, generated control IDs and explicit IDs establish each
+  control's accessible name.
+- [ ] Verify native Select with no supplied ID, explicit IDs, repeated instances
+  and the existing “Group by” example are named correctly.
+- [ ] Run component assertions and a browser accessibility scan; preserve
+  compatible host labels and the supported control variants.
+
+### RD-006
+
+**Make loading announcements consistent.** P1 · Confirmed · TODO.
+Dependencies: none; coordinate with RD-012. [Clinic](UI_PACKAGE_CLINIC.md#rd-006).
+
+- [ ] Specify busy semantics and accessible names for every supported loading
+  position; choose when the spinner is named versus decorative.
+- [ ] Verify loading start/end, button naming, disabled behavior and announced
+  status without duplicate announcements.
+- [ ] Cover each position in component tests and browser accessibility checks.
+
+### RD-007
+
+**Keep collapsed criteria out of hidden keyboard navigation.** P1 · Confirmed · TODO.
+Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-007).
+
+- [ ] Specify which criteria remain visible and interactive when collapsed;
+  preserve entered state and define focus handling when collapsing.
+- [ ] Add correct `aria-expanded`, `aria-controls` and expand/collapse names;
+  hidden criteria must not remain keyboard-activatable.
+- [ ] Verify Tab/Shift+Tab, expand, edit and collapse in a browser at desktop and
+  mobile widths. Confirm visible criteria still work.
+
+### RD-008
+
+**Resolve Dialog title IDs once.** P1 · Confirmed · TODO.
+Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-008).
+
+- [ ] Define precedence for generated IDs, `titleProps.id`, custom headers,
+  suppressed headers and explicitly supplied accessible names.
+- [ ] Verify every `aria-labelledby` resolves to the intended mounted title,
+  including multiple dialogs and custom IDs; avoid dangling references.
+- [ ] Run dialog public-contract tests and browser naming/focus checks in the
+  host portal configuration.
+
+### RD-009
+
+**Namespace Builder tab/panel IDs per instance.** P1 · Confirmed · TODO.
+Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-009).
+
+- [ ] Define a shared instance namespace for tab IDs, panel IDs and their ARIA
+  relationships without requiring callers to coordinate global IDs.
+- [ ] Render two Builders together and verify unique IDs, correct relationships
+  and independent keyboard tab selection.
+- [ ] Verify inactive panels keep their established mounted state and values;
+  check SSR/hydration compatibility where the generated IDs are rendered.
+
+### RD-010
+
+**Propagate shared field state consistently.** P1 · Confirmed · TODO.
+Dependencies: none; coordinate with RD-005. [Clinic](UI_PACKAGE_CLINIC.md#rd-010).
+
+- [ ] Specify precedence and propagation for disabled, error and required state
+  across Input/Select, their FormControl, label and input elements.
+- [ ] Test the public combinations and state transitions rather than only the
+  underlying input attributes.
+- [ ] Verify label/control appearance and semantics in both modes and generations;
+  factor a small internal helper only if it makes these rules easier to maintain.
+
+### RD-011
+
+**Compose all supported sx forms.** P1 · Confirmed · TODO.
+Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-011).
+
+- [ ] Document default-versus-caller precedence for SearchInput and date wrappers.
+- [ ] Preserve object, callback and array `SxProps` forms, including conditional
+  array entries, without overwriting the caller's style.
+- [ ] Test resolved styles through public components and type-check representative
+  consumer usage; verify package defaults still apply when no override is supplied.
+
+### RD-012
+
+**Honor SearchButton's advertised loadingPosition.** P1 · Confirmed · TODO.
+Dependencies: RD-006. [Clinic](UI_PACKAGE_CLINIC.md#rd-012).
+
+- [ ] Decide whether to support the advertised positions through shared loading
+  behavior or narrow/deprecate the interface with explicit compatibility review.
+- [ ] Test each supported position and busy/name semantics; prevent unsupported
+  props from leaking to the DOM.
+- [ ] Verify existing SearchButton consumers, declarations and visual states.
+
+### RD-013
+
+**Expose a Builder close-request callback.** P2 · Enhancement · TODO.
+Dependencies: RD-009. [Clinic](UI_PACKAGE_CLINIC.md#rd-013).
+
+- [ ] Specify an optional callback with dismissal reasons for Escape and backdrop
+  interactions; retain host ownership of `anchorEl` and open state.
+- [ ] Test request delivery and controlled dismissal, including the existing
+  behavior when no callback is supplied.
+- [ ] Verify focus restoration and dismissal in host portals; document the
+  compatible addition and retain mounted inactive panel behavior.
+
+## Phase 2: Design consistency
+
+### RD-014
+
+**Preserve media-query conditions in generated tokens.** P1 · Static finding · TODO.
+Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-014).
+
+- [ ] Specify how conditional ancestry is retained when extracting canonical CSS.
+- [ ] Add a regression with conditional token declarations and verify mobile-only
+  values do not become unconditional generated rules.
+- [ ] Regenerate deterministically, review source hashes and diff, and compare
+  computed token values at narrow/wide widths in light/dark modes.
+
+### RD-015
+
+**Resolve the public font-size token.** P1 · Static finding · TODO.
+Dependencies: RD-014. [Clinic](UI_PACKAGE_CLINIC.md#rd-015).
+
+- [ ] Map the published font-size reference to an approved defined token or emit
+  its canonical definition; document any intended fallback.
+- [ ] Validate every public token reference and alias chain against packaged CSS,
+  detecting missing definitions and cycles rather than checking only this token.
+- [ ] Verify computed font sizing from the packed stylesheet in the consumer
+  fixture and affected catalog controls.
+
+### RD-016
+
+**Generate CSS and MUI raw values from a canonical source.** P2 · Enhancement · TODO.
+Dependencies: RD-014, RD-015. [Clinic](UI_PACKAGE_CLINIC.md#rd-016).
+
+- [ ] Document the versioned source, generation boundary and cases where MUI needs
+  raw values rather than CSS references.
+- [ ] Generate or validate theme palette values and public CSS references against
+  that source, with drift checks and deterministic output.
+- [ ] Verify legacy/WebKit, light/dark and responsive values; ordinary package
+  builds must still work from committed assets without a sibling source checkout.
+
+### RD-017
+
+**Complete WebKit action-control states.** P2 · Static finding · TODO.
+Dependencies: RD-016. [Clinic](UI_PACKAGE_CLINIC.md#rd-017).
+
+- [ ] Specify SearchButton, ResetButton and ToggleButton behavior under explicit
+  WebKit generation while preserving the legacy default branch.
+- [ ] Apply approved semantic tokens to normal, hover, focus, pressed, selected,
+  disabled, error and loading states as applicable.
+- [ ] Review a state matrix on desktop/mobile across both generations and modes;
+  record intentional visual changes and compatible host checks.
+
+### RD-018
+
+**Improve contrast and restore visible focus cues.** P1 · Static finding · TODO.
+Dependencies: RD-016; coordinate with RD-017. [Clinic](UI_PACKAGE_CLINIC.md#rd-018).
+
+- [ ] Measure placeholders, relevant text and focus indicators against their actual
+  backgrounds; use approved semantic tokens and record the applicable criteria.
+- [ ] Restore a reviewed keyboard focus indication for legacy portal grids and
+  assess legacy input focus plus WebKit light/dark focus states.
+- [ ] Verify keyboard navigation and measured contrast in actual rendered states;
+  record host compatibility review for changes to intentional legacy overrides.
+
+### RD-019
+
+**Respect reduced-motion preferences.** P2 · Enhancement · TODO.
+Dependencies: none; coordinate with RD-006. [Clinic](UI_PACKAGE_CLINIC.md#rd-019).
+
+- [ ] Specify reduced-motion behavior for animated loaders while keeping loading
+  state understandable and accessible.
+- [ ] Implement the approved reduced-motion presentation using shared tokens/styles
+  where appropriate, without changing the ordinary animation unintentionally.
+- [ ] Verify browser-emulated reduced motion and default motion, including loading
+  announcements and both appearance generations.
+
+### RD-020
+
+**Document supported public contracts and font ownership.** P2 · Enhancement · TODO.
+Dependencies: RD-001–RD-013; update alongside those fixes where useful.
+[Clinic](UI_PACKAGE_CLINIC.md#rd-020).
+
+- [ ] Document defaults, controlled/uncontrolled values, nulls, callbacks/reasons,
+  refs, slots, labels/IDs, style precedence and supported inherited props.
+- [ ] State that legacy Poppins is host-provided and identify packaged fonts,
+  explicit stylesheet loading, optional peers, localization and Pro ownership.
+- [ ] Add compiling examples for changed contracts and link corresponding stories;
+  verify README, declarations, compatibility guidance and changelog agree.
+
+## Phase 3: Distribution quality
+
+### RD-021
+
+**Improve tree shaking and enforce a package byte budget.** P2 · Confirmed · TODO.
+Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-021).
+
+- [ ] Reproduce the Button-only retained-code baseline with pinned tooling and
+  peer externalization stated explicitly; inspect unrelated retained modules.
+- [ ] Make pure initialization removable without dropping actual side effects;
+  validate any annotation/build or icon-import change through SSR and Storybook.
+- [ ] Enforce a reviewed byte ceiling and unrelated-module checks in the packed
+  consumer verifier. Record measured before/after bytes; the clinic's approximate
+  18.6 KB → 1.6 KB experiment is evidence, not a promised release threshold.
+
+### RD-022
+
+**Automate browser accessibility, interaction and visual checks.** P2 · Enhancement · TODO.
+Dependencies: phase 1 regressions, RD-017–RD-019.
+[Clinic](UI_PACKAGE_CLINIC.md#rd-022).
+
+- [ ] Make actionable catalog accessibility violations fail a repeatable automated
+  command; record any narrowly justified, owned exclusions.
+- [ ] Gate keyboard behavior, dismissal, focus restoration and overlay hit testing
+  with representative package and host flows.
+- [ ] Replace screenshot-only artifacts with reviewed screenshot comparisons for
+  the selected desktop/mobile and legacy/WebKit light/dark matrix; record baseline
+  update/review procedure and avoid accepting changed images without review.
+
+### RD-023
+
+**Validate supported versions and runtime dependency resolution.** P2 · Static finding · TODO.
+Dependencies: RD-029 when affected host suites are needed.
+[Clinic](UI_PACKAGE_CLINIC.md#rd-023).
+
+- [ ] Check supported peer versions rather than only Material/icons major version 5.
+- [ ] Verify React, ReactDOM, MUI and Emotion resolve to each host's intended runtime;
+  check optional integrations when present and core operation when absent.
+- [ ] Exercise negative fixtures for unsupported or duplicate resolution and run
+  the independent consumer plus affected host checks. Keep federation sharing
+  changes outside this fix unless separately specified and measured.
+
+### RD-024
+
+**Strengthen lint and provide an aggregate quality command.** P2 · Enhancement · TODO.
+Dependencies: RD-021–RD-023. [Clinic](UI_PACKAGE_CLINIC.md#rd-024).
+
+- [ ] Add suitable TypeScript, React Hooks and JSX accessibility rules, resolving
+  actionable findings with scoped changes and documented exceptions.
+- [ ] Provide a repository-owned command aggregating the relevant package,
+  distribution and browser gates; document required services and external CI use.
+- [ ] Demonstrate successful exit on a clean candidate and failed exit when a
+  representative gate fails; preserve actionable logs and avoid masking failures.
+
+## Phase 4: Adoption and ownership
+
+### RD-025
+
+**Share pure Ratan/Cashflow compatibility adaptation.** P2 · Static finding · TODO.
+Dependencies: phase 1 fixes, RD-020, RD-023, RD-029.
+[Clinic](UI_PACKAGE_CLINIC.md#rd-025).
+
+- [ ] Recheck the reported duplicated adapter block and specify the smallest shared
+  pure UI boundary using current consumers and GitNexus impact.
+- [ ] Share that boundary while preserving Base imports, host-specific services,
+  forced portals and each host's existing theme policy.
+- [ ] Run adapter contract tests, both host builds and affected workspace journeys;
+  document a focused rollback and avoid extracting unrelated host policy.
+
+### RD-026
+
+**Propagate explicit mode and designGeneration from hosts.** P2 · Enhancement · TODO.
+Dependencies: RD-017, RD-020, RD-025. [Clinic](UI_PACKAGE_CLINIC.md#rd-026).
+
+- [ ] Specify a host appearance contract containing both `mode` and
+  `designGeneration`, including inheritance and fallback behavior.
+- [ ] Propagate it through providers/adapters without changing existing legacy
+  defaults or unifying intentionally different host theme policies implicitly.
+- [ ] Verify runtime mode/generation transitions, portals and multiple mounted
+  micro-frontends; document an incremental opt-in rollout and rollback.
+
+### RD-027
+
+**Pilot direct public-package adoption in Alpha Payments.** P3 · Enhancement · TODO.
+Dependencies: RD-020, RD-024, RD-026, RD-028 before publication;
+RD-030 for the performance comparison. [Clinic](UI_PACKAGE_CLINIC.md#rd-027).
+
+- [ ] Inventory the duplicated controls/feedback states and select a small pilot
+  with explicit behavior and appearance acceptance criteria.
+- [ ] Adopt public entries with explicit styles/provider configuration, preserving
+  Alpha's business, routing and data ownership.
+- [ ] Verify public types, peer resolution, browser interactions and visual states;
+  compare bundle/runtime measurements and document rollout/rollback evidence.
+
+### RD-028
+
+**Assign release ownership and record publication decisions.** P2 · Enhancement · TODO.
+Dependencies: none for recording decisions; publication requires applicable
+release gates. [Clinic](UI_PACKAGE_CLINIC.md#rd-028).
+
+- [ ] Record named release owner and backup, registry/access/visibility policy,
+  maintainer review responsibilities and immutable artifact retention.
+- [ ] Obtain and record the required asset/font redistribution decision and
+  production MUI X Pro license/initialization ownership where applicable.
+- [ ] Update release/changelog guidance with approved decisions and rollback
+  responsibilities. Missing decisions remain explicit blockers; this tracking item
+  does not authorize registry publication or production deployment.
+
+## Baseline and measurement work
+
+### RD-029
+
+**Reproduce and classify historical broad host test failures.** P2 · Historical baseline · TODO.
+Dependencies: none; run early when host changes or broad host validation start.
+[Clinic](UI_PACKAGE_CLINIC.md#rd-029).
+
+- [ ] Locate the recorded host dependency-resolution failures and rerun their
+  original commands on the implementation baseline; capture versions and logs.
+- [ ] Classify results as still failing, already resolved or environment-specific.
+  Separate existing failures from regressions introduced by this work.
+- [ ] Fix any reproduced resolution issue within a specified scope, or record an
+  owned follow-up/blocker with affected checks. Mark this item DONE only when the
+  baseline classification and disposition are evidenced; do not claim a historical
+  failure was freshly reproduced without its actual command result.
+
+### RD-030
+
+**Measure real host performance before architectural changes.** P3 · Enhancement · TODO.
+Dependencies: RD-021, RD-023; baseline measurements may begin earlier.
+[Clinic](UI_PACKAGE_CLINIC.md#rd-030).
+
+- [ ] Define repeatable production-build measurements with real UI dependencies
+  included: route/chunk transfer size, dependency duplication, relevant render and
+  interaction timings, hardware/browser and cache conditions.
+- [ ] Record baseline and candidate results for representative hosts; set reviewed
+  budgets consistent with repository performance targets and enforce useful checks.
+- [ ] Use the evidence to decide whether further provider, import or federation
+  changes are justified. Do not change MUI/Emotion federation sharing solely from
+  a package-only externalized byte result; record any separate design decision.
+
+## Activity log
+
+No implementation activity recorded yet. Add entries as work starts or status
+changes; link the item completion record or committed evidence.
+
+| Date | Item | Status change | Commit / evidence | Notes / next action |
+| --- | --- | --- | --- | --- |
+| | | | | |
