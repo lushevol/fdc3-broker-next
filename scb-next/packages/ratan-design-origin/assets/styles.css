@@ -36,7 +36,8 @@
   --sc-transition-fast: 150ms;
   --sc-scrollbar-size: 0.75rem;
 }
-.ratan-design-root[data-generation="webkit"] {
+@media screen and (max-width: 415px) {
+  .ratan-design-root[data-generation="webkit"] {
     --sc-time-input-list-item-width: auto;
     --sc-time-input-list-item-min-width: 4rem;
     --sc-time-input-list-flex: 1;
@@ -58,14 +59,17 @@
     --sc-date-picker-grid-margin: 0;
     --sc-date-picker-month-grid-margin-top: 1rem;
     --sc-date-picker-weekday-display: flex;
+  }
 }
-.ratan-design-root[data-generation="webkit"] {
+@media screen and (max-width: 680px) {
+  .ratan-design-root[data-generation="webkit"] {
     --sc-button-display: flex;
     --sc-button-width: 100%;
     --sc-action-sheet-container-direction: column;
     --sc-date-range-container-direction: column;
     --sc-image-doc-viewer-width: 100%;
     --sc-action-bar-container-padding: 0;
+  }
 }
 @font-face {
   font-display: block;

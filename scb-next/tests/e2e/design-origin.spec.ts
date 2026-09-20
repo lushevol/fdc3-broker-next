@@ -47,6 +47,17 @@ for (const width of [390, 1280]) {
             getComputedStyle(element).getPropertyValue('--sc-layout-text-color'),
           );
           expect(token.trim()).not.toBe('');
+          const responsiveTokens = await root.evaluate((element) => {
+            const styles = getComputedStyle(element);
+            return {
+              buttonWidth: styles.getPropertyValue('--sc-button-width').trim(),
+              mode: styles.getPropertyValue('--sc-mode').trim(),
+            };
+          });
+          expect(responsiveTokens).toEqual({
+            buttonWidth: width === 390 ? '100%' : '',
+            mode,
+          });
           expect(
             await page.evaluate(() =>
               document.fonts.load('12px "Inter"').then((fonts) => fonts.length),

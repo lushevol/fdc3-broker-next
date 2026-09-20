@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 13/30 DONE. Next: RD-014.** The clinic contains the review evidence
+**Progress: 14/30 DONE. Next: RD-015.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -38,7 +38,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-011](#rd-011) | Supported sx composition | P1 | 1 | DONE |
 | [RD-012](#rd-012) | SearchButton loadingPosition | P1 | 1 | DONE |
 | [RD-013](#rd-013) | Builder close requests | P2 | 1 | DONE |
-| [RD-014](#rd-014) | Responsive token conditions | P1 | 2 | TODO |
+| [RD-014](#rd-014) | Responsive token conditions | P1 | 2 | DONE |
 | [RD-015](#rd-015) | Unresolved font-size token | P1 | 2 | TODO |
 | [RD-016](#rd-016) | Canonical token source | P2 | 2 | TODO |
 | [RD-017](#rd-017) | WebKit action states | P2 | 2 | TODO |
@@ -690,14 +690,51 @@ Limitations / pre-existing failures / follow-up IDs: Storybook retains its
 
 ### RD-014
 
-**Preserve media-query conditions in generated tokens.** P1 · Static finding · TODO.
+**Preserve media-query conditions in generated tokens.** P1 · Static finding · DONE.
 Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-014).
 
-- [ ] Specify how conditional ancestry is retained when extracting canonical CSS.
-- [ ] Add a regression with conditional token declarations and verify mobile-only
+- [x] Specify how conditional ancestry is retained when extracting canonical CSS.
+- [x] Add a regression with conditional token declarations and verify mobile-only
   values do not become unconditional generated rules.
-- [ ] Regenerate deterministically, review source hashes and diff, and compare
+- [x] Regenerate deterministically, review source hashes and diff, and compare
   computed token values at narrow/wide widths in light/dark modes.
+
+```text
+Status: DONE
+Completed: 2026-09-21
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-014 contract;
+  generate-webkit-assets.test.mjs covers direct declarations plus nested
+  @media/@supports ancestry and rejects unrelated selector leakage;
+  design-origin.spec.ts checks computed responsive and mode tokens from the
+  independently installed tarball at 390px and 1280px in light/dark modes.
+GitNexus impact and staged detect_changes: the generator source list has no
+  indexed dependants or execution flows; the browser spec has one direct docs
+  dependant and no flows. Both are LOW risk. The staged scope audit is recorded
+  in this stage commit.
+Commands (working directory scb-next/packages/ratan-design-origin unless noted):
+  npm test; npm run typecheck; npm run lint; npm run build;
+  npm run build:storybook; npm run verify:package; two consecutive
+  npm run tokens:generate runs with SHA-1 comparison; from scb-next, the
+  independent-consumer Playwright design-origin matrix.
+Outcomes: 10 Vitest files/96 tests plus one generator test passed with 98.21%
+  lines and 96.58% branches; package, Storybook and independent tarball checks
+  passed. Both generations produced styles.css 2eddcbd7fcc14eec2305d474bb48a0bb7efba350
+  and webkit-sources.json 6fcf7abc309d8e8eec69fd86e920360c3958aa96.
+  All four canonical source hashes were unchanged. Browser verification passed
+  16/16: --sc-button-width computed to 100% at 390px and remained undefined at
+  1280px for both light and dark WebKit roots; --sc-mode matched each mode.
+Compatibility review and rollback target: unconditional canonical variables,
+  font extraction, token aliases, generation/mode scoping and committed-asset
+  builds are unchanged. Only canonical @media/@supports declarations regain
+  their source conditions. Roll back if a downstream host intentionally relies
+  on a formerly flattened responsive declaration.
+Limitations / pre-existing failures / follow-up IDs: Storybook retains its
+  existing chunk-size warning; the independent Vite consumer retains upstream
+  module-directive warnings and the existing kebab-case CSS warning. RD-029 owns
+  the broader historical warning baseline. RD-015 owns unresolved token aliases.
+```
 
 ### RD-015
 
@@ -945,3 +982,5 @@ or committed evidence.
 | 2026-09-20 | RD-012 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-013 |
 | 2026-09-21 | RD-013 | TODO → IN PROGRESS | GitNexus LOW risk: BuilderButton three direct dependants; no processes | Specify controlled close requests and add public regressions |
 | 2026-09-21 | RD-013 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-014 |
+| 2026-09-21 | RD-014 | TODO → IN PROGRESS | GitNexus LOW risk: generator source list has no dependants/flows; browser spec one direct docs dependant, no flows | Preserve conditional ancestry and add generator/browser regressions |
+| 2026-09-21 | RD-014 | IN PROGRESS → DONE | Deterministic assets and passing package, Storybook, packed-consumer and 16-case browser gates | Next: RD-015 |

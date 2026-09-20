@@ -748,6 +748,20 @@ the remaining inventory classification, and release governance remain open.
 - After the caller-controlled close transition completes, focus returns to the
   Builder trigger.
 
+### RD-014 specification: conditional token extraction
+
+- Canonical `--sc-*` declarations on supported root/mode selectors retain every
+  enclosing `@media` and `@supports` condition, including nested conditions and
+  their source order. Unconditional declarations remain directly scoped to the
+  matching Ratan WebKit root.
+- Extraction never promotes conditional declarations to the output root and
+  continues to omit declarations from unrelated selectors. Font extraction and
+  light/dark mode selector mapping are unchanged.
+- Regeneration from WebKit 2.0.5 is deterministic and retains the recorded
+  canonical source hashes. In the packed consumer, `--sc-button-width` resolves
+  to `100%` below the canonical 680px breakpoint and is undefined above it for
+  both light and dark WebKit roots; `--sc-mode` continues to match the root mode.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

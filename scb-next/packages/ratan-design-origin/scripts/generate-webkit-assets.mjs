@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import postcss from "postcss";
 import ts from "typescript";
+import { appendScopedTokenRules } from "./token-css.mjs";
 
 const canonical = fileURLToPath(
   new URL("../../../../sc-dev-web/sc-dev-web/dist/", import.meta.url)
@@ -23,31 +24,7 @@ for (const name of sources) {
   const content = await readFile(join(canonical, "styles", name), "utf8");
   hashes[name] = createHash("sha256").update(content).digest("hex");
   const source = postcss.parse(content);
-  source.walkRules((rule) => {
-    if (
-      !rule.selectors.every((selector) =>
-        [":root", ":host", ".sc-mode-light", ".sc-mode-dark"].includes(
-          selector.trim()
-        )
-      )
-    )
-      return;
-    const declarations = rule.nodes.filter(
-      (node) => node.type === "decl" && node.prop.startsWith("--sc-")
-    );
-    if (!declarations.length) return;
-    const mode =
-      name === "ScDarkMode.css"
-        ? '[data-mode="dark"]'
-        : name === "ScLightMode.css"
-          ? '[data-mode="light"]'
-          : "";
-    const scoped = postcss.rule({
-      selector: `.ratan-design-root[data-generation="webkit"]${mode}`,
-    });
-    scoped.append(declarations.map((declaration) => declaration.clone()));
-    output.append(scoped);
-  });
+  appendScopedTokenRules(source, output, name);
   source.walkAtRules("font-face", (rule) => {
     const src = rule.nodes.find(
       (node) =>
