@@ -24,6 +24,7 @@ import {
 } from "../src";
 import MenuItem from "@mui/material/MenuItem";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import { getWebkitActionStyle } from "../src/action-style";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 describe("standalone controls", () => {
@@ -477,6 +478,71 @@ describe("standalone controls", () => {
     expect(changed).toHaveBeenCalled();
     expect(modeStyle({ shape: { borderRadius: 5 } } as never, "light")).toBeDefined();
     expect(modeStyle({ shape: { borderRadius: 5 } } as never, "dark")).toBeDefined();
+  });
+
+  it("maps the complete WebKit primary and secondary action state vocabulary", () => {
+    expect(getWebkitActionStyle("primary", true)).toMatchObject({
+      "&.MuiButtonBase-root": {
+        backgroundColor: "var(--sc-button-primary-background-color)",
+        borderColor: "var(--sc-button-primary-border-color)",
+        color: "var(--sc-button-primary-text-color)",
+      },
+      "&:hover": {
+        backgroundColor: "var(--sc-button-primary-hover-background-color)",
+      },
+      "&:active": {
+        backgroundColor: "var(--sc-button-primary-press-background-color)",
+      },
+      "&.Mui-focusVisible": {
+        outlineColor: "var(--sc-button-focus-outline-color)",
+      },
+      "&.Mui-disabled": {
+        backgroundColor: "var(--sc-button-primary-disabled-background-color)",
+        color: "var(--sc-button-primary-disabled-text-color)",
+      },
+      "&.MuiButton-containedError, &.MuiButton-outlinedError, &.MuiButton-textError": {
+        backgroundColor: "var(--sc-button-primary-error-background-color)",
+        "&:hover": {
+          backgroundColor: "var(--sc-button-primary-error-hover-background-color)",
+        },
+        "&:active": {
+          backgroundColor: "var(--sc-button-primary-error-press-background-color)",
+        },
+      },
+    });
+    expect(getWebkitActionStyle("secondary", false)).toMatchObject({
+      "&.MuiButtonBase-root": {
+        backgroundColor: "var(--sc-button-secondary-background-color)",
+      },
+      "&:hover": {
+        backgroundColor: "var(--sc-button-secondary-hover-background-color)",
+      },
+      "&:active": {
+        backgroundColor: "var(--sc-button-secondary-press-background-color)",
+      },
+      "&.Mui-disabled": {
+        backgroundColor: "var(--sc-button-secondary-disabled-background-color)",
+      },
+    });
+  });
+
+  it("keeps legacy Toggle styles and exposes semantic WebKit Toggle states", () => {
+    const theme = {
+      shape: { borderRadius: 5 },
+      ratan: { designGeneration: "webkit" },
+    } as never;
+    expect(modeStyle(theme, "light", "webkit")).toMatchObject({
+      "&.MuiButtonBase-root": {
+        backgroundColor: "var(--sc-button-secondary-background-color)",
+      },
+      "&.Mui-selected": {
+        backgroundColor: "var(--sc-button-secondary-select-background-color)",
+        color: "var(--sc-button-secondary-select-text-color)",
+      },
+    });
+    expect(modeStyle(theme, "light", "legacy")).toMatchObject({
+      "&.MuiToggleButton-root": { backgroundColor: "rgba(237,237,237,1)" },
+    });
   });
 
   it("renders the label selector and reports the selected label", () => {

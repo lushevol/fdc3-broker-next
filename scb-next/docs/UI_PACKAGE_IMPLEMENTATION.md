@@ -802,6 +802,23 @@ the remaining inventory classification, and release governance remain open.
   narrow/wide computed values. A core Button-only import must not retain provider
   or token CSS, preserving the existing tree-shaking boundary.
 
+### RD-017 specification: WebKit action-control states
+
+- SearchButton uses the WebKit primary-button semantic variables; ResetButton and
+  ToggleButton use the secondary-button variables. Normal, hover, pressed,
+  focus-visible, disabled, and Toggle selected states resolve through scoped CSS
+  so light/dark changes remain live. Search/Reset `color="error"` states use the
+  corresponding primary/secondary error variables.
+- SearchButton loading remains a disabled, `aria-busy` action with one decorative
+  spinner. Its visual state therefore uses the primary disabled variables without
+  changing the RD-006/RD-012 interaction and announcement contracts.
+- Legacy generation retains the existing fixed Search colors, mode-specific Reset
+  colors, and legacy Toggle gradients/transforms. The new semantic branch is
+  selected only when `theme.ratan.designGeneration` is `webkit`.
+- The catalog and independent consumer expose the state matrix. Browser checks
+  cover both generations and modes at 390px and 1280px, including pointer hover,
+  held press, keyboard focus, error, loading/disabled, and Toggle selection.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

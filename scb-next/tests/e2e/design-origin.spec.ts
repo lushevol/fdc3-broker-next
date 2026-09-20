@@ -33,6 +33,96 @@ for (const width of [390, 1280]) {
         await page.getByRole('button', { name: 'Cancel' }).click();
         await expect(page.getByRole('button', { name: 'Submit' })).toBeEnabled();
         if (generation === 'webkit') {
+          const resolveToken = (name: string) =>
+            root.evaluate((element, tokenName) => {
+              const probe = document.createElement('span');
+              probe.style.color = `var(${tokenName})`;
+              element.append(probe);
+              const value = getComputedStyle(probe).color;
+              probe.remove();
+              return value;
+            }, name);
+          const searchAction = page.getByTestId('search-action');
+          const searchError = page.getByTestId('search-error');
+          const loadingSearch = page.getByRole('button', { name: 'Search trades' });
+          const resetAction = page.getByTestId('reset-action');
+          const resetError = page.getByTestId('reset-error');
+          const resetDisabled = page.getByTestId('reset-disabled');
+          const toggleAction = page.getByTestId('toggle-action');
+          const toggleSelected = page.getByTestId('toggle-selected');
+
+          await expect(searchAction).toHaveCSS(
+            'background-color',
+            await resolveToken('--sc-button-primary-background-color'),
+          );
+          await searchAction.hover();
+          await expect(searchAction).toHaveCSS(
+            'background-color',
+            await resolveToken('--sc-button-primary-hover-background-color'),
+          );
+          const searchBox = await searchAction.boundingBox();
+          expect(searchBox).not.toBeNull();
+          await page.mouse.move(
+            searchBox!.x + searchBox!.width / 2,
+            searchBox!.y + searchBox!.height / 2,
+          );
+          await page.mouse.down();
+          await expect(searchAction).toHaveCSS(
+            'background-color',
+            await resolveToken('--sc-button-primary-press-background-color'),
+          );
+          await page.mouse.up();
+          await submit.focus();
+          await page.keyboard.press('Tab');
+          await expect(searchAction).toBeFocused();
+          await expect(searchAction).toHaveCSS(
+            'outline-color',
+            await resolveToken('--sc-button-focus-outline-color'),
+          );
+          await expect(loadingSearch).toHaveCSS(
+            'background-color',
+            await resolveToken('--sc-button-primary-disabled-background-color'),
+          );
+          await expect(searchError).toHaveCSS(
+            'background-color',
+            await resolveToken('--sc-button-primary-error-background-color'),
+          );
+          await searchError.hover();
+          await expect(searchError).toHaveCSS(
+            'background-color',
+            await resolveToken('--sc-button-primary-error-hover-background-color'),
+          );
+
+          await expect(resetAction).toHaveCSS(
+            'background-color',
+            await resolveToken('--sc-button-secondary-background-color'),
+          );
+          await resetAction.hover();
+          await expect(resetAction).toHaveCSS(
+            'background-color',
+            await resolveToken('--sc-button-secondary-hover-background-color'),
+          );
+          await expect(resetDisabled).toHaveCSS(
+            'background-color',
+            await resolveToken('--sc-button-secondary-disabled-background-color'),
+          );
+          await expect(resetError).toHaveCSS(
+            'background-color',
+            await resolveToken('--sc-button-secondary-error-background-color'),
+          );
+          await expect(toggleAction).toHaveCSS(
+            'background-color',
+            await resolveToken('--sc-button-secondary-background-color'),
+          );
+          await toggleAction.hover();
+          await expect(toggleAction).toHaveCSS(
+            'background-color',
+            await resolveToken('--sc-button-secondary-hover-background-color'),
+          );
+          await expect(toggleSelected).toHaveCSS(
+            'background-color',
+            await resolveToken('--sc-button-secondary-select-background-color'),
+          );
           await expect(root).toHaveCSS('font-family', /SC Prosper Sans/);
           await expect(page.getByRole('button', { name: 'Submit' })).toHaveCSS(
             'background-color',
@@ -72,6 +162,14 @@ for (const width of [390, 1280]) {
             ),
           ).toBeGreaterThan(0);
         } else {
+          await expect(page.getByTestId('search-action')).toHaveCSS(
+            'background-color',
+            'rgb(44, 63, 94)',
+          );
+          await expect(page.getByTestId('reset-action')).toHaveCSS(
+            'background-color',
+            mode === 'dark' ? 'rgb(41, 49, 58)' : 'rgb(237, 237, 237)',
+          );
           await expect(root).toHaveCSS('font-family', /Poppins/);
           await expect(page.getByRole('button', { name: 'Submit' })).toHaveCSS(
             'background-color',
@@ -126,24 +224,25 @@ test('search clear action is named and follows editable field state', async ({ p
   await expect(field).toHaveValue('');
   await expect(clear).toBeFocused();
 
-  await expect(
-    page.getByRole('button', { name: 'Clear disabled trade search' }),
-  ).toBeDisabled();
-  await expect(
-    page.getByRole('button', { name: 'Clear read-only trade search' }),
-  ).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Clear disabled trade search' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Clear read-only trade search' })).toBeDisabled();
   await expect(page.getByRole('textbox', { name: 'Disabled trade search' })).toHaveValue('Locked');
-  await expect(page.getByRole('textbox', { name: 'Read-only trade search' })).toHaveValue('Retained');
+  await expect(page.getByRole('textbox', { name: 'Read-only trade search' })).toHaveValue(
+    'Retained',
+  );
 
   expect(
-    await page.locator('button').evaluateAll((buttons) =>
-      buttons.filter(
-        (button) =>
-          !button.getAttribute('aria-label') &&
-          !button.getAttribute('aria-labelledby') &&
-          !button.textContent?.trim(),
-      ).length,
-    ),
+    await page
+      .locator('button')
+      .evaluateAll(
+        (buttons) =>
+          buttons.filter(
+            (button) =>
+              !button.getAttribute('aria-label') &&
+              !button.getAttribute('aria-labelledby') &&
+              !button.textContent?.trim(),
+          ).length,
+      ),
   ).toBe(0);
 });
 
@@ -166,19 +265,20 @@ test('label and native selects expose stable accessible names', async ({ page })
     'explicit-settlement-status-label',
   );
   expect(
-    await page.locator('[role="combobox"], select').evaluateAll((comboboxes) =>
-      comboboxes.filter((combobox) => {
-        if (
-          combobox.getAttribute('aria-label')?.trim() ||
-          combobox.getAttribute('aria-labelledby')?.trim()
-        ) {
-          return false;
-        }
-        return !(
-          combobox instanceof HTMLSelectElement &&
-          Array.from(combobox.labels ?? []).some((label) => label.textContent?.trim())
-        );
-      }).length,
+    await page.locator('[role="combobox"], select').evaluateAll(
+      (comboboxes) =>
+        comboboxes.filter((combobox) => {
+          if (
+            combobox.getAttribute('aria-label')?.trim() ||
+            combobox.getAttribute('aria-labelledby')?.trim()
+          ) {
+            return false;
+          }
+          return !(
+            combobox instanceof HTMLSelectElement &&
+            Array.from(combobox.labels ?? []).some((label) => label.textContent?.trim())
+          );
+        }).length,
     ),
   ).toBe(0);
 });
@@ -285,10 +385,12 @@ test('closed loading overlay releases its underlying action', async ({ page }) =
   expect(
     await target.evaluate((element) => {
       const bounds = element.getBoundingClientRect();
-      return document.elementFromPoint(
-        bounds.left + bounds.width / 2,
-        bounds.top + bounds.height / 2,
-      ) === element;
+      return (
+        document.elementFromPoint(
+          bounds.left + bounds.width / 2,
+          bounds.top + bounds.height / 2,
+        ) === element
+      );
     }),
   ).toBe(false);
 

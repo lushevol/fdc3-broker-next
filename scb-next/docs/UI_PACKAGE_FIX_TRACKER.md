@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 16/30 DONE. Next: RD-017.** The clinic contains the review evidence
+**Progress: 17/30 DONE. Next: RD-018.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -41,7 +41,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-014](#rd-014) | Responsive token conditions | P1 | 2 | DONE |
 | [RD-015](#rd-015) | Unresolved font-size token | P1 | 2 | DONE |
 | [RD-016](#rd-016) | Canonical token source | P2 | 2 | DONE |
-| [RD-017](#rd-017) | WebKit action states | P2 | 2 | TODO |
+| [RD-017](#rd-017) | WebKit action states | P2 | 2 | DONE |
 | [RD-018](#rd-018) | Contrast and focus cues | P1 | 2 | TODO |
 | [RD-019](#rd-019) | Reduced motion | P2 | 2 | TODO |
 | [RD-020](#rd-020) | Public contracts and font ownership | P2 | 2 | TODO |
@@ -841,15 +841,56 @@ Limitations / pre-existing failures / follow-up IDs: Storybook retains its
 
 ### RD-017
 
-**Complete WebKit action-control states.** P2 · Static finding · TODO.
+**Complete WebKit action-control states.** P2 · Static finding · DONE.
 Dependencies: RD-016. [Clinic](UI_PACKAGE_CLINIC.md#rd-017).
 
-- [ ] Specify SearchButton, ResetButton and ToggleButton behavior under explicit
+- [x] Specify SearchButton, ResetButton and ToggleButton behavior under explicit
   WebKit generation while preserving the legacy default branch.
-- [ ] Apply approved semantic tokens to normal, hover, focus, pressed, selected,
+- [x] Apply approved semantic tokens to normal, hover, focus, pressed, selected,
   disabled, error and loading states as applicable.
-- [ ] Review a state matrix on desktop/mobile across both generations and modes;
+- [x] Review a state matrix on desktop/mobile across both generations and modes;
   record intentional visual changes and compatible host checks.
+
+```text
+Status: DONE
+Completed: 2026-09-21
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-017 contract;
+  controls.test.tsx first failed because the semantic action-state layer and
+  WebKit Toggle branch did not exist, then covers primary/secondary normal,
+  hover, press, focus, disabled, error and selected mappings plus the unchanged
+  legacy Toggle branch. Controls/ActionStateMatrix exposes catalog review states;
+  design-origin.spec.ts verifies the independently packed computed styles.
+GitNexus impact and staged detect_changes: SearchButtonRoot and ResetButtonRoot
+  have no indexed dependants; modeStyle has one direct file dependant and 29
+  imports within three levels, including Base compatibility paths, but no affected
+  execution flows. Controls has no dependants. All resolved symbols are LOW risk;
+  the fixture is unindexed and covered by its packed-consumer gates. The staged
+  scope audit is recorded in this stage commit.
+Commands (package directory unless noted): red/green focused controls test;
+  npm test; npm run typecheck; npm run lint; npm run build;
+  npm run build:storybook; npm run verify:package; from scb-next, the fresh
+  independent-consumer Playwright design-origin matrix and
+  npm run verify:dependency-isolation; from web/mfe-base-origin, focused
+  SearchButton/ResetButton/ToggleButton tests, typecheck and production build.
+Outcomes: 10 Vitest files/100 tests plus three generator tests passed with 97.04%
+  lines and 96.18% branches. Package, Storybook, packed consumer and Button-only
+  tree-shaking checks passed. Browser verification passed 16/16 across both
+  generations, modes and widths, exercising pointer hover/held press, keyboard
+  focus, error, loading/disabled and selection. Base's six focused tests,
+  typecheck/build and workspace MUI dependency isolation passed.
+Compatibility review and rollback target: legacy Search/Reset fixed colors and
+  Toggle gradients/transforms remain on the default branch. Only explicit WebKit
+  roots now resolve action states through scoped primary/secondary variables;
+  loading/accessibility behavior and component props are unchanged. Roll back the
+  generation branches and shared action map if hosts require the incomplete fixed
+  WebKit colors.
+Limitations / pre-existing failures / follow-up IDs: Storybook retains its chunk
+  warning; Base retains Vite config-loader advisories; the independent consumer
+  retains upstream module-directive and kebab-case CSS warnings. RD-029 owns that
+  historical baseline. RD-018 owns measured contrast and remaining focus cues.
+```
 
 ### RD-018
 
@@ -1067,3 +1108,5 @@ or committed evidence.
 | 2026-09-21 | RD-015 | IN PROGRESS → DONE | Complete 212-root per-generation/mode graph plus passing package, Storybook, packed-consumer and 16-case browser gates | Next: RD-016 |
 | 2026-09-21 | RD-016 | TODO → IN PROGRESS | GitNexus LOW risk: getWebkitOptions has three dependants/one module; newStyleTokens has none | Add one versioned authoring manifest and drift regressions |
 | 2026-09-21 | RD-016 | IN PROGRESS → DONE | Deterministic generated runtime source plus passing package, Storybook, packed-consumer and 16-case browser gates | Next: RD-017 |
+| 2026-09-21 | RD-017 | TODO → IN PROGRESS | GitNexus LOW risk: Search/Reset roots have no dependants; modeStyle reaches 29 imports and no flows | Add generation-aware semantic state mappings and matrix regressions |
+| 2026-09-21 | RD-017 | IN PROGRESS → DONE | Passing package, Storybook, packed-consumer, 16-case browser, Base and dependency-isolation gates | Next: RD-018 |

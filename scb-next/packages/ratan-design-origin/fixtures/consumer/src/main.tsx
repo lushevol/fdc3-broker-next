@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import MenuItem from "@mui/material/MenuItem";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import {
   Button,
   Dialog,
@@ -9,10 +10,12 @@ import {
   Input,
   Label,
   LabelMenuItem,
+  ResetButton,
   SearchButton,
   SearchConditionContainer,
   SearchInput,
   Select,
+  ToggleButton,
   RatanDesignProvider,
 } from "ratan-design-origin";
 import type { DesignGeneration } from "ratan-design-origin/theme";
@@ -157,6 +160,28 @@ function App() {
               Import trades
             </LoadingButton>
             <SearchButton loading>Search trades</SearchButton>
+            <SearchButton data-testid="search-action">Search action</SearchButton>
+            <SearchButton data-testid="search-error" color="error">
+              Search error
+            </SearchButton>
+            <ResetButton data-testid="reset-action">Reset action</ResetButton>
+            <ResetButton data-testid="reset-error" color="error">
+              Reset error
+            </ResetButton>
+            <ResetButton data-testid="reset-disabled" disabled>
+              Reset disabled
+            </ResetButton>
+            <ToggleButtonGroup exclusive value="selected" aria-label="Action view">
+              <ToggleButton data-testid="toggle-selected" value="selected">
+                Selected view
+              </ToggleButton>
+              <ToggleButton data-testid="toggle-action" value="available">
+                Available view
+              </ToggleButton>
+              <ToggleButton value="disabled" disabled>
+                Disabled view
+              </ToggleButton>
+            </ToggleButtonGroup>
             <Button onClick={() => setLoading(false)}>Cancel</Button>
             <Button disabled>Approve</Button>
           </div>

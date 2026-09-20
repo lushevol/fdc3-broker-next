@@ -79,9 +79,37 @@ function Controls() {
   );
 }
 
+function ActionStates() {
+  return (
+    <div style={{ padding: 24, display: "grid", gap: 16 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <SearchButton>Search</SearchButton>
+        <SearchButton color="error">Search error</SearchButton>
+        <SearchButton disabled>Search disabled</SearchButton>
+        <SearchButton loading>Search loading</SearchButton>
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <ResetButton>Reset</ResetButton>
+        <ResetButton color="error">Reset error</ResetButton>
+        <ResetButton disabled>Reset disabled</ResetButton>
+      </div>
+      <ToggleButtonGroup exclusive value="selected">
+        <ToggleButton value="selected">Selected</ToggleButton>
+        <ToggleButton value="available">Available</ToggleButton>
+        <ToggleButton value="disabled" disabled>
+          Disabled
+        </ToggleButton>
+      </ToggleButtonGroup>
+    </div>
+  );
+}
+
 const meta: Meta<typeof Controls> = {
   title: "Controls/States",
   component: Controls,
 };
 export default meta;
 export const States: StoryObj<typeof Controls> = {};
+export const ActionStateMatrix: StoryObj<typeof Controls> = {
+  render: () => <ActionStates />,
+};

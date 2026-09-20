@@ -4,6 +4,11 @@ import MuiToggleButton, {
 } from "@mui/material/ToggleButton";
 import type { PaletteMode } from "@mui/material";
 import { darken, styled, type Theme } from "@mui/material/styles";
+import {
+  getWebkitActionState,
+  getWebkitActionStyle,
+} from "./action-style.js";
+import type { DesignGeneration } from "./theme/index.js";
 
 export interface ToggleButtonProps extends MuiToggleButtonProps {}
 
@@ -25,7 +30,29 @@ const selectedStyle = {
   zIndex: 1,
 };
 
-export const modeStyle = (theme: Theme, mode: PaletteMode) => {
+export const modeStyle = (
+  theme: Theme,
+  mode: PaletteMode,
+  generation: DesignGeneration = theme.ratan?.designGeneration ?? "legacy"
+) => {
+  if (generation === "webkit") {
+    const webkit = getWebkitActionStyle("secondary", false);
+    const disabled = getWebkitActionState("secondary", "disabled");
+    return {
+      ...webkit,
+      "&.MuiButtonBase-root": {
+        ...webkit["&.MuiButtonBase-root"],
+        ...defaultStyle(theme),
+      },
+      "&.Mui-selected": {
+        ...getWebkitActionState("secondary", "select"),
+        ...selectedStyle,
+        "&:hover": getWebkitActionState("secondary", "select"),
+        "&:active": getWebkitActionState("secondary", "press"),
+        "&.Mui-disabled": { ...disabled, opacity: 1 },
+      },
+    };
+  }
   if (mode === "dark") {
     return {
       color: "rgba(141, 141, 141, 1)",
@@ -68,7 +95,7 @@ export const modeStyle = (theme: Theme, mode: PaletteMode) => {
 };
 
 const ToggleButtonRoot = styled(MuiToggleButton)(({ theme }) =>
-  modeStyle(theme, theme.palette.mode)
+  modeStyle(theme, theme.palette.mode, theme.ratan?.designGeneration)
 );
 
 export const ToggleButton = /*#__PURE__*/ React.forwardRef<
