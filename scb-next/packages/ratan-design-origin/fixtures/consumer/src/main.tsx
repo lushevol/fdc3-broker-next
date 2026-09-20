@@ -254,6 +254,8 @@ function App() {
             style={{
               color: newStyleTokens.color.text,
               background: newStyleTokens.color.surface,
+              fontSize: newStyleTokens.typography.fontSize,
+              boxShadow: newStyleTokens.shadow.focus,
             }}
           >
             Payment review

@@ -51,13 +51,21 @@ for (const width of [390, 1280]) {
             const styles = getComputedStyle(element);
             return {
               buttonWidth: styles.getPropertyValue('--sc-button-width').trim(),
+              fontSize: styles.getPropertyValue('--sc-font-size').trim(),
               mode: styles.getPropertyValue('--sc-mode').trim(),
             };
           });
           expect(responsiveTokens).toEqual({
             buttonWidth: width === 390 ? '100%' : '',
+            fontSize: '1rem',
             mode,
           });
+          const tokenSurface = page.getByText('Payment review');
+          await expect(tokenSurface).toHaveCSS('font-size', '16px');
+          await expect(tokenSurface).toHaveCSS(
+            'box-shadow',
+            mode === 'dark' ? /rgb\(2, 57, 117\)/ : /rgb\(129, 185, 244\)/,
+          );
           expect(
             await page.evaluate(() =>
               document.fonts.load('12px "Inter"').then((fonts) => fonts.length),

@@ -17,6 +17,31 @@ const sources = [
   "ScDarkMode.css",
 ];
 const output = postcss.root();
+// ScStyleguide's unmodified root uses var(--sc-font-size, 1rem).
+output.append(
+  postcss
+    .rule({ selector: ".ratan-design-root[data-generation=\"webkit\"]" })
+    .append(postcss.decl({ prop: "--sc-font-size", value: "1rem" }))
+);
+// ScDarkMode omits the light mode's exported data-grid focus shadow.
+output.append(
+  postcss
+    .rule({
+      selector:
+        ".ratan-design-root[data-generation=\"webkit\"][data-mode=\"dark\"]",
+    })
+    .append(
+      postcss.decl({
+        prop: "--sc-data-grid-cell-focus-shadow-color",
+        value: "var(--sc-color-blue-250-dark)",
+      }),
+      postcss.decl({
+        prop: "--sc-data-grid-cell-focus-shadow",
+        value:
+          "0px 0px 0px 2px var(--sc-data-grid-cell-focus-shadow-color)",
+      })
+    )
+);
 const hashes = {};
 const fontFiles = new Set();
 

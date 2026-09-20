@@ -762,6 +762,24 @@ the remaining inventory classification, and release governance remain open.
   to `100%` below the canonical 680px breakpoint and is undefined above it for
   both light and dark WebKit roots; `--sc-mode` continues to match the root mode.
 
+### RD-015 specification: resolvable public token graph
+
+- The scoped WebKit root defines `--sc-font-size: 1rem`, matching the canonical
+  `var(--sc-font-size, 1rem)` default. This resolves
+  `newStyleTokens.typography.fontSize` and the generated `--font-size-l/m/s`
+  compatibility aliases without changing legacy-generation values.
+- Dark WebKit roots define the canonical light focus-shadow formula with
+  `--sc-color-blue-250-dark`, resolving the exported focus shadow and the modal
+  and popover compatibility aliases that depend on it.
+- Every exported WebKit token reference and generated compatibility alias is a
+  root in each applicable generation/mode custom-property graph. Verification
+  follows transitive `var(...)` references and fails on a missing definition or
+  a reference cycle; negative fixtures prove both failure modes.
+- The independently installed consumer applies the public typography token to
+  its WebKit token surface. The custom property computes to `1rem` and the
+  rendered surface to `16px` with the mode-appropriate focus shadow at
+  narrow/wide widths in light/dark modes.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

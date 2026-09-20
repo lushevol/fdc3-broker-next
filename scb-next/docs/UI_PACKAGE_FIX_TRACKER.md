@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 14/30 DONE. Next: RD-015.** The clinic contains the review evidence
+**Progress: 15/30 DONE. Next: RD-016.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -39,7 +39,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-012](#rd-012) | SearchButton loadingPosition | P1 | 1 | DONE |
 | [RD-013](#rd-013) | Builder close requests | P2 | 1 | DONE |
 | [RD-014](#rd-014) | Responsive token conditions | P1 | 2 | DONE |
-| [RD-015](#rd-015) | Unresolved font-size token | P1 | 2 | TODO |
+| [RD-015](#rd-015) | Unresolved font-size token | P1 | 2 | DONE |
 | [RD-016](#rd-016) | Canonical token source | P2 | 2 | TODO |
 | [RD-017](#rd-017) | WebKit action states | P2 | 2 | TODO |
 | [RD-018](#rd-018) | Contrast and focus cues | P1 | 2 | TODO |
@@ -738,15 +738,56 @@ Limitations / pre-existing failures / follow-up IDs: Storybook retains its
 
 ### RD-015
 
-**Resolve the public font-size token.** P1 · Static finding · TODO.
+**Resolve the public font-size token.** P1 · Static finding · DONE.
 Dependencies: RD-014. [Clinic](UI_PACKAGE_CLINIC.md#rd-015).
 
-- [ ] Map the published font-size reference to an approved defined token or emit
+- [x] Map the published font-size reference to an approved defined token or emit
   its canonical definition; document any intended fallback.
-- [ ] Validate every public token reference and alias chain against packaged CSS,
+- [x] Validate every public token reference and alias chain against packaged CSS,
   detecting missing definitions and cycles rather than checking only this token.
-- [ ] Verify computed font sizing from the packed stylesheet in the consumer
+- [x] Verify computed font sizing from the packed stylesheet in the consumer
   fixture and affected catalog controls.
+
+```text
+Status: DONE
+Completed: 2026-09-21
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-015 contract;
+  generate-webkit-assets.test.mjs first reproduced --sc-font-size as the sole
+  globally missing node, then exposed the omitted dark focus-shadow chain through
+  per-generation/per-mode validation. Explicit missing/cycle fixtures remain;
+  all 31 exported WebKit references and 181 generated aliases are validated;
+  design-origin.spec.ts verifies the packed consumer token and rendered surface.
+GitNexus impact and staged detect_changes: generator output and newStyleTokens
+  have no indexed dependants/flows; the browser spec has one direct docs
+  dependant and no flows. All indexed targets are LOW risk. The consumer fixture
+  is not indexed; its packed-consumer build/browser gates provide direct evidence.
+  The staged scope audit is recorded in this stage commit.
+Commands (working directory scb-next/packages/ratan-design-origin unless noted):
+  red/green npm run test:tokens; npm test; npm run typecheck; npm run lint;
+  npm run build; npm run build:storybook; npm run verify:package; repeated
+  npm run tokens:generate with SHA-1 comparison; from scb-next, the independent
+  tarball-consumer Playwright design-origin matrix.
+Outcomes: 10 Vitest files/96 tests plus three generator tests passed with 98.21%
+  lines and 96.58% branches; the 212-root token graph has no missing definitions
+  or cycles. Package, Storybook and independent tarball checks passed. Repeated
+  generation produced styles.css 8e22e0d1bd35a3c78a2685041df9280146cf13a5
+  and unchanged provenance 6fcf7abc309d8e8eec69fd86e920360c3958aa96.
+  Browser verification passed 16/16: WebKit roots expose --sc-font-size: 1rem and
+  the public-token consumer surface computes to 16px plus the appropriate light
+  or dark focus shadow at narrow/wide widths.
+Compatibility review and rollback target: WebKit's existing root fallback is now
+  an explicit scoped variable, resolving newStyleTokens.typography.fontSize and
+  the three legacy-name size aliases without changing legacy-generation values.
+  The missing dark focus shadow now mirrors the canonical light formula with the
+  dark blue counterpart. Roll back if a host deliberately distinguishes an
+  undefined token from either scoped fallback.
+Limitations / pre-existing failures / follow-up IDs: Storybook retains its
+  existing chunk-size warning; the independent Vite consumer retains upstream
+  module-directive warnings and the existing kebab-case CSS warning. RD-029 owns
+  the broader historical warning baseline. RD-016 owns canonical source unification.
+```
 
 ### RD-016
 
@@ -984,3 +1025,5 @@ or committed evidence.
 | 2026-09-21 | RD-013 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-014 |
 | 2026-09-21 | RD-014 | TODO → IN PROGRESS | GitNexus LOW risk: generator source list has no dependants/flows; browser spec one direct docs dependant, no flows | Preserve conditional ancestry and add generator/browser regressions |
 | 2026-09-21 | RD-014 | IN PROGRESS → DONE | Deterministic assets and passing package, Storybook, packed-consumer and 16-case browser gates | Next: RD-015 |
+| 2026-09-21 | RD-015 | TODO → IN PROGRESS | GitNexus LOW risk for generator output, public token object and browser spec; consumer fixture not indexed | Resolve the canonical fallback and add graph/browser regressions |
+| 2026-09-21 | RD-015 | IN PROGRESS → DONE | Complete 212-root per-generation/mode graph plus passing package, Storybook, packed-consumer and 16-case browser gates | Next: RD-016 |

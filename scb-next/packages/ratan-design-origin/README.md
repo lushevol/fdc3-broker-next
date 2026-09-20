@@ -28,6 +28,11 @@ aliases, canonical WebKit variables and fonts. Keyboard-focused actions show a
 The WebKit generation maps MUI controls to the SC GDS palette, SC Prosper Sans,
 spacing, radii, button states and form-control states. Legacy keeps its existing
 Poppins typography and compact visual baseline during migration.
+WebKit's public `newStyleTokens.typography.fontSize` resolves through the scoped
+`--sc-font-size: 1rem` canonical default; generated compatibility aliases are
+checked transitively per generation/mode for missing custom-property definitions
+and cycles. Dark WebKit roots supplement the omitted canonical data-grid focus
+shadow with the same formula and the dark blue token counterpart.
 
 ## Imports
 
