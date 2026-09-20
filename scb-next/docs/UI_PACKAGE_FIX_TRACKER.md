@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 11/30 DONE. Next: RD-012.** The clinic contains the review evidence
+**Progress: 12/30 DONE. Next: RD-013.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -36,7 +36,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-009](#rd-009) | Builder instance IDs | P1 | 1 | DONE |
 | [RD-010](#rd-010) | Shared field state | P1 | 1 | DONE |
 | [RD-011](#rd-011) | Supported sx composition | P1 | 1 | DONE |
-| [RD-012](#rd-012) | SearchButton loadingPosition | P1 | 1 | TODO |
+| [RD-012](#rd-012) | SearchButton loadingPosition | P1 | 1 | DONE |
 | [RD-013](#rd-013) | Builder close requests | P2 | 1 | TODO |
 | [RD-014](#rd-014) | Responsive token conditions | P1 | 2 | TODO |
 | [RD-015](#rd-015) | Unresolved font-size token | P1 | 2 | TODO |
@@ -606,14 +606,44 @@ Limitations / pre-existing failures / follow-up IDs: Storybook retains its
 
 ### RD-012
 
-**Honor SearchButton's advertised loadingPosition.** P1 · Confirmed · TODO.
+**Honor SearchButton's advertised loadingPosition.** P1 · Confirmed · DONE.
 Dependencies: RD-006. [Clinic](UI_PACKAGE_CLINIC.md#rd-012).
 
-- [ ] Decide whether to support the advertised positions through shared loading
+- [x] Decide whether to support the advertised positions through shared loading
   behavior or narrow/deprecate the interface with explicit compatibility review.
-- [ ] Test each supported position and busy/name semantics; prevent unsupported
+- [x] Test each supported position and busy/name semantics; prevent unsupported
   props from leaking to the DOM.
-- [ ] Verify existing SearchButton consumers, declarations and visual states.
+- [x] Verify existing SearchButton consumers, declarations and visual states.
+
+```text
+Status: DONE
+Completed: 2026-09-20
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-012 contract;
+  loading-compatibility.test.tsx covers SearchButton inline/startIcon loading,
+  caller icon replacement/restoration, action name, busy/disabled semantics,
+  spinner decoration and the absence of a leaked loadingposition attribute.
+GitNexus impact and staged detect_changes: SearchButton LOW (one direct
+  dependant) and SearchButtonProps LOW (two direct type dependants); neither
+  affects an execution flow. The staged scope audit is recorded in this commit.
+Commands (working directory scb-next): focused/full package tests, typecheck,
+  lint, build and verify:package; Storybook and dependency-isolation checks;
+  Base SearchButton focused test, typecheck/build; Base-host Playwright journey.
+Outcomes: 10 package test files/94 tests passed with 98.20% lines and 96.58%
+  branches; package, catalog and isolated-dependency checks passed; Base passed
+  one focused test file/2 tests plus typecheck/build; the host journey passed 1/1
+  at http://127.0.0.1:8001 with required remotes running.
+Compatibility review and rollback target: inline SearchButton spacing and caller
+  start icons remain unchanged; startIcon loading now follows LoadingButton's
+  established replace-and-restore behavior. Default exports, props and 14px/host
+  16px sizing remain compatible. Roll back if a host relies on the prior invalid
+  DOM prop or seeing its start icon beside a startIcon-position spinner.
+Limitations / pre-existing failures / follow-up IDs: Storybook retains its
+  existing chunk-size warning; Base retains its Vite config-loader advisory. The
+  host journey retains unrelated federation, kebab-case CSS and uncontrolled-input
+  warnings. RD-029 owns the broader historical warning baseline.
+```
 
 ### RD-013
 
@@ -882,3 +912,5 @@ or committed evidence.
 | 2026-09-20 | RD-010 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-011 |
 | 2026-09-20 | RD-011 | TODO → IN PROGRESS | GitNexus LOW risk: SearchInput, DatePicker and DateRangePicker have three direct dependants each; no processes | Specify sx precedence and add public style regressions |
 | 2026-09-20 | RD-011 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-012 |
+| 2026-09-20 | RD-012 | TODO → IN PROGRESS | GitNexus LOW risk: SearchButton one direct dependant; props two type dependants; no processes | Specify supported loading positions and add public regressions |
+| 2026-09-20 | RD-012 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-013 |

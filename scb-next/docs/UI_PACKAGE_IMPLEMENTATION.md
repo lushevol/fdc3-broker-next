@@ -721,6 +721,19 @@ the remaining inventory classification, and release governance remain open.
   does not evaluate callbacks or object-spread any `sx` value. No caller style is
   silently discarded.
 
+### RD-012 specification: SearchButton loading positions
+
+- SearchButton supports the existing `LoadingButtonProps` positions: `inline`
+  remains the default, preserving its inline decorative spinner and layout
+  placeholders; `startIcon` replaces the caller's start icon with the decorative
+  spinner only while loading and restores that icon while idle.
+- Every loading position keeps the action's accessible name, disables activation,
+  and sets `aria-busy=true`. The progress indicator remains `aria-hidden` so it
+  does not create a duplicate announcement.
+- `loadingPosition` is consumed by SearchButton and never forwarded to its MUI
+  button DOM. Unknown positions are not part of the public type; no widening or
+  compatibility alias is introduced.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

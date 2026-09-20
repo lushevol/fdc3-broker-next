@@ -59,6 +59,8 @@ remain authoritative. LoadingButton
 retains the label and disables the action while loading (default spinner 14px).
 `loadingPosition="startIcon"` replaces the caller's start icon while loading
 and restores it when idle; consumer adapters retain their 16px default.
+SearchButton supports the same `inline` default and `startIcon` loading positions
+and consumes the prop internally, so it never reaches the button DOM.
 `Spinner`/`SpinnerProps` expose the existing MUI circular progress primitive.
 SearchInput composes Input with search and clear adornments. SearchButton,
 ResetButton, ToggleButton and Label preserve the existing Base contracts while

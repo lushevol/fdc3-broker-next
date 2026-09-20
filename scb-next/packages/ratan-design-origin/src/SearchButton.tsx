@@ -28,11 +28,33 @@ export const SearchButton = /*#__PURE__*/ React.forwardRef<
   HTMLButtonElement,
   SearchButtonProps
 >(function SearchButton(
-  { loading, children, loadingSize = 14, ...props },
+  {
+    loading,
+    children,
+    loadingSize = 14,
+    loadingPosition = "inline",
+    startIcon,
+    ...props
+  },
   ref
 ) {
+  if (loadingPosition === "startIcon") {
+    return (
+      <SearchButtonRoot
+        {...props}
+        ref={ref}
+        disabled={props.disabled || loading}
+        aria-busy={loading || undefined}
+        startIcon={
+          loading ? <CircularProgress aria-hidden="true" size={loadingSize} /> : startIcon
+        }
+      >
+        {children}
+      </SearchButtonRoot>
+    );
+  }
   return loading ? (
-    <SearchButtonRoot {...props} ref={ref} disabled aria-busy>
+    <SearchButtonRoot {...props} ref={ref} startIcon={startIcon} disabled aria-busy>
       <CircularProgress
         aria-hidden="true"
         color="inherit"
@@ -42,7 +64,7 @@ export const SearchButton = /*#__PURE__*/ React.forwardRef<
       {children}
     </SearchButtonRoot>
   ) : (
-    <SearchButtonRoot {...props} ref={ref}>
+    <SearchButtonRoot {...props} ref={ref} startIcon={startIcon}>
       <span style={{ width: loadingSize }} />
       {children}
       <span style={{ width: loadingSize }} />
