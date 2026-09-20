@@ -352,6 +352,26 @@ describe("standalone controls", () => {
     ).toBeEnabled();
   });
 
+  it("composes SearchInput default padding with caller object, callback and array sx", () => {
+    render(
+      <ThemeProvider theme={createTheme()}>
+        <SearchInput
+          label="Find trade"
+          variant="outlined"
+          handleClear={vi.fn()}
+          sx={[
+            { width: "120px" },
+            false,
+            (theme) => ({ width: theme.spacing(30) }),
+          ]}
+        />
+      </ThemeProvider>
+    );
+    const input = screen.getByRole("textbox", { name: "Find trade" });
+    expect(input.closest(".MuiFormControl-root")).toHaveStyle({ width: "240px" });
+    expect(input.closest(".MuiInputBase-root")).toHaveStyle({ paddingRight: "8px" });
+  });
+
   it.each<{
     name: string;
     props: Partial<SearchInputProps>;

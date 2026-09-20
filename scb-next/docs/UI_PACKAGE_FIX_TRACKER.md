@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 10/30 DONE. Next: RD-011.** The clinic contains the review evidence
+**Progress: 11/30 DONE. Next: RD-012.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -35,7 +35,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-008](#rd-008) | Dialog title relationships | P1 | 1 | DONE |
 | [RD-009](#rd-009) | Builder instance IDs | P1 | 1 | DONE |
 | [RD-010](#rd-010) | Shared field state | P1 | 1 | DONE |
-| [RD-011](#rd-011) | Supported sx composition | P1 | 1 | TODO |
+| [RD-011](#rd-011) | Supported sx composition | P1 | 1 | DONE |
 | [RD-012](#rd-012) | SearchButton loadingPosition | P1 | 1 | TODO |
 | [RD-013](#rd-013) | Builder close requests | P2 | 1 | TODO |
 | [RD-014](#rd-014) | Responsive token conditions | P1 | 2 | TODO |
@@ -565,14 +565,44 @@ Limitations / pre-existing failures / follow-up IDs: Storybook retains its
 
 ### RD-011
 
-**Compose all supported sx forms.** P1 · Confirmed · TODO.
+**Compose all supported sx forms.** P1 · Confirmed · DONE.
 Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-011).
 
-- [ ] Document default-versus-caller precedence for SearchInput and date wrappers.
-- [ ] Preserve object, callback and array `SxProps` forms, including conditional
+- [x] Document default-versus-caller precedence for SearchInput and date wrappers.
+- [x] Preserve object, callback and array `SxProps` forms, including conditional
   array entries, without overwriting the caller's style.
-- [ ] Test resolved styles through public components and type-check representative
+- [x] Test resolved styles through public components and type-check representative
   consumer usage; verify package defaults still apply when no override is supplied.
+
+```text
+Status: DONE
+Completed: 2026-09-20
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-011 contract;
+  controls.test.tsx, dates.test.tsx and date-range.test.tsx cover object,
+  callback and conditional-array sx values through the public SearchInput,
+  community picker and Pro range APIs, including caller precedence and defaults.
+GitNexus impact and staged detect_changes: SearchInput, DatePicker and
+  DateRangePicker are each LOW risk with three direct dependants and no affected
+  execution flows. The staged scope audit is recorded in this stage commit.
+Commands (working directory scb-next): focused/full package tests, typecheck,
+  lint, build and verify:package; Storybook and dependency-isolation checks;
+  Base date/search focused tests, typecheck/build; Base-host Playwright journey.
+Outcomes: 10 package test files/92 tests passed with 98.18% lines and 96.51%
+  branches; package, catalog and isolated-dependency checks passed; Base passed
+  four focused test files/9 tests plus typecheck/build; the host journey passed
+  1/1 at http://127.0.0.1:8001 with required remotes running.
+Compatibility review and rollback target: SearchInput retains its 8px padding
+  default while callers override it with normal sx order; dates retain caller
+  style source order and hidden's existing forced display behavior; DateRange
+  retains its fixed single-input slot. Roll back if a host depends on invalid
+  object-spread treatment of callback or array sx values.
+Limitations / pre-existing failures / follow-up IDs: Storybook retains its
+  existing chunk-size warning; Base retains its Vite config-loader advisory. The
+  host journey retains unrelated federation, kebab-case CSS and uncontrolled-input
+  warnings. RD-029 owns the broader historical warning baseline.
+```
 
 ### RD-012
 
@@ -850,3 +880,5 @@ or committed evidence.
 | 2026-09-20 | RD-009 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-010 |
 | 2026-09-20 | RD-010 | TODO → IN PROGRESS | GitNexus LOW risk: Input four direct dependants; Select two; no processes | Specify shared state precedence and add public state regressions |
 | 2026-09-20 | RD-010 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-011 |
+| 2026-09-20 | RD-011 | TODO → IN PROGRESS | GitNexus LOW risk: SearchInput, DatePicker and DateRangePicker have three direct dependants each; no processes | Specify sx precedence and add public style regressions |
+| 2026-09-20 | RD-011 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-012 |

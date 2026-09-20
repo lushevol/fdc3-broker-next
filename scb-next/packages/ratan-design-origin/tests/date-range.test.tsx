@@ -39,6 +39,23 @@ describe("public Pro date range integration", () => {
     });
     expect(screen.getByText("Inclusive dates")).toBeInTheDocument();
   });
+  it("composes object, callback and conditional-array sx while retaining the single field", () => {
+    render(
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DateRangePicker
+          label="Sx period"
+          sx={[
+            { width: "120px" },
+            false,
+            (theme) => ({ width: theme.spacing(30) }),
+          ]}
+        />
+      </LocalizationProvider>
+    );
+    const field = screen.getByRole("textbox", { name: "Sx period" });
+    expect(screen.getAllByRole("textbox")).toHaveLength(1);
+    expect(field.closest(".MuiFormControl-root")).toHaveStyle({ width: "240px" });
+  });
   it("preserves an empty controlled range without invalid-date errors", () => {
     const error = vi.fn();
     render(

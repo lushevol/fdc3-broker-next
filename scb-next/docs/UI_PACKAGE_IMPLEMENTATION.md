@@ -706,6 +706,21 @@ the remaining inventory classification, and release governance remain open.
   associated with that resolved field state. No new state API or host migration is
   required.
 
+### RD-011 specification: supported `sx` composition
+
+- SearchInput prepends its required input-padding default and then applies every
+  caller `sx` item in source order. Consequently, a caller can override that
+  visual default while objects, callbacks, arrays and conditional array entries
+  retain their supported MUI semantics.
+- DatePicker, DateTimePicker and TimePicker preserve every caller `sx` form in
+  source order. Their `hidden` prop remains authoritative and is appended after
+  caller styles, preserving the established `display: none !important` behavior.
+  DateRangePicker follows the same rule while retaining its fixed single-input
+  field slot.
+- Internal composition flattens only the top-level supported `SxProps` array; it
+  does not evaluate callbacks or object-spread any `sx` value. No caller style is
+  silently discarded.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

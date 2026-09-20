@@ -74,6 +74,9 @@ The SearchInput clear button is named `Clear search` by default; set
 `clearButtonLabel` for localized or field-specific text. The clear action is
 disabled when the effective input is disabled or read-only, including through
 legacy `InputProps`/`inputProps` and modern `slotProps` spellings.
+SearchInput's default input padding precedes caller `sx`; callers may use MUI
+object, callback or conditional-array forms. Date and range wrappers preserve
+those forms too; date `hidden` remains the explicit final display override.
 SearchGrid, SearchCondition and SearchConditionContainer provide the composed
 search layout, dismissible criteria and collapsed/expanded criteria region. The
 collapsed region keeps its first visible row interactive while clipped rows are

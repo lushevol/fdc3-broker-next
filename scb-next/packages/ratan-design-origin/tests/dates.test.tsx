@@ -50,6 +50,27 @@ describe("public date integration", () => {
     }
   );
 
+  it.each([DatePicker, DateTimePicker, TimePicker])(
+    "composes object, callback and conditional-array sx for %p",
+    (Picker) => {
+      render(
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Picker
+            label="Sx composition"
+            value={null}
+            sx={[
+              { width: "120px" },
+              false,
+              (theme) => ({ width: theme.spacing(30) }),
+            ]}
+          />
+        </LocalizationProvider>
+      );
+      expect(screen.getByRole("textbox", { name: "Sx composition" })
+        .closest(".MuiFormControl-root")).toHaveStyle({ width: "240px" });
+    }
+  );
+
   it.each([
     {
       Picker: DatePicker,

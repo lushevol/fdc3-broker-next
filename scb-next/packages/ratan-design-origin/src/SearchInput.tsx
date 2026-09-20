@@ -3,6 +3,7 @@ import { Search as SearchIcon, Close as CloseIcon } from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import { Input, type InputProps } from "./Input.js";
+import { composeSx } from "./sx.js";
 
 const DEFAULT_CLEAR_BUTTON_LABEL = "Clear search";
 
@@ -15,6 +16,7 @@ export function SearchInput({
   slotProps,
   handleClear,
   clearButtonLabel = DEFAULT_CLEAR_BUTTON_LABEL,
+  sx,
   ...rest
 }: SearchInputProps) {
   const inputDisabled =
@@ -57,11 +59,7 @@ export function SearchInput({
         },
       }}
       {...rest}
-      sx={{
-        "& .MuiInputBase-root": {
-          paddingRight: "8px",
-        },
-      }}
+      sx={composeSx({ "& .MuiInputBase-root": { paddingRight: "8px" } }, sx)}
     />
   );
 }

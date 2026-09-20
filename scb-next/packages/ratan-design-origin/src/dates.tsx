@@ -14,6 +14,7 @@ import {
   type TimePickerProps as MuiTimePickerProps
 } from "@mui/x-date-pickers/TimePicker";
 import { datePickerClasses, datePickerStyle } from "./date-style.js";
+import { composeSx } from "./sx.js";
 
 export { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 export { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -47,7 +48,7 @@ export const DatePicker = /*#__PURE__*/ React.memo(function DatePicker({
         .join(" ")}
       value={value === undefined ? undefined : value === null ? null : dayjs(value)}
       slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
-      sx={{ ...sx, display: hidden ? "none!important" : undefined }}
+      sx={composeSx(sx, hidden ? { display: "none!important" } : undefined)}
       {...rest}
     />
   );
@@ -80,7 +81,7 @@ export const DateTimePicker = /*#__PURE__*/ React.memo(function DateTimePicker({
         .join(" ")}
       value={value === undefined ? undefined : value === null ? null : dayjs(value)}
       slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
-      sx={{ ...sx, display: hidden ? "none!important" : undefined }}
+      sx={composeSx(sx, hidden ? { display: "none!important" } : undefined)}
       {...rest}
     />
   );
@@ -113,7 +114,7 @@ export const TimePicker = /*#__PURE__*/ React.memo(function TimePicker({
         .join(" ")}
       value={value === undefined ? undefined : value === null ? null : dayjs(value)}
       slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
-      sx={{ ...sx, display: hidden ? "none!important" : undefined }}
+      sx={composeSx(sx, hidden ? { display: "none!important" } : undefined)}
       {...rest}
     />
   );
