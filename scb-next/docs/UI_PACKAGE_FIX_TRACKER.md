@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 8/30 DONE. Next: RD-009.** The clinic contains the review evidence
+**Progress: 9/30 DONE. Next: RD-010.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -33,7 +33,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-006](#rd-006) | Loading announcements | P1 | 1 | DONE |
 | [RD-007](#rd-007) | Collapsed criteria keyboard behavior | P1 | 1 | DONE |
 | [RD-008](#rd-008) | Dialog title relationships | P1 | 1 | DONE |
-| [RD-009](#rd-009) | Builder instance IDs | P1 | 1 | TODO |
+| [RD-009](#rd-009) | Builder instance IDs | P1 | 1 | DONE |
 | [RD-010](#rd-010) | Shared field state | P1 | 1 | TODO |
 | [RD-011](#rd-011) | Supported sx composition | P1 | 1 | TODO |
 | [RD-012](#rd-012) | SearchButton loadingPosition | P1 | 1 | TODO |
@@ -480,15 +480,47 @@ Limitations / pre-existing failures / follow-up IDs: a coverage-enabled focused
 
 ### RD-009
 
-**Namespace Builder tab/panel IDs per instance.** P1 · Confirmed · TODO.
+**Namespace Builder tab/panel IDs per instance.** P1 · Confirmed · DONE.
 Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-009).
 
-- [ ] Define a shared instance namespace for tab IDs, panel IDs and their ARIA
+- [x] Define a shared instance namespace for tab IDs, panel IDs and their ARIA
   relationships without requiring callers to coordinate global IDs.
-- [ ] Render two Builders together and verify unique IDs, correct relationships
+- [x] Render two Builders together and verify unique IDs, correct relationships
   and independent keyboard tab selection.
-- [ ] Verify inactive panels keep their established mounted state and values;
+- [x] Verify inactive panels keep their established mounted state and values;
   check SSR/hydration compatibility where the generated IDs are rendered.
+
+```text
+Status: DONE
+Completed: 2026-09-20
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-009 contract;
+  builder.test.tsx covers two concurrent Builder instances, namespaced ARIA
+  pairs, independent keyboard selection, retained inactive state, explicit caller
+  relationships and SSR/hydration of IDs rendered by BuilderButton.
+GitNexus impact and staged detect_changes: BuilderTabPanel LOW (three direct
+  dependants) and builderTabProps LOW (two direct dependants); neither affects
+  an execution flow. The staged scope audit is recorded in this stage commit.
+Commands (working directory scb-next): focused/full package tests, typecheck,
+  lint, build and verify:package; Storybook and dependency-isolation checks;
+  Base focused Builder test, typecheck/build; Base-host Playwright journey.
+Outcomes: 10 package test files/79 tests passed with 98.14% lines and 96.41%
+  branches; package, catalog and isolated-dependency checks passed; Base passed
+  one focused test file/2 tests plus typecheck/build; the host journey passed 1/1
+  at http://127.0.0.1:8001 with the required Ratan remote running.
+Compatibility review and rollback target: legacy helper IDs, explicit caller
+  IDs/relationships, controlled anchor/open ownership, package tab navigation and
+  mounted inactive panels remain supported. Roll back this stage if an adapter
+  depends on colliding static package tab/panel IDs across concurrent Builders.
+Limitations / pre-existing failures / follow-up IDs: MUI Popover portals do not
+  server-render tab/panel children; the runtime multi-instance regression covers
+  those relationships, while the hydration regression covers rendered trigger IDs
+  and reports no recoverable hydration errors. The focused coverage command runs
+  all-file thresholds and therefore exits nonzero despite 7/7 tests passing; the
+  full gate passes. The full dev launcher has an unrelated Alpha watcher EMFILE /
+  port-8086 conflict; the prerequisite frontend-only host setup passed.
+```
 
 ### RD-010
 
@@ -785,3 +817,5 @@ or committed evidence.
 | 2026-09-20 | RD-007 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-008 |
 | 2026-09-20 | RD-008 | TODO → IN PROGRESS | GitNexus MEDIUM risk: five direct dependants, one Scenarios module, no processes | Specify effective name/ID precedence and add dangling-reference regressions |
 | 2026-09-20 | RD-008 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-009 |
+| 2026-09-20 | RD-009 | TODO → IN PROGRESS | GitNexus LOW risk: BuilderTabPanel three direct dependants; builderTabProps two; no processes | Specify instance namespace and add multi-Builder regressions |
+| 2026-09-20 | RD-009 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-010 |

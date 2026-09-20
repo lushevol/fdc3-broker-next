@@ -674,6 +674,23 @@ the remaining inventory classification, and release governance remain open.
   dialogs, focus entry and portal rendering through the public package and Base
   adapter contracts. No dangling `aria-labelledby` token may remain.
 
+### RD-009 specification: Builder instance tab relationships
+
+- Each `BuilderButton` supplies its nested `BuilderTab` and `BuilderTabPanel`
+  components one stable React `useId` namespace. Generated tab IDs, panel IDs,
+  `aria-controls` and `aria-labelledby` use that shared namespace, so callers do
+  not coordinate global IDs and concurrent Builders cannot collide.
+- `builderTabProps(index)` retains its legacy `id`/`aria-controls` output for
+  consumers that use Material tabs directly. When used with package `BuilderTab`
+  inside a `BuilderButton`, its index metadata selects the Builder namespace;
+  manually supplied tab and panel ID/relationship props remain authoritative.
+- Panels remain mounted when inactive and keep their descendants' values. MUI
+  keyboard tab selection remains controlled by the caller's `value`/`onChange`.
+  React-generated namespaces must be stable for SSR hydration. MUI Popover
+  portals omit tab/panel children from server output, so hydration validation
+  covers the rendered Builder trigger relationship; the public runtime regression
+  separately verifies generated tab/panel relationships.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

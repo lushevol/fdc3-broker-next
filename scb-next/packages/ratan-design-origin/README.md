@@ -80,7 +80,12 @@ Callers own `anchorEl` and clear it from their actions to close; the legacy
 284x560px popover accepts `popOverWidth`/`popOverHeight` overrides. BuilderTabs,
 BuilderTab, BuilderTabPanel and `builderTabProps` retain MUI tab navigation and
 the existing mounted inactive-panel behavior. A provider scopes the popover
-inside its theme root. Trigger/popover IDs are stable across SSR hydration.
+inside its theme root. Each BuilderButton namespaces the nested package tab and
+panel IDs, so concurrent Builders have isolated ARIA relationships without
+caller-managed IDs. Existing `builderTabProps` IDs remain available for direct
+Material-tab use; explicitly supplied tab or panel relationships take precedence.
+Trigger/popover IDs are stable across SSR hydration. MUI's portal renders the
+tab/panel content on the client, where the same Builder namespace applies.
 
 Loader announces a loading status (default accessible name: "Loading...") and
 shows visible text only when supplied. `size` accepts a number or CSS dimension;

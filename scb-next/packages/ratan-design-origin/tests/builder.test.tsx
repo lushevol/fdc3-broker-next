@@ -1,6 +1,8 @@
 import React from "react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   BuilderButton,
   BuilderTab,
@@ -25,6 +27,32 @@ function Builder() {
       <BuilderTabPanel value={value} index={0}>Column settings</BuilderTabPanel>
       <BuilderTabPanel value={value} index={1}>Order settings</BuilderTabPanel>
       <button onClick={() => setAnchor(null)}>Apply settings</button>
+    </BuilderButton>
+  );
+}
+
+function NamespaceBuilder({
+  label,
+  initialAnchor = null,
+}: {
+  label: "Table" | "Filters";
+  initialAnchor?: HTMLButtonElement | null;
+}) {
+  const [anchor, setAnchor] = React.useState<HTMLButtonElement | null>(initialAnchor);
+  const [value, setValue] = React.useState(0);
+  return (
+    <BuilderButton label={label} anchorEl={anchor}
+      onClick={(event) => setAnchor(event.currentTarget)}>
+      <BuilderTabs value={value} onChange={(_event, next: number) => setValue(next)}
+        aria-label={`${label} builder tabs`} selectionFollowsFocus>
+        <BuilderTab label={`${label} columns`} {...builderTabProps(0)} />
+        <BuilderTab label={`${label} order`} {...builderTabProps(1)} />
+      </BuilderTabs>
+      <BuilderTabPanel value={value} index={0}>
+        <input aria-label={`${label} retained value`} defaultValue={`${label} value`} />
+      </BuilderTabPanel>
+      <BuilderTabPanel value={value} index={1}>{label} order settings</BuilderTabPanel>
+      <button onClick={() => setAnchor(null)}>Close {label} builder</button>
     </BuilderButton>
   );
 }
@@ -94,5 +122,95 @@ describe("public builder pattern", () => {
     expect(builderEmptyStyle()).toEqual({});
     unmount();
     anchor.remove();
+  });
+
+  it("namespaces tab relationships and keeps each Builder's keyboard state independent", async () => {
+    render(<RatanDesignProvider>
+      <NamespaceBuilder label="Table" />
+      <NamespaceBuilder label="Filters" />
+    </RatanDesignProvider>);
+
+    fireEvent.click(screen.getByRole("button", { name: "Table" }));
+    const tableColumns = screen.getByRole("tab", { name: "Table columns" });
+    const tableOrder = screen.getByRole("tab", { name: "Table order" });
+    const tablePanelId = tableColumns.getAttribute("aria-controls");
+    expect(tableColumns.getAttribute("id")).not.toBe("Builder-tab-0");
+    expect(document.getElementById(tablePanelId!)).toHaveAttribute(
+      "aria-labelledby", tableColumns.getAttribute("id")
+    );
+    tableColumns.focus();
+    fireEvent.keyDown(tableColumns, { key: "ArrowRight" });
+    expect(tableOrder).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByLabelText("Table retained value")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Close Table builder" }));
+    await waitFor(() => expect(screen.queryByLabelText("Table retained value")).not.toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: "Filters" }));
+    const filtersColumns = screen.getByRole("tab", { name: "Filters columns" });
+    const filtersOrder = screen.getByRole("tab", { name: "Filters order" });
+    expect(filtersColumns.getAttribute("id")).not.toBe(tableColumns.getAttribute("id"));
+    expect(filtersColumns.getAttribute("aria-controls")).not.toBe(tablePanelId);
+    expect(filtersColumns).toHaveAttribute("aria-selected", "true");
+    filtersColumns.focus();
+    fireEvent.keyDown(filtersColumns, { key: "ArrowRight" });
+    expect(filtersOrder).toHaveAttribute("aria-selected", "true");
+
+    fireEvent.click(screen.getByRole("button", { name: "Close Filters builder" }));
+    await waitFor(() => expect(screen.queryByText("Filters order settings")).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "Table" }));
+    expect(screen.getByRole("tab", { name: "Table order" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByLabelText("Table retained value")).toHaveValue("Table value");
+  });
+
+  it("preserves caller-defined tab and panel relationships", () => {
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const { unmount } = render(<RatanDesignProvider>
+      <BuilderButton label="Table" anchorEl={anchor}>
+        <BuilderTabs value={0} aria-label="Caller relationship tabs">
+          <BuilderTab label="Caller tab" {...builderTabProps(0)}
+            id="caller-tab" aria-controls="caller-panel" />
+        </BuilderTabs>
+        <BuilderTabPanel value={0} index={0} id="caller-panel" aria-labelledby="caller-tab">
+          Caller panel
+        </BuilderTabPanel>
+      </BuilderButton>
+    </RatanDesignProvider>);
+    const tab = screen.getByRole("tab", { name: "Caller tab", hidden: true });
+    const panel = screen.getByRole("tabpanel", { name: "Caller tab", hidden: true });
+    expect(tab).toHaveAttribute("id", "caller-tab");
+    expect(tab).toHaveAttribute("aria-controls", "caller-panel");
+    expect(panel).toHaveAttribute("id", "caller-panel");
+    expect(panel).toHaveAttribute("aria-labelledby", "caller-tab");
+    unmount();
+    anchor.remove();
+  });
+
+  it("keeps Builder tab relationships unique through server render and hydration", async () => {
+    const tableAnchor = document.createElement("button");
+    const filtersAnchor = document.createElement("button");
+    const builders = (
+      <RatanDesignProvider>
+        <NamespaceBuilder label="Table" initialAnchor={tableAnchor} />
+        <NamespaceBuilder label="Filters" initialAnchor={filtersAnchor} />
+      </RatanDesignProvider>
+    );
+    const html = renderToString(builders);
+    const serverPopoverIds = Array.from(html.matchAll(/aria-describedby="([^"]+)"/g))
+      .map((match) => match[1]);
+    expect(serverPopoverIds).toHaveLength(2);
+    expect(new Set(serverPopoverIds).size).toBe(2);
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    document.body.append(container);
+    const recoverableError = vi.fn();
+    const root = hydrateRoot(container, builders, { onRecoverableError: recoverableError });
+    await waitFor(() => expect(container.querySelectorAll('[data-testid="BuilderButton"]')).toHaveLength(2));
+    const hydratedPopoverIds = Array.from(container.querySelectorAll('[data-testid="BuilderButton"]'))
+      .map((button) => button.getAttribute("aria-describedby"));
+    expect(hydratedPopoverIds).toEqual(serverPopoverIds);
+    expect(recoverableError).not.toHaveBeenCalled();
+    root.unmount();
+    container.remove();
   });
 });
