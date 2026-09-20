@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 7/30 DONE. Next: RD-008.** The clinic contains the review evidence
+**Progress: 8/30 DONE. Next: RD-009.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -32,7 +32,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-005](#rd-005) | Label and native Select names | P1 | 1 | DONE |
 | [RD-006](#rd-006) | Loading announcements | P1 | 1 | DONE |
 | [RD-007](#rd-007) | Collapsed criteria keyboard behavior | P1 | 1 | DONE |
-| [RD-008](#rd-008) | Dialog title relationships | P1 | 1 | TODO |
+| [RD-008](#rd-008) | Dialog title relationships | P1 | 1 | DONE |
 | [RD-009](#rd-009) | Builder instance IDs | P1 | 1 | TODO |
 | [RD-010](#rd-010) | Shared field state | P1 | 1 | TODO |
 | [RD-011](#rd-011) | Supported sx composition | P1 | 1 | TODO |
@@ -435,15 +435,48 @@ Limitations / pre-existing failures / follow-up IDs: package builds retain MUI
 
 ### RD-008
 
-**Resolve Dialog title IDs once.** P1 · Confirmed · TODO.
+**Resolve Dialog title IDs once.** P1 · Confirmed · DONE.
 Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-008).
 
-- [ ] Define precedence for generated IDs, `titleProps.id`, custom headers,
+- [x] Define precedence for generated IDs, `titleProps.id`, custom headers,
   suppressed headers and explicitly supplied accessible names.
-- [ ] Verify every `aria-labelledby` resolves to the intended mounted title,
+- [x] Verify every `aria-labelledby` resolves to the intended mounted title,
   including multiple dialogs and custom IDs; avoid dangling references.
-- [ ] Run dialog public-contract tests and browser naming/focus checks in the
+- [x] Run dialog public-contract tests and browser naming/focus checks in the
   host portal configuration.
+
+```text
+Status: DONE
+Completed: 2026-09-20
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-008 contract;
+  dialog.test.tsx covers generated, explicit, custom, suppressed and PaperProps
+  names plus unique IDs; the packed-consumer fixture and design-origin.spec.ts
+  cover scoped-portal naming, focus entry and focus restoration.
+GitNexus impact and staged detect_changes: Dialog upstream impact MEDIUM: five
+  direct dependants, one Scenarios module and no affected execution flows.
+  Staged detect_changes found eight files/12 symbols, no affected processes and
+  LOW risk; the scope is limited to Dialog behavior, package/consumer coverage
+  and the accompanying contract documentation.
+Commands (working directory scb-next): package test, typecheck, lint, build,
+  Storybook build, verify:package and verify:dependency-isolation; Base focused
+  Dialog test, typecheck and build; packed-consumer and Base-host Playwright suites.
+Outcomes: 10 package test files/76 tests passed with 98.03% line and 96.5%
+  branch coverage; package, catalog and isolated-dependency checks passed; the
+  packed-consumer matrix passed 16/16 at 390px and 1280px across legacy/WebKit
+  and light/dark at http://127.0.0.1:8019; the Base host journey passed 1/1 at
+  http://127.0.0.1:8001.
+Compatibility review and rollback target: titleProps IDs, explicit caller names,
+  header suppression, custom headers, PaperProps names, Base's portal container,
+  close behavior and focus restoration remain supported. Roll back this stage if
+  a consumer depends on MUI's generated dangling relationship for an unnamed
+  custom or suppressed header.
+Limitations / pre-existing failures / follow-up IDs: a coverage-enabled focused
+  Base test fails its global 90% suite threshold despite the 5/5 contract tests
+  passing; the no-coverage focused command, Base typecheck/build and host journey
+  pass. Vite retains its existing config-loader warning. RD-009 is next.
+```
 
 ### RD-009
 
@@ -750,3 +783,5 @@ or committed evidence.
 | 2026-09-20 | RD-006 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-007 |
 | 2026-09-20 | RD-007 | TODO → IN PROGRESS | GitNexus LOW risk: one direct test dependant, no processes/modules | Specify first-row/inert behavior and add keyboard regressions |
 | 2026-09-20 | RD-007 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-008 |
+| 2026-09-20 | RD-008 | TODO → IN PROGRESS | GitNexus MEDIUM risk: five direct dependants, one Scenarios module, no processes | Specify effective name/ID precedence and add dangling-reference regressions |
+| 2026-09-20 | RD-008 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-009 |

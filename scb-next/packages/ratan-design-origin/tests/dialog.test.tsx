@@ -5,6 +5,122 @@ import { Dialog, RatanDesignProvider } from "../src";
 import { DialogTitle, DialogRoot, dialogClasses } from "../src/compatibility";
 
 describe("public dialog presentation", () => {
+  it("resolves mounted title IDs and explicit naming without dangling references", async () => {
+    const { rerender } = render(
+      <Dialog
+        open
+        disablePortal
+        titleComponents="Settlement details"
+        titleProps={{ id: "settlement-dialog-title" }}
+      >
+        Settlement content
+      </Dialog>
+    );
+    let dialog = await screen.findByRole("dialog", {
+      name: "Settlement details",
+      hidden: true,
+    });
+    expect(dialog).toHaveAttribute("aria-labelledby", "settlement-dialog-title");
+    expect(document.getElementById("settlement-dialog-title")).toHaveTextContent(
+      "Settlement details"
+    );
+
+    rerender(
+      <Dialog
+        open
+        disablePortal
+        header={<h2 id="custom-position-title">Position details</h2>}
+      >
+        Position content
+      </Dialog>
+    );
+    dialog = await screen.findByRole("dialog", {
+      name: "Position details",
+      hidden: true,
+    });
+    expect(dialog).toHaveAttribute("aria-labelledby", "custom-position-title");
+
+    rerender(
+      <Dialog open disablePortal header={<h2>Unidentified title</h2>}>
+        Unidentified content
+      </Dialog>
+    );
+    dialog = screen.getByRole("dialog", { hidden: true });
+    expect(dialog).not.toHaveAttribute("aria-labelledby");
+
+    rerender(
+      <Dialog
+        open
+        disablePortal
+        header={null}
+        titleComponents="Suppressed title"
+        aria-label="Manually named dialog"
+      >
+        Manual content
+      </Dialog>
+    );
+    dialog = await screen.findByRole("dialog", {
+      name: "Manually named dialog",
+      hidden: true,
+    });
+    expect(dialog).not.toHaveAttribute("aria-labelledby");
+    expect(dialog).toHaveAttribute("aria-label", "Manually named dialog");
+    expect(document.getElementById("settlement-dialog-title")).toBeNull();
+
+    rerender(
+      <Dialog
+        open
+        disablePortal
+        header={null}
+        PaperProps={{ "aria-label": "Paper-named dialog" }}
+      >
+        Paper-named content
+      </Dialog>
+    );
+    dialog = await screen.findByRole("dialog", {
+      name: "Paper-named dialog",
+      hidden: true,
+    });
+    expect(dialog).not.toHaveAttribute("aria-labelledby");
+
+    rerender(
+      <Dialog
+        open
+        disablePortal
+        titleComponents="Generated title"
+        aria-labelledby="caller-title"
+      >
+        <span id="caller-title">Caller title</span>
+      </Dialog>
+    );
+    dialog = await screen.findByRole("dialog", {
+      name: "Caller title",
+      hidden: true,
+    });
+    expect(dialog).toHaveAttribute("aria-labelledby", "caller-title");
+  });
+
+  it("generates unique relationships for multiple mounted dialogs", () => {
+    render(
+      <>
+        <Dialog open disablePortal titleComponents="First dialog">
+          First content
+        </Dialog>
+        <Dialog open disablePortal titleComponents="Second dialog">
+          Second content
+        </Dialog>
+      </>
+    );
+    const dialogs = Array.from(document.querySelectorAll('[role="dialog"]'));
+    const titleIds = dialogs.map((dialog) => dialog.getAttribute("aria-labelledby"));
+    expect(titleIds).toHaveLength(2);
+    expect(new Set(titleIds).size).toBe(2);
+    for (const titleId of titleIds) {
+      expect(titleId).not.toBeNull();
+      expect(document.getElementById(titleId!)).not.toBeNull();
+    }
+  });
+
   it("honors header suppression, disabled close, explicit containers and slot props", () => {
     const close = vi.fn();
     const host = document.createElement("div");

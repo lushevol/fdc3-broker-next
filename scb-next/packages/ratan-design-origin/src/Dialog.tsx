@@ -26,19 +26,40 @@ export interface DialogProps extends MuiDialogProps {
 export const Dialog = /*#__PURE__*/ React.forwardRef<HTMLDivElement, DialogProps>(function Dialog({
   titleComponents, actionComponents, header, surfaceChildren, onCloseButton, disabledClose,
   dividers, contentRef, titleProps, contentProps, actionProps,
-  RootComponent = MuiDialog, children, open, container, ...rest
+  RootComponent = MuiDialog, children, open, container, disablePortal,
+  "aria-label": callerAriaLabel, "aria-labelledby": callerAriaLabelledBy,
+  PaperProps: callerPaperProps, ...rest
 }, ref) {
-  const titleId = React.useId();
+  const generatedTitleId = React.useId();
   const theme = useTheme();
   const overlayContainer = React.useContext(OverlayContainerContext);
   const waitingForContainer = overlayContainer === null && container === undefined;
   const hasTitle = titleComponents !== undefined && titleComponents !== null;
+  const generatedHeader = header === undefined && hasTitle;
+  const customHeaderId =
+    header !== undefined && React.isValidElement(header) && typeof header.props.id === "string"
+      ? header.props.id
+      : undefined;
+  const paperAriaLabel = callerPaperProps?.["aria-label"];
+  const paperAriaLabelledBy = callerPaperProps?.["aria-labelledby"];
+  const effectiveAriaLabel = callerAriaLabel ?? paperAriaLabel;
+  const titleId = titleProps?.id ?? generatedTitleId;
+  const labelledBy = callerAriaLabelledBy
+    ?? paperAriaLabelledBy
+    ?? (effectiveAriaLabel === undefined && generatedHeader ? titleId : customHeaderId);
+  const paperProps = {
+    ...callerPaperProps,
+    "aria-label": effectiveAriaLabel,
+    "aria-labelledby": labelledBy,
+  };
   return <RootComponent open={open && !waitingForContainer}
     container={container ?? overlayContainer ?? theme.components?.MuiDialog?.defaultProps?.container}
-    aria-labelledby={hasTitle ? titleId : undefined} scroll="paper" {...rest} ref={ref}>
+    disablePortal={disablePortal} aria-labelledby={labelledBy} aria-label={callerAriaLabel}
+    PaperProps={paperProps} scroll="paper" {...rest} ref={ref}>
     {header !== undefined ? header : (hasTitle || onCloseButton) ?
-      <MuiDialogTitle id={titleId} component="div"
-        sx={{ display: "flex", alignItems: "center", gap: 1 }} {...titleProps}>
+      <MuiDialogTitle component="div"
+        sx={{ display: "flex", alignItems: "center", gap: 1 }} {...titleProps}
+        id={generatedHeader ? titleId : undefined}>
         <div style={{ flex: 1, minWidth: 0 }}>{titleComponents}</div>
         {onCloseButton && <IconButton aria-label="Close dialog" onClick={onCloseButton}
           disabled={disabledClose} size="small"><Close /></IconButton>}

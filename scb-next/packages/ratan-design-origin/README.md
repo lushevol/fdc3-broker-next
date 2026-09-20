@@ -98,6 +98,10 @@ overlay; an explicit `container` overrides that default. Hosts can replace or
 suppress `header`, supply `contentRef`, title/content/action props, and append
 `surfaceChildren` for interaction adornments. Hosts own sizing, maximize/resize,
 drag integration via PaperComponent, stacking, telemetry and workspace policy.
+The dialog references only a mounted generated or custom title. Explicit
+`aria-labelledby`/`aria-label` names and equivalent `PaperProps` names remain
+authoritative, so suppressed or unnamed custom headers leave no dangling label
+relationship.
 
 EmptyState accepts host-supplied `title`, `description`, `illustration` and
 `action`, plus wrapper/content Box props. ErrorFallback composes a title and

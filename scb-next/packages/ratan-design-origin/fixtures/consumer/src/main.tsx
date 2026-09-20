@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import MenuItem from "@mui/material/MenuItem";
 import {
   Button,
+  Dialog,
   LoadingOverlay,
   LoadingButton,
   Input,
@@ -31,6 +32,9 @@ function App() {
   const [overlayActionCount, setOverlayActionCount] = React.useState(0);
   const [criterionActionCount, setCriterionActionCount] = React.useState(0);
   const [criterionNote, setCriterionNote] = React.useState("");
+  const [dialogVariant, setDialogVariant] = React.useState<
+    "title" | "custom" | "manual" | null
+  >(null);
   return (
     <RatanDesignProvider mode={mode} designGeneration={generation}>
       <main>
@@ -187,6 +191,40 @@ function App() {
             />
           </SearchConditionContainer>
           <output aria-label="Criterion action count">{criterionActionCount}</output>
+        </section>
+        <section className="dialog-demo" aria-labelledby="dialog-demo-title">
+          <h2 id="dialog-demo-title">Dialog naming behavior</h2>
+          <div className="actions">
+            <Button onClick={() => setDialogVariant("title")}>Open titled dialog</Button>
+            <Button onClick={() => setDialogVariant("custom")}>Open custom dialog</Button>
+            <Button onClick={() => setDialogVariant("manual")}>Open manual dialog</Button>
+          </div>
+          <Dialog
+            open={dialogVariant === "title"}
+            titleComponents="Settlement details"
+            titleProps={{ id: "consumer-settlement-title" }}
+            onCloseButton={() => setDialogVariant(null)}
+          >
+            Settlement content
+          </Dialog>
+          <Dialog
+            open={dialogVariant === "custom"}
+            header={<h2 id="consumer-custom-title">Position details</h2>}
+            onClose={() => setDialogVariant(null)}
+          >
+            Position content
+          </Dialog>
+          <Dialog
+            open={dialogVariant === "manual"}
+            header={null}
+            titleComponents="Suppressed title"
+            aria-label="Manually named dialog"
+            onClose={(_event, reason) => {
+              if (reason === "escapeKeyDown") setDialogVariant(null);
+            }}
+          >
+            Manual content
+          </Dialog>
         </section>
         <section className="overlay-demo" aria-labelledby="overlay-demo-title">
           <h2 id="overlay-demo-title">Loading overlay behavior</h2>

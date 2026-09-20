@@ -657,6 +657,23 @@ the remaining inventory classification, and release governance remain open.
   including Tab/Shift+Tab, edit/close behavior, expand/collapse and retained child
   state. Preserve the 49px legacy collapsed height and host theme policy.
 
+### RD-008 specification: Dialog title relationships
+
+- Resolve the effective dialog name and title ID once. Explicit caller
+  `aria-labelledby` and `aria-label` props remain authoritative; an explicit
+  `aria-label` suppresses the package's implicit title relationship unless the
+  caller also explicitly supplies `aria-labelledby`. `PaperProps` names retain
+  their MUI behavior and are applied to the role-bearing dialog paper.
+- For the package-rendered header, `titleProps.id` is the effective title ID when
+  supplied; otherwise use one stable generated ID. The dialog references that ID
+  only when a non-null title is mounted. Multiple dialogs must receive unique IDs.
+- For a custom `header`, adopt its explicit `id` when it is a valid React element.
+  A custom header without an ID and `header={null}` produce no implicit
+  `aria-labelledby`; callers name those dialogs explicitly when needed.
+- Verify default/custom/suppressed headers, caller naming precedence, multiple
+  dialogs, focus entry and portal rendering through the public package and Base
+  adapter contracts. No dangling `aria-labelledby` token may remain.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

@@ -228,6 +228,31 @@ for (const width of [390, 1280]) {
   });
 }
 
+test('dialog names resolve to mounted headers in the scoped portal', async ({ page }) => {
+  await page.goto(consumerUrl!);
+
+  const titledTrigger = page.getByRole('button', { name: 'Open titled dialog' });
+  await titledTrigger.click();
+  let dialog = page.getByRole('dialog', { name: 'Settlement details' });
+  await expect(dialog).toHaveAttribute('aria-labelledby', 'consumer-settlement-title');
+  await expect(page.locator('#consumer-settlement-title')).toHaveText('Settlement details');
+  const close = page.getByRole('button', { name: 'Close dialog' });
+  await expect(dialog.locator('xpath=..')).toBeFocused();
+  await close.click();
+  await expect(titledTrigger).toBeFocused();
+
+  await page.getByRole('button', { name: 'Open custom dialog' }).click();
+  dialog = page.getByRole('dialog', { name: 'Position details' });
+  await expect(dialog).toHaveAttribute('aria-labelledby', 'consumer-custom-title');
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('button', { name: 'Open manual dialog' }).click();
+  dialog = page.getByRole('dialog', { name: 'Manually named dialog' });
+  await expect(dialog).not.toHaveAttribute('aria-labelledby');
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+});
+
 test('closed loading overlay releases its underlying action', async ({ page }) => {
   await page.goto(consumerUrl!);
   const target = page.getByRole('button', { name: 'Underlying overlay action' });
