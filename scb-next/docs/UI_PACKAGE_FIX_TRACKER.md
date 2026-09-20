@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 9/30 DONE. Next: RD-010.** The clinic contains the review evidence
+**Progress: 10/30 DONE. Next: RD-011.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -34,7 +34,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-007](#rd-007) | Collapsed criteria keyboard behavior | P1 | 1 | DONE |
 | [RD-008](#rd-008) | Dialog title relationships | P1 | 1 | DONE |
 | [RD-009](#rd-009) | Builder instance IDs | P1 | 1 | DONE |
-| [RD-010](#rd-010) | Shared field state | P1 | 1 | TODO |
+| [RD-010](#rd-010) | Shared field state | P1 | 1 | DONE |
 | [RD-011](#rd-011) | Supported sx composition | P1 | 1 | TODO |
 | [RD-012](#rd-012) | SearchButton loadingPosition | P1 | 1 | TODO |
 | [RD-013](#rd-013) | Builder close requests | P2 | 1 | TODO |
@@ -524,15 +524,44 @@ Limitations / pre-existing failures / follow-up IDs: MUI Popover portals do not
 
 ### RD-010
 
-**Propagate shared field state consistently.** P1 · Confirmed · TODO.
+**Propagate shared field state consistently.** P1 · Confirmed · DONE.
 Dependencies: none; coordinate with RD-005. [Clinic](UI_PACKAGE_CLINIC.md#rd-010).
 
-- [ ] Specify precedence and propagation for disabled, error and required state
+- [x] Specify precedence and propagation for disabled, error and required state
   across Input/Select, their FormControl, label and input elements.
-- [ ] Test the public combinations and state transitions rather than only the
+- [x] Test the public combinations and state transitions rather than only the
   underlying input attributes.
-- [ ] Verify label/control appearance and semantics in both modes and generations;
+- [x] Verify label/control appearance and semantics in both modes and generations;
   factor a small internal helper only if it makes these rules easier to maintain.
+
+```text
+Status: DONE
+Completed: 2026-09-20
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-010 contract;
+  controls.test.tsx covers effective Input disabled/required slot precedence,
+  error semantics, Input/Select state transitions and the FormControl/label/native
+  control state in legacy/WebKit plus light/dark combinations.
+GitNexus impact and staged detect_changes: Input LOW (four direct dependants) and
+  Select LOW (two direct dependants), with no affected execution flows. The staged
+  scope audit is recorded in this stage commit.
+Commands (working directory scb-next): focused/full package tests, typecheck,
+  lint, build and verify:package; Storybook and dependency-isolation checks;
+  Base Input/Select focused tests, typecheck/build; Base-host Playwright journey.
+Outcomes: 10 package test files/87 tests passed with 98.16% lines and 96.47%
+  branches; package, catalog and isolated-dependency checks passed; Base passed
+  three focused test files/11 tests plus typecheck/build; the host journey passed
+  1/1 at http://127.0.0.1:8001 with required remotes running.
+Compatibility review and rollback target: modern slot precedence over legacy
+  InputProps/inputProps remains intact, callers retain all non-state attributes,
+  generated Select labels/IDs and refs remain unchanged. Roll back this stage if
+  a consumer intentionally requires contradictory field-level and native state.
+Limitations / pre-existing failures / follow-up IDs: Storybook retains its
+  existing chunk-size warning; Base retains its Vite config-loader advisory. The
+  host journey retains unrelated federation, kebab-case CSS and uncontrolled-input
+  warnings. RD-029 owns the broader historical warning baseline.
+```
 
 ### RD-011
 
@@ -819,3 +848,5 @@ or committed evidence.
 | 2026-09-20 | RD-008 | IN PROGRESS → DONE | Item completion record and passing package, packed-consumer, Base and host gates | Next: RD-009 |
 | 2026-09-20 | RD-009 | TODO → IN PROGRESS | GitNexus LOW risk: BuilderTabPanel three direct dependants; builderTabProps two; no processes | Specify instance namespace and add multi-Builder regressions |
 | 2026-09-20 | RD-009 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-010 |
+| 2026-09-20 | RD-010 | TODO → IN PROGRESS | GitNexus LOW risk: Input four direct dependants; Select two; no processes | Specify shared state precedence and add public state regressions |
+| 2026-09-20 | RD-010 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-011 |

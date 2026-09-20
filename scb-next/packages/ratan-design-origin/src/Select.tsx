@@ -30,6 +30,9 @@ export const Select = /*#__PURE__*/ React.forwardRef<
     id,
     variant,
     size,
+    disabled,
+    error,
+    required,
     formControlClassName,
     ...props
   },
@@ -43,6 +46,9 @@ export const Select = /*#__PURE__*/ React.forwardRef<
       fullWidth
       size={size ?? "small"}
       variant={variant}
+      disabled={disabled}
+      error={error}
+      required={required}
       className={[
         labelPosition === "left" ? classes.left : "",
         formControlClassName,
@@ -58,6 +64,9 @@ export const Select = /*#__PURE__*/ React.forwardRef<
         ref={ref}
         id={resolvedId}
         labelId={resolvedLabelId}
+        disabled={disabled}
+        error={error}
+        required={required}
         IconComponent={props.IconComponent ?? KeyboardArrowDownIcon}
       />
     </SelectFormControl>

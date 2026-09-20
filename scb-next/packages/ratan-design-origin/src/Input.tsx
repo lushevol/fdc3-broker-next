@@ -27,7 +27,9 @@ export const Input = /*#__PURE__*/ React.forwardRef<HTMLDivElement, InputProps>(
     {
       labelPosition = "top",
       hidden,
-      disabled,
+      disabled: disabledProp,
+      error,
+      required: requiredProp,
       slotProps,
       InputProps,
       InputLabelProps,
@@ -40,10 +42,21 @@ export const Input = /*#__PURE__*/ React.forwardRef<HTMLDivElement, InputProps>(
     },
     ref
   ) {
+    const disabled =
+      slotProps?.input?.disabled ??
+      slotProps?.htmlInput?.disabled ??
+      InputProps?.disabled ??
+      inputProps?.disabled ??
+      disabledProp;
+    const required =
+      slotProps?.htmlInput?.required ?? inputProps?.required ?? requiredProp;
     return (
       <TextField
         {...rest}
         ref={ref}
+        disabled={disabled}
+        error={error}
+        required={required}
         className={[
           labelPosition.toLowerCase() === "left" ? classes.left : "",
           className,
@@ -55,8 +68,8 @@ export const Input = /*#__PURE__*/ React.forwardRef<HTMLDivElement, InputProps>(
           ...InputLabelProps,
           ...slotProps?.inputLabel,
         }}
-        InputProps={{ disabled, ...InputProps, ...slotProps?.input }}
-        inputProps={{ ...inputProps, ...slotProps?.htmlInput }}
+        InputProps={{ ...InputProps, ...slotProps?.input, disabled }}
+        inputProps={{ ...inputProps, ...slotProps?.htmlInput, disabled, required }}
         FormHelperTextProps={{
           ...FormHelperTextProps,
           ...slotProps?.formHelperText,

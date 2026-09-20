@@ -101,6 +101,87 @@ describe("standalone controls", () => {
     );
   });
 
+  it.each([
+    ["legacy", "light"],
+    ["legacy", "dark"],
+    ["webkit", "light"],
+    ["webkit", "dark"],
+  ] as const)("keeps Input field, label and native state aligned in %s %s mode", (designGeneration, mode) => {
+    const { rerender } = render(
+      <RatanDesignProvider designGeneration={designGeneration} mode={mode}>
+        <Input
+          label="Payment reference"
+          variant="outlined"
+          disabled
+          error
+          required
+          InputProps={{ disabled: false }}
+          inputProps={{ required: false }}
+          slotProps={{
+            input: { disabled: true },
+            htmlInput: { required: true },
+          }}
+        />
+      </RatanDesignProvider>
+    );
+    const input = screen.getByRole("textbox", { name: /payment reference/i });
+    const label = document.querySelector(`label[for="${input.id}"]`)!;
+    expect(input).toBeDisabled();
+    expect(input).toBeRequired();
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(label).toHaveClass("Mui-disabled", "Mui-error", "Mui-required");
+
+    rerender(
+      <RatanDesignProvider designGeneration={designGeneration} mode={mode}>
+        <Input
+          label="Payment reference"
+          variant="outlined"
+          disabled
+          InputProps={{ disabled: true }}
+          slotProps={{ input: { disabled: false } }}
+        />
+      </RatanDesignProvider>
+    );
+    expect(screen.getByRole("textbox", { name: /payment reference/i })).not.toBeDisabled();
+    expect(document.querySelector(`label[for="${input.id}"]`)).not.toHaveClass("Mui-disabled");
+  });
+
+  it.each([
+    ["legacy", "light"],
+    ["legacy", "dark"],
+    ["webkit", "light"],
+    ["webkit", "dark"],
+  ] as const)("propagates Select state to its field, label and control in %s %s mode", (designGeneration, mode) => {
+    const { rerender } = render(
+      <RatanDesignProvider designGeneration={designGeneration} mode={mode}>
+        <Select label="Settlement status" variant="outlined" disabled error required value="Pending">
+          <MenuItem value="Pending">Pending</MenuItem>
+        </Select>
+      </RatanDesignProvider>
+    );
+    const select = screen.getByRole("combobox", { name: /settlement status/i });
+    const formControl = select.closest(".MuiFormControl-root")!;
+    const label = formControl.querySelector("label")!;
+    const nativeInput = formControl.querySelector("input")!;
+    expect(select).toHaveAttribute("aria-disabled", "true");
+    expect(nativeInput).toBeDisabled();
+    expect(nativeInput).toBeRequired();
+    expect(nativeInput).toHaveAttribute("aria-invalid", "true");
+    expect(label).toHaveClass("Mui-disabled", "Mui-error", "Mui-required");
+
+    rerender(
+      <RatanDesignProvider designGeneration={designGeneration} mode={mode}>
+        <Select label="Settlement status" variant="outlined" value="Pending">
+          <MenuItem value="Pending">Pending</MenuItem>
+        </Select>
+      </RatanDesignProvider>
+    );
+    expect(screen.getByRole("combobox", { name: /settlement status/i })).not.toHaveAttribute(
+      "aria-disabled", "true"
+    );
+    expect(formControl.querySelector("label")).not.toHaveClass("Mui-disabled", "Mui-error", "Mui-required");
+  });
+
   it("generates unique label relationships for custom and native selects", () => {
     render(
       <>

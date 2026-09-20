@@ -47,7 +47,11 @@ Poppins typography and compact visual baseline during migration.
   extensions, document reset and grid override policy for existing hosts.
 
 Controls accept MUI 5 props. Input also translates Base's modern slot spelling
-to MUI 5, with slots taking precedence over legacy props. Button/LoadingButton
+to MUI 5, with slots taking precedence over legacy props. Its effective disabled
+and required values are shared by the TextField, label and native input; error is
+a field-level MUI state shared by the label and input. Select likewise propagates
+its disabled, error and required props through its FormControl, label and select
+surface. Button/LoadingButton
 forward button refs; Input forwards root and native input refs. Select forwards
 its root ref, generates a stable control ID when one is omitted, and associates
 its visible label with custom and native comboboxes; explicit `id` and `labelId`

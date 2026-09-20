@@ -691,6 +691,21 @@ the remaining inventory classification, and release governance remain open.
   covers the rendered Builder trigger relationship; the public runtime regression
   separately verifies generated tab/panel relationships.
 
+### RD-010 specification: shared field state
+
+- `Input` resolves `disabled` once, honoring its established modern slot
+  precedence over legacy `InputProps`/`inputProps` spellings and the root prop.
+  The resulting boolean is applied to the TextField/FormControl and native input,
+  so its label, control semantics and appearance cannot disagree. `required`
+  follows the same root/legacy/modern precedence through the native input props.
+- `error` remains a field-level Input prop and is applied to the TextField so MUI
+  propagates its semantics and styling to its label and input. Callers can still
+  add non-state attributes through existing legacy and modern slot props.
+- `Select` applies its public `disabled`, `error` and `required` props to both its
+  FormControl and Select surface. The generated or caller-supplied label remains
+  associated with that resolved field state. No new state API or host migration is
+  required.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,
