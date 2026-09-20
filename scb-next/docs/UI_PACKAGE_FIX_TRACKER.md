@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 12/30 DONE. Next: RD-013.** The clinic contains the review evidence
+**Progress: 13/30 DONE. Next: RD-014.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -37,7 +37,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-010](#rd-010) | Shared field state | P1 | 1 | DONE |
 | [RD-011](#rd-011) | Supported sx composition | P1 | 1 | DONE |
 | [RD-012](#rd-012) | SearchButton loadingPosition | P1 | 1 | DONE |
-| [RD-013](#rd-013) | Builder close requests | P2 | 1 | TODO |
+| [RD-013](#rd-013) | Builder close requests | P2 | 1 | DONE |
 | [RD-014](#rd-014) | Responsive token conditions | P1 | 2 | TODO |
 | [RD-015](#rd-015) | Unresolved font-size token | P1 | 2 | TODO |
 | [RD-016](#rd-016) | Canonical token source | P2 | 2 | TODO |
@@ -135,7 +135,7 @@ Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-001).
 
 ```text
 Status: DONE
-Completed: 2026-09-20
+Completed: 2026-09-21
 Owner: Codex
 Commit(s): fix(ratan-design): release closed loading overlays (this stage)
 Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-001 contract;
@@ -647,15 +647,44 @@ Limitations / pre-existing failures / follow-up IDs: Storybook retains its
 
 ### RD-013
 
-**Expose a Builder close-request callback.** P2 · Enhancement · TODO.
+**Expose a Builder close-request callback.** P2 · Enhancement · DONE.
 Dependencies: RD-009. [Clinic](UI_PACKAGE_CLINIC.md#rd-013).
 
-- [ ] Specify an optional callback with dismissal reasons for Escape and backdrop
+- [x] Specify an optional callback with dismissal reasons for Escape and backdrop
   interactions; retain host ownership of `anchorEl` and open state.
-- [ ] Test request delivery and controlled dismissal, including the existing
+- [x] Test request delivery and controlled dismissal, including the existing
   behavior when no callback is supplied.
-- [ ] Verify focus restoration and dismissal in host portals; document the
+- [x] Verify focus restoration and dismissal in host portals; document the
   compatible addition and retain mounted inactive panel behavior.
+
+```text
+Status: DONE
+Completed: 2026-09-20
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-013 contract;
+  builder.test.tsx covers Escape/backdrop close requests, controlled-open
+  retention with and without a callback, trigger ARIA state, mounted value and
+  trigger focus restoration after host-controlled dismissal.
+GitNexus impact and staged detect_changes: BuilderButton LOW with three direct
+  dependants and no affected execution flows. The staged scope audit is recorded
+  in this stage commit.
+Commands (working directory scb-next): focused/full package tests, typecheck,
+  lint, build and verify:package; Storybook and dependency-isolation checks;
+  Base Builder focused test, typecheck/build; Base-host Playwright journey.
+Outcomes: 10 package test files/96 tests passed with 98.21% lines and 96.58%
+  branches; package, catalog and isolated-dependency checks passed; Base passed
+  one focused test file/2 tests plus typecheck/build; the host journey passed 1/1
+  at http://127.0.0.1:8001 with required remotes running.
+Compatibility review and rollback target: anchor-controlled open state, action
+  closure, panel mounting/state, tab relationships and existing described-by IDs
+  remain intact. The callback is optional and additive. Roll back if a host needs
+  to suppress Popover dismissal requests while retaining MUI default behavior.
+Limitations / pre-existing failures / follow-up IDs: Storybook retains its
+  existing chunk-size warning; Base retains its Vite config-loader advisory. The
+  host journey retains unrelated federation, kebab-case CSS and uncontrolled-input
+  warnings. RD-029 owns the broader historical warning baseline.
+```
 
 ## Phase 2: Design consistency
 
@@ -914,3 +943,5 @@ or committed evidence.
 | 2026-09-20 | RD-011 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-012 |
 | 2026-09-20 | RD-012 | TODO → IN PROGRESS | GitNexus LOW risk: SearchButton one direct dependant; props two type dependants; no processes | Specify supported loading positions and add public regressions |
 | 2026-09-20 | RD-012 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-013 |
+| 2026-09-21 | RD-013 | TODO → IN PROGRESS | GitNexus LOW risk: BuilderButton three direct dependants; no processes | Specify controlled close requests and add public regressions |
+| 2026-09-21 | RD-013 | IN PROGRESS → DONE | Item completion record and passing package, dependency, Base and host gates | Next: RD-014 |

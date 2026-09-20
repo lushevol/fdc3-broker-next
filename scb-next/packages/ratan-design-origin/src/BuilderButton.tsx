@@ -89,6 +89,7 @@ export interface BuilderButtonProps extends ButtonProps {
   anchorEl: PopoverProps["anchorEl"];
   popOverWidth?: string;
   popOverHeight?: string;
+  onClose?: PopoverProps["onClose"];
 }
 
 const legacy = {
@@ -166,20 +167,23 @@ const PopoverRoot = /*#__PURE__*/ styled(MuiPopover)(({ theme }) => {
 
 export function BuilderButton({
   variant: _variant, startIcon: _startIcon, color: _color,
-  label, anchorEl, popOverWidth, popOverHeight, children, ...rest
+  label, anchorEl, popOverWidth, popOverHeight, onClose, children, ...rest
 }: BuilderButtonProps) {
   const uniqueId = React.useId();
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
   const open = Boolean(anchorEl);
   const id = open ? `${label}-${uniqueId}-popover` : undefined;
   return (
     <>
-      <ButtonRoot aria-describedby={id} variant="outlined" color="primary"
+      <ButtonRoot ref={triggerRef} aria-describedby={id} aria-haspopup="dialog" aria-expanded={open}
+        aria-controls={id} variant="outlined" color="primary"
         startIcon={label === "Table" ? <DesignServicesOutlinedIcon /> : <FilterAltOutlinedIcon />}
         endIcon={<KeyboardArrowDownOutlinedIcon />} {...rest} data-testid="BuilderButton">
         {label}
       </ButtonRoot>
-      <PopoverRoot id={id} open={open} anchorEl={anchorEl}
+      <PopoverRoot id={id} open={open} anchorEl={anchorEl} onClose={onClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }} elevation={2}
+        TransitionProps={{ onExited: () => triggerRef.current?.focus() }}
         sx={{ "& .MuiPaper-root": { width: popOverWidth, height: popOverHeight } }}>
         <BuilderInstanceContext.Provider value={uniqueId}>
           {children}

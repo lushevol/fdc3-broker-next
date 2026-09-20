@@ -57,6 +57,20 @@ function NamespaceBuilder({
   );
 }
 
+function DismissibleBuilder() {
+  const [anchor, setAnchor] = React.useState<HTMLButtonElement | null>(null);
+  return (
+    <BuilderButton
+      label="Table"
+      anchorEl={anchor}
+      onClick={(event) => setAnchor(event.currentTarget)}
+      onClose={() => setAnchor(null)}
+    >
+      <input aria-label="Dismissible Builder value" defaultValue="preserved" />
+    </BuilderButton>
+  );
+}
+
 describe("public builder pattern", () => {
   it("opens its controlled popover, switches tabs and closes through a caller action", async () => {
     render(<RatanDesignProvider><Builder /></RatanDesignProvider>);
@@ -184,6 +198,62 @@ describe("public builder pattern", () => {
     expect(panel).toHaveAttribute("aria-labelledby", "caller-tab");
     unmount();
     anchor.remove();
+  });
+
+  it("forwards controlled Builder close requests and leaves panel state with the caller", async () => {
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const closeRequest = vi.fn();
+    const { rerender, unmount } = render(
+      <RatanDesignProvider>
+        <BuilderButton label="Table" anchorEl={anchor} onClose={closeRequest}>
+          <input aria-label="Retained Builder value" defaultValue="still here" />
+        </BuilderButton>
+      </RatanDesignProvider>
+    );
+    const trigger = screen.getByRole("button", { name: "Table", hidden: true });
+    const popoverId = trigger.getAttribute("aria-describedby")!;
+    expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    expect(trigger).toHaveAttribute("aria-controls", popoverId);
+    fireEvent.keyDown(document.querySelector(".MuiPopover-root")!, { key: "Escape" });
+    expect(closeRequest).toHaveBeenLastCalledWith(expect.anything(), "escapeKeyDown");
+    expect(screen.getByLabelText("Retained Builder value")).toHaveValue("still here");
+    fireEvent.click(document.querySelector(".MuiBackdrop-root")!);
+    expect(closeRequest).toHaveBeenLastCalledWith(expect.anything(), "backdropClick");
+
+    rerender(
+      <RatanDesignProvider>
+        <BuilderButton label="Table" anchorEl={anchor}>
+          <input aria-label="Retained Builder value" defaultValue="still here" />
+        </BuilderButton>
+      </RatanDesignProvider>
+    );
+    fireEvent.keyDown(document.querySelector(".MuiPopover-root")!, { key: "Escape" });
+    fireEvent.click(document.querySelector(".MuiBackdrop-root")!);
+    expect(screen.getByLabelText("Retained Builder value")).toHaveValue("still here");
+
+    rerender(
+      <RatanDesignProvider>
+        <BuilderButton label="Table" anchorEl={null} onClose={closeRequest}>
+          <input aria-label="Retained Builder value" defaultValue="still here" />
+        </BuilderButton>
+      </RatanDesignProvider>
+    );
+    expect(screen.getByRole("button", { name: "Table", hidden: true })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Table", hidden: true })).not.toHaveAttribute("aria-controls");
+    await waitFor(() => expect(screen.queryByLabelText("Retained Builder value")).not.toBeInTheDocument());
+    unmount();
+    anchor.remove();
+  });
+
+  it("restores trigger focus when a host fulfills an Escape close request", async () => {
+    render(<RatanDesignProvider><DismissibleBuilder /></RatanDesignProvider>);
+    const trigger = screen.getByRole("button", { name: "Table" });
+    fireEvent.click(trigger);
+    fireEvent.keyDown(document.querySelector(".MuiPopover-root")!, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByLabelText("Dismissible Builder value")).not.toBeInTheDocument());
+    expect(trigger).toHaveFocus();
   });
 
   it("keeps Builder tab relationships unique through server render and hydration", async () => {

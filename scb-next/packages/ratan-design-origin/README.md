@@ -95,6 +95,10 @@ caller-managed IDs. Existing `builderTabProps` IDs remain available for direct
 Material-tab use; explicitly supplied tab or panel relationships take precedence.
 Trigger/popover IDs are stable across SSR hydration. MUI's portal renders the
 tab/panel content on the client, where the same Builder namespace applies.
+Builder triggers expose expanded/control semantics and may receive an optional
+`onClose` request callback for Escape or backdrop interactions. The caller still
+owns `anchorEl` and closes the controlled popover by clearing it. Focus returns
+to the trigger after that controlled close transition.
 
 Loader announces a loading status (default accessible name: "Loading...") and
 shows visible text only when supplied. `size` accepts a number or CSS dimension;

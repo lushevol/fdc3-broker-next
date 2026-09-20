@@ -734,6 +734,20 @@ the remaining inventory classification, and release governance remain open.
   button DOM. Unknown positions are not part of the public type; no widening or
   compatibility alias is introduced.
 
+### RD-013 specification: Builder controlled close requests
+
+- BuilderButton accepts an optional `onClose` callback with MUI Popover's event
+  and reason (`escapeKeyDown` or `backdropClick`). It forwards a dismissal request
+  only; callers retain ownership of `anchorEl` and must clear it to close.
+- A Builder trigger exposes `aria-haspopup="dialog"`, its current
+  `aria-expanded` state, and an `aria-controls` reference while the popover is
+  mounted. Existing `aria-describedby` behavior remains intact.
+- When no callback is supplied, Escape and backdrop interaction do not change the
+  controlled open state. Inactive tab panels remain mounted and their state is
+  unaffected by a close request or eventual caller-controlled dismissal.
+- After the caller-controlled close transition completes, focus returns to the
+  Builder trigger.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,
