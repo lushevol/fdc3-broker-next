@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 15/30 DONE. Next: RD-016.** The clinic contains the review evidence
+**Progress: 16/30 DONE. Next: RD-017.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -40,7 +40,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-013](#rd-013) | Builder close requests | P2 | 1 | DONE |
 | [RD-014](#rd-014) | Responsive token conditions | P1 | 2 | DONE |
 | [RD-015](#rd-015) | Unresolved font-size token | P1 | 2 | DONE |
-| [RD-016](#rd-016) | Canonical token source | P2 | 2 | TODO |
+| [RD-016](#rd-016) | Canonical token source | P2 | 2 | DONE |
 | [RD-017](#rd-017) | WebKit action states | P2 | 2 | TODO |
 | [RD-018](#rd-018) | Contrast and focus cues | P1 | 2 | TODO |
 | [RD-019](#rd-019) | Reduced motion | P2 | 2 | TODO |
@@ -791,15 +791,53 @@ Limitations / pre-existing failures / follow-up IDs: Storybook retains its
 
 ### RD-016
 
-**Generate CSS and MUI raw values from a canonical source.** P2 · Enhancement · TODO.
+**Generate CSS and MUI raw values from a canonical source.** P2 · Enhancement · DONE.
 Dependencies: RD-014, RD-015. [Clinic](UI_PACKAGE_CLINIC.md#rd-016).
 
-- [ ] Document the versioned source, generation boundary and cases where MUI needs
+- [x] Document the versioned source, generation boundary and cases where MUI needs
   raw values rather than CSS references.
-- [ ] Generate or validate theme palette values and public CSS references against
+- [x] Generate or validate theme palette values and public CSS references against
   that source, with drift checks and deterministic output.
-- [ ] Verify legacy/WebKit, light/dark and responsive values; ordinary package
+- [x] Verify legacy/WebKit, light/dark and responsive values; ordinary package
   builds must still work from committed assets without a sibling source checkout.
+
+```text
+Status: DONE
+Completed: 2026-09-21
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-016 contract;
+  webkit-theme.json is the versioned authoring manifest for scoped supplements,
+  all 31 public WebKit references and the raw values MUI must calculate with.
+  tokens:generate emits a narrow runtime module and validates the manifest against
+  canonical CSS definitions; theme tests cover every generated light/dark value.
+GitNexus impact and staged detect_changes: getWebkitOptions has three indexed
+  dependants through createRatanTheme and one Theme module; newStyleTokens has no
+  indexed dependants or flows. Both are LOW risk. The staged scope audit is
+  recorded in this stage commit.
+Commands (working directory scb-next/packages/ratan-design-origin unless noted):
+  npm test; npm run typecheck; npm run lint; npm run build;
+  npm run build:storybook; npm run verify:package; two consecutive
+  npm run tokens:generate runs with SHA-1 comparison; from scb-next, the fresh
+  independent-tarball-consumer Playwright design-origin matrix.
+Outcomes: 10 Vitest files/98 tests plus three generator tests passed with 98.22%
+  lines and 96.47% branches. Production, Storybook and independent packed-consumer
+  builds passed, including the Button-only tree-shaking assertion. Consecutive
+  generation produced webkit-theme.generated.ts
+  7f015c28da0534491997cf21002565467e229a96, styles.css
+  8e22e0d1bd35a3c78a2685041df9280146cf13a5 and unchanged provenance
+  6fcf7abc309d8e8eec69fd86e920360c3958aa96. Browser verification passed 16/16
+  across legacy/WebKit, light/dark and 390px/1280px values.
+Compatibility review and rollback target: public token strings and generated CSS
+  values are unchanged. Theme raw values now come from the same versioned manifest;
+  committed generated TypeScript and CSS keep ordinary builds independent of a
+  sibling WebKit checkout. Roll back the manifest imports and generated module if
+  downstream tooling cannot consume the committed output.
+Limitations / pre-existing failures / follow-up IDs: Storybook retains its
+  existing chunk-size warning; the independent consumer retains upstream
+  module-directive warnings and the existing kebab-case CSS warning. RD-029 owns
+  the broader historical warning baseline. RD-017 owns action-control states.
+```
 
 ### RD-017
 
@@ -1027,3 +1065,5 @@ or committed evidence.
 | 2026-09-21 | RD-014 | IN PROGRESS → DONE | Deterministic assets and passing package, Storybook, packed-consumer and 16-case browser gates | Next: RD-015 |
 | 2026-09-21 | RD-015 | TODO → IN PROGRESS | GitNexus LOW risk for generator output, public token object and browser spec; consumer fixture not indexed | Resolve the canonical fallback and add graph/browser regressions |
 | 2026-09-21 | RD-015 | IN PROGRESS → DONE | Complete 212-root per-generation/mode graph plus passing package, Storybook, packed-consumer and 16-case browser gates | Next: RD-016 |
+| 2026-09-21 | RD-016 | TODO → IN PROGRESS | GitNexus LOW risk: getWebkitOptions has three dependants/one module; newStyleTokens has none | Add one versioned authoring manifest and drift regressions |
+| 2026-09-21 | RD-016 | IN PROGRESS → DONE | Deterministic generated runtime source plus passing package, Storybook, packed-consumer and 16-case browser gates | Next: RD-017 |

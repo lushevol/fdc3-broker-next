@@ -6,6 +6,7 @@ import { useTheme } from '@mui/material/styles';
 import { Button, Select, RatanDesignProvider } from '../src';
 import { createRatanTheme } from '../src/theme';
 import { newStyleTokens, legacyTokens } from '../src/tokens';
+import { webkitMuiTheme } from '../src/tokens/webkit-theme.generated';
 
 function Appearance() {
   const theme = useTheme();
@@ -74,6 +75,25 @@ describe('explicit standalone appearance', () => {
     expect(componentStyles).toContain('--sc-form-control-border-color');
     expect(componentStyles).toContain('--sc-form-input-focus-outline-color');
   });
+  it.each(['light', 'dark'] as const)(
+    'derives %s WebKit MUI values from the versioned theme source',
+    (mode) => {
+      const theme = createRatanTheme({ mode, designGeneration: 'webkit' });
+      const palette = webkitMuiTheme.palette[mode];
+      expect(theme.typography.fontFamily).toBe(webkitMuiTheme.typography.fontFamily.value);
+      expect(theme.typography.fontSize).toBe(webkitMuiTheme.typography.fontSize.value);
+      expect(theme.shape.borderRadius).toBe(webkitMuiTheme.shape.borderRadius.value);
+      expect(theme.palette.primary.main).toBe(palette.primary.value);
+      expect(theme.palette.secondary.main).toBe(palette.secondary.value);
+      expect(theme.palette.error.main).toBe(palette.error.value);
+      expect(theme.palette.warning.main).toBe(palette.warning.value);
+      expect(theme.palette.success.main).toBe(palette.success.value);
+      expect(theme.palette.background.default).toBe(palette.backgroundDefault.value);
+      expect(theme.palette.background.paper).toBe(palette.backgroundPaper.value);
+      expect(theme.palette.text.primary).toBe(palette.textPrimary.value);
+      expect(theme.palette.text.secondary).toBe(palette.textSecondary.value);
+    },
+  );
 
   it('keeps two differently themed roots independent without mutating the host', () => {
     const classes = document.documentElement.className;

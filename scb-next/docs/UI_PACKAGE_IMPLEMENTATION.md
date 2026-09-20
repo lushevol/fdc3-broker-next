@@ -780,6 +780,28 @@ the remaining inventory classification, and release governance remain open.
   rendered surface to `16px` with the mode-appropriate focus shadow at
   narrow/wide widths in light/dark modes.
 
+### RD-016 specification: canonical WebKit theme source
+
+- `src/tokens/webkit-theme.json` is the versioned package authoring source for
+  scoped WebKit supplements, public semantic token references, and the raw MUI
+  theme values paired with their canonical CSS variables. Its WebKit version
+  must match the generated asset provenance.
+- `tokens:generate` reads that manifest and the pinned WebKit 2.0.5 sources. It
+  emits committed scoped CSS/provenance plus a narrow generated TypeScript module
+  consumed by `newStyleTokens` and `getWebkitOptions`. Generation must be
+  deterministic; tests fail when the manifest version, CSS references, raw
+  palette values, or scoped supplements drift.
+- Components and public token exports use CSS references so mode and responsive
+  changes remain live. MUI theme creation retains raw color strings because MUI
+  performs JavaScript color parsing/contrast calculations, and retains numeric
+  `fontSize` and `borderRadius` because MUI performs arithmetic on those fields.
+- The generated TypeScript and CSS are committed distribution inputs. Ordinary
+  typecheck/build/packing therefore require no sibling WebKit checkout; only
+  explicit regeneration requires the pinned source tree.
+- The independent tarball consumer verifies legacy/WebKit, light/dark, and
+  narrow/wide computed values. A core Button-only import must not retain provider
+  or token CSS, preserving the existing tree-shaking boundary.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

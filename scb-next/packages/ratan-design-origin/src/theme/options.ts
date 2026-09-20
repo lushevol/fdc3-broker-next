@@ -1,34 +1,34 @@
 import type { PaletteMode, ThemeOptions } from '@mui/material';
 import { legacyTokens as custom } from '../tokens/legacy.js';
+import { webkitMuiTheme } from '../tokens/webkit-theme.generated.js';
 import type { ControlThemeConfig, DesignGeneration } from './index.js';
 
 const getWebkitOptions = (props: ControlThemeConfig): ThemeOptions => {
-  const dark = props.palette.mode === 'dark';
   const mode = props.palette.mode as PaletteMode;
+  const palette = webkitMuiTheme.palette[mode];
   return {
     typography: {
-      fontFamily:
-        '"SC Prosper Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-      fontSize: 14,
+      fontFamily: webkitMuiTheme.typography.fontFamily.value,
+      fontSize: webkitMuiTheme.typography.fontSize.value,
       button: { textTransform: 'none' },
     },
     palette: {
       mode,
-      primary: { main: '#0473EA' },
-      secondary: { main: dark ? '#68ABF2' : '#02458C' },
-      error: { main: dark ? '#E9545B' : '#E00A15' },
-      warning: { main: '#FAAD14' },
-      success: { main: dark ? '#73E350' : '#207E00' },
+      primary: { main: palette.primary.value },
+      secondary: { main: palette.secondary.value },
+      error: { main: palette.error.value },
+      warning: { main: palette.warning.value },
+      success: { main: palette.success.value },
       background: {
-        default: dark ? '#1A1A1A' : '#F9F9F9',
-        paper: dark ? '#000000' : '#FFFFFF',
+        default: palette.backgroundDefault.value,
+        paper: palette.backgroundPaper.value,
       },
       text: {
-        primary: dark ? '#CCE3FA' : '#00172E',
-        secondary: dark ? '#B2B2B2' : '#595959',
+        primary: palette.textPrimary.value,
+        secondary: palette.textSecondary.value,
       },
     },
-    shape: { borderRadius: 6 },
+    shape: { borderRadius: webkitMuiTheme.shape.borderRadius.value },
     components: {
       MuiButtonBase: {
         styleOverrides: {

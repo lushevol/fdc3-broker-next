@@ -171,12 +171,19 @@ temporary independent consumer, checks declarations/assets/SSR/tree shaking,
 and prints its path. Run `npm run dev` in that printed consumer for port 8019.
 Use `npm run storybook` for appearance controls and component states on 6019.
 
-`tokens:generate` regenerates committed assets from WebKit 2.0.5, retaining
-canonical `@media`/`@supports` ancestry around scoped token declarations;
-provenance hashes are in `assets/webkit-sources.json`. `npm test` also exercises
-the generator's conditional extraction. Ordinary builds need no sibling source
-checkout. See NOTICE.md for asset licensing restrictions. Registry, release
-owners and redistribution approval must be confirmed before publishing.
+`src/tokens/webkit-theme.json` is the versioned authoring manifest for scoped
+supplements, public semantic references, and MUI raw theme values.
+`tokens:generate` combines it with WebKit 2.0.5 to regenerate committed CSS,
+provenance, and `src/tokens/webkit-theme.generated.ts`, retaining canonical
+`@media`/`@supports` ancestry around scoped token declarations. Components use
+CSS references so mode and responsive values stay live. Theme creation uses raw
+colors where MUI parses and calculates contrast, and numeric font size/radius
+where MUI performs arithmetic. `npm test` checks manifest/CSS drift, complete
+token graphs, and deterministic generation; provenance hashes are in
+`assets/webkit-sources.json`. Ordinary builds consume the committed generated
+files and need no sibling source checkout. See NOTICE.md for asset licensing
+restrictions. Registry, release owners and redistribution approval must be
+confirmed before publishing.
 Base, Ratan and Cashflow use package presentation behind their existing exports.
 See [the inventory](../../docs/UI_PACKAGE_INVENTORY.md) for deliberate portal
 boundaries and [release/rollback](../../docs/UI_PACKAGE_RELEASE.md) for versioning,

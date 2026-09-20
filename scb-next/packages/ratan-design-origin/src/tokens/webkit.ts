@@ -1,49 +1,51 @@
+import { webkitReferences } from "./webkit-theme.generated.js";
+
 export type ScWebkitToken = `var(--sc-${string})`;
 
-const token = <Name extends `--sc-${string}`>(name: Name): `var(${Name})` =>
-  `var(${name})`;
+const token = (name: string): ScWebkitToken => `var(${name})` as ScWebkitToken;
+const references = webkitReferences;
 
 export const newStyleTokens = {
   color: {
-    background: token("--sc-layout-background-color"),
-    surface: token("--sc-panel-background-color"),
-    surfaceRaised: token("--sc-card-background-color"),
-    surfaceSelected: token("--sc-card-selected-background"),
-    text: token("--sc-layout-text-color"),
-    textHeading: token("--sc-panel-title-color"),
-    textMuted: token("--sc-panel-content-color"),
-    border: token("--sc-divider-color"),
-    borderInteractive: token("--sc-card-hover-border-color"),
-    focus: token("--sc-focus-ring-color"),
-    link: token("--sc-link-primary-color"),
-    linkHover: token("--sc-link-hover-color"),
-    icon: token("--sc-icon-primary-color"),
-    info: token("--sc-status-info-icon"),
-    success: token("--sc-status-success-icon"),
-    warning: token("--sc-status-warning-icon"),
-    danger: token("--sc-status-danger-icon"),
+    background: token(references.color.background),
+    surface: token(references.color.surface),
+    surfaceRaised: token(references.color.surfaceRaised),
+    surfaceSelected: token(references.color.surfaceSelected),
+    text: token(references.color.text),
+    textHeading: token(references.color.textHeading),
+    textMuted: token(references.color.textMuted),
+    border: token(references.color.border),
+    borderInteractive: token(references.color.borderInteractive),
+    focus: token(references.color.focus),
+    link: token(references.color.link),
+    linkHover: token(references.color.linkHover),
+    icon: token(references.color.icon),
+    info: token(references.color.info),
+    success: token(references.color.success),
+    warning: token(references.color.warning),
+    danger: token(references.color.danger),
   },
   typography: {
-    fontFamily: token("--sc-font-family"),
-    fontSize: token("--sc-font-size"),
+    fontFamily: token(references.typography.fontFamily),
+    fontSize: token(references.typography.fontSize),
   },
   spacing: {
-    none: token("--sc-spacing-0"),
-    xsmall: token("--sc-spacing-4"),
-    small: token("--sc-spacing-8"),
-    medium: token("--sc-spacing-16"),
-    large: token("--sc-spacing-24"),
-    xlarge: token("--sc-spacing-32"),
+    none: token(references.spacing.none),
+    xsmall: token(references.spacing.xsmall),
+    small: token(references.spacing.small),
+    medium: token(references.spacing.medium),
+    large: token(references.spacing.large),
+    xlarge: token(references.spacing.xlarge),
   },
   radius: {
-    none: token("--sc-radius-none"),
-    small: token("--sc-radius-sm"),
-    medium: token("--sc-radius-md"),
-    large: token("--sc-radius-lg"),
+    none: token(references.radius.none),
+    small: token(references.radius.small),
+    medium: token(references.radius.medium),
+    large: token(references.radius.large),
   },
   shadow: {
-    color: token("--sc-box-shadow-color"),
-    focus: token("--sc-data-grid-cell-focus-shadow"),
+    color: token(references.shadow.color),
+    focus: token(references.shadow.focus),
   },
 } as const satisfies Record<string, Record<string, ScWebkitToken>>;
 
