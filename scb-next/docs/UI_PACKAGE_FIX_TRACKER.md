@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 24/30 DONE. Next: RD-025.** The clinic contains the review evidence
+**Progress: 25/30 DONE. Next: RD-025.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -53,7 +53,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-026](#rd-026) | Explicit host appearance contract | P2 | 4 | TODO |
 | [RD-027](#rd-027) | Alpha direct-adoption pilot | P3 | 4 | TODO |
 | [RD-028](#rd-028) | Release ownership and decisions | P2 | 4 | TODO |
-| [RD-029](#rd-029) | Reproduce historical host test failures | P2 | 1 preflight | TODO |
+| [RD-029](#rd-029) | Reproduce historical host test failures | P2 | 1 preflight | DONE |
 | [RD-030](#rd-030) | Real host performance budgets | P3 | 3 measurement | TODO |
 
 ## Compatibility boundaries
@@ -1325,18 +1325,61 @@ release gates. [Clinic](UI_PACKAGE_CLINIC.md#rd-028).
 
 ### RD-029
 
-**Reproduce and classify historical broad host test failures.** P2 · Historical baseline · TODO.
+**Reproduce and classify historical broad host test failures.** P2 · Historical baseline · DONE.
 Dependencies: none; run early when host changes or broad host validation start.
 [Clinic](UI_PACKAGE_CLINIC.md#rd-029).
 
-- [ ] Locate the recorded host dependency-resolution failures and rerun their
+- [x] Locate the recorded host dependency-resolution failures and rerun their
   original commands on the implementation baseline; capture versions and logs.
-- [ ] Classify results as still failing, already resolved or environment-specific.
+- [x] Classify results as still failing, already resolved or environment-specific.
   Separate existing failures from regressions introduced by this work.
-- [ ] Fix any reproduced resolution issue within a specified scope, or record an
+- [x] Fix any reproduced resolution issue within a specified scope, or record an
   owned follow-up/blocker with affected checks. Mark this item DONE only when the
   baseline classification and disposition are evidenced; do not claim a historical
   failure was freshly reproduced without its actual command result.
+
+```text
+Status: DONE
+Completed: 2026-09-22
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-029 contract. The exact
+  original commands were rerun from scb-next. `npm test --workspace
+  @fm/ratan_container-origin` failed 47/164 files and 167/829 tests (116 files and
+  661 tests passed; one file/test skipped; one unhandled error; 184.66s).
+  `npm test --workspace @fm/ratan_cashflow_blotter-origin` failed 84/242 files and
+  228/1969 tests (158 files and 1724 tests passed; 17 skipped; 606.61s). Both runs
+  repeatedly paired repository-root React with host-local ReactDOM.
+Cause and fix: both Vitest configs forced CommonJS Ant Design to the repository
+  root even though each host has a local Ant Design/React/ReactDOM set. The aliases
+  now resolve host-local Ant Design. Cashflow's copied Ratan hooks also imported
+  undeclared react-use from the repository root, so Cashflow now declares and
+  installs its own react-use. Root and host React versions were all 18.3.1; physical
+  instance identity, not version incompatibility, caused the invalid-hook calls.
+Verification: the minimized Ratan Ant Design repro passes 1/1. Cashflow's Ant
+  Design representative plus all four formerly split react-use hook tests pass
+  5/5, and `npm ls react-use --workspace @fm/ratan_cashflow_blotter-origin --all`
+  resolves 17.6.1 under that workspace. After the Ant Design fix, Ratan completed
+  160 passed files/822 passed tests with 3 files/6 tests failing and one skipped;
+  Vitest required an interrupt after its fork-termination timeout but emitted the
+  complete 164-file/829-test summary. Final bounded Cashflow verification
+  (`npx vitest run --maxWorkers=4`) completed with 240/242 files and 1950/1969
+  tests passing, 17 skipped and only 2 unrelated failures; no invalid-hook or
+  duplicate-React error remained.
+Classification and disposition: the reproduced duplicate-React failures were
+  repository configuration defects and are fixed. Remaining broad failures are
+  pre-existing host-test debt, not design-origin regressions: both adapter suites
+  query an intentionally aria-hidden spinner as a visible role (owned by RD-025),
+  Ratan retains three empty DynamicComponent fixtures and two Day.js weekday-plugin
+  setup failures, and Cashflow retains one QuickFilters value interaction failure.
+  The host owners/Codex own those legacy fixture/setup follow-ups; they do not block
+  package adapter extraction because its focused contracts and both builds remain
+  the acceptance gates. The Vite native-config advisory and non-top-level vi.mock
+  advisories are environment/tooling warnings rather than this resolution defect.
+Rollback: revert the two test aliases, Cashflow dependency and lock entries if a
+  host intentionally requires repository-root Ant Design/react-use in tests; the
+  historical invalid-hook failures will return immediately in the minimized repros.
+```
 
 ### RD-030
 
@@ -1408,3 +1451,4 @@ or committed evidence.
 | 2026-09-21 | RD-023 | IN PROGRESS → DONE | Nine negative/positive fixtures, full Vite resolution matrix, packed consumer and Base/Ratan/Cashflow checks pass | Next: RD-024 |
 | 2026-09-21 | RD-024 | TODO → IN PROGRESS | ESLint config has no indexed export/process; aggregate runner is new | Specification added; write fail-fast runner fixtures next |
 | 2026-09-22 | RD-024 | IN PROGRESS → DONE | 107 tests, zero-warning lint, three runner fixtures, 24 browser checks and Base/Ratan/Cashflow builds pass; pristine lock reconstruction matches | Next: RD-025 |
+| 2026-09-22 | RD-029 | TODO → DONE | Original broad commands reproduced 47/167 Ratan and 84/228 Cashflow failures; host-local Ant Design and declared react-use remove duplicate React, leaving 6 and 2 classified legacy failures | Next: RD-025 |

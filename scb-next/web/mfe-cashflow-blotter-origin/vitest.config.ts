@@ -6,8 +6,8 @@ export default defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom', '@mui/material', '@mui/icons-material', '@mui/system', '@emotion/react', '@emotion/styled'],
     alias: [
-      { find: /^antd$/, replacement: fileURLToPath(new URL('../../../node_modules/antd/lib/index.js', import.meta.url)) },
-      { find: /^antd\/es\/(.*)$/, replacement: fileURLToPath(new URL('../../../node_modules/antd/lib/$1', import.meta.url)) },
+      { find: /^antd$/, replacement: fileURLToPath(new URL('./node_modules/antd/lib/index.js', import.meta.url)) },
+      { find: /^antd\/es\/(.*)$/, replacement: fileURLToPath(new URL('./node_modules/antd/lib/$1', import.meta.url)) },
       { find: /^events$/, replacement: fileURLToPath(new URL('../../../node_modules/events/events.js', import.meta.url)) },
       { find: 'src', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
       { find: 'Import', replacement: fileURLToPath(new URL('./src/Root/import', import.meta.url)) },

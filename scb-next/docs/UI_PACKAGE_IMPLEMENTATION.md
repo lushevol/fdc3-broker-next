@@ -997,6 +997,26 @@ settled UI while leaving infinite loader animations available to motion tests.
   dependencies and Chromium before invoking the same command; external templates
   may call it directly but must not substitute a narrower set of gates.
 
+### RD-029 specification: broad host dependency-resolution baseline
+
+- Historical host failures are classified only from the original workspace test
+  commands and their complete summaries. Focused adapter tests may minimize a
+  failure and prove a repair, but never replace the recorded broad baseline.
+- Test-only aliases for CommonJS UI libraries must resolve from the same host-local
+  dependency tree as that host's React and ReactDOM renderer. A workspace that
+  imports a hook-bearing package directly must declare it directly; relying on an
+  ancestor installation is unsupported because its peer React can bind to a
+  different physical instance even when package versions match.
+- The repair loop must show the invalid-hook failure before the change and a green
+  representative from each affected dependency path afterward. A bounded-worker
+  broad run may be used when the exact post-fix command exhausts fork termination,
+  provided the original command was captured and the altered worker policy is
+  explicit in the evidence.
+- Remaining broad failures are listed by file and failure class with an owner. They
+  are not reported as design-package regressions unless the failing behavior was
+  introduced by the package stage, and a focused pass is not used to claim the
+  broad suite is green.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,
@@ -1021,13 +1041,11 @@ admin editors and other portal-specific features as intentionally host-owned.
 - Base: 127 files / 355 tests pass; 96.85% lines and 94.13% branches; strict
   typecheck and production build pass. The integrated host journey passes
   login, New Tile, Cashflow render, workspace creation and deletion.
-- Ratan and Cashflow focused adapter suites pass (four tests each). Running a
-  single Ratan file through the package's coverage-enforcing script reports the
-  expected global-threshold failure; the same tests pass with coverage disabled.
-  The broad legacy Ratan/Cashflow suites retain their pre-migration duplicate
-  React hook failures, reproduced against the baseline adapters, so they are
-  recorded as an existing workspace test-environment limitation rather than a
-  migration regression.
+- Ratan and Cashflow focused adapter suites pass (four tests each). RD-029 later
+  reproduced the historical broad failures and repaired their split React cause:
+  test-only Ant Design aliases now remain host-local and Cashflow directly owns
+  react-use. The broad suites now expose only classified legacy fixture/assertion
+  debt; their exact before/after counts and worker limitation live in the tracker.
 - `npm run verify:dependency-isolation` passes. GitNexus impact checks for the
   edited component, adapter and theme symbols report LOW risk; JSX/import graph
   gaps are covered by public compatibility tests and the browser journey.
