@@ -10,7 +10,7 @@ export const classes = {
   hideBackdrop: `${PREFIX}-hideBackdrop`,
 };
 
-export const Root = styled(Dialog)(({ theme }) => ({
+export const Root = /*#__PURE__*/ styled(Dialog)(({ theme }) => ({
   [`& .${classes.resize}`]: {
     position: "absolute",
     right: "-5px",

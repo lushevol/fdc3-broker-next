@@ -7,7 +7,7 @@ import type { LoadingButtonProps } from "./LoadingButton.js";
 
 export interface SearchButtonProps extends LoadingButtonProps {}
 
-const SearchButtonRoot = styled(MuiButton)(({ theme }) => {
+const SearchButtonRoot = /*#__PURE__*/ styled(MuiButton)(({ theme }) => {
   if (theme.ratan?.designGeneration === "webkit") {
     const webkit = getWebkitActionStyle("primary", true);
     return {

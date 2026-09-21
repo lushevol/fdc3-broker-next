@@ -24,7 +24,7 @@ export const searchConditionContainerBorderStyle = (mode: string) =>
     ? "1px solid rgba(44, 63, 94, 1)"
     : "1px solid rgba(208, 208, 208, 1)";
 
-const SearchConditionContainerRoot = styled(MuiStack)(({ theme }) => {
+const SearchConditionContainerRoot = /*#__PURE__*/ styled(MuiStack)(({ theme }) => {
   const webkit = theme.ratan?.designGeneration === "webkit";
 
   return {

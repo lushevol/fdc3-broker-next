@@ -94,7 +94,7 @@ export const modeStyle = (
   };
 };
 
-const ToggleButtonRoot = styled(MuiToggleButton)(({ theme }) =>
+const ToggleButtonRoot = /*#__PURE__*/ styled(MuiToggleButton)(({ theme }) =>
   modeStyle(theme, theme.palette.mode, theme.ratan?.designGeneration)
 );
 

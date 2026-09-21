@@ -14,7 +14,7 @@ export interface SearchConditionProps extends AlertProps {
 export const searchConditionModeStyle = (mode: string) =>
   mode === "dark" ? "rgba(203, 203, 203, 1)" : "rgba(34,34,34, 1)";
 
-const SearchConditionRoot = styled(MuiAlert)(({ theme }) => {
+const SearchConditionRoot = /*#__PURE__*/ styled(MuiAlert)(({ theme }) => {
   const webkit = theme.ratan?.designGeneration === "webkit";
   const textColor = webkit
     ? newStyleTokens.color.text

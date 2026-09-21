@@ -7,6 +7,30 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import postcss from "postcss";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
+const BUTTON_ONLY_VITE_VERSION = "8.2.1";
+const BUTTON_ONLY_BUNDLE_BUDGET_BYTES = 2_048;
+const BUTTON_ONLY_EXTERNAL_PEERS = [
+  "react",
+  "react-dom",
+  "@mui/material",
+  "@mui/icons-material",
+  "@emotion/react",
+  "@emotion/styled"
+];
+const BUTTON_ONLY_FORBIDDEN_MARKERS = [
+  "M20,35c-8.271",
+  "ratan-design-loader",
+  "MuiSnackbarContent-message",
+  "base-color-grey",
+  "--sc-",
+  "createRatanTheme",
+  "ratan-design-root",
+  "x-data-grid",
+  "x-date-pickers",
+  "AdminRecord",
+  "customElements",
+  "react.production"
+];
 const consumer = await mkdtemp(join(tmpdir(), "ratan-design-origin-consumer-"));
 const npm = (args, cwd = consumer) =>
   execFileSync("npm", ["--cache=/tmp/npm-cache", ...args], {
@@ -74,6 +98,14 @@ assert(!manifest.dependencies, "Core must only have external peers");
 const { build } = await import(
   pathToFileURL(join(consumer, "node_modules/vite/dist/node/index.js"))
 );
+const viteManifest = JSON.parse(
+  await readFile(join(consumer, "node_modules/vite/package.json"), "utf8")
+);
+assert.equal(
+  viteManifest.version,
+  BUTTON_ONLY_VITE_VERSION,
+  "Button-only measurement requires the fixture's pinned Vite version"
+);
 const modules = [];
 const peers =
   /^(react|react-dom|@mui\/material|@mui\/icons-material|@emotion\/react|@emotion\/styled)(\/|$)/;
@@ -95,26 +127,38 @@ const result = await build({
     rolldownOptions: { external: peers }
   }
 });
-const code = (Array.isArray(result) ? result : [result])
+const buttonOnlyChunks = (Array.isArray(result) ? result : [result])
   .flatMap((bundle) => bundle.output)
-  .filter((item) => item.type === "chunk")
-  .map((item) => item.code)
-  .join("\n");
-assert(
-  !/(x-data-grid|x-date-pickers|AdminRecord|customElements|createRatanTheme|legacyColor|react\.production)/.test(
-    code
+  .filter((item) => item.type === "chunk");
+const code = buttonOnlyChunks.map((item) => item.code).join("\n");
+const renderedPackageModules = [
+  ...new Set(
+    buttonOnlyChunks.flatMap((chunk) =>
+      Object.entries(chunk.modules)
+        .filter(([, module]) => (module.renderedLength ?? 0) > 0)
+        .map(([id]) => id.replaceAll("\\", "/"))
+        .filter((id) => id.includes("/node_modules/ratan-design-origin/dist/"))
+        .map((id) => id.split("/node_modules/ratan-design-origin/dist/")[1])
+    )
   )
+].sort();
+assert.deepEqual(
+  renderedPackageModules,
+  ["Button.js"],
+  `Button-only import retained unrelated package modules: ${renderedPackageModules.join(", ")}`
 );
+for (const marker of BUTTON_ONLY_FORBIDDEN_MARKERS) {
+  assert(!code.includes(marker), `Button-only import retained unrelated marker: ${marker}`);
+}
+assert(!modules.some((id) => /node_modules\/(react|react-dom)\//.test(id)), "React was bundled");
+const buttonOnlyBytes = Buffer.byteLength(code);
 assert(
-  !code.includes("var(--sc-") && !code.includes("ratan-design-root"),
-  "Button-only import retained provider/token CSS"
-);
-assert(
-  !modules.some((id) => /node_modules\/(react|react-dom)\//.test(id)),
-  "React was bundled"
+  buttonOnlyBytes <= BUTTON_ONLY_BUNDLE_BUDGET_BYTES,
+  `Button-only bundle is ${buttonOnlyBytes} bytes; budget is ${BUTTON_ONLY_BUNDLE_BUDGET_BYTES}`
 );
 console.log(
-  `Button-only external-peer bundle: ${Buffer.byteLength(code)} bytes`
+  `Button-only package code: ${buttonOnlyBytes}/${BUTTON_ONLY_BUNDLE_BUDGET_BYTES} bytes ` +
+    `(Vite ${viteManifest.version}; external: ${BUTTON_ONLY_EXTERNAL_PEERS.join(", ")})`
 );
 await build({
   root: consumer,

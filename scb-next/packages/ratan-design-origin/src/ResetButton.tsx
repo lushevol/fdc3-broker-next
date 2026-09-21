@@ -5,7 +5,7 @@ import { getWebkitActionStyle } from "./action-style.js";
 
 export interface ResetButtonProps extends ButtonProps {}
 
-const ResetButtonRoot = styled(MuiButton)(({ theme }) => {
+const ResetButtonRoot = /*#__PURE__*/ styled(MuiButton)(({ theme }) => {
   if (theme.ratan?.designGeneration === "webkit") {
     const webkit = getWebkitActionStyle("secondary", true);
     return {

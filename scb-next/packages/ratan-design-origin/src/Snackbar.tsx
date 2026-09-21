@@ -30,7 +30,7 @@ export interface SnackbarProps extends MuiSnackbarProps {
 }
 
 /** Messages are React content; strings are never interpreted as HTML. */
-export const Snackbar = React.memo(function Snackbar({
+export const Snackbar = /*#__PURE__*/ React.memo(function Snackbar({
   message,
   action,
   variant,

@@ -4,7 +4,7 @@ import { styled } from "@mui/material/styles";
 
 export interface SearchGridProps extends GridProps {}
 
-const SearchGridRoot = styled(MuiGrid)(({ theme }) => ({
+const SearchGridRoot = /*#__PURE__*/ styled(MuiGrid)(({ theme }) => ({
   "& .MuiFormControl-root": {
     justifyContent: "space-between",
     marginBottom: theme.spacing(0.5),

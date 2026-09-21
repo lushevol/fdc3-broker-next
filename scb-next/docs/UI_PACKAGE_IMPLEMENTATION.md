@@ -879,6 +879,32 @@ the remaining inventory classification, and release governance remain open.
   build, Storybook build and packed-consumer verification must pass from the
   committed sources before this documentation stage is complete.
 
+### RD-021 specification: Button-only tree shaking and byte budget
+
+- The independent packed consumer measures an ESM build whose only package import
+  is the core `Button`. The fixture pins Vite 8.2.1 and externalizes React,
+  ReactDOM, MUI Material/icons and Emotion, so the result measures emitted package
+  code rather than framework bytes. The pre-fix checkout records 21,935 bytes;
+  the clinic's earlier approximate 18.6 KB result remains historical evidence.
+- Top-level `styled(...)` and `React.memo(...)` component creation that has no
+  observable module-load side effect is explicitly marked pure. Removing an
+  unused export may omit only that initialization; importing and rendering every
+  public component must retain its existing behavior in unit, SSR and Storybook
+  gates. The package build preserves source-module boundaries so the core index
+  selects only `Button.js` as rendered package code. No icon import or public
+  export shape changes are part of this stage.
+- The packed verifier enforces a 2,048-byte uncompressed package-code ceiling for
+  the Button-only external-peer build. It fails when another emitted package
+  module besides `Button.js` has rendered code or when Loader SVG/classes,
+  Snackbar styles, legacy or
+  WebKit token markers, provider/theme markers, optional integrations, React or
+  host code are retained. The ceiling provides review headroom over the measured
+  optimized result and must be deliberately revised when the Button contract grows.
+- Package coverage, typecheck, lint, production build, Storybook, independent
+  declaration/build/tree-shaking and DOM-free SSR checks must pass. README,
+  changelog and release guidance record the measurement boundary, before/after
+  bytes, budget and rollback target.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

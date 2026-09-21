@@ -30,6 +30,10 @@ export default defineConfig({
     rolldownOptions: {
       external:
         /^(react|react-dom|@mui\/material|@mui\/icons-material|@mui\/x-date-pickers|@mui\/x-date-pickers-pro|dayjs|@emotion\/react|@emotion\/styled)(\/|$)/,
+      output: {
+        preserveModules: true,
+        preserveModulesRoot: "src",
+      },
     },
   },
 });

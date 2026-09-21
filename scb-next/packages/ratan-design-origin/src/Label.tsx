@@ -13,7 +13,7 @@ const borderless = {
   backgroundColor: "transparent !important",
 };
 
-const Root = styled(MuiSelect)(({ theme }) => ({
+const Root = /*#__PURE__*/ styled(MuiSelect)(({ theme }) => ({
   ...borderless,
   "&:before": { ...borderless },
   "&:after": { ...borderless },
@@ -30,7 +30,7 @@ const Root = styled(MuiSelect)(({ theme }) => ({
   },
 }));
 
-const LabelMenuItemRoot = styled(MuiMenuItem)({ minWidth: "263px" });
+const LabelMenuItemRoot = /*#__PURE__*/ styled(MuiMenuItem)({ minWidth: "263px" });
 
 export const LabelMenuItem = /*#__PURE__*/ React.forwardRef<
   HTMLLIElement,

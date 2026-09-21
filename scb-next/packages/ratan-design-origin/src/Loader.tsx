@@ -17,7 +17,7 @@ const outerLine = `M5.203,20c0-8.159,6.638-14.797,14.797-14.797V5C11.729,5,5,11.
 const innerLine = `M7.078,20c0-7.125,5.797-12.922,12.922-12.922V6.875C12.763,6.875,6.875,12.763,6.875,20S12.763,
                     33.125,20,33.125v-0.203C12.875,32.922,7.078,27.125,7.078,20z`;
 
-export const Loader = React.memo(function Loader({
+export const Loader = /*#__PURE__*/ React.memo(function Loader({
   size = 90,
   text,
   children: _children,
@@ -52,7 +52,7 @@ export interface PageLoaderProps extends LoaderProps {
   slotProps?: { loader?: LoaderProps };
 }
 
-export const PageLoader = React.memo(function PageLoader({
+export const PageLoader = /*#__PURE__*/ React.memo(function PageLoader({
   text,
   size,
   children: _children,

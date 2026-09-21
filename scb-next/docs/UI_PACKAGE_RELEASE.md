@@ -69,6 +69,13 @@ Keep the printed fixture/log path with release evidence. Ordinary package builds
 use committed WebKit 2.0.5 assets; tokens:generate additionally needs the canonical
 source build and updates source hashes. Review NOTICE.md before distributing fonts.
 
+The Button-only tree-shaking gate pins Vite 8.2.1 and externalizes React,
+ReactDOM, MUI Material/icons and Emotion. It permits only rendered `Button.js`,
+rejects unrelated package markers/modules, and enforces 2,048 uncompressed bytes.
+The RD-021 reference improved from 21,935 to 427 bytes. Treat this as package-code
+evidence for that import boundary, not an application bundle or transfer-size
+claim; a budget increase requires a reviewed public Button contract change.
+
 ## Dependencies and Adoption
 
 Verified core: React/ReactDOM 18.3.1, Material/icons 5.18.0, Emotion React 11.14.0/

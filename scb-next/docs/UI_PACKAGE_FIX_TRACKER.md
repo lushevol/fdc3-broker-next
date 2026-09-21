@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 20/30 DONE. Active: RD-021.** The clinic contains the review evidence
+**Progress: 21/30 DONE. Active: RD-022.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -45,7 +45,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-018](#rd-018) | Contrast and focus cues | P1 | 2 | DONE |
 | [RD-019](#rd-019) | Reduced motion | P2 | 2 | DONE |
 | [RD-020](#rd-020) | Public contracts and font ownership | P2 | 2 | DONE |
-| [RD-021](#rd-021) | Tree shaking and package byte budget | P2 | 3 | TODO |
+| [RD-021](#rd-021) | Tree shaking and package byte budget | P2 | 3 | DONE |
 | [RD-022](#rd-022) | Browser accessibility and visual gates | P2 | 3 | TODO |
 | [RD-023](#rd-023) | Dependency resolution verification | P2 | 3 | TODO |
 | [RD-024](#rd-024) | Lint and aggregate verification | P2 | 3 | TODO |
@@ -1060,16 +1060,58 @@ Limitations / pre-existing failures / follow-up IDs: Storybook retains its chunk
 
 ### RD-021
 
-**Improve tree shaking and enforce a package byte budget.** P2 · Confirmed · TODO.
+**Improve tree shaking and enforce a package byte budget.** P2 · Confirmed · DONE.
 Dependencies: none. [Clinic](UI_PACKAGE_CLINIC.md#rd-021).
 
-- [ ] Reproduce the Button-only retained-code baseline with pinned tooling and
+- [x] Reproduce the Button-only retained-code baseline with pinned tooling and
   peer externalization stated explicitly; inspect unrelated retained modules.
-- [ ] Make pure initialization removable without dropping actual side effects;
+- [x] Make pure initialization removable without dropping actual side effects;
   validate any annotation/build or icon-import change through SSR and Storybook.
-- [ ] Enforce a reviewed byte ceiling and unrelated-module checks in the packed
+- [x] Enforce a reviewed byte ceiling and unrelated-module checks in the packed
   consumer verifier. Record measured before/after bytes; the clinic's approximate
   18.6 KB → 1.6 KB experiment is evidence, not a promised release threshold.
+
+```text
+Status: DONE
+Completed: 2026-09-21
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-021 records the pinned
+  Vite 8.2.1, external-peer measurement contract and pure-initialization boundary.
+  The packed consumer gate first failed against the reproduced 21,935-byte bundle,
+  which retained index, Snackbar, Loader, legacy-token and WebKit-token modules.
+  It now requires only Button.js to render, rejects Loader/Snackbar/token/provider/
+  optional-integration/React/host markers and enforces a 2,048-byte ceiling.
+GitNexus impact and staged detect_changes: Loader, PageLoader, Snackbar, Label and
+  the styled component roots are LOW risk, with at most four dependants and no
+  affected execution processes. vite.config.ts and the verifier top-level script
+  are not indexed. The staged audit reports 17 intended files, 33 changed symbols,
+  zero affected processes and LOW risk.
+Commands (working directory scb-next unless noted): package tests, token-generator
+  tests, coverage, typecheck, lint, build and Storybook build; verify:package;
+  verify:dependency-isolation; Base typecheck/build; Ratan and Cashflow builds;
+  node --check packages/ratan-design-origin/scripts/verify-package.mjs; git diff
+  --check.
+Outcomes: the Button-only package code fell from 21,935 to 427 bytes (98.05%) with
+  Vite 8.2.1 and React/MUI/Emotion externalized; Button.js is the only rendered
+  package module. All marker, byte-budget, declaration, production-build, DOM-free
+  core/date/date-range/portal SSR and optional-peer checks passed. Eleven Vitest
+  files/106 tests and three generator tests passed with 97.04% line and 96.18%
+  branch coverage. Package typecheck/lint/build, Storybook, dependency isolation,
+  Base typecheck/build and both host builds passed.
+Compatibility review and rollback target: preserved modules keep every documented
+  entry point while pure annotations cover only side-effect-free styled and memo
+  initialization. SSR, Storybook and host builds prove required initialization was
+  retained. Roll back this stage if a supported bundler cannot resolve the emitted
+  module graph or if a documented import depends on discarded initialization.
+Limitations / pre-existing failures / follow-up IDs: Storybook retains its existing
+  large-chunk warning, host builds retain Vite config-loader/deprecation warnings,
+  and the packed consumer retains upstream MUI module-directive warnings. Ratan's
+  existing typecheck script fails before source analysis because it combines
+  emitDeclarationOnly with noEmit (TS5053); its production build passed. RD-022
+  owns browser gates, RD-023 owns dependency-resolution breadth and RD-024 owns
+  aggregate verification.
+```
 
 ### RD-022
 
@@ -1243,3 +1285,5 @@ or committed evidence.
 | 2026-09-21 | RD-019 | IN PROGRESS → DONE | Passing package, Storybook, packed-consumer, 22-case browser, Base and live-host gates | Next: RD-020 |
 | 2026-09-21 | RD-020 | TODO → IN PROGRESS | Source/declaration/catalog audit; specification recorded | Add the public contract matrix, compiled examples and ownership alignment |
 | 2026-09-21 | RD-020 | IN PROGRESS → DONE | Passing documentation contract, package, Storybook, packed-consumer and dependency-isolation gates | Next: RD-021 |
+| 2026-09-21 | RD-021 | TODO → IN PROGRESS | Current Vite 8.2.1 external-peer baseline: 21,935 bytes plus legacy/WebKit/Snackbar/Loader retention; all edit targets LOW risk | Add failing budget/module assertions, then mark pure component initialization |
+| 2026-09-21 | RD-021 | IN PROGRESS → DONE | Button-only package code is 427/2,048 bytes with only Button.js rendered; package, Storybook, packed-consumer, dependency and host gates pass | Next: RD-022 |

@@ -225,6 +225,15 @@ temporary independent consumer, checks declarations/assets/SSR/tree shaking,
 and prints its path. Run `npm run dev` in that printed consumer for port 8019.
 Use `npm run storybook` for appearance controls and component states on 6019.
 
+The tree-shaking gate uses the fixture's exact Vite 8.2.1 and externalizes React,
+ReactDOM, MUI Material/icons and Emotion. A core `Button` import renders only
+`Button.js`: 427 uncompressed package-code bytes after the RD-021 fix, down from
+the reproduced 21,935-byte baseline. The enforced ceiling is 2,048 bytes and the
+verifier also rejects unrelated component/token markers and rendered modules.
+This measures package code for one import, not framework bytes, gzip transfer size
+or total application savings. Revise the ceiling only with a reviewed Button
+contract change and a new before/after measurement.
+
 `src/tokens/webkit-theme.json` is the versioned authoring manifest for scoped
 supplements, public semantic references, and MUI raw theme values.
 `tokens:generate` combines it with WebKit 2.0.5 to regenerate committed CSS,

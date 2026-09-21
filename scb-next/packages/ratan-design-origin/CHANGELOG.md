@@ -29,6 +29,10 @@
   IDs, style precedence and inherited MUI props. Font documentation distinguishes
   packaged WebKit assets from host-provided legacy Poppins and assigns optional
   peer, localization and MUI X Pro policy to hosts.
+- Package output preserves source-module boundaries and marks side-effect-free
+  styled/memo component initialization as pure. The pinned external-peer Button
+  check now renders only `Button.js` at 427 bytes (21,935 before) and enforces a
+  2,048-byte ceiling plus unrelated-module/marker exclusions.
 - Collapsed search criteria keep the visible row interactive while clipped rows
   leave keyboard navigation; the toggle now exposes its state and controlled region.
 - Base and Ratan/Cashflow adoption behind their existing compatible exports,
