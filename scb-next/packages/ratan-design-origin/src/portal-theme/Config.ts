@@ -39,10 +39,12 @@ export const Config = (props: ThemeConfig) => {
           columnHeader: {
             borderWidth: 0,
             "&:focus": {
-              outline: "0 !important",
+              outline: `2px solid ${props.palette.primary.main} !important`,
+              outlineOffset: "-2px",
             },
             "&:focus-within": {
-              outline: "0 !important",
+              outline: `2px solid ${props.palette.primary.main} !important`,
+              outlineOffset: "-2px",
             },
           },
           columnHeaderTitle: {
@@ -77,10 +79,12 @@ export const Config = (props: ThemeConfig) => {
             borderBottomStyle: "solid",
             borderBottomColor: `${props.borderColor}!important`,
             "&:focus": {
-              outline: "0 !important",
+              outline: `2px solid ${props.palette.primary.main} !important`,
+              outlineOffset: "-2px",
             },
             "&:focus-within": {
-              outline: "0 !important",
+              outline: `2px solid ${props.palette.primary.main} !important`,
+              outlineOffset: "-2px",
             },
             "&:nth-child(1)": {
               borderLeft: `1px solid ${props.borderColor}`,

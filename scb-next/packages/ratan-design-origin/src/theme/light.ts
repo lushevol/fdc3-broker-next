@@ -103,6 +103,10 @@ const getControlTheme = () => ({
           background: `linear-gradient(to right,rgba(255,255,255,1),rgba(237,237,237,1)) padding-box,
                          linear-gradient(to right, rgba(255, 0, 0, 1),rgba(245,245,245,1)) border-box`,
         },
+        "&.Mui-focused": {
+          outline: "2px solid #2C3F5E",
+          outlineOffset: "1px",
+        },
         "& input": {
           border: 0,
           zIndex: 1,

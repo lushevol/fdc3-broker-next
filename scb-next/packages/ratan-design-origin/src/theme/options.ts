@@ -34,7 +34,7 @@ const getWebkitOptions = (props: ControlThemeConfig): ThemeOptions => {
         styleOverrides: {
           root: {
             '&.Mui-focusVisible': {
-              outline: '2px solid var(--sc-button-focus-outline-color)',
+              outline: '2px solid var(--sc-focus-ring-color)',
               outlineOffset: 2,
             },
           },
@@ -91,7 +91,7 @@ const getWebkitOptions = (props: ControlThemeConfig): ThemeOptions => {
             fontSize: '0.875rem',
             lineHeight: '1.375rem',
             '&::placeholder': {
-              color: 'var(--sc-form-control-placeholder-color)',
+              color: 'var(--sc-label-color)',
               opacity: 1,
             },
           },
@@ -105,6 +105,10 @@ const getWebkitOptions = (props: ControlThemeConfig): ThemeOptions => {
             color: 'var(--sc-form-control-color)',
             backgroundColor: 'var(--sc-form-control-background-color)',
             borderRadius: 'var(--sc-form-input-border-radius, 0.375rem)',
+            '&& input::placeholder': {
+              color: 'var(--sc-label-color)',
+              opacity: 1,
+            },
             '& .MuiOutlinedInput-notchedOutline': {
               borderColor: 'var(--sc-form-control-border-color)',
             },
@@ -112,8 +116,8 @@ const getWebkitOptions = (props: ControlThemeConfig): ThemeOptions => {
               borderColor: 'var(--sc-form-input-hover-border-color, var(--sc-color-blue-450))',
             },
             '&.Mui-focused': {
-              outline:
-                '2px solid var(--sc-form-input-focus-outline-color, var(--sc-color-blue-100))',
+              outline: '2px solid var(--sc-focus-ring-color)',
+              outlineOffset: 1,
             },
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
               borderColor: 'var(--sc-form-input-focus-border-color)',

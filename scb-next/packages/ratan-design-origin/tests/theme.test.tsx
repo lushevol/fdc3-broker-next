@@ -73,8 +73,22 @@ describe('explicit standalone appearance', () => {
     const componentStyles = JSON.stringify(webkit.components);
     expect(componentStyles).toContain('--sc-button-primary-background-color');
     expect(componentStyles).toContain('--sc-form-control-border-color');
-    expect(componentStyles).toContain('--sc-form-input-focus-outline-color');
+    expect(componentStyles).toContain('--sc-label-color');
+    expect(componentStyles).toContain('--sc-focus-ring-color');
+    expect(componentStyles).not.toContain('--sc-form-input-focus-outline-color');
+    expect(componentStyles).toContain('"opacity":1');
+    expect(componentStyles).toContain('&& input::placeholder');
   });
+
+  it.each(['light', 'dark'] as const)(
+    'keeps a visible legacy %s outlined-input focus treatment',
+    (mode) => {
+      const theme = createRatanTheme({ mode, designGeneration: 'legacy' });
+      const styles = JSON.stringify(theme.components?.MuiOutlinedInput?.styleOverrides);
+      expect(styles).toContain('Mui-focused');
+      expect(styles).toContain(`2px solid ${theme.palette.primary.main}`);
+    },
+  );
   it.each(['light', 'dark'] as const)(
     'derives %s WebKit MUI values from the versioned theme source',
     (mode) => {

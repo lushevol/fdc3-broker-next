@@ -11,6 +11,9 @@ describe("opt-in legacy portal theme", () => {
     expect(config.theme.LoginPage.contentWidth).toBe("306px");
     expect(config.customColor.blue).toBe("#2f82ff");
     expect(config.components?.MuiDataGrid?.styleOverrides?.root).toMatchObject({ borderWidth: 0 });
+    const gridStyles = JSON.stringify(config.components?.MuiDataGrid?.styleOverrides);
+    expect(gridStyles).toContain(`2px solid ${props.palette.primary.main}`);
+    expect(gridStyles).not.toContain('outline":"0 !important');
     expect(props.MuiCssBaseline.styleOverrides.body.overflow).toBe("hidden");
   });
   it.each(["dark", "light", "gold", undefined, "unknown"])(

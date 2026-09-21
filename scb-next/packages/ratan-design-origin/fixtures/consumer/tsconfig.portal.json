@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/server-portal.tsx"],
+  "include": ["src/portal-browser.tsx", "src/server-portal.tsx"],
   "exclude": []
 }

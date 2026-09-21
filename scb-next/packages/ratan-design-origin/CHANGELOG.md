@@ -19,6 +19,9 @@
   modes, while Label exposes its compact combobox name and honors ARIA overrides.
 - LoadingButton and SearchButton retain their action names, expose button-level
   busy state and hide their decorative progress indicators from assistive technology.
+- WebKit placeholders and focus rings use reviewed semantic colors; legacy outlined
+  inputs and opt-in portal DataGrid headers/cells expose visible 2px keyboard focus
+  indicators across light and dark modes.
 - Collapsed search criteria keep the visible row interactive while clipped rows
   leave keyboard navigation; the toggle now exposes its state and controlled region.
 - Base and Ratan/Cashflow adoption behind their existing compatible exports,

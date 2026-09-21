@@ -494,7 +494,7 @@ describe("standalone controls", () => {
         backgroundColor: "var(--sc-button-primary-press-background-color)",
       },
       "&.Mui-focusVisible": {
-        outlineColor: "var(--sc-button-focus-outline-color)",
+        outlineColor: "var(--sc-focus-ring-color)",
       },
       "&.Mui-disabled": {
         backgroundColor: "var(--sc-button-primary-disabled-background-color)",

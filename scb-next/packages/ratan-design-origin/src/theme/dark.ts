@@ -142,6 +142,10 @@ const getControlTheme = () => ({
           background: `linear-gradient(to right,rgba(17, 23, 29, 1),rgba(17, 23, 29, 1)) padding-box,
                          linear-gradient(to right, rgba(244, 67, 54, 1),rgba(28, 1, 1, 1)) border-box`,
         },
+        "&.Mui-focused": {
+          outline: `2px solid ${custom.color["blue"]}`,
+          outlineOffset: "1px",
+        },
         "& input": {
           border: 0,
           zIndex: 1,

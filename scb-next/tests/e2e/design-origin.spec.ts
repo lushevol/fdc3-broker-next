@@ -1,7 +1,60 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator } from '@playwright/test';
 
 const consumerUrl = process.env.RATAN_DESIGN_CONSUMER_URL;
 test.skip(!consumerUrl, 'Requires the verified independent tarball consumer');
+
+async function measuredContrast(
+  locator: Locator,
+  options: {
+    property?: 'color' | 'outlineColor';
+    pseudo?: '::placeholder';
+    outside?: boolean;
+  } = {},
+) {
+  return locator.evaluate((element, { property = 'color', pseudo, outside = false }) => {
+    const parseColor = (value: string) => {
+      const channels = value.match(/[\d.]+/g)?.map(Number) ?? [];
+      return [channels[0] ?? 0, channels[1] ?? 0, channels[2] ?? 0, channels[3] ?? 1];
+    };
+    const composite = (foreground: number[], background: number[]) => {
+      const alpha = foreground[3];
+      return foreground.slice(0, 3).map((channel, index) =>
+        channel * alpha + background[index] * (1 - alpha),
+      );
+    };
+    const backgroundAt = (start: Element | null): number[] => {
+      let current = start;
+      const layers: number[][] = [];
+      while (current) {
+        const color = parseColor(getComputedStyle(current).backgroundColor);
+        if (color[3] > 0) layers.push(color);
+        if (color[3] >= 1) break;
+        current = current.parentElement;
+      }
+      let result = [255, 255, 255];
+      for (const layer of layers.reverse()) result = composite(layer, result);
+      return result;
+    };
+    const luminance = (color: number[]) => {
+      const [red, green, blue] = color.slice(0, 3).map((channel) => {
+        const normalized = channel / 255;
+        return normalized <= 0.04045
+          ? normalized / 12.92
+          : ((normalized + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+    };
+    const style = getComputedStyle(element, pseudo);
+    const background = backgroundAt(outside ? element.parentElement : element);
+    const foreground = parseColor(style[property]);
+    foreground[3] *= Number(style.opacity || 1);
+    const renderedForeground = composite(foreground, background);
+    const values = [luminance(renderedForeground), luminance(background)].sort(
+      (left, right) => right - left,
+    );
+    return (values[0] + 0.05) / (values[1] + 0.05);
+  }, options);
+}
 
 for (const width of [390, 1280]) {
   for (const mode of ['light', 'dark']) {
@@ -16,7 +69,24 @@ for (const width of [390, 1280]) {
         const root = page.locator('.ratan-design-root');
         await expect(root).toHaveAttribute('data-mode', mode);
         await expect(root).toHaveCSS('color-scheme', mode);
-        await page.getByRole('textbox', { name: 'Reference' }).fill('REF-123');
+        const reference = page.getByRole('textbox', { name: 'Reference' });
+        await expect
+          .poll(() => measuredContrast(reference, { pseudo: '::placeholder' }), {
+            message: 'placeholder must meet WCAG 2.2 SC 1.4.3 after its theme transition',
+          })
+          .toBeGreaterThanOrEqual(4.5);
+        await reference.focus();
+        const referenceControl = reference.locator('..');
+        await expect(referenceControl).toHaveCSS('outline-style', 'solid');
+        await expect(referenceControl).toHaveCSS('outline-width', '2px');
+        expect(
+          await measuredContrast(referenceControl, {
+            property: 'outlineColor',
+            outside: true,
+          }),
+          'input focus indicator must meet WCAG 2.2 SC 1.4.11',
+        ).toBeGreaterThanOrEqual(3);
+        await reference.fill('REF-123');
         await page.getByRole('combobox', { name: 'Currency' }).click();
         await expect(root.getByRole('listbox')).toBeVisible();
         await page.getByRole('option', { name: 'SGD' }).click();
@@ -25,6 +95,10 @@ for (const width of [390, 1280]) {
           'aria-invalid',
           'true',
         );
+        expect(
+          await measuredContrast(page.getByText('Enter a positive amount')),
+          'error helper text must meet WCAG 2.2 SC 1.4.3',
+        ).toBeGreaterThanOrEqual(4.5);
         await expect(page.getByRole('textbox', { name: 'Approved by' })).toBeDisabled();
         const submit = page.getByRole('button', { name: 'Submit', exact: true });
         await submit.click();
@@ -77,8 +151,15 @@ for (const width of [390, 1280]) {
           await expect(searchAction).toBeFocused();
           await expect(searchAction).toHaveCSS(
             'outline-color',
-            await resolveToken('--sc-button-focus-outline-color'),
+            await resolveToken('--sc-focus-ring-color'),
           );
+          expect(
+            await measuredContrast(searchAction, {
+              property: 'outlineColor',
+              outside: true,
+            }),
+            'button focus indicator must meet WCAG 2.2 SC 1.4.11',
+          ).toBeGreaterThanOrEqual(3);
           await expect(loadingSearch).toHaveCSS(
             'background-color',
             await resolveToken('--sc-button-primary-disabled-background-color'),
@@ -197,6 +278,44 @@ for (const width of [390, 1280]) {
       });
     }
   }
+}
+
+for (const mode of ['light', 'dark']) {
+  test(`legacy portal grid exposes keyboard focus in ${mode} mode`, async ({ page }) => {
+    await page.goto(`${consumerUrl!.replace(/\/$/, '')}/portal.html`);
+    await page.getByLabel('Portal mode').click();
+    await page.getByRole('option', { name: mode, exact: true }).click();
+
+    const symbolHeader = page.getByRole('columnheader', { name: 'Symbol' });
+    const quantityHeader = page.getByRole('columnheader', { name: 'Quantity' });
+    await symbolHeader.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(quantityHeader).toBeFocused();
+    await expect(quantityHeader).toHaveCSS('outline-style', 'solid');
+    await expect(quantityHeader).toHaveCSS('outline-width', '2px');
+    expect(
+      await measuredContrast(quantityHeader, {
+        property: 'outlineColor',
+        outside: true,
+      }),
+      'grid header focus indicator must meet WCAG 2.2 SC 1.4.11',
+    ).toBeGreaterThanOrEqual(3);
+
+    const symbolCell = page.locator('.MuiDataGrid-cell[data-field="symbol"]').first();
+    const quantityCell = page.locator('.MuiDataGrid-cell[data-field="quantity"]').first();
+    await symbolCell.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(quantityCell).toBeFocused();
+    await expect(quantityCell).toHaveCSS('outline-style', 'solid');
+    await expect(quantityCell).toHaveCSS('outline-width', '2px');
+    expect(
+      await measuredContrast(quantityCell, {
+        property: 'outlineColor',
+        outside: true,
+      }),
+      'grid cell focus indicator must meet WCAG 2.2 SC 1.4.11',
+    ).toBeGreaterThanOrEqual(3);
+  });
 }
 
 test('keyboard users can see the focused action', async ({ page }) => {

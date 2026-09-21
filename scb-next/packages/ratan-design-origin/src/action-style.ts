@@ -39,7 +39,7 @@ export function getWebkitActionStyle(kind: WebkitActionKind, includeError: boole
     "&:active": getWebkitActionState(kind, "press"),
     "&.Mui-focusVisible": {
       outline: "2px solid",
-      outlineColor: variable("--sc-button-focus-outline-color"),
+      outlineColor: variable("--sc-focus-ring-color"),
       outlineOffset: 2,
     },
     "&.Mui-disabled": {

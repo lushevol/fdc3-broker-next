@@ -10,5 +10,10 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
   "include": ["src"],
-  "exclude": ["src/dates.tsx", "src/server-dates.tsx", "src/server-portal.tsx"]
+  "exclude": [
+    "src/dates.tsx",
+    "src/portal-browser.tsx",
+    "src/server-dates.tsx",
+    "src/server-portal.tsx"
+  ]
 }

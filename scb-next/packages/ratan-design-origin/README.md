@@ -24,7 +24,11 @@ containers to its own root. It does not reset the document, change scrolling,
 read storage or choose appearance from application state. Hosts own those
 policies and date localization. Load CSS explicitly for scoped legacy/WebKit
 aliases, canonical WebKit variables and fonts. Keyboard-focused actions show a
-2px brand-color focus ring; Select labels are associated with their combobox.
+2px brand-color focus ring; outlined inputs and opt-in portal DataGrid cells and
+headers retain the same visible keyboard cue. WebKit placeholders use the label
+semantic so rendered placeholder and helper text meet the package's normal-text
+contrast target in light and dark modes. Select labels are associated with their
+combobox.
 The WebKit generation maps MUI controls to the SC GDS palette, SC Prosper Sans,
 spacing, radii, button states and form-control states. Legacy keeps its existing
 Poppins typography and compact visual baseline during migration.

@@ -819,6 +819,26 @@ the remaining inventory classification, and release governance remain open.
   cover both generations and modes at 390px and 1280px, including pointer hover,
   held press, keyboard focus, error, loading/disabled, and Toggle selection.
 
+### RD-018 specification: contrast and keyboard focus
+
+- Placeholder text is normal text under WCAG 2.2 SC 1.4.3 and targets at least
+  4.5:1 against its rendered input background. WebKit inputs use the approved
+  label semantic (`--sc-label-color`): `#595959` on white is 7.00:1 and
+  `#A6A6A6` on `#333333` is 5.19:1. Error/helper text is measured on the provider
+  surface and must retain the same normal-text threshold.
+- Visible component boundaries and focus indicators target at least 3:1 against
+  adjacent colors under SC 1.4.11. WebKit button and input focus use
+  `--sc-focus-ring-color`; the canonical blue is 4.29:1 against the light
+  provider background and 3.85:1 against the dark provider background.
+- Legacy outlined inputs retain their historical fill/gradient and hidden notch,
+  but focused roots receive a two-pixel palette-primary outline. Legacy portal
+  DataGrid headers/cells replace the removed outline with the same two-pixel
+  palette-primary indicator, inset to avoid changing layout or clipping.
+- Pointer focus does not gain a persistent button ring; keyboard focus remains
+  selected through MUI's focus-visible state. The independent consumer verifies
+  keyboard traversal and computed placeholder, helper/error, input, button, and
+  optional-peer DataGrid focus colors in light/dark modes.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

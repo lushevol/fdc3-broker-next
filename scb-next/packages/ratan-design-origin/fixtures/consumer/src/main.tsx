@@ -79,6 +79,7 @@ function App() {
           <Input
             variant="outlined"
             label="Reference"
+            placeholder="Payment reference"
             value={reference}
             onChange={(event) => setReference(event.target.value)}
           />

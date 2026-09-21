@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 17/30 DONE. Next: RD-018.** The clinic contains the review evidence
+**Progress: 18/30 DONE. Active: RD-019.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -42,7 +42,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-015](#rd-015) | Unresolved font-size token | P1 | 2 | DONE |
 | [RD-016](#rd-016) | Canonical token source | P2 | 2 | DONE |
 | [RD-017](#rd-017) | WebKit action states | P2 | 2 | DONE |
-| [RD-018](#rd-018) | Contrast and focus cues | P1 | 2 | TODO |
+| [RD-018](#rd-018) | Contrast and focus cues | P1 | 2 | DONE |
 | [RD-019](#rd-019) | Reduced motion | P2 | 2 | TODO |
 | [RD-020](#rd-020) | Public contracts and font ownership | P2 | 2 | TODO |
 | [RD-021](#rd-021) | Tree shaking and package byte budget | P2 | 3 | TODO |
@@ -894,15 +894,58 @@ Limitations / pre-existing failures / follow-up IDs: Storybook retains its chunk
 
 ### RD-018
 
-**Improve contrast and restore visible focus cues.** P1 · Static finding · TODO.
+**Improve contrast and restore visible focus cues.** P1 · Static finding · DONE.
 Dependencies: RD-016; coordinate with RD-017. [Clinic](UI_PACKAGE_CLINIC.md#rd-018).
 
-- [ ] Measure placeholders, relevant text and focus indicators against their actual
+- [x] Measure placeholders, relevant text and focus indicators against their actual
   backgrounds; use approved semantic tokens and record the applicable criteria.
-- [ ] Restore a reviewed keyboard focus indication for legacy portal grids and
+- [x] Restore a reviewed keyboard focus indication for legacy portal grids and
   assess legacy input focus plus WebKit light/dark focus states.
-- [ ] Verify keyboard navigation and measured contrast in actual rendered states;
+- [x] Verify keyboard navigation and measured contrast in actual rendered states;
   record host compatibility review for changes to intentional legacy overrides.
+
+```text
+Status: DONE
+Completed: 2026-09-21
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-018 contract;
+  controls/theme/portal-theme regressions cover the semantic focus source,
+  placeholder opacity, legacy outlined-input focus, and replacement DataGrid
+  focus indicators. The packed fixture adds a placeholder and an optional-peer
+  portal grid; design-origin.spec.ts measures rendered contrast and keyboard focus.
+GitNexus impact and staged detect_changes: getWebkitActionStyle has three direct
+  dependants and 19 total; Config and getWebkitOptions each have one direct
+  dependant; the legacy getControlTheme factories have no indexed dependants.
+  All resolved symbols are LOW risk with no affected execution processes. The
+  consumer fixture is unindexed and covered by packed-consumer/browser gates.
+  The staged scope audit is recorded in this stage commit.
+Commands (working directory scb-next unless noted): package test, typecheck,
+  lint, build and Storybook build; verify:package; verify:dependency-isolation;
+  fresh independent-consumer Playwright design-origin suite; from Base, six
+  focused theme/control tests, typecheck, lint and production build; live host
+  design-origin-host Playwright journey.
+Outcomes: 10 Vitest files/102 tests plus three generator tests passed with 97.04%
+  line and 96.18% branch coverage. Package, Storybook, packed declaration/build,
+  SSR/tree-shaking, dependency isolation, Base focused tests/typecheck/build and
+  18/18 browser checks passed. The browser matrix covered 390px/1280px,
+  legacy/WebKit and light/dark controls plus both legacy portal grid modes; it
+  enforced 4.5:1 placeholder/helper text and 3:1 input/button/grid focus cues.
+  The required login -> New Tile -> Cashflow render -> add/delete workspace journey
+  passed at 1280x720 on http://127.0.0.1:8001 with no page errors.
+Compatibility review and rollback target: legacy fill/gradient and hidden-notch
+  visuals remain unchanged; only focused outlined roots gain the palette-primary
+  outline. The portal override replaces deliberately removed grid outlines with
+  an inset indicator that does not alter layout. WebKit placeholder and focus
+  semantics change only under explicit WebKit generation. Roll back these theme
+  overrides if consumer visual review rejects the approved contrast treatment.
+Limitations / pre-existing failures / follow-up IDs: Base's repository-wide lint
+  remains red on 8 errors and 138 warnings in untouched admin tests, hooks and
+  module-federation.d.ts. The live alpha API watcher reproduced EMFILE while the
+  required Base/Ratan/Cashflow journey passed. Storybook, Base and packed consumer
+  retain their existing chunk/config-loader/module-directive advisories. RD-024
+  owns aggregate lint; RD-029 owns historical host failures.
+```
 
 ### RD-019
 
@@ -1110,3 +1153,5 @@ or committed evidence.
 | 2026-09-21 | RD-016 | IN PROGRESS → DONE | Deterministic generated runtime source plus passing package, Storybook, packed-consumer and 16-case browser gates | Next: RD-017 |
 | 2026-09-21 | RD-017 | TODO → IN PROGRESS | GitNexus LOW risk: Search/Reset roots have no dependants; modeStyle reaches 29 imports and no flows | Add generation-aware semantic state mappings and matrix regressions |
 | 2026-09-21 | RD-017 | IN PROGRESS → DONE | Passing package, Storybook, packed-consumer, 16-case browser, Base and dependency-isolation gates | Next: RD-018 |
+| 2026-09-21 | RD-018 | TODO → IN PROGRESS | GitNexus LOW risk: action style three direct dependants; portal Config one; WebKit options one/Theme module; legacy factories none; no processes | Measure approved contrast pairs and restore browser-verified keyboard focus cues |
+| 2026-09-21 | RD-018 | IN PROGRESS → DONE | Passing package, Storybook, packed-consumer, 18-case browser, Base and live-host gates | Next: RD-019 |
