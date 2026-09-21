@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { cp, mkdtemp, readFile, readdir, access } from "node:fs/promises";
+import { cp, mkdtemp, readFile, readdir, access, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -232,3 +232,6 @@ execFileSync(process.execPath, [join(consumer, "dist-server-portal/server-portal
   stdio: "inherit"
 });
 console.log(`Independent tarball consumer verified: ${consumer}`);
+if (process.env.RATAN_DESIGN_CONSUMER_PATH_FILE) {
+  await writeFile(process.env.RATAN_DESIGN_CONSUMER_PATH_FILE, consumer);
+}

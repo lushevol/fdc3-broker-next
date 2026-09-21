@@ -63,7 +63,11 @@ export function LoadingOverlay({
     ...style,
     pointerEvents: open ? style?.pointerEvents : "none",
   }}>
-    <Backdrop aria-hidden={!open} sx={{ color: "common.white", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    <Backdrop aria-hidden={!open} sx={{
+      color: "common.white",
+      backgroundColor: "rgb(0 0 0 / 62%)",
+      zIndex: (theme) => theme.zIndex.drawer + 1,
+    }}
       {...backdropProps} open={open}>
       {open && <div role="status">{children}</div>}
     </Backdrop>

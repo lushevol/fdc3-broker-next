@@ -57,15 +57,26 @@ export const Snackbar = /*#__PURE__*/ React.memo(function Snackbar({
       >
         <SnackbarContent
           role="presentation"
-          message={<span style={{ width: '100%' }}>{message}</span>}
+          message={
+            <span
+              tabIndex={0}
+              style={{
+                display: 'block',
+                maxHeight: notificationTokens.messageMaxHeight,
+                overflowY: 'auto',
+                width: '100%',
+                wordBreak: 'break-all',
+              }}
+            >
+              {message}
+            </span>
+          }
           action={action}
           sx={{
             background: 'inherit',
             color: 'inherit',
             boxShadow: 'none',
             '& .MuiSnackbarContent-message': {
-              maxHeight: notificationTokens.messageMaxHeight,
-              overflowY: 'auto',
               width: '100%',
               userSelect: 'text',
               fontSize: legacyTokens.font.fontSizeM,

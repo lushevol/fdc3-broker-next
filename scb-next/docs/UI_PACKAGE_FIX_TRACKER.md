@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 21/30 DONE. Active: RD-022.** The clinic contains the review evidence
+**Progress: 22/30 DONE. Active: RD-023.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -46,7 +46,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-019](#rd-019) | Reduced motion | P2 | 2 | DONE |
 | [RD-020](#rd-020) | Public contracts and font ownership | P2 | 2 | DONE |
 | [RD-021](#rd-021) | Tree shaking and package byte budget | P2 | 3 | DONE |
-| [RD-022](#rd-022) | Browser accessibility and visual gates | P2 | 3 | TODO |
+| [RD-022](#rd-022) | Browser accessibility and visual gates | P2 | 3 | DONE |
 | [RD-023](#rd-023) | Dependency resolution verification | P2 | 3 | TODO |
 | [RD-024](#rd-024) | Lint and aggregate verification | P2 | 3 | TODO |
 | [RD-025](#rd-025) | Shared pure host adapters | P2 | 4 | TODO |
@@ -1115,17 +1115,60 @@ Limitations / pre-existing failures / follow-up IDs: Storybook retains its exist
 
 ### RD-022
 
-**Automate browser accessibility, interaction and visual checks.** P2 · Enhancement · TODO.
+**Automate browser accessibility, interaction and visual checks.** P2 · Confirmed · DONE.
 Dependencies: phase 1 regressions, RD-017–RD-019.
 [Clinic](UI_PACKAGE_CLINIC.md#rd-022).
 
-- [ ] Make actionable catalog accessibility violations fail a repeatable automated
+- [x] Make actionable catalog accessibility violations fail a repeatable automated
   command; record any narrowly justified, owned exclusions.
-- [ ] Gate keyboard behavior, dismissal, focus restoration and overlay hit testing
+- [x] Gate keyboard behavior, dismissal, focus restoration and overlay hit testing
   with representative package and host flows.
-- [ ] Replace screenshot-only artifacts with reviewed screenshot comparisons for
+- [x] Replace screenshot-only artifacts with reviewed screenshot comparisons for
   the selected desktop/mobile and legacy/WebKit light/dark matrix; record baseline
   update/review procedure and avoid accepting changed images without review.
+
+```text
+Status: DONE
+Completed: 2026-09-21
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-022 defines one
+  repository command, zero accessibility exclusions, settled catalog scanning,
+  the interaction/date contract and explicit baseline ownership. Initial browser
+  runs failed on Loader/LoadingOverlay contrast, an inaccessible long-message
+  Snackbar scroll region and missing baselines. The final suite scans every story
+  across legacy/WebKit light/dark, scans the consumer/date surfaces and compares
+  eight 390px/1280px appearance baselines.
+GitNexus impact and staged detect_changes: the browser spec, LoaderRoot, Loader,
+  LoadingOverlay and Snackbar are LOW risk. Loader has three direct consumers,
+  LoadingOverlay two and Snackbar three; no target reaches an indexed execution
+  process. The staged audit reports 21 indexed files, 22 changed symbols, zero
+  affected processes and LOW risk.
+Commands (working directory scb-next unless noted): explicit baseline update and
+  review; npm run test:e2e:design-origin; package npm test, typecheck, lint, build
+  and Storybook build; verify:package; verify:dependency-isolation; build:apps;
+  focused Snackbar red/green test; git diff --check.
+Outcomes: the ordinary browser gate passed 24/24 after all eight PNGs were visually
+  reviewed. The gate built both surfaces, verified a fresh tarball consumer, scanned
+  the complete catalog and consumer matrix with no axe exclusions, and passed clear,
+  collapse, keyboard focus, dialog dismissal/restoration, overlay hit testing,
+  reduced-motion and date Escape/restoration behavior. Eleven Vitest files/107
+  tests plus three generator tests passed with 97.04% lines and 96.15% branches.
+  Package typecheck/lint/build, Storybook, packed declarations/build/SSR/tree
+  shaking, dependency isolation and Base/Ratan/Cashflow/Alpha/API builds passed.
+Compatibility review and rollback target: existing commands remain available and
+  the new command owns only package browser surfaces. Loader text now follows the
+  active theme, LoadingOverlay uses a contrast-safe backdrop and the Snackbar's
+  existing 50px scroll region is keyboard focusable. Roll back those three focused
+  presentation changes and the browser command together if a supported host cannot
+  preserve the verified behavior; never retain baselines for reverted pixels.
+Limitations / pre-existing failures / follow-up IDs: Storybook and hosts retain
+  existing chunk/config-loader warnings, the packed consumer retains upstream MUI
+  module-directive warnings, and the optional Pro date fixture logs its expected
+  missing-license notice. Existing Emotion kebab-case and nth-child console warnings
+  are non-page errors. RD-023 owns dependency resolution breadth and RD-024 owns the
+  aggregate release command.
+```
 
 ### RD-023
 
@@ -1287,3 +1330,5 @@ or committed evidence.
 | 2026-09-21 | RD-020 | IN PROGRESS → DONE | Passing documentation contract, package, Storybook, packed-consumer and dependency-isolation gates | Next: RD-021 |
 | 2026-09-21 | RD-021 | TODO → IN PROGRESS | Current Vite 8.2.1 external-peer baseline: 21,935 bytes plus legacy/WebKit/Snackbar/Loader retention; all edit targets LOW risk | Add failing budget/module assertions, then mark pure component initialization |
 | 2026-09-21 | RD-021 | IN PROGRESS → DONE | Button-only package code is 427/2,048 bytes with only Button.js rendered; package, Storybook, packed-consumer, dependency and host gates pass | Next: RD-022 |
+| 2026-09-21 | RD-022 | TODO → IN PROGRESS | Existing 22-case browser suite has LOW graph risk, manual screenshot artifacts and no failing axe command | Add catalog/consumer axe scans, date interaction and reviewed 2×2×2 baselines |
+| 2026-09-21 | RD-022 | IN PROGRESS → DONE | 24/24 browser checks, zero axe exclusions, eight reviewed baselines, package/packed-consumer/dependency/host gates pass | Next: RD-023 |

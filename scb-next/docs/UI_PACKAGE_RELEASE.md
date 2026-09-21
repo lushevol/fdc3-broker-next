@@ -53,6 +53,7 @@ npm run build:packages
 npm run build:storybook --workspace ratan-design-origin
 npm run verify:package --workspace ratan-design-origin
 npm run verify:dependency-isolation
+npm run test:e2e:design-origin
 ```
 
 Then run affected Base/consumer compatibility tests and application production
@@ -61,6 +62,16 @@ builds. With Base/Ratan/Cashflow dev servers running, run
 Inspect the affected catalog controls on desktop/mobile in both appearance
 generations/modes. Document pre-existing consumer suite failures separately;
 do not label a failing broad suite as passing.
+
+The design-origin browser command builds and verifies the package, Storybook and
+independent tarball consumer before running axe, keyboard/focus, overlay, date and
+visual comparisons. It scans every catalog story in legacy/WebKit light/dark and
+compares the consumer at 390px/1280px in the same appearance matrix. The gate has
+no accessibility exclusions. For an intentional visual change, run
+`npm run test:e2e:design-origin:update`, inspect all changed PNGs under
+`tests/e2e/__screenshots__`, explain the change in the fix tracker or release
+record, then rerun `npm run test:e2e:design-origin`. Never update baselines solely
+to clear an unexplained comparison failure.
 
 verify:package packs into a fresh temporary consumer, installs ordinary peers,
 checks modern/legacy TypeScript declarations, CSS scoping/fonts, SSR and

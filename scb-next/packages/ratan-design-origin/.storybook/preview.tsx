@@ -4,6 +4,11 @@ import { RatanDesignProvider } from "../src";
 import "../assets/styles.css";
 
 const preview: Preview = {
+  parameters: {
+    a11y: {
+      test: "error",
+    },
+  },
   globalTypes: {
     mode: { toolbar: { items: ["light", "dark"] } },
     designGeneration: { toolbar: { items: ["legacy", "webkit"] } },
@@ -15,7 +20,9 @@ const preview: Preview = {
         mode={globals.mode}
         designGeneration={globals.designGeneration}
       >
-        <Story />
+        <div style={{ minHeight: "100vh" }}>
+          <Story />
+        </div>
       </RatanDesignProvider>
     ),
   ],

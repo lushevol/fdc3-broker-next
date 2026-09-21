@@ -1,4 +1,5 @@
 import { expect, test, type Locator } from '@playwright/test';
+import { expectNoActionableAxeViolations } from './accessibility';
 
 const consumerUrl = process.env.RATAN_DESIGN_CONSUMER_URL;
 test.skip(!consumerUrl, 'Requires the verified independent tarball consumer');
@@ -59,7 +60,7 @@ async function measuredContrast(
 for (const width of [390, 1280]) {
   for (const mode of ['light', 'dark']) {
     for (const generation of ['legacy', 'webkit']) {
-      test(`independent controls ${width}px ${generation}/${mode}`, async ({ page }, testInfo) => {
+      test(`independent controls ${width}px ${generation}/${mode}`, async ({ page }) => {
         const errors: Error[] = [];
         page.on('pageerror', (error) => errors.push(error));
         await page.setViewportSize({ width, height: 844 });
@@ -270,10 +271,20 @@ for (const width of [390, 1280]) {
         );
         for (let index = 1; index < controls.length; index++)
           expect(controls[index].top).toBeGreaterThanOrEqual(controls[index - 1].bottom);
-        await page.screenshot({
-          path: testInfo.outputPath('controls.png'),
-          fullPage: true,
-        });
+        await expectNoActionableAxeViolations(
+          page,
+          `consumer controls ${width}px ${generation}/${mode}`,
+        );
+        await expect(page).toHaveScreenshot(
+          `controls-${width}-${generation}-${mode}.png`,
+          {
+            animations: 'disabled',
+            caret: 'hide',
+            fullPage: true,
+            maxDiffPixelRatio: 0.005,
+            scale: 'css',
+          },
+        );
         expect(errors).toEqual([]);
       });
     }
@@ -551,4 +562,19 @@ test('closed loading overlay releases its underlying action', async ({ page }) =
   await target.focus();
   await page.keyboard.press('Enter');
   await expect(count).toHaveText('2');
+});
+
+test('date controls dismiss with Escape and restore trigger focus', async ({ page }) => {
+  await page.goto(`${consumerUrl!.replace(/\/$/, '')}/dates.html`);
+  const settlement = page.getByRole('textbox', { name: 'Settlement', exact: true });
+  await expect(settlement).toHaveValue('09/18/2026');
+  const trigger = page.getByRole('button', { name: /choose date/i }).first();
+  await trigger.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+  await expect(page.getByRole('textbox', { name: 'Complete period' }).first()).toBeVisible();
+  await expectNoActionableAxeViolations(page, 'optional date controls');
 });

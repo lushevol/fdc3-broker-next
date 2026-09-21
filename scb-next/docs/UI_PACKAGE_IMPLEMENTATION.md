@@ -905,6 +905,43 @@ the remaining inventory classification, and release governance remain open.
   changelog and release guidance record the measurement boundary, before/after
   bytes, budget and rollback target.
 
+### RD-022 specification: automated browser quality gates
+
+- A repository-owned command builds the package and Storybook, creates the
+  verified independent tarball consumer, serves both surfaces, and runs the
+  design-origin Playwright suites. The command fails on package verification,
+  browser interaction, accessibility, console/page errors, or visual comparison
+  failure and cleans up its child servers on success, failure, or interruption.
+- Axe-core from the installed Storybook accessibility addon scans every rendered
+  catalog story. Violations with `serious` or `critical` impact fail with the
+  affected rule, help URL, story and target. The same scanner covers the complete
+  consumer appearance matrix and the optional date surface. Any exclusion must
+  name the exact rule and surface, include a reason and owner in this contract,
+  and remain narrower than a component or story; RD-022 starts with no exclusions.
+- The independent consumer gates keyboard search clearing, criteria expansion and
+  collapse, dialog dismissal and trigger-focus restoration, closed/open loading
+  overlay hit testing, and optional date/date-range rendering. A date picker must
+  open from the keyboard, close with Escape and restore focus to its trigger.
+- Reviewed screenshot comparisons cover the consumer controls at 390x844 and
+  1280x844 for legacy/WebKit in light/dark mode. Animations and the caret are
+  disabled for capture; full-page CSS-pixel snapshots use a reviewed small pixel
+  tolerance. Updating baselines is a separate explicit command. Reviewers inspect
+  all changed images and run the ordinary gate again before accepting an update.
+- Baselines live beside the Playwright suite under a stable repository path. A
+  package, token, font, fixture, browser or Playwright change that alters pixels
+  must explain the intended visual change in the tracker; unchanged images must
+  never be regenerated merely to make a failing comparison pass.
+
+RD-022 delivered `test:e2e:design-origin` and its explicit `:update` companion.
+The ordinary command builds the package and Storybook, verifies and serves a fresh
+tarball consumer, then runs 24 Playwright tests. The final run passed the complete
+catalog axe matrix with no exclusions, eight reviewed screenshot comparisons,
+consumer axe scans, search/criteria/dialog/overlay/reduced-motion interactions and
+the optional date Escape/focus-restoration flow. The red runs found and fixed
+theme-dependent Loader contrast, LoadingOverlay contrast and keyboard access to
+long Snackbar messages; the scanner waits for finite transitions before measuring
+settled UI while leaving infinite loader animations available to motion tests.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

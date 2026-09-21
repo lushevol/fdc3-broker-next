@@ -23,7 +23,10 @@
   inputs and opt-in portal DataGrid headers/cells expose visible 2px keyboard focus
   indicators across light and dark modes.
 - Loader and PageLoader retain their visible status affordance but stop both ring
-  rotations when the browser requests reduced motion.
+  rotations when the browser requests reduced motion; status text now follows the
+  active theme's contrast-safe secondary text color.
+- LoadingOverlay uses a contrast-safe backdrop and long Snackbar messages expose
+  a keyboard-focusable scroll region.
 - Public contract matrix, compiling consumer examples and catalog links now record
   defaults, value/null behavior, callbacks/reasons, refs, slots, accessible names/
   IDs, style precedence and inherited MUI props. Font documentation distinguishes
@@ -39,5 +42,9 @@
   defaults, callbacks and selectors; portal policy remains with applications.
 - Verified public interfaces, independent tarball consumption, SSR/tree shaking,
   catalog states and integrated workspace journeys. See implementation evidence.
+- Repository browser gates now fail on serious/critical axe findings across every
+  catalog story and the independent consumer, verify keyboard/focus/overlay/date
+  behavior, and compare eight reviewed mobile/desktop legacy/WebKit light/dark
+  screenshots. Baseline updates require a separate explicit command and review.
 - Internal candidate only. Publication owners, registry and asset/Pro licensing
   decisions remain external release gates.

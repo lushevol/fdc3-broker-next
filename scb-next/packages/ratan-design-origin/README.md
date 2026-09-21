@@ -150,7 +150,8 @@ loader-specific attributes.
 Snackbar accepts plain text or React content in `message`, plus `action`,
 `severity`, `variant`, `alertsx`, and MUI Snackbar lifecycle props. Strings are
 never parsed as HTML. Its scrollable message region retains the legacy 50px
-height cap. Base's adapter alone preserves sanitized legacy HTML messages.
+height cap and is keyboard focusable so overflow can be scrolled without a
+pointer. Base's adapter alone preserves sanitized legacy HTML messages.
 
 Dialog composes a controlled MUI dialog with `titleComponents`, `actionComponents`,
 `onCloseButton`, `disabledClose` and `dividers`. MUI `onClose` retains its reason
@@ -224,6 +225,11 @@ Run `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`, and
 temporary independent consumer, checks declarations/assets/SSR/tree shaking,
 and prints its path. Run `npm run dev` in that printed consumer for port 8019.
 Use `npm run storybook` for appearance controls and component states on 6019.
+From `scb-next`, `npm run test:e2e:design-origin` builds those surfaces and runs
+the required catalog axe scan, consumer accessibility/interaction matrix, and
+eight reviewed screenshot comparisons. Use
+`npm run test:e2e:design-origin:update` only for an intentional visual change;
+inspect every changed PNG and rerun the ordinary command before accepting it.
 
 The tree-shaking gate uses the fixture's exact Vite 8.2.1 and externalizes React,
 ReactDOM, MUI Material/icons and Emotion. A core `Button` import renders only

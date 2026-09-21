@@ -11,6 +11,7 @@
   },
   "include": ["src"],
   "exclude": [
+    "src/dates-browser.tsx",
     "src/dates.tsx",
     "src/portal-browser.tsx",
     "src/server-dates.tsx",

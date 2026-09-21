@@ -52,8 +52,8 @@ export const LoaderRoot: StyledComponent<
       }
     `,
     [`& .${loaderClasses.text}`]: css`
-      fill: ${webkit ? newStyleTokens.color.textMuted : legacyTokens.color['base-color-grey']};
-      color: ${webkit ? newStyleTokens.color.textMuted : legacyTokens.color['base-color-grey']};
+      fill: ${theme.palette.text.secondary};
+      color: ${theme.palette.text.secondary};
       letter-spacing: 0.6px;
       text-overflow: ellipsis;
       max-width: 100%;

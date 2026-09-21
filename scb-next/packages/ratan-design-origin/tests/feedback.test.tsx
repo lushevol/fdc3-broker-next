@@ -37,6 +37,13 @@ describe('public feedback controls', () => {
 });
 
 describe('public notification content', () => {
+  it('makes the bounded message region keyboard scrollable', () => {
+    const message = 'Payment update '.repeat(20);
+    render(<Snackbar open message={message} />);
+
+    expect(screen.getByText(/Payment update Payment update/)).toHaveAttribute('tabindex', '0');
+  });
+
   it('treats strings as text and preserves React content and actions', () => {
     const retry = vi.fn();
     const { rerender } = render(<Snackbar open message="<b>Pending</b>" />);
