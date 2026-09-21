@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 18/30 DONE. Active: RD-019.** The clinic contains the review evidence
+**Progress: 19/30 DONE. Active: RD-020.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -43,7 +43,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-016](#rd-016) | Canonical token source | P2 | 2 | DONE |
 | [RD-017](#rd-017) | WebKit action states | P2 | 2 | DONE |
 | [RD-018](#rd-018) | Contrast and focus cues | P1 | 2 | DONE |
-| [RD-019](#rd-019) | Reduced motion | P2 | 2 | TODO |
+| [RD-019](#rd-019) | Reduced motion | P2 | 2 | DONE |
 | [RD-020](#rd-020) | Public contracts and font ownership | P2 | 2 | TODO |
 | [RD-021](#rd-021) | Tree shaking and package byte budget | P2 | 3 | TODO |
 | [RD-022](#rd-022) | Browser accessibility and visual gates | P2 | 3 | TODO |
@@ -949,15 +949,58 @@ Limitations / pre-existing failures / follow-up IDs: Base's repository-wide lint
 
 ### RD-019
 
-**Respect reduced-motion preferences.** P2 · Enhancement · TODO.
+**Respect reduced-motion preferences.** P2 · Enhancement · DONE.
 Dependencies: none; coordinate with RD-006. [Clinic](UI_PACKAGE_CLINIC.md#rd-019).
 
-- [ ] Specify reduced-motion behavior for animated loaders while keeping loading
+- [x] Specify reduced-motion behavior for animated loaders while keeping loading
   state understandable and accessible.
-- [ ] Implement the approved reduced-motion presentation using shared tokens/styles
+- [x] Implement the approved reduced-motion presentation using shared tokens/styles
   where appropriate, without changing the ordinary animation unintentionally.
-- [ ] Verify browser-emulated reduced motion and default motion, including loading
+- [x] Verify browser-emulated reduced motion and default motion, including loading
   announcements and both appearance generations.
+
+```text
+Status: DONE
+Completed: 2026-09-21
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-019 contract;
+  the independent fixture renders the public Loader, and design-origin.spec.ts
+  verifies ordinary timing, live reduced-motion switching, static visible rings,
+  and the preserved named polite status in legacy/WebKit and light/dark modes.
+  The four cases first failed with animation-name rotate after emulating reduce,
+  then passed after the CSS media override was added.
+GitNexus impact and staged detect_changes: LoaderRoot has no indexed dependants,
+  affected modules or execution processes and is LOW risk. JSX/style edges are
+  not represented for Loader, PageLoader or the compatibility export; package,
+  packed-consumer, Base adapter and browser gates cover those known consumers.
+  The fixture App is not indexed. The staged scope audit is recorded in the
+  stage commit evidence.
+Commands (working directory scb-next unless noted): focused feedback test;
+  package test, typecheck, lint, build and Storybook build; verify:package after
+  build; verify:dependency-isolation; fresh independent-consumer focused red/green
+  and full Playwright design-origin suites; from Base, focused Loader/PageLoader
+  tests, typecheck and production build; live design-origin-host Playwright journey.
+Outcomes: 10 Vitest files/102 tests plus three generator tests passed with 97.04%
+  line and 96.18% branch coverage. Package, Storybook, packed declarations/build,
+  SSR/tree-shaking and dependency isolation passed. The reduced-motion matrix
+  passed 4/4 and the complete browser suite passed 22/22. Base passed two files/
+  three tests plus typecheck/build. The required login -> New Tile -> Cashflow
+  render -> add/delete workspace journey passed at 1280x720 on
+  http://127.0.0.1:8001 with no page errors.
+Compatibility review and rollback target: default two-second outer and one-second
+  inner rotations, SVG geometry, colors, dimensions, status semantics and both
+  appearance branches are unchanged. Only `prefers-reduced-motion: reduce` stops
+  the transforms, using CSS so preference changes apply without remounting. Roll
+  back the two media overrides if a host requires motion despite the user setting.
+Limitations / pre-existing failures / follow-up IDs: verify:package consumes the
+  existing dist and therefore must follow the documented build step; the first
+  green attempt exposed that stale-output condition before a rebuilt tarball
+  passed. Storybook and the consumer retain their known chunk/module-directive
+  warnings. The live alpha API watcher again reproduced EMFILE while the required
+  Base/Ratan/Cashflow journey passed. RD-024 owns aggregate verification and
+  RD-029 owns historical host failures.
+```
 
 ### RD-020
 
@@ -1155,3 +1198,5 @@ or committed evidence.
 | 2026-09-21 | RD-017 | IN PROGRESS → DONE | Passing package, Storybook, packed-consumer, 16-case browser, Base and dependency-isolation gates | Next: RD-018 |
 | 2026-09-21 | RD-018 | TODO → IN PROGRESS | GitNexus LOW risk: action style three direct dependants; portal Config one; WebKit options one/Theme module; legacy factories none; no processes | Measure approved contrast pairs and restore browser-verified keyboard focus cues |
 | 2026-09-21 | RD-018 | IN PROGRESS → DONE | Passing package, Storybook, packed-consumer, 18-case browser, Base and live-host gates | Next: RD-019 |
+| 2026-09-21 | RD-019 | TODO → IN PROGRESS | GitNexus LOW risk: LoaderRoot has no indexed dependants or flows; fixture App is unindexed | Specify static reduced-motion behavior and add browser regressions |
+| 2026-09-21 | RD-019 | IN PROGRESS → DONE | Passing package, Storybook, packed-consumer, 22-case browser, Base and live-host gates | Next: RD-020 |

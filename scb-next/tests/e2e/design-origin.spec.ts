@@ -318,6 +318,36 @@ for (const mode of ['light', 'dark']) {
   });
 }
 
+for (const mode of ['light', 'dark']) {
+  for (const generation of ['legacy', 'webkit']) {
+    test(`loader respects reduced motion in ${generation}/${mode}`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.goto(consumerUrl!);
+      await page.getByLabel('Mode', { exact: true }).selectOption(mode);
+      await page.getByLabel('Design', { exact: true }).selectOption(generation);
+
+      const status = page.getByRole('status', { name: 'Refreshing trades' });
+      const outerRing = status.locator('.ratan-design-loader-outerLine');
+      const innerRing = status.locator('.ratan-design-loader-innerLine');
+      await expect(status).toHaveAttribute('aria-live', 'polite');
+      await expect(status).toContainText('Refreshing trades');
+      await expect(outerRing).toBeVisible();
+      await expect(innerRing).toBeVisible();
+      await expect(outerRing).toHaveCSS('animation-duration', '2s');
+      await expect(innerRing).toHaveCSS('animation-duration', '1s');
+      await expect(outerRing).not.toHaveCSS('animation-name', 'none');
+      await expect(innerRing).not.toHaveCSS('animation-name', 'none');
+
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await expect(outerRing).toHaveCSS('animation-name', 'none');
+      await expect(innerRing).toHaveCSS('animation-name', 'none');
+      await expect(outerRing).toBeVisible();
+      await expect(innerRing).toBeVisible();
+      await expect(status).toHaveAccessibleName('Refreshing trades');
+    });
+  }
+}
+
 test('keyboard users can see the focused action', async ({ page }) => {
   await page.goto(consumerUrl!);
   await page.getByRole('textbox', { name: 'Amount' }).focus();

@@ -7,6 +7,7 @@ import {
   Dialog,
   LoadingOverlay,
   LoadingButton,
+  Loader,
   Input,
   Label,
   LabelMenuItem,
@@ -188,6 +189,10 @@ function App() {
           </div>
         </form>
         <output aria-label="Selected currency">{currency}</output>
+        <section aria-labelledby="loader-demo-title">
+          <h2 id="loader-demo-title">Loader motion behavior</h2>
+          <Loader text="Refreshing trades" size={48} />
+        </section>
         <section className="criteria-demo" aria-labelledby="criteria-demo-title">
           <h2 id="criteria-demo-title">Search criteria behavior</h2>
           <SearchConditionContainer id="consumer-search-criteria">

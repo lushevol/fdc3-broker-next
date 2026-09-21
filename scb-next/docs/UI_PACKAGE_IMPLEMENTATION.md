@@ -839,6 +839,23 @@ the remaining inventory classification, and release governance remain open.
   keyboard traversal and computed placeholder, helper/error, input, button, and
   optional-peer DataGrid focus colors in light/dark modes.
 
+### RD-019 specification: reduced-motion loaders
+
+- Loader and PageLoader keep the existing two-ring SVG affordance, visible status
+  text when supplied, polite live-region semantics, accessible name, dimensions,
+  colors, and ordinary rotation timing in both appearance generations and modes.
+  Without a reduced-motion request, the outer ring rotates with the existing
+  two-second cubic-bezier cycle and the inner ring with the existing one-second
+  linear cycle.
+- Under `@media (prefers-reduced-motion: reduce)`, both ring segments remain
+  visible but stop rotating. The static affordance and status semantics continue
+  to communicate loading without substituting another component or requiring
+  JavaScript media-query state.
+- The preference is resolved by CSS so a live operating-system/browser preference
+  change takes effect without remounting. The independent consumer verifies the
+  computed animation and status contract for legacy/WebKit in light/dark modes;
+  existing loading-action announcement regressions remain unchanged.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

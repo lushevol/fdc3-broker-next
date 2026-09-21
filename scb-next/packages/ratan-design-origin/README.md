@@ -111,8 +111,11 @@ to the trigger after that controlled close transition.
 
 Loader announces a loading status (default accessible name: "Loading...") and
 shows visible text only when supplied. `size` accepts a number or CSS dimension;
-the legacy 90px maximum remains. PageLoader centers it in an absolute full-page
-region and accepts `slotProps.loader` for loader-specific attributes.
+the legacy 90px maximum remains. Its two rings retain their ordinary 2s/1s
+rotation unless the browser requests reduced motion, when the visible affordance
+becomes static while the status announcement remains available. PageLoader
+centers it in an absolute full-page region and accepts `slotProps.loader` for
+loader-specific attributes.
 Snackbar accepts plain text or React content in `message`, plus `action`,
 `severity`, `variant`, `alertsx`, and MUI Snackbar lifecycle props. Strings are
 never parsed as HTML. Its scrollable message region retains the legacy 50px

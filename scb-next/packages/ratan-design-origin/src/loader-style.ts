@@ -83,6 +83,9 @@ export const LoaderRoot: StyledComponent<
       stroke-miterlimit: 10;
       animation: rotate 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
       transform-origin: 20px 20px;
+      @media (prefers-reduced-motion: reduce) {
+        animation: none;
+      }
     `,
     [`& .${loaderClasses.outerCircle}`]: css`
       fill: ${webkit ? newStyleTokens.color.border : legacyTokens.color['base-color-grey-xlight']};
@@ -94,6 +97,9 @@ export const LoaderRoot: StyledComponent<
       stroke-miterlimit: 10;
       animation: rotate 1s linear infinite;
       transform-origin: 20px 20px;
+      @media (prefers-reduced-motion: reduce) {
+        animation: none;
+      }
     `,
     [`& .${loaderClasses.innerCircle}`]: css`
       fill: ${webkit ? newStyleTokens.color.border : legacyTokens.color['base-color-grey-xlight']};

@@ -22,6 +22,8 @@
 - WebKit placeholders and focus rings use reviewed semantic colors; legacy outlined
   inputs and opt-in portal DataGrid headers/cells expose visible 2px keyboard focus
   indicators across light and dark modes.
+- Loader and PageLoader retain their visible status affordance but stop both ring
+  rotations when the browser requests reduced motion.
 - Collapsed search criteria keep the visible row interactive while clipped rows
   leave keyboard navigation; the toggle now exposes its state and controlled region.
 - Base and Ratan/Cashflow adoption behind their existing compatible exports,
