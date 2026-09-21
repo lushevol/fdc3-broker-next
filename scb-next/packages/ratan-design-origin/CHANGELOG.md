@@ -46,5 +46,9 @@
   catalog story and the independent consumer, verify keyboard/focus/overlay/date
   behavior, and compare eight reviewed mobile/desktop legacy/WebKit light/dark
   screenshots. Baseline updates require a separate explicit command and review.
+- Dependency verification now enforces the package's full React/MUI/Emotion peer
+  ranges, host declarations and Vite-resolved core identity for Base, Ratan and
+  Cashflow. Optional integrations are checked only when host-declared, with
+  negative fixtures for unsupported, missing, duplicate and incompatible cases.
 - Internal candidate only. Publication owners, registry and asset/Pro licensing
   decisions remain external release gates.

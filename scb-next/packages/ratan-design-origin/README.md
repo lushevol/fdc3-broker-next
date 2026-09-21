@@ -173,14 +173,18 @@ surfaces do not catch errors, dispatch loading, select support addresses or
 open navigation. Hosts own those decisions.
 
 React / ReactDOM, Material / icons and Emotion are required external peers. The
-verified matrix is React 18.3.1, Material/icons 5.18.0, Emotion 11.14.0 / 11.14.1.
+supported ranges are React/ReactDOM `^18.2.0`, Material/icons `^5.18.0`,
+Emotion React `^11.14.0` and Emotion styled `^11.14.1`. The repository hosts
+currently resolve React 18.3.1, Material/icons 5.18.0 and Emotion 11.14.0/11.14.1.
 ESM and declarations are shipped; no CommonJS export is promised. Core excludes
 grid/date/Pro integrations and WebKit element registration.
 
-The optional host-installed peers are `@mui/x-date-pickers` (`6.20.2`),
-`@mui/x-date-pickers-pro` (`6.20.2`), `@mui/x-data-grid` (`6.20.4`),
-`@mui/base` (`5.0.0-beta.70`) and `dayjs` (`1.11.21`). They are never loaded by
-the core entry. Range hosts own MUI X Pro licensing and license initialization.
+The optional host-installed peer ranges are `@mui/x-date-pickers` (`~6.20.2`),
+`@mui/x-date-pickers-pro` (`~6.20.2`), `@mui/x-data-grid` (`~6.20.4`),
+`@mui/base` (`5.0.0-beta.70`) and `dayjs` (`^1.11.21`). They are never loaded by
+the core entry. An integration is present only when the host declares it; an
+ancestor-hoisted copy does not enable package entries. Range hosts own date-entry
+policy. Hosts own MUI X Pro licensing and license initialization.
 Wrap dates in LocalizationProvider with AdapterDayjs. Hosts own localization,
 timezone, format and validation policy, including `adapterLocale`.
 Controls retain `labelPosition="top" | "left"`, `hidden`, Dayjs values and MUI X
@@ -230,6 +234,13 @@ the required catalog axe scan, consumer accessibility/interaction matrix, and
 eight reviewed screenshot comparisons. Use
 `npm run test:e2e:design-origin:update` only for an intentional visual change;
 inspect every changed PNG and rerun the ordinary command before accepting it.
+
+Also from `scb-next`, `npm run test:dependency-isolation` exercises unsupported,
+missing, duplicate and optional-peer fixtures. `npm run verify:dependency-isolation`
+loads each host's Vite policy and checks that declared versions satisfy both the
+host and package ranges, while package-originated core imports resolve to the same
+physical React/MUI/Emotion instances as host imports. It reports undeclared
+optional integrations as absent even when npm has hoisted a copy elsewhere.
 
 The tree-shaking gate uses the fixture's exact Vite 8.2.1 and externalizes React,
 ReactDOM, MUI Material/icons and Emotion. A core `Button` import renders only

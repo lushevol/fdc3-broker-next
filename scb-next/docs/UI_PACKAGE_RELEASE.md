@@ -52,6 +52,7 @@ npm run lint --workspace ratan-design-origin
 npm run build:packages
 npm run build:storybook --workspace ratan-design-origin
 npm run verify:package --workspace ratan-design-origin
+npm run test:dependency-isolation
 npm run verify:dependency-isolation
 npm run test:e2e:design-origin
 ```
@@ -87,12 +88,21 @@ The RD-021 reference improved from 21,935 to 427 bytes. Treat this as package-co
 evidence for that import boundary, not an application bundle or transfer-size
 claim; a budget increase requires a reviewed public Button contract change.
 
+The dependency fixture command must fail for unsupported core versions, missing
+required declarations, split host/package core resolution and incompatible
+declared optional peers; undeclared optional peers remain valid. The runtime
+command loads Base, Ratan and Cashflow Vite policies, validates resolved versions
+against the host declaration and package peer range, and compares physical core
+resolution from host and package importers. It does not change federation sharing.
+
 ## Dependencies and Adoption
 
-Verified core: React/ReactDOM 18.3.1, Material/icons 5.18.0, Emotion React 11.14.0/
-styled 11.14.1. Dates: MUI X pickers/Pro 6.20.2 and Dayjs 1.11.21. Portal-theme
-declarations: grid 6.20.4 plus Base 5.0.0-beta.70 for its legacy upstream types.
-Core does not install/load these optional integrations.
+Supported core ranges: React/ReactDOM `^18.2.0`, Material/icons `^5.18.0`,
+Emotion React `^11.14.0` and styled `^11.14.1`. Base, Ratan and Cashflow currently
+resolve 18.3.1, 5.18.0, 11.14.0 and 11.14.1 respectively. Optional ranges are MUI
+X pickers/Pro `~6.20.2`, grid `~6.20.4`, Base `5.0.0-beta.70` and Dayjs `^1.11.21`.
+Core does not install or load these optional integrations. Base currently declares
+pickers, Pro, grid and Dayjs; Ratan and Cashflow declare none of the optional set.
 
 The explicit stylesheet packages SC Prosper Sans, Open Dyslexic, Inter and Roboto
 Mono WOFF2 files recorded in `assets/webkit-sources.json`; Poppins is host-provided

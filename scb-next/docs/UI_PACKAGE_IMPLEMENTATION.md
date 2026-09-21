@@ -942,6 +942,35 @@ theme-dependent Loader contrast, LoadingOverlay contrast and keyboard access to
 long Snackbar messages; the scanner waits for finite transitions before measuring
 settled UI while leaving infinite loader animations available to motion tests.
 
+### RD-023 specification: supported dependency resolution
+
+- `ratan-design-origin` is the source of the supported peer ranges. Every host must
+  declare each required React, ReactDOM, MUI and Emotion peer as a production
+  dependency, resolve an installed version accepted by both its own declaration and
+  the package peer range, and resolve host imports and package-originated imports to
+  the same physical package instance through its existing Vite policy.
+- Required core peers are `react`, `react-dom`, `@mui/material`,
+  `@mui/icons-material`, `@emotion/react` and `@emotion/styled`. The verifier checks
+  full supported ranges, including minor and patch floors, instead of treating a
+  matching major version as sufficient. Missing declarations, missing installs,
+  unsupported versions and split host/package resolution are failures.
+- Optional peers remain `@mui/x-date-pickers`, `@mui/x-date-pickers-pro`,
+  `@mui/x-data-grid`, `@mui/base` and `dayjs`. Incidental ancestor hoisting does not
+  make an integration present: a host owns an optional integration only when it
+  declares that package. A declared integration must resolve and satisfy both the
+  host declaration and the package peer range; an undeclared integration is skipped
+  and core verification must still pass. Exact prerelease contracts such as
+  `@mui/base@5.0.0-beta.70` remain exact.
+- Automated negative fixtures cover unsupported core versions, missing required
+  dependencies, duplicate core resolution, absent optional peers and incompatible
+  declared optional peers. The repository command must emit host/package/version
+  details for every failure and a concise per-host resolution report on success.
+- The independent packed consumer continues to prove core operation without any
+  optional peer, then verifies supported optional entries after explicit install.
+  Base, Ratan and Cashflow production builds prove the checked host policies remain
+  executable. This stage validates existing Vite dedupe and React federation
+  settings but does not alter federation sharing.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

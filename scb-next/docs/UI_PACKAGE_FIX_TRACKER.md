@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 22/30 DONE. Active: RD-023.** The clinic contains the review evidence
+**Progress: 23/30 DONE. Active: RD-024.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -47,7 +47,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-020](#rd-020) | Public contracts and font ownership | P2 | 2 | DONE |
 | [RD-021](#rd-021) | Tree shaking and package byte budget | P2 | 3 | DONE |
 | [RD-022](#rd-022) | Browser accessibility and visual gates | P2 | 3 | DONE |
-| [RD-023](#rd-023) | Dependency resolution verification | P2 | 3 | TODO |
+| [RD-023](#rd-023) | Dependency resolution verification | P2 | 3 | DONE |
 | [RD-024](#rd-024) | Lint and aggregate verification | P2 | 3 | TODO |
 | [RD-025](#rd-025) | Shared pure host adapters | P2 | 4 | TODO |
 | [RD-026](#rd-026) | Explicit host appearance contract | P2 | 4 | TODO |
@@ -1172,16 +1172,57 @@ Limitations / pre-existing failures / follow-up IDs: Storybook and hosts retain
 
 ### RD-023
 
-**Validate supported versions and runtime dependency resolution.** P2 · Static finding · TODO.
+**Validate supported versions and runtime dependency resolution.** P2 · Static finding · DONE.
 Dependencies: RD-029 when affected host suites are needed.
 [Clinic](UI_PACKAGE_CLINIC.md#rd-023).
 
-- [ ] Check supported peer versions rather than only Material/icons major version 5.
-- [ ] Verify React, ReactDOM, MUI and Emotion resolve to each host's intended runtime;
+- [x] Check supported peer versions rather than only Material/icons major version 5.
+- [x] Verify React, ReactDOM, MUI and Emotion resolve to each host's intended runtime;
   check optional integrations when present and core operation when absent.
-- [ ] Exercise negative fixtures for unsupported or duplicate resolution and run
+- [x] Exercise negative fixtures for unsupported or duplicate resolution and run
   the independent consumer plus affected host checks. Keep federation sharing
   changes outside this fix unless separately specified and measured.
+
+```text
+Status: DONE
+Completed: 2026-09-21
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-023 defines required
+  peer ownership, full-range checks, Vite-resolved identity, optional declaration
+  semantics and the five required negative fixture classes. The Node contract
+  suite first failed because the major-only script exported no validator; it now
+  passes nine fixtures covering supported, unsupported, missing, duplicate,
+  absent-optional, incompatible-optional, exact prerelease and host-range cases.
+GitNexus impact and staged detect_changes: refreshed at 7d23c209. The original
+  top-level expectations constant has zero direct dependants, affected processes
+  or modules: LOW risk. The verifier had no existing function/class/method symbols.
+  The final staged audit reports eight intended files, 25 indexed symbols, zero
+  affected execution processes and LOW risk.
+Commands (working directory scb-next unless noted): test:dependency-isolation;
+  verify:dependency-isolation; package test/coverage and token-generator tests;
+  package typecheck, lint, build, Storybook build and verify:package; Base typecheck;
+  Base, Ratan and Cashflow production builds; node --check; git diff --check.
+Outcomes: all nine dependency fixtures pass. Vite resolution verifies six required
+  peers per host at React/ReactDOM 18.3.1, Material/icons 5.18.0, Emotion React
+  11.14.0 and styled 11.14.1. Base additionally verifies declared pickers/Pro
+  6.20.2, grid 6.20.4 and Dayjs 1.11.23; Ratan/Cashflow correctly ignore undeclared
+  optional copies. The fresh tarball consumer passed core-without-optionals,
+  explicit optional entries, declarations, build, SSR and tree-shaking checks.
+  Eleven Vitest files/107 tests plus three generator tests passed with 97.04% line
+  and 96.15% branch coverage. Package typecheck/lint/build, Storybook, Base
+  typecheck and all three host builds passed.
+Compatibility review and rollback target: public runtime exports, peer ranges,
+  host declarations and Vite/federation configuration are unchanged. The verifier
+  now evaluates the existing Vite policies from host and package importers. Roll
+  back the verifier/test/docs command set if a supported Vite release cannot expose
+  equivalent resolution evidence; do not weaken the package peer contract or add
+  federation sharing as part of that rollback.
+Limitations / pre-existing failures / follow-up IDs: Vite retains config-loader and
+  Cashflow optimizeDeps deprecation warnings, Storybook retains its chunk warning,
+  and the packed consumer retains upstream MUI module-directive warnings. RD-024
+  owns aggregate verification; RD-030 owns real-host performance measurements.
+```
 
 ### RD-024
 
@@ -1332,3 +1373,5 @@ or committed evidence.
 | 2026-09-21 | RD-021 | IN PROGRESS → DONE | Button-only package code is 427/2,048 bytes with only Button.js rendered; package, Storybook, packed-consumer, dependency and host gates pass | Next: RD-022 |
 | 2026-09-21 | RD-022 | TODO → IN PROGRESS | Existing 22-case browser suite has LOW graph risk, manual screenshot artifacts and no failing axe command | Add catalog/consumer axe scans, date interaction and reviewed 2×2×2 baselines |
 | 2026-09-21 | RD-022 | IN PROGRESS → DONE | 24/24 browser checks, zero axe exclusions, eight reviewed baselines, package/packed-consumer/dependency/host gates pass | Next: RD-023 |
+| 2026-09-21 | RD-023 | TODO → IN PROGRESS | GitNexus LOW risk: verifier constant has no direct dependants, processes or modules | Specification added; write dependency-contract negative fixtures next |
+| 2026-09-21 | RD-023 | IN PROGRESS → DONE | Nine negative/positive fixtures, full Vite resolution matrix, packed consumer and Base/Ratan/Cashflow checks pass | Next: RD-024 |
