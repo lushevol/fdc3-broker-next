@@ -14,6 +14,7 @@ import {
   type TimePickerProps as MuiTimePickerProps
 } from "@mui/x-date-pickers/TimePicker";
 import { datePickerClasses, datePickerStyle } from "./date-style.js";
+import { composePickerTextFieldSlotProps } from "./picker-slot-props.js";
 import { composeSx } from "./sx.js";
 
 export { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -36,6 +37,7 @@ export const DatePicker = /*#__PURE__*/ React.memo(function DatePicker({
   hidden,
   sx,
   className,
+  slotProps,
   ...rest
 }: DatePickerProps) {
   return (
@@ -47,7 +49,13 @@ export const DatePicker = /*#__PURE__*/ React.memo(function DatePicker({
         .filter(Boolean)
         .join(" ")}
       value={value === undefined ? undefined : value === null ? null : dayjs(value)}
-      slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
+      slotProps={{
+        ...slotProps,
+        textField: composePickerTextFieldSlotProps(
+          slotProps?.textField,
+          hidden
+        )
+      }}
       sx={composeSx(sx, hidden ? { display: "none!important" } : undefined)}
       {...rest}
     />
@@ -69,6 +77,7 @@ export const DateTimePicker = /*#__PURE__*/ React.memo(function DateTimePicker({
   hidden,
   sx,
   className,
+  slotProps,
   ...rest
 }: DateTimePickerProps) {
   return (
@@ -80,7 +89,13 @@ export const DateTimePicker = /*#__PURE__*/ React.memo(function DateTimePicker({
         .filter(Boolean)
         .join(" ")}
       value={value === undefined ? undefined : value === null ? null : dayjs(value)}
-      slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
+      slotProps={{
+        ...slotProps,
+        textField: composePickerTextFieldSlotProps(
+          slotProps?.textField,
+          hidden
+        )
+      }}
       sx={composeSx(sx, hidden ? { display: "none!important" } : undefined)}
       {...rest}
     />
@@ -102,6 +117,7 @@ export const TimePicker = /*#__PURE__*/ React.memo(function TimePicker({
   hidden,
   sx,
   className,
+  slotProps,
   ...rest
 }: TimePickerProps) {
   return (
@@ -113,7 +129,13 @@ export const TimePicker = /*#__PURE__*/ React.memo(function TimePicker({
         .filter(Boolean)
         .join(" ")}
       value={value === undefined ? undefined : value === null ? null : dayjs(value)}
-      slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
+      slotProps={{
+        ...slotProps,
+        textField: composePickerTextFieldSlotProps(
+          slotProps?.textField,
+          hidden
+        )
+      }}
       sx={composeSx(sx, hidden ? { display: "none!important" } : undefined)}
       {...rest}
     />

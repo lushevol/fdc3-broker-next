@@ -242,6 +242,15 @@ host and package ranges, while package-originated core imports resolve to the sa
 physical React/MUI/Emotion instances as host imports. It reports undeclared
 optional integrations as absent even when npm has hoisted a copy elsewhere.
 
+`npm run verify:design-origin` is the complete candidate gate. It runs package
+tests/coverage, typecheck and zero-warning lint; dependency fixtures and host
+resolution; the package/Storybook/tarball/browser gate; Base typecheck; and the
+Base, Ratan and Cashflow production builds. Install workspace dependencies and
+Playwright Chromium first, keep ports 8019 and 8020 free, and allow npm registry or
+cache access for the temporary consumer. No application/backend service is started
+separately. Azure uses `azure-pipelines-design-origin-quality.yml`; an external CI
+template can invoke the same command after `npm ci` and Chromium installation.
+
 The tree-shaking gate uses the fixture's exact Vite 8.2.1 and externalizes React,
 ReactDOM, MUI Material/icons and Emotion. A core `Button` import renders only
 `Button.js`: 427 uncompressed package-code bytes after the RD-021 fix, down from

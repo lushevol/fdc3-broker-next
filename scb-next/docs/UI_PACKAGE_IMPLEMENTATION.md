@@ -971,6 +971,32 @@ settled UI while leaving infinite loader animations available to motion tests.
   executable. This stage validates existing Vite dedupe and React federation
   settings but does not alter federation sharing.
 
+### RD-024 specification: lint policy and aggregate quality gate
+
+- Package TypeScript and TSX use the recommended non-type-aware TypeScript rules;
+  React components use the recommended Hooks rules; and JSX uses the recommended
+  accessibility rules. The package declares each plugin directly, treats findings
+  as errors, retains its existing JavaScript safety rules, and completes with zero
+  warnings. Exceptions must name the exact rule and narrow file/line scope; this
+  stage starts with no blanket rule disablement.
+- `npm run verify:design-origin` is the canonical repository quality command. It
+  runs labeled steps sequentially: package tests/coverage, typecheck and lint;
+  dependency fixture/runtime checks; the ordinary RD-022 browser command (which
+  builds and verifies the package, catalog and independent tarball consumer); Base
+  typecheck; and Base, Ratan and Cashflow production builds. A step failure stops
+  later work and reports both the label and failed command without replacing its
+  exit status or masking its output.
+- The command owns the temporary consumer and catalog servers on ports 8019/8020
+  through the RD-022 runner. It requires installed workspace dependencies, a
+  Playwright Chromium binary, those ports to be free and registry/cache access for
+  the fresh consumer install; it requires no separately started application or
+  backend service. Snapshot updates are never part of the aggregate gate.
+- Unit fixtures prove all configured steps run in order on success and that a
+  representative non-zero gate stops the sequence with actionable context. The
+  real command must pass on the clean candidate. A checked-in Azure pipeline installs
+  dependencies and Chromium before invoking the same command; external templates
+  may call it directly but must not substitute a narrower set of gates.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

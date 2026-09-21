@@ -1,0 +1,41 @@
+trigger: none
+
+pr:
+  paths:
+    include:
+      - scb-next/azure-pipelines-design-origin-quality.yml
+      - scb-next/docs/UI_PACKAGE_*.md
+      - scb-next/package.json
+      - scb-next/package-lock.json
+      - scb-next/packages/ratan-design-origin/**
+      - scb-next/scripts/run-design-origin-browser.mjs
+      - scb-next/scripts/verify-dependency-isolation.mjs
+      - scb-next/scripts/verify-dependency-isolation.test.mjs
+      - scb-next/scripts/verify-design-origin-quality.mjs
+      - scb-next/scripts/verify-design-origin-quality.test.mjs
+      - scb-next/tests/e2e/design-origin*.spec.ts
+      - scb-next/tests/e2e/__screenshots__/**
+      - scb-next/web/mfe-base-origin/**
+      - scb-next/web/mfe-ratan-container-origin/**
+      - scb-next/web/mfe-cashflow-blotter-origin/**
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: NodeTool@0
+    displayName: Use Node.js 24
+    inputs:
+      versionSpec: 24.x
+
+  - script: npm ci
+    displayName: Install scb-next dependencies
+    workingDirectory: scb-next
+
+  - script: npx playwright install --with-deps chromium
+    displayName: Install Chromium
+    workingDirectory: scb-next
+
+  - script: npm run verify:design-origin
+    displayName: Verify ratan-design-origin candidate
+    workingDirectory: scb-next

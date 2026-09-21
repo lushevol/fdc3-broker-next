@@ -10,7 +10,7 @@ import {
 } from "./action-style.js";
 import type { DesignGeneration } from "./theme/index.js";
 
-export interface ToggleButtonProps extends MuiToggleButtonProps {}
+export type ToggleButtonProps = MuiToggleButtonProps;
 
 const defaultStyle = (theme: Theme) => ({
   minWidth: "100px",

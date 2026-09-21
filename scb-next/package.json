@@ -48,9 +48,11 @@
     "test:e2e": "playwright test",
     "test:e2e:design-origin": "node ./scripts/run-design-origin-browser.mjs",
     "test:e2e:design-origin:update": "node ./scripts/run-design-origin-browser.mjs --update-snapshots",
+    "test:quality-runner": "node --test ./scripts/verify-design-origin-quality.test.mjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test:dependency-isolation": "node --test ./scripts/verify-dependency-isolation.test.mjs",
-    "verify:dependency-isolation": "node ./scripts/verify-dependency-isolation.mjs"
+    "verify:dependency-isolation": "node ./scripts/verify-dependency-isolation.mjs",
+    "verify:design-origin": "node ./scripts/verify-design-origin-quality.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

@@ -3,7 +3,7 @@ import MuiButton, { type ButtonProps } from "@mui/material/Button";
 import { lighten, styled } from "@mui/material/styles";
 import { getWebkitActionStyle } from "./action-style.js";
 
-export interface ResetButtonProps extends ButtonProps {}
+export type ResetButtonProps = ButtonProps;
 
 const ResetButtonRoot = /*#__PURE__*/ styled(MuiButton)(({ theme }) => {
   if (theme.ratan?.designGeneration === "webkit") {

@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 23/30 DONE. Active: RD-024.** The clinic contains the review evidence
+**Progress: 24/30 DONE. Next: RD-025.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -48,7 +48,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-021](#rd-021) | Tree shaking and package byte budget | P2 | 3 | DONE |
 | [RD-022](#rd-022) | Browser accessibility and visual gates | P2 | 3 | DONE |
 | [RD-023](#rd-023) | Dependency resolution verification | P2 | 3 | DONE |
-| [RD-024](#rd-024) | Lint and aggregate verification | P2 | 3 | TODO |
+| [RD-024](#rd-024) | Lint and aggregate verification | P2 | 3 | DONE |
 | [RD-025](#rd-025) | Shared pure host adapters | P2 | 4 | TODO |
 | [RD-026](#rd-026) | Explicit host appearance contract | P2 | 4 | TODO |
 | [RD-027](#rd-027) | Alpha direct-adoption pilot | P3 | 4 | TODO |
@@ -1226,15 +1226,46 @@ Limitations / pre-existing failures / follow-up IDs: Vite retains config-loader 
 
 ### RD-024
 
-**Strengthen lint and provide an aggregate quality command.** P2 · Enhancement · TODO.
+**Strengthen lint and provide an aggregate quality command.** P2 · Enhancement · DONE.
 Dependencies: RD-021–RD-023. [Clinic](UI_PACKAGE_CLINIC.md#rd-024).
 
-- [ ] Add suitable TypeScript, React Hooks and JSX accessibility rules, resolving
+- [x] Add suitable TypeScript, React Hooks and JSX accessibility rules, resolving
   actionable findings with scoped changes and documented exceptions.
-- [ ] Provide a repository-owned command aggregating the relevant package,
+- [x] Provide a repository-owned command aggregating the relevant package,
   distribution and browser gates; document required services and external CI use.
-- [ ] Demonstrate successful exit on a clean candidate and failed exit when a
+- [x] Demonstrate successful exit on a clean candidate and failed exit when a
   representative gate fails; preserve actionable logs and avoid masking failures.
+
+```text
+Status: DONE
+Started: 2026-09-21
+Completed: 2026-09-22
+Owner: Codex
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-024 defines the
+  TypeScript/Hooks/JSX-a11y policy, zero-warning/exception boundary, sequential
+  aggregate steps, failure semantics, browser prerequisites and CI entry point.
+GitNexus impact: eslint.config.mjs has no indexed default-export symbol or execution
+  process. DatePicker, DateTimePicker, TimePicker and DateRangePicker were LOW risk,
+  with at most two direct dependants and no indexed processes. The aggregate runner
+  and picker slot-prop composer are new symbols; final staged scope is checked with
+  detect_changes.
+Completion evidence: the package passes 107 Vitest cases with 95.53% statements,
+  95.97% branches and zero lint warnings. Runner fixtures prove ordered success and
+  fail-fast output that includes the failed label/command. The real aggregate gate
+  passes dependency fixtures/resolution, package/Storybook/tarball/SSR verification,
+  all 24 browser/axe/visual cases, Base typecheck and Base/Ratan/Cashflow builds.
+  A pristine HEAD archive plus the intended package manifest reproduced the checked
+  lockfile exactly. The picker slot merge also keeps hidden fields non-visible with
+  the currently locked MUI/testing stack while preserving caller text-field props.
+Compatibility review and rollback target: no public exports, peer ranges, host
+  adapters or federation policy changed. Type-only empty-interface aliases preserve
+  assignability; date wrappers preserve caller slot props and the existing hidden
+  contract. Roll back the lint config, aggregate scripts/pipeline and picker slot
+  merge together if the gate cannot run on a supported CI image.
+Limitations / pre-existing failures / follow-up IDs: upstream MUI directive/license,
+  Vite config-loader/optimizeDeps and Storybook chunk advisories remain visible.
+  CI ownership is assigned by RD-028; live-host performance is measured by RD-030.
+```
 
 ## Phase 4: Adoption and ownership
 
@@ -1375,3 +1406,5 @@ or committed evidence.
 | 2026-09-21 | RD-022 | IN PROGRESS → DONE | 24/24 browser checks, zero axe exclusions, eight reviewed baselines, package/packed-consumer/dependency/host gates pass | Next: RD-023 |
 | 2026-09-21 | RD-023 | TODO → IN PROGRESS | GitNexus LOW risk: verifier constant has no direct dependants, processes or modules | Specification added; write dependency-contract negative fixtures next |
 | 2026-09-21 | RD-023 | IN PROGRESS → DONE | Nine negative/positive fixtures, full Vite resolution matrix, packed consumer and Base/Ratan/Cashflow checks pass | Next: RD-024 |
+| 2026-09-21 | RD-024 | TODO → IN PROGRESS | ESLint config has no indexed export/process; aggregate runner is new | Specification added; write fail-fast runner fixtures next |
+| 2026-09-22 | RD-024 | IN PROGRESS → DONE | 107 tests, zero-warning lint, three runner fixtures, 24 browser checks and Base/Ratan/Cashflow builds pass; pristine lock reconstruction matches | Next: RD-025 |

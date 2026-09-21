@@ -50,5 +50,11 @@
   ranges, host declarations and Vite-resolved core identity for Base, Ratan and
   Cashflow. Optional integrations are checked only when host-declared, with
   negative fixtures for unsupported, missing, duplicate and incompatible cases.
+- Package lint now applies recommended TypeScript, React Hooks and JSX accessibility
+  rules with zero warnings. A fail-fast repository command and Azure entry point
+  aggregate package, dependency, browser, packed-consumer and affected host gates.
+- Date wrappers now merge their required label and hidden styles at the rendered
+  text-field slot while preserving caller slot props, keeping the established
+  `hidden` contract stable across the locked MUI and DOM-testing versions.
 - Internal candidate only. Publication owners, registry and asset/Pro licensing
   decisions remain external release gates.

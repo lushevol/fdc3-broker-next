@@ -41,9 +41,10 @@ describe("public date integration", () => {
         </RatanDesignProvider>
       );
       const input = screen.getByLabelText("Schedule");
-      expect(input).not.toBeVisible();
+      const root = input.closest(".host-date");
+      expect(root).not.toBeVisible();
       expect(screen.getByText("Host hint")).toBeInTheDocument();
-      expect(input.closest(".host-date")).toHaveStyle({
+      expect(root).toHaveStyle({
         display: "none",
         width: "240px"
       });

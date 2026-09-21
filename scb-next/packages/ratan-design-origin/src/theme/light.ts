@@ -1,5 +1,4 @@
-import { darken, lighten } from "@mui/material/styles";
-import { legacyTokens as custom } from "../tokens/legacy.js";
+import { lighten } from "@mui/material/styles";
 
 const getControlTheme = () => ({
   palette: {

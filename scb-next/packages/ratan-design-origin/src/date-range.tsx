@@ -7,6 +7,7 @@ import {
 } from "@mui/x-date-pickers-pro/DateRangePicker";
 import { SingleInputDateRangeField } from "@mui/x-date-pickers-pro/SingleInputDateRangeField";
 import { datePickerClasses, datePickerStyle } from "./date-style.js";
+import { composePickerTextFieldSlotProps } from "./picker-slot-props.js";
 import { composeSx } from "./sx.js";
 
 export interface DateRangePickerProps extends MuiDateRangePickerProps<Dayjs> {
@@ -26,6 +27,7 @@ export const DateRangePicker = /*#__PURE__*/ React.memo(
     hidden,
     sx,
     className,
+    slotProps,
     ...rest
   }: DateRangePickerProps) {
     return (
@@ -45,7 +47,13 @@ export const DateRangePicker = /*#__PURE__*/ React.memo(
             : undefined
         }
         slots={{ field: SingleInputDateRangeField }}
-        slotProps={{ textField: { InputLabelProps: { shrink: true } } }}
+        slotProps={{
+          ...slotProps,
+          textField: composePickerTextFieldSlotProps(
+            slotProps?.textField,
+            hidden
+          )
+        }}
         sx={composeSx(sx, hidden ? { display: "none!important" } : undefined)}
         {...rest}
       />

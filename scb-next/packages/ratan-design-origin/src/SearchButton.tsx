@@ -5,7 +5,7 @@ import { lighten, styled } from "@mui/material/styles";
 import { getWebkitActionStyle } from "./action-style.js";
 import type { LoadingButtonProps } from "./LoadingButton.js";
 
-export interface SearchButtonProps extends LoadingButtonProps {}
+export type SearchButtonProps = LoadingButtonProps;
 
 const SearchButtonRoot = /*#__PURE__*/ styled(MuiButton)(({ theme }) => {
   if (theme.ratan?.designGeneration === "webkit") {

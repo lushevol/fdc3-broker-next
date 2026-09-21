@@ -2,7 +2,7 @@ import React from "react";
 import MuiGrid, { type GridProps } from "@mui/material/Grid";
 import { styled } from "@mui/material/styles";
 
-export interface SearchGridProps extends GridProps {}
+export type SearchGridProps = GridProps;
 
 const SearchGridRoot = /*#__PURE__*/ styled(MuiGrid)(({ theme }) => ({
   "& .MuiFormControl-root": {

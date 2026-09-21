@@ -32,8 +32,9 @@ describe("public Pro date range integration", () => {
       </LocalizationProvider>
     );
     const field = screen.getByLabelText("Period");
-    expect(field).not.toBeVisible();
-    expect(field.closest(".host-range")).toHaveStyle({
+    const root = field.closest(".host-range");
+    expect(root).not.toBeVisible();
+    expect(root).toHaveStyle({
       display: "none",
       width: "360px"
     });

@@ -57,6 +57,21 @@ npm run verify:dependency-isolation
 npm run test:e2e:design-origin
 ```
 
+For a complete candidate, install Playwright Chromium and run the aggregate gate:
+
+```sh
+npx playwright install chromium
+npm run verify:design-origin
+```
+
+The aggregate command owns its temporary consumer and preview servers on ports
+8019/8020; those ports must be free. It needs installed workspace dependencies and
+npm registry/cache access for the fresh consumer, but no separately running app or
+backend service. It stops at the first failed labeled command and preserves child
+output. `azure-pipelines-design-origin-quality.yml` installs dependencies and
+Chromium before running the same command. External CI templates should invoke this
+command directly and must never use the snapshot-update command as a quality gate.
+
 Then run affected Base/consumer compatibility tests and application production
 builds. With Base/Ratan/Cashflow dev servers running, run
 `npm exec -- playwright test tests/e2e/design-origin-host.spec.ts`.
