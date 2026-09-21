@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 19/30 DONE. Active: RD-020.** The clinic contains the review evidence
+**Progress: 20/30 DONE. Active: RD-021.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -44,7 +44,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-017](#rd-017) | WebKit action states | P2 | 2 | DONE |
 | [RD-018](#rd-018) | Contrast and focus cues | P1 | 2 | DONE |
 | [RD-019](#rd-019) | Reduced motion | P2 | 2 | DONE |
-| [RD-020](#rd-020) | Public contracts and font ownership | P2 | 2 | TODO |
+| [RD-020](#rd-020) | Public contracts and font ownership | P2 | 2 | DONE |
 | [RD-021](#rd-021) | Tree shaking and package byte budget | P2 | 3 | TODO |
 | [RD-022](#rd-022) | Browser accessibility and visual gates | P2 | 3 | TODO |
 | [RD-023](#rd-023) | Dependency resolution verification | P2 | 3 | TODO |
@@ -1004,16 +1004,57 @@ Limitations / pre-existing failures / follow-up IDs: verify:package consumes the
 
 ### RD-020
 
-**Document supported public contracts and font ownership.** P2 · Enhancement · TODO.
+**Document supported public contracts and font ownership.** P2 · Enhancement · DONE.
 Dependencies: RD-001–RD-013; update alongside those fixes where useful.
 [Clinic](UI_PACKAGE_CLINIC.md#rd-020).
 
-- [ ] Document defaults, controlled/uncontrolled values, nulls, callbacks/reasons,
+- [x] Document defaults, controlled/uncontrolled values, nulls, callbacks/reasons,
   refs, slots, labels/IDs, style precedence and supported inherited props.
-- [ ] State that legacy Poppins is host-provided and identify packaged fonts,
+- [x] State that legacy Poppins is host-provided and identify packaged fonts,
   explicit stylesheet loading, optional peers, localization and Pro ownership.
-- [ ] Add compiling examples for changed contracts and link corresponding stories;
+- [x] Add compiling examples for changed contracts and link corresponding stories;
   verify README, declarations, compatibility guidance and changelog agree.
+
+```text
+Status: DONE
+Completed: 2026-09-21
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-020 contract; the new
+  documentation test derives the packaged font list and optional-peer list from
+  package metadata, then requires explicit stylesheet/Poppins ownership, contract
+  matrix dimensions, compiled example links and every public catalog source. It
+  first failed all four requirements and passed after the documentation update.
+  The independent consumer examples now compile explicit refs/IDs, default values,
+  read-only localized search clearing, both loading positions, Dialog naming/close
+  reasons and controlled Builder close requests. Existing date fixtures cover
+  uncontrolled defaults plus controlled empty and partial-null values.
+GitNexus impact and staged detect_changes: capturedContracts, builderContracts and
+  Dates are not indexed, so no caller/process blast radius can be calculated for
+  these fixture-only symbols. The public runtime symbols and declarations are
+  unchanged; package tests and the isolated tarball verifier cover the fixture and
+  emitted-contract boundary. The staged audit reports eight intended files,
+  18 documentation/fixture symbols, zero affected processes and LOW risk.
+Commands (working directory scb-next unless noted): focused red/green documentation
+  test; package test, typecheck, lint, build and Storybook build; verify:package
+  after build; verify:dependency-isolation; git diff --check.
+Outcomes: 11 Vitest files/106 tests plus three generator tests passed with 97.04%
+  line and 96.18% branch coverage. The focused documentation contract passed 4/4.
+  Package typecheck/lint/build, Storybook, dependency isolation and the independent
+  tarball consumer passed, including Bundler/Node declarations, production build,
+  DOM-free imports, SSR, tree shaking, packaged CSS/fonts and optional date,
+  date-range and portal-theme peers.
+Compatibility review and rollback target: no runtime export, declaration or host
+  adapter changed. The README now describes the already verified public behavior,
+  and the fixture exercises it without altering consumers. Roll back this stage if
+  a declared contract is found to exceed the supported emitted surface.
+Limitations / pre-existing failures / follow-up IDs: Storybook retains its chunk
+  warning and the isolated consumer retains upstream MUI module-directive warnings.
+  Directly typechecking the repository fixture without isolation sees unrelated
+  root type-package conflicts; verify:package is the authoritative clean install.
+  RD-021 owns measured tree-shaking improvement, RD-023 owns broader dependency
+  resolution, and RD-024 owns aggregate release gates.
+```
 
 ## Phase 3: Distribution quality
 
@@ -1200,3 +1241,5 @@ or committed evidence.
 | 2026-09-21 | RD-018 | IN PROGRESS → DONE | Passing package, Storybook, packed-consumer, 18-case browser, Base and live-host gates | Next: RD-019 |
 | 2026-09-21 | RD-019 | TODO → IN PROGRESS | GitNexus LOW risk: LoaderRoot has no indexed dependants or flows; fixture App is unindexed | Specify static reduced-motion behavior and add browser regressions |
 | 2026-09-21 | RD-019 | IN PROGRESS → DONE | Passing package, Storybook, packed-consumer, 22-case browser, Base and live-host gates | Next: RD-020 |
+| 2026-09-21 | RD-020 | TODO → IN PROGRESS | Source/declaration/catalog audit; specification recorded | Add the public contract matrix, compiled examples and ownership alignment |
+| 2026-09-21 | RD-020 | IN PROGRESS → DONE | Passing documentation contract, package, Storybook, packed-consumer and dependency-isolation gates | Next: RD-021 |

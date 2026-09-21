@@ -31,7 +31,8 @@ contrast target in light and dark modes. Select labels are associated with their
 combobox.
 The WebKit generation maps MUI controls to the SC GDS palette, SC Prosper Sans,
 spacing, radii, button states and form-control states. Legacy keeps its existing
-Poppins typography and compact visual baseline during migration.
+Poppins typography and compact visual baseline during migration. Poppins is host-provided;
+it is not one of this package's font assets.
 WebKit's public `newStyleTokens.typography.fontSize` resolves through the scoped
 `--sc-font-size: 1rem` canonical default; generated compatibility aliases are
 checked transitively per generation/mode for missing custom-property definitions
@@ -54,6 +55,36 @@ shadow with the same formula and the dark blue token counterpart.
 - `ratan-design-origin/date-range`: optional Pro single-input DateRangePicker.
 - `ratan-design-origin/portal-theme`: opt-in historical portal theme factory,
   extensions, document reset and grid override policy for existing hosts.
+
+## Public contract matrix
+
+| Surface | Values and defaults | Callbacks and refs | Accessibility and keyboard | Customization and precedence |
+| --- | --- | --- | --- | --- |
+| `RatanDesignProvider`, theme and tokens | `mode="light"` and `designGeneration="legacy"`; hosts control both values. | No application-state callback or forwarded ref. | Scopes color scheme, variables and overlay containers to its root. | Supports `children` and `className`; use the `theme` and `tokens` entries for supported theme composition. It does not read URL, storage, auth or document state. |
+| `Button`, `ResetButton`, `ToggleButton`, `SearchGrid`, `SearchCondition` | Preserve the corresponding MUI Button, ToggleButton, Grid and Alert values/defaults; `SearchCondition` requires `label`, `value` and `onClose`. | Forward their MUI root refs and callbacks; `SearchCondition.onClose` receives the close `SyntheticEvent`. | Retain MUI keyboard behavior and names. `SearchCondition` keeps its close action. | Support their inherited MUI 5 props, including `sx`, DOM attributes and ARIA props. Package visual policy remains token/theme-owned. |
+| `LoadingButton`, `SearchButton` | `loading=false`, `loadingSize=14`, `loadingPosition="inline"`; `startIcon` replaces and later restores the caller icon. | Forward `HTMLButtonElement` refs and inherited Button callbacks. Loading disables activation. | The named button owns `aria-busy`; its spinner is decorative. | Support inherited MUI `ButtonProps`. Caller `disabled` remains effective; `loadingPosition` is consumed and never reaches the DOM. |
+| `Input`, `SearchInput` | Use MUI `value`/`defaultValue`; `labelPosition="top"`. `SearchInput.clearButtonLabel="Clear search"`. | `Input` forwards its root `HTMLDivElement` ref and native `inputRef`; callbacks are inherited from MUI TextField. `SearchInput.handleClear` is required. | MUI label/input keyboard behavior is retained. Search clear is disabled when the effective input is disabled or read-only. | Support `TextFieldProps` except unrestricted `variant`. Modern `slotProps` override legacy `InputProps`/`inputProps` counterparts; caller `sx` follows SearchInput padding. `hidden` supplies the initial inline display value and caller `style` is applied last. |
+| `Select`, `Label` | Use inherited controlled `value` or uncontrolled `defaultValue`; `Select.labelPosition="top"`, FormControl size defaults to `small`, and `variant` is explicit. `Label` uses `label` as its initial value. | `Select` forwards its root `HTMLDivElement` ref and the MUI `(event, child)` callback; `Label` retains MUI Select callbacks. | `Select` generates associated control/label IDs unless explicit `id`/`labelId` are supplied. `Label` derives its name from string/number `label`; `SelectDisplayProps` ARIA fields override root ARIA fields and the derived name. | Support inherited MUI Select props. `Select.IconComponent` overrides the package icon; caller IDs and ARIA names are authoritative. |
+| Search composition | `SearchConditionContainer` starts collapsed at the legacy 49px height and keeps children mounted. | Container and grid refs are forwarded; criteria removal remains caller-owned. | Fully visible first-row criteria remain interactive; clipped rows become inert and hidden. The toggle exposes state-specific text, `aria-expanded` and `aria-controls`; MUI handles grid/control keyboard behavior. | `SearchGrid`, `SearchCondition` and the container support their inherited MUI props. The container owns spacing, direction and collapsed height; caller `sx` may customize wrapping and other MUI styles. |
+| Builder | `anchorEl` is controlled; default popover size is 284x560px. Inactive panels stay mounted. | `onClose(event, "escapeKeyDown" | "backdropClick")` requests closure; callers clear `anchorEl`. Tabs retain MUI change callbacks and refs; focus returns to the trigger after controlled close. | Trigger, tab and panel IDs are stable and instance-scoped. MUI tab arrow-key behavior is retained. Explicit tab/panel relationships override generated relationships. | `BuilderButton` supports inherited Button props except package-owned variant/icons/color. `popOverWidth`/`popOverHeight` override size; `builderTabProps` remains available for direct MUI tab use. |
+| `Loader`, `PageLoader`, `Snackbar` | Loader `size=90`; its accessible name is `text` or `Loading...`. Snackbar is controlled by inherited `open`; strings remain text. | Loader accepts HTML attributes. Snackbar retains MUI close event/reasons. PageLoader passes `slotProps.loader` to the nested Loader. | Loader is a polite named status and becomes static under reduced motion. Snackbar retains MUI alert/Snackbar keyboard behavior. | Loader supports section HTML attributes. Snackbar supports MUI Snackbar props plus `severity`, `variant` and `alertsx`; `alertsx` follows package alert styles. |
+| `Dialog` | `open` is controlled. Generated header/actions render only when their content is non-null; provider overlay is the default container. | MUI `onClose(event, "escapeKeyDown" | "backdropClick")` and `onCloseButton` are separate. Root and `contentRef` are forwarded. | MUI manages modal focus/Escape. Explicit root naming wins, then `PaperProps`, then a mounted generated/custom header ID; suppressed or ID-less custom headers create no dangling relationship. | Supports inherited MUI Dialog props plus header/content/action/surface slots. Explicit `container` wins over provider/theme. `titleProps`, `contentProps`, `actionProps`, `PaperProps` and `RootComponent` are supported; host drag/resize/maximize policy stays outside. |
+| State presentation | `LoadingOverlay.open` is controlled; optional content is omitted when null. | Presentation surfaces do not dispatch, navigate, catch errors or emit policy callbacks. | Loading content is a status only while open; a closed overlay immediately releases pointer input. | `EmptyState`/`ErrorFallback` support Box root props; EmptyState also supports wrapper/content Box props. LoadingOverlay supports Box and `backdropProps`; caller root props follow package defaults while closed pointer release remains authoritative. |
+| Date, time and range entries | Community pickers preserve omitted `value` as uncontrolled and explicit `null` as controlled-empty. Range preserves each null endpoint. `labelPosition="top"`; `hidden=false`. | Retain MUI X callbacks; these wrappers do not add forwarded refs. | Retain MUI X field/dialog keyboard and labeling behavior. IDs belong in `slotProps.textField.inputProps`. | Support inherited MUI X 6 props. Caller `slotProps` replaces default shrink props; range always uses `SingleInputDateRangeField`. Caller `sx` is preserved and `hidden` is the final display override. |
+
+Compatibility-only exports in `ratan-design-origin/compatibility` preserve Base
+adapter selectors and styled surfaces. They are migration helpers, not supported
+general-purpose customization primitives. `portal-theme` likewise preserves an
+explicit historical host integration and document-level policy.
+
+The compiling examples are [core contracts](fixtures/consumer/src/contracts.tsx),
+[date contracts](fixtures/consumer/src/dates.tsx), and
+[portal contracts](fixtures/consumer/src/server-portal.tsx). Corresponding catalog
+stories are [Controls/States and ActionStateMatrix](stories/Controls.stories.tsx),
+[Inputs/Dates](stories/Dates.stories.tsx), [Search/Builder](stories/Builder.stories.tsx),
+[Feedback/Dialog](stories/Dialog.stories.tsx),
+[Feedback/States](stories/Feedback.stories.tsx), and
+[Feedback/Presentation](stories/StatePresentation.stories.tsx).
 
 Controls accept MUI 5 props. Input also translates Base's modern slot spelling
 to MUI 5, with slots taking precedence over legacy props. Its effective disabled
@@ -140,16 +171,17 @@ controlled `open` and status content, with explicit backdrop props. These
 surfaces do not catch errors, dispatch loading, select support addresses or
 open navigation. Hosts own those decisions.
 
-React / ReactDOM, Material / icons and Emotion are external peers. The verified
-matrix is React 18.3.1, Material/icons 5.18.0, Emotion 11.14.0 / 11.14.1.
-ESM and declarations are shipped; no CommonJS export is promised.
-Core excludes grid/date/Pro integrations and WebKit element registration.
+React / ReactDOM, Material / icons and Emotion are required external peers. The
+verified matrix is React 18.3.1, Material/icons 5.18.0, Emotion 11.14.0 / 11.14.1.
+ESM and declarations are shipped; no CommonJS export is promised. Core excludes
+grid/date/Pro integrations and WebKit element registration.
 
-Date integrations require `@mui/x-date-pickers@6.20.2` and `dayjs@1.11.21`.
-Range also requires `@mui/x-date-pickers-pro@6.20.2`; the host owns MUI X Pro
-licensing and license initialization. These peers are optional and never loaded
-by the core entry point. Wrap dates in LocalizationProvider with AdapterDayjs;
-the host chooses `adapterLocale`, timezone, formats and validation policy.
+The optional host-installed peers are `@mui/x-date-pickers` (`6.20.2`),
+`@mui/x-date-pickers-pro` (`6.20.2`), `@mui/x-data-grid` (`6.20.4`),
+`@mui/base` (`5.0.0-beta.70`) and `dayjs` (`1.11.21`). They are never loaded by
+the core entry. Range hosts own MUI X Pro licensing and license initialization.
+Wrap dates in LocalizationProvider with AdapterDayjs. Hosts own localization,
+timezone, format and validation policy, including `adapterLocale`.
 Controls retain `labelPosition="top" | "left"`, `hidden`, Dayjs values and MUI X
 callbacks. Community date controls preserve omitted `value` as uncontrolled so
 `defaultValue` works, while explicit `null` remains controlled-empty. Caller
@@ -158,6 +190,21 @@ range always uses SingleInputDateRangeField and preserves null endpoints in empt
 and partial controlled values. Field identifiers belong in
 `slotProps.textField.inputProps`; MUI X 6 ignores top-level data attributes.
 The compiled `fixtures/consumer/src/dates.tsx` demonstrates the public imports.
+
+Import `ratan-design-origin/styles.css` explicitly to load scoped variables and
+fonts. The package ships these WOFF2 assets:
+
+- SC Prosper Sans: `SCProsperSans-Regular.woff2`, `SCProsperSans-Medium.woff2`,
+  `SCProsperSans-Bold.woff2`.
+- Open Dyslexic: `OpenDyslexic-Regular.woff2`, `OpenDyslexic-Bold.woff2`.
+- Inter: `inter-v18-latin-regular.woff2`, `inter-v18-latin-500.woff2`,
+  `inter-v18-latin-600.woff2`, `inter-v18-latin-700.woff2`.
+- Roboto Mono: `roboto-mono-v23-latin-regular.woff2`,
+  `roboto-mono-v23-latin-500.woff2`, `roboto-mono-v23-latin-600.woff2`,
+  `roboto-mono-v23-latin-700.woff2`.
+
+Legacy Poppins is host-provided and is not packaged. Asset redistribution still
+requires the approval described in NOTICE.md and the release guide.
 
 Existing portal hosts can use `Config(getPortalTheme(mode, newStyles, isNewLayout))`
 from `portal-theme`. Defaults remain legacy and the original layout. Gold

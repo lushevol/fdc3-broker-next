@@ -76,6 +76,12 @@ styled 11.14.1. Dates: MUI X pickers/Pro 6.20.2 and Dayjs 1.11.21. Portal-theme
 declarations: grid 6.20.4 plus Base 5.0.0-beta.70 for its legacy upstream types.
 Core does not install/load these optional integrations.
 
+The explicit stylesheet packages SC Prosper Sans, Open Dyslexic, Inter and Roboto
+Mono WOFF2 files recorded in `assets/webkit-sources.json`; Poppins is host-provided
+for legacy rendering and is not packaged. The asset/license owner must approve
+redistribution of the packaged files. Date hosts own localization, timezone,
+formats and validation. Range hosts also own MUI X Pro licensing and initialization.
+
 Install the package into an independent React host, load styles.css explicitly,
 and use RatanDesignProvider with explicit mode/designGeneration. Host providers
 own URL/storage/document policy. Ordinary date controls require dates plus a

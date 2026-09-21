@@ -2,6 +2,7 @@ import React from 'react';
 import type { Theme } from '@mui/material/styles';
 import {
   Button,
+  Dialog,
   BuilderButton,
   BuilderTab,
   BuilderTabs,
@@ -52,17 +53,37 @@ export const capturedContracts = (
     <LoadingButton {...loading} ref={buttonRef}>
       Save
     </LoadingButton>
-    <Input {...input} ref={rootRef} inputRef={inputRef} onChange={(event) => event.target.value} />
+    <Input
+      {...input}
+      ref={rootRef}
+      inputRef={inputRef}
+      defaultValue="ABC123"
+      onChange={(event) => event.target.value}
+    />
     <Select
       variant="standard"
+      ref={rootRef}
+      id="settlement-currency"
+      labelId="settlement-currency-label"
       value="USD"
       onChange={(event, child) => {
         String(event.target.value);
         React.isValidElement(child);
       }}
     />
-    <SearchInput variant="outlined" handleClear={() => undefined} />
-    <SearchButton loading={false}>Search</SearchButton>
+    <SearchInput
+      variant="outlined"
+      defaultValue="trade"
+      handleClear={() => undefined}
+      clearButtonLabel="Clear trade search"
+      slotProps={{ htmlInput: { readOnly: true } }}
+    />
+    <SearchButton loading loadingPosition="inline">
+      Search
+    </SearchButton>
+    <SearchButton loading loadingPosition="startIcon">
+      Search with icon
+    </SearchButton>
     <ResetButton>Reset</ResetButton>
     <SearchGrid>
       <Input label="Reference" variant="outlined" />
@@ -99,16 +120,40 @@ export const feedbackContracts = (
     <Loader {...loader} />
     <PageLoader {...loader} slotProps={{ loader: { 'data-testid': 'loading' } }} />
     <Snackbar {...notification} action={<Button>Undo</Button>} />
+    <Dialog
+      open={false}
+      titleComponents="Trade details"
+      titleProps={{ id: 'trade-dialog-title' }}
+      aria-labelledby="trade-dialog-title"
+      contentRef={rootRef}
+      onCloseButton={() => undefined}
+      onClose={(_event, reason) => {
+        const closeReason: 'backdropClick' | 'escapeKeyDown' = reason;
+        String(closeReason);
+      }}
+    >
+      Trade content
+    </Dialog>
   </>
 );
 
-const builder: BuilderButtonProps = { label: 'Filters', anchorEl: null, popOverWidth: '400px' };
+const builder: BuilderButtonProps = {
+  label: 'Filters',
+  anchorEl: null,
+  popOverWidth: '400px',
+  onClose: (_event, reason) => {
+    const closeReason: 'backdropClick' | 'escapeKeyDown' = reason;
+    String(closeReason);
+  },
+};
 export const builderContracts = (
   <BuilderButton {...builder}>
     <BuilderTabs value={0} ref={rootRef}>
       <BuilderTab component="button" ref={buttonRef} label="Columns" {...builderTabProps(0)} />
       <BuilderTab component="a" href="#settings" label="Settings" {...builderTabProps(1)} />
     </BuilderTabs>
-    <BuilderTabPanel value={0} index={0}>Column settings</BuilderTabPanel>
+    <BuilderTabPanel value={0} index={0}>
+      Column settings
+    </BuilderTabPanel>
   </BuilderButton>
 );

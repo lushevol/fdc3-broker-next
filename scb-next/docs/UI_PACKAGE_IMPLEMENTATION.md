@@ -856,6 +856,29 @@ the remaining inventory classification, and release governance remain open.
   computed animation and status contract for legacy/WebKit in light/dark modes;
   existing loading-action announcement regressions remain unchanged.
 
+### RD-020 specification: supported public contracts and font ownership
+
+- The package README provides one concise matrix for each public component group.
+  It records defaults; controlled, uncontrolled and null value behavior;
+  callbacks and close reasons; forwarded refs; slots and style precedence;
+  accessible labels and IDs; and the supported inherited MUI or React props.
+  Compatibility-only exports remain identified as migration helpers rather than
+  general customization APIs.
+- The README names every font file shipped through `styles.css`, states that hosts
+  must import that stylesheet explicitly, and states that legacy Poppins is
+  host-provided. It separates required React/MUI/Emotion peers from optional date,
+  Pro range and portal-theme peers. Hosts own date locale/timezone/format policy,
+  SC WebKit/font redistribution approval and MUI X Pro licensing/initialization.
+- The independent packed-consumer fixtures compile representative examples for
+  the documented contracts, including refs, slot precedence, controlled and
+  uncontrolled dates, null ranges, localized/read-only search clearing, both
+  loading positions, callback reasons, Builder close requests and Dialog naming
+  precedence. README catalog links point to the corresponding Storybook stories.
+- README, emitted declarations, compatibility guidance, release guidance and the
+  changelog describe the same ownership and behavior. Package typecheck, lint,
+  build, Storybook build and packed-consumer verification must pass from the
+  committed sources before this documentation stage is complete.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

@@ -24,6 +24,11 @@
   indicators across light and dark modes.
 - Loader and PageLoader retain their visible status affordance but stop both ring
   rotations when the browser requests reduced motion.
+- Public contract matrix, compiling consumer examples and catalog links now record
+  defaults, value/null behavior, callbacks/reasons, refs, slots, accessible names/
+  IDs, style precedence and inherited MUI props. Font documentation distinguishes
+  packaged WebKit assets from host-provided legacy Poppins and assigns optional
+  peer, localization and MUI X Pro policy to hosts.
 - Collapsed search criteria keep the visible row interactive while clipped rows
   leave keyboard navigation; the toggle now exposes its state and controlled region.
 - Base and Ratan/Cashflow adoption behind their existing compatible exports,

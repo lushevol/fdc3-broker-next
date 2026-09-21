@@ -25,6 +25,12 @@ builder composition, date integrations, notifications/loaders, Dialog and the
 three state presentations. Its toolbar selects legacy/WebKit and light/dark.
 Base's retained stories continue to exercise compatible exports.
 
+The `compatibility` entry is restricted to the existing Base migration helpers;
+it is not a general customization API. Hosts load `styles.css` explicitly. That
+stylesheet packages SC Prosper Sans, Open Dyslexic, Inter and Roboto Mono assets;
+legacy Poppins remains host-provided. Hosts also own date localization/timezone/
+format policy, font redistribution approval and MUI X Pro licensing/initialization.
+
 ## Deliberately Retained
 
 | Surface | Disposition and reason |
