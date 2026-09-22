@@ -78,6 +78,7 @@ npm run verify:package --workspace ratan-design-origin
 npm run test:dependency-isolation
 npm run verify:dependency-isolation
 npm run test:e2e:design-origin
+npm run verify:design-origin-host-performance
 ```
 
 For a complete candidate, install Playwright Chromium and run the aggregate gate:
@@ -94,6 +95,16 @@ backend service. It stops at the first failed labeled command and preserves chil
 output. `azure-pipelines-design-origin-quality.yml` installs dependencies and
 Chromium before running the same command. External CI templates should invoke this
 command directly and must never use the snapshot-update command as a quality gate.
+
+The host-performance command separately rebuilds Base, Ratan and Cashflow with
+hidden source maps, owns a controlled localhost edge on port 9081 and runs three
+cold Chromium samples for legacy and WebKit. It writes the complete report to
+`/tmp/design-origin-performance.json` and enforces the reviewed static, transfer,
+duplication, timing and same-run generation-ratio policy in
+`performance/design-origin-budget.json`. The recorded reference conditions and
+results live in `performance/design-origin-baseline.json`. A budget increase must
+include reviewed evidence and a refreshed three-run baseline; package-only byte
+results do not authorize MUI/Emotion federation changes.
 
 Then run affected Base/consumer compatibility tests and application production
 builds. With Base/Ratan/Cashflow dev servers running, run

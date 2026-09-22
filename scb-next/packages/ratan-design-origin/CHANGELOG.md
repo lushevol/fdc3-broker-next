@@ -55,6 +55,10 @@
 - Package lint now applies recommended TypeScript, React Hooks and JSX accessibility
   rules with zero warnings. A fail-fast repository command and Azure entry point
   aggregate package, dependency, browser, packed-consumer and affected host gates.
+- Real Base/Ratan/Cashflow production builds now have a recorded three-run
+  legacy/WebKit host baseline and enforced static, transfer, duplication, runtime
+  and same-run generation-ratio budgets; the evidence does not justify changing
+  provider or MUI/Emotion federation boundaries.
 - Date wrappers now merge their required label and hidden styles at the rendered
   text-field slot while preserving caller slot props, keeping the established
   `hidden` contract stable across the locked MUI and DOM-testing versions.

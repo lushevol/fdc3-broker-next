@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "baseline": "design-origin-baseline.json",
+  "policy": {
+    "staticHeadroom": "approximately five percent over the recorded production outputs",
+    "runtime": "absolute safety ceilings plus same-run WebKit-to-legacy ratios",
+    "review": "increases require a reviewed host-performance decision and refreshed three-run baseline"
+  },
+  "checks": [
+    { "path": "static.hosts.base.gzipBytes", "max": 485000 },
+    { "path": "static.hosts.ratan.gzipBytes", "max": 2005000 },
+    { "path": "static.hosts.cashflow.gzipBytes", "max": 3100000 },
+    { "path": "static.duplicatedUiModules", "max": 1030 },
+    { "path": "runtime.scenarios.legacy.aggregate.requests.p95", "max": 260 },
+    { "path": "runtime.scenarios.webkit.aggregate.requests.p95", "max": 260 },
+    { "path": "runtime.scenarios.legacy.aggregate.transferBytes.p95", "max": 6880000 },
+    { "path": "runtime.scenarios.webkit.aggregate.transferBytes.p95", "max": 6880000 },
+    { "path": "runtime.scenarios.legacy.aggregate.scriptEncodedBytes.p95", "max": 4010000 },
+    { "path": "runtime.scenarios.webkit.aggregate.scriptEncodedBytes.p95", "max": 4010000 },
+    { "path": "runtime.scenarios.legacy.aggregate.styleEncodedBytes.p95", "max": 56250 },
+    { "path": "runtime.scenarios.webkit.aggregate.styleEncodedBytes.p95", "max": 56250 },
+    { "path": "runtime.scenarios.legacy.aggregate.styleElements.p95", "max": 118 },
+    { "path": "runtime.scenarios.webkit.aggregate.styleElements.p95", "max": 118 },
+    { "path": "runtime.scenarios.legacy.aggregate.styleSheets.p95", "max": 121 },
+    { "path": "runtime.scenarios.webkit.aggregate.styleSheets.p95", "max": 121 },
+    { "path": "runtime.scenarios.legacy.aggregate.coldTileMs.p95", "max": 2000 },
+    { "path": "runtime.scenarios.webkit.aggregate.coldTileMs.p95", "max": 2000 },
+    { "path": "runtime.scenarios.legacy.aggregate.themeSwitchMs.p95", "max": 250 },
+    { "path": "runtime.scenarios.webkit.aggregate.themeSwitchMs.p95", "max": 250 },
+    { "path": "runtime.scenarios.legacy.aggregate.longTaskMs.p95", "max": 400 },
+    { "path": "runtime.scenarios.webkit.aggregate.longTaskMs.p95", "max": 400 },
+    { "path": "runtime.scenarios.legacy.aggregate.taskMs.p95", "max": 1250 },
+    { "path": "runtime.scenarios.webkit.aggregate.taskMs.p95", "max": 1250 },
+    { "path": "runtime.scenarios.legacy.aggregate.scriptMs.p95", "max": 800 },
+    { "path": "runtime.scenarios.webkit.aggregate.scriptMs.p95", "max": 800 }
+  ],
+  "comparisons": [
+    {
+      "candidatePath": "runtime.scenarios.webkit.aggregate.requests.p95",
+      "baselinePath": "runtime.scenarios.legacy.aggregate.requests.p95",
+      "maxRatio": 1
+    },
+    {
+      "candidatePath": "runtime.scenarios.webkit.aggregate.transferBytes.p95",
+      "baselinePath": "runtime.scenarios.legacy.aggregate.transferBytes.p95",
+      "maxRatio": 1
+    },
+    {
+      "candidatePath": "runtime.scenarios.webkit.aggregate.scriptEncodedBytes.p95",
+      "baselinePath": "runtime.scenarios.legacy.aggregate.scriptEncodedBytes.p95",
+      "maxRatio": 1
+    },
+    {
+      "candidatePath": "runtime.scenarios.webkit.aggregate.styleEncodedBytes.p95",
+      "baselinePath": "runtime.scenarios.legacy.aggregate.styleEncodedBytes.p95",
+      "maxRatio": 1
+    },
+    {
+      "candidatePath": "runtime.scenarios.webkit.aggregate.styleElements.p95",
+      "baselinePath": "runtime.scenarios.legacy.aggregate.styleElements.p95",
+      "maxRatio": 1
+    },
+    {
+      "candidatePath": "runtime.scenarios.webkit.aggregate.coldTileMs.p95",
+      "baselinePath": "runtime.scenarios.legacy.aggregate.coldTileMs.p95",
+      "maxRatio": 1.25
+    },
+    {
+      "candidatePath": "runtime.scenarios.webkit.aggregate.themeSwitchMs.p95",
+      "baselinePath": "runtime.scenarios.legacy.aggregate.themeSwitchMs.p95",
+      "maxRatio": 1.25
+    },
+    {
+      "candidatePath": "runtime.scenarios.webkit.aggregate.longTaskMs.p95",
+      "baselinePath": "runtime.scenarios.legacy.aggregate.longTaskMs.p95",
+      "maxRatio": 1.25
+    },
+    {
+      "candidatePath": "runtime.scenarios.webkit.aggregate.taskMs.p95",
+      "baselinePath": "runtime.scenarios.legacy.aggregate.taskMs.p95",
+      "maxRatio": 1.25
+    },
+    {
+      "candidatePath": "runtime.scenarios.webkit.aggregate.scriptMs.p95",
+      "baselinePath": "runtime.scenarios.legacy.aggregate.scriptMs.p95",
+      "maxRatio": 1.25
+    },
+    {
+      "candidatePath": "runtime.scenarios.webkit.aggregate.layoutMs.p95",
+      "baselinePath": "runtime.scenarios.legacy.aggregate.layoutMs.p95",
+      "maxRatio": 1.25
+    },
+    {
+      "candidatePath": "runtime.scenarios.webkit.aggregate.recalcStyleMs.p95",
+      "baselinePath": "runtime.scenarios.legacy.aggregate.recalcStyleMs.p95",
+      "maxRatio": 1.25
+    }
+  ]
+}

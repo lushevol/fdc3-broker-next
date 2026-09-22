@@ -1080,6 +1080,39 @@ settled UI while leaving infinite loader animations available to motion tests.
   independently. Application maintainers validate their own host after an exact
   package/app rollback; asset and Pro-license owners restore matching entitlements.
 
+### RD-030 specification: integrated host performance budget
+
+- The measurement command builds `ratan-design-origin`, Base, Ratan and Cashflow as
+  production Module Federation outputs with hidden source maps. A repository-owned
+  localhost edge serves the real emitted JS/CSS with gzip, immutable asset caching
+  headers and the existing mock BFF; no separately running host or backend is used.
+- Static evidence records raw/gzip/Brotli bytes per host and counts UI source modules
+  present in more than one host map. Runtime evidence uses a fresh 1280x720 Chromium
+  context with cache disabled for each sample and records login, shell, cold
+  Cashflow-tile and live theme-switch timings, requests/transfer/encoded bytes,
+  styles, long tasks and CDP task/script/layout/style-recalculation durations.
+  Hardware, operating system, browser, viewport, cache policy and iteration count
+  are part of every report. Three runs per appearance generation are the minimum;
+  the maximum sample is the three-run p95 so one slow run cannot be averaged away.
+- Legacy is the same-run baseline and WebKit is the candidate. The checked-in
+  baseline records Base/Ratan/Cashflow gzip totals of 458,749/1,905,899/2,946,830
+  bytes and 1,017 cross-host duplicated UI modules. Both generations loaded 250
+  resources and 6,551,548 transfer bytes. Legacy/WebKit p95 was 1,581.7/1,597.9 ms
+  for a cold tile and 185.4/181.8 ms for a theme switch under the recorded Apple M5
+  conditions; the candidate therefore added no bytes/requests and was 1.0% slower
+  only on cold-tile time in this sample.
+- Deterministic production sizes, duplication, route bytes, request/style counts
+  and generous runtime safety ceilings are absolute checks. Same-run WebKit versus
+  legacy request/byte/style ratios may not increase; cold-tile, theme, long-task,
+  task, script, layout and style-recalc p95 ratios may not exceed 1.25. Static
+  ceilings provide approximately five percent headroom. Any ceiling increase needs
+  a reviewed reason and refreshed three-run evidence, never an unexplained update.
+- The evidence does not justify another provider/import rewrite or sharing MUI,
+  Ant Design or Emotion through federation. Large Cashflow chunks and duplicated
+  mapped UI modules may justify a separate, reversible code-splitting/federation
+  design experiment with its own compatibility and rollback proof; the package-only
+  Button result and this baseline do not authorize that architecture change.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

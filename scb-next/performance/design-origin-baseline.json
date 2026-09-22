@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-09-22T08:01:11.570Z",
+  "sourceCommit": "2d74445dd865633f74bfe323bbe5004c4ccf5f9e",
+  "conditions": {
+    "architecture": "arm64",
+    "browser": "Chromium 151.0.7922.34",
+    "cache": "disabled per fresh browser context",
+    "cpu": "Apple M5",
+    "cpuCount": 10,
+    "headless": true,
+    "iterationsPerGeneration": 3,
+    "operatingSystem": "darwin 25.5.0",
+    "transport": "controlled localhost edge with gzip transfer encoding",
+    "viewport": "1280x720"
+  },
+  "static": {
+    "base": {
+      "jsCssFiles": 35,
+      "gzipBytes": 458749,
+      "brotliBytes": 392146
+    },
+    "ratan": {
+      "jsCssFiles": 108,
+      "gzipBytes": 1905899,
+      "brotliBytes": 1584084
+    },
+    "cashflow": {
+      "jsCssFiles": 406,
+      "gzipBytes": 2946830,
+      "brotliBytes": 2404088
+    },
+    "duplicatedUiModules": 1017,
+    "duplicatedUiModulesByPackage": {
+      "antd": 486,
+      "@mui/material": 199,
+      "@mui/utils": 78,
+      "@ant-design/icons": 66,
+      "@mui/system": 38,
+      "@ant-design/icons-svg": 35,
+      "@ant-design/cssinjs": 33,
+      "ratan-design-origin": 25,
+      "@mui/icons-material": 14,
+      "@ant-design/cssinjs-utils": 13,
+      "@mui/styled-engine": 5,
+      "@mui/private-theming": 4,
+      "@ant-design/fast-color": 3,
+      "@ant-design/colors": 3,
+      "@emotion/hash": 2,
+      "@emotion/unitless": 2,
+      "@emotion/react": 2,
+      "@emotion/styled": 2,
+      "@emotion/sheet": 1,
+      "@emotion/cache": 1,
+      "@emotion/memoize": 1,
+      "@emotion/serialize": 1,
+      "@emotion/utils": 1,
+      "@emotion/use-insertion-effect-with-fallbacks": 1,
+      "@emotion/is-prop-valid": 1
+    }
+  },
+  "runtimeP95": {
+    "legacy": {
+      "loginReadyMs": 131.1,
+      "shellReadyMs": 133.6,
+      "coldTileMs": 1581.7,
+      "themeSwitchMs": 185.4,
+      "requests": 250,
+      "transferBytes": 6551548,
+      "scriptEncodedBytes": 3818824,
+      "styleEncodedBytes": 53538,
+      "longTaskCount": 4,
+      "longTaskMs": 295,
+      "styleElements": 111,
+      "styleSheets": 115,
+      "taskMs": 969.9,
+      "scriptMs": 600.5,
+      "layoutMs": 20.3,
+      "recalcStyleMs": 59.4
+    },
+    "webkit": {
+      "loginReadyMs": 108.5,
+      "shellReadyMs": 122.1,
+      "coldTileMs": 1597.9,
+      "themeSwitchMs": 181.8,
+      "requests": 250,
+      "transferBytes": 6551548,
+      "scriptEncodedBytes": 3818824,
+      "styleEncodedBytes": 53538,
+      "longTaskCount": 4,
+      "longTaskMs": 287,
+      "styleElements": 111,
+      "styleSheets": 115,
+      "taskMs": 952.2,
+      "scriptMs": 587.1,
+      "layoutMs": 16.7,
+      "recalcStyleMs": 54.4
+    }
+  }
+}

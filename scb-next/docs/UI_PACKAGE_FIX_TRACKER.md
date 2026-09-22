@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 27/30 DONE. RD-028 BLOCKED; next actionable item: RD-030.** The clinic contains the review evidence
+**Progress: 28/30 DONE. RD-028 BLOCKED; next actionable item: RD-027.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -54,7 +54,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-027](#rd-027) | Alpha direct-adoption pilot | P3 | 4 | TODO |
 | [RD-028](#rd-028) | Release ownership and decisions | P2 | 4 | BLOCKED |
 | [RD-029](#rd-029) | Reproduce historical host test failures | P2 | 1 preflight | DONE |
-| [RD-030](#rd-030) | Real host performance budgets | P3 | 3 measurement | TODO |
+| [RD-030](#rd-030) | Real host performance budgets | P3 | 3 measurement | DONE |
 
 ## Compatibility boundaries
 
@@ -1483,18 +1483,53 @@ Rollback: revert the two test aliases, Cashflow dependency and lock entries if a
 
 ### RD-030
 
-**Measure real host performance before architectural changes.** P3 · Enhancement · TODO.
+**Measure real host performance before architectural changes.** P3 · Enhancement · DONE.
 Dependencies: RD-021, RD-023; baseline measurements may begin earlier.
 [Clinic](UI_PACKAGE_CLINIC.md#rd-030).
 
-- [ ] Define repeatable production-build measurements with real UI dependencies
+- [x] Define repeatable production-build measurements with real UI dependencies
   included: route/chunk transfer size, dependency duplication, relevant render and
   interaction timings, hardware/browser and cache conditions.
-- [ ] Record baseline and candidate results for representative hosts; set reviewed
+- [x] Record baseline and candidate results for representative hosts; set reviewed
   budgets consistent with repository performance targets and enforce useful checks.
-- [ ] Use the evidence to decide whether further provider, import or federation
+- [x] Use the evidence to decide whether further provider, import or federation
   changes are justified. Do not change MUI/Emotion federation sharing solely from
   a package-only externalized byte result; record any separate design decision.
+
+```text
+Status: DONE
+Completed: 2026-09-22
+Owner: Codex
+Commit(s): pending this stage commit; production-ordering prerequisite 2d74445d
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-030 defines the
+  controlled production-build edge, cold-run measurement matrix, baseline/candidate
+  interpretation, checked-in evidence and budget review policy. Runner unit tests
+  cover percentile summaries, source-map dependency normalization and both absolute
+  and candidate-to-baseline failures.
+Measurement: three fresh Chromium contexts per generation on an Apple M5, arm64,
+  macOS 25.5.0, Chromium 151.0.7922.34, 1280x720, cache disabled and localhost gzip.
+  Production outputs measured 458,749 Base, 1,905,899 Ratan and 2,946,830 Cashflow
+  gzip bytes, with 1,017 UI modules present in more than one host source map. Both
+  journeys loaded 250 resources and 6,551,548 transfer bytes. Legacy/WebKit p95
+  cold tile was 1,581.7/1,597.9 ms and theme switch 185.4/181.8 ms; WebKit-to-legacy
+  ratios were 1.010 cold tile, 0.981 theme, 0.982 task and 0.978 script.
+Verification: test:performance-runner passes 3/3. The first production run correctly
+  failed on an existing Cashflow config-before-consumer ordering defect; commit
+  2d74445d adds the sequenced remote entry and its regression. A fresh six-run
+  verify:design-origin-host-performance rebuild passed every static, route-transfer,
+  DOM-style, long-task, CPU timing and same-run generation-ratio budget.
+Decision: the candidate adds no request or transfer bytes and stays within timing
+  ratios, so no provider/import rewrite or MUI/Emotion federation change is
+  justified. The large Cashflow output and 1,017 cross-host UI modules are explicit
+  evidence for a separately designed code-splitting/federation experiment, not
+  permission to alter shared policy in this stage. Raise a ceiling only with a
+  reviewed decision and refreshed three-run baseline.
+Artifacts and rollback: performance/design-origin-baseline.json records conditions
+  and results; performance/design-origin-budget.json is enforced by the repository
+  command. Roll back the runner/scripts/budgets to remove this gate. Roll back
+  2d74445d only together with the exposed-entry mapping; doing so restores the
+  reproduced production ReferenceError and is not a valid host rollback target.
+```
 
 ## Activity log
 
@@ -1554,3 +1589,7 @@ or committed evidence.
 | 2026-09-22 | RD-029 | TODO → DONE | Original broad commands reproduced 47/167 Ratan and 84/228 Cashflow failures; host-local Ant Design and declared react-use remove duplicate React, leaving 6 and 2 classified legacy failures | Next: RD-025 |
 | 2026-09-22 | RD-025 | TODO → IN PROGRESS | 394 duplicated adapter lines reproduced; Button, LoadingButton, Dialog and both cssSize helpers are LOW risk with no affected process/module | Add the package-owned pure presentation contract before host rewiring |
 | 2026-09-22 | RD-025 | IN PROGRESS → DONE | Five pure namespaces moved to the public package entry; 113 package/token tests, 11 focused host tests, packed consumer, both builds and live host journey pass | Next: RD-026 |
+| 2026-09-22 | RD-026 | TODO → DONE | Explicit mode/generation contract; package, three-host and live multi-scope transition gates pass | Next: RD-028 governance and RD-030 measurement |
+| 2026-09-22 | RD-028 | TODO → BLOCKED | Private-package guard and complete decision record added; authoritative owners, registry, asset/font, Pro-license and retention approvals are absent | Await named organizational decisions; continue non-public work |
+| 2026-09-22 | RD-030 | TODO → IN PROGRESS | New runner reproduced a production Cashflow config-ordering failure before collecting valid timings | Fix the production boundary, then measure three cold runs per generation |
+| 2026-09-22 | RD-030 | IN PROGRESS → DONE | Checked-in three-run baseline/budgets; 3/3 runner tests and fresh enforced six-run production gate pass | Next: RD-027 local Alpha pilot; RD-028 still blocks publication |
