@@ -58,5 +58,6 @@
 - Date wrappers now merge their required label and hidden styles at the rendered
   text-field slot while preserving caller slot props, keeping the established
   `hidden` contract stable across the locked MUI and DOM-testing versions.
-- Internal candidate only. Publication owners, registry and asset/Pro licensing
-  decisions remain external release gates.
+- Internal candidate only. The package is marked private to prevent accidental
+  publication; named owners, registry and asset/Pro licensing decisions remain
+  external release gates.

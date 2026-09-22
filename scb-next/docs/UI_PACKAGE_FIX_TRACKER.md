@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 27/30 DONE. Next: RD-028.** The clinic contains the review evidence
+**Progress: 27/30 DONE. RD-028 BLOCKED; next actionable item: RD-030.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -52,7 +52,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-025](#rd-025) | Shared pure host adapters | P2 | 4 | DONE |
 | [RD-026](#rd-026) | Explicit host appearance contract | P2 | 4 | DONE |
 | [RD-027](#rd-027) | Alpha direct-adoption pilot | P3 | 4 | TODO |
-| [RD-028](#rd-028) | Release ownership and decisions | P2 | 4 | TODO |
+| [RD-028](#rd-028) | Release ownership and decisions | P2 | 4 | BLOCKED |
 | [RD-029](#rd-029) | Reproduce historical host test failures | P2 | 1 preflight | DONE |
 | [RD-030](#rd-030) | Real host performance budgets | P3 | 3 measurement | TODO |
 
@@ -1390,7 +1390,7 @@ RD-030 for the performance comparison. [Clinic](UI_PACKAGE_CLINIC.md#rd-027).
 
 ### RD-028
 
-**Assign release ownership and record publication decisions.** P2 · Enhancement · TODO.
+**Assign release ownership and record publication decisions.** P2 · Enhancement · BLOCKED.
 Dependencies: none for recording decisions; publication requires applicable
 release gates. [Clinic](UI_PACKAGE_CLINIC.md#rd-028).
 
@@ -1401,6 +1401,24 @@ release gates. [Clinic](UI_PACKAGE_CLINIC.md#rd-028).
 - [ ] Update release/changelog guidance with approved decisions and rollback
   responsibilities. Missing decisions remain explicit blockers; this tracking item
   does not authorize registry publication or production deployment.
+
+```text
+Status: BLOCKED
+Started: 2026-09-22
+Owner: Codex (repository guard and decision-record preparation only)
+Repository evidence: no CODEOWNERS file or authoritative release assignment was
+  found. Git commit/config identities are not treated as organizational authority.
+Safely completed: the package is now private to block accidental publication;
+  UI_PACKAGE_RELEASE.md records the exact owner, backup, registry, maintainer,
+  asset/font, MUI X Pro and immutable-retention evidence required. Changelog and
+  rollback guidance identify how the guard may be removed after approval.
+Blocking input: a named release owner and backup; corporate registry, access and
+  visibility policy; authoritative maintainer approvers; written SC WebKit/font
+  redistribution approval; production MUI X Pro license/initialization owner; and
+  approved immutable artifact destination/retention duration.
+Safety: public npm publication and production Pro date-range adoption remain
+  prohibited. No credentials, keys, publication or deployment are included.
+```
 
 ## Baseline and measurement work
 

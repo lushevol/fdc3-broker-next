@@ -4,6 +4,29 @@
 publication, production deployment, redistribution approval or Pro license
 initialization is performed by this migration.
 
+## Publication Decision Record
+
+The repository currently provides no CODEOWNERS assignment or other authoritative
+source for the required people and external approvals. Until the unresolved rows
+below are completed by the organization, `packages/ratan-design-origin/package.json`
+sets `private: true`. Public npm publication and production use of the Pro entry
+are prohibited. Removing that guard is a reviewed release change, not a packaging
+cleanup.
+
+| Decision | Current recorded state | Required evidence before release |
+| --- | --- | --- |
+| Release owner | **BLOCKED — named owner not supplied.** Repository commit identity is not release authorization. | Named accountable person or durable team alias accepting version, evidence, rollout and rollback duties. |
+| Backup owner | **BLOCKED — named backup not supplied.** | Named person or durable team alias able to execute release and rollback independently. |
+| Registry/access/visibility | **BLOCKED — registry and entitlement not supplied.** Candidate remains local/private; public npm is not authorized. | Exact corporate registry, scoped package name, restricted visibility, publisher group and read/install audience. |
+| Maintainer reviews | Responsibilities are defined below; assignees are not yet mapped to authoritative identities. | Design-system, Base, Ratan and Cashflow approvers recorded for the candidate. |
+| Asset/font redistribution | **BLOCKED — no approval recorded.** NOTICE restrictions remain controlling. | Written approval covering SC WebKit 2.0.5 and every packaged WOFF2 asset for the selected registry/audience. |
+| MUI X Pro | **BLOCKED — production license and initialization owner not supplied.** Core/community entries remain usable locally; production `date-range` adoption is prohibited. | Entitled production owner, license scope, secure initialization location and renewal/support responsibility. |
+| Immutable artifacts | Required policy is defined below; destination and retention duration await the release owner. | Content-addressed tarball, SHA-256, source commit, validation log, catalog/screenshots and previous rollback artifact in the approved immutable store. |
+
+Approval updates must include the approving identity, date and evidence reference in
+this table and the matching changelog entry. Do not record credentials or license
+keys in the repository.
+
 ## Versioning and Review
 
 Use semantic versioning. Patch releases preserve behavior and visual contracts;
@@ -18,8 +41,8 @@ the package version and adopted version consistent. Pin an exact package version
 for a registry rollout; local file dependencies are repository development only.
 Do not broaden peer ranges based solely on matching major versions.
 
-The release owner, registry/access policy and named backup are **unassigned**.
-Assign them before publication. Required review responsibilities:
+The release owner, registry/access policy and named backup remain blocked as recorded
+above. Assign them before publication. Required review responsibilities:
 
 - Design-system maintainer: public API, semantic tokens, accessibility, legacy/
   WebKit light/dark/mobile comparison, and packaged asset provenance.

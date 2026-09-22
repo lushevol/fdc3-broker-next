@@ -1063,6 +1063,23 @@ settled UI while leaving infinite loader animations available to motion tests.
   to stop passing the appearance prop and remove the scoped host wrappers; no URL,
   storage, authentication, routing, FDC3 or business-state migration is required.
 
+### RD-028 publication governance guard
+
+- The local candidate is `private: true`. Removing that guard requires a named
+  release owner and backup, an exact restricted corporate registry/access policy,
+  mapped maintainer approvers, asset/font redistribution approval and production
+  MUI X Pro ownership. A git author identity is not evidence of release authority.
+- Public npm publication and production use of the Pro date-range entry are not
+  authorized. Credentials and license keys must never be committed. The release
+  decision record stores only accountable identities, dates and evidence references.
+- A releasable candidate must retain a content-addressed tarball and SHA-256 beside
+  the source commit, validation output, reviewed catalog/screenshots and prior
+  rollback artifact in the organization's approved immutable store. Its destination
+  and retention period remain blocked until the release owner is assigned.
+- Rollback ownership follows the release owner with the named backup able to execute
+  independently. Application maintainers validate their own host after an exact
+  package/app rollback; asset and Pro-license owners restore matching entitlements.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

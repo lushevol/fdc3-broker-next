@@ -1,6 +1,7 @@
 {
   "name": "ratan-design-origin",
   "version": "0.1.0",
+  "private": true,
   "description": "Standalone React 18 and MUI 5 controls and SCB design tokens",
   "type": "module",
   "files": [
