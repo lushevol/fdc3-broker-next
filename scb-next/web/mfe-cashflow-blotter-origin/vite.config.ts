@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
       federation({
         name: 'mfe_cashflow_blotter',
         filename: 'remoteEntry.js',
-        exposes: { './application': './src/root.tsx' },
+        exposes: { './application': './src/application.tsx' },
         dts: false,
         shared: {
           react: { singleton: true, requiredVersion: '^18.2.0' },
