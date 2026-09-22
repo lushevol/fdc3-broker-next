@@ -1039,6 +1039,30 @@ settled UI while leaving infinite loader animations available to motion tests.
   own theme policy and the shared rendering defaults. Both host builds and the
   required login → New Tile → render → remove journey remain acceptance gates.
 
+### RD-026 specification: explicit host appearance propagation
+
+- `RatanAppearance` is the host-to-design boundary and always contains both
+  `mode` (`light` or `dark`) and `designGeneration` (`legacy` or `webkit`). An
+  explicit child value overrides an inherited value; an omitted field inherits;
+  and a standalone mount with no owner falls back to `light`/`legacy`.
+- Base derives the contract from its owned reducer state: `theme` selects mode and
+  the existing `newStyles` rollout flag selects the generation. Ratan receives the
+  resolved object as a remote prop and forwards that same object to Cashflow.
+  Direct Ratan and Cashflow mounts resolve the documented fallback before render.
+- Each MFE owns one appearance scope. The scope adds Ratan generation metadata and
+  an owning overlay container to that host's existing MUI theme; it does not replace
+  Ratan's scrollbar policy, Cashflow's portal theme, either Ant Design algorithm,
+  or Base authentication/storage/theme policy. Nested legacy theme providers inherit
+  the nearest scope unless they receive an explicit override.
+- Compatibility contexts receive appearance from their owning React provider.
+  Consumer hooks do not watch document classes. Runtime changes flow through host
+  state and props, so independently mounted MFEs may use different appearances and
+  each portal remains under its owning scoped root.
+- Rollout is opt-in through Base's existing `newStyles` flag. Leaving it false, or
+  omitting appearance at a standalone boundary, keeps legacy rendering. Rollback is
+  to stop passing the appearance prop and remove the scoped host wrappers; no URL,
+  storage, authentication, routing, FDC3 or business-state migration is required.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

@@ -1,5 +1,18 @@
-import React from "react";
+import React from 'react';
 
-export default function RemoteRatanStub() {
-  return <div data-testid="remote-ratan-stub" />;
+interface RemoteRatanStubProps {
+  appearance?: {
+    mode?: string;
+    designGeneration?: string;
+  };
+}
+
+export default function RemoteRatanStub({ appearance }: RemoteRatanStubProps) {
+  return (
+    <div
+      data-testid="remote-ratan-stub"
+      data-mode={appearance?.mode}
+      data-generation={appearance?.designGeneration}
+    />
+  );
 }

@@ -20,9 +20,14 @@ export function PaymentForm() {
 ```
 
 The provider defaults to light/legacy and scopes CSS variables and overlay
-containers to its own root. It does not reset the document, change scrolling,
-read storage or choose appearance from application state. Hosts own those
-policies and date localization. Load CSS explicitly for scoped legacy/WebKit
+containers to its own root. Nested providers inherit omitted appearance fields
+from the nearest provider. Hosts that already own a MUI theme may pass it through
+`baseTheme`; the provider preserves that theme's policy while adding Ratan
+appearance metadata and scoped overlay containers. `useRatanAppearance()` exposes
+the resolved contract to adapters that must forward it across an MFE boundary.
+The provider does not reset the document, change scrolling, read storage or choose
+appearance from application state. Hosts own those policies and date localization.
+Load CSS explicitly for scoped legacy/WebKit
 aliases, canonical WebKit variables and fonts. Keyboard-focused actions show a
 2px brand-color focus ring; outlined inputs and opt-in portal DataGrid cells and
 headers retain the same visible keyboard cue. WebKit placeholders use the label
@@ -63,7 +68,7 @@ shadow with the same formula and the dark blue token counterpart.
 
 | Surface | Values and defaults | Callbacks and refs | Accessibility and keyboard | Customization and precedence |
 | --- | --- | --- | --- | --- |
-| `RatanDesignProvider`, theme and tokens | `mode="light"` and `designGeneration="legacy"`; hosts control both values. | No application-state callback or forwarded ref. | Scopes color scheme, variables and overlay containers to its root. | Supports `children` and `className`; use the `theme` and `tokens` entries for supported theme composition. It does not read URL, storage, auth or document state. |
+| `RatanDesignProvider`, theme and tokens | `mode="light"` and `designGeneration="legacy"`; omitted fields inherit from the nearest provider and standalone roots use those defaults. | No application-state callback or forwarded ref; `useRatanAppearance()` returns the resolved pair for explicit MFE forwarding. | Scopes color scheme, variables and overlay containers to its root. | Supports `children`, `className` and an existing MUI `baseTheme`; use the `theme` and `tokens` entries for supported standalone composition. It does not read URL, storage, auth or document state. |
 | `Button`, `ResetButton`, `ToggleButton`, `SearchGrid`, `SearchCondition` | Preserve the corresponding MUI Button, ToggleButton, Grid and Alert values/defaults; `SearchCondition` requires `label`, `value` and `onClose`. | Forward their MUI root refs and callbacks; `SearchCondition.onClose` receives the close `SyntheticEvent`. | Retain MUI keyboard behavior and names. `SearchCondition` keeps its close action. | Support their inherited MUI 5 props, including `sx`, DOM attributes and ARIA props. Package visual policy remains token/theme-owned. |
 | `LoadingButton`, `SearchButton` | `loading=false`, `loadingSize=14`, `loadingPosition="inline"`; `startIcon` replaces and later restores the caller icon. | Forward `HTMLButtonElement` refs and inherited Button callbacks. Loading disables activation. | The named button owns `aria-busy`; its spinner is decorative. | Support inherited MUI `ButtonProps`. Caller `disabled` remains effective; `loadingPosition` is consumed and never reaches the DOM. |
 | `Input`, `SearchInput` | Use MUI `value`/`defaultValue`; `labelPosition="top"`. `SearchInput.clearButtonLabel="Clear search"`. | `Input` forwards its root `HTMLDivElement` ref and native `inputRef`; callbacks are inherited from MUI TextField. `SearchInput.handleClear` is required. | MUI label/input keyboard behavior is retained. Search clear is disabled when the effective input is disabled or read-only. | Support `TextFieldProps` except unrestricted `variant`. Modern `slotProps` override legacy `InputProps`/`inputProps` counterparts; caller `sx` follows SearchInput padding. `hidden` supplies the initial inline display value and caller `style` is applied last. |

@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 26/30 DONE. Next: RD-026.** The clinic contains the review evidence
+**Progress: 27/30 DONE. Next: RD-028.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -50,7 +50,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-023](#rd-023) | Dependency resolution verification | P2 | 3 | DONE |
 | [RD-024](#rd-024) | Lint and aggregate verification | P2 | 3 | DONE |
 | [RD-025](#rd-025) | Shared pure host adapters | P2 | 4 | DONE |
-| [RD-026](#rd-026) | Explicit host appearance contract | P2 | 4 | TODO |
+| [RD-026](#rd-026) | Explicit host appearance contract | P2 | 4 | DONE |
 | [RD-027](#rd-027) | Alpha direct-adoption pilot | P3 | 4 | TODO |
 | [RD-028](#rd-028) | Release ownership and decisions | P2 | 4 | TODO |
 | [RD-029](#rd-029) | Reproduce historical host test failures | P2 | 1 preflight | DONE |
@@ -1326,15 +1326,54 @@ Limitations / pre-existing failures / follow-up IDs: provider/context, storage,
 
 ### RD-026
 
-**Propagate explicit mode and designGeneration from hosts.** P2 · Enhancement · TODO.
+**Propagate explicit mode and designGeneration from hosts.** P2 · Enhancement · DONE.
 Dependencies: RD-017, RD-020, RD-025. [Clinic](UI_PACKAGE_CLINIC.md#rd-026).
 
-- [ ] Specify a host appearance contract containing both `mode` and
+- [x] Specify a host appearance contract containing both `mode` and
   `designGeneration`, including inheritance and fallback behavior.
-- [ ] Propagate it through providers/adapters without changing existing legacy
+- [x] Propagate it through providers/adapters without changing existing legacy
   defaults or unifying intentionally different host theme policies implicitly.
-- [ ] Verify runtime mode/generation transitions, portals and multiple mounted
+- [x] Verify runtime mode/generation transitions, portals and multiple mounted
   micro-frontends; document an incremental opt-in rollout and rollback.
+
+```text
+Status: DONE
+Completed: 2026-09-22
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-026 defines the
+  two-field host appearance contract, field-level inheritance, light/legacy
+  standalone fallback, Base ownership, explicit Ratan-to-Cashflow forwarding,
+  independent scoped roots and incremental opt-in/rollback behavior. The public
+  package README records the same provider and base-theme composition contract.
+GitNexus impact and staged detect_changes: RatanDesignProvider is MEDIUM risk with
+  six direct test consumers and no affected indexed process. Base Container plus
+  both host Apps, theme providers, compatibility bridges and remote fixtures are
+  LOW risk with no affected indexed processes/modules. The final staged scope
+  audit is recorded in this stage commit.
+Commands (working directory scb-next unless noted): package test, token test,
+  typecheck, lint, build and verify:package; focused Base, Ratan and Cashflow
+  appearance/adapter suites; Base, Ratan and Cashflow production builds; forced
+  fresh-dependency design-origin-host Playwright journey.
+Outcomes: package checks passed 112 Vitest cases plus three token tests with 96.96%
+  line and 94.75% branch coverage, zero lint errors, typecheck/build and independent
+  tarball-consumer verification. Focused suites passed 13/13 package theme, 9/9
+  Base, 6/6 Ratan and 5/5 Cashflow tests. All three production builds passed. The
+  browser journey passed mock login -> New Tile -> rendered `CF-ACCEPT-001`, found
+  multiple independently scoped roots all at dark/WebKit, added a workspace and
+  removed the tile with no page errors.
+Compatibility review and rollback target: Base still owns appearance state; Ratan
+  and Cashflow retain their existing scrollbar, Ant Design, portal, routing and
+  business policies. Standalone and omitted values remain light/legacy. Roll back
+  the appearance remote props and scoped host wrappers to restore the previous
+  implicit host behavior; no persisted state or service migration is involved.
+Limitations / pre-existing failures / follow-up IDs: Ratan's standalone typecheck
+  command still has the recorded TS5053 noEmit/emitDeclarationOnly conflict, while
+  its production build succeeds. Existing Vite config-loader/optimizeDeps, MUI
+  directive, uncontrolled-input and nested-button advisories remain outside this
+  appearance item. RD-028 owns release decisions; RD-030 owns host performance
+  budgets; both remain dependencies for RD-027.
+```
 
 ### RD-027
 

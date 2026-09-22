@@ -1,31 +1,31 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { Provider } from './base';
 
 describe('Ratan platform compatibility bridge', () => {
-  afterEach(() => {
-    document.documentElement.className = '';
-  });
-
-  it('inherits host theme changes across the federation boundary', async () => {
-    document.documentElement.className = 'dark';
-
+  it('inherits explicit host appearance changes across the federation boundary', () => {
     const ThemeProbe = () => {
       const [store] = Provider.useContext();
-      return React.createElement('span', null, store.theme);
+      return React.createElement('span', null, `${store.theme}/${store.designGeneration}`);
     };
 
-    render(
+    const { rerender } = render(
       React.createElement(
         Provider.default,
-        null,
+        { appearance: { mode: 'dark', designGeneration: 'webkit' } },
         React.createElement(ThemeProbe),
       ),
     );
 
-    expect(screen.getByText('dark')).toBeVisible();
+    expect(screen.getByText('dark/webkit')).toBeVisible();
 
-    document.documentElement.className = 'light';
-    await waitFor(() => expect(screen.getByText('light')).toBeVisible());
+    rerender(
+      React.createElement(
+        Provider.default,
+        { appearance: { mode: 'light', designGeneration: 'legacy' } },
+        React.createElement(ThemeProbe),
+      ),
+    );
+    expect(screen.getByText('light/legacy')).toBeVisible();
   });
 });

@@ -1,30 +1,41 @@
-import { ThemeProvider } from "@mui/material";
-import { ConfigProvider, message, theme } from "antd";
-import { ConfigProviderProps } from "antd/es/config-provider";
-import { FC, PropsWithChildren, useEffect, useMemo } from "react";
+import { ConfigProvider, message, theme } from 'antd';
+import { ConfigProviderProps } from 'antd/es/config-provider';
+import { FC, PropsWithChildren, useEffect, useMemo } from 'react';
+import {
+  RatanDesignProvider,
+  resolveRatanAppearance,
+  useRatanAppearance,
+  type RatanAppearanceInput,
+} from 'ratan-design-origin';
 
-import { ContainerProvider, ThemeConfig, ThemeUtil } from "../../../import";
+import { ContainerProvider, ThemeConfig, ThemeUtil } from '../../../import';
 
 const defaultFontSize = 12;
 const defaultFontFamily = '"Poppins", Helvetica !important';
 
-const MfeThemeProvider: FC<PropsWithChildren> = (props) => {
+interface MfeThemeProviderProps extends PropsWithChildren {
+  appearance?: RatanAppearanceInput;
+}
+
+const MfeThemeProvider: FC<MfeThemeProviderProps> = (props) => {
   const [ContainerStore] = ContainerProvider.useContext();
+  const inheritedAppearance = useRatanAppearance();
+  const appearance = resolveRatanAppearance(props.appearance, {
+    mode: ContainerStore.theme === 'dark' ? 'dark' : 'light',
+    designGeneration: ContainerStore.designGeneration ?? inheritedAppearance.designGeneration,
+  });
   useEffect(() => {
     message.config({
       top: 80,
     });
   }, []);
   const muiTheme = useMemo(() => {
-    const { config } = ThemeConfig(ThemeUtil.getTheme(ContainerStore.theme));
+    const { config } = ThemeConfig(ThemeUtil.getTheme(appearance.mode));
     return config;
-  }, [ContainerStore.theme]);
+  }, [appearance.mode]);
 
   const antdTheme = useMemo<ConfigProviderProps>(() => {
-    const themeAlgo =
-      ContainerStore.theme === "dark"
-        ? theme.darkAlgorithm
-        : theme.defaultAlgorithm;
+    const themeAlgo = appearance.mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm;
     return {
       theme: {
         algorithm: themeAlgo,
@@ -40,11 +51,15 @@ const MfeThemeProvider: FC<PropsWithChildren> = (props) => {
         },
       },
     };
-  }, [ContainerStore.theme]);
+  }, [appearance.mode]);
   return (
-    <ThemeProvider theme={muiTheme}>
+    <RatanDesignProvider
+      baseTheme={muiTheme}
+      mode={appearance.mode}
+      designGeneration={appearance.designGeneration}
+    >
       <ConfigProvider {...antdTheme}>{props.children}</ConfigProvider>
-    </ThemeProvider>
+    </RatanDesignProvider>
   );
 };
 

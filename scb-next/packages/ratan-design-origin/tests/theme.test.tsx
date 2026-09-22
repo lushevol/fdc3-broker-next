@@ -2,8 +2,14 @@ import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import MenuItem from '@mui/material/MenuItem';
-import { useTheme } from '@mui/material/styles';
-import { Button, Select, RatanDesignProvider } from '../src';
+import { createTheme, useTheme } from '@mui/material/styles';
+import {
+  Button,
+  DEFAULT_RATAN_APPEARANCE,
+  RatanDesignProvider,
+  Select,
+  resolveRatanAppearance,
+} from '../src';
 import { createRatanTheme } from '../src/theme';
 import { newStyleTokens, legacyTokens } from '../src/tokens';
 import { webkitMuiTheme } from '../src/tokens/webkit-theme.generated';
@@ -11,13 +17,54 @@ import { webkitMuiTheme } from '../src/tokens/webkit-theme.generated';
 function Appearance() {
   const theme = useTheme();
   return (
-    <output aria-label="Appearance">
+    <output
+      aria-label="Appearance"
+      data-font-family={theme.typography.fontFamily}
+      data-radius={theme.shape.borderRadius}
+    >
       {theme.palette.mode}/{theme.ratan.designGeneration}
     </output>
   );
 }
 
 describe('explicit standalone appearance', () => {
+  it('resolves explicit values over inherited values and preserves safe fallbacks', () => {
+    expect(resolveRatanAppearance()).toEqual(DEFAULT_RATAN_APPEARANCE);
+    expect(
+      resolveRatanAppearance({ mode: 'dark' }, { mode: 'light', designGeneration: 'webkit' }),
+    ).toEqual({ mode: 'dark', designGeneration: 'webkit' });
+  });
+
+  it('adds appearance and scoped overlays without replacing a host theme', () => {
+    const hostTheme = createTheme({
+      typography: { fontFamily: 'Host Policy Font' },
+      shape: { borderRadius: 13 },
+    });
+    const { rerender } = render(
+      <RatanDesignProvider baseTheme={hostTheme} mode="dark" designGeneration="webkit">
+        <Appearance />
+      </RatanDesignProvider>,
+    );
+
+    expect(screen.getByLabelText('Appearance')).toHaveTextContent('dark/webkit');
+    expect(screen.getByLabelText('Appearance')).toHaveAttribute(
+      'data-font-family',
+      'Host Policy Font',
+    );
+    expect(screen.getByLabelText('Appearance')).toHaveAttribute('data-radius', '13');
+    expect(screen.getByLabelText('Appearance').closest('.ratan-design-root')).toHaveAttribute(
+      'data-generation',
+      'webkit',
+    );
+
+    rerender(
+      <RatanDesignProvider baseTheme={hostTheme} mode="light" designGeneration="legacy">
+        <Appearance />
+      </RatanDesignProvider>,
+    );
+    expect(screen.getByLabelText('Appearance')).toHaveTextContent('light/legacy');
+  });
+
   it.each(['legacy', 'webkit'] as const)(
     'updates %s appearance without host side effects',
     (designGeneration) => {

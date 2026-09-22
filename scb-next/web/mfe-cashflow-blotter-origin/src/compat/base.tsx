@@ -2,8 +2,6 @@ import {
   Component,
   createContext,
   useContext,
-  useEffect,
-  useState,
   type ErrorInfo,
   type PropsWithChildren,
   type ReactNode,
@@ -11,6 +9,11 @@ import {
 import type { PlatformCapabilities } from '@fm/platform-contracts';
 import * as ReactRouterDomModule from 'react-router-dom';
 import { Button, Dialog, Loader, LoadingButton, Time } from 'ratan-design-origin/base-compat';
+import {
+  resolveRatanAppearance,
+  type RatanAppearance,
+  type RatanAppearanceInput,
+} from 'ratan-design-origin';
 import { Config as createPortalTheme, getPortalTheme } from 'ratan-design-origin/portal-theme';
 
 export { Button, Dialog, Loader, LoadingButton, Time };
@@ -43,6 +46,7 @@ class PlatformErrorBoundary extends Component<PropsWithChildren, BoundaryState> 
 interface PlatformBridge {
   readonly token?: string;
   readonly theme: 'light' | 'dark';
+  readonly designGeneration: RatanAppearance['designGeneration'];
   readonly user: {
     readonly id: string;
     readonly fullName: string;
@@ -61,6 +65,7 @@ function getHostTheme(): PlatformBridge['theme'] {
 
 let platformBridge: PlatformBridge = {
   theme: getHostTheme(),
+  designGeneration: 'legacy',
   user: {
     id: 'portal-host',
     fullName: 'Portal Host User',
@@ -74,31 +79,28 @@ type PlatformContextValue = readonly [PlatformBridge, (action: unknown) => void]
 
 const PlatformContext = createContext<PlatformContextValue>([platformBridge, () => undefined]);
 
-export function PlatformProvider({ children }: PropsWithChildren) {
+export function PlatformProvider({
+  appearance,
+  children,
+}: PropsWithChildren<{ appearance?: RatanAppearanceInput }>) {
+  const resolvedAppearance = resolveRatanAppearance(appearance, {
+    mode: platformBridge.theme,
+    designGeneration: platformBridge.designGeneration,
+  });
+  const bridge = {
+    ...platformBridge,
+    theme: resolvedAppearance.mode,
+    designGeneration: resolvedAppearance.designGeneration,
+  };
   return (
-    <PlatformContext.Provider value={[platformBridge, () => undefined]}>
+    <PlatformContext.Provider value={[bridge, () => undefined]}>
       {children}
     </PlatformContext.Provider>
   );
 }
 
 function usePlatformContext(): PlatformContextValue {
-  const [bridge, dispatch] = useContext(PlatformContext);
-  const [theme, setTheme] = useState<PlatformBridge['theme']>(getHostTheme);
-
-  useEffect(() => {
-    if (typeof document === 'undefined' || typeof MutationObserver === 'undefined') return;
-    const syncHostTheme = () => setTheme(getHostTheme());
-    syncHostTheme();
-    const observer = new MutationObserver(syncHostTheme);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-    return () => observer.disconnect();
-  }, []);
-
-  return [{ ...bridge, theme }, dispatch];
+  return useContext(PlatformContext);
 }
 
 export function configurePlatformBridge(capabilities: PlatformCapabilities) {
@@ -108,6 +110,7 @@ export function configurePlatformBridge(capabilities: PlatformCapabilities) {
   const permissions = identity?.state === 'authenticated' ? identity.permissions : [];
   platformBridge = {
     theme: capabilities.appearance.getSnapshot().scheme,
+    designGeneration: 'legacy',
     user: {
       id: userId,
       fullName: userId,
