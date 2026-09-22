@@ -232,7 +232,77 @@ The portal declarations require optional `@mui/x-data-grid@6.20.4` and
 5.18 no longer installs). Core consumers need neither. See the compiled
 `fixtures/consumer/src/server-portal.tsx` for extension/declaration/SSR usage.
 
-## Development
+## Use tokens directly in application CSS
+
+Import the global token entry once in your application's stylesheet (with a
+bundler that resolves package CSS imports):
+
+```css
+@import 'ratan-design-origin/tokens.css';
+
+.payment-card {
+  color: var(--sc-layout-text-color);
+  background: var(--sc-panel-background-color);
+  border: 1px solid var(--sc-divider-color);
+  border-radius: var(--sc-radius-md);
+  padding: var(--sc-spacing-16);
+  font-family: var(--sc-font-family);
+}
+```
+
+Alternatively, import `ratan-design-origin/tokens.css` in your application entry
+file. No React, MUI, JavaScript token import, or `RatanDesignProvider` is needed
+to use the CSS. For an unbundled site, serve `dist/tokens.css` with its adjacent
+`fonts/` directory and load it with a stylesheet `<link>`.
+
+Tokens inherit throughout the document, including body-mounted overlays and
+micro-frontends in that document. Each iframe or separate document must load
+the stylesheet itself. Loading tokens does not apply colors, fonts, resets or
+layout rules to elements; applications choose which variables to use.
+
+The global entry defaults to **WebKit/light**. Set attributes on `<html>` to
+select an appearance, and change them at runtime to update CSS consumers:
+
+```html
+<html data-generation="webkit" data-mode="dark">
+```
+
+`data-mode="light"` (or no mode attribute) selects light; `data-mode="dark"`
+selects dark. `data-generation="legacy"` selects legacy variables, including
+`--base-*` and `--theme-*`; use `var(--theme-color-body-background)` for a
+background alias shared by both generations. `--sc-*` tokens belong to WebKit.
+Remove the generation attribute or set it to `webkit` for WebKit tokens.
+The application owns these attributes; this entry does not synchronize them
+with a React theme, portal store, or operating-system preference.
+
+Common WebKit variables:
+
+| Purpose | CSS variable |
+| --- | --- |
+| Page / panel background | `--sc-layout-background-color` / `--sc-panel-background-color` |
+| Text / muted text | `--sc-layout-text-color` / `--sc-panel-content-color` |
+| Border / focus | `--sc-divider-color` / `--sc-focus-ring-color` |
+| Spacing | `--sc-spacing-4`, `--sc-spacing-8`, `--sc-spacing-16`, `--sc-spacing-24` |
+| Radius | `--sc-radius-sm`, `--sc-radius-md`, `--sc-radius-lg` |
+| Typography | `--sc-font-family`, `--sc-font-size` |
+
+The [CSS-only consumer](fixtures/consumer/tokens.html) is bundled by the package
+verifier. The generated [token stylesheet](assets/tokens.css) lists every token.
+Both CSS entries ship the same font faces and retain responsive token values.
+Continue loading `styles.css` for `RatanDesignProvider` scopes; those scopes
+keep their own appearance even when `tokens.css` is also loaded. The provider's
+existing default remains legacy/light.
+
+To customize a global token, add a `:root` declaration after the import; no
+`!important` or appearance-selector matching is needed:
+
+```css
+:root {
+  --sc-radius-md: 0.75rem;
+}
+```
+
+## Development commands
 
 Run `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`, and
 `npm run build:storybook`. `npm run verify:package` packs and installs into a

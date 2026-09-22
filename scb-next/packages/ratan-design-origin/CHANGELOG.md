@@ -2,6 +2,9 @@
 
 ## 0.1.0 - Local Release Candidate
 
+- Opt-in `tokens.css` exposes document-wide CSS variables without a React
+  provider, defaulting to WebKit/light with HTML attributes for dark/legacy.
+
 - Standalone ESM/TypeScript React 18 and MUI 5 controls with explicit scoped
   legacy/WebKit themes, semantic tokens and packaged WebKit 2.0.5 assets.
 - Button/input/select, composed search layouts, Builder pattern, feedback,

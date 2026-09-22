@@ -43,6 +43,7 @@ const [packed] = JSON.parse(
   npm(["pack", "--json", "--pack-destination", consumer], root)
 );
 assert(packed.files.some(({ path }) => path === "dist/styles.css"));
+assert(packed.files.some(({ path }) => path === "dist/tokens.css"));
 assert.equal(
   packed.files.filter(({ path }) => path.endsWith(".woff2")).length,
   13
@@ -98,6 +99,22 @@ assert(!manifest.dependencies, "Core must only have external peers");
 const { build } = await import(
   pathToFileURL(join(consumer, "node_modules/vite/dist/node/index.js"))
 );
+const tokenBuild = await build({
+  root: consumer,
+  configFile: false,
+  logLevel: "warn",
+  build: {
+    outDir: "dist-tokens",
+    assetsInlineLimit: 0,
+    rolldownOptions: { input: join(consumer, "tokens.html") }
+  }
+});
+const tokenAssets = (Array.isArray(tokenBuild) ? tokenBuild : [tokenBuild])
+  .flatMap((bundle) => bundle.output);
+assert(!tokenAssets.some((asset) => asset.type === "chunk"), "CSS tokens must not load JavaScript");
+assert.equal(tokenAssets.filter((asset) => asset.fileName.endsWith(".woff2")).length, 13);
+assert(tokenAssets.some((asset) => asset.fileName.endsWith(".css") &&
+  String(asset.source).includes("--sc-panel-background-color")));
 const viteManifest = JSON.parse(
   await readFile(join(consumer, "node_modules/vite/package.json"), "utf8")
 );

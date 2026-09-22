@@ -63,6 +63,7 @@
       "import": "./dist/base-compat.js"
     },
     "./styles.css": "./dist/styles.css",
+    "./tokens.css": "./dist/tokens.css",
     "./dates": {
       "types": "./dist/dates.d.ts",
       "import": "./dist/dates.js"
@@ -81,7 +82,7 @@
     "dev": "vite build --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage && npm run test:tokens",
-    "test:tokens": "node --test scripts/generate-webkit-assets.test.mjs",
+    "test:tokens": "node --test scripts/generate-webkit-assets.test.mjs scripts/global-token-css.test.mjs",
     "lint": "eslint src tests stories",
     "storybook": "storybook dev -p 6019",
     "build:storybook": "storybook build -o storybook-static",

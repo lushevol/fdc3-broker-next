@@ -1,0 +1,10 @@
+@import 'ratan-design-origin/tokens.css';
+
+.payment-card {
+  color: var(--sc-layout-text-color);
+  background: var(--sc-panel-background-color);
+  border: 1px solid var(--sc-divider-color);
+  border-radius: var(--sc-radius-md);
+  padding: var(--sc-spacing-16);
+  font-family: var(--sc-font-family);
+}

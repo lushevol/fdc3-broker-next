@@ -8,6 +8,37 @@ business screens must compile without import, prop, or callback changes.
 
 ## Requirements
 
+### Application CSS token entry
+
+- Export `ratan-design-origin/tokens.css` as an explicit, framework-independent
+  stylesheet. Importing it defines tokens on `:root` so ordinary application CSS
+  can use `var(--sc-...)` and the existing `--base-*` / `--theme-*` aliases without
+  mounting a provider or importing JavaScript.
+- Default to WebKit/light. Applications select dark mode with
+  `<html data-mode="dark">` and legacy aliases with
+  `<html data-generation="legacy">`; absent attributes select WebKit/light.
+  Switching these attributes must recompute dependent token values.
+- Generate the entry from the same source as scoped `styles.css`, preserving
+  conditional rules, font assets, token values, and complete alias chains.
+  Define only custom properties and font faces; do not apply document resets
+  or element styling. Later `:root` declarations can override tokens without
+  `!important`. Existing provider scopes remain independent.
+- Ship the CSS and relative fonts in the package tarball. Verify CSS-only
+  consumer bundling, all four appearance combinations, responsive values,
+  and coexistence with scoped providers in a real browser.
+
+Verification (2026-09-22): 112 package tests and five token-generation tests
+pass; package coverage is 96.96% lines / 94.75% branches, and the global CSS
+generator has 100% line/branch/function coverage. Typecheck, zero-warning lint,
+build, and independent tarball verification pass, including a CSS-only bundle
+with all 13 fonts and no JavaScript. Two Chromium tests cover document appearance
+switching, inherited overlay tokens, responsive values, provider isolation, and
+ordinary `:root` overrides. The localhost:8001 host smoke reaches login and tile
+opening but Cashflow rendering is blocked by an unrelated `DateFormat` temporal
+initialization error in `CashflowDetails/MultiExceptions/components/Affirmation`.
+
+### Existing package requirements
+
 1. Base and ratan-design-origin use Material/icons 5.18.0 and React 18. Existing
    consumer dependency declarations remain unchanged. Base uses Data Grid 6.20.4
    and date pickers 6.20.2, matching the installed legacy consumer matrix.
