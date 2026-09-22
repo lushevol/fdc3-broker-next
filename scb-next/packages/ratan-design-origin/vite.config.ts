@@ -20,6 +20,7 @@ export default defineConfig({
         theme: "src/theme/index.ts",
         tokens: "src/tokens/index.ts",
         compatibility: "src/compatibility.ts",
+        "base-compat": "src/base-compat.tsx",
         dates: "src/dates.tsx",
         "date-range": "src/date-range.tsx",
         "portal-theme": "src/portal-theme.ts",

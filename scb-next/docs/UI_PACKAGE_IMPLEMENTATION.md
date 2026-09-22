@@ -1017,6 +1017,28 @@ settled UI while leaving infinite loader animations available to motion tests.
   introduced by the package stage, and a focused pass is not used to claim the
   broad suite is green.
 
+### RD-025 specification: migration-only Base presentation adapters
+
+- `ratan-design-origin/base-compat` is a migration-only entry for the five pure
+  presentation namespaces duplicated by the Ratan and Cashflow `@fm/base`
+  compatibility bridges: `Loader`, `Time`, `Button`, `LoadingButton` and `Dialog`.
+  Each namespace retains the legacy `{ default }` or `{ Time }` shape so existing
+  host imports and call sites do not change.
+- The shared entry normalizes legacy `type="primary"` to the native button type,
+  defaults loading buttons to the 16px start-icon pattern, stringifies Time values,
+  keeps the named circular Loader, defaults dialogs open, forces package dialogs
+  into a portal and preserves the existing responsive Paper dimensions, callbacks,
+  title/actions and divider layout.
+- The entry is pure with respect to host policy: it must not read URL state,
+  document classes, local/session storage, authentication, platform capabilities,
+  routing, telemetry, FDC3, HTTP services or theme selection. Provider/context,
+  error/splash orchestration, Hooks, utilities, services, dispatcher and both
+  intentionally different host theme policies remain in each bridge.
+- Package contract tests exercise every shared namespace. Each host contract test
+  proves its legacy export is the identical shared namespace, then re-verifies its
+  own theme policy and the shared rendering defaults. Both host builds and the
+  required login → New Tile → render → remove journey remain acceptance gates.
+
 ### Stage 4 and final inventory delivery (2026-09-18)
 
 Ratan and Cashflow compatibility adapters now consume the package Button,

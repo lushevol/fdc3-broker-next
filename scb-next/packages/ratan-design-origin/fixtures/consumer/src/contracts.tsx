@@ -32,6 +32,13 @@ import {
 import { createRatanTheme, type DesignGeneration } from 'ratan-design-origin/theme';
 import { legacyTokens, newStyleTokens } from 'ratan-design-origin/tokens';
 import { InputStyled, legacyColorAliases } from 'ratan-design-origin/compatibility';
+import {
+  Button as BaseButton,
+  Dialog as BaseDialog,
+  Loader as BaseLoader,
+  LoadingButton as BaseLoadingButton,
+  Time as BaseTime,
+} from 'ratan-design-origin/base-compat';
 
 const theme: Theme = createRatanTheme();
 const generation: DesignGeneration = theme.ratan.designGeneration;
@@ -104,6 +111,16 @@ export const exportedContracts = {
   InputStyled,
   legacyColorAliases,
 };
+
+export const baseCompatibilityContracts = (
+  <>
+    <BaseButton.default type="primary">Open</BaseButton.default>
+    <BaseLoadingButton.default loading>Save</BaseLoadingButton.default>
+    <BaseLoader.default />
+    <BaseTime.Time value={0} />
+    <BaseDialog.default open={false}>Details</BaseDialog.default>
+  </>
+);
 
 const loader: LoaderProps = { text: 'Loading trades', size: '24px', 'aria-label': 'Refreshing' };
 const notification: SnackbarProps = {

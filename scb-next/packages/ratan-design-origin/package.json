@@ -26,6 +26,9 @@
       "compatibility": [
         "dist/compatibility.d.ts"
       ],
+      "base-compat": [
+        "dist/base-compat.d.ts"
+      ],
       "dates": [
         "dist/dates.d.ts"
       ],
@@ -53,6 +56,10 @@
     "./compatibility": {
       "types": "./dist/compatibility.d.ts",
       "import": "./dist/compatibility.js"
+    },
+    "./base-compat": {
+      "types": "./dist/base-compat.d.ts",
+      "import": "./dist/base-compat.js"
     },
     "./styles.css": "./dist/styles.css",
     "./dates": {

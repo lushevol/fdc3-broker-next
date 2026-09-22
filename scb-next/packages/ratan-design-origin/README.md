@@ -49,6 +49,9 @@ shadow with the same formula and the dark blue token counterpart.
 - `ratan-design-origin/compatibility`: existing CSS alias strings,
   `InputStyled`, `DialogTitle`, `DialogRoot` and `dialogClasses`; retained
   for Base adapters, not a new customization contract.
+- `ratan-design-origin/base-compat`: migration-only legacy Base presentation
+  namespaces for Ratan/Cashflow (`Loader`, `Time`, `Button`, `LoadingButton`,
+  `Dialog`); it contains no host state, services, routing or theme policy.
 - `ratan-design-origin/styles.css`: scoped canonical WebKit variables and fonts.
 - `ratan-design-origin/dates`: DatePicker, DateTimePicker, TimePicker, their
   Dayjs prop types, LocalizationProvider and AdapterDayjs.
@@ -73,9 +76,11 @@ shadow with the same formula and the dark blue token counterpart.
 | Date, time and range entries | Community pickers preserve omitted `value` as uncontrolled and explicit `null` as controlled-empty. Range preserves each null endpoint. `labelPosition="top"`; `hidden=false`. | Retain MUI X callbacks; these wrappers do not add forwarded refs. | Retain MUI X field/dialog keyboard and labeling behavior. IDs belong in `slotProps.textField.inputProps`. | Support inherited MUI X 6 props. Caller `slotProps` replaces default shrink props; range always uses `SingleInputDateRangeField`. Caller `sx` is preserved and `hidden` is the final display override. |
 
 Compatibility-only exports in `ratan-design-origin/compatibility` preserve Base
-adapter selectors and styled surfaces. They are migration helpers, not supported
-general-purpose customization primitives. `portal-theme` likewise preserves an
-explicit historical host integration and document-level policy.
+adapter selectors and styled surfaces. The `base-compat` entry preserves only the
+pure presentation namespace shape during Ratan/Cashflow migration. They are
+migration helpers, not supported general-purpose customization primitives.
+`portal-theme` likewise preserves an explicit historical host integration and
+document-level policy.
 
 The compiling examples are [core contracts](fixtures/consumer/src/contracts.tsx),
 [date contracts](fixtures/consumer/src/dates.tsx), and

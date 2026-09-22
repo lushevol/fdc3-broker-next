@@ -40,6 +40,8 @@
   leave keyboard navigation; the toggle now exposes its state and controlled region.
 - Base and Ratan/Cashflow adoption behind their existing compatible exports,
   defaults, callbacks and selectors; portal policy remains with applications.
+- Ratan and Cashflow now share the migration-only `base-compat` presentation
+  namespaces while retaining host-owned services, storage, routing and theme policy.
 - Verified public interfaces, independent tarball consumption, SSR/tree shaking,
   catalog states and integrated workspace journeys. See implementation evidence.
 - Repository browser gates now fail on serious/critical axe findings across every

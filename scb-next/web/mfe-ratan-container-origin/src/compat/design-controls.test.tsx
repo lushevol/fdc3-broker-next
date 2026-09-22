@@ -1,9 +1,24 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { Button, LoadingButton, Loader, Dialog, ThemeConfig, ThemeUtil } from "@fm/base";
+import { Button, LoadingButton, Loader, Dialog, ThemeConfig, ThemeUtil, Time } from "@fm/base";
+import {
+  Button as SharedButton,
+  Dialog as SharedDialog,
+  Loader as SharedLoader,
+  LoadingButton as SharedLoadingButton,
+  Time as SharedTime,
+} from "ratan-design-origin/base-compat";
 
 describe("unchanged consumer control exports", () => {
+  it("re-exports the shared presentation adapters without wrapping them", () => {
+    expect(Button).toBe(SharedButton);
+    expect(Dialog).toBe(SharedDialog);
+    expect(Loader).toBe(SharedLoader);
+    expect(LoadingButton).toBe(SharedLoadingButton);
+    expect(Time).toBe(SharedTime);
+  });
+
   it("retains Ratan's palette-only theme policy", () => {
     expect(ThemeConfig.default(ThemeUtil.getTheme("dark")).config.palette.mode).toBe("dark");
     expect(ThemeConfig.default(ThemeUtil.getTheme("gold")).config.palette.mode).toBe("light");
@@ -19,11 +34,11 @@ describe("unchanged consumer control exports", () => {
     fireEvent.click(screen.getByRole("button", { name: "Open trade" }));
     expect(click).toHaveBeenCalledOnce();
     expect(screen.getByRole("button", { name: "Save trade" })).toBeDisabled();
-    expect(screen.getByRole("progressbar")).toHaveStyle({ width: "16px", height: "16px" });
+    expect(screen.getByRole("progressbar", { hidden: true })).toHaveStyle({ width: "16px", height: "16px" });
     expect(screen.queryByText("Host icon")).not.toBeInTheDocument();
     rerender(<LoadingButton.default startIcon={<span>Host icon</span>}>Save trade</LoadingButton.default>);
     expect(screen.getByRole("button", { name: "Host icon Save trade" })).toBeEnabled();
-    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+    expect(screen.queryByRole("progressbar", { hidden: true })).not.toBeInTheDocument();
   });
 
   it("keeps the circular loading primitive and its accessible name", () => {

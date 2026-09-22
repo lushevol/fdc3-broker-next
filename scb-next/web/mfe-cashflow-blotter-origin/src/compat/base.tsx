@@ -10,17 +10,10 @@ import {
 } from 'react';
 import type { PlatformCapabilities } from '@fm/platform-contracts';
 import * as ReactRouterDomModule from 'react-router-dom';
-import {
-  type DialogProps as MuiDialogProps,
-  type ButtonProps as MuiButtonProps,
-} from '@mui/material';
-import {
-  Button as DesignButton,
-  LoadingButton as DesignLoadingButton,
-  Dialog as DesignDialog,
-  Spinner,
-} from 'ratan-design-origin';
+import { Button, Dialog, Loader, LoadingButton, Time } from 'ratan-design-origin/base-compat';
 import { Config as createPortalTheme, getPortalTheme } from 'ratan-design-origin/portal-theme';
+
+export { Button, Dialog, Loader, LoadingButton, Time };
 
 interface BoundaryState {
   readonly error?: Error;
@@ -77,15 +70,9 @@ let platformBridge: PlatformBridge = {
 };
 let platformCapabilities: PlatformCapabilities | undefined;
 
-type PlatformContextValue = readonly [
-  PlatformBridge,
-  (action: unknown) => void,
-];
+type PlatformContextValue = readonly [PlatformBridge, (action: unknown) => void];
 
-const PlatformContext = createContext<PlatformContextValue>([
-  platformBridge,
-  () => undefined,
-]);
+const PlatformContext = createContext<PlatformContextValue>([platformBridge, () => undefined]);
 
 export function PlatformProvider({ children }: PropsWithChildren) {
   return (
@@ -173,7 +160,6 @@ const storage = (kind: 'local' | 'session') =>
 
 export const ErrorBoundry = { default: PlatformErrorBoundary };
 export const Splash = { default: () => <div role="status">Loading Cashflow CN…</div> };
-export const Loader = { default: () => <Spinner aria-label="Loading" /> };
 export const Provider = {
   default: PlatformProvider,
   useContext: usePlatformContext,
@@ -211,11 +197,10 @@ export const CommonUtil = {
   showErrorMsg: (message: string) => console.error(message),
   showSuccessMsg: (message: string) => console.info(message),
   isDate: (value: unknown) => !Number.isNaN(Date.parse(String(value))),
-  isNumber: (value: unknown) =>
-    value !== null && value !== '' && Number.isFinite(Number(value)),
+  isNumber: (value: unknown) => value !== null && value !== '' && Number.isFinite(Number(value)),
   uuidv4: () =>
-    globalThis.crypto?.randomUUID?.()
-    ?? 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (character) => {
+    globalThis.crypto?.randomUUID?.() ??
+    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (character) => {
       const random = Math.floor(Math.random() * 16);
       const value = character === 'x' ? random : (random & 0x3) | 0x8;
       return value.toString(16);
@@ -230,59 +215,13 @@ export const ThemeConfig = {
   default: createPortalTheme,
 };
 export const ThemeUtil = {
-  getTheme: (theme: string | undefined, newStyles = false) => getPortalTheme(
-    theme,
-    newStyles,
-    new URLSearchParams(window.location.search).get('new-layout') === 'true',
-  ),
+  getTheme: (theme: string | undefined, newStyles = false) =>
+    getPortalTheme(
+      theme,
+      newStyles,
+      new URLSearchParams(window.location.search).get('new-layout') === 'true',
+    ),
 };
-export const Time = {
-  Time: ({ value }: {
-    readonly value?: unknown;
-    readonly field?: string;
-    readonly isAccurateToDay?: boolean;
-  }) => <>{String(value ?? '')}</>,
-};
-interface CompatibilityButtonProps extends Omit<MuiButtonProps, 'type'> {
-  readonly type?: MuiButtonProps['type'] | 'primary';
-}
-
-function CompatibilityButton({ type, ...props }: CompatibilityButtonProps) {
-  return <DesignButton {...props} type={type === 'primary' ? 'button' : type} />;
-}
-
-export const Button = { default: CompatibilityButton };
-
-interface CompatibilityLoadingButtonProps extends CompatibilityButtonProps {
-  readonly loading?: boolean;
-  readonly loadingSize?: number;
-}
-
-function CompatibilityLoadingButton({
-  children,
-  disabled,
-  loading = false,
-  loadingSize = 16,
-  startIcon,
-  type,
-  ...props
-}: CompatibilityLoadingButtonProps) {
-  return (
-    <DesignLoadingButton
-      {...props}
-      disabled={disabled}
-      loading={loading}
-      loadingPosition="startIcon"
-      loadingSize={loadingSize}
-      startIcon={startIcon}
-      type={type === 'primary' ? 'button' : type}
-    >
-      {children}
-    </DesignLoadingButton>
-  );
-}
-
-export const LoadingButton = { default: CompatibilityLoadingButton };
 export const ExtendService = { extendToken: (_url?: string) => undefined };
 export const Analytics = {
   default: () => ({ ButtonEvent: () => undefined }),
@@ -291,104 +230,6 @@ export const FDC3Agent = {
   default: {
     useIntentListener: (_intent: string, _handler: (context: unknown) => void) => undefined,
   },
-};
-
-interface CompatibilityDialogProps extends PropsWithChildren {
-  readonly open?: boolean;
-  readonly onClose?: () => void;
-  readonly titleComponents?: ReactNode;
-  readonly actionComponents?: ReactNode;
-  readonly defaultWidth?: number | string;
-  readonly defaultHeight?: number | string;
-  readonly dividers?: boolean;
-  readonly disablePortal?: boolean;
-  readonly fullScreen?: boolean;
-  readonly fullWidth?: boolean;
-  readonly scroll?: MuiDialogProps['scroll'];
-  readonly disableEscapeKeyDown?: boolean;
-  readonly className?: string;
-  readonly PaperProps?: MuiDialogProps['PaperProps'];
-  readonly 'data-testid'?: string;
-}
-
-function cssSize(value: number | string | undefined, fallback: string) {
-  if (value === undefined || value === 'auto') return fallback;
-  return typeof value === 'number' ? `${value}px` : value;
-}
-
-function CompatibilityDialog({
-  children,
-  open = true,
-  onClose,
-  titleComponents,
-  actionComponents,
-  defaultWidth,
-  defaultHeight,
-  dividers,
-  fullScreen,
-  fullWidth,
-  scroll = 'paper',
-  disableEscapeKeyDown,
-  className,
-  PaperProps,
-  'data-testid': testId,
-}: CompatibilityDialogProps) {
-  const requestedWidth = cssSize(defaultWidth, 'auto');
-  const requestedHeight = cssSize(defaultHeight, 'auto');
-
-  return (
-    <DesignDialog
-      open={open}
-      onClose={() => onClose?.()}
-      disablePortal={false}
-      fullScreen={fullScreen}
-      fullWidth={fullWidth}
-      scroll={scroll}
-      disableEscapeKeyDown={disableEscapeKeyDown}
-      className={className}
-      data-testid={testId}
-      maxWidth={false}
-      titleComponents={titleComponents}
-      actionComponents={actionComponents}
-      onCloseButton={onClose}
-      titleProps={{ sx: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1,
-        minHeight: 48,
-        padding: '4px 8px 4px 16px',
-      } }}
-      dividers={dividers}
-      contentProps={{ sx: {
-        minHeight: 0,
-        overflow: 'auto',
-        padding: dividers ? undefined : 0,
-      } }}
-      PaperProps={{
-        ...PaperProps,
-        style: {
-          ...PaperProps?.style,
-          width:
-            requestedWidth === 'auto'
-              ? 'auto'
-              : `min(${requestedWidth}, calc(100vw - 32px))`,
-          height:
-            requestedHeight === 'auto'
-              ? 'auto'
-              : `min(${requestedHeight}, calc(100vh - 32px))`,
-          maxWidth: 'calc(100vw - 32px)',
-          maxHeight: 'calc(100vh - 32px)',
-          margin: 16,
-        },
-      }}
-    >
-      {children}
-    </DesignDialog>
-  );
-}
-
-export const Dialog = {
-  default: CompatibilityDialog,
 };
 
 export default {

@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 25/30 DONE. Next: RD-025.** The clinic contains the review evidence
+**Progress: 26/30 DONE. Next: RD-026.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -49,7 +49,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-022](#rd-022) | Browser accessibility and visual gates | P2 | 3 | DONE |
 | [RD-023](#rd-023) | Dependency resolution verification | P2 | 3 | DONE |
 | [RD-024](#rd-024) | Lint and aggregate verification | P2 | 3 | DONE |
-| [RD-025](#rd-025) | Shared pure host adapters | P2 | 4 | TODO |
+| [RD-025](#rd-025) | Shared pure host adapters | P2 | 4 | DONE |
 | [RD-026](#rd-026) | Explicit host appearance contract | P2 | 4 | TODO |
 | [RD-027](#rd-027) | Alpha direct-adoption pilot | P3 | 4 | TODO |
 | [RD-028](#rd-028) | Release ownership and decisions | P2 | 4 | TODO |
@@ -1271,16 +1271,58 @@ Limitations / pre-existing failures / follow-up IDs: upstream MUI directive/lice
 
 ### RD-025
 
-**Share pure Ratan/Cashflow compatibility adaptation.** P2 · Static finding · TODO.
+**Share pure Ratan/Cashflow compatibility adaptation.** P2 · Static finding · DONE.
 Dependencies: phase 1 fixes, RD-020, RD-023, RD-029.
 [Clinic](UI_PACKAGE_CLINIC.md#rd-025).
 
-- [ ] Recheck the reported duplicated adapter block and specify the smallest shared
+- [x] Recheck the reported duplicated adapter block and specify the smallest shared
   pure UI boundary using current consumers and GitNexus impact.
-- [ ] Share that boundary while preserving Base imports, host-specific services,
+- [x] Share that boundary while preserving Base imports, host-specific services,
   forced portals and each host's existing theme policy.
-- [ ] Run adapter contract tests, both host builds and affected workspace journeys;
+- [x] Run adapter contract tests, both host builds and affected workspace journeys;
   document a focused rollback and avoid extracting unrelated host policy.
+
+```text
+Status: DONE
+Completed: 2026-09-22
+Owner: Codex
+Commit(s): pending this stage commit
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-025 contract; the new
+  public `ratan-design-origin/base-compat` entry owns Loader, Time, Button,
+  LoadingButton and Dialog namespaces. Package tests cover primary-button
+  normalization, the 16px start-icon loading state, loader/time rendering, forced
+  portals, sizing and close behavior. Both host adapter suites assert that @fm/base
+  re-exports the exact shared namespace objects while retaining their distinct theme
+  policies.
+GitNexus impact and staged detect_changes: both CompatibilityButton symbols,
+  CompatibilityLoadingButton and CompatibilityDialog are LOW risk with no affected
+  process/module; cssSize is LOW risk with one direct dependant and no affected
+  process/module. The final staged scope audit is recorded in this stage commit.
+Commands (working directory scb-next unless noted): package test, typecheck, lint
+  and build; verify:package; focused Base-compat package test; focused Ratan and
+  Cashflow adapter suites; both host production builds; live design-origin-host
+  Playwright journey.
+Outcomes: the reproduced compatibility clinic contained 394 identical lines. The
+  host adapters lost 160 and 159 lines (402 -> 242 and 415 -> 256) while keeping providers,
+  storage, HTTP, routing, telemetry, platform capabilities, FDC3, error/splash and
+  host-specific theme policy local. Package checks passed 110 Vitest tests plus
+  three token tests with 96.89% line and 94.66% branch coverage, zero lint errors,
+  typecheck/build and independent tarball consumer verification. Focused hosts
+  passed 6/6 Ratan and 5/5 Cashflow tests; both production builds passed. The clean
+  browser journey passed mock login -> New Tile -> rendered `CF-ACCEPT-001` -> add
+  workspace -> delete, with no page errors.
+Compatibility review and rollback target: the public namespace shapes, `primary`
+  normalization, hidden 16px loading spinner, forced portal and Dialog sizing are
+  unchanged. Consumers still import @fm/base; only the two host implementations now
+  delegate pure presentation behavior to the package. Roll back the base-compat
+  entry and restore the five local definitions if either host needs to diverge.
+Limitations / pre-existing failures / follow-up IDs: provider/context, storage,
+  services, routing, telemetry, platform capabilities and distinct theme policies
+  intentionally remain host-owned. Vite config-loader, bundle-size and packed
+  consumer module-directive advisories remain unchanged. RD-029 records remaining
+  unrelated broad host fixture/setup failures; RD-026 owns explicit appearance
+  propagation.
+```
 
 ### RD-026
 
@@ -1374,7 +1416,8 @@ Classification and disposition: the reproduced duplicate-React failures were
   setup failures, and Cashflow retains one QuickFilters value interaction failure.
   The host owners/Codex own those legacy fixture/setup follow-ups; they do not block
   package adapter extraction because its focused contracts and both builds remain
-  the acceptance gates. The Vite native-config advisory and non-top-level vi.mock
+  the acceptance gates. RD-025 repaired the hidden-spinner query in both adapter
+  suites. The Vite native-config advisory and non-top-level vi.mock
   advisories are environment/tooling warnings rather than this resolution defect.
 Rollback: revert the two test aliases, Cashflow dependency and lock entries if a
   host intentionally requires repository-root Ant Design/react-use in tests; the
@@ -1452,3 +1495,5 @@ or committed evidence.
 | 2026-09-21 | RD-024 | TODO → IN PROGRESS | ESLint config has no indexed export/process; aggregate runner is new | Specification added; write fail-fast runner fixtures next |
 | 2026-09-22 | RD-024 | IN PROGRESS → DONE | 107 tests, zero-warning lint, three runner fixtures, 24 browser checks and Base/Ratan/Cashflow builds pass; pristine lock reconstruction matches | Next: RD-025 |
 | 2026-09-22 | RD-029 | TODO → DONE | Original broad commands reproduced 47/167 Ratan and 84/228 Cashflow failures; host-local Ant Design and declared react-use remove duplicate React, leaving 6 and 2 classified legacy failures | Next: RD-025 |
+| 2026-09-22 | RD-025 | TODO → IN PROGRESS | 394 duplicated adapter lines reproduced; Button, LoadingButton, Dialog and both cssSize helpers are LOW risk with no affected process/module | Add the package-owned pure presentation contract before host rewiring |
+| 2026-09-22 | RD-025 | IN PROGRESS → DONE | Five pure namespaces moved to the public package entry; 113 package/token tests, 11 focused host tests, packed consumer, both builds and live host journey pass | Next: RD-026 |
