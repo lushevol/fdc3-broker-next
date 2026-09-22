@@ -1063,6 +1063,30 @@ settled UI while leaving infinite loader animations available to motion tests.
   to stop passing the appearance prop and remove the scoped host wrappers; no URL,
   storage, authentication, routing, FDC3 or business-state migration is required.
 
+### RD-027 specification: bounded Alpha direct-adoption pilot
+
+- Alpha directly owns the package provider boundary and explicitly imports the
+  package stylesheet. Base passes the same complete appearance contract used by
+  Ratan; an independent Alpha mount retains the documented light/legacy fallback.
+- The pilot replaces only duplicated search, status-select, acknowledgement,
+  loading, load-error/retry and empty-state presentation. Alpha retains its case
+  types, API client, state transitions, filtering rules, summary, table, routes and
+  workspace ownership. Accessible names and user-visible state text remain stable.
+- Alpha declares all required React, MUI and Emotion peers, deduplicates them in
+  production and pins its test renderer to the same local React instance. The
+  repository dependency-isolation gate includes Alpha and optional date/Pro peers
+  remain absent.
+- Acceptance covers default and explicit appearance metadata, search/status
+  filtering, clear/action/error/retry/empty behavior, loading and busy semantics,
+  Base prop propagation, production builds and the live dark/legacy Alpha journey.
+  The three-run before/after bundle and development-host timing method and exact
+  evidence live in `ALPHA_DIRECT_ADOPTION_PILOT.md`.
+- Alpha is the only canary. The measured cold-load increase blocks mechanical
+  rollout to more remotes until a separate architecture experiment meets the
+  recorded 25% p95 guardrail. RD-028 still prohibits publication. Rollback reverts
+  the Alpha provider/control/dependency stage without migrating business data,
+  routes, services or persisted state.
+
 ### RD-028 publication governance guard
 
 - The local candidate is `private: true`. Removing that guard requires a named

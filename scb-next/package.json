@@ -50,6 +50,7 @@
     "test:e2e:design-origin:update": "node ./scripts/run-design-origin-browser.mjs --update-snapshots",
     "test:performance-runner": "node --test ./scripts/measure-design-origin-host.test.mjs",
     "measure:design-origin-host": "node ./scripts/measure-design-origin-host.mjs --build --no-enforce --output /tmp/design-origin-performance.json",
+    "measure:alpha-adoption": "node ./scripts/measure-alpha-adoption.mjs",
     "verify:design-origin-host-performance": "node ./scripts/measure-design-origin-host.mjs --build --output /tmp/design-origin-performance.json",
     "test:quality-runner": "node --test ./scripts/verify-design-origin-quality.test.mjs",
     "typecheck": "npm run typecheck --workspaces --if-present",

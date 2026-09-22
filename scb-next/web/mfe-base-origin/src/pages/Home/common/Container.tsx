@@ -38,7 +38,10 @@ const Container: React.FC<ContainerProps> = (props: ContainerProps): ReactElemen
             parameters={props.parameters ?? {}}
             panelId={props.panelId}
             tabId={props.tabId}
-            {...(props.container === '@fm/ratan_container' ? { appearance } : {})}
+            {...(props.container === '@fm/ratan_container' ||
+            props.container === '@fm/alpha_payments'
+              ? { appearance }
+              : {})}
           />
         ) : (
           <div role="alert">Unknown federated container: {props.container}</div>

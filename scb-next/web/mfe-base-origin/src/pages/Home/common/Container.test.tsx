@@ -14,7 +14,7 @@ const Comp = (props: ContainerProps) => {
 describe('Container component', () => {
   it('renders the Alpha Payments federated application', async () => {
     render(
-      <Provider data={{ user: { id: '123' }, token: '123', theme: 'dark' }}>
+      <Provider data={{ user: { id: '123' }, token: '123', theme: 'dark', newStyles: true }}>
         <ThemeProvider>
           <Comp
             id="alpha-payments"
@@ -31,6 +31,9 @@ describe('Container component', () => {
     );
 
     expect(await screen.findByText('Alpha Payments remote test')).toBeTruthy();
+    const remote = screen.getByTestId('remote-alpha-payments-stub');
+    expect(remote).toHaveAttribute('data-mode', 'dark');
+    expect(remote).toHaveAttribute('data-generation', 'webkit');
   });
 
   it('TEMPLATE_CONTAINER should be in the document', () => {

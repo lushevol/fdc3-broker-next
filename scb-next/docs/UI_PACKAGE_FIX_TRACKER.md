@@ -2,7 +2,7 @@
 
 Created: 2026-09-19. Source: [package clinic](UI_PACKAGE_CLINIC.md).
 
-**Progress: 28/30 DONE. RD-028 BLOCKED; next actionable item: RD-027.** The clinic contains the review evidence
+**Progress: 29/30 DONE. RD-028 BLOCKED; no remaining local implementation item.** The clinic contains the review evidence
 and its limits. Reproduce each finding against the checkout used for implementation
 before changing behavior, then record current verification evidence here.
 
@@ -51,7 +51,7 @@ quality, then phase 4 adoption. Dependencies take precedence over ID order.
 | [RD-024](#rd-024) | Lint and aggregate verification | P2 | 3 | DONE |
 | [RD-025](#rd-025) | Shared pure host adapters | P2 | 4 | DONE |
 | [RD-026](#rd-026) | Explicit host appearance contract | P2 | 4 | DONE |
-| [RD-027](#rd-027) | Alpha direct-adoption pilot | P3 | 4 | TODO |
+| [RD-027](#rd-027) | Alpha direct-adoption pilot | P3 | 4 | DONE |
 | [RD-028](#rd-028) | Release ownership and decisions | P2 | 4 | BLOCKED |
 | [RD-029](#rd-029) | Reproduce historical host test failures | P2 | 1 preflight | DONE |
 | [RD-030](#rd-030) | Real host performance budgets | P3 | 3 measurement | DONE |
@@ -1377,16 +1377,58 @@ Limitations / pre-existing failures / follow-up IDs: Ratan's standalone typechec
 
 ### RD-027
 
-**Pilot direct public-package adoption in Alpha Payments.** P3 · Enhancement · TODO.
+**Pilot direct public-package adoption in Alpha Payments.** P3 · Enhancement · DONE.
 Dependencies: RD-020, RD-024, RD-026, RD-028 before publication;
 RD-030 for the performance comparison. [Clinic](UI_PACKAGE_CLINIC.md#rd-027).
 
-- [ ] Inventory the duplicated controls/feedback states and select a small pilot
+- [x] Inventory the duplicated controls/feedback states and select a small pilot
   with explicit behavior and appearance acceptance criteria.
-- [ ] Adopt public entries with explicit styles/provider configuration, preserving
+- [x] Adopt public entries with explicit styles/provider configuration, preserving
   Alpha's business, routing and data ownership.
-- [ ] Verify public types, peer resolution, browser interactions and visual states;
+- [x] Verify public types, peer resolution, browser interactions and visual states;
   compare bundle/runtime measurements and document rollout/rollback evidence.
+
+```text
+Status: DONE
+Completed: 2026-09-22
+Owner: Codex
+Commit(s): feat(ratan-design): pilot alpha direct adoption (this stage)
+Specification/regression: UI_PACKAGE_IMPLEMENTATION.md RD-027 and
+  ALPHA_DIRECT_ADOPTION_PILOT.md define the bounded presentation inventory,
+  appearance/behavior criteria, measurements, canary decision and rollback.
+  Alpha tests cover standalone light/legacy, explicit dark/WebKit, search/status,
+  busy acknowledgement, load/error/retry and empty behavior. Base's Container
+  regression proves explicit Alpha appearance propagation; the existing Alpha
+  browser journey now verifies its dark/legacy scope before the full workflow.
+GitNexus impact and staged detect_changes: pre-edit App and Alpha test-remote
+  impact were LOW with zero upstream symbols/processes. Base Container had two
+  same-file candidates, each zero-impact/LOW. HOSTS and the anonymous browser test
+  were not indexed; focused integration and browser gates cover those graph gaps.
+  Staged scope audit is recorded with the stage commit.
+Commands (working directory scb-next unless noted): Alpha and Base typechecks;
+  Alpha full coverage test; focused Base Container test; dependency runner tests
+  and live verify:dependency-isolation; Alpha and Base production builds;
+  npm run measure:alpha-adoption before/after; focused Alpha Playwright journey.
+Outcomes: Alpha passed 6/6 tests with 96.66% lines and 94.73% branches; Base passed
+  9/9 focused tests. All four hosts resolved six required peers to one instance.
+  Both builds and the 1280x720 dark/legacy login -> New Tile -> Payment
+  Investigation -> search -> acknowledge -> add/delete workspace journey passed
+  with no page errors. JS/CSS changed 82,962 -> 174,359 gzip bytes; three-run
+  cold-tile p95 changed 567.0 -> 1,064.1 ms and search p95 5.6 -> 23.2 ms.
+Compatibility review and rollback target: case/API/routing/table/business ownership
+  is unchanged; native presentation alone moved to package contracts. Alpha remains
+  the sole canary because cold load exceeds the 25% further-rollout guardrail.
+  Revert this stage to restore native controls and remove Alpha's provider/peers;
+  no data or service rollback is needed.
+Limitations / pre-existing failures / follow-up IDs: runtime values are directional
+  three-run development-host samples, not production SLAs. The alpha API watcher
+  still logs the existing EMFILE advisory while serving successfully. The shell
+  reports multiple independently bundled Emotion instances after Alpha loads;
+  host/package resolution within Alpha is singular, while cross-MFE sharing remains
+  intentionally unchanged. RD-028 blocks publication; RD-030 does not authorize
+  MUI/Emotion federation sharing, so broader adoption remains paused pending a
+  separate approved performance experiment.
+```
 
 ### RD-028
 
@@ -1593,3 +1635,4 @@ or committed evidence.
 | 2026-09-22 | RD-028 | TODO → BLOCKED | Private-package guard and complete decision record added; authoritative owners, registry, asset/font, Pro-license and retention approvals are absent | Await named organizational decisions; continue non-public work |
 | 2026-09-22 | RD-030 | TODO → IN PROGRESS | New runner reproduced a production Cashflow config-ordering failure before collecting valid timings | Fix the production boundary, then measure three cold runs per generation |
 | 2026-09-22 | RD-030 | IN PROGRESS → DONE | Checked-in three-run baseline/budgets; 3/3 runner tests and fresh enforced six-run production gate pass | Next: RD-027 local Alpha pilot; RD-028 still blocks publication |
+| 2026-09-22 | RD-027 | TODO → DONE | Alpha direct-adoption canary passes types, peer identity, builds, 6/6 Alpha tests, 9/9 Base tests and the live browser journey; before/after bundle/runtime evidence records the rollout cost | No further local items; RD-028 remains organizationally blocked |

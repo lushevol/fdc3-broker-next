@@ -8,6 +8,17 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: env.VITE_PUBLIC_BASE ?? "/",
+    resolve: {
+      dedupe: [
+        "react",
+        "react-dom",
+        "@mui/material",
+        "@mui/icons-material",
+        "@mui/system",
+        "@emotion/react",
+        "@emotion/styled"
+      ]
+    },
     plugins: [
       react(),
       federation({

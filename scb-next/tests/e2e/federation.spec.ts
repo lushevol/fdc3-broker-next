@@ -92,6 +92,11 @@ developmentTest(
     await expect(page.getByRole('heading', { name: 'Payment Investigation' })).toBeVisible({
       timeout: 20_000,
     });
+    await expect(page.locator('.alpha-design-scope')).toHaveAttribute('data-mode', 'dark');
+    await expect(page.locator('.alpha-design-scope')).toHaveAttribute(
+      'data-generation',
+      'legacy',
+    );
     await expect(page.getByRole('row', { name: /AP-20481/ })).toContainText('Merlion Bank');
 
     const search = page.getByRole('searchbox', { name: 'Search cases' });

@@ -26,6 +26,7 @@ const HOSTS = [
   { name: 'Base', workspace: 'web/mfe-base-origin' },
   { name: 'Ratan', workspace: 'web/mfe-ratan-container-origin' },
   { name: 'Cashflow', workspace: 'web/mfe-cashflow-blotter-origin' },
+  { name: 'Alpha Payments', workspace: 'web/mfe-alpha-payments-origin' },
 ];
 
 function parseVersion(value) {
@@ -301,7 +302,7 @@ export async function runDependencyIsolationCheck() {
       'Dependency isolation check failed:\n' + failures.map((line) => `- ${line}`).join('\n'),
     );
   }
-  console.log('Dependency isolation check passed for Base, Ratan, and Cashflow.');
+  console.log(`Dependency isolation check passed for ${HOSTS.map(({ name }) => name).join(', ')}.`);
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href;

@@ -1,7 +1,7 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import App from "./App";
+import AlphaPaymentsApplication from "./root";
 
 const casesResponse = {
   tenantId: "alpha-payments",
@@ -41,6 +41,28 @@ const casesResponse = {
 };
 
 describe("Alpha Payments application", () => {
+  it("scopes the selected host appearance through the design provider", () => {
+    vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>(() => undefined)));
+
+    const { container, rerender } = render(<AlphaPaymentsApplication />);
+
+    expect(container.querySelector(".ratan-design-root")).toHaveAttribute("data-mode", "light");
+    expect(container.querySelector(".ratan-design-root")).toHaveAttribute(
+      "data-generation",
+      "legacy"
+    );
+
+    rerender(
+      <AlphaPaymentsApplication appearance={{ mode: "dark", designGeneration: "webkit" }} />
+    );
+
+    expect(container.querySelector(".ratan-design-root")).toHaveAttribute("data-mode", "dark");
+    expect(container.querySelector(".ratan-design-root")).toHaveAttribute(
+      "data-generation",
+      "webkit"
+    );
+  });
+
   it("shows loading feedback and then renders the API-backed investigation queue", async () => {
     let resolveRequest: ((value: Response) => void) | undefined;
     const responsePromise = new Promise<Response>((resolve) => {
@@ -48,7 +70,7 @@ describe("Alpha Payments application", () => {
     });
     vi.stubGlobal("fetch", vi.fn(() => responsePromise));
 
-    render(<App />);
+    render(<AlphaPaymentsApplication />);
 
     expect(screen.getByRole("status").textContent).toContain("Loading payment investigations");
 
@@ -68,7 +90,7 @@ describe("Alpha Payments application", () => {
       vi.fn().mockResolvedValue({ ok: true, json: async () => casesResponse } as Response)
     );
 
-    render(<App />);
+    render(<AlphaPaymentsApplication />);
     await screen.findByRole("row", { name: /AP-20481/ });
 
     fireEvent.change(screen.getByRole("searchbox", { name: "Search cases" }), {
@@ -78,9 +100,8 @@ describe("Alpha Payments application", () => {
     expect(screen.getByRole("row", { name: /AP-20482/ })).toBeTruthy();
     expect(screen.getByText("1 result")).toBeTruthy();
 
-    fireEvent.change(screen.getByRole("combobox", { name: "Filter by status" }), {
-      target: { value: "ACKNOWLEDGED" }
-    });
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Filter by status" }));
+    fireEvent.click(screen.getByRole("option", { name: "Acknowledged" }));
     expect(screen.getByText("No cases match the active filters.")).toBeTruthy();
   });
 
@@ -91,15 +112,28 @@ describe("Alpha Payments application", () => {
       acknowledgedBy: "mock.alpha-payments",
       acknowledgedAt: "2026-08-19T00:00:00.000Z"
     };
+    let resolveAcknowledge: ((value: Response) => void) | undefined;
+    const acknowledgeResponse = new Promise<Response>((resolve) => {
+      resolveAcknowledge = resolve;
+    });
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce({ ok: true, json: async () => casesResponse } as Response)
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ item: acknowledgedCase }) } as Response);
+      .mockReturnValueOnce(acknowledgeResponse);
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<App />);
+    render(<AlphaPaymentsApplication />);
     const acknowledge = await screen.findByRole("button", { name: "Acknowledge AP-20481" });
     fireEvent.click(acknowledge);
+
+    expect(acknowledge).toBeDisabled();
+    expect(acknowledge).toHaveAttribute("aria-busy", "true");
+    expect(acknowledge).toHaveTextContent("Saving");
+
+    resolveAcknowledge?.({
+      ok: true,
+      json: async () => ({ item: acknowledgedCase })
+    } as Response);
 
     expect(await screen.findByRole("row", { name: /AP-20481.*Acknowledged/ })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Acknowledge AP-20481" })).toBeNull();
@@ -125,11 +159,14 @@ describe("Alpha Payments application", () => {
       } as Response);
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<App />);
-    expect(await screen.findByRole("alert")).toHaveProperty(
-      "textContent",
-      "Unable to load payment investigationsPayment investigations could not be loaded.Retry"
-    );
+    render(<AlphaPaymentsApplication />);
+    const loadAlert = await screen.findByRole("alert");
+    expect(
+      within(loadAlert).getByRole("heading", {
+        name: "Unable to load payment investigations"
+      })
+    ).toBeTruthy();
+    expect(within(loadAlert).getByText("Payment investigations could not be loaded.")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Retry loading payment investigations" }));
 
@@ -148,7 +185,7 @@ describe("Alpha Payments application", () => {
         .mockResolvedValueOnce({ ok: false, status: 409 } as Response)
     );
 
-    render(<App />);
+    render(<AlphaPaymentsApplication />);
     fireEvent.click(await screen.findByRole("button", { name: "Acknowledge AP-20481" }));
 
     expect(await screen.findByRole("alert")).toHaveProperty(

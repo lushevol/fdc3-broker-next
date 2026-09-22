@@ -1,4 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import MenuItem from "@mui/material/MenuItem";
+import {
+  Button,
+  EmptyState,
+  ErrorFallback,
+  Loader,
+  LoadingButton,
+  SearchInput,
+  Select
+} from "ratan-design-origin";
 
 import {
   acknowledgePaymentCase,
@@ -85,15 +95,20 @@ export default function App(): React.ReactElement {
     return (
       <main className="alpha-app">
         <div className="alpha-app__state" role="alert">
-          <strong>Unable to load payment investigations</strong>
-          <span>{error}</span>
-          <button
-            type="button"
-            aria-label="Retry loading payment investigations"
-            onClick={() => void loadCases()}
-          >
-            Retry
-          </button>
+          <ErrorFallback
+            title="Unable to load payment investigations"
+            description={error}
+            action={
+              <Button
+                type="button"
+                variant="outlined"
+                aria-label="Retry loading payment investigations"
+                onClick={() => void loadCases()}
+              >
+                Retry
+              </Button>
+            }
+          />
         </div>
       </main>
     );
@@ -102,9 +117,8 @@ export default function App(): React.ReactElement {
   if (!cases) {
     return (
       <main className="alpha-app">
-        <div className="alpha-app__state" role="status">
-          <span className="alpha-app__spinner" aria-hidden="true" />
-          Loading payment investigations
+        <div className="alpha-app__state">
+          <Loader size={26} text="Loading payment investigations" />
         </div>
       </main>
     );
@@ -138,29 +152,32 @@ export default function App(): React.ReactElement {
         </div>
 
         <div className="alpha-app__filters">
-          <label>
-            <span className="alpha-app__sr-only">Search cases</span>
-            <input
-              type="search"
-              aria-label="Search cases"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search case or counterparty"
-            />
-          </label>
-          <label>
-            <span>Status</span>
-            <select
-              aria-label="Filter by status"
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value as PaymentCaseStatus | "ALL")}
-            >
-              <option value="ALL">All statuses</option>
-              <option value="OPEN">Open</option>
-              <option value="REVIEWING">Reviewing</option>
-              <option value="ACKNOWLEDGED">Acknowledged</option>
-            </select>
-          </label>
+          <SearchInput
+            className="alpha-app__search"
+            type="search"
+            value={query}
+            variant="outlined"
+            size="small"
+            placeholder="Search case or counterparty"
+            handleClear={() => setQuery("")}
+            onChange={(event) => setQuery(event.target.value)}
+            slotProps={{ htmlInput: { "aria-label": "Search cases" } }}
+          />
+          <Select
+            formControlClassName="alpha-app__status-filter"
+            label="Filter by status"
+            value={statusFilter}
+            variant="outlined"
+            size="small"
+            onChange={(event) =>
+              setStatusFilter(event.target.value as PaymentCaseStatus | "ALL")
+            }
+          >
+            <MenuItem value="ALL">All statuses</MenuItem>
+            <MenuItem value="OPEN">Open</MenuItem>
+            <MenuItem value="REVIEWING">Reviewing</MenuItem>
+            <MenuItem value="ACKNOWLEDGED">Acknowledged</MenuItem>
+          </Select>
         </div>
         {actionError ? <div className="alpha-app__action-error" role="alert">{actionError}</div> : null}
 
@@ -194,14 +211,18 @@ export default function App(): React.ReactElement {
                     {paymentCase.status === "ACKNOWLEDGED" ? (
                       <span className="alpha-app__complete" aria-label={`${paymentCase.id} complete`}>Done</span>
                     ) : (
-                      <button
+                      <LoadingButton
                         type="button"
+                        variant="outlined"
+                        color="success"
+                        size="small"
                         aria-label={`Acknowledge ${paymentCase.id}`}
-                        disabled={acknowledgingId === paymentCase.id}
+                        loading={acknowledgingId === paymentCase.id}
+                        loadingPosition="startIcon"
                         onClick={() => void acknowledge(paymentCase.id)}
                       >
                         {acknowledgingId === paymentCase.id ? "Saving" : "Acknowledge"}
-                      </button>
+                      </LoadingButton>
                     )}
                   </td>
                 </tr>
@@ -209,9 +230,14 @@ export default function App(): React.ReactElement {
               {filteredCases.length === 0 ? (
                 <tr>
                   <td className="alpha-app__empty" colSpan={8}>
-                    {cases.length === 0
-                      ? "No payment investigations are currently assigned."
-                      : "No cases match the active filters."}
+                    <EmptyState
+                      className="alpha-app__empty-state"
+                      title={
+                        cases.length === 0
+                          ? "No payment investigations are currently assigned."
+                          : "No cases match the active filters."
+                      }
+                    />
                   </td>
                 </tr>
               ) : null}

@@ -1,14 +1,18 @@
+.alpha-design-scope {
+  min-height: 100%;
+}
+
 .alpha-app {
-  --alpha-bg: var(--theme-color-body-background, #11171d);
-  --alpha-surface: var(--theme-color-component-background, #1c242b);
-  --alpha-surface-raised: #232d35;
-  --alpha-border: var(--theme-color-border-color, #3b4852);
-  --alpha-text: var(--theme-color-font-color, #f5f7f8);
-  --alpha-muted: #a9b4bc;
-  --alpha-green: #2fbd72;
-  --alpha-cyan: #46abbf;
-  --alpha-amber: #ffc857;
-  --alpha-red: #ff6961;
+  --alpha-bg: var(--sc-layout-background-color, var(--theme-color-body-background, #11171d));
+  --alpha-surface: var(--sc-panel-background-color, var(--theme-color-component-background, #1c242b));
+  --alpha-surface-raised: var(--sc-card-background-color, var(--theme-color-card-header-bg, #232d35));
+  --alpha-border: var(--sc-divider-color, var(--theme-color-border-color, #3b4852));
+  --alpha-text: var(--sc-layout-text-color, var(--theme-color-font-color, #f5f7f8));
+  --alpha-muted: var(--sc-panel-content-color, var(--theme-color-panel-font, #a9b4bc));
+  --alpha-green: var(--sc-status-success-icon, var(--theme-color-loading-green, #2fbd72));
+  --alpha-cyan: var(--sc-status-info-icon, var(--theme-color-loading-blue, #46abbf));
+  --alpha-amber: var(--sc-status-warning-icon, #ffc857);
+  --alpha-red: var(--sc-status-danger-icon, var(--theme-color-cashflow-cutOff-red, #ff6961));
   min-height: 100%;
   box-sizing: border-box;
   padding: 24px;
@@ -54,12 +58,10 @@
 .alpha-app__queue-heading { display: flex; min-height: 64px; align-items: center; justify-content: space-between; gap: 16px; padding: 11px 14px; border-bottom: 1px solid var(--alpha-border); }
 .alpha-app__queue-heading > span { color: var(--alpha-muted); white-space: nowrap; }
 .alpha-app__filters { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--alpha-border); background: var(--alpha-surface-raised); }
-.alpha-app__filters label { display: flex; align-items: center; gap: 7px; color: var(--alpha-muted); }
-.alpha-app__filters label:first-child { flex: 1 1 320px; max-width: 420px; }
-.alpha-app__filters input, .alpha-app__filters select { height: 34px; border: 1px solid var(--alpha-border); border-radius: 4px; padding: 0 10px; color: var(--alpha-text); background: var(--alpha-bg); font: inherit; }
-.alpha-app__filters input { width: 100%; }
-.alpha-app__filters input:focus-visible, .alpha-app__filters select:focus-visible { outline: 2px solid var(--alpha-cyan); outline-offset: 1px; }
-.alpha-app__filters input::placeholder { color: var(--alpha-muted); }
+.alpha-app__search { flex: 1 1 320px; max-width: 420px; }
+.alpha-app__search .MuiInputBase-root, .alpha-app__status-filter .MuiInputBase-root { min-height: 34px; }
+.alpha-app__status-filter { flex: 0 0 180px; }
+.alpha-app__status-filter .MuiFormLabel-root { margin-bottom: 4px; color: var(--alpha-muted); }
 .alpha-app__table-scroll { width: 100%; overflow-x: auto; }
 .alpha-app table { width: 100%; min-width: 860px; border-collapse: collapse; text-align: left; }
 .alpha-app th, .alpha-app td { height: 48px; border-bottom: 1px solid var(--alpha-border); padding: 9px 12px; white-space: nowrap; }
@@ -77,32 +79,23 @@
 .alpha-app__status--reviewing { color: var(--alpha-amber); border: 1px solid rgb(255 200 87 / 40%); }
 .alpha-app__status--acknowledged { color: var(--alpha-green); border: 1px solid rgb(47 189 114 / 40%); }
 .alpha-app__action { text-align: right; color: var(--alpha-muted); }
-.alpha-app__action button { min-width: 96px; height: 30px; border: 1px solid var(--alpha-green); border-radius: 4px; padding: 0 10px; color: var(--alpha-text); background: rgb(47 189 114 / 12%); font: inherit; font-weight: 600; cursor: pointer; }
-.alpha-app__action button:hover:not(:disabled) { background: rgb(47 189 114 / 24%); }
-.alpha-app__action button:focus-visible { outline: 2px solid var(--alpha-cyan); outline-offset: 1px; }
-.alpha-app__action button:disabled { cursor: wait; opacity: 0.6; }
+.alpha-app__action .MuiButton-root { min-width: 112px; min-height: 30px; font-size: 10px; font-weight: 600; text-transform: none; }
 .alpha-app__complete { color: var(--alpha-green); font-size: 10px; font-weight: 600; }
 .alpha-app__action-error { border-bottom: 1px solid var(--alpha-border); padding: 9px 14px; color: var(--alpha-red); background: rgb(255 105 97 / 9%); }
 .alpha-app__empty { height: 96px !important; color: var(--alpha-muted); text-align: center; }
+.alpha-app__empty-state { padding: 6px; }
+.alpha-app__empty-state section { margin: 0; }
+.alpha-app__empty-state p { margin: 0; color: var(--alpha-muted); font: inherit; }
 
 .alpha-app__state { display: flex; min-height: 280px; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--alpha-muted); text-align: center; }
-.alpha-app__state strong { color: var(--alpha-text); font-size: 14px; }
-.alpha-app__state button { height: 32px; border: 1px solid var(--alpha-green); border-radius: 4px; padding: 0 14px; color: var(--alpha-text); background: rgb(47 189 114 / 12%); font: inherit; font-weight: 600; cursor: pointer; }
-.alpha-app__state button:focus-visible { outline: 2px solid var(--alpha-cyan); outline-offset: 1px; }
-.alpha-app__spinner { width: 26px; height: 26px; border: 3px solid var(--alpha-border); border-top-color: var(--alpha-green); border-radius: 50%; animation: alpha-spin 800ms linear infinite; }
+.alpha-app__state h6 { color: var(--alpha-text); font-size: 14px; }
 .alpha-app__sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-
-@keyframes alpha-spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 720px) {
   .alpha-app { padding: 14px; }
   .alpha-app__header { align-items: flex-start; }
   .alpha-app__summary { grid-template-columns: repeat(2, minmax(110px, 1fr)); }
   .alpha-app__filters { align-items: stretch; flex-direction: column; }
-  .alpha-app__filters label:first-child { flex-basis: auto; max-width: none; }
-  .alpha-app__filters select { flex: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .alpha-app__spinner { animation: none; }
+  .alpha-app__search { flex-basis: auto; max-width: none; }
+  .alpha-app__status-filter { flex-basis: auto; width: 100%; }
 }
