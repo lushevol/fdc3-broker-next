@@ -5,7 +5,6 @@ const root0 = (store: RootModel, action: IAction): RootModel => {
   switch (action.type) {
     case ActionType.SET_TOKEN:
       store.token = action.data.token;
-      store.refreshToken = undefined;
       store.isOnLogout = false;
       break;
     case ActionType.SET_USER:

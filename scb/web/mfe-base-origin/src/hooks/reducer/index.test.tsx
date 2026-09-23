@@ -41,4 +41,12 @@ describe("SET_DATA Reducer", () => {
     expect(result.expiredIn).toStrictEqual(0)
     expect(result.iat).toStrictEqual(0)
   });
+  it("SET_TOKEN should preserve the refresh token during access-token rotation", () => {
+    const result = reducers(
+      { ...initialData, refreshToken: "refresh-token" },
+      { type: ActionType.SET_TOKEN, data: { token: "next-access-token" } }
+    );
+
+    expect(result.refreshToken).toBe("refresh-token");
+  });
 });

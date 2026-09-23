@@ -2,7 +2,11 @@ import React from "react";
 import { useContext } from "../../../hooks/provider";
 import useDispatcher from "../../../hooks/dispathcer";
 import { Workspace } from "../../../hooks/model/workspaces";
-import { validateWorkspace, aOrb } from "../../../utils/common";
+import {
+  validateWorkspace,
+  aOrb,
+  getJWTPayload,
+} from "../../../utils/common";
 import { getRefreshToken } from "../../../hooks/service";
 import { extend } from "../../../hooks/service/util/extend";
 import useAnalytics from "../../../analytics";
@@ -23,7 +27,7 @@ const useController = () => {
   } = useDispatcher();
   const timerPopup = React.useRef<any>(0);
   const timerMouseMove = React.useRef<any>(0);
-  const timerRefreshToken = React.useRef<any>(0);
+  const lastRefreshTokenRequest = React.useRef<string>();
   const [showTimeout, setShowTimeout] = React.useState(false);
   const [value, setValue] = React.useState(1);
   const [ready, setReady] = React.useState(false);
@@ -66,9 +70,6 @@ const useController = () => {
     if (timerPopup.current) {
       clearTimeout(timerPopup.current);
     }
-    if (timerRefreshToken.current) {
-      clearTimeout(timerRefreshToken.current);
-    }
     if (timerMouseMove.current) {
       clearTimeout(timerMouseMove.current);
     }
@@ -92,14 +93,61 @@ const useController = () => {
       timerPopup.current = setTimeout(() => {
         setShowTimeout(true);
       }, difftime);
-      timerRefreshToken.current = setTimeout(() => {
-        getRefreshToken();
-      }, difftime - 25000);
     }
     return () => {
-      clearAllTimeout();
+      if (timerPopup.current) {
+        clearTimeout(timerPopup.current);
+      }
     };
   }, [store?.token, store?.expiredIn, ready]);
+
+  React.useEffect(() => {
+    if (
+      !ready ||
+      !store?.token ||
+      store.refreshToken ||
+      1000 * aOrb(store.expiredIn, 0) <= Date.now() ||
+      lastRefreshTokenRequest.current === store.token
+    ) {
+      return;
+    }
+    lastRefreshTokenRequest.current = store.token;
+    getRefreshToken();
+  }, [ready, store?.token, store?.refreshToken, store?.expiredIn]);
+
+  React.useEffect(() => {
+    if (!ready || !store?.token) return;
+
+    let refreshExpiresAt = 0;
+    if (store.refreshToken) {
+      try {
+        const payload = getJWTPayload(store.refreshToken);
+        refreshExpiresAt = payload ? (payload.exp ?? 0) * 1000 : 0;
+      } catch {
+        // An invalid token has no usable expiry timestamp.
+      }
+    }
+
+    const reconcileExpiry = () => {
+      if (
+        1000 * aOrb(store.expiredIn, 0) <= Date.now() ||
+        (refreshExpiresAt > 0 && refreshExpiresAt <= Date.now())
+      ) {
+        setShowTimeout(true);
+      }
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") reconcileExpiry();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    const refreshExpiryTimer = refreshExpiresAt
+      ? setTimeout(reconcileExpiry, Math.max(0, refreshExpiresAt - Date.now()))
+      : undefined;
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      clearTimeout(refreshExpiryTimer);
+    };
+  }, [ready, store?.token, store?.expiredIn, store?.refreshToken]);
 
   React.useEffect(() => {
     if (
