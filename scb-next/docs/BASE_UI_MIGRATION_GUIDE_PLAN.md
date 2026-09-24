@@ -1,6 +1,6 @@
 # Base UI migration guide plan
 
-Status: revised scope and initial audit, 2026-09-24. The migration unit is a
+Status: guide created and examples verified, 2026-09-24. The migration unit is a
 reusable UI building block: a control or a useful composition of primitives.
 Login, Home, portal features, and business workflows remain in Base.
 
@@ -9,6 +9,11 @@ This plan defines the guide for components already supplied by
 adopting or extracting from `web/mfe-base-origin`. The accompanying
 [component audit](BASE_UI_COMPONENT_AUDIT.md) records the inspection of both
 codebases and the evidence behind the proposed scope.
+
+The resulting [migration guide](UI_PACKAGE_MIGRATION_GUIDE.md) now contains the
+current status, import mappings, verified usage recipes, candidate contracts and
+implementation gates. The guide creation stage is complete. Adoption changes
+and the proposed new components remain pending as recorded there.
 
 ## Component selection and ownership
 

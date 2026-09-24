@@ -4,13 +4,17 @@ The maintained package is `packages/ratan-design-origin` (candidate 0.1.0).
 Base keeps compatible namespace/default paths; Ratan/Cashflow keep `@fm/base`
 compatibility resolution. Business screens need no import or prop changes.
 
+Use the [migration guide](UI_PACKAGE_MIGRATION_GUIDE.md) for import mappings,
+usage recipes and the remaining component candidates. The
+[source audit](BASE_UI_COMPONENT_AUDIT.md) explains the business ownership rules.
+
 | Original surface | Maintained presentation | Host responsibility |
 | --- | --- | --- |
 | Theme controls/tokens and CSS aliases | Core/theme/tokens/compatibility entries | Auth-based mode, persistence, document classes, explicit CSS loading |
 | Config, light/dark/common/normalize/scroll | Optional portal-theme entry | URL flags and explicit global CssBaseline policy; Ratan retains its palette-only theme |
-| Button, LoadingButton, Input, Select | Core named exports | Consumer primary-type translation and 16px startIcon default |
+| Button, LoadingButton, Input, Select | Core named exports | Ratan/Cashflow compatibility retains primary-type translation and 16px startIcon defaults; Base Button/LoadingButton directly use core defaults |
 | SearchInput, SearchButton, ResetButton, ToggleButton, Label | Core named exports | Screen state, query execution and analytics |
-| SearchGrid, SearchCondition, SearchConditionContainer | Core named exports | Criteria values, removal and expansion policy |
+| SearchGrid, SearchCondition, SearchConditionContainer | Core named exports | Criteria values, data removal and query policy; package owns UI collapse/expansion |
 | BuilderButton and its tabs/panel | Core named exports | Controlled anchor, selected tab and filter content |
 | Loader, PageLoader, Snackbar | Core named exports; Spinner primitive for consumer Loader | Application loading/notification orchestration; Base-only sanitized HTML compatibility |
 | DatePicker, DateTimePicker, TimePicker | dates entry | Localization, locale/timezone, validation and application values |
@@ -32,6 +36,9 @@ legacy Poppins remains host-provided. Hosts also own date localization/timezone/
 format policy, font redistribution approval and MUI X Pro licensing/initialization.
 
 ## Deliberately Retained
+
+These features remain in Base. Their reusable controls can be adopted or
+extracted individually; retaining the feature is a valid final disposition.
 
 | Surface | Disposition and reason |
 | --- | --- |
