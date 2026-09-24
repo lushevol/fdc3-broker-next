@@ -1,141 +1,129 @@
 # Base UI migration guide plan
 
-Status: planning inventory, 2026-09-24. Scope: production UI under
-`web/mfe-base-origin/src` and its public `@fm/base` compatibility surface.
-The goal is for Base's visual components and design policy to come from
-`packages/ratan-design-origin`, while Base continues to own portal state,
-workflows, routing, services, authentication, and browser integrations.
+Status: revised scope and initial audit, 2026-09-24. The migration unit is a
+reusable UI building block: a control or a useful composition of primitives.
+Login, Home, portal features, and business workflows remain in Base.
 
-This document plans the **migration guide** and records the starting inventory.
-It does not mark the remaining surfaces as migrated. The existing
-[UI package inventory](UI_PACKAGE_INVENTORY.md) and
-[implementation contract](UI_PACKAGE_IMPLEMENTATION.md) are the evidence for
-completed extraction; reconcile them with source and tests when writing each
-guide entry. The older [extraction plan](UI_PACKAGE_EXTRACTION_PLAN.md)
-describes the original stages and includes historical status.
+This plan defines the guide for components already supplied by
+`packages/ratan-design-origin` and selected building blocks still worth
+adopting or extracting from `web/mfe-base-origin`. The accompanying
+[component audit](BASE_UI_COMPONENT_AUDIT.md) records the inspection of both
+codebases and the evidence behind the proposed scope.
 
-## Working definition and audit boundary
+## Component selection and ownership
 
-For this goal, "from `ratan-design-origin`" means Base's rendered controls,
-shared presentation, theme values, and reusable styled patterns use a documented
-package entry point. A Base component may remain as an adapter that supplies
-portal data and callbacks. A package component must not import Base stores,
-services, routes, analytics, or browser registration.
+The package owns reusable rendering, visual states, accessibility, and local
+interaction behavior. A field may compose a label, input, adornment and helper
+text; a dialog may compose a title, content, actions and focus handling. Those
+are useful component interfaces even though each contains several primitives.
+There is no requirement to expose every underlying primitive individually.
 
-Audit production `.ts` and `.tsx` in `src`, excluding tests, stories, fixtures,
-and generated output. Record JSX usage, styles, icons, component imports, type
-imports, theme hooks, global CSS, and public exports separately. A source scan
-currently finds **55** production files importing `ratan-design-origin` and
-**62** importing `@mui/material`, `@mui/icons-material`, or MUI X directly;
-these file counts overlap and are a discovery measure, not a component count or
-proof of runtime adoption. Re-run the scan at the start of the guide work and
-keep a file-level ledger rather than using the counts as the exit gate.
+**Business dependencies must stay outside `ratan-design-origin`.** This includes
+Base stores, authentication, entitlements, services, routing, workspace and
+remote lifecycle, analytics, persistence, business record types, and decisions
+based on domain field names. Passing an entire business object as a prop or
+injecting a business service does not make a component independent. Base should
+resolve those decisions into presentation values and ordinary event callbacks.
 
-The guide must classify every UI use as:
+Use these selection rules:
 
-1. **Package owned:** a public package component/theme/token is already used
-   through a direct import or a thin Base adapter.
-2. **Ready to adopt:** the package already exports the needed presentation, but
-   the Base call site still uses MUI or a local duplicate.
-3. **Package gap:** reusable presentation needs a new package primitive or
-   pattern before a Base call site can migrate.
-4. **Host composition:** Base keeps the feature component and policy, but its
-   visual building blocks must use package UI. This is not an exemption for
-   direct MUI component rendering.
-5. **Integration exception:** an external runtime or browser capability, such
-   as WebKit custom-element registration, needs an explicit integration contract.
-   Record why it cannot be provided by the package and how its visuals follow
-   package tokens.
+- Adopt an existing package component when its interface fits the use case.
+- Extract a new component when it has a meaningful shared UI contract, can
+  render independently, and centralizes useful presentation or interaction.
+  Prefer evidence from multiple uses; a folder name alone is insufficient.
+- Keep pages and feature compositions in Base. They may consume package
+  controls while retaining their layout, assets, copy and domain decisions.
+- Allow local MUI layout, typography, icons and styling utilities. Their
+  presence alone is not migration debt. Do not create a complete MUI facade
+  or target zero direct MUI imports.
+- Keep legacy visual compatibility distinct from business logic. Preserve
+  existing consumer contracts while documenting which interfaces are
+  transitional and unsuitable as templates for new components.
 
-Treat `@mui/*` type-only imports, MUI `styled`/`useTheme`, icons, DataGrid,
-date localization, and `@scdevkit/webkit` as distinct rows. The final guide
-must state whether each becomes a package export, a package-defined type, a
-host configuration boundary, or a documented exception. Do not declare success
-from replacing import strings with an undifferentiated MUI re-export.
+## Already migrated: guide chapters
 
-## Already migrated: guide chapters to write first
-
-| Surface | Current package entry and Base bridge | Guide evidence to capture |
+| Component family | Current package interface | What the guide must explain |
 | --- | --- | --- |
-| Theme, tokens, CSS aliases | `theme`, `tokens`, `portal-theme`, `compatibility`, explicit `styles.css`; Base theme adapter remains | Legacy/WebKit and light/dark selection, provider boundary, CSS loading, portal overrides |
-| Core controls | `Button`, `LoadingButton`, `Input`, `Select`, `ToggleButton`, `Label` from core; Base component paths remain | Import/export shape, MUI prop mapping, refs, disabled/loading states, selectors |
-| Search and builder | `SearchInput`, `SearchButton`, `ResetButton`, `SearchGrid`, `SearchCondition`, `SearchConditionContainer`, `BuilderButton` from core | Controlled state, clear/remove behavior, keyboard use, layout and popup ownership |
-| Feedback and states | `Loader`, `PageLoader`, `Snackbar`, `EmptyState`, `ErrorFallback`, `LoadingOverlay` from core | Base orchestration, sanitized legacy HTML, error capture, copy, loading and empty states |
-| Dialog | Core `Dialog` and compatibility styles/title | Base drag/resize, workspace portal lookup, close callbacks, sizing and focus |
-| Date/time | Community pickers from `dates`; Pro range picker from `date-range` | Localization ownership, optional peers, Pro license setup, null and uncontrolled values |
+| Controls | Core `Button`, `LoadingButton`, `Input`, `Select`, `ToggleButton`, `Label` | Props, refs, defaults, disabled/loading/error states, Base import adapters |
+| Search and builder | Core search inputs/actions/criteria/layout and `BuilderButton` with tabs/panels | Local interaction versus host-owned criteria, query execution and selected content |
+| Feedback and state presentation | Core `Loader`, `PageLoader`, `Snackbar`, `EmptyState`, `ErrorFallback`, `LoadingOverlay` | Host-owned copy, error capture, notifications and legacy HTML adaptation |
+| Dialog | Core `Dialog`; legacy title/root in `compatibility` | Package rendering/focus; Base workspace placement, telemetry and drag/resize policy |
+| Date/time inputs | `dates` and optional Pro `date-range` | Values, callbacks, localization inputs, optional peers and host license setup |
+| Appearance | Core provider plus `theme`, `tokens`, explicit CSS | Explicit appearance inputs; Base persistence and application-wide policy |
+| Legacy integrations | `portal-theme`, `compatibility`, `base-compat` | Preserved visual contracts, existing consumers and limits on new usage |
 
-For each chapter, publish a short before/after import example using the actual
-Base path, the package path, and the adapter relationship. Link the current
-contract test, package public API test, Storybook story, and relevant consumer
-fixture. Verify the example compiles; do not copy an outdated example from an
-earlier plan. Explicitly label the compatibility and `base-compat` entries as
-transitional APIs.
+These are implementation ownership statements, not claims that every Base call
+site already uses the package. For each family, link the package implementation,
+Base adapter, public behavior test, story, and compiling fixture. Explain any
+consumer differences explicitly: for example, `base-compat.Time` preserves a
+string renderer and is not the domain-aware Base `Time` component.
 
-## Not yet done: guide backlog
+## Remaining scope: component candidates
 
-| Area | Current evidence | Guide decision and migration work to specify |
+Candidate names below describe proposed interfaces; they are not current exports.
+Validate each interface before adding it to the supported catalog.
+
+| Priority | Building block | Consumer evidence and scope |
 | --- | --- | --- |
-| Login and Home screens | `pages/Login/index.tsx` and `pages/Home/index.tsx` render MUI layout, tabs, typography, fields, buttons, icons | Map each rendered primitive to an existing package control or a narrowly designed package primitive. Keep sign-in and workspace behavior in Base. |
-| Shell navigation and workspace UI | AppBar, Avatar/Profile, Drawer/NewTile/Tile, TabItem/TabPanel, Switch/SwitchTime, Time, Timeout, Version retain local presentation and MUI imports/styles | Separate visual slots from portal controllers; define package primitives/patterns only where reusable. Preserve workspace editing, remote mounting, identity and session policy in Base. |
-| Survey and portal dialogs | Survey, SurveyButton and parts of the Base Dialog adapter still render MUI controls or icons | Use package Dialog/controls where the contract fits; specify any missing slots/icons. Keep survey and logout decisions in Base. |
-| Admin screens and grids | `admin/**`, Table and TableDetail render MUI controls, icons and DataGrid; Table owns `AdminRecord` workflows | Design a package grid/toolbar/field presentation API with an optional MUI X entry if justified. Keep audit, verification and save behavior in Base; document licensing and peer dependencies. |
-| Styled surfaces and theme access | Many `common/style.ts` files use MUI `styled`; Home uses `useTheme`; Base still has host CSS/assets | Move reusable visual rules into package components/tokens. Keep explicit host layout and global policy, with a documented token bridge and reviewed exceptions. |
-| WebKit elements | `ScWebkit` registers custom elements in the browser | Keep registration in Base; decide whether a package integration entry can own reusable visual wrappers. Document tokens, events, SSR behavior and browser validation. |
+| First | Adopt existing `Input`, `Button`/`LoadingButton`, and `Dialog` where they fit | Login fields; Home/admin/Tile action buttons; Survey/Timeout dialog presentation. Keep page layouts and controllers local; verify labels, sizing, callbacks and selectors before substitution. |
+| Next | Autocomplete field | `admin/Tile/index.tsx` and `components/TableDetail/Field.tsx` repeat Autocomplete + Input composition. Own the field rendering, labeling and selection interface; callers supply options, values and handlers. |
+| Next | Labeled switch | `components/Switch` and `components/SwitchTime` repeat switch presentation. Own checked/disabled/label/icon rendering; Base retains mode/timezone selection, storage, clock and analytics. |
+| Next | Icon action, with optional tooltip | SurveyButton, CopyText and workspace actions share icon-button behavior. Own accessible naming, focus, disabled state and tooltip composition; callers supply icon and click handler. |
+| Later, if justified | Action card, generic tab group, or grid presentation | Inspect Tile, Login/Home tabs and repeated admin grids for a genuinely shared interface. Do not move workspace records, tab lifecycle, admin editors or approval actions. A DataGrid import alone does not justify a new package grid. |
 
-The current inventory calls many of these components "deliberately retained".
-That describes **behavior ownership**, not a permanent exception to this goal's
-UI sourcing requirement. The guide must show the host/package seam for each
-retained component and list any still-local visual code as open work.
+AppBar, Avatar/Profile, Drawer/NewTile, TabItem/TabPanel, Time, Timeout, Survey,
+Version, Table/TableDetail, ErrorBoundry and WebKit registration retain their
+feature or integration ownership in Base. Selecting a reusable piece inside
+one of these does not require migrating the whole feature. "Retained in Base"
+is a valid final disposition, not an incomplete migration status.
 
 ## Guide creation sequence
 
-1. **Build the ledger.** Enumerate every production UI import and rendered
-   surface under `src`, including indirect local component usage and `root.tsx`
-   exports. Give each row a file path, consumer, current source, package
-   equivalent, category above, behavior owner, and contract/test link. Reconcile
-   the ledger with the package export map and the two existing UI package docs.
-2. **Publish completed migration recipes.** For each already migrated family,
-   document the supported import entry, Base adapter, unchanged consumer API,
-   deliberate legacy behavior, and verification command. Mark any partial
-   adapters as partial rather than complete.
-3. **Specify remaining recipes.** Group the backlog into core primitives,
-   shell presentation, admin/grid presentation, styling/theme, and optional
-   integrations. For each, write the proposed public API, host inputs/callbacks,
-   compatibility mapping, dependencies, tests, and migration order. Do not
-   create generic package components merely to rename portal workflows.
-4. **Order implementation slices.** Start with call sites that can use existing
-   package exports, then add missing package primitives, then shell and admin
-   compositions, then the WebKit integration decision. Keep each slice small
-   enough to verify and commit independently; update the guide and ledger as
-   its source changes land.
-5. **Close with an executable verification section.** Include the package and
-   Base tests, typecheck, lint, build, Storybook/package checks, dependency
-   isolation, cross-host Playwright journey, and screenshots for legacy/WebKit
-   light/dark and responsive states. Record actual outcomes and known baseline
-   failures rather than treating historical results as current proof.
+1. **Audit both sides.** Start with the accompanying source audit. Review the
+   existing package's imports, public types, default values and side effects;
+   inspect remaining Base candidates and their controllers. Record findings at
+   component-family level, with exact source paths where evidence matters.
+2. **Document completed components.** Write one recipe per migrated family:
+   supported package import, legacy Base adapter, host responsibilities,
+   before/after usage, preserved behavior and test/story links. Compile examples
+   against current exports. Label compatibility entries explicitly.
+3. **Specify selected gaps.** For each accepted candidate, record actual uses,
+   the proposed interface, internal primitives, allowed interaction state and
+   excluded business dependencies. Keep speculative cards/tabs/grids deferred
+   until this review establishes a useful common contract.
+4. **Order implementation slices.** Adopt existing controls first, then add one
+   selected missing building block at a time. Capture consumer behavior before
+   extraction; implement and test the package component; adapt its Base callers;
+   update the guide and inventory; verify and commit that slice.
+5. **Publish the guide.** Use `UI_PACKAGE_MIGRATION_GUIDE.md` alongside these
+   docs. Include a family-level status table (`migrated`, `adoption pending`,
+   `candidate`, `retained in Base`, `deferred`), usage recipes, business ownership
+   rules, verification evidence and rollback guidance. Update the existing
+   [inventory](UI_PACKAGE_INVENTORY.md) and
+   [implementation contract](UI_PACKAGE_IMPLEMENTATION.md) only as scope or
+   shipped ownership changes.
 
-The finished guide should live alongside these docs and contain: a scope and
-ownership rule; a live status table with `migrated`, `partial`, `planned`, or
-`blocked`; one recipe per surface; an import/type/CSS mapping table; a test and
-visual evidence index; a compatibility and deprecation policy; and a rollback
-procedure. Update [UI_PACKAGE_INVENTORY.md](UI_PACKAGE_INVENTORY.md) when an
-ownership decision changes, rather than maintaining conflicting status claims.
+## Acceptance and verification
 
-## Acceptance for the guide and for eventual migration
+The guide is complete when migrated families have usable, verified recipes and
+selected remaining candidates have explicit interfaces, ownership and next
+steps. Page and feature retention must be explained, with no blanket obligation
+to move all local components, CSS, icons, or MUI primitives into the package.
+Progress is measured by the agreed component catalog and actual adoption.
+Import-file counts are discovery evidence only.
 
-The **guide** is ready when every production UI use has a ledger row and a
-decision, completed entries have source/test evidence, pending entries have a
-concrete migration recipe and ordered dependency, and all examples compile.
-Unknowns must be listed as open decisions with an owner and an evidence task.
+Each implementation slice must preserve the existing `@fm/base` contracts and
+prove that its package interface works without Base runtime or domain models.
+UI-only expansion, focus, selection and overlay behavior may live in the package;
+authentication, data access and business decisions must remain in the host.
+Review public types and semantics as well as imports to enforce this rule.
 
-The **migration** is ready only when the ledger has no unreviewed direct UI
-component imports from MUI or other visual libraries in Base production code;
-remaining type, localization, styling, and runtime imports are explicitly
-classified; old `@fm/base` contracts still work; and package, Base, and
-integrated host gates pass. The existing portal shell and admin workflows may
-remain in Base as compositions of package presentation.
+Use focused package/Base contract tests, affected typecheck/lint/build gates,
+package stories and packed-consumer checks as appropriate. Shell-facing changes
+also require the localhost:8001 login → New Tile → launch → remove-tab journey
+and relevant legacy/WebKit light/dark and responsive checks. This documentation
+revision does not change UI behavior; its audit records the focused tests run.
 
-Before source edits, follow repository GitNexus impact analysis for each edited
-symbol, capture current behavior in focused contract tests, and warn on HIGH or
-CRITICAL risk. Before each stage commit, run change detection and exclude
-unrelated working-tree edits.
+Before source edits, run GitNexus impact on the edited symbols and report the
+blast radius; warn on HIGH or CRITICAL risk. Before committing each completed
+stage, run change detection and isolate its files from unrelated work.
