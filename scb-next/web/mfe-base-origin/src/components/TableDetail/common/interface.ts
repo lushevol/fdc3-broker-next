@@ -1,4 +1,4 @@
-import { GridColDef } from "@mui/x-data-grid";
+import { GridColDef } from "ratan-design-origin/data-grid";
 import { AdminRecord } from "../../../admin/common/interface";
 
 export type TableColumn = GridColDef<AdminRecord> & {

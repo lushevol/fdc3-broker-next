@@ -5,7 +5,7 @@ import {
   TextField,
   TextFieldProps,
   Autocomplete as MuiAutocomplete,
-} from "@mui/material";
+} from "ratan-design-origin/primitives";
 import { top100Films } from "../data"
 
 export const Autocomplete = ({ label, ...rest }: TextFieldProps) => (

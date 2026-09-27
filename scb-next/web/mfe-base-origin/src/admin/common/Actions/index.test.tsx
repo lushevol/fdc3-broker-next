@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import Actions from "./index";
 
-vi.mock("@mui/x-data-grid", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@mui/x-data-grid")>();
+vi.mock("ratan-design-origin/data-grid", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("ratan-design-origin/data-grid")>();
   return {
     ...actual,
     GridActionsCellItem: (props) => { return (<div>{props.children}</div>) },

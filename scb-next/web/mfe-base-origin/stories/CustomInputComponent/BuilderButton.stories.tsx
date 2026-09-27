@@ -1,10 +1,7 @@
 import React from "react";
 import type { Meta } from "@storybook/react-vite";
-import Typography from '@mui/material/Typography';
+import { Typography, Button as MuiButton, Box, Stack } from 'ratan-design-origin/primitives';
 import SearchInput from "../../src/components/SearchInput";
-import MuiButton from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
 /*
 This is custom component, in your code it should be imported from "src/Root/import"
 import { SearchButton } from "src/Root/import";

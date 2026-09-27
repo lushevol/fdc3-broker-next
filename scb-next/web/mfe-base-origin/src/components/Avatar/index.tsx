@@ -1,13 +1,8 @@
 import React, { ReactElement } from "react";
-import AvatarMui from "@mui/material/Avatar";
-import IconButton from "@mui/material/IconButton";
+import { Avatar as AvatarMui, IconButton, Tooltip, Typography, MenuItem, Divider } from "ratan-design-origin/primitives";
 import useController from "./common/useController";
-import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
-import MenuItem from "@mui/material/MenuItem";
 import female from "./common/female.svg";
 import Root, { classes, PREFIX, MenuStyled } from "./common/style";
-import Divider from "@mui/material/Divider";
 import { AvatarProps } from "./common/interface";
 import Profile from "../Profile";
 import json from "../../../package.json";

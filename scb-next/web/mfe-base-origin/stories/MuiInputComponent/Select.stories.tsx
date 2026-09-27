@@ -1,15 +1,8 @@
 //Please check this page https://mui.com/material-ui/react-text-field/ for detail
 import React from "react";
 import type { Meta } from "@storybook/react-vite"
-import {
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select as MuiSelect,
-  SelectProps as MuiSelectProps
-} from "@mui/material";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import OutlinedInput from "@mui/material/OutlinedInput";
+import { FormControl, InputLabel, MenuItem, Select as MuiSelect, SelectProps as MuiSelectProps, OutlinedInput } from "ratan-design-origin/primitives";
+import { KeyboardArrowDown as KeyboardArrowDownIcon } from "ratan-design-origin/icons";
 
 export const Select = ({ onChange, label, size, ...rest }: MuiSelectProps) => {
   const [age, setAge] = React.useState();

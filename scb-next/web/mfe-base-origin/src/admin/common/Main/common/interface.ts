@@ -1,5 +1,5 @@
 import { TableProps } from "../../../../components/Table/common/interface";
-import { GridColDef } from "@mui/x-data-grid";
+import { GridColDef } from "ratan-design-origin/data-grid";
 import { AdminRecord } from "../../interface";
 
 export interface FormProps extends TableProps {

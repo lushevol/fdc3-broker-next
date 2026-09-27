@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { styled } from "@mui/material/styles";
+import { styled } from "ratan-design-origin/theme";
 import { TileProps } from "./interface";
 
 export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_tile`;

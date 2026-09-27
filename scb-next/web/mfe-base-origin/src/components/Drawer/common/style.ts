@@ -1,4 +1,4 @@
-import { styled } from "@mui/material/styles";
+import { styled } from "ratan-design-origin/theme";
 import { css } from "@emotion/css";
 export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_drawer`;
 export const classes = {

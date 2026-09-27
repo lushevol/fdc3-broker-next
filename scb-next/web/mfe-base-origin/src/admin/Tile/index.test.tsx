@@ -12,8 +12,8 @@ const waitFor = (time = 2000) => new Promise((resolve) => {
   }, time)
 });
 
-vi.mock("@mui/x-data-grid", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@mui/x-data-grid")>();
+vi.mock("ratan-design-origin/data-grid", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("ratan-design-origin/data-grid")>();
   return {
     ...actual,
     __esModule: true,

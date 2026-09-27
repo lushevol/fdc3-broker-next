@@ -1,5 +1,5 @@
 import React, { ReactElement, Suspense } from "react";
-import Box from "@mui/material/Box";
+import { Box } from "ratan-design-origin/primitives";
 import ErrorBoundry from "../ErrorBoundry";
 import { DrawerProps, Tiles } from "./common/interface";
 import Splash from "../Splash";

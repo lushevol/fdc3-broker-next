@@ -1,5 +1,5 @@
-import { styled } from "@mui/material/styles";
-import Alert from "@mui/material/Alert";
+import { styled } from "ratan-design-origin/theme";
+import { Alert } from "ratan-design-origin/primitives";
 export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_version`;
 export const classes = {
   root: `${PREFIX}-root`,

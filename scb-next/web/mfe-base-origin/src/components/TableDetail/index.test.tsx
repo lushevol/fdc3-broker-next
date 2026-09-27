@@ -1,8 +1,8 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import TableDetail from "./";
-import { GridActionsCellItem } from "@mui/x-data-grid";
-import EditIcon from "@mui/icons-material/Edit";
+import { GridActionsCellItem } from "ratan-design-origin/data-grid";
+import { Edit as EditIcon } from "ratan-design-origin/icons";
 import useController from "./common/Field.useController";
 const waitFor = (time = 2000) => new Promise((resolve) => {
     setTimeout(() => {

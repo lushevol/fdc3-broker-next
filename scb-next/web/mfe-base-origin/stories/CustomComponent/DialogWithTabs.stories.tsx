@@ -1,11 +1,6 @@
 import React from "react";
 import type { Meta } from "@storybook/react-vite";
-import Button from '@mui/material/Button';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import { SnackbarCloseReason } from "@mui/material/Snackbar";
+import { Button, Tabs, Tab, Typography, Box, SnackbarCloseReason } from 'ratan-design-origin/primitives';
 /*
 This is custom component, in your code it should be imported from "src/Root/import"
 import { PageLoader } from "src/Root/import";

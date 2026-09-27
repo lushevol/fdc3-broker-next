@@ -5,8 +5,8 @@ import Root, { PREFIX, classes, presentationClasses } from "./common/style";
 import DialogTitle from "./common/DialogTitle";
 import useController from "./common/useController";
 import Draggable from "./common/Draggable";
-import { ArrowForwardIos as ArrowForwardIosIcon } from "@mui/icons-material";
-import IconButton from "@mui/material/IconButton";
+import { ArrowForwardIos as ArrowForwardIosIcon } from "ratan-design-origin/icons";
+import { IconButton } from "ratan-design-origin/primitives";
 
 const joinClassNames = (...classNames: Array<string | undefined>) =>
   classNames.filter(Boolean).join(" ");

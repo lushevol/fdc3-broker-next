@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "ratan-design-origin/theme";
 import React from "react";
 import Root, { classes } from "./style";
 

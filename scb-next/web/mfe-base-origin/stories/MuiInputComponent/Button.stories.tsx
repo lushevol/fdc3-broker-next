@@ -4,7 +4,7 @@ import type { Meta } from "@storybook/react-vite"
 import {
   Button as MuiButton,
   ButtonProps as MuiButtonProps,
-} from "@mui/material";
+} from "ratan-design-origin/primitives";
 
 export interface ButtonProps extends MuiButtonProps {
   label: string;

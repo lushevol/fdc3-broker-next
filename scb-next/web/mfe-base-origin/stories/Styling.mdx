@@ -34,7 +34,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 <div>
   <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-template-tiles/browse/src/Tile1/components/Comp1/common/style.ts?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/Tile1/components/Comp1/common/style.ts in mfe-template-tiles`</a> File.
   ``` tsx dark
-  import { css, styled } from "@mui/material/styles";
+  import { css, styled } from "ratan-design-origin/theme";
   export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_Comp1`;
   export const classes = {
     root: `${PREFIX}-root`,
@@ -71,8 +71,8 @@ import { Meta } from '@storybook/addon-docs/blocks';
   import Root, { classes, PREFIX } from "./common/style";
   import { Comp1Props } from "./common/interface";
   import { ErrorBoundry } from "../../../Root/import";
-  import TextField from "@mui/material/TextField";
-  import Button from "@mui/material/Button";
+  import { TextField } from "ratan-design-origin/primitives";
+  import { Button } from "ratan-design-origin";
 
   const Comp1: React.FC<Comp1Props> = (props: Comp1Props): React.ReactElement => {
     const { ContainerStore } = useController(props);

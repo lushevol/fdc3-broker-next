@@ -1,6 +1,5 @@
 import * as React from 'react';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
+import { Stack, Button } from 'ratan-design-origin/primitives';
 
 export default function BasicButtons() {
   return (

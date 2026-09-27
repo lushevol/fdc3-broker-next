@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta } from "@storybook/react-vite";
-import Stack from '@mui/material/Stack';
+import { Stack } from 'ratan-design-origin/primitives';
 /*
 This is custom component, in your code it should be imported from "src/Root/import"
 import { SearchButton } from "src/Root/import";

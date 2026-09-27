@@ -1,4 +1,4 @@
-import { styled } from "@mui/material/styles";
+import { styled } from "ratan-design-origin/theme";
 import Dialog from "../../Dialog";
 
 export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_table_detail`;

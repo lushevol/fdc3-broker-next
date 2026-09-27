@@ -5,6 +5,9 @@
 - Added curated `primitives` and `icons` entries for the Login layout, fields,
   tabs and original glyphs, plus the exact `styled` helper through `theme`.
   Base Login consumes these exports without changing its DOM or portal styling.
+- Extended those entries to all Base-used Material surfaces and glyphs, added
+  optional `data-grid`, and exposed theme/provider helpers through `theme`.
+  Base source, tests, stories and examples now import UI through package entries.
 
 - Opt-in `tokens.css` exposes document-wide CSS variables without a React
   provider, defaulting to WebKit/light with HTML attributes for dark/legacy.

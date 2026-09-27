@@ -1,10 +1,10 @@
 import React, { ReactElement } from "react";
 import Table from "../../../components/Table";
 import ErrorBoundry from "../../../components/ErrorBoundry";
-import Button from "@mui/material/Button";
+import { Button } from "ratan-design-origin";
 import { FormProps } from "./common/interface";
 import Dialog from "../../../components/Dialog";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid } from "ratan-design-origin/data-grid";
 import Root, { classes, PREFIX } from "./common/style";
 
 const Main: React.FC<FormProps> = (props: FormProps): ReactElement => {

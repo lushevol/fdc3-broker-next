@@ -1,5 +1,5 @@
 import React, { ReactElement } from "react";
-import MuiDrawer from "@mui/material/Drawer";
+import { Drawer as MuiDrawer } from "ratan-design-origin/primitives";
 import Root, {
   classes,
   DrawerClass,

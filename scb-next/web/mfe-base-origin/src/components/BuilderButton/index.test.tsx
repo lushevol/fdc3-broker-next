@@ -1,11 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import Typography from '@mui/material/Typography';
-import MuiButton from '@mui/material/Button';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
+import { Typography, Button as MuiButton, Tabs, Tab, Box, Stack } from 'ratan-design-origin/primitives';
 import Provider from "../../hooks/provider";
 import ThemeProvider from "../../theme";
 import BuilderButton, { TabPanel, a11yTabPanelProps, emptyFunction } from ".";

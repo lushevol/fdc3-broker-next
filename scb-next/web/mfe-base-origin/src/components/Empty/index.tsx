@@ -1,6 +1,6 @@
 import React, { ReactElement } from "react";
 import { EmptyState, Button } from "ratan-design-origin";
-import CallMadeIcon from "@mui/icons-material/CallMade";
+import { CallMade as CallMadeIcon } from "ratan-design-origin/icons";
 import Root, { classes, PREFIX } from "./common/style";
 import useDispatcher from "../../hooks/dispathcer";
 import useAnalytics from "../../analytics";

@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import DataGrid from "./";
-import { GridColDef } from "@mui/x-data-grid";
+import { GridColDef } from "ratan-design-origin/data-grid";
 
 
 const Comp = (props) => {

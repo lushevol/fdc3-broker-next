@@ -1,6 +1,6 @@
 # Base direct-MUI migration inventory
 
-Audit date: 2026-09-27. This is the implementation checklist for the [Base UI component migration plan](BASE_UI_COMPONENT_MIGRATION_PLAN.md), audited from the original `mfe-base-origin` source and public exports of `ratan-design-origin`. The Login rows have been implemented and visually compared; other rows remain pending.
+Audit date: 2026-09-27; adoption update: 2026-09-28. This is the original import baseline for the [Base UI component migration plan](BASE_UI_COMPONENT_MIGRATION_PLAN.md). All listed Base source, test, Storybook and MDX imports now resolve through Ratan Design. The sole retained `@mui/*` source string is the type-only theme module augmentation. The tables below retain original imports for traceability; broader portal visual comparison is still pending.
 
 ## Scope and counts
 
@@ -24,21 +24,22 @@ All Base runtime UI imports must resolve through public Ratan entry points by co
 | Key | Target | Status and purpose |
 | --- | --- | --- |
 | C | `ratan-design-origin` | Existing Button, Input, Select, Dialog and other controls; proposed coarse LabeledSwitch, AutocompleteField and IconAction. Confirm markup/default/interaction parity before substituting for a raw MUI component. |
-| F | `ratan-design-origin/primitives` | Initial Login layout/field/tab exports shipped; remaining narrow Material UI presentation exports and prop/event types are pending. Preserve exact primitive behavior, refs, generics, theme lookup, classes and slots. |
-| I | `ratan-design-origin/icons` | Initial `PersonOutlined`/`LockOutlined` glyph exports shipped; other used glyphs are pending. Preserve SVG paths, viewBox, sizing, color, accessible/decorative semantics and styling. |
-| T | `ratan-design-origin/theme` | Existing entry now exports `styled`; remaining provider helpers and types are pending. A re-exported ThemeProvider must use the same MUI context instance. |
+| F | `ratan-design-origin/primitives` | Curated exact Material UI presentation exports and used prop/event types. Component identity, refs, generics, theme lookup, classes and slots remain MUI-compatible. |
+| I | `ratan-design-origin/icons` | Curated exact original glyph exports used by Base and its stories. |
+| T | `ratan-design-origin/theme` | Exposes the same `styled`, theme provider/hook, creation helpers and imported types. |
 | P | `ratan-design-origin/portal-theme` | Existing opt-in historical portal theme; extend its explicit reset/type exports where necessary. Keep CssBaseline opt-in and preserve its placement. Base continues to choose modes from host state. |
 | D | `ratan-design-origin/dates` | Existing LocalizationProvider and AdapterDayjs exports. Current Pro import paths must also migrate, preserving locale and provider behavior. Keep the actual Pro range picker in existing `/date-range`. |
-| G | `ratan-design-origin/data-grid` | Proposed isolated optional entry for Community DataGrid, toolbar/actions and grid types. No admin service, audit workflow, record policy or license machinery belongs in the core entry. |
+| G | `ratan-design-origin/data-grid` | Isolated optional Community DataGrid, toolbar/actions and grid-type entry. No admin service, audit workflow, record policy or license machinery enters the package. |
 
 `C/F` means adopt the existing core component if parity is demonstrated; otherwise expose the exact generic primitive through F. It is not an unresolved permission to retain a direct MUI import. A pass-through export is appropriate when it preserves a standard primitive; a new wrapper solely to rename a domain operation is not.
 
 The file tables map the currently imported contracts to their package owners. A coarse C component such as AutocompleteField, LabeledSwitch or IconAction can consume F/I internally and replace several host imports together. Prefer that composition when it preserves the existing consumer contract; the tables do not require each host to keep assembling those primitives itself.
 
-Completed production rows: `src/pages/Login/index.tsx`, its local
-`common/TabPanel.tsx`, and `common/style.ts`. The table retains their original
-MUI imports as an audit baseline. Login uses the exact raw TextField export to
-preserve its existing FormControl/InputLabel DOM and page styling.
+Completed import rows: all production, type, test, story, decorator and MDX
+examples in this inventory. The table retains original MUI imports as an audit
+baseline. The `verify:base-design-imports` command enforces zero direct Base
+imports and rejects package-to-application imports. Login retains exact raw
+TextField behavior; Home, Tile, Admin Main and Survey use the existing core Button.
 
 ## Exhaustive imported symbol set
 
@@ -123,7 +124,7 @@ The symbols below are original exports, not local aliases such as `MuiButton` or
 | [src/components/TableDetail/common/interface.ts](../web/mfe-base-origin/src/components/TableDetail/common/interface.ts#L1) | — | `GridColDef` | G |
 | [src/routing/common/useController.ts](../web/mfe-base-origin/src/routing/common/useController.ts#L12) | — | `SnackbarCloseReason` | F |
 
-`src/@types/index.d.ts` currently augments `Theme` and `ThemeOptions` with `customColor` and the portal `theme` shape, including the optional Avatar menu override. Generic presentation types may be exported by P. A host-specific module augmentation may remain in Base as a type-only declaration, with its imported types coming through Ratan. It must not introduce a runtime MUI import or make the package import Base source.
+`src/@types/index.d.ts` augments `Theme` and `ThemeOptions` with `customColor` and the portal `theme` shape, including the optional Avatar menu override. Its `CSSObject` import now comes through `theme`. The host-specific module augmentation remains in Base as a type-only declaration; it emits no runtime MUI import and does not make the package import Base source.
 
 ## Tests (18)
 

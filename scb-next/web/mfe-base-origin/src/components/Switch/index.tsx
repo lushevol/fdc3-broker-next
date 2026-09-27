@@ -2,7 +2,7 @@ import React, { ReactElement } from "react";
 import dark from "./common/images/dark.svg";
 import moon from "./common/images/moon.svg";
 import sun from "./common/images/sun.svg";
-import LightModeIcon from "@mui/icons-material/LightMode";
+import { LightMode as LightModeIcon } from "ratan-design-origin/icons";
 import useController from "./common/useController";
 import Root, { classes, PREFIX, SwitchStyled } from "./common/style";
 import { useIsNewLayout } from "../../hooks/model/root";

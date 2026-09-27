@@ -24,3 +24,20 @@ for (const generation of ['legacy', 'webkit'] as const) {
     }
   }
 }
+
+test('Base shell opens the tile drawer and manages workspace tabs', async ({ page }) => {
+  await page.goto('/?show_normal_login=Y&survey=no&new-styles=true');
+  await page.getByPlaceholder('Enter Username').fill('mock.cashflow');
+  await page.getByPlaceholder('Enter Password').fill('acceptance');
+  await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+
+  await page.getByText('New Tile', { exact: true }).click();
+  await expect(page.getByText('Cashflow Blotter', { exact: true })).toBeVisible();
+  await page.getByText('Cashflow Blotter', { exact: true }).click();
+  await expect(page.getByRole('tab', { name: 'Cashflow Blotter' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Add Workspace' }).click();
+  await expect(page.getByRole('button', { name: 'delete' })).toHaveCount(2);
+  await page.getByRole('button', { name: 'delete' }).first().click();
+  await expect(page.getByRole('tab', { name: 'Cashflow Blotter' })).toHaveCount(0);
+});

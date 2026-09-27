@@ -1,10 +1,8 @@
 import React, { ReactElement } from "react";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import AddIcon from "@mui/icons-material/Add";
-import { useTheme } from "@mui/material/styles";
+import { Tabs, Tab, Box } from "ratan-design-origin/primitives";
+import { Button } from "ratan-design-origin";
+import { Add as AddIcon } from "ratan-design-origin/icons";
+import { useTheme } from "ratan-design-origin/theme";
 import useController from "./common/useController";
 import Root, { classes, PREFIX } from "./common/style";
 import TabPanel, { a11yProps } from "../../components/TabPanel";

@@ -31,6 +31,8 @@ The table below records shipped presentation only: proposed `primitives`,
 | Splash | LoadingOverlay | Existing copy/root viewport sizing and error boundary |
 | Login layout, raw fields and tabs | `primitives` entry: exact MUI component exports | Base owns page composition, credential state, SSO and layout policy; current DOM/theme selectors are preserved |
 | Login field glyphs | `icons` entry: original `PersonOutlined` and `LockOutlined` glyphs | Base chooses which glyph appears with each field |
+| Base shell, settings, profile and admin presentation | Curated `primitives`, `icons` and `theme` entries with exact MUI identities | Base retains navigation, identity, state, policy, services and page composition |
+| Base grids and date localization | Optional `data-grid` and `dates` entries | Base retains row models, actions, audit workflows, provider placement and license policy |
 
 The catalog at `packages/ratan-design-origin/stories` covers controls, search/
 builder composition, date integrations, notifications/loaders, Dialog and the

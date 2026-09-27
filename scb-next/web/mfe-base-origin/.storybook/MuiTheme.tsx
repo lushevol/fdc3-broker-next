@@ -1,10 +1,9 @@
 import React from "react";
-import { ThemeProvider } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider } from "ratan-design-origin/theme";
+import { CssBaseline } from "ratan-design-origin/primitives";
 import CreateTheme from "../src/theme/Config";
 import { getTheme } from "../src/theme/config/utils";
-import { LocalizationProvider } from "@mui/x-date-pickers-pro";
-import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
+import { LocalizationProvider, AdapterDayjs } from "ratan-design-origin/dates";
 
 const MuiTheme = (Story, context) => {
   const { theme: themeKey } = context.globals;

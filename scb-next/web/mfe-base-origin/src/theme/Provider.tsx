@@ -2,10 +2,9 @@ import React from "react";
 import {
   Theme,
   ThemeProvider as MuiThemeProvider,
-} from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+} from "ratan-design-origin/theme";
+import { CssBaseline } from "ratan-design-origin/primitives";
+import { LocalizationProvider, AdapterDayjs } from "ratan-design-origin/dates";
 
 interface ThemeProviderProps {
   theme: Theme;

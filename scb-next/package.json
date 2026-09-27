@@ -56,6 +56,7 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test:dependency-isolation": "node --test ./scripts/verify-dependency-isolation.test.mjs",
     "verify:dependency-isolation": "node ./scripts/verify-dependency-isolation.mjs",
+    "verify:base-design-imports": "node ./scripts/verify-base-design-imports.mjs",
     "verify:design-origin": "node ./scripts/verify-design-origin-quality.mjs"
   },
   "devDependencies": {

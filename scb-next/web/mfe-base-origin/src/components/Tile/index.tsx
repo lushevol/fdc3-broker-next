@@ -1,7 +1,7 @@
 import React, { ReactElement } from "react";
 import { TileProps } from "./common/interface";
-import Button from "@mui/material/Button";
-import AddIcon from "@mui/icons-material/Add";
+import { Button } from "ratan-design-origin";
+import { Add as AddIcon } from "ratan-design-origin/icons";
 import Root, { backgroundCss, classes, PREFIX } from "./common/style";
 import { useContext } from "../../hooks/provider";
 

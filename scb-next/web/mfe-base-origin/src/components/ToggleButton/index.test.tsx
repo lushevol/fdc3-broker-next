@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { ToggleButtonGroup } from "@mui/material";
+import { ToggleButtonGroup } from "ratan-design-origin/primitives";
 import ToggleButton, { modeStyle } from ".";
 import Provider from "../../hooks/provider";
 import ThemeProvider from "../../theme";

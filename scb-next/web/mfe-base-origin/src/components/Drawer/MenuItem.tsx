@@ -1,5 +1,5 @@
 import React, { ReactElement } from "react";
-import Grid from "@mui/material/Grid";
+import { Grid } from "ratan-design-origin/primitives";
 import Root, { classes, PREFIX } from "./common/tile.style";
 import { MenuItemProps, Tile as TileProps } from "./common/interface";
 import Tile from "../Tile";

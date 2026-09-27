@@ -1,7 +1,5 @@
 import React, { ReactElement } from "react";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
+import { AppBar, Toolbar, Typography } from "ratan-design-origin/primitives";
 import useController from "./common/useController";
 import Root, { classes, PREFIX } from "./common/style";
 import Switch from "../Switch";

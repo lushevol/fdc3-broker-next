@@ -1,9 +1,5 @@
 import React from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "ratan-design-origin/primitives";
 import useController from "./common/useController";
 import Button from "../../components/LoadingButton";
 import { TimeoutProps } from "./common/interface";

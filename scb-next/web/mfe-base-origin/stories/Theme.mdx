@@ -31,7 +31,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 <div>
   <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/Config.ts?at=refs%2Fheads%2Ftrunk" target="_blank">`Config.ts`</a> File.<br/>
   ``` tsx dark
-  import { createTheme, responsiveFontSizes } from "@mui/material/styles";
+  import { createTheme, responsiveFontSizes } from "ratan-design-origin/theme";
   import custom from "./config/common";
 
   export const Config = (props) => {
@@ -177,8 +177,8 @@ import { Meta } from '@storybook/addon-docs/blocks';
   <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/index.tsx?at=refs%2Fheads%2Ftrunk" target="_blank">`/src/theme/index.tsx`</a> File.
   ``` tsx dark
   import React, { ReactElement } from "react";
-  import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
-  import CssBaseline from "@mui/material/CssBaseline";
+  import { ThemeProvider as MuiThemeProvider } from "ratan-design-origin/theme";
+  import { CssBaseline } from "ratan-design-origin/primitives";
   import Config from "./Config";
   import { useContext } from "../hooks/provider";
   import { ComponentPropsDefault } from "../hooks/model/root";
@@ -237,7 +237,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 <div>
   <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/config/dark.ts?at=trunk" target="_blank">`/src/theme/config/dark.ts`</a> File.
   ``` tsx dark
-  import { css, darken } from "@mui/material/styles";
+  import { css, darken } from "ratan-design-origin/theme";
   import color from "./color";
   import colordark from "./color.dark";
   import custom from "./common";
@@ -435,7 +435,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 <div>
   <a href="https://bitbucket.global.standardchartered.com/projects/RATANRT/repos/mfe-base/browse/src/theme/config/light.ts?at=trunk" target="_blank">`/src/theme/config/light.ts`</a> File.
   ``` tsx dark
-  import { css } from "@mui/material/styles";
+  import { css } from "ratan-design-origin/theme";
   import color from "./color";
   import light from "./color.light";
   import custom from "./common";
@@ -686,7 +686,8 @@ import { Meta } from '@storybook/addon-docs/blocks';
   ``` tsx dark
   import { FC, PropsWithChildren, useMemo } from "react";
   import { ContainerProvider, ThemeConfig, ThemeUtil } from "../../import";
-  import { ThemeProvider, CssBaseline } from "@mui/material";
+  import { ThemeProvider } from "ratan-design-origin/theme";
+  import { CssBaseline } from "ratan-design-origin/primitives";
 
   const MfeThemeProvider: FC<PropsWithChildren> = (props) => {
     const [ContainerStore] = ContainerProvider.useContext();

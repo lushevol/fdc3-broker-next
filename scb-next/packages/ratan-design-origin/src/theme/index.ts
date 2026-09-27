@@ -4,7 +4,16 @@ import getDarkTheme from './dark.js';
 import getLightTheme from './light.js';
 import { getThemeOptions } from './options.js';
 
-export { styled } from '@mui/material/styles';
+export {
+  createTheme,
+  css,
+  darken,
+  responsiveFontSizes,
+  styled,
+  ThemeProvider,
+  useTheme,
+} from '@mui/material/styles';
+export type { CSSObject, Theme } from '@mui/material/styles';
 
 export type DesignGeneration = 'legacy' | 'webkit';
 export interface RatanThemeOptions {

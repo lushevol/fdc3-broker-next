@@ -24,6 +24,9 @@
       "icons": [
         "dist/icons.d.ts"
       ],
+      "data-grid": [
+        "dist/data-grid.d.ts"
+      ],
       "theme": [
         "dist/theme/index.d.ts"
       ],
@@ -59,6 +62,10 @@
     "./icons": {
       "types": "./dist/icons.d.ts",
       "import": "./dist/icons.js"
+    },
+    "./data-grid": {
+      "types": "./dist/data-grid.d.ts",
+      "import": "./dist/data-grid.js"
     },
     "./theme": {
       "types": "./dist/theme/index.d.ts",

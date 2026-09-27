@@ -1,4 +1,4 @@
-import type { CSSObject } from "@mui/material/styles";
+import type { CSSObject } from "ratan-design-origin/theme";
 import type custom from "../theme/config/common";
 import type { getTheme } from "../theme/config/utils";
 

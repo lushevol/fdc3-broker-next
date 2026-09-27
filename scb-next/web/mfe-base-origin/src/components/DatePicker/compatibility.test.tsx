@@ -2,7 +2,7 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import dayjs from "dayjs";
-import { AdapterDayjs, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs, LocalizationProvider } from "ratan-design-origin/dates";
 import DatePicker from ".";
 import DateTimePicker from "../DateTimePicker";
 import TimePicker from "../TimePicker";

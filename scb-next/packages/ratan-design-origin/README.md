@@ -47,8 +47,9 @@ shadow with the same formula and the dark blue token counterpart.
 ## Imports
 
 - `ratan-design-origin`: controls, prop types, provider.
-- `ratan-design-origin/primitives`: curated exact MUI presentation exports for Base composition (initially the Login field, layout and tab surfaces).
-- `ratan-design-origin/icons`: curated original MUI glyph exports (initially `PersonOutlined` and `LockOutlined`).
+- `ratan-design-origin/primitives`: curated exact MUI presentation exports for Base fields, shell, dialogs, layout and stories, including the used prop/event types.
+- `ratan-design-origin/icons`: curated original MUI glyph exports used by Base and its stories.
+- `ratan-design-origin/data-grid`: optional Community DataGrid, toolbar/actions and grid types; isolated from the core entry.
 - `ratan-design-origin/theme`: `createRatanTheme`, shared control overrides and
   compact defaults; emitted `Theme.ratan.designGeneration` augmentation.
 - `ratan-design-origin/tokens`: framework-independent `legacyTokens` and

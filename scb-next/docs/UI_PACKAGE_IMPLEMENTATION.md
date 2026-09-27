@@ -1227,3 +1227,29 @@ production build, focused Login tests (15), changed-file lint and dependency
 isolation also passed. Base's repository-wide lint remains at nine errors and
 138 warnings in existing unrelated files; it is not a passing gate for this
 slice. The other Base MUI imports remain tracked in the migration inventory.
+
+## Base UI migration: complete import routing (2026-09-28)
+
+All Base source, tests, stories, Storybook decorator and MDX examples now obtain
+their MUI-supplied UI through `ratan-design-origin`. The `primitives` and `icons`
+entries explicitly export only the Material components and glyphs used by Base;
+`theme` exposes the same MUI helpers and types, `dates` supplies localization,
+and the optional `data-grid` entry supplies Community grid UI and types. Grid
+stays an external peer in the package build. The current Base provider remains
+host-owned and keeps its provider/CssBaseline/localization nesting. Ordinary
+Home, Tile, Admin Main and Survey actions use the existing package Button.
+Business controllers, page composition, session policy and admin record logic
+remain in Base. The only `@mui/*` string in Base source is its type-only theme
+augmentation. `npm run verify:base-design-imports` enforces the import boundary
+and rejects application imports from package source.
+
+The package identity test covers representative shell controls, icons and the
+DataGrid; package/Base typechecks and builds, package tests (115), Base tests
+(355), Base Storybook and dependency isolation passed. Eight Login screenshots
+still match the pre-migration baseline with zero differing pixels. A browser
+journey passed login, New Tile drawer, Cashflow tile selection, Add Workspace
+and tab removal. The deeper Cashflow rendering journey is currently blocked
+by its own `DateFormat` initialization error in the local remote; broader
+portal visual-state comparison and the optional higher-level compositions in
+the migration plan remain open. Do not infer full portal parity from the import
+scan or Login screenshots alone.

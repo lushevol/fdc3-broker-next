@@ -19,6 +19,7 @@ export default defineConfig({
         index: "src/index.ts",
         primitives: "src/primitives.ts",
         icons: "src/icons.ts",
+        "data-grid": "src/data-grid.ts",
         theme: "src/theme/index.ts",
         tokens: "src/tokens/index.ts",
         compatibility: "src/compatibility.ts",
@@ -32,7 +33,7 @@ export default defineConfig({
     },
     rolldownOptions: {
       external:
-        /^(react|react-dom|@mui\/material|@mui\/icons-material|@mui\/x-date-pickers|@mui\/x-date-pickers-pro|dayjs|@emotion\/react|@emotion\/styled)(\/|$)/,
+        /^(react|react-dom|@mui\/material|@mui\/icons-material|@mui\/x-date-pickers|@mui\/x-date-pickers-pro|@mui\/x-data-grid|dayjs|@emotion\/react|@emotion\/styled)(\/|$)/,
       output: {
         preserveModules: true,
         preserveModulesRoot: "src",

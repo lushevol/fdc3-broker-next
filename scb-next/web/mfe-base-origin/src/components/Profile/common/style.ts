@@ -1,6 +1,6 @@
-import { styled } from "@mui/material/styles";
+import { styled } from "ratan-design-origin/theme";
 import Dialog from "../../Dialog";
-import MuiAccordion from "@mui/material/Accordion";
+import { Accordion as MuiAccordion } from "ratan-design-origin/primitives";
 
 export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_profile`;
 export const classes = {};

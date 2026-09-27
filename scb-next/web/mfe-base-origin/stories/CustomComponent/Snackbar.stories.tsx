@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import type { Meta } from "@storybook/react-vite";
-import { Button, SnackbarCloseReason } from "@mui/material";
+import { Button, SnackbarCloseReason } from "ratan-design-origin/primitives";
 /*
 This is custom component, in your code it should be imported from "src/Root/import"
 import { Splash } from "src/Root/import";

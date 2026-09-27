@@ -1,5 +1,5 @@
-import { styled } from "@mui/material/styles";
-import Box from "@mui/material/Box";
+import { styled } from "ratan-design-origin/theme";
+import { Box } from "ratan-design-origin/primitives";
 
 export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_Main`;
 export const classes = {

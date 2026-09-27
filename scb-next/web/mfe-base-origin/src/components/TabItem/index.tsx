@@ -1,11 +1,7 @@
 import React, { ReactElement } from "react";
-import TextField from "@mui/material/TextField";
+import { TextField, IconButton, Tooltip } from "ratan-design-origin/primitives";
 import { TabProps } from "./common/interface";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
-import DeleteIcon from "@mui/icons-material/Delete";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import Tooltip from "@mui/material/Tooltip";
+import { Close as CloseIcon, Delete as DeleteIcon, Refresh as RefreshIcon } from "ratan-design-origin/icons";
 import Root, { classes, PREFIX } from "./common/style";
 import { useIsNewLayout } from "../../hooks/model/root";
 

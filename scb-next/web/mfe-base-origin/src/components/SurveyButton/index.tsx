@@ -1,7 +1,6 @@
 import React, { ReactElement } from "react";
-import RateReviewIcon from "@mui/icons-material/RateReview";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
+import { RateReview as RateReviewIcon } from "ratan-design-origin/icons";
+import { IconButton, Tooltip } from "ratan-design-origin/primitives";
 import Root, { classes, PREFIX } from "./common/style";
 import { SurveyButtonProps } from "./common/interface";
 

@@ -1,6 +1,5 @@
 import React, { ReactElement } from "react";
-import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
+import { Typography, Stack } from "ratan-design-origin/primitives";
 import Root, { classes, PREFIX } from "./common/style";
 import ErrorBoundry from "../../components/ErrorBoundry";
 import { VersionProps } from "./common/interface";

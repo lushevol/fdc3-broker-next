@@ -3,7 +3,7 @@ import type { Meta } from "@storybook/react-vite"
 import {
   Autocomplete as MuiAutocomplete,
   Box,
-} from "@mui/material";
+} from "ratan-design-origin/primitives";
 /*
 This is custom component, in your code it should be imported from "src/Root/import"
 import { Input } from "src/Root/import";

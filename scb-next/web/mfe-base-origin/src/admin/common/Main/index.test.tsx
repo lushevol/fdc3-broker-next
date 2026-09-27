@@ -1,13 +1,13 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import Main from "./";
-import { GridColDef } from "@mui/x-data-grid";
+import { GridColDef } from "ratan-design-origin/data-grid";
 import Actions from "../Actions";
 import Status from "../Status";
 
 
-vi.mock("@mui/x-data-grid", async (importOriginal) => {
-    const actual = await importOriginal<typeof import("@mui/x-data-grid")>();
+vi.mock("ratan-design-origin/data-grid", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("ratan-design-origin/data-grid")>();
     return {
         ...actual,
         __esModule: true,

@@ -3,8 +3,7 @@ import { render, screen } from "@testing-library/react";
 import Provider from "../../hooks/provider";
 import ThemeProvider from "../../theme";
 import DateRangePicker from ".";
-import { LocalizationProvider } from '@mui/x-date-pickers-pro';
-import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs';
+import { LocalizationProvider, AdapterDayjs } from 'ratan-design-origin/dates';
 
 const Comp = () => {
   return (

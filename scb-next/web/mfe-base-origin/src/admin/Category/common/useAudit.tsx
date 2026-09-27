@@ -1,6 +1,6 @@
 import React from "react";
 import { useContext } from "../../../hooks/provider";
-import { GridColDef } from "@mui/x-data-grid";
+import { GridColDef } from "ratan-design-origin/data-grid";
 import useServices from "../services/useServices";
 import { DateTimeFormat } from "../../../utils/locale";
 import Status from "../../common/Status";

@@ -1,10 +1,6 @@
 import React from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import Button from "@mui/material/Button";
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "ratan-design-origin/primitives";
+import { Button } from "ratan-design-origin";
 import LoadingButton from "../../components/LoadingButton";
 import useController from "./common/useController";
 import { SurveyProps } from "./common/interface";

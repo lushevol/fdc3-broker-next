@@ -1,8 +1,4 @@
-import {
-  DialogProps as MuiDialogProps,
-  DialogTitleProps as MuiDialogTitleProps,
-} from "@mui/material";
-import { PaperProps as MuiPaperProps } from "@mui/material/Paper";
+import { DialogProps as MuiDialogProps, DialogTitleProps as MuiDialogTitleProps, PaperProps as MuiPaperProps } from "ratan-design-origin/primitives";
 
 export interface DialogTitleProps extends MuiDialogTitleProps {
   id?: string;

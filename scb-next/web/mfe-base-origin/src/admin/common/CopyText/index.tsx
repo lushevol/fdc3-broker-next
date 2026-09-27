@@ -1,7 +1,7 @@
 import React, { ReactElement } from "react";
-import IconButton from "@mui/material/IconButton";
+import { IconButton } from "ratan-design-origin/primitives";
 import ErrorBoundry from "../../../components/ErrorBoundry";
-import ContentPasteIcon from "@mui/icons-material/ContentPaste";
+import { ContentPaste as ContentPasteIcon } from "ratan-design-origin/icons";
 
 interface CopyTextProps {
   value: string;

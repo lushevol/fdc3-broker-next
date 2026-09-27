@@ -1,4 +1,4 @@
-import { styled } from "@mui/material/styles";
+import { styled } from "ratan-design-origin/theme";
 
 const PREFIX = `Fallback`;
 export const classes = {

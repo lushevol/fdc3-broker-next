@@ -1,5 +1,5 @@
-import { styled } from "@mui/material/styles";
-import Menu from "@mui/material/Menu";
+import { styled } from "ratan-design-origin/theme";
+import { Menu } from "ratan-design-origin/primitives";
 
 export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_avatar`;
 export const classes = {

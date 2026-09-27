@@ -1,10 +1,7 @@
 import React from "react";
-import EditIcon from "@mui/icons-material/Edit";
-import PublishedWithChangesIcon from "@mui/icons-material/PublishedWithChanges";
-import UnpublishedIcon from "@mui/icons-material/Unpublished";
-import HistoryIcon from "@mui/icons-material/History";
-import Tooltip from "@mui/material/Tooltip";
-import { GridActionsCellItem } from "@mui/x-data-grid";
+import { Edit as EditIcon, PublishedWithChanges as PublishedWithChangesIcon, Unpublished as UnpublishedIcon, History as HistoryIcon } from "ratan-design-origin/icons";
+import { Tooltip } from "ratan-design-origin/primitives";
+import { GridActionsCellItem } from "ratan-design-origin/data-grid";
 import { AdminRecord } from "../interface";
 
 interface ActionsProps {

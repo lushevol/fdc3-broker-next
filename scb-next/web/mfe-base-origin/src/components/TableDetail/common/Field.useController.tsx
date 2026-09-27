@@ -1,6 +1,6 @@
 import React from "react";
-import Box from "@mui/material/Box";
-import type { GridValueGetterParams } from "@mui/x-data-grid";
+import { Box } from "ratan-design-origin/primitives";
+import type { GridValueGetterParams } from "ratan-design-origin/data-grid";
 import type { AdminRecord } from "../../../admin/common/interface";
 import { FieldProps } from "./interface";
 

@@ -3,18 +3,9 @@ import { ProfileProps, RoleProps, SubjectProps } from "./common/interface";
 import Root, { Accordion } from "./common/style";
 import { useContext } from "../../hooks/provider";
 
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import Typography from "@mui/material/Typography";
-import Chip from "@mui/material/Chip";
-import Stack from "@mui/material/Stack";
-import Divider from "@mui/material/Divider";
+import { Box, Card, CardContent, CardMedia, Typography, Chip, Stack, Divider, AccordionSummary, AccordionDetails } from "ratan-design-origin/primitives";
 
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { ExpandMore as ExpandMoreIcon } from "ratan-design-origin/icons";
 import { Entity, Subject } from "../../hooks/model/root";
 import { DateTimeFormat } from "../../utils/locale";
 

@@ -1,8 +1,8 @@
 # Migrating reusable Base UI to Ratan Design
 
-Status: guide for the current `ratan-design-origin@0.1.0` catalog and remaining
-component candidates, with adoption scope revised 2026-09-27. Candidate
-interfaces below are proposals; they are not exports available for use yet.
+Status: guide for the current `ratan-design-origin@0.1.0` catalog, with Base
+direct-MUI import adoption complete 2026-09-28. Higher-level candidate
+interfaces below remain proposals; they are not exports available for use yet.
 
 Use this guide to adopt or extract reusable controls and useful compositions of
 primitives. Login, Home and portal features remain in Base. They can use package
@@ -60,10 +60,10 @@ inside the retained feature from adoption.
 | Dialog presentation and legacy title/root styles | Migrated | Keep Base's workspace/drag/resize adapter where required. |
 | DatePicker, DateTimePicker, TimePicker, DateRangePicker | Migrated | Use the appropriate optional entry and host localization. |
 | Theme/tokens, legacy visual compatibility | Migrated | Keep core appearance explicit and portal compatibility opt-in. |
-| Direct Button/Input/Dialog uses in Base | Adoption pending | Verify every call-site contract, then adopt an existing export or Base bridge. |
+| Direct Button/Input/Dialog uses in Base | Import adoption complete | Plain actions use core Button; specialized Base composition uses exact package primitives until a shared abstraction proves equivalent. |
 | Autocomplete field, labeled switch, icon action | Candidate | Implement the contracts in the remaining-work section after capturing consumer behavior. |
-| Remaining MUI layout/typography, cards/tabs/menus/shell, feedback primitives and icons | Required adoption pending | Add curated `primitives`/`icons` entries as proposed in the plan; migrate all consumers with parity checks. |
-| MUI X grid UI/types, theme/style helpers and localization imports | Required adoption pending | Add optional `data-grid`, extend existing theme/date entries as needed, and preserve provider/peer behavior. |
+| MUI layout/typography, cards/tabs/menus/shell, feedback primitives and icons | Import adoption complete | Curated exact `primitives`/`icons` exports preserve the existing component identity; continue visual state comparison. |
+| MUI X grid UI/types, theme/style helpers and localization imports | Import adoption complete | Optional `data-grid`, `theme` and `dates` entries preserve provider/peer behavior; continue grid and overlay comparisons. |
 | New higher-level action-card/navigation/profile abstractions | Optional future work | Underlying MUI primitive adoption is required now; new feature-shaped abstractions need reuse evidence. |
 | Pages, shell navigation, identity, session, admin and WebKit integrations | Retained in Base | Migrate all their MUI UI imports while keeping business logic/composition local. |
 

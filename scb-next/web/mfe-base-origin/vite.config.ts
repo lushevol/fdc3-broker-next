@@ -23,6 +23,7 @@ export default defineConfig(({ mode }) => {
         "@mui/system",
         "@mui/x-date-pickers",
         "@mui/x-date-pickers-pro",
+        "@mui/x-data-grid",
         "dayjs",
         "@emotion/react",
         "@emotion/styled",

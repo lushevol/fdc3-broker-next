@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta } from "@storybook/react-vite";
-import { ToggleButtonGroup } from "@mui/material";
+import { ToggleButtonGroup } from "ratan-design-origin/primitives";
 /*
 This is custom component, in your code it should be imported from "src/Root/import"
 import { LoadingButton } from "src/Root/import";

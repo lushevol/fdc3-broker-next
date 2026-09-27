@@ -1,8 +1,7 @@
 import React, { ReactElement } from "react";
 import ErrorBoundry from "../../../components/ErrorBoundry";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import DangerousIcon from "@mui/icons-material/Dangerous";
-import Tooltip from "@mui/material/Tooltip";
+import { CheckCircleOutlined as CheckCircleOutlinedIcon, Dangerous as DangerousIcon } from "ratan-design-origin/icons";
+import { Tooltip } from "ratan-design-origin/primitives";
 
 interface StatusProps {
   value?: boolean;

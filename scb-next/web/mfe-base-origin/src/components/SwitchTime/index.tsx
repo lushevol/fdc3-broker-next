@@ -1,7 +1,5 @@
 import React, { ReactElement } from "react";
-import FormLabel from "@mui/material/FormLabel";
-import FormControl from "@mui/material/FormControl";
-import Switch from "@mui/material/Switch";
+import { FormLabel, FormControl, Switch } from "ratan-design-origin/primitives";
 import StyledRoot, { classes, PREFIX } from "./common/style";
 import { SwitchStyled } from "../Switch/common/style";
 import useController from "./common/useController";

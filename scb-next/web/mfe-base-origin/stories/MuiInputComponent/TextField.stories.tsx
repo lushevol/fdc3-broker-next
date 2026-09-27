@@ -4,7 +4,7 @@ import type { Meta } from "@storybook/react-vite"
 import {
   TextField as MuiTextField,
   TextFieldProps as MuiTextFieldProps,
-} from "@mui/material";
+} from "ratan-design-origin/primitives";
 
 export const TextField = ({ label, placeholder, ...rest }: MuiTextFieldProps) => (
   <MuiTextField label={label || "label"} placeholder={placeholder || "Plese type"} {...rest} />

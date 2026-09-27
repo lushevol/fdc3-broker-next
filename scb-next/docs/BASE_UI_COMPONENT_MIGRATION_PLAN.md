@@ -1,6 +1,7 @@
 # Base UI component migration plan
 
-Status: revised implementation sequence, 2026-09-27. This plan covers
+Status: import adoption implemented 2026-09-28; broader portal visual and
+interaction comparisons remain open. This plan covers
 `web/mfe-base-origin` adopting reusable presentation from
 `packages/ratan-design-origin`. It does not implement the migration.
 
@@ -9,8 +10,10 @@ documentation stage. This plan turns the [migration guide](UI_PACKAGE_MIGRATION_
 and [component audit](BASE_UI_COMPONENT_AUDIT.md) into concrete implementation
 slices, rechecked against the current source. The
 [inventory](UI_PACKAGE_INVENTORY.md) remains the record of shipped ownership.
-The Login primitive/icon exports are available; other candidate entries below
-remain proposals until implemented.
+The curated primitive, icon, theme and data-grid entries are available. The
+higher-level LabeledSwitch, AutocompleteField and IconAction ideas below remain
+optional proposals; exact package re-exports currently preserve their Base
+compositions without moving business policy into the package.
 
 Scope clarification: every direct MUI UI use in Base must migrate through
 Ratan Design, including layout, typography, icons, shell surfaces and data grids.
@@ -164,10 +167,11 @@ leave a direct MUI import in the completed migration.
 Exit: these consumers use the existing catalog with their page/controllers and
 public Base paths intact. No LoginPage, HomePage or authentication-form export.
 
-Login, its local TabPanel and styled page root now have no direct MUI imports.
-The eight captured desktop/mobile, legacy/WebKit, old/new-layout screenshots
-matched the pre-migration portal pixel for pixel. The other consumers in this
-slice remain pending.
+Every Base call site in this slice now imports through Ratan Design. Login's
+eight captured desktop/mobile, legacy/WebKit and old/new-layout screenshots
+match the pre-migration portal pixel for pixel. A Base shell browser check covers
+login, tile drawer, tile selection, workspace creation and tab removal. Wider
+screen-state comparison remains a separate exit condition.
 
 ### 2. Adopt existing Dialog in Survey and Timeout
 
@@ -322,7 +326,7 @@ the baseline, and core still installs/builds without optional MUI X packages.
 ### 8. Complete theme, localization, type and development-use adoption
 
 Route Base `styled`, `useTheme`, ThemeProvider and imported theme/types through
-the package; route explicit CssBaseline through `portal-theme`. Update every
+the package; route explicit CssBaseline through `primitives`. Update every
 local styled wrapper while preserving its selectors and theme logic. Re-export
 the same underlying helpers so existing MUI theme augmentation and Emotion
 resolution continue to work. Leave host-only augmentations in Base.

@@ -5,7 +5,7 @@ import {
   DataGrid,
   GridToolbarContainer,
   GridToolbarExport,
-} from "@mui/x-data-grid";
+} from "ratan-design-origin/data-grid";
 import ErrorBoundry from "../ErrorBoundry";
 import TableDetail from "../TableDetail";
 import LoadingButton from "../LoadingButton";

@@ -9,7 +9,7 @@ import {
   waitFor,
 } from "../../utils/common";
 import useServices from "../../services";
-import { SnackbarCloseReason } from "@mui/material";
+import { SnackbarCloseReason } from "ratan-design-origin/primitives";
 import { validateOpenFinToken } from "../../auth/validation";
 
 const useController = () => {

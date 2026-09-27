@@ -2,8 +2,7 @@ import React, { ReactElement } from "react";
 import Provider from "./hooks/provider";
 import ThemeProvider from "./theme";
 import Routing from "./routing";
-import { LocalizationProvider } from "@mui/x-date-pickers-pro";
-import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
+import { LocalizationProvider, AdapterDayjs } from "ratan-design-origin/dates";
 
 export interface AppProps {
   version?: string;
