@@ -1,0 +1,75 @@
+PGSL_RDB_SCHEMA: ratan_flowzero_auth_service
+
+info:
+  build:
+    artifactId: "@project.artifactId@"
+    name: "@project.name@"
+    description: "@project.description@"
+    version: "@project.version@"
+  applicationName: ${spring.application.name}
+
+jasypt:
+  encryptor:
+    password: ${RATAN_CIPHER_KEY}
+server:
+  max-http-header-size: 20KB
+  max-http-request-header-size: 20KB
+  http2:
+    enabled: true
+spring:
+  datasource:
+    url: ${PGSL_RDB_URL}
+    username: ${PGSL_RDB_USERNAME_HASHICORP}
+    password: ${PGSL_RDB_JANUS_HASHICORP}
+    driver-class-name: ${PGSL_RDB_DRIVER}
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    placeholder-replacement: false
+    table: ratanone_flowzero_schema_history
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        boot:
+          allow_jdbc_metadata_access: "false"
+  retry:
+    enabled: true
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500, expireAfterWrite=30s
+
+logging:
+  level:
+    reactor.netty: INFO
+    org.apache.kafka.clients.NetworkClient: ERROR
+ratanone:
+  open-apis:
+    auto-startup: true
+    api-gateway-url: ${API_GATEWAY_URL}
+    api-gateway-token: ${API_GATEWAY_TOKEN}
+    apis:
+      - name: sync_user@flowZeroAuthService
+        entrypoint:
+          method: GET
+          path: /v1/sync/entitlements
+        endpoint:
+          service: lb://RATAN-FLOWZERO-AUTH-SERVICE
+          path: /v1/sync/entitlements
+        auth:
+          required: true
+        audit:
+          type: flowZeroAuthService
+          action: sync_user
+
+ems3:
+  tokenUrl: https://login.microsoftonline.com/${EMS3_TENANT_ID:}/oauth2/v2.0/token
+  clientId: ${EMS3_CLIENT_ID:}
+  clientSecret: ${EMS3_CLIENT_SECRET:}
+  scope: api://${EMS3_FMCES_CLIENT_ID:}/.default
+  entitlementUrl: https://${EMS3_FMCES_GATEWAY_HOST:}/fmces/v1/${EMS3_ENTITLEMENT_ENDPOINT:}
+  userUrl: https://${EMS3_FMCES_GATEWAY_HOST:}/fmces/v1/${EMS3_USER_ENDPOINT:}
+  proxyHost: gateway.zscloud.net
+  proxyPort: 443

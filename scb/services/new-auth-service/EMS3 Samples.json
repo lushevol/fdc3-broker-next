@@ -1,0 +1,3350 @@
+https://fmcesuat.gdc.standardchartered.com/fmces/v1/entitlement/app/51358/FLOWZERO
+
+[
+    {
+        "entitlement_id": 224,
+        "entitlement_name": "FLOWZERO Consumer",
+        "role_entitlements": [],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 225,
+        "entitlement_name": "FLOWZERO Application User",
+        "role_entitlements": [],
+        "user_ids": [
+            "2000115",
+            "8229727"
+        ]
+    },
+    {
+        "entitlement_id": 226,
+        "entitlement_name": "FLOWZERO Application Admin",
+        "role_entitlements": [],
+        "user_ids": [
+            "1401141",
+            "1537392",
+            "8229724"
+        ]
+    },
+    {
+        "entitlement_id": 227,
+        "entitlement_name": "FLOWZERO PSS User",
+        "role_entitlements": [],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 327,
+        "entitlement_name": "FMCES_ADMIN",
+        "role_entitlements": [],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 328,
+        "entitlement_name": "FMCES_ User",
+        "role_entitlements": [],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 329,
+        "entitlement_name": "Global_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": [
+            "1401141"
+        ]
+    },
+    {
+        "entitlement_id": 330,
+        "entitlement_name": "Global Except_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 331,
+        "entitlement_name": "Korea_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": [
+            "1537392"
+        ]
+    },
+    {
+        "entitlement_id": 332,
+        "entitlement_name": "Bangladesh_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 333,
+        "entitlement_name": "Pakistan_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 334,
+        "entitlement_name": "Germany_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 335,
+        "entitlement_name": "India_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 336,
+        "entitlement_name": "China_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 337,
+        "entitlement_name": "Taiwan (Province of China)_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 338,
+        "entitlement_name": "Indonesia_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 339,
+        "entitlement_name": "Global_Onboard_BatchOps",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "BATCH_IMPORT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": [
+            "2000115"
+        ]
+    },
+    {
+        "entitlement_id": 340,
+        "entitlement_name": "Global Except_Onboard_BatchOps",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "BATCH_IMPORT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": [
+            "8229727"
+        ]
+    },
+    {
+        "entitlement_id": 341,
+        "entitlement_name": "Korea_Onboard__BatchOps",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "BATCH_IMPORT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 342,
+        "entitlement_name": "Bangladesh_Onboard_BatchOps",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "BATCH_IMPORT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 343,
+        "entitlement_name": "Pakistan_Onboard_BatchOps",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "BATCH_IMPORT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 344,
+        "entitlement_name": "Germany_Onboard_BatchOps",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "BATCH_IMPORT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 345,
+        "entitlement_name": "India_Onboard_BatchOps",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "BATCH_IMPORT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 346,
+        "entitlement_name": "China_Onboard_BatchOps",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "BATCH_IMPORT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 347,
+        "entitlement_name": "Taiwan (Province of China)_Onboard_BatchOps",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "BATCH_IMPORT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 348,
+        "entitlement_name": "Indonesia_Onboard_BatchOps",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "BATCH_IMPORT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 349,
+        "entitlement_name": "Global_Designer",
+        "role_entitlements": [
+            {
+                "feature": "FIELD_CONFIGURATION",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "FORM_MANAGEMENT",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "WORKFLOW_MANAGEMENT",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": [
+            "1490627"
+        ]
+    },
+    {
+        "entitlement_id": 350,
+        "entitlement_name": "Global_Onboard_Ops_RO",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "VIEW_COMMENTS"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "VIEW_COMMENTS"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": [
+            "1453256"
+        ]
+    },
+    {
+        "entitlement_id": 351,
+        "entitlement_name": "Global_Designer_RO",
+        "role_entitlements": [
+            {
+                "feature": "FIELD_CONFIGURATION",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "FORM_MANAGEMENT",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "WORKFLOW_MANAGEMENT",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": [
+            "8229729"
+        ]
+    },
+    {
+        "entitlement_id": 352,
+        "entitlement_name": "PSS_RO",
+        "role_entitlements": [
+            {
+                "feature": "FIELD_CONFIGURATION",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "FORM_MANAGEMENT",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "VIEW_COMMENTS"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "VIEW_COMMENTS"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "WORKFLOW_MANAGEMENT",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": [
+            "8228044"
+        ]
+    },
+    {
+        "entitlement_id": 353,
+        "entitlement_name": "DEV_RO",
+        "role_entitlements": [
+            {
+                "feature": "FIELD_CONFIGURATION",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "FORM_MANAGEMENT",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "TODO",
+                "action": "VIEW_COMMENTS"
+            },
+            {
+                "feature": "UPLOAD_FILE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "VIEW_COMMENTS"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            },
+            {
+                "feature": "WORKFLOW_MANAGEMENT",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 354,
+        "entitlement_name": "FLOWZERO Indonesia & India & Global except _Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 355,
+        "entitlement_name": "FLOWZERO India & Global except _Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 356,
+        "entitlement_name": "FLOWZERO Indonesia & Global Except_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 357,
+        "entitlement_name": "FLOWZERO India & Germany  & Global Except_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 358,
+        "entitlement_name": "Flowzero Korea & Global Except_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 359,
+        "entitlement_name": "Flowzero Pakistan & India & Global except _Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 360,
+        "entitlement_name": "FLOWZERO Bangladesh & Global Except_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            }
+        ],
+        "user_ids": []
+    },
+    {
+        "entitlement_id": 361,
+        "entitlement_name": "FLOWZERO Taiwan (Province of China) &  Global Except_Onboard_Ops",
+        "role_entitlements": [
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "RAISE_NEW_REQUEST"
+            },
+            {
+                "feature": "TODO",
+                "action": "TERMINATE_TASK"
+            },
+            {
+                "feature": "REQUEST_CENTRE",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_TASK"
+            },
+            {
+                "feature": "TODO",
+                "action": "REJECT_TASK"
+            },
+            {
+                "feature": "HOMEPAGE",
+                "action": "VIEW_HOMEPAGE"
+            },
+            {
+                "feature": "TODO",
+                "action": "APPROVE_TASK"
+            },
+            {
+                "feature": "TODO",
+                "action": "EDIT_COMMENT"
+            },
+            {
+                "feature": "RAISE_REQUEST",
+                "action": "VIEW_PUBLISHEDWORKFLOW"
+            }
+        ],
+        "user_ids": []
+    }
+]
+
+https://fmcesuat.gdc.standardchartered.com/fmces/v1/entitlement/app/51358/RATAN_ENTITLEMENT_RULE/user/1257298
+
+[
+    {
+        "user_data": {
+            "app_name": "RATAN_ENTITLEMENT_RULE",
+            "itam_id": "51358",
+            "user_id": "1257298"
+        },
+        "entitlements": {
+            "entitlement_name": [
+                "RATAN_ENTITLEMENT_COMMON",
+                "RATAN IN GBS MO User Access"
+            ],
+            "data_policies": {
+                "policy_rules": [
+                    {
+                        "data_policy_name": "RATAN - IN Onshore User",
+                        "policy_owner": "2021102"
+                    }
+                ]
+            },
+            "data_profiles": {
+                "data_profile_rules": [
+                    {
+                        "data_profile_name": "RATAN - All Access Except PK",
+                        "data_profile_owner": "1616774"
+                    },
+                    {
+                        "data_profile_name": "RATAN - back2back FMID",
+                        "data_profile_owner": "2021102"
+                    }
+                ]
+            },
+            "data_entitlements": [
+                {
+                    "key": "Entity.Booking_Entity_SCI_FMID",
+                    "values": [
+                        "10040387",
+                        "400568282",
+                        "10038345",
+                        "400516442",
+                        "400516443",
+                        "400667486",
+                        "10020899",
+                        "FMIDBRAMX01",
+                        "400683682",
+                        "400327728",
+                        "400107029",
+                        "300010872",
+                        "401053411",
+                        "300036368",
+                        "400910415",
+                        "15",
+                        "400075752",
+                        "400609343",
+                        "400058959",
+                        "400677737",
+                        "10041902",
+                        "300010633",
+                        "400011581",
+                        "10041903",
+                        "2",
+                        "123",
+                        "3",
+                        "400130178",
+                        "4",
+                        "400095464",
+                        "5",
+                        "400452428",
+                        "10038468",
+                        "6",
+                        "10054931",
+                        "7",
+                        "8",
+                        "9",
+                        "400131263",
+                        "401081696",
+                        "FINNKOREA01",
+                        "400040353",
+                        "300010782",
+                        "400170359",
+                        "10041530",
+                        "300011470",
+                        "MUXBZ01",
+                        "10036981",
+                        "401037180",
+                        "300084297",
+                        "123M",
+                        "10075222",
+                        "400013111",
+                        "400960089",
+                        "1234",
+                        "400041070",
+                        "400001378",
+                        "400045551",
+                        "10062461",
+                        "300011345",
+                        "400032489",
+                        "400451508",
+                        "400033177",
+                        "400931959",
+                        "10037164",
+                        "10032025",
+                        "10063428",
+                        "400045549",
+                        "300075472",
+                        "400991880",
+                        "400617263",
+                        "235003861",
+                        "400192940",
+                        "300089409",
+                        "400059978",
+                        "10078716",
+                        "400077046",
+                        "400077044",
+                        "400057714",
+                        "400798477",
+                        "400209000",
+                        "401036553",
+                        "FM ID TST 1",
+                        "400088463",
+                        "400085753",
+                        "400220273",
+                        "400218197",
+                        "400007847",
+                        "300063361",
+                        "300011525",
+                        "400077978",
+                        "10036647",
+                        "400054708",
+                        "10036642",
+                        "10036645",
+                        "10038667",
+                        "400193370",
+                        "400090093",
+                        "10022098",
+                        "400994973",
+                        "400130180",
+                        "400013557",
+                        "10037477",
+                        "10036382",
+                        "400227738",
+                        "400054741",
+                        "400172181",
+                        "10036775",
+                        "400054737",
+                        "400044944",
+                        "400625349",
+                        "400823493",
+                        "400229749",
+                        "400093619",
+                        "10036430",
+                        "400018439",
+                        "400906330",
+                        "400017223",
+                        "300010730",
+                        "400147183",
+                        "10036428",
+                        "400022800",
+                        "400185419",
+                        "400899993",
+                        "195000930",
+                        "400823482",
+                        "400823485"
+                    ]
+                }
+            ],
+            "role_entitlements": [
+                {
+                    "feature": "Entitlement",
+                    "action": "View"
+                }
+            ]
+        }
+    }
+]
+
+https://fmcesuat.gdc.standardchartered.com/fmces/v1/entitlement/167/app/51358/RATAN_ENTITLEMENT_RULE
+
+{
+    "entitlementName": "RATAN_ENTITLEMENT_COMMON",
+    "entitlementId": 167,
+    "featureActions": {
+        "Reports": [
+            "View"
+        ]
+    },
+    "policies": [],
+    "profiles": []
+}
+
+
+https://fmcesuat.gdc.standardchartered.com/fmces/v1/entitlement/user/2000115
+
+[
+    {
+        "entitlementId": "167",
+        "entitlementName": "RATAN_ENTITLEMENT_COMMON",
+        "appId": "51358",
+        "appName": "RATAN_ENTITLEMENT_RULE",
+        "itamName": "RATAN",
+        "appUID": 10,
+        "itamId": null,
+        "featureActionDtos": [
+            {
+                "features": {
+                    "featureId": 153,
+                    "featureName": "Reports",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 165,
+                    "actionName": "View",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "entitlementId": "199",
+        "entitlementName": "FMO_COO_SUP",
+        "appId": "51358",
+        "appName": "RATAN_ENTITLEMENT_RULE",
+        "itamName": "RATAN",
+        "appUID": 10,
+        "itamId": null,
+        "featureActionDtos": [
+            {
+                "features": {
+                    "featureId": 158,
+                    "featureName": "RATAN_FLOW_ZERO",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 193,
+                    "actionName": "ACCESS_FMO_POST_TRADE_PORTAL",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 161,
+                    "featureName": "RATAN_FM_COO_RULE",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 193,
+                    "actionName": "ACCESS_FMO_POST_TRADE_PORTAL",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 167,
+                    "featureName": "RATAN_FM_COO_EXCEPTION",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 193,
+                    "actionName": "ACCESS_FMO_POST_TRADE_PORTAL",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 172,
+                    "featureName": "RATAN_TRADE_BLOTTER",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 193,
+                    "actionName": "ACCESS_FMO_POST_TRADE_PORTAL",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 167,
+                    "featureName": "RATAN_FM_COO_EXCEPTION",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 203,
+                    "actionName": "F_Custom_Query_Builder",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 172,
+                    "featureName": "RATAN_TRADE_BLOTTER",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 203,
+                    "actionName": "F_Custom_Query_Builder",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 167,
+                    "featureName": "RATAN_FM_COO_EXCEPTION",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 204,
+                    "actionName": "F_Custom_View_Builder_Private",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 167,
+                    "featureName": "RATAN_FM_COO_EXCEPTION",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 205,
+                    "actionName": "F_Custom_View_Builder_Public",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 167,
+                    "featureName": "RATAN_FM_COO_EXCEPTION",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 206,
+                    "actionName": "F_Exception_Addtional_Info_Update",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 172,
+                    "featureName": "RATAN_TRADE_BLOTTER",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 208,
+                    "actionName": "F_Export_Data",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 167,
+                    "featureName": "RATAN_FM_COO_EXCEPTION",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 208,
+                    "actionName": "F_Export_Data",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 174,
+                    "featureName": "RATAN_RULE_ENGINE",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 213,
+                    "actionName": "F_Input_Delete_Modify_Initiate",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 161,
+                    "featureName": "RATAN_FM_COO_RULE",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 213,
+                    "actionName": "F_Input_Delete_Modify_Initiate",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 174,
+                    "featureName": "RATAN_RULE_ENGINE",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 216,
+                    "actionName": "F_Input_Delete_Modify_Verify",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 161,
+                    "featureName": "RATAN_FM_COO_RULE",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 216,
+                    "actionName": "F_Input_Delete_Modify_Verify",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 167,
+                    "featureName": "RATAN_FM_COO_EXCEPTION",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 219,
+                    "actionName": "F_Manually_Close_Exception",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "entitlementId": "222",
+        "entitlementName": "FM Trading Plus - FX Cash",
+        "appId": "51358",
+        "appName": "RATAN_ENTITLEMENT_RULE",
+        "itamName": "RATAN",
+        "appUID": 10,
+        "itamId": null,
+        "featureActionDtos": []
+    },
+    {
+        "entitlementId": "339",
+        "entitlementName": "Global_Onboard_BatchOps",
+        "appId": "51358",
+        "appName": "FLOWZERO",
+        "itamName": "RATAN",
+        "appUID": 65,
+        "itamId": null,
+        "featureActionDtos": [
+            {
+                "features": {
+                    "featureId": 1500,
+                    "featureName": "RAISE_REQUEST",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 343,
+                    "actionName": "ACCESS_FMO_POST_TRADE_PORTAL",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1500,
+                    "featureName": "RAISE_REQUEST",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 344,
+                    "actionName": "VIEW_PUBLISHEDWORKFLOW",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1500,
+                    "featureName": "RAISE_REQUEST",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 345,
+                    "actionName": "RAISE_NEW_REQUEST",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1500,
+                    "featureName": "RAISE_REQUEST",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 352,
+                    "actionName": "BATCH_IMPORT",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1501,
+                    "featureName": "REQUEST_CENTRE",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 343,
+                    "actionName": "ACCESS_FMO_POST_TRADE_PORTAL",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1501,
+                    "featureName": "REQUEST_CENTRE",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 346,
+                    "actionName": "EDIT_COMMENT",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1502,
+                    "featureName": "HOMEPAGE",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 343,
+                    "actionName": "ACCESS_FMO_POST_TRADE_PORTAL",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1502,
+                    "featureName": "HOMEPAGE",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 347,
+                    "actionName": "VIEW_HOMEPAGE",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1503,
+                    "featureName": "TODO",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 343,
+                    "actionName": "ACCESS_FMO_POST_TRADE_PORTAL",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1503,
+                    "featureName": "TODO",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 348,
+                    "actionName": "EDIT_TASK",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1503,
+                    "featureName": "TODO",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 346,
+                    "actionName": "EDIT_COMMENT",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1503,
+                    "featureName": "TODO",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 349,
+                    "actionName": "APPROVE_TASK",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1503,
+                    "featureName": "TODO",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 350,
+                    "actionName": "REJECT_TASK",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1503,
+                    "featureName": "TODO",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 351,
+                    "actionName": "TERMINATE_TASK",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            },
+            {
+                "features": {
+                    "featureId": 1504,
+                    "featureName": "UPLOAD_FILE",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                },
+                "actions": {
+                    "actionId": 343,
+                    "actionName": "ACCESS_FMO_POST_TRADE_PORTAL",
+                    "applicationDto": {
+                        "appUID": 65,
+                        "appName": "FLOWZERO"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "entitlementId": "225",
+        "entitlementName": "FLOWZERO Application User",
+        "appId": "51358",
+        "appName": "FLOWZERO",
+        "itamName": "RATAN",
+        "appUID": 65,
+        "itamId": null,
+        "featureActionDtos": []
+    },
+    {
+        "entitlementId": "418",
+        "entitlementName": "RATAN_ENTITLEMENT_DEV_USERS",
+        "appId": "51358",
+        "appName": "RATAN_ENTITLEMENT_RULE",
+        "itamName": "RATAN",
+        "appUID": 10,
+        "itamId": null,
+        "featureActionDtos": [
+            {
+                "features": {
+                    "featureId": 119,
+                    "featureName": "Entitlement",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                },
+                "actions": {
+                    "actionId": 165,
+                    "actionName": "View",
+                    "applicationDto": {
+                        "appUID": 10,
+                        "appName": "RATAN_ENTITLEMENT_RULE"
+                    }
+                }
+            }
+        ]
+    }
+]
+
+
+https://fmcesuat.gdc.standardchartered.com/fmces/v1/entitlement/user-response/2000115
+
+[
+    {
+        "user_data": {
+            "app_name": "FLOWZERO",
+            "itam_id": "51358",
+            "user_id": "2000115"
+        },
+        "entitlements": {
+            "entitlement_name": [
+                "Global_Onboard_BatchOps",
+                "FLOWZERO Application User"
+            ],
+            "data_policies": {
+                "policy_rules": []
+            },
+            "data_profiles": {
+                "data_profile_rules": [
+                    {
+                        "data_profile_name": "All Country",
+                        "data_profile_owner": "8229724"
+                    },
+                    {
+                        "data_profile_name": "flowzero_Onboarding",
+                        "data_profile_owner": "1466717"
+                    }
+                ]
+            },
+            "data_entitlements_logical_indicator": "OR",
+            "data_entitlements": [
+                {
+                    "key": "Entity.flowzero_process_business_area",
+                    "values": [
+                        "Onboarding"
+                    ]
+                },
+                {
+                    "key": "Entity.flowzero_process_country",
+                    "values": [
+                        "Niger (the)",
+                        "Papua New Guinea",
+                        "Cambodia",
+                        "Gambia (the)",
+                        "Kazakhstan",
+                        "Paraguay",
+                        "Åland Islands",
+                        "Solomon Islands",
+                        "Montserrat",
+                        "Mali",
+                        "Panama",
+                        "Guadeloupe",
+                        "Bonaire, Sint Eustatius and Saba",
+                        "Argentina",
+                        "Seychelles",
+                        "Zambia",
+                        "Belize",
+                        "Bahrain",
+                        "Guinea-Bissau",
+                        "Namibia",
+                        "Finland",
+                        "North Macedonia",
+                        "Syrian Arab Republic (the)",
+                        "Georgia",
+                        "Saint Kitts and Nevis",
+                        "Türkiye",
+                        "Yemen",
+                        "Eritrea",
+                        "Puerto Rico",
+                        "Viet Nam",
+                        "Madagascar",
+                        "Aruba",
+                        "Libya",
+                        "Svalbard and Jan Mayen",
+                        "Sweden",
+                        "South Georgia and the South Sandwich Islands",
+                        "Korea (the Democratic People's Republic of)",
+                        "Malawi",
+                        "Saint Helena, Ascension and Tristan da Cunha",
+                        "Andorra",
+                        "Russian Federation (the)",
+                        "Liechtenstein",
+                        "Poland",
+                        "Jordan",
+                        "United States Minor Outlying Islands (the)",
+                        "Bulgaria",
+                        "Western Sahara*",
+                        "Tunisia",
+                        "Côte d'Ivoire",
+                        "Tuvalu",
+                        "Kenya",
+                        "French Polynesia",
+                        "Lebanon",
+                        "Djibouti",
+                        "Azerbaijan",
+                        "Cuba",
+                        "Saint Lucia",
+                        "Mauritania",
+                        "Guernsey",
+                        "Congo (the Democratic Republic of the)",
+                        "Mayotte",
+                        "San Marino",
+                        "Israel",
+                        "Australia",
+                        "Tajikistan",
+                        "Myanmar",
+                        "Cameroon",
+                        "Gibraltar",
+                        "Cyprus",
+                        "Malaysia",
+                        "Iceland",
+                        "Oman",
+                        "Armenia",
+                        "Gabon",
+                        "Korea (the Republic of)",
+                        "Luxembourg",
+                        "Brazil",
+                        "Algeria",
+                        "Slovenia",
+                        "Cabo Verde",
+                        "Jersey",
+                        "Antigua and Barbuda",
+                        "Colombia",
+                        "Ecuador",
+                        "Iran (Islamic Republic of)",
+                        "United States of America (the)",
+                        "Vanuatu",
+                        "Eswatini",
+                        "Italy",
+                        "Honduras",
+                        "Antarctica",
+                        "Turks and Caicos Islands (the)",
+                        "Nauru",
+                        "Haiti",
+                        "Afghanistan",
+                        "Burundi",
+                        "Singapore",
+                        "British Indian Ocean Territory (the)",
+                        "French Guiana",
+                        "Christmas Island",
+                        "American Samoa",
+                        "China",
+                        "Martinique",
+                        "Sudan (the)",
+                        "Saint Pierre and Miquelon",
+                        "Kyrgyzstan",
+                        "Comoros (the)",
+                        "United Kingdom of Great Britain and Northern Ireland (the)",
+                        "Bhutan",
+                        "Romania",
+                        "Togo",
+                        "Cocos (Keeling) Islands (the)",
+                        "Uzbekistan",
+                        "Dominican Republic (the)",
+                        "Holy See (the)",
+                        "Pitcairn",
+                        "Zimbabwe",
+                        "Montenegro",
+                        "Dominica",
+                        "Indonesia",
+                        "Benin",
+                        "Angola",
+                        "Virgin Islands (British)",
+                        "Brunei Darussalam",
+                        "Portugal",
+                        "New Caledonia",
+                        "Moldova (the Republic of)",
+                        "Grenada",
+                        "Greece",
+                        "Latvia",
+                        "Mongolia",
+                        "Morocco",
+                        "Guatemala",
+                        "Guyana",
+                        "Iraq",
+                        "Chile",
+                        "Nepal",
+                        "Heard Island and McDonald Islands",
+                        "Cayman Islands (the)",
+                        "Isle of Man",
+                        "Ukraine",
+                        "Curaçao",
+                        "Ghana",
+                        "Bahamas (The)",
+                        "Anguilla",
+                        "India",
+                        "Canada",
+                        "Maldives",
+                        "Belgium",
+                        "Faroe Islands (the)",
+                        "South Africa",
+                        "Trinidad and Tobago",
+                        "Bermuda",
+                        "Jamaica",
+                        "Peru",
+                        "Venezuela (Bolivarian Republic of)",
+                        "Turkmenistan",
+                        "Germany",
+                        "United Arab Emirates (the)",
+                        "Tokelau",
+                        "Fiji",
+                        "Hong Kong",
+                        "Guinea",
+                        "Chad",
+                        "Somalia",
+                        "Sao Tome and Principe",
+                        "Thailand",
+                        "Kiribati",
+                        "Cook Islands (the)",
+                        "Equatorial Guinea",
+                        "Costa Rica",
+                        "Saint Martin (French part)",
+                        "Kuwait",
+                        "Nigeria",
+                        "Central African Republic (the)",
+                        "Palestine, State of",
+                        "Croatia",
+                        "Uruguay",
+                        "Sri Lanka",
+                        "Timor-Leste",
+                        "Switzerland",
+                        "Samoa",
+                        "Spain",
+                        "Liberia",
+                        "Burkina Faso",
+                        "Lao People's Democratic Republic (the)",
+                        "Saint Barthélemy",
+                        "Palau",
+                        "Estonia",
+                        "Wallis and Futuna",
+                        "Niue",
+                        "Austria",
+                        "Mozambique",
+                        "El Salvador",
+                        "Monaco",
+                        "Tanzania, the United Republic of",
+                        "Guam",
+                        "Lesotho",
+                        "Tonga",
+                        "South Sudan",
+                        "Réunion",
+                        "Hungary",
+                        "Japan",
+                        "Congo (the)",
+                        "Belarus",
+                        "Mauritius",
+                        "Taiwan (Province of China)",
+                        "Bouvet Island",
+                        "Albania",
+                        "Norfolk Island",
+                        "Virgin Islands (U.S.)",
+                        "Bolivia (Plurinational State of)",
+                        "New Zealand",
+                        "Sint Maarten (Dutch part)",
+                        "Senegal",
+                        "Micronesia (Federated States of)",
+                        "Ethiopia",
+                        "Netherlands (Kingdom of the)",
+                        "Czechia",
+                        "Egypt",
+                        "Falkland Islands (the) [Malvinas]",
+                        "Sierra Leone",
+                        "Marshall Islands (the)",
+                        "Malta",
+                        "Saudi Arabia",
+                        "Pakistan",
+                        "Ireland",
+                        "Qatar",
+                        "Slovakia",
+                        "Serbia",
+                        "France",
+                        "Lithuania",
+                        "Bosnia and Herzegovina",
+                        "French Southern Territories (the)",
+                        "Rwanda",
+                        "Bangladesh",
+                        "Barbados",
+                        "Nicaragua",
+                        "Norway",
+                        "Saint Vincent and the Grenadines",
+                        "Botswana",
+                        "Macao",
+                        "Denmark",
+                        "Mexico",
+                        "Uganda",
+                        "Northern Mariana Islands (the)",
+                        "Suriname",
+                        "Philippines (the)",
+                        "Greenland"
+                    ]
+                }
+            ],
+            "role_entitlements": [
+                {
+                    "feature": "HOMEPAGE",
+                    "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+                },
+                {
+                    "feature": "TODO",
+                    "action": "REJECT_TASK"
+                },
+                {
+                    "feature": "REQUEST_CENTRE",
+                    "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+                },
+                {
+                    "feature": "TODO",
+                    "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+                },
+                {
+                    "feature": "TODO",
+                    "action": "EDIT_COMMENT"
+                },
+                {
+                    "feature": "RAISE_REQUEST",
+                    "action": "RAISE_NEW_REQUEST"
+                },
+                {
+                    "feature": "TODO",
+                    "action": "TERMINATE_TASK"
+                },
+                {
+                    "feature": "REQUEST_CENTRE",
+                    "action": "EDIT_COMMENT"
+                },
+                {
+                    "feature": "RAISE_REQUEST",
+                    "action": "BATCH_IMPORT"
+                },
+                {
+                    "feature": "TODO",
+                    "action": "EDIT_TASK"
+                },
+                {
+                    "feature": "UPLOAD_FILE",
+                    "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+                },
+                {
+                    "feature": "HOMEPAGE",
+                    "action": "VIEW_HOMEPAGE"
+                },
+                {
+                    "feature": "TODO",
+                    "action": "APPROVE_TASK"
+                },
+                {
+                    "feature": "RAISE_REQUEST",
+                    "action": "VIEW_PUBLISHEDWORKFLOW"
+                },
+                {
+                    "feature": "RAISE_REQUEST",
+                    "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+                }
+            ]
+        }
+    },
+    {
+        "user_data": {
+            "app_name": "RATAN_ENTITLEMENT_RULE",
+            "itam_id": "51358",
+            "user_id": "2000115"
+        },
+        "entitlements": {
+            "entitlement_name": [
+                "RATAN_ENTITLEMENT_COMMON",
+                "FMO_COO_SUP",
+                "RATAN_ENTITLEMENT_DEV_USERS",
+                "FM Trading Plus - FX Cash"
+            ],
+            "data_policies": {
+                "policy_rules": [
+                    {
+                        "data_policy_name": "RATAN - GBS CN PSS",
+                        "policy_owner": "2021102"
+                    }
+                ]
+            },
+            "data_profiles": {
+                "data_profile_rules": [
+                    {
+                        "data_profile_name": "RATAN- Back2Back FMID CN",
+                        "data_profile_owner": "1666699"
+                    },
+                    {
+                        "data_profile_name": "RATAN - back2back FMID",
+                        "data_profile_owner": "2021102"
+                    },
+                    {
+                        "data_profile_name": "RATAN - ALL ACCESS User",
+                        "data_profile_owner": "2021102"
+                    }
+                ]
+            },
+            "data_entitlements": [
+                {
+                    "key": "Entity.Booking_Entity_SCI_FMID",
+                    "values": [
+                        "10040387",
+                        "400568282",
+                        "10038345",
+                        "400516442",
+                        "400516443",
+                        "400667486",
+                        "10020899",
+                        "FMIDBRAMX01",
+                        "400683682",
+                        "400327728",
+                        "400107029",
+                        "300010872",
+                        "401053411",
+                        "300036368",
+                        "400910415",
+                        "15",
+                        "400075752",
+                        "400609343",
+                        "400058959",
+                        "400677737",
+                        "10041902",
+                        "300010633",
+                        "400011581",
+                        "10041903",
+                        "2",
+                        "123",
+                        "3",
+                        "400130178",
+                        "4",
+                        "400095464",
+                        "5",
+                        "400452428",
+                        "10038468",
+                        "6",
+                        "10054931",
+                        "7",
+                        "8",
+                        "9",
+                        "400131263",
+                        "401081696",
+                        "FINNKOREA01",
+                        "400040353",
+                        "300010782",
+                        "400170359",
+                        "10041530",
+                        "300011470",
+                        "MUXBZ01",
+                        "10036981",
+                        "401037180",
+                        "300084297",
+                        "123M",
+                        "10075222",
+                        "400013111",
+                        "400960089",
+                        "1234",
+                        "400041070",
+                        "400001378",
+                        "400045551",
+                        "10062461",
+                        "300011345",
+                        "400032489",
+                        "400451508",
+                        "400033177",
+                        "400931959",
+                        "10037164",
+                        "10032025",
+                        "10063428",
+                        "400045549",
+                        "300075472",
+                        "400991880",
+                        "400617263",
+                        "235003861",
+                        "400192940",
+                        "300089409",
+                        "400059978",
+                        "10078716",
+                        "400077046",
+                        "400077044",
+                        "400057714",
+                        "400798477",
+                        "400209000",
+                        "401036553",
+                        "FM ID TST 1",
+                        "400088463",
+                        "400085753",
+                        "400220273",
+                        "400218197",
+                        "400007847",
+                        "300063361",
+                        "300011525",
+                        "400077978",
+                        "10036647",
+                        "400054708",
+                        "10036642",
+                        "10036645",
+                        "10038667",
+                        "400193370",
+                        "400090093",
+                        "10022098",
+                        "400994973",
+                        "400521212",
+                        "400130180",
+                        "400013557",
+                        "10037477",
+                        "10036382",
+                        "400227738",
+                        "400054741",
+                        "400172181",
+                        "10036775",
+                        "400054737",
+                        "10036655",
+                        "400625349",
+                        "400044944",
+                        "400823493",
+                        "400229749",
+                        "400093619",
+                        "10036430",
+                        "400018439",
+                        "400906330",
+                        "400017223",
+                        "300010730",
+                        "400147183",
+                        "10036428",
+                        "400022800",
+                        "400185419",
+                        "400899993",
+                        "195000930",
+                        "400823482",
+                        "400823485"
+                    ]
+                }
+            ],
+            "role_entitlements": [
+                {
+                    "feature": "RATAN_FM_COO_EXCEPTION",
+                    "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+                },
+                {
+                    "feature": "RATAN_FM_COO_EXCEPTION",
+                    "action": "F_Custom_View_Builder_Private"
+                },
+                {
+                    "feature": "RATAN_FM_COO_EXCEPTION",
+                    "action": "F_Custom_Query_Builder"
+                },
+                {
+                    "feature": "Entitlement",
+                    "action": "View"
+                },
+                {
+                    "feature": "RATAN_FLOW_ZERO",
+                    "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+                },
+                {
+                    "feature": "RATAN_TRADE_BLOTTER",
+                    "action": "F_Export_Data"
+                },
+                {
+                    "feature": "Reports",
+                    "action": "View"
+                },
+                {
+                    "feature": "RATAN_FM_COO_EXCEPTION",
+                    "action": "F_Manually_Close_Exception"
+                },
+                {
+                    "feature": "RATAN_TRADE_BLOTTER",
+                    "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+                },
+                {
+                    "feature": "RATAN_FM_COO_EXCEPTION",
+                    "action": "F_Exception_Addtional_Info_Update"
+                },
+                {
+                    "feature": "RATAN_FM_COO_RULE",
+                    "action": "F_Input_Delete_Modify_Initiate"
+                },
+                {
+                    "feature": "RATAN_FM_COO_RULE",
+                    "action": "ACCESS_FMO_POST_TRADE_PORTAL"
+                },
+                {
+                    "feature": "RATAN_RULE_ENGINE",
+                    "action": "F_Input_Delete_Modify_Verify"
+                },
+                {
+                    "feature": "RATAN_FM_COO_EXCEPTION",
+                    "action": "F_Export_Data"
+                },
+                {
+                    "feature": "RATAN_TRADE_BLOTTER",
+                    "action": "F_Custom_Query_Builder"
+                },
+                {
+                    "feature": "RATAN_FM_COO_RULE",
+                    "action": "F_Input_Delete_Modify_Verify"
+                },
+                {
+                    "feature": "RATAN_RULE_ENGINE",
+                    "action": "F_Input_Delete_Modify_Initiate"
+                },
+                {
+                    "feature": "RATAN_FM_COO_EXCEPTION",
+                    "action": "F_Custom_View_Builder_Public"
+                }
+            ]
+        }
+    }
+]

@@ -1,0 +1,12 @@
+spring:
+  zipkin:
+    enabled: false
+ratanone:
+  api-gateway:
+    circuitBreaker:
+      timeout: 30
+    security:
+      auth-service: lb://RATAN-FLOWZERO-AUTH-SERVICE
+      sso-service: lb://SINGLE-UI-BFF
+      token-header-name: x-token
+    open-apis:

@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: ratan-flowzero-auth-service
+#  main:
+    # Must be set in bootstrap phase so that Spring Cloud Gateway's reactive
+    # infrastructure is registered before any servlet auto-configuration runs.
+#    web-application-type: reactive
+  cloud:
+    config:
+      # Always fetch config for "ratanone-api-gateway" regardless of the runtime
+      # spring.application.name override (e.g. -Dspring.application.name=ratan-market-workflow-gateway-service-8233398).
+      name: ratan-flowzero-auth-service
+      # Git branch / label to fetch from the config-server git backend.
+      # Pass -Dspring.cloud.config.label=develop to select the develop branch.
+      label: ${spring.cloud.config.label:master}
+      # Discover the config-server via Eureka instead of a hard-coded URL.
+      # This is the same mechanism used by ratan-flowzero-designer-service.
+      discovery:
+        enabled: true
+        service-id: config-server
+      # Do NOT fail fatally if the config-server is temporarily unreachable on
+      # first boot; allows graceful fall-through to local defaults.
+      fail-fast: false
+
+server:
+  port: 9869
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER_URL:http://10.198.199.160:8763/eureka}
+
+logging:
+  level:
+    '[reactor.netty]': INFO
+
+ratanone:
+  logging:
+    level: info
+    # Default to ./logs for local development; override with -DLOG_DIR=/path
+    folder: ${LOG_DIR:./logs}
+    logstash:
+      destinations: ${LOGSTASH_URL:10.198.199.160:5000}

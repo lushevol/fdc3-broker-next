@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: ratanone-api-gateway
+  profiles:
+    active: test
+logging:
+  level:
+    '[reactor.netty]': INFO
+    '[com.scb.ratan.gateway]': DEBUG
+
+server:
+  port: 9869

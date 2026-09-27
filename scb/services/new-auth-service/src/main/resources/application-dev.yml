@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    hikari:
+      # In dev, start with 0 idle connections so HikariCP does NOT
+      # try to pre-create connections in a background thread.
+      # Connections are acquired lazily on the first actual DB call,
+      # which eliminates the "GatewayPgPool - Starting..." retry spam
+      # in the log when the DB is temporarily unreachable.
+      minimum-idle: 0
+      # 30 s gives enough time for a temporarily slow dev DB to respond.
+      connection-timeout: 30000
+
+  sql:
+    init:
+      # Schema changes are managed by Flyway. Keep legacy schema.sql bootstrap
+      # disabled in dev as well to avoid running duplicate or stale DDL.
+      mode: never
+
