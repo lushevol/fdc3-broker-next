@@ -30,6 +30,9 @@ import {
   type LoadingButtonProps,
 } from 'ratan-design-origin';
 import { createRatanTheme, type DesignGeneration } from 'ratan-design-origin/theme';
+import { styled } from 'ratan-design-origin/theme';
+import { Box, TextField, Tab, Tabs } from 'ratan-design-origin/primitives';
+import { LockOutlined, PersonOutlined } from 'ratan-design-origin/icons';
 import { legacyTokens, newStyleTokens } from 'ratan-design-origin/tokens';
 import { InputStyled, legacyColorAliases } from 'ratan-design-origin/compatibility';
 import {
@@ -41,6 +44,16 @@ import {
 } from 'ratan-design-origin/base-compat';
 
 const theme: Theme = createRatanTheme();
+export const LoginComposition = styled(Box)(() => ({
+  '& .MuiTextField-root': { width: '100%' },
+}));
+export const loginPrimitiveContracts = (
+  <LoginComposition>
+    <TextField variant="outlined" InputProps={{ startAdornment: <PersonOutlined /> }} />
+    <TextField type="password" InputProps={{ startAdornment: <LockOutlined /> }} />
+    <Tabs value={0}><Tab label="Sign in" /></Tabs>
+  </LoginComposition>
+);
 const generation: DesignGeneration = theme.ratan.designGeneration;
 const input: InputProps = {
   variant: 'outlined',

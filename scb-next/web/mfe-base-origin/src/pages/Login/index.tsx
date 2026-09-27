@@ -1,18 +1,22 @@
 import React, { ReactElement } from "react";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
+import {
+  Tabs,
+  Tab,
+  Typography,
+  Box,
+  InputLabel,
+  InputAdornment,
+  FormControl,
+  TextField,
+  Grid,
+  Divider,
+} from "ratan-design-origin/primitives";
+import {
+  PersonOutlined as PersonOutlinedIcon,
+  LockOutlined as LockOutlinedIcon,
+} from "ratan-design-origin/icons";
 import useController from "./common/useController";
 import Root, { classes, PREFIX } from "./common/style";
-import InputLabel from "@mui/material/InputLabel";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import InputAdornment from "@mui/material/InputAdornment";
-import FormControl from "@mui/material/FormControl";
-import TextField from "@mui/material/TextField";
-import Grid from "@mui/material/Grid";
-import Divider from "@mui/material/Divider";
 import ErrorBoundry from "../../components/ErrorBoundry";
 import { LoginTabsProps } from "./common/interface";
 import TabPanel from "./common/TabPanel";

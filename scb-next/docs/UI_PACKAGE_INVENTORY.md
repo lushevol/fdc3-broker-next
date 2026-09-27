@@ -29,6 +29,8 @@ The table below records shipped presentation only: proposed `primitives`,
 | Empty | EmptyState | Workspace copy/illustration/layout, loading dispatch, drawer action and telemetry |
 | FallbackError | ErrorFallback | Support-address selection, portal copy, mailto construction and captured error |
 | Splash | LoadingOverlay | Existing copy/root viewport sizing and error boundary |
+| Login layout, raw fields and tabs | `primitives` entry: exact MUI component exports | Base owns page composition, credential state, SSO and layout policy; current DOM/theme selectors are preserved |
+| Login field glyphs | `icons` entry: original `PersonOutlined` and `LockOutlined` glyphs | Base chooses which glyph appears with each field |
 
 The catalog at `packages/ratan-design-origin/stories` covers controls, search/
 builder composition, date integrations, notifications/loaders, Dialog and the

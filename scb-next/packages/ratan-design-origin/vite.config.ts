@@ -17,6 +17,8 @@ export default defineConfig({
     lib: {
       entry: {
         index: "src/index.ts",
+        primitives: "src/primitives.ts",
+        icons: "src/icons.ts",
         theme: "src/theme/index.ts",
         tokens: "src/tokens/index.ts",
         compatibility: "src/compatibility.ts",

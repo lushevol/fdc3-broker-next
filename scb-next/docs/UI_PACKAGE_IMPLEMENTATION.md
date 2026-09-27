@@ -1204,3 +1204,26 @@ admin editors and other portal-specific features as intentionally host-owned.
 No package publication, registry release, external ownership assignment, font
 redistribution approval or production MUI X Pro licensing decision is included.
 Those release-governance decisions remain documented in `UI_PACKAGE_RELEASE.md`.
+
+## Base UI migration: Login foundation slice (2026-09-28)
+
+The package now exposes `primitives` (Box, Divider, FormControl, Grid,
+InputAdornment, InputLabel, Tab, Tabs, TextField, Typography), `icons`
+(LockOutlined, PersonOutlined), and `styled` from `theme`. These are exact MUI 5
+exports. Base Login, its local TabPanel and its styled root import through these
+entries; authentication, page composition and the user's existing unforced-focus
+field behavior remain in Base. The existing package Input has different field
+wrapper/label behavior, so this slice uses the exact TextField export to retain
+the Login DOM and theme selectors.
+
+The pre-migration Base host at port 8101 supplied eight Login screenshots for
+legacy/WebKit, old/new layout and 1440x900/390x844 viewports. A second baseline
+run and the post-migration run each passed all eight with zero differing pixels.
+The 390px baseline already clips the two fields; this migration neither caused
+nor repairs that existing layout issue. Package tests passed 114 cases with
+96.96% line and 94.75% branch coverage; the two focused package contract tests,
+Storybook build, packed-consumer verification, package/Base typechecks, Base
+production build, focused Login tests (15), changed-file lint and dependency
+isolation also passed. Base's repository-wide lint remains at nine errors and
+138 warnings in existing unrelated files; it is not a passing gate for this
+slice. The other Base MUI imports remain tracked in the migration inventory.

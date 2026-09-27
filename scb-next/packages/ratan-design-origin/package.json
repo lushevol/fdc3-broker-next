@@ -18,6 +18,12 @@
   "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
+      "primitives": [
+        "dist/primitives.d.ts"
+      ],
+      "icons": [
+        "dist/icons.d.ts"
+      ],
       "theme": [
         "dist/theme/index.d.ts"
       ],
@@ -45,6 +51,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./primitives": {
+      "types": "./dist/primitives.d.ts",
+      "import": "./dist/primitives.js"
+    },
+    "./icons": {
+      "types": "./dist/icons.d.ts",
+      "import": "./dist/icons.js"
     },
     "./theme": {
       "types": "./dist/theme/index.d.ts",

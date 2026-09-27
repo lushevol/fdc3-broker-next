@@ -8,8 +8,9 @@ The earlier [guide plan](BASE_UI_MIGRATION_GUIDE_PLAN.md) completed the
 documentation stage. This plan turns the [migration guide](UI_PACKAGE_MIGRATION_GUIDE.md)
 and [component audit](BASE_UI_COMPONENT_AUDIT.md) into concrete implementation
 slices, rechecked against the current source. The
-[inventory](UI_PACKAGE_INVENTORY.md) remains the record of shipped ownership;
-candidate components below are not available exports yet.
+[inventory](UI_PACKAGE_INVENTORY.md) remains the record of shipped ownership.
+The Login primitive/icon exports are available; other candidate entries below
+remain proposals until implemented.
 
 Scope clarification: every direct MUI UI use in Base must migrate through
 Ratan Design, including layout, typography, icons, shell surfaces and data grids.
@@ -148,7 +149,7 @@ No broad architectural rewrite is required to start.
 
 | Consumer | Change | Behavior that remains in Base / must survive |
 | --- | --- | --- |
-| [Login](../web/mfe-base-origin/src/pages/Login/index.tsx) | Replace the two direct TextField compositions with existing Input through the Base adapter. Consolidate label ownership without rendering duplicate labels. Existing sign-in/SSO LoadingButtons already use the package. | Username trimming, password handling, Enter behavior, loading, SSO URL and visibility policy; placeholders, adornments, test IDs, accessible label association, medium sizing and page CSS. Preserve the current unforced focus state. |
+| [Login](../web/mfe-base-origin/src/pages/Login/index.tsx) | Completed: use exact TextField/layout/tab exports from `primitives` and original glyphs from `icons`. Existing Input changes wrapper and label behavior here, so substituting it requires separate parity evidence. Existing sign-in/SSO LoadingButtons already use the package. | Username trimming, password handling, Enter behavior, loading, SSO URL and visibility policy; placeholders, adornments, test IDs, accessible label association, medium sizing and page CSS. Preserve the current unforced focus state. |
 | [Home](../web/mfe-base-origin/src/pages/Home/index.tsx) | Adopt Button for Add Workspace. | Workspace creation, accessible name, class and test ID, tab positioning and both layout branches. |
 | [Tile](../web/mfe-base-origin/src/components/Tile/index.tsx) | Adopt Button inside the existing card. | Disabled behavior and click bubbling: launch must happen once. Theme-dependent card composition and launch policy stay local. |
 | [Admin Main](../web/mfe-base-origin/src/admin/common/Main/index.tsx) | Adopt Button for ordinary actions. | Permissions, create/save workflows and DataGrid stay local. |
@@ -162,6 +163,11 @@ leave a direct MUI import in the completed migration.
 
 Exit: these consumers use the existing catalog with their page/controllers and
 public Base paths intact. No LoginPage, HomePage or authentication-form export.
+
+Login, its local TabPanel and styled page root now have no direct MUI imports.
+The eight captured desktop/mobile, legacy/WebKit, old/new-layout screenshots
+matched the pre-migration portal pixel for pixel. The other consumers in this
+slice remain pending.
 
 ### 2. Adopt existing Dialog in Survey and Timeout
 

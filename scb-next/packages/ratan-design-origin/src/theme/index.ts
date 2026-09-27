@@ -4,6 +4,8 @@ import getDarkTheme from './dark.js';
 import getLightTheme from './light.js';
 import { getThemeOptions } from './options.js';
 
+export { styled } from '@mui/material/styles';
+
 export type DesignGeneration = 'legacy' | 'webkit';
 export interface RatanThemeOptions {
   mode?: PaletteMode;

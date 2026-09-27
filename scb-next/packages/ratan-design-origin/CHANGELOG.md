@@ -2,6 +2,10 @@
 
 ## 0.1.0 - Local Release Candidate
 
+- Added curated `primitives` and `icons` entries for the Login layout, fields,
+  tabs and original glyphs, plus the exact `styled` helper through `theme`.
+  Base Login consumes these exports without changing its DOM or portal styling.
+
 - Opt-in `tokens.css` exposes document-wide CSS variables without a React
   provider, defaulting to WebKit/light with HTML attributes for dark/legacy.
 

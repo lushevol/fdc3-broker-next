@@ -1,5 +1,5 @@
 import React, { ReactElement } from "react";
-import Box from "@mui/material/Box";
+import { Box } from "ratan-design-origin/primitives";
 import { TabPanelProps } from "./interface";
 
 const TabPanel: React.FC<TabPanelProps> = (

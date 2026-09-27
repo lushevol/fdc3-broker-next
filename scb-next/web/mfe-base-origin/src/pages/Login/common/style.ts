@@ -1,4 +1,4 @@
-import { styled } from "@mui/material/styles";
+import { styled } from "ratan-design-origin/theme";
 import { LoginPageTokens } from "../../../theme/config/common";
 import svg1 from "./svg1.svg";
 export const PREFIX = `${process.env.MFE_APP_PREFIX_STYLE}_login`;
