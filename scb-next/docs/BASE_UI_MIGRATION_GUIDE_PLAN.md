@@ -17,7 +17,9 @@ and the proposed new components remain pending as recorded there.
 
 The [component migration plan](BASE_UI_COMPONENT_MIGRATION_PLAN.md) provides the
 implementation sequence, named Base consumers and acceptance checks, re-audited
-against the source on 2026-09-27.
+against the source on 2026-09-27. Its revised scope requires all direct MUI UI
+uses to migrate through package exports and the portal to retain its existing
+appearance and interactions; the original selected-component scope is superseded.
 
 ## Component selection and ownership
 
@@ -25,14 +27,17 @@ The package owns reusable rendering, visual states, accessibility, and local
 interaction behavior. A field may compose a label, input, adornment and helper
 text; a dialog may compose a title, content, actions and focus handling. Those
 are useful component interfaces even though each contains several primitives.
-There is no requirement to expose every underlying primitive individually.
+Expose the supporting primitives actually used by Base through curated package
+entries when a coarser composition cannot preserve the existing usage. This does
+not require bespoke wrappers for every primitive or moving pages into the package.
 
 **Business dependencies must stay outside `ratan-design-origin`.** This includes
 Base stores, authentication, entitlements, services, routing, workspace and
 remote lifecycle, analytics, persistence, business record types, and decisions
-based on domain field names. Passing an entire business object as a prop or
-injecting a business service does not make a component independent. Base should
-resolve those decisions into presentation values and ordinary event callbacks.
+based on domain field names. Requiring a Base business object or injecting a
+business service does not make a component independent. Base resolves decisions
+into presentation values and ordinary callbacks. Generic grids may accept opaque
+rows and caller-defined columns without importing or interpreting Base models.
 
 Use these selection rules:
 
@@ -42,9 +47,11 @@ Use these selection rules:
   Prefer evidence from multiple uses; a folder name alone is insufficient.
 - Keep pages and feature compositions in Base. They may consume package
   controls while retaining their layout, assets, copy and domain decisions.
-- Allow local MUI layout, typography, icons and styling utilities. Their
-  presence alone is not migration debt. Do not create a complete MUI facade
-  or target zero direct MUI imports.
+- Migrate all direct MUI imports, including layout, typography, icons, styling,
+  providers and grid integrations, to package exports. Preserve the exact
+  underlying behavior through curated re-exports where useful. The final import
+  guard also covers stories/tests/types; the implementation plan defines the
+  narrow ambient type-declaration exception.
 - Keep legacy visual compatibility distinct from business logic. Preserve
   existing consumer contracts while documenting which interfaces are
   transitional and unsuitable as templates for new components.
@@ -78,13 +85,15 @@ Validate each interface before adding it to the supported catalog.
 | Next | Autocomplete field | `admin/Tile/index.tsx` and `components/TableDetail/Field.tsx` repeat Autocomplete + Input composition. Own the field rendering, labeling and selection interface; callers supply options, values and handlers. |
 | Next | Labeled switch | `components/Switch` and `components/SwitchTime` repeat switch presentation. Own checked/disabled/label/icon rendering; Base retains mode/timezone selection, storage, clock and analytics. |
 | Next | Icon action, with optional tooltip | SurveyButton, CopyText and workspace actions share icon-button behavior. Own accessible naming, focus, disabled state and tooltip composition; callers supply icon and click handler. |
-| Later, if justified | Action card, generic tab group, or grid presentation | Inspect Tile, Login/Home tabs and repeated admin grids for a genuinely shared interface. Do not move workspace records, tab lifecycle, admin editors or approval actions. A DataGrid import alone does not justify a new package grid. |
+| Required | Remaining layout, typography, icons, shell/card/tab/menu/grid presentation and integration helpers | Provide package entries for every used MUI surface; keep workspace records, tab lifecycle and admin workflows in Base. |
+| Later, if justified | New ActionCard or higher-level navigation/profile abstractions | Optional new compositions; their underlying MUI imports still must migrate now. |
 
 AppBar, Avatar/Profile, Drawer/NewTile, TabItem/TabPanel, Time, Timeout, Survey,
 Version, Table/TableDetail, ErrorBoundry and WebKit registration retain their
 feature or integration ownership in Base. Selecting a reusable piece inside
 one of these does not require migrating the whole feature. "Retained in Base"
-is a valid final disposition, not an incomplete migration status.
+is a valid ownership disposition. Their direct MUI UI imports remain migration
+work until they resolve through Ratan Design.
 
 ## Guide creation sequence
 
@@ -98,8 +107,9 @@ is a valid final disposition, not an incomplete migration status.
    against current exports. Label compatibility entries explicitly.
 3. **Specify selected gaps.** For each accepted candidate, record actual uses,
    the proposed interface, internal primitives, allowed interaction state and
-   excluded business dependencies. Keep speculative cards/tabs/grids deferred
-   until this review establishes a useful common contract.
+   excluded business dependencies. Higher-level feature abstractions remain
+   optional, but existing Card/Tabs/DataGrid and other MUI imports must adopt
+   package-owned presentation exports without changing their behavior.
 4. **Order implementation slices.** Adopt existing controls first, then add one
    selected missing building block at a time. Capture consumer behavior before
    extraction; implement and test the package component; adapt its Base callers;
@@ -116,10 +126,10 @@ is a valid final disposition, not an incomplete migration status.
 
 The guide is complete when migrated families have usable, verified recipes and
 selected remaining candidates have explicit interfaces, ownership and next
-steps. Page and feature retention must be explained, with no blanket obligation
-to move all local components, CSS, icons, or MUI primitives into the package.
-Progress is measured by the agreed component catalog and actual adoption.
-Import-file counts are discovery evidence only.
+steps. Pages and business features stay local while every direct MUI UI use
+migrates through Ratan Design. Completion requires both the zero-direct-import
+guard and actual portal screenshot/interaction comparisons against the captured
+pre-migration baseline. Import counts alone cannot prove unchanged UI or UX.
 
 Each implementation slice must preserve the existing `@fm/base` contracts and
 prove that its package interface works without Base runtime or domain models.

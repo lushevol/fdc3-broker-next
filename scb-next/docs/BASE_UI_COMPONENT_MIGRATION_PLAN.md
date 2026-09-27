@@ -1,6 +1,6 @@
 # Base UI component migration plan
 
-Status: proposed implementation sequence, 2026-09-27. This plan covers
+Status: revised implementation sequence, 2026-09-27. This plan covers
 `web/mfe-base-origin` adopting reusable presentation from
 `packages/ratan-design-origin`. It does not implement the migration.
 
@@ -11,16 +11,25 @@ slices, rechecked against the current source. The
 [inventory](UI_PACKAGE_INVENTORY.md) remains the record of shipped ownership;
 candidate components below are not available exports yet.
 
+Scope clarification: every direct MUI UI use in Base must migrate through
+Ratan Design, including layout, typography, icons, shell surfaces and data grids.
+The finished portal must look and behave the same. This replaces the earlier
+plan's permission to retain direct MUI imports in those areas.
+
 ## Target and ownership
 
-Base pages should obtain their shared fields, actions, dialogs, switches and
-feedback from Ratan Design, directly or through compatible Base adapters.
+Base pages must obtain all currently MUI-supplied UI from Ratan Design, directly
+or through compatible Base adapters. This includes fields, actions, dialogs,
+switches, feedback, layouts, typography, icons, menus, tabs, cards and grids.
 Login and Home remain Base pages. Their page layouts and feature compositions
 do not become design-package exports.
 
-The migration unit is a useful component: for example, a field with its label,
-adornments and validation display, or an icon action with tooltip and keyboard
-behavior. Its internal primitives need not each become public exports.
+The preferred migration unit is a useful component: for example, a field with
+its label/adornments/validation display or an icon action with tooltip behavior.
+Where Base still composes MUI primitives, provide curated package exports for
+the actual primitives it uses. A behavior-preserving re-export is appropriate;
+there is no need to invent a new wrapper, redesign a primitive or move a page
+into the package simply to change its import owner.
 
 **No logic with business dependencies belongs in Ratan Design.**
 
@@ -32,15 +41,26 @@ behavior. Its internal primitives need not each become public exports.
 | Generic callbacks and component-local presentation state | Stores, services, analytics, persistence, FDC3/OpenFin and remote lifecycle |
 | Generic presentation types | User, Workspace, AdminRecord and other domain models |
 
-Passing a business record or service into the package through props still
-violates this rule. Base must resolve it into presentation values and ordinary
-event callbacks first. DOM measurement and focus handling are legitimate UI
-behavior; reading session storage or interpreting business field names is not.
+Package interfaces must not require Base domain records or injected business
+services. Base resolves policy into presentation values and ordinary callbacks.
+A generic DataGrid may receive opaque `TRow` objects and caller-owned column/
+render/event functions, preserving existing row identity; the package must not
+import Base record types, interpret their business fields or execute domain
+policy. DOM measurement and focus handling are legitimate UI behavior; reading
+session storage or deciding entitlements is not.
 
-Completion means adoption of the agreed shared component catalog and an explicit
-disposition for remaining uses. Local MUI layout, typography, icons, styling
-utilities and retained feature integrations are allowed. A complete MUI facade,
-zero direct MUI imports and relocation of every Base component are not targets.
+Completion requires zero direct runtime or type imports/re-exports from `@mui/*`
+in Base source, stories and test helpers/tests, and verified visual/interaction
+parity. This includes deep paths, barrel imports, dynamic imports and `require`.
+The package may continue using MUI internally. Base keeps its MUI/Emotion peer
+dependencies where needed for compatible resolution; removing installed MUI is
+not required. Build dedupe/noExternal settings are not UI imports.
+
+The only source-level MUI module-name exception is an existing type-only
+`declare module "@mui/material/styles"` augmentation that must address MUI's
+canonical type identity. Keep Base-specific theme types in Base, source imported
+types through Ratan Design, and enforce that this exception emits no runtime
+code. It cannot exempt a component, stylesheet helper, icon or grid import.
 
 ## Current codebase findings
 
@@ -57,25 +77,56 @@ This is a source audit, not a new runtime verification result.
 | Feedback | Loader/PageLoader, Snackbar, EmptyState, ErrorFallback and LoadingOverlay already have Base adapters. | Preserve those seams, including Base's sanitized HTML Snackbar and host-owned error/support behavior. |
 | Dialog | [Core Dialog](../packages/ratan-design-origin/src/Dialog.tsx) supplies title/content/actions and focus/overlay handling. Base Dialog additionally manages workspace placement, drag, resize, stacking and telemetry. | Use core Dialog for ordinary Survey/Timeout presentation; retain the specialized Base adapter elsewhere. |
 | Dates | `dates` and optional Pro `date-range` entries already exist. | Keep localization, timezone policy and license initialization in Base; no new extraction. |
-| Missing shared compositions | AutocompleteField, LabeledSwitch and IconAction are absent from current core exports. Repeated Base uses establish their need. | Add one focused interface per composition, then adopt it in the named consumers below. |
+| Missing shared compositions | AutocompleteField, LabeledSwitch and IconAction are absent from current core exports. Repeated Base uses establish their need. | Add one focused interface per composition, then adopt it in the named consumers below. These are not the entire remaining scope. |
+| Remaining direct MUI surfaces | Base also imports layout/typography, Tabs/Tab, AppBar/Toolbar, Drawer, Avatar/Menu, cards/accordion/chips, Alert/Tooltip/Paper, icons and DataGrid. | Every such use must consume a package export, even when the containing feature remains Base-owned. See the complete [import inventory](BASE_MUI_IMPORT_INVENTORY.md). |
 | Legacy presentation | `compatibility`, `base-compat` and `portal-theme` contain intentional legacy contracts. Portal theme still includes LoginPage visual values; `base-compat.Time` only stringifies a value. | Keep them opt-in/transitional. Do not remove compatible exports or promote login tokens, domain-aware Time, or portal reset policy into core. |
 | Host theme integration | [Base theme selection](../web/mfe-base-origin/src/theme/index.tsx) and [provider](../web/mfe-base-origin/src/theme/Provider.tsx) still use host state, MUI ThemeProvider, CssBaseline and localization. Base loads its own WebKit CSS; [Container](../web/mfe-base-origin/src/pages/Home/common/Container.tsx) forwards appearance to remotes. | Test both standalone RatanDesignProvider and the actual Base provider. Do not assume Base already uses RatanDesignProvider or replace the host provider/CSS as an incidental adoption. |
 
 The older [extraction plan](UI_PACKAGE_EXTRACTION_PLAN.md) describes historical
 foundation work and is not the current completion baseline. In particular,
 MUI 5 alignment and most shared-control extraction are already implemented.
-The remaining work is call-site adoption plus the three demonstrated gaps.
+The remaining work is complete call-site adoption, the three demonstrated
+compositions, and missing package exports for every other used MUI surface.
+The full import audit found 62 production files with MUI imports (54 with runtime
+uses and eight using only types), plus tests, stories, the hidden Storybook
+provider and MDX examples: 98 source/example files in total. Treat these as a
+dated baseline and re-scan at implementation and completion.
+
+## Package coverage for every MUI family
+
+New entry names below are proposed and must be added to package export maps,
+declarations, fixtures and tests before adoption. Export only required symbols
+with explicit named exports; do not copy the entire MUI catalog or use wildcard
+icon exports. Keep the current React/MUI/Emotion versions and component identity.
+
+| Current imports | Package destination | Preservation requirement |
+| --- | --- | --- |
+| Button, TextField, Autocomplete, Switch, IconButton and dialog compositions | Existing core controls and proposed AutocompleteField/LabeledSwitch/IconAction; compatibility export where an existing core default cannot reproduce the current use | Preserve DOM, props, refs, default sizes, label behavior, loading and event semantics. A package component with the same name is not automatically equivalent. |
+| Box, Grid, Stack, Typography, Divider | Proposed `ratan-design-origin/primitives` | Preserve Grid breakpoints/gutters, component/as polymorphism, text metrics, `sx`, refs and inherited MUI class names. Base still decides page composition. |
+| Tabs/Tab, AppBar/Toolbar, Drawer, Menu/MenuItem, Avatar, Card/CardContent/CardMedia, Chip, Accordion/Summary/Details | Proposed `primitives` entry | Curated compatible presentation exports; preserve controlled state, focus, transitions, portals, scroll buttons and retained mounting. Base owns navigation, identity and entitlements. |
+| Tooltip, Paper, Alert, FormControl/FormLabel/InputLabel/InputAdornment, remaining dialog subcomponents | Composed core controls where appropriate; proposed `primitives` for remaining presentation uses | Preserve DOM/heading semantics and layout. Do not force a composition that changes the portal just to remove imports. |
+| Every `@mui/icons-material` import, including barrel aliases | Proposed `ratan-design-origin/icons` | Re-export the same used glyphs with their props/refs/viewBox and inherited sizing. No substitutions or new icon set. |
+| styled/useTheme/ThemeProvider and theme utilities/types | Extend existing `theme`; explicit CssBaseline export in `portal-theme` | Preserve provider order, Emotion insertion, theme object, component overrides and document reset. Host still selects theme and explicitly applies baseline CSS. |
+| DataGrid, GridActionsCellItem and grid types | Proposed optional `ratan-design-origin/data-grid` | Preserve MUI X 6 generic types, apiRef, virtualization, row IDs, columns, events and grid-action keyboard semantics; no AdminRecord or workflow helpers in the package. Keep MUI X outside core. |
+| LocalizationProvider/AdapterDayjs and community/Pro date imports | Existing `dates` and `date-range`, extended only if needed | Preserve nested provider structure, locale, formats and adapter identity; do not remove a provider as an incidental import cleanup. Licensing stays host-owned. |
+| MUI types in interfaces, tests, fixtures and stories | Relevant package entry above | Re-export precise types so signatures remain compatible. Update mocks and examples to package imports; retain existing behavioral assertions. |
+
+The [file-level inventory](BASE_MUI_IMPORT_INVENTORY.md) is the implementation
+checklist. Each row must acquire a destination, parity evidence and completed
+status. A feature being retained in Base never closes its MUI adoption rows.
+All visible native markup, custom CSS and host-integrated WebKit surfaces must
+also remain visually unchanged; this does not relocate their business owners.
 
 ## Implementation sequence
 
 Each slice ends with captured behavior, verified source changes, documentation
 updates and its own commit. The order prioritizes existing exports before new
-public interfaces. Slice 0 precedes source work; slices 3–5 can proceed
-independently once their contracts and file ownership are settled.
+public interfaces. Slice 0 precedes source work. Add the needed support exports
+within each consuming slice; keep ownership of overlapping files explicit.
 
 ### 0. Capture contracts and establish the baseline
 
-- Record selected imports, exported/default shapes, props, callback arguments,
+- Record all imports from the inventory, exported/default shapes, props, callback arguments,
   refs, native IDs, root test IDs, selectors, portal placement and visual states.
 - Capture the current worktree, including Login's removal of forced `focused`
   props. Keep unrelated local edits out of migration commits.
@@ -86,6 +137,9 @@ independently once their contracts and file ownership are settled.
   warn on HIGH/CRITICAL results.
 - Record existing legacy/WebKit light/dark visuals and both `new-layout`
   branches where they apply. Layout and design-generation flags are distinct.
+- Capture stable before-migration screenshots and interaction expectations of
+  the real Base portal as specified below. This is required before changing UI;
+  package Storybook screenshots alone are not the reference.
 
 Exit: a small contract checklist for each slice and a reproducible baseline.
 No broad architectural rewrite is required to start.
@@ -102,8 +156,9 @@ No broad architectural rewrite is required to start.
 
 Use the existing Input interface first. If its label/style defaults obstruct a
 consumer, identify the exact shared contract gap and test a minimal general
-extension; do not add a `login` or `workspace` mode. Record any justified retained
-use explicitly rather than silently declaring the family complete.
+extension or package compatibility export; do not add a `login` or `workspace`
+mode. A parity mismatch blocks that adoption row; it is not permission to
+leave a direct MUI import in the completed migration.
 
 Exit: these consumers use the existing catalog with their page/controllers and
 public Base paths intact. No LoginPage, HomePage or authentication-form export.
@@ -192,7 +247,9 @@ label association, callbacks and popup placement.
 Proposed interface: icon/content node, required accessible name, optional tooltip,
 disabled/size/color, normal button attributes/events, root class and button ref.
 It owns focus cues and tooltip composition, including an intentional disabled
-tooltip wrapper that does not change the ref target or event behavior.
+tooltip wrapper that does not change the ref target or event behavior. Existing
+focus/hover visuals and hit areas must match the captured Base baseline; a new
+package default must not silently redesign them.
 
 Adopt it in [SurveyButton](../web/mfe-base-origin/src/components/SurveyButton/index.tsx),
 [CopyText](../web/mfe-base-origin/src/admin/common/CopyText/index.tsx),
@@ -206,17 +263,89 @@ Keep clipboard effects, survey windows, identity/photo lookup, menu state,
 workspace callbacks and resize orchestration in Base. Preserve button IDs,
 test IDs, curried callback binding and mouse-event propagation. Add an explicit
 accessible name where a consumer currently relies only on tooltip/image text.
-Do not replace DataGrid's GridActionsCellItem; its grid-specific keyboard and
-menu behavior is a retained integration.
+Keep DataGrid's GridActionsCellItem behavior through the proposed package
+`data-grid` entry; do not substitute IconAction for its grid-specific keyboard
+and menu semantics.
 
-Exit: the six named consumers use the shared action where their contracts fit;
-any exception has a documented technical reason. Tests cover accessible name,
+Exit: all six consumers use package-owned actions with matching contracts;
+use a package compatibility export if the composition cannot preserve a case.
+Tests cover accessible name,
 Enter/Space, disabled activation, tooltip on pointer/focus, refs and host events.
 
-### 6. Close the inventory and prevent regressions
+### 6. Migrate the remaining layouts, shell and feature presentation
 
-- Re-scan Base call sites for the adopted families. Require package usage or an
-  explicit, reviewed exception; do not use a blanket MUI import ban.
+Add the required `primitives` and `icons` exports and migrate every remaining
+runtime UI import in these consumers, including their `common/style.ts` files:
+
+| Base consumers | Required adoption |
+| --- | --- |
+| Login, Login TabPanel, Home and Drawer menu items | Box/Grid/Stack/Typography/Divider, Tabs/Tab, adornments/labels and icons. Keep the workspace TabPanel controller; changing the Tabs import must not affect cached remotes. |
+| AppBar, Drawer, Drawer Menu, NewTile and Tile | AppBar/Toolbar/Drawer, layout and action presentation. Preserve anchors, drawer width, overlay/backdrop, header geometry and tile hit areas. |
+| Avatar/Profile | Avatar/Menu/MenuItem, Card/CardContent/CardMedia, Chip, Accordion/Summary/Details, Tooltip, layout, typography and icons. Profile entitlement/identity decisions remain local. |
+| Dialog's Draggable wrapper, Survey, Timeout and Version | Paper, any remaining dialog subcomponents, Alert, typography/layout and icons. Preserve drag/resize, z-index, modal semantics and version-alert appearance. |
+| Admin Category/ImportMap/Tile/Main/Actions/Status/CopyText and TableDetail renderers | Layout, tooltips, menu items, status glyphs and action icons. Migrate UI constructed inside controllers/render callbacks too. |
+| Empty, FallbackError, Splash, Switch/SwitchTime and routing styles | Remaining icons/layout/styling imports. Existing assets, copy, dimensions and host behavior stay unchanged. |
+
+Exact component re-exports preserve MUI classes and `muiName` more safely than
+unnecessary wrapper elements. Verify this with the existing host CSS, theme
+overrides and refs; preserve polymorphic types as well as rendering. All used
+glyphs must come through `icons`, even where IconAction receives a caller icon.
+
+Exit: no remaining runtime MUI UI imports outside the separately tracked grid
+and theme/date integration slices; before/after screenshots and interactions
+pass for every touched surface. Custom ActionCard/ProfileCard/navigation-page
+abstractions remain optional; adoption of their underlying primitives is required.
+
+### 7. Migrate data-grid presentation without moving admin workflows
+
+Add the optional `data-grid` entry for the exact DataGrid, GridActionsCellItem,
+hooks/constants and types present in the inventory. Migrate components/Table,
+admin/common/Main, admin/common/Actions and the grid types in audit/field
+controllers/interfaces. Preserve the same MUI X peer version and generic public
+types; Base supplies its own rows, column definitions, action callbacks and
+record mappings. The package must never import Base AdminRecord or services.
+
+Test density/row heights, headers, column widths, sorting/filtering, selection,
+pagination, scrolling/virtualization, focus/keyboard navigation, menus and edit
+flows. Verify verify/deactivate/save callbacks and permission-based actions in
+Base. A library re-export does not excuse skipping these integration checks.
+
+Exit: every Base MUI X grid import uses `data-grid`, admin behavior/screens match
+the baseline, and core still installs/builds without optional MUI X packages.
+
+### 8. Complete theme, localization, type and development-use adoption
+
+Route Base `styled`, `useTheme`, ThemeProvider and imported theme/types through
+the package; route explicit CssBaseline through `portal-theme`. Update every
+local styled wrapper while preserving its selectors and theme logic. Re-export
+the same underlying helpers so existing MUI theme augmentation and Emotion
+resolution continue to work. Leave host-only augmentations in Base.
+
+Route both App.tsx's current Pro localization imports and theme/Provider.tsx's
+community imports through the appropriate package date entry, preserving the
+actual provider nesting and locale/format behavior. Keep theme/store selection,
+URL flags, document classes and explicit CSS loading in Base. Do not switch to
+RatanDesignProvider, reorder global CSS, regenerate tokens, change fonts or
+upgrade MUI as an incidental part of changing imports.
+
+Migrate imports in stories, Storybook preview, test setup, tests and executable
+documentation examples. Broader story-only controls must receive package exports
+or use an equivalent existing composition with parity evidence; do not delete
+stories/tests to achieve a zero count. Update test mocks to the public entry
+without weakening their assertions. Keep config dependency/dedupe strings and
+the narrowly allowed ambient type declaration distinct from runtime imports.
+
+Exit: every UI import in the inventory, including type-only and development
+uses, resolves through package exports. Standalone fixtures and Base/remote
+themes retain their current rendering and dependency identity.
+
+### 9. Close the inventory and prevent regressions
+
+- Re-scan all Base source, stories and test files and reconcile every inventory
+  row. Require zero direct `@mui/*` runtime/type imports or re-exports. Add an
+  AST-based architectural check plus restricted-import lint rules covering
+  root/deep paths, aliases, export-from, dynamic import and require. The type-only
+  ambient module declaration is the sole source exception, not an import bypass.
 - Add focused architecture checks for forbidden package-to-application imports,
   application aliases and unexpected dependencies. Review public types/defaults
   manually for domain leakage that an import check cannot detect.
@@ -225,20 +354,90 @@ Enter/Space, disabled activation, tooltip on pointer/focus, refs and host events
 - Update the inventory, migration-guide status, package README, implementation
   record and changelog to describe actual exports and actual adoption. Keep
   existing `@fm/base` export/default shapes and downstream feature imports.
-- Record the final accepted exceptions, test results and remaining deferred
-  candidates. Future package extraction requires independent reuse evidence.
+- Record final visual/interaction evidence, type-declaration/config exceptions
+  and remaining optional higher-level abstractions. A broken/missing comparison
+  or a remaining direct MUI component import means the migration is incomplete.
 
 ## Deliberately retained or deferred
 
 | Surface | Final disposition for this migration |
 | --- | --- |
-| Login/Home, AppBar, Drawer/NewTile, Avatar/Profile | Retain page/shell/identity composition in Base; adopt selected controls within them. |
-| TabItem/TabPanel and Home Container | Keep workspace semantics, editing, mounting, caching and activation local. Adopt Input/IconAction where selected; do not substitute Builder tabs. |
-| Table/TableDetail, admin editors/actions/status | Retain record-aware grids, permission checks, verification/deactivate/save and status meaning. Extract only the agreed field/action presentation. |
+| Login/Home, AppBar, Drawer/NewTile, Avatar/Profile | Retain page/shell/identity composition in Base; all underlying MUI presentation imports migrate through package exports. |
+| TabItem/TabPanel and Home Container | Keep workspace semantics, editing, mounting, caching and activation local. Adopt Input/IconAction or exact package-compatible primitives, plus package Tabs/Tab; do not substitute Builder tabs. |
+| Table/TableDetail, admin editors/actions/status | Retain domain controllers, permission checks, verification/deactivate/save and status meaning. All fields/actions and generic grid presentation/types come from the package. |
 | Time, Timeout, Survey, Version | Keep time-field heuristics, session/survey/version policy in Base. Base Time is not replaced with `base-compat.Time`. |
 | Empty/FallbackError/Splash/ErrorBoundry | Keep existing host wrappers, support lookup, capture, illustrations, copy and layout; presentation is already packaged. |
 | ScWebkit/ReactWrapper and platform bridges | Keep custom-element registration, browser integration, services and related-app navigation local. |
-| ActionCard, general tabs, generic grid, profile/menu/accordion abstractions | Defer pending a second meaningful use and a shared interface. Raw Card, Tabs or DataGrid imports alone do not justify extraction. |
+| New ActionCard, navigation-tab controller or domain-neutral profile abstractions | Optional future composition work. Required Card/Tabs/Menu/Accordion/DataGrid package exports and Base adoption are in scope now. |
+
+"Retained in Base" describes feature ownership, never permission to retain its
+direct MUI UI imports. Pages still compose package-owned building blocks.
+
+## Required proof of unchanged UI and UX
+
+Capture reference screenshots from the pre-migration Base worktree before
+implementation, preserving any user edits already present. Record the source
+commit and local-diff fingerprint, fixture data, URL flags, appearance, viewport,
+browser/OS, device scale and font assets. Re-run after each slice against exactly
+the same inputs. Do not use newly generated package stories as the old portal
+baseline.
+
+Create a Base host visual-regression suite; the current host test is a functional
+smoke and takes no comparison screenshots. Existing packed-consumer screenshots
+cover isolated controls, and Storybook accessibility checks do not prove portal
+equivalence. `mui5-compatibility.spec.ts` also saves screenshots with
+`page.screenshot()` but does not compare them. Add actual `toHaveScreenshot`
+assertions against the pre-migration references. Keep existing gates, and add
+the following host coverage:
+
+| Surface | Required captured states and interactions |
+| --- | --- |
+| Login | Ordinary and SSO-only modes; empty, populated, invalid and loading fields; pointer/keyboard focus; Enter submission. Preserve hero assets, labels, spacing and the current unforced focus state. |
+| Home and navigation | Empty and populated workspace, long/overflowing tabs, rename, add/refresh/remove, cached inactive remotes, scroll buttons; header and background geometry. |
+| New Tile/Drawer | Open/closed drawer, category/menu selection, hover/focus/disabled tiles, launch once, backdrop/Escape and restored focus. |
+| Avatar/Profile | Menu open, profile dialog, avatar fallback/image, chips and entitlement groups, expanded/collapsed accordion, logout actions. |
+| Survey/Timeout/standard and draggable dialogs | Title/content/actions, autofocus, loading/disabled, close restrictions, focus trap/return, portals/stacking, drag/resize/maximize and backdrop. |
+| Admin grids and editors | All reachable Category/Tile/ImportMap screens, populated/empty/loading/error grids, headers/density/scroll, sorting/filtering/selection, action menus and edit/verify/deactivate/save; autocomplete listbox and selected/cleared values. |
+| Shared feedback and settings | Toast/error/empty/loading/version states, enabled/disabled controls, tooltips, theme switch, time switch and picker popups where reachable. |
+
+For authenticated states, cover every supported combination of legacy/WebKit,
+light/dark and old/new layout. Preserve existing host capture sizes 390×844 and
+1440×900, add 768×1024 and 1280×900, and check breakpoint boundaries affected by
+changed layout helpers. Keep device scale fixed.
+Assert the actual resolved appearance and layout, not just query strings. Login
+currently forces dark while unauthenticated: cover its reachable generations
+and layouts without inventing a light-mode login as a migration requirement.
+Document unreachable states with controller evidence instead of silently skipping
+them. Existing layout defects are baseline findings, not incidental redesigns.
+
+Use deterministic local API fixtures, fixed clock/locale/timezone and stable
+avatar/asset responses; wait for fonts, data and animation settling. Set up
+fixtures in the SCB Vite host's existing dev-mock layer, not remote production
+services. Existing default empty API responses do not prove populated admin
+screens work: add explicit category/tile/import-map rows, audit history, profile
+entitlements/photos, permission variants, loading/errors and session-expiry/
+renewal/logout fixtures. Assert these expected records are visible so an empty
+screen cannot falsely pass. Mask only a documented irreducible changing value,
+never an entire
+component, text block, grid or overlay that could hide a regression.
+
+Require zero unexplained screenshot differences. Use zero differing pixels in
+the pinned environment where rendering is deterministic; any unavoidable
+rasterization tolerance must be narrowly documented and established on repeated
+unchanged-baseline captures before migration. Do not reuse the separate consumer
+suite's broad tolerance without proving it is appropriate for Base. Review
+before/after/diff images for spacing, fonts, glyphs, colors, borders, shadows,
+dimensions, responsive wrapping, clipping, focus rings and overlay placement.
+
+Screenshots must be paired with event/keyboard/focus assertions: identical looks
+alone cannot prove unchanged UX. Block completion for new console/hydration
+errors, changed click counts, focus order, scroll/keyboard behavior, mount state,
+or broken flows. Do not overwrite reference snapshots to make migration failures
+pass. Any desired visual/UX change requires separate scope; no unapproved visual
+change is an acceptable result of this migration.
+Keep before/after/diff artifacts, fixture/config provenance and results for each
+slice so the parity decision is reviewable. Missing fixtures, skipped target
+tests or uncaptured required states block completion rather than counting as pass.
 
 ## Verification and completion
 
@@ -292,10 +491,12 @@ restoring its coherent package/adapter/CSS revision and rerunning the same gates
 never reset unrelated work. Publication/deployment follows the separate
 [release runbook](UI_PACKAGE_RELEASE.md).
 
-The migration is complete when the named consumers use the agreed catalog (or
-have explicit exceptions), each new component works independently, business
-policy remains in Base, compatibility is preserved, and the affected gates pass.
-Retained features and deferred abstractions are not unfinished migration work.
+The migration is complete only when all inventoried MUI uses resolve through
+Ratan Design, the direct-import guard passes, every new export works independently,
+business policy remains in Base, and the full portal visual/interaction matrix
+passes with no unexplained differences. Import cleanup alone is not completion.
+Retained business features and optional new abstractions do not exempt their
+underlying UI from adoption or parity verification.
 
 ## Planning verification record
 
@@ -304,9 +505,10 @@ controllers, theme integration, manifests, test configuration and earlier audit.
 Only documentation is changed by this planning stage. No new component is
 claimed as implemented, and no application/browser test pass is claimed here.
 
-Planning checks confirmed the source/test/story counts, absence of the three
-candidate exports, all 88 local links across the three touched documents, and
-balanced code fences. An independent source review checked the adoption seams.
+The initial planning checks confirmed the source/test/story counts, absence of
+the three candidate exports, local links and balanced code fences. The revised
+scope adds a full MUI import inventory and host visual/interaction acceptance
+matrix. Independent source reviews checked the import coverage and parity gaps.
 GitNexus returned unrelated flows for the package/Base query; index refresh did
 not complete global registry registration because of filesystem permissions.
 These findings therefore rely on current source inspection, not a graph-based

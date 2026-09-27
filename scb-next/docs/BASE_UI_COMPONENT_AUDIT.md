@@ -5,6 +5,14 @@ Audit date: 2026-09-24. This source audit supports the revised
 reusable control or composition of primitives. Pages and business features stay
 in Base and consume those components as useful.
 
+Scope update, 2026-09-27: the user now requires all direct MUI UI imports in Base
+to migrate, including primitives, icons, shell surfaces and grids, with unchanged
+portal appearance and interactions. The source ownership findings below still
+apply, but the earlier selected-component/deferred-import scope is superseded by
+the [implementation plan](BASE_UI_COMPONENT_MIGRATION_PLAN.md) and
+[complete import inventory](BASE_MUI_IMPORT_INVENTORY.md). Feature ownership
+remaining in Base does not exempt its MUI rendering from adoption.
+
 ## Current package
 
 An import scan of all 54 TypeScript source files under
@@ -67,8 +75,10 @@ and event callbacks, without constructing Base providers or services.
 
 Prioritize adoption of existing package controls, then the demonstrated missing
 compositions: autocomplete field, labeled switch and icon action. Cards, general
-tabs and grids remain candidates requiring justification. Page and feature
-retention is an intentional end state. There is no zero-MUI-import target.
+tabs and grids were previously candidates requiring justification for a new
+abstraction. Under the revised scope, all existing MUI uses must adopt curated
+package exports; a new higher-level abstraction remains optional. Page and
+business-feature retention is still the intended ownership outcome.
 
 ## Verification and limits
 

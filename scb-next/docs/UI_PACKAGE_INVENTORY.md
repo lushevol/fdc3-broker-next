@@ -8,6 +8,12 @@ Use the [migration guide](UI_PACKAGE_MIGRATION_GUIDE.md) for import mappings,
 usage recipes and the remaining component candidates. The
 [source audit](BASE_UI_COMPONENT_AUDIT.md) explains the business ownership rules.
 
+The [revised implementation plan](BASE_UI_COMPONENT_MIGRATION_PLAN.md) and
+[complete MUI import inventory](BASE_MUI_IMPORT_INVENTORY.md) require every Base
+MUI UI use to adopt package exports with unchanged portal appearance/behavior.
+The table below records shipped presentation only: proposed `primitives`,
+`icons`, `data-grid` and additional helper exports are still pending.
+
 | Original surface | Maintained presentation | Host responsibility |
 | --- | --- | --- |
 | Theme controls/tokens and CSS aliases | Core/theme/tokens/compatibility entries | Auth-based mode, persistence, document classes, explicit CSS loading |
@@ -37,8 +43,9 @@ format policy, font redistribution approval and MUI X Pro licensing/initializati
 
 ## Deliberately Retained
 
-These features remain in Base. Their reusable controls can be adopted or
-extracted individually; retaining the feature is a valid final disposition.
+These features remain in Base. All their underlying direct MUI UI imports must
+still migrate through Ratan Design; retaining a business feature is not an
+exemption from UI adoption. Preserve its appearance and behavior throughout.
 
 | Surface | Disposition and reason |
 | --- | --- |
