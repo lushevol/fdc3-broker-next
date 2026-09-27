@@ -15,6 +15,10 @@ current status, import mappings, verified usage recipes, candidate contracts and
 implementation gates. The guide creation stage is complete. Adoption changes
 and the proposed new components remain pending as recorded there.
 
+The [component migration plan](BASE_UI_COMPONENT_MIGRATION_PLAN.md) provides the
+implementation sequence, named Base consumers and acceptance checks, re-audited
+against the source on 2026-09-27.
+
 ## Component selection and ownership
 
 The package owns reusable rendering, visual states, accessibility, and local

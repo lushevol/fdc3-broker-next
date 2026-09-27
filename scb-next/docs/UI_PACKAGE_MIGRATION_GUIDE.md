@@ -16,6 +16,9 @@ the [implementation contract](UI_PACKAGE_IMPLEMENTATION.md) records detailed
 specifications. Use the [package README](../packages/ratan-design-origin/README.md)
 for the full prop/default/ref matrix and supported peer versions.
 
+For execution order, named adoption targets and slice acceptance checks, follow
+the [component migration plan](BASE_UI_COMPONENT_MIGRATION_PLAN.md).
+
 ## Ownership rule
 
 **No business-dependent logic belongs in `ratan-design-origin`.** Review public
