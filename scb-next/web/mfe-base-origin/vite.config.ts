@@ -14,6 +14,9 @@ export default defineConfig(({ mode }) => {
     env.VITE_ALPHA_PAYMENTS_API_TARGET ?? "http://127.0.0.1:8086";
 
   return {
+    optimizeDeps: {
+      include: ["ratan-design-origin/icons", "ratan-design-origin/data-grid"],
+    },
     resolve: {
       dedupe: [
         "react",

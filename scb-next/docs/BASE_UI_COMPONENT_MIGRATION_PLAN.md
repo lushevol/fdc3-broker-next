@@ -1,9 +1,12 @@
 # Base UI component migration plan
 
-Status: import adoption implemented 2026-09-28; broader portal visual and
-interaction comparisons remain open. This plan covers
+Status: import adoption implemented 2026-09-28. Login, authenticated shell,
+populated admin screens, SSO-only Login, an overflowed workspace and the logout
+survey have matched pre-migration visual and interaction comparisons. Feedback,
+timeout, picker, cached-remote and deeper admin states remain open. This plan covers
 `web/mfe-base-origin` adopting reusable presentation from
-`packages/ratan-design-origin`. It does not implement the migration.
+`packages/ratan-design-origin`. The current evidence is recorded in
+[Base UI parity evidence](BASE_UI_PARITY_EVIDENCE.md).
 
 The earlier [guide plan](BASE_UI_MIGRATION_GUIDE_PLAN.md) completed the
 documentation stage. This plan turns the [migration guide](UI_PACKAGE_MIGRATION_GUIDE.md)

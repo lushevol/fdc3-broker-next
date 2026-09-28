@@ -1,6 +1,6 @@
 # Base direct-MUI migration inventory
 
-Audit date: 2026-09-27; adoption update: 2026-09-28. This is the original import baseline for the [Base UI component migration plan](BASE_UI_COMPONENT_MIGRATION_PLAN.md). All listed Base source, test, Storybook and MDX imports now resolve through Ratan Design. The sole retained `@mui/*` source string is the type-only theme module augmentation. The tables below retain original imports for traceability; broader portal visual comparison is still pending.
+Audit date: 2026-09-27; adoption update: 2026-09-28. This is the original import baseline for the [Base UI component migration plan](BASE_UI_COMPONENT_MIGRATION_PLAN.md). All listed Base source, test, Storybook and MDX imports now resolve through Ratan Design. The sole retained `@mui/*` source string is the type-only theme module augmentation. The tables below retain original imports for traceability; [authenticated shell parity](BASE_UI_PARITY_EVIDENCE.md) is verified, while deeper portal states remain open.
 
 ## Scope and counts
 

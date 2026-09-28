@@ -8,6 +8,10 @@
 - Extended those entries to all Base-used Material surfaces and glyphs, added
   optional `data-grid`, and exposed theme/provider helpers through `theme`.
   Base source, tests, stories and examples now import UI through package entries.
+- Normalized CommonJS icon defaults at the `icons` entry so linked Vite hosts
+  receive the original React components and named exports during prebundling.
+- Base prebundles the optional `data-grid` entry with `icons` to keep linked
+  MUI X and portal theme consumers on one Vite dependency graph.
 
 - Opt-in `tokens.css` exposes document-wide CSS variables without a React
   provider, defaulting to WebKit/light with HTML attributes for dark/legacy.

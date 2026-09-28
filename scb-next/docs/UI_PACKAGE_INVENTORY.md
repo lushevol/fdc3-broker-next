@@ -11,8 +11,10 @@ usage recipes and the remaining component candidates. The
 The [revised implementation plan](BASE_UI_COMPONENT_MIGRATION_PLAN.md) and
 [complete MUI import inventory](BASE_MUI_IMPORT_INVENTORY.md) require every Base
 MUI UI use to adopt package exports with unchanged portal appearance/behavior.
-The table below records shipped presentation only: proposed `primitives`,
-`icons`, `data-grid` and additional helper exports are still pending.
+The table below records shipped presentation; `primitives`, `icons` and
+`data-grid` are available. Optional higher-level composition helpers remain
+proposals, while [host parity evidence](BASE_UI_PARITY_EVIDENCE.md) covers the
+verified surfaces and outstanding checks.
 
 | Original surface | Maintained presentation | Host responsibility |
 | --- | --- | --- |
