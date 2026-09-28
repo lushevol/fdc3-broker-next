@@ -2,8 +2,9 @@
 
 Status: import adoption implemented 2026-09-28. Login, authenticated shell,
 populated admin screens, SSO-only Login, an overflowed workspace and the logout
-survey have matched pre-migration visual and interaction comparisons. Feedback,
-timeout, picker, cached-remote and deeper admin states remain open. This plan covers
+survey, login-error feedback and session timeout have matched pre-migration
+visual and interaction comparisons. Picker, cached-remote and deeper admin states
+remain open. This plan covers
 `web/mfe-base-origin` adopting reusable presentation from
 `packages/ratan-design-origin`. The current evidence is recorded in
 [Base UI parity evidence](BASE_UI_PARITY_EVIDENCE.md).

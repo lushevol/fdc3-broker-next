@@ -47,19 +47,29 @@ tab count and rename value, and the survey's Escape restriction and Cancel close
 The pre-migration survey did not focus its `autoFocus` action; this test preserves
 the observed dialog behavior rather than treating that prop as proof of focus.
 
+The [session suite](../tests/e2e/base-ui-session-parity.spec.ts) passes four
+legacy/WebKit cases with zero differing pixels. A rejected login displays the
+same complete Snackbar and its Close action dismisses it. A deterministic
+30-second auth token opens the same timeout dialog in both hosts, including
+its Extend/Logout actions and Escape restriction. The Snackbar screenshot is
+component-scoped because a separate in-progress Login focus edit changes the
+credential field borders in a full-page comparison.
+
 Package tests (115), Base tests, both typechecks, package lint, production Base
 build, dependency isolation, package verification and the direct-MUI import guard
 pass. The package's identity test verifies original MUI component references for
 representative controls, icons, grid and theme exports. Base source has no
 direct MUI UI imports; the type-only theme module augmentation is retained.
-Across the three host suites, 27 cases compare 73 screenshots with zero
+Across the four host suites, 31 cases compare 77 screenshots with zero
 differing pixels. The Base lint command is not green: seven `no-void` errors in
 admin service tests and two duplicate-import errors in
 `src/module-federation.d.ts` are also present at the pre-migration commit.
 
 This does not yet close the full [acceptance matrix](BASE_UI_COMPONENT_MIGRATION_PLAN.md#required-proof-of-unchanged-ui-and-ux).
-Cached remote content, timeout dialogs, feedback states, picker popups, and
-admin empty/loading/error, sorting/filtering and mutation workflows still need
-matched fixtures, screenshots and behavior checks. The existing Cashflow journey
-also hits a pre-migration `DateFormat`
-circular-initialization error; it cannot be counted as a migration pass.
+Cached remote content and admin empty/loading/error, sorting/filtering and
+mutation workflows still need matched fixtures, screenshots and behavior checks.
+Base exports Date/Time picker adapters but does not open them on its own pages;
+their popup behavior has package coverage, not a Base-host comparison. The
+cross-host Cashflow journey fails on both old and migrated Base with the same
+`DateFormat` circular-initialization error in the Cashflow remote; it cannot be
+counted as a migration pass.
