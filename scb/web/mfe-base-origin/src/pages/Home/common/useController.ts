@@ -14,6 +14,7 @@ import { AnalyticsData } from "../../../analytics/model";
 import { handleLoginEntities } from "../../../utils/login";
 import { setDetail, refreshTabUtil } from "./util";
 const analyticsData: AnalyticsData = { container: "Base", tile: "home" };
+const REFRESH_BEFORE_ACCESS_EXPIRY_MS = 25_000;
 
 const useController = () => {
   const [store, dispatch] = useContext();
@@ -27,7 +28,6 @@ const useController = () => {
   } = useDispatcher();
   const timerPopup = React.useRef<any>(0);
   const timerMouseMove = React.useRef<any>(0);
-  const lastRefreshTokenRequest = React.useRef<string>();
   const [showTimeout, setShowTimeout] = React.useState(false);
   const [value, setValue] = React.useState(1);
   const [ready, setReady] = React.useState(false);
@@ -102,22 +102,9 @@ const useController = () => {
   }, [store?.token, store?.expiredIn, ready]);
 
   React.useEffect(() => {
-    if (
-      !ready ||
-      !store?.token ||
-      store.refreshToken ||
-      1000 * aOrb(store.expiredIn, 0) <= Date.now() ||
-      lastRefreshTokenRequest.current === store.token
-    ) {
-      return;
-    }
-    lastRefreshTokenRequest.current = store.token;
-    getRefreshToken();
-  }, [ready, store?.token, store?.refreshToken, store?.expiredIn]);
-
-  React.useEffect(() => {
     if (!ready || !store?.token) return;
 
+    const accessExpiresAt = 1000 * aOrb(store.expiredIn, 0);
     let refreshExpiresAt = 0;
     if (store.refreshToken) {
       try {
@@ -130,24 +117,64 @@ const useController = () => {
 
     const reconcileExpiry = () => {
       if (
-        1000 * aOrb(store.expiredIn, 0) <= Date.now() ||
+        accessExpiresAt <= Date.now() ||
         (refreshExpiresAt > 0 && refreshExpiresAt <= Date.now())
       ) {
         setShowTimeout(true);
       }
     };
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") reconcileExpiry();
+    const requestRefresh = () => {
+      if (
+        accessExpiresAt > Date.now() &&
+        !showTimeout &&
+        !store.isOnLogout &&
+        (!refreshExpiresAt || refreshExpiresAt > Date.now())
+      ) {
+        getRefreshToken();
+      }
     };
+    let acquisitionTimer: ReturnType<typeof setTimeout> | undefined;
+    const scheduleAcquisition = () => {
+      clearTimeout(acquisitionTimer);
+      const delay = accessExpiresAt - REFRESH_BEFORE_ACCESS_EXPIRY_MS - Date.now();
+      // A missed deadline must not replay an acquisition when the page returns.
+      if (document.visibilityState === "visible" && delay > 0) {
+        acquisitionTimer = setTimeout(() => {
+          if (document.visibilityState === "visible") requestRefresh();
+        }, delay);
+      }
+    };
+    let previousVisibility = document.visibilityState;
+    const handleVisibilityChange = () => {
+      const visibility = document.visibilityState;
+      if (visibility === previousVisibility) return;
+      previousVisibility = visibility;
+      clearTimeout(acquisitionTimer);
+      if (visibility === "hidden") {
+        requestRefresh();
+      } else {
+        reconcileExpiry();
+        scheduleAcquisition();
+      }
+    };
+    scheduleAcquisition();
     document.addEventListener("visibilitychange", handleVisibilityChange);
     const refreshExpiryTimer = refreshExpiresAt
       ? setTimeout(reconcileExpiry, Math.max(0, refreshExpiresAt - Date.now()))
       : undefined;
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      clearTimeout(acquisitionTimer);
       clearTimeout(refreshExpiryTimer);
     };
-  }, [ready, store?.token, store?.expiredIn, store?.refreshToken]);
+  }, [
+    ready,
+    store?.token,
+    store?.expiredIn,
+    store?.refreshToken,
+    store?.isOnLogout,
+    showTimeout,
+  ]);
 
   React.useEffect(() => {
     if (

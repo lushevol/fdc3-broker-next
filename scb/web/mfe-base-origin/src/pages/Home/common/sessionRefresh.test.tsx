@@ -1,104 +1,234 @@
-import { act, renderHook } from "@testing-library/react";
-import type { RootModel } from "../../../hooks/model/root";
-import useController from "./useController";
+import React from 'react';
+import { act, cleanup, renderHook } from '@testing-library/react';
+import type { RootModel } from '../../../hooks/model/root';
+import { extend } from '../../../hooks/service/util/extend';
+import useController from './useController';
 
 const mockRefreshToken = jest.fn();
 const mockDispatch = jest.fn();
 let mockStore: RootModel;
 
-jest.mock("../../../hooks/provider", () => ({
+jest.mock('../../../hooks/provider', () => ({
   useContext: () => [mockStore, mockDispatch],
 }));
-jest.mock("../../../hooks/service", () => ({
+jest.mock('../../../hooks/HooksBase', () => ({
+  getHooksBase: () => ({ store: mockStore, baseDispatch: mockDispatch }),
+}));
+jest.mock('../../../hooks/service', () => ({
   getRefreshToken: (...args: unknown[]) => mockRefreshToken(...args),
 }));
-jest.mock("../../../hooks/service/util/extend", () => ({
+jest.mock('../../../hooks/service/util/extend', () => ({
   extend: jest.fn(),
 }));
-jest.mock("../../../hooks/dispathcer", () => () => ({
+jest.mock('../../../hooks/dispathcer', () => () => ({
   dispacthLoading: jest.fn(),
   dispacthWorkspaces: jest.fn(),
   dispacthCurrentWorkspace: jest.fn(),
   addWorkspace: jest.fn(),
   dispacthErrorMessage: jest.fn(),
 }));
-jest.mock("../../../analytics", () => () => ({
+jest.mock('../../../analytics', () => () => ({
   ButtonEvent: jest.fn(),
   TileEvent: jest.fn(),
   TabEvent: jest.fn(),
 }));
-jest.mock("../../../utils/login", () => ({
+jest.mock('../../../utils/login', () => ({
   handleLoginEntities: jest.fn(),
 }));
-jest.mock("../../../utils/common", () => ({
-  aOrb: (value: unknown, fallback: unknown) => value || fallback,
-  getJWTPayload: (token: string) => JSON.parse(token),
-  validateWorkspace: jest.fn((workspaces: unknown) => workspaces),
-}));
-jest.mock("./util", () => ({
+jest.mock('./util', () => ({
   setDetail: jest.fn(),
   refreshTabUtil: jest.fn(),
 }));
 
 const setVisibility = (state: DocumentVisibilityState) => {
-  Object.defineProperty(document, "visibilityState", {
+  Object.defineProperty(document, 'visibilityState', {
     configurable: true,
     value: state,
   });
-  document.dispatchEvent(new Event("visibilitychange"));
+  document.dispatchEvent(new Event('visibilitychange'));
 };
 
-describe("Home session refresh", () => {
-  const now = Date.parse("2026-09-21T00:00:00Z");
+const tokenExpiringAt = (expiresAt: number) =>
+  `Bearer header.${btoa(JSON.stringify({ exp: expiresAt / 1000 }))}.signature`;
+
+describe('Home session refresh', () => {
+  const now = Date.parse('2026-09-21T00:00:00Z');
   const accessLifetime = 15 * 60_000;
   const refreshLifetime = 225 * 60_000 + 24_000;
+  const originalVisibility = Object.getOwnPropertyDescriptor(document, 'visibilityState');
 
   beforeEach(() => {
     jest.useFakeTimers();
     jest.setSystemTime(now);
-    jest.clearAllMocks();
-    setVisibility("visible");
+    jest.resetAllMocks();
+    setVisibility('visible');
     mockStore = {
-      token: "access-token",
+      token: 'access-token',
       expiredIn: (now + accessLifetime) / 1000,
       workspaces: [],
     };
   });
 
   afterEach(() => {
+    cleanup();
+    jest.restoreAllMocks();
+    if (originalVisibility) {
+      Object.defineProperty(document, 'visibilityState', originalVisibility);
+    } else {
+      Reflect.deleteProperty(document, 'visibilityState');
+    }
     jest.useRealTimers();
   });
 
-  it("acquires a refresh token once without following access-token rotations", async () => {
-    const { rerender } = renderHook(() => useController());
-
-    await act(async () => undefined);
+  it('[SR31] Given a never-hidden idle session, refresh is acquired at 14m35s and access expires at 15m', () => {
+    const { result } = renderHook(() => useController());
+    expect(mockRefreshToken).not.toHaveBeenCalled();
+    act(() => jest.advanceTimersByTime(874_999));
+    expect(mockRefreshToken).not.toHaveBeenCalled();
+    act(() => jest.advanceTimersByTime(1));
     expect(mockRefreshToken).toHaveBeenCalledTimes(1);
-
-    mockStore.refreshToken = JSON.stringify({
-      exp: (now + refreshLifetime) / 1000,
-    });
-    mockStore.token = "next-access-token";
-    mockStore.expiredIn = (now + accessLifetime) / 1000;
-    rerender();
-    await act(async () => undefined);
-
+    expect(result.current.showTimeout).toBe(false);
+    act(() => jest.advanceTimersByTime(25_000));
+    expect(result.current.showTimeout).toBe(true);
     expect(mockRefreshToken).toHaveBeenCalledTimes(1);
   });
 
-  it("does not request a refresh token after the access token has expired", async () => {
-    mockStore.expiredIn = (now - 1) / 1000;
+  it('[SR39] Hiding requests immediately and cancels the visible pre-expiry timer', () => {
     renderHook(() => useController());
+    act(() => setVisibility('hidden'));
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+    act(() => jest.advanceTimersByTime(875_000));
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+    act(() => setVisibility('visible'));
+    act(() => jest.advanceTimersByTime(1000));
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+  });
 
+  it('[SR40] Returning before the timer deadline re-arms acquisition for that deadline', () => {
+    renderHook(() => useController());
+    act(() => setVisibility('hidden'));
+    act(() => jest.advanceTimersByTime(600_000));
+    act(() => setVisibility('visible'));
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+    act(() => jest.advanceTimersByTime(274_999));
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+    act(() => jest.advanceTimersByTime(1));
+    expect(mockRefreshToken).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([875_000, 875_001, 890_000, 900_000])(
+    '[SR41] Returning at %i ms never replays the cancelled acquisition deadline',
+    (elapsed) => {
+      const { result } = renderHook(() => useController());
+      act(() => setVisibility('hidden'));
+      act(() => jest.setSystemTime(now + elapsed));
+      act(() => setVisibility('visible'));
+      act(() => jest.advanceTimersByTime(1));
+      expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+      expect(result.current.showTimeout).toBe(elapsed >= 900_000);
+    },
+  );
+
+  it('[SR42] Repeated notifications in the same visibility state do not count as new hides', () => {
+    renderHook(() => useController());
+    act(() => {
+      setVisibility('hidden');
+      setVisibility('hidden');
+      setVisibility('hidden');
+    });
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+    act(() => {
+      setVisibility('visible');
+      setVisibility('hidden');
+    });
+    expect(mockRefreshToken).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    [1, 1],
+    [0, 0],
+    [-1, 0],
+  ])(
+    '[SR34] Hiding with %i ms access remaining sends %i request before the modal renders',
+    (remaining, expectedRequests) => {
+      renderHook(() => useController());
+      act(() => jest.setSystemTime(now + accessLifetime - remaining));
+      act(() => setVisibility('hidden'));
+      expect(mockRefreshToken).toHaveBeenCalledTimes(expectedRequests);
+    },
+  );
+
+  it('[SR36] A visible timer delivered after access expires cannot acquire credentials', () => {
+    renderHook(() => useController());
+    act(() => jest.setSystemTime(now + accessLifetime));
+    act(() => jest.advanceTimersByTime(875_000));
+    expect(mockRefreshToken).not.toHaveBeenCalled();
+  });
+
+  it('[SR35] Access rotation cancels the obsolete visible acquisition deadline', () => {
+    const { rerender } = renderHook(() => useController());
+    act(() => jest.advanceTimersByTime(600_000));
+    mockStore = { ...mockStore, token: 'new-access', expiredIn: (now + 25 * 60_000) / 1000 };
+    rerender();
+    expect(mockRefreshToken).not.toHaveBeenCalled();
+    act(() => jest.advanceTimersByTime(275_000));
+    expect(mockRefreshToken).not.toHaveBeenCalled();
+    act(() => jest.advanceTimersByTime(600_000));
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('[SR15] Once the modal is open, hiding and scheduled acquisition do not renew refresh', () => {
+    const { result } = renderHook(() => useController());
+    act(() => result.current.setShowTimeout(true));
+    act(() => {
+      setVisibility('hidden');
+      setVisibility('visible');
+      jest.advanceTimersByTime(875_000);
+    });
+    expect(mockRefreshToken).not.toHaveBeenCalled();
+  });
+
+  it('[SR16] Logout in progress blocks hide and timer acquisition', () => {
+    mockStore.isOnLogout = true;
+    renderHook(() => useController());
+    act(() => {
+      setVisibility('hidden');
+      setVisibility('visible');
+      jest.advanceTimersByTime(875_000);
+    });
+    expect(mockRefreshToken).not.toHaveBeenCalled();
+  });
+
+  it('[SR02] Given an acquired refresh token, when access rotates, then no immediate refresh is requested', async () => {
+    mockStore.refreshToken = tokenExpiringAt(now + refreshLifetime);
+    const { rerender } = renderHook(() => useController());
+
+    await act(async () => undefined);
+    expect(mockRefreshToken).not.toHaveBeenCalled();
+
+    mockStore.refreshToken = tokenExpiringAt(now + refreshLifetime);
+    mockStore.token = 'next-access-token';
+    mockStore.expiredIn = (now + accessLifetime) / 1000;
+    rerender();
     await act(async () => undefined);
 
     expect(mockRefreshToken).not.toHaveBeenCalled();
   });
 
-  it("does not renew the refresh token when the page becomes hidden near expiry", async () => {
-    mockStore.refreshToken = JSON.stringify({
-      exp: (now + 60_000) / 1000,
-    });
+  it.each([0, -1, -15 * 60_000])(
+    '[SR17] Given access has %i ms remaining, when Home mounts, then no refresh is requested',
+    async (remaining) => {
+      mockStore.expiredIn = (now + remaining) / 1000;
+      renderHook(() => useController());
+
+      await act(async () => undefined);
+
+      expect(mockRefreshToken).not.toHaveBeenCalled();
+    },
+  );
+
+  it('[SR32] Given refresh is near expiry, each hide while access is valid requests a replacement', async () => {
+    mockStore.refreshToken = tokenExpiringAt(now + 60_000);
     renderHook(() => useController());
 
     await act(async () => undefined);
@@ -106,87 +236,98 @@ describe("Home session refresh", () => {
 
     act(() => {
       jest.advanceTimersByTime(40_000);
-      setVisibility("hidden");
+      setVisibility('hidden');
     });
 
-    expect(mockRefreshToken).not.toHaveBeenCalled();
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
 
     act(() => {
-      setVisibility("visible");
-      setVisibility("hidden");
+      setVisibility('visible');
+      setVisibility('hidden');
     });
-    expect(mockRefreshToken).not.toHaveBeenCalled();
+    expect(mockRefreshToken).toHaveBeenCalledTimes(2);
   });
 
-  it("resumes normally when the page returns before access-token expiry", async () => {
-    mockStore.refreshToken = JSON.stringify({
-      exp: (now + refreshLifetime) / 1000,
-    });
-    const { result } = renderHook(() => useController());
+  it.each([0, 60_000, 5 * 60_000, 10 * 60_000, 15 * 60_000 - 1])(
+    '[SR03] Given suspended timers, when restoring after %i ms, then access is still usable',
+    async (elapsed) => {
+      mockStore.refreshToken = tokenExpiringAt(now + refreshLifetime);
+      const { result } = renderHook(() => useController());
 
-    await act(async () => undefined);
-    act(() => {
-      setVisibility("hidden");
-      jest.setSystemTime(now + accessLifetime - 1);
-      setVisibility("visible");
-    });
+      await act(async () => undefined);
+      act(() => {
+        setVisibility('hidden');
+        jest.setSystemTime(now + elapsed);
+        setVisibility('visible');
+      });
 
-    expect(result.current.showTimeout).toBe(false);
-  });
-
-  it.each([15, 30, 60, 120, 225])(
-    "shows the existing prompt when returning after %i minutes",
-    async (minutesAway) => {
-    mockStore.refreshToken = JSON.stringify({
-      exp: (now + refreshLifetime) / 1000,
-    });
-    const { result } = renderHook(() => useController());
-
-    await act(async () => undefined);
-    act(() => {
-      setVisibility("hidden");
-      jest.setSystemTime(now + minutesAway * 60_000);
-      setVisibility("visible");
-    });
-
-    expect(result.current.showTimeout).toBe(true);
-    expect(mockRefreshToken).not.toHaveBeenCalled();
-    }
+      expect(result.current.showTimeout).toBe(false);
+      expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+    },
   );
 
-  it("reconciles refresh-token expiry when returning from suspension", async () => {
-    mockStore.refreshToken = JSON.stringify({
-      exp: (now + refreshLifetime) / 1000,
-    });
+  it.each([
+    15 * 60_000,
+    15 * 60_000 + 1,
+    20 * 60_000,
+    30 * 60_000 - 1,
+    30 * 60_000,
+    45 * 60_000,
+    60 * 60_000 - 1,
+    60 * 60_000,
+    120 * 60_000,
+    180 * 60_000,
+    225 * 60_000,
+  ])(
+    '[SR04] Given suspended timers, when restoring after %i ms, then the expiry prompt opens',
+    async (elapsed) => {
+      mockStore.refreshToken = tokenExpiringAt(now + refreshLifetime);
+      const { result } = renderHook(() => useController());
+
+      await act(async () => undefined);
+      act(() => {
+        setVisibility('hidden');
+        jest.setSystemTime(now + elapsed);
+        setVisibility('visible');
+      });
+
+      expect(result.current.showTimeout).toBe(true);
+      expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('[SR05] Given expired refresh, when returning from suspension, then the logout path opens', async () => {
+    mockStore.refreshToken = tokenExpiringAt(now + refreshLifetime);
     const { result } = renderHook(() => useController());
 
     await act(async () => undefined);
     act(() => {
-      setVisibility("hidden");
+      setVisibility('hidden');
       jest.setSystemTime(now + refreshLifetime + 1);
-      setVisibility("visible");
+      setVisibility('visible');
     });
 
     expect(result.current.showTimeout).toBe(true);
-    expect(mockRefreshToken).not.toHaveBeenCalled();
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps the normal fifteen-minute session prompt", async () => {
+  it('[SR06] Given no activity, when 15 minutes elapse, then the normal prompt opens', async () => {
     const { result } = renderHook(() => useController());
 
     await act(async () => undefined);
     act(() => {
-      jest.advanceTimersByTime(accessLifetime);
+      jest.advanceTimersByTime(accessLifetime - 1);
     });
+    expect(result.current.showTimeout).toBe(false);
+
+    act(() => jest.advanceTimersByTime(1));
 
     expect(result.current.showTimeout).toBe(true);
   });
 
-  it("opens the logout path at refresh-token expiry even with a valid access token", async () => {
+  it('[SR11] Given valid access, when refresh expires, then the logout path opens', async () => {
     mockStore.expiredIn = (now + refreshLifetime + accessLifetime) / 1000;
-    mockStore.refreshToken = JSON.stringify({
-      exp: (now + refreshLifetime) / 1000,
-    });
+    mockStore.refreshToken = tokenExpiringAt(now + refreshLifetime);
     const { result } = renderHook(() => useController());
 
     await act(async () => undefined);
@@ -199,5 +340,149 @@ describe("Home session refresh", () => {
       jest.advanceTimersByTime(1);
     });
     expect(result.current.showTimeout).toBe(true);
+  });
+
+  it('[SR42] Rendering does not request but every actual hide requests even with a pending call', () => {
+    const { result, rerender } = renderHook(() => useController());
+
+    for (let attempt = 0; attempt < 5; attempt++) {
+      rerender();
+      act(() => {
+        setVisibility('hidden');
+        jest.advanceTimersByTime(1000);
+        setVisibility('visible');
+      });
+    }
+
+    expect(mockRefreshToken).toHaveBeenCalledTimes(5);
+    expect(result.current.showTimeout).toBe(false);
+  });
+
+  it('[SR01] StrictMode does not acquire on mount and schedules a single visible timer', () => {
+    renderHook(() => useController(), { wrapper: React.StrictMode });
+    expect(mockRefreshToken).not.toHaveBeenCalled();
+    act(() => jest.advanceTimersByTime(875_000));
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('[SR17] Given no access token, when time and visibility change, then no session work starts', () => {
+    mockStore = { workspaces: [] };
+    const { result } = renderHook(() => useController());
+
+    act(() => {
+      setVisibility('hidden');
+      jest.advanceTimersByTime(4 * 60 * 60_000);
+      setVisibility('visible');
+    });
+
+    expect(mockRefreshToken).not.toHaveBeenCalled();
+    expect(result.current.showTimeout).toBe(false);
+  });
+
+  it.each(['running', 'suspended'] as const)(
+    '[SR07] Given %s background timers, when restoring at access expiry, then the prompt is shown',
+    (timers) => {
+      mockStore.refreshToken = tokenExpiringAt(now + refreshLifetime);
+      const { result } = renderHook(() => useController());
+
+      act(() => {
+        setVisibility('hidden');
+        if (timers === 'running') {
+          jest.advanceTimersByTime(accessLifetime);
+        } else {
+          // A wall-clock jump deliberately leaves scheduled callbacks pending.
+          jest.setSystemTime(now + accessLifetime);
+        }
+        setVisibility('visible');
+        setVisibility('visible');
+      });
+
+      expect(result.current.showTimeout).toBe(true);
+      expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('[SR18] Given newer access, when returning past the old expiry, then only the latest deadline applies', () => {
+    mockStore.refreshToken = tokenExpiringAt(now + refreshLifetime);
+    const { result, rerender } = renderHook(() => useController());
+    act(() => jest.advanceTimersByTime(10 * 60_000));
+    mockStore = {
+      ...mockStore,
+      token: 'renewed-access',
+      expiredIn: (now + 25 * 60_000) / 1000,
+    };
+    rerender();
+
+    act(() => {
+      setVisibility('hidden');
+      jest.advanceTimersByTime(10 * 60_000);
+      setVisibility('visible');
+    });
+    expect(result.current.showTimeout).toBe(false);
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+
+    act(() => jest.advanceTimersByTime(5 * 60_000));
+    expect(result.current.showTimeout).toBe(true);
+  });
+
+  it('[SR11] Given repeated successful access renewals, when refresh expires, then the fixed cutoff still applies', () => {
+    mockStore.refreshToken = tokenExpiringAt(now + refreshLifetime);
+    const { result, rerender } = renderHook(() => useController());
+
+    for (let minute = 10; minute <= 220; minute += 10) {
+      act(() => jest.advanceTimersByTime(10 * 60_000));
+      expect(result.current.showTimeout).toBe(false);
+      mockStore = {
+        ...mockStore,
+        token: `access-at-minute-${minute}`,
+        expiredIn: (Date.now() + accessLifetime) / 1000,
+      };
+      rerender();
+    }
+
+    act(() => jest.advanceTimersByTime(5 * 60_000 + 23_999));
+    expect(result.current.showTimeout).toBe(false);
+    act(() => jest.advanceTimersByTime(1));
+    expect(result.current.showTimeout).toBe(true);
+    expect(mockRefreshToken).not.toHaveBeenCalled();
+  });
+
+  it('[SR05] Given valid access but expired refresh, when restoring, then the logout path opens', () => {
+    mockStore.refreshToken = tokenExpiringAt(now + 60_000);
+    const { result } = renderHook(() => useController());
+    act(() => {
+      setVisibility('hidden');
+      jest.setSystemTime(now + 60_000);
+      setVisibility('visible');
+    });
+    expect(result.current.showTimeout).toBe(true);
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('[SR16] Given pending activity and expiry timers, when Home unmounts, then no further work runs', () => {
+    mockStore.refreshToken = tokenExpiringAt(now + refreshLifetime);
+    const addListener = jest.spyOn(document, 'addEventListener');
+    const removeListener = jest.spyOn(document, 'removeEventListener');
+    const { result, unmount } = renderHook(() => useController());
+    act(() => result.current.mouseMove());
+    const visibilityListener = addListener.mock.calls.find(
+      ([event]) => event === 'visibilitychange',
+    )?.[1];
+    expect(visibilityListener).toBeDefined();
+    expect(jest.getTimerCount()).toBeGreaterThan(0);
+    unmount();
+    expect(removeListener).toHaveBeenCalledWith('visibilitychange', visibilityListener);
+    expect(jest.getTimerCount()).toBe(0);
+    mockRefreshToken.mockClear();
+
+    act(() => {
+      setVisibility('hidden');
+      jest.advanceTimersByTime(4 * 60 * 60_000);
+      setVisibility('visible');
+    });
+
+    expect(jest.getTimerCount()).toBe(0);
+    expect(mockRefreshToken).not.toHaveBeenCalled();
+    expect(extend).not.toHaveBeenCalled();
   });
 });
