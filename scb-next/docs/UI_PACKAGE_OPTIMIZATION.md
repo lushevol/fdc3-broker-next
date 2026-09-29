@@ -93,3 +93,47 @@ selects, host themes, appearance changes, disabled controls and retained search
 criteria. All 127 package tests and seven token tests pass, with 97.21% line and
 94.42% branch coverage. These counts establish reduced work, not a wall-clock
 speed guarantee. Observer lifecycle and public component APIs are unchanged.
+
+### Stage 5 — contracts and final validation
+
+The maintained inventory now includes all eleven JavaScript entries and the
+three CSS choices. Search collapse/expansion ownership is explicitly in the
+package. README documents the compatibility namespace shapes and intentional
+differences from core APIs; no legacy props/defaults were removed. The new Grid
+story opts into MUI 6's supported `ariaV7` semantics so pagination controls are
+outside the grid role. The DataGrid export and existing host props are unchanged.
+
+Final checks, 2026-09-30:
+
+- Package: 127 Vitest tests, seven token tests, typecheck, zero-warning lint,
+  library build, Storybook build and independent packed-consumer verification
+  (declarations, SSR, optional integrations, assets and tree shaking).
+- Package browser gate: 23 consumer cases pass against unchanged screenshots;
+  the complete Storybook accessibility scan passes after the Grid story fix.
+- CSS: four browser cases pass, including the combined-entry equivalence matrix.
+- Base: all 40 migration/parity cases pass across the final runs, covering Login,
+  shell, admin, feedback/session states and the workspace add/remove journey.
+  Base's 15 focused component contract tests, typecheck and production build pass.
+- Ratan/Cashflow: five focused bridge tests and both production builds pass.
+  Dependency isolation and the Base import-boundary check pass.
+- Production cross-MFE verification: the existing controlled-edge harness passes
+  Login, Cashflow rendering and shared-theme updates for legacy and WebKit, with
+  no page errors. Its existing render/remove Playwright test also passes against
+  those production outputs. One sample per generation was collected; no new
+  application performance budget or before/after timing claim is made.
+
+Validation limitations retained outside this optimization:
+
+- Ratan's existing `typecheck` script fails with TS5053 because its inherited
+  `emitDeclarationOnly` option conflicts with `--noEmit`; its production build and
+  bridge contracts pass. The package and Base typechecks pass normally.
+- Running all three development servers together exposes a Cashflow DateFormat
+  initialization error and a host prefix collision (Base dialog test IDs become
+  `MicroWebUI_cashflow_cn_*`). The admin failure also reproduces with the original
+  provider; all six admin comparisons pass in the original Base-only setup. The
+  production cross-MFE path passes. These application/dev-runtime issues were not
+  moved into the design package or hidden by changing parity expectations.
+
+All five stages are complete. Business logic remains in the applications, the
+existing standalone CSS artifacts are unchanged, and optimizations preserve the
+captured component contracts and portal screenshots.

@@ -19,6 +19,7 @@ verified surfaces and outstanding checks.
 | Original surface | Maintained presentation | Host responsibility |
 | --- | --- | --- |
 | Theme controls/tokens and CSS aliases | Core/theme/tokens/compatibility entries | Auth-based mode, persistence, document classes, explicit CSS loading |
+| Scoped and global CSS tokens/fonts | `styles.css`, `tokens.css`, or combined `styles-and-tokens.css` | Choose the required scope; load the combined entry instead of both standalone files when both are needed |
 | Config, light/dark/common/normalize/scroll | Optional portal-theme entry | URL flags and explicit global CssBaseline policy; Ratan retains its palette-only theme |
 | Button, LoadingButton, Input, Select | Core named exports | Ratan/Cashflow compatibility retains primary-type translation and 16px startIcon defaults; Base Button/LoadingButton directly use core defaults |
 | SearchInput, SearchButton, ResetButton, ToggleButton, Label | Core named exports | Screen state, query execution and analytics |
@@ -42,10 +43,18 @@ three state presentations. Its toolbar selects legacy/WebKit and light/dark.
 Base's retained stories continue to exercise compatible exports.
 
 The `compatibility` entry is restricted to the existing Base migration helpers;
-it is not a general customization API. Hosts load `styles.css` explicitly. That
+it is not a general customization API. Hosts load `styles.css` explicitly (or
+`styles-and-tokens.css` when they also need document-wide tokens). That
 stylesheet packages SC Prosper Sans, Open Dyslexic, Inter and Roboto Mono assets;
 legacy Poppins remains host-provided. Hosts also own date localization/timezone/
 format policy, font redistribution approval and MUI X Pro licensing/initialization.
+
+The [compatibility contract table](../packages/ratan-design-origin/README.md)
+records legacy namespace shapes, spinner defaults, forced dialog portals and
+string-only Time rendering. These are intentional supported migration contracts.
+The [optimization record](UI_PACKAGE_OPTIMIZATION.md) contains reconciliation,
+measured work reductions and current validation results. Optional compositions
+in the migration plan remain proposals, not new package exports.
 
 ## Deliberately Retained
 

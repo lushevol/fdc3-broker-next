@@ -6,6 +6,9 @@
 - Share loading-button presentation internally without changing public contracts.
 - Add optional `styles-and-tokens.css` for applications requiring both CSS scopes;
   preserve the existing standalone CSS entries.
+- Reuse the appearance theme when attaching provider roots and skip geometry
+  reads for expanded search criteria, preserving portal and focus behavior.
+- Document intentional Base compatibility defaults and CSS scope selection.
 
 ## 0.1.0 - Local Release Candidate
 

@@ -61,6 +61,9 @@ shadow with the same formula and the dark blue token counterpart.
   namespaces for Ratan/Cashflow (`Loader`, `Time`, `Button`, `LoadingButton`,
   `Dialog`); it contains no host state, services, routing or theme policy.
 - `ratan-design-origin/styles.css`: scoped canonical WebKit variables and fonts.
+- `ratan-design-origin/tokens.css`: document-wide tokens and fonts for plain CSS.
+- `ratan-design-origin/styles-and-tokens.css`: combined global and scoped tokens
+  with shared declarations; use instead of loading both standalone stylesheets.
 - `ratan-design-origin/dates`: DatePicker, DateTimePicker, TimePicker, their
   Dayjs prop types, LocalizationProvider and AdapterDayjs.
 - `ratan-design-origin/date-range`: optional Pro single-input DateRangePicker.
@@ -89,6 +92,19 @@ pure presentation namespace shape during Ratan/Cashflow migration. They are
 migration helpers, not supported general-purpose customization primitives.
 `portal-theme` likewise preserves an explicit historical host integration and
 document-level policy.
+
+The legacy namespaces deliberately differ from the core controls:
+
+| Compatibility API | Preserved behavior |
+| --- | --- |
+| `Button.default` | Accepts legacy `type="primary"` and maps it to HTML `type="button"`; other button props/callbacks pass through. |
+| `LoadingButton.default` | Defaults to a 16px spinner in the start-icon slot, replacing/restoring the caller icon. Core LoadingButton/SearchButton default to 14px inline presentation. |
+| `Dialog.default` | Defaults to open, forces portal rendering even if `disablePortal` is supplied, caps dimensions to the viewport with 16px margins, and invokes the legacy no-argument close callback. |
+| `Loader.default` | Renders a spinner with the accessible name "Loading". |
+| `Time.Time` | Renders `String(value ?? '')`; `field` and `isAccurateToDay` remain accepted compatibility props, not date-formatting instructions. |
+
+Keep these namespace shapes/defaults for existing consumers. New reusable UI
+should use the core named exports; business-aware formatting stays in the host.
 
 The compiling examples are [core contracts](fixtures/consumer/src/contracts.tsx),
 [date contracts](fixtures/consumer/src/dates.tsx), and
@@ -299,7 +315,7 @@ their specificity, appearance overrides and responsive conditions. Keep using
 `styles.css` for scoped-only consumers and `tokens.css` for global-only consumers.
 The combined entry is self-contained and uses the same adjacent `fonts/` assets.
 
-Continue loading `styles.css` for `RatanDesignProvider` scopes; those scopes
+Load `styles.css` or the combined entry for `RatanDesignProvider` scopes; those scopes
 keep their own appearance even when `tokens.css` is also loaded. The provider's
 existing default remains legacy/light.
 

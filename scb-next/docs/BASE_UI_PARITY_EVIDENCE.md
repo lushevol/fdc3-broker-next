@@ -1,5 +1,19 @@
 # Base UI migration parity evidence
 
+## Current branch reconciliation, 2026-09-30
+
+The migration and subsequent package optimizations are now reconciled into the
+session-expiry branch. All 40 Base migration/parity cases pass across the final
+runs. The eight credential-login baselines were recaptured against that branch's
+original Base source, then compared with zero differing pixels after restoring
+the migration. This preserves that branch's forced field-focus appearance rather
+than importing the historical uncommitted focus edit described below.
+
+The controlled production host also passes Cashflow rendering, shared appearance
+updates and workspace removal. See [the optimization record](UI_PACKAGE_OPTIMIZATION.md)
+for current validation, exact scope, and separate dev-runtime limitations. The
+remaining sections are the original migration's historical evidence.
+
 The pre-migration Base source is commit `98c2d131`. The comparison uses that
 checkout on port 8101 and the migrated checkout on port 8001. Both resolve the
 same installed React 18.3.1, MUI 5.18.0, Emotion 11.14 and SC WebKit assets.
