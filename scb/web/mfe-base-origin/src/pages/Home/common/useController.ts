@@ -159,6 +159,13 @@ const useController = () => {
         scheduleAcquisition();
       }
     };
+    if (
+      !refreshExpiresAt &&
+      (document.visibilityState === "hidden" ||
+        accessExpiresAt - Date.now() <= REFRESH_BEFORE_ACCESS_EXPIRY_MS)
+    ) {
+      requestRefresh();
+    }
     scheduleAcquisition();
     document.addEventListener("visibilitychange", handleVisibilityChange);
     const refreshExpiryTimer = refreshExpiresAt

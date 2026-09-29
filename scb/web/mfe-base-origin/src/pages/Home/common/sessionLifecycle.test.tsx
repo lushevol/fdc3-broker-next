@@ -170,6 +170,47 @@ describe("Session lifecycle across browser minimize and return", () => {
     sessionStorage.clear();
   });
 
+  it.each(["running", "suspended"])(
+    "Given Home starts hidden with %s timers, When access expires and the user returns, Then Extend succeeds",
+    async (timers) => {
+      setVisibility("hidden");
+      await renderSession();
+      expect(requestsTo("refreshtoken")).toHaveLength(1);
+      if (timers === "running") {
+        await advanceTime(accessLifetime);
+      } else {
+        jest.setSystemTime(now + accessLifetime);
+      }
+      await act(async () => setVisibility("visible"));
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "Extend" }));
+      });
+      expect(requestsTo("relogin")[0].headers["Single-UI-Refresh"]).toBe(
+        responseRefreshToken
+      );
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(screen.getByTestId("session-workspace")).toBeInTheDocument();
+    }
+  );
+
+  it("Given Home first mounts after the acquisition deadline, Then it obtains missing refresh while access is still valid", async () => {
+    await renderSession({
+      token: token("late-access", now + 10_000),
+      expiredIn: (now + 10_000) / 1000,
+    });
+    expect(requestsTo("refreshtoken")).toHaveLength(1);
+    await advanceTime(10_000);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Extend" }));
+    });
+    expect(requestsTo("relogin")[0].headers["Single-UI-Refresh"]).toBe(
+      responseRefreshToken
+    );
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
   it("Given a page that never hides, When access expires, Then the visible timer has prepared a refresh token for manual Extend", async () => {
     await renderSession();
     expect(requestsTo("refreshtoken")).toHaveLength(0);

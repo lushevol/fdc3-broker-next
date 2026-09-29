@@ -24,3 +24,8 @@ When a usable refresh token is already available, Home must not request a
 replacement in the final 25 seconds of access-token validity. A request sent
 at that boundary can arrive after access expires and invalidate an otherwise
 extendable session.
+
+If Home starts hidden, it must acquire a missing refresh token immediately
+while access is valid. The same applies if Home first becomes ready in the
+final 25 seconds of access validity. Initial acquisition must not depend on a
+future visibility change or an already-missed timer deadline.
