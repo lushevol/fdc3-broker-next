@@ -11,6 +11,7 @@ import {
 import { getEntities } from "./entities";
 import type { Dispatch } from "react";
 import { Entity, Tiles } from "../hooks/model/root";
+import type { SessionRequestConfig } from "../hooks/service/util/sessionRequest";
 
 export const setAuthorization = (token: string) => {
   const { baseDispatch } = getHooksBase();
@@ -108,11 +109,11 @@ export const handleDrawers = (response: AxiosResponse) => {
   }
 };
 
-export const setRefreshToken = (refreshToken: string) => {
+export const setRefreshToken = (refreshToken: string, sessionGeneration = 0) => {
   const { baseDispatch } = getHooksBase();
   baseDispatch({
     type: ActionType.SET_REFRESH_TOKEN,
-    data: { refreshToken },
+    data: { refreshToken, sessionGeneration },
   });
 };
 
@@ -126,7 +127,8 @@ export const handleRefreshToken = (response: AxiosResponse) => {
       response.headers["Single-UI-Refresh"] ??
       response.headers["single-ui-refresh"]
     }`;
-    setRefreshToken(refreshToken);
+    const config: SessionRequestConfig | undefined = response.config;
+    setRefreshToken(refreshToken, config?.sessionGeneration);
   }
 };
 

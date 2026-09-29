@@ -4,6 +4,9 @@ import { ActionType, IAction } from "./util/ActionType";
 const root0 = (store: RootModel, action: IAction): RootModel => {
   switch (action.type) {
     case ActionType.SET_TOKEN:
+      if (!store.token) {
+        store.refreshToken = undefined;
+      }
       store.token = action.data.token;
       store.isOnLogout = false;
       break;
@@ -33,6 +36,7 @@ const root0 = (store: RootModel, action: IAction): RootModel => {
       store.isOnLogout = action.data.isOnLogout;
       break;
     case ActionType.CLEAR:
+      store.sessionGeneration = (store.sessionGeneration ?? 0) + 1;
       store.user = undefined;
       store.token = undefined;
       store.refreshToken = undefined;

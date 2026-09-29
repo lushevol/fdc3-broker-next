@@ -4,7 +4,13 @@ import { ActionType, IAction } from "./util/ActionType";
 const root = (store: RootModel, action: IAction): RootModel => {
   switch (action.type) {
     case ActionType.SET_REFRESH_TOKEN:
-      store.refreshToken = action.data.refreshToken;
+      if (
+        store.token &&
+        !store.isOnLogout &&
+        (action.data.sessionGeneration ?? 0) === (store.sessionGeneration ?? 0)
+      ) {
+        store.refreshToken = action.data.refreshToken;
+      }
       break;
     case ActionType.SET_IS_OPENFIN:
       store.isOpenFin = action.data.isOpenFin;

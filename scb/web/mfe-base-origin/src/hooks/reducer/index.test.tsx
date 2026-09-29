@@ -23,7 +23,7 @@ describe("SET_DATA Reducer", () => {
     const result = reducers(initialData, { type: ActionType.CLEAR, data: {} })
     result.expiredIn = 0
     result.iat = 0
-    expect(result).toStrictEqual(initialData)
+    expect(result).toStrictEqual({ ...initialData, sessionGeneration: 1 })
   });
   it("initialData should be equal to", async () => {
     //@ts-ignore
@@ -43,7 +43,7 @@ describe("SET_DATA Reducer", () => {
   });
   it("SET_TOKEN should preserve the refresh token during access-token rotation", () => {
     const result = reducers(
-      { ...initialData, refreshToken: "refresh-token" },
+      { ...initialData, token: "current-access-token", refreshToken: "refresh-token" },
       { type: ActionType.SET_TOKEN, data: { token: "next-access-token" } }
     );
 

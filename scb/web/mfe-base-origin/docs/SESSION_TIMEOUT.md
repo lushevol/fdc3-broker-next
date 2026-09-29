@@ -29,3 +29,9 @@ If Home starts hidden, it must acquire a missing refresh token immediately
 while access is valid. The same applies if Home first becomes ready in the
 final 25 seconds of access validity. Initial acquisition must not depend on a
 future visibility change or an already-missed timer deadline.
+
+Refresh acquisition belongs to the session that started the request. Logging
+out invalidates pending refresh replies, including failures; an old reply
+must not restore credentials or clear a later login. Access rotation within
+the same session must still accept its pending refresh reply. Fresh login
+clears any leftover refresh credential.

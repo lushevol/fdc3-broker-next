@@ -2,6 +2,7 @@ import { AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
 import { getHooksBase } from "../HooksBase";
 import service from "./config";
 import { getEndPoint } from "./util/getEndpoint";
+import type { SessionRequestConfig } from "./util/sessionRequest";
 
 export interface ConfigProps {
   signal?: any;
@@ -19,13 +20,15 @@ export const getRefreshToken = () => {
   }
   signal.getRefreshToken = new AbortController();
   const { store } = getHooksBase();
+  const config: SessionRequestConfig = {
+    signal: signal.getRefreshToken.signal,
+    sessionGeneration: store.sessionGeneration ?? 0,
+  };
   service
     .post(
       getEndPoint("/auth/v2/sso/refreshtoken"),
       { singleUIAuthorization: store.token },
-      {
-        signal: signal.getRefreshToken.signal,
-      }
+      config
     )
     .catch((e) => {
       console.error("e", e);
