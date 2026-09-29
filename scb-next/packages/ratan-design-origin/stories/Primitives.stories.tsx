@@ -54,6 +54,7 @@ export function GridSurface() {
   return (
     <Box sx={{ width: 640, maxWidth: '100%', height: 280 }}>
       <DataGrid rows={[{ id: 1, name: 'First row' }, { id: 2, name: 'Second row' }]}
+        experimentalFeatures={{ ariaV7: true }}
         columns={[{ field: 'id', headerName: 'ID', width: 100 }, { field: 'name', headerName: 'Name', flex: 1 }]} />
     </Box>
   );

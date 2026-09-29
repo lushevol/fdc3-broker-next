@@ -71,3 +71,25 @@ Seven token-generation tests pass. Four browser cases pass, including exhaustive
 computed custom-property comparisons for default/explicit document appearances,
 all four provider appearances, nested scopes and overrides at 390/1000px. No new
 fonts or visual defaults were introduced. Generator output is deterministic.
+
+### Stage 4 — measured render work
+
+Measured operation counts in the package's regression harness (ordinary React
+mount, not StrictMode's deliberate development double invocation):
+
+| Scenario | Before | After |
+| --- | ---: | ---: |
+| Full theme factory calls, mount + 10 unchanged parent rerenders | 2 | 1 |
+| Geometry reads, 50 expanded criteria, resize + child mutation | 102 | 0 |
+
+The provider memoizes the appearance theme separately and clones only portal
+defaults when its root attaches. The original container identity update and
+core Dialog readiness gate are retained. Expanded criteria restore managed
+accessibility attributes without measuring clipping. Collapsed criteria still
+measure geometry and move focus out of clipped content.
+
+Regression coverage includes initial-open core and primitive dialogs, nested
+selects, host themes, appearance changes, disabled controls and retained search
+criteria. All 127 package tests and seven token tests pass, with 97.21% line and
+94.42% branch coverage. These counts establish reduced work, not a wall-clock
+speed guarantee. Observer lifecycle and public component APIs are unchanged.

@@ -118,6 +118,11 @@ export const SearchConditionContainer = /*#__PURE__*/ React.forwardRef<
     const action = actionRef.current;
     if (!root || !action) return;
 
+    if (expanded) {
+      for (const item of Array.from(managedItems.current.keys())) restoreItem(item);
+      return;
+    }
+
     const items = Array.from(root.children).filter(
       (element): element is HTMLElement =>
         element !== action && element instanceof HTMLElement
@@ -131,7 +136,6 @@ export const SearchConditionContainer = /*#__PURE__*/ React.forwardRef<
     for (const item of items) {
       const itemBounds = item.getBoundingClientRect();
       const clipped =
-        !expanded &&
         (itemBounds.top < rootBounds.top - CLIP_TOLERANCE ||
           itemBounds.bottom > rootBounds.bottom + CLIP_TOLERANCE);
 

@@ -32,34 +32,41 @@ export function useRatanAppearance(): RatanAppearance {
 function createScopedHostTheme(
   baseTheme: Theme,
   appearance: RatanAppearance,
-  container?: HTMLElement,
 ): Theme {
   return createTheme(baseTheme, {
     palette: { mode: appearance.mode },
     ratan: { designGeneration: appearance.designGeneration },
+  });
+}
+
+/** Clone only portal defaults; attaching a root must not rebuild the theme. */
+function withPortalContainer(theme: Theme, container?: HTMLElement): Theme {
+  return {
+    ...theme,
     components: {
+      ...theme.components,
       MuiMenu: {
-        ...baseTheme.components?.MuiMenu,
-        defaultProps: { ...baseTheme.components?.MuiMenu?.defaultProps, container },
+        ...theme.components?.MuiMenu,
+        defaultProps: { ...theme.components?.MuiMenu?.defaultProps, container },
       },
       MuiPopover: {
-        ...baseTheme.components?.MuiPopover,
-        defaultProps: { ...baseTheme.components?.MuiPopover?.defaultProps, container },
+        ...theme.components?.MuiPopover,
+        defaultProps: { ...theme.components?.MuiPopover?.defaultProps, container },
       },
       MuiDialog: {
-        ...baseTheme.components?.MuiDialog,
-        defaultProps: { ...baseTheme.components?.MuiDialog?.defaultProps, container },
+        ...theme.components?.MuiDialog,
+        defaultProps: { ...theme.components?.MuiDialog?.defaultProps, container },
       },
       MuiModal: {
-        ...baseTheme.components?.MuiModal,
-        defaultProps: { ...baseTheme.components?.MuiModal?.defaultProps, container },
+        ...theme.components?.MuiModal,
+        defaultProps: { ...theme.components?.MuiModal?.defaultProps, container },
       },
       MuiPopper: {
-        ...baseTheme.components?.MuiPopper,
-        defaultProps: { ...baseTheme.components?.MuiPopper?.defaultProps, container },
+        ...theme.components?.MuiPopper,
+        defaultProps: { ...theme.components?.MuiPopper?.defaultProps, container },
       },
     },
-  });
+  };
 }
 
 export function RatanDesignProvider({
@@ -75,15 +82,15 @@ export function RatanDesignProvider({
     () => resolveRatanAppearance({ mode, designGeneration }, inheritedAppearance),
     [mode, designGeneration, inheritedAppearance],
   );
+  const appearanceTheme = React.useMemo(
+    () => baseTheme
+      ? createScopedHostTheme(baseTheme, appearance)
+      : createRatanTheme(appearance),
+    [appearance, baseTheme],
+  );
   const theme = React.useMemo(
-    () =>
-      baseTheme
-        ? createScopedHostTheme(baseTheme, appearance, root ?? undefined)
-        : createRatanTheme({
-            ...appearance,
-            container: root ?? undefined,
-          }),
-    [appearance, baseTheme, root],
+    () => withPortalContainer(appearanceTheme, root ?? undefined),
+    [appearanceTheme, root],
   );
   return (
     <RatanAppearanceContext.Provider value={appearance}>
