@@ -19,3 +19,8 @@ The refresh request can still be in flight when the prompt opens. If the token
 arrives after the prompt is mounted, the prompt must schedule forced logout from
 the refresh token's expiry. Until then, it remains visible and lets the user
 choose whether to log out.
+
+When a usable refresh token is already available, Home must not request a
+replacement in the final 25 seconds of access-token validity. A request sent
+at that boundary can arrive after access expires and invalidate an otherwise
+extendable session.

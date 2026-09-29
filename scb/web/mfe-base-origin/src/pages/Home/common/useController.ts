@@ -128,7 +128,9 @@ const useController = () => {
         accessExpiresAt > Date.now() &&
         !showTimeout &&
         !store.isOnLogout &&
-        (!refreshExpiresAt || refreshExpiresAt > Date.now())
+        (!refreshExpiresAt || refreshExpiresAt > Date.now()) &&
+        (!refreshExpiresAt ||
+          accessExpiresAt - Date.now() >= REFRESH_BEFORE_ACCESS_EXPIRY_MS)
       ) {
         getRefreshToken();
       }

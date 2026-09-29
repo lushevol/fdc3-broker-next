@@ -202,6 +202,55 @@ describe("Session lifecycle across browser minimize and return", () => {
     expect(requestsTo("refreshtoken")).toHaveLength(1);
   });
 
+  it.each([1, refreshLead - 1])(
+    "Given a usable refresh and %i ms of access remaining, When the page hides, Then the session remains manually extendable",
+    async (remaining) => {
+      await renderSession();
+      await advanceTime(accessLifetime - refreshLead);
+      const acquiredRefresh = getHooksBase().store.refreshToken;
+      expect(acquiredRefresh).toBeDefined();
+
+      const adapter = service.defaults.adapter as AxiosAdapter;
+      let rejectLateAcquisition: (() => void) | undefined;
+      service.defaults.adapter = async (config) => {
+        const response = await adapter(config);
+        if (config.url === "/api/auth/v2/sso/refreshtoken") {
+          await new Promise<void>((_resolve, reject) => {
+            rejectLateAcquisition = () =>
+              reject({
+                config,
+                message: "Request failed with status code 401",
+                response: {
+                  ...response,
+                  status: 401,
+                  data: { errorMessage: "TOKEN_INVALID_EXPIRED" },
+                },
+              });
+          });
+        }
+        return response;
+      };
+      await advanceTime(refreshLead - remaining);
+      await act(async () => setVisibility("hidden"));
+      await advanceTime(remaining + 1);
+      await act(async () => {
+        rejectLateAcquisition?.();
+        setVisibility("visible");
+      });
+
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      expect(requestsTo("refreshtoken")).toHaveLength(1);
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "Extend" }));
+      });
+      expect(requestsTo("relogin")[0].headers["Single-UI-Refresh"]).toBe(
+        acquiredRefresh
+      );
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(screen.getByTestId("session-workspace")).toBeInTheDocument();
+    }
+  );
+
   it("Given the page is hidden across the timer deadline, When it returns in the final 25 seconds, Then no hidden or catch-up timer request runs", async () => {
     await renderSession();
     await act(async () => {
