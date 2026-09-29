@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Reconcile the Base migration's primitives, icons and optional data-grid entries.
+- Share loading-button presentation internally without changing public contracts.
+- Add optional `styles-and-tokens.css` for applications requiring both CSS scopes;
+  preserve the existing standalone CSS entries.
+
 ## 0.1.0 - Local Release Candidate
 
 - Added curated `primitives` and `icons` entries for the Login layout, fields,

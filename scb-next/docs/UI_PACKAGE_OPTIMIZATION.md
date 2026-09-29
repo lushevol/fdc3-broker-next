@@ -55,3 +55,19 @@ their existing styled roots. Captured and passed six additional public contract
 cases before and after refactoring, including stable DOM/ref identity, spinner
 placement/color/size, idle spacing, busy attributes, disabled clicks and icon
 restoration. All 121 package tests plus token tests, typecheck, lint and build pass.
+
+### Stage 3 — combined CSS
+
+Added opt-in `styles-and-tokens.css`. Both original files remain byte-for-byte
+unchanged. Consumers needing both scopes can use the combined entry; consumers
+needing only one keep their existing import. Measurements (raw / gzip bytes):
+
+| Input | Raw | Gzip |
+| --- | ---: | ---: |
+| Separate scoped + global files | 405175 | 44612 |
+| Combined entry | 203366 | 22426 |
+
+Seven token-generation tests pass. Four browser cases pass, including exhaustive
+computed custom-property comparisons for default/explicit document appearances,
+all four provider appearances, nested scopes and overrides at 390/1000px. No new
+fonts or visual defaults were introduced. Generator output is deterministic.

@@ -6,6 +6,7 @@ import postcss from "postcss";
 import ts from "typescript";
 import { appendScopedTokenRules } from "./token-css.mjs";
 import { createGlobalTokenStylesheet } from "./global-token-css.mjs";
+import { createCombinedTokenStylesheet } from "./combined-token-css.mjs";
 
 const canonical = fileURLToPath(
   new URL("../../../../sc-dev-web/sc-dev-web/dist/", import.meta.url)
@@ -104,6 +105,12 @@ await writeFile(
 await writeFile(
   join(destination, "tokens.css"),
   createGlobalTokenStylesheet(postcss.parse(
+    `/* Generated from SC WebKit 2.0.5; see webkit-sources.json. */\n${stylesheet}\n`
+  )).toString()
+);
+await writeFile(
+  join(destination, "styles-and-tokens.css"),
+  createCombinedTokenStylesheet(postcss.parse(
     `/* Generated from SC WebKit 2.0.5; see webkit-sources.json. */\n${stylesheet}\n`
   )).toString()
 );

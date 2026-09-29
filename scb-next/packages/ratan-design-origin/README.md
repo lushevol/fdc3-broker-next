@@ -292,6 +292,13 @@ Common WebKit variables:
 The [CSS-only consumer](fixtures/consumer/tokens.html) is bundled by the package
 verifier. The generated [token stylesheet](assets/tokens.css) lists every token.
 Both CSS entries ship the same font faces and retain responsive token values.
+Applications that need both global tokens and provider-scoped tokens can import
+`ratan-design-origin/styles-and-tokens.css` once instead of importing both files.
+It shares each declaration block and font face across the two scopes, preserving
+their specificity, appearance overrides and responsive conditions. Keep using
+`styles.css` for scoped-only consumers and `tokens.css` for global-only consumers.
+The combined entry is self-contained and uses the same adjacent `fonts/` assets.
+
 Continue loading `styles.css` for `RatanDesignProvider` scopes; those scopes
 keep their own appearance even when `tokens.css` is also loaded. The provider's
 existing default remains legacy/light.

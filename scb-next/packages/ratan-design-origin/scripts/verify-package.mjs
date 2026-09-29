@@ -44,6 +44,7 @@ const [packed] = JSON.parse(
 );
 assert(packed.files.some(({ path }) => path === "dist/styles.css"));
 assert(packed.files.some(({ path }) => path === "dist/tokens.css"));
+assert(packed.files.some(({ path }) => path === "dist/styles-and-tokens.css"));
 assert.equal(
   packed.files.filter(({ path }) => path.endsWith(".woff2")).length,
   13
