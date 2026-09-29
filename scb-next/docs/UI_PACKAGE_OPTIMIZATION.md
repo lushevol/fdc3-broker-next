@@ -47,3 +47,11 @@ mobile layout limitations are retained, not redesigned by this migration.
 
 GitNexus change detection: low risk, no indexed execution processes affected.
 The unrelated AGENTS.md and staged data changes are excluded from this stage.
+
+### Stage 2 — shared loading presentation
+
+Both public buttons now use one private props/presentation helper, retaining
+their existing styled roots. Captured and passed six additional public contract
+cases before and after refactoring, including stable DOM/ref identity, spinner
+placement/color/size, idle spacing, busy attributes, disabled clicks and icon
+restoration. All 121 package tests plus token tests, typecheck, lint and build pass.
