@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Expand Storybook to 157 stories across all public components, curated primitives,
+  icons, optional integrations, themes and compatibility APIs. Add typed Controls,
+  variant matrices, stateful examples and a complete scenario inventory.
+- Verify public-export story coverage during Storybook builds; exercise catalog
+  accessibility in all four appearances, play functions, user workflows and
+  representative responsive layouts without changing shipped components.
+
 - Reconcile the Base migration's primitives, icons and optional data-grid entries.
 - Share loading-button presentation internally without changing public contracts.
 - Add optional `styles-and-tokens.css` for applications requiring both CSS scopes;

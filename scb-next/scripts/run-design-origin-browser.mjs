@@ -118,6 +118,8 @@ try {
     "test",
     "tests/e2e/design-origin.spec.ts",
     "tests/e2e/design-origin-storybook.spec.ts",
+    "tests/e2e/design-origin-storybook-interactions.spec.ts",
+    "tests/e2e/design-origin-storybook-play.spec.ts",
     "--workers=1",
   ];
   if (process.argv.includes("--update-snapshots")) {

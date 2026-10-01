@@ -37,9 +37,13 @@ verified surfaces and outstanding checks.
 | Base shell, settings, profile and admin presentation | Curated `primitives`, `icons` and `theme` entries with exact MUI identities | Base retains navigation, identity, state, policy, services and page composition |
 | Base grids and date localization | Optional `data-grid` and `dates` entries | Base retains row models, actions, audit workflows, provider placement and license policy |
 
-The catalog at `packages/ratan-design-origin/stories` covers controls, search/
-builder composition, date integrations, notifications/loaders, Dialog and the
-three state presentations. Its toolbar selects legacy/WebKit and light/dark.
+The [Storybook scenario inventory](../packages/ratan-design-origin/STORYBOOK_COVERAGE.md)
+maps 157 stories across 24 files: core controls and patterns, every curated
+primitive and icon, dates/ranges, data grids, themes/tokens and legacy
+compatibility APIs. Typed playgrounds, variant matrices and interactive local
+workflows cover appearance, size, state, content, keyboard and integration axes.
+The toolbar selects legacy/WebKit and light/dark. A build check guards public
+visual-export coverage; browser checks exercise the catalog and responsive layouts.
 Base's retained stories continue to exercise compatible exports.
 
 The `compatibility` entry is restricted to the existing Base migration helpers;

@@ -328,6 +328,27 @@ To customize a global token, add a `:root` declaration after the import; no
 }
 ```
 
+## Storybook catalog
+
+The [component and scenario inventory](STORYBOOK_COVERAGE.md) maps all 157 stories
+across 24 files. Start with **Start here / Catalog**, then browse Components,
+Patterns, Foundation, Inputs, Search, Feedback, Integration and Migration.
+Existing story IDs remain available.
+
+Playgrounds expose typed Controls and Docs; matrix stories compare meaningful
+prop combinations. Interactive examples show values, callback results, validation,
+loading completion, retained drafts and recovery. The appearance toolbar selects
+legacy/WebKit and light/dark. Resize the canvas to compare responsive layouts.
+Explicit appearance/token examples show their named scopes. Optional date-range
+examples retain host-owned Pro licensing.
+
+`npm run build:storybook` also verifies that every public visual export is used
+by a built story. The browser gate loads every story in four appearances, scans
+for serious/critical accessibility violations, exercises story play functions and
+interactive workflows, and captures representative 390/768/1440px layouts.
+These examples use local state and generic fixtures; package APIs and portal
+behavior are unchanged.
+
 ## Development commands
 
 Run `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`, and
@@ -336,7 +357,7 @@ temporary independent consumer, checks declarations/assets/SSR/tree shaking,
 and prints its path. Run `npm run dev` in that printed consumer for port 8019.
 Use `npm run storybook` for appearance controls and component states on 6019.
 From `scb-next`, `npm run test:e2e:design-origin` builds those surfaces and runs
-the required catalog axe scan, consumer accessibility/interaction matrix, and
+the catalog accessibility/interaction/responsive checks, consumer matrix, and
 eight reviewed screenshot comparisons. Use
 `npm run test:e2e:design-origin:update` only for an intentional visual change;
 inspect every changed PNG and rerun the ordinary command before accepting it.
