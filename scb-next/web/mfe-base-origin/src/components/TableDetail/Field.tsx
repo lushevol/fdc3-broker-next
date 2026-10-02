@@ -26,7 +26,7 @@ const Field: React.FC<FieldProps> = (props: FieldProps): React.ReactElement => {
     case "autoComplete":
       element = (
         <ErrorBoundry>
-          <Autocomplete
+          <Autocomplete<string, false, boolean>
             key={`ModalInput-${column.field}-${columnId}`}
             data-testid={`ModalInput-${column.field}-${columnId}`}
             disableClearable
@@ -37,7 +37,7 @@ const Field: React.FC<FieldProps> = (props: FieldProps): React.ReactElement => {
             autoHighlight
             getOptionLabel={(option: string) => option}
             popupIcon={<KeyboardArrowDownIcon />}
-            value={fieldValue as string}
+            value={(fieldValue === "" ? null : fieldValue ?? null) as string | null}
             onChange={onChangeAutoComplete}
             renderOption={RenderOptions}
             renderInput={(params) => (
@@ -64,7 +64,7 @@ const Field: React.FC<FieldProps> = (props: FieldProps): React.ReactElement => {
             label={column.headerName}
             variant="outlined"
             labelPosition="left"
-            value={`${fieldValue}`}
+            value={`${fieldValue ?? ""}`}
             onChange={(e) => {
               let value: string | boolean = String(e.target.value);
               if (["true", "false"].includes(value)) {
@@ -95,7 +95,7 @@ const Field: React.FC<FieldProps> = (props: FieldProps): React.ReactElement => {
             variant="outlined"
             labelPosition="left"
             placeholder={column.placeholder ?? "Type here"}
-            value={fieldValue}
+            value={fieldValue ?? ""}
             disabled={column.readOnly ?? record.readOnly}
             multiline={column.multiline}
             type={column.type ?? "text"}

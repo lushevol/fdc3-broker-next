@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Preserve portal grid row stripes and cell edges with selectors that avoid
+  Emotion's server-rendering warnings.
 - Expand Storybook to 157 stories across all public components, curated primitives,
   icons, optional integrations, themes and compatibility APIs. Add typed Controls,
   variant matrices, stateful examples and a complete scenario inventory.

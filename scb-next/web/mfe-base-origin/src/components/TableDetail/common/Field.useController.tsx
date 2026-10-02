@@ -53,11 +53,13 @@ const useController = (props: FieldProps) => {
   );
 
   const RenderOptions = (
-    props: React.HTMLAttributes<HTMLLIElement>,
+    props: React.HTMLAttributes<HTMLLIElement> & { key?: React.Key },
     option: string
   ) => {
+    const { key, ...optionProps } = props;
     return (
       <Box
+        key={key}
         component="li"
         sx={{
           height: "50px",
@@ -65,7 +67,7 @@ const useController = (props: FieldProps) => {
           mb: 1,
           "& > img": { mr: 2, flexShrink: 0 },
         }}
-        {...props}
+        {...optionProps}
       >
         <img
           loading="lazy"

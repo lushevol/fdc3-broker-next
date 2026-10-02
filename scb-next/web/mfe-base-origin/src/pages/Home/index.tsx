@@ -159,13 +159,22 @@ const Home: React.FC = (): ReactElement => {
         <Box className={classes.box}>
           {store?.workspaces?.map((item: Workspace, i) => {
             const validation: boolean = !!item?.containers?.length;
+            const preserveAdminLayout =
+              item.containers[0]?.container === "@fm/base" &&
+              ["/category", "/tile", "/importmap"].includes(
+                item.containers[0].module
+              );
             return (
               <TabPanel
                 key={item.id}
                 tabId={item.id}
                 value={value}
                 index={i + 1}
-                className={classes.tabpanel}
+                className={
+                  preserveAdminLayout
+                    ? `${classes.tabpanel} ${classes.cachedAdminPanel}`
+                    : classes.tabpanel
+                }
                 isActive={item.isActive}
               >
                 {ContainerComponent(validation, item, i)}

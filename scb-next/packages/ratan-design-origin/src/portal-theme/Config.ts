@@ -52,10 +52,10 @@ export const Config = (props: ThemeConfig) => {
           },
           row: {
             marginBottom: "6px",
-            "&:nth-child(odd):not(:hover, .Mui-selected)": {
+            "&:nth-of-type(odd):not(:hover, .Mui-selected)": {
               backgroundColor: props.backgroundColorOddRow,
             },
-            "&:nth-child(even):not(:hover, .Mui-selected)": {
+            "&:nth-of-type(even):not(:hover, .Mui-selected)": {
               backgroundColor: props.backgroundColorEvenRow,
             },
             "&.Mui-selected": {
@@ -86,7 +86,7 @@ export const Config = (props: ThemeConfig) => {
               outline: `2px solid ${props.palette.primary.main} !important`,
               outlineOffset: "-2px",
             },
-            "&:nth-child(1)": {
+            "&:first-of-type": {
               borderLeft: `1px solid ${props.borderColor}`,
               borderTopLeftRadius: "5px",
               borderBottomLeftRadius: "5px",

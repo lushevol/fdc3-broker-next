@@ -31,7 +31,11 @@ const Tile: React.FC<TileProps> = (props: TileProps): ReactElement => {
         <Stack direction="row" spacing={1}>
           <Autocomplete
             disablePortal
-            value={category}
+            value={category ?? null}
+            isOptionEqualToValue={(option, value) =>
+              option === value ||
+              (option.id != null && value.id != null && option.id === value.id)
+            }
             onChange={onCategoryChange}
             options={categories}
             inputValue={inputValue}

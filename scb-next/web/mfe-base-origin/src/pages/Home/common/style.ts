@@ -10,6 +10,7 @@ export const classes = {
   div: `${PREFIX}-div`,
   box: `${PREFIX}-box`,
   tabpanel: `${PREFIX}-tabpanel`,
+  cachedAdminPanel: `${PREFIX}-cachedAdminPanel`,
   addtab: `${PREFIX}-addtab`,
   containerTile: `${PREFIX}-containerTile`,
 };
@@ -90,6 +91,9 @@ const Root = styled("section")(({ theme }) => ({
   },
   [`& .${classes.box}`]: {
     ...theme.theme["HomePage"]["Box"],
+    [`&:has(> .${classes.cachedAdminPanel})`]: {
+      position: "relative",
+    },
   },
   [`& .${classes.tabpanel}`]: {
     height: "calc(100vh - 114px)",
@@ -109,6 +113,25 @@ const Root = styled("section")(({ theme }) => ({
   },
   [`& .${classes.addtab}`]: {
     ...theme.theme["HomePage"]["Addtab"],
+  },
+  // Cached admin grids keep their dimensions without exposing inactive content.
+  [`& .${classes.cachedAdminPanel}`]: {
+    "&[hidden]": {
+      display: "block",
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      visibility: "hidden!important",
+      pointerEvents: "none",
+    },
+    "& .tabmain[hidden]": {
+      display: "block",
+      pointerEvents: "none",
+    },
+    "&[hidden] *, & .tabmain[hidden], & .tabmain[hidden] *": {
+      visibility: "hidden!important",
+    },
   },
   [`& .${classes.containerTile}`]: {
     textTransform: "capitalize",
