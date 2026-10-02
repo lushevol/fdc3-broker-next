@@ -1,0 +1,132 @@
+[
+  {
+    "id": 1,
+    "title": "Module Map",
+    "categoryId": 1,
+    "categoryLabel": "Admin Module",
+    "entities": [
+      "FMO PORTAL ADMIN"
+    ],
+    "subject": "/importmap",
+    "isTemplate": false
+  },
+  {
+    "id": 2,
+    "title": "Drawer Category",
+    "categoryId": 1,
+    "categoryLabel": "Admin Module",
+    "entities": [
+      "FMO PORTAL ADMIN"
+    ],
+    "subject": "/category",
+    "isTemplate": false
+  },
+  {
+    "id": 3,
+    "title": "Tile Configuration",
+    "categoryId": 1,
+    "categoryLabel": "Admin Module",
+    "entities": [
+      "FMO PORTAL ADMIN"
+    ],
+    "subject": "/tile",
+    "isTemplate": false
+  },
+  {
+    "id": 4,
+    "title": "FDC3",
+    "categoryId": 1,
+    "categoryLabel": "Admin Module",
+    "entities": [
+      "FMO PORTAL ADMIN"
+    ],
+    "subject": "/tile",
+    "isTemplate": false
+  },
+  {
+    "id": 18,
+    "title": "Korea MX Exceptions",
+    "categoryId": 4,
+    "categoryLabel": "Exception Management",
+    "entities": [
+      "X_RATANONE"
+    ],
+    "subject": "RATAN_KR_EXCEPTION",
+    "isTemplate": false
+  },
+  {
+    "id": 54,
+    "title": "Trade Blotter",
+    "categoryId": 15,
+    "categoryLabel": "Trade Processing",
+    "entities": [
+      "X_RATANONE"
+    ],
+    "subject": "RATAN_TRADE_BLOTTER",
+    "isTemplate": false
+  },
+  {
+    "id": 104,
+    "title": "FM COO Rules",
+    "categoryId": 8,
+    "categoryLabel": "Business Rule",
+    "entities": [
+      "X_RATANONE"
+    ],
+    "subject": "RATAN_FM_COO_RULE",
+    "isTemplate": false
+  },
+  {
+    "id": 105,
+    "title": "FM COO Exceptions",
+    "categoryId": 4,
+    "categoryLabel": "Exception Management",
+    "entities": [
+      "X_RATANONE"
+    ],
+    "subject": "RATAN_FM_COO_EXCEPTION",
+    "isTemplate": false
+  },
+  {
+    "id": 9001,
+    "title": "Synthetic Template",
+    "categoryId": 9001,
+    "categoryLabel": "POC Edge Cases",
+    "entities": [],
+    "subject": "",
+    "isTemplate": true
+  },
+  {
+    "id": 9002,
+    "title": "Synthetic Blank Subject",
+    "categoryId": 9001,
+    "categoryLabel": "POC Edge Cases",
+    "entities": [
+      "X_RATANONE"
+    ],
+    "subject": "",
+    "isTemplate": false
+  },
+  {
+    "id": 9003,
+    "title": "Synthetic Wrong Entity",
+    "categoryId": 9001,
+    "categoryLabel": "POC Edge Cases",
+    "entities": [
+      "OTHER"
+    ],
+    "subject": "RATAN_TRADE_BLOTTER",
+    "isTemplate": false
+  },
+  {
+    "id": 9004,
+    "title": "Synthetic Long Name Match",
+    "categoryId": 9001,
+    "categoryLabel": "POC Edge Cases",
+    "entities": [
+      "X_RATANONE"
+    ],
+    "subject": "/ratan_fm_coo_rule",
+    "isTemplate": false
+  }
+]

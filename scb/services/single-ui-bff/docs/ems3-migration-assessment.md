@@ -2,7 +2,7 @@
 
 Investigated 2026-09-27 against the checked-out `scb/services/new-auth-service` and `scb/services/single-ui-bff` sources. This is a source-based migration assessment, not an implemented migration or a verified FMCES API specification. The supplied samples establish example payloads; endpoint availability, permissions and completeness still need confirmation from the EMS3 squad.
 
-Planning update, 2026-10-02: the user confirmed that the goal is to plan migration of every application in the supplied production setup, preserving existing access. FlowZero is the only EMS3 pilot; other apps have yet to be onboarded. Their EMS3 definitions, assignments and paired test responses are outputs of migration work. Follow the [all-application migration plan](ems3-migration-plan.md) for sequencing and ownership; this assessment supports its BFF implementation workstream.
+Planning update, 2026-10-03: the user narrowed the first phase to a POC that proves the function-entitlement pattern and tile visibility using test accounts. The production user-role source and full application coverage are deferred. Data entitlement control is outside this task. Required EMS3 API failures must reject the whole authorization attempt without stale grants or EMS2 fallback. FlowZero remains the only confirmed EMS3 pilot; other target setups and comparison responses will be created during the work. Follow the [POC and rollout plan](ems3-migration-plan.md) for the current scope and acceptance criteria. The broader findings below are reference material, not additional prerequisites for the POC.
 
 ## Recommendation
 
