@@ -45,6 +45,8 @@ const Root = styled("section")(({ theme }) => ({
     },
     [`& .${classes.tab}`]: {
       userSelect: "none",
+      // Preserve the original button's spacing when remote CSS changes body typography.
+      letterSpacing: "normal",
       width: 176,
       zIndex: 1,
       opacity: "0.6",
