@@ -23,7 +23,12 @@ The provider defaults to light/legacy and scopes CSS variables and overlay
 containers to its own root. Nested providers inherit omitted appearance fields
 from the nearest provider. Hosts that already own a MUI theme may pass it through
 `baseTheme`; the provider preserves that theme's policy while adding Ratan
-appearance metadata and scoped overlay containers. `useRatanAppearance()` exposes
+appearance metadata and scoped overlay containers. `baseTheme` owns the palette,
+typography and component overrides even when `designGeneration="webkit"`; hosts
+switching generation must supply a matching theme from
+`createRatanTheme({ mode, designGeneration })` and then apply their own policy
+overrides. Selecting generation only on the provider does not rebuild a supplied
+theme. `useRatanAppearance()` exposes
 the resolved contract to adapters that must forward it across an MFE boundary.
 The provider does not reset the document, change scrolling, read storage or choose
 appearance from application state. Hosts own those policies and date localization.

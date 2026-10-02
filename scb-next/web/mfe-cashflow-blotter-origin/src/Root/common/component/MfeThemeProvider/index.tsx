@@ -7,6 +7,7 @@ import {
   useRatanAppearance,
   type RatanAppearanceInput,
 } from 'ratan-design-origin';
+import { createRatanTheme } from 'ratan-design-origin/theme';
 
 import { ContainerProvider, ThemeConfig, ThemeUtil } from '../../../import';
 
@@ -30,9 +31,10 @@ const MfeThemeProvider: FC<MfeThemeProviderProps> = (props) => {
     });
   }, []);
   const muiTheme = useMemo(() => {
-    const { config } = ThemeConfig(ThemeUtil.getTheme(appearance.mode));
-    return config;
-  }, [appearance.mode]);
+    return appearance.designGeneration === 'webkit'
+      ? createRatanTheme(appearance)
+      : ThemeConfig(ThemeUtil.getTheme(appearance.mode)).config;
+  }, [appearance.mode, appearance.designGeneration]);
 
   const antdTheme = useMemo<ConfigProviderProps>(() => {
     const themeAlgo = appearance.mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm;

@@ -9,6 +9,7 @@ import {
   useRatanAppearance,
   type RatanAppearanceInput,
 } from 'ratan-design-origin';
+import { createRatanTheme } from 'ratan-design-origin/theme';
 
 const defaultFontSize = 12;
 const defaultFontFamily = '"Poppins",Helvetica!important';
@@ -30,7 +31,9 @@ const MfeThemeProvider: FC<MfeThemeProviderProps> = ({ appearance: appearanceInp
     });
   }, []);
   const muiTheme = useMemo(() => {
-    let { config } = ThemeConfig(ThemeUtil.getTheme(appearance.mode));
+    let config = appearance.designGeneration === 'webkit'
+      ? createRatanTheme(appearance)
+      : ThemeConfig(ThemeUtil.getTheme(appearance.mode)).config;
     const bgColor = appearance.mode === 'dark' ? '#39a1cd' : '#EAEEF4';
     const scrollbarStyle = {
       height: '9px',
@@ -60,7 +63,7 @@ const MfeThemeProvider: FC<MfeThemeProviderProps> = ({ appearance: appearanceInp
       },
     });
     return config;
-  }, [appearance.mode]);
+  }, [appearance.mode, appearance.designGeneration]);
 
   const antdTheme = useMemo(() => {
     const themeAlgo = appearance.mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm;
