@@ -374,14 +374,46 @@ host and package ranges, while package-originated core imports resolve to the sa
 physical React/MUI/Emotion instances as host imports. It reports undeclared
 optional integrations as absent even when npm has hoisted a copy elsewhere.
 
-`npm run verify:design-origin` is the complete candidate gate. It runs package
-tests/coverage, typecheck and zero-warning lint; dependency fixtures and host
-resolution; the package/Storybook/tarball/browser gate; Base typecheck; and the
-Base, Ratan and Cashflow production builds. Install workspace dependencies and
-Playwright Chromium first, keep ports 8019 and 8020 free, and allow npm registry or
-cache access for the temporary consumer. No application/backend service is started
-separately. Azure uses `azure-pipelines-design-origin-quality.yml`; an external CI
-template can invoke the same command after `npm ci` and Chromium installation.
+`npm run verify:design-origin` is the aggregate candidate gate. It prepares
+canonical WebKit host assets, checks Base's package-import boundary, and runs
+package tests/coverage/typecheck/zero-warning lint, runner/dependency fixtures,
+focused host compatibility contracts, the package/catalog/tarball/browser gate,
+Base typecheck, all three host builds, and Base portal parity. Keep ports
+8019/8020 and 8122/8121 free. Install workspace dependencies, the locked canonical
+WebKit dependencies and Playwright Chromium, and allow npm registry/cache access
+for the temporary consumer. The ordinary Base parity runner owns its temporary
+host and remote fixtures; no application/backend service must be started
+separately. See [release prerequisites and commands](../../docs/UI_PACKAGE_RELEASE.md#contribution-checks)
+for the exact clean-checkout setup and Azure workflow.
+
+Package tests/typecheck/lint/build, catalog build and independent tarball
+verification pass for the local candidate. The strict browser gate still fails
+without an approved `VITE_MUI_X_LICENSE_KEY`. The complete Base comparison passes
+56 original and 56 migrated cases with 167 exact screenshot matches, without
+masks or tolerance. The full Base unit suite passes 136 files/435 tests (99.01%
+lines, 95.28% branches); Base typecheck, import guard, dependency isolation and
+Ratan/Cashflow bridge tests (10/13) pass. The Cashflow rendering pair passed four
+original/four migrated cases and 16 exact screenshots against all sixteen
+retained original PNGs. Combined evidence totals 120 old/current test executions
+and 183 exact screenshot comparisons (167 + 16). The Base-only native
+login/workspace/drawer journey has no console errors. The full final Base
+comparison has zero forwarded current-phase console errors after the UI fixes,
+with 40 React Router future flag warnings. The separate Base admin recovery
+stage (`40705968`) covers eight reads/twelve mutation callbacks with 57 new
+contracts. Its 16 original/16 current affected-state replay keeps the same
+snapshots and has zero current console errors/unhandled rejections, preserving
+alerts, edits, cached rows/options and public service APIs. Business logic stays
+in Base. Ratan's 43 production type errors and inherited joined-host
+business-screen console errors belong to the deferred
+application backlog. Do not interpret a catalog build or prepared tarball as a
+passing browser gate or production release.
+
+The final controlled host performance gate at `40705968` fails its two strict
+WebKit/legacy request/transfer ratios: 222 versus 221 requests and 6,646,714 versus
+6,621,050 transfer bytes. All 26 absolute and ten other ratio limits pass. The sole extra resource
+is the required canonical SC Prosper Sans Regular font actively rendering the
+WebKit controls; the budget is unchanged pending review. See the
+[resource/font evidence and performance decision](../../docs/UI_PACKAGE_RELEASE.md#current-controlled-performance-result-2026-10-02).
 
 The tree-shaking gate uses the fixture's exact Vite 8.2.1 and externalizes React,
 ReactDOM, MUI Material/icons and Emotion. A core `Button` import renders only

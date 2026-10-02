@@ -2,11 +2,12 @@
 
 ## Scope and contracts
 
-Work from the current session-expiry branch, preserving its authentication and
-refresh scheduling. Reconcile the completed Base UI migration from `6a3e95de`
-(common ancestor `65f5f1a1`) before optimizing the shared package. Only the
-`scb-next` UI migration changes are carried forward; unrelated research, staged
-data, and local changes are excluded.
+The optimization originally ran on the session-expiry branch, preserving its
+authentication and refresh scheduling while reconciling the Base UI migration
+from `6a3e95de` (common ancestor `65f5f1a1`). The user subsequently moved the UI
+work to `main`; this section records the historical starting point. Only the
+`scb-next` UI migration changes were carried forward, excluding unrelated
+research, staged data, and local changes.
 
 The public props, default values, refs, callbacks, rendered elements, styles,
 accessibility, portal containers, and scoped theme behavior must remain stable.
@@ -15,21 +16,40 @@ Authentication, routing, services, stores and workspace orchestration stay in Ba
 ## Current status (2026-10-02)
 
 All five package optimization stages are complete. The Base import boundary is
-also complete and the package/Storybook checks pass. What remains is easier to
-separate into three buckets:
+also complete. Package unit/type/lint/build, catalog build and independent
+tarball verification pass; the strict catalog browser gate is blocked by the
+missing approved Pro key. Current evidence and remaining gates:
 
-- **Base parity evidence:** finish the expanded page-state comparison run and
-  record its final integrated counts. Base-owned console errors are fixed, and
-  the Base-only native journey has no console errors, page errors or failed
-  requests with all configured remotes running.
+- **Base parity evidence:** 56 original and 56 migrated cases pass with 167 exact
+  screenshot matches, without masks or tolerance. Base's full unit suite passes
+  136 files/435 tests (99.01% lines, 95.28% branches); its typecheck, import guard,
+  dependency isolation and Ratan/Cashflow bridge tests (10/13) pass. The Cashflow
+  rendering pair passes four original/four migrated cases and 16 exact screenshots
+  against all sixteen retained original PNGs. Combined Base/Cashflow evidence
+  totals 120 old/current test executions and 183 exact screenshot comparisons
+  (167 + 16). The captured Base-only native login/workspace/drawer journey has no
+  console errors, page errors or failed requests with all configured remotes
+  running. The full final Base comparison has zero forwarded current-phase
+  console errors after the UI fixes and 40 React Router future warnings. The
+  separate admin recovery stage (`40705968`) covers eight reads/twelve mutation
+  callbacks with 57 new contracts. Its affected-state replay passes 16 original/
+  16 current cases against unchanged snapshots, with zero current console errors
+  and zero unhandled rejections. Service APIs and business logic remain in Base.
 - **Application backlog:** Cashflow's `DateFormat` startup cycle is fixed. The
   strict joined-host gate still catches business-screen console failures, and
   Ratan's corrected production typecheck reports 43 source diagnostics. These
   belong to the deferred application work, with the strict failures kept visible.
+- **Performance decision:** the final controlled three-run report at `40705968`
+  passes all 26 absolute and ten other ratio limits, but fails the two strict WebKit/legacy request
+  and transfer ratios. Its sole resource difference is one required SC Prosper
+  Sans Regular font (25,364 encoded bytes/25,664 transfer bytes), confirmed as
+  rendering visible controls. The budget remains unchanged; see the
+  [exact evidence and review requirement](UI_PACKAGE_RELEASE.md#current-controlled-performance-result-2026-10-02).
 - **Release work:** assign owners, approve the registry and packaged fonts,
-  define MUI X Pro ownership, and record an immutable tarball and rollback
-  artifact. The strict package browser gate currently needs an approved
-  `VITE_MUI_X_LICENSE_KEY`. The candidate remains private until those external
+  define MUI X Pro ownership, and approve an immutable retention location and
+  previous rollback artifact. A verified local tarball is prepared; it is not
+  published or deployed. The strict package browser gate currently needs an
+  approved `VITE_MUI_X_LICENSE_KEY`. The candidate remains private until those external
   approvals and decisions are complete.
 
 The full Ratan/Cashflow direct-MUI migration is intentionally a later backlog
@@ -146,17 +166,21 @@ Final checks, 2026-09-30:
   those production outputs. One sample per generation was collected; no new
   application performance budget or before/after timing claim is made.
 
-Validation limitations retained outside this optimization:
+Historical validation limitations at that stage, with current follow-ups:
 
-- Ratan's existing `typecheck` script fails with TS5053 because its inherited
-  `emitDeclarationOnly` option conflicts with `--noEmit`; its production build and
-  bridge contracts pass. The package and Base typechecks pass normally.
-- Running all three development servers together exposes a Cashflow DateFormat
-  initialization error and a host prefix collision (Base dialog test IDs become
+- Ratan's then-current `typecheck` script stopped with TS5053 before checking
+  source. The configuration is now fixed; the strict production gate reports 43
+  source diagnostics. Its production build and focused bridge contracts pass.
+  The package and Base typechecks pass normally.
+- Running all three development servers then exposed a Cashflow DateFormat
+  initialization error and a host prefix collision (Base dialog test IDs became
   `MicroWebUI_cashflow_cn_*`). The admin failure also reproduces with the original
   provider; all six admin comparisons pass in the original Base-only setup. The
-  production cross-MFE path passes. These application/dev-runtime issues were not
-  moved into the design package or hidden by changing parity expectations.
+  production cross-MFE path passed. The startup cycle is now fixed. The strict
+  joined-host console check still reports business-screen issues and is not green;
+  the final Cashflow repeat now passes against sixteen retained original PNGs.
+  Application issues stay
+  out of the design package and are not hidden by changing parity expectations.
 
 All five stages are complete for this optimization scope. Business logic remains
 in the applications, the existing standalone CSS artifacts are unchanged, and

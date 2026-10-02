@@ -12,17 +12,39 @@ The simple reading is:
 
 - **Done:** `ratan-design-origin` contains the reusable presentation package;
   Base UI imports route through it, including the Base MUI layout, icon, theme,
-  date and grid entry points; and Storybook/package checks pass.
-- **Acceptance evidence:** expanded Base page-state fixtures and comparisons are
-  being finalized; record the final integrated parity counts before calling
-  acceptance complete.
-- **Fixed:** Cashflow's `DateFormat` startup cycle and Base-owned React/Emotion
-  console errors. The Base-only native journey reports no console errors, page
-  errors or failed requests with all configured remotes running.
+  date and grid entry points. Package unit tests, typecheck, lint, library build,
+  catalog build and independent tarball verification pass. The strict catalog
+  browser gate remains blocked by the missing approved Pro key.
+- **Base acceptance:** 56 original and 56 migrated cases pass with 167 exact
+  screenshot matches, without masks or tolerance. The full Base unit suite
+  passes 136 files/435 tests (99.01% lines, 95.28% branches), as do Base typecheck,
+  the import guard, dependency isolation and Ratan/Cashflow bridge tests (10/13).
+- **Cashflow evidence:** the final four original/four migrated cases and 16 exact
+  screenshot comparisons pass against all sixteen retained original PNGs.
+  Combined Base/Cashflow evidence is 120 old/current test executions and 183
+  exact screenshot comparisons (167 + 16).
+- **Fixed:** Cashflow's `DateFormat` startup cycle and the captured Base
+  login/workspace React/Emotion issues. That Base-only native journey reports no
+  console errors, page errors or failed requests with all configured remotes running.
+  The full final Base comparison now has zero forwarded current-phase console
+  errors, with 40 React Router future flag warnings. The separate admin recovery
+  stage (`40705968`) covers eight reads/twelve mutation callbacks with 57 new
+  contracts. Its affected-state replay passes 16 original/16 current cases with
+  unchanged snapshots, zero current console errors and zero current unhandled
+  rejections. Existing alerts, edits, cached rows/options and service APIs are
+  preserved, with business logic remaining in Base.
+  Ratan/Cashflow
+  providers also select a matching WebKit MUI theme while keeping host policy local.
 - **Later backlog:** full direct-MUI adoption in Ratan and Cashflow is tracked
   separately, together with 43 Ratan production type diagnostics and the strict
   joined-host business-screen console failures. It is not part of the Base
   migration and must not move business logic into this package.
+- **Performance gate:** the final report at `40705968` passes all 26 absolute
+  and ten other ratio limits, but WebKit's
+  one required SC Prosper Sans font makes the request/transfer comparisons fail
+  their strict legacy ratios. The budget is unchanged; evidence and the required
+  review are recorded in
+  [UI package release](UI_PACKAGE_RELEASE.md#current-controlled-performance-result-2026-10-02).
 - **Release blocked:** the package is still a private/local candidate until
   an approved `VITE_MUI_X_LICENSE_KEY`, release ownership, registry access,
   font redistribution and MUI X Pro licensing decisions are recorded. The missing
@@ -249,15 +271,23 @@ production builds prepare the package before applications.
 ### Remaining work and limits
 
 Stages 3-5 are complete for the package optimization work. The remaining work
-is verification and release preparation: complete the missing Base parity states,
-resolve or separately document the Cashflow development error, and complete the
-release decisions in [UI package release](UI_PACKAGE_RELEASE.md). Full
+is verification and release preparation: review the strict performance
+request/transfer comparisons and
+complete the release decisions in
+[UI package release](UI_PACKAGE_RELEASE.md). Full
 Ratan/Cashflow direct-MUI adoption is a later backlog item, not an unfinished
 Base import row. Legacy Poppins remains host-supplied and no performance latency
 guarantee is claimed.
 
-Stage 1's existing lint/mobile-login/console/typecheck limitations remain.
-Production-edge acceptance and a corporate-registry clean install were not run.
+Cashflow's startup cycle and the captured Base login/workspace console issues are
+fixed. The wider final Base comparison has zero forwarded current-phase console
+errors after the UI fixes. The separate admin recovery stage replays all affected
+states with zero current errors/rejections and unchanged original snapshots.
+React Router future warnings are retained in the evidence.
+Ratan's typecheck configuration now works and exposes 43 production diagnostics; the
+strict joined-host gate retains the business-screen errors in the backlog.
+Existing broad-suite/lint debt and baseline mobile clipping remain outside this
+extraction. A corporate-registry clean install was not run.
 Workspace dependency installation reported 44 audit findings (21 moderate,
 23 high); audit triage is a release prerequisite, not an automatic bulk upgrade.
 
@@ -1278,8 +1308,9 @@ DataGrid; package/Base typechecks and builds, package tests (115), Base tests
 (355), Base Storybook and dependency isolation passed. Eight Login screenshots
 still match the pre-migration baseline with zero differing pixels. A browser
 journey passed login, New Tile drawer, Cashflow tile selection, Add Workspace
-and tab removal. The deeper Cashflow rendering journey is currently blocked
-by its own `DateFormat` initialization error in the local remote; broader
-portal visual-state comparison and the optional higher-level compositions in
-the migration plan remain open. Do not infer full portal parity from the import
-scan or Login screenshots alone.
+and tab removal. At that stage, deeper Cashflow rendering was blocked by its
+`DateFormat` initialization error, now fixed. Broader portal visual-state
+comparison was not yet complete; the current status above records the expanded
+passing Base evidence. Higher-level compositions in the migration plan remain
+optional. The import scan and Login screenshots alone were not proof of full
+portal parity.

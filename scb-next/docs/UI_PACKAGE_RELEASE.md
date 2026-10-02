@@ -1,8 +1,10 @@
 # UI Package Release and Rollback
 
-`ratan-design-origin@0.1.0` is an internal/local release candidate. No registry
-publication, production deployment, redistribution approval or Pro license
-initialization is performed by this migration.
+`ratan-design-origin@0.1.0` is an internal/local release candidate. This migration
+does not publish to a registry, deploy to production, or approve font
+redistribution or production Pro licensing/initialization. Local catalog and
+packed-consumer fixtures initialize Pro from an approved environment key when
+one is supplied; that does not establish production entitlement.
 
 ## Current status (2026-10-02)
 
@@ -13,13 +15,36 @@ key` in the Pro date-range examples. The complete Storybook gate remains blocked
 until an approved key is supplied. This is not a production release yet. Before
 publication, the team still needs to:
 
-1. finish the missing Base parity fixtures and record the Cashflow development
-   error separately from package behavior;
-2. name a release owner and backup, choose the private registry and access list,
+1. retain the complete Base/Cashflow acceptance evidence separately from deferred
+   business-screen errors;
+2. review the required WebKit font's effect on the two strict request/transfer
+   ratios; keep the performance gate failed until a reviewed decision and
+   refreshed controlled baseline satisfy the policy;
+3. name a release owner and backup, choose the private registry and access list,
    approve packaged font redistribution, and assign MUI X Pro ownership; and
-3. review a locally prepared tarball/checksum and complete browser/portal evidence,
+4. review the prepared local tarball/checksum and complete browser/portal evidence,
    then publish it to the approved registry and retain the previous artifact for
    rollback.
+
+The complete Base comparison passes 56 original and 56 migrated cases with 167
+exact screenshot matches, without masks or tolerance. Its full unit suite passes
+136 files/435 tests (99.01% lines, 95.28% branches); Base typecheck, import guard,
+dependency isolation and Ratan/Cashflow bridge tests (10/13) pass. The Cashflow
+rendering pair passes four original/four migrated cases and 16 exact screenshots
+against all sixteen retained original PNGs. Combined evidence is 120 old/current
+test executions and 183 exact screenshot comparisons (167 + 16). Cashflow's
+`DateFormat` startup cycle and the captured login/workspace console issues are
+fixed; the Base-only native journey reports no console errors, page errors or
+failed requests with its configured remotes running. The full final Base
+comparison has zero forwarded current-phase console errors after the UI fixes,
+with 40 React Router future flag warnings. The separate admin recovery stage
+(`40705968`) covers eight reads/twelve mutation callbacks with 57 new contracts.
+Its affected-state replay passes 16 original/16 current cases against unchanged
+snapshots, with zero current console errors and zero current unhandled rejections.
+Existing alerts, edits, cached rows/options and public service rejection APIs
+remain intact; all business logic stays in Base. Ratan's production typecheck exposes 43 source
+diagnostics, and the strict joined-host console gate retains the business-screen
+failures in the later backlog.
 
 The aggregate quality command is useful evidence for the package candidate, but
 it does not by itself prove every Base page state or complete the later
@@ -113,12 +138,24 @@ npm run verify:design-origin
 The aggregate command runs the Base import guard, focused Base component and
 Ratan/Cashflow bridge contracts, package browser checks, host builds, and Base
 portal parity. It owns its temporary consumer/preview servers on ports 8019/8020
-and the isolated Base parity server on port 8121; those ports must be free. It
-needs installed workspace dependencies and npm registry/cache access for the fresh
+and sequential original/current Base comparison servers on ports 8122/8121;
+those ports must be free. It needs installed workspace dependencies and npm
+registry/cache access for the fresh
 consumer. It stops at the first failed labeled command and preserves child output.
 `azure-pipelines-design-origin-quality.yml` installs dependencies and Chromium
 before running the same command. External CI templates should invoke this command
 directly and must never use the snapshot-update command as a quality gate.
+
+The Base parity runner extracts the pinned original UI from
+`98c2d131:scb-next/web/mfe-base-origin`, applies the same current Vite/dev/mock
+fixtures to both hosts, and uses separate `cache-old`/`cache-new` dependency
+optimizer directories. It captures original expectations in a temporary
+directory, then compares current output with snapshot updates disabled in the
+same browser/OS environment. It does not rewrite tracked expectations to make a
+migration pass. Use `npm run test:e2e:base-ui-parity -- --states-only` for the
+expanded state suite. The `--cashflow` selection uses the live Ratan/Cashflow
+remotes and still requires their development servers (and configured Alpha
+Payments remote); the ordinary Base suite uses deterministic remote fixtures.
 
 Base still intentionally uses canonical WebKit CSS and two custom elements.
 A clean checkout must explicitly install their locked root-workspace dependencies
@@ -144,8 +181,8 @@ command does not mark them complete:
 | Gate | Command | Remaining requirement |
 | --- | --- | --- |
 | Broad application unit suites | `npm run test:unit` | Record the complete baseline and assign inherited failures; focused contract passes do not close this gate. |
-| Ratan full typecheck | `npm run typecheck --workspace @fm/ratan_container-origin` | Fix the inherited `emitDeclarationOnly`/`noEmit` conflict and review the resulting diagnostics. |
-| Controlled host performance | `npm run verify:design-origin-host-performance` | Retain a complete controlled report against the reviewed budget. |
+| Ratan full typecheck | `npm run typecheck --workspace @fm/ratan_container-origin` | The compiler conflict is fixed. Resolve the 43 production diagnostics recorded in the application backlog. |
+| Controlled host performance | `npm run verify:design-origin-host-performance` | **FAILED:** only the two strict WebKit/legacy request/transfer ratios exceed 1 because WebKit loads its required font. Review the evidence below; no policy change is made here. |
 
 The Storybook preview and independent date consumer read
 `VITE_MUI_X_LICENSE_KEY` and initialize MUI X Pro before rendering. Supply an
@@ -154,6 +191,10 @@ running `npm run test:e2e:design-origin`. Do not put keys in the repository, com
 arguments, release records or logs. Missing or invalid keys keep the strict browser
 gate failing; the check has no license-warning exclusion. License configuration
 does not itself establish production entitlement or assign a license owner.
+The quality pipeline maps the secret `VITE_MUI_X_LICENSE_KEY` variable into the
+verification environment (`75135a26`). It must be configured by the organization;
+the mapping is not an issued key. Browser-runner cancellation now terminates
+owned children and removes its temporary workspace.
 
 The host-performance command separately rebuilds Base, Ratan and Cashflow with
 hidden source maps, owns a controlled localhost edge on port 9081 and runs three
@@ -164,6 +205,62 @@ duplication, timing and same-run generation-ratio policy in
 results live in `performance/design-origin-baseline.json`. A budget increase must
 include reviewed evidence and a refreshed three-run baseline; package-only byte
 results do not authorize MUI/Emotion federation changes.
+
+### Current controlled performance result, 2026-10-02
+
+The final controlled three-run report is
+`/tmp/design-origin-performance-request-recovery.json`, measured at source
+`407059684ce47c14f8d5b7b3db8c91f8bd0a43ba` and generated at
+`2026-10-02T11:22:38.209Z`. It uses three cold samples per generation with
+no concurrent tests. Runtime output is retained in
+`/tmp/design-origin-performance-request-recovery-browser.log`; the initial
+package/three-host build log is
+`/tmp/design-origin-performance-request-recovery.log`. The initial sandboxed
+browser launch was denied; only the runtime measurement was rerun with approved
+browser permissions against the identical completed production outputs.
+The strict gate is **FAILED** on exactly these two same-run comparisons:
+
+| Metric (p95) | Legacy | WebKit | Allowed WebKit/legacy ratio |
+| --- | ---: | ---: | ---: |
+| Requests | 221 | 222 | 1 |
+| Transfer bytes | 6,621,050 | 6,646,714 | 1 |
+
+All 26 absolute limits and ten other ratio checks pass. Base/Ratan/Cashflow
+gzip totals are 459,349/1,905,999/2,946,976 bytes, with 1,019 duplicated UI
+modules. Cold-tile p95 is 1,614.1ms legacy/1,587.2ms WebKit; theme-switch p95
+is 178ms/159.1ms. These are controlled local results, not production latency
+guarantees.
+
+The earlier independent resource capture used fresh cache-disabled Chromium
+contexts and a 1280x720 viewport at the canonical local edge. After normalizing
+notification timestamps and random SockJS identifiers, the sole resource
+difference is one CSS-initiated WebKit request:
+
+`http://127.0.0.1:9081/assets/SCProsperSans-Regular-DA_92V58.woff2`
+
+The font is requested once, with 25,364 encoded body bytes and 25,664 transfer
+bytes. The fresh report retains the same 25,664-byte delta, and the newly built
+font still matches the canonical tracked SC GDS WebKit SHA-256:
+
+`325d1474a2d2575c6171c695f9132581c90527de659bb5a7a5f27bf53cd2941b`
+
+Chromium's `CSS.getPlatformFontsForNode` confirms that the custom
+`SCProsperSans-Regular` font renders visible WebKit New Tile, theme label,
+API Status and Refresh Page controls, and Cashflow ID, Value Date Range and
+Currency labels. Equivalent legacy text uses Helvetica fallback for declared
+Poppins. This is a required appearance asset, not duplicate transfer; removing
+it would change the visible typography.
+
+Retained investigation evidence is in
+`/tmp/design-origin-font-performance-evidence.md` and
+`/tmp/design-origin-font-resources.json`. The diagnostic font-capture rerun
+overlapped another measurement; its timings are not substituted for the original
+controlled report. The earlier `c1dccddd` report is separately retained in
+`/tmp/design-origin-performance.json` and
+`/tmp/design-origin-performance-final.log`; its 6,646,457/6,620,793 transfer
+numbers are historical, not the current result. The budget and baseline remain unchanged. A reviewed
+host-performance decision and refreshed three-run baseline are required before
+any policy adjustment; this evidence does not approve that adjustment.
 
 Then run affected Base/consumer compatibility tests and application production
 builds. With Base/Ratan/Cashflow dev servers running, run
@@ -250,6 +347,28 @@ lockfile must remain unchanged throughout validation. The manifest records packa
 validation separately from browser/portal checks and external approvals; a
 prepared candidate is not approval to publish or deploy. No registry publication
 is performed. Logs redact license and credential environment values.
+
+### Historical prepared candidate (2026-10-02)
+
+The verified candidate was prepared from source `531d6c7adcd5`. Its manifest
+describes that exact package snapshot; later documentation updates mean it is
+not an artifact of the latest checkout. The retained directory is
+`/tmp/ratan-design-origin-releases/ratan-design-origin-0.1.0-531d6c7adcd5-p3mRQ4/`.
+Its manifest records:
+
+- Tarball: `ratan-design-origin-0.1.0-531d6c7adcd5.tgz`, 598,973 bytes.
+- SHA-256: `7419be2f6430d840f007182160c4afa24d47f8a514969c57bae01599e90cc457`.
+- Passed validation: package tests, package typecheck, zero-warning lint, build
+  and independent tarball-consumer verification, with retained logs.
+- Browser/portal, broad application suites, Ratan full typecheck and performance
+  are not marked passed by this preparation manifest. External approvals are
+  unrecorded, Pro licensing is not configured, and no prior rollback artifact is
+  included.
+
+This is a historical local artifact with packaging evidence, not an approved
+production release. Prepare a fresh candidate after the final documentation is
+committed. The release owner must retain it and the completed browser/portal
+evidence in the approved immutable location before rollout.
 
 An approved previous tarball can be retained beside the candidate by supplying
 its path and independently recorded checksum:

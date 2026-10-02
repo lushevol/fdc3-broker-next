@@ -3,16 +3,38 @@
 Status (2026-10-02): the Base import migration is complete. Login, the
 authenticated shell, populated admin screens, SSO-only Login, an overflowed
 workspace, the logout survey, login-error feedback and session timeout have
-matched pre-migration visual and interaction comparisons. The remaining Base
-work is to finish the expanded parity run and record its final acceptance
-evidence. Cashflow's `DateFormat` startup failure is fixed, and the Base-only
-browser journey now reports no console errors, page errors or failed requests
-with its configured remotes available. The full joined portal still reports
-business-screen errors listed in the backlog below. The separate package browser
+matched pre-migration visual and interaction comparisons. The complete Base
+comparison now passes 56 original and 56 migrated tests with 167 exact screenshot
+matches, without masks or tolerance. This includes the added state-only pair
+of 16 original/16 migrated tests and 82 screenshots. Base's full unit suite
+passes 136 files/435 tests, with 99.01% line and 95.28% branch coverage; its
+typecheck, import guard and dependency-isolation checks pass. Ratan/Cashflow
+bridge tests pass 10/13 tests respectively. The final Cashflow rendering pair
+passes four original/four migrated cases and 16 exact screenshots against all
+16 retained original baselines. Across Base and Cashflow, this is 120
+old/current test executions and 183 exact screenshot comparisons (167 + 16).
+Cashflow's `DateFormat` startup failure is fixed, and the Base-only native
+login/workspace/drawer journey reports no console errors, page errors or failed
+requests with its configured remotes available. The final full Base comparison
+has zero forwarded current-phase `console.error` entries; 40 React Router future
+flag warnings remain. The hidden-admin DataGrid sizing, React Draggable refs,
+Emotion selectors, empty field presentation and category identity fixes preserve
+the screenshots and callbacks. The separate admin request-recovery stage
+(`40705968`) handles eight read paths and twelve mutation callbacks in Base,
+with 57 new contracts. Its affected-state replay passes 16 original/16 current
+cases with unchanged snapshots: six original unhandled 503 rejections become
+zero current rejections and zero current console errors. Service APIs and
+business logic stay in Base. The full joined portal still reports business-screen
+errors listed in the backlog below.
+The separate package browser
 gate still needs an approved `VITE_MUI_X_LICENSE_KEY`; release ownership,
 registry access, font redistribution and license approvals remain external
-release blockers. This plan covers
-`web/mfe-base-origin` adopting reusable presentation from
+release blockers. The final controlled performance gate at `40705968` fails its two strict
+WebKit/legacy request and transfer ratios because WebKit loads one required
+SC Prosper Sans font; all absolute and other ratio limits pass. The exact
+resource/font evidence and required budget review are recorded in
+[UI package release](UI_PACKAGE_RELEASE.md#current-controlled-performance-result-2026-10-02).
+This plan covers `web/mfe-base-origin` adopting reusable presentation from
 `packages/ratan-design-origin`. The current evidence is recorded in
 [Base UI parity evidence](BASE_UI_PARITY_EVIDENCE.md).
 
@@ -131,9 +153,10 @@ code. It cannot exempt a component, stylesheet helper, icon or grid import.
 
 ## Current codebase findings
 
-The reviewed package has 54 TypeScript source files, 12 test files and six
-Storybook files. Source inspection found no imports of Base source, stores,
-services or routing, and no obvious business execution dependency in the
+The initial audit reviewed 54 TypeScript source files, 12 test files and six
+Storybook files; these are historical counts, not the expanded catalog totals.
+Source inspection found no imports of Base source, stores, services or routing,
+and no obvious business execution dependency in the
 provider, controls, dialogs, state presentation or compatibility adapters.
 This is a source audit, not a new runtime verification result.
 
@@ -152,8 +175,10 @@ This is a source audit, not a new runtime verification result.
 The older [extraction plan](UI_PACKAGE_EXTRACTION_PLAN.md) describes historical
 foundation work and is not the current completion baseline. MUI 5 alignment,
 shared-control extraction and Base call-site adoption are already implemented.
-The remaining Base work is parity evidence for the states listed above, followed
-by release governance. The full import audit found 62 production files with MUI
+The Base/Cashflow comparisons match for the captured states, including the
+replayed admin failures after recovery fixes. Strict performance budget review
+and release governance remain. The initial import audit found
+62 production files with MUI
 imports (54 with runtime uses and eight using only types), plus tests, stories,
 the hidden Storybook provider and MDX examples: 98 source/example files in total.
 Treat those counts as a dated baseline and re-scan only when a new migration
