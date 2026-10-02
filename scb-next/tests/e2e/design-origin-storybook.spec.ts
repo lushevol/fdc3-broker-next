@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './browser-test';
+import { formatBrowserIssues } from './browser-issues';
 import { expectNoActionableAxeViolations } from './accessibility';
 
 import { openStory, settleStory, storybookUrl } from './storybook-helpers';
@@ -8,7 +9,11 @@ test.skip(!storybookUrl, 'Requires the built ratan-design-origin Storybook');
 
 for (const generation of ['legacy', 'webkit']) {
   for (const mode of ['light', 'dark']) {
-    test(`catalog renders accessibly: ${generation}/${mode}`, async ({ page, request }) => {
+    test(`catalog renders accessibly: ${generation}/${mode}`, async ({
+      page,
+      request,
+      browserIssues,
+    }) => {
       test.setTimeout(600_000);
       const response = await request.get(`${storybookUrl}/index.json`);
       expect(response.ok()).toBe(true);
@@ -20,11 +25,9 @@ for (const generation of ['legacy', 'webkit']) {
         .map(({ id }) => id)
         .sort();
       expect(storyIds.length).toBeGreaterThan(0);
-      const errors: string[] = [];
-      page.on('pageerror', (error) => errors.push(error.message));
       for (const storyId of storyIds) {
         await test.step(storyId, async () => {
-          errors.length = 0;
+          browserIssues.reset();
           await openStory(page, storyId, `mode:${mode};designGeneration:${generation}`);
           // Include content in examples that start with their modal or notification closed.
           const trigger = page.getByRole('button', { name: /^(Open dialog|Show notification)$/ });
@@ -35,7 +38,12 @@ for (const generation of ['legacy', 'webkit']) {
           } catch (error) {
             expect.soft(false, String(error)).toBe(true);
           }
-          expect.soft(errors, `${storyId} threw a browser error`).toEqual([]);
+          expect
+            .soft(
+              browserIssues.issues,
+              `${storyId} (${generation}/${mode}) at ${page.url()}:\n${formatBrowserIssues(browserIssues.issues)}`,
+            )
+            .toEqual([]);
         });
       }
     });

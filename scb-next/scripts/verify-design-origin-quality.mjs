@@ -6,6 +6,11 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 
 export const QUALITY_STEPS = [
   {
+    label: 'Base design import boundary',
+    command: 'npm',
+    args: ['run', 'verify:base-design-imports'],
+  },
+  {
     label: 'Package tests and coverage',
     command: 'npm',
     args: ['run', 'test', '--workspace', 'ratan-design-origin'],
@@ -36,6 +41,52 @@ export const QUALITY_STEPS = [
     args: ['run', 'verify:dependency-isolation'],
   },
   {
+    label: 'Base component compatibility',
+    command: 'npm',
+    args: [
+      'exec',
+      '--workspace',
+      '@fm/base-origin',
+      '--',
+      'vitest',
+      'run',
+      'src/components/Input/compatibility.test.tsx',
+      'src/components/Snackbar/compatibility.test.tsx',
+      'src/components/DatePicker/compatibility.test.tsx',
+      'src/components/mui5-compatibility.test.tsx',
+    ],
+  },
+  {
+    label: 'Ratan compatibility bridges',
+    command: 'npm',
+    args: [
+      'exec',
+      '--workspace',
+      '@fm/ratan_container-origin',
+      '--',
+      'vitest',
+      'run',
+      'src/compat/base.test.tsx',
+      'src/compat/design-controls.test.tsx',
+      'src/Root/component/MfeThemeProvider/appearance.test.tsx',
+    ],
+  },
+  {
+    label: 'Cashflow compatibility bridges',
+    command: 'npm',
+    args: [
+      'exec',
+      '--workspace',
+      '@fm/ratan_cashflow_blotter-origin',
+      '--',
+      'vitest',
+      'run',
+      'src/compat/base.test.ts',
+      'src/compat/design-controls.test.tsx',
+      'src/Root/common/component/MfeThemeProvider/appearance.test.tsx',
+    ],
+  },
+  {
     label: 'Package browser quality gate',
     command: 'npm',
     args: ['run', 'test:e2e:design-origin'],
@@ -59,6 +110,32 @@ export const QUALITY_STEPS = [
     label: 'Cashflow production build',
     command: 'npm',
     args: ['run', 'build', '--workspace', '@fm/ratan_cashflow_blotter-origin'],
+  },
+  {
+    label: 'Base portal parity',
+    command: 'npm',
+    args: ['run', 'test:e2e:base-ui-parity'],
+  },
+];
+
+export const MANUAL_RELEASE_GATES = [
+  {
+    label: 'Broad application unit suites',
+    command: 'npm',
+    args: ['run', 'test:unit'],
+    reason: 'Record the full baseline and classify inherited failures before release.',
+  },
+  {
+    label: 'Ratan full typecheck',
+    command: 'npm',
+    args: ['run', 'typecheck', '--workspace', '@fm/ratan_container-origin'],
+    reason: 'Resolve the inherited emitDeclarationOnly/noEmit conflict before release.',
+  },
+  {
+    label: 'Host performance budget',
+    command: 'npm',
+    args: ['run', 'verify:design-origin-host-performance'],
+    reason: 'Requires a controlled host fixture and reviewed performance evidence.',
   },
 ];
 
@@ -103,7 +180,12 @@ const isMain = process.argv[1] && import.meta.url === pathToFileURL(resolve(proc
 if (isMain) {
   try {
     await runQualitySteps();
-    console.log('\n[design-origin] All quality gates passed.');
+    console.log('\n[design-origin] Automated quality gates passed.');
+    for (const gate of MANUAL_RELEASE_GATES) {
+      console.log(
+        `[design-origin] Manual release gate: ${gate.label}: ${formatCommand(gate)} (${gate.reason})`,
+      );
+    }
   } catch (error) {
     console.error(`\n[design-origin] ${error.message}`);
     process.exitCode = 1;

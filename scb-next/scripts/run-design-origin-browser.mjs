@@ -116,6 +116,7 @@ try {
   const playwrightArgs = [
     join(root, "node_modules/@playwright/test/cli.js"),
     "test",
+    "tests/e2e/browser-issues.spec.ts",
     "tests/e2e/design-origin.spec.ts",
     "tests/e2e/design-origin-storybook.spec.ts",
     "tests/e2e/design-origin-storybook-interactions.spec.ts",

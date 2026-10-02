@@ -1,10 +1,8 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './browser-test';
 
 test.skip(!!process.env.PLAYWRIGHT_PRODUCTION_EDGE, 'Uses the development login fixtures');
 
 test('host can render and remove a tile after the control extraction', async ({ page }) => {
-  const errors: Error[] = [];
-  page.on('pageerror', (error) => errors.push(error));
   await page.goto('/?show_normal_login=Y&survey=no&new-styles=true');
   await page.getByPlaceholder('Enter Username').fill('mock.cashflow');
   await page.getByPlaceholder('Enter Password').fill('acceptance');
@@ -25,9 +23,24 @@ test('host can render and remove a tile after the control extraction', async ({ 
       ),
     ),
   ).toBe(true);
+  expect(
+    await appearanceRoots.evaluateAll((roots) =>
+      roots.map((root) => {
+        const style = window.getComputedStyle(root);
+        return {
+          webkitFont: style.fontFamily.includes('SC Prosper Sans'),
+          background: style.backgroundColor,
+        };
+      }),
+    ),
+  ).toEqual(
+    Array(await appearanceRoots.count()).fill({
+      webkitFont: true,
+      background: 'rgb(26, 26, 26)',
+    }),
+  );
   await page.getByRole('button', { name: 'Add Workspace' }).click();
   await expect(page.getByRole('button', { name: 'delete' })).toHaveCount(2);
   await page.getByRole('button', { name: 'delete' }).first().click();
   await expect(page.getByText('CF-ACCEPT-001', { exact: true })).toHaveCount(0);
-  expect(errors).toEqual([]);
 });

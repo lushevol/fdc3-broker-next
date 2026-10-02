@@ -1,4 +1,5 @@
-import { expect, test, type Locator } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import { expect, test } from './browser-test';
 import { expectNoActionableAxeViolations } from './accessibility';
 
 const consumerUrl = process.env.RATAN_DESIGN_CONSUMER_URL;
@@ -61,8 +62,6 @@ for (const width of [390, 1280]) {
   for (const mode of ['light', 'dark']) {
     for (const generation of ['legacy', 'webkit']) {
       test(`independent controls ${width}px ${generation}/${mode}`, async ({ page }) => {
-        const errors: Error[] = [];
-        page.on('pageerror', (error) => errors.push(error));
         await page.setViewportSize({ width, height: 844 });
         await page.goto(consumerUrl!);
         await page.getByLabel('Mode', { exact: true }).selectOption(mode);
@@ -285,7 +284,6 @@ for (const width of [390, 1280]) {
             scale: 'css',
           },
         );
-        expect(errors).toEqual([]);
       });
     }
   }

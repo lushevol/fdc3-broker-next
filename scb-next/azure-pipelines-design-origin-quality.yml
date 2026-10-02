@@ -9,12 +9,18 @@ pr:
       - scb-next/package-lock.json
       - scb-next/packages/ratan-design-origin/**
       - scb-next/scripts/run-design-origin-browser.mjs
+      - scb-next/scripts/run-base-ui-parity.mjs
       - scb-next/scripts/verify-dependency-isolation.mjs
       - scb-next/scripts/verify-dependency-isolation.test.mjs
       - scb-next/scripts/verify-design-origin-quality.mjs
       - scb-next/scripts/verify-design-origin-quality.test.mjs
+      - scb-next/scripts/verify-base-design-imports.mjs
       - scb-next/tests/e2e/design-origin*.spec.ts
+      - scb-next/tests/e2e/base-ui-*.spec.ts
+      - scb-next/tests/e2e/browser-*.ts
+      - scb-next/tests/e2e/storybook-helpers.ts
       - scb-next/tests/e2e/__screenshots__/**
+      - scb-next/docs/BASE_UI_*.md
       - scb-next/web/mfe-base-origin/**
       - scb-next/web/mfe-ratan-container-origin/**
       - scb-next/web/mfe-cashflow-blotter-origin/**

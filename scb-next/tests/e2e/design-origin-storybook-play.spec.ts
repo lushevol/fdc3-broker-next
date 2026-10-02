@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from './browser-test';
 
 const storybookUrl = process.env.RATAN_DESIGN_STORYBOOK_URL;
 test.skip(!storybookUrl, 'Requires the built ratan-design-origin Storybook');
@@ -103,8 +104,6 @@ for (const generation of ['legacy', 'webkit']) {
     test.describe(`${generation}/${mode} story play functions`, () => {
       for (const { id, verify } of scenarios) {
         test(id, async ({ page }) => {
-          const errors: string[] = [];
-          page.on('pageerror', (error) => errors.push(error.message));
           const query = new URLSearchParams({
             id,
             viewMode: 'story',
@@ -114,7 +113,6 @@ for (const generation of ['legacy', 'webkit']) {
           await expect(page.locator('#storybook-root > *').first()).toBeAttached();
           await verify(page);
           await expect(page.locator('.sb-errordisplay')).not.toBeVisible();
-          expect(errors, `${id} threw a browser error`).toEqual([]);
         });
       }
     });

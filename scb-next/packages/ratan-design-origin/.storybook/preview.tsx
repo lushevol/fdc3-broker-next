@@ -1,7 +1,13 @@
 import React from 'react';
 import type { Preview } from '@storybook/react-vite';
+import { LicenseInfo } from '@mui/x-date-pickers-pro';
 import { RatanDesignProvider } from '../src';
 import '../assets/styles.css';
+
+const muiXLicenseKey = (import.meta as ImportMeta & {
+  env?: { VITE_MUI_X_LICENSE_KEY?: string };
+}).env?.VITE_MUI_X_LICENSE_KEY;
+if (muiXLicenseKey) LicenseInfo.setLicenseKey(muiXLicenseKey);
 
 const preview: Preview = {
   parameters: {
