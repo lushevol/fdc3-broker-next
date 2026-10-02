@@ -31,6 +31,16 @@ export const QUALITY_STEPS = [
     args: ['run', 'test:quality-runner'],
   },
   {
+    label: 'Base parity runner fixtures',
+    command: 'npm',
+    args: ['run', 'test:base-parity-runner'],
+  },
+  {
+    label: 'Release candidate runner fixtures',
+    command: 'npm',
+    args: ['run', 'test:release-runner'],
+  },
+  {
     label: 'Dependency contract fixtures',
     command: 'npm',
     args: ['run', 'test:dependency-isolation'],

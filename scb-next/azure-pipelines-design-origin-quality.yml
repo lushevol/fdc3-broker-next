@@ -10,6 +10,9 @@ pr:
       - scb-next/packages/ratan-design-origin/**
       - scb-next/scripts/run-design-origin-browser.mjs
       - scb-next/scripts/run-base-ui-parity.mjs
+      - scb-next/scripts/run-base-ui-parity.test.mjs
+      - scb-next/scripts/prepare-design-origin-release.mjs
+      - scb-next/scripts/prepare-design-origin-release.test.mjs
       - scb-next/scripts/verify-dependency-isolation.mjs
       - scb-next/scripts/verify-dependency-isolation.test.mjs
       - scb-next/scripts/verify-design-origin-quality.mjs

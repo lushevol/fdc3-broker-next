@@ -16,6 +16,8 @@ test('defines the complete package, dependency, browser and host gate order', ()
       'Package typecheck',
       'Package lint',
       'Aggregate runner fixtures',
+      'Base parity runner fixtures',
+      'Release candidate runner fixtures',
       'Dependency contract fixtures',
       'Host dependency resolution',
       'Base component compatibility',

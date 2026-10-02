@@ -7,15 +7,19 @@ initialization is performed by this migration.
 ## Current status (2026-10-02)
 
 The package is usable for repository development and the Base migration has
-passed its current package, Storybook and import-boundary checks. It is not a
-production release yet. Before publication, the team still needs to:
+passed its package-contract and import-boundary checks. The stricter browser gate
+now captures console errors and failed requests; it detects `MUI: Missing license
+key` in the Pro date-range examples. The complete Storybook gate remains blocked
+until an approved key is supplied. This is not a production release yet. Before
+publication, the team still needs to:
 
 1. finish the missing Base parity fixtures and record the Cashflow development
    error separately from package behavior;
 2. name a release owner and backup, choose the private registry and access list,
    approve packaged font redistribution, and assign MUI X Pro ownership; and
-3. publish a versioned tarball to the approved registry, record its checksum and
-   validation evidence, and retain the previous artifact for rollback.
+3. review a locally prepared tarball/checksum and complete browser/portal evidence,
+   then publish it to the approved registry and retain the previous artifact for
+   rollback.
 
 The aggregate quality command is useful evidence for the package candidate, but
 it does not by itself prove every Base page state or complete the later
@@ -106,13 +110,32 @@ npx playwright install chromium
 npm run verify:design-origin
 ```
 
-The aggregate command owns its temporary consumer and preview servers on ports
-8019/8020; those ports must be free. It needs installed workspace dependencies and
-npm registry/cache access for the fresh consumer, but no separately running app or
-backend service. It stops at the first failed labeled command and preserves child
-output. `azure-pipelines-design-origin-quality.yml` installs dependencies and
-Chromium before running the same command. External CI templates should invoke this
-command directly and must never use the snapshot-update command as a quality gate.
+The aggregate command runs the Base import guard, focused Base component and
+Ratan/Cashflow bridge contracts, package browser checks, host builds, and Base
+portal parity. It owns its temporary consumer/preview servers on ports 8019/8020
+and the isolated Base parity server on port 8121; those ports must be free. It
+needs installed workspace dependencies and npm registry/cache access for the fresh
+consumer. It stops at the first failed labeled command and preserves child output.
+`azure-pipelines-design-origin-quality.yml` installs dependencies and Chromium
+before running the same command. External CI templates should invoke this command
+directly and must never use the snapshot-update command as a quality gate.
+
+The aggregate prints these separate manual release gates. A green automated
+command does not mark them complete:
+
+| Gate | Command | Remaining requirement |
+| --- | --- | --- |
+| Broad application unit suites | `npm run test:unit` | Record the complete baseline and assign inherited failures; focused contract passes do not close this gate. |
+| Ratan full typecheck | `npm run typecheck --workspace @fm/ratan_container-origin` | Fix the inherited `emitDeclarationOnly`/`noEmit` conflict and review the resulting diagnostics. |
+| Controlled host performance | `npm run verify:design-origin-host-performance` | Retain a complete controlled report against the reviewed budget. |
+
+The Storybook preview and independent date consumer read
+`VITE_MUI_X_LICENSE_KEY` and initialize MUI X Pro before rendering. Supply an
+approved key through the local environment or the CI variable store before
+running `npm run test:e2e:design-origin`. Do not put keys in the repository, command
+arguments, release records or logs. Missing or invalid keys keep the strict browser
+gate failing; the check has no license-warning exclusion. License configuration
+does not itself establish production entitlement or assign a license owner.
 
 The host-performance command separately rebuilds Base, Ratan and Cashflow with
 hidden source maps, owns a controlled localhost edge on port 9081 and runs three
@@ -194,12 +217,37 @@ typos without deprecation notes, consumer evidence and a breaking release.
 
 ## Reproducible Candidate and Rollout
 
-Build and verify the committed candidate, then run `npm --cache=/tmp/npm-cache pack`
-in packages/ratan-design-origin. Record the tarball name and SHA-256 checksum,
-commit, peer matrix and validation logs. Archive the matching previous tarball/
-catalog/screenshots. A clean tarball installation needs no sibling Base or WebKit
-source checkout. A full monorepo installation still uses its existing local
-WebKit overrides and repository-specific lockfile.
+Prepare a local, reviewable candidate from committed package inputs:
+
+```sh
+npm run prepare:design-origin-release
+```
+
+This command runs package tests, typecheck, lint, build and the independent
+tarball-consumer verifier. It retains the exact tarball installed by that
+verifier under `/tmp/ratan-design-origin-releases/`, with the version/source
+commit in the directory name, a SHA-256 checksum, `manifest.json`, and validation
+logs. Uncommitted package inputs are rejected, and the package tree and dependency
+lockfile must remain unchanged throughout validation. The manifest records packaging
+validation separately from browser/portal checks and external approvals; a
+prepared candidate is not approval to publish or deploy. No registry publication
+is performed. Logs redact license and credential environment values.
+
+An approved previous tarball can be retained beside the candidate by supplying
+its path and independently recorded checksum:
+
+```sh
+npm run prepare:design-origin-release -- \
+  --rollback /approved/path/ratan-design-origin-previous.tgz \
+  --rollback-sha256 RECORDED_SHA256
+```
+
+The command rejects a checksum mismatch and records the copied rollback artifact
+in the manifest. Its presence is not proof of owner approval, matching application
+bundles, or a successful rollback drill. Archive matching catalog/screenshots and
+the previously verified application bundles before rollout. A clean tarball
+installation needs no sibling Base or WebKit source checkout. A full monorepo
+installation still uses its existing local WebKit overrides and lockfile.
 
 After owners/registry/licensing are assigned, the release owner reviews the
 concrete tarball and publication settings before any publication. Roll out one
