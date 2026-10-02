@@ -348,6 +348,39 @@ validation separately from browser/portal checks and external approvals; a
 prepared candidate is not approval to publish or deploy. No registry publication
 is performed. Logs redact license and credential environment values.
 
+### Current prepared candidate (2026-10-02)
+
+The fresh local candidate was prepared from committed source
+`a937db218fb988cf4d569feec4cd849cb53dfe16`, with clean package inputs and package
+tree `c036894d80f4750e87a00c1805a3246a2e418626`. Its retained directory is
+`/tmp/ratan-design-origin-releases/ratan-design-origin-0.1.0-a937db218fb9-8sLm2V/`.
+The packaged README has not changed since preparation. This follow-up release
+record is outside the package and does not alter the verified artifact.
+
+- Tarball: `ratan-design-origin-0.1.0-a937db218fb9.tgz`, 599,969 bytes.
+- SHA-256: `ee156d217269af31f7a5fd113dbe9b6f1ab55aa0093e1e88d54b41ed86d78209`.
+- All five preparation gates pass: package tests, typecheck, zero-warning lint,
+  build and independent tarball-consumer verification. Package tests include
+  131 Vitest cases, seven token checks and three Storybook coverage checks;
+  package coverage is 97.21% lines/94.42% branches.
+- `manifest.json`, `SHA256SUMS` and five validation logs are retained beside the
+  tarball. All six artifact/log checksums were independently rechecked.
+- The manifest records packaging validation only. Its separate browser/portal,
+  broad application, Ratan typecheck and performance fields remain `not-run`;
+  the host evidence elsewhere in this document remains separate. External
+  approvals are unrecorded, Pro licensing is not configured, and no approved
+  previous rollback artifact is included. This package remains unpublished.
+
+After preparation, the refreshed `http://localhost:8001` portal passed login,
+New Tile, actual `CF-ACCEPT-001` Cashflow rendering, Add Workspace and tab
+deletion. `/tmp/base-native-release-journey.json` records zero Base console/page/
+request/HTTP errors. Its remote phase retains 34 inherited business console
+errors and one expected aborted SockJS stream on deletion, with zero page/HTTP
+errors. Desktop/mobile captures are `/tmp/base-native-release-desktop.png` and
+`/tmp/base-native-release-mobile.png`; the original mobile overflow is retained.
+This smoke check does not add unique screenshot comparisons or close the
+deferred business-screen backlog.
+
 ### Historical prepared candidate (2026-10-02)
 
 The verified candidate was prepared from source `531d6c7adcd5`. Its manifest
@@ -365,10 +398,9 @@ Its manifest records:
   unrecorded, Pro licensing is not configured, and no prior rollback artifact is
   included.
 
-This is a historical local artifact with packaging evidence, not an approved
-production release. Prepare a fresh candidate after the final documentation is
-committed. The release owner must retain it and the completed browser/portal
-evidence in the approved immutable location before rollout.
+This historical artifact is superseded by the fresh candidate above. The release
+owner must retain the selected artifact and completed browser/portal evidence in
+the approved immutable location before rollout.
 
 An approved previous tarball can be retained beside the candidate by supplying
 its path and independently recorded checksum:
