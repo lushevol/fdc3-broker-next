@@ -1,8 +1,11 @@
 import { defineConfig } from '@playwright/test';
+import { join } from 'node:path';
 
 export default defineConfig({
   testDir: './tests/e2e',
-  snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}{ext}',
+  snapshotPathTemplate: process.env.BASE_UI_PARITY_SNAPSHOT_DIR
+    ? join(process.env.BASE_UI_PARITY_SNAPSHOT_DIR, '{testFilePath}/{arg}{ext}')
+    : '{testDir}/__screenshots__/{testFilePath}/{arg}{ext}',
   timeout: 30_000,
   retries: 0,
   use: {
