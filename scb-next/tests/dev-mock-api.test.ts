@@ -1,4 +1,5 @@
 import { createServer } from 'node:http';
+import { createRequire } from 'node:module';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { createMockApiServer } from '../devops/mock-bff/server.mjs';
@@ -160,13 +161,118 @@ describe('SCB Next development mock API', () => {
     await expect(info.json()).resolves.toMatchObject({ websocket: false, cookie_needed: false });
     const url = `${origin}/api/ratan/notification/subscriptions/123/parity-session/xhr`;
     const opening = await fetch(url, { method: 'POST' });
+    const waiting = await fetch(url, { method: 'POST' });
+    expect(await waiting.text()).toBe('h\n');
+    const sent = await fetch(`${url}_send`, {
+      method: 'POST',
+      body: JSON.stringify(['CONNECT\naccept-version:1.1\n\n\u0000']),
+    });
     const connected = await fetch(url, { method: 'POST' });
     const heartbeat = await fetch(url, { method: 'POST' });
     expect(await opening.text()).toBe('o\n');
     expect(await connected.text()).toContain('CONNECTED');
     expect(await heartbeat.text()).toBe('h\n');
-    const sent = await fetch(`${url}_send`, { method: 'POST', body: '["CONNECT"]' });
     expect(sent.status).toBe(204);
+  });
+
+  it.each([
+    [undefined, 'xhr-streaming'],
+    ['eventsource', 'eventsource'],
+    ['xhr-polling', 'xhr-polling'],
+  ])(
+    'keeps the real SockJS client on %s until close',
+    async (forcedTransport, expectedTransport) => {
+      const origin = await startMockApi();
+      const requests: string[] = [];
+      servers.at(-1)!.on('request', (request) => requests.push(request.url ?? ''));
+      const require = createRequire(
+        new URL('../web/mfe-cashflow-blotter-origin/package.json', import.meta.url),
+      );
+      const SockJS = require('sockjs-client') as new (
+        url: string,
+        protocols: null,
+        options: { transports?: string[] },
+      ) => {
+        onopen: (() => void) | null;
+        onmessage: ((event: { data: string }) => void) | null;
+        onclose: (() => void) | null;
+        send: (message: string) => void;
+        close: () => void;
+        _transport: { transportName: string };
+      };
+      const socket = new SockJS(`${origin}/api/ratan/notification/subscriptions`, null, {
+        transports: forcedTransport ? [forcedTransport] : undefined,
+      });
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(
+            () => reject(new Error('SockJS notification connection timed out')),
+            2000,
+          );
+          socket.onopen = () => socket.send('CONNECT\naccept-version:1.1\n\n\u0000');
+          socket.onmessage = (event) => {
+            if (!event.data.includes('CONNECTED')) return;
+            clearTimeout(timeout);
+            resolve();
+          };
+          socket.onclose = () => {
+            clearTimeout(timeout);
+            reject(new Error('SockJS notification connection closed before CONNECTED'));
+          };
+        });
+        expect(socket._transport.transportName).toBe(expectedTransport);
+        if (expectedTransport !== 'xhr-polling') {
+          expect(requests.some((url) => /\/xhr(?:\?|$)/.test(url))).toBe(false);
+        }
+        expect(requests.some((url) => /\/jsonp(?:\?|$)/.test(url))).toBe(false);
+      } finally {
+        socket.close();
+      }
+    },
+  );
+
+  it('streams HTMLfile notification frames and resets a closed session', async () => {
+    const origin = await startMockApi();
+    const sessionPath = `${origin}/api/ratan/notification/subscriptions/123/htmlfile-session`;
+    const controller = new AbortController();
+    const closed = new Promise<void>((resolve) => {
+      servers.at(-1)!.on('request', (request, response) => {
+        if (request.url?.includes('/htmlfile?')) response.once('close', resolve);
+      });
+    });
+    try {
+      const response = await fetch(`${sessionPath}/htmlfile?c=_jp.mock`, {
+        signal: controller.signal,
+      });
+      const reader = response.body!.getReader();
+      const opening = await reader.read();
+      expect(response.headers.get('content-type')).toContain('text/html');
+      const text = new TextDecoder().decode(opening.value);
+      expect(text).toContain('parent._jp.mock;c.start()');
+      expect(text).toContain('p("o")');
+      await fetch(`${sessionPath}/xhr_send`, {
+        method: 'POST',
+        body: JSON.stringify(['CONNECT\naccept-version:1.1\n\n\u0000']),
+      });
+      const connected = await reader.read();
+      expect(new TextDecoder().decode(connected.value)).toContain('CONNECTED');
+    } finally {
+      controller.abort();
+    }
+    await closed;
+    const reopened = await fetch(`${sessionPath}/xhr`, { method: 'POST' });
+    expect(await reopened.text()).toBe('o\n');
+  });
+
+  it('rejects malformed SockJS send bodies without terminating the mock server', async () => {
+    const origin = await startMockApi();
+    const sessionPath = `${origin}/api/ratan/notification/subscriptions/123/invalid-session`;
+    for (const body of ['{invalid', '[1]', '{"message":"CONNECT"}']) {
+      const sent = await fetch(`${sessionPath}/xhr_send`, { method: 'POST', body });
+      expect(sent.status).toBe(400);
+    }
+    const health = await fetch(`${origin}/healthz`);
+    expect(health.status).toBe(200);
   });
 
   it('matches the production mock BFF validation and generic API fallbacks', async () => {
@@ -273,12 +379,14 @@ describe('SCB Next development mock API', () => {
     const sessionPath = '/api/ratan/notification/subscriptions/123/mock-session';
 
     const open = await fetch(`${origin}${sessionPath}/jsonp?c=_jp.mock`);
-    const connected = await fetch(`${origin}${sessionPath}/jsonp?c=_jp.mock`);
     const sent = await fetch(`${origin}${sessionPath}/jsonp_send`, {
       method: 'POST',
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      body: 'd=%5B%22CONNECT%22%5D',
+      body: new URLSearchParams({
+        d: JSON.stringify(['CONNECT\naccept-version:1.1\n\n\u0000']),
+      }).toString(),
     });
+    const connected = await fetch(`${origin}${sessionPath}/jsonp?c=_jp.mock`);
 
     expect(open.headers.get('content-type')).toContain('application/javascript');
     await expect(open.text()).resolves.toBe('_jp.mock("o");\r\n');

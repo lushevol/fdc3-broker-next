@@ -203,7 +203,12 @@ The development mock is a contract replay, not a universal fake backend.
 7. Custom filter/view responses MUST use the builder types requested by the
    Cashflow application and contain usable saved entries.
 8. SockJS JSONP requests MUST receive executable callback frames, not ordinary
-   JSON. Notification startup MUST not create syntax errors or reconnect alerts.
+   JSON. XHR streaming, EventSource, and HTMLfile receivers MUST receive their
+   transport-specific framing over an open response. A notification session MUST
+   send `CONNECTED` only after receiving the client's STOMP `CONNECT` or `STOMP`
+   frame, and MUST release its receive stream and heartbeat when the client closes
+   it. Notification startup and workspace removal MUST not create syntax errors,
+   stale JSONP callback errors, or reconnect alerts.
 9. Raw production credentials, JWTs, secrets, and unrelated personal data MUST
    NOT be committed.
 10. Unknown API calls MAY receive a deterministic empty envelope when no

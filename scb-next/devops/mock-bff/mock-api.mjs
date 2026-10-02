@@ -86,39 +86,117 @@ export function createMockApiMiddleware({ serviceName = 'single-ui-bff' } = {}) 
     }
 
     const notificationTransport = pathname.match(
-      /^(\/api\/ratan\/notification\/subscriptions\/\d+\/[^/]+)\/(jsonp|jsonp_send|xhr|xhr_send)$/,
+      /^(\/api\/ratan\/notification\/subscriptions\/\d+\/[^/]+)\/(jsonp|jsonp_send|xhr|xhr_send|xhr_streaming|eventsource|htmlfile)$/,
     );
-    if (notificationTransport?.[2] === 'xhr_send') {
-      await readBody(request);
-      response.statusCode = 204;
-      response.end();
-      return;
-    }
-    if (notificationTransport?.[2] === 'jsonp_send') {
-      await readBody(request);
-      sendText(response, 'ok', 'text/plain; charset=UTF-8');
-      return;
-    }
-    if (['jsonp', 'xhr'].includes(notificationTransport?.[2])) {
-      const session = notificationTransport[1];
-      const pollCount = notificationSessions.get(session) ?? 0;
-      notificationSessions.set(session, pollCount + 1);
+    if (notificationTransport) {
+      const [, sessionPath, transport] = notificationTransport;
+      let session = notificationSessions.get(sessionPath);
+      if (!session) {
+        session = {
+          opened: false,
+          connected: false,
+          pending: [],
+          stream: undefined,
+          expiry: undefined,
+        };
+        notificationSessions.set(sessionPath, session);
+      }
+      clearTimeout(session.expiry);
+      session.expiry = setTimeout(() => {
+        if (!session.stream) notificationSessions.delete(sessionPath);
+      }, 60_000);
+      session.expiry.unref();
       const callbackCandidate = requestUrl.searchParams.get('c') ?? '_jp';
       const callback = /^[A-Za-z_$][\w.$]*$/.test(callbackCandidate) ? callbackCandidate : '_jp';
-      const connectedFrame = 'CONNECTED\nversion:1.1\nheart-beat:0,0\n\n\u0000';
-      const frame =
-        pollCount === 0 ? 'o' : pollCount === 1 ? `a[${JSON.stringify(connectedFrame)}]` : 'h';
-      if (notificationTransport[2] === 'xhr') {
-        // Keep heartbeat polling bounded; JSONP fallback can race a removed workspace.
-        if (pollCount > 1) await new Promise((resolve) => setTimeout(resolve, 100));
-        sendText(response, `${frame}\n`, 'application/javascript; charset=UTF-8');
+
+      if (transport === 'xhr_send' || transport === 'jsonp_send') {
+        const body = await readBody(request);
+        let messages;
+        try {
+          messages = JSON.parse(
+            transport === 'jsonp_send' ? (new URLSearchParams(body).get('d') ?? '[]') : body,
+          );
+        } catch {
+          response.statusCode = 400;
+          response.end();
+          return;
+        }
+        if (!Array.isArray(messages) || messages.some((message) => typeof message !== 'string')) {
+          response.statusCode = 400;
+          response.end();
+          return;
+        }
+        if (
+          !session.connected &&
+          messages.some((message) => /^(?:CONNECT|STOMP)\n/.test(message))
+        ) {
+          session.connected = true;
+          const frame = `a[${JSON.stringify('CONNECTED\nversion:1.1\nheart-beat:0,0\n\n\u0000')}]`;
+          if (session.stream) session.stream(frame);
+          else session.pending.push(frame);
+        }
+        if (transport === 'xhr_send') {
+          response.statusCode = 204;
+          response.end();
+        } else sendText(response, 'ok', 'text/plain; charset=UTF-8');
         return;
       }
-      sendText(
-        response,
-        `${callback}(${JSON.stringify(frame)});\r\n`,
-        'application/javascript; charset=UTF-8',
-      );
+
+      if (['xhr_streaming', 'eventsource', 'htmlfile'].includes(transport)) {
+        const contentType =
+          transport === 'eventsource'
+            ? 'text/event-stream'
+            : transport === 'htmlfile'
+              ? 'text/html'
+              : 'application/javascript';
+        response.setHeader('content-type', `${contentType}; charset=UTF-8`);
+        response.setHeader('cache-control', 'no-store');
+        response.setHeader('x-accel-buffering', 'no');
+        response.statusCode = 200;
+        // SockJS receivers need a flushed prelude and an open response.
+        if (transport === 'xhr_streaming') response.write(`${'h'.repeat(2048)}\n`);
+        if (transport === 'eventsource') response.write('\r\n');
+        if (transport === 'htmlfile') {
+          response.write(
+            `<!doctype html><html><body><script>var c=parent.${callback};c.start();function p(d){c.message(d)};window.onload=function(){c.stop()};</script>${' '.repeat(1024)}\r\n`,
+          );
+        }
+        const sendFrame = (frame) => {
+          if (response.destroyed) return;
+          if (transport === 'eventsource') response.write(`data: ${encodeURI(frame)}\r\n\r\n`);
+          else if (transport === 'htmlfile')
+            response.write(`<script>p(${JSON.stringify(frame)});</script>\r\n`);
+          else response.write(`${frame}\n`);
+        };
+        session.stream = sendFrame;
+        if (!session.opened) {
+          session.opened = true;
+          sendFrame('o');
+        }
+        session.pending.splice(0).forEach(sendFrame);
+        const heartbeat = setInterval(() => sendFrame('h'), 25_000);
+        heartbeat.unref();
+        response.once('close', () => {
+          clearInterval(heartbeat);
+          if (session.stream === sendFrame) {
+            clearTimeout(session.expiry);
+            notificationSessions.delete(sessionPath);
+          }
+        });
+        return;
+      }
+
+      const frame = session.opened ? (session.pending.shift() ?? 'h') : 'o';
+      session.opened = true;
+      if (transport === 'xhr') {
+        if (frame === 'h') await new Promise((resolve) => setTimeout(resolve, 100));
+        sendText(response, `${frame}\n`, 'application/javascript; charset=UTF-8');
+      } else
+        sendText(
+          response,
+          `${callback}(${JSON.stringify(frame)});\r\n`,
+          'application/javascript; charset=UTF-8',
+        );
       return;
     }
 
