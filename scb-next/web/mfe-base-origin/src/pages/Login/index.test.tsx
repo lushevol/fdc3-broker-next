@@ -83,6 +83,27 @@ const Comp2 = () => {
 };
 
 describe("Routing component", () => {
+  it("keeps empty credentials controlled when the user starts typing", () => {
+    const errors = vi.spyOn(console, "error");
+    render(<Provider data={{ theme: "dark" }}>
+      <ThemeProvider>
+        <Root />
+      </ThemeProvider>
+    </Provider>);
+
+    const username = screen.getByPlaceholderText("Enter Username");
+    const password = screen.getByPlaceholderText("Enter Password");
+    expect(username).toHaveValue("");
+    expect(password).toHaveValue("");
+    fireEvent.change(username, { target: { value: "user" } });
+    fireEvent.change(password, { target: { value: "secret" } });
+    expect(username).toHaveValue("user");
+    expect(password).toHaveValue("secret");
+    expect(errors.mock.calls.map((args) => args.join(" ")).join("\n"))
+      .not.toMatch(/uncontrolled input to be controlled/);
+    errors.mockRestore();
+  });
+
   it("should be in the document", () => {
     render(<Provider data={{ theme: "light", token: undefined, user: undefined }}>
       <ThemeProvider>

@@ -99,10 +99,8 @@ const Root = styled("section")(({ theme }) => ({
       padding: "6px 8px",
       overflow: "auto",
       position: "relative",
-      "&>section:first-child": {
-        height: "auto!important",
-      },
-      "&>div:first-child": {
+      // Keep the first content root at natural height, ignoring Emotion style nodes.
+      "&>:is(section, div):first-of-type:not(:where(:not(style) ~ *))": {
         height: "auto!important",
       },
     },

@@ -74,7 +74,7 @@ const Login: React.FC = (): ReactElement => {
                           setUsername(`${e.target.value}`.trim());
                         }}
                         onKeyUp={onKeyUp}
-                        value={username}
+                        value={username ?? ""}
                       />
                     </FormControl>
                     <FormControl
@@ -102,7 +102,7 @@ const Login: React.FC = (): ReactElement => {
                           setPassword(e.target.value);
                         }}
                         onKeyUp={onKeyUpPassword}
-                        value={password}
+                        value={password ?? ""}
                       />
                     </FormControl>
                     <Button

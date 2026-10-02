@@ -1,6 +1,7 @@
 import { federation } from "@module-federation/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig, loadEnv } from "vite";
+import { fileURLToPath } from "node:url";
+import { defineConfig, loadEnv, searchForWorkspaceRoot } from "vite";
 import { devMockApiPlugin } from "./dev/mock-api";
 
 export default defineConfig(({ mode }) => {
@@ -14,6 +15,7 @@ export default defineConfig(({ mode }) => {
     env.VITE_ALPHA_PAYMENTS_API_TARGET ?? "http://127.0.0.1:8086";
 
   return {
+    cacheDir: process.env.BASE_UI_PARITY_CACHE_DIR,
     optimizeDeps: {
       include: ["ratan-design-origin/icons", "ratan-design-origin/data-grid"],
     },
@@ -71,6 +73,12 @@ export default defineConfig(({ mode }) => {
       host: "127.0.0.1",
       port: 8001,
       strictPort: true,
+      fs: {
+        allow: [
+          searchForWorkspaceRoot(process.cwd()),
+          fileURLToPath(new URL("../../../sc-dev-web/sc-dev-web", import.meta.url)),
+        ],
+      },
       headers: { "Cache-Control": "no-store" },
       proxy: {
         "/api/alpha-payments/": {

@@ -6,7 +6,7 @@ import { setTabPanel } from "../../utils/drawer";
 const TabPanel: React.FC<TabPanelProps> = (
   props: TabPanelProps
 ): ReactElement => {
-  const { children, value, index, isActive, ...other } = props;
+  const { children, value, index, isActive, tabId: _tabId, ...other } = props;
   const [isHidden, setIsHidden] = React.useState(true);
   const [isHidden2, setIsHidden2] = React.useState(true);
   const [isTabPanelLoaded, setIsTabPanelLoaded] = React.useState(false);

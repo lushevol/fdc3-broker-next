@@ -37,6 +37,11 @@ export const ContainerComponent = (
     <Empty />
   );
 
+// Tabs decorates every child with tab-only props; these slots remain plain divs.
+const WorkspaceTabsAdornment: React.FC<
+  Pick<React.HTMLAttributes<HTMLDivElement>, "children" | "className">
+> = ({ children, className }) => <div className={className}>{children}</div>;
+
 const Home: React.FC = (): ReactElement => {
   const theme = useTheme();
   const {
@@ -100,7 +105,7 @@ const Home: React.FC = (): ReactElement => {
           scrollButtons
           onDoubleClick={focus(value)}
         >
-          <div className={classes.firsttab}></div>
+          <WorkspaceTabsAdornment className={classes.firsttab} />
           {store?.workspaces?.map((item: Workspace) => {
             const showRefresh: boolean = !!(
               item.id === store?.currentWorkspace?.id &&
@@ -112,6 +117,7 @@ const Home: React.FC = (): ReactElement => {
             return (
               <Tab
                 key={item.id}
+                component="div"
                 label={
                   <TabItem
                     item={item}
@@ -128,7 +134,7 @@ const Home: React.FC = (): ReactElement => {
             );
           })}
           {!isNewLayout && (
-            <div className={classes.lasttab}>
+            <WorkspaceTabsAdornment className={classes.lasttab}>
               <Button
                 variant="contained"
                 className={classes.addtab}
@@ -139,7 +145,7 @@ const Home: React.FC = (): ReactElement => {
               >
                 <AddIcon />
               </Button>
-            </div>
+            </WorkspaceTabsAdornment>
           )}
         </Tabs>
         {isNewLayout && (

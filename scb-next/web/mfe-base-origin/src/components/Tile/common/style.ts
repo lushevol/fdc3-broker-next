@@ -79,7 +79,7 @@ const Root = styled("section")(({ theme }) => ({
     height: "75px",
     fontSize: "0.875rem",
     fontWeight: 300,
-    "white-space": "nowrap",
+    whiteSpace: "nowrap",
     color: "rgb(115 121 126)",
     p: {
       margin: 0,
