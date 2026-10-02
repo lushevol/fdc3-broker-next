@@ -1,6 +1,6 @@
 import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './base-ui-parity.fixture';
 
 test.use({
   deviceScaleFactor: 1,
@@ -8,9 +8,8 @@ test.use({
   timezoneId: 'Asia/Singapore',
 });
 
-const profileImage = `<svg xmlns="http://www.w3.org/2000/svg" width="151" height="151" viewBox="0 0 151 151"><rect width="151" height="151" fill="#b7c9d3"/><circle cx="75.5" cy="56" r="25" fill="#fff"/><path d="M27 146c0-33 21-53 48.5-53S124 113 124 146" fill="#fff"/></svg>`;
 const fontsDirectory = fileURLToPath(
-  new URL('../../../sc-dev-web/sc-dev-web/dist/assets/fonts/', import.meta.url),
+  new URL('../../../sc-dev-web/sc-dev-web/public/assets/fonts/', import.meta.url),
 );
 
 for (const generation of ['legacy', 'webkit'] as const) {
@@ -24,12 +23,6 @@ for (const generation of ['legacy', 'webkit'] as const) {
         page.on('pageerror', (error) => errors.push(error));
         await page.setViewportSize({ width: 1440, height: 900 });
         await page.clock.setFixedTime(new Date('2099-12-31T00:00:00Z'));
-        await page.route('https://axess.sc.net/**/photo', (route) =>
-          route.fulfill({ contentType: 'image/svg+xml', body: profileImage }),
-        );
-        await page.route('https://leap.standardchartered.com/**/photo_lg.jpg', (route) =>
-          route.fulfill({ contentType: 'image/svg+xml', body: profileImage }),
-        );
         await page.route(/SCProsperSans-.*\.(woff2?|ttf)$/, (route) =>
           route.fulfill({
             path: join(fontsDirectory, basename(new URL(route.request().url()).pathname)),
@@ -78,6 +71,15 @@ for (const generation of ['legacy', 'webkit'] as const) {
         await snapshot('home');
         await newTile.click();
         await expect(page.getByText('Cashflow Blotter', { exact: true })).toBeVisible();
+        // Wait for settled compositing before sampling text beneath the drawer backdrop.
+        await expect(page.locator('.MuiDrawer-paper')).toHaveCSS('transform', 'none');
+        await expect(page.locator('.MuiBackdrop-root:visible')).toHaveCSS('opacity', '1');
+        await page.evaluate(
+          () =>
+            new Promise<void>((resolve) => {
+              requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+            }),
+        );
         await snapshot('drawer');
         await page.keyboard.press('Escape');
         await expect(page.getByText('Cashflow Blotter', { exact: true })).toBeHidden();

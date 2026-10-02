@@ -1,6 +1,7 @@
 import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from './base-ui-parity.fixture';
 
 test.use({ deviceScaleFactor: 1, locale: 'en-US', timezoneId: 'Asia/Singapore' });
 
