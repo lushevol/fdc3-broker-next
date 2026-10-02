@@ -54,6 +54,7 @@
     "measure:alpha-adoption": "node ./scripts/measure-alpha-adoption.mjs",
     "verify:design-origin-host-performance": "node ./scripts/measure-design-origin-host.mjs --build --output /tmp/design-origin-performance.json",
     "test:quality-runner": "node --test ./scripts/verify-design-origin-quality.test.mjs",
+    "test:browser-runner": "node --test ./scripts/run-design-origin-browser.test.mjs",
     "test:webkit-host-runner": "node --test ./scripts/prepare-webkit-host.test.mjs",
     "prepare:webkit-host": "node ./scripts/prepare-webkit-host.mjs",
     "test:base-parity-runner": "node --test ./scripts/run-base-ui-parity.test.mjs",

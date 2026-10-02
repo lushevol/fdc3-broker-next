@@ -36,6 +36,11 @@ export const QUALITY_STEPS = [
     args: ['run', 'test:base-parity-runner'],
   },
   {
+    label: 'Browser runner fixtures',
+    command: 'npm',
+    args: ['run', 'test:browser-runner'],
+  },
+  {
     label: 'Canonical WebKit host fixtures',
     command: 'npm',
     args: ['run', 'test:webkit-host-runner'],

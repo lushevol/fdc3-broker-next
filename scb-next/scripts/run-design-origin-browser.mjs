@@ -9,15 +9,11 @@ const packageRoot = join(root, "packages/ratan-design-origin");
 const stateDirectory = await mkdtemp(join(tmpdir(), "ratan-design-browser-"));
 const consumerPathFile = join(stateDirectory, "consumer-path.txt");
 const children = new Set();
+let stopPromise;
 
 const run = (command, args, options = {}) =>
   new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
-      cwd: root,
-      env: process.env,
-      stdio: "inherit",
-      ...options,
-    });
+    const child = start(command, args, options);
     child.once("error", reject);
     child.once("exit", (code, signal) => {
       if (code === 0) resolve();
@@ -30,9 +26,11 @@ const start = (command, args, options = {}) => {
     cwd: root,
     env: process.env,
     stdio: "inherit",
+    detached: process.platform !== "win32",
     ...options,
   });
   children.add(child);
+  child.once("error", () => children.delete(child));
   child.once("exit", () => children.delete(child));
   return child;
 };
@@ -58,20 +56,37 @@ async function stopChildren() {
     [...children].map(
       (child) =>
         new Promise((resolve) => {
-          if (child.exitCode !== null) return resolve();
+          if (child.exitCode !== null || child.signalCode !== null) return resolve();
           child.once("exit", resolve);
-          child.kill("SIGTERM");
+          const signal = (name) => {
+            try {
+              if (process.platform !== "win32") process.kill(-child.pid, name);
+              else child.kill(name);
+            } catch (error) {
+              if (error.code !== "ESRCH") throw error;
+            }
+          };
+          // Include npm's build workers in the process group on CI and macOS.
+          signal("SIGTERM");
           setTimeout(() => {
-            if (child.exitCode === null) child.kill("SIGKILL");
+            if (child.exitCode === null && child.signalCode === null) signal("SIGKILL");
           }, 2_000).unref();
         }),
     ),
   );
 }
 
+function stop() {
+  stopPromise ??= (async () => {
+    await stopChildren();
+    await rm(stateDirectory, { recursive: true, force: true });
+  })();
+  return stopPromise;
+}
+
 for (const signal of ["SIGINT", "SIGTERM"]) {
   process.once(signal, async () => {
-    await stopChildren();
+    await stop();
     process.exit(128 + (signal === "SIGINT" ? 2 : 15));
   });
 }
@@ -125,6 +140,8 @@ try {
   ];
   if (process.argv.includes("--update-snapshots")) {
     playwrightArgs.push("--update-snapshots");
+  } else {
+    playwrightArgs.push("--update-snapshots=none");
   }
   await run(process.execPath, playwrightArgs, {
     env: {
@@ -134,6 +151,5 @@ try {
     },
   });
 } finally {
-  await stopChildren();
-  await rm(stateDirectory, { recursive: true, force: true });
+  await stop();
 }

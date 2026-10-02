@@ -12,6 +12,7 @@ pr:
       - scb-next/package-lock.json
       - scb-next/packages/ratan-design-origin/**
       - scb-next/scripts/run-design-origin-browser.mjs
+      - scb-next/scripts/run-design-origin-browser.test.mjs
       - scb-next/scripts/run-base-ui-parity.mjs
       - scb-next/scripts/run-base-ui-parity.test.mjs
       - scb-next/scripts/prepare-design-origin-release.mjs
@@ -59,3 +60,5 @@ steps:
   - script: npm run verify:design-origin
     displayName: Verify ratan-design-origin candidate
     workingDirectory: scb-next
+    env:
+      VITE_MUI_X_LICENSE_KEY: $(VITE_MUI_X_LICENSE_KEY)
