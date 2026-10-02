@@ -80,15 +80,26 @@ export function createMockApiMiddleware({ serviceName = 'single-ui-bff' } = {}) 
       return;
     }
 
+    if (pathname === '/api/ratan/notification/subscriptions/info') {
+      sendJson(response, { websocket: false, cookie_needed: false, origins: ['*:*'], entropy: 1 });
+      return;
+    }
+
     const notificationTransport = pathname.match(
-      /^(\/api\/ratan\/notification\/subscriptions\/\d+\/[^/]+)\/(jsonp|jsonp_send)$/,
+      /^(\/api\/ratan\/notification\/subscriptions\/\d+\/[^/]+)\/(jsonp|jsonp_send|xhr|xhr_send)$/,
     );
+    if (notificationTransport?.[2] === 'xhr_send') {
+      await readBody(request);
+      response.statusCode = 204;
+      response.end();
+      return;
+    }
     if (notificationTransport?.[2] === 'jsonp_send') {
       await readBody(request);
       sendText(response, 'ok', 'text/plain; charset=UTF-8');
       return;
     }
-    if (notificationTransport?.[2] === 'jsonp') {
+    if (['jsonp', 'xhr'].includes(notificationTransport?.[2])) {
       const session = notificationTransport[1];
       const pollCount = notificationSessions.get(session) ?? 0;
       notificationSessions.set(session, pollCount + 1);
@@ -97,6 +108,12 @@ export function createMockApiMiddleware({ serviceName = 'single-ui-bff' } = {}) 
       const connectedFrame = 'CONNECTED\nversion:1.1\nheart-beat:0,0\n\n\u0000';
       const frame =
         pollCount === 0 ? 'o' : pollCount === 1 ? `a[${JSON.stringify(connectedFrame)}]` : 'h';
+      if (notificationTransport[2] === 'xhr') {
+        // Keep heartbeat polling bounded; JSONP fallback can race a removed workspace.
+        if (pollCount > 1) await new Promise((resolve) => setTimeout(resolve, 100));
+        sendText(response, `${frame}\n`, 'application/javascript; charset=UTF-8');
+        return;
+      }
       sendText(
         response,
         `${callback}(${JSON.stringify(frame)});\r\n`,

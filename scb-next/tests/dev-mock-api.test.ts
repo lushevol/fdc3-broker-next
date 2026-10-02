@@ -154,6 +154,21 @@ describe('SCB Next development mock API', () => {
     });
   });
 
+  it('advertises and serves SockJS HTTP polling without stale JSONP callbacks', async () => {
+    const origin = await startMockApi();
+    const info = await fetch(`${origin}/api/ratan/notification/subscriptions/info`);
+    await expect(info.json()).resolves.toMatchObject({ websocket: false, cookie_needed: false });
+    const url = `${origin}/api/ratan/notification/subscriptions/123/parity-session/xhr`;
+    const opening = await fetch(url, { method: 'POST' });
+    const connected = await fetch(url, { method: 'POST' });
+    const heartbeat = await fetch(url, { method: 'POST' });
+    expect(await opening.text()).toBe('o\n');
+    expect(await connected.text()).toContain('CONNECTED');
+    expect(await heartbeat.text()).toBe('h\n');
+    const sent = await fetch(`${url}_send`, { method: 'POST', body: '["CONNECT"]' });
+    expect(sent.status).toBe(204);
+  });
+
   it('matches the production mock BFF validation and generic API fallbacks', async () => {
     const origin = await startMockApi();
 
