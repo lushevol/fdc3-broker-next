@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import { MutableRefObject, RefObject, useCallback, useRef } from "react";
 
+import { DateFormat, TimeFormat } from "../common/dateFormats";
 import {
   AntFormCustomValidate,
   CommonExceptionsNames,
@@ -10,11 +11,9 @@ import {
   RefStructType,
 } from "../common/interface";
 import {
-  DateFormat,
   isMissingNostroException,
   isSSIGoodStamping,
   isVostroFormDataEmpty,
-  TimeFormat,
 } from "../common/utils";
 import type {
   affirmationSubmitFormDataType,

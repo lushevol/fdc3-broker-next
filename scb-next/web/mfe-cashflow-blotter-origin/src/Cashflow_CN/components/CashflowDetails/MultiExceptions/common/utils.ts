@@ -24,8 +24,7 @@ import {
   Verifier,
 } from "./interface";
 
-export const DateFormat = "YYYY-MM-DD";
-export const TimeFormat = "HH:mm:ss";
+export { DateFormat, TimeFormat } from "./dateFormats";
 
 export const EDIT = "Edit";
 export const ADHOC = "Edit (Adhoc SSI)";
