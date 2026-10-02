@@ -54,7 +54,7 @@ const getControlTheme = () => ({
           backgroundColor: "transparent",
         },
         "&.Mui-disabled": {
-          "-webkit-text-fill-color": "rgba(255, 255, 255, 0.7)",
+          WebkitTextFillColor: "rgba(255, 255, 255, 0.7)",
         },
         "&::placeholder": {
           color: "rgba(255, 255, 255, 0.9)",
