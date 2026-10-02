@@ -331,6 +331,12 @@ for (const [generation, mode] of [
     await page.getByRole('button', { name: 'Add Workspace' }).click();
     await expect(page.getByRole('heading', { name: 'Cached remote fixture' })).toBeHidden();
     await page.getByRole('tab').first().click();
+    await expect(
+      page.getByRole('columnheader', { name: 'Category Label', exact: true }),
+    ).toBeVisible();
+    await page.getByRole('tab', { name: 'Cashflow Blotter' }).click();
+    await expect(page.getByRole('heading', { name: 'Cached remote fixture' })).toBeVisible();
+    await expect(page.getByLabel('Remote draft')).toBeVisible();
     await expect(page.getByLabel('Remote draft')).toHaveValue('Unsaved settlement draft');
     await screenshot(page, `${generation}-cached-remote-restored.png`);
   });
