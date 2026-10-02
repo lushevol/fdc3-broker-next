@@ -14,6 +14,21 @@ updates and workspace removal. See [the optimization record](UI_PACKAGE_OPTIMIZA
 for current validation, exact scope, and separate dev-runtime limitations. The
 remaining sections are the original migration's historical evidence.
 
+### What this proves, and what is still missing
+
+In plain language, the evidence proves that the extracted package keeps the
+tested Base pages looking and behaving like the old Base pages. It does not yet
+prove every possible Base state or every MFE in the portal:
+
+- Base still needs matched fixtures for cached remote content, admin
+  empty/loading/error states, admin sorting/filtering/mutations and Base-host
+  picker popups.
+- The local development Cashflow journey has a `DateFormat` initialization
+  error in both the old and migrated hosts. The controlled production-edge
+  rendering path passes, so the error is tracked separately from package parity.
+- Ratan/Cashflow feature-level MUI imports are a later backlog item. They remain
+  application-owned until that separate migration is started.
+
 The pre-migration Base source is commit `98c2d131`. The comparison uses that
 checkout on port 8101 and the migrated checkout on port 8001. Both resolve the
 same installed React 18.3.1, MUI 5.18.0, Emotion 11.14 and SC WebKit assets.
@@ -83,7 +98,8 @@ This does not yet close the full [acceptance matrix](BASE_UI_COMPONENT_MIGRATION
 Cached remote content and admin empty/loading/error, sorting/filtering and
 mutation workflows still need matched fixtures, screenshots and behavior checks.
 Base exports Date/Time picker adapters but does not open them on its own pages;
-their popup behavior has package coverage, not a Base-host comparison. The
-cross-host Cashflow journey fails on both old and migrated Base with the same
-`DateFormat` circular-initialization error in the Cashflow remote; it cannot be
-counted as a migration pass.
+their popup behavior has package coverage, not a Base-host comparison. In the
+local cross-host development setup, the Cashflow journey fails on both old and
+migrated Base with the same `DateFormat` circular-initialization error in the
+Cashflow remote; it cannot be counted as a migration pass even though the
+controlled production-edge rendering path passes.

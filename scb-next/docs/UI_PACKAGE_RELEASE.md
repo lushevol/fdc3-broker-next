@@ -4,6 +4,24 @@
 publication, production deployment, redistribution approval or Pro license
 initialization is performed by this migration.
 
+## Current status (2026-10-02)
+
+The package is usable for repository development and the Base migration has
+passed its current package, Storybook and import-boundary checks. It is not a
+production release yet. Before publication, the team still needs to:
+
+1. finish the missing Base parity fixtures and record the Cashflow development
+   error separately from package behavior;
+2. name a release owner and backup, choose the private registry and access list,
+   approve packaged font redistribution, and assign MUI X Pro ownership; and
+3. publish a versioned tarball to the approved registry, record its checksum and
+   validation evidence, and retain the previous artifact for rollback.
+
+The aggregate quality command is useful evidence for the package candidate, but
+it does not by itself prove every Base page state or complete the later
+Ratan/Cashflow direct-MUI backlog. That backlog is tracked in the
+[Base migration plan](BASE_UI_COMPONENT_MIGRATION_PLAN.md#deferred-backlog-full-ratancashflow-package-adoption).
+
 ## Publication Decision Record
 
 The repository currently provides no CODEOWNERS assignment or other authoritative

@@ -1,13 +1,18 @@
 # Base UI component migration plan
 
-Status: import adoption implemented 2026-09-28. Login, authenticated shell,
-populated admin screens, SSO-only Login, an overflowed workspace and the logout
-survey, login-error feedback and session timeout have matched pre-migration
-visual and interaction comparisons. Picker, cached-remote and deeper admin states
-remain open. This plan covers
+Status (2026-10-02): the Base import migration is complete. Login, the
+authenticated shell, populated admin screens, SSO-only Login, an overflowed
+workspace, the logout survey, login-error feedback and session timeout have
+matched pre-migration visual and interaction comparisons. The remaining Base
+work is proof for cached remote content, empty/loading/error admin states,
+admin sorting/filtering/mutations and Base-host picker popups. This plan covers
 `web/mfe-base-origin` adopting reusable presentation from
 `packages/ratan-design-origin`. The current evidence is recorded in
 [Base UI parity evidence](BASE_UI_PARITY_EVIDENCE.md).
+
+The full Ratan/Cashflow application migration is a separate later backlog item.
+It is deliberately outside the current Base goal; see
+[Deferred backlog](#deferred-backlog-full-ratancashflow-package-adoption).
 
 The earlier [guide plan](BASE_UI_MIGRATION_GUIDE_PLAN.md) completed the
 documentation stage. This plan turns the [migration guide](UI_PACKAGE_MIGRATION_GUIDE.md)
@@ -23,6 +28,34 @@ Scope clarification: every direct MUI UI use in Base must migrate through
 Ratan Design, including layout, typography, icons, shell surfaces and data grids.
 The finished portal must look and behave the same. This replaces the earlier
 plan's permission to retain direct MUI imports in those areas.
+
+## Deferred backlog: full Ratan/Cashflow package adoption
+
+**Status: BACKLOG (later, after the Base work and release gates).**
+
+`mfe-ratan-container-origin` and `mfe-cashflow-blotter-origin` still contain
+direct MUI imports in business screens. That is intentional for the current
+Base-only migration: those screens own business composition, data loading and
+feature rules, while the package owns reusable presentation. Their remaining
+imports are not evidence that the Base migration failed.
+
+When this backlog item starts, do the work in this order:
+
+1. Make a file-level inventory of Ratan and Cashflow MUI imports and group them
+   into reusable presentation versus business-specific composition.
+2. Extract only the reusable presentation that is shared or stable enough for a
+   package API. Keep routing, stores, services, records, permissions and remote
+   lifecycle in the applications.
+3. Add compatibility adapters so existing screen imports, props, callbacks,
+   test IDs and visual defaults continue to work during the migration.
+4. Compare the old and migrated Ratan/Cashflow hosts in legacy/WebKit and
+   light/dark modes, including overlays, grids, dates and representative empty,
+   loading, error and populated states.
+5. Roll out one MFE at a time with a versioned package and a rollback artifact.
+
+This backlog is complete only when the two applications have their own import
+guard, matched host evidence and an explicit decision for every remaining MUI
+surface. It must not move business logic into `ratan-design-origin`.
 
 ## Target and ownership
 
@@ -91,14 +124,14 @@ This is a source audit, not a new runtime verification result.
 | Host theme integration | [Base theme selection](../web/mfe-base-origin/src/theme/index.tsx) and [provider](../web/mfe-base-origin/src/theme/Provider.tsx) still use host state, MUI ThemeProvider, CssBaseline and localization. Base loads its own WebKit CSS; [Container](../web/mfe-base-origin/src/pages/Home/common/Container.tsx) forwards appearance to remotes. | Test both standalone RatanDesignProvider and the actual Base provider. Do not assume Base already uses RatanDesignProvider or replace the host provider/CSS as an incidental adoption. |
 
 The older [extraction plan](UI_PACKAGE_EXTRACTION_PLAN.md) describes historical
-foundation work and is not the current completion baseline. In particular,
-MUI 5 alignment and most shared-control extraction are already implemented.
-The remaining work is complete call-site adoption, the three demonstrated
-compositions, and missing package exports for every other used MUI surface.
-The full import audit found 62 production files with MUI imports (54 with runtime
-uses and eight using only types), plus tests, stories, the hidden Storybook
-provider and MDX examples: 98 source/example files in total. Treat these as a
-dated baseline and re-scan at implementation and completion.
+foundation work and is not the current completion baseline. MUI 5 alignment,
+shared-control extraction and Base call-site adoption are already implemented.
+The remaining Base work is parity evidence for the states listed above, followed
+by release governance. The full import audit found 62 production files with MUI
+imports (54 with runtime uses and eight using only types), plus tests, stories,
+the hidden Storybook provider and MDX examples: 98 source/example files in total.
+Treat those counts as a dated baseline and re-scan only when a new migration
+scope starts.
 
 ## Package coverage for every MUI family
 

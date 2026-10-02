@@ -12,6 +12,27 @@ The public props, default values, refs, callbacks, rendered elements, styles,
 accessibility, portal containers, and scoped theme behavior must remain stable.
 Authentication, routing, services, stores and workspace orchestration stay in Base.
 
+## Current status (2026-10-02)
+
+All five package optimization stages are complete. The Base import boundary is
+also complete and the package/Storybook checks pass. What remains is easier to
+separate into three buckets:
+
+- **Base parity evidence:** capture the remaining cached-remote and admin
+  empty/loading/error/sorting/filtering/mutation states, plus Base-host picker
+  popup behavior. These are proof gaps, not known package API failures.
+- **Known application issue:** the local cross-host Cashflow journey hits the
+  same `DateFormat` initialization error in the old and migrated hosts. The
+  controlled production-edge rendering path passes, so this is tracked as an
+  application/dev-runtime issue.
+- **Release work:** assign owners, approve the registry and packaged fonts,
+  define MUI X Pro ownership, and record an immutable tarball and rollback
+  artifact. The candidate remains private until those decisions are complete.
+
+The full Ratan/Cashflow direct-MUI migration is intentionally a later backlog
+item. It is not required to close the Base-only extraction and must preserve
+business logic in the applications.
+
 ## Ordered stages
 
 1. Restore the migration entry points, Base imports, inventory, and parity tests.
@@ -134,6 +155,9 @@ Validation limitations retained outside this optimization:
   production cross-MFE path passes. These application/dev-runtime issues were not
   moved into the design package or hidden by changing parity expectations.
 
-All five stages are complete. Business logic remains in the applications, the
-existing standalone CSS artifacts are unchanged, and optimizations preserve the
-captured component contracts and portal screenshots.
+All five stages are complete for this optimization scope. Business logic remains
+in the applications, the existing standalone CSS artifacts are unchanged, and
+optimizations preserve the captured component contracts and portal screenshots.
+This does not claim that every Base page state has matched evidence or that the
+package is ready for production publication; those items are listed above and in
+the release document.

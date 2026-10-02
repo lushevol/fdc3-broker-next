@@ -6,6 +6,28 @@ The extraction plan defines the test surfaces: existing Base component exports,
 existing consumer compatibility exports, and standalone package imports. Existing
 business screens must compile without import, prop, or callback changes.
 
+## Current status (2026-10-02)
+
+The simple reading is:
+
+- **Done:** `ratan-design-origin` contains the reusable presentation package;
+  Base UI imports route through it, including the Base MUI layout, icon, theme,
+  date and grid entry points; and Storybook/package checks pass.
+- **Still to prove:** a few Base page states need old-versus-new fixtures and
+  screenshots: cached remote content, empty/loading/error admin states,
+  admin sorting/filtering/mutations and Base-host picker popups. The local
+  Cashflow development journey also has a `DateFormat` initialization failure
+  in both old and migrated hosts.
+- **Later backlog:** full direct-MUI adoption in Ratan and Cashflow is tracked
+  separately. It is not part of the Base migration and must not move business
+  logic into this package.
+- **Release blocked:** the package is still a private/local candidate until
+  release ownership, registry access, font redistribution and MUI X Pro
+  licensing decisions are recorded. See [UI package release](UI_PACKAGE_RELEASE.md).
+
+The detailed stage notes below are historical evidence. This section is the
+current status to use when deciding what remains.
+
 ## Requirements
 
 ### Application CSS token entry
@@ -222,10 +244,14 @@ production builds prepare the package before applications.
 
 ### Remaining work and limits
 
-Stages 3-5 remain open: additional reusable patterns, central Ratan/Cashflow
-adapter rewiring and cross-app theme-import removal, catalog adoption, ownership,
-versioned releases and rollback governance. Legacy Poppins remains host-supplied.
-No performance latency guarantee is claimed.
+Stages 3-5 are complete for the package optimization work. The remaining work
+is verification and release preparation: complete the missing Base parity states,
+resolve or separately document the Cashflow development error, and complete the
+release decisions in [UI package release](UI_PACKAGE_RELEASE.md). Full
+Ratan/Cashflow direct-MUI adoption is a later backlog item, not an unfinished
+Base import row. Legacy Poppins remains host-supplied and no performance latency
+guarantee is claimed.
+
 Stage 1's existing lint/mobile-login/console/typecheck limitations remain.
 Production-edge acceptance and a corporate-registry clean install were not run.
 Workspace dependency installation reported 44 audit findings (21 moderate,
