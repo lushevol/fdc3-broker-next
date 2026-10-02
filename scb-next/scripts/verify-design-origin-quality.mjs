@@ -36,6 +36,11 @@ export const QUALITY_STEPS = [
     args: ['run', 'test:base-parity-runner'],
   },
   {
+    label: 'Canonical WebKit host fixtures',
+    command: 'npm',
+    args: ['run', 'test:webkit-host-runner'],
+  },
+  {
     label: 'Release candidate runner fixtures',
     command: 'npm',
     args: ['run', 'test:release-runner'],
@@ -49,6 +54,11 @@ export const QUALITY_STEPS = [
     label: 'Host dependency resolution',
     command: 'npm',
     args: ['run', 'verify:dependency-isolation'],
+  },
+  {
+    label: 'Canonical WebKit host assets',
+    command: 'npm',
+    args: ['run', 'prepare:webkit-host'],
   },
   {
     label: 'Base component compatibility',
@@ -139,7 +149,7 @@ export const MANUAL_RELEASE_GATES = [
     label: 'Ratan full typecheck',
     command: 'npm',
     args: ['run', 'typecheck', '--workspace', '@fm/ratan_container-origin'],
-    reason: 'Resolve the inherited emitDeclarationOnly/noEmit conflict before release.',
+    reason: 'Resolve the 43 inherited production TypeScript errors before release.',
   },
   {
     label: 'Host performance budget',

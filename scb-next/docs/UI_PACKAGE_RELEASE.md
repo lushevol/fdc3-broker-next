@@ -120,6 +120,24 @@ consumer. It stops at the first failed labeled command and preserves child outpu
 before running the same command. External CI templates should invoke this command
 directly and must never use the snapshot-update command as a quality gate.
 
+Base still intentionally uses canonical WebKit CSS and two custom elements.
+A clean checkout must explicitly install their locked root-workspace dependencies
+and build those assets before host checks:
+
+```sh
+# From the repository root:
+npm ci --workspace @scdevkit/webkit --workspace @scdevkit/webkit-rte --ignore-scripts
+# From scb-next after its own npm ci:
+npm run prepare:webkit-host
+```
+
+The preparation command runs the existing canonical `build:mvp` scripts in a
+temporary source copy, then copies only ignored `dist` output back. Tracked theme
+source remains untouched. It copies fonts from the tracked `public/assets/fonts`
+directory, verifies the CSS/custom-element declarations/font files required by
+Base, and fails before publishing incomplete output. The quality pipeline fetches
+full Git history for the pinned old-Base comparison and performs both installs.
+
 The aggregate prints these separate manual release gates. A green automated
 command does not mark them complete:
 
