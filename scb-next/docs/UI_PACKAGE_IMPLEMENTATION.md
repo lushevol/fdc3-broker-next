@@ -13,17 +13,21 @@ The simple reading is:
 - **Done:** `ratan-design-origin` contains the reusable presentation package;
   Base UI imports route through it, including the Base MUI layout, icon, theme,
   date and grid entry points; and Storybook/package checks pass.
-- **Still to prove:** a few Base page states need old-versus-new fixtures and
-  screenshots: cached remote content, empty/loading/error admin states,
-  admin sorting/filtering/mutations and Base-host picker popups. The local
-  Cashflow development journey also has a `DateFormat` initialization failure
-  in both old and migrated hosts.
+- **Acceptance evidence:** expanded Base page-state fixtures and comparisons are
+  being finalized; record the final integrated parity counts before calling
+  acceptance complete.
+- **Fixed:** Cashflow's `DateFormat` startup cycle and Base-owned React/Emotion
+  console errors. The Base-only native journey reports no console errors, page
+  errors or failed requests with all configured remotes running.
 - **Later backlog:** full direct-MUI adoption in Ratan and Cashflow is tracked
-  separately. It is not part of the Base migration and must not move business
-  logic into this package.
+  separately, together with 43 Ratan production type diagnostics and the strict
+  joined-host business-screen console failures. It is not part of the Base
+  migration and must not move business logic into this package.
 - **Release blocked:** the package is still a private/local candidate until
-  release ownership, registry access, font redistribution and MUI X Pro
-  licensing decisions are recorded. See [UI package release](UI_PACKAGE_RELEASE.md).
+  an approved `VITE_MUI_X_LICENSE_KEY`, release ownership, registry access,
+  font redistribution and MUI X Pro licensing decisions are recorded. The missing
+  key currently fails the strict package browser gate. See
+  [UI package release](UI_PACKAGE_RELEASE.md).
 
 The detailed stage notes below are historical evidence. This section is the
 current status to use when deciding what remains.

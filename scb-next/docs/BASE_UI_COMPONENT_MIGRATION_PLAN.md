@@ -4,8 +4,14 @@ Status (2026-10-02): the Base import migration is complete. Login, the
 authenticated shell, populated admin screens, SSO-only Login, an overflowed
 workspace, the logout survey, login-error feedback and session timeout have
 matched pre-migration visual and interaction comparisons. The remaining Base
-work is proof for cached remote content, empty/loading/error admin states,
-admin sorting/filtering/mutations and Base-host picker popups. This plan covers
+work is to finish the expanded parity run and record its final acceptance
+evidence. Cashflow's `DateFormat` startup failure is fixed, and the Base-only
+browser journey now reports no console errors, page errors or failed requests
+with its configured remotes available. The full joined portal still reports
+business-screen errors listed in the backlog below. The separate package browser
+gate still needs an approved `VITE_MUI_X_LICENSE_KEY`; release ownership,
+registry access, font redistribution and license approvals remain external
+release blockers. This plan covers
 `web/mfe-base-origin` adopting reusable presentation from
 `packages/ratan-design-origin`. The current evidence is recorded in
 [Base UI parity evidence](BASE_UI_PARITY_EVIDENCE.md).
@@ -38,6 +44,26 @@ direct MUI imports in business screens. That is intentional for the current
 Base-only migration: those screens own business composition, data loading and
 feature rules, while the package owns reusable presentation. Their remaining
 imports are not evidence that the Base migration failed.
+
+The following remediation belongs to that later application work:
+
+- **Ratan production types:** the corrected production typecheck reaches 43
+  source diagnostics with TypeScript 4.9.5. Its compiler configuration is valid;
+  the gate still fails on application/compatibility contracts. See the
+  [typecheck audit](../web/mfe-ratan-container-origin/docs/TYPECHECK_AUDIT.md).
+- **Cashflow/Ratan browser errors:** the strict joined-host journey still catches
+  deprecated AntD AutoComplete/Select props, missing child keys in BulkDialog,
+  AG Grid enterprise features without registered enterprise modules, Redux
+  nonserializable grid state/actions, and application Emotion selectors/style
+  keys. Assign and fix these one at a time with behavior coverage during the
+  deferred application stage. Keep the strict browser checks enabled.
+- **Startup fixed:** Cashflow's former `DateFormat` circular initialization was
+  repaired in `dff6446c`; the real Base/Ratan/Cashflow render/add/remove journey
+  now completes. This fix does not make the joined-host console gate pass.
+
+No business-screen remediation or full Ratan/Cashflow MUI adoption is included in
+the current Base extraction. Do not move service, entitlement or grid business
+logic into the design package to close these items.
 
 When this backlog item starts, do the work in this order:
 

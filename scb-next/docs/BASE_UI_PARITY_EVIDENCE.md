@@ -1,6 +1,25 @@
 # Base UI migration parity evidence
 
-## Current branch reconciliation, 2026-09-30
+## Current follow-up status, 2026-10-02
+
+Cashflow's `DateFormat` circular initialization is fixed (`dff6446c`). The real
+Base/Ratan/Cashflow render/add/remove journey now completes without uncaught page
+errors. The strict joined-host browser gate still fails on business-screen
+console errors; those remain in the
+[deferred backlog](BASE_UI_COMPONENT_MIGRATION_PLAN.md#deferred-backlog-full-ratancashflow-package-adoption).
+
+The Base-only login/workspace/drawer journey reports no console errors, page
+errors or failed requests with all configured remotes running. Focused Base
+regressions, typecheck and production build pass. Expanded parity evidence is
+being finalized; this current section does not invent a final aggregate count.
+
+Ratan's corrected production typecheck reports 43 source diagnostics. The package
+browser gate separately fails on the missing approved `VITE_MUI_X_LICENSE_KEY`.
+Release owners, registry access, font redistribution and license approval remain
+external decisions. Historical passing checks below are not evidence that those
+current strict gates pass.
+
+## Historical branch reconciliation, 2026-09-30
 
 The migration and subsequent package optimizations are now reconciled into the
 session-expiry branch. All 40 Base migration/parity cases pass across the final
@@ -14,7 +33,7 @@ updates and workspace removal. See [the optimization record](UI_PACKAGE_OPTIMIZA
 for current validation, exact scope, and separate dev-runtime limitations. The
 remaining sections are the original migration's historical evidence.
 
-### What this proves, and what is still missing
+### What this proved at that stage
 
 In plain language, the evidence proves that the extracted package keeps the
 tested Base pages looking and behaving like the old Base pages. It does not yet
@@ -23,9 +42,9 @@ prove every possible Base state or every MFE in the portal:
 - Base still needs matched fixtures for cached remote content, admin
   empty/loading/error states, admin sorting/filtering/mutations and Base-host
   picker popups.
-- The local development Cashflow journey has a `DateFormat` initialization
-  error in both the old and migrated hosts. The controlled production-edge
-  rendering path passes, so the error is tracked separately from package parity.
+- The local development Cashflow journey then had a `DateFormat` initialization
+  error in both hosts. That startup error is now fixed; the current strict
+  business-screen console failures remain separate from Base parity.
 - Ratan/Cashflow feature-level MUI imports are a later backlog item. They remain
   application-owned until that separate migration is started.
 

@@ -18,16 +18,19 @@ All five package optimization stages are complete. The Base import boundary is
 also complete and the package/Storybook checks pass. What remains is easier to
 separate into three buckets:
 
-- **Base parity evidence:** capture the remaining cached-remote and admin
-  empty/loading/error/sorting/filtering/mutation states, plus Base-host picker
-  popup behavior. These are proof gaps, not known package API failures.
-- **Known application issue:** the local cross-host Cashflow journey hits the
-  same `DateFormat` initialization error in the old and migrated hosts. The
-  controlled production-edge rendering path passes, so this is tracked as an
-  application/dev-runtime issue.
+- **Base parity evidence:** finish the expanded page-state comparison run and
+  record its final integrated counts. Base-owned console errors are fixed, and
+  the Base-only native journey has no console errors, page errors or failed
+  requests with all configured remotes running.
+- **Application backlog:** Cashflow's `DateFormat` startup cycle is fixed. The
+  strict joined-host gate still catches business-screen console failures, and
+  Ratan's corrected production typecheck reports 43 source diagnostics. These
+  belong to the deferred application work, with the strict failures kept visible.
 - **Release work:** assign owners, approve the registry and packaged fonts,
   define MUI X Pro ownership, and record an immutable tarball and rollback
-  artifact. The candidate remains private until those decisions are complete.
+  artifact. The strict package browser gate currently needs an approved
+  `VITE_MUI_X_LICENSE_KEY`. The candidate remains private until those external
+  approvals and decisions are complete.
 
 The full Ratan/Cashflow direct-MUI migration is intentionally a later backlog
 item. It is not required to close the Base-only extraction and must preserve

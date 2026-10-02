@@ -6,7 +6,7 @@
     "dev": "vite --host 127.0.0.1 --port 8009",
     "start:standalone": "vite --host 127.0.0.1 --port 8009",
     "build": "vite build",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --project tsconfig.typecheck.json",
     "build:server": "env-cmd -f .env.server tsc --project ./server",
     "lint": "eslint src --ext js,ts,tsx --fix",
     "format": "prettier --write .",

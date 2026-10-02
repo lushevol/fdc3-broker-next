@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "emitDeclarationOnly": false,
+    "declaration": false,
+    "declarationDir": null,
+    "incremental": false,
+    "paths": {
+      "src/*": ["src/*"],
+      "@fm/base": ["src/compat/base.tsx"]
+    }
+  },
+  "exclude": [
+    "dist",
+    "node_modules",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "src/vitest.setup.ts"
+  ]
+}
