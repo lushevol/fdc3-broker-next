@@ -46,37 +46,66 @@ const useTableDetail = () => {
   const onReset = React.useCallback(() => {
     if (record) onResetUtil(data, record, setRecord, setResetId);
   }, [data, record]);
+  // Axios reports request failures; errors in successful response processing must still propagate.
   const onSave = React.useCallback(async () => {
     if (!record) return;
     setIsLoading(true);
-    const result = await createCategory(store.entitlementsToken, record);
-    onSaveUtil(result, data, setData);
-    setIsLoading(false);
-    onClose();
+    try {
+      await createCategory(store.entitlementsToken, record).then(
+        (result) => {
+          onSaveUtil(result, data, setData);
+          onClose();
+        },
+        () => undefined,
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }, [store.entitlementsToken, record, data]);
   const onVerify = React.useCallback(async () => {
     if (!record) return;
     setIsLoading(true);
-    const result = await verifyCategory(store.entitlementsToken, record);
-    onVerifyUtil(result, data, setData);
-    setIsLoading(false);
-    onClose();
+    try {
+      await verifyCategory(store.entitlementsToken, record).then(
+        (result) => {
+          onVerifyUtil(result, data, setData);
+          onClose();
+        },
+        () => undefined,
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }, [store.entitlementsToken, record, data]);
   const onUpdate = React.useCallback(async () => {
     if (!record) return;
     setIsLoading(true);
-    const result = await updateCategory(store.entitlementsToken, record);
-    onUpdateUtil(result, data, setData);
-    setIsLoading(false);
-    onClose();
+    try {
+      await updateCategory(store.entitlementsToken, record).then(
+        (result) => {
+          onUpdateUtil(result, data, setData);
+          onClose();
+        },
+        () => undefined,
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }, [store.entitlementsToken, record, data]);
   const onDeactivate = React.useCallback(async () => {
     if (!record) return;
     setIsLoading(true);
-    const result = await deactivateCategory(store.entitlementsToken, record);
-    onDeactivateUtil(result, data, setData);
-    setIsLoading(false);
-    onClose();
+    try {
+      await deactivateCategory(store.entitlementsToken, record).then(
+        (result) => {
+          onDeactivateUtil(result, data, setData);
+          onClose();
+        },
+        () => undefined,
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }, [store.entitlementsToken, record, data]);
 
   return {

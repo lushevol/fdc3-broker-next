@@ -66,14 +66,18 @@ const useController = (_props: TileProps) => {
     [store.entitlementsToken]
   );
   const initData = React.useCallback(() => {
-    getCategory(store.entitlementsToken).then(setCategoryData);
-    getImportMap(store.entitlementsToken).then((_data) => {
-      _data = _data.map((item) => {
-        item.id = item.applicationCategoryId;
-        return item;
-      });
-      setImportMap(_data);
-    });
+    // The service interceptor reports failed loads; keep the cached options.
+    getCategory(store.entitlementsToken).then(setCategoryData, () => undefined);
+    getImportMap(store.entitlementsToken).then(
+      (_data) => {
+        _data = _data.map((item) => {
+          item.id = item.applicationCategoryId;
+          return item;
+        });
+        setImportMap(_data);
+      },
+      () => undefined
+    );
   }, [store.entitlementsToken]);
   React.useEffect(() => {
     if (store.entitlementsToken) {
@@ -86,13 +90,17 @@ const useController = (_props: TileProps) => {
       if (_category?.id !== -1) {
         filter = { applicationCategory: _category };
       }
-      getTile(store.entitlementsToken, filter).then((_data) => {
-        _data = _data.map((item) => {
-          item.id = item.applicationTileId;
-          return item;
-        });
-        setData(_data);
-      });
+      getTile(store.entitlementsToken, filter).then(
+        (_data) => {
+          _data = _data.map((item) => {
+            item.id = item.applicationTileId;
+            return item;
+          });
+          setData(_data);
+        },
+        // The service interceptor reports the failure; keep the displayed rows.
+        () => undefined
+      );
     },
     [store.entitlementsToken]
   );

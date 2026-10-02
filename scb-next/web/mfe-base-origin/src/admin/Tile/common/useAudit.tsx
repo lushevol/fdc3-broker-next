@@ -22,14 +22,18 @@ const useAudit = () => {
   const getAuditData = React.useCallback(
     (_tile: AdminRecord | undefined) => {
       if (_tile && store.entitlementsToken) {
-        getTileAudit(store.entitlementsToken, _tile).then((_data) => {
-          _data = _data.map((item) => {
-            item.id = item.applicationTileAuditId;
-            return item;
-          });
-          setData(_data);
-          setOpenAudit(true);
-        });
+        getTileAudit(store.entitlementsToken, _tile).then(
+          (_data) => {
+            _data = _data.map((item) => {
+              item.id = item.applicationTileAuditId;
+              return item;
+            });
+            setData(_data);
+            setOpenAudit(true);
+          },
+          // The service interceptor reports the failure; retain the audit state.
+          () => undefined
+        );
       }
     },
     [store.entitlementsToken]

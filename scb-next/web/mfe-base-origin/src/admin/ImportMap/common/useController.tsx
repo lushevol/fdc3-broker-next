@@ -51,13 +51,17 @@ const useController = (props: ImportMapProps) => {
     [store.entities]
   );
   const refreshTab = React.useCallback(() => {
-    getImportMap(store.entitlementsToken).then((_data) => {
-      _data = _data.map((item) => {
-        item.id = item.importMapId;
-        return item;
-      });
-      setData(_data);
-    });
+    getImportMap(store.entitlementsToken).then(
+      (_data) => {
+        _data = _data.map((item) => {
+          item.id = item.importMapId;
+          return item;
+        });
+        setData(_data);
+      },
+      // The service interceptor reports the failure; keep the displayed rows.
+      () => undefined
+    );
   }, [store.entitlementsToken]);
   React.useEffect(() => {
     registerRefreshTab(props.tabId, refreshTab);

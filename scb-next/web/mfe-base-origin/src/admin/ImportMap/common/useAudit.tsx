@@ -22,14 +22,18 @@ const useAudit = () => {
   const getAuditData = React.useCallback(
     (_importMap: AdminRecord | undefined) => {
       if (_importMap && store.entitlementsToken) {
-        getImportMapAudit(store.entitlementsToken, _importMap).then((_data) => {
-          _data = _data.map((item) => {
-            item.id = item.importMapAuditId;
-            return item;
-          });
-          setData(_data);
-          setOpenAudit(true);
-        });
+        getImportMapAudit(store.entitlementsToken, _importMap).then(
+          (_data) => {
+            _data = _data.map((item) => {
+              item.id = item.importMapAuditId;
+              return item;
+            });
+            setData(_data);
+            setOpenAudit(true);
+          },
+          // The service interceptor reports the failure; retain the audit state.
+          () => undefined
+        );
       }
     },
     [store.entitlementsToken]

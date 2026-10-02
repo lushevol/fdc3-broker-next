@@ -46,13 +46,17 @@ const useController = (props: CategoryProps) => {
     [store.entities]
   );
   const refreshTab = React.useCallback(() => {
-    getCategory(store.entitlementsToken).then((_data) => {
-      _data = _data.map((item) => {
-        item.id = item.applicationCategoryId;
-        return item;
-      });
-      setData(_data);
-    });
+    getCategory(store.entitlementsToken).then(
+      (_data) => {
+        _data = _data.map((item) => {
+          item.id = item.applicationCategoryId;
+          return item;
+        });
+        setData(_data);
+      },
+      // The service interceptor reports the failure; keep the displayed rows.
+      () => undefined
+    );
   }, [store.entitlementsToken]);
   React.useEffect(() => {
     registerRefreshTab(props.tabId, refreshTab);

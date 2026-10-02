@@ -65,20 +65,30 @@ const useTableDetail = (
     },
     [store.entitlementsToken, record, data, importMap]
   );
+  // Axios reports request failures; errors in successful response processing must still propagate.
   const onSave = React.useCallback(async () => {
     if (!record) return;
     setIsLoading(true);
-    const result = await createTile(store.entitlementsToken, record);
-    onSaveData(result);
-    setIsLoading(false);
+    try {
+      await createTile(store.entitlementsToken, record).then(onSaveData, () => undefined);
+    } finally {
+      setIsLoading(false);
+    }
   }, [store.entitlementsToken, record, data, importMap]);
   const onVerify = React.useCallback(async () => {
     if (!record) return;
     setIsLoading(true);
-    const result = await verifyTile(store.entitlementsToken, record);
-    onVerifyUtil(result, data, setData);
-    setIsLoading(false);
-    onClose();
+    try {
+      await verifyTile(store.entitlementsToken, record).then(
+        (result) => {
+          onVerifyUtil(result, data, setData);
+          onClose();
+        },
+        () => undefined,
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }, [store.entitlementsToken, record, data]);
   const onUpdateData = React.useCallback(
     async (result: AdminRecord) => {
@@ -92,17 +102,26 @@ const useTableDetail = (
   const onUpdate = React.useCallback(async () => {
     if (!record) return;
     setIsLoading(true);
-    const result = await updateTile(store.entitlementsToken, record);
-    onUpdateData(result);
-    setIsLoading(false);
+    try {
+      await updateTile(store.entitlementsToken, record).then(onUpdateData, () => undefined);
+    } finally {
+      setIsLoading(false);
+    }
   }, [store.entitlementsToken, record, data, importMap]);
   const onDeactivate = React.useCallback(async () => {
     if (!record) return;
     setIsLoading(true);
-    const result = await deactivateTile(store.entitlementsToken, record);
-    onDeactivateUtil(result, data, setData);
-    setIsLoading(false);
-    onClose();
+    try {
+      await deactivateTile(store.entitlementsToken, record).then(
+        (result) => {
+          onDeactivateUtil(result, data, setData);
+          onClose();
+        },
+        () => undefined,
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }, [store.entitlementsToken, record, data]);
 
   return {

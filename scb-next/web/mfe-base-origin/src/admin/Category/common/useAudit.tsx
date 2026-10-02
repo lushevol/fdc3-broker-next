@@ -22,14 +22,18 @@ const useAudit = () => {
   const getAuditData = React.useCallback(
     (_category: AdminRecord | undefined) => {
       if (_category && store.entitlementsToken) {
-        getCategoryAudit(store.entitlementsToken, _category).then((_data) => {
-          _data = _data.map((item) => {
-            item.id = item.applicationCategoryAuditId;
-            return item;
-          });
-          setData(_data);
-          setOpenAudit(true);
-        });
+        getCategoryAudit(store.entitlementsToken, _category).then(
+          (_data) => {
+            _data = _data.map((item) => {
+              item.id = item.applicationCategoryAuditId;
+              return item;
+            });
+            setData(_data);
+            setOpenAudit(true);
+          },
+          // The service interceptor reports the failure; retain the audit state.
+          () => undefined
+        );
       }
     },
     [store.entitlementsToken]

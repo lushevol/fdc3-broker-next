@@ -59,20 +59,30 @@ const useTableDetail = () => {
     },
     [store.entitlementsToken, record, data]
   );
+  // Axios reports request failures; errors in successful response processing must still propagate.
   const onSave = React.useCallback(async () => {
     if (!record) return;
     setIsLoading(true);
-    const result = await createImportMap(store.entitlementsToken, record);
-    onSaveData(result);
-    setIsLoading(false);
+    try {
+      await createImportMap(store.entitlementsToken, record).then(onSaveData, () => undefined);
+    } finally {
+      setIsLoading(false);
+    }
   }, [store.entitlementsToken, record, data]);
   const onVerify = React.useCallback(async () => {
     if (!record) return;
     setIsLoading(true);
-    const result = await verifyImportMap(store.entitlementsToken, record);
-    onVerifyUtil(result, data, setData);
-    setIsLoading(false);
-    onClose();
+    try {
+      await verifyImportMap(store.entitlementsToken, record).then(
+        (result) => {
+          onVerifyUtil(result, data, setData);
+          onClose();
+        },
+        () => undefined,
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }, [store.entitlementsToken, record, data]);
   const onUpdateData = React.useCallback(
     async (result: AdminRecord) => {
@@ -86,17 +96,26 @@ const useTableDetail = () => {
   const onUpdate = React.useCallback(async () => {
     if (!record) return;
     setIsLoading(true);
-    const result = await updateImportMap(store.entitlementsToken, record);
-    onUpdateData(result);
-    setIsLoading(false);
+    try {
+      await updateImportMap(store.entitlementsToken, record).then(onUpdateData, () => undefined);
+    } finally {
+      setIsLoading(false);
+    }
   }, [store.entitlementsToken, record, data]);
   const onDeactivate = React.useCallback(async () => {
     if (!record) return;
     setIsLoading(true);
-    const result = await deactivateImportMap(store.entitlementsToken, record);
-    onDeactivateUtil(result, data, setData);
-    setIsLoading(false);
-    onClose();
+    try {
+      await deactivateImportMap(store.entitlementsToken, record).then(
+        (result) => {
+          onDeactivateUtil(result, data, setData);
+          onClose();
+        },
+        () => undefined,
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }, [store.entitlementsToken, record, data]);
 
   return {
