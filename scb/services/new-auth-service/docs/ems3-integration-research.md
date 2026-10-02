@@ -2,6 +2,8 @@
 
 Research date: 2026-09-27. Scope: the checked-in `new-auth-service` implementation and its supplied EMS3 samples. This is evidence about this squad's integration, not a verified EMS3 API specification or confirmation of production behavior. Hosts, credentials, and personal identifiers are deliberately omitted.
 
+Planning update, 2026-10-02: the user confirmed that FlowZero is the only EMS3 pilot. Other application names appearing in the sample file are API examples, not evidence of completed onboarding. The [all-application migration plan](../../single-ui-bff/docs/ems3-migration-plan.md) includes creating their EMS3 definitions, user assignments and comparison results as migration work.
+
 ## What this service demonstrates
 
 The service obtains an application access token, downloads entitlement membership, synchronizes a local database, and serves authentication from that database. It does not call EMS3 during each authentication request. The sync entry point is `GET /v1/sync/entitlements`; it invokes asynchronous `syncAll()` and immediately returns a success DTO. The checked-in implementation contains no scheduled sync trigger. Authentication reads the locally stored function entitlements and role names using the subject from incoming user information. Sources: [DataSyncController:20](../src/main/java/com/scb/ratan/flowzero/auth/web/DataSyncController.java#L20), [EM3DataSyncService:109](../src/main/java/com/scb/ratan/flowzero/auth/service/ems3/EM3DataSyncService.java#L109), [JwtConvertorForNewUse:45](../src/main/java/com/scb/ratan/flowzero/auth/jwtparser/convertor/JwtConvertorForNewUse.java#L45), [JwtConvertorForNewUse:105](../src/main/java/com/scb/ratan/flowzero/auth/jwtparser/convertor/JwtConvertorForNewUse.java#L105).

@@ -2,13 +2,15 @@
 
 Investigated 2026-09-27 against the checked-out `scb/services/new-auth-service` and `scb/services/single-ui-bff` sources. This is a source-based migration assessment, not an implemented migration or a verified FMCES API specification. The supplied samples establish example payloads; endpoint availability, permissions and completeness still need confirmation from the EMS3 squad.
 
+Planning update, 2026-10-02: the user confirmed that the goal is to plan migration of every application in the supplied production setup, preserving existing access. FlowZero is the only EMS3 pilot; other apps have yet to be onboarded. Their EMS3 definitions, assignments and paired test responses are outputs of migration work. Follow the [all-application migration plan](ems3-migration-plan.md) for sequencing and ownership; this assessment supports its BFF implementation workstream.
+
 ## Recommendation
 
 Add an EMS3 implementation behind the existing `AuthorizationService.getEntitlements(userId, requestEntities)` boundary. Initially preserve the BFF's `Entity → Subject → Action` response, drawer filtering, and signed entitlement-token format. Reuse the reference service's OAuth and FMCES integration approach, but adapt its data to the Single UI authorization contract.
 
-The HTTP integration is straightforward. The prerequisite for a correct migration is an agreed mapping from EMS3 applications, entitlement names and feature/action permissions to the BFF's existing entity names, role names and subjects. The per-user EMS3 payload does not provide enough information to prove that mapping lossless. In particular, it does not associate each effective feature/action grant with an individual entitlement name.
+The migration team must design the mapping from the BFF's existing entity names, roles, subjects and actions into the new EMS3 application setup. The aggregate per-user EMS3 payload does not provide enough information to prove that mapping lossless: it does not associate each effective feature/action grant with an individual entitlement name. The detailed endpoint below is a candidate to investigate while designing the adapter.
 
-The BFF serves multiple applications. Configuring only `RATAN_ENTITLEMENT_RULE` would not establish parity for all configured tiles or `FMO PORTAL ADMIN`. Inventory the deployed database's entity/subject/role values before defining the EMS3 application set. Seed data shows several business domains, but is not proof of current production configuration. [B1, B3, B4, B7]
+The BFF serves multiple applications. Configuring only `RATAN_ENTITLEMENT_RULE` would not establish parity for all configured tiles or `FMO PORTAL ADMIN`. The subsequently supplied production CSVs and five EMS2 XML exports now provide a starting inventory; see the plan for their coverage. Complete that inventory with user assignments, remaining application definitions and downstream consumers before switching each app. [B1, B3, B4, B7]
 
 ## How EMS3 is used in the new service
 
@@ -90,11 +92,11 @@ Sources: [R3, R5, R8, B1, B3, B4, B6]. No claim is made that the current per-use
 
 These are proposed work items; no Java/configuration behavior is changed by this assessment.
 
-1. **Agree the contract and capture sanitized fixtures.** Obtain EMS2/EMS3 pairs for no access, one role, several roles, multiple applications, admin maker/checker, hierarchical subjects, revoked grants and data-restricted access. Record the application/ITAM/entity/role/subject/action crosswalk and the policy enforcement owner. Update a migration specification before implementation.
+1. **Design the mapping and provision test applications.** Derive the proposed EMS3 application/role/feature/action model from the EMS2 definitions, assignments and data restrictions. Agree the API, mapping and policy enforcement owner with the EMS3/app teams, and update the migration specification. Create synthetic contract fixtures for initial adapter tests; create paired EMS2/EMS3 user fixtures after the relevant EMS3 application and assignments exist. Application setup and assignment migration are explicit work in the all-application plan.
 2. **Add a small EMS3 transport boundary.** Introduce `EMS3ConfigProperties`, `EMS3TokenProvider`, `EMS3Client`, and DTOs for the actually selected response. Configure token URL, client credentials, audience/scope, FMCES URLs, application mapping, proxy and bounded timeouts. Encode path segments; validate configuration when EMS3 is selected. Keep service credentials in the deployment secret mechanism. Derive cache expiry from `expires_in` or a validated equivalent; refresh at most once on authentication rejection and restrict retries to transient failures within the request budget.
 3. **Implement the compatibility adapter with tests first.** `EMS3AuthorizationImplementation implements AuthorizationService` can initially return the existing `Ems2Result` type to contain the change. A dedicated mapper applies the approved crosswalk, requested-entity filter, stable grouping and deduplication. Validate the returned user/app/ITAM; reject unexpected or incomplete responses. Handle a documented valid empty result as no grants and an upstream failure as a failure, rather than successful partial authorization.
-4. **Add explicit provider selection in `AuthConfig`.** A proposed `scb.authorization.provider=ems2|ems3` setting allows controlled rollout. Existing checked-in `EMS3_HOST`, `EMS3_APP_ID` and `EMS3_APP_NAME` values do not switch the provider: no EMS3 Java integration is present and the factory constructs EMS2 directly. Retain or move `adminModuleEntity` deliberately because `AdminModuleUtil` currently reads it from `EMS2ConfigProperties`. [B2, B4, B8]
-5. **Compare decisions before cutover.** In a controlled test/shadow mode, keep EMS2 authoritative and compare the EMS3 result after canonicalization: visible tiles, effective feature/actions, per-role mappings, admin access and data restrictions. Ensure a shadow failure cannot affect the live decision. Log counts/differences without tokens, secrets or complete entitlement payloads.
+4. **Add explicit provider routing in `AuthConfig`.** The [migration plan](ems3-migration-plan.md#step-4-connect-the-applications) requires one authoritative provider for each application's entities during staged rollout. A global `ems2|ems3` setting alone cannot support that rollout; define complete per-application/entity ownership and routing, including shared entities and users with roles in several apps. Existing checked-in `EMS3_HOST`, `EMS3_APP_ID` and `EMS3_APP_NAME` values do not switch the provider: no EMS3 Java integration is present and the factory constructs EMS2 directly. Retain or move `adminModuleEntity` deliberately because `AdminModuleUtil` currently reads it from `EMS2ConfigProperties`. [B2, B4, B8]
+5. **Produce paired fixtures and compare decisions before cutover.** Once each app is set up, collect EMS2/EMS3 results for no access, one/several roles, multiple apps, admin maker/checker, hierarchical subjects, revoked grants and data-restricted users. In a controlled test/shadow mode, keep EMS2 authoritative and compare the EMS3 result after canonicalization: visible tiles, effective feature/actions, per-role mappings, admin access and data restrictions. Ensure a shadow failure cannot affect the live decision. Log counts/differences without tokens, secrets or complete entitlement payloads.
 6. **Cut over by configured application scope.** A whole-provider switch requires all required apps to be ready. If the organization migrates apps separately, define explicit per-application routing/ownership; do not silently fall back to EMS2 on an EMS3 denial or error, or union providers' grants. Rollback should be an explicit deployment/configuration choice with entitlement-token invalidation or expiry handling.
 
 No WebFlux or Spring Cloud Gateway adoption is needed for the initial BFF adapter: the reference's EMS3 integration itself uses `RestTemplate`, and the BFF is already a servlet-based Spring Boot service. No user/role synchronization database is required for an on-demand adapter. Existing `ems2_*` database columns can remain compatibility names when their values stay valid; any value conversion needs a separate reviewed migration. [R1, R2, B2, B7, B9]
@@ -122,7 +124,7 @@ No WebFlux or Spring Cloud Gateway adoption is needed for the initial BFF adapte
 
 Existing EMS2 tests provide fixtures and grouping coverage, but their assertions alone are not EMS3 parity evidence. Add contract and failure tests from the agreed requirements and paired fixtures, following the repository's specification/TDD workflow. [B11]
 
-## Questions for the EMS3 squad before production implementation
+## Decisions for the EMS3 squad during migration
 
 1. Which endpoints and application/ITAM registrations cover every BFF entity, including portal administration? Is `user-response` complete for the BFF's service principal, and how are pagination, inaccessible apps and partial failures signaled?
 2. What are the authoritative legacy-to-EMS3 entity, role, feature, action and ID mappings? Does a catalog preserve role-to-feature attribution, and how are its versions kept consistent with effective user responses?
@@ -130,7 +132,7 @@ Existing EMS2 tests provide fixtures and grouping coverage, but their assertions
 4. What service-principal permissions, token lifetime, network/proxy/certificate requirements, rate limits and latency targets apply in each environment?
 5. What revocation deadline and staged application cutover/rollback behavior must the BFF support, including already-issued entitlement tokens?
 
-These are decisions needed to implement and validate the migration; they do not prevent completing this source investigation.
+The EMS3, BFF and application teams resolve these decisions during the plan's design, setup and validation steps. Existing EMS3 registrations and comparison responses for unmigrated apps are not prerequisites for planning.
 
 ## Evidence and verification limits
 
