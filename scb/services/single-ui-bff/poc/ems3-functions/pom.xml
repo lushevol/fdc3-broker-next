@@ -56,7 +56,7 @@
                     </execution>
                 </executions>
                 <configuration><includes><include>com/scb/sso/singleuibff/poc/**</include></includes>
-                    <excludes><exclude>**/Demo*</exclude><exclude>**/FixtureEms3*</exclude></excludes>
+                    <excludes><exclude>**/Demo*</exclude><exclude>**/FixtureEms3*</exclude><exclude>**/FixtureEms2*</exclude></excludes>
                 </configuration>
             </plugin>
             <plugin>

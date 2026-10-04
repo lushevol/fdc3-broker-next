@@ -4,11 +4,19 @@
 
 Local POC passed on 2026-10-03. Live EMS3 integration is still pending.
 
-The POC reads function grants over real local HTTP, returns the existing BFF
-`AuthorizationService`/`Ems2Result` contract, and applies the current tile-matching
-rules in an isolated session. It uses five synthetic accounts and selected
-permissions from the supplied production dumps. It does not change production
-login, register applications in EMS3, or evaluate data entitlements.
+The actual BFF has since gained database routing, EMS3 HTTP integration and strict
+renewal checks. See the [BFF integration explanation](../../docs/ems3-bff-integration.md)
+and [verification build](../../verification/README.md). The standalone POC below
+remains a separate, smaller demonstration with its original in-memory fixtures.
+
+The POC runs both providers behind one transitional router. Its route table sends
+`X_RATANONE` to the EMS2 fixture and `FMO PORTAL ADMIN` to the EMS3 HTTP fixture.
+The router calls each selected provider once, merges their results into the
+existing `AuthorizationService`/`Ems2Result` contract, and applies the current
+tile-matching rules in an isolated session. It uses five synthetic accounts and
+selected permissions from the supplied production dumps. It does not change
+production login, persist the route table in the BFF database, register
+applications in EMS3, or evaluate data entitlements.
 
 ## Run
 
@@ -26,10 +34,10 @@ export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
 export PATH="$JAVA_HOME/bin:$PATH"
 ```
 
-The demo starts a loopback fixture service on an available port, checks the
-accounts below, prints seven JSON results, and closes the service. It requires no
-credentials or running BFF. Maven downloads public build dependencies on the
-first run. Fixtures can be regenerated using the command in
+The demo starts a loopback EMS3 fixture service, checks the accounts below through
+the mixed EMS2/EMS3 router, prints seven JSON results, and closes the service. It
+requires no credentials or running BFF. Maven downloads public build dependencies
+on the first run. Fixtures can be regenerated using the command in
 [fixtures/README.md](fixtures/README.md).
 
 ## Observed results
@@ -52,7 +60,7 @@ Removing every role leaves only template 9001. A validated role with explicitly
 empty function grants still permits its blank-subject tile, matching the current
 BFF rule.
 
-The suite contains 236 passing tests, covering:
+The suite contains 244 passing tests, covering:
 
 - All five accounts, role-specific subjects/actions, drawer filtering and claim encoding.
 - HTTP 204, 206, 301, 401, 403, 404, 429, 500 and 503 on every required endpoint.
@@ -60,6 +68,7 @@ The suite contains 236 passing tests, covering:
 - Incorrect application IDs/names, nested application identity and echoed user identity.
 - Partial multi-application results, connection failure, interruption, header timeout and a stalled body after successful headers.
 - Responses over the one MiB byte limit, valid empty grants, revocation, and success followed by failure.
+- Per-entity EMS2/EMS3 routing, mixed-result merging, multiple roles for one entity, unknown routes, malformed provider results, and no EMS2 fallback after an EMS3 failure.
 
 JaCoCo enforces at least 90% line and branch coverage for the adapter and session.
 The fixture server and CLI demo are excluded from that coverage gate; the tests
@@ -100,10 +109,11 @@ Token data is synthetic; the adapter accepts loopback HTTP base URLs only.
 ## Failure and token behavior
 
 `PocSession.authorize` clears its current result before lookup. Any failed token,
-grant or validation step throws an authorization-unavailable error. It returns no
-successful result, drawers or token, including template tiles, and leaves the
-number of issued tokens unchanged. A web integration should map this failure to
-an unavailable response and clear the client's previous tiles.
+grant, provider, or validation step throws an authorization-unavailable error. It
+returns no successful result, drawers or token, including template tiles, and
+leaves the number of issued tokens unchanged. Selecting EMS3 and getting an EMS3
+failure never retries that entity through EMS2. A web integration should map this
+failure to an unavailable response and clear the client's previous tiles.
 
 Successful results contain a short-lived token signed with a random local key,
 issuer `ems3-function-poc`, and the BFF-style string claim:
@@ -118,6 +128,6 @@ Clearing this local session does not revoke previously issued production JWTs.
 3. EMS3 confirmation of which API gives complete effective function permissions, how no access is represented, and whether paging, inactive roles or unrelated apps affect these responses.
 
 The production user-role source and full application coverage can wait until
-rollout. Before production switching, integrate session/token renewal and
-invalidation, test real BFF/frontend consumers, and validate application mappings
+rollout. Before production switching, verify the integrated session/token renewal
+behavior, decide the required invalidation behavior, test real BFF/frontend consumers, and validate application mappings
 one application at a time. See the [migration plan](../../docs/ems3-migration-plan.md).

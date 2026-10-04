@@ -1,12 +1,14 @@
 # EMS2 to EMS3: function entitlement POC and rollout plan
 
-Updated 2026-10-03 following the user's scope clarification. This document defines the POC and its acceptance criteria; verified results are recorded with the runnable POC.
+Updated 2026-10-05. This document defines the agreed migration scope. See the [BFF integration explanation](ems3-bff-integration.md) for the current code, database schema and verification steps.
 
 ## Current progress
 
-**Local POC passed:** the [runnable POC](../poc/ems3-functions/README.md) exercises five synthetic accounts through a real loopback HTTP service, preserves the selected role grants and tile rules, and denies every required-call failure without retaining the previous local result. All 236 tests and the seven-result CLI demo pass. This completes steps 1-5 below for the selected function scope.
+**Local POC passed:** the [runnable POC](../poc/ems3-functions/README.md) exercises five synthetic accounts through a real loopback EMS3 HTTP service and a mixed EMS2/EMS3 router. The route table sends Ratan to EMS2 and portal-admin to EMS3, then merges both providers into the unchanged BFF response. It preserves the selected role grants and tile rules, keeps multiple roles for one entity, and denies every required-call failure without retaining the previous local result or falling back from EMS3 to EMS2. All 244 tests and the seven-result CLI demo pass. This completes steps 1-5 below for the selected function scope.
 
 **Live EMS3 integration pending:** step 6 still needs EMS3 test access, real test accounts with known assignments, and confirmation that the selected API contract returns complete effective permissions. The local fixture does not establish those guarantees or production token revocation.
+
+**BFF implementation added:** the actual service now has a PostgreSQL route table and audit history, provider routing in `AuthConfig`, a production EMS3 HTTP adapter, strict EMS2 response handling, and fresh entitlement checks on token renewal. The [verification build](../verification/README.md) tests actual BFF source with isolated PostgreSQL and synthetic provider responses. No live application is switched by these tests.
 
 ## Agreed first phase
 
@@ -56,7 +58,7 @@ The initial protected tile set uses production tile IDs 1, 2, 3, 4, 18, 54, 104 
 | 5. Demonstrate the pattern | Run each account and error scenario through the POC. Record input, expected tiles, actual tiles and failure behavior. | A runnable local proof, documented results, and a list of platform assumptions to validate live. |
 | 6. Validate against EMS3 | Use approved EMS3 test accounts and connectivity with FlowZero or a minimal provisioned application. Repeat successful, no-access, changed-role and failure checks. | Evidence that the pattern works against actual EMS3, separate from the local proof. |
 
-Use the existing `AuthorizationService` boundary as the integration target. Preserve the BFF's entity → role → subject → action relationships and `entityName:roleName` entitlement-claim keys. Build the selected scope first; general rollout routing can follow when the pattern works.
+The integration uses the existing `AuthorizationService` boundary, preserving the BFF's entity → role → subject → action relationships and `entityName:roleName` entitlement-claim keys. Database routing and the EMS3 adapter are implemented in BFF source; confirmation against the live EMS3 contract remains pending.
 
 Use test-first development for the actual adapter and API behavior. Observe results through the authorization response and visible tile list. The prototype UI, if one is added, is only a way to drive these cases; a visual simulation alone is not evidence that an API failure is handled correctly.
 
@@ -99,13 +101,15 @@ The local POC is complete when all of these are demonstrated with recorded resul
 - A valid empty result and removal of a test role remove the corresponding function grants on the next successful lookup.
 - Every error case in the table produces no successful authorization response or newly issued tokens. A success followed by an error cannot reuse the old tile list.
 - At least one real local HTTP request exercises timeout/non-success handling; mapping JSON in memory alone is not enough to claim API handling is proven.
+- A mixed request sends each entity to its configured provider, merges the results, and keeps separate roles for one entity.
+- An EMS3 failure fails the whole authorization attempt and does not retry that entity through EMS2.
 - No production settings, assignments or application permissions are changed by the local POC.
 
 Report two separate milestones: **local POC passed** and **EMS3 test-environment integration passed**. The first can be completed using synthetic accounts and responses. The second requires platform access and real EMS3 test accounts but does not require all production apps or the production user-role source.
 
 ## What comes after the POC
 
-Once the pattern is accepted, connect the real user-role source, collect the remaining function definitions as each app is onboarded, and replace test-only identifiers with the agreed production mapping. Add application-by-application provider routing, validate all consumers of the function entitlement response, and plan production switching, removal timing, observation and rollback.
+Once the pattern is accepted, connect the real user-role source, collect the remaining function definitions as each app is onboarded, and replace test-only identifiers with the agreed production mapping. Use the implemented application-by-application provider routing, validate all consumers of the function entitlement response, and plan production switching, removal timing, observation and rollback.
 
 The existing production inventory remains useful for that later work: 129 tiles, 115 active, including 99 active non-template tiles; five supplied XML entities cover at least one configured entity on 59 of those 99. The other 40 are later onboarding work, not POC blockers. Defer full catalog coverage, SSTM ownership gaps, inactive/test-row disposition and bulk user assignment migration until their application rollout is planned.
 

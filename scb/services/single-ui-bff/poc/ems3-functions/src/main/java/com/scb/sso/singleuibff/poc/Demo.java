@@ -5,14 +5,22 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Finite local demonstration; does not connect to EMS3 or print tokens. */
+/** Finite local demonstration; uses EMS2 and EMS3 providers through one route table. */
 public final class Demo {
     private static final List<String> ENTITIES = List.of("X_RATANONE", "FMO PORTAL ADMIN");
     private static final ObjectMapper JSON = new ObjectMapper();
 
     public static void main(String[] arguments) throws Exception {
         try (var ems3 = new FixtureEms3()) {
-            var session = new PocSession(new FunctionAuthorization(ems3.uri()));
+            var ems2 = new FixtureEms2();
+            var ems3Authorization = new FunctionAuthorization(ems3.uri());
+            var authorization = new TransitionalAuthorization(List.of(
+                new TransitionalAuthorization.ApplicationRoute("X_RATANONE",
+                    TransitionalAuthorization.Provider.EMS2, null),
+                new TransitionalAuthorization.ApplicationRoute("FMO PORTAL ADMIN",
+                    TransitionalAuthorization.Provider.EMS3, "FMO_PORTAL_ADMIN")),
+                ems2, ems3Authorization);
+            var session = new PocSession(authorization);
             var accounts = new LinkedHashMap<String, List<Long>>();
             accounts.put("poc-ratan", List.of(54L, 104L, 105L, 9001L, 9002L, 9004L));
             accounts.put("poc-admin", List.of(1L, 2L, 3L, 4L, 9001L));
@@ -26,16 +34,19 @@ public final class Demo {
                     throw new IllegalStateException("Unexpected tiles for " + entry.getKey());
                 }
                 report(Map.of("account", entry.getKey(), "visibleTileIds", actual,
+                    "ems2Scopes", ems2.scopes(),
                     "roleKeys", JSON.readTree(result.entitlements()).properties().stream().map(Map.Entry::getKey).toList(),
                     "check", "PASS"));
             }
-            session.authorize("poc-ratan", ENTITIES);
-            ems3.revoke("poc-ratan");
-            var revoked = session.authorize("poc-ratan", ENTITIES);
-            if (!tiles(revoked).equals(List.of(9001L)) || !revoked.entities().isEmpty()) {
-                throw new IllegalStateException("Revocation did not clear grants");
+            session.authorize("poc-both", ENTITIES);
+            ems3.revoke("poc-both");
+            var revoked = session.authorize("poc-both", ENTITIES);
+            if (!tiles(revoked).equals(List.of(54L, 104L, 105L, 9001L, 9002L, 9004L))
+                || revoked.entities().size() != 1) {
+                throw new IllegalStateException("EMS3 revocation did not clear only the EMS3 application");
             }
-            report(Map.of("scenario", "role removed", "visibleTileIds", tiles(revoked), "check", "PASS"));
+            report(Map.of("scenario", "EMS3 application revoked", "visibleTileIds", tiles(revoked),
+                "ems2StillGranted", true, "check", "PASS"));
             ems3.reset();
             session.authorize("poc-both", ENTITIES);
             long issuedBeforeError = session.issuedTokens();
@@ -48,7 +59,7 @@ public final class Demo {
                     throw new AssertionError("Failure retained access or issued a token");
                 }
                 report(Map.of("scenario", "API error after success", "access", "DENIED",
-                    "oldTilesCleared", true, "newTokens", 0, "check", "PASS"));
+                    "oldTilesCleared", true, "newTokens", 0, "ems2Fallback", false, "check", "PASS"));
             }
         }
     }

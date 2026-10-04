@@ -19,6 +19,7 @@ import com.scb.sso.singleuibff.service.v1.*;
 import com.scb.sso.singleuibff.service.v1.implementation.MFAAuthenticationService;
 import com.scb.sso.singleuibff.service.v1.implementation.OUDAuthenticationService;
 import com.scb.sso.singleuibff.service.v2.AuthorizationService;
+import com.scb.sso.singleuibff.service.v2.AuthorizationUnavailableException;
 import com.scb.sso.singleuibff.util.AdminModuleUtil;
 import com.scb.sso.singleuibff.util.JwtTokenUtil;
 import com.scb.sso.singleuibff.util.OudUtil;
@@ -93,9 +94,8 @@ public class JwtAuthenticationController {
 
     private Map<String, Object> buildEntities(HttpServletResponse response, String username,
         String oudString, String sessionId) throws JsonProcessingException, RecordNotFoundException {
-        List<Map<String, Object>> applicationCategories = applicationCategoryService.getDrawers().get();
-        final List<String> ems2Entities = adminModuleUtil.getEntityFromApplicationCategory(applicationCategories);
-        Ems2Result ems2Result = authorizationService.getEntitlements(username, ems2Entities);
+        List<Map<String, Object>> applicationCategories = currentApplicationCategories();
+        Ems2Result ems2Result = currentEntitlements(username, applicationCategories);
         List<Entity> entities = ems2Result.getEntities();
         List<Map<String, Object>> drawers = adminModuleUtil.getDrawer(applicationCategories, entities);
         String jsonString = buildEntitlementString(entities);
@@ -113,6 +113,40 @@ public class JwtAuthenticationController {
         returnObject.put("entitlementsToken", entitlementsToken);
         returnObject.put("drawers", drawers);
         return returnObject;
+    }
+
+    private List<Map<String, Object>> currentApplicationCategories() {
+        try {
+            return applicationCategoryService.getDrawers()
+                .orElseThrow(() -> new AuthorizationUnavailableException("Application scope is unavailable"));
+        } catch (AuthorizationUnavailableException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new AuthorizationUnavailableException("Application scope is unavailable", exception);
+        }
+    }
+
+    private Ems2Result currentEntitlements(String username, List<Map<String, Object>> applicationCategories) {
+        try {
+            List<String> entities = adminModuleUtil.getEntityFromApplicationCategory(applicationCategories);
+            Ems2Result result = authorizationService.getEntitlements(username, entities);
+            if (result == null || result.getEntities() == null) {
+                throw new AuthorizationUnavailableException("Entitlement result is incomplete");
+            }
+            return result;
+        } catch (AuthorizationUnavailableException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new AuthorizationUnavailableException("Entitlement lookup is unavailable", exception);
+        }
+    }
+
+    private ResponseEntity<ResponseOfAuthenticate> authorizationUnavailable(HttpServletResponse response) {
+        response.setHeader(HEADER_JWT_TOKEN, null);
+        response.setHeader(HEADER_REFRESH_TOKEN, null);
+        log.info("entitlement check unavailable");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
+            ResponseOfAuthenticate.builder().result(false).errorMessage("AUTHORIZATION_UNAVAILABLE").build());
     }
 
     private String buildEntitlementString(List<Entity> entities) throws JsonProcessingException {
@@ -178,6 +212,8 @@ public class JwtAuthenticationController {
                 ResponseOfAuthenticate.builder().entitlementsToken(entitlementsToken).oud(oudString).result(true).drawers(drawers)
                     .entities(entities)
                     .userInfo(userInfo).build());
+        } catch (AuthorizationUnavailableException exception) {
+            return authorizationUnavailable(response);
         } catch (AuthenticationException exception) {
             log.info("login failed, reason: {}", exception.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
@@ -228,6 +264,8 @@ public class JwtAuthenticationController {
                 ResponseOfAuthenticate.builder().entitlementsToken(entitlementsToken).oud(oudString).result(true).drawers(drawers)
                     .entities(entities)
                     .userInfo(userInfo).build());
+        } catch (AuthorizationUnavailableException exception) {
+            return authorizationUnavailable(response);
         } catch (AuthenticationException exception) {
             log.info("entra login failed, reason: {}", exception.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
@@ -248,6 +286,9 @@ public class JwtAuthenticationController {
         try {
             String jwtToken = retrieveToken(requestOfJWT.getSingleUIAuthorization());
             boolean result = jwtTokenUtil.validateToken(jwtToken);
+            if (!result) {
+                throw JwtException.builder().message("Token validation failed").build();
+            }
             jwtTokenUtil.handleIssuer(jwtToken, JWT_ISSUER);
             Date expirationDate = jwtTokenUtil.getExpirationDate(jwtToken);
             String userInfo = jwtTokenUtil.retrieveUserInfoFromToken(jwtToken);
@@ -265,6 +306,8 @@ public class JwtAuthenticationController {
                 .ok(ResponseOfAuthenticate.builder().entitlementsToken(entitlementsToken).oud(oudString).result(result).drawers(drawers)
                     .entities(entities)
                     .userInfo(userInfo).expiration(expirationDate).build());
+        } catch (AuthorizationUnavailableException exception) {
+            return authorizationUnavailable(response);
         } catch (Exception e) {
             log.info("token validate failed, reason: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
@@ -277,11 +320,15 @@ public class JwtAuthenticationController {
         try {
             String jwtToken = retrieveToken(requestOfJWT.getSingleUIAuthorization());
             boolean result = jwtTokenUtil.validateToken(jwtToken);
+            if (!result) {
+                throw JwtException.builder().message("Token validation failed").build();
+            }
             jwtTokenUtil.handleIssuer(jwtToken, JWT_ISSUER);
             String userInfo = jwtTokenUtil.retrieveUserInfoFromToken(jwtToken);
             Map<String, String> payload = objectMapper.readValue(userInfo, HashMap.class);
             sessionService.validateSession(payload.get(SESSION_ID));
             String userName = payload.get("sub");
+            currentEntitlements(userName, currentApplicationCategories());
             payload.remove("exp");
             payload.remove("iat");
             String newJwtToken = jwtTokenUtil.generateToken(userName, payload);
@@ -293,6 +340,8 @@ public class JwtAuthenticationController {
             }
             response.setHeader(HEADER_JWT_TOKEN, HEADER_JWT_TOKEN_VALUE_PREFIX.concat(newJwtToken));
             return ResponseEntity.ok(ResponseOfAuthenticate.builder().result(result).expiration(newExpirationDate).build());
+        } catch (AuthorizationUnavailableException exception) {
+            return authorizationUnavailable(response);
         } catch (Exception e) {
             log.info("token extend failed, reason: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
@@ -306,11 +355,15 @@ public class JwtAuthenticationController {
         try {
             String jwtToken = retrieveToken(requestOfJWT.getSingleUIAuthorization());
             boolean result = jwtTokenUtil.validateToken(jwtToken);
+            if (!result) {
+                throw JwtException.builder().message("Token validation failed").build();
+            }
             jwtTokenUtil.handleIssuer(jwtToken, JWT_ISSUER);
             String userInfo = jwtTokenUtil.retrieveUserInfoFromToken(jwtToken);
             Map<String, Object> payload = objectMapper.readValue(userInfo, HashMap.class);
             String userName = (String) payload.get("sub");
             sessionService.validateSession((String) payload.get(SESSION_ID));
+            currentEntitlements(userName, currentApplicationCategories());
             Map<String, String> userInfoPayload = new HashMap<>();
             userInfoPayload.put("oud", (String) payload.get("oud"));
             userInfoPayload.put(SESSION_ID, (String) payload.get(SESSION_ID));
@@ -318,6 +371,8 @@ public class JwtAuthenticationController {
             response.setHeader(HEADER_REFRESH_TOKEN, HEADER_JWT_TOKEN_VALUE_PREFIX.concat(refreshToken));
             Date newExpirationDate = jwtTokenUtil.getExpirationDate(refreshToken);
             return ResponseEntity.ok(ResponseOfAuthenticate.builder().result(result).expiration(newExpirationDate).build());
+        } catch (AuthorizationUnavailableException exception) {
+            return authorizationUnavailable(response);
         } catch (Exception e) {
             log.info("token refreshtoken failed, reason: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
@@ -331,6 +386,9 @@ public class JwtAuthenticationController {
         try {
             String jwtToken = retrieveToken(request.getHeader(HEADER_REFRESH_TOKEN));
             boolean result = jwtTokenUtil.validateToken(jwtToken);
+            if (!result) {
+                throw JwtException.builder().message("Token validation failed").build();
+            }
             jwtTokenUtil.handleIssuer(jwtToken, JWT_ISSUER_REFRESH);
             String userInfo = jwtTokenUtil.retrieveUserInfoFromToken(jwtToken);
             Map<String, String> payload = objectMapper.readValue(userInfo, HashMap.class);
@@ -348,6 +406,8 @@ public class JwtAuthenticationController {
                 .ok(ResponseOfAuthenticate.builder().entitlementsToken(entitlementsToken).oud(oudString).result(result).drawers(drawers)
                     .entities(entities)
                     .userInfo(userInfo).build());
+        } catch (AuthorizationUnavailableException exception) {
+            return authorizationUnavailable(response);
         } catch (Exception e) {
             log.info("token relogin failed, reason: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(

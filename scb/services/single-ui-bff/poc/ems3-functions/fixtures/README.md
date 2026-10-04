@@ -18,6 +18,16 @@ No production user IDs or user assignments are copied.
 
 ## Proposed application mapping
 
+The transitional demo selects a provider per BFF entitlement entity:
+
+| EMS2 entity | Selected provider | EMS3 application mapping |
+| --- | --- | --- |
+| `X_RATANONE` | EMS2 | not used by the EMS2 route |
+| `FMO PORTAL ADMIN` | EMS3 | `FMO_PORTAL_ADMIN` |
+
+This route table is in-memory in the POC. Production will load the same fields
+from the BFF database after the mapping migration is implemented.
+
 | EMS2 entity | POC EMS3 application | appId | Synthetic appUID |
 | --- | --- | --- | --- |
 | `X_RATANONE` | `RATAN_ENTITLEMENT_RULE` | `51358` | 10 |

@@ -8,6 +8,8 @@ import com.scb.sso.singleuibff.service.v1.*;
 import com.scb.sso.singleuibff.service.v1.implementation.*;
 import com.scb.sso.singleuibff.service.v2.AuthorizationService;
 import com.scb.sso.singleuibff.service.v2.implementation.EMS2AuthorizationImplementation;
+import com.scb.sso.singleuibff.service.v2.implementation.EMS3AuthorizationImplementation;
+import com.scb.sso.singleuibff.service.v2.implementation.RoutingAuthorizationService;
 import com.scb.sso.singleuibff.util.*;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +39,12 @@ public class AuthConfig {
 
     @Autowired
     private EMS2ConfigProperties ems2ConfigProperties;
+
+    @Autowired
+    private EMS3ConfigProperties ems3ConfigProperties;
+
+    @Autowired
+    private AuthorizationApplicationRepo authorizationApplicationRepo;
 
     @Autowired
     private JWTConfigProperties jwtConfigProperties;
@@ -130,7 +138,9 @@ public class AuthConfig {
                 .setConnectTimeout(ems2ConfigProperties.getConnectTimeout())
                 .setReadTimeout(ems2ConfigProperties.getReadTimeout())
                 .build();
-        return new EMS2AuthorizationImplementation(restTemplate, objectMapper, ems2ConfigProperties);
+        return new RoutingAuthorizationService(authorizationApplicationRepo,
+            new EMS2AuthorizationImplementation(restTemplate, objectMapper, ems2ConfigProperties),
+            new EMS3AuthorizationImplementation(ems3ConfigProperties));
     }
 
     @Bean
