@@ -4,11 +4,11 @@ test.skip(!!process.env.PLAYWRIGHT_PRODUCTION_EDGE, 'Uses the development login 
 
 test('host can render and remove a tile after the control extraction', async ({ page }) => {
   await page.goto('/?show_normal_login=Y&survey=no&new-styles=true');
-  await page.getByPlaceholder('Enter Username').fill('mock.cashflow');
-  await page.getByPlaceholder('Enter Password').fill('acceptance');
+  await page.getByLabel('Username', { exact: true }).fill('mock.cashflow');
+  await page.getByLabel('Password', { exact: true }).fill('acceptance');
   await page.getByRole('button', { name: 'Sign In', exact: true }).click();
-  await page.getByText('New Tile', { exact: true }).click();
-  await page.getByText('Cashflow Blotter', { exact: true }).click();
+  await page.getByRole('button', { name: 'Open new tile', exact: true }).click();
+  await page.getByRole('button', { name: 'Add Cashflow Blotter', exact: true }).click();
   await expect(page.getByText('CF-ACCEPT-001', { exact: true })).toBeVisible({
     timeout: 20_000,
   });
@@ -41,6 +41,9 @@ test('host can render and remove a tile after the control extraction', async ({ 
   );
   await page.getByRole('button', { name: 'Add Workspace' }).click();
   await expect(page.getByRole('button', { name: 'delete' })).toHaveCount(2);
-  await page.getByRole('button', { name: 'delete' }).first().click();
+  await page
+    .getByRole('tab', { name: 'Cashflow Blotter', exact: true })
+    .getByRole('button', { name: 'delete', exact: true })
+    .click();
   await expect(page.getByText('CF-ACCEPT-001', { exact: true })).toHaveCount(0);
 });

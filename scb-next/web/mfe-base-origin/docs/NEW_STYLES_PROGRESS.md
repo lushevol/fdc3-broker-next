@@ -3,16 +3,59 @@
 The [implementation plan](NEW_STYLES_IMPLEMENTATION_PLAN.md) and
 [specification](NEW_STYLES_SPEC.md) define the scope and acceptance gates.
 
-| Stage                                     | Status      | Evidence / next step                                                                                                                          |
-| ----------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. References, assets, contract, fixtures | Complete    | Resolver 5 tests and fixture 7 tests: 100% line/branch coverage. Browser smoke and three native evidence captures pass; type/lint/build pass. |
-| 2. Theme and header                       | Implemented | 10 browser behavior/geometry checks and 62 shell/theme tests pass. Native capture reviewed; remaining reference differences listed below.     |
-| 3. Login                                  | Implemented | Native form geometry and responsive/Enter/loading/error checks pass in both themes; lower hero artwork remains unavailable.                   |
-| 4. Empty workspace                        | Implemented | Reference dark illustration, responsive CTA and real drawer/analytics dispatch verified; light illustration is a documented adaptation.       |
-| 5. Avatar menu                            | Implemented | Responsive menu, real identity/versions, logout, keyboard/outside close and focus restoration verified.                                       |
-| 6. Profile                                | Implemented | Real identity, functional/data entitlements, photo fallback, responsive hierarchy and close/focus behavior verified.                          |
-| 7. Tile drawer                            | Implemented | Responsive patterned cards, explicit launch-option metadata, real launch/disabled contracts and keyboard close/focus verified.                |
-| 8. Portal acceptance                      | In progress | 82 browser behavior/geometry/evidence checks pass; exact visual comparison and remaining rollout gates stay open.                             |
+| Stage                                     | Status      | Evidence / next step                                                                                                                               |
+| ----------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. References, assets, contract, fixtures | Complete    | Resolver 5 tests and fixture 7 tests: 100% line/branch coverage. Browser smoke and three native evidence captures pass; type/lint/build pass.      |
+| 2. Theme and header                       | Implemented | 10 browser behavior/geometry checks and 62 shell/theme tests pass. Native capture reviewed; remaining reference differences listed below.          |
+| 3. Login                                  | Implemented | Native form geometry and responsive/Enter/loading/error checks pass in both themes; lower hero artwork remains unavailable.                        |
+| 4. Empty workspace                        | Implemented | Reference dark illustration, responsive CTA and real drawer/analytics dispatch verified; light illustration is a documented adaptation.            |
+| 5. Avatar menu                            | Implemented | Responsive menu, real identity/versions, logout, keyboard/outside close and focus restoration verified.                                            |
+| 6. Profile                                | Implemented | Real identity, functional/data entitlements, photo fallback, responsive hierarchy and close/focus behavior verified.                               |
+| 7. Tile drawer                            | Implemented | Responsive patterned cards, explicit launch-option metadata, real launch/disabled contracts and keyboard close/focus verified.                     |
+| 8. Portal acceptance                      | In progress | 82 browser behavior/geometry/evidence checks pass; exact visual comparison and remaining rollout gates stay open.                                  |
+| 9. Typography and compact density         | Complete    | 90 Portal browser checks verified; Base/package tests, targeted quality checks and all app builds pass. Remaining baseline gates are listed below. |
+
+## Compact-density correction
+
+The compact adaptation in [the specification](NEW_STYLES_SPEC.md#compact-typography-and-density)
+is the current desktop sizing target. The native measurements in stages 1-8
+below record the earlier prototype implementation.
+
+- Rebuilt Base typography from raw options, preserving host AppBar/grid and
+  custom fields. SC Prosper variants and `pxToRem` now agree; responsive font
+  processing applies once to the new theme.
+- Shared `compactControlTokens` define 12px/28px small buttons and inputs,
+  14px/32px regular MUI controls, and 11px/12px grid text. Ant operational inputs
+  retain 12px text. Outer and lazy Ant providers follow the selected generation;
+  grids adopt SC Prosper while retaining their data density.
+- Login now uses a 360px form, 32px heading, 14px text and 44px controls. Drawer
+  cards are 125px tall in four desktop columns; entitlement rows are 48px.
+  Mobile launch/close controls retain 44px touch targets; Empty's 48px CTA stays
+  role-specific.
+- Red-to-green tests cover actual rendered typography and geometry. Base passes
+  all 507 tests (98.97% lines, 97.25% branches); the design package passes its
+  control/token/story test gates. Base, Ratan, Cashflow and Alpha builds pass,
+  as do Base/package typechecks, changed-file lint, import/dependency checks and
+  independent tarball consumer verification.
+- All 90 Portal browser checks are verified: the combined run passed 86, and the
+  four adapted drawer/profile geometry checks passed focused reruns after their
+  fixture expectations were corrected. The eight new desktop/mobile light/dark
+  density checks verify actual fonts, 12px/28px compact controls, regular buttons,
+  grid roles and single-line labels. Supplied source images and artwork baselines
+  are preserved; adapted geometry follows the compact specification.
+- The separate design-origin host smoke completes login, real Cashflow launch,
+  theme propagation and removal assertions. Its strict console gate remains
+  failing: all 16 distinct console signatures also reproduce with legacy styles,
+  with zero new signatures. The gate was preserved rather than filtering them.
+- Remaining unrelated gates: Ratan typecheck has 43 diagnostics outside the
+  changed adapters; Storybook assets build, but its catalog guard reports missing
+  `BadgeOutlined`, `MailOutline` and `VerifiedUserOutlined` examples. The earlier
+  whole-workspace lint and legacy snapshot limitations remain documented below.
+- Cashflow's fixed-width phone search/pending layout still clips controls. At
+  390px, the input wrapper spans x=194-419 in both legacy and compact modes;
+  Pending Verification ends around x=434 in both. This is a pre-existing business
+  layout limitation, not a passing full mobile-business-layout gate. Comparison
+  evidence: `/tmp/portal-mobile-business-baseline.json` and the paired screenshots.
 
 ## Stage 1 verification
 
@@ -176,9 +219,10 @@ specific source/data dependency is resolved.
 
 ## Exact reference acceptance
 
-Native captures are evidence, not passing visual comparisons. Source comparison
-uses the supplied PNGs with zero differing pixels; implementation captures never
-replace those references. All 14 frames remain pending full visual acceptance.
+Native captures are evidence, not passing visual comparisons. Supplied PNGs stay
+fixed and implementation captures never replace them. Exact source comparison
+remains appropriate for unchanged artwork; whole-screen review must account for
+the compact adaptation. All 14 frames remain pending full visual review.
 
 | Frames  | Remaining difference or dependency                                                                         |
 | ------- | ---------------------------------------------------------------------------------------------------------- |

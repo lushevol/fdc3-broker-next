@@ -5,6 +5,7 @@ import { CssBaseline } from '@mui/material';
 import { createTheme, darken } from '@mui/material/styles';
 import { RatanDesignProvider, useRatanAppearance } from 'ratan-design-origin';
 import { createRatanTheme } from 'ratan-design-origin/theme';
+import { compactControlTokens } from 'ratan-design-origin/tokens';
 
 const defaultFontSize = 12;
 const defaultFontFamily = '"Poppins",Helvetica!important';
@@ -53,18 +54,25 @@ const MfeThemeProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const antdTheme = useMemo(() => {
     const themeAlgo = appearance.mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm;
+    const compact = appearance.designGeneration === 'webkit' ? compactControlTokens : undefined;
     return {
       theme: {
         algorithm: themeAlgo,
         token: {
-          fontSize: defaultFontSize,
-          fontFamily: defaultFontFamily,
+          fontSize: compact?.typography.compact ?? defaultFontSize,
+          fontFamily: compact?.typography.fontFamily ?? defaultFontFamily,
+          ...(compact && {
+            fontSizeSM: compact.typography.compact,
+            controlHeight: compact.control.medium.minHeight,
+            controlHeightSM: compact.control.small.minHeight,
+            controlHeightLG: compact.control.large.minHeight,
+          }),
           zIndexPopupBase: 1500,
           colorBgSpotlight: 'var(--theme-color-antd-tooltip-bg)',
         },
       },
     };
-  }, [appearance.mode]);
+  }, [appearance.mode, appearance.designGeneration]);
   return (
     <RatanDesignProvider
       baseTheme={muiTheme}

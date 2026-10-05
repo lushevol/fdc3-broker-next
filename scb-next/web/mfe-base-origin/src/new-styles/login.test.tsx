@@ -16,6 +16,26 @@ const props = () => ({
 });
 
 describe('prototype login', () => {
+  it.each(['light', 'dark'] as const)('keeps compact form typography and 44px controls in %s mode', (mode) => {
+    render(
+      <ThemeProvider theme={createRatanTheme({ mode })}>
+        <PrototypeLogin {...props()} />
+      </ThemeProvider>,
+    );
+    expect(screen.getByRole('form', { name: 'Sign In' })).toHaveStyle({ maxWidth: '360px' });
+    expect(screen.getByRole('heading', { name: 'Sign In' })).toHaveStyle({
+      fontSize: '32px', lineHeight: '40px',
+    });
+    const username = screen.getByLabelText('Username');
+    expect(username.parentElement).toHaveStyle({ height: '44px' });
+    expect(screen.getByText('Username')).toHaveStyle({ fontSize: '14px' });
+    expect(screen.getByRole('button', { name: 'Sign In' })).toHaveStyle({
+      height: '44px',
+    });
+    expect(screen.getByRole('link', { name: 'Sign In With SSO' })).toHaveStyle({
+      height: '44px',
+    });
+  });
   it('uses the selected dark appearance and empty optional credentials', () => {
     render(
       <ThemeProvider theme={createRatanTheme({ mode: 'dark' })}>

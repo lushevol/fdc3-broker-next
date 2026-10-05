@@ -22,14 +22,14 @@ for (const theme of ['light', 'dark'] as const) {
     await expect(cards).toHaveCount(8);
     const first = await cards.first().boundingBox();
     expect(first?.y).toBe(230);
-    expect(first?.height).toBe(150);
-    expect(first?.width).toBeCloseTo(262, 0);
+    expect(first?.height).toBe(125);
+    expect(first?.width).toBeCloseTo(192.5, 0);
     const settlement = drawer.getByRole('region', { name: 'Settlement' });
     const settlementCards = settlement.getByTestId('portal-prototype-tile');
     const row = await Promise.all(
       [0, 1, 2, 3].map((index) => settlementCards.nth(index).boundingBox()),
     );
-    expect(row[0]?.y).toBe(444);
+    expect(row[0]?.y).toBe(419);
     expect(
       (
         await drawer
@@ -38,10 +38,11 @@ for (const theme of ['light', 'dark'] as const) {
           .first()
           .boundingBox()
       )?.y,
-    ).toBe(824);
+    ).toBe(749);
     expect(row[0]?.y).toBe(row[1]?.y);
     expect(row[1]?.y).toBe(row[2]?.y);
-    expect(row[3]?.y).toBeGreaterThan(row[0]?.y ?? 0);
+    expect(row[3]?.y).toBe(row[0]?.y);
+    expect((await settlementCards.nth(4).boundingBox())?.y).toBe(560);
     expect(
       await drawer
         .getByTestId('portal-prototype-tile-art')
@@ -92,7 +93,7 @@ for (const theme of ['light', 'dark'] as const) {
   for (const viewport of [
     { width: 390, height: 844, columns: 1 },
     { width: 768, height: 1024, columns: 2 },
-    { width: 1280, height: 600, columns: 3 },
+    { width: 1280, height: 600, columns: 4 },
   ]) {
     test(`${theme} ${viewport.width}px drawer stays within the shell and scrolls with reduced motion`, async ({
       page,

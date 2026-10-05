@@ -1,6 +1,15 @@
-/** Base-owned branding and geometry measured from the Portal reference frames. */
+/** Base-owned branding, compact geometry and semantic text roles. */
 export const portalTokens = {
   fontFamily: '"SC Prosper Sans", Arial, sans-serif',
+  typography: {
+    pageHeading: { fontSize: 32, lineHeight: '40px' },
+    sectionHeading: { fontSize: 16, lineHeight: '24px' },
+    title: { fontSize: 20, lineHeight: '26px' },
+    body: { fontSize: 14, lineHeight: '20px' },
+    caption: { fontSize: 12, lineHeight: '18px' },
+    heroHeading: { fontSize: 28, lineHeight: '36px' },
+    heroBody: { fontSize: 16, lineHeight: '24px' },
+  },
   color: {
     primary: '#0473ea',
     primaryHover: '#025dbd',
@@ -61,13 +70,15 @@ export const portalTokens = {
     profileBannerHeight: 156,
     profilePortrait: 116,
     profileMaxHeight: 800,
-    profileRowHeight: 54,
+    profileRowHeight: 48,
     drawerWidth: 895,
     drawerHeaderHeight: 56,
-    tileHeight: 150,
+    tileHeight: 125,
     emptyButtonWidth: 320,
     loginPaneWidth: 690,
-    loginFormWidth: 490,
+    loginFormWidth: 360,
+    loginControlHeight: 44,
+    touchControl: 44,
   },
   space: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
   radius: { panel: 6, control: 8, pill: 999 },

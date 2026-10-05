@@ -1,6 +1,7 @@
 import type { PaletteMode, ThemeOptions } from '@mui/material';
 import { legacyTokens as custom } from '../tokens/legacy.js';
 import { webkitMuiTheme } from '../tokens/webkit-theme.generated.js';
+import { compactControlTokens as compact } from '../tokens/compact.js';
 import type { ControlThemeConfig, DesignGeneration } from './index.js';
 
 const getWebkitOptions = (props: ControlThemeConfig): ThemeOptions => {
@@ -8,9 +9,38 @@ const getWebkitOptions = (props: ControlThemeConfig): ThemeOptions => {
   const palette = webkitMuiTheme.palette[mode];
   return {
     typography: {
-      fontFamily: webkitMuiTheme.typography.fontFamily.value,
+      fontFamily: compact.typography.fontFamily,
       fontSize: webkitMuiTheme.typography.fontSize.value,
-      button: { textTransform: 'none' },
+      body1: {
+        fontFamily: compact.typography.fontFamily,
+        fontSize: `${compact.typography.body}px`,
+        lineHeight: 1.5,
+      },
+      body2: {
+        fontFamily: compact.typography.fontFamily,
+        fontSize: `${compact.typography.compact}px`,
+        lineHeight: 1.5,
+      },
+      subtitle1: {
+        fontFamily: compact.typography.fontFamily,
+        fontSize: `${compact.typography.body}px`,
+        lineHeight: 1.5,
+      },
+      subtitle2: {
+        fontFamily: compact.typography.fontFamily,
+        fontSize: `${compact.typography.compact}px`,
+        lineHeight: 1.5,
+      },
+      caption: {
+        fontFamily: compact.typography.fontFamily,
+        fontSize: `${compact.typography.compact}px`,
+        lineHeight: 1.5,
+      },
+      button: {
+        fontFamily: compact.typography.fontFamily,
+        fontSize: `${compact.typography.compact}px`,
+        textTransform: 'none',
+      },
     },
     palette: {
       mode,
@@ -44,17 +74,31 @@ const getWebkitOptions = (props: ControlThemeConfig): ThemeOptions => {
         defaultProps: { size: 'small' },
         styleOverrides: {
           root: {
-            minHeight: 'var(--sc-spacing-32, 2rem)',
-            padding: '0.25rem 0.75rem',
             borderRadius: 'var(--sc-button-rounded-border-radius, 0.375rem)',
-            fontSize: '0.875rem',
             fontWeight: 500,
-            lineHeight: 1.375,
             textTransform: 'none',
             boxShadow: 'none',
             '&:hover': {
               boxShadow: 'var(--sc-button-hover-shadow, 0 1px 3px 1px rgb(26 26 26 / 15%))',
             },
+          },
+          sizeSmall: {
+            fontSize: compact.control.small.fontSize,
+            minHeight: compact.control.small.minHeight,
+            padding: `${compact.control.small.paddingBlock}px ${compact.control.small.paddingInline}px`,
+            lineHeight: compact.control.small.lineHeight,
+          },
+          sizeMedium: {
+            fontSize: compact.control.medium.fontSize,
+            minHeight: compact.control.medium.minHeight,
+            padding: `${compact.control.medium.paddingBlock}px ${compact.control.medium.paddingInline}px`,
+            lineHeight: compact.control.medium.lineHeight,
+          },
+          sizeLarge: {
+            fontSize: compact.control.large.fontSize,
+            minHeight: compact.control.large.minHeight,
+            padding: `${compact.control.large.paddingBlock}px ${compact.control.large.paddingInline}px`,
+            lineHeight: compact.control.large.lineHeight,
           },
           containedPrimary: {
             color: 'var(--sc-button-primary-text-color)',
@@ -88,12 +132,16 @@ const getWebkitOptions = (props: ControlThemeConfig): ThemeOptions => {
         defaultProps: { margin: 'dense' },
         styleOverrides: {
           input: {
-            fontSize: '0.875rem',
-            lineHeight: '1.375rem',
+            fontSize: compact.input.medium.fontSize,
+            lineHeight: `${compact.input.medium.lineHeight}px`,
             '&::placeholder': {
               color: 'var(--sc-label-color)',
               opacity: 1,
             },
+          },
+          inputSizeSmall: {
+            fontSize: compact.input.small.fontSize,
+            lineHeight: `${compact.input.small.lineHeight}px`,
           },
         },
       },
@@ -101,7 +149,15 @@ const getWebkitOptions = (props: ControlThemeConfig): ThemeOptions => {
         defaultProps: { margin: 'dense' },
         styleOverrides: {
           root: {
-            minHeight: 'var(--sc-spacing-32, 2rem)',
+            minHeight: compact.control.medium.minHeight,
+            '&.MuiInputBase-sizeSmall': {
+              minHeight: compact.control.small.minHeight,
+              '& .MuiOutlinedInput-input': {
+                fontSize: compact.input.small.fontSize,
+                lineHeight: `${compact.input.small.lineHeight}px`,
+                padding: `${compact.input.small.paddingBlock}px ${compact.input.small.paddingInline}px`,
+              },
+            },
             color: 'var(--sc-form-control-color)',
             backgroundColor: 'var(--sc-form-control-background-color)',
             borderRadius: 'var(--sc-form-input-border-radius, 0.375rem)',
@@ -130,14 +186,28 @@ const getWebkitOptions = (props: ControlThemeConfig): ThemeOptions => {
               backgroundColor: 'var(--sc-form-disabled-input-background-color)',
             },
           },
-          input: { padding: '0.25rem 0.75rem' },
+          input: {
+            padding: `${compact.input.medium.paddingBlock}px ${compact.input.medium.paddingInline}px`,
+          },
+        },
+      },
+      MuiTextField: {
+        defaultProps: { margin: 'dense', size: 'small' },
+      },
+      MuiFormControl: {
+        defaultProps: { margin: 'dense', size: 'small' },
+        styleOverrides: {
+          root: ({ ownerState }) => ({
+            fontSize:
+              ownerState.size === 'small' ? compact.typography.compact : compact.typography.body,
+          }),
         },
       },
       MuiInputLabel: {
         styleOverrides: {
           root: {
             color: 'var(--sc-label-color)',
-            fontSize: '0.75rem',
+            fontSize: compact.typography.compact,
             fontWeight: 500,
             lineHeight: '1.25rem',
           },
@@ -145,7 +215,7 @@ const getWebkitOptions = (props: ControlThemeConfig): ThemeOptions => {
       },
       MuiFormHelperText: {
         defaultProps: { margin: 'dense' },
-        styleOverrides: { root: { fontSize: '0.75rem' } },
+        styleOverrides: { root: { fontSize: compact.typography.compact } },
       },
       MuiPaper: {
         styleOverrides: {

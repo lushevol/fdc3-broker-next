@@ -8,6 +8,7 @@ import {
   type RatanAppearanceInput,
 } from 'ratan-design-origin';
 import { createRatanTheme } from 'ratan-design-origin/theme';
+import { compactControlTokens } from 'ratan-design-origin/tokens';
 
 import { ContainerProvider, ThemeConfig, ThemeUtil } from '../../../import';
 
@@ -38,12 +39,19 @@ const MfeThemeProvider: FC<MfeThemeProviderProps> = (props) => {
 
   const antdTheme = useMemo<ConfigProviderProps>(() => {
     const themeAlgo = appearance.mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm;
+    const compact = appearance.designGeneration === 'webkit' ? compactControlTokens : undefined;
     return {
       theme: {
         algorithm: themeAlgo,
         token: {
-          fontSize: defaultFontSize,
-          fontFamily: defaultFontFamily,
+          fontSize: compact?.typography.compact ?? defaultFontSize,
+          fontFamily: compact?.typography.fontFamily ?? defaultFontFamily,
+          ...(compact && {
+            fontSizeSM: compact.typography.compact,
+            controlHeight: compact.control.medium.minHeight,
+            controlHeightSM: compact.control.small.minHeight,
+            controlHeightLG: compact.control.large.minHeight,
+          }),
           zIndexPopupBase: 1500,
         },
         components: {
@@ -53,7 +61,7 @@ const MfeThemeProvider: FC<MfeThemeProviderProps> = (props) => {
         },
       },
     };
-  }, [appearance.mode]);
+  }, [appearance.mode, appearance.designGeneration]);
   return (
     <RatanDesignProvider
       baseTheme={muiTheme}

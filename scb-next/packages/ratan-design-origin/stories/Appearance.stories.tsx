@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button, Input, RatanDesignProvider, useRatanAppearance } from '../src';
 import { Alert, Box, CssBaseline, Paper, Stack, Typography } from '../src/primitives';
 import { createRatanTheme, createTheme, ThemeProvider, useTheme } from '../src/theme';
-import { legacyTokens, newStyleTokens } from '../src/tokens';
+import { compactControlTokens, legacyTokens, newStyleTokens } from '../src/tokens';
 import { Config, getPortalTheme } from '../src/portal-theme';
 
 function AppearanceSample() {
@@ -54,6 +54,29 @@ export const FourAppearances: Story = {
         )),
       )}
     </Box>
+  ),
+};
+export const CompactBusinessControls: Story = {
+  render: () => (
+    <Stack spacing={3} sx={{ p: 2 }}>
+      {(['light', 'dark'] as const).map((mode) => (
+        <RatanDesignProvider key={mode} mode={mode} designGeneration="webkit">
+          <Stack spacing={2} sx={{ p: 2, bgcolor: 'background.default' }}>
+            <Typography variant="body1">Cashflow actions</Typography>
+            <Typography variant="body2">Pending verification</Typography>
+            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+              <Button size="small" variant="contained">Pending Verification</Button>
+              <Button size="medium" variant="outlined">Search</Button>
+              <Button size="large">Export</Button>
+              <Button size="small" disabled>Clear Filters</Button>
+            </Stack>
+            <Input size="small" label="Reference" variant="outlined" defaultValue="SGD-001" />
+            <Typography sx={{ fontSize: compactControlTokens.typography.gridHeader }}>Currency</Typography>
+            <Typography sx={{ fontSize: compactControlTokens.typography.gridCell }}>SGD 1,250.00</Typography>
+          </Stack>
+        </RatanDesignProvider>
+      ))}
+    </Stack>
   ),
 };
 export const NestedInheritance: Story = {

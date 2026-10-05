@@ -1,4 +1,5 @@
 import { css, styled } from "@mui/material/styles";
+import { compactControlTokens } from 'ratan-design-origin/tokens';
 
 export const classes = {
   mainBlotter: "main-blotter-data-grid",
@@ -28,8 +29,11 @@ const Root = styled("div")(
       }
       .ag-theme-alpine,
       .ag-theme-alpine-dark {
-        --ag-font-size: ${defaultFontSize};
-        --ag-font-family: ${defaultFontFamily};
+        --ag-font-size: ${theme.ratan?.designGeneration === 'webkit' ? `${compactControlTokens.typography.gridHeader}px` : defaultFontSize};
+        --ag-font-family: ${theme.ratan?.designGeneration === 'webkit' ? compactControlTokens.typography.fontFamily : defaultFontFamily};
+        ${theme.ratan?.designGeneration === 'webkit' && css`
+          .ag-cell { font-size: ${compactControlTokens.typography.gridCell}px; }
+        `}
         --ag-icon-font-color: ${theme.palette.mode === "dark"
           ? "#fff"
           : "#8D8D8D"};

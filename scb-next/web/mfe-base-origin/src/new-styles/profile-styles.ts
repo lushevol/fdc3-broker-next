@@ -20,26 +20,20 @@ export const profileLayout = {
   bannerLowerWidth: 656,
   bannerLowerHeight: 117,
   titleInset: 20,
-  titleLineHeight: 20,
   borderWidth: 1,
   focusWidth: 2,
   portraitBorder: 2,
   closeGlyph: 20,
   identityTop: 12,
   identityBottom: 16,
-  nameLineHeight: 26,
-  rowLineHeight: 22,
   sessionLineHeight: 24,
   metadataGlyph: 18,
   sectionGlyphWidth: 20,
   sectionGlyphHeight: 24,
   chipHeight: 22,
-  chipLineHeight: 18,
-  subjectRowHeight: 51,
   actionGap: 12,
   scrollbarWidth: 12,
   transitionMs: 180,
-  type: { title: 14, name: 20, metadata: 14, session: 12, section: 16, row: 14, action: 12 },
 } as const;
 
 const profilePalette = {
@@ -137,8 +131,7 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
       position: 'relative' as const,
       margin: 0,
       padding: `${profileLayout.titleInset}px ${portalTokens.space.lg}px`,
-      fontSize: profileLayout.type.title,
-      lineHeight: `${profileLayout.titleLineHeight}px`,
+      ...portalTokens.typography.body,
       color: portalTokens.color.headerText,
     },
     close: {
@@ -153,6 +146,10 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
         outline: `${profileLayout.focusWidth}px solid ${portalTokens.color.headerText}`,
       },
       '& .MuiSvgIcon-root': { fontSize: profileLayout.closeGlyph },
+      [mobile]: {
+        width: portalTokens.size.touchControl,
+        height: portalTokens.size.touchControl,
+      },
       ...portalMotionStyles,
     },
     content: {
@@ -194,8 +191,7 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
     },
     name: {
       ...baseText,
-      fontSize: profileLayout.type.name,
-      lineHeight: `${profileLayout.nameLineHeight}px`,
+      ...portalTokens.typography.title,
       fontWeight: 700,
       marginBottom: `${portalTokens.space.sm}px`,
       overflowWrap: 'anywhere' as const,
@@ -211,7 +207,7 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
         display: 'inline-flex',
         alignItems: 'center',
         gap: `${portalTokens.space.sm}px`,
-        fontSize: profileLayout.type.metadata,
+        ...portalTokens.typography.body,
         overflowWrap: 'anywhere' as const,
         minWidth: 0,
       },
@@ -227,7 +223,7 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
     },
     session: {
       color: profile.sessionText,
-      fontSize: profileLayout.type.session,
+      ...portalTokens.typography.caption,
       lineHeight: `${profileLayout.sessionLineHeight}px`,
       overflowWrap: 'anywhere' as const,
     },
@@ -258,9 +254,8 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
       color: profile.rowText,
       backgroundColor: profile.hierarchy,
       '& .MuiTypography-root': {
-        fontSize: profileLayout.type.section,
+        ...portalTokens.typography.sectionHeading,
         fontWeight: 700,
-        lineHeight: `${profileLayout.sessionLineHeight}px`,
       },
     },
     accordion: {
@@ -278,14 +273,13 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
       paddingRight: expanded ? `${profileLayout.scrollbarWidth}px` : `${portalTokens.space.lg}px`,
     },
     subjectSummary: {
-      minHeight: profileLayout.subjectRowHeight,
-      '&.Mui-expanded': { minHeight: profileLayout.subjectRowHeight },
+      minHeight: portalTokens.size.profileRowHeight,
+      '&.Mui-expanded': { minHeight: portalTokens.size.profileRowHeight },
     },
     selected: { backgroundColor: profile.selected, color: colors.selectedText },
     stripe: { backgroundColor: profile.stripe },
     rowText: {
-      fontSize: profileLayout.type.row,
-      lineHeight: `${profileLayout.rowLineHeight}px`,
+      ...portalTokens.typography.body,
       overflowWrap: 'anywhere' as const,
     },
     roleDetails: {
@@ -312,14 +306,13 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
         whiteSpace: 'normal',
         overflowWrap: 'anywhere',
         padding: `${profileLayout.borderWidth * 2}px ${portalTokens.space.sm}px`,
-        fontSize: profileLayout.type.action,
-        lineHeight: `${profileLayout.chipLineHeight}px`,
+        ...portalTokens.typography.caption,
       },
     },
     empty: {
       color: colors.muted,
       padding: `${portalTokens.space.md}px ${portalTokens.space.lg}px`,
-      fontSize: profileLayout.type.row,
+      ...portalTokens.typography.body,
     },
   };
 };

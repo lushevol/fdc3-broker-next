@@ -43,6 +43,15 @@ The WebKit generation maps MUI controls to the SC GDS palette, SC Prosper Sans,
 spacing, radii, button states and form-control states. Legacy keeps its existing
 Poppins typography and compact visual baseline during migration. Poppins is host-provided;
 it is not one of this package's font assets.
+WebKit business controls use `compactControlTokens` from the `tokens` entry:
+small buttons and fields have 12px text and a 28px minimum height, regular
+buttons have 14px text and a 32px minimum height, and large buttons have 16px
+text and a 40px minimum height. Body text uses 14px; secondary text and labels
+use 12px. Explicit MUI sizes retain their meaning across variants. Ant host
+adapters retain the operational input role at 12px, including their lazy-loaded
+providers, with 32px regular and 28px small control heights. AG Grid uses the
+same font while headers remain 11px and cells 12px to preserve the established
+business-data density.
 WebKit's public `newStyleTokens.typography.fontSize` resolves through the scoped
 `--sc-font-size: 1rem` canonical default; generated compatibility aliases are
 checked transitively per generation/mode for missing custom-property definitions
@@ -57,8 +66,8 @@ shadow with the same formula and the dark blue token counterpart.
 - `ratan-design-origin/data-grid`: optional Community DataGrid, toolbar/actions and grid types; isolated from the core entry.
 - `ratan-design-origin/theme`: `createRatanTheme`, shared control overrides and
   compact defaults; emitted `Theme.ratan.designGeneration` augmentation.
-- `ratan-design-origin/tokens`: framework-independent `legacyTokens` and
-  `newStyleTokens` semantic references.
+- `ratan-design-origin/tokens`: framework-independent `legacyTokens`,
+  `newStyleTokens` semantic references and `compactControlTokens` business-control geometry.
 - `ratan-design-origin/compatibility`: existing CSS alias strings,
   `InputStyled`, `DialogTitle`, `DialogRoot` and `dialogClasses`; retained
   for Base adapters, not a new customization contract.

@@ -45,12 +45,19 @@ for (const theme of ['light', 'dark'] as const) {
     await portal.open('profile', theme);
     const dialog = page.getByRole('dialog', { name: 'User Profile' });
     await expect(dialog).toHaveCSS('width', '800px');
-    await expect(dialog).toHaveCSS('height', '576px');
+    await expect(dialog).toHaveCSS('height', '552px');
+    await expect(dialog.getByText('Functional User Profile', { exact: true })).toHaveCSS(
+      'font-size',
+      '16px',
+    );
+    const role = dialog.getByRole('button', {
+      name: 'RATAN::X_RATANONE::FMO_COO_SUP',
+      exact: true,
+    });
+    expect((await role.boundingBox())?.height).toBe(48);
     const identity = page.getByTestId('prototype-profile-identity');
     const hierarchy = page.getByRole('region', { name: 'Profile entitlements' });
-    await dialog
-      .getByRole('button', { name: 'RATAN::X_RATANONE::FMO_COO_SUP', exact: true })
-      .click();
+    await role.click();
     await expect(dialog).toHaveCSS('height', '800px');
     const top = await identity.boundingBox();
     await dialog.getByRole('button', { name: expandedSubject, exact: true }).click();

@@ -27,7 +27,7 @@ product of every MUI prop. Date examples use fixed dates to remain reproducible.
 
 ## Catalog navigation and source map
 
-The current built `storybook-static/index.json` contains **157 stories across
+The current built `storybook-static/index.json` contains **158 stories across
 24 story files**, plus **17 generated Docs pages**. Validation evidence is recorded below. The seven
 original files and their existing IDs remain alongside expanded scenario files.
 The singular **Integration** category contains Data grid; **Migration** contains
@@ -39,7 +39,7 @@ legacy compatibility contracts.
 | Components/Actions                           | [Actions.stories.tsx](stories/Actions.stories.tsx)                           |       9 | Core action props, matrices, loading, callbacks and toggles         |
 | Components/Fields                            | [Fields.stories.tsx](stories/Fields.stories.tsx)                             |      10 | Core Input/Select/SearchInput/Label form combinations               |
 | Patterns/Search                              | [SearchPatterns.stories.tsx](stories/SearchPatterns.stories.tsx)             |       6 | Search criteria, clipping, dismissal and responsive query form      |
-| Foundation/Appearance                        | [Appearance.stories.tsx](stories/Appearance.stories.tsx)                     |      10 | Provider inheritance, theme factories, tokens, fonts and CSS policy |
+| Foundation/Appearance                        | [Appearance.stories.tsx](stories/Appearance.stories.tsx)                     |      11 | Provider inheritance, compact business density, theme factories, tokens, fonts and CSS policy |
 | Foundation/Form primitives                   | [FormPrimitives.stories.tsx](stories/FormPrimitives.stories.tsx)             |       7 | MUI fields, autocomplete, selection, switches and actions           |
 | Foundation/Icons                             | [Icons.stories.tsx](stories/Icons.stories.tsx)                               |       3 | All 21 icons, sizes/colors, search and accessible actions           |
 | Foundation/Layout primitives                 | [LayoutPrimitives.stories.tsx](stories/LayoutPrimitives.stories.tsx)         |       6 | Responsive layouts, surfaces, cards, typography and identity        |

@@ -18,14 +18,6 @@ export const drawerLayout = {
   headerIconGap: 12,
   cardLightInset: 12,
   categoryGap: 20,
-  categorySize: 16,
-  categoryLine: 24,
-  titleSize: 14,
-  titleLine: 20,
-  subtitleSize: 12,
-  subtitleLine: 18,
-  optionSize: 14,
-  optionLine: 20,
   cardPadding: 16,
   cardAccent: 3,
   cardRadius: 6,
@@ -88,8 +80,7 @@ export const drawerHeaderStyles = (mode: DrawerMode) => ({
   '& h2': {
     flex: 1,
     margin: 0,
-    fontSize: drawerLayout.categorySize,
-    lineHeight: `${drawerLayout.categoryLine}px`,
+    ...t.typography.sectionHeading,
     fontWeight: 400,
     color: t.color[mode].muted,
   },
@@ -109,6 +100,9 @@ export const drawerHeaderStyles = (mode: DrawerMode) => ({
       outlineOffset: drawerLayout.focusWidth,
     },
     ...portalMotionStyles,
+  },
+  [`@media (max-width: ${t.breakpoint.mobile}px)`]: {
+    '& .MuiIconButton-root': { width: t.size.touchControl, height: t.size.touchControl },
   },
 });
 
@@ -134,14 +128,13 @@ export const drawerBodyStyles = (mode: DrawerMode) => ({
   '& > section + section': { marginTop: `${drawerLayout.categoryGap}px` },
   '& h3': {
     margin: `0 0 ${drawerLayout.categoryGap}px`,
-    fontSize: drawerLayout.categorySize,
-    lineHeight: `${drawerLayout.categoryLine}px`,
+    ...t.typography.sectionHeading,
     fontWeight: 500,
     overflowWrap: 'anywhere' as const,
   },
   '& .tile-grid': {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
     gap: `${drawerLayout.gridGap}px`,
   },
   [`@media (max-width: ${drawerLayout.twoColumns}px)`]: {
@@ -190,8 +183,7 @@ export const drawerTileStyles = (mode: DrawerMode) => ({
   '& .tile-art[data-pattern="rings"]': { top: t.space.sm, right: t.space.sm, bottom: 'auto' },
   '& button': {
     fontFamily: t.fontFamily,
-    fontSize: drawerLayout.optionSize,
-    lineHeight: `${drawerLayout.optionLine}px`,
+    ...t.typography.body,
     color: mode === 'dark' ? t.color.headerMuted : t.color.light.selectedText,
     letterSpacing: 0,
     cursor: 'pointer',
@@ -219,8 +211,7 @@ export const drawerTileStyles = (mode: DrawerMode) => ({
     backgroundColor: 'transparent',
     '&:hover:not(:disabled) .tile-plus': { background: t.color[mode].selected },
     '& .tile-name': {
-      fontSize: drawerLayout.titleSize,
-      lineHeight: `${drawerLayout.titleLine}px`,
+      ...t.typography.body,
       color: t.color[mode].text,
       overflowWrap: 'anywhere' as const,
       maxWidth: '100%',
@@ -229,8 +220,7 @@ export const drawerTileStyles = (mode: DrawerMode) => ({
     '& .tile-subtitle': {
       display: 'block',
       marginTop: `${t.space.xs}px`,
-      fontSize: drawerLayout.subtitleSize,
-      lineHeight: `${drawerLayout.subtitleLine}px`,
+      ...t.typography.caption,
     },
     '& .tile-plus': {
       display: 'inline-flex',
@@ -267,6 +257,17 @@ export const drawerTileStyles = (mode: DrawerMode) => ({
       borderRadius: `${t.radius.pill}px`,
       background: t.color[mode].canvas,
       '&:hover:not(:disabled)': { background: t.color[mode].selected },
+    },
+  },
+  [`@media (max-width: ${t.breakpoint.mobile}px)`]: {
+    '& .tile-plus': {
+      width: t.size.touchControl,
+      height: t.size.touchControl,
+      flexBasis: `${t.size.touchControl}px`,
+    },
+    '& .tile-options button': { minHeight: t.size.touchControl },
+    '&[data-options="true"] .tile-launch': {
+      minHeight: t.size.tileHeight - t.size.touchControl - drawerLayout.cardPadding,
     },
   },
 });

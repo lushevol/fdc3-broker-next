@@ -4,6 +4,11 @@ Date: 2026-10-05. The findings below describe the pre-implementation baseline.
 Implementation status, verification and unresolved acceptance gates are tracked
 in [NEW_STYLES_PROGRESS.md](NEW_STYLES_PROGRESS.md).
 
+The later compact-density correction in [the specification](NEW_STYLES_SPEC.md#compact-typography-and-density)
+supersedes the native login, drawer-card and profile-row geometry below. The
+original measurements remain a record of the supplied references; branding and
+artwork continue to use those references.
+
 ## Outcome and scope
 
 Recreate the supplied [14 prototype frames](new-styles-prototypes/) in SCB Next Base at their native **1512 × 982** viewport, then adapt the same composition across supported viewport widths and heights, including narrow, wide, and short screens. The existing shell is a partial starting point. Login, empty workspace, avatar menu, profile, and tile drawer require composition changes as well as styling.

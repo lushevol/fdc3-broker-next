@@ -31,6 +31,24 @@ const showProfile = (overrides: Partial<React.ComponentProps<typeof PrototypePro
     onClose={vi.fn()} {...overrides} /></ThemeProvider>);
 
 describe("prototype profile", () => {
+  it.each(["light", "dark"] as const)("keeps 48px entitlement rows and semantic text roles in %s mode", (mode) => {
+    showProfile({ mode });
+    const role = screen.getByRole("button", { name: "RATAN::X_RATANONE::FMO_COO_SUP" });
+    expect(role).toHaveStyle({ minHeight: "48px" });
+    expect(screen.getByRole("heading", { name: "Yating, Yang", level: 3 })).toHaveStyle({
+      fontSize: "20px", lineHeight: "26px",
+    });
+    expect(within(role).getByText("RATAN::X_RATANONE::FMO_COO_SUP")).toHaveStyle({
+      fontSize: "14px", lineHeight: "20px",
+    });
+    fireEvent.click(role);
+    const subject = screen.getByRole("button", { name: "RATAN_FM_COO_EXCEPTION" });
+    expect(subject).toHaveStyle({ minHeight: "48px" });
+    fireEvent.click(subject);
+    expect(screen.getByText("F_Export_Data")).toHaveStyle({
+      fontSize: "12px", lineHeight: "18px",
+    });
+  });
   it("shows real identity, session values and separate functional/data entitlement groups", () => {
     showProfile();
     const dialog = screen.getByRole("dialog", { name: "User Profile" });

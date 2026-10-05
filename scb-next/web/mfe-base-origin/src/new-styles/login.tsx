@@ -19,7 +19,7 @@ export interface PrototypeLoginProps {
   ssoLink: string;
 }
 
-// Measurements from Frame 11; small-screen values define the responsive adaptation.
+// Reference composition with compact desktop typography and control geometry.
 const loginLayout = {
   panePercent: 45.635,
   panePadding: 80,
@@ -30,24 +30,12 @@ const loginLayout = {
   formTop: 124,
   headingInset: 10,
   headingGap: 52,
-  headingSize: 48,
-  headingLine: 58,
-  labelSize: 18,
-  labelLine: 24,
-  inputHeight: 49,
-  controlType: 20,
   submitGap: 12,
   dividerGap: 36,
   heroBottom: 88,
   heroCopyWidth: 660,
-  heroTitleSize: 28,
-  heroTitleLine: 36,
-  bodyType: 16,
-  bodyLine: 24,
   heroNavy: '#141d4f',
   mobileFormTop: 56,
-  mobileHeadingSize: 40,
-  mobileHeadingLine: 48,
   mobileHeroHeight: 240,
   shortHeight: 760,
   compactInset: 40,
@@ -77,8 +65,7 @@ const Root = styled('main')(({ theme }) => {
       marginInline: 'auto',
     },
     '& h1': {
-      fontSize: loginLayout.headingSize,
-      lineHeight: `${loginLayout.headingLine}px`,
+      ...t.typography.pageHeading,
       fontWeight: 700,
       margin: `0 0 ${loginLayout.headingGap}px`,
       paddingLeft: loginLayout.headingInset,
@@ -88,16 +75,15 @@ const Root = styled('main')(({ theme }) => {
     '& .MuiTextField-root': { margin: 0 },
     '& .login-label': {
       display: 'block',
-      fontSize: loginLayout.labelSize,
-      lineHeight: `${loginLayout.bodyLine}px`,
+      ...t.typography.body,
       marginBottom: t.space.md,
       color: colors.muted,
     },
-    '& .MuiOutlinedInput-root': {
-      height: loginLayout.inputHeight,
+    '& .login-field .MuiOutlinedInput-root': {
+      height: t.size.loginControlHeight,
       borderRadius: t.radius.control,
       background: colors.canvas,
-      fontSize: loginLayout.controlType,
+      ...t.typography.body,
       color: colors.text,
       border: 'none !important',
       '& fieldset': {
@@ -107,16 +93,16 @@ const Root = styled('main')(({ theme }) => {
         '& legend': { display: 'none' },
       },
       '&:focus-within fieldset': { borderColor: t.color.primary },
-      '& input': { fontSize: loginLayout.controlType, fontFamily: t.fontFamily },
+      '& .MuiOutlinedInput-input': { ...t.typography.body, fontFamily: t.fontFamily },
       '& .MuiSvgIcon-root': { fontSize: t.space.lg },
       ...portalMotionStyles,
     },
     '& .MuiInputAdornment-root': { color: colors.muted },
     '& .login-submit, & .login-sso': {
-      height: t.size.buttonHeight,
+      height: t.size.loginControlHeight,
       borderRadius: t.radius.pill,
       fontFamily: t.fontFamily,
-      fontSize: loginLayout.controlType,
+      ...t.typography.body,
       fontWeight: 600,
       textTransform: 'none',
       boxShadow: 'none',
@@ -131,7 +117,7 @@ const Root = styled('main')(({ theme }) => {
     },
     '& .login-divider': {
       marginBlock: loginLayout.dividerGap,
-      fontSize: loginLayout.bodyType,
+      ...t.typography.body,
       color: colors.muted,
       '&:before, &:after': { borderColor: colors.divider },
     },
@@ -153,14 +139,12 @@ const Root = styled('main')(({ theme }) => {
     },
     '& .hero-copy': { maxWidth: loginLayout.heroCopyWidth },
     '& h2': {
-      fontSize: loginLayout.heroTitleSize,
-      lineHeight: `${loginLayout.heroTitleLine}px`,
+      ...t.typography.heroHeading,
       fontWeight: 600,
       margin: `0 0 ${loginLayout.dividerGap}px`,
     },
     '& .hero-copy p': {
-      fontSize: loginLayout.bodyType,
-      lineHeight: `${loginLayout.bodyLine}px`,
+      ...t.typography.heroBody,
       margin: 0,
     },
     [`@media (max-width: ${t.breakpoint.tablet}px)`]: {
@@ -169,8 +153,6 @@ const Root = styled('main')(({ theme }) => {
       '& .login-form': { marginTop: loginLayout.mobileFormTop },
       '& .login-logo': { marginLeft: 0 },
       '& h1': {
-        fontSize: loginLayout.mobileHeadingSize,
-        lineHeight: `${loginLayout.mobileHeadingLine}px`,
         marginBottom: t.space.xl,
         paddingLeft: 0,
       },

@@ -31,6 +31,23 @@ function showDrawer(overrides: Partial<React.ComponentProps<typeof PrototypeDraw
 }
 
 describe('prototype tile drawer', () => {
+  it.each(['light', 'dark'] as const)('uses four compact desktop columns with readable text roles in %s mode', (mode) => {
+    showDrawer({ mode });
+    const card = screen.getByTestId('portal-prototype-tile');
+    expect(card).toHaveStyle({ minHeight: '125px' });
+    expect(card.closest('.tile-grid')).toHaveStyle({
+      gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    });
+    expect(screen.getByRole('heading', { name: 'Settlement' })).toHaveStyle({
+      fontSize: '16px', lineHeight: '24px',
+    });
+    expect(screen.getByText('Cashflow Blotter')).toHaveStyle({
+      fontSize: '14px', lineHeight: '20px',
+    });
+    expect(screen.getByText('[FX & Equity]')).toHaveStyle({
+      fontSize: '12px', lineHeight: '18px',
+    });
+  });
   it('shows real categories and launches a tile once from the keyboard-accessible card', () => {
     const { props } = showDrawer();
     const drawer = screen.getByRole('dialog', { name: 'Tile Option' });

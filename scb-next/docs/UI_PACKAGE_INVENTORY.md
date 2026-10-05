@@ -19,6 +19,7 @@ verified surfaces and outstanding checks.
 | Original surface | Maintained presentation | Host responsibility |
 | --- | --- | --- |
 | Theme controls/tokens and CSS aliases | Core/theme/tokens/compatibility entries | Auth-based mode, persistence, document classes, explicit CSS loading |
+| Compact business typography and sizing | `tokens`: `compactControlTokens`; WebKit theme overrides | Ant and AG Grid adapters consume the shared SC Prosper roles; hosts retain legacy settings and business row density |
 | Scoped and global CSS tokens/fonts | `styles.css`, `tokens.css`, or combined `styles-and-tokens.css` | Choose the required scope; load the combined entry instead of both standalone files when both are needed |
 | Config, light/dark/common/normalize/scroll | Optional portal-theme entry | URL flags and explicit global CssBaseline policy; Ratan retains its palette-only theme |
 | Button, LoadingButton, Input, Select | Core named exports | Ratan/Cashflow compatibility retains primary-type translation and 16px startIcon defaults; Base Button/LoadingButton directly use core defaults |
@@ -38,7 +39,7 @@ verified surfaces and outstanding checks.
 | Base grids and date localization | Optional `data-grid` and `dates` entries | Base retains row models, actions, audit workflows, provider placement and license policy |
 
 The [Storybook scenario inventory](../packages/ratan-design-origin/STORYBOOK_COVERAGE.md)
-maps 157 stories across 24 files: core controls and patterns, every curated
+maps 158 stories across 24 files: core controls and patterns, every curated
 primitive and icon, dates/ranges, data grids, themes/tokens and legacy
 compatibility APIs. Typed playgrounds, variant matrices and interactive local
 workflows cover appearance, size, state, content, keyboard and integration axes.
