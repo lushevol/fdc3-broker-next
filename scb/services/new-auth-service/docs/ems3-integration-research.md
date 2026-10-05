@@ -2,7 +2,7 @@
 
 Research date: 2026-09-27. Scope: the checked-in `new-auth-service` implementation and its supplied EMS3 samples. This is evidence about this squad's integration, not a verified EMS3 API specification or confirmation of production behavior. Hosts, credentials, and personal identifiers are deliberately omitted.
 
-Planning update, 2026-10-02: the user confirmed that FlowZero is the only EMS3 pilot. Other application names appearing in the sample file are API examples, not evidence of completed onboarding. The [all-application migration plan](../../single-ui-bff/docs/ems3-migration-plan.md) includes creating their EMS3 definitions, user assignments and comparison results as migration work.
+Planning update, 2026-10-02: the user confirmed that FlowZero is the only EMS3 pilot. Other application names appearing in the sample file are API examples, not evidence of completed onboarding. The [all-application migration plan](../../../../services/single-ui-bff-ems3/docs/ems3-migration-plan.md) includes creating their EMS3 definitions, user assignments and comparison results as migration work.
 
 ## What this service demonstrates
 

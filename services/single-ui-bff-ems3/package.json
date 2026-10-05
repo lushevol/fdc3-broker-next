@@ -1,0 +1,10 @@
+{
+  "name": "single-ui-bff-ems3",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "../../scripts/mvn-build.sh",
+    "test": "mvn test",
+    "verify:authorization": "mvn -f verification/pom.xml clean verify"
+  }
+}

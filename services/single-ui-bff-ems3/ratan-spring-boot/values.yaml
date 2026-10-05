@@ -1,0 +1,51 @@
+environment: dev
+
+replicas: 1
+
+service:
+  type: ClusterIP
+
+env: []
+
+appVersion: 1.0.0
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "800m"
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+  initialDelaySeconds: 90
+  periodSeconds: 15
+  timeoutSeconds: 2
+  failureThreshold: 3
+  successThreshold: 1
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+  successThreshold: 1
+
+hostAliases:
+  - ip: "10.198.37.149"
+    hostnames:
+      - "uklvadapp192"
+      - "uklvadapp192.uk"
+
+ratanTrustStore: /apps/ratanrt/ssl/java/ratan_truststore_eks.jks
+ratanTrustStoreJanus: ""
+
+defaultJavaOpts: -Djava.security.egd=file:/dev/./urandom -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/apps/ratanrt -XX:+UseContainerSupport -Djavax.net.ssl.trustStore=$(RATAN_TRUST_STORE) -Djavax.net.ssl.trustStorePassword=$(RATAN_TRUST_STORE_PASSWORD)
+javaOpts: -server -Xms256M -Xmx512M -XX:MaxMetaspaceSize=256M -Dreactor.netty.http.server.accessLogEnabled=true
+javaArgs: []
+
+bootstrapEnabled: true

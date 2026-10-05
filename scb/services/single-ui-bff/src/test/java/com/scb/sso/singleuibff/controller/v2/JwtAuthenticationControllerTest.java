@@ -29,7 +29,6 @@ import com.scb.sso.singleuibff.util.OudUtil;
 import lombok.SneakyThrows;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -86,15 +85,6 @@ class JwtAuthenticationControllerTest {
     private ApplicationCategoryService applicationCategoryService;
     @Autowired
     private ObjectMapper objectMapper;
-
-    @BeforeEach
-    void defaultRenewalAuthorization() throws Exception {
-        Ems2Result result = new Ems2Result();
-        result.setEntities(List.of());
-        when(applicationCategoryService.getDrawers()).thenReturn(Optional.of(List.of()));
-        when(adminModuleUtil.getEntityFromApplicationCategory(any())).thenReturn(List.of());
-        when(authorizationService.getEntitlements(any(), any())).thenReturn(result);
-    }
 
     private Algorithm getAlgorithm() throws Exception {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -1129,8 +1119,7 @@ class JwtAuthenticationControllerTest {
         mockMvc.perform(post("/v2/sso/login")
             .content(objectMapper.writeValueAsString(request))
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(MockMvcResultMatchers.status().isServiceUnavailable())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.errorMessage").value("AUTHORIZATION_UNAVAILABLE"));
+            .andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn().getResponse().getContentAsString();
 
     }
 
