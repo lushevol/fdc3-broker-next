@@ -7,7 +7,7 @@ The [implementation plan](NEW_STYLES_IMPLEMENTATION_PLAN.md) and
 | ----------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1. References, assets, contract, fixtures | Complete    | Resolver 5 tests and fixture 7 tests: 100% line/branch coverage. Browser smoke and three native evidence captures pass; type/lint/build pass. |
 | 2. Theme and header                       | Implemented | 10 browser behavior/geometry checks and 61 shell/theme tests pass. Native capture reviewed; remaining reference differences listed below.     |
-| 3. Login                                  | In progress | Connect recovered presentation to the real authentication controller; verify both themes and responsive states.                               |
+| 3. Login                                  | Implemented | Native form geometry and responsive/Enter/loading/error checks pass in both themes; lower hero artwork remains unavailable.                   |
 | 4. Empty workspace                        | In progress | Connect reference illustration and CTA composition to the existing drawer dispatch.                                                           |
 | 5. Avatar menu                            | In progress | Connect recovered pointer/section presentation to identity, versions and logout controls.                                                     |
 | 6. Profile                                | In progress | Connect recovered hierarchy to production identity, entitlements and photo policy.                                                            |
@@ -51,3 +51,18 @@ The [implementation plan](NEW_STYLES_IMPLEMENTATION_PLAN.md) and
 Implementation status and exact visual acceptance are distinct. Full 1:1
 acceptance remains open until every supplied frame passes comparison or its
 specific source/data dependency is resolved.
+
+## Stage 3 verification
+
+- The prototype Login branch uses the existing authentication controller and SSO
+  URL. Username normalization, password whitespace, Enter submission, pending
+  lock and authentication errors pass through the real HTTP boundary.
+- Native form geometry and both-theme 390/768/1280px layouts pass. Login controls
+  honor reduced motion. SSO-only behavior remains covered by presentation tests.
+- Presentation and Login adapter tests have 100% line/branch coverage; targeted
+  lint and typecheck pass. The combined login/empty browser suite passes 9 tests.
+- Frame 11 was visually compared to the native light capture. Form composition
+  is close, but icon shapes, font metrics and the exact logo still have small
+  differences. Only the upper 736px of the hero artwork is recoverable as a clean
+  crop; the lower patterned region needs a clean original export. Dark login is
+  a documented theme adaptation rather than a supplied reference state.

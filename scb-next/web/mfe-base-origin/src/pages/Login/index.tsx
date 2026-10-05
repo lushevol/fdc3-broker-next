@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react";
+import React, { ReactElement } from 'react';
 import {
   Tabs,
   Tab,
@@ -10,20 +10,23 @@ import {
   TextField,
   Grid,
   Divider,
-} from "ratan-design-origin/primitives";
+} from 'ratan-design-origin/primitives';
 import {
   PersonOutlined as PersonOutlinedIcon,
   LockOutlined as LockOutlinedIcon,
-} from "ratan-design-origin/icons";
-import useController from "./common/useController";
-import Root, { classes, PREFIX } from "./common/style";
-import ErrorBoundry from "../../components/ErrorBoundry";
-import { LoginTabsProps } from "./common/interface";
-import TabPanel from "./common/TabPanel";
-import Button from "../../components/LoadingButton";
-import { getSSOLink } from "../../utils/common";
+} from 'ratan-design-origin/icons';
+import useController from './common/useController';
+import Root, { classes, PREFIX } from './common/style';
+import ErrorBoundry from '../../components/ErrorBoundry';
+import { LoginTabsProps } from './common/interface';
+import TabPanel from './common/TabPanel';
+import Button from '../../components/LoadingButton';
+import { getSSOLink } from '../../utils/common';
+import { useContext } from '../../hooks/provider';
+import PrototypeLogin from '../../new-styles/login';
 
 const Login: React.FC = (): ReactElement => {
+  const [store] = useContext();
   const {
     username,
     setUsername,
@@ -38,6 +41,23 @@ const Login: React.FC = (): ReactElement => {
     onKeyUpPassword,
   } = useController();
 
+  if (store.newStyles) {
+    return (
+      <ErrorBoundry>
+        <PrototypeLogin
+          username={username}
+          password={password}
+          loading={loading}
+          showNormalLogin={showNormalLogin}
+          setUsername={setUsername}
+          setPassword={setPassword}
+          onLoginUserNamePassword={onLoginUserNamePassword}
+          ssoLink={getSSOLink()}
+        />
+      </ErrorBoundry>
+    );
+  }
+
   return (
     <ErrorBoundry>
       <Root className={classes.root} data-testid={`${PREFIX}`}>
@@ -50,10 +70,7 @@ const Login: React.FC = (): ReactElement => {
                     Sign In
                   </Typography>
                   <section>
-                    <FormControl
-                      variant="standard"
-                      className={classes.formControl}
-                    >
+                    <FormControl variant="standard" className={classes.formControl}>
                       <InputLabel>Username</InputLabel>
                       <TextField
                         fullWidth
@@ -74,13 +91,10 @@ const Login: React.FC = (): ReactElement => {
                           setUsername(`${e.target.value}`.trim());
                         }}
                         onKeyUp={onKeyUp}
-                        value={username ?? ""}
+                        value={username ?? ''}
                       />
                     </FormControl>
-                    <FormControl
-                      variant="standard"
-                      className={classes.formControl}
-                    >
+                    <FormControl variant="standard" className={classes.formControl}>
                       <InputLabel>Password</InputLabel>
                       <TextField
                         fullWidth
@@ -102,7 +116,7 @@ const Login: React.FC = (): ReactElement => {
                           setPassword(e.target.value);
                         }}
                         onKeyUp={onKeyUpPassword}
-                        value={password ?? ""}
+                        value={password ?? ''}
                       />
                     </FormControl>
                     <Button
@@ -145,18 +159,13 @@ const Login: React.FC = (): ReactElement => {
                   Markets Operations One
                 </Typography>
                 <Typography variant="body1" className={classes.description}>
-                  Markets Operations One Portal (MO1) is a single, evolving
-                  workspace for Operations processing, integrating post-trade
-                  applications, and progressively delivering a more connected,
-                  intelligent, and efficient processing.
+                  Markets Operations One Portal (MO1) is a single, evolving workspace for Operations
+                  processing, integrating post-trade applications, and progressively delivering a
+                  more connected, intelligent, and efficient processing.
                 </Typography>
               </TabPanel>
               <Box className={classes.box}>
-                <Tabs
-                  value={value}
-                  onChange={handleChange}
-                  aria-label="login tabs"
-                >
+                <Tabs value={value} onChange={handleChange} aria-label="login tabs">
                   <Tab {...LoginTabsProps(0)} />
                 </Tabs>
               </Box>
