@@ -8,7 +8,7 @@ The [implementation plan](NEW_STYLES_IMPLEMENTATION_PLAN.md) and
 | 1. References, assets, contract, fixtures | Complete    | Resolver 5 tests and fixture 7 tests: 100% line/branch coverage. Browser smoke and three native evidence captures pass; type/lint/build pass. |
 | 2. Theme and header                       | Implemented | 10 browser behavior/geometry checks and 61 shell/theme tests pass. Native capture reviewed; remaining reference differences listed below.     |
 | 3. Login                                  | Implemented | Native form geometry and responsive/Enter/loading/error checks pass in both themes; lower hero artwork remains unavailable.                   |
-| 4. Empty workspace                        | In progress | Connect reference illustration and CTA composition to the existing drawer dispatch.                                                           |
+| 4. Empty workspace                        | Implemented | Reference dark illustration, responsive CTA and real drawer/analytics dispatch verified; light illustration is a documented adaptation.       |
 | 5. Avatar menu                            | In progress | Connect recovered pointer/section presentation to identity, versions and logout controls.                                                     |
 | 6. Profile                                | In progress | Connect recovered hierarchy to production identity, entitlements and photo policy.                                                            |
 | 7. Tile drawer                            | In progress | Patterned responsive library and explicit launch-option metadata; retain current launch contracts.                                            |
@@ -66,3 +66,18 @@ specific source/data dependency is resolved.
   differences. Only the upper 736px of the hero artwork is recoverable as a clean
   crop; the lower patterned region needs a clean original export. Dark login is
   a documented theme adaptation rather than a supplied reference state.
+
+## Stage 4 verification
+
+- Find Tile retains the existing drawer dispatch, analytics event and initial
+  loading completion. Its Base adapter and presentation have 100% line/branch
+  coverage in the 31-test login/empty verification set.
+- The native dark illustration region exactly matches the supplied 624 x 452px
+  source crop (zero unequal pixels in 282,048 pixels). The 822 x 736px clean
+  login-art region also matches its source crop exactly. These limited artwork
+  checks do not claim whole-screen parity.
+- Both-theme small/short viewport tests verify contained text, visible controls
+  and reduced motion. The light illustration uses inversion/brightness with a
+  white backing; a supplied light export would replace that adaptation.
+- Targeted lint/typecheck and nine combined login/empty browser tests pass.
+  Native evidence is retained in `/tmp/portal-login-empty-evidence`.
