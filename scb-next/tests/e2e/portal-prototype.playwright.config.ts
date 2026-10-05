@@ -8,7 +8,7 @@ import { referenceViewport } from '../fixtures/portal-prototype';
 export default defineConfig({
   ...existingConfig,
   testDir: fileURLToPath(new URL('./', import.meta.url)),
-  testMatch: 'portal-prototype.capture.spec.ts',
+  testMatch: ['portal-prototype.capture.spec.ts', 'portal-prototype.behavior.spec.ts'],
   workers: 1,
   timeout: 60_000,
   updateSnapshots: 'none',

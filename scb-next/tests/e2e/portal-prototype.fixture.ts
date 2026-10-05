@@ -108,12 +108,19 @@ export const test = base.extend<{ portal: PortalPrototype }>({
           },
           buildPrototypeStorage(theme, stress),
         );
-        // Keep the preview flag while Stage 2 centralizes the complete appearance decision.
-        await page.goto('/?show_normal_login=Y&survey=no&new-styles=true&new-layout=true');
+        await page.goto(`/?show_normal_login=Y&survey=no&new-styles=true&login-theme=${theme}`);
         await expect(page.getByRole('button', { name: 'Sign In', exact: true })).toBeVisible();
         if (state !== 'login') {
-          await page.getByPlaceholder('Enter Username').fill('portal.prototype');
-          await page.getByPlaceholder('Enter Password').fill('prototype-fixture');
+          await page
+            .getByLabel(/^Username$/)
+            .or(page.getByPlaceholder('Enter Username'))
+            .first()
+            .fill('portal.prototype');
+          await page
+            .getByLabel(/^Password$/)
+            .or(page.getByPlaceholder('Enter Password'))
+            .first()
+            .fill('prototype-fixture');
           await page.getByRole('button', { name: 'Sign In', exact: true }).click();
           await expect(
             page.getByRole('button', { name: 'User Profiles', exact: true }),
@@ -122,6 +129,7 @@ export const test = base.extend<{ portal: PortalPrototype }>({
           await expect(page.locator('html')).toHaveClass(`${theme} sc-mode-${theme}`);
           await page
             .getByRole('tab')
+            .filter({ has: page.getByRole('textbox', { name: 'Workspace Name' }) })
             .nth(state === 'empty' ? 2 : state === 'workspace' ? 0 : 1)
             .click();
           if (state === 'drawer') await openDrawer();

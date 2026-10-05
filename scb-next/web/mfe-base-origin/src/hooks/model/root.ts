@@ -1,7 +1,8 @@
-import { useMemo } from "react";
-import { ActionType } from "../reducer/util/ActionType";
-import { firstWorkspace, Workspace } from "./workspaces";
-import { getLocalStorage } from "../../utils/common";
+import { ActionType } from '../reducer/util/ActionType';
+import { firstWorkspace, Workspace } from './workspaces';
+import { getLocalStorage } from '../../utils/common';
+import { useContext } from '../provider';
+import { resolvePortalAppearance } from '../../new-styles/appearance';
 
 export interface ErrorProps extends ComponentPropsDefault {
   emailSupport?: string;
@@ -117,32 +118,29 @@ export interface RootModel {
   drawers?: Tiles[] | [];
   rootVersion?: string;
   newStyles?: boolean;
+  loginAppearance?: 'light' | 'dark';
 }
 
 export interface ProviderPropsDefault extends ComponentPropsDefault {
   data?: RootModel;
 }
 
-const workspacesDefault: Workspace[] = getLocalStorage().getItem(
-  ActionType.SET_WORKSPACES
-)
-  ? (JSON.parse(
-      getLocalStorage().getItem(ActionType.SET_WORKSPACES) ?? "[]"
-    ) as Workspace[])
+const workspacesDefault: Workspace[] = getLocalStorage().getItem(ActionType.SET_WORKSPACES)
+  ? (JSON.parse(getLocalStorage().getItem(ActionType.SET_WORKSPACES) ?? '[]') as Workspace[])
   : [firstWorkspace()];
 
 const entities: Entity[] = getLocalStorage().getItem(ActionType.SET_ENTITIES)
-  ? JSON.parse(getLocalStorage().getItem(ActionType.SET_ENTITIES) ?? "[]")
+  ? JSON.parse(getLocalStorage().getItem(ActionType.SET_ENTITIES) ?? '[]')
   : [];
 
 export const initialData: RootModel = {
   user: getLocalStorage().getItem(ActionType.SET_USER)
-    ? JSON.parse(getLocalStorage().getItem(ActionType.SET_USER) ?? "{}")
+    ? JSON.parse(getLocalStorage().getItem(ActionType.SET_USER) ?? '{}')
     : undefined,
   token: getLocalStorage().getItem(ActionType.SET_TOKEN) ?? undefined,
   errorMsg: undefined,
   isLoading: true,
-  theme: getLocalStorage().getItem(ActionType.SET_THEME) ?? "dark",
+  theme: getLocalStorage().getItem(ActionType.SET_THEME) ?? 'dark',
   isOpenFin: false,
   expiredIn: 0,
   userLoginTime: undefined,
@@ -151,7 +149,7 @@ export const initialData: RootModel = {
   workspaces: workspacesDefault,
   currentWorkspace: workspacesDefault[0],
   drawer: false,
-  timeType: getLocalStorage().getItem(ActionType.SET_TIME_TYPE) ?? "utc",
+  timeType: getLocalStorage().getItem(ActionType.SET_TIME_TYPE) ?? 'utc',
   entities: entities,
   refreshTab: {},
   refreshToken: undefined,
@@ -160,13 +158,11 @@ export const initialData: RootModel = {
   entitlementsToken: undefined,
   isOnLogout: false,
   drawers: [],
-  rootVersion: "",
+  rootVersion: '',
   newStyles: false,
 };
 
 export const useIsNewLayout = () => {
-  return useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get("new-layout") === "true";
-  }, []);
+  const [store] = useContext();
+  return resolvePortalAppearance(store.newStyles, window.location.search) !== 'legacy';
 };
