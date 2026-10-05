@@ -100,6 +100,21 @@ describe('Portal prototype reference contract', () => {
     expect(JSON.parse(buildPrototypeStorage('dark', true).SET_WORKSPACES)).toHaveLength(10);
   });
 
+  it('assigns decorative card patterns explicitly without defining unsupported location launches', () => {
+    const tiles = buildPrototypeAuth('shell').body.drawers.flatMap((category) => category.tiles);
+    expect(tiles.map((tile) => tile.presentation?.pattern)).toEqual([
+      'chevron',
+      'wave',
+      'dots',
+      'chevron',
+      'rings',
+      'wave',
+      'wave',
+      'dots',
+    ]);
+    expect(tiles.every((tile) => !tile.presentation?.launchOptions?.length)).toBe(true);
+  });
+
   it('covers narrow, tablet, compact, short and wide layouts independently from native references', () => {
     expect(prototypeViewports.map(({ name }) => name)).toEqual([
       'mobile',

@@ -1,4 +1,5 @@
-import type { Entity, Tiles, User } from '../../web/mfe-base-origin/src/hooks/model/root';
+import type { Entity, User } from '../../web/mfe-base-origin/src/hooks/model/root';
+import type { PresentedTiles } from '../../web/mfe-base-origin/src/new-styles/drawer-presentation';
 import type { Workspace } from '../../web/mfe-base-origin/src/hooks/model/workspaces';
 
 export type PrototypeTheme = 'dark' | 'light';
@@ -243,7 +244,7 @@ function buildEntities(stress: boolean): Entity[] {
   return entities;
 }
 
-function buildDrawers(): Tiles[] {
+function buildDrawers(): PresentedTiles[] {
   const tile = (id: number, title: string, tilePath: string, subtitle?: string) => ({
     id,
     title,
@@ -258,24 +259,49 @@ function buildDrawers(): Tiles[] {
     subject: 'RATAN_STRATEGIC_CASHFLOW_BLOTTER',
   });
   return [
-    { id: 1, label: 'Trade Processing', tiles: [tile(1, 'Trade Blotter', '/trade')] },
+    {
+      id: 1,
+      label: 'Trade Processing',
+      tiles: [{ ...tile(1, 'Trade Blotter', '/trade'), presentation: { pattern: 'chevron' } }],
+    },
     {
       id: 2,
       label: 'Settlement',
       tiles: [
-        tile(2, 'Cashflow Blotter', '/cashflow_cn', '[FX & Equity]'),
-        tile(3, 'Cashflow Blotter', '/cashflow_open_search', '[Open Search]'),
-        tile(4, 'Cashflow Blotter', '/cashflow_cn_location'),
-        tile(5, 'Group Blotter', '/cashflow_group_management'),
-        tile(6, 'Cashflow Dashboard', '/cashflow_cn_dashboard'),
+        {
+          ...tile(2, 'Cashflow Blotter', '/cashflow_cn', '[FX & Equity]'),
+          presentation: { pattern: 'wave' },
+        },
+        {
+          ...tile(3, 'Cashflow Blotter', '/cashflow_open_search', '[Open Search]'),
+          presentation: { pattern: 'dots' },
+        },
+        {
+          ...tile(4, 'Cashflow Blotter', '/cashflow_cn_location'),
+          presentation: { pattern: 'chevron' },
+        },
+        {
+          ...tile(5, 'Group Blotter', '/cashflow_group_management'),
+          presentation: { pattern: 'rings' },
+        },
+        {
+          ...tile(6, 'Cashflow Dashboard', '/cashflow_cn_dashboard'),
+          presentation: { pattern: 'wave' },
+        },
       ],
     },
     {
       id: 3,
       label: 'Exception Management',
       tiles: [
-        tile(7, 'Validation Exceptions', '/validation_exceptions'),
-        tile(8, 'Settlement Exceptions', '/settlement_exceptions'),
+        {
+          ...tile(7, 'Validation Exceptions', '/validation_exceptions'),
+          presentation: { pattern: 'wave' },
+        },
+        {
+          ...tile(8, 'Settlement Exceptions', '/settlement_exceptions'),
+          presentation: { pattern: 'dots' },
+        },
       ],
     },
   ];

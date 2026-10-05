@@ -63,7 +63,7 @@ export const portalTokens = {
     profileMaxHeight: 800,
     profileRowHeight: 54,
     drawerWidth: 895,
-    drawerHeaderHeight: 60,
+    drawerHeaderHeight: 56,
     tileHeight: 150,
     emptyButtonWidth: 320,
     loginPaneWidth: 690,

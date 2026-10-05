@@ -11,7 +11,7 @@ The [implementation plan](NEW_STYLES_IMPLEMENTATION_PLAN.md) and
 | 4. Empty workspace                        | Implemented | Reference dark illustration, responsive CTA and real drawer/analytics dispatch verified; light illustration is a documented adaptation.       |
 | 5. Avatar menu                            | Implemented | Responsive menu, real identity/versions, logout, keyboard/outside close and focus restoration verified.                                       |
 | 6. Profile                                | Implemented | Real identity, functional/data entitlements, photo fallback, responsive hierarchy and close/focus behavior verified.                          |
-| 7. Tile drawer                            | In progress | Patterned responsive library and explicit launch-option metadata; retain current launch contracts.                                            |
+| 7. Tile drawer                            | Implemented | Responsive patterned cards, explicit launch-option metadata, real launch/disabled contracts and keyboard close/focus verified.                |
 | 8. Portal acceptance                      | Pending     | Both themes, responsive/motion checks and full localhost journey.                                                                             |
 
 ## Stage 1 verification
@@ -112,3 +112,22 @@ specific source/data dependency is resolved.
   14.65-26.93%, including incomplete banner artwork, the reference portrait's
   baked border, typography/icons and authentic session data. Evidence is in
   `/tmp/portal-avatar-profile-e2e`; these are not accepted pixel matches.
+
+## Stage 7 verification
+
+- The native drawer occupies x=617, y=98, width=895 and height=884 at 1512 x 982.
+  Its 56px header and patterned body preserve the reference category/card rhythm;
+  columns adapt to available width and scrolling stays below the header.
+- Cards retain real launch parameters, disabled policy and the existing launch
+  callback. Optional `presentation.launchOptions` carry explicit parameters and
+  title overrides through a private `PresentedTile` extension. The shared `Tile`
+  contract was left intact after its CRITICAL impact result.
+- Drawer close/toggle, Escape, focus containment/return, reduced motion and
+  390/768/1280px behavior pass in both themes. The focused drawer set passes 19
+  unit tests with 100% line and 97.87% branch coverage, eight fixture tests and
+  eight browser checks. Targeted lint, typecheck and build pass.
+- The localhost login -> New Tile -> real Cashflow grid -> remove workspace
+  journey passes in both themes. Evidence is in `/tmp/portal-drawer-tests`.
+- Frame 06/17/18 acceptance remains open: clean full background/card artwork is
+  unavailable, and production Global/Indonesia launch parameters are undefined.
+  The fixture omits those pills rather than inventing launch behavior.
