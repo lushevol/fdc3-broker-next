@@ -1,4 +1,10 @@
-# New styles token migration
+# New styles foundation and Portal appearance
+
+The token-only migration below is the historical baseline. The next phase follows
+[NEW_STYLES_SPEC.md](NEW_STYLES_SPEC.md) and
+[NEW_STYLES_IMPLEMENTATION_PLAN.md](NEW_STYLES_IMPLEMENTATION_PLAN.md): responsive
+Base composition, both themes, and necessary motion/interactions. Foundation
+helpers/assets are prepared first; component activation follows in verified stages.
 
 ## Scope
 
@@ -13,7 +19,8 @@ backed by `@scdevkit/webkit` CSS custom properties.
 3. Existing legacy token names must remain available for remote MFE consumers.
 4. Existing portal selectors must remain active alongside WebKit light/dark
    mode selectors.
-5. Components and layout declarations must remain unchanged.
+5. Legacy component/layout behavior stays compatible; prototype composition is
+   introduced through the explicit appearance contract in the new specification.
 6. The token surface must be exported by the Base remote for incremental
    consumers.
 
@@ -25,9 +32,16 @@ existing remote hosts retain the legacy token values until they opt in.
 For the standalone portal, use the equivalent `?new-styles=true` query
 parameter.
 
+The prototype foundation defines `resolvePortalAppearance(newStyles, search)`:
+the enabled prop selects `prototype`, otherwise `new-layout=true` retains
+`layout-preview`, and the default is `legacy`. Integration must use this same
+decision for embedded and standalone Base. `portalTokens` contains Base-owned
+brand colors and measured geometry; existing `newStyleTokens` continues to expose
+the shared WebKit alias surface without breaking its contract.
+
 ## Non-goals
 
-- Replacing MUI or existing Base components.
-- Changing light/dark mode behavior.
-- Migrating component structure or layout styles.
+- Replacing the shared component library.
+- Changing production authentication, entitlement, or tenant-launch contracts.
+- Changing historical shared Portal theme defaults for all consumers.
 - Defining fallback values that duplicate WebKit design-token values.
