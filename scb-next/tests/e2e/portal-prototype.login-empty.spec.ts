@@ -70,7 +70,14 @@ for (const theme of ['light', 'dark'] as const) {
       await portal.open('empty', theme);
       const empty = page.locator('[data-testid="portal-prototype-empty"]:visible');
       await expect(empty).toBeVisible();
+      await expect(empty.getByRole('heading')).toHaveCSS('font-size', '20px');
+      await expect(empty.getByRole('heading')).toHaveCSS('line-height', '26px');
+      await expect(empty.locator('p')).toHaveCSS('font-size', '14px');
+      await expect(empty.locator('p')).toHaveCSS('line-height', '20px');
       const find = empty.getByRole('button', { name: 'Find Tile', exact: true });
+      await expect(find).toHaveCSS('font-size', '14px');
+      await expect(find).toHaveCSS('line-height', '20px');
+      await expect(find).toHaveCSS('height', '48px');
       await find.scrollIntoViewIfNeeded();
       await expect(find).toBeInViewport();
       await expect(find).toHaveCSS('transition-duration', '0s');

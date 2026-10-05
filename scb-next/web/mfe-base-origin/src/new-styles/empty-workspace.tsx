@@ -10,16 +10,9 @@ const emptyLayout = {
   width: 624,
   illustrationInset: 6,
   headingGap: 20,
-  headingSize: 28,
-  headingLine: 36,
-  bodySize: 18,
-  bodyLine: 24,
   bodyGap: 4,
   copyWidth: 800,
   buttonGap: 36,
-  buttonType: 20,
-  mobileHeadingSize: 26,
-  mobileHeadingLine: 32,
   mobileCopyWidth: 340,
   shortHeight: 760,
   shortIllustration: 430,
@@ -48,15 +41,13 @@ const Root = styled('section')(({ theme }) => ({
   },
   '& h1': {
     margin: `${emptyLayout.headingGap}px 0 ${emptyLayout.bodyGap}px`,
-    fontSize: emptyLayout.headingSize,
-    lineHeight: `${emptyLayout.headingLine}px`,
+    ...t.typography.title,
     fontWeight: 400,
     color: theme.palette.mode === 'dark' ? emptyLayout.headingColorDark : t.color.primary,
   },
   '& p': {
     margin: 0,
-    fontSize: emptyLayout.bodySize,
-    lineHeight: `${emptyLayout.bodyLine}px`,
+    ...t.typography.body,
     maxWidth: emptyLayout.copyWidth,
   },
   '& .find-tile': {
@@ -69,7 +60,6 @@ const Root = styled('section')(({ theme }) => ({
     color: t.color.primaryText,
     textTransform: 'none',
     fontFamily: t.fontFamily,
-    fontSize: emptyLayout.buttonType,
     fontWeight: 600,
     boxShadow: 'none',
     transition: `background ${t.motion.feedback}`,
@@ -78,10 +68,6 @@ const Root = styled('section')(({ theme }) => ({
   },
   [`@media (max-width: ${t.breakpoint.mobile}px)`]: {
     paddingTop: t.space.xl,
-    '& h1': {
-      fontSize: emptyLayout.mobileHeadingSize,
-      lineHeight: `${emptyLayout.mobileHeadingLine}px`,
-    },
     '& p': { maxWidth: emptyLayout.mobileCopyWidth },
     '& .workspace-illustration': { transform: 'none' },
   },
@@ -97,7 +83,13 @@ export default function PrototypeEmptyWorkspace({ onFindTile }: { onFindTile: ()
       <img className="workspace-illustration" src={illustration} alt="" />
       <h1>Start customizing your workspace</h1>
       <p>Find out what workspace preference options you have and how those options work.</p>
-      <Button className="find-tile" variant="contained" onClick={onFindTile}>
+      <Button
+        className="find-tile"
+        variant="contained"
+        size="medium"
+        sx={t.typography.body}
+        onClick={onFindTile}
+      >
         Find Tile
       </Button>
     </Root>

@@ -14,7 +14,7 @@ for (const theme of ['light', 'dark'] as const) {
   test(`${theme} avatar keyboard, outside close, versions and logout confirmation`, async ({
     page,
     portal,
-  }) => {
+  }, testInfo) => {
     await page.setViewportSize(referenceViewport);
     await portal.open('avatar', theme);
     const avatar = page.getByRole('button', { name: 'User Profiles', exact: true });
@@ -22,8 +22,25 @@ for (const theme of ['light', 'dark'] as const) {
     await expect(menu).toHaveCSS('width', '548px');
     await expect(menu).toHaveCSS('height', '232px');
     await expect(menu).toHaveCSS('border-radius', '6px');
+    await expect(menu.getByText('Yating, Yang', { exact: true })).toHaveCSS('font-size', '14px');
+    await expect(menu.getByRole('menuitem', { name: 'Logout', exact: true })).toHaveCSS(
+      'font-size',
+      '14px',
+    );
+    await expect(menu.getByText('Click to view user profile', { exact: true })).toHaveCSS(
+      'font-size',
+      '12px',
+    );
+    await expect(menu.getByText('Root Config Version:', { exact: false })).toHaveCSS(
+      'font-size',
+      '12px',
+    );
     await expect(menu.getByText('Root Config Version:', { exact: false })).toBeVisible();
     await expect(menu.getByText('Base Container Version:', { exact: false })).toBeVisible();
+    await page.screenshot({
+      path: testInfo.outputPath('avatar-compact.png'),
+      animations: 'disabled',
+    });
     await page.keyboard.press('Escape');
     await expect(menu).toBeHidden();
     await expect(avatar).toBeFocused();
@@ -113,12 +130,24 @@ for (const theme of ['light', 'dark'] as const) {
       await expect(dialog).toBeHidden();
       await portal.open('avatar', theme, true);
       const menu = page.getByTestId('portal-prototype-avatar-menu');
+      await expect(menu.getByText('Click to view user profile', { exact: true })).toHaveCSS(
+        'font-size',
+        '12px',
+      );
+      await expect(menu.getByRole('menuitem', { name: 'Logout', exact: true })).toHaveCSS(
+        'font-size',
+        '14px',
+      );
       const menuBounds = await menu.boundingBox();
       expect(menuBounds!.x).toBeGreaterThanOrEqual(0);
       expect(menuBounds!.x + menuBounds!.width).toBeLessThanOrEqual(viewport.width);
       expect(await menu.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
         true,
       );
+      await page.screenshot({
+        path: testInfo.outputPath('avatar-responsive.png'),
+        animations: 'disabled',
+      });
       await page.keyboard.press('Escape');
       await expect(menu).toBeHidden();
     });

@@ -14,6 +14,27 @@ The [implementation plan](NEW_STYLES_IMPLEMENTATION_PLAN.md) and
 | 7. Tile drawer                            | Implemented | Responsive patterned cards, explicit launch-option metadata, real launch/disabled contracts and keyboard close/focus verified.                     |
 | 8. Portal acceptance                      | In progress | 82 browser behavior/geometry/evidence checks pass; exact visual comparison and remaining rollout gates stay open.                                  |
 | 9. Typography and compact density         | Complete    | 90 Portal browser checks verified; Base/package tests, targeted quality checks and all app builds pass. Remaining baseline gates are listed below. |
+| 10. Empty/dropdown text correction        | Complete    | 507 Base tests and 18 responsive browser checks pass; Base typecheck, build and targeted lint pass. |
+
+## Empty workspace and dropdown text correction
+
+- Empty and Avatar retained local prototype font sizes after the shared compact
+  theme correction. Empty used 28px/26px headings, 18px description text and 20px
+  action text; Avatar used 20px identity/Logout text and 14px secondary text.
+- Both now consume existing semantic text tokens: Empty uses a 20px/26px heading
+  and 14px/20px description/action on every viewport; Avatar uses 14px/20px
+  identity/Logout and 12px/18px hint/version text. Find Tile explicitly uses the
+  regular button text role. Illustration, menu and touch-target geometry remain
+  as specified.
+- Rendered-style tests failed before the fix and pass afterward. All 507 Base
+  tests pass with 98.97% line and 97.18% branch coverage. Base typecheck, build,
+  changed-file lint and independent diff review pass.
+- All 18 focused browser checks pass in light/dark modes across native, phone,
+  tablet and short desktop viewports. These include actual computed font sizes,
+  long identity wrapping, focus/keyboard behavior, Find Tile analytics and the
+  login -> New Tile -> real Cashflow launch -> workspace removal journey.
+  Desktop/mobile screenshots were reviewed; evidence is in
+  `/tmp/portal-text-followup-final/` and `/tmp/portal-text-followup-base-tests.log`.
 
 ## Compact-density correction
 

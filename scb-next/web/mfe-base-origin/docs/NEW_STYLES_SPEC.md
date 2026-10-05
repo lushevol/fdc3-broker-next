@@ -24,7 +24,8 @@ The standalone bootstrap maps `new-styles=true` to the same Base prop. Prototype
 ## Compact typography and density
 
 The compact adaptation supersedes the native reference sizes for desktop login,
-drawer cards, profile entitlement rows and operational controls. Reference images
+drawer cards, profile entitlement rows, empty-workspace/avatar-menu typography
+and operational controls. Reference images
 remain the source for branding/artwork; they are not the geometry acceptance
 baseline for these adapted surfaces.
 
@@ -45,6 +46,11 @@ baseline for these adapted surfaces.
   touch targets.
 - Profile entitlement rows are 48px tall on desktop. Long content and narrow
   screens remain contained and interactive; collapsed height follows its content.
+- Empty workspace uses a 20px/26px heading and 14px/20px description/action text
+  on desktop and mobile. Its illustration and 48px Find Tile target retain their
+  existing geometry.
+- Avatar dropdown uses 14px/20px identity and Logout text, with 12px/18px profile
+  hint and version text. Menu geometry, wrapping and keyboard behavior are retained.
 
 ## Observable requirements
 

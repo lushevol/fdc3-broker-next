@@ -22,10 +22,6 @@ const menuLayout = {
   identityHeight: 88,
   logoutHeight: 59,
   footerHeight: 85,
-  nameType: 20,
-  bodyType: 14,
-  nameLine: 24,
-  bodyLine: 24,
   border: 1,
   transitionMs: 180,
 } as const;
@@ -100,9 +96,8 @@ export default function PrototypeAvatarMenu(props: PrototypeAvatarMenuProps) {
         <Typography
           sx={{
             fontFamily: t.fontFamily,
-            fontSize: menuLayout.nameType,
+            ...t.typography.body,
             fontWeight: 500,
-            lineHeight: `${menuLayout.nameLine}px`,
             overflowWrap: 'anywhere',
           }}
         >
@@ -111,8 +106,7 @@ export default function PrototypeAvatarMenu(props: PrototypeAvatarMenuProps) {
         <Typography
           sx={{
             fontFamily: t.fontFamily,
-            fontSize: menuLayout.bodyType,
-            lineHeight: `${menuLayout.bodyLine}px`,
+            ...t.typography.caption,
             color: colors.muted,
             textTransform: 'capitalize',
           }}
@@ -123,7 +117,7 @@ export default function PrototypeAvatarMenu(props: PrototypeAvatarMenuProps) {
       <MenuItem
         onClick={props.onLogout}
         sx={{
-          fontSize: menuLayout.nameType,
+          ...t.typography.body,
           borderBottom: `${menuLayout.border}px solid ${colors.divider}`,
         }}
       >
@@ -138,8 +132,7 @@ export default function PrototypeAvatarMenu(props: PrototypeAvatarMenuProps) {
           boxSizing: 'border-box',
           color: colors.muted,
           fontFamily: t.fontFamily,
-          fontSize: menuLayout.bodyType,
-          lineHeight: `${menuLayout.bodyLine}px`,
+          ...t.typography.caption,
           overflowWrap: 'anywhere',
           listStyle: 'none',
         }}
