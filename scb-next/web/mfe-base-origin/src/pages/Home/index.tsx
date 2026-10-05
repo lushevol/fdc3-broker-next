@@ -90,6 +90,71 @@ const Home: React.FC = (): ReactElement => {
         }
       : undefined;
 
+  const addWorkspaceButton = (
+    <Button
+      variant="contained"
+      className={classes.addtab}
+      onClick={add}
+      data-testid={`${PREFIX}_add_btn`}
+      aria-label="Add Workspace"
+      title="Add Workspace"
+    >
+      <AddIcon />
+    </Button>
+  );
+  const workspaceTabs = (
+    <Tabs
+      value={store.workspaces?.length ? Math.min(value, store.workspaces.length) : false}
+      onChange={handleChange}
+      data-testid={`${PREFIX}_workspaces`}
+      aria-label="workspaces"
+      className={classes.tabs}
+      variant="scrollable"
+      scrollButtons
+      onDoubleClick={focus(value)}
+    >
+      {!isPrototype && <WorkspaceTabsAdornment className={classes.firsttab} />}
+      {store?.workspaces?.map((item: Workspace, index) => {
+        const showRefresh: boolean = !!(
+          item.id === store?.currentWorkspace?.id &&
+          store?.refreshTab &&
+          (store?.refreshTab as Record<string, () => void> | undefined)?.[item.id]
+        );
+        return (
+          <Tab
+            key={item.id}
+            value={index + 1}
+            component="div"
+            label={
+              <TabItem
+                item={item}
+                edit={edit}
+                remove={remove}
+                refreshTab={refreshTab}
+                showRemove={length > 1}
+                showRefresh={showRefresh}
+              />
+            }
+            className={classes.tab}
+            style={
+              isPrototype
+                ? ({
+                    '--portal-tab-name-width': `${Math.min(Math.max(item.label.length, 6), 30)}ch`,
+                  } as React.CSSProperties)
+                : undefined
+            }
+            {...a11yProps(item.id)}
+          />
+        );
+      })}
+      {!isNewLayout && (
+        <WorkspaceTabsAdornment className={classes.lasttab}>
+          {addWorkspaceButton}
+        </WorkspaceTabsAdornment>
+      )}
+    </Tabs>
+  );
+
   return (
     <WorkspaceRoot
       data-testid={PREFIX}
@@ -101,65 +166,14 @@ const Home: React.FC = (): ReactElement => {
           <img className="portal-shell-logo" src={mo1Logo} alt="Markets Operations One logo" />
         )}
         <AppBar />
-        <Tabs
-          value={store.workspaces?.length ? Math.min(value, store.workspaces.length) : false}
-          onChange={handleChange}
-          data-testid={`${PREFIX}_workspaces`}
-          aria-label="workspaces"
-          className={classes.tabs}
-          variant="scrollable"
-          scrollButtons
-          onDoubleClick={focus(value)}
-        >
-          {!isPrototype && <WorkspaceTabsAdornment className={classes.firsttab} />}
-          {store?.workspaces?.map((item: Workspace, index) => {
-            const showRefresh: boolean = !!(
-              item.id === store?.currentWorkspace?.id &&
-              store?.refreshTab &&
-              (store?.refreshTab as Record<string, () => void> | undefined)?.[item.id]
-            );
-            return (
-              <Tab
-                key={item.id}
-                value={index + 1}
-                component="div"
-                label={
-                  <TabItem
-                    item={item}
-                    edit={edit}
-                    remove={remove}
-                    refreshTab={refreshTab}
-                    showRemove={length > 1}
-                    showRefresh={showRefresh}
-                  />
-                }
-                className={classes.tab}
-                style={
-                  isPrototype
-                    ? ({
-                        '--portal-tab-name-width': `${Math.min(Math.max(item.label.length, 6), 30)}ch`,
-                      } as React.CSSProperties)
-                    : undefined
-                }
-                {...a11yProps(item.id)}
-              />
-            );
-          })}
-          {(!isNewLayout || isPrototype) && (
-            <WorkspaceTabsAdornment className={classes.lasttab}>
-              <Button
-                variant="contained"
-                className={classes.addtab}
-                onClick={add}
-                data-testid={`${PREFIX}_add_btn`}
-                aria-label="Add Workspace"
-                title="Add Workspace"
-              >
-                <AddIcon />
-              </Button>
-            </WorkspaceTabsAdornment>
-          )}
-        </Tabs>
+        {isPrototype ? (
+          <div className="portal-workspace-navigation">
+            {workspaceTabs}
+            <div className={classes.lasttab}>{addWorkspaceButton}</div>
+          </div>
+        ) : (
+          workspaceTabs
+        )}
         {appearance === 'layout-preview' && (
           <div className="divider" style={{ flexBasis: '100%', height: '18px' }}></div>
         )}

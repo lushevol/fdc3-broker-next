@@ -82,7 +82,7 @@ test('fixture smoke supplies identity, nested actions and populated categories t
   await expect(dialog.getByText('Yating, Yang', { exact: true })).toBeVisible();
   await expect(dialog.getByText('8227715', { exact: true })).toBeVisible();
   await expect(dialog.getByText('F_Custom_Query_Builder', { exact: true })).toBeVisible();
-  await dialog.getByRole('button', { name: /^Close$/i }).click();
+  await dialog.getByRole('button', { name: 'Close User Profile', exact: true }).click();
   await expect(dialog).toHaveCount(0);
   await portal.openDrawer();
   const drawer = page.locator('.MuiDrawer-paper');

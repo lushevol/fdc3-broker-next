@@ -129,18 +129,31 @@ export const PortalWorkspaceRoot = styled(LegacyRoot)(({ theme }) => {
       border: `1px solid ${t.color.primaryText}`,
       boxShadow: 'none',
     },
-    [`&& .${classes.tabs}`]: {
+    '&& .portal-workspace-navigation': {
       position: 'absolute',
       bottom: 0,
       left: t.space.lg,
       width: `calc(100% - ${t.space.lg * 2}px)`,
       height: t.size.tabHeight,
-      minHeight: t.size.tabHeight,
+      display: 'flex',
+      alignItems: 'center',
       zIndex: 1,
+    },
+    [`&& .${classes.tabs}`]: {
+      flex: '0 1 auto',
+      minWidth: 0,
+      height: t.size.tabHeight,
+      minHeight: t.size.tabHeight,
       alignSelf: 'auto',
       '& .MuiTabs-flexContainer': { alignItems: 'center', height: '100%' },
       '& .MuiTabs-indicator': { display: 'none' },
       '& .MuiTabs-scrollButtons': { color: t.color.headerMuted, flexShrink: 0 },
+      [`@media (min-width: ${t.breakpoint.mobile + 1}px)`]: {
+        '&:has(.MuiTabs-scrollButtons:not(.Mui-disabled)) .MuiTabs-scrollButtons.Mui-disabled': {
+          display: 'inline-flex',
+          opacity: 0,
+        },
+      },
     },
     [`&& .${classes.firsttab}`]: { display: 'none' },
     [`&&& .${classes.tabs} .${classes.tab}`]: {
@@ -206,7 +219,10 @@ export const PortalWorkspaceRoot = styled(LegacyRoot)(({ theme }) => {
       },
       [`&& .${appBar.right}`]: { width: '100%', justifyContent: 'flex-end', gap: t.space.md },
       '&& .portal-shell-logo': { left: t.space.md },
-      [`&& .${classes.tabs}`]: { left: t.space.sm, width: `calc(100% - ${t.space.md}px)` },
+      '&& .portal-workspace-navigation': {
+        left: t.space.sm,
+        width: `calc(100% - ${t.space.md}px)`,
+      },
     },
   };
 });

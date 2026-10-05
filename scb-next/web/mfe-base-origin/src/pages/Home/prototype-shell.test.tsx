@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { vi } from 'vitest';
 import Home from '.';
 import Provider from '../../hooks/provider';
@@ -58,29 +58,38 @@ beforeEach(() => {
   } as RootModel;
 });
 
-it('renders the complete prototype shell from props and preserves workspace actions', () => {
-  render(
-    <Provider data={state}>
-      <Theme>
-        <Home />
-      </Theme>
-    </Provider>,
-  );
-  expect(screen.getByRole('img', { name: 'Markets Operations One logo' })).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Add Workspace' }));
-  expect(callbacks.add).toHaveBeenCalledOnce();
-  fireEvent.change(screen.getAllByRole('textbox', { name: 'Workspace Name' })[0], {
-    target: { value: 'New name' },
-  });
-  expect(callbacks.edit).toHaveBeenCalledOnce();
-  fireEvent.click(screen.getByRole('button', { name: 'refresh' }));
-  expect(callbacks.refresh).toHaveBeenCalledOnce();
-  fireEvent.click(screen.getAllByRole('button', { name: 'delete' })[0]);
-  expect(callbacks.remove).toHaveBeenCalledOnce();
-  expect(screen.getByRole('button', { name: 'Open new tile' })).toBeInTheDocument();
-  expect(screen.getByRole('checkbox', { name: 'Theme Switch' })).toBeInTheDocument();
-  expect(screen.getByRole('checkbox', { name: 'Time Switch' })).toBeInTheDocument();
-});
+it.each(['light', 'dark'] as const)(
+  'renders the %s prototype shell from props and preserves workspace actions',
+  (mode) => {
+    state.theme = mode;
+    render(
+      <Provider data={state}>
+        <Theme>
+          <Home />
+        </Theme>
+      </Provider>,
+    );
+    expect(screen.getByRole('img', { name: 'Markets Operations One logo' })).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('tablist', { name: 'workspaces' })).queryByRole('button', {
+        name: 'Add Workspace',
+      }),
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Add Workspace' }));
+    expect(callbacks.add).toHaveBeenCalledOnce();
+    fireEvent.change(screen.getAllByRole('textbox', { name: 'Workspace Name' })[0], {
+      target: { value: 'New name' },
+    });
+    expect(callbacks.edit).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole('button', { name: 'refresh' }));
+    expect(callbacks.refresh).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getAllByRole('button', { name: 'delete' })[0]);
+    expect(callbacks.remove).toHaveBeenCalledOnce();
+    expect(screen.getByRole('button', { name: 'Open new tile' })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Theme Switch' })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Time Switch' })).toBeInTheDocument();
+  },
+);
 
 it('keeps workspace tab values aligned with the one-based panel controller', () => {
   render(

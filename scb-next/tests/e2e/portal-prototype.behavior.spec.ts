@@ -159,12 +159,29 @@ for (const theme of ['light', 'dark'] as const) {
       await expect(workspaces(page)).toHaveCount(10);
       const add = page.getByRole('button', { name: 'Add Workspace', exact: true });
       await add.focus();
+      await expect(add).toBeFocused();
       const box = await add.boundingBox();
       expect(box?.x).toBeGreaterThanOrEqual(0);
       expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(viewport.width);
-      await add.click();
+      await page.keyboard.press('Enter');
       await expect(workspaces(page)).toHaveCount(11);
-      await expect(selectedWorkspace(page)).toBeVisible();
+      await expect(selectedWorkspace(page)).toBeInViewport();
+      await expect(
+        selectedWorkspace(page).getByRole('textbox', { name: 'Workspace Name' }),
+      ).toBeInViewport();
+      await expect(
+        selectedWorkspace(page).getByRole('button', { name: 'delete', exact: true }),
+      ).toBeInViewport();
+      await expectControlsReachable(page);
+      const selected = selectedWorkspace(page);
+      const name = selected.getByRole('textbox', { name: 'Workspace Name' });
+      await selected.dblclick();
+      await expect(name).toBeFocused();
+      await name.fill('Workspace acceptance');
+      await page.keyboard.press('Tab');
+      await expect(name).toHaveValue('Workspace acceptance');
+      await selected.getByRole('button', { name: 'delete', exact: true }).click();
+      await expect(workspaces(page)).toHaveCount(10);
       await expectControlsReachable(page);
     });
   }
