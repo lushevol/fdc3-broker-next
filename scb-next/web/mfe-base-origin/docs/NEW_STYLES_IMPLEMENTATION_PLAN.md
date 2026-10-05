@@ -1,6 +1,8 @@
 # Portal prototype comparison and implementation plan
 
-Date: 2026-10-05. Status: proposed; application code has not been changed.
+Date: 2026-10-05. The findings below describe the pre-implementation baseline.
+Implementation status, verification and unresolved acceptance gates are tracked
+in [NEW_STYLES_PROGRESS.md](NEW_STYLES_PROGRESS.md).
 
 ## Outcome and scope
 
@@ -26,7 +28,7 @@ Use rendered content rather than filename suffixes to classify the frames. In pa
 | 10 / 16 | Profile subject/actions expanded, light / dark | Nested selection and action chips                          |
 | 18 / 17 | Drawer over Flowzero, light / dark             | Category/card grid, artwork, launch actions                |
 
-## Current implementation: findings
+## Pre-implementation findings
 
 ### Header: partly implemented, still needs completion
 

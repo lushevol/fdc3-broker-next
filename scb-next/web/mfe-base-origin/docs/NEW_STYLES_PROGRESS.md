@@ -6,13 +6,13 @@ The [implementation plan](NEW_STYLES_IMPLEMENTATION_PLAN.md) and
 | Stage                                     | Status      | Evidence / next step                                                                                                                          |
 | ----------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1. References, assets, contract, fixtures | Complete    | Resolver 5 tests and fixture 7 tests: 100% line/branch coverage. Browser smoke and three native evidence captures pass; type/lint/build pass. |
-| 2. Theme and header                       | Implemented | 10 browser behavior/geometry checks and 61 shell/theme tests pass. Native capture reviewed; remaining reference differences listed below.     |
+| 2. Theme and header                       | Implemented | 10 browser behavior/geometry checks and 62 shell/theme tests pass. Native capture reviewed; remaining reference differences listed below.     |
 | 3. Login                                  | Implemented | Native form geometry and responsive/Enter/loading/error checks pass in both themes; lower hero artwork remains unavailable.                   |
 | 4. Empty workspace                        | Implemented | Reference dark illustration, responsive CTA and real drawer/analytics dispatch verified; light illustration is a documented adaptation.       |
 | 5. Avatar menu                            | Implemented | Responsive menu, real identity/versions, logout, keyboard/outside close and focus restoration verified.                                       |
 | 6. Profile                                | Implemented | Real identity, functional/data entitlements, photo fallback, responsive hierarchy and close/focus behavior verified.                          |
 | 7. Tile drawer                            | Implemented | Responsive patterned cards, explicit launch-option metadata, real launch/disabled contracts and keyboard close/focus verified.                |
-| 8. Portal acceptance                      | Pending     | Both themes, responsive/motion checks and full localhost journey.                                                                             |
+| 8. Portal acceptance                      | In progress | 82 browser behavior/geometry/evidence checks pass; exact visual comparison and remaining rollout gates stay open.                             |
 
 ## Stage 1 verification
 
@@ -103,7 +103,9 @@ specific source/data dependency is resolved.
   endpoint. Unavailable photos use an accessible fallback.
 - Native collapsed/expanded dialogs are 576/800px high with a stable banner and
   identity region. The entitlement hierarchy scrolls within the remaining space;
-  long identities, nested actions and small/short screens remain contained.
+  long identities and nested actions remain contained. At heights of 600px or
+  less, metadata and hierarchy scroll together below the fixed banner/close
+  control; this preserves access to all data in short-screen adaptations.
 - Both themes pass role/subject expansion, Escape/close, focus return and live
   reduced-motion preference checks. Avatar/profile verification passes 23 unit
   tests with 100% line and 98.14% branch coverage, and 18 browser checks.
@@ -131,3 +133,77 @@ specific source/data dependency is resolved.
 - Frame 06/17/18 acceptance remains open: clean full background/card artwork is
   unavailable, and production Global/Indonesia launch parameters are undefined.
   The fixture omits those pills rather than inventing launch behavior.
+
+## Stage 8 verification
+
+- The combined prototype browser run passes all 82 checks in 4.0 minutes,
+  including native captures for all 14 references and the required login ->
+  New Tile -> real tile -> remove workspace journey in both themes. Capture
+  mode asserts behavior/geometry separately and does not assert source fidelity.
+  Log: `/tmp/portal-final-combined.log`; evidence: `/tmp/portal-final-combined`.
+- Avatar, Profile and Drawer implementation landed in `0d7e18b6`, `a77b3a88`
+  and `311f5e9d`. The acceptance pass found a real workspace focus bug: MUI
+  auto-scrolling moved the focused Add button off-screen. `d5ebf149` keeps Add
+  outside the scrolling tabs and stabilizes desktop scroll-arrow widths. Both
+  themes pass keyboard Add, selected-tab rename and ordinary delete clicks at
+  390/768px. The Profile smoke locator now uses its accessible close name.
+- The full Base suite passes 150 files and 497 tests, with 99.14% line and
+  96.58% branch coverage. Final typecheck, build, design import verification,
+  changed-file lint and formatting pass. Whole-workspace lint retains nine
+  unrelated errors and 136 warnings in the existing baseline.
+- Eight additional browser checks pass across both themes: survey explicit
+  cancellation, session expiry and actual relogin/token renewal, cached admin
+  filter/sort and remote draft restoration after resizing, and interrupted
+  normal-motion drawer/profile controls with focus return.
+- Two real-remote checks pass through the Ratan/Cashflow/Alpha dev servers at
+  8009/8015/8018, with HTTP data fixtures. They verify rendered Cashflow rows,
+  live theme propagation across design scopes, Alpha loading/503/retry/filtered
+  empty states, and return to cached Cashflow after removing Alpha's workspace.
+  The cached-draft check uses a remote-boundary fixture separately.
+- The 125% pinch-zoom evidence includes keyboard close/reopen and focus return
+  while zoomed. Pinch zoom can clip right-side controls in the visual viewport;
+  it is not an all-controls-visible or desktop text/layout zoom acceptance gate.
+- Legacy compatibility run: seven of eight checks pass. The remaining
+  `legacy-new-light-home` zero-diff snapshot has an existing 600ms TabPanel mount
+  race: the pre-delay capture matches its baseline exactly, while the post-delay
+  capture matches the failed image exactly. Legacy Empty styles, timer and
+  markup are unchanged from baseline `606debcd`. Repeats passed 2/2 and 7/8;
+  baselines and thresholds were retained. This gate is not reported as green.
+- Independent review found no actionable authentication, entitlement, launch,
+  theme, cached-layout or focus regression. Desktop browser text/layout zoom,
+  exact source comparison and measured interaction/API performance budgets
+  remain open acceptance gates.
+
+## Exact reference acceptance
+
+Native captures are evidence, not passing visual comparisons. Source comparison
+uses the supplied PNGs with zero differing pixels; implementation captures never
+replace those references. All 14 frames remain pending full visual acceptance.
+
+| Frames  | Remaining difference or dependency                                                                         |
+| ------- | ---------------------------------------------------------------------------------------------------------- |
+| 04      | Whole-screen typography/CTA parity; only the 624 x 452px illustration crop is an exact match.              |
+| 05      | Header background, icons and tab geometry; country metadata has no supported contract.                     |
+| 06      | Complete drawer/card artwork and source comparison over Cashflow.                                          |
+| 07 / 13 | Menu text metrics/positions and dynamic version values; strict differences 11.34-11.36%.                   |
+| 08 / 14 | Clean complete banner/portrait and typography, icons and session data.                                     |
+| 09 / 15 | Expanded hierarchy/scroll geometry plus the same profile dependencies.                                     |
+| 10 / 16 | Action-expanded hierarchy/chips plus the same profile dependencies; profile differences span 14.65-26.93%. |
+| 11      | Lower 246px hero artwork, logo/font/icon parity; only the upper 822 x 736px art crop is exact.             |
+| 17 / 18 | Complete drawer/card artwork; production Global/Indonesia launch parameters are undefined.                 |
+
+Dark login, light empty illustration and responsive layouts are documented
+adaptations without supplied counterparts. Clean artwork dependencies are listed
+in [NEW_STYLES_ASSETS.md](NEW_STYLES_ASSETS.md).
+
+## Opt-in and rollback
+
+- Standalone preview: `http://localhost:8001/?new-styles=true&show_normal_login=Y&survey=no`.
+  Optional `login-theme=light` or `login-theme=dark` selects unauthenticated mode
+  without overwriting the saved authenticated workspace preference.
+- Embedded hosts opt in with Base `newStyles=true`. It selects the full prototype
+  theme and layout, regardless of the historical `new-layout` preview query.
+- Roll back with `newStyles=false` or remove/set `new-styles=false` in standalone.
+  `new-layout=true` with the prototype disabled retains the historical preview.
+- Default appearance remains legacy. Default deployment rollout and full 1:1
+  approval remain pending the acceptance gates above.

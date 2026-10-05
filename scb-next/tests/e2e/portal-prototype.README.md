@@ -14,8 +14,8 @@ The smoke test proves that current login controllers receive deterministic
 identity, four functional roles, nested subjects/actions, and populated tile
 categories. Capture mode attaches the full current page, the owned Base region,
 the supplied reference, its corresponding crop, and source SHA-256 metadata to
-each native-frame test. It makes no fidelity assertion before that surface has
-been implemented. Comparison mode is a deliberate acceptance gate for completed
+each native-frame test. Capture mode never asserts fidelity, including after a
+surface has been implemented. Comparison mode is a deliberate acceptance gate for
 surfaces; each expected image is generated from the supplied PNG, written under
 the system temporary directory, and compared with zero differing pixels.
 `--update-snapshots` must never promote implementation captures into reference
@@ -39,9 +39,11 @@ images. The dedicated config disables snapshot updates.
 - The fixture portrait is a 118 × 120 source crop. It belongs to tests only;
   production keeps the real photo/fallback policy. The stress preset adds a
   separate data-entitlement role, long identity/email and ten workspaces.
-- Location choices are separate candidate presentation metadata. They are not
-  sent as `Tile.entity` values or invented launch parameters. Stage 7 must
-  define the actual location launch contract before asserting that behavior.
+- Optional `presentation.launchOptions` carry explicit IDs, labels, parameters
+  and title overrides through the private `PresentedTile` contract. They are
+  never derived from `Tile.entity`. The production Global/Indonesia contract is
+  undefined, so native fixtures omit those pills; unit tests cover explicit
+  option dispatch without inventing production parameters.
 
 ## Scope and remaining acceptance work
 
@@ -61,8 +63,15 @@ claiming an exact avatar-footer comparison. This harness does not rewrite
 
 Responsive evidence covers 390, 768, 1280, short-height and 1920 pixel widths in
 both themes, with long data and reduced-motion preference. These adaptations
-have no supplied visual counterpart. They are review evidence, not proof that
-all controls are reachable, focus is preserved, layouts never overflow, or
-necessary transitions work. Add surface-specific behavior and geometry gates
-as each implementation stage lands. Login's dark adaptation also requires the
-explicit unauthenticated appearance contract from Stage 2/3.
+have no supplied visual counterpart. The behavior, login/empty, avatar/profile
+and drawer suites separately assert geometry, keyboard access, focus return,
+scrolling and reduced motion. The acceptance suite adds session overlays,
+cached layouts and interrupted normal-motion interactions; its pinch-zoom
+capture is evidence, not a desktop browser text/layout zoom gate. The remotes
+suite requires the real Ratan, Cashflow and Alpha dev servers at 8009/8015/8018
+and verifies theme propagation and API loading/error recovery.
+
+Login's dark mode and the light empty illustration are documented adaptations.
+Full source comparison is still pending; see
+`web/mfe-base-origin/docs/NEW_STYLES_PROGRESS.md` for individual frame gaps,
+verification results and opt-in/rollback instructions.

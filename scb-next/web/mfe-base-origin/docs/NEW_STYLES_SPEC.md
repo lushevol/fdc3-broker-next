@@ -41,6 +41,7 @@ The standalone bootstrap maps `new-styles=true` to the same Base prop. Prototype
 - Avatar menu retains identity/profile, logout and version sections, with the reference pointer, dimensions, and theme surfaces.
 - Profile retains real metadata/session values, photo/fallback policy, functional/data entitlement grouping, and role/subject/action expansion.
 - Match collapsed, role-expanded and subject-expanded references. Keep identity/banner stable while the hierarchy scrolls; close/Escape returns focus to the initiating control.
+- At heights of 600px or less, keep the banner/close control fixed and scroll identity plus hierarchy together so long metadata cannot make entitlements unreachable. This is a responsive adaptation without a supplied reference.
 - Optional metadata and long data must fit without hiding required entitlements.
 
 ### Drawer and tile launch
