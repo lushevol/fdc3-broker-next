@@ -10,7 +10,7 @@ The [implementation plan](NEW_STYLES_IMPLEMENTATION_PLAN.md) and
 | 3. Login                                  | Implemented | Native form geometry and responsive/Enter/loading/error checks pass in both themes; lower hero artwork remains unavailable.                   |
 | 4. Empty workspace                        | Implemented | Reference dark illustration, responsive CTA and real drawer/analytics dispatch verified; light illustration is a documented adaptation.       |
 | 5. Avatar menu                            | Implemented | Responsive menu, real identity/versions, logout, keyboard/outside close and focus restoration verified.                                       |
-| 6. Profile                                | In progress | Connect recovered hierarchy to production identity, entitlements and photo policy.                                                            |
+| 6. Profile                                | Implemented | Real identity, functional/data entitlements, photo fallback, responsive hierarchy and close/focus behavior verified.                          |
 | 7. Tile drawer                            | In progress | Patterned responsive library and explicit launch-option metadata; retain current launch contracts.                                            |
 | 8. Portal acceptance                      | Pending     | Both themes, responsive/motion checks and full localhost journey.                                                                             |
 
@@ -95,3 +95,20 @@ specific source/data dependency is resolved.
 - Frame 07/13 menu surface colors match sampled source pixels. Strict source
   differences remain 11.34-11.36%, including text metrics/positions and dynamic
   production version strings; these are not accepted pixel matches.
+
+## Stage 6 verification
+
+- The prototype Profile uses production identity, session/timezone formatting,
+  functional and data entitlements, expansion analytics and the existing photo
+  endpoint. Unavailable photos use an accessible fallback.
+- Native collapsed/expanded dialogs are 576/800px high with a stable banner and
+  identity region. The entitlement hierarchy scrolls within the remaining space;
+  long identities, nested actions and small/short screens remain contained.
+- Both themes pass role/subject expansion, Escape/close, focus return and live
+  reduced-motion preference checks. Avatar/profile verification passes 23 unit
+  tests with 100% line and 98.14% branch coverage, and 18 browser checks.
+  Targeted lint, typecheck, build and design primitive checks pass.
+- Frame 08-10/14-16 comparisons remain pending: strict differences are
+  14.65-26.93%, including incomplete banner artwork, the reference portrait's
+  baked border, typography/icons and authentic session data. Evidence is in
+  `/tmp/portal-avatar-profile-e2e`; these are not accepted pixel matches.
