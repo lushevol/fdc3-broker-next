@@ -12,6 +12,12 @@ describe('prototype avatar menu', () => {
     const view = render(<ThemeProvider theme={createRatanTheme({ mode })}>
       <PrototypeAvatarMenu anchorEl={anchor} name="Yating, Yang" rootVersion="root-test" baseVersion="base-test" onProfile={onProfile} onLogout={onLogout} onClose={onClose} />
     </ThemeProvider>);
+    expect(screen.getByTestId('portal-prototype-avatar-menu')).toHaveStyle({ width: '320px', marginTop: '8px' });
+    expect(screen.getByRole('menuitem', { name: /Yating, Yang/ })).toHaveStyle({
+      minHeight: '72px', paddingInline: '16px', paddingBlock: '12px', gap: '4px',
+    });
+    expect(screen.getByRole('menuitem', { name: 'Logout' })).toHaveStyle({ minHeight: '44px' });
+    expect(screen.getByText('Root Config Version: root-test').parentElement).toHaveStyle({ minHeight: '60px' });
     expect(screen.getByText('Yating, Yang')).toHaveStyle({ fontSize: '14px', lineHeight: '20px' });
     expect(screen.getByRole('menuitem', { name: 'Logout' })).toHaveStyle({ fontSize: '14px', lineHeight: '20px' });
     expect(screen.getByText('Click to view user profile')).toHaveStyle({ fontSize: '12px', lineHeight: '18px' });

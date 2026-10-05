@@ -3,18 +3,55 @@
 The [implementation plan](NEW_STYLES_IMPLEMENTATION_PLAN.md) and
 [specification](NEW_STYLES_SPEC.md) define the scope and acceptance gates.
 
-| Stage                                     | Status      | Evidence / next step                                                                                                                               |
-| ----------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. References, assets, contract, fixtures | Complete    | Resolver 5 tests and fixture 7 tests: 100% line/branch coverage. Browser smoke and three native evidence captures pass; type/lint/build pass.      |
-| 2. Theme and header                       | Implemented | 10 browser behavior/geometry checks and 62 shell/theme tests pass. Native capture reviewed; remaining reference differences listed below.          |
-| 3. Login                                  | Implemented | Native form geometry and responsive/Enter/loading/error checks pass in both themes; lower hero artwork remains unavailable.                        |
-| 4. Empty workspace                        | Implemented | Reference dark illustration, responsive CTA and real drawer/analytics dispatch verified; light illustration is a documented adaptation.            |
-| 5. Avatar menu                            | Implemented | Responsive menu, real identity/versions, logout, keyboard/outside close and focus restoration verified.                                            |
-| 6. Profile                                | Implemented | Real identity, functional/data entitlements, photo fallback, responsive hierarchy and close/focus behavior verified.                               |
-| 7. Tile drawer                            | Implemented | Responsive patterned cards, explicit launch-option metadata, real launch/disabled contracts and keyboard close/focus verified.                     |
-| 8. Portal acceptance                      | In progress | 82 browser behavior/geometry/evidence checks pass; exact visual comparison and remaining rollout gates stay open.                                  |
-| 9. Typography and compact density         | Complete    | 90 Portal browser checks verified; Base/package tests, targeted quality checks and all app builds pass. Remaining baseline gates are listed below. |
-| 10. Empty/dropdown text correction        | Complete    | 507 Base tests and 18 responsive browser checks pass; Base typecheck, build and targeted lint pass. |
+| Stage                                             | Status      | Evidence / next step                                                                                                                               |
+| ------------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. References, assets, contract, fixtures         | Complete    | Resolver 5 tests and fixture 7 tests: 100% line/branch coverage. Browser smoke and three native evidence captures pass; type/lint/build pass.      |
+| 2. Theme and header                               | Implemented | 10 browser behavior/geometry checks and 62 shell/theme tests pass. Native capture reviewed; remaining reference differences listed below.          |
+| 3. Login                                          | Implemented | Native form geometry and responsive/Enter/loading/error checks pass in both themes; lower hero artwork remains unavailable.                        |
+| 4. Empty workspace                                | Implemented | Reference dark illustration, responsive CTA and real drawer/analytics dispatch verified; light illustration is a documented adaptation.            |
+| 5. Avatar menu                                    | Implemented | Responsive menu, real identity/versions, logout, keyboard/outside close and focus restoration verified.                                            |
+| 6. Profile                                        | Implemented | Real identity, functional/data entitlements, photo fallback, responsive hierarchy and close/focus behavior verified.                               |
+| 7. Tile drawer                                    | Implemented | Responsive patterned cards, explicit launch-option metadata, real launch/disabled contracts and keyboard close/focus verified.                     |
+| 8. Portal acceptance                              | In progress | 82 browser behavior/geometry/evidence checks pass; exact visual comparison and remaining rollout gates stay open.                                  |
+| 9. Typography and compact density                 | Complete    | 90 Portal browser checks verified; Base/package tests, targeted quality checks and all app builds pass. Remaining baseline gates are listed below. |
+| 10. Empty/dropdown text correction                | Complete    | 507 Base tests and 18 responsive browser checks pass; Base typecheck, build and targeted lint pass.                                                |
+| 11. Dropdown spacing, profile layers and switches | Complete    | 509 Base tests and 32 combined browser checks pass; Base typecheck, build, targeted lint and independent browser review pass.                      |
+
+## Dropdown spacing, profile layers and switches
+
+- The dropdown retained its 548px reference width and large section spacing
+  after its text became compact. It now uses a 320px viewport-clamped width,
+  16px horizontal padding, a 4px identity/hint gap and 72px/44px/60px minimum
+  section heights. Its 176px native height and pointer align with the avatar;
+  long identity/version values still wrap and scroll.
+- Profile artwork used two incomplete crops at fixed offsets, leaving a navy
+  patch behind the upper portrait. One existing themed bitmap now covers the
+  full banner. Scoped overrides remove the inherited DialogContent background;
+  the transparent overlapping content edge preserves the whole initial portrait.
+  Banner/title/close layers remain above scrolling body backgrounds. On short
+  screens, identity and portrait continue to scroll together below the fixed
+  banner. A portrait-only clip follows the scroll offset, progressively removing
+  the overlap without leaving a fragment across the header. Returning to the top
+  restores the full portrait; the identity/hierarchy scrolling contract is retained.
+- Portal switches inherited a transparent outer border and legacy blue-border,
+  darkening and halo hover rules. Portal-only overrides remove those rules and
+  establish 32px by 14px tracks, 12px thumbs with 1px insets, stable hover colors
+  and an inset keyboard-focus cue. The input covers the full track in either
+  state, including both edge pixels.
+- Rendered-style and browser regressions failed before their corresponding
+  fixes and pass afterward. All 509 Base tests pass with 99.11% line and 97.32%
+  branch coverage. Base typecheck, build and changed-file lint pass.
+- The final combined 32-case browser run passed dropdown/profile geometry, switch
+  behavior, responsive header/preferences and real login -> New Tile -> Cashflow
+  launch -> workspace removal. This includes all eight profile-layer cases,
+  including painting checks at the portrait side after scrolling and restoration
+  at the top. The 14 focused profile unit tests also pass. The strengthened
+  two-case switch suite checks 12 hover frames per state, input bounds, edge
+  clicks, Space activation and visible focus. An independent eight-case browser
+  rerun passed; additional portrait probes cover scroll offsets 0/1/20/45/100/0.
+  Desktop/mobile screenshots were reviewed in both themes. Evidence:
+  `/tmp/portal-ui-polish-verified-browser/`, `/tmp/profile-portrait-scroll-green/`,
+  `/tmp/portal-switch-final-green/` and `/tmp/portal-ui-polish-verified-base-tests.log`.
 
 ## Empty workspace and dropdown text correction
 

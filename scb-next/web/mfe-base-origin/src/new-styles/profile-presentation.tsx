@@ -23,9 +23,7 @@ import { DateTimeFormat } from '../utils/locale';
 import { getProfileStyles, profileLayout } from './profile-styles';
 import { useProfileReducedMotion } from './profile-motion';
 import { portalTokens } from './portal-tokens';
-import lightCenter from './assets/profile-banner-light-center.png';
 import lightLower from './assets/profile-banner-light-lower-right.png';
-import darkCenter from './assets/profile-banner-dark-center.png';
 import darkLower from './assets/profile-banner-dark-lower-right.png';
 
 export interface PrototypeProfileProps {
@@ -247,20 +245,22 @@ export const PrototypeProfile = ({
       transitionDuration={transitionMs}
       BackdropProps={{ sx: { backgroundColor: portalTokens.color.backdrop } }}
       PaperProps={{ sx: styles.paper, 'data-testid': 'prototype-profile-paper' }}
-      contentProps={{ sx: styles.content }}
+      contentProps={{
+        sx: styles.content,
+        onScroll: ({ currentTarget }) => {
+          currentTarget.style.setProperty(
+            profileLayout.portraitScrollVariable,
+            `${Math.max(0, currentTarget.scrollTop)}px`,
+          );
+        },
+      }}
       header={
         <Box sx={styles.banner} data-testid="prototype-profile-banner">
           <Box
             component="img"
-            src={mode === 'light' ? lightCenter : darkCenter}
-            alt=""
-            sx={styles.bannerBand}
-          />
-          <Box
-            component="img"
             src={mode === 'light' ? lightLower : darkLower}
             alt=""
-            sx={styles.bannerLower}
+            sx={styles.bannerArtwork}
           />
           <Typography component="h2" id={titleId} sx={styles.title}>
             User Profile

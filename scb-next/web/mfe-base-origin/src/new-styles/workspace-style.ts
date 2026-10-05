@@ -13,6 +13,7 @@ import { portalTokens as t, portalMotionStyles } from './portal-tokens';
 /** Styling is scoped to the complete Portal appearance; the preview stays intact. */
 export const PortalWorkspaceRoot = styled(LegacyRoot)(({ theme }) => {
   const colors = t.color[theme.palette.mode];
+  const switchInset = (t.size.headerSwitchHeight - t.size.headerSwitchThumb) / 2;
   return {
     '&&': {
       '--portal-shell-height': `${t.size.headerHeight}px`,
@@ -88,24 +89,46 @@ export const PortalWorkspaceRoot = styled(LegacyRoot)(({ theme }) => {
     '&&& .custom-switch': {
       width: t.size.control,
       height: t.size.headerSwitchHeight,
-      '& .MuiSwitch-switchBase': { padding: 1, transform: 'none' },
+      padding: 0,
+      border: 0,
+      borderRadius: t.radius.pill,
+      '& .MuiSwitch-switchBase, & .MuiSwitch-switchBase:hover': {
+        padding: switchInset,
+        transform: 'none',
+        backgroundColor: 'transparent',
+      },
+      '& .MuiSwitch-input': {
+        width: t.size.control,
+        height: t.size.headerSwitchHeight,
+        left: 0,
+        top: 0,
+      },
       '& .MuiSwitch-thumb': {
         width: t.size.headerSwitchThumb,
         height: t.size.headerSwitchThumb,
+        borderRadius: t.radius.pill,
         background: `${colors.muted} !important`,
       },
-      '& .MuiSwitch-track': {
+      '& .MuiSwitch-track, & .MuiSwitch-switchBase:hover + .MuiSwitch-track': {
         background: `${t.color.primaryText} !important`,
         border: 'none !important',
       },
-      '& .MuiSwitch-switchBase.Mui-checked': {
+      '& .MuiSwitch-switchBase.Mui-checked, & .MuiSwitch-switchBase.Mui-checked:hover': {
         transform: `translateX(${t.size.headerSwitchTravel}px)`,
+      },
+      '& .MuiSwitch-switchBase.Mui-checked .MuiSwitch-input': {
+        left: -t.size.headerSwitchTravel,
       },
       '& .MuiSwitch-switchBase.Mui-checked .MuiSwitch-thumb': {
         background: `${t.color.primaryText} !important`,
       },
-      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-        background: `${t.color.primary} !important`,
+      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track, & .MuiSwitch-switchBase.Mui-checked:hover + .MuiSwitch-track':
+        {
+          background: `${t.color.primary} !important`,
+          border: 'none !important',
+        },
+      '& .MuiSwitch-switchBase.Mui-focusVisible .MuiSwitch-thumb': {
+        boxShadow: `inset 0 0 0 ${switchInset}px ${t.color.primary}`,
       },
     },
     [`&&& .new-tile-icon-wrapper .${newTile.box}`]: {

@@ -24,7 +24,8 @@ The standalone bootstrap maps `new-styles=true` to the same Base prop. Prototype
 ## Compact typography and density
 
 The compact adaptation supersedes the native reference sizes for desktop login,
-drawer cards, profile entitlement rows, empty-workspace/avatar-menu typography
+drawer cards, profile entitlement rows, avatar-menu geometry and
+empty-workspace/avatar-menu typography
 and operational controls. Reference images
 remain the source for branding/artwork; they are not the geometry acceptance
 baseline for these adapted surfaces.
@@ -50,7 +51,11 @@ baseline for these adapted surfaces.
   on desktop and mobile. Its illustration and 48px Find Tile target retain their
   existing geometry.
 - Avatar dropdown uses 14px/20px identity and Logout text, with 12px/18px profile
-  hint and version text. Menu geometry, wrapping and keyboard behavior are retained.
+  hint and version text. Use a 320px desktop width, clamped to the viewport with
+  12px outer clearance, 16px horizontal padding and a 4px identity/hint gap.
+  Identity/version sections use 12px vertical padding; Logout uses 8px.
+  Identity/Logout/version sections have 72px/44px/60px
+  minimum heights; long content may increase height without truncation.
 
 ## Observable requirements
 
@@ -60,6 +65,10 @@ baseline for these adapted surfaces.
 - Keep New Tile, theme, UTC/local time, avatar, workspace add/rename/close/refresh/focus behavior. The workspace add button remains available in the new appearance.
 - Tabs occupy a contained scrolling row; controls remain reachable on narrow screens. Remote workspace height derives from the actual shell height.
 - Empty workspace opens the existing tile drawer through Find Tile and retains its analytics/loading behavior.
+- Theme/time switches keep a stable 32px by 14px track footprint and 12px thumb,
+  inset 1px from both track ends. Hover and focus feedback cannot add a border,
+  move the thumb or change hit areas; both checked and unchecked states remain
+  stable while hovered, toggled or operated from the keyboard.
 
 ### Login
 
@@ -69,7 +78,15 @@ baseline for these adapted surfaces.
 
 ### Avatar and profile
 
-- Avatar menu retains identity/profile, logout and version sections, with the reference pointer, dimensions, and theme surfaces.
+- Avatar menu retains identity/profile, logout and version sections, with a
+  pointer aligned to the launching avatar, compact dimensions and theme surfaces.
+- Profile custom banner fills the popup width with one continuous themed
+  background. Title/close/portrait remain above the artwork; inherited dialog
+  decoration cannot introduce blue/white patches. The overlapping upper portrait
+  remains fully visible initially, including short viewports. As the short-screen
+  identity scrolls, its portrait progressively clips beneath the fixed banner
+  without leaving a fragment across the title area; scrolling back to the top
+  restores the full overlap.
 - Profile retains real metadata/session values, photo/fallback policy, functional/data entitlement grouping, and role/subject/action expansion.
 - Preserve collapsed, role-expanded and subject-expanded composition with compact entitlement rows. Keep identity/banner stable while the hierarchy scrolls; close/Escape returns focus to the initiating control.
 - At heights of 600px or less, keep the banner/close control fixed and scroll identity plus hierarchy together so long metadata cannot make entitlements unreachable. This is a responsive adaptation without a supplied reference.

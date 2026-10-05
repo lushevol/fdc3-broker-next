@@ -15,13 +15,13 @@ export interface PrototypeAvatarMenuProps {
 }
 
 const menuLayout = {
-  offset: 15,
+  offset: 8,
   rightOffset: 12,
-  pointer: 16,
-  pointerRight: 20,
-  identityHeight: 88,
-  logoutHeight: 59,
-  footerHeight: 85,
+  pointer: 12,
+  identityHeight: 72,
+  logoutHeight: 44,
+  footerHeight: 60,
+  paddingBlock: 12,
   border: 1,
   transitionMs: 180,
 } as const;
@@ -43,7 +43,6 @@ export default function PrototypeAvatarMenu(props: PrototypeAvatarMenuProps) {
         'data-testid': 'portal-prototype-avatar-menu',
         sx: {
           marginTop: `${menuLayout.offset}px`,
-          marginLeft: `${menuLayout.rightOffset}px`,
           width: t.size.menuWidth,
           maxWidth: `calc(100vw - ${t.space.lg}px)`,
           borderRadius: `${t.radius.panel}px`,
@@ -57,7 +56,7 @@ export default function PrototypeAvatarMenu(props: PrototypeAvatarMenuProps) {
             content: '""',
             position: 'absolute',
             top: -menuLayout.pointer / 2,
-            right: menuLayout.pointerRight,
+            right: (t.size.avatar - menuLayout.pointer) / 2,
             width: menuLayout.pointer,
             height: menuLayout.pointer,
             background: colors.canvas,
@@ -72,24 +71,24 @@ export default function PrototypeAvatarMenu(props: PrototypeAvatarMenuProps) {
             marginInline: 0,
             textTransform: 'none',
             whiteSpace: 'normal',
-            paddingInline: `${t.space.lg}px`,
+            paddingInline: `${t.space.md}px`,
             fontFamily: t.fontFamily,
-            '&:first-of-type': { minHeight: menuLayout.identityHeight },
-            '&:nth-of-type(2)': { minHeight: menuLayout.logoutHeight },
             '&:hover, &.Mui-focusVisible': { background: colors.stripe },
             ...portalMotionStyles,
           },
-          [`@media (max-width: ${t.breakpoint.mobile}px)`]: { marginLeft: 0 },
         },
       }}
     >
       <MenuItem
         onClick={props.onProfile}
         sx={{
-          paddingBlock: `${t.space.md}px`,
+          '&&': { minHeight: menuLayout.identityHeight },
+          paddingBlock: `${menuLayout.paddingBlock}px`,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start',
+          justifyContent: 'center',
+          gap: `${t.space.xs}px`,
           borderBottom: `${menuLayout.border}px solid ${colors.divider}`,
         }}
       >
@@ -117,6 +116,8 @@ export default function PrototypeAvatarMenu(props: PrototypeAvatarMenuProps) {
       <MenuItem
         onClick={props.onLogout}
         sx={{
+          '&&': { minHeight: menuLayout.logoutHeight },
+          paddingBlock: `${t.space.sm}px`,
           ...t.typography.body,
           borderBottom: `${menuLayout.border}px solid ${colors.divider}`,
         }}
@@ -128,7 +129,7 @@ export default function PrototypeAvatarMenu(props: PrototypeAvatarMenuProps) {
         role="presentation"
         sx={{
           minHeight: menuLayout.footerHeight,
-          padding: `${t.space.md}px ${t.space.lg}px`,
+          padding: `${menuLayout.paddingBlock}px ${t.space.md}px`,
           boxSizing: 'border-box',
           color: colors.muted,
           fontFamily: t.fontFamily,

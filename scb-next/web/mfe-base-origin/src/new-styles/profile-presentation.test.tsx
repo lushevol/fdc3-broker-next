@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import { ThemeProvider, createTheme } from "ratan-design-origin/theme";
 import type { Entity, User } from "../hooks/model/root";
 import { PrototypeProfile } from "./profile-presentation";
+import { createPortalPresentationTheme } from "./theme";
 
 const entities: Entity[] = [
   { id: 1, applicationName: "RATAN", name: "X_RATANONE", roleId: 11,
@@ -31,6 +32,19 @@ const showProfile = (overrides: Partial<React.ComponentProps<typeof PrototypePro
     onClose={vi.fn()} {...overrides} /></ThemeProvider>);
 
 describe("prototype profile", () => {
+  it.each(["light", "dark"] as const)("contains the portrait overlap in a transparent content edge and fills the banner in %s mode", (mode) => {
+    render(<ThemeProvider theme={createPortalPresentationTheme(mode)}>
+      <PrototypeProfile open mode={mode} user={user} entities={entities} onClose={vi.fn()} />
+    </ThemeProvider>);
+    const banner = screen.getByTestId("prototype-profile-banner");
+    const artwork = banner.querySelectorAll("img");
+    expect(artwork).toHaveLength(1);
+    expect(artwork[0]).toHaveStyle({ top: "0px", left: "0px", width: "100%", height: "100%", objectFit: "cover" });
+    const content = screen.getByTestId("prototype-profile-identity").parentElement!;
+    expect(content).toHaveStyle({ backgroundColor: "transparent", backgroundImage: "none", marginTop: "-45px", paddingTop: "45px" });
+    expect(screen.getByRole("heading", { name: "User Profile" })).toHaveStyle({ position: "relative", zIndex: "1" });
+    expect(screen.getByRole("button", { name: "Close User Profile" })).toHaveStyle({ zIndex: "1" });
+  });
   it.each(["light", "dark"] as const)("keeps 48px entitlement rows and semantic text roles in %s mode", (mode) => {
     showProfile({ mode });
     const role = screen.getByRole("button", { name: "RATAN::X_RATANONE::FMO_COO_SUP" });

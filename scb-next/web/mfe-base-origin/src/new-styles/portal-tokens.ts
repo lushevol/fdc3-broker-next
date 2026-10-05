@@ -65,7 +65,7 @@ export const portalTokens = {
     control: 32,
     avatar: 32,
     buttonHeight: 48,
-    menuWidth: 548,
+    menuWidth: 320,
     profileWidth: 800,
     profileBannerHeight: 156,
     profilePortrait: 116,

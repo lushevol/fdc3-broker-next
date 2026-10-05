@@ -1,11 +1,12 @@
 import { portalMotionStyles, portalTokens } from './portal-tokens';
 
-/** Profile-only measurements; incomplete artwork retains its documented native offsets. */
+/** Profile-only measurements for identity and entitlement composition. */
 export const profileLayout = {
   identityHeight: 148,
   identityInset: 168,
   portraitInset: 26,
   portraitOverlap: 45,
+  portraitScrollVariable: '--profile-portrait-scroll',
   sectionHeight: 56,
   guideInset: 39,
   smallPortrait: 80,
@@ -13,12 +14,7 @@ export const profileLayout = {
   smallIdentityInset: 116,
   shortViewport: 600,
   viewportInset: 32,
-  bannerBandTop: 39,
-  bannerLowerLeft: 144,
-  bannerBandWidth: 800,
-  bannerBandHeight: 72,
-  bannerLowerWidth: 656,
-  bannerLowerHeight: 117,
+  foregroundLayer: 1,
   titleInset: 20,
   borderWidth: 1,
   focusWidth: 2,
@@ -97,6 +93,7 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
       display: 'flex',
       flexDirection: 'column' as const,
       '& .MuiTypography-root': { fontFamily: portalTokens.fontFamily },
+      '& .MuiDialogContent-root': { backgroundColor: 'transparent', backgroundImage: 'none' },
       '& .MuiCollapse-root, & .MuiAccordionSummary-expandIconWrapper': portalMotionStyles,
       [short]: { height: `calc(100dvh - ${profileLayout.viewportInset}px)` },
     },
@@ -104,31 +101,27 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
       height: portalTokens.size.profileBannerHeight,
       flexShrink: 0,
       position: 'relative' as const,
+      zIndex: profileLayout.foregroundLayer,
       overflow: 'hidden',
       backgroundColor:
         mode === 'light'
           ? portalTokens.color.headerBackgroundLight
           : portalTokens.color.headerBackgroundDark,
+      backgroundImage: 'none',
       [short]: { height: profileLayout.smallBanner },
     },
-    bannerBand: {
+    bannerArtwork: {
       position: 'absolute' as const,
       left: 0,
-      top: profileLayout.bannerBandTop,
-      width: profileLayout.bannerBandWidth,
-      height: profileLayout.bannerBandHeight,
-      pointerEvents: 'none' as const,
-    },
-    bannerLower: {
-      position: 'absolute' as const,
-      left: profileLayout.bannerLowerLeft,
-      top: profileLayout.bannerBandTop,
-      width: profileLayout.bannerLowerWidth,
-      height: profileLayout.bannerLowerHeight,
+      top: 0,
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover' as const,
       pointerEvents: 'none' as const,
     },
     title: {
       position: 'relative' as const,
+      zIndex: profileLayout.foregroundLayer,
       margin: 0,
       padding: `${profileLayout.titleInset}px ${portalTokens.space.lg}px`,
       ...portalTokens.typography.body,
@@ -136,6 +129,7 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
     },
     close: {
       position: 'absolute' as const,
+      zIndex: profileLayout.foregroundLayer,
       top: portalTokens.space.sm,
       right: portalTokens.space.md,
       width: portalTokens.size.control,
@@ -153,8 +147,12 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
       ...portalMotionStyles,
     },
     content: {
-      backgroundColor: colors.canvas,
-      padding: '0 !important',
+      backgroundColor: 'transparent',
+      backgroundImage: 'none',
+      // Keep the overlapping portrait inside the content scroll viewport.
+      marginTop: `${-profileLayout.portraitOverlap}px`,
+      padding: `${profileLayout.portraitOverlap}px 0 0 !important`,
+      position: 'relative' as const,
       display: 'flex',
       flexDirection: 'column' as const,
       minHeight: 0,
@@ -176,6 +174,7 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
     },
     portrait: {
       position: 'absolute' as const,
+      zIndex: profileLayout.foregroundLayer + 1,
       top: -profileLayout.portraitOverlap,
       left: profileLayout.portraitInset,
       width: portalTokens.size.profilePortrait,
@@ -183,6 +182,9 @@ export const getProfileStyles = (mode: 'light' | 'dark', expanded: boolean) => {
       border: `${profileLayout.portraitBorder}px solid ${colors.canvas}`,
       backgroundColor: colors.stripe,
       color: colors.muted,
+      [short]: {
+        clipPath: `inset(calc(var(${profileLayout.portraitScrollVariable}, 0px) + min(var(${profileLayout.portraitScrollVariable}, 0px), ${profileLayout.portraitOverlap}px)) 0 0)`,
+      },
       [mobile]: {
         width: profileLayout.smallPortrait,
         height: profileLayout.smallPortrait,

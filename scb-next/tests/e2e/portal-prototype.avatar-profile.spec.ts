@@ -17,10 +17,23 @@ for (const theme of ['light', 'dark'] as const) {
   }, testInfo) => {
     await page.setViewportSize(referenceViewport);
     await portal.open('avatar', theme);
-    const avatar = page.getByRole('button', { name: 'User Profiles', exact: true });
+    const avatar = page.getByRole('button', {
+      name: 'User Profiles',
+      exact: true,
+      includeHidden: true,
+    });
     const menu = page.getByTestId('portal-prototype-avatar-menu');
-    await expect(menu).toHaveCSS('width', '548px');
-    await expect(menu).toHaveCSS('height', '232px');
+    await expect(menu).toHaveCSS('width', '320px');
+    await expect(menu).toHaveCSS('height', '176px');
+    await expect(menu.getByRole('menuitem').first()).toHaveCSS('padding-left', '16px');
+    await expect(menu.getByRole('menuitem').first()).toHaveCSS('padding-top', '12px');
+    await expect(menu.getByRole('menuitem').first()).toHaveCSS('gap', '4px');
+    await expect(menu).toHaveCSS('transform', 'none');
+    const menuBounds = await menu.boundingBox();
+    const avatarBounds = await avatar.boundingBox();
+    expect(
+      Math.abs(menuBounds!.x + menuBounds!.width - avatarBounds!.x - avatarBounds!.width),
+    ).toBeLessThanOrEqual(1);
     await expect(menu).toHaveCSS('border-radius', '6px');
     await expect(menu.getByText('Yating, Yang', { exact: true })).toHaveCSS('font-size', '14px');
     await expect(menu.getByRole('menuitem', { name: 'Logout', exact: true })).toHaveCSS(
