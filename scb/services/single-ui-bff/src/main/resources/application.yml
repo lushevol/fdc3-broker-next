@@ -316,21 +316,6 @@ scb:
     userRoles: ${scb.ems2.host}/ems2/rest/account/%s
     newUserAuthorizationOnEntity: ${scb.ems2.host}/ems2/rest/entitlements/entitlementList
     adminModuleEntity: FMO PORTAL ADMIN
-  ems3:
-    # Grant URLs are bases before /{userId}; token URL is the full OAuth endpoint.
-    # Credentials are supplied by the secret store.
-    # Empty settings allow EMS2-only startup. They are checked when EMS3 is selected.
-    token-url: ${EMS3_TOKEN_URL:}
-    detail-url: ${EMS3_DETAIL_URL:}
-    aggregate-url: ${EMS3_AGGREGATE_URL:}
-    client-id: ${EMS3_CLIENT_ID:}
-    client-secret: ${EMS3_CLIENT_SECRET:}
-    scope: ${EMS3_SCOPE:}
-    connect-timeout: ${EMS3_CONNECT_TIMEOUT:2s}
-    read-timeout: ${EMS3_READ_TIMEOUT:5s}
-    token-proxy-host: ${EMS3_TOKEN_PROXY_HOST:}
-    token-proxy-port: ${EMS3_TOKEN_PROXY_PORT:0}
-    allow-insecure-localhost: false
   mfa:
     headers:
       X-Cert: ${MFA_CERT}
