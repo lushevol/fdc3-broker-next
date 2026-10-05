@@ -1,13 +1,22 @@
-import React, { ReactElement } from "react";
-import { Avatar as AvatarMui, IconButton, Tooltip, Typography, MenuItem, Divider } from "ratan-design-origin/primitives";
-import useController from "./common/useController";
-import female from "./common/female.svg";
-import Root, { classes, PREFIX, MenuStyled } from "./common/style";
-import { AvatarProps } from "./common/interface";
-import Profile from "../Profile";
-import json from "../../../package.json";
+import React, { ReactElement } from 'react';
+import {
+  Avatar as AvatarMui,
+  IconButton,
+  Tooltip,
+  Typography,
+  MenuItem,
+  Divider,
+} from 'ratan-design-origin/primitives';
+import useController from './common/useController';
+import female from './common/female.svg';
+import Root, { classes, PREFIX, MenuStyled } from './common/style';
+import { AvatarProps } from './common/interface';
+import Profile from '../Profile';
+import json from '../../../package.json';
+import PrototypeAvatarMenu from '../../new-styles/avatar-menu';
 
 const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
+  const avatarButton = React.useRef<HTMLButtonElement>(null);
   const {
     store,
     anchorElUser,
@@ -28,6 +37,10 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
       <Root className={classes.root} data-testid={`${PREFIX}`}>
         <Tooltip title="User Profiles">
           <IconButton
+            ref={avatarButton}
+            aria-label="User Profiles"
+            aria-haspopup="menu"
+            aria-expanded={Boolean(anchorElUser)}
             onClick={handleOpenUserMenu}
             sx={{ p: 0 }}
             data-testid={`${PREFIX}_IconButton`}
@@ -35,67 +48,73 @@ const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
             <AvatarMui className={classes.img} alt="Avatar" src={imgUrl} />
           </IconButton>
         </Tooltip>
-        <MenuStyled
-          sx={{ mt: "35px" }}
-          id="menu-appbar-avatar"
-          anchorEl={anchorElUser}
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
-          keepMounted
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
-          open={Boolean(anchorElUser)}
-          onClose={handleCloseUserMenu}
-        >
-          <MenuItem
-            data-testid={`${PREFIX}_Profile`}
-            onClick={handleOpenUserProfile}
-            sx={{ flexDirection: "column", alignItems: "start" }}
+        {store.newStyles ? (
+          <PrototypeAvatarMenu
+            anchorEl={anchorElUser}
+            name={store.user?.fullName ?? store.user?.userId ?? 'User'}
+            rootVersion={store.rootVersion}
+            baseVersion={json.version}
+            onProfile={handleOpenUserProfile}
+            onLogout={onBeforeLogout}
+            onClose={handleCloseUserMenu}
+          />
+        ) : (
+          <MenuStyled
+            sx={{ mt: '35px' }}
+            id="menu-appbar-avatar"
+            anchorEl={anchorElUser}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={Boolean(anchorElUser)}
+            onClose={handleCloseUserMenu}
           >
-            <Typography sx={{ display: "block" }}>
-              {store?.user?.fullName ?? store?.user?.userId}
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{ display: "block" }}
-              color="InactiveCaptionText"
+            <MenuItem
+              data-testid={`${PREFIX}_Profile`}
+              onClick={handleOpenUserProfile}
+              sx={{ flexDirection: 'column', alignItems: 'start' }}
             >
-              Click to view user profile details
-            </Typography>
-          </MenuItem>
-          <Divider />
-          <MenuItem onClick={onBeforeLogout} data-testid={`${PREFIX}_Logout`}>
-            <Typography sx={{ display: "block" }}>Logout</Typography>
-          </MenuItem>
-          <Divider />
-          <MenuItem
-            data-testid={`${PREFIX}_Version`}
-            className={classes.disable}
-            sx={{ flexDirection: "column", alignItems: "start" }}
-          >
-            <Typography
-              variant="caption"
-              sx={{ display: "block" }}
-              color="InactiveCaptionText"
+              <Typography sx={{ display: 'block' }}>
+                {store?.user?.fullName ?? store?.user?.userId}
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block' }} color="InactiveCaptionText">
+                Click to view user profile details
+              </Typography>
+            </MenuItem>
+            <Divider />
+            <MenuItem onClick={onBeforeLogout} data-testid={`${PREFIX}_Logout`}>
+              <Typography sx={{ display: 'block' }}>Logout</Typography>
+            </MenuItem>
+            <Divider />
+            <MenuItem
+              data-testid={`${PREFIX}_Version`}
+              className={classes.disable}
+              sx={{ flexDirection: 'column', alignItems: 'start' }}
             >
-              Root Config Version: {store.rootVersion}
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{ display: "block" }}
-              color="InactiveCaptionText"
-            >
-              Base Container Version: {json.version}
-            </Typography>
-          </MenuItem>
-        </MenuStyled>
+              <Typography variant="caption" sx={{ display: 'block' }} color="InactiveCaptionText">
+                Root Config Version: {store.rootVersion}
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block' }} color="InactiveCaptionText">
+                Base Container Version: {json.version}
+              </Typography>
+            </MenuItem>
+          </MenuStyled>
+        )}
       </Root>
       {openProfile && (
-        <Profile open={openProfile} onClose={handleCloseUserProfile} />
+        <Profile
+          open={openProfile}
+          onClose={() => {
+            handleCloseUserProfile();
+            avatarButton.current?.focus();
+          }}
+        />
       )}
     </>
   );

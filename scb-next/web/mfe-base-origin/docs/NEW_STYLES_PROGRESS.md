@@ -9,7 +9,7 @@ The [implementation plan](NEW_STYLES_IMPLEMENTATION_PLAN.md) and
 | 2. Theme and header                       | Implemented | 10 browser behavior/geometry checks and 61 shell/theme tests pass. Native capture reviewed; remaining reference differences listed below.     |
 | 3. Login                                  | Implemented | Native form geometry and responsive/Enter/loading/error checks pass in both themes; lower hero artwork remains unavailable.                   |
 | 4. Empty workspace                        | Implemented | Reference dark illustration, responsive CTA and real drawer/analytics dispatch verified; light illustration is a documented adaptation.       |
-| 5. Avatar menu                            | In progress | Connect recovered pointer/section presentation to identity, versions and logout controls.                                                     |
+| 5. Avatar menu                            | Implemented | Responsive menu, real identity/versions, logout, keyboard/outside close and focus restoration verified.                                       |
 | 6. Profile                                | In progress | Connect recovered hierarchy to production identity, entitlements and photo policy.                                                            |
 | 7. Tile drawer                            | In progress | Patterned responsive library and explicit launch-option metadata; retain current launch contracts.                                            |
 | 8. Portal acceptance                      | Pending     | Both themes, responsive/motion checks and full localhost journey.                                                                             |
@@ -81,3 +81,17 @@ specific source/data dependency is resolved.
   white backing; a supplied light export would replace that adaptation.
 - Targeted lint/typecheck and nine combined login/empty browser tests pass.
   Native evidence is retained in `/tmp/portal-login-empty-evidence`.
+
+## Stage 5 verification
+
+- The avatar opens a 548px native menu with a viewport-clamped width, pointer,
+  section dividers, real identity/version values and the existing logout
+  confirmation. Long content wraps and scrolls within the viewport.
+- Outside click, Escape, Enter activation and focus return pass in both themes.
+  Menu motion follows the live reduced-motion media preference.
+- Avatar/profile verification passes 23 unit tests with 100% line and 98.14%
+  branch coverage across the changed modules, plus 18 browser tests covering
+  native and small/short screens. Targeted lint/typecheck/build pass.
+- Frame 07/13 menu surface colors match sampled source pixels. Strict source
+  differences remain 11.34-11.36%, including text metrics/positions and dynamic
+  production version strings; these are not accepted pixel matches.
