@@ -102,7 +102,7 @@ const Home: React.FC = (): ReactElement => {
         )}
         <AppBar />
         <Tabs
-          value={value}
+          value={store.workspaces?.length ? Math.min(value, store.workspaces.length) : false}
           onChange={handleChange}
           data-testid={`${PREFIX}_workspaces`}
           aria-label="workspaces"

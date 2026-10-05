@@ -14,10 +14,11 @@ const callbacks = vi.hoisted(() => ({
   change: vi.fn(),
 }));
 let state: RootModel;
+let selectedValue = 1;
 vi.mock('./common/useController', () => ({
   default: () => ({
     store: state,
-    value: 1,
+    value: selectedValue,
     handleChange: callbacks.change,
     add: callbacks.add,
     edit: () => callbacks.edit,
@@ -35,6 +36,7 @@ vi.mock('./common/Container', () => ({ default: () => <div>Remote workspace</div
 
 beforeEach(() => {
   vi.clearAllMocks();
+  selectedValue = 1;
   window.history.replaceState({}, '', '/');
   state = {
     newStyles: true,
@@ -93,6 +95,18 @@ it('keeps workspace tab values aligned with the one-based panel controller', () 
   expect(tabs[1]).toHaveAttribute('aria-selected', 'false');
   fireEvent.click(tabs[1]);
   expect(callbacks.change).toHaveBeenCalledWith(expect.anything(), 2);
+});
+
+it('keeps the remaining workspace selected while deletion updates the controller', () => {
+  selectedValue = 3;
+  render(
+    <Provider data={state}>
+      <Theme>
+        <Home />
+      </Theme>
+    </Provider>,
+  );
+  expect(screen.getAllByRole('tab')[1]).toHaveAttribute('aria-selected', 'true');
 });
 
 it('retains the historical preview when the complete appearance is disabled', () => {

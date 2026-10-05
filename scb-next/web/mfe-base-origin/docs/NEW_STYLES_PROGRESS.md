@@ -37,8 +37,9 @@ The [implementation plan](NEW_STYLES_IMPLEMENTATION_PLAN.md) and
 - Removing the legacy spacer initially shifted tab selection by one. Explicit
   one-based tab values preserve the controller contract. Header actions sit above
   the tab row so it cannot intercept theme/time clicks.
-- Seven targeted shell/theme tests pass; theme integration has 100% line and
-  94.73% branch coverage. The broader Home/theme regression set passes 61 tests.
+- The Home/theme regression set passes 62 tests with 100% line and 95.23% branch
+  coverage for the modified composition. Deletion clamps the tab value while the
+  controller updates, preventing a transient invalid-value warning.
 - Base typecheck, build, design-import verification and targeted lint pass.
   Workspace-wide lint reports 9 errors and 138 warnings outside the stage's clean
   file set; these are not represented as a passing whole-workspace lint gate.
