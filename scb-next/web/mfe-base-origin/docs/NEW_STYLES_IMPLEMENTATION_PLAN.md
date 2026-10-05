@@ -4,7 +4,7 @@ Date: 2026-10-05. Status: proposed; application code has not been changed.
 
 ## Outcome and scope
 
-Recreate the supplied [14 prototype frames](new-styles-prototypes/) in SCB Next Base at their native **1512 × 982** viewport, then adapt the same composition for smaller screens. The existing shell is a partial starting point. Login, empty workspace, avatar menu, profile, and tile drawer require composition changes as well as styling.
+Recreate the supplied [14 prototype frames](new-styles-prototypes/) in SCB Next Base at their native **1512 × 982** viewport, then adapt the same composition across supported viewport widths and heights, including narrow, wide, and short screens. The existing shell is a partial starting point. Login, empty workspace, avatar menu, profile, and tile drawer require composition changes as well as styling.
 
 Implementation belongs in `scb-next/web/mfe-base-origin`. Base owns the login, workspace navigation, and portal overlays; `scb-next/packages/ratan-design-origin` supplies reusable primitives, icons, and tokens. Keep business-MFE dashboards and Cashflow content as integration backgrounds and regression checks. The Flowzero dashboard/sidebar in these frames is tenant content, not a new Base home screen.
 
@@ -12,7 +12,7 @@ The requested scope includes the tile drawer because Frames 06, 17, and 18 speci
 
 ## Reference inventory
 
-Use rendered content rather than filename suffixes to classify the frames. In particular, **Frame 04 is a dark empty workspace despite its “Light” filename**. There is no supplied light empty-workspace or mobile reference; those adaptations must be documented rather than claimed as direct pixel matches.
+Use rendered content rather than filename suffixes to classify the frames. In particular, **Frame 04 is a dark empty workspace despite its “Light” filename**. There is no supplied dark login, light empty-workspace, or mobile reference; those adaptations must be documented rather than claimed as direct pixel matches.
 
 | Frames  | Reference state                                | Acceptance surface                                         |
 | ------- | ---------------------------------------------- | ---------------------------------------------------------- |
@@ -61,7 +61,7 @@ Measurements below are approximate raster measurements, to be finalized as desig
 
 [`NEW_STYLES_TOKENS.md`](NEW_STYLES_TOKENS.md) explicitly excludes layout/component changes. `newStyles` / `?new-styles=true` enables WebKit aliases and mode classes; `?new-layout=true` separately enables the existing preview composition. Enabling both today does not produce the supplied design.
 
-Base's [`Theme`](../src/theme/index.tsx) forces unauthenticated users into dark mode. Frame 11 requires an explicit white login appearance when the new Portal design is active, without overwriting the user's saved authenticated theme.
+Base's [`Theme`](../src/theme/index.tsx) forces unauthenticated users into dark mode. The new Portal needs explicit light/dark login appearance selection: Frame 11 is the light reference, with a documented dark adaptation. Selecting unauthenticated appearance must not overwrite the user's saved authenticated theme.
 
 The shared [`portal-theme/Config`](../../../packages/ratan-design-origin/src/portal-theme/Config.ts) currently calls `getThemeOptions(props)` using its default legacy generation. Token aliases alone do not select all WebKit control options. Resolve generation consistently in a narrow Base theme adapter, retaining required host overrides; do not replace the historical package-wide Portal theme by accident.
 
@@ -80,11 +80,17 @@ Live captures were taken from `http://localhost:8001` at 1512 × 982. Flagged ca
 
 The live session exposed an expired-session prompt, an unavailable profile photo, no role rows, and no drawer categories. These captures establish the current chrome/composition only. Expanded profile and populated drawer comparisons use inspected source and the supplied references, not a claim that those live states were verified. Current source still declares the old login SVG, although it did not render in this capture. Full accessibility and responsive behavior remain implementation acceptance work.
 
+## Implementation principles
+
+1. **Always responsive layout.** Every Portal surface must adapt continuously to viewport width and height, browser zoom, and long content. Keep controls reachable, prevent overlaps and unintended page overflow, and contain scrolling in workspace, menu, dialog, and drawer regions. Preserve prototype geometry at 1512 × 982 and verify mobile, tablet, compact desktop, and short-height layouts throughout implementation.
+2. **Support dark/light theme.** Every Portal surface, including login, empty workspace, menus, dialogs, and drawer cards, must support both modes through semantic tokens with readable text, icons, controls, and focus states. Match supplied theme references and document consistent adaptations where a counterpart is missing. Keep branded artwork legible and preserve the user's stored workspace theme.
+3. **Keep necessary motions and interactions.** Preserve working login, tab, tile, menu, modal, switch, and entitlement interactions. Retain or implement purposeful open/close transitions, hover/pressed/focus feedback, and expand/collapse motion without delaying actions or breaking keyboard/focus behavior. Respect reduced-motion preferences and verify settled and transitioning states; do not introduce decorative motion without a functional purpose.
+
 ## Implementation decisions
 
 1. **Keep Portal composition in Base.** Reuse `ratan-design-origin` primitives, icons, controls, and semantic tokens. Add Base-specific layout/branding tokens where the package has no appropriate role. Define measured dimensions as tokens; avoid scattered literal colors and spacing.
 2. **Use one explicit appearance decision.** Recommended rollout: `newStyles=true` selects the complete prototype appearance, including shell layout. Keep default false during implementation. Preserve the existing `new-layout` preview for callers with `newStyles=false`. This deliberately expands the token-only contract and must update its specification/docs and tests before code changes. Do not silently make all hosts default to the new design.
-3. **Treat login as its own branded surface.** Render Frame 11's white pane/navy hero for the new appearance while preserving stored workspace theme and the production SSO-only policy.
+3. **Treat login as its own branded surface.** Render Frame 11's white pane/navy hero as the light reference, and derive its dark counterpart from the same layout and semantic tokens. Keep unauthenticated appearance selection explicit while preserving stored workspace theme and the production SSO-only policy.
 4. **Keep new profile presentation narrow.** Use the package Dialog directly in a Base-owned profile composition, or narrowly add explicit presentation hooks to the Base adapter with contract tests. The core package supports custom header/content/paper hooks, but the current Base adapter overwrites those props with its legacy chrome. Avoid changing all generic dialogs to match this one screen. New profile omits legacy maximize/resize chrome.
 5. **Keep real data dynamic.** Names, country, photo, versions, session times, categories, entitlements, action chips, and location options come from existing data or defined optional metadata. Prototype strings/photos become visual-test fixtures only.
 6. **Preserve launch semantics.** Location pills need explicit optional launch metadata/callbacks if existing tile records cannot express them. Do not repurpose entitlement `Tile.entity` values as locations. Document the mapping to actual launch parameters before implementing these controls.
@@ -121,8 +127,8 @@ Each stage follows specification → behavior tests where needed → implementat
 ### Stage 1 — Lock references, assets, appearance contract, and test fixtures
 
 - Update the new-styles specification with the flag matrix, Base ownership, login policy, and per-frame acceptance states. Supersede the token-only layout non-goal in `NEW_STYLES_TOKENS.md` for this next phase.
-- Catalog exact assets, theme mappings, typography, shell/content offsets, menu/dialog/drawer measurements, and responsive defaults.
-- Build deterministic fixtures: reference-like identity, adequate portrait, four functional roles, nested subjects/actions, separate data-entitlement group, long labels/versions, representative tile categories and location variants, fixed clock/timezone and workspace tabs.
+- Catalog exact assets, theme mappings, typography, shell/content offsets, menu/dialog/drawer measurements, responsive defaults, and necessary transition/interaction states, including reduced motion.
+- Build deterministic fixtures: reference-like identity, adequate portrait, four functional roles, nested subjects/actions, separate data-entitlement group, long labels/versions, representative tile categories and location variants, fixed clock/timezone and workspace tabs. Cover both themes, responsive states, interaction states, and reduced-motion behavior.
 - Add a separate prototype screenshot suite rather than overwriting old migration-parity expectations. Establish source-reference comparisons before UI work.
 - Exit: every frame maps to a fixture and owned component; missing asset and launch metadata requirements are explicit.
 
@@ -137,10 +143,10 @@ Each stage follows specification → behavior tests where needed → implementat
 
 ### Stage 3 — Recreate login
 
-- Implement white form pane/navy patterned hero, logo/title placement, field metrics/icons, pill Sign In, labeled divider, outlined SSO and bottom hero copy.
+- Implement Frame 11's white form pane/navy patterned hero in light mode and a documented dark counterpart; match logo/title placement, field metrics/icons, pill Sign In, labeled divider, outlined SSO and bottom hero copy.
 - Remove the visible single-tab indicator only in the new appearance. Define narrow-screen stacking and SSO-only/error/loading states.
 - Preserve username normalization, password whitespace, Enter submission, loading/validation, Entra/OpenAM continuations, SSO URLs, and `show_normal_login=Y` behavior.
-- Exit: Frame 11 matches at 1512 × 982; auth controller tests and responsive/SSO states pass; saved authenticated theme is unaffected.
+- Exit: Frame 11 matches at 1512 × 982 in light mode; dark adaptation, auth controller tests and responsive/SSO states pass; saved authenticated theme is unaffected.
 
 ### Stage 4 — Recreate empty workspace
 
@@ -174,6 +180,7 @@ Each stage follows specification → behavior tests where needed → implementat
 - Compare every supplied frame with native-size screenshots and overlays/diffs, including action-expanded profile and populated drawer states. Correct geometry/type/assets rather than simply approving screenshots generated from the implementation.
 - Verify remote Cashflow/Ratan/Alpha rendering, theme propagation, cached admin layouts, timeout/logout/survey overlays and loading/error states. Match shared token styling where appropriate; document states for which no reference exists.
 - Complete localhost:8001 login → New Tile → launch a tile → remove its workspace tab; repeat key overlay flows in both themes and at smaller widths.
+- Verify purposeful transitions and interaction feedback in both themes, including interrupted open/close, expand/collapse, keyboard/focus behavior, and reduced-motion mode. Check responsive layouts across width/height changes, browser zoom, and long content.
 - Prepare an opt-in release with appearance matrix and rollback behavior documented. Enabling the default for all deployments is a separate rollout decision.
 
 Stages 3–5 can proceed independently after Stage 2's tokens/geometry stabilize. Profile and drawer are larger stages because they alter composition and expose nested/data-driven states.
@@ -201,8 +208,9 @@ GitNexus was refreshed to comparison HEAD `29591e4`. Preliminary upstream analys
 ## Definition of done
 
 - Every supplied frame has a corresponding passing comparison or a specific unresolved source-asset dependency; 1:1 completion requires those dependencies resolved.
-- Header, login, empty workspace, avatar menu, all profile levels and tile drawer follow the new appearance in both themes where references exist.
+- Header, login, empty workspace, avatar menu, all profile levels and tile drawer support both themes; supplied references match and missing counterparts have documented adaptations.
 - No overlaps or inaccessible controls at supported viewports; unauthenticated appearance does not corrupt saved theme.
+- Necessary motions and interactions remain functional, including transition interruption, keyboard/focus behavior, and reduced-motion preferences.
 - Real identity, entitlement and tile-launch contracts remain functional; tenant rendering and cached workspace behavior remain correct.
 - Relevant test, coverage, type, lint, build, visual and manual gates pass; remaining environment limitations are reported accurately.
 - Each verified stage is committed separately, and the appearance/rollout documentation matches delivered behavior.
