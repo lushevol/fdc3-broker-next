@@ -2,6 +2,10 @@
 
 Updated 2026-10-05. This document defines the agreed migration scope. See the [BFF integration explanation](ems3-bff-integration.md) for the current code, database schema and verification steps.
 
+The [rollout report](ems3-rollout-report.md), prepared 2026-10-06, combines the
+delivery approach, application requirements and current schedule: FlowZero
+production pilot by 13 November and parallel onboarding readiness by 4 December.
+
 ## Current progress
 
 **Local POC passed:** the [runnable POC](../poc/ems3-functions/README.md) exercises five synthetic accounts through a real loopback EMS3 HTTP service and a mixed EMS2/EMS3 router. The route table sends Ratan to EMS2 and portal-admin to EMS3, then merges both providers into the unchanged BFF response. It preserves the selected role grants and tile rules, keeps multiple roles for one entity, and denies every required-call failure without retaining the previous local result or falling back from EMS3 to EMS2. All 244 tests and the seven-result CLI demo pass. This completes steps 1-5 below for the selected function scope.
