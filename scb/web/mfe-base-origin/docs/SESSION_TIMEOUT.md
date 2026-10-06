@@ -67,6 +67,11 @@ rejection, logout, unmount, an open prompt, or access expiry. If a page returns
 before access expiry with no refresh, it can recover a missed acquisition.
 Optional replacements do not retry while usable refresh is already available.
 
+Pending mouse activity belongs to the access token that scheduled it. Token
+rotation, logout start, and Home unmount cancel it. Before sending activity,
+check the current login, token, expiry, and logout state again. New activity
+after rotation uses the new token and retains the existing five-second delay.
+
 The Timeout dialog retains its existing two-second lead before refresh expiry
 and one-second delay before logout. During continuous activity, Home opens
 that flow at refresh expiry even if the access token is still valid. Logout

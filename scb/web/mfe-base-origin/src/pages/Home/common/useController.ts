@@ -5,6 +5,7 @@ import { Workspace } from "../../../hooks/model/workspaces";
 import { validateWorkspace, aOrb, getJWTPayload } from "../../../utils/common";
 import { getRefreshToken } from "../../../hooks/service";
 import { getSessionGeneration } from "../../../hooks/service/util/session";
+import { getHooksBase } from "../../../hooks/HooksBase";
 import { extend } from "../../../hooks/service/util/extend";
 import useAnalytics from "../../../analytics";
 import { AnalyticsData } from "../../../analytics/model";
@@ -61,14 +62,27 @@ const useController = () => {
       dispacthErrorMessage(undefined);
     }
   };
-  const runExtend = () => {
-    extend(store?.expiredIn, store.isOnLogout, store.token);
+  const runExtend = (token: string | undefined, generation: number) => {
+    const current = getHooksBase().store;
+    // Cleanup can run after a timer is delivered. Recheck its owner before
+    // sending activity so an old timer cannot rotate access in a later login.
+    if (
+      generation !== getSessionGeneration() ||
+      current.token !== token ||
+      current.isOnLogout
+    )
+      return;
+    extend(current.expiredIn, current.isOnLogout, current.token);
   };
   const mouseMove = () => {
     if (timerMouseMove.current) {
       clearTimeout(timerMouseMove.current);
     }
-    timerMouseMove.current = setTimeout(runExtend, 5000);
+    const generation = getSessionGeneration();
+    timerMouseMove.current = setTimeout(
+      () => runExtend(store.token, generation),
+      5000
+    );
   };
   const clearAllTimeout = () => {
     if (timerPopup.current) {
@@ -104,6 +118,14 @@ const useController = () => {
       }
     };
   }, [store?.token, store?.expiredIn, ready]);
+
+  React.useEffect(
+    () => () => {
+      // Activity recorded before rotation must not be sent with the old token.
+      clearTimeout(timerMouseMove.current);
+    },
+    [store.token, store.isOnLogout]
+  );
 
   React.useEffect(() => {
     if (!ready || !store?.token) return;

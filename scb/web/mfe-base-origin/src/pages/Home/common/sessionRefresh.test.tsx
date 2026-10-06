@@ -463,6 +463,27 @@ describe('Home session refresh', () => {
     expect(mockRefreshToken).toHaveBeenCalledTimes(1);
   });
 
+  it('cancels old activity on access rotation and uses the new token for new activity', () => {
+    const { result, rerender } = renderHook(() => useController());
+    act(() => result.current.mouseMove());
+    act(() => jest.advanceTimersByTime(1000));
+    mockStore = { ...mockStore, token: 'new-access', expiredIn: (now + 25 * 60_000) / 1000 };
+    rerender();
+    act(() => jest.advanceTimersByTime(4000));
+    expect(extend).not.toHaveBeenCalled();
+    act(() => result.current.mouseMove());
+    act(() => jest.advanceTimersByTime(5000));
+    expect(extend).toHaveBeenCalledWith(mockStore.expiredIn, mockStore.isOnLogout, 'new-access');
+  });
+
+  it.each(['token', 'logout'])('checks current %s even before the old activity effect is cleaned up', (change) => {
+    const { result } = renderHook(() => useController());
+    act(() => result.current.mouseMove());
+    mockStore = change === 'token' ? { ...mockStore, token: 'new-access' } : { ...mockStore, isOnLogout: true };
+    act(() => jest.advanceTimersByTime(5000));
+    expect(extend).not.toHaveBeenCalled();
+  });
+
   it('[SR16] Given pending activity and expiry timers, when Home unmounts, then no further work runs', () => {
     mockStore.refreshToken = tokenExpiringAt(now + refreshLifetime);
     const addListener = jest.spyOn(document, 'addEventListener');
