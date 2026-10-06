@@ -13,6 +13,13 @@ import {
 
 export { expect } from '@playwright/test';
 
+export async function expectPortalTheme(page: Page, theme: PrototypeTheme) {
+  const root = page.locator('html');
+  await expect(root).toContainClass(`${theme} sc-mode-${theme} ratan-design-root`);
+  await expect(root).toHaveAttribute('data-generation', 'webkit');
+  await expect(root).toHaveAttribute('data-mode', theme);
+}
+
 const fontsDirectory = fileURLToPath(
   new URL('../../../sc-dev-web/sc-dev-web/public/assets/fonts/', import.meta.url),
 );
@@ -126,7 +133,7 @@ export const test = base.extend<{ portal: PortalPrototype }>({
             page.getByRole('button', { name: 'User Profiles', exact: true }),
           ).toBeVisible();
           await page.getByRole('checkbox', { name: 'Theme Switch' }).setChecked(theme === 'light');
-          await expect(page.locator('html')).toHaveClass(`${theme} sc-mode-${theme}`);
+          await expectPortalTheme(page, theme);
           await page
             .getByRole('tab')
             .filter({ has: page.getByRole('textbox', { name: 'Workspace Name' }) })

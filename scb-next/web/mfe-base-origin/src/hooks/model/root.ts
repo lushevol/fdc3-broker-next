@@ -1,8 +1,6 @@
 import { ActionType } from '../reducer/util/ActionType';
 import { firstWorkspace, Workspace } from './workspaces';
 import { getLocalStorage } from '../../utils/common';
-import { useContext } from '../provider';
-import { resolvePortalAppearance } from '../../new-styles/appearance';
 
 export interface ErrorProps extends ComponentPropsDefault {
   emailSupport?: string;
@@ -162,7 +160,4 @@ export const initialData: RootModel = {
   newStyles: false,
 };
 
-export const useIsNewLayout = () => {
-  const [store] = useContext();
-  return resolvePortalAppearance(store.newStyles, window.location.search) !== 'legacy';
-};
+export { useIsNewLayout } from '../../new-styles/appearance';

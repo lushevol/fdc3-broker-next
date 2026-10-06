@@ -53,6 +53,8 @@ describe('prototype tile drawer', () => {
     const drawer = screen.getByRole('dialog', { name: 'Tile Option' });
     expect(within(drawer).getByRole('heading', { name: 'Settlement' })).toBeVisible();
     const card = within(drawer).getByRole('button', { name: 'Add Cashflow Blotter [FX & Equity]', exact: true });
+    expect(card).toHaveClass('MuiButton-root');
+    expect(card).toHaveStyle({ textTransform: 'none', minWidth: '0' });
     fireEvent.click(card);
     expect(props.addTile).toHaveBeenCalledTimes(1);
     expect(props.addTile).toHaveBeenCalledWith(expect.objectContaining({
@@ -78,6 +80,7 @@ describe('prototype tile drawer', () => {
       ],
     } };
     const { props } = showDrawer({ drawers: [{ id: 1, label: 'Settlement', tiles: [presented] }] });
+    expect(screen.getByRole('button', { name: 'Add Cashflow Blotter [FX & Equity] for Global' })).toHaveClass('MuiButton-root');
     fireEvent.click(screen.getByRole('button', { name: 'Add Cashflow Blotter [FX & Equity] for Global' }));
     expect(props.addTile).toHaveBeenLastCalledWith(expect.objectContaining({
       title: 'Cashflow Blotter [FX & Equity]', parameters: { currency: 'USD', region: 'global' },

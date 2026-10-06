@@ -147,6 +147,24 @@ export const drawerBodyStyles = (mode: DrawerMode) => ({
   },
 });
 
+export const drawerTileActionStyles = (mode: DrawerMode) => ({
+  fontFamily: t.fontFamily,
+  ...t.typography.body,
+  fontWeight: 400,
+  textTransform: 'none' as const,
+  minWidth: 0,
+  color: mode === 'dark' ? t.color.headerMuted : t.color.light.selectedText,
+  letterSpacing: 0,
+  cursor: 'pointer',
+  transition: `background ${t.motion.feedback}, color ${t.motion.feedback}`,
+  '&:disabled': { cursor: 'default' },
+  '&:focus-visible': {
+    outline: `${drawerLayout.focusWidth}px solid ${t.color.primary}`,
+    outlineOffset: -drawerLayout.focusWidth,
+  },
+  ...portalMotionStyles,
+});
+
 export const drawerTileStyles = (mode: DrawerMode) => ({
   position: 'relative' as const,
   minWidth: 0,
@@ -181,20 +199,6 @@ export const drawerTileStyles = (mode: DrawerMode) => ({
     pointerEvents: 'none' as const,
   },
   '& .tile-art[data-pattern="rings"]': { top: t.space.sm, right: t.space.sm, bottom: 'auto' },
-  '& button': {
-    fontFamily: t.fontFamily,
-    ...t.typography.body,
-    color: mode === 'dark' ? t.color.headerMuted : t.color.light.selectedText,
-    letterSpacing: 0,
-    cursor: 'pointer',
-    transition: `background ${t.motion.feedback}, color ${t.motion.feedback}`,
-    '&:disabled': { cursor: 'default' },
-    '&:focus-visible': {
-      outline: `${drawerLayout.focusWidth}px solid ${t.color.primary}`,
-      outlineOffset: -drawerLayout.focusWidth,
-    },
-    ...portalMotionStyles,
-  },
   '& .tile-launch': {
     position: 'relative' as const,
     display: 'flex',
@@ -209,6 +213,7 @@ export const drawerTileStyles = (mode: DrawerMode) => ({
     border: 0,
     background: t.color[mode].canvas,
     backgroundColor: 'transparent',
+    '&:hover:not(:disabled)': { backgroundColor: 'transparent' },
     '&:hover:not(:disabled) .tile-plus': { background: t.color[mode].selected },
     '& .tile-name': {
       ...t.typography.body,

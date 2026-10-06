@@ -1,6 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 import type { Locator, Page } from '@playwright/test';
 import { expect, test } from './base-ui-parity.fixture';
+import { expectPortalTheme } from './portal-prototype.fixture';
 
 test.use({ deviceScaleFactor: 1, locale: 'en-US', timezoneId: 'Asia/Singapore' });
 test.setTimeout(90_000);
@@ -65,7 +66,7 @@ async function signIn(page: Page, theme: 'light' | 'dark') {
   await page.getByLabel('Password', { exact: true }).fill('acceptance');
   await page.getByRole('button', { name: 'Sign In', exact: true }).click();
   await page.getByRole('checkbox', { name: 'Theme Switch' }).setChecked(theme === 'light');
-  await expect(page.locator('html')).toHaveClass(`${theme} sc-mode-${theme}`);
+  await expectPortalTheme(page, theme);
 }
 
 async function addAdminContracts(page: Page) {

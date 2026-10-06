@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import type { Locator, Page } from '@playwright/test';
-import { expect, test } from './portal-prototype.fixture';
+import { expect, expectPortalTheme, test } from './portal-prototype.fixture';
 import {
   buildPrototypeAuth,
   expandedSubject,
@@ -54,7 +54,7 @@ async function submitFixtureLogin(page: Page, auth: AuthFixture, theme: Prototyp
   await page.getByLabel('Password', { exact: true }).fill('acceptance-fixture');
   await page.getByRole('button', { name: 'Sign In', exact: true }).click();
   await expect(page.getByRole('button', { name: 'User Profiles', exact: true })).toBeVisible();
-  await expect(page.locator('html')).toHaveClass(`${theme} sc-mode-${theme}`);
+  await expectPortalTheme(page, theme);
 }
 
 function tokenWithExpiry(token: string, expiry: number) {
@@ -170,8 +170,9 @@ for (const theme of ['light', 'dark'] as const) {
         errors.push(message.text());
     });
     await page.setViewportSize(referenceViewport);
-    await page.route('http://127.0.0.1:8009/remoteEntry.js', (route) =>
-      route.fulfill({ path: remoteEntry, contentType: 'application/javascript' }),
+    await page.route(
+      process.env.VITE_RATAN_REMOTE_URL ?? 'http://127.0.0.1:8009/remoteEntry.js',
+      (route) => route.fulfill({ path: remoteEntry, contentType: 'application/javascript' }),
     );
     await portal.open('login', theme);
     const auth: AuthFixture = buildPrototypeAuth('shell');

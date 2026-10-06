@@ -3,6 +3,7 @@ import Provider from './hooks/provider';
 import ThemeProvider from './theme';
 import Routing from './routing';
 import { LocalizationProvider, AdapterDayjs } from 'ratan-design-origin/dates';
+import { createInitialAppearance } from './new-styles/appearance';
 
 export interface AppProps {
   version?: string;
@@ -13,13 +14,7 @@ export interface AppProps {
 
 const App: React.FC<AppProps> = (props): ReactElement => (
   <LocalizationProvider dateAdapter={AdapterDayjs}>
-    <Provider
-      data={{
-        rootVersion: props.version,
-        newStyles: props.newStyles ?? false,
-        loginAppearance: props.loginAppearance,
-      }}
-    >
+    <Provider data={createInitialAppearance(props)}>
       <ThemeProvider>
         <Routing {...props} />
       </ThemeProvider>

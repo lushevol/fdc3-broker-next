@@ -12,7 +12,10 @@ test('host can render and remove a tile after the control extraction', async ({ 
   await expect(page.getByText('CF-ACCEPT-001', { exact: true })).toBeVisible({
     timeout: 20_000,
   });
-  const appearanceRoots = page.locator('.ratan-design-root');
+  await expect(page.locator('html')).toContainClass('dark sc-mode-dark ratan-design-root');
+  await expect(page.locator('html')).toHaveAttribute('data-generation', 'webkit');
+  await expect(page.locator('html')).toHaveAttribute('data-mode', 'dark');
+  const appearanceRoots = page.locator('.ratan-design-root:not(html)');
   expect(await appearanceRoots.count()).toBeGreaterThanOrEqual(2);
   expect(
     await appearanceRoots.evaluateAll((roots) =>

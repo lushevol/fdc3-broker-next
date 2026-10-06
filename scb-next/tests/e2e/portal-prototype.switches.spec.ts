@@ -10,8 +10,9 @@ async function switchAppearance(input: Locator) {
       const thumb = element.querySelector('.MuiSwitch-thumb');
       const base = element.querySelector('.MuiSwitch-switchBase');
       const input = element.querySelector('input');
-      if (!track || !thumb || !base || !input)
-        throw new Error('The switch must expose its input, track and thumb.');
+      const label = element.closest('section')?.querySelector('span[class*="-label"]');
+      if (!track || !thumb || !base || !input || !label)
+        throw new Error('The switch must expose its input, track, thumb and label.');
       const rootBounds = element.getBoundingClientRect();
       const trackBounds = track.getBoundingClientRect();
       const thumbBounds = thumb.getBoundingClientRect();
@@ -44,6 +45,7 @@ async function switchAppearance(input: Locator) {
         baseBackground: baseStyle.backgroundColor,
         focusVisible: base.classList.contains('Mui-focusVisible'),
         thumbShadow: thumbStyle.boxShadow,
+        labelColor: getComputedStyle(label).color,
       };
     });
 }
@@ -124,6 +126,9 @@ for (const viewport of [
       expect.soft(focused.root).toEqual({ width: 32, height: 14 });
       expect.soft(focused.focusVisible).toBe(true);
       expect.soft(focused.thumbShadow).not.toBe('none');
+      expect
+        .soft(focused.labelColor, `${name}: focus preserves readable header text`)
+        .toBe('rgb(229, 241, 252)');
       expect.soft(focused.track.border, `${name}: focus preserves the border`).toBe('0px');
       expect.soft(focused.thumb.top).toBe(1);
       expect.soft(focused.thumb.bottom).toBe(1);

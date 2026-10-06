@@ -3,17 +3,14 @@ import { Container as ContainerProps } from '../../../hooks/model/workspaces';
 import Splash from '../../../components/Splash';
 import ErrorBoundry from '../../../components/ErrorBoundry';
 import { useContext } from '../../../hooks/provider';
-import type { RatanAppearance } from 'ratan-design-origin';
+import { resolveFederatedAppearance } from '../../../new-styles/appearance';
 const AdminModule = React.lazy(() => import('../../../admin'));
 const RatanContainer = React.lazy(() => import('mfe_ratan_container/application'));
 const AlphaPayments = React.lazy(() => import('mfe_alpha_payments/application'));
 
 const Container: React.FC<ContainerProps> = (props: ContainerProps): ReactElement => {
   const [store] = useContext();
-  const appearance: RatanAppearance = {
-    mode: store.theme === 'light' ? 'light' : 'dark',
-    designGeneration: store.newStyles ? 'webkit' : 'legacy',
-  };
+  const appearance = resolveFederatedAppearance(store);
   const Comp =
     props.container === '@fm/ratan_container'
       ? RatanContainer

@@ -1,0 +1,123 @@
+import React, { ReactElement } from 'react';
+import {
+  Avatar as AvatarMui,
+  IconButton,
+  Tooltip,
+  Typography,
+  MenuItem,
+  Divider,
+} from 'ratan-design-origin/primitives';
+import useController from '../../components/Avatar/common/useController';
+import female from '../../components/Avatar/common/female.svg';
+import Root, { classes, PREFIX, MenuStyled } from '../../components/Avatar/common/style';
+import { AvatarProps } from '../../components/Avatar/common/interface';
+import Profile from '../../components/Profile';
+import json from '../../../package.json';
+import PrototypeAvatarMenu from '../avatar-menu';
+
+const Avatar: React.FC<AvatarProps> = (props: AvatarProps): ReactElement => {
+  const avatarButton = React.useRef<HTMLButtonElement>(null);
+  const {
+    store,
+    anchorElUser,
+    openProfile,
+    handleOpenUserMenu,
+    handleCloseUserMenu,
+    onBeforeLogout,
+    handleOpenUserProfile,
+    handleCloseUserProfile,
+  } = useController(props);
+  let imgUrl = female;
+  if (store?.user?.id) {
+    imgUrl = `https://axess.sc.net/scb-axess-cms/api/users/${store?.user?.id}/photo`;
+  }
+
+  return (
+    <>
+      <Root className={classes.root} data-testid={`${PREFIX}`}>
+        <Tooltip title="User Profiles">
+          <IconButton
+            ref={avatarButton}
+            aria-label="User Profiles"
+            aria-haspopup="menu"
+            aria-expanded={Boolean(anchorElUser)}
+            onClick={handleOpenUserMenu}
+            sx={{ p: 0 }}
+            data-testid={`${PREFIX}_IconButton`}
+          >
+            <AvatarMui className={classes.img} alt="Avatar" src={imgUrl} />
+          </IconButton>
+        </Tooltip>
+        {store.newStyles ? (
+          <PrototypeAvatarMenu
+            anchorEl={anchorElUser}
+            name={store.user?.fullName ?? store.user?.userId ?? 'User'}
+            rootVersion={store.rootVersion}
+            baseVersion={json.version}
+            onProfile={handleOpenUserProfile}
+            onLogout={onBeforeLogout}
+            onClose={handleCloseUserMenu}
+          />
+        ) : (
+          <MenuStyled
+            sx={{ mt: '35px' }}
+            id="menu-appbar-avatar"
+            anchorEl={anchorElUser}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={Boolean(anchorElUser)}
+            onClose={handleCloseUserMenu}
+          >
+            <MenuItem
+              data-testid={`${PREFIX}_Profile`}
+              onClick={handleOpenUserProfile}
+              sx={{ flexDirection: 'column', alignItems: 'start' }}
+            >
+              <Typography sx={{ display: 'block' }}>
+                {store?.user?.fullName ?? store?.user?.userId}
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block' }} color="InactiveCaptionText">
+                Click to view user profile details
+              </Typography>
+            </MenuItem>
+            <Divider />
+            <MenuItem onClick={onBeforeLogout} data-testid={`${PREFIX}_Logout`}>
+              <Typography sx={{ display: 'block' }}>Logout</Typography>
+            </MenuItem>
+            <Divider />
+            <MenuItem
+              data-testid={`${PREFIX}_Version`}
+              className={classes.disable}
+              sx={{ flexDirection: 'column', alignItems: 'start' }}
+            >
+              <Typography variant="caption" sx={{ display: 'block' }} color="InactiveCaptionText">
+                Root Config Version: {store.rootVersion}
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block' }} color="InactiveCaptionText">
+                Base Container Version: {json.version}
+              </Typography>
+            </MenuItem>
+          </MenuStyled>
+        )}
+      </Root>
+      {openProfile && (
+        <Profile
+          open={openProfile}
+          onClose={() => {
+            handleCloseUserProfile();
+            avatarButton.current?.focus();
+          }}
+        />
+      )}
+    </>
+  );
+};
+
+export default React.memo(Avatar);

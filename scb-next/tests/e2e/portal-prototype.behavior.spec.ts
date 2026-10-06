@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
-import { expect, test } from './portal-prototype.fixture';
+import { expect, expectPortalTheme, test } from './portal-prototype.fixture';
 import { referenceViewport } from '../fixtures/portal-prototype';
 
 test.use({ deviceScaleFactor: 1, locale: 'en-US', timezoneId: 'Asia/Singapore' });
@@ -128,10 +128,10 @@ for (const theme of ['light', 'dark'] as const) {
     const themeSwitch = page.getByRole('checkbox', { name: 'Theme Switch' });
     await themeSwitch.setChecked(theme === 'dark');
     const opposite = theme === 'light' ? 'dark' : 'light';
-    await expect(page.locator('html')).toHaveClass(`${opposite} sc-mode-${opposite}`);
+    await expectPortalTheme(page, opposite);
     expect(await page.evaluate(() => localStorage.getItem('SET_THEME'))).toBe(opposite);
     await themeSwitch.setChecked(theme === 'light');
-    await expect(page.locator('html')).toHaveClass(`${theme} sc-mode-${theme}`);
+    await expectPortalTheme(page, theme);
     const clock = page
       .getByRole('checkbox', { name: 'Time Switch' })
       .locator('xpath=ancestor::section[1]');

@@ -16,6 +16,14 @@ The table below records shipped presentation; `primitives`, `icons` and
 proposals, while [host parity evidence](BASE_UI_PARITY_EVIDENCE.md) covers the
 verified surfaces and outstanding checks.
 
+Base keeps its complete appearance implementation and selection policy under
+`web/mfe-base-origin/src/new-styles`, including the theme, standalone query
+mapping, federated appearance mapping and shell/page adapters. Original public
+component paths re-export those adapters. New UI uses the package's supported
+controls, primitives, icons, theme APIs and `styles-and-tokens.css`; authentication,
+analytics, persistence and workspace lifecycle remain host responsibilities.
+See the [Portal specification](../web/mfe-base-origin/docs/NEW_STYLES_SPEC.md).
+
 | Original surface | Maintained presentation | Host responsibility |
 | --- | --- | --- |
 | Theme controls/tokens and CSS aliases | Core/theme/tokens/compatibility entries | Auth-based mode, persistence, document classes, explicit CSS loading |

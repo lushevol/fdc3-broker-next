@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { Button } from 'ratan-design-origin';
 import { Box, Drawer, IconButton, Tooltip } from 'ratan-design-origin/primitives';
 import { Add, Close } from 'ratan-design-origin/icons';
 import {
@@ -8,7 +9,7 @@ import {
   type Tiles,
 } from '../components/Drawer/common/interface';
 import type { Container } from '../hooks/model/workspaces';
-import TileIcon from '../components/Drawer/common/Tile';
+import TileIcon from './tile-icon';
 import chevronDark from './assets/tile-chevron-dark.png';
 import chevronLight from './assets/tile-chevron-light.png';
 import waveDark from './assets/tile-wave-dark.png';
@@ -22,6 +23,7 @@ import {
   drawerBodyStyles,
   drawerHeaderStyles,
   drawerPaperStyles,
+  drawerTileActionStyles,
   drawerTileStyles,
   type DrawerMode,
 } from './drawer-styles';
@@ -118,9 +120,11 @@ function PrototypeTile({
           data-pattern={tile.presentation?.pattern}
         />
       )}
-      <button
+      <Button
         type="button"
+        disableRipple
         className="tile-launch"
+        sx={drawerTileActionStyles(mode)}
         aria-label={`Add ${title}`}
         disabled={tile.disabled}
         onClick={() => addTile(buildDrawerLaunch(tile))}
@@ -134,19 +138,21 @@ function PrototypeTile({
             <Add />
           </span>
         )}
-      </button>
+      </Button>
       {options.length > 0 && (
         <div className="tile-options">
           {options.map((option) => (
-            <button
+            <Button
               type="button"
+              disableRipple
               key={option.id}
+              sx={drawerTileActionStyles(mode)}
               disabled={tile.disabled}
               aria-label={`Add ${title} for ${option.label}`}
               onClick={() => addTile(buildDrawerLaunch(tile, option))}
             >
               {option.label}
-            </button>
+            </Button>
           ))}
         </div>
       )}

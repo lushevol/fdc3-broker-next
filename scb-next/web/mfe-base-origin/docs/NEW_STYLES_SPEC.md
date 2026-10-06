@@ -16,6 +16,15 @@ The standalone bootstrap maps `new-styles=true` to the same Base prop. Prototype
 
 ## Global principles
 
+- All new-appearance implementation, component composition and appearance
+  selection live under Base `src/new-styles`. Existing public component/page
+  paths are compatibility delegates; host controllers and transport contracts
+  retain their existing responsibilities. Appearance defaults, URL parsing,
+  theme selection and federated appearance mapping belong to this boundary.
+- Supported UI controls, icons, styling APIs, theme utilities and canonical CSS
+  are consumed through public `ratan-design-origin` entries. Portal composition
+  remains in `new-styles`; missing reusable support is added to the package
+  before use. Direct MUI/Emotion/WebKit implementation imports are prohibited.
 - Layouts adapt to width, height, zoom, and long content. No overlapping or unreachable controls; scrolling is contained in the appropriate region.
 - All surfaces support light and dark modes. Match supplied references; record theme adaptations where references are absent, including dark login and light empty workspace.
 - Preserve necessary interactions and purposeful motion. Drawer/dialog transitions, selection feedback, hover/focus/pressed states, and entitlement expansion remain usable with keyboard and reduced-motion preferences. Motion cannot postpone dispatching user actions.

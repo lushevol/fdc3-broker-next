@@ -16,6 +16,48 @@ The [implementation plan](NEW_STYLES_IMPLEMENTATION_PLAN.md) and
 | 9. Typography and compact density                 | Complete    | 90 Portal browser checks verified; Base/package tests, targeted quality checks and all app builds pass. Remaining baseline gates are listed below. |
 | 10. Empty/dropdown text correction                | Complete    | 507 Base tests and 18 responsive browser checks pass; Base typecheck, build and targeted lint pass.                                                |
 | 11. Dropdown spacing, profile layers and switches | Complete    | 509 Base tests and 32 combined browser checks pass; Base typecheck, build, targeted lint and independent browser review pass.                      |
+| 12. New-styles implementation boundary            | Complete    | 531 Base tests and 76 Portal browser checks verified; typecheck, build, changed-file quality and dependency isolation checks pass.                    |
+
+## New-styles implementation boundary
+
+- Appearance defaults, standalone query parsing, theme selection and federated
+  appearance mapping live under `src/new-styles`. The Home, Login, AppBar,
+  Avatar, Profile, Drawer, Empty, NewTile, theme/time switch and workspace-tab
+  implementations live in `new-styles/adapters`. Original public paths re-export
+  the existing default/named contracts, including `RoleComp` and `ContainerComponent`.
+- New shell roots and switches use supported package primitives independently
+  of legacy styled roots. Drawer actions and New Tile use package Button and
+  IconButton. Portal-specific composition stays in Base; existing reusable APIs
+  cover the requested surfaces, so no new package export is needed.
+- Canonical CSS loads through `ratan-design-origin/styles-and-tokens.css`.
+  The new theme exposes package scope and generation/mode metadata on the
+  document. Legacy fallback removes this scope while retaining document-wide
+  SC variables and fonts. Authentication, telemetry, persistence, workspace
+  controllers and remote lifecycle retain their existing responsibilities.
+- Ownership tests first caught scattered appearance branches and a direct
+  WebKit CSS import, then passed after relocation. Full Base verification passes
+  531 tests across 154 files, with 99.12% line and 97.52% branch coverage;
+  typecheck, production build and package dependency isolation also pass.
+  The final 18 boundary/appearance tests and four header contract tests pass.
+- All 76 Portal browser cases are verified across suites and focused reruns:
+  26 avatar/profile/layer cases, 25 login/empty/drawer/density cases, 12 shell
+  and preference cases, eight acceptance cases, two switch cases and three
+  document-token cases. Desktop/mobile screenshots in both themes preserve
+  compact text, dropdown spacing, profile containment and switch geometry.
+  Clock focus keeps the header text color through a local selector override.
+  Cached admin grids and remote drafts retain their dimensions/state through
+  hiding, resizing and restoration. Both real Cashflow launch/removal journeys pass.
+- Verification uses the isolated Base host on port 8001 with matching Ratan
+  and Cashflow remotes on 8109 and 8115. The cached-remote fixture accepts
+  `VITE_RATAN_REMOTE_URL`, matching the host's remote configuration. Browser
+  mode checks verify package document metadata independently of class order.
+- The separate strict design-origin host console gate remains failing on
+  documented Cashflow Redux/Ant/React/style warnings and photo/stream transport
+  failures; its functional launch, appearance and removal assertions complete.
+  No warnings were filtered from this gate. Evidence is in
+  `/tmp/portal-boundary-base-tests.log`, `/tmp/portal-boundary-profile-browser/`,
+  `/tmp/portal-boundary-density-browser-final/`, `/tmp/portal-boundary-final-controls/`,
+  `/tmp/portal-boundary-cached-final/` and `/tmp/portal-boundary-design-host-final.log`.
 
 ## Dropdown spacing, profile layers and switches
 
