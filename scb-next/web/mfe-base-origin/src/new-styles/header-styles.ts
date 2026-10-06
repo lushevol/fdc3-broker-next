@@ -5,7 +5,7 @@ import { classes as timeSwitch } from '../components/SwitchTime/common/style';
 import { classes as newTile } from '../components/NewTile/common/style';
 import { classes as appBar } from '../components/AppBar/common/style';
 import { classes as tabItem } from '../components/TabItem/common/style';
-import { portalMotionStyles, portalTokens as t } from './portal-tokens';
+import { portalMotionStyles, portalPresentationTokens as t } from './portal-tokens';
 
 const headerLayout = {
   gap: 6,

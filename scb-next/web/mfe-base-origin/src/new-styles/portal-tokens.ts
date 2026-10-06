@@ -86,6 +86,41 @@ export const portalTokens = {
   motion: { feedback: '120ms', transition: '180ms', easing: 'ease-out' },
 } as const;
 
+const previewTypography = (role: string, defaults: { fontSize: number; lineHeight: string }) => ({
+  fontSize: `var(--portal-preview-${role}-font-size, ${defaults.fontSize}px)`,
+  lineHeight: `var(--portal-preview-${role}-line-height, ${defaults.lineHeight})`,
+});
+
+/** Optional dev-preview values; structural geometry retains the compact defaults. */
+export const portalPresentationTokens = {
+  ...portalTokens,
+  fontFamily: `var(--portal-preview-font-family, ${portalTokens.fontFamily})`,
+  typography: {
+    pageHeading: previewTypography('page-heading', portalTokens.typography.pageHeading),
+    sectionHeading: previewTypography('section-heading', portalTokens.typography.sectionHeading),
+    title: previewTypography('title', portalTokens.typography.title),
+    body: previewTypography('body', portalTokens.typography.body),
+    caption: previewTypography('caption', portalTokens.typography.caption),
+    heroHeading: previewTypography('hero-heading', portalTokens.typography.heroHeading),
+    heroBody: previewTypography('hero-body', portalTokens.typography.heroBody),
+  },
+  color: {
+    ...portalTokens.color,
+    primary: `var(--portal-preview-primary, ${portalTokens.color.primary})`,
+    primaryHover: `var(--portal-preview-primary-hover, ${portalTokens.color.primaryHover})`,
+    primaryText: `var(--portal-preview-primary-text, ${portalTokens.color.primaryText})`,
+  },
+  size: {
+    ...portalTokens.size,
+    headerLabelSize: `var(--portal-preview-header-label-font-size, ${portalTokens.size.headerLabelSize}px)`,
+    tabFontSize: `var(--portal-preview-tab-font-size, ${portalTokens.size.tabFontSize}px)`,
+  },
+  radius: {
+    ...portalTokens.radius,
+    control: `var(--portal-preview-control-radius, ${portalTokens.radius.control}px)`,
+  },
+} as const;
+
 export const portalMotionStyles = {
   '@media (prefers-reduced-motion: reduce)': {
     transition: 'none !important',

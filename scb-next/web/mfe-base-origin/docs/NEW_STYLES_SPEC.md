@@ -107,6 +107,30 @@ baseline for these adapted surfaces.
 - Header close, Escape and New Tile toggle close the drawer. Plus/card activation preserves the current entitled launch.
 - Location pills are optional explicit launch actions, with defined parameters. Entitlement entity names cannot be repurposed as locations.
 
+## Local development styling console
+
+- A styling-console icon is available only in development builds served on
+  localhost, 127.0.0.1 or the IPv6 loopback. Production bundles exclude the console.
+- Implementation, switching, preview themes and temporary settings remain under
+  `src/new-styles`; every UI control/icon/theme API uses public
+  `ratan-design-origin` entries.
+- The console provides light/dark mode, WebKit/legacy package generation,
+  10–20px base font size, packaged font-family presets, a six-digit primary
+  color, 0–16px control radius and small/medium control size.
+- Package samples preview changes immediately. Apply to Portal is initially off
+  and applies settings to Base theme controls and explicit Portal semantic tokens.
+  Portal layout selection remains independent of package component generation.
+  Remote business grids retain their existing appearance contract and geometry.
+- The editor retains stable compact sizing while its samples and Portal change.
+  The drawer uses a transparent backdrop so Portal colors remain inspectable,
+  scrolls within the viewport and remains operable at mobile widths.
+- Settings survive reloads in a separate versioned sessionStorage entry. Invalid
+  values normalize to safe defaults/bounds; unavailable storage never blocks UI.
+  Reset restores defaults, disables Portal application and clears this entry.
+  Turning off Portal application restores its original mode/theme and tokens.
+- Preview changes do not dispatch application preferences or overwrite login,
+  identity, authentication, saved workspaces or the authenticated theme preference.
+
 ## Acceptance and test seams
 
 Test appearance selection through the resolver and props-only Base composition; test user behavior through visible login, shell/workspace, avatar/profile and drawer controls; mock only external API, clock, photo and remote boundaries. Prototype fixtures use fixed time, identities, entitlements and categories. Reference comparisons use native 1512 × 982 crops and real editable UI. Legacy migration snapshots stay separate.

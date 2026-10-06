@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from "ratan-design-origin/theme";
 import type { Entity, User } from "../hooks/model/root";
 import { PrototypeProfile } from "./profile-presentation";
 import { createPortalPresentationTheme } from "./theme";
+import { portalPresentationTokens as t } from "./portal-tokens";
 
 const entities: Entity[] = [
   { id: 1, applicationName: "RATAN", name: "X_RATANONE", roleId: 11,
@@ -49,19 +50,13 @@ describe("prototype profile", () => {
     showProfile({ mode });
     const role = screen.getByRole("button", { name: "RATAN::X_RATANONE::FMO_COO_SUP" });
     expect(role).toHaveStyle({ minHeight: "48px" });
-    expect(screen.getByRole("heading", { name: "Yating, Yang", level: 3 })).toHaveStyle({
-      fontSize: "20px", lineHeight: "26px",
-    });
-    expect(within(role).getByText("RATAN::X_RATANONE::FMO_COO_SUP")).toHaveStyle({
-      fontSize: "14px", lineHeight: "20px",
-    });
+    expect(screen.getByRole("heading", { name: "Yating, Yang", level: 3 })).toHaveStyle(t.typography.title);
+    expect(within(role).getByText("RATAN::X_RATANONE::FMO_COO_SUP")).toHaveStyle(t.typography.body);
     fireEvent.click(role);
     const subject = screen.getByRole("button", { name: "RATAN_FM_COO_EXCEPTION" });
     expect(subject).toHaveStyle({ minHeight: "48px" });
     fireEvent.click(subject);
-    expect(screen.getByText("F_Export_Data")).toHaveStyle({
-      fontSize: "12px", lineHeight: "18px",
-    });
+    expect(screen.getByText("F_Export_Data")).toHaveStyle(t.typography.caption);
   });
   it("shows real identity, session values and separate functional/data entitlement groups", () => {
     showProfile();

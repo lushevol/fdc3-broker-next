@@ -6,7 +6,7 @@ import { classes as tabItem } from '../components/TabItem/common/style';
 import { classes as avatar } from '../components/Avatar/common/style';
 import pattern from '../theme/config/pattern.png';
 import navyBackground from '../theme/config/background-light.png';
-import { portalTokens as t } from './portal-tokens';
+import { portalPresentationTokens as t } from './portal-tokens';
 
 /** Styling is scoped to the complete Portal appearance; the preview stays intact. */
 export const PortalWorkspaceRoot = styled(Box)(({ theme }) => {

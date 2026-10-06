@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { createRatanTheme, ThemeProvider } from 'ratan-design-origin/theme';
 import PrototypeLogin from './login';
+import { portalPresentationTokens as t } from './portal-tokens';
 
 const props = () => ({
   username: '',
@@ -23,12 +24,10 @@ describe('prototype login', () => {
       </ThemeProvider>,
     );
     expect(screen.getByRole('form', { name: 'Sign In' })).toHaveStyle({ maxWidth: '360px' });
-    expect(screen.getByRole('heading', { name: 'Sign In' })).toHaveStyle({
-      fontSize: '32px', lineHeight: '40px',
-    });
+    expect(screen.getByRole('heading', { name: 'Sign In' })).toHaveStyle(t.typography.pageHeading);
     const username = screen.getByLabelText('Username');
     expect(username.parentElement).toHaveStyle({ height: '44px' });
-    expect(screen.getByText('Username')).toHaveStyle({ fontSize: '14px' });
+    expect(screen.getByText('Username')).toHaveStyle({ fontSize: t.typography.body.fontSize });
     expect(screen.getByRole('button', { name: 'Sign In' })).toHaveStyle({
       height: '44px',
     });

@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { createRatanTheme, ThemeProvider } from 'ratan-design-origin/theme';
 import PrototypeAvatarMenu from './avatar-menu';
+import { portalPresentationTokens as t } from './portal-tokens';
 
 describe('prototype avatar menu', () => {
   it.each(['light', 'dark'] as const)('keeps profile/logout and real versions in %s mode', (mode) => {
@@ -18,10 +19,10 @@ describe('prototype avatar menu', () => {
     });
     expect(screen.getByRole('menuitem', { name: 'Logout' })).toHaveStyle({ minHeight: '44px' });
     expect(screen.getByText('Root Config Version: root-test').parentElement).toHaveStyle({ minHeight: '60px' });
-    expect(screen.getByText('Yating, Yang')).toHaveStyle({ fontSize: '14px', lineHeight: '20px' });
-    expect(screen.getByRole('menuitem', { name: 'Logout' })).toHaveStyle({ fontSize: '14px', lineHeight: '20px' });
-    expect(screen.getByText('Click to view user profile')).toHaveStyle({ fontSize: '12px', lineHeight: '18px' });
-    expect(screen.getByText('Root Config Version: root-test').parentElement).toHaveStyle({ fontSize: '12px', lineHeight: '18px' });
+    expect(screen.getByText('Yating, Yang')).toHaveStyle(t.typography.body);
+    expect(screen.getByRole('menuitem', { name: 'Logout' })).toHaveStyle(t.typography.body);
+    expect(screen.getByText('Click to view user profile')).toHaveStyle(t.typography.caption);
+    expect(screen.getByText('Root Config Version: root-test').parentElement).toHaveStyle(t.typography.caption);
     fireEvent.click(screen.getByRole('menuitem', { name: /Yating, Yang/ }));
     expect(onProfile).toHaveBeenCalledOnce();
     fireEvent.click(screen.getByRole('menuitem', { name: 'Logout' }));

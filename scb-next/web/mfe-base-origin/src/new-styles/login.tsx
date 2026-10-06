@@ -6,7 +6,7 @@ import { styled, useTheme } from 'ratan-design-origin/theme';
 import darkLogo from '../components/AppBar/mo1_logo_dark.svg';
 import lightLogo from '../components/AppBar/mo1_logo_light.svg';
 import hero from './assets/login-hero-light-top.png';
-import { portalMotionStyles, portalTokens as t } from './portal-tokens';
+import { portalMotionStyles, portalPresentationTokens as t } from './portal-tokens';
 
 export interface PrototypeLoginProps {
   username?: string;

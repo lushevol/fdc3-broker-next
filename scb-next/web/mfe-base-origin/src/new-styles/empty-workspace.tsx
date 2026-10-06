@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from 'ratan-design-origin';
 import { styled } from 'ratan-design-origin/theme';
 import illustration from './assets/empty-workspace-dark.png';
-import { portalMotionStyles, portalTokens as t } from './portal-tokens';
+import { portalMotionStyles, portalPresentationTokens as t } from './portal-tokens';
 
 const emptyLayout = {
   top: 86,

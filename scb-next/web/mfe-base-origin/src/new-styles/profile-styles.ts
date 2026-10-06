@@ -1,4 +1,4 @@
-import { portalMotionStyles, portalTokens } from './portal-tokens';
+import { portalMotionStyles, portalPresentationTokens as portalTokens } from './portal-tokens';
 
 /** Profile-only measurements for identity and entitlement composition. */
 export const profileLayout = {

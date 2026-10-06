@@ -2,6 +2,7 @@ import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { ThemeProvider, createTheme } from 'ratan-design-origin/theme';
 import { PrototypeDrawer, type PresentedTile } from './drawer-presentation';
+import { portalPresentationTokens as t } from './portal-tokens';
 
 const tile: PresentedTile = {
   id: 1,
@@ -38,15 +39,9 @@ describe('prototype tile drawer', () => {
     expect(card.closest('.tile-grid')).toHaveStyle({
       gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
     });
-    expect(screen.getByRole('heading', { name: 'Settlement' })).toHaveStyle({
-      fontSize: '16px', lineHeight: '24px',
-    });
-    expect(screen.getByText('Cashflow Blotter')).toHaveStyle({
-      fontSize: '14px', lineHeight: '20px',
-    });
-    expect(screen.getByText('[FX & Equity]')).toHaveStyle({
-      fontSize: '12px', lineHeight: '18px',
-    });
+    expect(screen.getByRole('heading', { name: 'Settlement' })).toHaveStyle(t.typography.sectionHeading);
+    expect(screen.getByText('Cashflow Blotter')).toHaveStyle(t.typography.body);
+    expect(screen.getByText('[FX & Equity]')).toHaveStyle(t.typography.caption);
   });
   it('shows real categories and launches a tile once from the keyboard-accessible card', () => {
     const { props } = showDrawer();

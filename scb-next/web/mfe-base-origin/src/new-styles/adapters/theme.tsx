@@ -6,11 +6,17 @@ import ThemeProvider from '../../theme/Provider';
 import { createPortalPresentationTheme } from '../theme';
 import { resolvePortalAppearance } from '../appearance';
 import { getTheme, getThemeClassName } from '../theme-selection';
+import type { PortalStylePreview } from '../styling-console/contract';
+
+const DevelopmentConsole = import.meta.env.DEV
+  ? React.lazy(() => import('../styling-console/Boundary'))
+  : null;
 
 export { getThemeClassName } from '../theme-selection';
 
 const Theme: React.FC<ComponentPropsDefault> = (props): ReactElement => {
   const [store] = useContext();
+  const [preview, setPreview] = React.useState<PortalStylePreview | null>(null);
   const theme = React.useMemo(() => {
     const prototype =
       resolvePortalAppearance(store.newStyles, window.location.search) === 'prototype';
@@ -18,13 +24,15 @@ const Theme: React.FC<ComponentPropsDefault> = (props): ReactElement => {
     if (!store?.user?.id || !store.token) {
       themeConfig = prototype ? (store.loginAppearance ?? 'light') : 'dark';
     }
-    const config = prototype
+    if (preview) themeConfig = preview.mode;
+    const baseline = prototype
       ? createPortalPresentationTheme(themeConfig === 'light' ? 'light' : 'dark')
       : Config(getTheme(themeConfig, store.newStyles)).config;
+    const config = preview ? preview.composeTheme(baseline) : baseline;
     document.documentElement.className = getThemeClassName(themeConfig, store.newStyles);
-    if (store.newStyles) {
+    if (store.newStyles || preview) {
       document.documentElement.classList.add('ratan-design-root');
-      document.documentElement.dataset.generation = 'webkit';
+      document.documentElement.dataset.generation = preview?.designGeneration ?? 'webkit';
       document.documentElement.dataset.mode = config.palette.mode;
     } else {
       delete document.documentElement.dataset.generation;
@@ -32,8 +40,17 @@ const Theme: React.FC<ComponentPropsDefault> = (props): ReactElement => {
     }
     document.body.style.backgroundColor = config.palette.background.default;
     return config;
-  }, [store.theme, store.user, store.token, store.newStyles, store.loginAppearance]);
-  return <ThemeProvider theme={theme}>{props.children}</ThemeProvider>;
+  }, [store.theme, store.user, store.token, store.newStyles, store.loginAppearance, preview]);
+  return (
+    <ThemeProvider theme={theme}>
+      {props.children}
+      {DevelopmentConsole && (
+        <React.Suspense fallback={null}>
+          <DevelopmentConsole onPreviewChange={setPreview} />
+        </React.Suspense>
+      )}
+    </ThemeProvider>
+  );
 };
 
 export default Theme;

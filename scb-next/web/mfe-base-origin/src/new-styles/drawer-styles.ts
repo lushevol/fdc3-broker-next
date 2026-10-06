@@ -1,4 +1,4 @@
-import { portalMotionStyles, portalTokens as t } from './portal-tokens';
+import { portalMotionStyles, portalPresentationTokens as t } from './portal-tokens';
 import darkUpper from './assets/drawer-pattern-dark-upper-right.png';
 import darkLower from './assets/drawer-pattern-dark-lower-right.png';
 import lightUpper from './assets/drawer-pattern-light-upper-right.png';

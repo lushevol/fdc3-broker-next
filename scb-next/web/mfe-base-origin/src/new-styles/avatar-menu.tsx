@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Menu, MenuItem, Typography } from 'ratan-design-origin/primitives';
 import { useTheme } from 'ratan-design-origin/theme';
-import { portalMotionStyles, portalTokens as t } from './portal-tokens';
+import { portalMotionStyles, portalPresentationTokens as t } from './portal-tokens';
 import { useProfileReducedMotion } from './profile-motion';
 
 export interface PrototypeAvatarMenuProps {
