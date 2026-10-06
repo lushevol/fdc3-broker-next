@@ -57,7 +57,15 @@ Returning to visible reconciles both expiries immediately. If the visible
 acquisition deadline is still in the future, it is rescheduled; a missed
 deadline is not replayed on return. Hiding cancels the visible acquisition
 timer. Repeated notifications without an actual visibility change do nothing.
-The existing service cancels an unfinished acquisition when a new one starts.
+Visibility changes reuse an unfinished acquisition for the same access token.
+A new access token or login cancels the obsolete acquisition.
+
+Missing refresh acquisition retries temporary network, timeout, and 5xx errors
+after 5, 15, and 30 seconds. Permit one request at a time. Keep the retry limit
+for the current access token across visibility changes. Stop on authentication
+rejection, logout, unmount, an open prompt, or access expiry. If a page returns
+before access expiry with no refresh, it can recover a missed acquisition.
+Optional replacements do not retry while usable refresh is already available.
 
 The Timeout dialog retains its existing two-second lead before refresh expiry
 and one-second delay before logout. During continuous activity, Home opens
@@ -70,5 +78,4 @@ controllers, dialog and Axios interceptors), `sessionRefresh.test.tsx`
 (scheduling), and `hooks/reducer/index.test.tsx` (refresh preservation). The
 integration cases cover hidden startup with running or suspended timers,
 late mounting, near-expiry hiding, manual Extend, and refresh replies arriving
-after the timeout dialog opens. Cross-login reply isolation is not covered by
-this change.
+after the timeout dialog opens, temporary outages, and cross-login responses.

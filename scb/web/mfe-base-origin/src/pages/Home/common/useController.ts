@@ -2,12 +2,9 @@ import React from "react";
 import { useContext } from "../../../hooks/provider";
 import useDispatcher from "../../../hooks/dispathcer";
 import { Workspace } from "../../../hooks/model/workspaces";
-import {
-  validateWorkspace,
-  aOrb,
-  getJWTPayload,
-} from "../../../utils/common";
+import { validateWorkspace, aOrb, getJWTPayload } from "../../../utils/common";
 import { getRefreshToken } from "../../../hooks/service";
+import { getSessionGeneration } from "../../../hooks/service/util/session";
 import { extend } from "../../../hooks/service/util/extend";
 import useAnalytics from "../../../analytics";
 import { AnalyticsData } from "../../../analytics/model";
@@ -17,6 +14,7 @@ const analyticsData: AnalyticsData = { container: "Base", tile: "home" };
 // Keep the existing lead time: the backend must receive valid access before
 // issuing refresh, so normal acquisition starts before the access deadline.
 const REFRESH_BEFORE_ACCESS_EXPIRY_MS = 25_000;
+const REFRESH_RETRY_DELAYS_MS = [5_000, 15_000, 30_000];
 
 const useController = () => {
   const [store, dispatch] = useContext();
@@ -30,6 +28,12 @@ const useController = () => {
   } = useDispatcher();
   const timerPopup = React.useRef<any>(0);
   const timerMouseMove = React.useRef<any>(0);
+  const refreshRecovery = React.useRef<{
+    token?: string;
+    generation: number;
+    failures: number;
+    retryAt: number;
+  }>({ generation: -1, failures: 0, retryAt: 0 });
   const [showTimeout, setShowTimeout] = React.useState(false);
   const [value, setValue] = React.useState(1);
   const [ready, setReady] = React.useState(false);
@@ -38,9 +42,7 @@ const useController = () => {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     const target = event.target as HTMLElement;
     if (
-      !target.parentElement?.parentElement?.id?.includes(
-        "deleteWorkspace-"
-      )
+      !target.parentElement?.parentElement?.id?.includes("deleteWorkspace-")
     ) {
       const workspaces = [...(store?.workspaces as Workspace[])];
       const workspace = workspaces[newValue - 1];
@@ -107,6 +109,22 @@ const useController = () => {
     if (!ready || !store?.token) return;
 
     const accessExpiresAt = 1000 * aOrb(store.expiredIn, 0);
+    const generation = getSessionGeneration();
+    if (
+      refreshRecovery.current.token !== store.token ||
+      refreshRecovery.current.generation !== generation
+    ) {
+      refreshRecovery.current = {
+        token: store.token,
+        generation,
+        failures: 0,
+        retryAt: 0,
+      };
+    }
+    const recovery = refreshRecovery.current;
+    let cancelled = false;
+    let acquisitionPending = false;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
     // Use the current refresh token's own deadline. Access rotation does not
     // extend it, while a successful replacement can supply a later expiry.
     let refreshExpiresAt = 0;
@@ -133,6 +151,9 @@ const useController = () => {
       // All acquisition paths share these checks because a timer or hide event
       // can arrive after the prompt opens, logout starts, or access expires.
       if (
+        !cancelled &&
+        !acquisitionPending &&
+        generation === getSessionGeneration() &&
         accessExpiresAt > Date.now() &&
         !showTimeout &&
         !store.isOnLogout &&
@@ -143,13 +164,44 @@ const useController = () => {
         (!refreshExpiresAt ||
           accessExpiresAt - Date.now() >= REFRESH_BEFORE_ACCESS_EXPIRY_MS)
       ) {
-        getRefreshToken();
+        if (
+          !refreshExpiresAt &&
+          recovery.failures > REFRESH_RETRY_DELAYS_MS.length
+        )
+          return;
+        if (!refreshExpiresAt && recovery.retryAt > Date.now()) {
+          clearTimeout(retryTimer);
+          retryTimer = setTimeout(
+            requestRefresh,
+            recovery.retryAt - Date.now()
+          );
+          return;
+        }
+        acquisitionPending = true;
+        clearTimeout(retryTimer);
+        Promise.resolve(getRefreshToken()).then((result) => {
+          acquisitionPending = false;
+          if (cancelled || refreshExpiresAt) return;
+          if (result === "temporaryFailure") {
+            const delay = REFRESH_RETRY_DELAYS_MS[recovery.failures++];
+            // Retry while access can authorize acquisition. Frozen browsers
+            // still need the visibility check because this timer may not run.
+            if (delay !== undefined && Date.now() + delay < accessExpiresAt) {
+              recovery.retryAt = Date.now() + delay;
+              retryTimer = setTimeout(requestRefresh, delay);
+            }
+          } else if (result === "rejected" || result === "cancelled") {
+            // Keep the terminal result across visibility changes for this token.
+            recovery.failures = REFRESH_RETRY_DELAYS_MS.length + 1;
+          }
+        });
       }
     };
     let acquisitionTimer: ReturnType<typeof setTimeout> | undefined;
     const scheduleAcquisition = () => {
       clearTimeout(acquisitionTimer);
-      const delay = accessExpiresAt - REFRESH_BEFORE_ACCESS_EXPIRY_MS - Date.now();
+      const delay =
+        accessExpiresAt - REFRESH_BEFORE_ACCESS_EXPIRY_MS - Date.now();
       // Hidden pages acquire on hide because their timers may be frozen.
       // Returning after this deadline must not replay a late replacement.
       if (document.visibilityState === "visible" && delay > 0) {
@@ -172,6 +224,12 @@ const useController = () => {
       } else {
         // Resolve expiry first so returning cannot silently renew expired access.
         reconcileExpiry();
+        if (
+          !refreshExpiresAt &&
+          (recovery.failures > 0 ||
+            accessExpiresAt - Date.now() <= REFRESH_BEFORE_ACCESS_EXPIRY_MS)
+        )
+          requestRefresh();
         scheduleAcquisition();
       }
     };
@@ -193,11 +251,13 @@ const useController = () => {
       ? setTimeout(reconcileExpiry, Math.max(0, refreshExpiresAt - Date.now()))
       : undefined;
     return () => {
+      cancelled = true;
       // Token changes rebuild this effect. Remove the old callbacks so they
       // cannot apply obsolete deadlines after rotation or after Home unmounts.
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       clearTimeout(acquisitionTimer);
       clearTimeout(refreshExpiryTimer);
+      clearTimeout(retryTimer);
     };
   }, [
     ready,
@@ -228,14 +288,14 @@ const useController = () => {
     dispacthErrorMessage(undefined);
   };
 
-  const edit = (item: Workspace) => (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const workspaces = [...(store?.workspaces as Workspace[])];
-    const index = workspaces.findIndex((w) => w.id === item.id);
-    workspaces[index].label = event.target.value;
-    dispacthWorkspaces(workspaces);
-  };
+  const edit =
+    (item: Workspace) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const workspaces = [...(store?.workspaces as Workspace[])];
+      const index = workspaces.findIndex((w) => w.id === item.id);
+      workspaces[index].label = event.target.value;
+      dispacthWorkspaces(workspaces);
+    };
 
   const updateValue = (
     workspaces: Workspace[],

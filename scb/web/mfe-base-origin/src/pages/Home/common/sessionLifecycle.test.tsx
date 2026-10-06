@@ -526,7 +526,7 @@ describe("Session lifecycle across browser minimize and return", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("Given a pending hide request, When the page is shown and hidden again, Then a new request cancels the previous one and only its response is stored", async () => {
+  it("reuses a pending acquisition across repeated visibility changes", async () => {
     const adapter = service.defaults.adapter as AxiosAdapter;
     const finishRefresh: Array<() => void> = [];
     const consoleError = jest.spyOn(console, "error").mockImplementation();
@@ -554,27 +554,126 @@ describe("Session lifecycle across browser minimize and return", () => {
         setVisibility("hidden");
       });
 
-      expect(requestsTo("refreshtoken")).toHaveLength(2);
-      expect(requestsTo("refreshtoken")[0].signal?.aborted).toBe(true);
-      expect(requestsTo("refreshtoken")[1].signal?.aborted).toBe(false);
-      await act(async () => {
-        finishRefresh[1]();
-      });
-      expect(getHooksBase().store.refreshToken).toBe(responseRefreshToken);
+      expect(requestsTo("refreshtoken")).toHaveLength(1);
+      expect(requestsTo("refreshtoken")[0].signal?.aborted).toBe(false);
       await act(async () => {
         finishRefresh[0]();
       });
 
-      expect(getHooksBase().store.refreshToken).toBe(responseRefreshToken);
-      expect(requestsTo("refreshtoken")).toHaveLength(2);
-      expect(requestsTo("relogin")).toHaveLength(0);
-      expect(consoleError).toHaveBeenCalledWith(
-        "e",
-        expect.objectContaining({ code: "ERR_CANCELED" })
+      expect(getHooksBase().store.refreshToken).toBe(
+        token("initial-refresh", now + refreshLifetime)
       );
+      expect(requestsTo("refreshtoken")).toHaveLength(1);
+      expect(requestsTo("relogin")).toHaveLength(0);
+      expect(consoleError).not.toHaveBeenCalled();
     } finally {
       consoleError.mockRestore();
     }
+  });
+
+  it.each(["network", "server"])(
+    "recovers missing refresh after a temporary %s outage while hidden",
+    async (failure) => {
+      const adapter = service.defaults.adapter as AxiosAdapter;
+      service.defaults.adapter = async (config) => {
+        if (
+          config.url?.endsWith("/refreshtoken") &&
+          Date.now() < now + 30_000
+        ) {
+          requests.push(config);
+          throw new AxiosError(
+            "temporary outage",
+            failure === "network" ? "ERR_NETWORK" : "ERR_BAD_RESPONSE",
+            config,
+            undefined,
+            failure === "server"
+              ? {
+                  config,
+                  status: 503,
+                  statusText: "Unavailable",
+                  headers: {},
+                  data: {},
+                }
+              : undefined
+          );
+        }
+        return adapter(config);
+      };
+      await renderSession();
+      await act(async () => setVisibility("hidden"));
+      await advanceTime(5000);
+      await advanceTime(15_000);
+      await advanceTime(30_000);
+      expect(requestsTo("refreshtoken")).toHaveLength(4);
+      expect(getHooksBase().store.refreshToken).toBe(responseRefreshToken);
+      await advanceTime(accessLifetime - 50_000);
+      await act(async () =>
+        fireEvent.click(screen.getByRole("button", { name: "Extend" }))
+      );
+      expect(requestsTo("relogin")).toHaveLength(1);
+      expect(getHooksBase().store.token).toBe(responseAccessToken);
+    }
+  );
+
+  it.each([401, 403, 503])(
+    "bounds refresh recovery for status %s across visibility changes",
+    async (status) => {
+      service.defaults.adapter = async (config) => {
+        requests.push(config);
+        throw new AxiosError("failed", "ERR_BAD_RESPONSE", config, undefined, {
+          config,
+          status,
+          statusText: "Failed",
+          headers: {},
+          data: {},
+        });
+      };
+      await renderSession();
+      await act(async () => setVisibility("hidden"));
+      await advanceTime(5000);
+      await advanceTime(15_000);
+      await advanceTime(30_000);
+      await advanceTime(60_000);
+      await act(async () => {
+        setVisibility("visible");
+        setVisibility("hidden");
+      });
+      expect(requestsTo("refreshtoken")).toHaveLength(status === 503 ? 4 : 1);
+    }
+  );
+
+  it("cancels refresh recovery on logout and unmount", async () => {
+    service.defaults.adapter = async (config) => {
+      requests.push(config);
+      throw new AxiosError("offline", "ERR_NETWORK", config);
+    };
+    await renderSession();
+    await act(async () => setVisibility("hidden"));
+    act(() => {
+      getHooksBase().baseDispatch({
+        type: ActionType.SET_IS_ON_LOGOUT,
+        data: { isOnLogout: true },
+      });
+      // Run before React can clean up the old effect. Ownership must block it.
+      jest.advanceTimersByTime(5000);
+    });
+    cleanup();
+    await advanceTime(60_000);
+    expect(requestsTo("refreshtoken")).toHaveLength(1);
+  });
+
+  it("recovers missing refresh on return before access expiry after suspended retry timers", async () => {
+    const adapter = service.defaults.adapter as AxiosAdapter;
+    service.defaults.adapter = async (config) => {
+      requests.push(config);
+      throw new AxiosError("offline", "ERR_NETWORK", config);
+    };
+    await renderSession();
+    await act(async () => setVisibility("hidden"));
+    service.defaults.adapter = adapter;
+    jest.setSystemTime(now + accessLifetime - 10_000);
+    await act(async () => setVisibility("visible"));
+    expect(getHooksBase().store.refreshToken).toBe(responseRefreshToken);
   });
 
   it("[SR08] Given a minimized browser, When the user returns before access expiry and works, Then access renews and the refresh token is preserved", async () => {

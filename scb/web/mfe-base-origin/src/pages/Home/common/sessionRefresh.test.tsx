@@ -61,6 +61,7 @@ describe('Home session refresh', () => {
     jest.useFakeTimers();
     jest.setSystemTime(now);
     jest.resetAllMocks();
+    mockRefreshToken.mockResolvedValue('acquired');
     setVisibility('visible');
     mockStore = {
       token: 'access-token',
@@ -104,9 +105,10 @@ describe('Home session refresh', () => {
     expect(mockRefreshToken).toHaveBeenCalledTimes(1);
   });
 
-  it('[SR40] Returning before the timer deadline re-arms acquisition for that deadline', () => {
+  it('[SR40] Returning before the timer deadline re-arms acquisition for that deadline', async () => {
     renderHook(() => useController());
     act(() => setVisibility('hidden'));
+    await act(async () => undefined);
     act(() => jest.advanceTimersByTime(600_000));
     act(() => setVisibility('visible'));
     expect(mockRefreshToken).toHaveBeenCalledTimes(1);
@@ -129,7 +131,7 @@ describe('Home session refresh', () => {
     },
   );
 
-  it('[SR42] Repeated notifications in the same visibility state do not count as new hides', () => {
+  it('[SR42] Repeated notifications in the same visibility state do not count as new hides', async () => {
     renderHook(() => useController());
     act(() => {
       setVisibility('hidden');
@@ -137,6 +139,7 @@ describe('Home session refresh', () => {
       setVisibility('hidden');
     });
     expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+    await act(async () => undefined);
     act(() => {
       setVisibility('visible');
       setVisibility('hidden');
@@ -240,7 +243,7 @@ describe('Home session refresh', () => {
     });
 
     expect(mockRefreshToken).toHaveBeenCalledTimes(1);
-
+    await act(async () => undefined);
     act(() => {
       setVisibility('visible');
       setVisibility('hidden');
@@ -342,7 +345,8 @@ describe('Home session refresh', () => {
     expect(result.current.showTimeout).toBe(true);
   });
 
-  it('[SR42] Rendering does not request but every actual hide requests even with a pending call', () => {
+  it('[SR42] Rendering and repeated hides reuse a pending call', () => {
+    mockRefreshToken.mockReturnValue(new Promise(() => undefined));
     const { result, rerender } = renderHook(() => useController());
 
     for (let attempt = 0; attempt < 5; attempt++) {
@@ -354,7 +358,7 @@ describe('Home session refresh', () => {
       });
     }
 
-    expect(mockRefreshToken).toHaveBeenCalledTimes(5);
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
     expect(result.current.showTimeout).toBe(false);
   });
 
