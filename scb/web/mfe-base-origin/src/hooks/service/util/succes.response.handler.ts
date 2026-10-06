@@ -10,10 +10,8 @@ import {
   handleEntitlementsToken,
 } from "../../../utils/login";
 import { handleStandardResponse } from "../../../utils/ratan";
-import { isStaleSessionRequest } from "./sessionRequest";
 
 export const successHandler = (response: AxiosResponse): any => {
-  if (isStaleSessionRequest(response.config)) return response;
   if (
     response?.config?.url?.includes("/api/auth/v2/sso/login") ||
     response?.config?.url?.includes("/api/auth/v3/sso/login") ||

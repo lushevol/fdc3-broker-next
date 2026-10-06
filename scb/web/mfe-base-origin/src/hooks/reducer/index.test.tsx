@@ -23,7 +23,7 @@ describe("SET_DATA Reducer", () => {
     const result = reducers(initialData, { type: ActionType.CLEAR, data: {} })
     result.expiredIn = 0
     result.iat = 0
-    expect(result).toStrictEqual({ ...initialData, sessionGeneration: 1 })
+    expect(result).toStrictEqual(initialData)
   });
   it("initialData should be equal to", async () => {
     //@ts-ignore
@@ -42,8 +42,9 @@ describe("SET_DATA Reducer", () => {
     expect(result.iat).toStrictEqual(0)
   });
   it("SET_TOKEN should preserve the refresh token during access-token rotation", () => {
+    // Access renewal must leave the credential used by manual Extend available.
     const result = reducers(
-      { ...initialData, token: "current-access-token", refreshToken: "refresh-token" },
+      { ...initialData, refreshToken: "refresh-token" },
       { type: ActionType.SET_TOKEN, data: { token: "next-access-token" } }
     );
 

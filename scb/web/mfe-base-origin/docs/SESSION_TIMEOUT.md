@@ -39,11 +39,11 @@ while access is valid. The same applies if Home first becomes ready in the
 final 25 seconds of access validity. Initial acquisition must not depend on a
 future visibility change or an already-missed timer deadline.
 
-Refresh acquisition belongs to the session that started the request. Logging
-out invalidates pending refresh replies, including failures; an old reply
-must not restore credentials or clear a later login. Access rotation within
-the same session must still accept its pending refresh reply. Fresh login
-clears any leftover refresh credential.
+Isolation of pending refresh replies across logout and a later login
+(review issue 3) is deferred. Responses still use the existing shared handlers:
+an old successful reply can store a refresh credential after logout, and an
+old expiry failure can clear a later login. Fixes 1 and 2 address acquisition
+timing; they do not resolve this separate response-ownership risk.
 
 Returning to visible reconciles both expiries immediately. If the visible
 acquisition deadline is still in the future, it is rescheduled; a missed
@@ -59,7 +59,8 @@ across a page reload.
 
 Regression coverage lives in `sessionLifecycle.test.tsx` (real Provider,
 controllers, dialog and Axios interceptors), `sessionRefresh.test.tsx`
-(scheduling), and `hooks/reducer/session.test.ts` (session ownership). The
+(scheduling), and `hooks/reducer/index.test.tsx` (refresh preservation). The
 integration cases cover hidden startup with running or suspended timers,
-late mounting, near-expiry hiding, manual Extend, and late replies before or
-after another login.
+late mounting, near-expiry hiding, manual Extend, and refresh replies arriving
+after the timeout dialog opens. Cross-login reply isolation is not covered by
+this change.

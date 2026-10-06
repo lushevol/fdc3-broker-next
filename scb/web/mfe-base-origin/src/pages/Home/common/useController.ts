@@ -14,6 +14,8 @@ import { AnalyticsData } from "../../../analytics/model";
 import { handleLoginEntities } from "../../../utils/login";
 import { setDetail, refreshTabUtil } from "./util";
 const analyticsData: AnalyticsData = { container: "Base", tile: "home" };
+// Keep the existing lead time: the backend must receive valid access before
+// issuing refresh, so normal acquisition starts before the access deadline.
 const REFRESH_BEFORE_ACCESS_EXPIRY_MS = 25_000;
 
 const useController = () => {
@@ -105,6 +107,8 @@ const useController = () => {
     if (!ready || !store?.token) return;
 
     const accessExpiresAt = 1000 * aOrb(store.expiredIn, 0);
+    // Use the current refresh token's own deadline. Access rotation does not
+    // extend it, while a successful replacement can supply a later expiry.
     let refreshExpiresAt = 0;
     if (store.refreshToken) {
       try {
@@ -116,6 +120,8 @@ const useController = () => {
     }
 
     const reconcileExpiry = () => {
+      // Suspended browsers may not deliver timers on time. Check wall-clock
+      // expiry on return, including refresh expiry while access is still valid.
       if (
         accessExpiresAt <= Date.now() ||
         (refreshExpiresAt > 0 && refreshExpiresAt <= Date.now())
@@ -124,11 +130,16 @@ const useController = () => {
       }
     };
     const requestRefresh = () => {
+      // All acquisition paths share these checks because a timer or hide event
+      // can arrive after the prompt opens, logout starts, or access expires.
       if (
         accessExpiresAt > Date.now() &&
         !showTimeout &&
         !store.isOnLogout &&
         (!refreshExpiresAt || refreshExpiresAt > Date.now()) &&
+        // Fix 1: a late replacement may reach the backend after access expires;
+        // its expiry error clears authentication even when refresh is usable.
+        // Preserve that credential once less than the 25-second lead remains.
         (!refreshExpiresAt ||
           accessExpiresAt - Date.now() >= REFRESH_BEFORE_ACCESS_EXPIRY_MS)
       ) {
@@ -139,9 +150,11 @@ const useController = () => {
     const scheduleAcquisition = () => {
       clearTimeout(acquisitionTimer);
       const delay = accessExpiresAt - REFRESH_BEFORE_ACCESS_EXPIRY_MS - Date.now();
-      // A missed deadline must not replay an acquisition when the page returns.
+      // Hidden pages acquire on hide because their timers may be frozen.
+      // Returning after this deadline must not replay a late replacement.
       if (document.visibilityState === "visible" && delay > 0) {
         acquisitionTimer = setTimeout(() => {
+          // Visibility can change between scheduling and callback delivery.
           if (document.visibilityState === "visible") requestRefresh();
         }, delay);
       }
@@ -149,16 +162,22 @@ const useController = () => {
     let previousVisibility = document.visibilityState;
     const handleVisibilityChange = () => {
       const visibility = document.visibilityState;
+      // Duplicate notifications must not create extra refresh requests.
       if (visibility === previousVisibility) return;
       previousVisibility = visibility;
       clearTimeout(acquisitionTimer);
       if (visibility === "hidden") {
+        // Acquire while JavaScript can still run, before possible suspension.
         requestRefresh();
       } else {
+        // Resolve expiry first so returning cannot silently renew expired access.
         reconcileExpiry();
         scheduleAcquisition();
       }
     };
+    // Fix 2: a page already hidden at mount emits no new hide event, and a late
+    // mount has already missed the visible timer deadline. Acquire missing
+    // refresh now; requestRefresh still requires valid access and no logout.
     if (
       !refreshExpiresAt &&
       (document.visibilityState === "hidden" ||
@@ -168,10 +187,14 @@ const useController = () => {
     }
     scheduleAcquisition();
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    // Continuous activity may keep access alive beyond refresh expiry, so the
+    // refresh deadline needs its own timer as well as the check on return.
     const refreshExpiryTimer = refreshExpiresAt
       ? setTimeout(reconcileExpiry, Math.max(0, refreshExpiresAt - Date.now()))
       : undefined;
     return () => {
+      // Token changes rebuild this effect. Remove the old callbacks so they
+      // cannot apply obsolete deadlines after rotation or after Home unmounts.
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       clearTimeout(acquisitionTimer);
       clearTimeout(refreshExpiryTimer);

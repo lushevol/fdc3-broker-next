@@ -2,10 +2,8 @@ import { AxiosError } from "axios";
 import { getHooksBase } from "../../HooksBase";
 import { ActionType } from "../../reducer/util/ActionType";
 import { clearStorageWhenLogout } from "../../../utils/common";
-import { isStaleSessionRequest } from "./sessionRequest";
 
 export const errorHandler = (error: AxiosError): unknown => {
-  if (isStaleSessionRequest(error.config)) return Promise.reject(error);
   const { baseDispatch } = getHooksBase();
   if (
     error.code !== "ERR_CANCELED" &&

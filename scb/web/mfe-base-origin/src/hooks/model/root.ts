@@ -95,8 +95,6 @@ export interface RootModel {
   user?: User;
   token?: string;
   refreshToken?: string;
-  /** Changes on logout so pending refresh replies cannot enter another session. */
-  sessionGeneration?: number;
   errorMsg?: string;
   isLoading?: boolean;
   theme?: string;

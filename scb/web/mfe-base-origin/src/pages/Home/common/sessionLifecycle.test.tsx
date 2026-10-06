@@ -173,6 +173,8 @@ describe("Session lifecycle across browser minimize and return", () => {
   it.each(["running", "suspended"])(
     "Given Home starts hidden with %s timers, When access expires and the user returns, Then Extend succeeds",
     async (timers) => {
+      // Issue 2: hiding before mount cannot notify Home's future listener.
+      // Both background and frozen timers must leave manual Extend usable.
       setVisibility("hidden");
       await renderSession();
       expect(requestsTo("refreshtoken")).toHaveLength(1);
@@ -195,6 +197,8 @@ describe("Session lifecycle across browser minimize and return", () => {
   );
 
   it("Given Home first mounts after the acquisition deadline, Then it obtains missing refresh while access is still valid", async () => {
+    // Issue 2 also applies to a visible mount after the 25-second deadline.
+    // Prove that the recovered credential works through the real dialog.
     await renderSession({
       token: token("late-access", now + 10_000),
       expiredIn: (now + 10_000) / 1000,
@@ -251,6 +255,8 @@ describe("Session lifecycle across browser minimize and return", () => {
       const acquiredRefresh = getHooksBase().store.refreshToken;
       expect(acquiredRefresh).toBeDefined();
 
+      // Issue 1: if hiding sends a replacement, simulate the backend checking
+      // access after it expires. The real error handler would clear the session.
       const adapter = service.defaults.adapter as AxiosAdapter;
       let rejectLateAcquisition: (() => void) | undefined;
       service.defaults.adapter = async (config) => {
@@ -280,6 +286,8 @@ describe("Session lifecycle across browser minimize and return", () => {
       });
 
       expect(screen.getByRole("dialog")).toBeInTheDocument();
+      // Keep the original credential and prove Extend still works; checking
+      // only the request count would miss an accidental authentication reset.
       expect(requestsTo("refreshtoken")).toHaveLength(1);
       await act(async () => {
         fireEvent.click(screen.getByRole("button", { name: "Extend" }));
@@ -638,95 +646,6 @@ describe("Session lifecycle across browser minimize and return", () => {
       expect(getHooksBase().store.refreshToken).toBeUndefined();
     }
   );
-
-  it.each([
-    { outcome: "success", replyAfterLogin: false },
-    { outcome: "success", replyAfterLogin: true },
-    { outcome: "failure", replyAfterLogin: false },
-    { outcome: "failure", replyAfterLogin: true },
-  ])(
-    "Given pending refresh $outcome, When logout precedes the reply (after new login: $replyAfterLogin), Then the old request cannot affect authentication",
-    async ({ outcome, replyAfterLogin }) => {
-      const adapter = service.defaults.adapter as AxiosAdapter;
-      let finishRefresh: (() => void) | undefined;
-      service.defaults.adapter = async (config) => {
-        const response = await adapter(config);
-        if (config.url === "/api/auth/v2/sso/refreshtoken") {
-          await new Promise<void>((resolve, reject) => {
-            finishRefresh = () => {
-              if (outcome === "success") {
-                resolve();
-              } else {
-                reject({
-                  config,
-                  message: "Request failed with status code 401",
-                  response: {
-                    ...response,
-                    status: 401,
-                    data: { errorMessage: "TOKEN_INVALID_EXPIRED" },
-                  },
-                });
-              }
-            };
-          });
-        }
-        return response;
-      };
-      await renderSession();
-      await advanceTime(accessLifetime - refreshLead);
-      expect(requestsTo("refreshtoken")).toHaveLength(1);
-      await advanceTime(refreshLead);
-      fireEvent.click(screen.getByRole("button", { name: "Logout" }));
-      await advanceTime(1000);
-      expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
-
-      if (!replyAfterLogin) {
-        await act(async () => finishRefresh?.());
-        expect(getHooksBase().store.refreshToken).toBeUndefined();
-        expect(getHooksBase().store.errorMsg).toBeUndefined();
-      }
-      jest.setSystemTime(now + refreshLifetime + 1000);
-      responseAccessToken = token(
-        "new-login-access",
-        Date.now() + accessLifetime,
-        Date.now()
-      );
-      await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
-      });
-      if (replyAfterLogin) {
-        await act(async () => finishRefresh?.());
-      }
-      await advanceTime(0);
-      await advanceTime(1000);
-      expect(screen.getByTestId("session-workspace")).toBeInTheDocument();
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-      expect(getHooksBase().store.token).toBe(responseAccessToken);
-      expect(getHooksBase().store.refreshToken).toBeUndefined();
-      expect(getHooksBase().store.errorMsg).toBeUndefined();
-    }
-  );
-
-  it("Given a pending refresh, When access rotates within the same session, Then its reply remains usable", async () => {
-    const adapter = service.defaults.adapter as AxiosAdapter;
-    let finishRefresh: (() => void) | undefined;
-    service.defaults.adapter = async (config) => {
-      const response = await adapter(config);
-      if (config.url === "/api/auth/v2/sso/refreshtoken") {
-        await new Promise<void>((resolve) => { finishRefresh = resolve; });
-      }
-      return response;
-    };
-    await renderSession();
-    await act(async () => setVisibility("hidden"));
-    await act(async () => setVisibility("visible"));
-    await advanceTime(10 * minute);
-    await continueWorking();
-    expect(getHooksBase().store.token).toBe(responseAccessToken);
-    await act(async () => finishRefresh?.());
-    expect(getHooksBase().store.refreshToken).toBe(responseRefreshToken);
-    expect(screen.getByTestId("session-workspace")).toBeInTheDocument();
-  });
 
   it("[SR13] Given the user logs out from the alert, When another login succeeds and the page hides, Then it obtains a new refresh token rather than reusing the previous session", async () => {
     await renderSession();
