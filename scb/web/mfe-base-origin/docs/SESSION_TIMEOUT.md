@@ -34,6 +34,13 @@ replacement in the final 25 seconds of access-token validity. A request sent
 at that boundary can arrive after access expires and invalidate an otherwise
 extendable session.
 
+A failed optional replacement must preserve the current usable refresh token
+only when the server returns ACCESS_TOKEN_EXPIRED for this login. The server
+must verify the signature, issuer, session limit, and session status before it
+returns that code. It must not issue a new token from expired access. Invalid
+credentials, revoked sessions, missing/expired refresh, and unclassified legacy
+errors keep the existing logout behavior. Deploy the server change first.
+
 If Home starts hidden, it must acquire a missing refresh token immediately
 while access is valid. The same applies if Home first becomes ready in the
 final 25 seconds of access validity. Initial acquisition must not depend on a

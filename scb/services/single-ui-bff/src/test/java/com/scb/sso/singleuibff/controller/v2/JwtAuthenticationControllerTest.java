@@ -602,6 +602,23 @@ class JwtAuthenticationControllerTest {
 
     @SneakyThrows
     @Test
+    void expiredAccessReturnsSpecificCodeOnlyForAnActiveSession() {
+        doThrow(JwtException.builder().message("expired access").build()).when(jwtTokenUtil).validateToken(any());
+        doReturn("{\"sub\":\"user\",\"id\":\"session\"}").when(jwtTokenUtil).retrieveExpiredAccessInfoForRefresh(any());
+        RequestOfJWT request = new RequestOfJWT();
+        request.setSingleUIAuthorization("Bearer expired");
+        mockMvc.perform(post("/v2/sso/refreshtoken").content(objectMapper.writeValueAsString(request))
+            .contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isUnauthorized())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorCode").value("ACCESS_TOKEN_EXPIRED"));
+        doThrow(JwtException.builder().message("revoked session").build()).when(sessionService).validateSession("session");
+        mockMvc.perform(post("/v2/sso/refreshtoken").content(objectMapper.writeValueAsString(request))
+            .contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isUnauthorized())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.errorCode").value("INVALID_AUTHENTICATION"));
+        verify(jwtTokenUtil, never()).generateReToken(any(), any());
+    }
+
+    @SneakyThrows
+    @Test
     void testCheckRefreshTokenWrong() {
         doThrow(JwtException.builder().message("jwtToken is empty, validation failed.").build()).when(jwtTokenUtil).validateToken(any());
         RequestOfJWT request = new RequestOfJWT();

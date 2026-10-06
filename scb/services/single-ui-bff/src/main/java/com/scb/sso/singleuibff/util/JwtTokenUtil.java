@@ -106,6 +106,26 @@ public class JwtTokenUtil {
         return decodedJWT.getExpiresAt();
     }
 
+    public String retrieveExpiredAccessInfoForRefresh(String token) {
+        DecodedJWT decoded = JWT.decode(token);
+        Date now = new Date();
+        Date expiration = decoded.getExpiresAt();
+        if (expiration == null || !expiration.before(now)) {
+            throw JwtException.builder().message("access token is not expired").build();
+        }
+        // This verifier classifies a rejected request only. Expiry leeway must
+        // never be used to authorize a request or generate a refresh token.
+        // Keep signature, issuer, issued-at and not-before verification enabled.
+        long expiryLeeway = (now.getTime() - expiration.getTime()) / 1000 + 2;
+        DecodedJWT verified = JWT.require(algorithm).withIssuer(JWT_ISSUER)
+            .acceptExpiresAt(expiryLeeway).build().verify(token);
+        Date maxAge = verified.getClaim(ABSOLUTE_IDLE).asDate();
+        if (maxAge != null && !maxAge.after(now)) {
+            throw JwtException.builder().message("session limit is expired").build();
+        }
+        return retrieveUserInfo(token);
+    }
+
     public Date getMaxAge(String token) {
         if (Objects.isNull(token)) {
             return null;

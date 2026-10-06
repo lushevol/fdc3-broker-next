@@ -281,6 +281,48 @@ describe("Session lifecycle across browser minimize and return", () => {
     expect(getHooksBase().store.isOnLogout).toBe(true);
   });
 
+  it.each([
+    ["ACCESS_TOKEN_EXPIRED", true, true],
+    ["INVALID_AUTHENTICATION", true, false],
+    ["SESSION_LIMIT_EXPIRED", true, false],
+    [undefined, true, false],
+    ["ACCESS_TOKEN_EXPIRED", false, false],
+  ])(
+    "handles slow refresh failure %s with existing refresh %s safely",
+    async (errorCode, hasRefresh, preserve) => {
+      let rejectRequest: (error: AxiosError) => void;
+      service.defaults.adapter = (config) => {
+        requests.push(config);
+        return new Promise((_resolve, reject) => {
+          rejectRequest = reject;
+        });
+      };
+      await renderSession({
+        token: token("short-access", now + 30_000),
+        expiredIn: (now + 30_000) / 1000,
+        refreshToken: hasRefresh ? responseRefreshToken : undefined,
+      });
+      await act(async () => setVisibility("hidden"));
+      const config = requestsTo("refreshtoken")[0];
+      await advanceTime(31_000);
+      await act(async () => {
+        rejectRequest(
+          new AxiosError("expired", "ERR_BAD_REQUEST", config, undefined, {
+            config,
+            status: 401,
+            statusText: "Unauthorized",
+            headers: {},
+            data: { errorCode, errorMessage: "TOKEN_INVALID_EXPIRED" },
+          })
+        );
+      });
+      expect(Boolean(getHooksBase().store.token)).toBe(preserve);
+      expect(getHooksBase().store.refreshToken).toBe(
+        preserve ? responseRefreshToken : undefined
+      );
+    }
+  );
+
   it.each(["running", "suspended"])(
     "Given Home starts hidden with %s timers, When access expires and the user returns, Then Extend succeeds",
     async (timers) => {

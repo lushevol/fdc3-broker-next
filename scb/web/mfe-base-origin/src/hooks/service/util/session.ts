@@ -1,8 +1,9 @@
 import { AxiosRequestConfig, CanceledError } from "axios";
 
-type SessionConfig = AxiosRequestConfig & {
+export type SessionConfig = AxiosRequestConfig & {
   sessionGeneration?: number;
   releaseSession?: () => void;
+  refreshReplacement?: boolean;
 };
 
 let generation = 0;

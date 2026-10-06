@@ -1,7 +1,8 @@
 import { AxiosError } from "axios";
 import { getHooksBase } from "../../HooksBase";
 import { ActionType } from "../../reducer/util/ActionType";
-import { clearStorageWhenLogout } from "../../../utils/common";
+import { clearStorageWhenLogout, getJWTPayload } from "../../../utils/common";
+import type { SessionConfig } from "./session";
 import {
   isCurrentSession,
   releaseSessionRequest,
@@ -13,7 +14,35 @@ export const errorHandler = (error: AxiosError): unknown => {
   // An old expiry error must not clear credentials or errors in a later login.
   if (!isCurrentSession(error.config))
     return Promise.reject(staleSessionError());
-  const { baseDispatch } = getHooksBase();
+  const { baseDispatch, store } = getHooksBase();
+  const request = error.config as SessionConfig | undefined;
+  const data = error.response?.data as { errorCode?: string } | undefined;
+  let usableRefresh = false;
+  try {
+    const payload = store.refreshToken
+      ? getJWTPayload(store.refreshToken)
+      : undefined;
+    usableRefresh = Boolean(payload && (payload.exp ?? 0) * 1000 > Date.now());
+  } catch {
+    // A malformed credential must not disable the authentication failure rule.
+  }
+  if (
+    error.response?.status === 401 &&
+    request?.url?.endsWith("/sso/refreshtoken") &&
+    request.sessionGeneration !== undefined &&
+    request.refreshReplacement &&
+    data?.errorCode === "ACCESS_TOKEN_EXPIRED" &&
+    usableRefresh &&
+    !store.isOnLogout
+  ) {
+    // The server verified identity and revocation. Preserve usable refresh for
+    // explicit Extend; this rejected replacement must not clear authentication.
+    baseDispatch({
+      type: ActionType.SET_IS_LOADING,
+      data: { isLoading: false },
+    });
+    return Promise.reject(error);
+  }
   if (
     error.code !== "ERR_CANCELED" &&
     !error?.config?.url?.includes("/logout") &&

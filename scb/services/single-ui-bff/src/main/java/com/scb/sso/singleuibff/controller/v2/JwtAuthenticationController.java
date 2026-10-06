@@ -320,8 +320,22 @@ public class JwtAuthenticationController {
             return ResponseEntity.ok(ResponseOfAuthenticate.builder().result(result).expiration(newExpirationDate).build());
         } catch (Exception e) {
             log.info("token refreshtoken failed, reason: {}", e.getMessage());
+            String errorCode = "INVALID_AUTHENTICATION";
+            try {
+                // Distinguish ordinary access expiry from invalid credentials
+                // and revoked sessions. This path still returns 401 and never
+                // issues a token. Verify identity before checking revocation.
+                String expiredAccess = retrieveToken(requestOfJWT.getSingleUIAuthorization());
+                String userInfo = jwtTokenUtil.retrieveExpiredAccessInfoForRefresh(expiredAccess);
+                Map<String, Object> payload = objectMapper.readValue(userInfo, HashMap.class);
+                sessionService.validateSession((String) payload.get(SESSION_ID));
+                errorCode = "ACCESS_TOKEN_EXPIRED";
+            } catch (Exception invalidAuthentication) {
+                // Unknown errors keep the existing authentication failure rule.
+            }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                ResponseOfAuthenticate.builder().result(false).errorMessage("TOKEN_INVALID_EXPIRED - ".concat(e.getMessage())).build());
+                ResponseOfAuthenticate.builder().result(false).errorCode(errorCode)
+                    .errorMessage("TOKEN_INVALID_EXPIRED - ".concat(e.getMessage())).build());
         }
     }
 

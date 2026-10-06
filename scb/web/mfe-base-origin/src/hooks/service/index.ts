@@ -2,6 +2,7 @@ import { AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
 import { getHooksBase } from "../HooksBase";
 import service from "./config";
 import { getEndPoint } from "./util/getEndpoint";
+import type { SessionConfig } from "./util/session";
 
 export interface ConfigProps {
   signal?: any;
@@ -19,13 +20,16 @@ export const getRefreshToken = () => {
   }
   signal.getRefreshToken = new AbortController();
   const { store } = getHooksBase();
+  const config: SessionConfig = {
+    signal: signal.getRefreshToken.signal,
+    // Only replacement failures can preserve an already available credential.
+    refreshReplacement: Boolean(store.refreshToken),
+  };
   service
     .post(
       getEndPoint("/auth/v2/sso/refreshtoken"),
       { singleUIAuthorization: store.token },
-      {
-        signal: signal.getRefreshToken.signal,
-      }
+      config
     )
     .catch((e) => {
       console.error("e", e);
@@ -55,7 +59,11 @@ const putService = <T = unknown, D = unknown>(
   data: D,
   config?: AxiosRequestConfig<D>
 ): AxiosPromise<T, D> => {
-  return service.put<T, AxiosResponse<T, D>, D>(getEndPoint(path), data, config);
+  return service.put<T, AxiosResponse<T, D>, D>(
+    getEndPoint(path),
+    data,
+    config
+  );
 };
 
 const postService = <T = unknown, D = unknown>(
