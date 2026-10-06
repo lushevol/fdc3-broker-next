@@ -30,9 +30,11 @@ the refresh token's expiry. Until then, it remains visible and lets the user
 choose whether to log out.
 
 When a usable refresh token is already available, Home must not request a
-replacement in the final 25 seconds of access-token validity. A request sent
-at that boundary can arrive after access expires and invalidate an otherwise
-extendable session.
+replacement on hide or mount in the final 25 seconds of access validity.
+The scheduled visible callback can run late within that window while access
+remains valid. It must not require exact millisecond delivery. Its acquisition
+time remains expiry minus 25 seconds. A late server rejection follows the
+specific error rule below, so usable refresh remains available for Extend.
 
 A failed optional replacement must preserve the current usable refresh token
 only when the server returns ACCESS_TOKEN_EXPIRED for this login. The server

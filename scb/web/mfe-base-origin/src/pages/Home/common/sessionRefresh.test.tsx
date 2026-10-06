@@ -168,6 +168,27 @@ describe('Home session refresh', () => {
     expect(mockRefreshToken).not.toHaveBeenCalled();
   });
 
+  it.each([1, 5000, 24_999])('allows a scheduled replacement delivered %i ms late while access remains valid', (lateness) => {
+    mockStore.refreshToken = tokenExpiringAt(now + refreshLifetime);
+    const timeout = jest.spyOn(window, 'setTimeout');
+    renderHook(() => useController());
+    const scheduled = timeout.mock.calls.find(([, delay]) => delay === accessLifetime - 25_000)?.[0];
+    expect(scheduled).toBeDefined();
+    jest.setSystemTime(now + accessLifetime - 25_000 + lateness);
+    act(() => (scheduled as () => void)());
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects a scheduled replacement delivered at access expiry', () => {
+    mockStore.refreshToken = tokenExpiringAt(now + refreshLifetime);
+    const timeout = jest.spyOn(window, 'setTimeout');
+    renderHook(() => useController());
+    const scheduled = timeout.mock.calls.find(([, delay]) => delay === accessLifetime - 25_000)?.[0];
+    jest.setSystemTime(now + accessLifetime);
+    act(() => (scheduled as () => void)());
+    expect(mockRefreshToken).not.toHaveBeenCalled();
+  });
+
   it('[SR35] Access rotation cancels the obsolete visible acquisition deadline', () => {
     const { rerender } = renderHook(() => useController());
     act(() => jest.advanceTimersByTime(600_000));
@@ -474,6 +495,12 @@ describe('Home session refresh', () => {
     act(() => result.current.mouseMove());
     act(() => jest.advanceTimersByTime(5000));
     expect(extend).toHaveBeenCalledWith(mockStore.expiredIn, mockStore.isOnLogout, 'new-access');
+  });
+
+  it('preserves direct runExtend calls without arguments', () => {
+    const { result } = renderHook(() => useController());
+    act(() => result.current.runExtend());
+    expect(extend).toHaveBeenCalledWith(mockStore.expiredIn, mockStore.isOnLogout, mockStore.token);
   });
 
   it.each(['token', 'logout'])('checks current %s even before the old activity effect is cleaned up', (change) => {

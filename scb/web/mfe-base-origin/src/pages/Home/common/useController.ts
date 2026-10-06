@@ -62,7 +62,7 @@ const useController = () => {
       dispacthErrorMessage(undefined);
     }
   };
-  const runExtend = (token: string | undefined, generation: number) => {
+  const runExtend = (token = store.token, generation = getSessionGeneration()) => {
     const current = getHooksBase().store;
     // Cleanup can run after a timer is delivered. Recheck its owner before
     // sending activity so an old timer cannot rotate access in a later login.
@@ -169,7 +169,7 @@ const useController = () => {
         setShowTimeout(true);
       }
     };
-    const requestRefresh = () => {
+    const requestRefresh = (scheduledReplacement = false) => {
       // All acquisition paths share these checks because a timer or hide event
       // can arrive after the prompt opens, logout starts, or access expires.
       if (
@@ -180,10 +180,11 @@ const useController = () => {
         !showTimeout &&
         !store.isOnLogout &&
         (!refreshExpiresAt || refreshExpiresAt > Date.now()) &&
-        // Fix 1: a late replacement may reach the backend after access expires;
-        // its expiry error clears authentication even when refresh is usable.
-        // Preserve that credential once less than the 25-second lead remains.
+        // Preserve the final-window hide/mount rule. Scheduled callbacks may
+        // arrive late; verified access-expiry failures now preserve refresh.
+        // The wall-clock guard above still rejects expired access.
         (!refreshExpiresAt ||
+          scheduledReplacement ||
           accessExpiresAt - Date.now() >= REFRESH_BEFORE_ACCESS_EXPIRY_MS)
       ) {
         if (
@@ -229,7 +230,7 @@ const useController = () => {
       if (document.visibilityState === "visible" && delay > 0) {
         acquisitionTimer = setTimeout(() => {
           // Visibility can change between scheduling and callback delivery.
-          if (document.visibilityState === "visible") requestRefresh();
+          if (document.visibilityState === "visible") requestRefresh(true);
         }, delay);
       }
     };
