@@ -2,8 +2,17 @@ import { AxiosError } from "axios";
 import { getHooksBase } from "../../HooksBase";
 import { ActionType } from "../../reducer/util/ActionType";
 import { clearStorageWhenLogout } from "../../../utils/common";
+import {
+  isCurrentSession,
+  releaseSessionRequest,
+  staleSessionError,
+} from "./session";
 
 export const errorHandler = (error: AxiosError): unknown => {
+  releaseSessionRequest(error.config);
+  // An old expiry error must not clear credentials or errors in a later login.
+  if (!isCurrentSession(error.config))
+    return Promise.reject(staleSessionError());
   const { baseDispatch } = getHooksBase();
   if (
     error.code !== "ERR_CANCELED" &&

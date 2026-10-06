@@ -10,8 +10,16 @@ import {
   handleEntitlementsToken,
 } from "../../../utils/login";
 import { handleStandardResponse } from "../../../utils/ratan";
+import {
+  isCurrentSession,
+  releaseSessionRequest,
+  staleSessionError,
+} from "./session";
 
 export const successHandler = (response: AxiosResponse): any => {
+  releaseSessionRequest(response.config);
+  // Cancellation is best effort. Check ownership before storage or state writes.
+  if (!isCurrentSession(response.config)) throw staleSessionError();
   if (
     response?.config?.url?.includes("/api/auth/v2/sso/login") ||
     response?.config?.url?.includes("/api/auth/v3/sso/login") ||

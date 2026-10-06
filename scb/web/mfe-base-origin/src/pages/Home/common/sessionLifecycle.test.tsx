@@ -1,12 +1,21 @@
 import React from "react";
 import { Buffer } from "buffer";
 import type { AxiosAdapter, InternalAxiosRequestConfig } from "axios";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import Provider, { useContext } from "../../../hooks/provider";
 import { getHooksBase } from "../../../hooks/HooksBase";
 import type { RootModel } from "../../../hooks/model/root";
 import { ActionType } from "../../../hooks/reducer/util/ActionType";
 import service from "../../../hooks/service/config";
+import { successHandler } from "../../../hooks/service/util/succes.response.handler";
+import { errorHandler } from "../../../hooks/service/util/error.response.handler";
+import { AxiosError } from "axios";
 import { signal as sessionSignals } from "../../../hooks/service";
 import { signal as extendSignal } from "../../../hooks/service/util/extend";
 import useServices from "../../../services";
@@ -36,7 +45,11 @@ const originalVisibility = Object.getOwnPropertyDescriptor(
 
 const token = (subject: string, expiresAt: number, issuedAt = now) =>
   `Bearer e30.${Buffer.from(
-    JSON.stringify({ sub: subject, iat: issuedAt / 1000, exp: expiresAt / 1000 })
+    JSON.stringify({
+      sub: subject,
+      iat: issuedAt / 1000,
+      exp: expiresAt / 1000,
+    })
   ).toString("base64")}.test-signature`;
 
 const setVisibility = (visibility: DocumentVisibilityState) => {
@@ -168,6 +181,104 @@ describe("Session lifecycle across browser minimize and return", () => {
     }
     localStorage.clear();
     sessionStorage.clear();
+  });
+
+  it.each([ActionType.CLEAR, ActionType.SET_IS_ON_LOGOUT])(
+    "rejects a refresh success after %s, even if transport cancellation is ignored",
+    async (type) => {
+      await renderSession();
+      await act(async () => setVisibility("hidden"));
+      const config = requestsTo("refreshtoken")[0];
+      act(() =>
+        getHooksBase().baseDispatch({ type, data: { isOnLogout: true } })
+      );
+      expect(() =>
+        successHandler({
+          config,
+          data: {},
+          status: 200,
+          statusText: "OK",
+          headers: { "single-ui-refresh": "old-refresh" },
+        })
+      ).toThrow();
+      expect(getHooksBase().store.refreshToken).not.toBe("old-refresh");
+    }
+  );
+
+  it("rejects old success and expiry errors after a later login", async () => {
+    await renderSession();
+    await act(async () => setVisibility("hidden"));
+    const config = requestsTo("refreshtoken")[0];
+    act(() =>
+      getHooksBase().baseDispatch({ type: ActionType.CLEAR, data: {} })
+    );
+    await act(async () =>
+      fireEvent.click(screen.getByRole("button", { name: "Sign in" }))
+    );
+    const currentToken = getHooksBase().store.token;
+    expect(() =>
+      successHandler({
+        config,
+        data: {},
+        status: 200,
+        statusText: "OK",
+        headers: { "single-ui-refresh": "old-refresh" },
+      })
+    ).toThrow();
+    await act(async () => {
+      await expect(
+        errorHandler(
+          new AxiosError("expired", "ERR_BAD_REQUEST", config, undefined, {
+            config,
+            status: 401,
+            statusText: "Unauthorized",
+            headers: {},
+            data: { errorMessage: "TOKEN_INVALID_EXPIRED" },
+          })
+        )
+      ).rejects.toBeDefined();
+    });
+    expect(getHooksBase().store.token).toBe(currentToken);
+    expect(getHooksBase().store.errorMsg).toBeUndefined();
+  });
+
+  it("accepts refresh replies across access rotation within the same login", async () => {
+    await renderSession();
+    await act(async () => setVisibility("hidden"));
+    const config = requestsTo("refreshtoken")[0];
+    act(() =>
+      getHooksBase().baseDispatch({
+        type: ActionType.SET_TOKEN,
+        data: { token: responseAccessToken },
+      })
+    );
+    act(() =>
+      successHandler({
+        config,
+        data: {},
+        status: 200,
+        statusText: "OK",
+        headers: { "single-ui-refresh": "same-session-refresh" },
+      })
+    );
+    expect(getHooksBase().store.refreshToken).toBe("same-session-refresh");
+  });
+
+  it("does not apply credential updates queued before logout starts", async () => {
+    await renderSession();
+    act(() => {
+      const { baseDispatch } = getHooksBase();
+      baseDispatch({
+        type: ActionType.SET_TOKEN,
+        data: { token: "obsolete-access" },
+      });
+      baseDispatch({
+        type: ActionType.SET_IS_ON_LOGOUT,
+        data: { isOnLogout: true },
+      });
+    });
+    expect(getHooksBase().store.token).not.toBe("obsolete-access");
+    expect(getHooksBase().store.isOnLogout).toBe(true);
   });
 
   it.each(["running", "suspended"])(
@@ -390,7 +501,10 @@ describe("Session lifecycle across browser minimize and return", () => {
         setVisibility("hidden");
       });
       expect(requestsTo("refreshtoken")).toHaveLength(1);
-      responseRefreshToken = token("second-hide-refresh", now + refreshLifetime);
+      responseRefreshToken = token(
+        "second-hide-refresh",
+        now + refreshLifetime
+      );
       await act(async () => {
         setVisibility("visible");
       });
@@ -638,7 +752,9 @@ describe("Session lifecycle across browser minimize and return", () => {
       expect(screen.getByRole("button", { name: "Extend" })).toBeDisabled();
       await advanceTime(1000);
 
-      expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Sign in" })
+      ).toBeInTheDocument();
       expect(requestsTo("logout")).toHaveLength(1);
       expect(requestsTo("relogin")).toHaveLength(0);
       expect(requestsTo("extend")).toHaveLength(0);

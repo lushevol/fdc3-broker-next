@@ -5,8 +5,14 @@ import rootReducer from "./root.reducers";
 import workspacesReducer from "./workspaces.reducers";
 import { getHooks } from "..";
 import { getHooksBase } from "../HooksBase";
+import { getSessionGeneration } from "../service/util/session";
 
 export const reducers = (state: RootModel, action: IAction): RootModel => {
+  if (
+    action.sessionGeneration !== undefined &&
+    action.sessionGeneration !== getSessionGeneration()
+  )
+    return state;
   Object.freeze(state);
   let store: RootModel = { ...state };
   store = rootReducer0(store, action);

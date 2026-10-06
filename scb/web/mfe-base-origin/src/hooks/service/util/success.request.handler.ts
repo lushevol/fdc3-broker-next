@@ -1,7 +1,9 @@
 import { getHooksBase } from "../../HooksBase";
 import { ActionType } from "../../reducer/util/ActionType";
+import { prepareSessionRequest } from "./session";
 
 export const requestHandler = (request: any) => {
+  prepareSessionRequest(request);
   const { store, baseDispatch } = getHooksBase();
   /**
    * Prevent showing loading when request is sent

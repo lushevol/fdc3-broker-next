@@ -39,11 +39,12 @@ while access is valid. The same applies if Home first becomes ready in the
 final 25 seconds of access validity. Initial acquisition must not depend on a
 future visibility change or an already-missed timer deadline.
 
-Isolation of pending refresh replies across logout and a later login
-(review issue 3) is deferred. Responses still use the existing shared handlers:
-an old successful reply can store a refresh credential after logout, and an
-old expiry failure can clear a later login. Fixes 1 and 2 address acquisition
-timing; they do not resolve this separate response-ownership risk.
+Each request belongs to the login that started it. Logout start, credential
+clear, and a new login invalidate older requests immediately. Old successes,
+old errors, and queued state updates must not change the later login. Normal
+access-token rotation does not change request ownership. Cancel pending
+authentication requests as additional protection; keep logout requests running
+so the server can revoke the session.
 
 Returning to visible reconciles both expiries immediately. If the visible
 acquisition deadline is still in the future, it is rescheduled; a missed

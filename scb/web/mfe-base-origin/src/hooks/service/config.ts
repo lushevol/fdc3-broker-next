@@ -15,7 +15,10 @@ export const config: AxiosRequestConfig = {
   timeout: 60000,
 };
 const service = axios.create(config);
-service.interceptors.request.use(requestHandler);
+// Capture ownership before a caller can start logout in the same event turn.
+service.interceptors.request.use(requestHandler, undefined, {
+  synchronous: true,
+});
 service.interceptors.response.use(successHandler, errorHandler);
 
 export default service;

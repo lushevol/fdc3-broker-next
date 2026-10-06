@@ -3,6 +3,7 @@ import { RootModel } from "../../model/root";
 export interface IAction {
   type: ActionType;
   data: RootModel;
+  sessionGeneration?: number;
 }
 
 export enum ActionType {
