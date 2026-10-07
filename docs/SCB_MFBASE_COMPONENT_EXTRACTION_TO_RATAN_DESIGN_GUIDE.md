@@ -361,6 +361,14 @@ contracts, compatible adapters, checkable verification and an isolated commit.
 | `/styles.css`         | Explicit scoped provider tokens and font assets               |
 | `/tokens.css`         | CSS-only global token consumers                               |
 
+New consumers can import individual components, for example
+`import { Button } from 'ratan-design-origin/button'`. The package README lists
+all 30 direct component/provider/appearance paths. Prefer these paths when the
+consumer build should skip unrelated package modules. Existing root imports
+remain supported and eliminate unused final runtime code, but can traverse the
+root barrel. Explicit CSS imports remain side effects. The package producer
+build still emits all public modules for distribution.
+
 For an export added to an existing entry, update that entry and its public type
 exports. The current declaration build includes `src`; the library preserves
 modules. Confirm actual output rather than assuming the file is shipped.
@@ -368,7 +376,8 @@ modules. Confirm actual output rather than assuming the file is shipped.
 If a new public subpath is justified, update all of these together:
 
 - its source entry module;
-- `vite.config.ts` library entry map;
+- `vite.config.ts` library entry map, so the producer preserves every public
+  runtime export of the direct entry;
 - `package.json` export map with ESM and declaration paths;
 - applicable `typesVersions` mapping;
 - external peer handling if a new integration requires it;
@@ -386,6 +395,14 @@ Button-only fixture requires only `Button.js` as rendered package code and a
 2,048-byte limit with its pinned builder and external UI peers. Keep that
 tree-shaking gate when adding core exports rather than widening it to admit
 unrelated component, theme, token or runtime code.
+
+Keep new component implementations independently importable where practical.
+Export each direct path through ESM `exports` and legacy `typesVersions`, and add
+its required module graph to `scripts/verify-tree-shaking.mjs`. After a package
+build, run `npm run verify:tree-shaking --workspace ratan-design-origin` from
+`scb-next`; `verify:package` repeats this against the installed tarball. Verify
+root/direct export identity and both TypeScript resolution modes in the consumer
+fixtures. Do not claim unrelated consumer modules are skipped for a root import.
 
 Keep imports safe for server rendering: avoid browser globals at module load
 and preserve the verifier's DOM-free SSR checks.

@@ -4,6 +4,13 @@ The maintained package is `packages/ratan-design-origin` (candidate 0.1.0).
 Base keeps compatible namespace/default paths; Ratan/Cashflow keep `@fm/base`
 compatibility resolution. Business screens need no import or prop changes.
 
+The existing entries remain supported. New consumers can use the 30 direct
+component/provider/appearance paths documented in the package README, for example
+`ratan-design-origin/button` and `ratan-design-origin/date-picker`, to avoid
+compiling unrelated package modules. Root named imports still remove unused
+runtime code from production bundles. CSS/fonts require an explicit stylesheet
+import; producer package builds emit every supported module for distribution.
+
 | Original surface | Maintained presentation | Host responsibility |
 | --- | --- | --- |
 | Theme controls/tokens and CSS aliases | Core/theme/tokens/compatibility entries | Auth-based mode, persistence, document classes, explicit CSS loading |
