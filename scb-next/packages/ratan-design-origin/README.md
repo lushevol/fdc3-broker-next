@@ -347,6 +347,15 @@ To customize a global token, add a `:root` declaration after the import; no
 }
 ```
 
+## AI migration and usage guidance
+
+The package includes the [ratan-design-origin skill](.agents/skills/ratan-design-origin/SKILL.md)
+for component usage, migration through compatible adapters, and extraction of
+reusable presentation. Its references cover imports/tree shaking, themes/overlays,
+optional dates, host ownership, and validation. It is included in npm tarballs
+and uses packaged documentation/declarations when source-checkout tools are absent.
+For an agent working outside this package, provide the skill's file path explicitly.
+
 ## Development commands
 
 Run `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`, and

@@ -5,6 +5,7 @@
   "description": "Standalone React 18 and MUI 5 controls and SCB design tokens",
   "type": "module",
   "files": [
+    ".agents/skills/ratan-design-origin",
     "dist",
     "README.md",
     "CHANGELOG.md",

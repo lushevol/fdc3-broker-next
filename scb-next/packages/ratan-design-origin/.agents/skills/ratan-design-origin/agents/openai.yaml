@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ratan Design Origin"
+  short_description: "Migrate and use Ratan Design Origin components"
+  default_prompt: "Use $ratan-design-origin to migrate this UI while preserving its consumer contracts and selecting the supported package imports."
