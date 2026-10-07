@@ -13,6 +13,8 @@ Prepared: 7 October 2026. Updated: 8 October 2026. EM3 below means the EMS3 enti
 | The tile flags for selected RATAN settlement screens + FlowZero on EMS3, other RATAN screens + Stamp on EMS2 | Section 4, including proposed SQL. |
 | One user logging in and opening the actual cashflow table | Sections 6 and 7. |
 | What has been proved and what still needs a live check | Sections 8 and 9. |
+| Maintenance work if applications manage EMS3 themselves or Portal manages it | Section 11. |
+| Refined effort, delivery dates and checks before release | Section 12 and the [detailed rollout plan](ems3-rollout-report.md). |
 
 ## 1. The Proposal In Plain Words
 
@@ -231,6 +233,8 @@ The sample already shows RATAN and FlowZero sharing `appId="51358"` with differe
 | What needs controlling? | Each team must follow the agreed compatibility and assignment rules. | Portal administrators need clear boundaries and application owner approval. |
 | Can selected screens switch first? | Proposed: yes, through tile flags while other subjects stay EMS2. | Proposed: yes, through the same tile flags with centrally managed registration identities. |
 | Does either option remove shared BFF/EMS3 outage risk? | No. Both use the same runtime services. | No. Both use the same runtime services. |
+
+Section 11 shows the ongoing maintenance work and rough effort under both choices. The permission matrix stays the same; the administrator and the queue change.
 
 There is no need to choose one management owner for all applications to run this POC. The runtime can support either supported arrangement once the actual registration identities are confirmed.
 
@@ -807,9 +811,9 @@ Supporting files: [BFF recorded verification](/Users/lushevol/.codex/worktrees/e
 | Simple question / check | Why it remains |
 | --- | --- |
 | What are the real production registration identities and existing numeric entity IDs? | The sample IDs and this report's placeholders are not production configuration. |
-| Which additional settlement subject groups should join the first phase? | The concrete example includes strategic cashflow/dashboard and NSTP. Grouping, suppression, limits and other functions remain EMS2 until selected. |
+| Which settlement subject groups should follow the FlowZero production pilot? | This report's design example includes strategic cashflow/dashboard and NSTP. The delivery plan launches FlowZero first and tests settlements later in staging. Grouping, suppression, limits and other functions remain EMS2 until selected. |
 | Does FlowZero migration include only tile 108, or also the separate `RATAN_FLOW_ZERO` function grants? | The latter has no supplied tile row, so it needs an explicit binding/default decision beyond a tile flag. Ownership alone does not map the pilot's different roles/actions. |
-| Can EMS3 provide the complete selected RATAN subject definitions, then the full matrix for later phases? | The first phase needs strategic cashflow/NSTP parity; the separate `FMO_COO_SUP` workflow gap still matters when that subject migrates. |
+| Can EMS3 provide the complete selected RATAN subject definitions, then the full matrix for later phases? | The selected-settlement staging group needs strategic cashflow/NSTP parity; the separate `FMO_COO_SUP` workflow gap still matters when that subject migrates. |
 | Is the FlowZero pilot catalogue the complete target, and do its consumers accept `RAISE_REQUEST` as the permission key? | No old FlowZero matrix was supplied; the tile alias does not translate JWT keys. |
 | Which test accounts should have access, and which should be denied? | Definitions alone do not establish user-role assignments. Test accounts are enough for the POC stage. |
 | Do the live detailed/aggregate APIs meet the implemented completeness, empty-result and identity rules? | Synthetic responses validate code behavior; live paging/effective-permission rules still need agreement. |
@@ -826,3 +830,102 @@ The corporate build and production database upgrade also need their normal envir
 - [Proposed EMS3: Portal manages them centrally](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-portal-managed.md): the same eventual target under a shared parent ID with distinct logical apps; tile flags select the same subset.
 
 The expected visible result is the same under both ownership arrangements. Selected RATAN strategic cashflow/NSTP subjects and FlowZero come from EMS3; other RATAN subjects and Stamp come from EMS2. **The proposed flag on `application_tile` controls each tile's source.** Existing application configuration supplies EMS3 identities/defaults; matrices and assignments determine the grants. The additional subject-routing table suggested earlier is not required for this example.
+
+## 11. Maintenance Effort: Who Does The Work?
+
+Both choices need the same runtime support. They change who administers the EMS3 registrations, roles and assignments. A shared Portal ID still contains separate logical application names/UIDs in this proposal. EMS3 administrators must confirm the actual registration and delegation rules.
+
+### Application Teams Compared With Central Management
+
+| Work | Each application manages its registration | Portal manages registrations centrally |
+| --- | --- | --- |
+| Decide who may see/use a feature | RATAN, FlowZero or Stamp owner defines and approves the matrix. | The same application owner defines and approves the matrix. Portal needs that business decision. |
+| Maintain roles, features and actions | Each application's EMS administrator edits its own catalogue and keeps names compatible. | Portal's EMS administrator edits each logical application's catalogue using the owner's approved request. |
+| Assign/remove users | Each application's approved access-management process. | Central access-management process with application-owner approval. Neither option makes the BFF a user-role store. |
+| Add a feature | Application team prepares permissions, administers EMS3 and tests the feature. | Application team prepares permissions; Portal applies them; application team tests the feature. |
+| Change EMS3 identities, aliases or tile flags | Application supplies the approved mapping; platform validates and applies the audited BFF change. | Portal supplies the approved mapping with the application owner; platform applies the same validated BFF change. |
+| Review access and provide audit evidence | Each team prepares its evidence and confirms its users/grants. | Central team collects evidence; each application owner still confirms its users/grants. |
+| Investigate a permission issue | Application admin checks its matrix; platform checks BFF/tiles/tokens. | Central admin checks the matrix, application owner explains expected access, platform checks BFF/tiles/tokens. |
+| Train administrators | Every participating team needs EMS3 skills and consistent naming/review habits. | A smaller central group needs EMS3 administration skills; owners still need to explain and accept their permissions. |
+| Maintain BFF, shell, DB, gateway, monitoring and service credentials | Shared platform/operations work. | The same shared platform/operations work. Registration ownership alone does not prove separate credentials or fewer runtime dependencies. |
+| Roll back a migration | Owner and platform restore the full subject group and applicable defaults, then check fresh access. | Same process with central coordination. Both require a usable EMS2 baseline or a rehearsed service rollback. |
+
+**Application management:** teams can prepare and make approved changes in parallel. More teams need training, administration time and consistent audit practices.
+
+**Central management:** fewer administrators need EMS3 expertise, and common naming/audit practices are easier to enforce. Requests share a queue. A shared registration change can affect several logical applications, so administration rights and review boundaries matter.
+
+Central management moves work to Portal. It does not remove application-owner approval, testing or shared service maintenance. The supplied dumps do not show request volume, administration rights or staffing, so they cannot prove that either option needs fewer people.
+
+### Rough Effort To Plan For
+
+One **person-day** is one person's working day. These are combined planning allowances across the owner, EMS administrator, tester and platform engineer, not elapsed delivery times or measured results. They assume existing administration tools, ready access and straightforward mappings. Approval waiting time is additional.
+
+A **cohort** below means one application or a selected group of tiles and permission subjects.
+
+| Event | Combined person-days | Included / limit |
+| --- | ---: | --- |
+| Prepare one straightforward application or selected subject cohort after shared support is ready | 5-12 | Mapping/configuration, tests, owner acceptance and staging switch/rollback rehearsal. Scope, EMS3 definitions, known users and IDs must already be ready. Bulk registration/assignment work is extra. |
+| Change grants for an existing feature | 0.5-1.5 | Owner approval, EMS edit, allow/deny checks and a change record. |
+| Add a new feature or permission subject | 1-3 | Permission definition, EMS configuration, mapping and checks. Application feature development is extra. |
+| Execute an approved source switch or rollback | 0.5-1.5 | Complete flag group/defaults, configuration review, fresh-check smoke tests and monitoring. Full acceptance tests must already be current. |
+| Routine user-role assignment/removal | Not estimated yet | Needs actual request volume, approval rules and the access-management workflow. |
+| Periodic audit, administrator training, incidents and credential changes | Not estimated yet | Needs review frequency, support hours, number of administrators and service access design. |
+
+The effort per event is broadly similar for both registration choices. Application ownership distributes it among application teams. Central ownership puts more of the administration in Portal; owner checks and platform work still remain.
+
+**A workload example:** if ten applications each need two existing-feature grant changes per month, that is twenty changes. At the allowance above, plan **10-30 combined person-days per month** for those changes. This is an illustration, not a forecast from the dumps. User requests, new features, incidents and audits are additional. Confirm actual volumes and the central team's turnaround before deciding staffing.
+
+### Examples In This Report
+
+| Request | Application-managed | Centrally managed |
+| --- | --- | --- |
+| RATAN changes `FMO_OPS_BO` export access for strategic cashflow | RATAN approves, its admin updates the RATAN logical app, and the tester checks all affected strategic cashflow/dashboard tiles. | RATAN approves, Portal updates the same RATAN logical app, and the tester checks the same tiles. |
+| FlowZero gives a role `RAISE_REQUEST / BATCH_IMPORT` | FlowZero owner approves and its admin changes the FlowZero logical app; test the batch-import function, not just tile visibility. | FlowZero owner approves, Portal changes the FlowZero logical app, and the same function checks follow. |
+| Stamp requests a later migration | Stamp prepares its matrix/users and works with platform on flags, compatibility and acceptance. | Stamp prepares its matrix/users with Portal; platform uses the same flags, compatibility and acceptance process. Stamp stays EMS2 until its approved switch. |
+
+**Suggested responsibility split:** application owners define and accept business permissions; platform controls the BFF and audited source switches. Each application's own administrator or a delegated central administrator can perform EMS3 edits. Agree the named administrator, support contact, approval process and turnaround before onboarding.
+
+During the transition, keep revoked access consistent in both systems for any cohort that may roll back. Switching to EMS2 must not restore a role that was removed in EMS3. Source changes take effect on a fresh authorization check; existing signed tokens are not automatically revoked.
+
+## 12. Refined Work Estimate And Schedule
+
+The earlier schedule is a reasonable target **with parallel staffing and passing checks**. The main correction is to include the tile-source implementation and browser work. The saved POC tests cover the earlier whole-entity implementation; they do not show this new work is finished.
+
+| Earlier estimate | Refinement against the current proposal |
+| --- | --- |
+| Each application chooses its source in a BFF configuration table. | Use `application_tile.entitlement_source`; reuse `authorization_application` for identities and untiled defaults. Tiles sharing the same existing entity and permission subject switch together. |
+| Mainly connect the BFF to real EMS3. | Also implement tile/audit/admin/CSV support, mixed providers within RATAN, source isolation, role merge and shared-shell fixes. |
+| FlowZero login works by 16 October. | 16 October checks live grants and locally verified routing. Complete deployed routing/browser checks are due 23 October, before UAT. |
+| Configuration rollback is sufficient. | First prove FlowZero's old EMS2 permissions/assignments or rehearse an agreed service/gateway rollback. Restore whole groups/defaults and account for existing tokens. |
+| Normally no application code changes. | Keep this as the aim. Verify permission keys, numeric IDs, multi-role handling and actual deployed bundles for each cohort. |
+
+### Effort And Staffing
+
+| Stage | Combined planning person-days | What it covers |
+| --- | ---: | --- |
+| Shared support and FlowZero production pilot | **30-45** | 27-39 shared platform days plus 3-6 FlowZero-owner days; implementation, integration, browser checks, UAT participation, deployment and rollback. |
+| Shared stabilization/readiness after the pilot | 3-5 | Revise instructions using pilot findings and add multi-application load/readiness checks. Initial operator handover is counted in the pilot. Major defects need a new estimate. |
+| Each straightforward staging cohort | 5-12 | After scope, definitions/users/IDs are ready; configure, test, accept and rehearse. |
+| Two staging cohorts plus shared readiness | **13-29 total** | 3-5 shared days plus 5-12 for each cohort; later production releases are extra. |
+| A complex later cohort | 10-20 or more | Re-estimate mapping, shared logical-app changes, missing assignments or consumer fixes after discovery. |
+
+The dates assume one focused BFF engineer, frontend and QA availability of about half to one person's capacity during their work, and available EMS3/platform/owner contacts. These are assumptions to confirm, not committed staffing. One person doing all the work sequentially needs a different schedule. Access, release approval, bulk assignment work and team queues can add time. The [detailed rollout report](ems3-rollout-report.md#6-effort-estimates-and-team-availability) shows the work breakdown and exclusions.
+
+### Revised Dates, 2026
+
+The production pilot is **FlowZero tile 108 with its agreed function scope**. RATAN settlement/other RATAN subjects and Stamp stay EMS2 in production. The selected-settlement example earlier in this report describes a supported design goal; it is not an extra pilot production promise.
+
+| Dates | Main work | Check before moving on |
+| --- | --- | --- |
+| **6-9 Oct; remaining work 8-9 Oct** | Confirm scope, staffing, real EMS3 access/contract, FlowZero identities, expected allow/deny accounts and rollback baseline. Start environment preparation. | Named owners and a dated dependency list. |
+| **12-16 Oct** | Build tile/database/admin/import changes and core routing/merge; connect real EMS3 and begin shell fixes. | **16 Oct:** known live grants and passing local routing checks. |
+| **19-23 Oct** | Complete/deploy the new routing and shell; test all login/renewal paths, same-RATAN mixed providers, names/JWTs, old sessions and failures. | **23 Oct:** integrated checks pass before UAT. |
+| **26-30 Oct** | FlowZero UAT and fixes; prepare follow-on registrations and users. | Owner-reviewed results and remaining release list. |
+| **2-6 Nov** | Finish UAT/sign-off, monitoring, release approval and production/rollback rehearsal. | **6 Nov:** accepted pilot and tested rollback. |
+| **9-13 Nov** | Launch FlowZero on EMS3; keep other production subjects EMS2 and monitor users. | **FlowZero pilot live by 13 Nov**, conditional on the earlier checks. |
+| **16-27 Nov** | Stabilize FlowZero; test selected RATAN settlements and Stamp concurrently in staging; finish multi-application load checks and revise pilot instructions. | Both staging groups pass; their scope, definitions, users and IDs must be ready by 13 Nov. This does not approve their production switches. |
+| **30 Nov-4 Dec** | Close findings and confirm configuration, audit, administrator capacity and support readiness. | **Ready for parallel onboarding by 4 Dec**, conditional on staging evidence. |
+
+If the 16 October access/core check or 23 October integrated check is missed, review the November date. Do not compress acceptance, failure or rollback checks. Complete and verify FlowZero pilot-user assignments before the 6 November release check; bulk assignment effort depends on user counts and needs a separate estimate. If RATAN/Stamp inputs are not ready by 13 November, revise the staging start and 4 December target. That milestone means teams can follow a repeatable process; it does not mean every application has migrated.
+
+The [full rollout plan](ems3-rollout-report.md) lists the detailed acceptance checks, dependencies, staffing and maintenance assumptions. No new code, database configuration or production change has been made for this report update.
