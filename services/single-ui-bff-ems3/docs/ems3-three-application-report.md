@@ -1,6 +1,16 @@
-# EMS3 Migration Explained With RATAN, FlowZero And Stamp
+# EMS3 Migration Explained With RATAN Cashflow Blotter, FlowZero And Stamp
 
 Prepared: 7 October 2026. EM3 below means the EMS3 entitlement system.
+
+### Where To Start
+
+| What you want to understand | Where to read |
+| --- | --- |
+| Today's permissions, for all supplied roles | Section 2 and [complete current matrices](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-current.md). |
+| The two ways of managing EMS3 registrations | Section 3 and the two complete target matrices linked there. |
+| The database settings for RATAN + FlowZero on EMS3, Stamp on EMS2 | Section 4. |
+| One user logging in and opening the actual cashflow table | Sections 6 and 7. |
+| What has been proved and what still needs a live check | Sections 8 and 9. |
 
 ## 1. The Proposal In Plain Words
 
@@ -38,8 +48,8 @@ The implemented and tested part is the BFF's routing, permission conversion, til
 | Name | Simple meaning | Example |
 | --- | --- | --- |
 | Entity | The application's existing permission bucket in Portal. | `X_RATANONE` |
-| Role | A named set of permissions assigned to a user. | `FMO_COO_SUP` |
-| Subject / feature | The screen or function covered by a permission. EMS2 calls it a subject; EMS3 calls it a feature. | `RATAN_TRADE_BLOTTER` |
+| Role | A named set of permissions assigned to a user. | `FMO_OPS_BO` |
+| Subject / feature | The screen or function covered by a permission. EMS2 calls it a subject; EMS3 calls it a feature. | `RATAN_CASHFLOW_BLOTTER` |
 | Action | Something the role may do for that feature. | `F_Export_Data` |
 | Matrix | The definitions of which role has which feature/action pair. It does not say which people have that role. | The tables below. |
 | Registration | The EMS3 application record containing those definitions. | Application name, app ID and app UID. |
@@ -59,23 +69,58 @@ These are counts from the supplied files, not a live production query.
 
 The shorter tables here explain the examples used later.
 
-### RATAN: The Complete `FMO_COO_SUP` Role
+### RATAN Cashflow Blotter: Today's Matrix
 
-This is one of RATAN's 25 roles. The full matrix contains all roles.
+The older Cashflow Blotter tile uses entity `X_RATANONE` and subject `RATAN_CASHFLOW_BLOTTER`. This table includes every role with grants for that subject. Roles with identical grants are grouped on one row. "Yes" means the named grant is present; a blank means it is absent.
 
-| EMS2 entity | Role | Subject | Allowed actions |
+| Roles | Open | Custom query | Private views | Public views | Export | All 12 operations below | ID test |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `FMO_ID_OPS_TEST` | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| `FMO_OPS_BO`, `FMO_OPS_BOC`, `FMO_OPS_BOL`, `FMO_OPS_BOM`, `FMO_OPS_BOS`, `FMO_OPS_MKR` | Yes | Yes | Yes | Yes | Yes | Yes | |
+| `FMO_MO_RO`, `FMO_MO_TE`, `FMO_MO_TE_SUP`, `FMO_MO_TV`, `FMO_MO_TV_SUP`, `FMO_RO`, `NON_FMO_RO`, `PSS_RO` | Yes | Yes | Yes | | Yes | | |
+| `FMO_OPS_INV`, `FMO_STA_CKR`, `FMO_STA_MKR` | Yes | | | | | | |
+
+| Label above | Exact action name |
+| --- | --- |
+| Open | `ACCESS_FMO_POST_TRADE_PORTAL` |
+| Custom query | `F_Custom_Query_Builder` |
+| Private views | `F_Custom_View_Builder_Private` |
+| Public views | `F_Custom_View_Builder_Public` |
+| Export | `F_Export_Data` |
+| ID test | `ACCESS_ID_TEST` |
+
+| The 12 operations | Exact action name |
+| --- | --- |
+| Start / verify an ad hoc Nostro change | `F_Ad_Hoc_Nostro_Initiate`, `F_Ad_Hoc_Nostro_Verify` |
+| Start / verify an ad hoc SSI change | `F_Ad_Hoc_SSI_Initiate`, `F_Ad_Hoc_SSI_Verify` |
+| Suppress / reinstate | `F_Ad_Hoc_Suppress`, `F_Reinstate` |
+| Add a settlement comment | `F_Add_Settlement_Comment` |
+| Change affirmation status | `F_Cashflow_Affirmation_Status_Change` |
+| Release a cashflow | `F_Cashflow_Status_Change_Release` |
+| Perform ad hoc netting | `F_Perform_Ad_Hoc_Netting` |
+| Start / verify un-netting | `F_Perform_Un_Net_Initiate`, `F_Perform_Un_Net_Verify` |
+
+That is **18 roles and 155 grants for this one subject**. `FMO_OPS_BO`, the role used later, has 17 of these actions and 58 grants across its 14 RATAN subjects. The seven RATAN roles not listed have no grants for this cashflow subject; in particular, `FMO_COO_SUP` is not a suitable Cashflow Blotter example.
+
+There are also CN/strategic cashflow and group-management subjects. They are separate permission definitions, even though they belong to the same `X_RATANONE` entity:
+
+| Cashflow example | Tile IDs in the export | Subject | Relevant `FMO_OPS_BO` grants |
 | --- | --- | --- | --- |
-| `X_RATANONE` | `FMO_COO_SUP` | `RATAN_TRADE_BLOTTER` | `ACCESS_FMO_POST_TRADE_PORTAL`, `F_Custom_Query_Builder`, `F_Export_Data` |
-| `X_RATANONE` | `FMO_COO_SUP` | `RATAN_FM_COO_EXCEPTION` | `ACCESS_FMO_POST_TRADE_PORTAL`, `F_Custom_Query_Builder`, `F_Custom_View_Builder_Private`, `F_Custom_View_Builder_Public`, `F_Exception_Addtional_Info_Update`, `F_Export_Data`, `F_Manually_Close_Exception` |
-| `X_RATANONE` | `FMO_COO_SUP` | `RATAN_FM_COO_RULE` | `ACCESS_FMO_POST_TRADE_PORTAL`, `F_Input_Delete_Modify_Initiate`, `F_Input_Delete_Modify_Verify` |
-| `X_RATANONE` | `FMO_COO_SUP` | `RATAN_RULE_ENGINE` | `F_Input_Delete_Modify_Initiate`, `F_Input_Delete_Modify_Verify` |
-| `X_RATANONE` | `FMO_COO_SUP` | `RATAN_FLOW_ZERO` | `ACCESS_FMO_POST_TRADE_PORTAL`, `F_WORKFLOW_BPMN_DESIGNER`, `F_WORKFLOW_INSTANCE_REQUEST`, `F_WORKFLOW_QUERY`, `F_WORKFLOW_STA_CKR`, `F_WORKFLOW_STA_MKR` |
+| Older Cashflow Blotter / BAU | 36 | `RATAN_CASHFLOW_BLOTTER` | The 17 actions described above. |
+| Cashflow Blotter: CN, Simple and Open Search examples | 37, 144, 152 | `RATAN_STRATEGIC_CASHFLOW_BLOTTER` | `ACCESS_FMO_POST_TRADE_PORTAL`, `F_Ad_Hoc_Suppress`, `F_Cashflow_Status_Change_Release`, `F_Custom_Query_Builder`, `F_Custom_View_Builder_Private`, `F_Export_Data`, `F_Fail`, `F_Hold`, `F_Modify_Settlement_Means`, `F_Multi_Exception_Initiate`, `F_Multi_Exception_Verify`, `F_Perform_Ad_Hoc_Netting`, `F_Perform_Cashflow_Split`, `F_Perform_Un_Net_Initiate`, `F_Perform_Un_Net_Verify`, `F_Reinstate`, `F_Un_Hold`. |
+| Cashflow Group Management | 38 and 164 | `RATAN_CASHFLOW_GROUP_BLOTTER` | `ACCESS_FMO_POST_TRADE_PORTAL`, `F_Cashflow_Status_Change_Release`, `F_ManualStp`. |
 
-This role has **21 grants**. Exact names are kept, including the existing spelling `Addtional`.
+The full current appendix contains every role for all three subjects. Section 7 traces the **CN screen**, whose query and grid code are supplied. The older BAU route is not present in that supplied cashflow source version.
 
-`RATAN_FLOW_ZERO` here belongs to RATAN's `X_RATANONE` entity. It is separate from the `FLOW_ZERO` entity used by the independent Flowzero tile. Similar names do not make them the same permission bucket.
+| Cashflow subject | Roles with grants | Distinct actions | Role/subject/action grants |
+| --- | ---: | ---: | ---: |
+| `RATAN_CASHFLOW_BLOTTER` | 18 | 18 | 155 |
+| `RATAN_STRATEGIC_CASHFLOW_BLOTTER` | 17 | 20 | 133 |
+| `RATAN_CASHFLOW_GROUP_BLOTTER` | 10 | 3 | 22 |
 
-**A real gap in the supplied EMS3 sample:** its per-user response contains only 16 grants for `FMO_COO_SUP`. The five `F_WORKFLOW_*` actions in the last row are absent. Therefore that sample alone does not prove RATAN parity. The target in this report keeps all 21 grants for this role and all 806 grants across RATAN.
+Both proposed EMS3 ownership options retain these exact cashflow grant sets. The full 806-grant RATAN matrix also covers its other screens, because the current switch applies to the whole `X_RATANONE` entity.
+
+**A separate RATAN parity gap:** the EMS3 per-user sample has 16 grants for `FMO_COO_SUP`, while its EMS2 definition has 21. Five `F_WORKFLOW_*` actions for `RATAN_FLOW_ZERO` are missing. That sample does not prove the complete RATAN target is registered. `RATAN_FLOW_ZERO` also belongs to `X_RATANONE`; it is separate from the independent `FLOW_ZERO` entity.
 
 ### FlowZero: The Known Pilot Role `Global_Onboard_BatchOps`
 
@@ -124,7 +169,7 @@ These numbers describe the proposed target. They do not mean those registrations
 | FlowZero | FlowZero team | `FLOWZERO_ID_TBC` | `FLOWZERO` | `FLOWZERO_UID_TBC` |
 | Stamp, later | Stamp team | `STAMP_ID_TBC` | `STAMP` | `STAMP_UID_TBC` |
 
-For example, RATAN's registration contains `FMO_COO_SUP -> RATAN_TRADE_BLOTTER -> F_Export_Data`. FlowZero's registration contains `Global_Onboard_BatchOps -> RAISE_REQUEST -> BATCH_IMPORT`. Stamp's future registration contains `VIEW_ONLY -> Mapping Query -> Read`.
+For example, RATAN's registration contains `FMO_OPS_BO -> RATAN_CASHFLOW_BLOTTER -> F_Export_Data`. FlowZero's registration contains `Global_Onboard_BatchOps -> RAISE_REQUEST -> BATCH_IMPORT`. Stamp's future registration contains `VIEW_ONLY -> Mapping Query -> Read`.
 
 **[Full EMS3 Matrices: Application-Owned](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-application-owned.md)** lists every proposed role/feature/action grant for all three applications.
 
@@ -139,6 +184,25 @@ Use one parent Portal ID while keeping a separate logical application name and U
 | Stamp, later | Portal team, with Stamp owner approval | `PORTAL_ID_TBC` | `STAMP` | `STAMP_UID_TBC` |
 
 The example grant triples remain exactly the same as Option A. Portal ownership does not give a RATAN role access to FlowZero or Stamp. The BFF selects and maps each logical application independently.
+
+### The Same Permissions Under Both Options
+
+This table shows concrete target entries. The linked appendices contain the complete matrices, including all cashflow roles and all Stamp mapping functions.
+
+| Role / EMS3 feature | Allowed actions after migration | Option A location | Option B location |
+| --- | --- | --- | --- |
+| `FMO_OPS_BO / RATAN_CASHFLOW_BLOTTER` | Exactly the same 17 actions from the current cashflow table. | RATAN registration, `RATAN_ENTITLEMENT_RULE`. | Portal registration, logical app `RATAN_ENTITLEMENT_RULE`. |
+| `FMO_OPS_BO / RATAN_STRATEGIC_CASHFLOW_BLOTTER` | Exactly the same 17 CN actions listed above. | RATAN registration, `RATAN_ENTITLEMENT_RULE`. | Portal registration, logical app `RATAN_ENTITLEMENT_RULE`. |
+| `Global_Onboard_BatchOps / HOMEPAGE` | `ACCESS_FMO_POST_TRADE_PORTAL`, `VIEW_HOMEPAGE`. | FlowZero registration, `FLOWZERO`. | Portal registration, logical app `FLOWZERO`. |
+| `Global_Onboard_BatchOps / TODO` | `ACCESS_FMO_POST_TRADE_PORTAL`, `APPROVE_TASK`, `EDIT_COMMENT`, `EDIT_TASK`, `REJECT_TASK`, `TERMINATE_TASK`. | FlowZero registration, `FLOWZERO`. | Portal registration, logical app `FLOWZERO`. |
+| `Global_Onboard_BatchOps / REQUEST_CENTRE` | `ACCESS_FMO_POST_TRADE_PORTAL`, `EDIT_COMMENT`. | FlowZero registration, `FLOWZERO`. | Portal registration, logical app `FLOWZERO`. |
+| `Global_Onboard_BatchOps / RAISE_REQUEST` | `ACCESS_FMO_POST_TRADE_PORTAL`, `BATCH_IMPORT`, `RAISE_NEW_REQUEST`, `VIEW_PUBLISHEDWORKFLOW`. | FlowZero registration, `FLOWZERO`. | Portal registration, logical app `FLOWZERO`. |
+| `Global_Onboard_BatchOps / UPLOAD_FILE` | `ACCESS_FMO_POST_TRADE_PORTAL`. | FlowZero registration, `FLOWZERO`. | Portal registration, logical app `FLOWZERO`. |
+| `VIEW_ONLY / Mapping Query` | `Read`. | Stamp registration, `STAMP`, when migrated later. | Portal registration, logical app `STAMP`, when migrated later. |
+| `VIEW_ONLY / Audit` | `Read`. | Stamp registration, `STAMP`, when migrated later. | Portal registration, logical app `STAMP`, when migrated later. |
+| `VIEW_ONLY / each of the other 30 Stamp features` | `Read` for each. | Stamp registration, `STAMP`, when migrated later. | Portal registration, logical app `STAMP`, when migrated later. |
+
+For the current walkthrough, the Stamp rows remain in **EMS2**. Its EMS3 target tables describe a later migration.
 
 **[Full EMS3 Matrices: Portal-Managed](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-portal-managed.md)** lists every proposed role/feature/action grant under this arrangement.
 
@@ -161,7 +225,7 @@ There is no need to choose one management owner for all applications to run this
 
 If it means **one combined EMS3 app name and UID containing every application's roles**, the current fork does not implement that design. The unique app-name/UID constraints reject sharing one logical application across several active routes.
 
-That variant would need an explicit mapping from each Portal role and feature/action pair to its destination entity and legacy permission names, plus tests for cross-application access and independent switches. For example, `PORTAL_RATAN_FMO_COO_SUP` would need to become `X_RATANONE:FMO_COO_SUP`, and a prefixed feature would need to become the old subject key. Removing the unique indexes alone would not provide those mappings.
+That variant would need an explicit mapping from each Portal role and feature/action pair to its destination entity and legacy permission names, plus tests for cross-application access and independent switches. For example, `PORTAL_RATAN_FMO_OPS_BO` would need to become `X_RATANONE:FMO_OPS_BO`, and a prefixed feature would need to become the old subject key. Removing the unique indexes alone would not provide those mappings.
 
 This report's central option uses a shared parent ID with separate logical applications. EMS3 administrators must confirm how that arrangement is registered and delegated in the real system.
 
@@ -190,22 +254,25 @@ Source: [new schema and triggers](/Users/lushevol/.codex/worktrees/ems3-single-u
 
 ### Existing Catalogue Rows Stay The Same
 
-| `application_tile_id` | Title | Category ID | Import-map ID | `ems2_entities` | `ems2_subject` | Module / tile in DB |
-| --- | --- | ---: | ---: | --- | --- | --- |
-| 54 | Trade Blotter | 15 | 10 | `X_RATANONE` | `RATAN_TRADE_BLOTTER` | `trade_blotter` / `trade` |
-| 108 | Flowzero | 32 | 66 | `FLOW_ZERO` | `FLOW_ZERO_RAISE REQUEST` | `flowzero` / `home` |
-| 48 | Mapping Query | 12 | 32 | `STAMP_STATIC` | `Mapping Query` | `stamp` / `stamp-mappingquery` |
-| 49 | Audit | 12 | 32 | `STAMP_STATIC` | `Audit` | `stamp` / `stamp-audit` |
+| `application_tile_id` | Actual title | Subtitle / explanation | Category ID | Import-map ID | `ems2_entities` | `ems2_subject` | Module / tile in DB |
+| --- | --- | --- | ---: | ---: | --- | --- | --- |
+| 36 | Cashflow Blotter | Subtitle: `[FX & Equity]` | 9 | 10 | `X_RATANONE` | `RATAN_CASHFLOW_BLOTTER` | `cashflow_blotter` / `cashflow_bau` |
+| 37 | Cashflow Blotter | No subtitle; CN implementation. | 9 | 10 | `X_RATANONE` | `RATAN_STRATEGIC_CASHFLOW_BLOTTER` | `cashflow_blotter_cn` / `cashflow_cn` |
+| 108 | Flowzero | No subtitle. | 32 | 66 | `FLOW_ZERO` | `FLOW_ZERO_RAISE REQUEST` | `flowzero` / `home` |
+| 48 | Mapping Query | No subtitle. | 12 | 32 | `STAMP_STATIC` | `Mapping Query` | `stamp` / `stamp-mappingquery` |
+| 49 | Audit | No subtitle. | 12 | 32 | `STAMP_STATIC` | `Audit` | `stamp` / `stamp-audit` |
 
 | Category ID | Category label | Import-map ID | Import-map key |
 | --- | --- | --- | --- |
-| 15 | Trade Processing | 10 | `ratan_container` |
+| 9 | Settlement | 10 | `ratan_container` |
 | 32 | Flowzero | 66 | `flowzero` |
 | 12 | Static Data Mapping | 32 | `stamp_container` |
 
 The old column names still contain `ems2`, but their entity and subject values remain the Portal's matching keys even for an EMS3 application. Changing `ems2_role=RATAN_PROD` to `EMS3` would not switch the provider: those role labels belong to the existing configuration administration scheme. Visibility is decided by entity/subject matching.
 
-Sources: [tile export](/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/application_tile.csv:41), [category export](/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/application_category.csv:15), [import-map export](/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/import_map.csv:9).
+Sources: [cashflow tile export](/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/application_tile.csv:26), [Settlement category export](/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/application_category.csv:10), [RATAN import-map export](/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/import_map.csv:9).
+
+**The provider switch is per entity.** Setting `X_RATANONE` to EMS3 moves all RATAN tiles using that entity together, including BAU, CN and group cashflow screens. This fork does not offer a separate provider switch just for Cashflow Blotter. The dump also contains data-filter metadata; this function-permission POC does not evaluate that metadata or determine which cashflow rows the backend returns.
 
 ### The New Routing Table's Fields
 
@@ -276,17 +343,23 @@ Use a synthetic account named `demo_migration`. The assignments below are an ill
 
 | Application | Assigned role | Assignment system | Grant count for this example |
 | --- | --- | --- | ---: |
-| RATAN | `FMO_COO_SUP` | EMS3, using the complete proposed EMS2-equivalent definition | 21 |
+| RATAN | `FMO_OPS_BO` | EMS3, using the complete proposed EMS2-equivalent definition | 58 |
 | FlowZero | `Global_Onboard_BatchOps` | EMS3 pilot-equivalent definition | 15 |
 | Stamp | `VIEW_ONLY` | EMS2 | 32 |
 
-This walkthrough requires RATAN's full 21-grant target, not the partial 16-grant EMS3 user sample. Assume this account has no other application roles, the supplied catalogue is loaded, the FlowZero alias is approved, and all required calls succeed.
+This walkthrough requires RATAN's full 58-grant role definition, including 17 BAU cashflow actions and 17 CN cashflow actions. These are proposed EMS3 grants copied from the EMS2 export, not a recorded EMS3 response for a real user. Assume this account has no other application roles, the supplied catalogue is loaded, the FlowZero alias is approved, and all required calls succeed. There are 105 role/subject/action grants across this account's three assigned roles.
 
 ### Step 1: Open Portal And Authenticate
 
 The root page loads its configured SystemJS import map. That map tells the browser where application bundles live. It does not decide who may open a tile.
 
-The browser submits `/api/auth/v2/sso/login`, or the supported Entra login route. The BFF checks credentials through OUD/MFA or Entra, then uses the authenticated user's identity for permission lookup. A browser-provided application/provider choice cannot select the authorization route.
+The browser sends the login request. The BFF checks credentials through OUD/MFA or Entra, then uses the authenticated user's identity for permission lookup. A browser-provided application/provider choice cannot select the authorization route.
+
+| Browser submits | BFF endpoint | Where the verified user identity comes from |
+| --- | --- | --- |
+| Username and password | `/api/auth/v2/sso/login` | OUD LDAP authentication. |
+| Legacy SSO `code`, `iss`, `client_id` | `/api/auth/v2/sso/login` | MFA exchange and its returned ID token. |
+| Entra SSO `code` | `/api/auth/v3/sso/login` | Entra exchange and its returned ID token. |
 
 Sources: [root page](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-root-config-origin/src/index.ejs:22), [frontend login endpoints](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-base-origin/src/services/index.ts:15), [BFF login](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/controller/v2/JwtAuthenticationController.java:188).
 
@@ -326,7 +399,7 @@ The EMS3 service token is used only between the BFF and EMS3. It is separate fro
 
 The BFF checks app names, IDs/UIDs, nested identities, returned account identity, and detailed/aggregate agreement. Each selected app must have an explicit aggregate record, including a valid empty result if the account has no access.
 
-For `demo_migration`, the target detail includes RATAN's 21 role grants and FlowZero's 15. Stamp is not selected from EMS3 even if that system returns an unrelated Stamp record.
+For `demo_migration`, the target detail includes RATAN's 58 role grants and FlowZero's 15. Stamp is not selected from EMS3 even if that system returns an unrelated Stamp record.
 
 Agreement between two endpoints does not prove the definition is complete against EMS2: both could omit the same permission. That is why the full matrix comparison is also required.
 
@@ -338,7 +411,8 @@ The BFF converts EMS3 grants to the same entity/role/subject/action structure th
 
 | Provider input | BFF entity / role | BFF subject name | BFF subject long name | Action |
 | --- | --- | --- | --- | --- |
-| RATAN EMS3 feature | `X_RATANONE / FMO_COO_SUP` | `RATAN_TRADE_BLOTTER` | `/RATAN_TRADE_BLOTTER`, with proposed alias map | `F_Export_Data` |
+| RATAN EMS3 feature | `X_RATANONE / FMO_OPS_BO` | `RATAN_CASHFLOW_BLOTTER` | `/RATAN_CASHFLOW_BLOTTER`, with proposed alias map | `F_Export_Data` |
+| RATAN EMS3 CN feature | `X_RATANONE / FMO_OPS_BO` | `RATAN_STRATEGIC_CASHFLOW_BLOTTER` | `/RATAN_STRATEGIC_CASHFLOW_BLOTTER`, with proposed alias map | `F_Export_Data` |
 | FlowZero EMS3 feature | `FLOW_ZERO / Global_Onboard_BatchOps` | `RAISE_REQUEST` | `FLOW_ZERO_RAISE REQUEST`, with proposed alias | `BATCH_IMPORT` |
 | Stamp EMS2 subject | `STAMP_STATIC / VIEW_ONLY` | `Mapping Query` | `/Mapping Query` | `Read` |
 
@@ -352,18 +426,32 @@ The normal filter asks: "Does this user have the tile's entity and its subject?"
 
 | Tile | Required match | Example account has it? | Menu result |
 | --- | --- | --- | --- |
-| 54 Trade Blotter | `X_RATANONE` + `RATAN_TRADE_BLOTTER` | Yes, through `FMO_COO_SUP` from EMS3. | Show. |
-| 104 FM COO Rules | `X_RATANONE` + `RATAN_FM_COO_RULE` | Yes, through EMS3. | Show. |
-| 105 FM COO Exceptions | `X_RATANONE` + `RATAN_FM_COO_EXCEPTION` | Yes, through EMS3. | Show. |
-| 156 RATAN Rule Engine | `X_RATANONE` + `RATAN_RULE_ENGINE` | Yes, through EMS3. | Show, even though this subject has no `ACCESS_FMO_POST_TRADE_PORTAL` action for this role. |
+| 36 Cashflow Blotter [FX & Equity] | `X_RATANONE` + `RATAN_CASHFLOW_BLOTTER` | Yes, through `FMO_OPS_BO` from EMS3. | Show. |
+| 37 Cashflow Blotter, CN | `X_RATANONE` + `RATAN_STRATEGIC_CASHFLOW_BLOTTER` | Yes, through the same EMS3 role. | Show. |
+| 38 Grouping Blotter | `X_RATANONE` + `RATAN_CASHFLOW_GROUP_BLOTTER` | Yes, through the same EMS3 role. | Show. |
 | 193 Exception Auto Recover | `X_RATANONE`; subject is blank. | Yes, the entity is assigned. | Show under the existing entity-only rule. |
 | 108 Flowzero | `FLOW_ZERO` + `FLOW_ZERO_RAISE REQUEST` | Yes, `RAISE_REQUEST` matches through the long-name alias. | Show. |
 | 48 Mapping Query | `STAMP_STATIC` + `Mapping Query` | Yes, with `Read` from EMS2. | Show. |
 | 49 Audit | `STAMP_STATIC` + `Audit` | Yes, with `Read` from EMS2. | Show. |
 
-There are **eight protected tiles from these applications** for this account. The supplied full catalogue also has 14 active template tiles that bypass permission matching after a successful authorization request. With no other assigned roles, this example therefore predicts 22 visible tiles in that snapshot. Templates do not rescue a failed provider lookup: authorization must succeed first.
+The table above highlights the screens discussed here. The complete calculation predicts **40 RATAN protected tiles, one FlowZero tile and two Stamp tiles**. The supplied full catalogue also has 14 active template tiles that bypass permission matching after a successful authorization request. With no other assigned roles, that is **57 visible tiles out of 113 active joined candidates**. Templates do not rescue a failed provider lookup: authorization must succeed first.
 
-The three-application account result is a calculation from the exports and filter rules. It is not a recorded live login. Earlier execution evidence separately proved the RATAN five-tile result and the mixed-provider mechanics with synthetic fixtures.
+| Menu category | Protected tile IDs for this account | Count |
+| --- | --- | ---: |
+| Trade Processing | 54 | 1 |
+| Settlement | 36, 37, 38, 39, 144, 152, 161, 164, 165 | 9 |
+| Exception Management | 15, 16, 17, 115, 193 | 5 |
+| Business Rule | 29, 30, 31, 32, 33, 34, 162, 171, 172, 173, 174 | 11 |
+| Static | 50, 51, 52, 53, 123, 137, 166, 167, 168, 169, 170, 183, 196 | 13 |
+| Flowzero | 108 | 1 |
+| Static Data Mapping | 48, 49 | 2 |
+| Verification Sample | 109 | 1 |
+| Templates, across their categories | 65, 66, 67, 68, 69, 70, 71, 72, 73, 79, 80, 101, 131, 136 | 14 |
+| **Total** | | **57** |
+
+Without the FlowZero long-name alias, tile 108 does not match and the total is 56. Several tiles share the same subject, so a role can expose more tiles than it has subjects. Tile 109 is an existing unusual case: it opens the BAU module but matches `RATAN_VALIDATION_EXCEPTION`.
+
+This three-application account result was independently calculated from structured exports and the filter rules. It is not a recorded live login. Earlier execution evidence separately proved the smaller RATAN five-tile fixture and mixed-provider mechanics; it did not execute this new 57-tile account scenario.
 
 Source: [actual tile filter](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/util/AdminModuleUtil.java:97), [full catalogue replay](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-user-records.md).
 
@@ -375,10 +463,16 @@ This is a **fragment** of the JSON permission map stored as the JWT's `entitleme
 
 ```json
 {
-  "X_RATANONE:FMO_COO_SUP": {
-    "RATAN_TRADE_BLOTTER": [
+  "X_RATANONE:FMO_OPS_BO": {
+    "RATAN_CASHFLOW_BLOTTER": [
       "ACCESS_FMO_POST_TRADE_PORTAL",
       "F_Custom_Query_Builder",
+      "F_Export_Data"
+    ],
+    "RATAN_STRATEGIC_CASHFLOW_BLOTTER": [
+      "ACCESS_FMO_POST_TRADE_PORTAL",
+      "F_Custom_Query_Builder",
+      "F_Custom_View_Builder_Private",
       "F_Export_Data"
     ]
   },
@@ -397,7 +491,9 @@ This is a **fragment** of the JSON permission map stored as the JWT's `entitleme
 }
 ```
 
-The actual token includes the other granted subjects too. Notice that the FlowZero key is `RAISE_REQUEST`, even though its tile matches `FLOW_ZERO_RAISE REQUEST`. This is why tile-alias compatibility and JWT-key compatibility must be checked separately.
+The actual token includes all granted subjects and actions, not just the fragment above. The body also returns `entities`: one entity/role record for `X_RATANONE / FMO_OPS_BO`, one for `FLOW_ZERO / Global_Onboard_BatchOps`, and one for `STAMP_STATIC / VIEW_ONLY` in this example. Subject entries contain their action arrays. The RATAN function helper can read those records directly from shell state.
+
+Notice that the FlowZero JWT key is `RAISE_REQUEST`, even though its tile matches `FLOW_ZERO_RAISE REQUEST`. This is why tile-alias compatibility and JWT-key compatibility must be checked separately.
 
 Source: [response and token assembly](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/controller/v2/JwtAuthenticationController.java:95).
 
@@ -411,30 +507,149 @@ Sources: [success handler](/Users/lushevol/code/github/fdc3-broker-next/scb/web/
 
 ## 7. From Clicking A Tile To Seeing The Business Table
 
-### RATAN Trade Blotter
+### The Common Shell Steps
 
-1. The user clicks **Trade Blotter** in the allowed menu.
-2. The shell puts its container/module/tile into a workspace panel.
-3. The workspace calls `System.import("@fm/ratan_container")`; the import map resolves that symbolic name to the deployed bundle.
-4. The shell passes module `/trade_blotter` and tile `/trade` to the container. The BFF added the leading slashes when constructing the drawer entry; the database stores `trade_blotter` and `trade`.
-5. The RATAN container routes to TradeBlotter, which imports `@fm/ratan_trades`.
-6. The separately deployed trades application must call its business API, receive rows and render its grid. Its normal function controls can consume the same permission names. API authorization must still be enforced by the application backend.
+After login, the user initially sees the workspace. The permitted applications are choices in the **New Tile** drawer; login does not open every table at once.
 
-### FlowZero And Stamp Follow The Same Shell Pattern
+1. The user clicks **New Tile**, then a returned tile.
+2. The shell copies its container/module/tile into a workspace panel and closes the drawer.
+3. The panel shows a loading splash while it calls `System.import` for the named container.
+4. The import map finds the deployed JavaScript bundle. The imported app receives the module and tile path.
+5. That app opens its own screen, calls its business API, then places the returned rows into its grid.
 
-| User chooses | Symbolic container | Module / tile passed to app | Where permissions came from in this example |
+| User chooses | Symbolic container | Module / tile passed to app | Permission source |
 | --- | --- | --- | --- |
-| Flowzero | `@fm/flowzero` | `/flowzero` / `/home` | EMS3. |
-| Mapping Query | `@fm/stamp_container` | `/stamp` / `/stamp-mappingquery` | EMS2. |
-| Audit | `@fm/stamp_container` | `/stamp` / `/stamp-audit` | EMS2. |
+| Cashflow Blotter [FX & Equity], tile 36 | `@fm/ratan_container` | `/cashflow_blotter` / `/cashflow_bau` | EMS3, `RATAN_CASHFLOW_BLOTTER`. |
+| Cashflow Blotter, CN, tile 37 | `@fm/ratan_container` | `/cashflow_blotter_cn` / `/cashflow_cn` | EMS3, `RATAN_STRATEGIC_CASHFLOW_BLOTTER`. |
+| Flowzero, tile 108 | `@fm/flowzero` | `/flowzero` / `/home` | EMS3, `RAISE_REQUEST` with the tile alias. |
+| Mapping Query, tile 48 | `@fm/stamp_container` | `/stamp` / `/stamp-mappingquery` | EMS2, `Mapping Query`. |
+| Audit, tile 49 | `@fm/stamp_container` | `/stamp` / `/stamp-audit` | EMS2, `Audit`. |
 
-FlowZero opens its existing home view; it is not evidence that a particular request table was queried. Stamp's container opens its existing Mapping Query or Audit screen. Registration ownership does not change these bundle names, application routes or business API locations.
+The BFF adds the leading slashes when constructing the drawer entry; the database stores the paths without them. Registration ownership does not change the bundle names, screen routes or business API addresses.
 
-**What is known:** source inspection traces the shell click, SystemJS loading, route parameters and RATAN trade-module import. **What is not available:** the actual deployed `ratan_trades` and Stamp application sources/API contracts are absent from `scb/web`; the FlowZero source elsewhere in the repo is not confirmed identical to the deployed bundle. We cannot truthfully name the last API URL, trade database query or row-filter policy from these exports alone, or claim a rendered business-table migration test.
+Sources: [tile click](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-base-origin/src/components/Drawer/common/MenuItem.useController.ts:11), [SystemJS workspace loading](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-base-origin/src/pages/Home/common/Container.tsx:11), [BFF drawer paths](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/util/AdminModuleUtil.java:136).
 
-Tile visibility and the function claims are this POC's scope. They do not prove which trade rows a user may read, whether a business API blocks an unauthorized direct call, or whether buttons inside the application are implemented correctly.
+### RATAN Cashflow CN: From The Tile To Actual Grid Rows
 
-Sources: [tile click](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-base-origin/src/components/Drawer/common/MenuItem.useController.ts:11), [SystemJS workspace loading](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-base-origin/src/pages/Home/common/Container.tsx:11), [BFF drawer paths](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/util/AdminModuleUtil.java:136), [RATAN route](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-ratan-container-origin/src/Root/routing/index.tsx:20), [trade module import](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-ratan-container-origin/src/Root/import/TradeBlotter.tsx:7).
+This is traced through supplied frontend source. It has not been executed in a browser connected to the EMS3 fork.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Shell as Portal shell
+    participant Container as RATAN container
+    participant App as Cashflow CN app
+    participant API as Existing cashflow API
+    participant Grid as AG Grid
+    User->>Shell: Click allowed Cashflow Blotter tile 37
+    Shell->>Container: System.import @fm/ratan_container
+    Shell->>Container: Pass /cashflow_blotter_cn and /cashflow_cn
+    Container->>App: System.import @fm/ratan_cashflow_blotter
+    App->>App: Read shell permissions and build grid columns
+    Grid->>App: Grid ready, start default query
+    App->>API: GraphQL /api/ratan/stmcn/v1/cashflows
+    API-->>App: cashflowUltraQuery, rows and paging
+    App->>Grid: Set rowData to returned results
+    Grid-->>User: Display cashflow table
+```
+
+| Step | Actual code behavior | Source |
+| --- | --- | --- |
+| 1. Load the screen | RATAN routes `/cashflow_blotter_cn` to CashFlowCN, which imports `@fm/ratan_cashflow_blotter`. | [container route](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-ratan-container-origin/src/Root/routing/index.tsx:28), [nested app import](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-ratan-container-origin/src/Root/import/CashFlowCN.tsx:7). |
+| 2. Create the table | The nested app routes `/cashflow_cn` to Cashflow_CN. Main renders CashflowDataGrid, which loads business-field column definitions and creates the shared DataGrid / AgGridReact. | [app route](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-cashflow-blotter-origin/src/Root/routing/index.tsx:37), [grid construction](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-cashflow-blotter-origin/src/Cashflow_CN/components/CashflowDataGrid/index.tsx:148). |
+| 3. Start the query | When the grid is ready, query the supplied cashflow ID or filters if present; otherwise run the default search. Build filters, page size, page index and requested fields. | [grid-ready search](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-cashflow-blotter-origin/src/Cashflow_CN/components/CashflowDataGrid/hooks/useGridReadyEvent.ts:33), [query payload](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-cashflow-blotter-origin/src/Cashflow_CN/Main/store/actions/cashflowAction.ts:208). |
+| 4. Call the business API | Send GraphQL to `/api/ratan/stmcn/v1/cashflows`, carrying the shell's `Single-UI-Authorization` token and `Userid`. This code does not send the EMS3 service token. | [API and headers](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-cashflow-blotter-origin/src/Root/rtk-query/baseGraphQLApi.ts:13). |
+| 5. Receive rows | Read `cashflowUltraQuery.results`, plus `totalResult`, `pageIndex`, `itemsPerPage` and `lastPage`. The real backend supplies the business rows; EMS3 supplies function permissions. | [query shape](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-cashflow-blotter-origin/src/Cashflow_CN/schema/ultra-cashflow-query.generated.ts:35), [response handling](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-cashflow-blotter-origin/src/Cashflow_CN/Main/store/actions/cashflowAction.ts:231). |
+| 6. Show the table | Call `api.setGridOption("rowData", results)` and end loading. A query error clears rows and shows the no-rows overlay. | [row assignment](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-cashflow-blotter-origin/src/Cashflow_CN/Main/store/actions/cashflowAction.ts:249). |
+
+These are literal excerpts from the row-handling code, with intervening paging assignments omitted:
+
+```typescript
+const { cashflowUltraQuery } = res ?? {};
+const {
+  results: responsResults,
+  pageIndex,
+  itemsPerPage,
+  totalResult,
+  lastPage,
+} = cashflowUltraQuery ?? {};
+results = responsResults ?? [];
+// The code checks that this is still the current query before rendering.
+api?.setGridOption("rowData", results);
+api?.setGridOption("loading", false);
+```
+
+### How A Function Inside Cashflow Keeps Working
+
+The actual Export button checks this existing permission:
+
+```typescript
+hasPermission("RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Export_Data")
+```
+
+For the worked account:
+
+| Check | What supplies the answer |
+| --- | --- |
+| Does `FMO_OPS_BO` have the CN feature? | The migrated EMS3 role definition. |
+| Does that feature contain `F_Export_Data`? | Yes, in the EMS2 export and proposed EMS3 target. |
+| How does the old frontend find it? | The BFF converts it to an `X_RATANONE` subject/action record; the shell stores that in `entities`; RATAN's `getUser` / `hasPermission` reads it. |
+| What does the user see? | The Export File control can render; it remains disabled until its grid API is ready. |
+| How is exporting done? | Existing code calls AG Grid's CSV or Excel export. EMS3 is not called again when exporting. |
+
+Source: [export condition and implementation](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-cashflow-blotter-origin/src/Cashflow_CN/components/GridFooter/ExportFile.tsx:39), [permission helper](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-ratan-container-origin/src/ratanutils/authenticator.ts:38).
+
+This example shows why keeping the subject/action names matters. It is source evidence of one control's permission check, not proof that every control or business API has been tested after migration.
+
+### Older RATAN Cashflow BAU: The Known Limit
+
+Tile 36 follows the same shell steps, then its RATAN wrapper runs `System.import("@fm/ratan_cashflow")`. The matching BAU application's source is not supplied. The available CN application's routes do not implement `/cashflow_bau`, so its query cannot be presented as the BAU query.
+
+We can show tile 36's complete matrix, proposed EMS3 grants, filtering and wrapper load. Its last business API call and grid implementation still require the matching BAU bundle/source or a live application trace.
+
+Source: [BAU app import](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-ratan-container-origin/src/Root/import/CashFlow.tsx:8).
+
+### FlowZero: From Home To The Request Table
+
+Tile 108 opens the deployed `/static/flowzero/flowzero.js` bundle. There is no matching production FlowZero source under `scb/web`. The following last steps are from the **local reference implementation** in `apps/mfe-flowzero`; its equality with that deployed bundle needs confirmation.
+
+| Step | Local reference behavior | Source |
+| --- | --- | --- |
+| 1. Open FlowZero | `/flowzero/home` displays its home view and statistics, not the request table. | [home route](/Users/lushevol/code/github/fdc3-broker-next/apps/mfe-flowzero/src/Root/routing/index.tsx:71). |
+| 2. Choose My Request | Its menu opens `/flowzero/task-center`, which renders RequestCenter. | [menu link](/Users/lushevol/code/github/fdc3-broker-next/apps/mfe-flowzero/src/components/SiderMenu/index.tsx:48), [screen route](/Users/lushevol/code/github/fdc3-broker-next/apps/mfe-flowzero/src/Root/routing/index.tsx:51). |
+| 3. Ask for a page of rows | The grid datasource calls `getTaskCenter` with page, size, the shell user ID, workflow-name filter and status filter. | [request construction](/Users/lushevol/code/github/fdc3-broker-next/apps/mfe-flowzero/src/pages/RequestCenter/index.tsx:194). |
+| 4. Call the business API | GET `/api/flowzero/v1/workflow-request/my-request` with those query parameters. It uses the shared Base service, which adds `Single-UI-Authorization` and `userId`. | [API call](/Users/lushevol/code/github/fdc3-broker-next/apps/mfe-flowzero/src/api/index.ts:132), [shared headers](/Users/lushevol/code/github/fdc3-broker-next/apps/base/src/hooks/service/util/success.request.handler.ts:7). |
+| 5. Show the table | `res.data` supplies rows, `res.totalElements` supplies the count; pass them to the grid's `successCallback`. Columns include Workflow Name, Request ID, Status and Request Time. | [rows and count](/Users/lushevol/code/github/fdc3-broker-next/apps/mfe-flowzero/src/pages/RequestCenter/index.tsx:201), [column definitions](/Users/lushevol/code/github/fdc3-broker-next/apps/mfe-flowzero/src/pages/RequestCenter/index.tsx:62). |
+
+The row-delivery code uses the following values:
+
+```typescript
+const rows = res.data || [];
+const total = res.totalElements ?? 0;
+```
+
+The datasource then sorts/delivers those rows through `rowParams.successCallback(sorted, totalRef.current)`.
+
+The inspected reference menu, routes and request-centre screen do not check EMS feature/action grants. Therefore a migrated `RAISE_NEW_REQUEST` or `EDIT_COMMENT` grant is not proof that this UI enforces those actions. The Portal tile gate is established; production function checks and backend behavior need confirmation. We are not expanding the migration into business-row entitlement control here.
+
+### Stamp: Keep Its Existing EMS2 Path
+
+| Step | What happens in the mixed setup | Evidence |
+| --- | --- | --- |
+| 1. Get its permissions | BFF fetches `STAMP_STATIC / VIEW_ONLY` from EMS2. | EMS2 adapter and supplied complete matrix. |
+| 2. Return its tiles | `Mapping Query / Read` and `Audit / Read` provide matching subjects for tiles 48 and 49. | BFF filter and supplied tile rows. |
+| 3. Open its screen | Shell imports `@fm/stamp_container`, resolved to `/stamp_container/stamp_container.js`, and passes the existing Mapping Query or Audit route. | Tile/import-map dump and inspected shell. |
+| 4. Load its table data | The Stamp app calls its existing business API and fills its own table. | Expected application step; the Stamp app/API source was not supplied. |
+
+The import map also contains `/stamp_tiles/stamp_tiles.js`; the available data does not prove exactly how Stamp's container uses it. We cannot name Stamp's final API, response shape or table component from these exports. Nothing in the mixed-provider setting moves Stamp permissions to EMS3.
+
+Sources: [Stamp tile rows](/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/application_tile.csv:35), [Stamp bundle rows](/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/import_map.csv:29).
+
+### What The Whole Flow Means
+
+The entitlement systems answer **which tiles and functions this user may use**. The BFF checks and translates those answers. The Portal opens an allowed application. The application then gets rows from its existing business API and renders its table.
+
+Both registration-ownership options follow this same sequence. Neither ownership arrangement changes the table query. The BFF POC does not prove which business rows a user may read or that an application backend rejects an unauthorized direct API call.
 
 ## 8. No Access, Failed Calls And Later Permission Changes
 
@@ -457,6 +672,8 @@ The inspected original shell has known gaps: it ignores an empty replacement dra
 
 Consequently the BFF's strict failure result is proved locally, while immediate removal of stale permissions from an already-open browser is not. Fix and test these shared-shell cases before the production pilot. The frontend gateway also needs to be connected to the fork; the existing development/production routes still target the original endpoints.
 
+The RATAN function helper also overwrites an earlier entity's subject map when several role records have the same entity name. Our one-RATAN-role example avoids that existing issue, but users with multiple RATAN roles need a check before claiming full function-control parity. Source: [role-to-permission loop](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-ratan-container-origin/src/ratanutils/authenticator.ts:15).
+
 Source: [screen flow and exact frontend gaps](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-user-screen-flow.md).
 
 ## 9. Evidence And The Remaining Checks
@@ -467,7 +684,9 @@ Source: [screen flow and exact frontend gaps](/Users/lushevol/.codex/worktrees/e
 | Saved standalone POC reports | 244 tests; 0 failures, 0 errors, 0 skips. | Earlier selected-role/permission pattern checks. |
 | Saved full-dump replay | 113 candidate tiles, 1,044 requested entities, 1,048 backfilled mappings; 40 role/provider combinations and 50 individual-role cases. | Actual SQL/router/filter results for recorded synthetic fixtures; earlier FlowZero tile was not granted in those fixtures. |
 | This report's full tables | RATAN 806, FlowZero pilot 398, Stamp 458 unique grants; no source duplicates. | A lossless presentation of the supplied definitions. Target tables preserve those sets, with FlowZero baseline qualification. |
-| This report's three-application account | 8 protected tiles plus 14 templates predicted. | Readable calculation from source grants and existing filter rules; not a live EMS3/browser result. |
+| Independent matrix comparison | Current and both EMS3 target appendices: zero missing or extra grants for all three applications. | Exact equality with supplied definitions; no claim of completed registration. |
+| This report's cashflow account | 43 protected tiles plus 14 templates predicted; 105 grants across three roles. | Independently checked calculation from source grants and existing filter rules; not a live EMS3/browser result. |
+| Cashflow CN code trace | GraphQL API, request headers, response-to-row assignment and Export permission condition found. | Explains the last steps through the supplied source; not a new rendered-table execution result. |
 
 Supporting files: [BFF recorded verification](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-bff-integration.md), [full-dump execution results](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/evidence/ems3-scenario-results.json), [matrix source hashes, counts and aliases](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/evidence/ems3-three-application-matrix-manifest.json).
 
@@ -481,13 +700,13 @@ Supporting files: [BFF recorded verification](/Users/lushevol/.codex/worktrees/e
 | Which test accounts should have access, and which should be denied? | Definitions alone do not establish user-role assignments. Test accounts are enough for the POC stage. |
 | Do the live detailed/aggregate APIs meet the implemented completeness, empty-result and identity rules? | Synthetic responses validate code behavior; live paging/effective-permission rules still need agreement. |
 | Does the deployed Portal, with its gateway pointed at the fork, pass fresh-login, renewal, revoked-role and failed-call browser tests? | The original shell gaps and deployment route remain unresolved. |
-| Can the application owners show the real Trade Blotter, FlowZero and Stamp screens using those test accounts? | Final business-table behavior comes from separately deployed applications. |
+| Can the application owners show the real Cashflow Blotter, FlowZero and Stamp screens using those test accounts? | CN source is traced; BAU and Stamp sources are missing, and local FlowZero source is not confirmed as the production bundle. |
 
 The corporate build and production database upgrade also need their normal environment verification. No production registrations, assignments, routing settings or applications were changed to produce this report.
 
 ## 10. Reading The Full Matrices
 
-- [Current supplied matrices](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-current.md): RATAN and Stamp EMS2 exports plus the known FlowZero EMS3 pilot catalogue; FlowZero EMS2 is unavailable.
+- [Current supplied matrices](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-current.md): RATAN and Stamp EMS2 exports plus the known FlowZero EMS3 pilot catalogue; FlowZero EMS2 is unavailable. [BAU cashflow table](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-current.md:46); [CN cashflow table](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-current.md:328).
 - [Proposed EMS3: each application manages itself](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-application-owned.md): full target tables under distinct registrations.
 - [Proposed EMS3: Portal manages them centrally](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-portal-managed.md): full target tables under a shared parent ID with distinct logical apps.
 
