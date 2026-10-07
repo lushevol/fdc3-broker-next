@@ -1,6 +1,8 @@
 # EMS3 Migration Explained With RATAN Cashflow Blotter, FlowZero And Stamp
 
-Prepared: 7 October 2026. EM3 below means the EMS3 entitlement system.
+Prepared: 7 October 2026. Updated: 8 October 2026. EM3 below means the EMS3 entitlement system.
+
+**Latest proposal:** select EMS2 or EMS3 directly on each `application_tile` row. Reuse `authorization_application` for EMS3 registration details. No additional subject-routing table is required for this example. This report describes the design; the tile flag and the required BFF changes have not been implemented.
 
 ### Where To Start
 
@@ -8,7 +10,7 @@ Prepared: 7 October 2026. EM3 below means the EMS3 entitlement system.
 | --- | --- |
 | Today's permissions, for all supplied roles | Section 2 and [complete current matrices](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-current.md). |
 | The two ways of managing EMS3 registrations | Section 3 and the two complete target matrices linked there. |
-| The database settings for RATAN + FlowZero on EMS3, Stamp on EMS2 | Section 4. |
+| The tile flags for selected RATAN settlement screens + FlowZero on EMS3, other RATAN screens + Stamp on EMS2 | Section 4, including proposed SQL. |
 | One user logging in and opening the actual cashflow table | Sections 6 and 7. |
 | What has been proved and what still needs a live check | Sections 8 and 9. |
 
@@ -16,12 +18,13 @@ Prepared: 7 October 2026. EM3 below means the EMS3 entitlement system.
 
 The Portal keeps the same tiles and application links. Its BFF, the service that answers the browser's login request, learns how to get permissions from either EMS2 or EMS3.
 
-One database row per existing entitlement entity tells the BFF which system to use. In this report's transition example:
+Each tile has a proposed `entitlement_source` setting: `EMS2` or `EMS3`, defaulting to `EMS2`. The BFF uses the setting to decide which provider may grant access to that tile. In the revised transition example:
 
 | Application | Existing Portal entity | Get permissions from | What the user should see |
 | --- | --- | --- | --- |
-| RATAN | `X_RATANONE` | EMS3 | The same RATAN tiles and function permissions as before, provided its complete matrix and user assignments are migrated. |
-| FlowZero | `FLOW_ZERO` | EMS3 | The Flowzero tile when the user has the matching EMS3 feature. Its old EMS2 matrix was not supplied. |
+| RATAN strategic cashflow, dashboards and NSTP rules | `X_RATANONE` | EMS3 for the selected tiles | Preserve the selected subjects' grants and assignments. |
+| Other RATAN screens | `X_RATANONE` | EMS2 | Older Cashflow BAU, Grouping, Trade Blotter and other subjects stay on EMS2 in this example. |
+| FlowZero launch tile 108 | `FLOW_ZERO` in the supplied tile row | EMS3 | FlowZero belongs to RATAN but can appear as a standalone application. Its supplied pilot has its own logical EMS3 app. |
 | Stamp | `STAMP_STATIC` | EMS2 | The existing Stamp tiles and function permissions. |
 
 The browser does not choose the provider. The application registration owner can be the application team or the Portal team. This changes who manages permissions and the registration IDs; it does not have to change what users are allowed to do.
@@ -29,10 +32,10 @@ The browser does not choose the provider. The application registration owner can
 ```mermaid
 flowchart TD
     Browser[User logs in to Portal] --> BFF[Single UI BFF authenticates user]
-    BFF --> DB[Read tile catalogue and provider settings]
-    DB --> E3[EMS3: RATAN and FlowZero permissions]
-    DB --> E2[EMS2: Stamp permissions]
-    E3 --> Combine[Check and combine permissions]
+    BFF --> DB[Read tile source flags and EMS3 registration settings]
+    DB --> E3[EMS3: selected RATAN subjects and FlowZero]
+    DB --> E2[EMS2: other RATAN subjects and Stamp]
+    E3 --> Combine[Check each tile against its source and combine selected grants]
     E2 --> Combine
     Combine --> Menu[Return allowed tiles and signed permissions]
     Menu --> Click[User opens a tile]
@@ -41,7 +44,7 @@ flowchart TD
     Data --> Table[Application displays its business table]
 ```
 
-The implemented and tested part is the BFF's routing, permission conversion, tile filtering and token handling. The final business API and table depend on the separately deployed application. Section 7 explains that boundary.
+The existing tested POC routes a whole entity to one provider. It does not yet support splitting `X_RATANONE` by tile. Its provider adapters and recorded tests remain evidence for the earlier implementation; they do not prove this revised tile-level design. Section 4 explains the required changes, and Section 7 traces the existing application code through the business table.
 
 ### A Few Names Used In This Report
 
@@ -118,9 +121,19 @@ The full current appendix contains every role for all three subjects. Section 7 
 | `RATAN_STRATEGIC_CASHFLOW_BLOTTER` | 17 | 20 | 133 |
 | `RATAN_CASHFLOW_GROUP_BLOTTER` | 10 | 3 | 22 |
 
-Both proposed EMS3 ownership options retain these exact cashflow grant sets. The full 806-grant RATAN matrix also covers its other screens, because the current switch applies to the whole `X_RATANONE` entity.
+Both proposed EMS3 ownership options retain these exact cashflow grant sets as the eventual full target. In the revised first phase, only selected subjects use EMS3: the older BAU and grouping subjects stay EMS2. The complete 806-grant appendix remains the reference for eventual RATAN migration, rather than a requirement to switch every subject at once.
 
 **A separate RATAN parity gap:** the EMS3 per-user sample has 16 grants for `FMO_COO_SUP`, while its EMS2 definition has 21. Five `F_WORKFLOW_*` actions for `RATAN_FLOW_ZERO` are missing. That sample does not prove the complete RATAN target is registered. `RATAN_FLOW_ZERO` also belongs to `X_RATANONE`; it is separate from the independent `FLOW_ZERO` entity.
+
+### FlowZero Belongs To RATAN, With Two Supplied Permission Keys
+
+| Supplied record | Existing key | What the record proves |
+| --- | --- | --- |
+| RATAN EMS2 workflow functions | `X_RATANONE / RATAN_FLOW_ZERO` | 32 grants across seven roles, including workflow designer/request/query and maker/checker functions. No supplied tile row references this subject. |
+| Standalone Flowzero launch tile 108 | `FLOW_ZERO / FLOW_ZERO_RAISE REQUEST` | This is the actual key the Portal uses to show the Flowzero tile. Its `ems2_role` is `RATAN_PROD`, which is configuration administration metadata. |
+| FlowZero EMS3 pilot | Logical app `FLOWZERO`, including feature `RAISE_REQUEST` | This is the supplied pilot definition, not proof that its roles/actions replace RATAN's workflow functions one for one. |
+
+RATAN ownership does not require renaming the existing launch key. The concrete example switches tile 108. Moving the separate, currently untiled `RATAN_FLOW_ZERO` function grants needs an explicit approved binding; a tile flag alone cannot select a subject that no tile references. Until that binding is agreed, those RATAN function grants keep the EMS2 default. Do not substitute the pilot's different role/action definitions automatically.
 
 ### FlowZero: The Known Pilot Role `Global_Onboard_BatchOps`
 
@@ -159,14 +172,14 @@ The intended migration preserves permissions. EMS3 uses features where EMS2 used
 | FlowZero | 39 | 8 | 398 | Use the supplied pilot catalogue as a candidate target; confirm completeness and legacy compatibility. |
 | Stamp | 4 | 32 | 458 | Copy every EMS2 grant when Stamp's later migration is approved. |
 
-These numbers describe the proposed target. They do not mean those registrations or user assignments have been created.
+These numbers describe the eventual full target. They do not mean those registrations or user assignments have been created. Tile flags decide which part is used during each migration phase; the unselected RATAN subjects continue to use EMS2.
 
 ### Option A: Each Application Manages Its Own Registration
 
 | Application | Who creates roles and assigns users | EMS3 registration ID | EMS3 logical app name, proposed | EMS3 app UID |
 | --- | --- | --- | --- | --- |
 | RATAN | RATAN team | `RATAN_ID_TBC` | `RATAN_ENTITLEMENT_RULE` | `RATAN_UID_TBC` |
-| FlowZero | FlowZero team | `FLOWZERO_ID_TBC` | `FLOWZERO` | `FLOWZERO_UID_TBC` |
+| FlowZero | RATAN / FlowZero owners | `FLOWZERO_ID_TBC` | `FLOWZERO` | `FLOWZERO_UID_TBC` |
 | Stamp, later | Stamp team | `STAMP_ID_TBC` | `STAMP` | `STAMP_UID_TBC` |
 
 For example, RATAN's registration contains `FMO_OPS_BO -> RATAN_CASHFLOW_BLOTTER -> F_Export_Data`. FlowZero's registration contains `Global_Onboard_BatchOps -> RAISE_REQUEST -> BATCH_IMPORT`. Stamp's future registration contains `VIEW_ONLY -> Mapping Query -> Read`.
@@ -202,7 +215,7 @@ This table shows concrete target entries. The linked appendices contain the comp
 | `VIEW_ONLY / Audit` | `Read`. | Stamp registration, `STAMP`, when migrated later. | Portal registration, logical app `STAMP`, when migrated later. |
 | `VIEW_ONLY / each of the other 30 Stamp features` | `Read` for each. | Stamp registration, `STAMP`, when migrated later. | Portal registration, logical app `STAMP`, when migrated later. |
 
-For the current walkthrough, the Stamp rows remain in **EMS2**. Its EMS3 target tables describe a later migration.
+For the current walkthrough, Stamp and the older RATAN Cashflow BAU subject remain in **EMS2**. Their EMS3 target tables describe later migration. Strategic cashflow and NSTP subjects use EMS3, regardless of which team owns the registration.
 
 **[Full EMS3 Matrices: Portal-Managed](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-portal-managed.md)** lists every proposed role/feature/action grant under this arrangement.
 
@@ -216,7 +229,7 @@ The sample already shows RATAN and FlowZero sharing `appId="51358"` with differe
 | Main advantage | Teams can manage their own roles, approvals and timing. | One team can keep naming, onboarding and audit practices consistent. |
 | Main drawback | More registrations and coordination across teams. | Portal may become a queue for every team's permission changes. |
 | What needs controlling? | Each team must follow the agreed compatibility and assignment rules. | Portal administrators need clear boundaries and application owner approval. |
-| Can applications switch one by one? | Yes, through each entity's provider row. | Yes, with separate logical apps and provider rows. |
+| Can selected screens switch first? | Proposed: yes, through tile flags while other subjects stay EMS2. | Proposed: yes, through the same tile flags with centrally managed registration identities. |
 | Does either option remove shared BFF/EMS3 outage risk? | No. Both use the same runtime services. | No. Both use the same runtime services. |
 
 There is no need to choose one management owner for all applications to run this POC. The runtime can support either supported arrangement once the actual registration identities are confirmed.
@@ -239,16 +252,18 @@ The relevant database is the Single UI BFF's `post_trade_portal_service` schema.
 | --- | --- | --- |
 | `application_category` | Menu categories and their ordering/active state. | Existing rows continue to group tiles. |
 | `application_category_audit` | Category change history. | Existing application-managed audit behavior. |
-| `application_tile` | Tile title, category/import references, entity, subject, module and tile path. | Existing names and paths continue to select permissions and open applications. |
-| `application_tile_audit` | Tile change history. | Existing application-managed audit behavior. |
+| `application_tile` | Tile title, category/import references, entity, subject, module and tile path. | Add proposed `entitlement_source`; existing matching keys and paths stay the same. |
+| `application_tile_audit` | Tile change history. | Mirror the new source flag and record changes through the normal tile administration flow. |
 | `import_map` | Symbolic application names and deployed bundle locations. | Existing entries load application code; they do not grant access. |
 | `import_map_audit` | Import-map change history. | Existing application-managed audit behavior. |
 | `application_session` | Logged-out/revoked session IDs. | Existing blacklist checked during session validation; it is not a user-role table. |
-| `authorization_application` | One provider choice and EMS3 identity per existing entity. | New routing configuration. |
+| `authorization_application` | Existing POC provider setting and EMS3 identity per existing entity. | Reuse for EMS3 identities, aliases and the default for permissions not selected by tile flags. The revised BFF must use tile flags for tile decisions. |
 | `authorization_application_audit` | Snapshots of routing changes. | New database-triggered audit for insert/update/delete, including direct SQL changes. |
 | `post_trade_portal_service_schema_history` | Flyway migration history. | Infrastructure record of applied schema changes. |
 
 There are no new local user, role, user-role assignment, feature/action catalogue or effective-permission cache tables. Direct SQL changes to old catalogue tables do not automatically create their application-managed audit records; the new authorization table has its own audit triggers.
+
+No `authorization_subject_route` table is proposed for this example. The source decision lives on the tile; the shared EMS3 identity remains in the existing configuration table.
 
 Source: [new schema and triggers](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/resources/db/migration/V1_0_10__authorization_application.sql:12).
 
@@ -272,14 +287,70 @@ The old column names still contain `ems2`, but their entity and subject values r
 
 Sources: [cashflow tile export](/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/application_tile.csv:26), [Settlement category export](/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/application_category.csv:10), [RATAN import-map export](/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/import_map.csv:9).
 
-**The provider switch is per entity.** Setting `X_RATANONE` to EMS3 moves all RATAN tiles using that entity together, including BAU, CN and group cashflow screens. This fork does not offer a separate provider switch just for Cashflow Blotter. The dump also contains data-filter metadata; this function-permission POC does not evaluate that metadata or determine which cashflow rows the backend returns.
+**Current code versus proposed design:** today's fork still switches an entire entity. The new design makes `application_tile.entitlement_source` authoritative for each tile, so selected settlement screens can use EMS3 while other `X_RATANONE` screens use EMS2. Adding the column without changing the BFF will not enable this behavior.
 
-### The New Routing Table's Fields
+The dump also contains data-filter metadata; this function-permission POC does not evaluate that metadata or determine which cashflow rows the backend returns.
+
+### Proposed Tile Flags For The First Phase
+
+This concrete scope includes the named strategic cashflow/dashboard and NSTP subjects, plus standalone Flowzero tile 108. "Other settlement screens" are not silently included: their exact subject groups can be switched in a later configuration change.
+
+| Tile IDs | Screens | Existing entity / subject | Proposed source |
+| --- | --- | --- | --- |
+| 37, 39, 144, 152, 161, 165 | Strategic Cashflow Blotter, Simple/Open Search variants and dashboards, including Indonesia variants | `X_RATANONE / RATAN_STRATEGIC_CASHFLOW_BLOTTER` | EMS3 |
+| 30, 31, 172 | Settlement NSTP Rules, including Indonesia variant | `X_RATANONE / RATAN_SETTLEMENT_STP_RULE` | EMS3 |
+| 108 | Flowzero | `FLOW_ZERO / FLOW_ZERO_RAISE REQUEST` | EMS3 |
+| 36 | Older Cashflow BAU | `X_RATANONE / RATAN_CASHFLOW_BLOTTER` | EMS2 |
+| 38, 164 | Grouping Blotter | `X_RATANONE / RATAN_CASHFLOW_GROUP_BLOTTER` | EMS2 in this example; optional later group |
+| 32, 33, 34, 173, 174 | Suppression rules | `X_RATANONE / RATAN_SUPPRESSION_RULE` | EMS2 in this example; optional later group |
+| 29, 171 | Authorization Limits | `X_RATANONE / RATAN_PROFILE_LIMITS` | EMS2 in this example; optional later group |
+| 54 | Trade Blotter | `X_RATANONE / RATAN_TRADE_BLOTTER` | EMS2 |
+| 48, 49 | Stamp Mapping Query / Audit | `STAMP_STATIC / Mapping Query` or `Audit` | EMS2 |
+| Other configured tiles | Existing screens | Existing keys | EMS2 by default |
+
+The example switches ten configured tile rows. NSTP is in menu category **Business Rule**, so changing every row in category **Settlement** would not select the correct scope.
+
+### Proposed SQL, Not Applied
+
+The following illustrates the schema/configuration change. It is not an executed migration or proof that the current BFF understands the flag. Add the same column to tile audit storage and include it in admin APIs, CSV import/export and audit snapshots during implementation.
+
+```sql
+ALTER TABLE post_trade_portal_service.application_tile
+    ADD COLUMN entitlement_source varchar(4) NOT NULL DEFAULT 'EMS2'
+    CHECK (entitlement_source IN ('EMS2', 'EMS3'));
+
+UPDATE post_trade_portal_service.application_tile
+SET entitlement_source = 'EMS3',
+    updated_at = CURRENT_TIMESTAMP,
+    updated_by = CURRENT_USER
+WHERE (btrim(ems2_entities) = 'X_RATANONE'
+       AND ems2_subject IN (
+           'RATAN_STRATEGIC_CASHFLOW_BLOTTER',
+           'RATAN_SETTLEMENT_STP_RULE'
+       ))
+   OR (btrim(ems2_entities) = 'FLOW_ZERO'
+       AND ems2_subject = 'FLOW_ZERO_RAISE REQUEST');
+```
+
+This example selects complete matching subject groups in the supplied single-entity rows, including inactive variants if present. Production changes should use the audited tile administration flow, or explicitly create its required audit records; a direct SQL update does not automatically populate `application_tile_audit`.
+
+### The Shared-Subject Rule
+
+| Situation | Proposed handling |
+| --- | --- |
+| Two non-template tiles have the same entity and subject | Require the same source for both, including configured variants that may be activated later. |
+| Strategic blotter is EMS3 but its dashboard is EMS2 | Reject the inconsistent configuration when preserving today's shared function-permission format. |
+| Only menu visibility is being split | A provider-aware filter could distinguish individual tiles, but that does not provide separate button/action permissions. |
+| A template or blank-subject tile | Preserve its existing explicit behavior; do not infer a function subject or migrate it by menu-category name. |
+
+The existing JWT identifies grants by entity, role and subject, without a tile ID or source. That is why shared-subject consistency is needed. The BFF can validate it from tile rows; it does not require a separate subject-routing table.
+
+### Reuse The Existing Application Configuration
 
 | Fields | Meaning |
 | --- | --- |
 | `id`, `bff_entity_name` | Row ID and unique existing entity name. |
-| `provider` | Exactly `EMS2` or `EMS3`. |
+| `provider` | Current code: provider for the entire entity. Proposed: default for permissions not selected by tile flags; it cannot override a tile's explicit source. |
 | `bff_entity_id` | Existing numeric entitlement entity ID, required for EMS3. This is not a tile ID, app UID or registration ID. |
 | `ems3_app_name`, `ems3_app_id`, `ems3_app_uid`, `ems3_itam_id` | Exact EMS3 identities that returned permissions must match. |
 | `subject_long_names` | JSON map from an EMS3 feature name to the subject's compatibility long name used for tile matching. |
@@ -287,27 +358,31 @@ Sources: [cashflow tile export](/Users/lushevol/code/github/fdc3-broker-next/scb
 | `mapping_version` | Configuration version; the database advances it once per update. |
 | `created_at`, `updated_at`, `created_by`, `updated_by` | Change timestamps and actors. |
 
-The migration initially backfills all tile entities as EMS2. The worked example changes only RATAN and FlowZero; the full supplied Portal catalogue contains many other entities that must retain valid rows.
+The earlier migration backfills all tile entities as EMS2. In the revised design, RATAN keeps an EMS2 default and complete EMS3 identity fields for its selected tiles. All FlowZero launch tiles use EMS3 in this supplied catalogue, so its application permissions can use the EMS3 default. Other Portal entities retain valid settings.
 
-### Option A Rows: RATAN And FlowZero Migrated, Stamp Still On EMS2
+### Option A Rows: Application Teams Manage The Registration Details
 
 All `*_TBC` values below are placeholders. The numeric entity IDs and UIDs must come from the real systems before these settings can be applied.
 
 | `bff_entity_name` | `provider` | `bff_entity_id` | `ems3_app_name` | `ems3_app_id` | `ems3_app_uid` | `ems3_itam_id` | `active` |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `X_RATANONE` | `EMS3` | RATAN legacy entity ID | `RATAN_ENTITLEMENT_RULE` | `RATAN_ID_TBC` | RATAN UID | `RATAN_ITAM_TBC` | true |
+| `X_RATANONE` | `EMS2` default | RATAN legacy entity ID | `RATAN_ENTITLEMENT_RULE` | `RATAN_ID_TBC` | RATAN UID | `RATAN_ITAM_TBC` | true |
 | `FLOW_ZERO` | `EMS3` | FlowZero legacy entity ID | `FLOWZERO` | `FLOWZERO_ID_TBC` | FlowZero UID | `FLOWZERO_ITAM_TBC` | true |
 | `STAMP_STATIC` | `EMS2` | Can remain unset | null | null | null | null | true |
 
-### Option B Rows: The Same Migration With Central Ownership
+### Option B Rows: The Same Tile Flags With Central Ownership
 
 | `bff_entity_name` | `provider` | `bff_entity_id` | `ems3_app_name` | `ems3_app_id` | `ems3_app_uid` | `ems3_itam_id` | `active` |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `X_RATANONE` | `EMS3` | RATAN legacy entity ID | `RATAN_ENTITLEMENT_RULE` | `PORTAL_ID_TBC` | RATAN UID | `PORTAL_ITAM_TBC` | true |
+| `X_RATANONE` | `EMS2` default | RATAN legacy entity ID | `RATAN_ENTITLEMENT_RULE` | `PORTAL_ID_TBC` | RATAN UID | `PORTAL_ITAM_TBC` | true |
 | `FLOW_ZERO` | `EMS3` | FlowZero legacy entity ID | `FLOWZERO` | `PORTAL_ID_TBC` | FlowZero UID | `PORTAL_ITAM_TBC` | true |
 | `STAMP_STATIC` | `EMS2` | Can remain unset | null | null | null | null | true |
 
 Stamp's future EMS3 row would use `STAMP` and its own unique UID, with its own registration/ITAM under Option A or the Portal registration/ITAM under Option B. Neither future row is activated in this walkthrough.
+
+The literal `provider` value for RATAN is `EMS2`; "default" in the table explains its revised meaning. Current code ignores RATAN's EMS3 identity fields while this value is EMS2. The new router must validate/use those fields whenever a RATAN tile selects EMS3, and enforce uniqueness for every consumed EMS3 identity, even when the entity default is EMS2.
+
+This simple reuse supports one EMS3 logical application per existing entity. If several different EMS3 logical applications must all emit `X_RATANONE` permissions, add a tile reference to the selected mapping and adjust the existing mapping constraints/adapter. A source flag alone does not identify which of several registrations to use. RATAN ownership or a shared Portal parent ID does not by itself require this extra variant.
 
 ### Subject Compatibility Settings
 
@@ -325,29 +400,48 @@ Sources: [subject conversion](/Users/lushevol/.codex/worktrees/ems3-single-ui-bf
 
 ## 5. Preparing The Mixed Setup
 
+These are implementation and rollout steps for the revised proposal, not a claim that the existing fork can already execute it.
+
 | Step | What happens | Required result |
 | --- | --- | --- |
-| 1 | Deploy the forked BFF schema with all routes initially EMS2 and connect the Portal gateway to that service in the test environment. | Existing behavior is checked through the actual browser route. |
+| 1 | Implement the tile flag, audit/admin/import support and provider-aware BFF flow; initially set all tiles to EMS2. Connect the Portal gateway to the fork in the test environment. | Verify the existing all-EMS2 behavior through the actual browser route. |
 | 2 | The chosen owners register RATAN and FlowZero in EMS3 using the relevant ownership arrangement. | Confirm app name, app ID, app UID and ITAM identity for both. |
-| 3 | Load the proposed matrices and compare complete grant sets. | RATAN has all 806 intended grants; FlowZero's owner confirms the pilot target and its alias/claim compatibility. |
-| 4 | Assign known test accounts to the intended roles in EMS3; retain Stamp assignments in EMS2. | An allow-list account and a denied account have known expected outcomes. |
+| 3 | Load and compare the complete selected subject definitions. Keep the full appendices as the eventual target. | RATAN strategic cashflow has 133 grants and NSTP has 22: 155 selected grants, while 651 other RATAN grants remain EMS2. FlowZero's owner confirms the pilot target and compatibility. |
+| 4 | Assign known test accounts to the intended roles in EMS3; retain the needed RATAN and Stamp assignments in EMS2. | An allow-list account and a denied account have known expected outcomes; role assignments need not move for unselected subjects. |
 | 5 | Configure the BFF's EMS3 token endpoint, detailed/aggregate grant endpoints, service credentials and timeouts. | The BFF service account can read both selected logical applications. Secrets stay in environment/service configuration. |
-| 6 | Fill the approved route identities and compatibility maps, then set `FLOW_ZERO` and `X_RATANONE` to EMS3. | Versioned, audited rows are complete. `STAMP_STATIC` remains EMS2. |
+| 6 | Fill the EMS3 identity/compatibility settings, then flag the ten selected tiles EMS3. Keep RATAN's default EMS2 and all Stamp tiles EMS2. | Validate same-subject consistency, required identities and audited changes. Do not switch all `X_RATANONE` to EMS3. |
 | 7 | Perform fresh login and permission rechecks, including failures and role removal. | Correct tiles and claims, no fallback, and agreed browser behavior. |
 
-Provider-row changes take effect on the next lookup without a BFF restart. Endpoint/credential configuration changes require the service configuration/restart process. This report creates no registrations, assignments or live database updates.
+The proposed BFF reads tile flags and identities afresh on each lookup. Endpoint/credential changes use the service configuration/restart process. This report creates no registrations, assignments, schema migrations or live database updates.
+
+### Required BFF Changes
+
+| Change | Why it is necessary |
+| --- | --- |
+| Pass tile source/subject requirements into authorization, instead of only distinct entity names. | RATAN now needs both providers in one lookup. |
+| Keep provider results separate until each tile has been checked against its selected source. | An EMS2 subject must not show an EMS3 tile. |
+| Remove migrated subjects from all EMS2 role records, even when EMS3 returns no grant for them. | A valid denial must not become an implicit fallback. |
+| Keep only selected RATAN subjects from EMS3; use the entity default for untiled functions. | Extra EMS3 RATAN features must not take over unselected EMS2 functions. For fully migrated FlowZero, retain its confirmed full application permissions, including features without separate Portal tiles. |
+| Merge by canonical entity and role before building the response/JWT; preserve approved subject names. | The current JWT builder overwrites duplicate `entity:role` blocks, so simply appending provider records loses permissions. Different numeric role/feature IDs need explicit compatibility handling. |
+| Validate the same-subject rule, identity mappings, templates and blank-subject behavior. | Invalid or ambiguous settings must fail rather than select another provider. |
+| Add focused mixed-RATAN tests, including an EMS3 denial while EMS2 still grants that subject. | Earlier whole-entity tests do not prove this new source isolation. |
+
+Sources: [current entity-only router](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/service/v2/implementation/RoutingAuthorizationService.java:54), [current JWT builder](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/controller/v2/JwtAuthenticationController.java:152).
 
 ## 6. One Test User, From Login To The Menu
 
+This section describes the expected flow after the tile-source extension is implemented. Source links show the existing code to reuse/change; this is not a recorded execution of the revised design.
+
 Use a synthetic account named `demo_migration`. The assignments below are an illustration; the real user assignment source has not been supplied.
 
-| Application | Assigned role | Assignment system | Grant count for this example |
+| Application / selected subjects | Assigned role | Assignment system | Grant count for this example |
 | --- | --- | --- | ---: |
-| RATAN | `FMO_OPS_BO` | EMS3, using the complete proposed EMS2-equivalent definition | 58 |
+| RATAN strategic cashflow + NSTP | `FMO_OPS_BO` | EMS3, using equivalent selected subject definitions | 18 |
+| Other RATAN subjects | `FMO_OPS_BO` | EMS2, with selected EMS3 subjects removed from the result | 40 |
 | FlowZero | `Global_Onboard_BatchOps` | EMS3 pilot-equivalent definition | 15 |
 | Stamp | `VIEW_ONLY` | EMS2 | 32 |
 
-This walkthrough requires RATAN's full 58-grant role definition, including 17 BAU cashflow actions and 17 CN cashflow actions. These are proposed EMS3 grants copied from the EMS2 export, not a recorded EMS3 response for a real user. Assume this account has no other application roles, the supplied catalogue is loaded, the FlowZero alias is approved, and all required calls succeed. There are 105 role/subject/action grants across this account's three assigned roles.
+The account's 58 RATAN grants are split: 17 strategic cashflow actions and one NSTP access action come from EMS3; 40 others, including 17 BAU cashflow actions, come from EMS2. The selected EMS3 definitions are copied from the export, not a recorded live response. Assume equivalent assignments exist in the required systems, no other roles are assigned, FlowZero's alias is approved, and all required calls succeed. There are still 105 effective grants across three canonical roles.
 
 ### Step 1: Open Portal And Authenticate
 
@@ -365,24 +459,28 @@ Sources: [root page](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-ro
 
 ### Step 2: Read The Catalogue And Provider Settings
 
-The BFF joins active categories, tiles and import-map rows, ordered by category and tile order. It collects the entity names from those candidate tiles, then reads their `authorization_application` rows once for this lookup.
+The BFF joins active categories, tiles and import-map rows, ordered by category and tile order. The revised flow must also read each tile's `entitlement_source`, validate shared-subject consistency, and take one snapshot of required application identities/defaults. The current code only passes distinct entity names to the router, which must change.
 
 For the three examples, the resulting provider groups are:
 
-| Provider group | Entity names | Use |
+| Provider group | Entity names | Selected scope |
 | --- | --- | --- |
-| EMS3 | `X_RATANONE`, `FLOW_ZERO` | Get RATAN and FlowZero grants from EMS3. |
-| EMS2 | `STAMP_STATIC` | Get Stamp grants from EMS2. |
+| EMS3 | `X_RATANONE` | Only strategic cashflow/dashboard and NSTP subjects. |
+| EMS3 | `FLOW_ZERO` | Confirmed FlowZero application permissions; alias the launch feature to tile 108. |
+| EMS2 | `X_RATANONE` | Other RATAN subjects; exclude every subject owned by selected EMS3 tiles. |
+| EMS2 | `STAMP_STATIC` | Existing Stamp permissions. |
 
-The full Portal also includes the other active catalogue entities; those retain their configured providers. This table shows the three applications discussed here, not the complete Portal lookup scope.
+Notice that `X_RATANONE` is deliberately in both provider groups. Each subject still has one authoritative source. The full Portal includes other catalogue entities that retain their settings; this table shows the three examples rather than the complete lookup scope.
 
 Sources: [active catalogue query](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/repository/ApplicationCategoryRepo.java:24), [entity extraction](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/util/AdminModuleUtil.java:89), [provider routing](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/service/v2/implementation/RoutingAuthorizationService.java:54).
 
-### Step 3: Fetch Stamp From EMS2
+### Step 3: Fetch The Remaining RATAN And Stamp Permissions From EMS2
 
 The EMS2 adapter fetches the user's role list. It retains only roles whose entities belong to the selected EMS2 group. It then requests function grants for the matched EMS2 entities.
 
-Stamp's result is `STAMP_STATIC / VIEW_ONLY`, including `Mapping Query -> Read` and `Audit -> Read`. Even if the general EMS2 role list still contains RATAN or FlowZero roles, they are not used for those entities because their routes now select EMS3.
+EMS2 may still return all 58 RATAN grants for `FMO_OPS_BO`. The revised BFF removes strategic cashflow and NSTP from every EMS2 role record, leaving this role's other 40 grants. This removal is required even if the user has no corresponding EMS3 role or grant.
+
+Stamp's result is `STAMP_STATIC / VIEW_ONLY`, including `Mapping Query -> Read` and `Audit -> Read`. EMS2 FlowZero launch grants cannot authorize tile 108 once it selects EMS3.
 
 Source: [EMS2 adapter](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/service/v2/implementation/EMS2AuthorizationImplementation.java:33).
 
@@ -399,42 +497,51 @@ The EMS3 service token is used only between the BFF and EMS3. It is separate fro
 
 The BFF checks app names, IDs/UIDs, nested identities, returned account identity, and detailed/aggregate agreement. Each selected app must have an explicit aggregate record, including a valid empty result if the account has no access.
 
-For `demo_migration`, the target detail includes RATAN's 58 role grants and FlowZero's 15. Stamp is not selected from EMS3 even if that system returns an unrelated Stamp record.
+For `demo_migration`, retain RATAN's 18 selected role grants and FlowZero's 15 confirmed pilot grants. If EMS3 also returns unrelated RATAN subjects, validate its response but do not use those subjects to replace the EMS2-owned permissions. Stamp is not selected from EMS3 even if an unrelated Stamp record appears.
 
 Agreement between two endpoints does not prove the definition is complete against EMS2: both could omit the same permission. That is why the full matrix comparison is also required.
 
 Source: [EMS3 HTTP calls](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/service/v2/implementation/EMS3AuthorizationImplementation.java:61), [response validation](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/service/v2/implementation/EMS3AuthorizationImplementation.java:185).
 
-### Step 5: Convert To The Existing Portal Permission Format
+### Step 5: Convert And Merge The Selected Permissions
 
-The BFF converts EMS3 grants to the same entity/role/subject/action structure that existing consumers receive. This allows the common filter and JWT builder to continue using their existing inputs.
+The existing EMS3 adapter converts grants into the entity/role/subject/action format. The proposed router must additionally retain the correct provider's subjects and merge mixed records by canonical entity/role before building the response/JWT. This avoids duplicate `X_RATANONE:FMO_OPS_BO` blocks overwriting one another.
 
 | Provider input | BFF entity / role | BFF subject name | BFF subject long name | Action |
 | --- | --- | --- | --- | --- |
-| RATAN EMS3 feature | `X_RATANONE / FMO_OPS_BO` | `RATAN_CASHFLOW_BLOTTER` | `/RATAN_CASHFLOW_BLOTTER`, with proposed alias map | `F_Export_Data` |
+| RATAN EMS2 subject | `X_RATANONE / FMO_OPS_BO` | `RATAN_CASHFLOW_BLOTTER` | `/RATAN_CASHFLOW_BLOTTER`, returned by EMS2 | `F_Export_Data` |
 | RATAN EMS3 CN feature | `X_RATANONE / FMO_OPS_BO` | `RATAN_STRATEGIC_CASHFLOW_BLOTTER` | `/RATAN_STRATEGIC_CASHFLOW_BLOTTER`, with proposed alias map | `F_Export_Data` |
 | FlowZero EMS3 feature | `FLOW_ZERO / Global_Onboard_BatchOps` | `RAISE_REQUEST` | `FLOW_ZERO_RAISE REQUEST`, with proposed alias | `BATCH_IMPORT` |
 | Stamp EMS2 subject | `STAMP_STATIC / VIEW_ONLY` | `Mapping Query` | `/Mapping Query` | `Read` |
 
-Separate roles remain separate records. Combining providers does not copy one application's permissions to another. Entity IDs can remain legacy IDs through `bff_entity_id`; EMS3 role/feature/action numeric IDs are returned as EMS3 IDs. The EMS3 per-grant `action.entitlementId` is null because the supplied contract has no equivalent ID. Consumers that depend on old numeric IDs need an explicit compatibility check.
+Different canonical roles remain separate records; the same canonical role's disjoint subjects must be merged. Combining providers must not copy one application's permissions to another. The current adapter can preserve entity IDs through `bff_entity_id`, but returns EMS3 role/feature/action IDs and null per-grant `action.entitlementId`. In the revised split, the same role may have different numeric IDs across providers: agree the canonical identity/metadata mapping rather than choosing whichever record arrives first. Numeric-ID consumers require a compatibility check.
 
 Source: [EMS3 conversion](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/service/v2/implementation/EMS3AuthorizationImplementation.java:202).
 
 ### Step 6: Decide Which Tiles To Return
 
-The normal filter asks: "Does this user have the tile's entity and its subject?" It matches subject name or long name, ignoring subject case. It does not require a particular action, and it does not check the catalogue's `ems2_role` label to show the tile.
+The current filter matches entity and subject name/long name, ignoring subject case; it does not require a particular action or the tile's `ems2_role` label. The revised filter must first limit the check to the tile's selected provider. A merged all-provider grant list must not restore an EMS2 grant for an EMS3-selected subject.
 
 | Tile | Required match | Example account has it? | Menu result |
 | --- | --- | --- | --- |
-| 36 Cashflow Blotter [FX & Equity] | `X_RATANONE` + `RATAN_CASHFLOW_BLOTTER` | Yes, through `FMO_OPS_BO` from EMS3. | Show. |
+| 36 Cashflow Blotter [FX & Equity] | EMS2: `X_RATANONE` + `RATAN_CASHFLOW_BLOTTER` | Yes, through `FMO_OPS_BO` from EMS2. | Show. |
 | 37 Cashflow Blotter, CN | `X_RATANONE` + `RATAN_STRATEGIC_CASHFLOW_BLOTTER` | Yes, through the same EMS3 role. | Show. |
-| 38 Grouping Blotter | `X_RATANONE` + `RATAN_CASHFLOW_GROUP_BLOTTER` | Yes, through the same EMS3 role. | Show. |
-| 193 Exception Auto Recover | `X_RATANONE`; subject is blank. | Yes, the entity is assigned. | Show under the existing entity-only rule. |
+| 38 Grouping Blotter | EMS2: `X_RATANONE` + `RATAN_CASHFLOW_GROUP_BLOTTER` | Yes, through the EMS2 role. | Show. |
+| 193 Exception Auto Recover | EMS2: `X_RATANONE`; subject is blank. | Yes, the entity is assigned in EMS2. | Show under the existing entity-only rule, using only its selected EMS2 source. |
 | 108 Flowzero | `FLOW_ZERO` + `FLOW_ZERO_RAISE REQUEST` | Yes, `RAISE_REQUEST` matches through the long-name alias. | Show. |
 | 48 Mapping Query | `STAMP_STATIC` + `Mapping Query` | Yes, with `Read` from EMS2. | Show. |
 | 49 Audit | `STAMP_STATIC` + `Audit` | Yes, with `Read` from EMS2. | Show. |
 
 The table above highlights the screens discussed here. The complete calculation predicts **40 RATAN protected tiles, one FlowZero tile and two Stamp tiles**. The supplied full catalogue also has 14 active template tiles that bypass permission matching after a successful authorization request. With no other assigned roles, that is **57 visible tiles out of 113 active joined candidates**. Templates do not rescue a failed provider lookup: authorization must succeed first.
+
+| Source in the revised example | Visible protected tiles |
+| --- | ---: |
+| EMS3: selected RATAN strategic cashflow/dashboard + NSTP | 9 |
+| EMS3: FlowZero | 1 |
+| EMS2: remaining RATAN | 31 |
+| EMS2: Stamp | 2 |
+| Templates, outside function matching | 14 |
+| **Total** | **57** |
 
 | Menu category | Protected tile IDs for this account | Count |
 | --- | --- | ---: |
@@ -451,7 +558,7 @@ The table above highlights the screens discussed here. The complete calculation 
 
 Without the FlowZero long-name alias, tile 108 does not match and the total is 56. Several tiles share the same subject, so a role can expose more tiles than it has subjects. Tile 109 is an existing unusual case: it opens the BAU module but matches `RATAN_VALIDATION_EXCEPTION`.
 
-This three-application account result was independently calculated from structured exports and the filter rules. It is not a recorded live login. Earlier execution evidence separately proved the smaller RATAN five-tile fixture and mixed-provider mechanics; it did not execute this new 57-tile account scenario.
+This result was independently calculated from structured exports and existing matching rules. It assumes the proposed provider checks and equivalent grants preserve access. It is not a recorded tile-flag login: earlier evidence proved whole-entity routing, not a RATAN entity split or this 57-tile scenario.
 
 Source: [actual tile filter](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/src/main/java/com/scb/sso/singleuibff/util/AdminModuleUtil.java:97), [full catalogue replay](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-user-records.md).
 
@@ -491,7 +598,9 @@ This is a **fragment** of the JSON permission map stored as the JWT's `entitleme
 }
 ```
 
-The actual token includes all granted subjects and actions, not just the fragment above. The body also returns `entities`: one entity/role record for `X_RATANONE / FMO_OPS_BO`, one for `FLOW_ZERO / Global_Onboard_BatchOps`, and one for `STAMP_STATIC / VIEW_ONLY` in this example. Subject entries contain their action arrays. The RATAN function helper can read those records directly from shell state.
+The expected token includes all selected grants, not just the fragment above. The proposed response returns one merged entity/role record for `X_RATANONE / FMO_OPS_BO`, one for `FLOW_ZERO / Global_Onboard_BatchOps`, and one for `STAMP_STATIC / VIEW_ONLY`. Subject entries contain their action arrays. The RATAN function helper can read those records directly from shell state.
+
+In the proposed combined RATAN record, BAU cashflow permissions come from EMS2 and strategic cashflow permissions come from EMS3. The JWT keeps the existing keys, without provider or tile identifiers. The selected-provider filtering and merge must happen before signing it; the current code does not yet implement that merge.
 
 Notice that the FlowZero JWT key is `RAISE_REQUEST`, even though its tile matches `FLOW_ZERO_RAISE REQUEST`. This is why tile-alias compatibility and JWT-key compatibility must be checked separately.
 
@@ -519,7 +628,7 @@ After login, the user initially sees the workspace. The permitted applications a
 
 | User chooses | Symbolic container | Module / tile passed to app | Permission source |
 | --- | --- | --- | --- |
-| Cashflow Blotter [FX & Equity], tile 36 | `@fm/ratan_container` | `/cashflow_blotter` / `/cashflow_bau` | EMS3, `RATAN_CASHFLOW_BLOTTER`. |
+| Cashflow Blotter [FX & Equity], tile 36 | `@fm/ratan_container` | `/cashflow_blotter` / `/cashflow_bau` | EMS2, `RATAN_CASHFLOW_BLOTTER`. |
 | Cashflow Blotter, CN, tile 37 | `@fm/ratan_container` | `/cashflow_blotter_cn` / `/cashflow_cn` | EMS3, `RATAN_STRATEGIC_CASHFLOW_BLOTTER`. |
 | Flowzero, tile 108 | `@fm/flowzero` | `/flowzero` / `/home` | EMS3, `RAISE_REQUEST` with the tile alias. |
 | Mapping Query, tile 48 | `@fm/stamp_container` | `/stamp` / `/stamp-mappingquery` | EMS2, `Mapping Query`. |
@@ -605,7 +714,7 @@ This example shows why keeping the subject/action names matters. It is source ev
 
 Tile 36 follows the same shell steps, then its RATAN wrapper runs `System.import("@fm/ratan_cashflow")`. The matching BAU application's source is not supplied. The available CN application's routes do not implement `/cashflow_bau`, so its query cannot be presented as the BAU query.
 
-We can show tile 36's complete matrix, proposed EMS3 grants, filtering and wrapper load. Its last business API call and grid implementation still require the matching BAU bundle/source or a live application trace.
+We can show tile 36's complete matrix, eventual EMS3 target grants, existing filtering and wrapper load. It remains EMS2 in this revised first phase. Its last business API call and grid implementation still require the matching BAU bundle/source or a live application trace.
 
 Source: [BAU app import](/Users/lushevol/code/github/fdc3-broker-next/scb/web/mfe-ratan-container-origin/src/Root/import/CashFlow.tsx:8).
 
@@ -653,18 +762,20 @@ Both registration-ownership options follow this same sequence. Neither ownership
 
 ## 8. No Access, Failed Calls And Later Permission Changes
 
-| Situation | Implemented BFF outcome | Practical meaning |
+| Situation | Expected revised outcome | Evidence / practical meaning |
 | --- | --- | --- |
-| EMS3 validly reports no RATAN roles, with an explicit empty aggregate record | No RATAN entity/grants are returned. | RATAN protected tiles are absent. FlowZero and Stamp can still be returned if their checks succeed. |
+| EMS3 validly reports no selected RATAN grants, with an explicit empty aggregate record | No strategic cashflow/dashboard or NSTP tiles are returned. Other RATAN subjects can remain available from EMS2. | Proposed split behavior; old whole-entity tests do not prove it. EMS2 copies of the migrated subjects must not restore access. |
 | FlowZero has only `FLOWZERO Application User`, an empty-feature role | A role record can exist, but no `RAISE_REQUEST` subject. | FlowZero tile 108 is absent. |
-| RATAN has an assigned role with no subject grants | Matching entity still exists. | Blank-subject tile 193 can remain visible under the existing rule. |
-| Required EMS3 call times out, fails, is malformed, has wrong identity, or selected endpoints disagree | Entire authorization attempt returns HTTP 503 / `AUTHORIZATION_UNAVAILABLE`. | No successful partial menu/grants or new tokens; no fallback to EMS2. This also prevents a successful Stamp login response even though Stamp remains EMS2. |
+| RATAN has an EMS2-assigned role with no subject grants | Matching EMS2 entity still exists. | Blank-subject tile 193 remains eligible under the existing entity-only rule. An EMS3-only role cannot authorize this EMS2 tile. |
+| Required EMS3 call times out, fails, is malformed, has wrong identity, or selected endpoints disagree | Entire authorization attempt returns HTTP 503 / `AUTHORIZATION_UNAVAILABLE`. | Retain the tested POC failure policy: no partial success, new tokens or fallback. Reverify after tile routing changes. |
 | Required EMS2 lookup fails | Same whole-request rejection. | The mixed login depends on both providers succeeding. |
-| A required route is missing or inactive | Same rejection. | Disabling a route is not a supported way to quietly hide its tiles. |
-| Provider changes in DB | Next lookup reads the new route. | Existing already-signed tokens are not automatically revoked. |
+| A required EMS3 identity is missing/inactive, a flag is invalid, or same-subject tiles disagree | Reject the authorization attempt. | Proposed validation; disabling configuration must not quietly change a tile's source. |
+| Tile source changes in DB | Next lookup reads the new flag after implementation. | Existing already-signed tokens are not automatically revoked. |
 | User loses a role in EMS3 | Fresh authorization uses the new grants. | Existing browser panels and old tokens need separate session/revocation handling. |
 
 All six login/renewal paths recheck current permissions: normal login, Entra login, validate, relogin, extend and refresh. Extend/refresh keep their existing response shape; they do not automatically deliver a replacement menu and entitlement JWT to the browser. The entitlement JWT lifetime is currently 12 hours.
+
+Those are properties of the existing POC. The tile-source extension must cover the same six paths and add the source-isolation/merge checks above; it has not yet been verified.
 
 ### Browser Work Still Needed Before Production
 
@@ -680,12 +791,13 @@ Source: [screen flow and exact frontend gaps](/Users/lushevol/.codex/worktrees/e
 
 | Evidence | Result | What it supports |
 | --- | --- | --- |
-| Saved actual-BFF Surefire reports | 747 tests; 0 failures, 0 errors, 0 skips. | Actual BFF source verified with isolated PostgreSQL and synthetic HTTP providers through the public verification build. These are saved results, not a new live run for this report. |
+| Saved actual-BFF Surefire reports | 747 tests; 0 failures, 0 errors, 0 skips. | Earlier whole-entity BFF routing verified with isolated PostgreSQL and synthetic HTTP providers. These are saved results, not tests of the proposed tile flag. |
 | Saved standalone POC reports | 244 tests; 0 failures, 0 errors, 0 skips. | Earlier selected-role/permission pattern checks. |
 | Saved full-dump replay | 113 candidate tiles, 1,044 requested entities, 1,048 backfilled mappings; 40 role/provider combinations and 50 individual-role cases. | Actual SQL/router/filter results for recorded synthetic fixtures; earlier FlowZero tile was not granted in those fixtures. |
 | This report's full tables | RATAN 806, FlowZero pilot 398, Stamp 458 unique grants; no source duplicates. | A lossless presentation of the supplied definitions. Target tables preserve those sets, with FlowZero baseline qualification. |
 | Independent matrix comparison | Current and both EMS3 target appendices: zero missing or extra grants for all three applications. | Exact equality with supplied definitions; no claim of completed registration. |
-| This report's cashflow account | 43 protected tiles plus 14 templates predicted; 105 grants across three roles. | Independently checked calculation from source grants and existing filter rules; not a live EMS3/browser result. |
+| This report's revised cashflow account | 43 protected tiles plus 14 templates predicted; 105 grants across three roles. RATAN grants split 18 EMS3 / 40 EMS2; protected tiles split 10 EMS3 / 33 EMS2. | Independently checked calculation under preserved grants and the proposed source rules; not an executed tile-flag or live-browser result. |
+| Tile-source design | Proposed column, SQL, scope groups and required BFF changes documented. | Not implemented or tested. No subject-routing table added, and no database changes applied. |
 | Cashflow CN code trace | GraphQL API, request headers, response-to-row assignment and Export permission condition found. | Explains the last steps through the supplied source; not a new rendered-table execution result. |
 
 Supporting files: [BFF recorded verification](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-bff-integration.md), [full-dump execution results](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/evidence/ems3-scenario-results.json), [matrix source hashes, counts and aliases](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/evidence/ems3-three-application-matrix-manifest.json).
@@ -695,10 +807,13 @@ Supporting files: [BFF recorded verification](/Users/lushevol/.codex/worktrees/e
 | Simple question / check | Why it remains |
 | --- | --- |
 | What are the real production registration identities and existing numeric entity IDs? | The sample IDs and this report's placeholders are not production configuration. |
-| Can EMS3 provide the complete intended RATAN matrix, including the five missing workflow actions for `FMO_COO_SUP`? | The current EMS3 user sample is short of the EMS2 role definition. |
+| Which additional settlement subject groups should join the first phase? | The concrete example includes strategic cashflow/dashboard and NSTP. Grouping, suppression, limits and other functions remain EMS2 until selected. |
+| Does FlowZero migration include only tile 108, or also the separate `RATAN_FLOW_ZERO` function grants? | The latter has no supplied tile row, so it needs an explicit binding/default decision beyond a tile flag. Ownership alone does not map the pilot's different roles/actions. |
+| Can EMS3 provide the complete selected RATAN subject definitions, then the full matrix for later phases? | The first phase needs strategic cashflow/NSTP parity; the separate `FMO_COO_SUP` workflow gap still matters when that subject migrates. |
 | Is the FlowZero pilot catalogue the complete target, and do its consumers accept `RAISE_REQUEST` as the permission key? | No old FlowZero matrix was supplied; the tile alias does not translate JWT keys. |
 | Which test accounts should have access, and which should be denied? | Definitions alone do not establish user-role assignments. Test accounts are enough for the POC stage. |
 | Do the live detailed/aggregate APIs meet the implemented completeness, empty-result and identity rules? | Synthetic responses validate code behavior; live paging/effective-permission rules still need agreement. |
+| Does the revised BFF pass same-entity mixed-provider, duplicate-role merge, invalid-flag and EMS3-denial tests? | The 747 saved tests predate this proposal. An EMS2 grant must never restore a selected EMS3 grant. |
 | Does the deployed Portal, with its gateway pointed at the fork, pass fresh-login, renewal, revoked-role and failed-call browser tests? | The original shell gaps and deployment route remain unresolved. |
 | Can the application owners show the real Cashflow Blotter, FlowZero and Stamp screens using those test accounts? | CN source is traced; BAU and Stamp sources are missing, and local FlowZero source is not confirmed as the production bundle. |
 
@@ -707,7 +822,7 @@ The corporate build and production database upgrade also need their normal envir
 ## 10. Reading The Full Matrices
 
 - [Current supplied matrices](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-current.md): RATAN and Stamp EMS2 exports plus the known FlowZero EMS3 pilot catalogue; FlowZero EMS2 is unavailable. [BAU cashflow table](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-current.md:46); [CN cashflow table](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-current.md:328).
-- [Proposed EMS3: each application manages itself](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-application-owned.md): full target tables under distinct registrations.
-- [Proposed EMS3: Portal manages them centrally](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-portal-managed.md): full target tables under a shared parent ID with distinct logical apps.
+- [Proposed EMS3: each application manages itself](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-application-owned.md): eventual full target under application-managed registrations; tile flags select the first-phase subset.
+- [Proposed EMS3: Portal manages them centrally](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-portal-managed.md): the same eventual target under a shared parent ID with distinct logical apps; tile flags select the same subset.
 
-The visible result for the worked account is the same under both ownership arrangements: RATAN permissions come from EMS3, FlowZero permissions come from EMS3, and Stamp permissions come from EMS2. The row chosen in `authorization_application` controls the source; the role matrix and assignments control what the user receives.
+The expected visible result is the same under both ownership arrangements. Selected RATAN strategic cashflow/NSTP subjects and FlowZero come from EMS3; other RATAN subjects and Stamp come from EMS2. **The proposed flag on `application_tile` controls each tile's source.** Existing application configuration supplies EMS3 identities/defaults; matrices and assignments determine the grants. The additional subject-routing table suggested earlier is not required for this example.

@@ -1,6 +1,6 @@
 # Proposed EMS3 Matrices: Portal Manages The Registrations
 
-Prepared: 7 October 2026.
+Prepared: 7 October 2026. Scope clarification: 8 October 2026.
 
 [Read the explanation and data flow](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-three-application-report.md)
 
@@ -10,7 +10,7 @@ A row is an allow-list: only the listed actions are granted by that role for tha
 
 The registration and assignment owner is the Portal team. Permissions are preserved; ownership does not add permissions.
 
-RATAN and Stamp retain their complete EMS2 matrices. FlowZero retains the supplied EMS3 pilot catalogue pending owner confirmation of completeness and any legacy claim compatibility.
+These are eventual full EMS3 targets: RATAN and Stamp retain their complete EMS2 matrices, and FlowZero retains its supplied pilot catalogue pending owner confirmation. The revised report proposes `application_tile.entitlement_source` for phased migration: strategic cashflow/dashboard and NSTP plus tile 108 first; other RATAN subjects and Stamp remain EMS2. The tile flag is not implemented yet. No grant rows below have changed.
 
 | Application | EMS3 app name (proposed) | Registration ID | Logical app UID | Portal entity |
 | --- | --- | --- | --- | --- |

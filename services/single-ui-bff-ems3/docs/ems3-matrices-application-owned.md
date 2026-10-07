@@ -1,6 +1,6 @@
 # Proposed EMS3 Matrices: Each Application Manages Its Own Registration
 
-Prepared: 7 October 2026.
+Prepared: 7 October 2026. Scope clarification: 8 October 2026.
 
 [Read the explanation and data flow](/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-three-application-report.md)
 
@@ -8,9 +8,9 @@ Every supplied role/feature/action grant is included below. Exact spellings, spa
 
 A row is an allow-list: only the listed actions are granted by that role for that feature. A missing role/feature row grants nothing in this export. This is a definition matrix, not a list of assigned users.
 
-The registration and assignment owner is the respective application team. Permissions are preserved; ownership does not add permissions.
+The registration and assignment owner is the respective application team, including RATAN / FlowZero owners for FlowZero. Permissions are preserved; ownership does not add permissions.
 
-RATAN and Stamp retain their complete EMS2 matrices. FlowZero retains the supplied EMS3 pilot catalogue pending owner confirmation of completeness and any legacy claim compatibility.
+These are eventual full EMS3 targets: RATAN and Stamp retain their complete EMS2 matrices, and FlowZero retains its supplied pilot catalogue pending owner confirmation. The revised report proposes `application_tile.entitlement_source` for phased migration: strategic cashflow/dashboard and NSTP plus tile 108 first; other RATAN subjects and Stamp remain EMS2. The tile flag is not implemented yet. No grant rows below have changed.
 
 | Application | EMS3 app name (proposed) | Registration ID | Logical app UID | Portal entity |
 | --- | --- | --- | --- | --- |
