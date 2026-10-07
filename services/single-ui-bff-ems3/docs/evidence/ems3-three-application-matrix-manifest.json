@@ -1,0 +1,141 @@
+{
+  "prepared": "2026-10-07",
+  "sources": [
+    {
+      "path": "/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/entitlements.xml",
+      "sha256": "a8aff895b280bbe0c89c4a8ad986cd5f63c7a4687bd33278548c33b2ddff647c"
+    },
+    {
+      "path": "/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/entitlements_stamp.xml",
+      "sha256": "364e99cb3a810eb100eb0a9f6438de2fa0e35a4a0251e262c59418bd5e822e1a"
+    },
+    {
+      "path": "/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/application_tile.csv",
+      "sha256": "fbe6f15602c424511f86d40fedc124cedd842ea656f10239cd0f247800c8895d"
+    },
+    {
+      "path": "/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/application_category.csv",
+      "sha256": "0cc9c75d70d0400422954a40dfc6710bfeb8f0af99cf2191f0c82eeb9e542367"
+    },
+    {
+      "path": "/Users/lushevol/code/github/fdc3-broker-next/scb-next/data/import_map.csv",
+      "sha256": "bcf6abfab438d16ef2ea1ab7bad2cab432fde8856290339cc20a5a8b681cde88"
+    },
+    {
+      "path": "/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/scb/services/new-auth-service/EMS3 Samples.json",
+      "sha256": "843681cabd82c8deb06ed1071f027abf49a8b423a1b221deb4be7680f1f4a8f2"
+    }
+  ],
+  "matrices": {
+    "RATAN": {
+      "role_count": 25,
+      "feature_count": 25,
+      "action_count": 51,
+      "grant_count": 806,
+      "role_feature_rows": 280,
+      "roles_with_no_grants": [],
+      "canonical_grants_sha256": "a00cd4c79911e1c8cc5d600c541f514af0f101fcc952f4fd1d1216d0337cc1a2"
+    },
+    "FlowZero": {
+      "role_count": 39,
+      "feature_count": 8,
+      "action_count": 11,
+      "grant_count": 398,
+      "role_feature_rows": 160,
+      "roles_with_no_grants": [
+        "FLOWZERO Application Admin",
+        "FLOWZERO Application User",
+        "FLOWZERO Consumer",
+        "FLOWZERO PSS User",
+        "FMCES_ User",
+        "FMCES_ADMIN"
+      ],
+      "canonical_grants_sha256": "b49df95127cfa6a5d679ec78c615a1cf54df4283def8b1e06c5c35434cf9e65a"
+    },
+    "Stamp": {
+      "role_count": 4,
+      "feature_count": 32,
+      "action_count": 6,
+      "grant_count": 458,
+      "role_feature_rows": 128,
+      "roles_with_no_grants": [],
+      "canonical_grants_sha256": "51c2735e05ec0db17b13230eb90d4e218ad6db939e3496608113f375522f38a6"
+    }
+  },
+  "outputs": [
+    "/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-current.md",
+    "/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-application-owned.md",
+    "/Users/lushevol/.codex/worktrees/ems3-single-ui-bff/fdc3-broker-next/services/single-ui-bff-ems3/docs/ems3-matrices-portal-managed.md"
+  ],
+  "notes": [
+    "No real user assignments included.",
+    "FlowZero EMS2 baseline unavailable.",
+    "Targets preserve provided grant sets; production registration and parity not proved."
+  ],
+  "proposed_subject_long_names": {
+    "X_RATANONE": {
+      "RATAN_AUTO_NETTING_RULE": "/RATAN_AUTO_NETTING_RULE",
+      "RATAN_CASHFLOW_BLOTTER": "/RATAN_CASHFLOW_BLOTTER",
+      "RATAN_CASHFLOW_GROUP_BLOTTER": "/RATAN_CASHFLOW_GROUP_BLOTTER",
+      "RATAN_CA_EXCEPTION": "/RATAN_CA_EXCEPTION",
+      "RATAN_CA_RULE": "/RATAN_CA_RULE",
+      "RATAN_ENTITLEMENT_RULE": "/RATAN_ENTITLEMENT_RULE",
+      "RATAN_FLOW_ZERO": "/RATAN_FLOW_ZERO",
+      "RATAN_FM_COO_EXCEPTION": "/RATAN_FM_COO_EXCEPTION",
+      "RATAN_FM_COO_RULE": "/RATAN_FM_COO_RULE",
+      "RATAN_KR_EXCEPTION": "/RATAN_KR_EXCEPTION",
+      "RATAN_MO_EXCEPTION": "/RATAN_MO_EXCEPTION",
+      "RATAN_MO_RULE": "/RATAN_MO_RULE",
+      "RATAN_NETTING_RULE": "/RATAN_NETTING_RULE",
+      "RATAN_NOSTRO_BLOTTER": "/RATAN_NOSTRO_BLOTTER",
+      "RATAN_OPTION_EXPIRY_BLOTTER": "/RATAN_OPTION_EXPIRY_BLOTTER",
+      "RATAN_PROFILE_LIMITS": "/RATAN_PROFILE_LIMITS",
+      "RATAN_RULE_ENGINE": "/RATAN_RULE_ENGINE",
+      "RATAN_SETTLEMENT_EXCEPTION": "/RATAN_SETTLEMENT_EXCEPTION",
+      "RATAN_SETTLEMENT_STP_RULE": "/RATAN_SETTLEMENT_STP_RULE",
+      "RATAN_STRATEGIC_CASHFLOW_BLOTTER": "/RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+      "RATAN_SUPPRESSION_RULE": "/RATAN_SUPPRESSION_RULE",
+      "RATAN_TEST_PORTAL_RATAN": "/RATAN_TEST_PORTAL_RATAN",
+      "RATAN_TEST_PORTAL_VPA": "/RATAN_TEST_PORTAL_VPA",
+      "RATAN_TRADE_BLOTTER": "/RATAN_TRADE_BLOTTER",
+      "RATAN_VALIDATION_EXCEPTION": "/RATAN_VALIDATION_EXCEPTION"
+    },
+    "FLOW_ZERO": {
+      "RAISE_REQUEST": "FLOW_ZERO_RAISE REQUEST"
+    },
+    "STAMP_STATIC": {
+      "Audit": "/Audit",
+      "CFETS_BusinessCenter_Mapping_STL": "/CFETS_BusinessCenter_Mapping_STL",
+      "CFETS_CCS_Index_Mapping_STL": "/CFETS_CCS_Index_Mapping_STL",
+      "CFETS_CCS_Schedule_Mapping_STL": "/CFETS_CCS_Schedule_Mapping_STL",
+      "CFETS_CCS_USDcurrency_STL": "/CFETS_CCS_USDcurrency_STL",
+      "CFETS_FX_TraderId_Mapping_STL": "/CFETS_FX_TraderId_Mapping_STL",
+      "CFETS_IRS_Index_Mapping_STL": "/CFETS_IRS_Index_Mapping_STL",
+      "CFETS_IRS_MDS_SD_SWAP_Mapping_STL": "/CFETS_IRS_MDS_SD_SWAP_Mapping_STL",
+      "CFETS_Rates_TraderId_Mapping_STL": "/CFETS_Rates_TraderId_Mapping_STL",
+      "Dummy_UVT_Mapping": "/Dummy_UVT_Mapping",
+      "FMRPStella_Cashflow_Suspension_Status_STL": "/FMRPStella_Cashflow_Suspension_Status_STL",
+      "FMRPStella_CortexIndex_Mapping_STL": "/FMRPStella_CortexIndex_Mapping_STL",
+      "FMRPStella_Product_Codes_STL": "/FMRPStella_Product_Codes_STL",
+      "FMRPStella_Products_Mapping": "/FMRPStella_Products_Mapping",
+      "FMRPStella_Restricted_Product_Portfolio_STL": "/FMRPStella_Restricted_Product_Portfolio_STL",
+      "FMRPStella_Schedule_Enrichment_Eligibility": "/FMRPStella_Schedule_Enrichment_Eligibility",
+      "Mapping Query": "/Mapping Query",
+      "RDM_CMPS": "/RDM_CMPS",
+      "RDM_FSS": "/RDM_FSS",
+      "RDM_MAS54B": "/RDM_MAS54B",
+      "RDM_Monitored_Non_Markets_Staff": "/RDM_Monitored_Non_Markets_Staff",
+      "RDM_RateSetter-ALM": "/RDM_RateSetter-ALM",
+      "RDM_RateSetter-BondsLoans": "/RDM_RateSetter-BondsLoans",
+      "RDM_RateSetter-Derivatives": "/RDM_RateSetter-Derivatives",
+      "RDM_RateSetter-FX": "/RDM_RateSetter-FX",
+      "RDM_T-Capital": "/RDM_T-Capital",
+      "RDM_T-Mgmt": "/RDM_T-Mgmt",
+      "S2BX_DropCopyPortfolio": "/S2BX_DropCopyPortfolio",
+      "S2BX_RestrictedPortfolio_Mapping": "/S2BX_RestrictedPortfolio_Mapping",
+      "S2BX_TCID_to_Portfolio_Mapping": "/S2BX_TCID_to_Portfolio_Mapping",
+      "S2BX_cptyTCID_to_FMID_Mapping": "/S2BX_cptyTCID_to_FMID_Mapping",
+      "Traiana_FMID_Counterparty_Broker_Mapping": "/Traiana_FMID_Counterparty_Broker_Mapping"
+    }
+  }
+}
