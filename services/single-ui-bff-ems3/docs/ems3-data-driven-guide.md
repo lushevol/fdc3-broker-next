@@ -79,8 +79,89 @@ EMS3: FLOWZERO / RAISE_REQUEST
 Portal output: FLOW_ZERO / FLOW_ZERO_RAISE REQUEST
 ```
 
-Write the old Portal subject into both `name` and `longName`: the current JWT
-builder uses `name`, while drawer matching also checks `longName`.
+Map `name` to the old Portal subject and `longName` to its expected name/path.
+For FlowZero, both can use `FLOW_ZERO_RAISE REQUEST`. The current JWT builder
+uses `name`, while drawer matching also checks `longName`.
+
+### Response field mappings: EMS2 -> EMS3 -> Portal
+
+EMS2 uses two responses: `GET /ems2/rest/account/{userId}` for assigned roles
+and `POST /ems2/rest/entitlements/entitlementList` for grants. EMS3 uses
+`GET /fmces/v1/entitlement/user/{userId}` for grants grouped by role and
+`GET /fmces/v1/entitlement/user-response/{userId}` for the combined result.
+
+In the table below, EMS2 grant fields are inside
+`response[userId].entitlements[]`; EMS3 detail fields are inside each item of
+the detailed response array. Portal fields are inside `entities[]`, unless
+otherwise stated. These mappings describe the revised tile-based target.
+
+| Meaning | EMS2 response field | EMS3 response field | Portal result / rule |
+|---|---|---|---|
+| User | Account response `accountName`; grant response key `[userId]` | Aggregate `user_data.user_id` | Validate against the signed-in user; internal `accountName` stays that user ID. |
+| Application/entity name | `role.entity.name` | Detail `appName`; aggregate `user_data.app_name` | Match the tile's `ems3_app_name`, then return `name = ems2_entities`, e.g. `RATAN_ENTITLEMENT_RULE` -> `X_RATANONE`. `applicationName` holds the EMS3 app name. |
+| Application registration ID | No direct equivalent to the EMS3 registration | Detail `appId`; aggregate `user_data.itam_id` | Validate against `ems3_app_id` only after confirming their relationship with CES. Do not use this as the Portal entity ID. |
+| User role name | `role.name`, also encoded in account `entitlementTypes[].uniqueName` | Detail `entitlementName` | `roleName`, e.g. `FMO_OPS_BO`. This is not the tile's admin `ems2_role`. Any role rename needs an approved mapping. |
+| Subject/feature name | `subject.name` | `featureActionDtos[].features.featureName` | Select using `ems3_subject`, then return `subjects[].name = ems2_subject`. |
+| Subject path/display name | `subject.longName` | No direct equivalent in the supplied detail response | Return the agreed Portal `subjects[].longName`; preserve existing paths where required. |
+| Action name | `action.name` | `featureActionDtos[].actions.actionName` | `subjects[].actions[].name`; preserve the action name, e.g. `F_Export_Data`, or use an approved rename. |
+| Portal entity numeric ID | `role.entity.id` (also in subject/action entity references) | No equivalent Portal ID; `appUID` is an EMS3 application identity | Preserve the agreed Portal `id`; do not substitute `appId` or `appUID`. Its configuration source still needs to be decided for the tile-only implementation. |
+| Role numeric ID | `role.id` | Detail `entitlementId` (numeric string) | `roleId`; the current POC converts the EMS3 string to a number. It is not necessarily the old EMS2 role ID. |
+| Subject numeric ID | `subject.id` | `featureActionDtos[].features.featureId` | `subjects[].id`; the current POC uses the EMS3 feature ID. |
+| Action numeric ID | `action.id` | `featureActionDtos[].actions.actionId` | `subjects[].actions[].id`; the current POC uses the EMS3 action ID. |
+| One grant's numeric ID | Grant `id` | No equivalent grant ID in the supplied EMS3 detail | EMS2 fills `subjects[].actions[].entitlementId` with the grant ID; EMS3 leaves it null. EMS3 `entitlementId` identifies the role, not this grant. |
+
+EMS2 account `uniqueName` contains
+`entityId|entityName|roleId|roleName`. The supplied XML export shows role,
+subject and action names, but does not supply these numeric API IDs or user
+assignments. EMS2 `applicationName` is descriptive metadata, not the entity
+lookup key. Confirm numeric-ID consumers before launch; the two systems' IDs
+are not interchangeable. The tile-only revision must define how to preserve
+Portal entity IDs without the old application route table.
+
+The aggregate EMS3 response is a cross-check, not the source for assigning
+permissions to individual roles:
+
+| Aggregate EMS3 field | How it relates to the detailed response |
+|---|---|
+| `user_data.user_id` | Must match the requested user; the detail sample has no user field. |
+| `user_data.app_name`, `user_data.itam_id` | Check the selected app name and confirmed registration identity. Detail `itamId` may be null; do not confuse it with aggregate `itam_id`. |
+| `entitlements.entitlement_name[]` | Must match the set of detail `entitlementName` values for that app. |
+| `entitlements.role_entitlements[].feature` / `.action` | Must match the union of detail feature/action pairs. This list does not say which role granted each pair; do not copy the union into every role. |
+| `entitlements.data_entitlements[].key` / `.values` | Country/region/business data access. Keep separate from subjects/actions and tile visibility; also keep its policies, profiles and logical indicator separate. |
+
+The other data-only paths are `entitlements.data_policies.policy_rules[]`,
+`entitlements.data_profiles.data_profile_rules[]` and
+`entitlements.data_entitlements_logical_indicator`. None maps to a functional
+subject/action grant.
+
+Nested `features.applicationDto` and `actions.applicationDto` carry `appName`
+and `appUID`; check that they identify the same application as their parent.
+The revised target selects by app name/ID without requiring a stored UID.
+EMS2's `count` must equal its grant-list length. EMS3 has no equivalent count
+in these samples; validate both endpoint results and their agreement before
+returning success. A failed API response is not an empty grant list.
+
+Full names and other EMS2 account metadata have no demonstrated equivalent in
+these EMS3 functional responses. Keep the agreed authentication/profile source;
+do not invent values from entitlement names.
+EMS2 account `status` describes API success; `accountStatus` describes account
+state. EMS3's normalized `SUCCESS` means the grant lookup was validated, not
+that the account is enabled.
+
+For one permission, the mapping looks like this (shortened values):
+
+| Example | EMS2 entity / role / subject / action | EMS3 app / role / feature / action | Portal permission after mapping |
+|---|---|---|---|
+| RATAN | `X_RATANONE / FMO_OPS_BO / RATAN_STRATEGIC_CASHFLOW_BLOTTER / F_Export_Data` | `RATAN_ENTITLEMENT_RULE / FMO_OPS_BO / RATAN_STRATEGIC_CASHFLOW_BLOTTER / F_Export_Data` | Same EMS2 permission names. |
+| FlowZero | Tile binding is `FLOW_ZERO / FLOW_ZERO_RAISE REQUEST`; no standalone EMS2 matrix supplied. | `FLOWZERO / Global_Onboard_BatchOps / RAISE_REQUEST / RAISE_NEW_REQUEST` | `FLOW_ZERO / Global_Onboard_BatchOps / FLOW_ZERO_RAISE REQUEST / RAISE_NEW_REQUEST` (proposed alias). |
+| Stamp | `STAMP_STATIC / VIEW_ONLY / Mapping Query / Read` | Not selected in this example; Stamp stays EMS2. | `STAMP_STATIC / VIEW_ONLY / Mapping Query / Read` |
+
+Check the exact nested fields in the [detailed EMS3 JSON](examples/cashflow-ems3/ems3-detailed-response.json),
+[aggregate JSON](examples/cashflow-ems3/ems3-aggregate-response.json) and
+[Portal response](examples/cashflow-ems3/portal-login-response.json).
+These are shortened/synthetic examples of the earlier POC, not live production
+responses; see their [manifest](examples/cashflow-ems3/manifest.json). The existing
+FlowZero alias implementation still needs the `name` update described above.
 
 ### Example rows: selected RATAN and FlowZero migrated; Stamp stays
 
