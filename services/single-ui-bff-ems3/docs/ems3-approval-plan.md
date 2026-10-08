@@ -6,6 +6,9 @@ See the [short data guide](ems3-data-driven-guide.md) for database rows,
 RATAN/FlowZero/Stamp examples and routing code. Use this plan for estimates and
 release dates; its first production launch moves FlowZero only.
 
+For a month-by-month view and rough later RATAN/Stamp launch targets, see the
+[monthly timeline](ems3-monthly-timeline.md).
+
 ## Approach
 
 1. Add EMS3 to the forked Single UI BFF. Keep existing APIs, permission names and tile rules.
