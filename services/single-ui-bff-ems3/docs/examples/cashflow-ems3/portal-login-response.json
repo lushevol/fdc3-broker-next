@@ -1,0 +1,127 @@
+{
+  "result": true,
+  "entities": [
+    {
+      "id": 1001,
+      "name": "X_RATANONE",
+      "applicationName": "RATAN_ENTITLEMENT_RULE",
+      "roleId": 9001,
+      "roleName": "FMO_OPS_BO",
+      "subjects": [
+        {
+          "id": 9101,
+          "name": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "longName": "/RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "actions": [
+            {
+              "name": "ACCESS_FMO_POST_TRADE_PORTAL",
+              "id": 9201,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Ad_Hoc_Suppress",
+              "id": 9202,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Cashflow_Status_Change_Release",
+              "id": 9203,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Custom_Query_Builder",
+              "id": 9204,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Custom_View_Builder_Private",
+              "id": 9205,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Export_Data",
+              "id": 9206,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Fail",
+              "id": 9207,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Hold",
+              "id": 9208,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Modify_Settlement_Means",
+              "id": 9209,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Multi_Exception_Initiate",
+              "id": 9210,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Multi_Exception_Verify",
+              "id": 9211,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Perform_Ad_Hoc_Netting",
+              "id": 9212,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Perform_Cashflow_Split",
+              "id": 9213,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Perform_Un_Net_Initiate",
+              "id": 9214,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Perform_Un_Net_Verify",
+              "id": 9215,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Reinstate",
+              "id": 9216,
+              "entitlementId": null
+            },
+            {
+              "name": "F_Un_Hold",
+              "id": 9217,
+              "entitlementId": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "drawers": [
+    {
+      "id": 9,
+      "label": "Settlement",
+      "tiles": [
+        {
+          "id": 37,
+          "title": "Cashflow Blotter",
+          "entity": [
+            "X_RATANONE"
+          ],
+          "subject": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "isTemplate": false,
+          "container": "@fm/ratan_container",
+          "module": "/cashflow_blotter_cn",
+          "tile": "/cashflow_cn"
+        }
+      ]
+    }
+  ],
+  "entitlementsToken": "<signed-permission-JWT>"
+}

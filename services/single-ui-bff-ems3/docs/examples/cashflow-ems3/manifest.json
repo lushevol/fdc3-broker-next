@@ -1,0 +1,71 @@
+{
+  "description": "Illustrative functional-entitlement API responses for strategic cashflow migration.",
+  "exampleOnly": true,
+  "liveResponse": false,
+  "permissionCategory": "functional",
+  "scope": {
+    "bffEntity": "X_RATANONE",
+    "subject": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+    "role": "FMO_OPS_BO",
+    "user": "demo_migration",
+    "functionalActionCount": 17
+  },
+  "sourceMatrix": "../../ems3-matrices-current.md",
+  "sourceExport": "scb-next/data/entitlements.xml",
+  "registration": {
+    "appName": "RATAN_ENTITLEMENT_RULE",
+    "appId": "51358",
+    "appUID": 10,
+    "itamId": "51358",
+    "status": "Identity from supplied UAT samples; production registration is not confirmed."
+  },
+  "synthetic": {
+    "user": "demo_migration",
+    "entityId": 1001,
+    "roleId": 9001,
+    "featureId": 9101,
+    "actionIds": {
+      "first": 9201,
+      "last": 9217
+    }
+  },
+  "notes": [
+    "All 17 function actions for this role and subject match the supplied EMS2 export.",
+    "Responses contain only this role and subject; other roles, subjects and applications are omitted.",
+    "The Portal drawer is an excerpt containing tile 37; other tiles sharing this subject are omitted.",
+    "The signed permission JWT is a placeholder, not a valid token. The separate access JWT is returned in the Single-UI-Authorization response header.",
+    "portal-entitlements-map.json is the decoded and parsed entitlements claim. In the signed JWT, this map is serialized as a JSON string.",
+    "Data entitlements, policies, profiles and logical indicators are deliberately omitted from these functional examples. Omission does not mean the user has no data entitlements.",
+    "Whole-entity EMS3 conversion exists in the POC. Migrating only this subject while other RATAN subjects stay on EMS2 still requires the proposed tile routing and merge."
+  ],
+  "files": [
+    {
+      "file": "ems3-detailed-response.json",
+      "method": "GET",
+      "path": "/fmces/v1/entitlement/user/demo_migration",
+      "consumer": "Portal BFF",
+      "purpose": "Role-specific function grants with application and permission identifiers."
+    },
+    {
+      "file": "ems3-aggregate-response.json",
+      "method": "GET",
+      "path": "/fmces/v1/entitlement/user-response/demo_migration",
+      "consumer": "Portal BFF",
+      "purpose": "User/application identity, assigned roles and combined function grants for consistency checking."
+    },
+    {
+      "file": "portal-login-response.json",
+      "method": "POST",
+      "paths": [
+        "/api/auth/v2/sso/login",
+        "/api/auth/v3/sso/login"
+      ],
+      "consumer": "Browser",
+      "purpose": "Permission/menu response excerpt after EMS3 conversion."
+    },
+    {
+      "file": "portal-entitlements-map.json",
+      "purpose": "Decoded and parsed functional permission map stored in the entitlements claim of the Portal permission JWT."
+    }
+  ]
+}

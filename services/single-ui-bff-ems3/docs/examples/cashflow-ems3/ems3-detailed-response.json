@@ -1,0 +1,318 @@
+[
+  {
+    "entitlementId": "9001",
+    "entitlementName": "FMO_OPS_BO",
+    "appId": "51358",
+    "appName": "RATAN_ENTITLEMENT_RULE",
+    "appUID": 10,
+    "itamId": null,
+    "featureActionDtos": [
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9201,
+          "actionName": "ACCESS_FMO_POST_TRADE_PORTAL",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9202,
+          "actionName": "F_Ad_Hoc_Suppress",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9203,
+          "actionName": "F_Cashflow_Status_Change_Release",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9204,
+          "actionName": "F_Custom_Query_Builder",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9205,
+          "actionName": "F_Custom_View_Builder_Private",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9206,
+          "actionName": "F_Export_Data",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9207,
+          "actionName": "F_Fail",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9208,
+          "actionName": "F_Hold",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9209,
+          "actionName": "F_Modify_Settlement_Means",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9210,
+          "actionName": "F_Multi_Exception_Initiate",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9211,
+          "actionName": "F_Multi_Exception_Verify",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9212,
+          "actionName": "F_Perform_Ad_Hoc_Netting",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9213,
+          "actionName": "F_Perform_Cashflow_Split",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9214,
+          "actionName": "F_Perform_Un_Net_Initiate",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9215,
+          "actionName": "F_Perform_Un_Net_Verify",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9216,
+          "actionName": "F_Reinstate",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      },
+      {
+        "features": {
+          "featureId": 9101,
+          "featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        },
+        "actions": {
+          "actionId": 9217,
+          "actionName": "F_Un_Hold",
+          "applicationDto": {
+            "appName": "RATAN_ENTITLEMENT_RULE",
+            "appUID": 10
+          }
+        }
+      }
+    ]
+  }
+]
