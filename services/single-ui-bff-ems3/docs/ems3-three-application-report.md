@@ -14,7 +14,7 @@ Prepared: 7 October 2026. Updated: 8 October 2026. EM3 below means the EMS3 enti
 | One user logging in and opening the actual cashflow table | Sections 6 and 7. |
 | What has been proved and what still needs a live check | Sections 8 and 9. |
 | Maintenance work if applications manage EMS3 themselves or Portal manages it | Section 11. |
-| Refined effort, delivery dates and checks before release | Section 12 and the [detailed rollout plan](ems3-rollout-report.md). |
+| Approach, effort, dates, milestones and application checklist | The separate [plan for approval](ems3-approval-plan.md). |
 
 ## 1. The Proposal In Plain Words
 
@@ -860,11 +860,8 @@ Central management moves work to Portal. It does not remove application-owner ap
 
 One **person-day** is one person's working day. These are combined planning allowances across the owner, EMS administrator, tester and platform engineer, not elapsed delivery times or measured results. They assume existing administration tools, ready access and straightforward mappings. Approval waiting time is additional.
 
-A **cohort** below means one application or a selected group of tiles and permission subjects.
-
 | Event | Combined person-days | Included / limit |
 | --- | ---: | --- |
-| Prepare one straightforward application or selected subject cohort after shared support is ready | 5-12 | Mapping/configuration, tests, owner acceptance and staging switch/rollback rehearsal. Scope, EMS3 definitions, known users and IDs must already be ready. Bulk registration/assignment work is extra. |
 | Change grants for an existing feature | 0.5-1.5 | Owner approval, EMS edit, allow/deny checks and a change record. |
 | Add a new feature or permission subject | 1-3 | Permission definition, EMS configuration, mapping and checks. Application feature development is extra. |
 | Execute an approved source switch or rollback | 0.5-1.5 | Complete flag group/defaults, configuration review, fresh-check smoke tests and monitoring. Full acceptance tests must already be current. |
@@ -885,47 +882,6 @@ The effort per event is broadly similar for both registration choices. Applicati
 
 **Suggested responsibility split:** application owners define and accept business permissions; platform controls the BFF and audited source switches. Each application's own administrator or a delegated central administrator can perform EMS3 edits. Agree the named administrator, support contact, approval process and turnaround before onboarding.
 
-During the transition, keep revoked access consistent in both systems for any cohort that may roll back. Switching to EMS2 must not restore a role that was removed in EMS3. Source changes take effect on a fresh authorization check; existing signed tokens are not automatically revoked.
+During the transition, keep revoked access consistent in both systems for any group that may roll back. Switching to EMS2 must not restore a role that was removed in EMS3. Source changes take effect on a fresh authorization check; existing signed tokens are not automatically revoked.
 
-## 12. Refined Work Estimate And Schedule
-
-The earlier schedule is a reasonable target **with parallel staffing and passing checks**. The main correction is to include the tile-source implementation and browser work. The saved POC tests cover the earlier whole-entity implementation; they do not show this new work is finished.
-
-| Earlier estimate | Refinement against the current proposal |
-| --- | --- |
-| Each application chooses its source in a BFF configuration table. | Use `application_tile.entitlement_source`; reuse `authorization_application` for identities and untiled defaults. Tiles sharing the same existing entity and permission subject switch together. |
-| Mainly connect the BFF to real EMS3. | Also implement tile/audit/admin/CSV support, mixed providers within RATAN, source isolation, role merge and shared-shell fixes. |
-| FlowZero login works by 16 October. | 16 October checks live grants and locally verified routing. Complete deployed routing/browser checks are due 23 October, before UAT. |
-| Configuration rollback is sufficient. | First prove FlowZero's old EMS2 permissions/assignments or rehearse an agreed service/gateway rollback. Restore whole groups/defaults and account for existing tokens. |
-| Normally no application code changes. | Keep this as the aim. Verify permission keys, numeric IDs, multi-role handling and actual deployed bundles for each cohort. |
-
-### Effort And Staffing
-
-| Stage | Combined planning person-days | What it covers |
-| --- | ---: | --- |
-| Shared support and FlowZero production pilot | **30-45** | 27-39 shared platform days plus 3-6 FlowZero-owner days; implementation, integration, browser checks, UAT participation, deployment and rollback. |
-| Shared stabilization/readiness after the pilot | 3-5 | Revise instructions using pilot findings and add multi-application load/readiness checks. Initial operator handover is counted in the pilot. Major defects need a new estimate. |
-| Each straightforward staging cohort | 5-12 | After scope, definitions/users/IDs are ready; configure, test, accept and rehearse. |
-| Two staging cohorts plus shared readiness | **13-29 total** | 3-5 shared days plus 5-12 for each cohort; later production releases are extra. |
-| A complex later cohort | 10-20 or more | Re-estimate mapping, shared logical-app changes, missing assignments or consumer fixes after discovery. |
-
-The dates assume one focused BFF engineer, frontend and QA availability of about half to one person's capacity during their work, and available EMS3/platform/owner contacts. These are assumptions to confirm, not committed staffing. One person doing all the work sequentially needs a different schedule. Access, release approval, bulk assignment work and team queues can add time. The [detailed rollout report](ems3-rollout-report.md#6-effort-estimates-and-team-availability) shows the work breakdown and exclusions.
-
-### Revised Dates, 2026
-
-The production pilot is **FlowZero tile 108 with its agreed function scope**. RATAN settlement/other RATAN subjects and Stamp stay EMS2 in production. The selected-settlement example earlier in this report describes a supported design goal; it is not an extra pilot production promise.
-
-| Dates | Main work | Check before moving on |
-| --- | --- | --- |
-| **6-9 Oct; remaining work 8-9 Oct** | Confirm scope, staffing, real EMS3 access/contract, FlowZero identities, expected allow/deny accounts and rollback baseline. Start environment preparation. | Named owners and a dated dependency list. |
-| **12-16 Oct** | Build tile/database/admin/import changes and core routing/merge; connect real EMS3 and begin shell fixes. | **16 Oct:** known live grants and passing local routing checks. |
-| **19-23 Oct** | Complete/deploy the new routing and shell; test all login/renewal paths, same-RATAN mixed providers, names/JWTs, old sessions and failures. | **23 Oct:** integrated checks pass before UAT. |
-| **26-30 Oct** | FlowZero UAT and fixes; prepare follow-on registrations and users. | Owner-reviewed results and remaining release list. |
-| **2-6 Nov** | Finish UAT/sign-off, monitoring, release approval and production/rollback rehearsal. | **6 Nov:** accepted pilot and tested rollback. |
-| **9-13 Nov** | Launch FlowZero on EMS3; keep other production subjects EMS2 and monitor users. | **FlowZero pilot live by 13 Nov**, conditional on the earlier checks. |
-| **16-27 Nov** | Stabilize FlowZero; test selected RATAN settlements and Stamp concurrently in staging; finish multi-application load checks and revise pilot instructions. | Both staging groups pass; their scope, definitions, users and IDs must be ready by 13 Nov. This does not approve their production switches. |
-| **30 Nov-4 Dec** | Close findings and confirm configuration, audit, administrator capacity and support readiness. | **Ready for parallel onboarding by 4 Dec**, conditional on staging evidence. |
-
-If the 16 October access/core check or 23 October integrated check is missed, review the November date. Do not compress acceptance, failure or rollback checks. Complete and verify FlowZero pilot-user assignments before the 6 November release check; bulk assignment effort depends on user counts and needs a separate estimate. If RATAN/Stamp inputs are not ready by 13 November, revise the staging start and 4 December target. That milestone means teams can follow a repeatable process; it does not mean every application has migrated.
-
-The [full rollout plan](ems3-rollout-report.md) lists the detailed acceptance checks, dependencies, staffing and maintenance assumptions. No new code, database configuration or production change has been made for this report update.
+The approach, delivery estimates, dates, milestone checks and application checklist are in the separate [plan for approval](ems3-approval-plan.md).

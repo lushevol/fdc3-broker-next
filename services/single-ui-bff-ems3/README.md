@@ -9,9 +9,9 @@ The fork includes database-selected EMS2/EMS3 routing, strict provider failure
 handling, the new route/audit migration and entitlement checks on token renewal.
 See [the data flow and verified behavior](docs/ems3-bff-integration.md).
 
-See [the rollout report](docs/ems3-rollout-report.md) for the approach,
-application checklist, estimates and delivery targets: FlowZero by 13 November
-2026 and parallel application onboarding readiness by 4 December 2026.
+See [the plan for approval](docs/ems3-approval-plan.md) for actions, estimates,
+dates and the application checklist. See [the technical report](docs/ems3-three-application-report.md)
+for matrices, database examples, data flow and maintenance responsibilities.
 
 ## Local Verification
 

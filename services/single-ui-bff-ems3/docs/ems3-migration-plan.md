@@ -2,9 +2,8 @@
 
 Updated 2026-10-05. This document defines the agreed migration scope. See the [BFF integration explanation](ems3-bff-integration.md) for the current code, database schema and verification steps.
 
-The [rollout report](ems3-rollout-report.md), prepared 2026-10-06, combines the
-delivery approach, application requirements and current schedule: FlowZero
-production pilot by 13 November and parallel onboarding readiness by 4 December.
+Use the separate [plan for approval](ems3-approval-plan.md) for the current
+approach, estimates, dates, milestone checks and application checklist.
 
 ## Current progress
 
