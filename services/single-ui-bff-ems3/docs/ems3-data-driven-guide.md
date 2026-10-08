@@ -1,310 +1,237 @@
 # EMS2 to EMS3: a short data guide
 
-This guide uses the data already in this repository. It explains the change
-through three real examples:
+The proposal is to extend **`application_tile`** with a provider and EMS3
+lookup fields. Each tile selects its entitlement source. There is no new
+`authorization_application` table in this target design.
 
-- RATAN Strategic Cashflow Blotter
-- FlowZero
-- Stamp
+This covers functional entitlement: tile visibility and feature/action grants.
+Country, region and business-row access remain separate data entitlements.
 
-The scope here is **functional entitlement**: whether a tile or feature is
-available. Data entitlement is separate: it decides which rows or countries a
-user can see inside an application.
+Use the [approval plan](ems3-approval-plan.md) and [monthly timeline](ems3-monthly-timeline.md)
+for effort and dates. The first production pilot is FlowZero only. The mixed
+RATAN/FlowZero example below shows the later rollout pattern.
 
-Use the [migration approval plan](ems3-approval-plan.md) for effort, dates and
-release checks. It targets FlowZero alone in production by **13 November 2026**,
-then RATAN settlements and Stamp tested together in staging by **4 December**.
-The mixed RATAN/FlowZero example below shows the later migration pattern.
+## 1. Before migration: actual data
 
-## 1. What exists today
+Portal stores tile configuration; EMS2 stores the grants. The database dump
+does not contain the complete permission matrix or user-role assignments.
 
-### Three different data sources
+Representative rows from [application_tile.csv](../../../scb-next/data/application_tile.csv):
 
-| Source | What it contains | Example |
-|---|---|---|
-| Portal `application_tile` dump | The menu key and the EMS2 lookup names | `37, X_RATANONE, RATAN_STRATEGIC_CASHFLOW_BLOTTER` |
-| EMS2 XML export | Role -> subject -> action grants | `FMO_OPS_BO -> RATAN_STRATEGIC_CASHFLOW_BLOTTER -> F_Export_Data` |
-| EMS3 response | App identity plus role -> feature -> action grants | `FMO_OPS_BO -> RATAN_STRATEGIC_CASHFLOW_BLOTTER -> F_Export_Data` |
-
-The Portal database does **not** contain the complete EMS2 grant matrix. It
-contains the names that the BFF uses to ask EMS2 for grants.
-
-### Portal rows used in this guide
-
-From [`application_tile.csv`](../../../scb-next/data/application_tile.csv):
-
-| Tile ID | Entity | Current subject | Tile |
+| Tile ID | `ems2_entities` | `ems2_subject` | What opens |
 |---:|---|---|---|
-| 36 | `X_RATANONE` | `RATAN_CASHFLOW_BLOTTER` | Cashflow Blotter (BAU) |
-| 37, 39, 144, 152, 161, 165 | `X_RATANONE` | `RATAN_STRATEGIC_CASHFLOW_BLOTTER` | Strategic Cashflow Blotter, Cashflow Dashboard and variants |
-| 108 | `FLOW_ZERO` | `FLOW_ZERO_RAISE REQUEST` | Flowzero |
-| 48, 49 | `STAMP_STATIC` | `Mapping Query`, `Audit` | Stamp |
+| 36 | `X_RATANONE` | `RATAN_CASHFLOW_BLOTTER` | Older BAU Cashflow Blotter |
+| 37, 39, 144, 152, 161, 165 | `X_RATANONE` | `RATAN_STRATEGIC_CASHFLOW_BLOTTER` | Strategic Cashflow Blotter/Dashboard and variants |
+| 108 | `FLOW_ZERO` | `FLOW_ZERO_RAISE REQUEST` | FlowZero |
+| 48 | `STAMP_STATIC` | `Mapping Query` | Stamp Mapping Query |
+| 49 | `STAMP_STATIC` | `Audit` | Stamp Audit |
 
-The current table has `ems2_entities`, `ems2_role` and
-`ems2_subject`. It has no `entitlement_source` column yet.
-The tile's `ems2_role` (for example `RATAN_PROD`) is catalogue/admin metadata;
-the end-user grant role in the XML is a different value (for example
-`FMO_OPS_BO`).
+Example grants from the supplied matrices:
 
-### What the EMS2 data looks like
-
-The supplied exports contain these useful totals:
-
-| Export | Grants | Roles | Subjects | Actions |
-|---|---:|---:|---:|---:|
-| RATAN (`entitlements.xml`) | 806 | 25 | 25 | 51 |
-| Stamp (`entitlements_stamp.xml`) | 458 | 4 | 32 | 6 |
-
-For RATAN, role `FMO_OPS_BO` has 17 actions on the strategic cashflow
-subject, including:
-
-```
-ACCESS_FMO_POST_TRADE_PORTAL
-F_Export_Data
-F_Hold
-F_Un_Hold
-...
-```
-
-For Stamp, the existing matrix includes grants such as:
-
-```
-VIEW_ONLY -> Mapping Query -> Read
-VIEW_ONLY -> Audit         -> Read
-```
-
-No old standalone FlowZero EMS2 matrix was supplied. The RATAN EMS2 export does
-contain a separate `X_RATANONE / RATAN_FLOW_ZERO` subject; that is not the
-`FLOW_ZERO` tile row above.
-
-### Functional and data entitlements are different
-
-The Strategic Cashflow rows also contain a `filter_rule` with a key such as
-`Entity.Booking_Entity_SCI_FMID`. That is tile/configuration metadata. It must
-not be treated as the functional grant that makes the tile visible. A user
-data-entitlement response is a separate object, for example:
-The JSON below shows the shape only; it is not the `filter_rule` expression stored in the tile row.
-
-```json
-{
-  "functional": {
-    "subject": "RATAN_STRATEGIC_CASHFLOW_BLOTTER",
-    "actions": ["F_Export_Data"]
-  },
-  "data": {
-    "Entity.Booking_Entity_SCI_FMID": ["10040387", "400568282"]
-  }
-}
-```
-
-This POC routes and checks the first part. The application or its data API must
-enforce the second part.
-
-## 2. The target data after migration
-
-### Small database change
-
-The existing Portal tables still have the same jobs:
-
-| Table | Job |
-|---|---|
-| `application_tile` | Which tile exists, and its entity/subject/role key |
-| `application_category` | Where the tile appears in the menu |
-| `import_map` | Which frontend bundle is loaded |
-| `*_audit` tables | History of Portal configuration changes |
-| `authorization_application` | Which provider and EMS3 identity a BFF entity uses |
-
-The proposed tile routing still needs implementation. Add a functional source
-flag to `application_tile`:
-
-```text
-entitlement_source = EMS2 | EMS3       -- default EMS2
-```
-
-Copy this field into `application_tile_audit` and the admin/API mapping so a
-source change is auditable.
-
-Later mixed example: Strategic Cashflow and FlowZero use EMS3; Stamp and other
-RATAN subjects stay EMS2. These are proposed rows, beyond the FlowZero pilot:
-
-```text
-tile 37  X_RATANONE  RATAN_STRATEGIC_CASHFLOW_BLOTTER  EMS3
-tile 39  X_RATANONE  RATAN_STRATEGIC_CASHFLOW_BLOTTER  EMS3
-tile 108 FLOW_ZERO   FLOW_ZERO_RAISE REQUEST           EMS3
-tile 48  STAMP_STATIC Mapping Query                    EMS2
-tile 49  STAMP_STATIC Audit                            EMS2
-```
-
-One rule keeps this simple: every tile with the same `(entity, subject)` must
-use the same source. Therefore all six Strategic Cashflow rows (37, 39, 144,
-152, 161 and 165) move together. A separate subject-route table is only needed
-if one subject later has to be split between EMS2 and EMS3.
-
-`authorization_application` already has the provider and EMS3 identity fields:
-
-```text
-bff_entity_name | provider | ems3_app_name         | ems3_app_id | ems3_app_uid | ems3_itam_id
-X_RATANONE      | EMS2*    | RATAN_ENTITLEMENT_RULE | 51358       | 10           | 51358
-FLOW_ZERO       | EMS3     | FLOWZERO               | ...         | 65           | ...
-STAMP_STATIC    | EMS2     | null                   | null        | null         | null
-```
-
-The IDs above are examples from the POC and must be replaced with confirmed
-environment values. The table is defined in
-[`V1_0_10__authorization_application.sql`](../src/main/resources/db/migration/V1_0_10__authorization_application.sql).
-
-`*` The current POC provider is entity-wide. For this later mixed example,
-`X_RATANONE` remains EMS2 by default while the tile source flag selects EMS3
-for Strategic Cashflow. The router must combine those two fields.
-
-### Two ways to own the EMS3 registration
-
-| Option | What the data says | Good part | Cost |
+| Source | User role | Subject/feature | Allowed actions, shortened |
 |---|---|---|---|
-| Each application owns its EMS3 ID | RATAN, FlowZero and Stamp each have their own `ems3_app_name`/UID | Clear ownership and independent release | More registrations to operate |
-| Portal owns one shared EMS3 ID | Portal owns one parent ID and stores all three applications' features under it | One place to manage grants | A shared app ID/ITAM ID can be reused, but the current route table still requires unique active app names/UIDs; one identical app name/UID for all apps needs a router/schema change |
+| RATAN EMS2 XML | `FMO_OPS_BO` | `RATAN_STRATEGIC_CASHFLOW_BLOTTER` | `ACCESS_FMO_POST_TRADE_PORTAL`, `F_Export_Data`, `F_Hold`, plus 14 others |
+| FlowZero EMS3 pilot | `Global_Onboard_BatchOps` | `RAISE_REQUEST` | `ACCESS_FMO_POST_TRADE_PORTAL`, `BATCH_IMPORT`, `RAISE_NEW_REQUEST`, `VIEW_PUBLISHEDWORKFLOW` |
+| Stamp EMS2 XML | `VIEW_ONLY` | `Mapping Query` | `Read` |
+| Stamp EMS2 XML | `VIEW_ONLY` | `Audit` | `Read` |
 
-Both options preserve the same functional key: role + feature/subject + action.
-The owner changes; the tile decision does not.
+RATAN has 806 grant rows, Stamp 458, and the FlowZero EMS3 pilot catalogue 398.
+See the [full matrices](ems3-matrices-current.md) for all roles and actions.
+No standalone `FLOW_ZERO` EMS2 matrix was supplied. RATAN's separate
+`RATAN_FLOW_ZERO` subject is not the same binding as tile 108.
 
-### The three examples after migration
+The tile's `ems2_role`, such as `RATAN_PROD`, controls configuration
+administration. It is not the user's grant role. Read user roles from EMS.
 
-#### A. RATAN Strategic Cashflow Blotter: EMS2 -> EMS3
+## 2. After migration: extend the tile row
 
-Before:
+### Columns
 
-```text
-Portal: X_RATANONE / RATAN_STRATEGIC_CASHFLOW_BLOTTER
-EMS2:   FMO_OPS_BO -> RATAN_STRATEGIC_CASHFLOW_BLOTTER -> F_Export_Data
-```
+Add these four columns to `application_tile`:
 
-After, EMS3 returns the same business grant with app identity added (illustrative
-POC response; the IDs and user are synthetic):
+| Column | Example | Purpose |
+|---|---|---|
+| `provider` | `EMS2` or `EMS3` | Selects the source; default `EMS2` |
+| `ems3_app_id` | `51358` | Expected EMS3 registration/parent ID |
+| `ems3_app_name` | `FLOWZERO` | Selects the EMS3 application |
+| `ems3_subject` | `RAISE_REQUEST` | Selects the EMS3 feature |
 
-```json
-{
-  "entitlementName": "FMO_OPS_BO",
-  "appName": "RATAN_ENTITLEMENT_RULE",
-  "featureActionDtos": [
-    {"featureName": "RATAN_STRATEGIC_CASHFLOW_BLOTTER", "actionName": "F_Export_Data"}
-  ]
-}
-```
+Require nonblank EMS3 fields when `provider='EMS3'`. An EMS2 tile can leave them
+empty. Use `(ems3_app_id, ems3_app_name)` to identify the application.
+The target does not require a stored `ems3_app_uid` or duplicate `ems3_itam_id`.
+The samples use the same value for detailed `appId` and aggregate `itam_id`;
+confirm that relationship for the production API before validating both against
+one column.
 
-The adapter maps `featureName` back to the Portal subject and produces the same
-internal shape:
-
-```text
-X_RATANONE:FMO_OPS_BO:RATAN_STRATEGIC_CASHFLOW_BLOTTER:F_Export_Data
-```
-
-The complete worked 17-action response is in
-[ems3-detailed-response.json](examples/cashflow-ems3/ems3-detailed-response.json)
-and the mapped Portal result is in
-[portal-entitlements-map.json](examples/cashflow-ems3/portal-entitlements-map.json).
-
-#### B. FlowZero: EMS3 pilot
-
-The Portal row is `FLOW_ZERO / FLOW_ZERO_RAISE REQUEST`. The supplied EMS3 pilot
-catalogue has 398 grants across 39 roles, 8 features and 11 actions. For the
-worked role `Global_Onboard_BatchOps`, the relevant feature is `RAISE_REQUEST`.
-Its four example actions are `ACCESS_FMO_POST_TRADE_PORTAL`, `BATCH_IMPORT`,
-`RAISE_NEW_REQUEST` and `VIEW_PUBLISHEDWORKFLOW`.
-
-The mapping is therefore:
+**Provider determines the permission lookup:**
 
 ```text
-EMS3 feature:  RAISE_REQUEST
-Portal subject: FLOW_ZERO_RAISE REQUEST
+EMS2 -> ems2_entities + ems2_subject
+EMS3 -> ems3_app_id + ems3_app_name + ems3_subject
 ```
 
-Tile matching can use the Portal subject as the EMS3 `longName` alias. The
-EMS3 subject name itself is `RAISE_REQUEST`; if a JWT consumer requires the old
-`FLOW_ZERO_RAISE REQUEST` name, add that canonicalization explicitly.
-
-#### C. Stamp: remains EMS2
-
-In this example, Stamp stays on EMS2:
+For an EMS3 tile, the existing `ems2_entities` and `ems2_subject` values also
+serve as the Portal output names. They are not used to get its grants from
+EMS2. This keeps JWT keys and drawer metadata compatible:
 
 ```text
-STAMP_STATIC / Mapping Query -> EMS2 -> VIEW_ONLY -> Read
-STAMP_STATIC / Audit         -> EMS2 -> VIEW_ONLY -> Read
+EMS3: FLOWZERO / RAISE_REQUEST
+Portal output: FLOW_ZERO / FLOW_ZERO_RAISE REQUEST
 ```
 
-The user can log in while RATAN and FlowZero use EMS3 and Stamp still uses
-EMS2. The response is merged before the Portal filters the tiles.
+Write the old Portal subject into both `name` and `longName`: the current JWT
+builder uses `name`, while drawer matching also checks `longName`.
 
-## 3. Rough logic and data flow
+### Example rows: selected RATAN and FlowZero migrated; Stamp stays
 
-### Login or entitlement refresh
+All rows below are in `application_tile`. The six Strategic Cashflow variants
+have the same settings; 37 and 39 are shown.
 
-```java
-tiles = tileRepository.activeTiles();
+| Tile ID | `provider` | `ems2_entities` | `ems2_subject` | `ems3_app_id` | `ems3_app_name` | `ems3_subject` |
+|---:|---|---|---|---|---|---|
+| 36 | EMS2 | `X_RATANONE` | `RATAN_CASHFLOW_BLOTTER` | null | null | null |
+| 37, 39 | EMS3 | `X_RATANONE` | `RATAN_STRATEGIC_CASHFLOW_BLOTTER` | `51358` | `RATAN_ENTITLEMENT_RULE` | `RATAN_STRATEGIC_CASHFLOW_BLOTTER` |
+| 108 | EMS3 | `FLOW_ZERO` | `FLOW_ZERO_RAISE REQUEST` | `51358` | `FLOWZERO` | `RAISE_REQUEST` |
+| 48 | EMS2 | `STAMP_STATIC` | `Mapping Query` | null | null | null |
+| 49 | EMS2 | `STAMP_STATIC` | `Audit` | null | null | null |
 
-for (tile : tiles) {
-    required[tile.entitlementSource].add(tile.entity, tile.subject, tile.role);
-}
+`51358` and the application names are supplied sample identities, not confirmed
+production configuration. NSTP can follow the same pattern using its confirmed
+EMS3 feature name.
 
-ems2Grants = required[EMS2].isEmpty()
-    ? empty()
-    : ems2.fetch(userId, filterBySelectedSubject(required[EMS2]));
+Tiles sharing a Portal `(entity, subject)` must have one provider and a
+consistent EMS3 mapping. Change their rows together. This lets Strategic
+Cashflow move while BAU Cashflow remains EMS2.
 
-ems3Grants = required[EMS3].isEmpty()
-    ? empty()
-    : ems3.fetchAndValidate(userId, filterBySelectedSubject(required[EMS3]));
+### Application-owned or Portal-owned registration
 
-grants = mergeByEntityRoleSubject(ems2Grants, ems3Grants);
-visibleTiles = tiles.filter(tile -> grants.matches(tile));
+The tile schema is the same for both options. Example EMS3 lookup values:
 
-return loginResponse(
-    drawers = visibleTiles,
-    entities = grants,
-    entitlementToken = sign(grants)
-);
+| Example | Each application owns a registration | Portal owns a shared parent registration |
+|---|---|---|
+| RATAN Strategic Cashflow | `RATAN_ID / RATAN_ENTITLEMENT_RULE / RATAN_STRATEGIC_CASHFLOW_BLOTTER` | `PORTAL_ID / RATAN_ENTITLEMENT_RULE / RATAN_STRATEGIC_CASHFLOW_BLOTTER` |
+| FlowZero | `FLOWZERO_ID / FLOWZERO / RAISE_REQUEST` | `PORTAL_ID / FLOWZERO / RAISE_REQUEST` |
+| Stamp, when it migrates | `STAMP_ID / STAMP / Mapping Query` | `PORTAL_ID / STAMP / Mapping Query` |
+
+These are proposed identity patterns. In the shared-parent option, application
+names still separate grants. If EMS3 instead registers everything under one
+`PORTAL` application name, use distinct feature names and explicit tile mappings
+to separate RATAN, FlowZero and Stamp.
+
+Application ownership distributes EMS3 edits among teams. Portal ownership
+puts those edits in a central queue. Application owners approve and test the
+permissions in both options.
+
+### Related tables and changes
+
+| Table/path | Change |
+|---|---|
+| `application_tile` | Add provider and the three EMS3 lookup columns |
+| `application_tile_audit` | Copy the new columns into configuration history |
+| `application_category` / `application_category_audit` | Keep menu/category configuration |
+| `import_map` / `import_map_audit` | Keep frontend bundle configuration |
+| Tile admin APIs and CSV import/export | Read, validate and save the new columns |
+| BFF router and drawer/JWT builder | Read tile settings; use only the selected provider; map results to Portal names |
+
+Repeated application IDs/names across tile rows are expected. Validate rows
+sharing a permission together so one tile does not point to the wrong app.
+
+### A launch tile is not every function
+
+FlowZero has eight EMS3 features, but tile 108 names only `RAISE_REQUEST`.
+The fields above select its launch feature and all actions/roles on that feature.
+Before claiming the whole application has migrated, also bind its other
+function permissions and test that the full grant set reaches the JWT.
+
+Additional features without their own tiles need explicit mappings associated
+with the owning tile, for example an additional feature-map JSON column in the
+same table. Define that list with the owner; do not drop those grants or copy
+all grants from a shared Portal registration. The separate untiled
+`RATAN_FLOW_ZERO` permissions also need an approved binding. Existing unmigrated
+function permissions keep EMS2 as their source during the transition.
+
+## 3. Rough routing and data flow
+
+The following is pseudocode for the new design, not the current implementation:
+
+```text
+tiles = readActiveTiles()
+validateProviderFieldsAndSharedSubjectMappings(tiles)
+
+scopes = scopesFromTilesAndConfirmedNonTileMappings(tiles)
+ems2 = fetchEms2OnceIfNeeded(userId, scopes)
+ems3 = fetchEms3OnceIfNeeded(userId, scopes)
+
+for tile in tiles:
+    if tile.provider == EMS2:
+        grants = selectEms2UsingExistingTileRules(ems2, tile)
+        visible[tile.id] = existingEms2Visibility(tile, grants)
+    else:
+        grants = select(ems3, tile.ems3_app_id,
+                        tile.ems3_app_name, tile.ems3_subject)
+        visible[tile.id] = hasGrantedSubject(grants)
+
+    picked += mapToPortalNames(grants, tile.ems2_entities, tile.ems2_subject)
+
+picked += resolveConfirmedNonTileFunctionMappings(ems2, ems3)
+permissions = mergeByEntityAndUserRoleAndSubject(picked)
+return { drawers: visibleTiles(visible),
+         entities: permissions, entitlementToken: sign(permissions) }
 ```
 
-EMS3 uses three calls in the adapter:
+Keep the source decision through filtering. EMS2 grants for a matching subject
+cannot make an EMS3-selected tile visible. Merge actions under the same
+`entity:userRole` before building the JWT so one provider's fragment cannot
+overwrite the other.
+
+Keep the existing EMS2 visibility rules: template tiles bypass grant checks,
+and a blank subject uses entity-only access (for example tile 193, Exception
+Auto Recover). An EMS3 tile requires its three lookup fields; a blank EMS3
+subject is a configuration error.
+
+The EMS3 adapter currently makes three calls per authorization check:
 
 ```text
 POST token endpoint
 GET  /fmces/v1/entitlement/user/{userId}          -- detailed grants
-GET  /fmces/v1/entitlement/user-response/{userId} -- aggregate grants/identity
+GET  /fmces/v1/entitlement/user-response/{userId} -- aggregate grants
 ```
 
-The adapter checks the returned app name, app ID/UID, role, feature and action
-before converting it to the Portal's existing entity/subject/action DTOs.
+The call count does not grow with the tile count. Filter the returned grants
+by app identity and feature. Each response currently has a 1 MiB limit;
+test response size for users with many grants.
 
-### Failure and denial decisions
+An allowed RATAN test role can produce the same Portal permission key:
 
-```java
-if (ems3CallFailsOrResponseIsInvalid()) {
-    throw new AuthorizationUnavailableException();
-    // no partial drawers
-    // no stale permission token
-    // no EMS2 fallback for an EMS3 tile
-}
-
-if (!ems3Grants.matches(tile)) {
-    hide(tile);             // a valid denial is simply no access
+```json
+{
+  "X_RATANONE:FMO_OPS_BO": {
+    "RATAN_STRATEGIC_CASHFLOW_BLOTTER": ["F_Export_Data", "F_Hold"]
+  }
 }
 ```
 
-The current router is entity-level: one `authorization_application` row routes
-all of `X_RATANONE`. The `application_tile.entitlement_source` change is what
-allows Strategic Cashflow to move while other RATAN subjects remain on EMS2.
-The router must apply the same source split when it builds its provider scopes.
+This is a shortened illustration. The [full JSON example](examples/cashflow-ems3/portal-entitlements-map.json)
+has all 17 actions. Its [manifest](examples/cashflow-ems3/manifest.json) identifies
+the synthetic values.
 
-## What this POC proves
+**Successful response with no grant:** hide that tile. **Required provider call
+fails or response is invalid:** reject the authorization attempt; issue no new
+permission token and do not fall back to EMS2. Previously issued tokens and
+open browser screens still need the session/browser handling in the rollout plan.
 
-- EMS3 detailed and aggregate responses can be validated and converted to the
-  existing Portal entitlement shape.
-- A mixed login can combine EMS2 Stamp grants with EMS3 RATAN/FlowZero grants
-  at entity level.
-- An EMS3 error fails closed and does not silently retry EMS2.
-- The existing tile entity/subject keys are enough to preserve the UI contract
-  when the EMS3 feature names are mapped correctly.
+Data entitlements such as `Entity.Booking_Entity_SCI_FMID` and existing
+`filter_rule` metadata remain separate from these provider columns. This
+routing proposal does not implement business-row filtering.
 
-It does not yet prove live production values, real user-role mapping, or data
-row filtering. Those need a test account and confirmed EMS3 application
-identities. The examples in this guide are synthetic POC data unless marked as
-coming directly from `scb-next/data`.
+## What is implemented
+
+The saved POC uses `authorization_application` for entity-level routing and
+makes `appUID` mandatory. This guide replaces that proposed configuration model
+with tile-based routing and app-name/ID matching.
+
+The code and database have not been changed for this revision. Implement the
+tile/audit/admin/CSV changes, replace the router's table lookup, and test mixed
+RATAN subjects, aliases, multi-role JWT merging, non-tile functions and failures.
+The earlier POC results demonstrate the older routing and EMS3 API conversion;
+they do not prove this revised schema or complete application migration.
