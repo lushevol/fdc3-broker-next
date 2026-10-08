@@ -2,6 +2,10 @@
 
 8 October 2026. All dates below are in 2026.
 
+See the [short data guide](ems3-data-driven-guide.md) for database rows,
+RATAN/FlowZero/Stamp examples and routing code. Use this plan for estimates and
+release dates; its first production launch moves FlowZero only.
+
 ## Approach
 
 1. Add EMS3 to the forked Single UI BFF. Keep existing APIs, permission names and tile rules.

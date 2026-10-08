@@ -11,6 +11,11 @@ The scope here is **functional entitlement**: whether a tile or feature is
 available. Data entitlement is separate: it decides which rows or countries a
 user can see inside an application.
 
+Use the [migration approval plan](ems3-approval-plan.md) for effort, dates and
+release checks. It targets FlowZero alone in production by **13 November 2026**,
+then RATAN settlements and Stamp tested together in staging by **4 December**.
+The mixed RATAN/FlowZero example below shows the later migration pattern.
+
 ## 1. What exists today
 
 ### Three different data sources
@@ -109,8 +114,8 @@ The existing Portal tables still have the same jobs:
 | `*_audit` tables | History of Portal configuration changes |
 | `authorization_application` | Which provider and EMS3 identity a BFF entity uses |
 
-For the first migration, add a functional source flag to
-`application_tile`:
+The proposed tile routing still needs implementation. Add a functional source
+flag to `application_tile`:
 
 ```text
 entitlement_source = EMS2 | EMS3       -- default EMS2
@@ -119,7 +124,8 @@ entitlement_source = EMS2 | EMS3       -- default EMS2
 Copy this field into `application_tile_audit` and the admin/API mapping so a
 source change is auditable.
 
-Example intended rows:
+Later mixed example: Strategic Cashflow and FlowZero use EMS3; Stamp and other
+RATAN subjects stay EMS2. These are proposed rows, beyond the FlowZero pilot:
 
 ```text
 tile 37  X_RATANONE  RATAN_STRATEGIC_CASHFLOW_BLOTTER  EMS3
@@ -147,7 +153,7 @@ The IDs above are examples from the POC and must be replaced with confirmed
 environment values. The table is defined in
 [`V1_0_10__authorization_application.sql`](../src/main/resources/db/migration/V1_0_10__authorization_application.sql).
 
-`*` The current POC provider is entity-wide. For the first partial rollout,
+`*` The current POC provider is entity-wide. For this later mixed example,
 `X_RATANONE` remains EMS2 by default while the tile source flag selects EMS3
 for Strategic Cashflow. The router must combine those two fields.
 
@@ -218,7 +224,7 @@ EMS3 subject name itself is `RAISE_REQUEST`; if a JWT consumer requires the old
 
 #### C. Stamp: remains EMS2
 
-No migration is required for the first phase:
+In this example, Stamp stays on EMS2:
 
 ```text
 STAMP_STATIC / Mapping Query -> EMS2 -> VIEW_ONLY -> Read
