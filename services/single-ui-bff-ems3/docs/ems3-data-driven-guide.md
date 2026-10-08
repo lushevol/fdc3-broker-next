@@ -148,20 +148,73 @@ EMS2 account `status` describes API success; `accountStatus` describes account
 state. EMS3's normalized `SUCCESS` means the grant lookup was validated, not
 that the account is enabled.
 
-For one permission, the mapping looks like this (shortened values):
+#### Worked example: RATAN_STRATEGIC_CASHFLOW_BLOTTER
 
-| Example | EMS2 entity / role / subject / action | EMS3 app / role / feature / action | Portal permission after mapping |
+Use tile 37, role `FMO_OPS_BO` and action `F_Export_Data`. The EMS2 names
+come from the supplied XML. The EMS3 values below use the [worked detailed JSON](examples/cashflow-ems3/ems3-detailed-response.json):
+its permission IDs are synthetic, and its app identity comes from UAT samples.
+This is an illustration of the mapping, not a live migrated user response.
+
+| Field | EMS2 value | EMS3 value | Portal result |
 |---|---|---|---|
-| RATAN | `X_RATANONE / FMO_OPS_BO / RATAN_STRATEGIC_CASHFLOW_BLOTTER / F_Export_Data` | `RATAN_ENTITLEMENT_RULE / FMO_OPS_BO / RATAN_STRATEGIC_CASHFLOW_BLOTTER / F_Export_Data` | Same EMS2 permission names. |
-| FlowZero | Tile binding is `FLOW_ZERO / FLOW_ZERO_RAISE REQUEST`; no standalone EMS2 matrix supplied. | `FLOWZERO / Global_Onboard_BatchOps / RAISE_REQUEST / RAISE_NEW_REQUEST` | `FLOW_ZERO / Global_Onboard_BatchOps / FLOW_ZERO_RAISE REQUEST / RAISE_NEW_REQUEST` (proposed alias). |
-| Stamp | `STAMP_STATIC / VIEW_ONLY / Mapping Query / Read` | Not selected in this example; Stamp stays EMS2. | `STAMP_STATIC / VIEW_ONLY / Mapping Query / Read` |
+| Entity/application | `role.entity.name = X_RATANONE` (tile binding) | `appName = RATAN_ENTITLEMENT_RULE` | `name = X_RATANONE`; `applicationName = RATAN_ENTITLEMENT_RULE` |
+| Registration | No equivalent registration ID | `appId = "51358"`, `appUID = 10` | Validate app identity; neither value replaces the Portal entity ID. |
+| Role | `role.name = FMO_OPS_BO` | `entitlementName = FMO_OPS_BO` | `roleName = FMO_OPS_BO` |
+| Subject/feature | `subject.name = RATAN_STRATEGIC_CASHFLOW_BLOTTER` | `features.featureName = RATAN_STRATEGIC_CASHFLOW_BLOTTER` | `subjects[].name = RATAN_STRATEGIC_CASHFLOW_BLOTTER` |
+| Subject path | `subject.longName = /RATAN_STRATEGIC_CASHFLOW_BLOTTER` | No `longName` field | Preserve `/RATAN_STRATEGIC_CASHFLOW_BLOTTER` in `subjects[].longName`. |
+| Action | `action.name = F_Export_Data` | `actions.actionName = F_Export_Data` | `subjects[].actions[].name = F_Export_Data` |
+| Role ID | Not supplied in the XML | `entitlementId = "9001"` (synthetic) | `roleId = 9001` in this POC example |
+| Subject ID | Not supplied in the XML | `features.featureId = 9101` (synthetic) | `subjects[].id = 9101` in this POC example |
+| Action ID | Not supplied in the XML | `actions.actionId = 9206` (synthetic) | `subjects[].actions[].id = 9206` in this POC example |
 
-Check the exact nested fields in the [detailed EMS3 JSON](examples/cashflow-ems3/ems3-detailed-response.json),
-[aggregate JSON](examples/cashflow-ems3/ems3-aggregate-response.json) and
-[Portal response](examples/cashflow-ems3/portal-login-response.json).
-These are shortened/synthetic examples of the earlier POC, not live production
-responses; see their [manifest](examples/cashflow-ems3/manifest.json). The existing
-FlowZero alias implementation still needs the `name` update described above.
+Here, the subject and action names already match. The application name needs
+the mapping `RATAN_ENTITLEMENT_RULE` -> `X_RATANONE`.
+
+#### Worked example: FLOWZERO
+
+Use tile 108, role `Global_Onboard_BatchOps` and feature `RAISE_REQUEST`.
+EMS3 values come from the [supplied UAT responses](../../../scb/services/new-auth-service/EMS3%20Samples.json).
+On the EMS2 side, only the tile binding is supplied; there is no standalone
+FlowZero EMS2 user response or matrix to prove the roles/actions are the same.
+
+| Field | EMS2 side: evidence available | EMS3 UAT value | Proposed Portal result |
+|---|---|---|---|
+| Entity/application | Tile `ems2_entities = FLOW_ZERO` | `appName = FLOWZERO` | `name = FLOW_ZERO`; `applicationName = FLOWZERO` |
+| Registration | No equivalent registration ID | `appId = "51358"`, `appUID = 65` | Validate app identity; preserve the agreed Portal entity ID separately. |
+| Role | User role not supplied | `entitlementName = Global_Onboard_BatchOps` | `roleName = Global_Onboard_BatchOps`, subject to owner confirmation. |
+| Subject/feature | Tile `ems2_subject = FLOW_ZERO_RAISE REQUEST` | `features.featureName = RAISE_REQUEST` | `subjects[].name = FLOW_ZERO_RAISE REQUEST` |
+| Subject path | EMS2 `longName` not supplied | No `longName` field | Use the agreed alias `FLOW_ZERO_RAISE REQUEST` for `subjects[].longName`. |
+| Action | EMS2 action not supplied | `actions.actionName = RAISE_NEW_REQUEST` | `subjects[].actions[].name = RAISE_NEW_REQUEST`, subject to owner confirmation. |
+| Role ID | Not supplied | `entitlementId = "339"` | `roleId = 339` under the current POC conversion rule |
+| Subject ID | Not supplied | `features.featureId = 1500` | `subjects[].id = 1500` under the current POC conversion rule |
+| Action ID | Not supplied | `actions.actionId = 345` | `subjects[].actions[].id = 345` under the current POC conversion rule |
+
+Here, both names need mapping: `FLOWZERO` -> `FLOW_ZERO` and
+`RAISE_REQUEST` -> `FLOW_ZERO_RAISE REQUEST`. The existing adapter still needs
+the `name` alias update; changing only `longName` does not preserve JWT keys.
+
+The resulting parsed Portal permission map could look like this. It combines
+the two examples for illustration; it is not one real user's captured response.
+RATAN is shortened to one of its 17 actions; FlowZero shows all four actions
+on `RAISE_REQUEST` for this role. The mapper must retain all granted actions.
+
+```json
+{
+  "X_RATANONE:FMO_OPS_BO": {
+    "RATAN_STRATEGIC_CASHFLOW_BLOTTER": ["F_Export_Data"]
+  },
+  "FLOW_ZERO:Global_Onboard_BatchOps": {
+    "FLOW_ZERO_RAISE REQUEST": [
+      "ACCESS_FMO_POST_TRADE_PORTAL", "VIEW_PUBLISHEDWORKFLOW",
+      "RAISE_NEW_REQUEST", "BATCH_IMPORT"
+    ]
+  }
+}
+```
+
+See the RATAN [aggregate JSON](examples/cashflow-ems3/ems3-aggregate-response.json),
+[Portal response](examples/cashflow-ems3/portal-login-response.json) and
+[manifest](examples/cashflow-ems3/manifest.json) for the full earlier POC example.
 
 ### Example rows: selected RATAN and FlowZero migrated; Stamp stays
 
